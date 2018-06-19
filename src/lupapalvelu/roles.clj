@@ -25,3 +25,17 @@
                          :export default-authz-reader-roles
                          :command default-authz-writer-roles
                          :raw default-authz-writer-roles})
+
+(defn organization-ids-by-roles
+  "Returns a set of organization IDs where user has given roles.
+  Note: the user must have gone through with-org-auth (the orgAuthz
+  must be keywords)."
+  [{org-authz :orgAuthz :as user} roles]
+  {:pre [(set? roles) (every? keyword? roles)]}
+  (->> org-authz
+       (filter (fn [[org org-roles]] (some roles org-roles)))
+       (map (comp name first))
+       set))
+
+(defn authority-admins-organization-id [user]
+  (first (organization-ids-by-roles user #{:authorityAdmin})))

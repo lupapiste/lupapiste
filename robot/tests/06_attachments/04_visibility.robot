@@ -17,6 +17,10 @@ Mikko uploads attachment
   Open tab  attachments
   Upload attachment  ${PNG_TESTFILE_PATH}  CV  CV  Osapuolet
 
+CV does not have a lock icon in the attachment table
+  Wait until  Element should be visible  jquery=table.attachments-table tr[data-test-type='osapuolet.cv']
+  Attachment indicator icon should not be visible  not-public  osapuolet.cv
+
 Mikko sets CV to be visible only to himself and authorities
   Open attachment details  osapuolet.cv
   # By default attachment is public
@@ -26,6 +30,9 @@ Mikko sets CV to be visible only to himself and authorities
   Scroll to top
   Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
   Wait Until  Tab should be visible  attachments
+
+CV has a lock icon in the attachment table
+  Attachment indicator icon should be visible  not-public  osapuolet.cv
 
 Mikko uploads attachment to placeholder asemapiirros
   Add attachment file  tr[data-test-type='paapiirustus.asemapiirros']  ${PNG_TESTFILE_PATH}  Asemapiirros

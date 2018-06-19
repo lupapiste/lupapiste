@@ -225,7 +225,6 @@
   {:description      "Creates system user for embedded Lupapiste view in Facta. Admin only."
    :parameters       [municipality-name organization-ids]
    :input-validators [(partial action/string-parameters [:municipality-name])
-                      (partial action/email-validator)
                       (partial action/vector-parameter-of :organization-ids string?)]
    :user-roles       #{:admin}}
   [_]
@@ -537,12 +536,12 @@
    :notified         true}
   [_]
   (let [user (usr/get-user-by-email email)]
-    (if (and user (not (usr/dummy? user)))
+    (if (and user (not (usr/dummy? user)) (:enabled user))
       (do
         (pw-reset/reset-password user)
         (ok))
       (do
-        (warnf "password reset request: unknown email: email=%s" email)
+        (warnf "password reset request: unknown or disabled email: email=%s" email)
         (fail :error.email-not-found)))))
 
 (defcommand admin-reset-password
@@ -579,6 +578,23 @@
     (if (= 1 (mongo/update-n :users {:email email} {$set {:enabled enabled}}))
       (ok)
       (fail :not-found))))
+
+;;
+;; erase user data:
+;;
+
+(defcommand erase-user
+  {:description "Erase/anonymize user data but retain the record in database."
+   :parameters  [email]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :user-roles #{:admin}}
+  [_]
+  (if-let [user (usr/get-user-by-email (ss/canonize-email email))]
+    (do
+      (usr/erase-user (:id user))
+      (ok))
+    (fail :not-found)))
 
 ;;
 ;; ==============================================================================
@@ -683,7 +699,7 @@
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
         email       (ss/canonize-email email)
-        token       (token/get-token tokenId)]
+        token       (token/get-usable-token tokenId)]
     (when-not (and vetuma-data
                    (= (:token-type token) :activate-linked-account)
                    (= email (get-in token [:data :email])))
@@ -697,7 +713,7 @@
                       :send-email false)]
         (do
           (vetuma/consume-user stamp)
-          (token/get-token tokenId :consume true)
+          (token/get-usable-token tokenId :consume true)
           (ok :id (:id user)))
         (fail :error.create-user))
       (catch IllegalArgumentException e
@@ -823,7 +839,7 @@
                         (when-not (-> command :user :architect)
                           unauthorized))
                       user-attachments-exists]}
-  [{application :application user :user :as command}]
+  [{application :application user :user ts :created :as command}]
   (doseq [attachment (:attachments (mongo/by-id :users (:id user) {:attachments true}))]
     (let [application-id         id
           user-id                (:id user)
@@ -839,12 +855,13 @@
                                      maybe-attachment-id)]
       (when (zero? (mongo/count :applications {:_id         application-id
                                                :attachments {$elemMatch {:id                 attachment-id              ; skip upload when user attachment as already been uploaded
-                                                                         :latestVersion.type attachment-type}}}))
+                                                                         :type.type-id (:type-id attachment-type)
+                                                                         :latestVersion.user.id (:id user)}}}))
         (att/upload-and-attach! command
                                 {:attachment-id   attachment-id
                                  :attachment-type attachment-type
                                  :group           {:groupType (get-in (att-type/attachment-type attachment-type) [:metadata :grouping])}
-                                 :created         (now)
+                                 :created         ts
                                  :required        false
                                  :locked          false}
                                 {:content      ((:content attachment))

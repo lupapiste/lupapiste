@@ -174,6 +174,44 @@
                                                      :aloitettava {:delta 1, :unit "years"},
                                                      :voimassa {:delta 1, :unit "years"}},
                                        :plans [],
+                                       :reviews []}}}
+               {:id "5b0689f8cb66507187fbc18f",
+                :draft {:verdict-dates ["muutoksenhaku" "lainvoimainen" "anto"],
+                        :language "fi",
+                        :giver "viranhaltija",
+                        :paatosteksti "Paatos annettu\n",
+                        :verdict-code "hyvaksytty",
+                        :appeal "Ohje muutoksen hakuun.\n",
+                        :upload true},
+                :name "TJ verdict template",
+                :category "tj",
+                :modified 1527155907891,
+                :deleted false,
+                :published {:published 1527155908947,
+                            :data {:appeal "Ohje muutoksen hakuun.\n",
+                                   :verdict-dates ["muutoksenhaku" "lainvoimainen" "anto"],
+                                   :giver "viranhaltija",
+                                   :verdict-code "hyvaksytty",
+                                   :language "fi",
+                                   :paatosteksti "Paatos annettu\n",
+                                   :upload true},
+                            :inclusions ["link-to-settings-no-label"
+                                         "verdict-dates"
+                                         "giver"
+                                         "link-to-settings"
+                                         "verdict-code"
+                                         "language"
+                                         "paatosteksti"
+                                         "appeal"
+                                         "upload"],
+                            :settings {:verdict-code ["myonnetty" "hyvaksytty"],
+                                       :date-deltas {:julkipano {:delta 0, :unit "days"},
+                                                     :anto {:delta 2, :unit "days"},
+                                                     :muutoksenhaku {:delta 2, :unit "days"},
+                                                     :lainvoimainen {:delta 2, :unit "days"},
+                                                     :aloitettava {:delta 0, :unit "days"},
+                                                     :voimassa {:delta 0, :unit "days"}},
+                                       :plans [],
                                        :reviews []}}}]
    :settings  {:r {:draft    {:voimassa                 "1"
                               :julkipano                "2"
@@ -193,7 +231,17 @@
                               :plans                    {:5a85960a809b5a1e454f3233 {:fi "Suunnitelmat" :sv "Planer" :en "Plans"}
                                                          :5a85960a809b5a1e454f3234 {:fi "ErityisSuunnitelmat" :sv "SpecialPlaner"
                                                                                     :en "SpecialPlans"}}}
-                   :modified created}}})
+                   :modified created}
+               :tj {:draft {:anto "2"
+                            :lainvoimainen "2"
+                            :muutoksenhaku "2"
+                            :verdict-code ["myonnetty" "hyvaksytty"]
+                            :lautakunta-muutoksenhaku "14"
+                            :boardname "Lauta ja Kunta"
+                            :julkipano "1"
+                            :aloitettava "1"
+                            :voimassa "1"}
+                    :modified created}}})
 
 (sc/validate ps/PateSavedVerdictTemplates verdic-templates-setting)
 

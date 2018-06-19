@@ -74,7 +74,9 @@
 (fact "Fetch document"
   (let [process-id (:id (init-sign))]
     (fetch-document process-id) => http200?
-    (get-process-status process-id) => "started"))
+    (get-process-status process-id) => "started"
+    (fact "Consequent call retuns also"
+      (fetch-document process-id) => http200?)))
 
 (fact "Fetch document for unknown process"
   (fetch-document "foozaa") => http404?)
@@ -167,6 +169,7 @@
         _ (fetch-document process-id) => http200?
         store (atom {})
         params {:cookie-store (->cookie-store store)
+                :query-params {:onnistuu_error 60 :onnistuu_message "fail"}
                 :throw-exceptions false}
         response   (http-get (str (server-address) "/api/sign/fail/" process-id) params)]
     response => http200?

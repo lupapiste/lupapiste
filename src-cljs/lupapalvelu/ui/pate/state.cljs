@@ -1,27 +1,33 @@
 (ns lupapalvelu.ui.pate.state
   (:refer-clojure :exclude [select-keys])
-  (:require [rum.core :as rum]))
+  (:require [clojure.string :as s]
+            [lupapalvelu.ui.common :as common]
+            [rum.core :as rum]))
 
 (defonce state* (atom {}))
 
 (defn- state-cursor [key]
   (rum/cursor-in state* [key]))
 
-(def current-template   (state-cursor :current-template))
-(def current-view       (state-cursor :current-view))
-(def current-category   (state-cursor :current-category))
-(def template-list      (state-cursor :template-list))
-(def categories         (state-cursor :categories))
-(def references         (state-cursor :references))
-(def settings           (rum/cursor-in references [:settings]))
-(def settings-info      (state-cursor :settings-info))
-(def reviews            (rum/cursor-in references [:reviews]))
-(def plans              (rum/cursor-in references [:plans]))
-(def phrases            (state-cursor :phrases))
-(def application-id     (state-cursor :application-id))
-(def current-verdict    (state-cursor :current-verdict))
-(def current-verdict-id (rum/cursor-in current-verdict [:info :id]))
-(def verdict-list       (state-cursor :verdict-list))
+(def current-template        (state-cursor :current-template))
+(def current-view            (state-cursor :current-view))
+(def current-category        (state-cursor :current-category))
+(def template-list           (state-cursor :template-list))
+(def categories              (state-cursor :categories))
+(def references              (state-cursor :references))
+(def settings                (rum/cursor-in references [:settings]))
+(def settings-info           (state-cursor :settings-info))
+(def reviews                 (rum/cursor-in references [:reviews]))
+(def plans                   (rum/cursor-in references [:plans]))
+(def phrases                 (state-cursor :phrases))
+(def application-id          (state-cursor :application-id))
+(def current-verdict         (state-cursor :current-verdict))
+(def current-verdict-id      (rum/cursor-in current-verdict [:info :id]))
+(def verdict-list            (state-cursor :verdict-list))
+(def replacement-verdict     (state-cursor :replacement-verdict))
+(def allowed-verdict-actions (state-cursor :allowed-verdict-actions))
+;; Wait state for verdict publishing. True when waiting.
+(def verdict-wait?           (state-cursor :verdict-wait?))
 
 ;; ok function of the currently active authModel.
 (defonce auth-fn (atom nil))
@@ -49,3 +55,53 @@
                                                                       (when callback (callback)))))
   ([app-id]
    (refresh-application-auth-model app-id nil)))
+
+
+;; Convenience wrappers for the verdicts category allowed
+;; actions. Since the actions are only used for ClojureScript we can
+;; bypass the JavaScript auth models.
+
+(defn verdict-auth? [verdict-id action]
+  (get-in @allowed-verdict-actions
+          [(keyword verdict-id) (keyword action) :ok]))
+
+(defn react-verdict-auth? [verdict-id action]
+  (rum/react (rum/cursor-in allowed-verdict-actions
+                            [(keyword verdict-id) (keyword action) :ok])))
+
+(defn- update-allowed-if-needed [verdict-id new-actions]
+  (let [ok-keys-fn #(->> %
+                         (map (fn [[k v]]
+                                (when (:ok v) k)))
+                         (remove nil?)
+                         set)
+        olds (ok-keys-fn (verdict-id @allowed-verdict-actions))
+        news (ok-keys-fn new-actions)]
+    (when (not= olds news)
+      (swap! allowed-verdict-actions
+             assoc
+             verdict-id new-actions))))
+
+(defn refresh-verdict-auths
+  ([app-id {:keys [callback verdict-id]}]
+   ;; Not in service due to circular reqs.
+   (let [verdict-id (when-not (s/blank? verdict-id) (keyword verdict-id))
+         query-fn   (partial common/query :allowed-actions-for-category
+                             (fn [{actions :actionsById}]
+                               (if verdict-id
+                                 (update-allowed-if-needed verdict-id (verdict-id actions))
+                                 (reset! allowed-verdict-actions actions))
+
+                               (when (and verdict-id (= verdict-id @current-verdict-id))
+                                 (common/reset-if-needed! (rum/cursor-in current-verdict
+                                                                         [:_meta :enabled?])
+                                                          (verdict-auth? verdict-id
+                                                                         :edit-pate-verdict)))
+                               (when callback
+                                 (callback)))
+                             :id app-id
+                             :category :pate-verdicts)]
+     (if verdict-id
+       (query-fn :verdict-id verdict-id)
+       (query-fn))))
+  ([app-id] (refresh-verdict-auths app-id nil)))

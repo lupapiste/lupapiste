@@ -33,6 +33,24 @@
          :headers {"content-type" "application/json;charset=utf-8"}
          :body    (json/encode user)}))))
 
+(def new-user-details
+  {:phone "0500"
+   :city "Tammerfors"
+   :zip "12345"
+   :street "Osootes"
+   :password "salasana"
+   :email "jukka@example.com"
+   :rakentajafi false
+   :allowDirectMarketing true
+   :architect true
+   :graduatingYear "1978"
+   :fise "foobar"
+   :fiseKelpoisuus "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"
+   :degree "diplomi-insin\u00f6\u00f6ri"})
+
+(defn stamped-new-user-details [stamp]
+  (assoc new-user-details :stamp stamp))
+
 (defn default-vetuma-response-data [trid]
   {"TRID" trid
    "STATUS" "SUCCESSFUL"
@@ -73,6 +91,9 @@
                    "CANCELLED"  (str vetuma-endpoint "/cancel"))]
 
     (http-post endpoint (assoc request-opts :form-params vetuma-post))))
+
+(defn vetuma-finish [request-opts trid]
+  (vetuma-fake-respose request-opts (default-vetuma-response-data trid)))
 
 (defn authenticate-to-vetuma! [cookie-store]
   (let [vetuma-params (default-vetuma-params cookie-store)

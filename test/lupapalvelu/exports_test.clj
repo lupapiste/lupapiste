@@ -2,14 +2,20 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.set :refer [difference]]
-            [lupapalvelu.exports-api :refer [kayttotarkoitus-hinnasto price-classes-for-operation permit-type-price-codes]]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]
+            [lupapalvelu.exports :as exports :refer [exported-application kayttotarkoitus-hinnasto price-classes-for-operation permit-type-price-codes]]
             [lupapalvelu.application :as app]
             [lupapalvelu.operations :as ops]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.permit :as permit]
-            [lupapiste-commons.usage-types :as usages]))
+            [lupapiste-commons.usage-types :as usages]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [sade.schema-generators :as ssg]
+            [sade.schemas :as ssc]))
 
-(testable-privates lupapalvelu.exports-api resolve-price-class exported-application)
+(testable-privates lupapalvelu.exports resolve-price-class)
 
 (def keyset (comp set keys))
 
@@ -26,7 +32,21 @@
       (get permit-type-price-codes permit-type) => number?)))
 
 (fact "Uusi kerrostalo-rivitalo"
-  (let [application (app/make-application "LP-123" "kerrostalo-rivitalo" 0 0 "address" "01234567891234" "location-service" "753" {:id "753-R"} false false [] {} 123 nil)
+  (let [app-info (util/assoc-when-pred
+                   {:id              (ssg/generate ssc/ApplicationId)
+                    :organization    {:id "753-R"
+                                      :name {:fi "Testi" :sv "Testi"}
+                                      :scope [{:permitType "R" :inforequest-enabled false :new-application-enabled false
+                                               :municipality "753"}]}
+                    :operation-name  "kerrostalo-rivitalo"
+                    :location        (app/->location (ssg/generate ssc/LocationX)
+                                                     (ssg/generate ssc/LocationY))
+                    :propertyId      "01234567891234"
+                    :address         "address"}
+                   ss/not-blank?
+                   :propertyIdSource "location-service"
+                   :municipality "753")
+        application (app/make-application app-info [] {} 123 nil)
         uusi-rakennus (domain/get-document-by-name application "uusiRakennus")]
 
     (fact "Default value '021 rivitalot' = B"
@@ -109,3 +129,60 @@
                              :paatospvm 9
                              :anto 9
                              :lainvoimainen 11}]}))
+
+;;
+;; Export Onkalo API usage
+;;
+(defn to-long [& args]
+  (-> (apply t/date-time args) tc/to-long))
+
+(facts timestamp->end-of-month-date-string
+  (fact "returns timestamp string representing the last day of the timestamp's month"
+    (exports/timestamp->end-of-month-date-string (to-long 2018 5 3 9 45 54))
+    => "2018-05-31")
+  (fact "handles leap days"
+    (exports/timestamp->end-of-month-date-string (to-long 2016 2 21 10 11 0))
+    => "2016-02-29"
+    (exports/timestamp->end-of-month-date-string (to-long 2016 2 29 10 11 0))
+    => "2016-02-29")
+  (fact "interprets timestamps in Helsinki time zone"
+    (exports/timestamp->end-of-month-date-string (to-long 2018 5 31 23 59 0))
+    => "2018-06-30"))
+
+(facts onkalo-log-entries->salesforce-export-entries
+  (fact "no log entries results in no export entries"
+        (exports/onkalo-log-entries->salesforce-export-entries [] 1234)
+    => {:lastRunTimestampMillis 1235
+        :transactions []})
+  (fact "single entry results in single entry"
+    (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R"
+                                                             :timestamp (to-long 2018 5 3)
+                                                             :logged (to-long 2018 5 3)}]
+                                                           1234)
+    => {:lastRunTimestampMillis (inc (to-long 2018 5 3))
+        :transactions [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1}]})
+  (fact "quantity shows the number of entries for given organization in given month"
+    (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3) :logged (to-long 2018 5 3)}
+                                                            {:organization "753-R" :timestamp (to-long 2018 5 3) :logged (to-long 2018 5 4)}]
+                                                           1234)
+    => {:lastRunTimestampMillis (inc (to-long 2018 5 4))
+        :transactions [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 2}]})
+  (fact "each organization has own entries"
+    (-> (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3) :logged (to-long 2018 5 3)}
+                                                                {:organization "091-R" :timestamp (to-long 2018 5 3) :logged (to-long 2018 5 3)}]
+                                                               1234)
+        :transactions)
+    => (contains [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1} {:organization "091-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1}]
+                 :in-any-order))
+  (fact "each month has own entries"
+    (-> (exports/onkalo-log-entries->salesforce-export-entries [{:organization "753-R" :timestamp (to-long 2018 5 3) :logged (to-long 2018 5 3)}
+                                                                {:organization "753-R" :timestamp (to-long 2018 6 3) :logged (to-long 2018 6 3)}]
+                                                               1234)
+        :transactions)
+    => (contains [{:organization "753-R" :lastDateOfTransactionMonth "2018-05-31" :quantity 1} {:organization "753-R" :lastDateOfTransactionMonth "2018-06-30" :quantity 1}]
+                 :in-any-order))
+  (fact "throws on invalid input data"
+    (exports/onkalo-log-entries->salesforce-export-entries [{:not-organization "753-R" :timestamp (to-long 2018 5 3) :logged (to-long 2018 5 3)}
+                                                            {:organization "753-R" :timestamp (to-long 2018 6 3) :logged (to-long 2018 6 3)}]
+                                                               1234)
+        => (throws #"does not match schema")))

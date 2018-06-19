@@ -14,6 +14,5 @@
    :parameters  [:application-id rest-schemas/ApplicationId
                  :attachment-id att/AttachmentId
                  :target-state sc/Str
-                 :archivist usr/SummaryUser
                  :deletion-explanation sc/Str]}
-  (oo/attachment-archiving-operation application-id attachment-id archivist (keyword target-state) deletion-explanation))
+  (oo/attachment-archiving-operation application-id attachment-id (keyword target-state) deletion-explanation))

@@ -5,6 +5,8 @@
             [clojure.java.io :as io]
             [sade.util :as util]))
 
+(mongo/connect!)
+
 (defn- upload-file [file linked]
   (let [file-id (mongo/create-id)]
     (mongo/upload file-id "test-pdf.pdf" "application/pdf" file :linked linked)

@@ -12,7 +12,7 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
     return util.getIn(applicationFiltersService.selected(), ["filter", "handlers"]);
   });
 
-  var usersInSameOrganizations = ko.observable();
+  var usersInSameOrganizations = lupapisteApp.services.organizationsUsersService.users;
 
   ko.computed(function() {
     if (savedFilter() && _.includes(savedFilter(), "no-authority")) {
@@ -30,30 +30,4 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
   self.data = ko.pureComputed(function() {
     return usersInSameOrganizations();
   });
-
-  function mapUser(user) {
-    user.fullName = _.filter([user.lastName, user.firstName]).join("\u00a0") || user.email;
-    if (!user.enabled) {
-      user.fullName += " " + loc("account.not-in-use");
-    }
-    return user;
-  }
-
-  function load() {
-    if (lupapisteApp.models.globalAuthModel.ok("users-in-same-organizations")) {
-      ajax
-        .query("users-in-same-organizations")
-        .success(function(res) {
-          usersInSameOrganizations(_(res.users).map(mapUser).sortBy("fullName").value());
-        })
-        .call();
-      return true;
-    }
-    return false;
-  }
-
-  if (!load()) {
-    hub.subscribe("global-auth-model-loaded", load, true);
-  }
-
 };

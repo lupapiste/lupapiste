@@ -17,8 +17,13 @@
     (defn first-attachment []
       (-> (query-application pena application-id) :attachments first))
 
+    (sent-emails) ;; Clear inbox
+
     (fact "Upload file to attachment"
       (upload-file-and-bind pena application-id {:type (:type base-attachment)} :attachment-id (:id base-attachment)) => truthy)
+
+    (fact "No email sent"
+      (sent-emails) => [])
 
     (fact "Ronja is set as general handler"
       (command sonja :upsert-application-handler :id application-id :userId ronja-id :roleId sipoo-general-handler-id) => ok?)
@@ -39,16 +44,16 @@
       (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
       => (partial expected-failure? :error.attachment-not-approved))
 
+    (sent-emails);; Clear inbox
+
     (fact "RAM link is created after approval"
       (command sonja :approve-attachment :id application-id
                :fileId (-> (first-attachment) :latestVersion :fileId)) => ok?
       (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
       => ok?)
 
-    (fact "Email notification about new RAM is sent"
-      (let [email (last-email)]
-        (:to email) => (contains (email-for-key ronja))
-        (:subject email) => "Lupapiste: foo 42, bar, Sipoo - Ilmoitus uudesta RAM:sta"))
+    (fact "No email sent"
+      (sent-emails) => [])
 
     (fact "RAM link cannot be created twice on same attachment"
       (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
@@ -66,9 +71,16 @@
           (command sonja :approve-attachment :id application-id
                    :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?
           (command pena :create-ram-attachment :id application-id :attachmentId (:id base)) => ok?)
+        ;; Clear inbox
+        (sent-emails)
         (upload-file-and-bind pena application-id
                               {:type {:type-group "paapiirustus" :type-id "julkisivupiirustus"}}
                               :attachment-id (:id (latest-attachment))) => truthy
+        (Thread/sleep 100) ; wait for email delivery
+        (fact "Email notification about new RAM is sent"
+          (let [email (last-email)]
+            (:to email) => (contains (email-for-key ronja))
+            (:subject email) => "Lupapiste: foo 42, bar, Sipoo - Ilmoitus uudesta RAM:sta"))
         (fact "Applicant cannot delete base attachment"
           (command pena :delete-attachment :id application-id :attachmentId (:id base))
           => fail?)

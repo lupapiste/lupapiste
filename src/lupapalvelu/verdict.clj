@@ -370,6 +370,7 @@
           validation-error)))
     ;; LPK-2459
     (when (or (foreman/foreman-app? application) (app/designer-app? application))
+      (debug "Checking foreman/designer verdict...")
       (fetch-tj-suunnittelija-verdict command))))
 
 (defn- verdict-task?
@@ -444,7 +445,8 @@
 
 (defn- missing-verdict-attachments-query [{:keys [start end organizations]}]
   (merge {:verdicts {$elemMatch {$and [{:timestamp {$gt start
-                                                    $lt end} }
+                                                    $lt end}
+                                        :permitType {$nin ["ARK"]}}
                                        {$or [{:paatokset.poytakirjat {$size 0}}
                                              {:paatokset.poytakirjat.urlHash {$exists false}}]}]}}}
          (when (not-empty organizations)
@@ -460,10 +462,10 @@
                 (missing-verdict-attachments-query options)
                 [:organization :permitType]))
 
-(defn- get-verdicts-from-xml [application organization xml]
+(defn get-verdicts-from-xml [application organization xml]
   (krysp-reader/->verdicts xml (:permitType application) permit/read-verdict-xml organization))
 
-(defn- matching-verdict
+(defn matching-verdict
   "Return a verdict with a matching kuntalupatunnus from verdicts"
   [verdict verdicts]
   (util/find-first #(= (:kuntalupatunnus %)

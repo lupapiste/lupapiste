@@ -609,14 +609,18 @@
 (defalias union-as-kw        shared/union-as-kw)
 
 (defn kw-path
-  "a b c -> :a.b.c
-   [a b c] -> :a.b.c"
+  "a b c       -> :a.b.c
+   [a b c]     -> :a.b.c
+   a [b nil] c -> :a.b.c
+   nil         -> nil"
   [& kw]
-  (->> kw
-       flatten
-       (map ss/->plain-string)
-       (ss/join ".")
-       keyword))
+  (some->> kw
+           flatten
+           (remove nil?)
+           not-empty
+           (map ss/->plain-string)
+           (ss/join ".")
+           keyword))
 
 (def split-kw-path shared/split-kw-path)
 

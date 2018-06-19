@@ -67,12 +67,10 @@
 (defn designers-index-update [application]
   {$set (designers-index application)})
 
-(defn get-applicant-phone [_ app]
-  (let [applicant-auth (first (auth/get-auths-by-role app :writer))]
-    (->> (if (= :company (keyword (:type applicant-auth)))
-           (usr/get-user {:company.id (:id applicant-auth) :company.role "admin"})
-           (usr/get-user-by-id (:id applicant-auth)))
-         :phone)))
+(defn get-inforequest-phone [_ app]
+  (when (:infoRequest app)
+    (when-let [info-requester-id (get-in app [:creator :id])]
+      (:phone (usr/get-user-by-id info-requester-id)))))
 
 (defn get-applicant-companies [_ app]
   (let [companies (auth/get-company-auths app)]
@@ -86,9 +84,12 @@
 (defn foreman-role-from-doc [doc]
   (get-in doc [:data :kuntaRoolikoodi :value]))
 
+(defn- foreman-doc-from-application [application]
+  (or (domain/get-document-by-name application :tyonjohtaja-v2)
+      (domain/get-document-by-name application :tyonjohtaja)))
+
 (defn foreman-index [application]
-  (let [foreman-doc (or (domain/get-document-by-name application :tyonjohtaja-v2)
-                      (domain/get-document-by-name application :tyonjohtaja))]
+  (let [foreman-doc (foreman-doc-from-application application)]
     {:foreman (foreman-name-from-doc foreman-doc)
      :foremanRole (foreman-role-from-doc foreman-doc)}))
 
@@ -201,7 +202,7 @@
 
 (def meta-fields (conj indicator-meta-fields
                    {:field :inPostVerdictState :fn in-post-verdict-state?}
-                   {:field :applicantPhone :fn get-applicant-phone}
+                   {:field :applicantPhone :fn get-inforequest-phone}
                    {:field :applicantCompanies :fn get-applicant-companies}
                    {:field :organizationMeta :fn organization-meta}
                    {:field :stateSeq :fn #(sm/application-state-seq %2)}
@@ -218,6 +219,11 @@
   "Enriches application with all meta fields. Causes database lookups."
   (partial enrich-with-meta-fields meta-fields))
 
+(defn- substitute-foreman? [foreman-doc]
+  (let [substitute (get-in foreman-doc [:data :sijaistus])]
+    (not (and (empty? (get-in substitute [:sijaistettavaHloEtunimi :value]))
+              (empty? (get-in substitute [:sijaistettavaHloSukunimi :value]))))))
+
 (defn enrich-with-link-permit-data [{application-id :id :as application}]
   (if-let [links (seq (when application-id (mongo/select :app-links {:link {$in [application-id]}})))]
 
@@ -230,7 +236,7 @@
                       {:_id {$in link-permit-ids}})
           link-applications (->> (mongo/select :applications
                                                app-query
-                                               {:primaryOperation 1 :permitSubtype 1})
+                                               {:primaryOperation 1 :permitSubtype 1 :state 1 :documents 1})
                                  (reduce #(assoc %1 (:id %2) %2) {}))
           our-link-permits (filter #(= (:type ((keyword application-id) %)) "application") links)
           apps-linking-to-us (filter #(= (:type ((keyword application-id) %)) "linkpermit") links)
@@ -248,12 +254,21 @@
                                                       (get-in link-applications [link-permit-id :primaryOperation :name]))]
                              {:id link-permit-id :type link-permit-type :operation link-permit-app-op :permitSubtype ""})
 
-                           (let [{:keys [primaryOperation permitSubtype]} (when (= (:type ((keyword link-permit-id) link-data)) "application")
-                                                                            (link-applications link-permit-id))]
-                             {:id link-permit-id
-                              :type link-permit-type
-                              :operation (:name primaryOperation)
-                              :permitSubtype permitSubtype}))))]
+                           (let [{:keys [primaryOperation permitSubtype state] :as linked-app}
+                                 (when (util/=as-kw (:type ((keyword link-permit-id) link-data)) :application)
+                                    (link-applications link-permit-id))
+
+                                 converted-link-data  {:id link-permit-id
+                                                       :type link-permit-type
+                                                       :operation (:name primaryOperation)
+                                                       :permitSubtype permitSubtype}]
+                             (if-let [foreman-doc (foreman-doc-from-application linked-app)]
+                               (assoc converted-link-data
+                                 :state       state
+                                 :foreman     (foreman-name-from-doc foreman-doc)
+                                 :foremanRole (foreman-role-from-doc foreman-doc)
+                                 :isSubstituteForeman (substitute-foreman? foreman-doc))
+                               converted-link-data)))))]
 
       (assoc application
         :linkPermitData  (when (seq our-link-permits) (mapv convert-fn our-link-permits))
@@ -261,4 +276,3 @@
 
     ;; No link permit data found
     (assoc application :linkPermitData nil, :appsLinkingToUs nil)))
-

@@ -4,7 +4,7 @@
             [clojure.string :as s]
             [monger.operators :refer :all]
             [sade.util :as util :refer [fn->]]
-            [sade.core :refer [ok fail fail! unauthorized!]]
+            [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [update-application application->command] :as action]
             [lupapalvelu.attachment :as att]
@@ -177,6 +177,7 @@
     (seq (map :id (filter
                     (fn [{versions :versions :as attachment}]
                       (and ((set (att-util/get-operation-ids attachment)) op-id)
+                           (-> attachment :op (count) (< 2))
                            (empty? versions)))
                     attachments)))))
 
@@ -403,3 +404,21 @@
                       {:documents {$elemMatch {:id doc-id}}}
                       {$set {:modified (:created command)
                              :documents.$.disabled (= "disabled" value)}}))
+
+(defn set-edited-timestamp [{:keys [user] :as command} doc-id]
+  (update-application command
+                      {:documents {$elemMatch {:id doc-id}}}
+                      {$set {:modified (:created command)
+                             :documents.$.meta._post_verdict_edit.timestamp (now)
+                             :documents.$.meta._post_verdict_edit.user {:id (:id user)
+                                                                        :firstName (:firstName user)
+                                                                        :lastName (:lastName user)}}}))
+
+(defn set-sent-timestamp [{:keys [user] :as command} doc-id]
+  (update-application command
+                      {:documents {$elemMatch {:id doc-id}}}
+                      {$set {:modified (:created command)
+                             :documents.$.meta._post_verdict_sent.timestamp (now)
+                             :documents.$.meta._post_verdict_sent.user {:id (:id user)
+                                                                        :firstName (:firstName user)
+                                                                        :lastName (:lastName user)}}}))

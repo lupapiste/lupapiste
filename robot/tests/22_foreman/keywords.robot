@@ -23,7 +23,6 @@ Create project application
   Append To List  ${applicationIds}  ${newApplicationId}
 
 Go back to project application
-  Wait test id visible  test-application-link-permit-lupapistetunnus
   Scroll and click test id  test-application-link-permit-lupapistetunnus
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='kerrostalo-rivitalo']
 
@@ -39,7 +38,7 @@ Open foreman app from list
   Click element  //div[contains(@class,"nav-top")]//div[contains(@class,"header-box")]//a[@title="Hankkeet"]
   Wait until  Element should be visible  //table[@id="applications-list"]//td[@data-test-col-name="operation"]
   Click element  //table[@id="applications-list"]//tr[@data-id="${foremanAppId}"]//td[@data-test-col-name="operation"]
-  Wait until  jQuery should match X times  span[data-test-primary-operation-id=tyonjohtajan-nimeaminen-v2]:visible  1
+  Wait until  Element should be visible  xpath=//section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
 
 Open foreman accordions
   Open accordions  parties
@@ -51,7 +50,7 @@ Sonja invites foreman to application
   Open tab  parties
   Open foreman accordions
   Wait until  Click by test id  invite-foreman-button
-  Sleep  1s
+  Wait until  Element should be visible  invite-foreman-email
   Wait until  Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
@@ -59,14 +58,32 @@ Sonja invites foreman to application
   ${foremanAppId} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
   Append To List  ${foremanApps}  ${foremanAppId}
 
-Foreman applies personal information to the foreman application
+Foreman accepts invitation
   [Arguments]  ${index}
   Open foreman app from list  ${index}
   Wait until  Confirm yes no dialog
   Open tab  parties
   Wait until  Page should contain  Hyväksynyt valtuutuksen
+
+Foreman disables attachment import checkbox
+  Unselect checkbox  fill-attachments-checkbox
+
+Foreman applies personal information to the foreman application
   Wait until  Click by test id  fill-info-button
+
+Foreman personal information has been applied
   Wait until  Textfield value should be  xpath=//section[@data-doc-type='tyonjohtaja-v2']//input[@data-docgen-path='henkilotiedot.etunimi']  Teppo
+
+Foreman personal attachments have been copied
+  Open tab  attachments
+  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
+  Open tab  parties
+
+Foreman personal attachments have not been copied
+  Open tab  attachments
+  Sleep  2s
+  Element should not be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
+  Open tab  parties
 
 Submit foreman base app
   [Arguments]  ${index}
@@ -82,12 +99,15 @@ Foreman accepts invitation and fills info
   Wait until  Scroll and click test id  fill-info-button
   Wait for jQuery
 
+Set foreman role
+  [Arguments]  ${role}
+  Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
+
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}
   Open foreman app from list  ${index}
   Test id visible  confirm-no
   Deny yes no dialog
-  Sleep  1s
   Open tab  parties
   Foreman accepts invitation and fills info
   Wait until  Select From List by test id  kuntaRoolikoodi  ${role}

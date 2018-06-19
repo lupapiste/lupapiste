@@ -10,7 +10,6 @@ Approve application
   Run Keyword If  ${BULLETIN_DESCR_VISIBLE}  Fill test id  bulletin-op-description-summaryTab  Toimenpideotsikko julkipanoon
   Wait test id visible  approve-application-summaryTab
   Click enabled by test id  approve-application-summaryTab
-  Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  sent
 
 Accordion approved

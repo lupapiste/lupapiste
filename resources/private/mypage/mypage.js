@@ -15,7 +15,8 @@
         if (n === "degree" && !model[n]()) {
           m[n] = "";
         } else {
-          m[n] = model[n]();
+          var value = model[n]();
+          m[n] = _.isString(value) ? _.trim(value) : value;
         }
         return m; }, {});
 

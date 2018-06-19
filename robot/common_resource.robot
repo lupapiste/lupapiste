@@ -10,7 +10,7 @@ Library        DebugLibrary
 *** Variables ***
 
 ${SERVER}                       http://localhost:8000
-${WAIT_DELAY}                   12
+${WAIT_DELAY}                   10
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
 ${OP_TREE_SPEED}                0.1
@@ -148,6 +148,7 @@ Language To
   Wait Until  Element Should Be Visible  css=div.language-menu
   Click Element  partial link=${lang}
   Wait Until  Element Should Contain  language-select  ${lang}
+  Kill dev-box
 
 Language Is
   [Arguments]  ${lang}
@@ -548,7 +549,7 @@ Clear autocomplete selections by test id
 
 Autocomplete selection is
   [Arguments]  ${container}  ${value}
-  Wait Until  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
+  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
 
 Autocomplete selection by test id is
   [Arguments]  ${tid}  ${value}
@@ -663,12 +664,12 @@ Input building identifier
 
 
 Document status is disabled
-  [Arguments]  ${docType}  ${xpathIdx}
+  [Arguments]  ${docType}  ${xpathIdx}=1
   Wait until  Element should be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
   Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Palauta aktiiviseksi
 
 Document status is enabled
-  [Arguments]  ${docType}  ${xpathIdx}
+  [Arguments]  ${docType}  ${xpathIdx}=1
   Wait until  Element should not be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
   Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Merkitse poistuneeksi
 
@@ -883,8 +884,6 @@ Add attachment
   Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
 
 Return to application
-  # The button might be behind a save indicator, so wait for it to clear
-  Sleep  2s
   Wait Until  Scroll and click test id  back-to-application-from-attachment
 
 Delete attachment
@@ -1092,20 +1091,9 @@ Approve application no dialogs
   Click enabled by test id  approve-application-summaryTab
   Wait until  Application state should be  sent
 
-Approve application with missing info
-  Open tab  requiredFieldSummary
-  Wait until  Element should be visible  //div[@id='application-requiredFieldSummary-tab']
-  ${BULLETIN_DESCR_VISIBLE}=  Run Keyword And Return Status  Test id visible  bulletin-op-description-summaryTab
-  Run Keyword If  ${BULLETIN_DESCR_VISIBLE}  Fill test id  bulletin-op-description-summaryTab  Toimenpideotsikko julkipanoon
-  Wait test id visible  approve-application-summaryTab
-  Click enabled by test id  approve-application-summaryTab
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Application state should be  sent
-
 Approve application ok
   Open tab  requiredFieldSummary
   Click enabled by test id  approve-application-summaryTab
-  Confirm  dynamic-yes-no-confirm-dialog
   Confirm ok dialog
   Wait until  Application state should be  sent
 
@@ -1602,8 +1590,7 @@ Scroll and click input
 
 Scroll and click test id
   [Arguments]  ${id}
-  Sleep  1s
-  Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
+  Element should be visible by test id  ${id}
   Scroll to  [data-test-id="${id}"]
   Click by test id  ${id}
 
@@ -1627,6 +1614,11 @@ Test id empty
   [Arguments]  ${id}
   Wait test id visible  ${id}
   Textfield Value Should Be  jquery=[data-test-id=${id}]  ${EMPTY}
+
+Textarea is empty
+  [Arguments]  ${test-id}
+  Wait test id visible  ${test-id}
+  Textarea Value Should Be  jquery=[data-test-id=${test-id}]  ${EMPTY}
 
 Test id disabled
   [Arguments]  ${id}
@@ -1723,6 +1715,14 @@ Toggle not selected
   [Arguments]  ${tid}
   Checkbox wrapper not selected by test id  ${tid}
 
+Toggle disabled
+  [Arguments]  ${tid}
+  Test id disabled  ${tid}-input
+
+Toggle enabled
+  [Arguments]  ${tid}
+  Test id enabled  ${tid}-input
+
 Toggle toggle
   [Arguments]  ${tid}
   Wait until  Element should be visible  xpath=//label[@data-test-id='${tid}-label']
@@ -1734,12 +1734,19 @@ Select from test id
 
 Test id select is
   [Arguments]  ${id}  ${value}
-  List selection should be  jquery=select[data-test-id=${id}]  ${value}
+  Wait until  List selection should be  jquery=select[data-test-id=${id}]  ${value}
 
 Test id select text is
   [Arguments]  ${id}  ${text}
   ${label}=  Get Selected List Label  jquery=select[data-test-id=${id}]
   Should be true  '${label}' == '${text}'
+
+Test id select values are
+  [Arguments]  ${tid}  @{values}
+  Wait test id visible  ${tid}
+  @{vals}=  Get list items  jquery=[data-test-id=${tid}]  values=True
+  Should be true  @{vals} == @{values}
+
 
 jQuery should match X times
   [Arguments]  ${selector}  ${count}
@@ -1754,6 +1761,10 @@ Test id autocomplete disabled
   [Arguments]  ${tid}
   jQuery should match X times  div[data-test-id='${tid}'] .autocomplete-selection-wrapper.disabled:visible  1
 
+
+Press key test id
+  [Arguments]  ${tid}  ${key}
+  Press key  jquery=[data-test-id=${tid}]  ${key}
 
 # Frontend error log
 

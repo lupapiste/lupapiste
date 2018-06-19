@@ -103,8 +103,8 @@
                                                        :varusteet sc/Any
                                                        :jaahdytysmuoto sc/Any
                                                        :asuinhuoneistot {:huoneisto [Huoneisto]
-                                                                         :asuntojenPintaala sc/Any
-                                                                         :asuntojenLkm sc/Any}
+                                                                         (sc/optional-key :asuntojenPintaala) sc/Any
+                                                                         (sc/optional-key :asuntojenLkm) sc/Any}
                                                        :liitettyJatevesijarjestelmaanKytkin sc/Bool})
                (sc/optional-key :rakennelmanTiedot) (util/map-keys sc/optional-key
                                                       {:yksilointitieto sc/Str

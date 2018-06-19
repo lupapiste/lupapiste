@@ -3,13 +3,13 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error warnf]]
             [clojure.set :refer [rename-keys]]
             [net.cgrand.enlive-html :as enlive]
+            [sade.env :as env]
             [sade.xml :refer :all]
             [sade.util :refer [fn-> fn->>] :as util]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
-            [sade.xml :as sxml]
             [lupapalvelu.drawing :as drawing]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
@@ -38,9 +38,10 @@
        </wfs:GetFeature>")}))
 
 (defn- application-xml [type-name id-path server credentials ids raw?]
-  (let [url (common/wfs-krysp-url-with-service server type-name (common/property-in id-path ids))]
+  (let [url (common/wfs-krysp-url-with-service server type-name (common/property-in id-path ids))
+        xml-timeout (or (env/value :kuntagml :conn-timeout) 15000)]
     (trace "Get application: " url)
-    (cr/get-xml url {} credentials raw?)))
+    (cr/get-xml url {:debug-event true :conn-timeout xml-timeout} credentials raw?)))
 
 (defn rakval-application-xml [server credentials ids search-type raw?]
   (application-xml common/rakval-case-type (common/get-tunnus-path permit/R search-type)    server credentials ids raw?))
@@ -360,10 +361,13 @@
 
 (defmethod application-state :default [xml-without-ns] (simple-application-state xml-without-ns))
 
-(defn standard-application-state [xml-without-ns]
+(defn get-sorted-tilamuutos-entries [xml-without-ns]
   (->> (select xml-without-ns [:kasittelynTilatieto :Tilamuutos])
        (map (fn-> cr/all-of (cr/convert-keys-to-timestamps [:pvm])))
-       (sort state-comparator)
+       (sort state-comparator)))
+
+(defn standard-application-state [xml-without-ns]
+  (->> (get-sorted-tilamuutos-entries xml-without-ns)
        last
        :tila
        ss/lower-case))
@@ -502,17 +506,24 @@
 
 ;; Coordinates
 
-(defn- resolve-point-coordinates [point-xml-with-ns point-str kuntalupatunnus]
+(defn select1-non-zero-point
+  "Select first element of matching selector, which doesn't have '0.0' as gml:Point/gml:pos value."
+  [xml selector]
+  (->> (select xml selector)
+       (remove #(some #{"0.0"} (-> (get-text % [:Point :pos]) (ss/split #"\s+"))))
+       first))
+
+(defn- resolve-point-coordinates [point-xml-with-ns point-str]
   (try
     (when-let [source-projection (common/->source-projection point-xml-with-ns [:Point])]
       (let [coords (ss/split point-str #" ")]
         (when-not (contains? coordinate/known-bad-coordinates coords)
           (coordinate/convert source-projection common/to-projection 3 coords))))
-    (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
+    (catch Exception e (error e "Coordinate conversion failed for point-str" point-str))))
 
 (defn- resolve-building-coordinates [xml]
   (try
-    (let [building-location-xml (select1 xml [:Rakennus :sijaintitieto :Sijainti])
+    (let [building-location-xml (select1-non-zero-point xml [:Rakennus :sijaintitieto :Sijainti])
           building-coordinates-str (->> (cr/all-of building-location-xml) :piste :Point :pos)
           building-coordinates (ss/split building-coordinates-str #"\s+")
           source-projection (common/->source-projection building-location-xml [:Point])]
@@ -583,6 +594,9 @@
     (when street
       (str street " " number))))
 
+(defn rakennuspaikka-property-id [rakennuspaikka-element]
+  (-> rakennuspaikka-element :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus))
+
 (defn- resolve-location-by-property-id [property-id kuntalupatunnus]
   (warn "Falling back to resolve location for kuntalupatunnus" kuntalupatunnus "by property id" property-id)
   (if-let [location (-> (find-address/search-property-id "fi" property-id)
@@ -609,24 +623,28 @@
 (defn resolve-coordinate-type [xml]
   (cond
     (some? (select1 xml [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])) :point
-    (some? (select1 xml [:Rakennus :sijaintitieto :Sijainti :piste :Point])) :building
+    (some? (select1-non-zero-point xml [:Rakennus :sijaintitieto :Sijainti :piste :Point])) :building
     (some? (select1 xml [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :alue])) :area))
 
-(defn resolve-coordinates [xml kuntalupatunnus]
+(defn resolve-coordinates
   "Primarily uses rakennuspaikka coordinates,
    if not found then takes coordinates from first building if exists,
    if still not found then checks if location is area like and calculates interior point
    finally returns nil and location is resolved later with kiinteistotunnus and kuntalupatunnus"
+  [xml]
   (let [coordinate-type (resolve-coordinate-type xml)
         Rakennuspaikka  (cr/all-of xml [:rakennuspaikkatieto :Rakennuspaikka])]
     (case coordinate-type
       :point    (resolve-point-coordinates
                   (select1 xml [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
-                  (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
-                  kuntalupatunnus)
+                  (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos))
       :building (resolve-building-coordinates xml)
       :area     (resolve-area-coordinates xml)
       nil)))
+
+(defn get-asiat-with-kuntalupatunnus [xml-no-ns kuntalupatunnus]
+  (let [asiat (enlive/select xml-no-ns common/case-elem-selector)]
+    (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)))
 
 ;;
 ;; Information parsed from verdict xml message for application creation
@@ -634,9 +652,8 @@
 (defn get-app-info-from-message [xml kuntalupatunnus]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
-        asiat (enlive/select xml-no-ns common/case-elem-selector)
         ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
-        asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)]
+        asiat-with-kuntalupatunnus (get-asiat-with-kuntalupatunnus xml-no-ns kuntalupatunnus)]
     (when (pos? (count asiat-with-kuntalupatunnus))
       ;; There should be only one RakennusvalvontaAsia element in the message, even though Krysp makes multiple elements possible.
       ;; Log an error if there were many. Use the first one anyway.
@@ -662,13 +679,15 @@
             osoite-Rakennuspaikka (build-address osoite-xml asioimiskieli-code)
 
             coordinates-type (resolve-coordinate-type asia)
-            [x y :as coord-array-Rakennuspaikka] (resolve-coordinates asia kuntalupatunnus)
+            [x y :as coord-array-Rakennuspaikka] (resolve-coordinates asia)
             osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
             suunnittelijat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija]))
+            tyonjohtajat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja]))
             [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) osapuolet)
             kiinteistotunnus (if (and (seq coord-array-Rakennuspaikka) (#{:building :area} coordinates-type))
-                               (resolve-property-id-by-point coord-array-Rakennuspaikka)
-                               (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus))
+                               (or (resolve-property-id-by-point coord-array-Rakennuspaikka)
+                                   (rakennuspaikka-property-id Rakennuspaikka))
+                               (rakennuspaikka-property-id Rakennuspaikka))
             municipality (or (prop/municipality-by-property-id kiinteistotunnus) kuntakoodi)]
 
         (-> (merge
@@ -679,7 +698,8 @@
                :vahainenPoikkeaminen        (:vahainenPoikkeaminen asianTiedot)
                :hakijat                     hakijat
                :muutOsapuolet               muut-osapuolet
-               :suunnittelijat              suunnittelijat}
+               :suunnittelijat              suunnittelijat
+               :tyonjohtajat                tyonjohtajat}
 
               (cond
                 (and (seq coord-array-Rakennuspaikka) (not-any? ss/blank? [osoite-Rakennuspaikka kiinteistotunnus]))

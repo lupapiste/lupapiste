@@ -1,9 +1,11 @@
-(ns lupapalvelu.ui.pate.path
+(ns lupapalvelu.pate.path
   "Various utilities for component state, path, schema and _meta
   handling."
+  (:refer-clojure :exclude [extend])
   (:require [clojure.string :as s]
-            [lupapalvelu.pate.shared :as shared]
-            [lupapalvelu.ui.common :as common]
+            [lupapalvelu.pate.schema-util :as schema-util]
+            #?(:cljs [lupapalvelu.ui.common :as l10n]
+               :clj  [lupapalvelu.i18n :as l10n])
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
@@ -23,14 +25,12 @@
 
 (defn loc-extend
   "Extends loc-path based on the options. The options can include
-  loc-prefix, locPrefix (via docgen body), id"
-  [loc-path {:keys [id loc-prefix body dict]}]
-  (let [locPrefix (some-> body first :locPrefix)]
-    (cond
-      loc-prefix [loc-prefix]
-      locPrefix  [locPrefix]
-      id         (extend loc-path id)
-      :else      loc-path)))
+  loc-prefix or id"
+  [loc-path {:keys [id loc-prefix]}]
+  (cond
+    loc-prefix [loc-prefix]
+    id         (extend loc-path id)
+    :else      loc-path))
 
 (defn id-extend
   "Extends id-path with the options id."
@@ -54,8 +54,8 @@
   path, [dict] otherwise."
   [{{dict :dict} :schema dictionary :dictionary path :path :as options}]
   (let [{dict-schema :schema
-         dict-path   :path :as res} (shared/dict-resolve (concat path [dict])
-                                                         dictionary)]
+         dict-path   :path :as res} (schema-util/dict-resolve (concat path [dict])
+                                                              dictionary)]
     (assoc (schema-options options dict-schema )
            :path (extend path dict dict-path))))
 
@@ -65,7 +65,7 @@
   (get-in @state* (extend path extra)))
 
 (defn react
-  "Like value but uses rum/reac for deref."
+  "Like value but uses rum/react for deref."
   [path state* & extra]
   (rum/react (state (extend path extra) state*)))
 
@@ -92,14 +92,13 @@
        (filter identity)
        (map name)
        (s/join ".")
-       common/loc))
+       l10n/loc))
 
-;; Component-aware localization: i18nkey(s), loc-prefix and dict
-;; override the loc-path.
+;; Component-aware localization: i18nkey, loc-prefix and dict override
+;; the loc-path.
 (defmethod loc :map
   [{:keys [i18nkey loc-path schema] :as arg} & extra]
   (loc (concat [(or i18nkey
-                    (some-> schema :body first :i18nkey)
                     (:i18nkey schema)
                     (:loc-prefix schema)
                     (:dict schema)
@@ -139,8 +138,7 @@
   (->> [(:css schema)
         other-classes]
        flatten
-       (map util/split-kw-path)
-       flatten
+       (mapcat util/split-kw-path)
        (remove nil?)
        (map name)))
 
@@ -289,12 +287,7 @@
 (defn- good? [options good-condition bad-condition]
   (let [good (eval-state-condition options good-condition)
         bad  (eval-state-condition options bad-condition)]
-    (cond
-      (and (nil? good)
-           (nil? bad))   true
-      (or bad
-          (false? good)) false
-      :else              true)))
+    (not (or bad (false? good)))))
 
 (defn- climb-to-condition [options schema-key]
             (loop [{:keys [schema _parent]} options]
@@ -305,7 +298,9 @@
 (defn enabled?
   "Enable disable climbs schema tree until conditions are found. Thus,
   if parent is disabled, the children are also automatically
-  disabled."
+  disabled. Note that the conditions are are still resolved according
+  to the 'current' path. In other words, the relative paths for
+  ancestors do not resolve correctly."
   [options]
   (and (react-meta options :enabled?)
        (good? options

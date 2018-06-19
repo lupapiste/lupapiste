@@ -4,18 +4,16 @@
             [net.cgrand.enlive-html :as enlive]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
+            [sade.common-reader :as cr]
+            [sade.strings :as ss]
             [sade.xml :as xml]
+            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.xml.krysp.reader :refer :all]
             [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals property-in wfs-krysp-url case-elem-selector]]
             [lupapalvelu.xml.krysp.review-reader :as review-reader]
             [lupapalvelu.xml.validator :as xml-validator]
             [lupapalvelu.krysp-test-util :refer [build-multi-app-xml]]
-            [sade.common-reader :as cr]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.tools :as tools]
-            [sade.strings :as ss]))
+            [lupapalvelu.permit :as permit]))
 
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
@@ -378,12 +376,10 @@
     (fact "validator does not find verdicts" (standard-verdicts-validator xml {}) => {:ok false, :text "info.no-verdicts-found-from-backend"})
     (fact "case has no verdicts" (-> cases last :paatokset count) => 0)))
 
-
-
 (facts "KRYSP verdict with reviews"
   (let [xml (-> "resources/krysp/dev/r-verdict-review.xml" slurp xml/parse)
         reviews (review-reader/xml->reviews xml)
-        katselmus-tasks (map (partial lupapalvelu.tasks/katselmus->task {} {} {}) reviews)
+        katselmus-tasks (map (partial tasks/katselmus->task {} {} {}) reviews)
         aloitus-review-task (nth katselmus-tasks 0)
         non-empty (complement clojure.string/blank?)]
     (fact "xml has 13 reviews" (count reviews) => 13)
@@ -646,7 +642,9 @@
         building-xml  (prepare-xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-with-building-location.xml")))
         area-xml      (prepare-xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-with-area-like-location.xml")))
         invalid-xml   (prepare-xml (xml/parse (slurp "resources/krysp/dev/verdict-p.xml")))
-        inv-area-xml  (prepare-xml (xml/parse "<rakval:Rakennusvalvonta><rakval:rakennusvalvontaAsiatieto><rakval:RakennusvalvontaAsia><rakval:rakennuspaikkatieto><rakval:Rakennuspaikka><yht:sijaintitieto><yht:Sijainti><yht:alue><gml:Polygon srsName=\"http://www.opengis.net/gml/srs/epsg.xml#3876\"><gml:outerBoundaryIs><gml:LinearRing><gml:coordinates>22464854.301,6735383.759 22464825.926,6735453.497</gml:coordinates></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon></yht:alue></yht:Sijainti></yht:sijaintitieto></rakval:Rakennuspaikka></rakval:rakennuspaikkatieto></rakval:RakennusvalvontaAsia></rakval:rakennusvalvontaAsiatieto></rakval:Rakennusvalvonta>"))]
+        inv-area-xml  (prepare-xml (xml/parse "<rakval:Rakennusvalvonta><rakval:rakennusvalvontaAsiatieto><rakval:RakennusvalvontaAsia><rakval:rakennuspaikkatieto><rakval:Rakennuspaikka><yht:sijaintitieto><yht:Sijainti><yht:alue><gml:Polygon srsName=\"http://www.opengis.net/gml/srs/epsg.xml#3876\"><gml:outerBoundaryIs><gml:LinearRing><gml:coordinates>22464854.301,6735383.759 22464825.926,6735453.497</gml:coordinates></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon></yht:alue></yht:Sijainti></yht:sijaintitieto></rakval:Rakennuspaikka></rakval:rakennuspaikkatieto></rakval:RakennusvalvontaAsia></rakval:rakennusvalvontaAsiatieto></rakval:Rakennusvalvonta>"))
+        zero-coordinates (prepare-xml (xml/parse "<rakval:Rakennusvalvonta><rakval:rakennusvalvontaAsiatieto><rakval:RakennusvalvontaAsia><rakval:rakennuspaikkatieto><rakval:Rakennuspaikka><rakval:sijaintitieto><rakval:Sijainti><yht:piste><gml:Point srsDimension=\"2\" srsName=\"urn:x-ogc:def:crs:EPSG:3876\"><gml:pos>0.0 0.0</gml:pos></gml:Point></yht:piste></rakval:Sijainti></rakval:sijaintitieto></rakval:Rakennuspaikka></rakval:rakennuspaikkatieto></rakval:RakennusvalvontaAsia></rakval:rakennusvalvontaAsiatieto></rakval:Rakennusvalvonta>"))
+        non-zero (prepare-xml (xml/parse "<rakval:Rakennusvalvonta><rakval:rakennusvalvontaAsiatieto><rakval:RakennusvalvontaAsia><rakval:rakennuspaikkatieto><rakval:Rakennuspaikka><rakval:sijaintitieto><rakval:Sijainti><yht:piste><gml:Point srsDimension=\"2\" srsName=\"urn:x-ogc:def:crs:EPSG:3876\"><gml:pos>1.0 2.0</gml:pos></gml:Point></yht:piste></rakval:Sijainti></rakval:sijaintitieto></rakval:Rakennuspaikka></rakval:rakennuspaikkatieto></rakval:RakennusvalvontaAsia></rakval:rakennusvalvontaAsiatieto></rakval:Rakennusvalvonta>"))]
 
     (fact "Should resolve coordinate type"
       (resolve-coordinate-type point-xml) => :point
@@ -655,12 +653,24 @@
       (resolve-coordinate-type invalid-xml) => nil
       )
 
+    (fact "select1 non-zero point"
+      (fact "Rakennnuspaikka"
+        (select1-non-zero-point point-xml [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste]) => map?)
+      (fact "Rakennus"
+        (select1-non-zero-point point-xml [:Rakennus :sijaintitieto :Sijainti :piste :Point]) => map?)
+      (fact "zero xml"
+        (select1-non-zero-point zero-coordinates [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste]) => nil?)
+      (fact "non-zero xml"
+        (select1-non-zero-point non-zero [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste]) => map?)
+      (fact "invalid"
+        (select1-non-zero-point inv-area-xml [:Rakennus :sijaintitieto :Sijainti :piste :Point]) => nil))
+
     (fact "Should resolve coordinates"
-      (resolve-coordinates point-xml "14-0241-R 3") => [393033.614 6707228.994]
-      (resolve-coordinates building-xml  "895-2015-002") => [192413.401 6745769.046]
-      (resolve-coordinates area-xml "895-2015-001") => [192416.901187 6745788.046445]
-      (resolve-coordinates invalid-xml "895-2015-001") => nil
-      (resolve-coordinates inv-area-xml "895-2015-001") => nil)))
+      (resolve-coordinates point-xml) => [393033.614 6707228.994]
+      (resolve-coordinates building-xml ) => [192413.401 6745769.046]
+      (resolve-coordinates area-xml) => [192416.901187 6745788.046445]
+      (resolve-coordinates invalid-xml) => nil
+      (resolve-coordinates inv-area-xml) => nil)))
 
 
 (facts* "Tests for TJ/suunnittelijan verdicts parsing"

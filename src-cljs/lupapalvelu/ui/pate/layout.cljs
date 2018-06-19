@@ -31,13 +31,12 @@
   reference-list components)"
   (:require [clojure.set :as set]
             [clojure.string :as s]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.path :as path]
             [lupapalvelu.pate.shared-schemas :as schemas]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
-            [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.attachments :as pate-att]
-            [lupapalvelu.ui.pate.path :as path]
+            [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.placeholder :as placeholder]
             [lupapalvelu.ui.pate.service :as service]
@@ -87,7 +86,9 @@
   (let [cell-type    (schema-type options)
         schema-value (cell-type schema)
         options      (path/schema-options options schema-value)]
-    (if (path/react-meta options :editing?)
+    (if (and (or (path/react-meta options :editing?)
+                 (:always-editing? schema-value))
+             (not (:read-only? schema-value)))
       ((case cell-type
          :date-delta     pate-components/pate-date-delta
          :reference-list (case (:type schema-value)
@@ -185,7 +186,7 @@
   [_ {:keys [schema state path] :as options}]
   (let [value (path/value path state)]
     [:span (when-not (s/blank? value)
-             (path/loc options value))]))
+             (pate-components/pate-select-item-text options value))]))
 
 (defn wrap-view-component [cell-type options wrap-label?]
   (pate-components/label-wrap-if-needed
@@ -229,8 +230,11 @@
   "The repeating keys (keys within the state that correspond to a
   repeating schema). Sorted by :sort-by if given within schema."
   [{:keys [dictionary path state] :as options} repeating]
-  (let [r-map    (path/react repeating state)
-        sort-key (get-in dictionary (path/extend path repeating :sort-by))]
+  (let [r-map  (path/react repeating state)
+        sorter (get-in dictionary (path/extend path repeating :sort-by))
+        sort-key (if-let [prefix (:prefix sorter)]
+                   (common/prefix-lang prefix)
+                   sorter)]
     (if sort-key
       (->> r-map
            (sort-by (fn [[_ m]]
@@ -242,45 +246,48 @@
 
 (rum/defc pate-grid < rum/reactive
   {:key-fn #(-> % :path path/id)}
-  [{:keys [schema path state] :as options}]
-  (letfn [(grid [{:keys [schema] :as options}]
-            [:div
-             {:class (path/css options
+  ([{:keys [schema path] :as options} extras]
+   (if-let [repeating (:repeating schema)]
+     [:div (map-indexed (fn [i k]
+                          (pate-grid (assoc options
+                                            :schema (dissoc schema :repeating)
+                                            :path (path/extend path repeating k))
+                                     (common/add-test-id {:data-repeating-id k }
+                                                         repeating (str i))))
+                        (repeating-keys options repeating))]
+     [:div
+      (merge {:class (path/css options
                                (str "pate-grid-" (:columns schema)))}
-             (map (fn [row-schema]
-                    (let [row-options (path/schema-options options row-schema)]
-                      ;; Row visibility
-                      (when (path/visible? row-options)
-                        [:div.row {:class (path/schema-css row-schema)}
-                         (map (fn [{:keys [col align] :as cell-schema}]
-                                (let [cell-options (path/schema-options row-options
-                                                                        cell-schema)]
-                                  ;; Cell visibility
-                                  (when (path/item-visible? cell-options)
-                                    [:div {:class (path/css cell-options
-                                                            (str "col-" (or col 1))
-                                                            (when align
-                                                              (str "col--" (name align))))}
-                                     (condp #(%1 %2) cell-schema
-                                       :dict
-                                       (instantiate (path/dict-options cell-options)
-                                                    true)
+             extras)
+      (map (fn [row-schema]
+             (let [row-options (path/schema-options options row-schema)]
+               ;; Row visibility
+               (when (path/visible? row-options)
+                 [:div.row {:class (path/schema-css row-schema)}
+                  (map (fn [{:keys [col align] :as cell-schema}]
+                         (let [cell-options (path/schema-options row-options
+                                                                 cell-schema)]
+                           ;; Cell visibility
+                           (when (path/item-visible? cell-options)
+                             [:div {:class (path/css cell-options
+                                                     (str "col-" (or col 1))
+                                                     (when align
+                                                       (str "col--" (name align))))}
+                              (condp #(%1 %2) cell-schema
+                                :dict
+                                (instantiate (path/dict-options cell-options)
+                                             true)
 
-                                       :list
-                                       :>> #(pate-list (path/schema-options cell-options %)
-                                                        true)
+                                :list
+                                :>> #(pate-list (path/schema-options cell-options %)
+                                                true)
 
-                                       :grid
-                                       :>> #(pate-grid (path/schema-options cell-options %))
+                                :grid
+                                :>> #(pate-grid (path/schema-options cell-options %))
 
-                                       nil)])))
+                                nil)])))
 
-                              (get row-schema :row row-schema))])))
-                  (-> schema :rows))])]
-    (if-let [repeating (:repeating schema)]
-      [:div (map (fn [k]
-                   (pate-grid (assoc options
-                                     :schema (dissoc schema :repeating)
-                                     :path (path/extend path repeating k))))
-                 (repeating-keys options repeating))]
-      (grid options))))
+                       (get row-schema :row row-schema))])))
+           (-> schema :rows))]))
+  ([options]
+   (pate-grid options nil)))

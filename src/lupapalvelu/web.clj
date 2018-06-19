@@ -503,18 +503,23 @@
 ;;
 
 (defpage [:get "/api/token/:token-id"] {token-id :token-id}
-  (if-let [token (token/get-token token-id :consume false)]
-    (resp/status 200 (resp/json (ok :token token)))
-    (resp/status 404 (resp/json (fail :error.token-not-found)))))
+  (let [[status token] (token/get-token token-id :consume false)]
+    (case status
+      :usable (resp/status 200 (resp/json (ok :token token)))
+      :used   (resp/status 404 (resp/json (fail :error.token-used)))
+      (resp/status 404 (resp/json (fail :error.token-not-found))))))
 
 (defpage [:post "/api/token/:token-id"] {token-id :token-id}
   (let [params (from-json (request/ring-request))
-        response (token/consume-token token-id params :consume true)]
-    (cond
-      (contains? response :status) response
-      (ok? response)   (resp/status 200 (resp/json response))
-      (fail? response) (resp/status 404 (resp/json response))
-      :else (resp/status 404 (resp/json (fail :error.unknown))))))
+        [token-status response] (token/consume-token token-id params :consume true)]
+    (case token-status
+      :usable (cond
+                (contains? response :status) response
+                (ok? response)   (resp/status 200 (resp/json response))
+                (fail? response) (resp/status 404 (resp/json response))
+                :else (resp/status 404 (resp/json (fail :error.unknown))))
+      :used   (resp/status 404 (resp/json (fail :error.token-used)))
+      (resp/status 404 (resp/json (fail :error.token-not-found))))))
 
 ;;
 ;; Cross-site request forgery protection

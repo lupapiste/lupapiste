@@ -64,7 +64,24 @@ $lupicon-size: 22px;
 
 // The rest is lupicon style definitions that are copied as is from lupicon style.css
 
-
+.lupicon-document-section-sign:before {
+  content: "\e934";
+}
+.lupicon-undersign:before {
+  content: "\e935";
+}
+.lupicon-refresh-section-sign:before {
+  content: "\e933";
+}
+.lupicon-user-pen:before {
+  content: "\e931";
+}
+.lupicon-archives-in:before {
+  content: "\e932";
+}
+.lupicon-map:before {
+  content: "\e930";
+}
 .lupicon-grip-diagonal:before {
   content: "\e92c";
 }

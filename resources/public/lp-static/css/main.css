@@ -206,9 +206,9 @@ body.admin, body.authority-admin {
 
 .container {
   box-sizing: border-box;
-  padding: 12px 6px 0 6px;
+  padding: 12px 60px 0 24px;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1660px;
   min-width: 640px;
   margin: 24px auto 24px auto;
   position: relative;
@@ -814,6 +814,30 @@ h1 .icon {
   cursor: default;
 }
 
+.lupicon-document-section-sign:before {
+  content: "\e934";
+}
+
+.lupicon-undersign:before {
+  content: "\e935";
+}
+
+.lupicon-refresh-section-sign:before {
+  content: "\e933";
+}
+
+.lupicon-user-pen:before {
+  content: "\e931";
+}
+
+.lupicon-archives-in:before {
+  content: "\e932";
+}
+
+.lupicon-map:before {
+  content: "\e930";
+}
+
 .lupicon-grip-diagonal:before {
   content: "\e92c";
 }
@@ -1342,11 +1366,13 @@ h1 .icon {
 
 .nav-box {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1660px;
   min-width: 640px;
   margin: 0 auto;
   position: relative;
   box-sizing: border-box;
+  padding-left: 12px;
+  padding-right: 12px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -1514,7 +1540,7 @@ nav .language-open a, nav .language-open span {
 nav .header-menu {
   display: inline-block;
   position: absolute;
-  right: 0px;
+  right: 20px;
 }
 
 nav .header-menu .header-box {
@@ -2312,7 +2338,7 @@ footer {
 footer .informations {
   padding: 12px;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1660px;
   margin: 0 auto 12px;
 }
 
@@ -8311,7 +8337,7 @@ message-panel {
   margin-right: 6px;
   position: relative;
   min-height: 48px;
-  vertical-align: top;
+  vertical-align: bottom;
 }
 
 .form-entry label {
@@ -8324,6 +8350,10 @@ message-panel {
 
 .form-entry .form-input, .form-entry .form-input--inline {
   margin-right: 36px;
+}
+
+.form-entry-vcenter {
+  line-height: 40px;
 }
 
 .form-full-width {
@@ -8383,7 +8413,6 @@ message-panel {
 }
 
 .form-input, .form-input--inline {
-  height: 22px;
   line-height: 24px;
   margin: 2px 6px 12px 0;
   width: 16.25em;
@@ -8462,10 +8491,6 @@ input.form-input.inline, input.inline.form-input--inline {
   border-bottom: none;
 }
 
-.form-group table, .form-choice table, .form-table table {
-  width: auto;
-}
-
 .form-group .form-group, .form-choice .form-group, .form-table .form-group {
   margin: 6px;
 }
@@ -8475,7 +8500,7 @@ input.form-input.inline, input.inline.form-input--inline {
 }
 
 .form-group .form-input.checkbox, .form-group .checkbox.form-input--inline, .form-group .form-input.radio, .form-group .radio.form-input--inline, .form-choice .form-input.checkbox, .form-choice .checkbox.form-input--inline, .form-choice .form-input.radio, .form-choice .radio.form-input--inline, .form-table .form-input.checkbox, .form-table .checkbox.form-input--inline, .form-table .form-input.radio, .form-table .radio.form-input--inline {
-  margin: 0 6px 0 0;
+  margin: 24px 6px 0 0;
   display: inline-block;
 }
 
@@ -8578,7 +8603,7 @@ input.form-input.inline, input.inline.form-input--inline {
 .form-string-unit {
   display: table-cell;
   vertical-align: middle;
-  padding-left: 2px;
+  padding-bottom: 5px;
 }
 
 .form-input.tiny, .tiny.form-input--inline {
@@ -8627,7 +8652,6 @@ input.form-input.inline, input.inline.form-input--inline {
 }
 
 .docgen-content .form-choice .form-entry .form-input-and-unit {
-  display: inline-block;
   margin-right: 12px;
 }
 
@@ -8635,9 +8659,14 @@ input.form-input.inline, input.inline.form-input--inline {
   width: 3.75em;
 }
 
+.docgen-content .form-choice .form-entry .form-input.checkbox, .docgen-content .form-choice .form-entry .checkbox.form-input--inline {
+  margin-top: 0;
+}
+
 .docgen-content .form-entry {
   min-width: 300px;
   min-height: 64px;
+  margin-bottom: 12px;
 }
 
 .docgen-content .form-entry.long {
@@ -8696,10 +8725,6 @@ input.form-input.inline, input.inline.form-input--inline {
 
 .docgen-content .huoneistot-table td, .docgen-content .huoneistot-table th, .docgen-content .muutHankkeet-table td, .docgen-content .muutHankkeet-table th {
   padding: 6px;
-}
-
-.docgen-content .huoneistot-table td, .docgen-content .muutHankkeet-table td {
-  text-align: center;
 }
 
 .docgen-content .huoneistot-table tr:hover, .docgen-content .muutHankkeet-table tr:hover {
@@ -13402,6 +13427,10 @@ ul.tabs {
   width: auto;
 }
 
+.autosized.autosized--wider {
+  min-width: 25em;
+}
+
 .autosized-yes-no {
   min-height: 144px;
   height: auto;
@@ -15451,7 +15480,7 @@ div.search i {
 }
 
 #indicator .indicator-box {
-  max-width: 1280px;
+  max-width: 1660px;
   min-width: 640px;
   margin: 0 auto;
   padding-left: 6px;
@@ -15520,7 +15549,7 @@ div.search i {
 }
 
 #indicator-icon .indicator-box {
-  max-width: 1280px;
+  max-width: 1660px;
   margin: 0 auto;
   padding: 12px;
 }
@@ -29452,10 +29481,6 @@ div.pate-settings-editor table.pate-editor-table tr:hover:nth-child(even) {
   background: #f6f6f6;
 }
 
-div.pate-verdict-page {
-  padding: 2em 2em;
-}
-
 div.pate-spin {
   width: 100%;
   text-align: center;
@@ -29483,7 +29508,7 @@ div.pate-spin > i:before {
 }
 
 table.pate-verdicts-table {
-  width: initial;
+  width: 100%;
 }
 
 table.pate-verdicts-table tr:hover {
@@ -29496,6 +29521,10 @@ table.pate-verdicts-table tr:hover:nth-child(even) {
 
 table.pate-verdicts-table tr {
   border: none;
+}
+
+table.pate-verdicts-table td.replaced {
+  padding-left: 4em;
 }
 
 div.pate-verdict div.pate-section div.section-header {
@@ -29545,6 +29574,10 @@ div.pate-phrases table.pate-phrases-table th > div.like-btn {
 div.pate-phrases table.pate-phrases-table th i.icon-placeholder,
 div.pate-phrases table.pate-phrases-table th > div.like-btn i.icon-placeholder {
   min-width: 22px;
+}
+
+div.pate-phrases table.pate-phrases-table td.category {
+  white-space: nowrap;
 }
 
 div.pate-phrases table.pate-phrases-table td.phrase {
@@ -29628,6 +29661,11 @@ div.pate-autocomplete {
 
 div.pate-autocomplete .ac--combobox {
   display: table;
+  width: 100%;
+}
+
+div.pate-autocomplete .ac--combobox input {
+  width: 100%;
 }
 
 div.pate-autocomplete .ac--selected {
@@ -29680,6 +29718,10 @@ div.pate-autocomplete .ac--selected.disabled span, div.pate-autocomplete .ac--se
 
 div.pate-autocomplete .ac--selected.disabled i {
   color: #bbbbbb;
+}
+
+div.pate-autocomplete .ac--selected.required span, div.pate-autocomplete .ac--selected.required i {
+  border-color: #f39129;
 }
 
 div.pate-autocomplete .ac__menu {
@@ -29896,6 +29938,10 @@ div.pate-autocomplete .ac__menu ul.ac__items li.ac--grouped {
 }
 
 .pate-batch-table td.batch--type {
+  min-width: 15em;
+}
+
+.pate-batch-table td.batch--contents {
   min-width: 15em;
 }
 
@@ -30241,6 +30287,41 @@ input.date-delta {
 
 body.pate-error-page {
   padding: 2em 2em;
+}
+
+textarea.grid-style-input.pate-textarea {
+  height: initial;
+}
+
+span.text-and-button > input {
+  line-height: 40px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+tr.verdict-signatures div.tabby {
+  margin-left: 1em;
+}
+
+tr.verdict-signatures div.tabby div.tabby__cell {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+tr.verdict-signatures div.tabby .cell--right {
+  text-align: right;
+}
+
+tr.verdict-signatures label {
+  display: block;
+}
+
+tr.verdict-signatures .text-and-button > input {
+  min-width: 16em;
+}
+
+tr.verdict-signatures button.cancel-signing {
+  margin-top: 1.5em;
 }
 
 .order-grid-1 {
@@ -33796,8 +33877,8 @@ span.icon_clear:before {
   position: relative;
   min-height: 280px;
   padding-left: 320px;
-  padding-right: 24%;
-  margin-right: 61px;
+  padding-right: 20%;
+  margin-right: 6px;
 }
 
 .application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
@@ -34427,11 +34508,7 @@ span.icon_clear:before {
 }
 
 .application-summary-table > div > span {
-  width: 100%;
-}
-
-.application-summary-table > div > p {
-  padding-right: 2em;
+  width: 75%;
 }
 
 @media (max-width: 991px) {
@@ -35945,7 +36022,7 @@ td.comment-text {
   width: 22.5em;
 }
 
-form.organizations-search input.textinput, form.xml-download input.textinput {
+div.organizations-search input.textinput, form.xml-download input.textinput {
   display: inline-block;
   width: 20em;
   vertical-align: middle;
@@ -36295,18 +36372,13 @@ div.organization-link-cell {
 body.admin .nav-box,
 body.authority-admin .nav-box {
   max-width: none;
-  padding-left: 48px;
-  padding-right: 48px;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 body.admin .nav-box .brand > a,
 body.authority-admin .nav-box .brand > a {
   margin-left: 0;
-}
-
-body.admin .header-menu,
-body.authority-admin .header-menu {
-  padding-right: 48px;
 }
 
 .navi-sidebar {
@@ -36486,6 +36558,12 @@ table.default-digitalization-location {
   width: 100%;
   height: auto;
   min-height: 32px;
+}
+
+.register-form .form-entry.register-checkbox label.checkbox-required::after {
+  color: #f39129;
+  content: "*";
+  display: inline;
 }
 
 .register-form .register-error {
@@ -38519,7 +38597,7 @@ div.summary-button-bar {
 }
 
 #bulletins .content-center, #local-bulletins .content-center {
-  max-width: 1280px;
+  max-width: 1660px;
   margin: 0 auto;
   position: relative;
   padding: 40px 0;
@@ -38710,8 +38788,8 @@ div.summary-button-bar {
   position: relative;
   min-height: 280px;
   padding-left: 320px;
-  padding-right: 24%;
-  margin-right: 61px;
+  padding-right: 20%;
+  margin-right: 6px;
 }
 
 #bulletins .application_summary .bulletin-preamble .application-map-container, #bulletins .application_summary .bulletin-preamble .application_actions, #local-bulletins .application_summary .bulletin-preamble .application-map-container, #local-bulletins .application_summary .bulletin-preamble .application_actions {

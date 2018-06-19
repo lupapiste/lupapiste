@@ -12,6 +12,7 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.authorization :as auth]
             [lupapiste-commons.attachment-types :as att-types]
+            [monger.operators :refer :all]
             [sade.schemas :as ssc]
             [sade.strings :as ss]))
 
@@ -78,7 +79,10 @@
   (reduce
     (fn [results {:keys [fileId type] :as filedata}]
       (job/update job-id assoc fileId {:status :working :fileId fileId})
-      (if-let [mongo-file (mongo/download fileId)]
+      (if-let [mongo-file (mongo/download-find {:_id fileId
+                                                $or [{:metadata.linked false}
+                                                     {:metadata.linked {$exists false}}]
+                                                :metadata.application {$exists false}})]
         (let [result (bind-single-attachment! command mongo-file filedata (map :attachment-id results))]
           (job/update job-id assoc fileId {:status :done :fileId fileId})
           (conj results {:original-file-id fileId
@@ -114,15 +118,20 @@
                                           :operations (and operations (map att/->attachment-operation operations))))))))
 
 (defn make-bind-job
+  "postprocess-fn can be either a function or a list of functions."
   [command file-infos & {:keys [preprocess-ref postprocess-fn]
                          :or   {preprocess-ref (delay (ok))
                                 postprocess-fn identity}}]
-  (let [coerced-file-infos (->> (map coerce-bindable-file file-infos) (sc/validate [BindableFile]))
-        job (-> (zipmap (map :fileId coerced-file-infos) (map #(assoc % :status :pending) coerced-file-infos))
-                (job/start bind-job-status))]
+  (let [coerced-file-infos (->> (map coerce-bindable-file file-infos)
+                                (sc/validate [BindableFile]))
+        job                (-> (zipmap (map :fileId coerced-file-infos)
+                                       (map #(assoc % :status :pending)
+                                            coerced-file-infos))
+                               (job/start bind-job-status))]
     (util/future*
      (if (ok? @preprocess-ref)
-       (-> (bind-attachments! command coerced-file-infos (:id job))
-           (postprocess-fn))
+       (let [results (bind-attachments! command coerced-file-infos (:id job))]
+         (doseq [fun (flatten [postprocess-fn])]
+           (fun results)))
        (cancel-job (:id job) (assoc @preprocess-ref :status :error))))
     job))

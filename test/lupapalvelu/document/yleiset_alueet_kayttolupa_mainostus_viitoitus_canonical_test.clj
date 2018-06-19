@@ -22,7 +22,6 @@
                  :type "group",
                  :version 1,
                  :repeating false,
-                 :removable false,
                  :op operation,
                  :name "mainosten-tai-viitoitusten-sijoittaminen"},
    :data {:_selected {:value "mainostus-tapahtuma-valinta"},

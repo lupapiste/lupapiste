@@ -140,8 +140,7 @@
 (defn- parse [s]
   (->> (s/split (or s "") #"^\\s*\r?\n")
        (remove s/blank?)
-       (map #(markup-parser (str % "\n")))
-       (apply concat)))
+       (mapcat #(markup-parser (str % "\n")))))
 
 (defn- consv
   ([x seq]

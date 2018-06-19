@@ -9,8 +9,7 @@
                                                  :approvable true
                                                  :op {:id "524128df03640915c932a642"
                                                       :name "kerrostalo-rivitalo"
-                                                      :created 1380002015862}
-                                                 :removable true}
+                                                      :created 1380002015862}}
                                    :created 1380002015862
                                    :data { :huoneistot {:0 {:muutostapa {:value "lis\u00e4ys"}
                                                             :keittionTyyppi {:value "keittio"}
@@ -29,8 +28,7 @@
                                                       :approvable true
                                                       :op {:id "524128df03640915c932a642"
                                                            :name "kerrostalo-rivitalo"
-                                                           :created 1380002015862}
-                                                      :removable true}
+                                                           :created 1380002015862}}
                                         :created 1380002015862
                                         :data { :huoneistot {:0 {:muutostapa {:value "lis\u00e4ys"}
                                                                  :keittionTyyppi {:value "keittio"}

@@ -10,7 +10,12 @@
             [lupapalvelu.i18n :as i18n]
             [sade.files :as files]
             [sade.util :refer [future* fn-> fn->>] :as util]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [lupapalvelu.building :as building]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.attachment.conversion :as conversion]
+            [lupapalvelu.file-upload :as file-upload])
+  (:import [java.io ByteArrayOutputStream]))
 
 (defn status [job-id version timeout]
   (job/status job-id (util/->long version) (util/->long timeout)))
@@ -21,7 +26,7 @@
         source (if re-stamp? (second versions) (first versions))]
     (assoc (select-keys source [:contentType :fileId :filename :size])
       :signatures (when-not re-stamp?
-                    (seq (filter #(= (:fileId (first versions)) (:fileId %))
+                    (seq (filter #(= (-> versions first :version) (:version %))
                                  (:signatures attachment))))
       :stamped-original-file-id (when re-stamp? (:originalFileId (first versions)))
       :operation-ids (set (att-util/get-operation-ids attachment))
@@ -111,23 +116,26 @@
 
 (defn- stamp-attachment! [stamp file-info context job-id application-id]
   (try
-    (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :stamped-original-file-id]))
+    (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :stamped-original-file-id :job-id]))
     (job/update job-id assoc (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
     (->> (update-stamp-to-attachment! stamp file-info context)
          (hash-map :status :done :fileId)
          (job/update job-id assoc (:attachment-id file-info)))
+    (debug "Stamping complete" (select-keys file-info [:attachment-id :contentType :fileId :filename :stamped-original-file-id]))
     (catch Throwable t
       (errorf t "failed to stamp attachment: application=%s, file=%s" application-id (:fileId file-info))
       (job/update job-id assoc (:attachment-id file-info) {:status :error :fileId (:fileId file-info)}))))
 
 (defn- stamp-attachments!
   [file-infos {:keys [job-id application info-fields] :as context}]
+  (debug "stamp-attachments! invoked")
   (let [stamp-without-buildings (make-stamp-without-buildings context info-fields)
         operation-specific-stamps (->> (map :operation-ids file-infos)
                                        (remove empty?)
                                        distinct
                                        (make-operation-specific-stamps context info-fields))]
     (doseq [{op-ids :operation-ids :as file-info} file-infos]
+      (debug "stamp-attachments! - file-infos seq, processing attachment:" (:attachment-id file-info))
       (-> (if (and (seq op-ids) (seq (:buildings info-fields)))
             (operation-specific-stamps op-ids)
             stamp-without-buildings)
@@ -141,4 +149,121 @@
         job (-> (zipmap (map :attachment-id file-infos) (map #(assoc % :status :pending) file-infos))
                 (job/start stamp-job-status))]
     (future* (stamp-attachments! file-infos (assoc context :job-id (:id job))))
+    (debug "Returning stamp job:" job)
     job))
+
+(defn regenerated-stamped-attachment [command timestamp application attachment-ids lang stamp]
+  (info "Fixing stamping for application" (:id application))
+  (let [parsed-timestamp (cond
+                           (number? timestamp) (long timestamp)
+                           (ss/blank? timestamp) (:created command)
+                           :else (util/->long timestamp))
+        stamp-timestamp (if (zero? parsed-timestamp) (:created command) parsed-timestamp)
+        attachments (att/get-attachments-infos application attachment-ids)
+        file-infos (map ->file-info attachments)
+        info-fields {:fields (:rows stamp) :buildings (building/building-ids application)}
+        context {:application   application
+                 :user          (:user command)
+                 :lang          lang
+                 :qr-code       (:qrCode stamp)
+                 :stamp-created stamp-timestamp
+                 :created       (:created command)
+                 :x-margin      (util/->long (get-in stamp [:position :x]))
+                 :y-margin      (util/->long (get-in stamp [:position :y]))
+                 :page          (keyword (:page stamp))
+                 :transparency  (util/->long (or (:background stamp) 0))
+                 :info-fields   info-fields}
+        stamp-without-buildings (make-stamp-without-buildings context (:info-fields context))
+        operation-specific-stamps (->> (map :operation-ids file-infos)
+                                       (remove empty?)
+                                       distinct
+                                       (make-operation-specific-stamps context info-fields))]
+    (doseq [{:keys [latestVersion type] :as attachment} attachments
+            :when (:stamped latestVersion)]
+      (let [source (-> attachment
+                       :versions
+                       reverse
+                       second)
+            {:keys [contentType fileId originalFileId filename]} source
+            op-ids (set (att-util/get-operation-ids attachment))
+            stamp (if (and (seq op-ids) (seq (:buildings info-fields)))
+                    (operation-specific-stamps op-ids)
+                    stamp-without-buildings)
+            options (select-keys context [:x-margin :y-margin :transparency :page])]
+        (info "Fixing attachment id" (:id attachment))
+        (when (and (nil? (mongo/download fileId))
+                   (mongo/download originalFileId))
+          (let [conversion (conversion/archivability-conversion application
+                                                                {:filename    filename
+                                                                 :contentType contentType
+                                                                 :content     ((:content (mongo/download originalFileId)))})]
+            (when (:autoConversion conversion)
+              (do
+                (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId fileId})
+                                       {:application (:id application) :linked true})
+                (infof "fileId %s from previous version converted, uploaded and linked successfully" fileId)))))
+        (files/with-temp-file file
+          (try
+            (if (mongo/download (:fileId latestVersion))
+              (do
+                (with-open [out (io/output-stream file)]
+                  (stamper/stamp stamp (:fileId latestVersion) out options))
+                (let [converted (conversion/archivability-conversion application
+                                                                     {:filename    filename
+                                                                      :contentType contentType
+                                                                      :content     file})]
+                  (if (:autoConversion converted)
+                    (do (info "Uploading stamped replacement version for file id" (:fileId latestVersion))
+                        (mongo/delete-file-by-id (:fileId latestVersion))
+                        (mongo/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))
+                    (error "Could not convert file id" (:fileId latestVersion) "to PDF/A"))))
+              (do
+                (with-open [out (io/output-stream file)]
+                  (stamper/stamp stamp fileId out options))
+                (info "Uploading stamped replacement version for original file id" (:originalFileId latestVersion))
+                (mongo/upload (:originalFileId latestVersion) filename contentType file {:linked true :application (:id application)})
+                (when-not (= (:fileId latestVersion) (:originalFileId latestVersion))
+                  (let [converted (conversion/archivability-conversion
+                                    application
+                                    {:filename    filename
+                                     :contentType contentType
+                                     :content     file})]
+                    (if (:autoConversion converted)
+                      (do (info "Uploading stamped replacement version for file id" (:fileId latestVersion))
+                          (mongo/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))
+                      (error "Could not convert file id" (:fileId latestVersion) "to PDF/A"))))))
+            (catch Throwable t
+              (error t "Could not fix attachment" attachment))))))))
+
+(defn stamp-input-stream [command timestamp application lang stamp attachment-id content-type input-stream]
+  (let [parsed-timestamp (cond
+                           (number? timestamp) (long timestamp)
+                           (ss/blank? timestamp) (:created command)
+                           :else (util/->long timestamp))
+        stamp-timestamp (if (zero? parsed-timestamp) (:created command) parsed-timestamp)
+        attachment (att/get-attachment-info application attachment-id)
+        info-fields {:fields (:rows stamp) :buildings (building/building-ids application)}
+        context {:application   application
+                 :user          (:user command)
+                 :lang          lang
+                 :qr-code       (:qrCode stamp)
+                 :stamp-created stamp-timestamp
+                 :created       (:created command)
+                 :x-margin      (util/->long (get-in stamp [:position :x]))
+                 :y-margin      (util/->long (get-in stamp [:position :y]))
+                 :page          (keyword (:page stamp))
+                 :transparency  (util/->long (or (:background stamp) 0))
+                 :info-fields   info-fields}
+        stamp-without-buildings (make-stamp-without-buildings context (:info-fields context))
+        operation-specific-stamps (make-operation-specific-stamps context
+                                                                  info-fields
+                                                                  [(set (att-util/get-operation-ids attachment))])]
+    (let [op-ids (set (att-util/get-operation-ids attachment))
+          stamp (if (and (seq op-ids) (seq (:buildings info-fields)))
+                  (operation-specific-stamps op-ids)
+                  stamp-without-buildings)
+          options (select-keys context [:x-margin :y-margin :transparency :page])]
+      (with-open [is input-stream
+                  output (ByteArrayOutputStream.)]
+        (stamper/stamp-stream stamp content-type is output options)
+        (.toByteArray output)))))

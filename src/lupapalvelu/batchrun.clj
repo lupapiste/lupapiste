@@ -1,19 +1,18 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [debug debugf error errorf info]]
+  (:require [taoensso.timbre :refer [debug debugf error errorf info infof warn warnf]]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [clojure.set :as set]
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
-            [monger.core :as monger]
             [monger.query :as monger-query]
-            [monger.credentials :as monger-cred]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.batchrun.fetch-verdict :as fetch-verdict]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.state-change :as state-change]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
@@ -27,19 +26,18 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapiste-commons.threads :as threads]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.dummy-email-server]
             [sade.http :as http]
             [sade.strings :as ss]
-            [lupapiste-commons.threads :as threads]
             [sade.util :refer [fn-> pcond->] :as util]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
-            [monger.collection :as mc]
-            [clojure.data :as cd]
-            [clojure.pprint])
+            [sade.validators :as v]
+            [ring.util.codec :as codec])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -118,6 +116,7 @@
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/snapshot :applications
                              {:state {$in ["open" "submitted"]}
+                              :permitType {$nin ["ARK"]}
                               :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
                                                        :given nil
                                                        $or [{:reminder-sent {$exists false}}
@@ -151,6 +150,7 @@
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/snapshot :applications
                              {:state      {$nin (map name (clojure.set/union states/post-verdict-states states/terminal-states))}
+                              :permitType {$nin ["ARK"]}
                               :statements {$elemMatch {:given nil
                                                        $and   [{:dueDate {$exists true}}
                                                                {:dueDate (older-than timestamp-now)}]
@@ -203,6 +203,7 @@
   (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/snapshot :applications
                              {:state {$in ["open" "submitted"]}
+                              :permitType {$nin ["ARK"]}
                               :neighbors.status {$elemMatch {$and [{:state {$in ["email-sent"]}}
                                                                    {:created (older-than timestamp-1-week-ago)}
                                                                    ]}}}
@@ -270,7 +271,7 @@
   []
   (let [apps (mongo/snapshot :applications
                              {:state {$in ["draft" "open"]}
-                              :permitType {$ne "ARK"}
+                              :permitType {$nin ["ARK"]}
                               $and [{:modified (older-than (util/get-timestamp-ago :month 1))}
                                     {:modified (newer-than (util/get-timestamp-ago :month 6))}]
                               $or [{:reminder-sent {$exists false}}
@@ -297,58 +298,100 @@
 
     (mongo/disconnect!)))
 
-(defn fetch-verdicts []
-  (let [orgs-with-wfs-url-defined-for-some-scope (organization/get-organizations
-                                                   {$or [{:krysp.R.url {$exists true}}
-                                                         {:krysp.YA.url {$exists true}}
-                                                         {:krysp.P.url {$exists true}}
-                                                         {:krysp.MAL.url {$exists true}}
-                                                         {:krysp.VVVL.url {$exists true}}
-                                                         {:krysp.YI.url {$exists true}}
-                                                         {:krysp.YL.url {$exists true}}
-                                                         {:krysp.KT.url {$exists true}}]}
-                                                   {:krysp 1})
-        orgs-by-id (util/key-by :id orgs-with-wfs-url-defined-for-some-scope)
-        org-ids (keys orgs-by-id)
-        apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
-        eraajo-user (user/batchrun-user org-ids)]
-    (doall
-      (pmap
-        (fn [{:keys [id permitType organization] :as app}]
-          (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
-            (let [url (get-in orgs-by-id [organization :krysp (keyword permitType) :url])]
-              (try
-                (if-not (ss/blank? url)
-                  (let [command (assoc (application->command app) :user eraajo-user :created (now) :action "fetch-verdicts")
-                        result (verdict/do-check-for-verdict command)]
-                    (when (-> result :verdicts count pos?)
-                      ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
-                      (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
-                      (notifications/notify! :application-state-change command))
-                    (when (or (nil? result) (fail? result))
-                      (logging/log-event :error {:run-by "Automatic verdicts checking"
-                                                 :event "Failed to check verdict"
-                                                 :failure (if (nil? result) :error.no-app-xml result)
-                                                 :organization {:id organization :permit-type permitType}
-                                                 })))
+(defn fetch-verdict
+  [batchrun-name batchrun-user {:keys [id organization] :as app} & [{:keys [jms?] :or {jms? false}}]]
+  (if jms?
+    (jms/produce-with-context (fetch-verdict/queue-for-organization organization)
+                              (fetch-verdict/fetch-verdict-message id))
+    (fetch-verdict/fetch-verdict batchrun-name batchrun-user app)))
 
-                  (logging/log-event :info {:run-by "Automatic verdicts checking"
-                                            :event "No Krysp WFS url defined for organization"
-                                            :organization {:id organization :permit-type permitType}}))
-                (catch Throwable t
-                  (logging/log-event :error {:run-by "Automatic verdicts checking"
-                                             :event "Unable to get verdict from backend"
-                                             :exception-message (.getMessage t)
-                                             :application-id id
-                                             :organization {:id organization :permit-type permitType}}))))))
-          apps))))
+(defn- organization-has-krysp-url-function
+  "Takes map of organization id as key and organization data as values.
+  Returns function, that takes application and returns true if application's organization has krysp url set."
+  [organizations-by-id]
+  (fn [{org :organization permitType :permitType}]
+    (ss/not-blank? (get-in organizations-by-id [org :krysp (keyword permitType) :url]))))
+
+(defn- get-valid-applications
+  "Returns applications, that have krysp.url set in their organizations permitType.
+  Applications need to be filtered, as there might be several permitTypes per organization, but not all have krysp.url set."
+  [organizations applications]
+  {:pre [(sequential? organizations) (sequential? applications)]}
+  (let [orgs-by-id (util/key-by :id organizations)
+        org-has-url? (organization-has-krysp-url-function orgs-by-id)]
+    (filter org-has-url? applications)))
+
+(defn fetch-verdicts [batchrun-name batchrun-user applications & [options]]
+  (let [start-ts (double (now))]
+    (logging/log-event :info {:run-by batchrun-name
+                              :event  (format "Starting verdict fetching with %s applications" (count applications))})
+    (doseq [application applications]
+      (fetch-verdict batchrun-name batchrun-user application options))
+    (logging/log-event :info {:run-by batchrun-name
+                              :event  "Finished verdict checking"
+                              :took   (format "%.2f minutes" (/ (- (now) start-ts) 1000 60))})))
+
+(defn application-id-args? [args]
+  (every? v/application-id? args))
+
+(defn fetch-verdicts-by-application-ids [ids]
+  (infof "Starting fetch-verdicts-by-application-ids with %s ids" (count ids))
+  (let [apps (mongo/select :applications {:_id {$in ids} :state "sent"})
+        distinct-org-ids (into #{} (map :organization) apps)
+        orgs (mongo/select :organizations {:_id {$in distinct-org-ids}} [:krysp])
+        apps-with-urls (get-valid-applications orgs apps)
+        eraajo-user (user/batchrun-user distinct-org-ids)
+        batchrun-name "Verdicts checking by application ids"]
+    (fetch-verdicts batchrun-name eraajo-user apps-with-urls)))
+
+(defn fetch-verdicts-by-org-ids [ids]
+  (infof "Starting fetch-verdicts-by-org-ids with %s ids" (count ids))
+  (if-let [orgs (seq (organization/get-organizations {:_id {$in ids}} [:krysp]))]
+    (let [applications (mongo/select :applications {:state {$in ["sent"]}
+                                                    :permitType {$nin ["ARK"]}
+                                                    :organization {$in ids}})
+          apps-with-urls (get-valid-applications orgs applications)
+          batchrun-name "Verdicts checking by organizations"
+          eraajo-user (user/batchrun-user (map :id orgs))]
+      (fetch-verdicts batchrun-name eraajo-user apps-with-urls))
+    (warn "No organizations found, exiting.")))
+
+(defn fetch-verdicts-with-args [args]
+  (debug "check-for-verdicts started with args" args)
+  (if (application-id-args? args)
+    (fetch-verdicts-by-application-ids args)
+    (fetch-verdicts-by-org-ids args)))
+
+(defn fetch-verdicts-default [& [{:keys [jms?] :or {jms? false}}]]
+  (let [organizations-with-krysp-url (organization/get-organizations
+                                       {$or [{:krysp.R.url {$exists true}}
+                                             {:krysp.YA.url {$exists true}}
+                                             {:krysp.P.url {$exists true}}
+                                             {:krysp.MAL.url {$exists true}}
+                                             {:krysp.VVVL.url {$exists true}}
+                                             {:krysp.YI.url {$exists true}}
+                                             {:krysp.YL.url {$exists true}}
+                                             {:krysp.KT.url {$exists true}}]}
+                                       {:krysp 1})
+        org-ids (map :id organizations-with-krysp-url)
+        apps (mongo/select-ordered :applications
+                                   {:state {$in ["sent"]}
+                                    :permitType {$nin ["ARK"]}
+                                    :organization {$in org-ids}}
+                                   {:modified -1})
+        apps-with-urls (get-valid-applications organizations-with-krysp-url apps)
+        eraajo-user (user/batchrun-user org-ids)
+        batchrun-name "Automatic verdicts checking"]
+    (fetch-verdicts batchrun-name eraajo-user apps-with-urls {:jms? jms?})))
 
 (defn check-for-verdicts [& args]
   (when-not (system-not-in-lockdown?)
     (logging/log-event :info {:run-by "Automatic verdict checking" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
   (mongo/connect!)
-  (fetch-verdicts))
+  (if (empty? args)
+    (fetch-verdicts-default {:jms? (env/feature? :jms)})
+    (fetch-verdicts-with-args args)))
 
 (defn- get-asianhallinta-ftp-users [organizations]
   (->> (for [org organizations
@@ -498,7 +541,8 @@
                                 :exception (.getName (class o))
                                 :message (get &throw-context :message "")
                                 :event (format "Unable to get reviews in chunks from %s backend: %s - %s"
-                                               (:id organization) (.getName (class o)) (get &throw-context :message ""))}))))
+                                               (:id organization) (.getName (class o)) (get &throw-context :message ""))})
+     (warn "Error in automatic review checking:" (get &throw-context :message "") "stack trace:" (ss/join " | " (.getStackTrace o))))))
 
 (defn- organization-applications-for-review-fetching
   [organization-id permit-type projection & application-ids]
@@ -561,7 +605,12 @@
   [& {:keys [application-ids organization-ids overwrite-background-reviews?] :as options}]
   (let [applications  (when (seq application-ids)
                         (mongo/select :applications {:_id {$in application-ids}}))
-        permit-types  (-> (map (comp keyword :permitType) applications) distinct not-empty (or [:R]))
+        permit-types  (or (->> applications
+                               (map (comp keyword :permitType))
+                               distinct
+                               (remove #{:ARK})
+                               not-empty)
+                          [:R])
         organizations (->> (map :organization applications) distinct (concat organization-ids) (apply orgs-for-review-fetch))
         eraajo-user   (user/batchrun-user (map :id organizations))
         threadpool    (threads/threadpool (util/->int (env/value :batchrun :review-check-threadpool-size) 8) "review checking worker")
@@ -662,6 +711,7 @@
       (doseq [application (->> (mongo/with-collection "applications"
                                                       (monger-query/find {:organization organization
                                                                           :state {$in states/post-verdict-states}
+                                                                          :permitType {$nin ["ARK"]}
                                                                           :archived.completed nil
                                                                           $or [{:submitted {$gte start-ts $lte end-ts}}
                                                                                {:submitted nil
@@ -762,3 +812,81 @@
                                    (util/to-millis-from-local-date-string end-timestamp))
                                  (now))
                              (or (vec organizations) [])))
+
+(defn unarchive [& [organization application-id]]
+  (if organization
+    (do
+      (mongo/connect!)
+      (info "Starting unarchiving operation for" organization "applications:" (or application-id "all"))
+      (doseq [application (->> (mongo/with-collection "applications"
+                                                      (monger-query/find (util/assoc-when
+                                                                           {:organization organization
+                                                                            :state        {$nin states/terminal-states}
+                                                                            :permitType   {$ne "ARK"}
+                                                                            :attachments  {$elemMatch {:metadata.tila   :arkistoitu
+                                                                                                       :type.type-group :erityissuunnitelmat}}}
+                                                                           :_id application-id)))
+                               (map mongo/with-id))]
+        (logging/with-logging-context {:applicationId (:id application)}
+          (info "Checking attachments of application" (:id application))
+          (let [results (pmap
+                          (fn [{:keys [latestVersion metadata] :as attachment}]
+                            (if (and latestVersion
+                                     (= (keyword (get-in attachment [:type :type-group])) :erityissuunnitelmat)
+                                     (= (keyword (:tila metadata)) :arkistoitu))
+                              (let [_ (info "Trying to unarchive attachment" (:id attachment) "/" (:filename latestVersion))
+                                    host (env/value :arkisto :host)
+                                    app-id (env/value :arkisto :app-id)
+                                    app-key (env/value :arkisto :app-key)
+                                    encoded-id (codec/url-encode (:id attachment))
+                                    url (str host "/documents/" encoded-id)
+                                    {:keys [status body]} (http/delete url {:basic-auth       [app-id app-key]
+                                                                            :throw-exceptions false
+                                                                            :as               :json
+                                                                            :query-params     {"organization" organization}})
+                                    log-message {:application-id (:id application)
+                                                 :attachment-id  (:id attachment)
+                                                 :type           (:type attachment)
+                                                 :filename       (:filename latestVersion)}]
+                                (if (= 200 status)
+                                  (logging/log-event :info (merge {:run-by "Batch unarchiving run"
+                                                                   :event  "Successfully unarchived attachment"}
+                                                                  log-message))
+                                  (logging/log-event :error (merge {:run-by       "Batch unarchiving run"
+                                                                    :event        "Attachment unarchiving failed"
+                                                                    :onkalo-error body}
+                                                                   log-message)))
+                                (= 200 status))
+                              true))
+                          (:attachments application))]
+            (if (every? true? results)
+              (info "Attachments successfully unarchived for application" (:id application))
+              (error "Some attachments were not successfully unarchived for application" (:id application)))))))
+    (println "Organization must be provided.")))
+
+(defn print-info [id att version message]
+  (let [type (get-in att [:type :type-id])
+        content (:contentType version)]
+    (println id "-" (:id att) "-" (:fileId version) ", msg:" message "," content"," type)))
+
+(defn analyze-missing [& args]
+  (mongo/connect!)
+  (info "Starting analyze-missing job")
+  (let [ts 1522540800000]
+    (doseq [app (mongo/select :applications
+                              {$or [{:modified {$gte ts}}
+                                    {:verdicts.timestamp {$gte ts}}
+                                    {:tasks.created {$gte ts}}]}
+                              [:attachments]
+                              {:_id 1})
+            {version :latestVersion :as att} (->> (:attachments app)
+                                                  (filter  :latestVersion)
+                                                  (remove #(get-in % [:latestVersion :onkaloFileId])))
+            :let [file (mongo/download (:fileId version))
+                  different-original? (not= (:fileId version) (:originalFileId version))]]
+      (when-not file
+        (if different-original?
+          (if (mongo/download (:originalFileId version))
+            (print-info (:id app) att version "fileId missing but originalFileIdFound")
+            (print-info (:id app) att version "fileId AND originalFileId missing"))
+          (print-info (:id app) att version "fileId missing"))))))

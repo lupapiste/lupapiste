@@ -203,7 +203,10 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   // Visibility
   self.getVibilityOptionsText = function(val) { return loc("attachment.visibility." + val); };
   self.setVisibilityAllowed = function() { return authModel.ok("set-attachment-visibility"); };
-  addUpdateListener("set-attachment-visibility", {ok: true}, util.showSavedIndicatorIcon);
+  addUpdateListener("set-attachment-visibility", {ok: true}, function( res ) {
+    util.showSavedIndicatorIcon( res );
+    querySelf();
+});
 
   // Manual construction time toggle
   self.setConstructionTimeEnabled = function() { return authModel.ok("set-attachment-as-construction-time"); };

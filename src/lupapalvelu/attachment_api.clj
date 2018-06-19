@@ -224,6 +224,7 @@
                       att/foreman-must-be-uploader
                       att/edit-allowed-by-target
                       att/attachment-editable-by-application-state
+                      att/attachment-not-archived
                       (action/some-pre-check usr/precheck-user-is-archivist
                                              att/attachment-not-readOnly)
                       att/attachment-matches-application
@@ -352,14 +353,12 @@
                       ram/attachment-type-allows-ram
                       att/validate-not-included-in-published-bulletin]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
-   :notified         true
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles roles/writer-roles-with-foreman
    :states           (difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})}
   [{application :application {attachment-id :attachmentId} :data created :created}]
   (if-let [attachment-id (ram/create-ram-attachment! application attachment-id created)]
-    (do (ram/notify-new-ram-attachment! application attachment-id created)
-        (ok :applicationId id :attachmentId attachment-id))
+    (ok :applicationId id :attachmentId attachment-id)
     (fail :error.attachment-placeholder)))
 
 ;;
@@ -767,6 +766,7 @@
                       att/attachment-editable-by-application-state
                       (action/some-pre-check usr/precheck-user-is-archivist
                                              att/attachment-not-readOnly)
+                      att/attachment-not-archived
                       att/edit-allowed-by-target
                       (action/some-pre-check att/allowed-only-for-authority-when-application-sent
                                              (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))

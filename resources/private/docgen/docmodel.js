@@ -13,6 +13,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.meta = doc.meta;
   self.docId = doc.id;
   self.docDisabled = doc.disabled;
+  self.docPostVerdictEdit = false;
   self.appId = application.id;
   self.application = application;
   self.authorizationModel = authorizationModel;
@@ -40,7 +41,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   };
 
-  self.sizeClasses = { "t": "form-input tiny", "s": "form-input short", "m": "form-input medium", "l": "form-input long", "xl": "form-input really-long"};
+  self.sizeClasses = { "t": "tiny", "s": "short", "m": "medium", "l": "long", "xl": "really-long"};
 
   // trigger stored events once
   self.triggerEvents = function() {
@@ -170,6 +171,34 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.approvalModel = new LUPAPISTE.DocumentApprovalModel(self);
   self.isApproved = self.approvalModel.isApproved;
 
+  self.isPostVerdictEdited = function () {
+    return _.get( self.meta, "_post_verdict_edit.timestamp") > 0;
+  };
+
+  self.isPostVerdictSent = function () {
+    return _.get( self.meta, "_post_verdict_sent.timestamp") > 0;
+  };
+
+  self.noteText = function(noteData, type) {
+    var text = null;
+    if(noteData && noteData.user && noteData.timestamp) {
+      text = sprintf("%s %s: %s %s",
+        loc(["document", type]),
+        moment(noteData.timestamp).format("D.M.YYYY HH:mm"),
+        noteData.user.firstName,
+        noteData.user.lastName);
+    }
+    return text;
+  };
+
+  self.editNote = function () {
+    return self.noteText(_.get( self.meta, "_post_verdict_edit"), "edited");
+  };
+
+  self.sentNote = function () {
+    return self.noteText(_.get( self.meta, "_post_verdict_sent"), "sent");
+  };
+
   //----------------------------------------------------------------------
 
   // Returns id if we are in the testing mode, otherwise null.
@@ -221,7 +250,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   function getUpdateCommand() {
-    return (options && options.updateCommand) ? options.updateCommand : "update-doc";
+    if (self.docPostVerdictEdit && self.authorizationModel.ok("update-post-verdict-doc")) {
+      return "update-post-verdict-doc";
+    }
+    return _.get( options, "updateCommand", "update-doc" );
   }
 
   // Element constructors
@@ -286,7 +318,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(input).removeClass("source-value-changed");
     } else if (sourceValue !== undefined && sourceValue !== value){
       $(input).addClass("source-value-changed");
-      input.title = _.escapeHTML(loc("sourceValue") + ": " + (localizedSourceValue ? localizedSourceValue : sourceValue));
+      if (!_.endsWith(input.name, "hetu")) {
+        input.title = _.escapeHTML(loc("sourceValue") + ": " + (localizedSourceValue ? localizedSourceValue : sourceValue));
+      }
     }
   }
 
@@ -1536,6 +1570,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (label) {
       label.appendChild(loader);
     }
+
+    if (self.docPostVerdictEdit) {
+      $(event.target).addClass("source-value-changed");
+    }
+
     saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
   }
 
@@ -1625,6 +1664,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(elements).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
       // TODO a better way would be to hide each individual button based on authorizationModel.ok
       $(elements).find("button").hide();
+    }
+
+    if (self.docPostVerdictEdit && self.authorizationModel.ok("update-post-verdict-doc")) {
+      $(elements).find("button").hide();
+      $(elements).find("div[data-repeating-id=rakennuksenOmistajat]").css({"pointer-events": "none"});
     }
 
     return section.append( contents.append( $(elements)));

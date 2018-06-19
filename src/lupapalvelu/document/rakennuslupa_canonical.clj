@@ -8,7 +8,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.organization :as org]))
 
 (defn- muutostapa
   "If muutostapa is hidden and has a default value via schema the
@@ -97,9 +98,11 @@
                                       :julkisivumateriaali (:julkisivu rakenne))
         lammitystapa (:lammitystapa lammitys)
         huoneistot-data (get-huoneisto-data huoneistot (:name info))
-        huoneistot {:huoneisto huoneistot-data
-                    :asuntojenPintaala (get-huoneistot-pintaala huoneistot-data)
-                    :asuntojenLkm (get-huoneistot-lkm huoneistot-data)}
+        huoneistot (if (org/pate-org? (:organization application))
+                     {:huoneisto huoneistot-data
+                      :asuntojenPintaala (get-huoneistot-pintaala huoneistot-data)
+                      :asuntojenLkm (get-huoneistot-lkm huoneistot-data)}
+                     {:huoneisto huoneistot-data})
         vaestonsuoja-value (ss/trim (get-in toimenpide [:varusteet :vaestonsuoja]))
         vaestonsuoja (when (ss/numeric? vaestonsuoja-value) (util/->int vaestonsuoja-value))
         rakennuksen-tiedot-basic-info {:kayttotarkoitus (:kayttotarkoitus kaytto)
@@ -326,7 +329,10 @@
 
 (defn- get-asian-tiedot [documents-by-type]
   (let [maisematyo_documents (:maisematyo documents-by-type)
-        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents-by-type) (:hankkeen-kuvaus-minimum documents-by-type) (:aloitusoikeus documents-by-type))
+        hankkeen-kuvaus-doc (or (:hankkeen-kuvaus documents-by-type)
+                                (:hankkeen-kuvaus-minimum documents-by-type)
+                                (:jatkoaika-hankkeen-kuvaus documents-by-type)
+                                (:aloitusoikeus documents-by-type))
         asian-tiedot (:data (first hankkeen-kuvaus-doc))
         maisematyo_kuvaukset (for [maisematyo_doc maisematyo_documents]
                                (str "\n\n" (:kuvaus (get-toimenpiteen-kuvaus maisematyo_doc))

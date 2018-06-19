@@ -604,12 +604,17 @@
 (fact "kw-path"
   (kw-path "a" :b 9) => :a.b.9
   (kw-path ["a" :b 9]) => :a.b.9
-  (kw-path) => (keyword "")
-  (kw-path "a" nil "b") => :a..b)
+  (kw-path "") => (keyword "")
+  (kw-path "a" nil "b") => :a.b
+  (kw-path nil "foo") => :foo
+  (kw-path nil) => nil
+  (kw-path) => nil
+  (kw-path "a" [:b nil] :c) => :a.b.c)
 
 (fact "split-kw-path"
   (split-kw-path :a.b.9) => [:a :b :9]
-  (split-kw-path :a..b) => [:a (keyword "" ):b])
+  (split-kw-path :a..b) => [:a (keyword "" ):b]
+  (split-kw-path nil) => nil)
 
 (facts "safe-update-in"
   (safe-update-in {:a [{:b 2}]} [:a 0 :b] + 2) => {:a [{:b 4}]}

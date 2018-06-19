@@ -5,10 +5,11 @@
             [clojure.set :refer [difference]]
             [clojure.walk :refer [keywordize-keys]]
             [monger.operators :refer :all]
+            [schema.core :as sc]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-state :as app-state]
-            [lupapalvelu.application-utils :refer [location->object]]
+            [lupapalvelu.application-utils :as app-utils :refer [location->object]]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
@@ -35,12 +36,12 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [sade.coordinate :as coord]
             [sade.core :refer :all]
             [sade.env :as env]
+            [sade.schemas :as ssc]
             [sade.util :as util :refer [merge-in]]
-            [sade.coordinate :as coord]
-            [sade.strings :as ss]
-            [lupapalvelu.application-utils :as app-utils]))
+            [sade.strings :as ss]))
 
 (defcontext canceled-app-context [{{user-id :id} :user application :application}]
   (let [last-history-entry (app-state/last-history-item application)]
@@ -363,7 +364,7 @@
 ;; Application creation
 ;;
 
-(defn- new-attachment-types-for-operation [organization operation existing-types]
+(defn new-attachment-types-for-operation [organization operation existing-types]
   (->> (org/get-organization-attachments-for-operation organization operation)
        (map (partial apply att-type/attachment-type))
        (filter #(or (att-type/operation-specific? %) (not (att-type/contains? existing-types %))))))
@@ -404,17 +405,18 @@
           (assoc-in body path val)))
       {} schema-data)))
 
+(def db-schema-info-keys [:name :version :type :subtype :op])
+
 (defn make-document [application primary-operation-name created manual-schema-datas schema]
   (let [op-info (op/operations (keyword primary-operation-name))
         op-schema-name (:schema op-info)
-        schema-version (:schema-version application)
         default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
                                                    op-schema-name
                                                    (:schema-data op-info))
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
         schema-name (get-in schema [:info :name])]
     {:id          (mongo/create-id)
-     :schema-info (:info schema) ; TODO: no need for storing doc schema into mongo (LPK-3107)
+     :schema-info (select-keys (:info schema) db-schema-info-keys)
      :created     created
      :data        (util/deep-merge
                    (tools/create-document-data schema tools/default-values)
@@ -429,15 +431,10 @@
   (let [op-info (op/operations (keyword (:name op)))
         op-schema-name (:schema op-info)
         schema-version (:schema-version application)
-        default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
-                                                   op-schema-name (:schema-data op-info))
-        merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
 
         make (partial make-document application (:name op) created manual-schema-datas)
 
-        ;; TODO: :removable is deprecated (LPK-3107), no need for storing doc schema into mongo
-        ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
-        op-doc (update-in (make (schemas/get-schema schema-version op-schema-name)) [:schema-info] #(merge {:op op :removable true} %))
+        op-doc (update (make (schemas/get-schema schema-version op-schema-name)) :schema-info assoc :op op)
 
         existing-schemas-infos (map :schema-info (:documents application))
         existing-schema-names (set (map :name existing-schemas-infos))
@@ -538,29 +535,47 @@
 (defn tos-function [organization operation-name]
   (get-in organization [:operations-tos-functions (keyword operation-name)]))
 
-(defn make-application
-  [id operation-name x y address property-id property-id-source municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
-  {:pre [id operation-name address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
+(sc/defschema MakeApplicationSchema
+  {:id                                 ssc/ApplicationId
+   :organization                       org/Organization
+   :propertyId                         sc/Str
+   :municipality                       sc/Str
+   :address                            sc/Str
+   :operation-name                     (apply sc/enum (map name (keys op/operations)))
+   :location                           [(sc/one ssc/LocationX "X coordinate")
+                                        (sc/one ssc/LocationY "Y coordinate")]
+   (sc/optional-key :infoRequest)      sc/Bool
+   (sc/optional-key :openInfoRequest)  sc/Bool
+   (sc/optional-key :propertyIdSource) sc/Str})
+
+(sc/defn ^:always-validate make-application
+  [{:keys [id operation-name
+           infoRequest organization] :as application-info} :- MakeApplicationSchema
+   messages
+   user
+   created
+   manual-schema-datas]
+  {:pre [user created]}
   (let [application (merge domain/application-skeleton
-                           (permit-type-and-operation-map operation-name created)
-                           (location-map (->location x y))
-                           {:address             address
-                            :auth                (application-auth user operation-name)
-                            :comments            (application-comments user messages open-inforequest? created)
-                            :created             created
-                            :creator             (usr/summary user)
-                            :id                  id
-                            :infoRequest         info-request?
-                            :municipality        municipality
-                            :openInfoRequest     open-inforequest?
-                            :organization        (:id organization)
-                            :propertyId          property-id
-                            :schema-version      (schemas/get-latest-schema-version)
-                            :state               (application-state user (:id organization) info-request? operation-name)
-                            :title               address
-                            :tosFunction         (tos-function organization operation-name)}
-                           (when-not (#{:location-service nil} (keyword property-id-source))
-                             {:propertyIdSource property-id-source}))]
+                           (dissoc application-info :propertyIdSource)
+                           (permit-type-and-operation-map (:operation-name application-info) created)
+                           (location-map (:location application-info))
+                           {:auth            (application-auth user operation-name)
+                            :comments        (application-comments user messages (:openInfoRequest application-info) created)
+                            :created         created
+                            :creator         (usr/summary user)
+                            :id              id
+                            :infoRequest     (or infoRequest false)
+                            :openInfoRequest (get application-info :openInfoRequest false)
+                            :municipality    (:municipality application-info)
+                            :organization    (:id organization)
+                            :propertyId      (:propertyId application-info)
+                            :schema-version  (schemas/get-latest-schema-version)
+                            :state           (application-state user (:id organization) infoRequest operation-name)
+                            :title           (:address application-info)
+                            :tosFunction     (tos-function (:organization application-info) operation-name)}
+                           (when-not (#{:location-service nil} (keyword (:propertyIdSource application-info)))
+                             {:propertyIdSource (:propertyIdSource application-info)}))]
     (-> application
         (merge-in application-timestamp-map)
         (merge-in application-history-map user)
@@ -586,22 +601,61 @@
       (when-not (:new-application-enabled scope)
         (fail! :error.new-applications-disabled)))
 
-    (let [id (make-application-id municipality)]
-      (make-application id
-                        operation
-                        x
-                        y
-                        address
-                        propertyId
-                        propertyIdSource
-                        municipality
-                        organization
-                        info-request?
-                        open-inforequest?
+    (let [id (make-application-id municipality)
+          application-info (util/assoc-when-pred
+                             {:id id
+                              :organization organization
+                              :operation-name operation
+                              :location (->location x y)
+                              :propertyId propertyId
+                              :address address
+                              :infoRequest info-request?
+                              :openInfoRequest open-inforequest?}
+                             ss/not-blank?
+                             :propertyIdSource propertyIdSource
+                             :municipality municipality)]
+      (make-application application-info
                         messages
                         user
                         created
                         manual-schema-datas))))
+
+;;
+;; Operation
+;;
+
+(defn add-operation [{{app-state :state tos-function :tosFunction :as application} :application
+                      organization :organization
+                      created :created
+                      :as command}
+                     id
+                     operation]
+  (let [op                 (make-op operation created)
+        new-docs           (make-documents nil created @organization op application)
+        attachments        (:attachments (domain/get-application-no-access-checking id {:attachments true}))
+        new-attachments    (make-attachments created op @organization app-state tos-function :existing-attachments-types (map :type attachments))
+        attachment-updates (multioperation-attachment-updates op @organization attachments)]
+    (action/update-application command {$push {:secondaryOperations  op
+                                               :documents   {$each new-docs}
+                                               :attachments {$each new-attachments}}
+                                        $set  {:modified created}})
+    ;; Cannot update existing array and push new items into it same time with one update
+    (when (not-empty attachment-updates) (action/update-application command attachment-updates))))
+
+(defn change-primary-operation [{:keys [application] :as command} id secondaryOperationId]
+  (let [old-primary-op                       (:primaryOperation application)
+        old-secondary-ops                    (:secondaryOperations application)
+        new-primary-op                       (util/find-first #(= secondaryOperationId (:id %)) old-secondary-ops)
+        secondary-ops-without-old-primary-op (remove #(= (:id new-primary-op) (:id %)) old-secondary-ops)
+        new-secondary-ops                    (conj secondary-ops-without-old-primary-op old-primary-op)]
+    (when-not (= (:id old-primary-op) secondaryOperationId)
+      (when-not new-primary-op
+        (fail! :error.unknown-operation))
+      ;; TODO update also :app-links apptype if application is linked to other apps (loose WriteConcern ok?)
+      (action/update-application command {$set {:primaryOperation    new-primary-op
+                                                :secondaryOperations new-secondary-ops}})
+      {:primaryOperation    new-primary-op
+       :secondaryOperations new-secondary-ops})))
 
 ;;
 ;; Link permit
@@ -700,150 +754,6 @@
                 :continuationPeriodEnd period-end}]
     (action/update-application (action/application->command application) {$push {:continuationPeriods period}})))
 
-;; Replacing operation
-
-(defn- get-operation-schemas [organization op-name]
-  (let [op-metadata (->> op-name (keyword) (get op/operations))
-        org-required-schema-fn (:org-required op-metadata)]
-    (concat (:required op-metadata)
-            (when org-required-schema-fn ((apply juxt org-required-schema-fn) organization))
-            [(:applicant-doc-schema op-metadata)])))
-
-(defn- get-required-document-schema-names-for-operations [organization new-ops]
-  (->> new-ops
-       (map #(get-operation-schemas organization (:name %)))
-       (apply concat)
-       (set)))
-
-(defn- replace-old-operation-doc-with-new [documents op-id new-docs]
-  (let [match-doc-with-op-id (fn [doc] (#{op-id} (-> doc :schema-info :op :id)))
-        new-operation-doc    (->> new-docs (filter match-doc-with-op-id) (first))]
-    (->> documents
-         (filter #(some? (-> % :schema-info :op :name)))
-         (remove match-doc-with-op-id)
-         (cons new-operation-doc))))
-
-(defn- pick-old-documents-that-new-op-needs [new-op-docs documents doc-name]
-  (let [existing-docs (filter #(= doc-name (-> % :schema-info :name)) documents)]
-    (if (seq existing-docs)
-      existing-docs
-      (filter #(= doc-name (-> % :schema-info :name)) new-op-docs))))
-
-(defn- copy-rakennuspaikka-data [old-docs new-docs]
-  (let [rakennuspaikka-filter   #(and (-> % :schema-info :type (= :location))
-                                      (-> % :schema-info :repeating (not)))
-        old-rakennuspaikka      (->> old-docs (filter rakennuspaikka-filter) (first))
-        new-rakennuspaikka      (->> new-docs (filter rakennuspaikka-filter) (first))
-        new-data-keys           (-> new-rakennuspaikka :data (keys))
-        rakennuspaikka-data     (when (and old-rakennuspaikka new-rakennuspaikka)
-                                  (-> old-rakennuspaikka :data (select-keys new-data-keys)))
-        updated-doc             (if rakennuspaikka-data
-                                  (assoc new-rakennuspaikka :data (merge (:data new-rakennuspaikka) rakennuspaikka-data))
-                                  new-rakennuspaikka)]
-    (->> new-docs
-         (remove rakennuspaikka-filter)
-         (cons updated-doc))))
-
-(defn- copy-docs-from-old-op-to-new
-  "Copies the old documents to the new operation, when the old documents are of those types that the new operation
-  requires. Changes the 'operation document' to that of the new operation. Takes into account that there might be
-  several operations, and keeps track which documents are required by all the operations."
-  [{:keys [documents]} organization op-id new-ops new-op-docs]
-  (let [docs-for-new-ops (get-required-document-schema-names-for-operations organization new-ops)
-        operation-docs   (replace-old-operation-doc-with-new documents op-id new-op-docs)]
-    (->> docs-for-new-ops
-         (map (partial pick-old-documents-that-new-op-needs new-op-docs documents))
-         (apply concat)
-         (copy-rakennuspaikka-data documents)
-         (concat operation-docs)
-         (remove nil?))))
-
-(defn- get-attachment-types [attachments]
-  (->> attachments
-       (map :type)
-       (set)))
-
-(defn- change-operation-in-attachment [old-op new-op att]
-  (let [new-ops (when (not-empty (:op att))
-                  (for [op (:op att)]
-                    (if (= (:id op) (:id old-op))
-                      (assoc op :id (:id new-op)
-                                :name (:name new-op))
-                      op)))]
-    (assoc att :op new-ops)))
-
-(defn- change-operation-in-attachments [old-op new-op attachments]
-  (map (partial change-operation-in-attachment old-op new-op) attachments))
-
-(defn- copy-attachments-from-old-op-to-new
-  "Copies the old attachments to the new, when there is already an added file and changes it's reference to the
-   operation. If there isn't any attachments, keeps the old placeholder when possible, otherwise adds new."
-  [{:keys [attachments]} old-op new-op new-attachments]
-  (let [new-attachment-types (get-attachment-types new-attachments)]
-    (loop [acc []
-           old-attachments attachments
-           new-attachments new-attachments]
-      (if (empty? new-attachments)
-        (if (empty? old-attachments)
-          acc
-          (->> old-attachments
-               (remove #(-> % :versions (empty?)))
-               (change-operation-in-attachments old-op new-op)
-               (concat acc)))
-        (let [new-attachment (first new-attachments)
-              old-atts-of-the-new-att-type (filter #(new-attachment-types (:type %)) old-attachments)]
-          (recur (concat acc (if (empty? old-atts-of-the-new-att-type)
-                               [new-attachment]
-                               (change-operation-in-attachments old-op new-op old-atts-of-the-new-att-type)))
-                 (remove #(new-attachment-types (:type %)) old-attachments)
-                 (rest new-attachments)))))))
-
-(defn- get-operation [application primary? op-id]
-  (if primary?
-    (:primaryOperation application)
-    (->> application
-         :secondaryOperations
-         (filter #(= op-id (:id %)))
-         (first))))
-
-(defn- get-new-operations [application old-op-id new-op]
-  (->> application
-       (get-operations)
-       (remove #(= old-op-id (:id %)))
-       (cons new-op)))
-
-(defn- build-replace-operation-query [application primary-op? new-op new-docs new-attachments]
-  (let [base-query {:attachments new-attachments
-                    :documents   new-docs}]
-    (if primary-op?
-      (assoc base-query :primaryOperation new-op)
-      (assoc base-query :secondaryOperations (->> application
-                                                  :secondaryOperations
-                                                  (remove #(= (:id new-op) (:id %)))
-                                                  (cons new-op))))))
-
-(defn replace-operation
-  "Replaces the old operation's name to the one requested. Then generates the necessary new documents and attachments
-   and deletes the documents that aren't needed any more but keeps all the attachments."
-  [{{app-state :state tos-function :tosFunction :as application} :application
-    organization                                                 :organization
-    created                                                      :created :as command} op-id operation]
-  (let [primary-op?            (= op-id (-> application :primaryOperation :id))
-        old-op                 (get-operation application primary-op? op-id)
-        new-op                 (assoc old-op :name operation)
-        new-operations         (get-new-operations application op-id new-op)
-        docs-for-new-op        (make-documents nil created @organization new-op (dissoc application :documents))
-        updated-docs           (copy-docs-from-old-op-to-new application organization op-id new-operations docs-for-new-op)
-        attachments-for-new-op (make-attachments created new-op @organization app-state tos-function)
-        updated-attachments    (copy-attachments-from-old-op-to-new application old-op new-op attachments-for-new-op)
-        update-query           (build-replace-operation-query application
-                                                              primary-op?
-                                                              new-op
-                                                              updated-docs
-                                                              updated-attachments)]
-    (action/update-application command {$set update-query})
-    (ok)))
-
 ;; Cancellation
 
 (defn- remove-app-links [id]
@@ -923,9 +833,6 @@
     (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} permit-type)]
       (building-reader/building-xml url credentials property-id))))
 
-(defn buildings-for-documents [xml]
-  (->> (building-reader/->buildings xml)
-       (map #(-> {:data %}))))
 
 (defn update-buildings-array! [xml application all-buildings]
   (let [doc-buildings (building/building-ids application)
@@ -952,7 +859,7 @@
 (defn fetch-buildings [{:keys [application] :as command} propertyId all-buildings]
   (let [building-xml              (fetch-building-xml (:organization application) "R" propertyId)
         old-building-docs         (domain/get-documents-by-name application "archiving-project")
-        buildings-and-structures  (buildings-for-documents building-xml)
+        buildings-and-structures  (building-reader/buildings-for-documents building-xml)
         document-datas            (schema-datas nil buildings-and-structures)
         structure-descriptions    (map :description buildings-and-structures)
         building-docs             (map (partial document-data->op-document application) document-datas)
@@ -962,7 +869,7 @@
         command                   (util/deep-merge command (action/application->command application))]
   (when (some? (:id primary-operation))
     (do
-      (mapv #(doc-persistence/remove! command %) old-building-docs)
+      (run! #(doc-persistence/remove! command %) old-building-docs)
       (action/update-application command {$set  {:primaryOperation    primary-operation
                                                  :secondaryOperations secondary-ops}
                                           $push {:documents {$each building-docs}}})
@@ -973,7 +880,7 @@
         primary-op-id (get-in application [:primaryOperation :id])
         secondary-building-docs (filter #(not (= (-> % :schema-info :op :id) primary-op-id)) building-docs)
         secondary-buildings (filter #(not (= (:operationId %) primary-op-id)) (:buildings application))]
-    (mapv #(doc-persistence/remove! command  %) secondary-building-docs)
+    (run! #(doc-persistence/remove! command  %) secondary-building-docs)
     (action/update-application command {$pull {:buildings {:buildingId {$in (map :buildingId secondary-buildings)}}}})))
 
 (defn jatkoaika-application? [application]

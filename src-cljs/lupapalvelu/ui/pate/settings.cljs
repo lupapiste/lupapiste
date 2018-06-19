@@ -1,11 +1,11 @@
 (ns lupapalvelu.ui.pate.settings
   (:require [clojure.string :as s]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.path :as path]
+            [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.layout :as layout]
-            [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
@@ -45,7 +45,7 @@
                    (let [value (.. event -target -value)]
                      (callback value)
                      (reset! selection* value)))}
-     (->> shared/review-type-map
+     (->> helper/review-type-map
           keys
           (map (fn [k]
                  {:text (common/loc (str "pate.review-type." (name k)))
@@ -59,24 +59,6 @@
 ;; Settings sections
 ;; -------------------------
 
-#_(defn settings-section-header [{:keys [path schema state] :as options}]
-  [:div.pate-grid-6.section-header
-   [:div.row.row--tight
-    [:div.col-4
-     [:span.pate-label
-      {:class (common/css-flags :required (:required? schema))}
-      (path/loc options)]]]])
-
-#_(rum/defc settings-section-body < rum/reactive
-  [{:keys [schema] :as options}]
-  [:div.section-body
-   (if (path/react-meta options :editor?)
-     (case (-> schema :id keyword)
-       :reviews (generic-editor :review)
-       :plans   (generic-editor :plan))
-     (layout/pate-grid (path/schema-options options
-                                             (:grid schema))))])
-
 (defmethod sections/section-header :settings
   [{:keys [path schema state] :as options} _]
   [:div.pate-grid-6.section-header
@@ -85,10 +67,6 @@
      [:span.pate-label
       {:class (common/css-flags :required (:required? schema))}
       (path/loc options)]]]])
-
-#_(defmethod sections/section-body :settings
-  [options _]
-  (settings-section-body options))
 
 (rum/defc verdict-template-settings < rum/reactive
   [{:keys [schema] :as options}]
@@ -99,7 +77,8 @@
       [:h2.pate-settings-title (common/loc :pate-settings
                                             (common/loc (:title schema)))]]
      [:div.col-1
-      (pate-components/required-fields-note options)]
+      (pate-components/required-fields-note (assoc options
+                                                   :test-id :settings-missing))]
      [:div.col-1.col--right
       (pate-components/last-saved options)]]]
    (sections/sections options :settings)])

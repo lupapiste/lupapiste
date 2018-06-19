@@ -386,5 +386,5 @@
                           :header      (rest (digitizer-report-headers lang))
                           :row-fn      (juxt :date :attachments)
                           :data        sum-data}])
-        sum-row       (excel/add-sum-row sum-sheet wb [(i18n/localize lang "digitizer.excel.sum") (apply + (map :attachments sum-data))])]
+        sum-row       (excel/add-sum-row! sum-sheet wb [(i18n/localize lang "digitizer.excel.sum") (apply + (map :attachments sum-data))])]
     (excel/xlsx-stream wb)))

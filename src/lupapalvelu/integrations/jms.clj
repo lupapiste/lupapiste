@@ -2,27 +2,31 @@
   (:require [taoensso.timbre :refer [error errorf info infof tracef warnf fatal]]
             [taoensso.nippy :as nippy]
             [lupapiste-jms.client :as jms]
+            [lupapalvelu.mongo :as mongo]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util])
-  (:import (javax.jms ExceptionListener Connection Session Queue
+  (:import (javax.jms ExceptionListener Connection Session Queue Message
                       MessageListener BytesMessage ObjectMessage TextMessage
-                      MessageConsumer MessageProducer JMSException)
+                      MessageConsumer MessageProducer JMSException JMSContext)
            (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection)
            (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
 
-(when (env/feature? :embedded-artemis)
+; If external broker is not defined, we start a embedded broker inside the JVM for testing.
+(when (and (env/dev-mode?) (ss/blank? (env/value :jms :broker-url)))
   ; This works only with :dev profile
   (require 'artemis-server)
   ((ns-resolve 'artemis-server 'start)))
 
 (when (env/feature? :jms)
 
-  (defonce state (atom {:producers        []
-                        :consumers        []
-                        :conn             nil
-                        :producer-session nil
-                        :consumer-session nil}))
+  (def jms-test-db-property "LP_test_db_name")
+
+  (defonce state (atom {:producers         []
+                        :consumers         []
+                        :conn              nil
+                        :producer-sessions []
+                        :consumer-sessions []}))
 
   (defn register [type fn object]
     (swap! state update type fn object)
@@ -38,11 +42,16 @@
           (tracef "Delivery count of message: %d" delivery-count)
           (when (< 1 delivery-count)
             (warnf "Message delivered already %d times" delivery-count)))
-        (condp instance? m
-          BytesMessage  (cb (jms/byte-message-as-array m))
-          ObjectMessage (cb (.getObject ^ObjectMessage m))
-          TextMessage   (cb (.getText ^TextMessage m))
-          (error "Unknown JMS message type:" (type m))))))
+        (let [test-db-name (.getStringProperty m jms-test-db-property)
+              db-name (if (and (env/dev-mode?) (ss/not-blank? test-db-name))
+                        test-db-name
+                        mongo/*db-name*)]
+          (mongo/with-db db-name
+            (condp instance? m
+              BytesMessage (cb (jms/byte-message-as-array m))
+              ObjectMessage (cb (.getObject ^ObjectMessage m))
+              TextMessage (cb (.getText ^TextMessage m))
+              (error "Unknown JMS message type:" (type m))))))))
 
   (def exception-listener
     (reify ExceptionListener
@@ -53,32 +62,58 @@
   (defn queue ^Queue [name]
     (ActiveMQJMSClient/createQueue name))
 
+  (def create-session jms/create-session)
+
+  (defn create-transacted-session [conn]
+    (jms/create-session conn Session/SESSION_TRANSACTED))
+
+  (defn register-session [session type]
+    (swap! state update (keyword (str (name type) "-session")) conj session)
+    session)
+
+  (defn commit [^Session sess] (.commit sess))
+  (defn rollback [^Session sess] (.rollback sess))
+
+  (defn create-jms-message [data session-or-context]
+    (let [^Message message (jms/create-message data session-or-context)]
+      (when (env/dev-mode?)
+        (.setStringProperty message jms-test-db-property mongo/*db-name*))
+      message))
+
   ;;
   ;; Connection
   ;;
 
+  (defn get-default-connection []
+    (get @state :conn))
+
   (def broker-url (or (env/value :jms :broker-url) "vm://0"))
 
-  (defn create-connection-factory ^ActiveMQJMSConnectionFactory [^String url connection-options]
-    (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts]
+  (def connection-properties (merge (env/value :jms) {:broker-url broker-url}))
+
+  (defn create-connection-factory ^ActiveMQJMSConnectionFactory [{^String url :broker-url :as connection-options}]
+    (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts consumer-window-size]
            :or   {retry-interval (* 2 1000)
                   retry-multipier 2
                   max-retry-interval (* 5 60 1000)          ; 5 mins
+                  consumer-window-size 0
                   reconnect-attempts -1}} connection-options]
       (doto (ActiveMQJMSConnectionFactory. url)
         (.setRetryInterval (util/->long retry-interval))
         (.setRetryIntervalMultiplier (util/->double retry-multipier))
         (.setMaxRetryInterval (util/->long max-retry-interval))
-        (.setReconnectAttempts (util/->int reconnect-attempts)))))
+        (.setReconnectAttempts (util/->int reconnect-attempts))
+        (.setConsumerWindowSize (util/->int consumer-window-size)))))
+
+  (def default-connection-factory (create-connection-factory connection-properties))
 
   (defn create-connection
     ([] (create-connection {:broker-url broker-url}))
     ([options]
-     (create-connection options exception-listener))
-    ([{:keys [broker-url username password] :as opts} ex-listener]
+     (create-connection default-connection-factory options exception-listener))
+    ([factory {:keys [broker-url username password]} ex-listener]
      (try
-       (let [factory (create-connection-factory broker-url opts)
-             conn (if (ss/not-blank? username)
+       (let [conn (if (ss/not-blank? username)
                     (jms/create-connection factory {:username username :password password :ex-listener ex-listener})
                     (jms/create-connection factory {:ex-listener ex-listener}))]
          (.start conn)
@@ -89,7 +124,7 @@
   (defn ensure-connection [state options]
     (loop [sleep-time 2000
            try-times 5]
-      (when-not (:conn @state)
+      (when-not (get-default-connection)
         (if-let [conn (create-connection options)]
           (do
             (swap! state assoc :conn conn)
@@ -102,18 +137,11 @@
             (do
               (warnf "Couldn't connect to broker %s, reconnecting in %s seconds" (:broker-url options) (/ sleep-time 1000))
               (Thread/sleep sleep-time)
-              (recur (min (* 2 sleep-time) 60000) (dec try-times))))))))
-
-  (defn register-session [type]
-    (swap! state assoc (keyword (str (name type) "-session")) (jms/create-session ^Connection (:conn @state) Session/AUTO_ACKNOWLEDGE)))
+              (recur (min (* 2 sleep-time) 15000) (dec try-times))))))))
 
   (defn start! []
     (try
-      (ensure-connection state (merge (env/value :jms) {:broker-url broker-url}))
-      (when-not (:consumer-session @state)
-        (register-session :consumer))
-      (when-not (:producer-session @state)
-        (register-session :producer))
+      (ensure-connection state connection-properties)
       (catch Exception e
         (fatal e "Couldn't initialize JMS connections" (.getMessage e)))))
 
@@ -122,7 +150,8 @@
   ;;
 
   (defn producer-session []
-    (get @state :producer-session))
+    (or (get-in @state [:producer-session 0])
+        (register-session (jms/create-session ^Connection (get-default-connection) Session/AUTO_ACKNOWLEDGE) :producer)))
 
   (defn register-producer
     "Register producer to state and return it."
@@ -136,7 +165,7 @@
     If no message-fn is given, message type is inferred from data with jms/MessageCreator protocol.
     Producer is internally registered and closed on shutdown."
     ([queue-name]
-     (create-producer (producer-session) queue-name #(jms/create-message % (producer-session))))
+     (create-producer (producer-session) queue-name #(create-jms-message % (producer-session))))
     ([session queue-name message-fn]
      (-> (jms/create-producer session (queue queue-name))
          (register-producer)
@@ -147,14 +176,25 @@
     ([queue-name]
      (create-nippy-producer (producer-session) queue-name))
     ([session queue-name]
-     (create-producer session queue-name #(jms/create-message (nippy/freeze %) session))))
+     (create-producer session queue-name #(create-jms-message (nippy/freeze %) session))))
+
+  (defn produce-with-context [destination-name data]
+    (jms/send-with-context
+      default-connection-factory
+      (queue destination-name)
+      data
+      (merge (select-keys connection-properties [:username :password])
+             {:session-mode JMSContext/AUTO_ACKNOWLEDGE
+              :message-fn   create-jms-message
+              :ex-listener  exception-listener})))
 
   ;;
   ;; Consumers
   ;;
 
   (defn consumer-session []
-    (get @state :consumer-session))
+    (or (get-in @state [:consumer-session 0])
+        (register-session (jms/create-session ^Connection (get-default-connection) Session/AUTO_ACKNOWLEDGE) :consumer)))
 
   (defn register-consumer
     "Register consumer to state and return it."
@@ -169,17 +209,21 @@
      (-> (jms/listen session (queue endpoint-name) (message-listener callback-fn))
          (register-consumer))))
 
+  (defn nippy-callbacker [callback]
+    (fn [^bytes data]
+      (try
+        (let [clj-data (nippy/thaw data)]
+          (callback clj-data))
+        (catch ClassCastException e
+          (errorf e "Couldn't cast JMS message to Clojure data with nippy, ignoring callback.")))))
+
   (defn create-nippy-consumer
-    "Creates and returns consumer to endpoint, that deserializes JMS data with nippy/thaw."
-    [endpoint callback-fn]
-    (create-consumer
-      endpoint
-      (fn [^bytes data]
-        (try
-          (let [clj-data (nippy/thaw data)]
-            (callback-fn clj-data))
-          (catch ClassCastException e
-            (errorf e "Couldn't cast JMS message to Clojure data with nippy, ignoring callback."))))))
+    "Creates and returns consumer to endpoint, that deserializes JMS data with nippy/thaw.
+    Uses default consumer session created in this namespace."
+    ([endpoint callback-fn]
+     (create-consumer endpoint (nippy-callbacker callback-fn)))
+    ([session endpoint callback-fn]
+     (create-consumer session endpoint (nippy-callbacker callback-fn))))
 
   ;;
   ;; misc
@@ -193,9 +237,10 @@
        (.close conn))
      (doseq [^MessageProducer conn (:producers @state)]
        (.close conn))
-     (.close ^Connection (:conn @state))
+     (when-let [conn (get-default-connection)]
+       (.close ^Connection conn))
 
-     (when close-embedded?
+     (when (and close-embedded? (find-ns 'artemis-server))
        (when-let [artemis (ns-resolve 'artemis-server 'embedded-broker)]
          (info "Stopping Artemis...")
          (.stop artemis)))))
@@ -219,4 +264,45 @@
   (nippy {:testi true :nimi "Nippy" :version 1})
   ;=> nil
   ; nippy dataa: {:testi true, :nimi Nippy, :version 1}
+
+  ; testing redeliveries with SESSION_TRANSACTED
+  (def error-prod (create-producer "boom"))
+  (def transacted-session (create-transacted-session (get-default-connection)))
+  (def consumer (create-consumer
+                  transacted-session
+                  "boom"
+                  (fn [msg]
+                    (try
+                      (if (= "boom" msg)
+                        (throw (IllegalAccessException. "sorry"))
+                        (println "got message:" msg))
+                      (.commit transacted-session)
+                      (catch Exception e
+                        (println "errori")
+                        (.rollback transacted-session))))))
+  (error-prod "moi")
+  ;=> nil
+  ;got message: moi
+  (error-prod "boom")
+  ;=> nil
+  ;errori
+  ;WARN 2018-05-07 12:32:31.145 [] [] [] lupapalvelu.integrations.jms - Message delivered already 2 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.151 [] [] [] lupapalvelu.integrations.jms - Message delivered already 3 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.156 [] [] [] lupapalvelu.integrations.jms - Message delivered already 4 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.161 [] [] [] lupapalvelu.integrations.jms - Message delivered already 5 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.166 [] [] [] lupapalvelu.integrations.jms - Message delivered already 6 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.170 [] [] [] lupapalvelu.integrations.jms - Message delivered already 7 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.175 [] [] [] lupapalvelu.integrations.jms - Message delivered already 8 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.180 [] [] [] lupapalvelu.integrations.jms - Message delivered already 9 times
+  ;errori
+  ;WARN 2018-05-07 12:32:31.183 [] [] [] lupapalvelu.integrations.jms - Message delivered already 10 times
+  ;errori
+
   )

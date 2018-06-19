@@ -1,3 +1,5 @@
+(require 'cemerick.pomegranate.aether)
+
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.9.0"]
@@ -128,15 +130,15 @@
                  [org.geotools/gt-epsg-wkt "18.1"]
 
                  ; Message Queue
-                 [org.apache.activemq/artemis-jms-client "2.5.0"]
-                 [lupapiste/jms-client "0.1.0"]
+                 [org.apache.activemq/artemis-jms-client "2.6.0"]
+                 [lupapiste/jms-client "0.2.1"]
                  [com.taoensso/nippy "2.14.0"]
 
                  ;; Lupapiste libraries
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.60"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.9.12"]
+                 [lupapiste/commons "0.9.18"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -176,11 +178,11 @@
                                          [com.cemerick/pomegranate "1.0.0"]                                             ; midje.repl needs this
                                          [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                          [com.raspasov/clj-ssh "0.5.12"]
-                                         [org.apache.activemq/artemis-jms-server "2.5.0"]
+                                         [org.apache.activemq/artemis-jms-server "2.6.0"]
                                          [rhizome "0.2.7"]
                                          [pdfboxing "0.1.13"]
                                          [com.cemerick/piggieback "0.2.2"]
-                                         [figwheel-sidecar "0.5.15"]
+                                         [figwheel-sidecar "0.5.14"]
                                          ;; Better Chrome Dev Tools support
                                          [binaryage/devtools "0.9.4"]]
                         :resource-paths ["dev-resources"]
@@ -237,8 +239,7 @@
   :jvm-opts ["-Dfile.encoding=UTF-8"]
   :nitpicker {:exts     ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug" #"lp-static/js/"]}
-  :repositories [["boundless" {:url "https://repo.boundlessgeo.com/main/"}]
-                 ["osgeo" {:url "http://download.osgeo.org/webdav/geotools"}]]
+  :repositories [["osgeo" {:url "https://download.osgeo.org/webdav/geotools"}]]
   :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]

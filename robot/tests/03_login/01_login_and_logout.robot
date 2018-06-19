@@ -112,5 +112,6 @@ Cleanup cookies
 
 Authority (Veikko) logs in and dont see the help text for no applications
   Veikko logs in
-  Wait until  Element should not be visible  //section[@id='applications']//*[@data-test-id='applications-no-application']
+  Element should be visible by test id  applications-create-new-application
+  Element should not be visible  //section[@id='applications']//*[@data-test-id='applications-no-application']
   [Teardown]  logout

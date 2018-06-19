@@ -1093,7 +1093,27 @@
                                                 :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirustus]
                                                                            [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                            [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]
-                                                                           [:suunnitelmat :valaistussuunnitelma]]}
+                                                                           [:suunnitelmat :valaistussuunnitelma]]
+                                                :varasto-tms [[:paapiirustus :asemapiirros]
+                                                              [:paapiirustus :julkisivupiirustus]
+                                                              [:paapiirustus :leikkauspiirustus]
+                                                              [:ennakkoluvat_ja_lausunnot :naapurin_kuuleminen]
+                                                              [:paapiirustus :pohjapiirustus]
+                                                              [:rakennuspaikan_hallinta :todistus_hallintaoikeudesta]]
+                                                :asuinrakennus [[:paapiirustus :asemapiirros]
+                                                                [:selvitykset :energiataloudellinen_selvitys]
+                                                                [:selvitykset :energiatodistus]
+                                                                [:paapiirustus :julkisivupiirustus]
+                                                                [:paapiirustus :leikkauspiirustus]
+                                                                [:ennakkoluvat_ja_lausunnot :naapurin_kuuleminen]
+                                                                [:pelastusviranomaiselle_esitettavat_suunnitelmat :paloturvallisuussuunnitelma]
+                                                                [:suunnitelmat :piha_tai_istutussuunnitelma]
+                                                                [:paapiirustus :pohjapiirustus]
+                                                                [:rakennuspaikan_hallinta :todistus_hallintaoikeudesta]]
+                                                :auto-katos [[:paapiirustus :asemapiirros]
+                                                             [:ennakkoluvat_ja_lausunnot :naapurin_kuuleminen]
+                                                             [:rakennuspaikan_hallinta :todistus_hallintaoikeudesta]]}
+                       :pate-enabled true
                        :krysp {:R {:url local-krysp :version "2.2.2"
                                    :http (merge
                                            {:auth-type "basic"
@@ -1524,6 +1544,15 @@
                  :reference "Esim"
                  :process-id "CkaekKfpEymHUG0nn5z4MLxwNm34zIdpAXHqQMF3"}])
 
+(defn dummy-onkalo-log-entry
+  "Generates a dummy log entry with timestamp between start-ts and end-ts"
+  [start-ts end-ts & [logged?]]
+  (let [ts (+ start-ts (long (rand (- end-ts start-ts))))]
+    (merge {:organization (rand-nth ["753-R" "091-R" "092-R" "837-R" "297-R"])
+            :timestamp ts}
+           (when logged?
+             {:logged ts}))))
+
 (deffixture "minimal" {}
   (mongo/clear!)
   (mongo/insert-batch :ssoKeys [{:_id "12342424c26b7342d92a4321" :ip "127.0.0.1" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}
@@ -1531,4 +1560,7 @@
                                 {:_id "12342424c26b7342d92a9876" :ip "109.204.231.126" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}])
   (mongo/insert-batch :users users)
   (mongo/insert-batch :companies companies)
-  (mongo/insert-batch :organizations organizations))
+  (mongo/insert-batch :organizations organizations)
+  (mongo/insert-batch :archive-api-usage [(dummy-onkalo-log-entry 0 (now) true)
+                                          (dummy-onkalo-log-entry 0 (now) true)
+                                          (dummy-onkalo-log-entry 0 (now) true)]))

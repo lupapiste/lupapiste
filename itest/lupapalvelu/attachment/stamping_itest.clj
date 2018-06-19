@@ -4,11 +4,11 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.attachment :refer [get-attachment-info]]
             [lupapalvelu.attachment.util :refer [attachment-state]]
-            [sade.util :as util]))
-
-(apply-remote-minimal)
+            [sade.util :as util]
+            [taoensso.timbre :as timbre]))
 
 (facts "Stamping"
+  (apply-remote-minimal)
   (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
         application-id (:id application)
         attachment (first (:attachments application))
@@ -56,6 +56,7 @@
 
     ; Poll for 10 seconds
     (when-not (= "done" (:status job))
+      (timbre/info "Polling for stamp job id" (:id job) "version" (:version job) "application" application-id "attachment" (:id attachment))
       (poll-job sonja :stamp-attachments-job (:id job) (:version job) 50) => ok?)
 
     (let [attachment (get-attachment-by-id sonja application-id (:id attachment))
@@ -97,6 +98,7 @@
               (get-in attachment [:latestVersion :stamped]) => true)))))))
 
 (facts* "Stamped attachment can't be deleted LPK-3335"
+  (apply-remote-minimal)
   (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
         application-id (:id application)
         attachment (first (:attachments application))
@@ -173,12 +175,17 @@
       (fact "New fileid is in response" (get-in new-attachment [:latestVersion :fileId]) =not=> file-id))))
 
 (facts "Stamping copies all signings"
+  (apply-remote-minimal)
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
         application (query-application pena application-id)
         attachment-id (:id (first (:attachments application)))
         _ (upload-attachment pena application-id {:id attachment-id :type {:type-group "paapiirustus" :type-id "asemapiirros"}} true) => ok?
         _ (command pena :invite-with-role :id application-id :email "mikko@example.com" :text  "" :documentName "" :documentId "" :path "" :role "writer") => ok?
         _ (command mikko :approve-invite :id application-id) => ok?
+        attachment-id2 (upload-attachment pena application-id
+                                          {:type {:type-group "paapiirustus" :type-id "pohjapiirustus"}}
+                                          true
+                                          :filename "dev-resources/test-pdf.pdf") => ok?
         stamp {:id         "123456789012345678901234"
                :name       "Oletusleima"
                :position   {:x 10 :y 200}
@@ -187,25 +194,43 @@
                :qrCode     true
                :rows       [[{:type "custom-text" :value "Stamp"}]]}]
 
-    (fact "Both guys has sign attachment"
+    (fact "Both guys sign the first attachment"
       (command pena :sign-attachments :id application-id :attachmentIds [attachment-id] :password "pena") => ok?
       (command mikko :sign-attachments :id application-id :attachmentIds [attachment-id] :password "mikko123") => ok?
       (count (:signatures (first (:attachments (query-application pena application-id))))) => 2)
 
-    (fact "Sonja stamps the attachment"
+    (fact "Pena signs the second attachment"
+      (command pena :sign-attachments :id application-id :attachmentIds [attachment-id2] :password "pena") => ok?)
+
+    (fact "Pena rotates the second attachment"
+      (command pena :rotate-pdf :id application-id :attachmentId attachment-id2 :rotation -90) => ok?)
+
+    (fact "Sonja stamps the attachments"
       (command pena :submit-application :id application-id) = ok?
-      (let [{job :job} (command sonja :stamp-attachments :id application-id :timestamp (sade.core/now) :files [attachment-id] :lang :fi :stamp stamp) => ok?]
+      (let [{job :job} (command sonja :stamp-attachments :id application-id
+                                :timestamp (sade.core/now)
+                                :files [attachment-id attachment-id2] :lang :fi :stamp stamp) => ok?]
         ; Wait that stamping job is done
         (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))))
 
-    (fact "Stamped attachment version have both signatures"
+    (fact "The first stamped attachment has both signatures"
       (let [{attachments :attachments} (query-application sonja application-id)
             stamped-attachment (first attachments)]
         (count (:signatures stamped-attachment)) => 4
         (:version (get (:signatures stamped-attachment) 2)) => {:major 1 :minor 1}
-        (:version (get (:signatures stamped-attachment) 3)) => {:major 1 :minor 1}))))
+        (:version (get (:signatures stamped-attachment) 3)) => {:major 1 :minor 1}))
+    (fact "The second stamped attachment has Pena's signature"
+      (let [{attachments :attachments} (query-application sonja application-id)
+            stamped-attachment (last attachments)]
+        (:latestVersion stamped-attachment) => (contains {:stamped true
+                                                          :version {:major 1 :minor 1}})
+        (:signatures stamped-attachment) => (just [(contains {:user (contains {:firstName "Pena"})
+                                                              :version {:major 1 :minor 0}})
+                                                   (contains {:user (contains {:firstName "Pena"})
+                                                              :version {:major 1 :minor 1}})])))))
 
 (facts "Stamping does not change approval"
+  (apply-remote-minimal)
   (let [application    (create-and-submit-application pena :propertyId sipoo-property-id)
         application-id (:id application)
         att-template   (first (:attachments application))
@@ -247,6 +272,7 @@
       (count stamps) => 2)))
 
 (facts "editing stamp templates"
+  (apply-remote-minimal)
   (let [add-result (command sipoo :upsert-stamp-template
                             :name "zero stamp" :page "first" :background 0
                             :qrCode false :position {:x 0 :y 0}
@@ -302,6 +328,7 @@
               (:rows edited-stamp) => [[{:type "custom-text" :text "Hello World"}]])))))))
 
 (facts "remove stamp"
+  (apply-remote-minimal)
   (let [stamps (:stamps (query sipoo :stamp-templates))
         stamp-id (:id (last stamps))]
 

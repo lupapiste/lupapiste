@@ -85,7 +85,8 @@
 (defn new-template [category callback]
   (common/command {:command "new-verdict-template"
                    :success (list-update-response callback)}
-                  :category category))
+                  :category category
+                  :lang (common/get-current-language)))
 
 (defn set-template-name [template-id name callback]
   (common/command {:command "set-verdict-template-name"
@@ -149,16 +150,27 @@
                 #(reset! state/template-list (:templates %))
                 :id app-id))
 
+;; Verdicts
+
 (defn fetch-verdict-list [app-id]
   (common/query "pate-verdicts"
                 #(reset! state/verdict-list (:verdicts %))
                 :id app-id))
 
-(defn new-verdict-draft [app-id template-id callback]
-  (common/command {:command "new-pate-verdict-draft"
+(defn new-verdict-draft
+  ([app-id template-id callback]
+    (new-verdict-draft app-id template-id callback nil))
+  ([app-id template-id callback replacement-id]
+    (common/command {:command "new-pate-verdict-draft"
+                     :success callback}
+                    :id app-id
+                    :template-id template-id
+                    :replacement-id replacement-id)))
+
+(defn new-legacy-verdict-draft [app-id callback]
+  (common/command {:command "new-legacy-verdict-draft"
                    :success callback}
-                  :id app-id
-                  :template-id template-id))
+                  :id app-id))
 
 (defn open-verdict [app-id verdict-id callback]
   (common/query "pate-verdict"
@@ -166,29 +178,52 @@
                 :id app-id
                 :verdict-id verdict-id))
 
-(defn delete-verdict [app-id verdict-id]
-  (common/command {:command "delete-pate-verdict"
+(defn delete-verdict [app-id {:keys [id published legacy?]}]
+  (common/command {:command (if legacy?
+                              :delete-legacy-verdict
+                              :delete-pate-verdict)
                    :success #(do (fetch-verdict-list app-id)
-                                 (js/lupapisteApp.services.attachmentsService.queryAll))}
+                                 (if published
+                                   (js/repository.load app-id)
+                                   (js/lupapisteApp.services.attachmentsService.queryAll)))}
                   :id app-id
-                  :verdict-id verdict-id))
+                  :verdict-id id))
 
 (defn edit-verdict [app-id verdict-id path value callback]
   (common/command {:command "edit-pate-verdict"
-                   :success callback}
+                   :success (fn [response]
+                              (state/refresh-verdict-auths app-id
+                                                           {:verdict-id verdict-id})
+                              (callback response))}
                   :id app-id
                   :verdict-id verdict-id
                   :path path
                   :value value))
 
-(defn publish-and-reopen-verdict [app-id verdict-id callback]
-  (common/command {:command :publish-pate-verdict
+(defn publish-and-reopen-verdict [app-id {verdict-id :id legacy? :legacy?} callback]
+  (common/command {:command (if legacy?
+                              :publish-legacy-verdict
+                              :publish-pate-verdict)
                    :success (fn []
+                              (state/refresh-verdict-auths app-id
+                                                           {:verdict-id verdict-id})
                               (fetch-verdict-list app-id)
                               (open-verdict app-id verdict-id callback)
                               (js/repository.load app-id))}
                   :id app-id
                   :verdict-id verdict-id))
+
+(defn sign-contract [app-id verdict-id password error-callback]
+  (common/command {:command :sign-pate-contract
+                   :success (fn []
+                              (state/refresh-verdict-auths app-id
+                                                           {:verdict-id verdict-id})
+                              (fetch-verdict-list app-id)
+                              (js/repository.load app-id))
+                   :error   error-callback}
+                  :id app-id
+                  :verdict-id verdict-id
+                  :password password))
 
 ;; Attachments
 

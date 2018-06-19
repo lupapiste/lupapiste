@@ -18,6 +18,7 @@
                                                                       application-suunnittelijan-nimeaminen-muu
                                                                       jatkolupa-application
                                                                       aloitusoikeus-hakemus]]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212
                                                                 rakennuslupa_to_krysp_213
                                                                 rakennuslupa_to_krysp_214
@@ -196,6 +197,8 @@
       )))
 
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
+  (against-background
+    (org/pate-org? irrelevant) => false)
   (fact "Rakennuslupa application -> canonical -> xml"
     (do-test application-rakennuslupa :validate-tyonjohtaja-type :v1 :validate-pysyva-tunnus? true :validate-operations? true))
 
@@ -210,6 +213,8 @@
 
 
 (facts "Rakennusvalvonta tests"
+  (against-background
+    (org/pate-org? irrelevant) => false)
   (let [canonical (application-to-canonical application-rakennuslupa "fi")
         xml_220 (rakennuslupa-element-to-xml canonical "2.2.0")
         xml_222 (rakennuslupa-element-to-xml canonical "2.2.2")
@@ -395,3 +400,14 @@
       (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "muu")
       (fact "muuSuunnittelijaRooli"   (xml/get-text suunnittelija [:muuSuunnittelijaRooli])   => "ei listassa -rooli")
       (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija"))))
+
+(def rakval-jatkolupa-canonical (application-to-canonical jatkolupa-application "fi"))
+
+(facts "rakval jatkolupa"
+
+  (facts "2.2.2"
+    (let [xml_s (-> rakval-jatkolupa-canonical (rakennuslupa-element-to-xml "2.2.2") indent-str)
+          app-info (-> xml_s xml/parse cr/strip-xml-namespaces)]
+
+      (validator/validate xml_s (:permitType jatkolupa-application) "2.2.2")
+      (fact "asiankuvaus" (xml/get-text app-info [:rakennusvalvontaasianKuvaus]) => "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."))))

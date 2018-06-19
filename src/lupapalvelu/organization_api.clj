@@ -5,7 +5,6 @@
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters parameters-matching-schema] :as action]
-            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.stamps :as stamps]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.i18n :as i18n]
@@ -15,18 +14,16 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [lupapalvelu.waste-ads :as waste-ads]
             [lupapalvelu.wfs :as wfs]
+            [lupapalvelu.xml.validator :as krysp-xml]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [noir.core :refer [defpage]]
-            [noir.request :as request]
             [noir.response :as resp]
             [sade.core :refer [ok fail fail! now unauthorized]]
-            [sade.env :as env]
             [sade.municipality :as muni]
             [sade.shared-schemas :as sssc]
             [sade.schemas :as ssc]
@@ -172,8 +169,8 @@
 
 (defn- bulletin-scope-settings-validator
   [{{:keys [notificationEmail descriptionsFromBackendSystem]} :data}]
-  (when (and notificationEmail (not (v/valid-email? notificationEmail))
-             (fail! :error.email)))
+  (when (and notificationEmail (not (v/valid-email? notificationEmail)))
+    (fail! :error.email))
   (when (and descriptionsFromBackendSystem (not (boolean? descriptionsFromBackendSystem)))
     (fail! :error.invalid-value)))
 
@@ -350,7 +347,7 @@
 (defquery organizations
   {:user-roles #{:admin}}
   [_]
-  (ok :organizations (org/get-organizations)))
+  (ok :organizations (org/get-organizations {} org/admin-projection)))
 
 (defquery allowed-autologin-ips-for-organization
   {:parameters       [org-id]
@@ -374,7 +371,7 @@
    :input-validators [(partial non-blank-parameters [:organizationId])]
    :user-roles       #{:admin}}
   [_]
-  (ok :data (org/get-organization organizationId)))
+  (ok :data (org/get-organization organizationId org/admin-projection)))
 
 (defquery permit-types
   {:user-roles #{:admin}}
@@ -518,6 +515,14 @@
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:multiple-operations-supported enabled}})
   (ok))
 
+(defcommand set-organization-remove-handlers-from-reverted-draft
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:remove-handlers-from-reverted-draft enabled}})
+  (ok))
+
 (defcommand set-organization-validate-verdict-given-date
   {:parameters       [enabled]
    :permissions      [{:required [:organization/admin]}]
@@ -532,6 +537,14 @@
    :input-validators [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:automatic-review-fetch-enabled enabled}})
+  (ok))
+
+(defcommand set-only-use-inspection-from-backend
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:only-use-inspection-from-backend enabled}})
   (ok))
 
 (defcommand set-organization-use-attachment-links-integration
@@ -689,8 +702,10 @@
   [{user :user}]
   (let [organization-id (usr/authority-admins-organization-id user)]
     (if-let [organization (org/get-organization organization-id)]
-      (let [permit-types (mapv (comp keyword :permitType) (:scope organization))
-            krysp-keys   (conj permit-types :osoitteet)
+      (let [permit-types (->> (:scope organization)
+                              (map (comp keyword :permitType))
+                              (filter #(get krysp-xml/supported-krysp-versions-by-permit-type %)))
+            krysp-keys   (conj (vec permit-types) :osoitteet)
             empty-confs  (zipmap krysp-keys (repeat {}))]
         (ok :krysp (merge empty-confs (:krysp organization))))
       (fail :error.unknown-organization))))
@@ -701,7 +716,7 @@
    :input-validators [(fn [{{permit-type :permitType} :data}]
                         (when-not (or
                                     (= "osoitteet" permit-type)
-                                    (permit/valid-permit-type? permit-type))
+                                    (get krysp-xml/supported-krysp-versions-by-permit-type (keyword permit-type)))
                           (fail :error.missing-parameters :parameters [:permitType])))
                       (partial validate-optional-url :url)
                       (partial action/string-parameters [:url :username :password :permitType :version])]}
@@ -1006,10 +1021,7 @@
    :optional-parameters [org lang]
    :input-validators    [org/valid-feed-format org/valid-org i18n/valid-language]
    :user-roles          #{:anonymous}}
-  ((memo/ttl waste-ads/waste-ads :ttl/threshold 900000)                         ; 15 min
-    (ss/upper-case org)
-    (-> fmt ss/lower-case keyword)
-    (-> (or lang :fi) ss/lower-case keyword)))
+  (resp/status 404 "Not Found"))              ;; LPK-3787 New waste-ads coming
 
 (defcommand section-toggle-enabled
   {:description      "Enable/disable section requirement for fetched
@@ -1152,19 +1164,11 @@
        org/allowed-docterminal-attachment-types
        (ok :attachment-types)))
 
-(defn- check-docterminal-enabled [{user :user}]
-  (when-not (-> user
-                usr/authority-admins-organization-id
-                org/get-docstore-info-for-organization!
-                :docTerminalInUse)
-    (fail :error.docterminal-not-enabled)))
-
-
 (defcommand set-docterminal-attachment-type
   {:description      "Allows or disallows showing the given attachment type in
                  the archive document terminal application."
-   :parameters       [attachmentType enabled]
-   :pre-checks       [check-docterminal-enabled]
+   :parameters     [attachmentType enabled]
+   :pre-checks     [org/check-docterminal-enabled]
    :input-validators [(partial parameters-matching-schema [:attachmentType]
                                (sc/cond-pre (sc/enum "all")
                                             org/DocTerminalAttachmentType))
@@ -1176,18 +1180,11 @@
       (org/set-allowed-docterminal-attachment-type attachmentType enabled)))
 
 (defquery docterminal-enabled
-  {:pre-checks  [check-docterminal-enabled]
+  {:pre-checks  [org/check-docterminal-enabled]
    :permissions [{:required [:organization/admin]}]}
   [_])
 
-(defn- check-docstore-enabled [{user :user}]
-  (when-not (-> user
-                usr/authority-admins-organization-id
-                org/get-docstore-info-for-organization!
-                :docStoreInUse)
-    (fail :error.docstore-not-enabled)))
-
 (defquery docstore-enabled
-  {:pre-checks  [check-docstore-enabled]
+  {:pre-checks  [org/check-docstore-enabled]
    :permissions [{:required [:organization/admin]}]}
   [_])

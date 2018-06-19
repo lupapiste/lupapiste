@@ -46,7 +46,7 @@
   (let [canonical (c/kiinteistotoimitus-canonical app "fi")
         attachments (attachments-canon/get-attachments-as-canonical app "sftp://testi/")
         final-canonical (mapping/bind-attachments canonical
-                                                     (mapping-common/add-generated-pdf-attachments app "sftp://testi" attachments "fi"))
+                                                  (mapping-common/add-generated-pdf-attachments app "sftp://testi" attachments "fi"))
         mapping_102 (get-mapping "1.0.2")
         xml_102       (emit/element-to-xml final-canonical mapping_102)
         xml_102_str   (cxml/indent-str xml_102)
@@ -57,7 +57,6 @@
         parsed-105    (cr/strip-xml-namespaces (xml/parse xml_105_str))]
     canonical => map?
     xml_105_str => string?
-    (debug "canonical generated for kiinteistotoimitus test: " (pr-str canonical))
     (fact "valid 1.0.2" (validator/validate xml_102_str (:permitType app) "1.0.2") => nil) ; throws exception if invalid+
     (fact "valid 1.0.5" (validator/validate xml_105_str (:permitType app) "1.0.5") => nil) ; throws exception if invalid
 

@@ -2,7 +2,8 @@
   "PDF testing concentrates mainly on the source value resolution."
   (:require [lupapalvelu.application :as app]
             [lupapalvelu.pate.pdf :as pdf]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.pdf-html :as html]
+            [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [midje.sweet :refer :all]))
 
 (fact "join-non-blanks"
@@ -81,21 +82,21 @@
                :address "Guang Hua Lu, 88 Beijing, Kiina"}] :in-any-order)))
 
 (facts "pathify"
-  (pdf/pathify :hello.world.foo.bar) => [:hello :world :foo :bar]
-  (pdf/pathify :hello) => [:hello]
-  (pdf/pathify "hello.world") => [:hello :world])
+  (html/pathify :hello.world.foo.bar) => [:hello :world :foo :bar]
+  (html/pathify :hello) => [:hello]
+  (html/pathify "hello.world") => [:hello :world])
 
 (facts "doc-value"
   (let [app {:documents [{:schema-info {:name "foo"}
                           :data {:bar {:baz "hello"}}}]}]
-    (pdf/doc-value app :foo :hii.hoo) => nil
-    (pdf/doc-value app :foo :bar) => {:baz "hello"}
-    (pdf/doc-value app :foo :bar.baz) => "hello"
-    (pdf/doc-value app :bad :bar.baz) => nil
-    (pdf/doc-value app :foo :bar.baz.bam) => nil))
+    (html/doc-value app :foo :hii.hoo) => nil
+    (html/doc-value app :foo :bar) => {:baz "hello"}
+    (html/doc-value app :foo :bar.baz) => "hello"
+    (html/doc-value app :bad :bar.baz) => nil
+    (html/doc-value app :foo :bar.baz.bam) => nil))
 
 (facts "dict-value"
-  (against-background (shared/verdict-schema :r nil)
+  (against-background (verdict-schemas/verdict-schema :r nil)
                       => {:dictionary {:ts   {:date {}}
                                        :txt  {:phrase-text {:category :yleinen}}
                                        :foo  {:text {}}
@@ -109,29 +110,29 @@
                             :list {:id1 {:day  1524733200000
                                          :word "### Title"
                                          :bar  true}}}}]
-    (pdf/dict-value verdict :ts)
+    (html/dict-value verdict :ts)
     => "25.4.2018"
-    (pdf/dict-value verdict :txt)
+    (html/dict-value verdict :txt)
     => '([:div.markup ([:p {} [:span.underline {} "markup text"] [:br]])])
-    (pdf/dict-value verdict :foo)
+    (html/dict-value verdict :foo)
     => "*regular text*"
-    (pdf/dict-value {:verdict verdict} :list.id1.day)
+    (html/dict-value {:verdict verdict} :list.id1.day)
     => "26.4.2018"
-    (pdf/dict-value verdict :list.id1.word)
+    (html/dict-value verdict :list.id1.word)
     => '([:div.markup ([:h3 {} "Title"])])
-    (pdf/dict-value {:verdict verdict} :list.id1.bar)
+    (html/dict-value {:verdict verdict} :list.id1.bar)
     => true))
 
 (fact "add-unit"
-  (pdf/add-unit :fi :ha " ") => nil
-  (pdf/add-unit :fi :ha nil) => nil
-  (pdf/add-unit :fi :ha "20") => "20 ha"
-  (pdf/add-unit :fi :ha 10) => "10 ha"
-  (pdf/add-unit :fi :m2 88) => [:span 88 " m"[:sup 2]]
-  (pdf/add-unit :fi :m3 "hello") => [:span "hello" " m"[:sup 3]]
-  (pdf/add-unit :fi :kpl 8) => "8 kpl"
-  (pdf/add-unit :fi :section 88) => "\u00a788"
-  (pdf/add-unit :fi :eur "foo") => "foo\u20ac")
+  (html/add-unit :fi :ha " ") => nil
+  (html/add-unit :fi :ha nil) => nil
+  (html/add-unit :fi :ha "20") => "20 ha"
+  (html/add-unit :fi :ha 10) => "10 ha"
+  (html/add-unit :fi :m2 88) => [:span 88 " m"[:sup 2]]
+  (html/add-unit :fi :m3 "hello") => [:span "hello" " m"[:sup 3]]
+  (html/add-unit :fi :kpl 8) => "8 kpl"
+  (html/add-unit :fi :section 88) => "\u00a788"
+  (html/add-unit :fi :eur "foo") => "foo\u20ac")
 
 (facts "property-id"
   (pdf/property-id {:propertyId "75341600550007"
@@ -425,3 +426,33 @@
                                                        :aaa {:condition "Probably first."}}}}})
     => [[:div.markup '(([:p {} "Probably first." [:br]])
                        ([:p {} "Should be last." [:br]]))]]))
+
+(fact "tj-vastattavat-tyot"
+  (pdf/tj-vastattavat-tyot
+   {:documents [{:schema-info {:name "tyonjohtaja-v2"}
+                 :data        {:vastattavatTyotehtavat
+                               {:rakennuksenPurkaminen                  {:value false},
+                                :ivLaitoksenKorjausJaMuutostyo          {:value false},
+                                :uudisrakennustyoIlmanMaanrakennustoita {:value false},
+                                :maanrakennustyot                       {:value true},
+                                :uudisrakennustyoMaanrakennustoineen    {:value false},
+                                :ulkopuolinenKvvTyo                     {:value true, :modified 1527251435900},
+                                :rakennuksenMuutosJaKorjaustyo          {:value false},
+                                :linjasaneeraus                         {:value false},
+                                :ivLaitoksenAsennustyo                  {:value false},
+                                :muuMika                                {:value ""},
+                                :sisapuolinenKvvTyo                     {:value true, :modified 1527251434831}}}}]}
+   "fi")
+  => ["Maanrakennusty\u00f6t" "Ulkopuolinen KVV-ty\u00f6" "Sis\u00e4puolinen KVV-ty\u00f6"])
+
+(facts "resolve-cell"
+  (html/resolve-cell {:lang "fi"} "hello" nil)
+  => [:div.cell {} "hello"]
+  (html/resolve-cell {:lang "fi"} [:span [:strong.foo "hello"]] nil)
+  => [:div.cell {} [:span [:strong.foo "hello"]]]
+  (html/resolve-cell {:lang "fi"} "hello" {:text "undo" :loc-prefix :phrase
+                                           :width 50 :styles :not-supported})
+  => [:div.cell {:class '("cell--50")} "Kumoa fraasi"]
+  (html/resolve-cell {:lang "fi"} 123 {:width 80 :styles [:bold :right]
+                                       :unit :m2})
+  => [:div.cell {:class '("cell--80" :bold :right)} [:span 123 " m" [:sup 2]]])

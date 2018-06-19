@@ -116,11 +116,10 @@
 
 (defn cancel-sign-process! [process-id ts]
   (infof "sign:cancel-sign-process:%s:" process-id)
-  (-> process-id
-      (find-sign-process!)
-      (process-update! :cancelled ts))
-  (mongo/delete-file {:metadata.process.id process-id})
-  nil)
+  (let [process (find-sign-process! process-id)]
+    (process-update! process :cancelled ts)
+    (mongo/delete-file {:_id (:fileId process)})
+    nil))
 
 ;
 ; Onnistuu.fi loads the document:
@@ -133,7 +132,7 @@
     (when (not= (:status process) "started")
       (process-update! process :started ts))
 
-    (if-let [pdf (mongo/download-find {:metadata.process.id process-id})]
+    (if-let [pdf (and (:fileId process) (mongo/download-find {:_id (:fileId process)}))]
       (do
         (debug "sign:fetch-document:download-from-mongo")
         [content-type ((:content pdf))])
@@ -147,13 +146,14 @@
                                                     (get-in selected-account [:price billing-type]))
                      :billingType (ss/lower-case (i18n/localize "fi" :register :company :billing billing-type :title))}
             pdf (docx/yritystilisopimus (:company process) (:signer process) account ts)
-            sha256 (pandect/sha256 pdf)]
+            sha256 (pandect/sha256 pdf)
+            mongo-id (mongo/create-id)]
         (debug "sign:fetch-document:upload-to-mongo")
         (.reset pdf) ; Hashing read the whole stream
-        (mongo/upload (mongo/create-id) filename content-type pdf {:sha256 sha256, :process process})
+        (mongo/upload mongo-id filename content-type pdf {:sha256 sha256, :process process})
         (.reset pdf) ; Again, the whole stream was read
+        (mongo/update-by-id :sign-processes (:id process) {$set {:fileId mongo-id}})
         [content-type pdf]))))
-
 ;
 ; Success:
 ;

@@ -3,7 +3,6 @@
 // Map dimensions are hard-coded in application.html?
 $map-width:  320px;
 $map-height: 200px;
-$side-panel-width: 60px;
 
 // Convenience grays. Please, do not use
 // outside this file.
@@ -18,9 +17,9 @@ $preamble-min-height: 280px; // at least the size of the map container
     min-height: $preamble-min-height;
     padding: {
       left: $map-width;
-      right: 24%;
+      right: 20%;
     }
-    margin-right: $side-panel-width + 1px;
+    margin-right: $marginS;
     .application-map-container, .application_actions {
       position: absolute;
       top: 0;
@@ -480,11 +479,11 @@ $preamble-min-height: 280px; // at least the size of the map container
 }
 
 .application-summary-table > div > span {
-  width: 100%;
+  width: 75%;
 }
 
 .application-summary-table > div > p {
-  padding-right: 2em;
+  //padding-right: 2em;
   @media (max-width: $narrow-breakpoint) {
     white-space: nowrap;
   }

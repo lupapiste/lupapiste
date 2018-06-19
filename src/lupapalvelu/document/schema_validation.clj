@@ -314,7 +314,6 @@
    (opt :approvable)           sc/Bool      ;; Approvable by authority
    (opt :repeating)            sc/Bool      ;; Array of groups
    (opt :repeating-init-empty) sc/Bool      ;; Init repeating group as empty array (default false)
-   (opt :removable)            sc/Bool      ;;
    (opt :copybutton)           sc/Bool      ;;
    (opt :exclude-from-pdf)     sc/Bool      ;;
    (opt :validator)            sc/Keyword   ;; Specific validator key for element (see model/validate-element)
@@ -378,6 +377,7 @@
           (opt :group-help)                  (sc/maybe sc/Str) ;; TODO: remove nils?
           (opt :section-help)                (sc/maybe sc/Str) ;; TODO: remove nils?
           (opt :approvable)                  sc/Bool    ;;
+          (opt :post-verdict-editable)       sc/Bool    ;; Editable by authority after PATE verdict is given
           (opt :repeating)                   sc/Bool    ;;
           (opt :removable-by)                (sc/enum :authority :all :none)
           (opt :disableable)                 sc/Bool    ;;
@@ -419,7 +419,7 @@
     (when (not-empty invalid-paths) {:description "Invalid rows definition" :schema name :errors invalid-paths})))
 
 (defn validate-value-reference [key doc-schema {:keys [path] :as schema}]
-  (when (and (key schema) (->> (build-absolute-path (butlast path) (get-in schema [key :path]))
+  (when (and (get schema key) (->> (build-absolute-path (butlast path) (get-in schema [key :path]))
                                (get-in-schema doc-schema)
                                nil?))
     {:description (str "Invalid " (name key) " path") :schema (:name schema) :path path :errors (get-in schema [key :path])}))

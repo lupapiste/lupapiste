@@ -1,5 +1,5 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="statements-tab-template">
-
+  <!-- ko if: application.permitType -->
       <div class="application-statements">
 
         <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
@@ -64,6 +64,7 @@
              </button>
         </div>
       <!-- /ko -->
+  <!-- /ko -->
 
 </script>
 

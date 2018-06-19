@@ -1,8 +1,9 @@
 (ns sade.common-reader
-  (:require [taoensso.timbre :as timbre :refer [debug warn error]]
+  (:require [taoensso.timbre :as timbre :refer [debug debugf warn error]]
             [clojure.string :as s]
             [clj-time.coerce :as coerce]
             [clj-time.format :as timeformat]
+            [lupapalvelu.logging :as logging]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util :refer [prewalk-map postwalk-map convert-values]]
@@ -103,19 +104,29 @@
   [xml & selector] (-> xml (as-is (-> selector vector flatten)) vals first))
 
 (defn map-index
-  "transform a collection into keyord-indexed map (starting from 0)."
+  "transform a collection into keyword-indexed map (starting from 0)."
   [c] (into {} (map (fn [[k v]] [(keyword (str k)) v]) (map-indexed vector c))))
 
 (defn index-maps
   "transform a form with replacing all sequential collections with keyword-indexed maps."
   [m] (postwalk-map (partial map (fn [[k v]] [k (if (sequential? v) (map-index v) v)])) m))
 
-(defn- do-get-xml [http-fn url opts raw?]
-  ; Set default timeout to 120 s
-  (let [options (merge {:socket-timeout 120000, :conn-timeout 120000, :throw-fail! (not raw?)} opts)
-        raw (:body (http-fn url options))]
-    (if-not (s/blank? raw)
-      (if raw? raw (parse raw))
+(defn- do-get-xml [http-fn url {debug-log? :debug-event :as opts} raw?]
+  (let [options (merge {:socket-timeout 120000, :conn-timeout 30000, :throw-fail! (not raw?)} opts)
+        {:keys [status body reason-phrase request-time] :as resp} (http-fn url options)
+        stripped-url (first (ss/split url #"\?"))
+        body-excerpt (s/trim-newline (apply str (take 50 body)))]
+    (when debug-log? (debugf "Received status %s %s in %.3f seconds from url %s" status reason-phrase (/ (double request-time) 1000) stripped-url))
+    (if-not (s/blank? body)
+      (do
+        (when debug-log?
+          (debugf "Response body starts with: '%s'..." body-excerpt)
+          (logging/log-event :debug {:ns    "sade.common-reader"
+                                     :event "Received XML"
+                                     :data  (assoc (select-keys resp [:status :reason-phrase :request-time])
+                                              :url stripped-url
+                                              :body-excerpt body-excerpt)}))
+        (if raw? body (parse body)))
       (do
         (error "Received an empty XML response with GET from url: " url)
         nil))))
@@ -149,7 +160,8 @@
 
 (defn get-date [xml & selector] (to-timestamp (apply get-text xml selector)))
 
-(defn convert-double-to-int [m k]
+(defn convert-double-to-int
   "Converts given key value to integer in map. Returns unchanged map if cant be converted."
+  [m k]
   (let [converted (int (util/->double (k m)))]
     (if (zero? converted) m (assoc m k (str converted)))))

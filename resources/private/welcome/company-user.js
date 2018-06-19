@@ -10,7 +10,7 @@
 
     self.loading = ko.observable();
     self.loaded = ko.observable();
-    self.notFound = ko.observable();
+    self.error = ko.observable();
 
     self.companyName = ko.observable();
     self.companyY = ko.observable();
@@ -29,7 +29,6 @@
              .token("")
              .loading(true)
              .loaded(false)
-             .notFound(false)
              .companyName("")
              .companyY("")
              .firstName("")
@@ -62,6 +61,14 @@
     hub.subscribe({eventType: "dialog-close", id: PW_CHANGED_DIALOG_ID}, pageutil.openFrontpage);
 
     hub.onPageLoad("new-company-user", function(e) {
+      var handleFail = function(response) {
+        var err = response.responseJSON.text;
+        self.loading(false).error(err);
+        if (err === "error.token-used") {
+          window.setTimeout(pageutil.openFrontpage, 3000);
+        }
+      };
+
       self.reset().token(e.pagePath[0]);
       ajax
         .get("/api/token/" + self.token())
@@ -69,20 +76,26 @@
           var token = data.token.data,
               company = token.company,
               user = token.user;
-          self
-            .companyName(company.name)
-            .companyY(company.y)
-            .firstName(user.firstName)
-            .lastName(user.lastName)
-            .email(user.email)
-            .loading(false)
-            .loaded(true);
+
+          ajax
+            .query("email-in-use", {email: user.email})
+            .success(function () {
+              pageutil.openPage("invite-company-user", "ok/" + self.token()); // LPK-3759
+            })
+            .error(function () {
+              self
+                .companyName(company.name)
+                .companyY(company.y)
+                .firstName(user.firstName)
+                .lastName(user.lastName)
+                .email(user.email)
+                .loading(false)
+                .loaded(true);
+            })
+            .fail(handleFail)
+            .call();
         })
-        .fail(function() {
-          self
-            .loading(false)
-            .notFound(true);
-        })
+        .fail(handleFail)
         .call();
     });
 
@@ -96,6 +109,7 @@
   function AcceptInviteModel(pageName, tokenIndex) {
     var self = this;
     self.result   = ko.observable("pending");
+    self.error = ko.observable();
 
     self.pending  = ko.pureComputed(function() {
       return self.result() === "pending";
@@ -113,7 +127,13 @@
         .post("/api/token/" + e.pagePath[tokenIndex])
         .json({ok: true})
         .success(_.partial(self.result, "ok"))
-        .fail(_.partial(self.result, "fail"))
+        .fail(function(response) {
+          var err = response.responseJSON.text;
+          self.result("fail").error(err);
+          if (err === "error.token-used") {
+            window.setTimeout(pageutil.openFrontpage, 3000);
+          }
+        })
         .call();
     };
 

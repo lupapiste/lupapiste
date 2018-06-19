@@ -166,37 +166,39 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
                       _.omitBy( fieldsCache, _.isNil ));
   }
 
-  function fetchSearchResults( clearCache ) {
-    if( clearCache ) {
-      fieldsCache = {};
-    }
-    // Create dependency to the observable
-    var fields = searchFields();
-    var currentSearchType = latestSearchType;
-    if(cacheMiss()) {
-      ajax.datatables("applications-search", fields)
-      .success(function( res ) {
-        if( currentSearchType === latestSearchType ) {
-          fieldsCache = _.cloneDeep(fields);
-          self.onSuccess( res );
-        }
-      })
-      .onError("error.unauthorized", notify.ajaxError)
-      .pending(self.pending)
-      .complete( function() {
-        self.initialized( true );
-      })
-      .call();
-      ajax.datatables("applications-search-total-count", fields)
+  self.fetchSearchResults = function ( clearCache ) {
+    if( lupapisteApp.models.currentUser.loaded()
+     && lupapisteApp.models.globalAuthModel.isInitialized()
+     && lupapisteApp.services.organizationsUsersService.isInitialized()) {
+      if( clearCache ) {
+        fieldsCache = {};
+      }
+      // Create dependency to the observable
+      var fields = searchFields();
+      var currentSearchType = latestSearchType;
+      if(cacheMiss()) {
+        ajax.datatables("applications-search", fields)
+        .success(function( res ) {
+          if( currentSearchType === latestSearchType ) {
+            fieldsCache = _.cloneDeep(fields);
+            self.onSuccess( res );
+          }
+        })
+        .onError("error.unauthorized", notify.ajaxError)
+        .pending(self.pending)
+        .complete( function() {
+          self.initialized( true );
+        })
+        .call();
+        ajax.datatables("applications-search-total-count", fields)
         .success(function( res ) {
           self.totalCount(res.data.totalCount);
         })
         .onError("error.unauthorized", notify.ajaxError)
         .call();
+      }
     }
-  }
+  };
 
-  hub.onPageLoad("applications", _.wrap( true, fetchSearchResults ) );
-
-  ko.computed( fetchSearchResults ).extend({deferred: true});
+  ko.computed( self.fetchSearchResults ).extend({deferred: true});
 };

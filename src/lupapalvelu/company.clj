@@ -268,7 +268,8 @@
    (assoc data :customAccountLimit nil)))
 
 (defn account-type-changing-with-custom? [{old-type :accountType} {new-type :accountType}]
-  (and (not= old-type new-type)
+  (and new-type
+       (not= old-type new-type)
        (or (= :custom (keyword old-type))
            (= :custom (keyword new-type)))))
 
@@ -427,22 +428,28 @@
                                       :link    #(str (env/value :host) "/app/" (name %) "/welcome#!/new-company-user/" token-id)})
     token-id))
 
-(defmethod token/handle-token :new-company-user [{{:keys [user company role submit]} :data} {password :password}]
+(defmethod token/handle-token :new-company-user [{{:keys [user company role submit]} :data :as token-data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
-  (usr/create-new-user nil (util/assoc-when
-                             {:email       (:email user)
-                              :username    (:email user)
-                              :firstName   (:firstName user)
-                              :lastName    (:lastName user)
-                              :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
-                              :password    password
-                              :role        :applicant
-                              :architect   true
-                              :enabled     true}
-                             :language    (:language user)
-                             :personId    (:personId user)
-                             :personIdSource (:personIdSource user))
-    :send-email false)
+  (if-let [existing-user (usr/get-user-by-email (:email user))]
+    ;; LPK-3759:
+    (token/handle-token (-> token-data
+                            (assoc :token-type :invite-company-user)
+                            (assoc-in [:data :user] existing-user))
+                        {:ok true})
+    (usr/create-new-user nil (util/assoc-when
+                               {:email       (:email user)
+                                :username    (:email user)
+                                :firstName   (:firstName user)
+                                :lastName    (:lastName user)
+                                :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
+                                :password    password
+                                :role        :applicant
+                                :architect   true
+                                :enabled     true}
+                               :language    (:language user)
+                               :personId    (:personId user)
+                               :personIdSource (:personIdSource user))
+      :send-email false))
   (ok))
 
 (defn invite-user! [caller user-email company-id role submit firstname lastname]

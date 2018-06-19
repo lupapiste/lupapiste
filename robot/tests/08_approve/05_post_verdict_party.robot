@@ -11,10 +11,14 @@ Sonja logs in and creates application
   Sonja logs in  False
   Create application with state  Post verdict party  753-416-25-30  pientalo  verdictGiven
 
-Sonja adds removes old designer and adds new one
+Sonja adds removes old designer
   Open tab  parties
   Scroll and click test id  toggle-document-status
   Confirm yes no dialog
+  Document status is disabled  suunnittelija  1
+
+... and adds new designer
+  Sleep  0.2s
   Scroll and click test id  suunnittelija_append_btn
 
 Two suunnnittelija docs, one disabled
@@ -25,15 +29,15 @@ Sonja rejects designer with empty note
   Reject with note  suunnittelija  suunnittelija  ${EMPTY}  1
 
 Sonja approves designer
-  Click approve  suunnittelija  1
+  Approve accordion  suunnittelija  1
 
 Sonja rejects designer with note
   Reject with note  suunnittelija  suunnittelija  Bad designer!  1
 
 Sonja approves designer again
-  Click approve  suunnittelija  1
+  Approve accordion  suunnittelija  1
   Reject note is  suunnittelija  Bad designer!
-  [Teardown]  Logout
+  Logout
 
 No frontend errors
   There are no frontend errors

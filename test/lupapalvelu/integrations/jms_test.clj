@@ -3,12 +3,12 @@
             [taoensso.timbre :refer [warnf]]
             [sade.env :as env]
             [lupapalvelu.integrations.jms :refer :all :as jms])
-  (:import (javax.jms Queue MessageConsumer Connection)
+  (:import (javax.jms Queue MessageConsumer)
            (org.apache.activemq.artemis.jms.client ActiveMQConnection)))
 
 (def test-atom (atom nil))
 
-(if-not (and (env/feature? :embedded-artemis) (env/feature? :jms))
+(if-not (env/feature? :jms)
   (warnf "JMS not enabled for unit testing")
   (facts "JMS"
     (fact "Embedded Artemis OK"
@@ -30,14 +30,14 @@
           prod => fn?
           (fact "successful send"
             (prod "test1") => nil
-            (Thread/sleep 10)                               ; non-deterministic wait for message delivery
+            (Thread/sleep 150)                               ; non-deterministic wait for message delivery
             @test-atom => "test1")
           (fact "wrong type -> exception"
-            (prod {:foo 1}) => (throws ClassCastException))))
+            (prod {:foo 1}) => (throws IllegalArgumentException))))
       (fact "Nippy producer can be also used"
         (let [nippy (create-nippy-producer "nippy.queue")]
           nippy => fn?
           (fact "successful send"
             (nippy {:works? true}) => nil
-            (Thread/sleep 10) ; non-deterministic wait for message delivery
+            (Thread/sleep 150) ; non-deterministic wait for message delivery
             @test-atom => {:works? true}))))))

@@ -1,6 +1,6 @@
-(ns lupapalvelu.archiving-test
+(ns lupapalvelu.archive.archiving-test
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.archiving :refer :all]
+            [lupapalvelu.archive.archiving :refer :all]
             [lupapalvelu.permit :as permit]))
 
 

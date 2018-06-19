@@ -3,6 +3,7 @@
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
+            [sade.util :as util]
             [clojure.java.io :as io])
   (:import [java.io InputStream Reader StringReader]
            [javax.xml.transform.stream StreamSource]
@@ -255,7 +256,11 @@
   (reduce (fn [m [permit-type validators]] (assoc m permit-type (keys validators))) {} schema-validators))
 
 (def supported-krysp-versions-by-permit-type
-  (reduce (fn [m [k versions]] (assoc m k (filter #(Character/isDigit (.charAt % 0)) versions))) {} supported-versions-by-permit-type))
+  (letfn [(krysp-version? [version]
+            (Character/isDigit (.charAt version 0)))
+          (assoc-krysp-versions [m [k versions]]
+            (util/assoc-when-pred m seq k (filter krysp-version? versions)))]
+    (reduce assoc-krysp-versions {} supported-versions-by-permit-type)))
 
 (def supported-asianhallinta-versions-by-permit-type
   (reduce (fn [m [k versions]] (assoc m k (filter #(ss/starts-with % "ah") versions))) {} supported-versions-by-permit-type))

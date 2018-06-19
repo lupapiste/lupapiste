@@ -16,7 +16,6 @@
               :schema-info {:approvable true
                             :subtype :hakija
                             :name "hakija"
-                            :removable true
                             :repeating true
                             :version 1
                             :type "party"
@@ -50,8 +49,7 @@
                           :name "rakennushanke"
                           :op {:id "523844e1da063788effc1c56"
                                :name "poikkeamis"
-                               :created 1379419361123}
-                          :removable true}
+                               :created 1379419361123}}
             :data {:toimenpiteet {:Toimenpide {:value "uusi"}
                                   :huoneistoja {:value "1"}
                                   :kayttotarkoitus {:value "011 yhden asunnon talot"}
@@ -66,8 +64,7 @@
                            :name "rakennushanke"
                            :op {:id "523844e1da063788effc1c56"
                                 :name "poikkeamis"
-                                :created 1379419361123}
-                           :removable true}
+                                :created 1379419361123}}
              :data {:toimenpiteet  {:Toimenpide {:value "uusi"}
                                     :kayttotarkoitus {:value "941 talousrakennukset"}
                                     :kerroksia {:value "1"}
@@ -81,8 +78,7 @@
                                :name "rakennushanke"
                                :op {:id "523844e1da063788effc1c56"
                                     :name "poikkeamis"
-                                    :created 1379419361123}
-                               :removable true}
+                                    :created 1379419361123}}
                  :data {:kaytettykerrosala {:kayttotarkoitusKoodi {:value "013 muut erilliset talot"}
                                             :pintaAla {:value "99"}}
                         :toimenpiteet {:Toimenpide {:value "laajennus"}
@@ -104,7 +100,6 @@
                :created 1379419361123
                :schema-info {:approvable true
                              :name "maksaja"
-                             :removable true
                              :repeating true
                              :version 1
                              :type "party"

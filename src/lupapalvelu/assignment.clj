@@ -1,18 +1,17 @@
 (ns lupapalvelu.assignment
   (:require [clojure.set :refer [rename-keys]]
             [monger.operators :refer [$and $each $setOnInsert $in $ne $nin $options $or $regex $set $pull $push]]
-            [monger.collection :as collection]
-            [taoensso.timbre :as timbre :refer [error errorf]]
+            [taoensso.timbre :refer [error errorf]]
             [schema.core :as sc]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.application-utils :as app-utils]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.user :as usr]
             [clj-time.coerce :as tc]
             [clj-time.core :as t]))
 
@@ -278,7 +277,7 @@
                           (match-state state)
                           {"$sort" (sort-query sort)}]
                          (remove nil?))
-          res (collection/aggregate (mongo/get-db) "assignments" aggregate)
+          res (mongo/aggregate "assignments" aggregate)
           converted
              (map
                  #(dissoc % :description-ci :created :currentState)

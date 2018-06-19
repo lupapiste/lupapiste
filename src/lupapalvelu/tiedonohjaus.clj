@@ -26,7 +26,7 @@
 (defn get-from-toj-api [organization-id coerce? & path-parts]
   (when (:permanent-archive-enabled (o/get-organization organization-id))
     (let [url (apply str (env/value :toj :host) "/tiedonohjaus/api/org/" organization-id "/asiat" (when path-parts "/") path-parts)
-          {:keys [status body]} (http/get url (cond-> {:throw-exceptions false}
+          {:keys [^long status body]} (http/get url (cond-> {:throw-exceptions false}
                                                       coerce? (assoc :as :json)))]
       (case status
         200 body

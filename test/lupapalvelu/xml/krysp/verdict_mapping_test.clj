@@ -2,7 +2,8 @@
   (:require [clojure.data.xml :as data-xml]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa]]
-            [lupapalvelu.pate.verdict-canonical-test :refer [verdict]]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.verdict-canonical-test :refer [verdict-with-attachment]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.verdict-mapping]
             [lupapalvelu.xml.validator :as validator]
@@ -11,6 +12,8 @@
             [net.cgrand.enlive-html :as enlive]
             [sade.common-reader :as cr]
             [sade.xml :as xml]))
+
+(def verdict verdict-with-attachment)
 
 (def app (assoc application-rakennuslupa :attachments [{:id "11"
                                                         :type {:type-id "paatosote" :type-group "paatoksenteko"}
@@ -29,7 +32,8 @@
     (meta-fields/enrich-with-link-permit-data irrelevant) => (assoc app :linkPermitData [{:id            "LP-753-2013-90001"
                                                                                           :type          "lupapistetunnus"
                                                                                           :operation     "kerrostalo-rivitalo"
-                                                                                          :permitSubtype ""}]))
+                                                                                          :permitSubtype ""}])
+    (org/pate-org? irrelevant) => false)
   (let [result (permit/verdict-krysp-mapper app verdict "fi" "2.2.2" "BEGIN_OF_LINK/")
         attachments (:attachments result)
         xml_s (data-xml/indent-str (:xml result))

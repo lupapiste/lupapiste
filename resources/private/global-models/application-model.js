@@ -30,7 +30,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.submitted = ko.observable();
   self.location = ko.observable();
   self.municipality = ko.observable();
-  self.permitType = ko.observable("R");
+  self.permitType = ko.observable();
   self.propertyId = ko.observable();
   self.propertyIdSource = ko.observable();
   self.title = ko.observable();
@@ -499,7 +499,8 @@ LUPAPISTE.ApplicationModel = function() {
   self.nonApprovedDesigners = ko.observableArray([]);
 
   function checkForNonApprovedDesigners() {
-    var nonApproved = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
+    if (lupapisteApp.models.applicationAuthModel.ok("approve-doc")) {
+      var nonApproved = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
         return docModel.schema.info.subtype === "suunnittelija" && !docModel.docDisabled;
       })
       .filter(function(designerDoc) {
@@ -518,7 +519,8 @@ LUPAPISTE.ApplicationModel = function() {
         return title + headerDescription;
       })
       .value();
-    self.nonApprovedDesigners(nonApproved);
+      self.nonApprovedDesigners(nonApproved);
+    }
   }
 
   hub.subscribe("update-doc-success", checkForNonApprovedDesigners);
@@ -567,9 +569,10 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.toApproveApplication = function () {
-    if (self.hasFieldWarnings()
+    if (lupapisteApp.models.applicationAuthModel.ok("pate-enabled-basic") &&
+      (self.hasFieldWarnings()
         || self.hasIncorrectlyFilledRequiredFields()
-        || self.hasMissingRequiredAttachments()) {
+        || self.hasMissingRequiredAttachments())) {
       LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("application.approve.missing-required-info.warning-title"),
         loc("application.approve.missing-required-info.warning-text"),

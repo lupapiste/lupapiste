@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [clojure.string :refer [join]]
             [sade.core :refer [unauthorized]]
+            [sade.env :as env]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -189,7 +190,7 @@
 
 (facts remove-application-handler
   (let [{app-id :id :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
-        resp     (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
+        resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
 
     (fact "Handler is added"
       resp => ok?)
@@ -328,10 +329,9 @@
         reason-text "Cancellation notice."]
     (fact "integration messages"
       (count generated-messages) => 1
-      (first generated-messages) => (contains {:status "published"
-                                               :partner "matti"
-                                               :data (contains {:fromState (contains {:name "draft"})
-                                                                :toState   (contains {:name "submitted"})})}))
+      (first generated-messages) => (contains {:partner "matti"
+                                               :data    (contains {:fromState (contains {:name "draft"})
+                                                                   :toState   (contains {:name "submitted"})})}))
 
     (fact "Pena sees the application" (query pena :application :id application-id) => ok?)
     (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
@@ -885,6 +885,12 @@
           emails => (partial some (comp (partial re-find (re-pattern (email-for-key mikko))) :to))))))
   (let [application-id (create-app-id teppo :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
     (command teppo :submit-application :id application-id)
+    (fact "Set Ronja as the handler"
+      (command sonja :upsert-application-handler
+               :id application-id
+               :roleId "abba1111111111111111acdc"
+               :userId ronja-id) => ok?
+      (-> (query-application sonja application-id) :handlers first :userId) => ronja-id)
     (return-to-draft sonja application-id)
 
     (let [email (last-email)]
@@ -900,7 +906,26 @@
       (fact "The authority's comments are also stored in application comments"
         (-> application :comments last :text) => "comment-text")
       (fact "Application's submission date is nil"
-        (-> application :submitted) => nil?))))
+        (-> application :submitted) => nil?)
+      (fact "Application still has handler"
+        (:handlers application) => (just [(contains {:userId ronja-id})])))))
+
+(fact "Remove handlers from reverted draft flag"
+  (let [application-id (create-app-id teppo :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
+    (command teppo :submit-application :id application-id)
+    (fact "Set Ronja as the handler"
+      (command sonja :upsert-application-handler
+               :id application-id
+               :roleId "abba1111111111111111acdc"
+               :userId ronja-id) => ok?
+      (-> (query-application sonja application-id) :handlers first :userId) => ronja-id)
+    (fact "Set the remove handlers from reverted draft flag"
+      (command sipoo :set-organization-remove-handlers-from-reverted-draft
+               :enabled true) => ok?)
+    (return-to-draft sonja application-id)
+    (let [application (query-application teppo application-id)]
+      (fact "Application has no handlers"
+        (:handlers application) => empty?))))
 
 (facts "Authority can create application in other organisation"
        (let [application-id (create-app-id luukas
@@ -987,54 +1012,3 @@
       pena => (allowed? :add-operation :id app-id-1 :operation "vapaa-ajan-asuinrakennus"))
     (fact "Multiple operations is not allowed in Kuopio"
       velho =not=> (allowed? :add-operation :id app-id-2 :operation "vapaa-ajan-asuinrakennus"))))
-
-#_(facts "Replacing primary operation"
-  (let [app        (create-application pena :operation :pientalo :propertyId sipoo-property-id)
-        app-id     (:id app)
-        op-id      (-> app :primaryOperation :id)
-        type-group "pelastusviranomaiselle_esitettavat_suunnitelmat"
-        type-id    "savunpoistosuunnitelma"]
-
-    (fact "Pena adds attachment"
-      (upload-file-and-bind pena app-id {:type {:type-group type-group :type-id type-id}} ) => truthy)
-
-    (fact "Pena adds operation"
-      (command pena :add-operation :id app-id :operation "varasto-tms"))
-
-    (fact "Pena replaces primary operation"
-      (command pena :replace-operation :id app-id :opId op-id :operation "masto-tms") => ok?)
-
-    (let
-      [updated-app (query-application pena app-id)]
-
-      (fact "Application has new primaryOperation"
-        (-> updated-app :primaryOperation :name) => "masto-tms")
-
-      (fact "Application still has the added attachment"
-        (->> updated-app
-             :attachments
-             (filter #(and (= (-> % :type :type-group) type-group)
-                           (= (-> % :type :type-id) type-id)))
-             (count)) => 1)
-
-      (fact "Application has new primary operation document and old secondary operation document"
-        (->> updated-app
-             :documents
-             (filter #(= "uusiRakennus" (-> % :schema-info :op :name)))) => empty?
-
-        (->> updated-app
-             :documents
-             (filter #(= "masto-tms" (-> % :schema-info :op :name)))
-             (count)) => 1)
-
-      (fact "Application also has the secondary operation"
-        (->> updated-app
-             :secondaryOperations
-             (first)
-             :name) => "varasto-tms"
-
-        (->> updated-app
-             :documents
-             (filter #(= "varasto-tms" (-> % :schema-info :op :name)))
-             (count)) => 1))))
-

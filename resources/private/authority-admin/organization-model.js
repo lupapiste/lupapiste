@@ -49,6 +49,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.extendedConstructionWasteReportEnabled = ko.observable(false);
   self.validateVerdictGivenDate = ko.observable(true);
   self.automaticReviewFetchEnabled = ko.observable(true);
+  self.onlyUseInspectionFromBackend = ko.observable(false);
   self.tosFunctions = ko.observableArray();
   self.tosFunctionVisible = ko.observable(false);
   self.archivingProjectTosFunction = ko.observable();
@@ -65,6 +66,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.handlerRoles = ko.observableArray();
   self.assignmentTriggers = ko.observableArray();
   self.multipleOperationsSupported = ko.observable(false);
+  self.removeHandlersFromRevertedDraft = ko.observable( false );
 
   self.sectionOperations = ko.observableArray();
 
@@ -136,6 +138,17 @@ LUPAPISTE.OrganizationModel = function () {
   });
 
   ko.computed(function() {
+    var removeHandlers = self.removeHandlersFromRevertedDraft();
+    if (self.initialized) {
+      ajax.command("set-organization-remove-handlers-from-reverted-draft",
+                   {enabled: removeHandlers})
+      .success(util.showSavedIndicator)
+      .error(util.showSavedIndicator)
+      .call();
+    }
+  });
+
+  ko.computed(function() {
     var validateVerdictGivenDate = self.validateVerdictGivenDate();
     if (self.initialized) {
       ajax.command("set-organization-validate-verdict-given-date", {enabled: validateVerdictGivenDate})
@@ -148,6 +161,15 @@ LUPAPISTE.OrganizationModel = function () {
   self.automaticReviewFetchEnabled.subscribe(function(automaticReviewFetchEnabled) {
     if (self.initialized) {
       ajax.command("set-organization-review-fetch-enabled", { enabled: automaticReviewFetchEnabled })
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
+  self.onlyUseInspectionFromBackend.subscribe(function(onlyUseInspectionFromBackend) {
+    if (self.initialized) {
+      ajax.command("set-only-use-inspection-from-backend", { enabled: onlyUseInspectionFromBackend })
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
@@ -338,9 +360,12 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.multipleOperationsSupported(organization["multiple-operations-supported"] || false);
 
+    self.removeHandlersFromRevertedDraft( organization["remove-handlers-from-reverted-draft"] || false );
+
     self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 
     self.automaticReviewFetchEnabled(organization["automatic-review-fetch-enabled"] === true);
+    self.onlyUseInspectionFromBackend(organization["only-use-inspection-from-backend"] || false);
 
     self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
     self.permanentArchiveInUseSince(new Date(organization["permanent-archive-in-use-since"] || 0));

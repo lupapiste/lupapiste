@@ -3,7 +3,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schemas :as schemas]
-            [lupapalvelu.pate.shared  :as shared]
+            [lupapalvelu.pate.schema-helper :as helper]
+            [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas  :as shared-schemas]
             [midje.sweet :refer :all]
             [sade.util :as util]
@@ -47,7 +48,7 @@
                 :text        {:text {}}
                 :giver       {:select {:items [:viranhaltija :lautakunta]}}
                 :date        {:date {}}
-                :complexity  shared/complexity-select
+                :complexity  helper/complexity-select
                 :keymap      {:keymap {:one   "hello"
                                        :two   :world
                                        :three 88}}
@@ -66,7 +67,8 @@
                 :add-item    {:button {:add :dynamic}}
                 :attachments {:application-attachments {}}
                 :toggle      {:toggle {}}
-                :select      {:select {:items [:one :two :three]}}}
+                :select      {:select {:items [:one :two :three]}}
+                :readonly    {:text {:read-only? true}}}
    :name       "test"
    :sections   [{:id   :one
                  :grid {:columns 4
@@ -275,7 +277,9 @@
     (validate-path-value [:text] nil) => :error.invalid-value
     (validate-path-value [:text] true) => :error.invalid-value
     (validate-path-value [:text] "") => nil
-    (validate-path-value [:text] "hello") => nil))
+    (validate-path-value [:text] "hello") => nil)
+  (fact "Readonly"
+    (validate-path-value [:readonly] "hi") => :error.read-only))
 
 (defn validate-and-process-value [path value old-data & [references]]
   (schemas/validate-and-process-value test-template
@@ -523,11 +527,11 @@
     => (ok [:date] (timestamp "25.9.2017")))
   (facts "Dynamic repeating"
     (facts "Subpaths"
-      (shared/repeating-subpath :dynamic [:dynamic] (:dictionary test-template))
+      (schema-util/repeating-subpath :dynamic [:dynamic] (:dictionary test-template))
       => [:dynamic]
-      (shared/repeating-subpath :dynamic-foo [:dynamic] (:dictionary test-template))
+      (schema-util/repeating-subpath :dynamic-foo [:dynamic] (:dictionary test-template))
       => nil?
-      (shared/repeating-subpath :dynamic [:dynamic :id :dynamic] (:dictionary test-template))
+      (schema-util/repeating-subpath :dynamic [:dynamic :id :dynamic] (:dictionary test-template))
       => nil?)
     (facts "Top level"
       (validate-and-process-value [:add-item] true {:dynamic {}})
@@ -601,3 +605,23 @@
   (schemas/parse-int false) => nil
   (schemas/parse-int true) => nil
   (schemas/parse-int :yeah) => nil)
+
+(fact "application->category"
+  (schema-util/application->category {:permitType "R"}) => :r
+  (schema-util/application->category {:permitType "R"
+                                      :permitSubtype "foobar"})=> :r
+  (schema-util/application->category {:permitType "R"
+                                      :permitSubtype "tyonjohtaja-hakemus"})
+  => :tj
+  (schema-util/application->category {:permitType "YA"
+                                      :permitSubtype "tyonjohtaja-hakemus"})
+  => :tj
+  (schema-util/application->category {:permitType "YA"}) => :ya
+  (schema-util/application->category {:permitType "YA"
+                                      :permitSubtype "foobar"})=> :ya
+  (schema-util/application->category {:permitType "YA"
+                                      :permitSubtype "sijoitussopimus"})
+  => :contract
+  (schema-util/application->category {:permitType "R"
+                                      :permitSubtype "sijoitussopimus"})
+  => :contract)

@@ -45,35 +45,6 @@
                                   :lyesTitle "ok"
                                   :lnoTitle  "cancel"}}))
 
-(rum/defcs pen-input < (rum/local "" ::name)
-  (rum/local false ::editing?)
-  "Editable text via pen button."
-  [{name ::name editing? ::editing?} {:keys [value handler-fn disabled?]}]
-  (if @editing?
-    (letfn [(save-fn []
-              (reset! editing? false)
-              (handler-fn @name))]
-      [:span.pen-input--edit
-       [:input.grid-style-input.row-text
-        {:type      "text"
-         :value     @name
-         :on-change (common/event->state name)
-         :on-key-up #(when-not (s/blank? @name)
-                       (case (.-keyCode %)
-                         13 (save-fn)               ;; Save on Enter
-                         27 (reset! editing? false) ;; Cancel on Esc
-                         :default))}]
-       [:button.primary
-        {:disabled (s/blank? @name)
-         :on-click save-fn}
-        [:i.lupicon-save]]])
-    (do (common/reset-if-needed! name value)
-        [:span.pen-input--view @name
-         (when-not disabled?
-           [:button.ghost.no-border
-            {:on-click #(swap! editing? not)}
-            [:i.lupicon-pen]])])))
-
 (defn initial-value-mixin
   "Assocs to component's local state local-key with atom that is
   initialized to the first component argument. If the argument is an
@@ -104,8 +75,7 @@
                            (callback value))))}
          (when (and callback (not immediate?))
            {:on-blur #(callback (.. % -target -value))})
-         (when test-id
-           {:data-test-id test-id})
+         (common/add-test-id {} test-id)
          (dissoc options :callback :required? :test-id :immediate? :class)))
 
 ;; Arguments Initial value, options
@@ -132,27 +102,56 @@
     [:textarea.grid-style-input
      (text-options text* options)]))
 
+(rum/defcs text-and-button < (initial-value-mixin ::text)
+  rum/reactive
+  "Text input with button.
+   Initial value can be atom for two-way binding (see the mixin).
+   Options [optional]:
+     [icon:] Button icon (default :lupicon-save)
+     [button-class:] Default :primary
+     callback: Callback function
+     [disabled?:] Is component disabled
+     [input-type:] Default text."
+  [{text* ::text} _ {:keys [icon button-class callback
+                            disabled? input-type]
+                     :as   options}]
+  [:span.text-and-button
+   (text-edit text* (merge {:disabled  disabled?
+                            :type      input-type
+                            :on-key-up #(when (and (not (s/blank? @text*))
+                                                   (= (.-keyCode %) 13))
+                                          (callback @text*))}
+                           (dissoc options
+                                   :icon :button-class :callback
+                                   :disabled? :input-type)))
+   [:button
+    {:class    (common/css (or button-class :primary))
+     :disabled (or disabled? (s/blank? (rum/react text*)))
+     :on-click #(callback @text*)}
+    [:i {:class (common/css (or icon :lupicon-save))}]]])
+
 (defn default-items-fn [items]
   (fn [term]
     (let [fuzzy (common/fuzzy-re term)]
       (filter #(re-find fuzzy (:text %)) items))))
 
 (defn- scroll-element-if-needed [container elem]
-  (let [scroll-top       (.-scrollTop container)
-        container-top    (.-offsetTop container)
-        container-height (.-offsetHeight container)
-        scroll-bottom    (+ scroll-top container-height)
-        elem-top         (- (.-offsetTop elem) container-top)
-        elem-height      (.-offsetHeight elem)
-        elem-bottom      (+ elem-top elem-height)
-        scroll           (cond
-                           (< elem-top scroll-top)
-                           elem-top
-                           (> elem-bottom scroll-bottom)
-                           (+ (- elem-top container-height)
-                              elem-height))]
-    (when (integer? scroll)
-      (aset container "scrollTop" scroll))))
+  (when container
+    (let [scroll-top      (.-scrollTop container)
+          container-top    (.-offsetTop container)
+          container-height (.-offsetHeight container)
+          scroll-bottom    (+ scroll-top container-height)
+          elem-top         (- (.-offsetTop elem) container-top)
+          elem-height      (.-offsetHeight elem)
+          elem-bottom      (+ elem-top elem-height)
+          scroll           (cond
+                             (< elem-top scroll-top)
+                             elem-top
+                             (> elem-bottom scroll-bottom)
+                             (+ (- elem-top container-height)
+                                elem-height))]
+      (when (integer? scroll)
+        (aset container "scrollTop" scroll)))))
 
 (defn- set-selected  [selected* value callback]
   (when (common/reset-if-needed! selected* value)
@@ -173,14 +172,16 @@
         items-fn            (if (fn? items)
                               items
                               (default-items-fn items))
-        items               (vec (items-fn (rum/react term*)))]
+        items               (vec (cond->> (items-fn (rum/react term*))
+                                   combobox? (mapv #(assoc % :value (:text %)))))]
     (letfn [(close []
               (reset! open?* false)
               (reset! current* 0))
             (select [value]
               (when value
                 (set-selected (or selected* term*) value callback))
-              (close))
+              (when-not combobox?
+                (close)))
             (inc-current [n]
               (when (pos? (count items))
                 (do (swap! current* #(rem (+ (or % 0) n) (count items)))
@@ -211,7 +212,8 @@
                                                                             :value))
                                                            (.preventDefault %))
                                                       ;; Esc
-                                                      27 (close)
+                                                      27 (when-not combobox?
+                                                           (close))
                                                       ;; Up
                                                       38 (inc-current (- (count items) 1))
                                                       ;; Down
@@ -255,8 +257,8 @@
    Initial value can be atom for two-way binding (see the mixin).
    Options [optional]:
      items  either list or function. The function argument is the
-            filtering term. An item is a map with mandatory :text
-            and :value keys and optional :group key.
+            filtering term. An item is a map with a mandatory :text
+            and optional :group key.
      [callback] change callback that is called when after list selection or blur.
      [disabled?] Is component disabled? (false)
      [required?] Is component required? (false)"
@@ -279,8 +281,13 @@
                                             :disabled  disabled?})]
     [:div.pate-autocomplete
      [:div.ac--combobox text-edit]
-     (when (and (rum/react open?*) (seq (items-fn @term*)))
-       [:div.ac__menu menu-items])]))
+     (let [items (items-fn @term*)]
+       (when (and (rum/react open?*)
+                  (seq (filter (fn [{:keys [text group]}]
+                                 (and (s/blank? group)
+                                      (not= (s/trim @term*) text)))
+                               items)))
+         [:div.ac__menu menu-items]))]))
 
 (rum/defcs autocomplete < (initial-value-mixin ::selected)
   rum/reactive
@@ -296,12 +303,15 @@
      [callback] change callback
      [clear?] if truthy, clear button is shown when proper (default
               false).
-     [disabled?] Is component disabled? (false)"
+     [disabled?] Is component disabled? (false)
+     [required?] Is component required? (false)
+     [test-id] data-test-id attribute for the top-level div."
   [{selected* ::selected
     term*     ::term
     current*  ::current
     open?*    ::open?
-    :as       local-state} _ {:keys [items clear? callback disabled?]
+    :as       local-state} _ {:keys [items clear? callback disabled?
+                                     required? test-id]
                                     :as options}]
   (let [{:keys [text-edit
                 menu-items
@@ -309,22 +319,26 @@
                                            options
                                            {})
 
-        open? (rum/react open?*)]
+        open? (rum/react open?*)
+        selected (rum/react selected*)]
     (when-not open?
       (common/reset-if-needed! term* ""))
     [:div.pate-autocomplete
+     (common/add-test-id {} test-id)
      [:div.like-btn.ac--selected
       {:on-click (when-not disabled?
                    #(swap! open?* not))
-       :class    (common/css-flags :disabled disabled?)}
-      [:span (:text (util/find-by-key :value
-                                      (rum/react selected*)
+       :class    (common/css-flags :disabled disabled?
+                                   :required (and required?
+                                                  (s/blank? selected)))}
+      [:span (:text (util/find-first #(util/=as-kw (:value %)
+                                                   selected)
                                       (items-fn "")))]
       [:i.primary.ac--chevron
        {:class (common/css-flags :lupicon-chevron-small-down (not open?)
                                  :lupicon-chevron-small-up   open?)}]
       (when (and clear?
-                 (not (s/blank? (rum/react selected*)))
+                 (not (s/blank? selected))
                  (not disabled?))
         [:i.secondary.ac--clear.lupicon-remove
          {:on-click (fn [event]
@@ -353,9 +367,11 @@
      [disabled?] See common/resolve-disabled
      [enabled?]  See common/resolve-disabled
      [required?] If true, the select is highlighted if empty.
+     [test-id]   Data-test-id attribute value
 
    The rest of the options are passed to the underlying select."
-  [{selected* ::selected} _ {:keys    [items choose? callback required?]
+  [{selected* ::selected} _ {:keys    [items choose? callback required?
+                                       test-id]
                              sort-key :sort-by
                              :as      options}]
   (let [value   (rum/react selected*)
@@ -367,8 +383,9 @@
             (common/update-css (dissoc options
                                        :items :choose? :callback
                                        :disabled? :enabled? :required?
-                                       :sort-by)
-                               :required (and required? (s/blank? value))))
+                                       :sort-by :test-id)
+                               :required (and required? (s/blank? value)))
+            (common/add-test-id {} test-id))
      (cond->> items
        sort-key (sort-by sort-key
                          (if (= sort-key :text)
@@ -409,23 +426,26 @@
 
 (rum/defc text-and-link < rum/reactive
 "Renders text with included link
- Options (text and text-loc are mutually exclusive):
+ Options (text and text-loc are mutually exclusive) [optional]:
    text Text where link is in brackets: 'Press [me] for details'
    text-loc Localization key for text.
-   click Function to be called when the link is clicked"
-  [{:keys [click] :as options}]
+   click Function to be called when the link is clicked
+   [test-id] Test-id for the link element."
+  [{:keys [click test-id] :as options}]
   (let [regex          #"\[(.*)\]"
         text           (common/resolve-text options)
         link           (last (re-find regex text))
         ;; Split results include the link
         [before after] (remove #(= link %) (s/split text regex))]
-    [:span before [:a {:on-click click} link] after]))
+    [:span before
+     [:a (common/add-test-id {:on-click click} test-id) link]
+     after]))
 
 (rum/defc icon-button < rum/reactive
   "Button with optional icon and waiting support
    Options (text and text-loc are mutually exclusive) [optional]
 
-     text or text-loc See common/resolve-text
+     [text or text-loc] See `common/resolve-text`.
 
      [icon] Icon class for the button (e.g., :lupicon-save)
 
@@ -433,25 +453,32 @@
      shown (if the icon has been given). Can be either value or
      atom. Atom makes the most sense for the typical use cases.
 
-     [disabled?] See common/resolve-disabled
-     [enabled?]  See common/resolve-disabled
+     [disabled?] See `common/resolve-disabled`
+     [enabled?]  See `common/resolve-disabled`
+
+     [class] Class definitions that are processed with `common/css`.
+
+     [test-id] Test id for the button.
 
    Any other options are passed to the :button
    tag (e.g, :class, :on-click). The only exception is :disabled,
    since it is overridden with :disabled?"
-  [{:keys [icon wait?] :as options}]
-  (let [waiting? (rum/react (common/atomize wait?))]
+  [{:keys [icon wait? class test-id] :as options}]
+  (let [waiting? (rum/react (common/atomize wait?))
+        text     (common/resolve-text options)]
     [:button
-     (assoc (dissoc options
-                    :text :text-loc :icon :wait?
-                    :disabled? :enabled?)
-            :disabled (or (common/resolve-disabled options)
-                          waiting?))
+     (-> (dissoc options
+                 :text :text-loc :icon :wait?
+                 :disabled? :enabled? :class :test-id)
+         (assoc :disabled (or (common/resolve-disabled options)
+                              waiting?)
+                :class (common/css class))
+         (common/add-test-id test-id))
      (when icon
        [:i {:class (common/css (if waiting?
                                  [:icon-spin :lupicon-refresh]
                                  icon))}])
-     [:span (common/resolve-text options)]]))
+     (when text [:span text])]))
 
 (rum/defc link-button < rum/reactive
   "Link that is rendered as button.
@@ -485,27 +512,75 @@
    [test-id]        Test id prefix for input and label."
   [{value* ::value} _ {:keys [callback negate? prefix test-id] :as options}]
   (let [input-id (common/unique-id "toggle")
-        test-id  (name (or test-id input-id))
         value-fn (if negate? not identity)
         value    (-> value* rum/react value-fn)
         prefix   (name (or prefix :pate-checkbox))]
     [:div
      {:class (str prefix "-wrapper")
       :key   input-id}
-     [:input {:type         "checkbox"
-              :disabled     (common/resolve-disabled options)
-              :checked      value
-              :id           input-id
-              :data-test-id (str test-id "-input")
-              :on-change    (fn [_]
-                              (swap! value* not)
-                              (when callback
-                                (callback (value-fn @value*))))}]
+     [:input (common/add-test-id {:type      "checkbox"
+                                  :disabled  (common/resolve-disabled options)
+                                  :checked   value
+                                  :id        input-id
+                                  :on-change (fn [_]
+                                               (swap! value* not)
+                                               (when callback
+                                                 (callback (value-fn @value*))))}
+                                 test-id :input)]
      [:label
-      {:class        (str prefix "-label")
-       :for          input-id
-       :data-test-id (str test-id "-label")}
+      (common/add-test-id {:class (str prefix "-label")
+                           :for   input-id}
+                          test-id :label)
       (common/resolve-text options "")]]))
+
+(rum/defcs pen-input < (rum/local "" ::name)
+  (rum/local false ::editing?)
+  "Editable text via pen button. Options [optional]:
+
+   value:       Initial input value
+   callback:    Callback to be called with new value.
+   [disabled?]: Is the editing disabled.
+
+   [test-id]: Prefix for test-ids. If given the test-ids are:
+              prefix-input, prefix-text, prefix-edit and prefix-save,
+              where prefix is the given test-id."
+  [{name ::name editing? ::editing?} {:keys [value callback disabled?
+                                             test-id]}]
+  (letfn [(save-fn []
+            (reset! editing? false)
+            (callback @name))
+          (tid [target k]
+            (cond-> target
+              test-id (common/add-test-id test-id k)))]
+    (if @editing?
+      [:span.pen-input--edit
+       [:input.grid-style-input.row-text
+        (tid {:type      "text"
+              :value     @name
+              :on-change (common/event->state name)
+              :on-key-up #(let [key (.-keyCode %)]
+                            (cond
+                              ;; Save on Enter
+                              (and (= key 13)
+                                   (not (s/blank? @name)))
+                              (save-fn)
+
+                              ;; Cancel on Esc
+                              (= key 27)
+                              (reset! editing? false)))}
+             :input)]
+       (icon-button (tid {:class     :primary
+                          :disabled? (s/blank? @name)
+                          :icon      :lupicon-save
+                          :on-click  save-fn}
+                         :save))]
+      (do (common/reset-if-needed! name value)
+          [:span.pen-input--view (tid {} :text) @name
+           (when-not disabled?
+             [:button.ghost.no-border
+              (tid {:on-click #(swap! editing? not)} :edit)
+              [:i.lupicon-pen]])]))))
+
 
 (defn add-key-attrs
   "Adds unique key attribute to every element. Note: the attribute is
@@ -561,21 +636,23 @@
   selected* Atom that holds the selected :id. The default id is the
             first tab id.
 
-  tabs  Sequence of :id :text-loc (or :text, see common/resolve-text)
-        maps.
+  tabs Sequence of :id, :text-loc (or :text, see
+        `common/resolve-text`) and optional :test-id maps.
 
   When a tab is selected its id is swapped into selected*."
   [{:keys [selected* tabs]}]
   (let [selected (or (rum/react selected*) (-> tabs first :id))]
     [:div.pate-tabbar
      (let [divider [:div.pate-tab__divider {}]
-           buttons (for [{id :id :as tab} tabs
-                         :let             [text (common/resolve-text tab)]]
+           buttons (for [{:keys [id test-id]
+                          :as   tab} tabs
+                         :let      [text (common/resolve-text tab)
+                                    attr (common/add-test-id {} test-id)]]
                      (if (= id selected)
                        [:div.pate-tab.pate-tab--active
-                        {} text]
+                        attr text]
                        [:div.pate-tab
-                        {}
+                        attr
                         [:a {:on-click #(reset! selected* id)} text]]))]
        (map #(assoc-in % [1 :key] (common/unique-id "tabbar-"))
             (concat (interpose divider buttons)

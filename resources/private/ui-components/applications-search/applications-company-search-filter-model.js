@@ -6,7 +6,7 @@ LUPAPISTE.ApplicationsCompanySearchFilterModel = function(params) {
   self.externalApi = params.externalApi;
   self.gotResults = params.gotResults;
 
-  self.savedFilters = lupapisteApp.services.applicationFiltersService.savedFilters;
+  self.savedFilters = lupapisteApp.services.applicationFiltersService.savedCompanyFilters;
 
   self.searchFieldSelected = ko.observable(false);
 

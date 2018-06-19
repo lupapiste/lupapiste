@@ -3,6 +3,10 @@
             [midje.sweet :refer :all]
             [sade.util :as util]))
 
+(defn err [error]
+  (partial expected-failure? error))
+
+(def timestamp util/to-millis-from-local-date-string)
 
 (defn no-errors?
   "Checks PATE api response and ensures request didn't contain errors"
@@ -12,25 +16,54 @@
 (defn invalid-value? [{:keys [errors]}]
   (util/=as-kw (-> errors first last) :error.invalid-value))
 
+(defn toggle-pate [org-id flag]
+  (fact {:midje/description (format "Toggle Pate for %s: %s"
+                                    org-id flag)}
+    (command admin :set-organization-boolean-path
+             :organizationId org-id
+             :path "pate-enabled"
+             :value flag)=> ok?))
 
-(defn init-verdict-template [as-user category]
-  (let [{id :id :as template} (command as-user :new-verdict-template :category category)]
-    template))
+(defn add-repeating-setting
+  "Returns the id of the new item."
+  [apikey category rep-dict add-dict & kvs]
+  (let [id (get-in (command apikey :save-verdict-template-settings-value
+                            :category category
+                            :path [add-dict]
+                            :value nil)
+                   [:changes 0 0 1])]
+    (doseq [[k v] (apply hash-map (flatten kvs))]
+      (command apikey :save-verdict-template-settings-value
+               :category category
+               :path [rep-dict id k]
+               :value v))
+    id))
 
-(defn set-template-draft-value [template-id path value]
+(defn check-file [file-id exists?]
+  (fact {:midje/description (str "Check that file "
+                                 (if exists? "exists" "does not exist"))}
+    (raw sonja :view-attachment :attachment-id file-id)
+    => (contains {:status (if exists? 200 404)})))
+
+(defn init-verdict-template [apikey category]
+  (command apikey :new-verdict-template
+           :category (name category)))
+
+(defn set-template-draft-value [apikey template-id path value]
   (fact {:midje/description (format "Draft value: %s %s"
                                     path value)}
-        (command sipoo :save-verdict-template-draft-value
+        (command apikey :save-verdict-template-draft-value
                  :template-id template-id
                  :path (map keyword (flatten [path]))
                  :value value) => ok?))
 
-(defn set-template-draft-values [template-id & args]
+(defn set-template-draft-values [apikey template-id & args]
   (doseq [[path value] (->arg-map args)]
-    (set-template-draft-value template-id path value)))
+    (set-template-draft-value apikey template-id path value)))
 
-(defn publish-verdict-template [as-user id]
-  (command as-user :publish-verdict-template :template-id id))
+(defn publish-verdict-template [apikey template-id]
+  (command apikey :publish-verdict-template
+           :template-id template-id))
 
 (defn fill-sisatila-muutos-application [apikey app-id]
   (let [{docs :documents
@@ -120,3 +153,117 @@
                  :statementId statement-id
                  :status "puollettu"
                  :text "All righty then.") => ok?))))
+
+(defn add-attachment
+  "Adds attachment to the application. Contents is mainly for logging. Returns attachment id."
+  [app-id contents type-group type-id & [target]]
+  (let [file-id               (upload-file-and-bind sonja
+                                                    app-id
+                                                    (merge {:contents contents
+                                                            :type     {:type-group type-group
+                                                                       :type-id    type-id}}
+                                                           (when target
+                                                             {:target target})))
+        {:keys [attachments]} (query-application sonja app-id)
+        {attachment-id :id}   (util/find-first (fn [{:keys [latestVersion]}]
+                                                 (= (:originalFileId latestVersion) file-id))
+                                               attachments)]
+    (fact {:midje/description (str "New attachment: " contents)}
+      attachment-id => truthy)
+    {:attachment-id attachment-id
+     :file-id       file-id}))
+
+(defn add-condition [add-cmd fill-cmd condition]
+  (let [changes      (:changes (add-cmd))
+        condition-id (-> changes first first last keyword)]
+    (fact "Add new condition"
+      condition-id => truthy
+      (when condition
+        (fact "Fill the added condition"
+          (fill-cmd condition-id condition)
+          => ok?)))
+    condition-id))
+
+(defn remove-condition [remove-cmd condition-id]
+  (fact "Remove condition"
+    (let [removals (:removals (remove-cmd))
+          removed-id (-> removals first last keyword)]
+      removed-id => condition-id)))
+
+(defn check-conditions [conditions-query kv]
+  (fact "Check conditions"
+    (conditions-query)
+    => (reduce-kv (fn [acc k v]
+                    (assoc acc k (if v
+                                   {:condition v}
+                                   {})))
+                  {}
+                  (apply hash-map kv))))
+
+(defn add-template-condition [apikey template-id condition]
+  (add-condition #(command apikey :save-verdict-template-draft-value
+                           :template-id template-id
+                           :path [:add-condition]
+                           :value true)
+                 #(command apikey :save-verdict-template-draft-value
+                   :template-id template-id
+                   :path [:conditions %1 :condition]
+                   :value %2)
+                 condition))
+
+(defn remove-template-condition [apikey template-id condition-id]
+  (remove-condition #(command apikey :save-verdict-template-draft-value
+                              :template-id template-id
+                              :path [:conditions condition-id :remove-condition]
+                              :value true)
+                    condition-id))
+
+
+(defn check-template-conditions [apikey template-id & kv]
+  (check-conditions #(-> (query apikey :verdict-template :template-id template-id)
+                         :draft :conditions)
+                    kv))
+
+(defn add-verdict-condition [apikey app-id verdict-id condition]
+  (add-condition #(command apikey :edit-pate-verdict
+                           :id app-id
+                           :verdict-id verdict-id
+                           :path [:add-condition]
+                           :value true)
+                 #(command apikey :edit-pate-verdict
+                           :id app-id
+                           :verdict-id verdict-id
+                           :path [:conditions %1 :condition]
+                           :value %2)
+                 condition))
+
+(defn remove-verdict-condition [apikey app-id verdict-id condition-id]
+  (remove-condition #(command apikey :edit-pate-verdict
+                           :id app-id
+                           :verdict-id verdict-id
+                           :path [:conditions condition-id :remove-condition]
+                           :value true)
+                    condition-id))
+
+(defn check-verdict-conditions [apikey app-id verdict-id & kv]
+  (check-conditions #(-> (query apikey :pate-verdict
+                                :id app-id
+                                :verdict-id verdict-id)
+                         :verdict :data :conditions)
+                    kv))
+
+(defn edit-verdict [apikey app-id verdict-id path value]
+  (let [result (command apikey :edit-pate-verdict :id app-id
+                        :verdict-id verdict-id
+                        :path (flatten [path])
+                        :value value)]
+    (fact {:midje/description (format "Edit verdict: %s -> %s" path value)}
+      result => no-errors?)
+    result))
+
+(defn fill-verdict [apikey app-id verdict-id & kvs]
+  (doseq [[k v] (apply hash-map kvs)]
+    (edit-verdict apikey app-id verdict-id k v)))
+
+(defn open-verdict [apikey app-id verdict-id]
+  (query apikey :pate-verdict :id app-id :verdict-id verdict-id))

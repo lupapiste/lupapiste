@@ -253,7 +253,7 @@ LUPAPISTE.AccordionService = function() {
     var indicator = event.indicator;
     var doc = _.find(self.documents(), {docId: docId});
     var buildingId = util.getIn(doc, ["data", "valtakunnallinenNumero"]);
-    if (buildingId !== value) {
+    if (doc && buildingId !== value) {
       lupapisteApp.services.documentDataService.updateDoc(docId, [[["valtakunnallinenNumero"], value]], indicator);
       doc.data.valtakunnallinenNumero(value);
     }

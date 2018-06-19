@@ -68,8 +68,8 @@
 (sc/defschema StampTemplate
               {:name       StampName
                :id         (sc/maybe sssc/ObjectIdStr)
-               :position   {:x sssc/Nat
-                            :y sssc/Nat}
+               :position   {:x sc/Num
+                            :y sc/Num}
                :background sssc/Nat
                :page       (sc/if keyword? (apply sc/enum pages) (apply sc/enum (mapv name pages)))
                :qrCode     sc/Bool
@@ -78,8 +78,8 @@
 (sc/defschema Stamp
               {:name       StampName
                :id         sssc/ObjectIdStr
-               :position   {:x sssc/Nat
-                            :y sssc/Nat}
+               :position   {:x sc/Num
+                            :y sc/Num}
                :background sssc/Nat
                :page       (apply sc/enum pages)
                :qrCode     sc/Bool

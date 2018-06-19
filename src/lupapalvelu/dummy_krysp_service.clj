@@ -1,5 +1,5 @@
 (ns lupapalvelu.dummy-krysp-service
-  (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
+  (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal spy]]
             [schema.core :as sc]
             [net.cgrand.enlive-html :as enlive]
             [sade.env :as env]
@@ -50,7 +50,7 @@
   (defn verdict-xml [typeName & [search-key search-val]]
     (let [verdicts-by-type (filter (comp #{typeName} :type-name) @dummy-verdicts)]
       (-> (or
-            (when (and search-val search-key)) (util/find-by-key search-key search-val verdicts-by-type)
+            (when (and search-val search-key) (util/find-by-key search-key search-val verdicts-by-type))
             (first verdicts-by-type))
           :template-file)))
 
@@ -135,7 +135,7 @@
   (defn krysp-endpoint-authentication
     [request]
     (let [[u p] (http/decode-basic-auth request)]
-      (debug "%s requesting krysp receiver endpoint, db cookie being: %s"
+      (debugf "%s requesting krysp receiver endpoint, db cookie being: %s"
              u (get-in request [:cookies "test_db_name" :value]))
       (and (= u "kuntagml") (= p "kryspi"))))
 

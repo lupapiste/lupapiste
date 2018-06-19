@@ -13,7 +13,7 @@
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.application-bulletin-utils :as bulletin-utils]
             [lupapalvelu.application-utils :as app-utils]
-            [lupapalvelu.archiving-util :as archiving-util]
+            [lupapalvelu.archive.archiving-util :as archiving-util]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.conversion :as conversion]
@@ -230,8 +230,12 @@
 
 (defn link-files-to-application [app-id fileIds]
   {:pre [(string? app-id)]}
-  (mongo/update-by-query :fs.files {:_id {$in fileIds}} {$set {:metadata.application app-id
-                                                               :metadata.linked true}}))
+  (mongo/update-by-query :fs.files
+                         {:_id {$in fileIds}
+                          $or [{:metadata.linked false}
+                               {:metadata.linked {$exists false}}]}
+                         {$set {:metadata.application app-id
+                                :metadata.linked true}}))
 
 (defn- by-file-ids [file-ids {versions :versions :as attachment}]
   (some (comp (set file-ids) :fileId) versions))
@@ -406,10 +410,11 @@
    :version version
    :fileId fileId})
 
-(defn- signature-updates [version-model user ts copied-signatures]
+(defn- signature-updates
   "Returns mongo updates for setting signatures to an attachment. If the copied-signatures are provided, just copies
    them to point to the given version. Otherwise a new signature is generated.
    Does NOT handle possible duplicates, i.e. the same version can be signed multiple times by the same user."
+  [version-model user ts copied-signatures]
   (cond
     (and (sequential? copied-signatures) (seq copied-signatures))
     {$push {:attachments.$.signatures {$each (map (fn [sig]
@@ -1047,11 +1052,18 @@
   (let [attachment (get-attachment-info application attachmentId)
         readonly-after-sent? (op/get-primary-operation-metadata application :attachments-readonly-after-sent)]
     (when (or (attachment-is-readOnly? attachment)
+              (= :arkistoitu (-> attachment :metadata :tila keyword))
               (and readonly-after-sent?
                    (not (states/pre-sent-application-states (-> application :state keyword)))
                    (not (auth/application-authority? application user))))
       (fail :error.unauthorized
             :desc "Attachment is read only."))))
+
+(defn attachment-not-archived [{{:keys [attachmentId]} :data application :application}]
+  (when (and attachmentId
+             (= (-> (get-attachment-info application attachmentId) :metadata :tila keyword) :arkistoitu))
+    (fail :error.unauthorized
+          :desc "Attachment is archived.")))
 
 (defn attachment-matches-application
   ([{{:keys [attachmentId]} :data :as command}]

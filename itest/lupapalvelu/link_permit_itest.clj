@@ -1,5 +1,6 @@
 (ns lupapalvelu.link-permit-itest
   (:require [midje.sweet :refer :all]
+            [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]))
 
@@ -129,7 +130,7 @@
     (fact "Application matches for dropdown selection contents do not include the applications that have a link-permit relation to the current application"
       (let [matches-resp (query apikey :app-matches-for-link-permits :id test-application-id) => ok?
             matches (:app-links matches-resp)
-            first-match (first matches)]
+            first-match (util/find-by-id approved-application-id matches)]
         (count matches) => 3
         (fact "id"
           (:id first-match) => approved-application-id)

@@ -16,9 +16,6 @@
 
 (apply-remote-minimal)
 
-(defn err [error]
-  (partial expected-failure? error))
-
 (defn mangle-keys [m fun]
   (reduce-kv (fn [acc k v]
                (assoc acc (fun k) v))
@@ -28,14 +25,8 @@
 (defn prefix-keys [m prefix]
   (mangle-keys m (util/fn->> name (str (name prefix)) keyword)))
 
-(def timestamp util/to-millis-from-local-date-string)
-
 (defn toggle-sipoo-pate [flag]
-  (fact {:midje/description (str "Sipoo Pate: " flag)}
-    (command admin :set-organization-boolean-path
-             :organizationId "753-R"
-             :path "pate-enabled"
-             :value flag) => ok?))
+  (toggle-pate "753-R" flag))
 
 (defn check-kuntagml [{:keys [organization permitType id]} verdict-date]
   (let [organization (organization-from-minimal-by-id organization)
@@ -144,58 +135,8 @@
 
 (fact "Sipoo categories"
   (:categories (query sipoo :verdict-template-categories))
-  => (contains ["r" "p" "ymp" "kt"] :in-any-order))
+  => (contains ["r" "p" "ymp" "kt" "tj"] :in-any-order))
 
-(defn add-condition [add-cmd fill-cmd condition]
-  (let [changes      (:changes (add-cmd))
-        condition-id (-> changes first first last keyword)]
-    (fact "Add new condition"
-      condition-id => truthy
-      (when condition
-        (fact "Fill the added condition"
-          (fill-cmd condition-id condition)
-          => ok?)))
-    condition-id))
-
-(defn remove-condition [remove-cmd condition-id]
-  (fact "Remove condition"
-    (let [removals (:removals (remove-cmd))
-          removed-id (-> removals first last keyword)]
-      removed-id => condition-id)))
-
-(defn check-conditions [conditions-query kv]
-  (fact "Check conditions"
-    (conditions-query)
-    => (reduce-kv (fn [acc k v]
-                    (assoc acc k (if v
-                                   {:condition v}
-                                   {})))
-                  {}
-                  (apply hash-map kv))))
-
-(defn add-template-condition [template-id condition]
-  (add-condition #(command sipoo :save-verdict-template-draft-value
-                           :template-id template-id
-                           :path [:add-condition]
-                           :value true)
-                 #(command sipoo :save-verdict-template-draft-value
-                   :template-id template-id
-                   :path [:conditions %1 :condition]
-                   :value %2)
-                 condition))
-
-(defn remove-template-condition [template-id condition-id]
-  (remove-condition #(command sipoo :save-verdict-template-draft-value
-                              :template-id template-id
-                              :path [:conditions condition-id :remove-condition]
-                              :value true)
-                    condition-id))
-
-
-(defn check-template-conditions [template-id & kv]
-  (check-conditions #(-> (query sipoo :verdict-template :template-id template-id)
-                         :draft :conditions)
-                    kv))
 
 (fact "Create new template"
   (let [{:keys [id name draft modified category]} (init-verdict-template sipoo :r)]
@@ -251,16 +192,17 @@
               => invalid-value?)
             (fact "Dynamic repeating conditions"
               (fact "Add conditions"
-                (let [condition-id1   (add-template-condition id "Strict condition")
-                      condition-id2   (add-template-condition id "Other condition")
-                      empty-condition (add-template-condition id nil)]
-                  (check-template-conditions id
+                (let [condition-id1   (add-template-condition sipoo id "Strict condition")
+                      condition-id2   (add-template-condition sipoo id "Other condition")
+                      empty-condition (add-template-condition sipoo id nil)]
+                  (check-template-conditions sipoo
+                                             id
                                              condition-id1 "Strict condition"
                                              condition-id2 "Other condition"
                                              empty-condition nil)
                   (fact "Remove condition"
-                    (remove-template-condition id condition-id2)
-                    (check-template-conditions id
+                    (remove-template-condition sipoo id condition-id2)
+                    (check-template-conditions sipoo id
                                              condition-id1 "Strict condition"
                                              empty-condition nil)))))
             (fact "Set foremen removed"
@@ -489,7 +431,7 @@
       => {:pientalo template-id})
 
     (facts "Application verdict templates"
-      (let [{app-id :id} (create-and-submit-application pena
+            (let [{app-id :id} (create-and-submit-application pena
                                                         :operation :pientalo
                                                         :propertyId sipoo-property-id)]
         (fact "Create and delete verdict template"
@@ -508,57 +450,12 @@
                          :default? false
                          :name "Uusi nimi"})] :in-any-order)))))
 
-(defn add-attachment
-  "Adds attachment to the application. Contents is mainly for logging. Returns attachment id."
-  [app-id contents type-group type-id & [target]]
-  (let [file-id               (upload-file-and-bind sonja
-                                                    app-id
-                                                    (merge {:contents contents
-                                                            :type     {:type-group type-group
-                                                                       :type-id    type-id}}
-                                                           (when target
-                                                             {:target target})))
-        {:keys [attachments]} (query-application sonja app-id)
-        {attachment-id :id}   (util/find-first (fn [{:keys [latestVersion]}]
-                                                 (= (:originalFileId latestVersion) file-id))
-                                               attachments)]
-    (fact {:midje/description (str "New attachment: " contents)}
-      attachment-id => truthy)
-    attachment-id))
-
 (defn add-verdict-attachment
   "Adds attachment to the verdict. Contents is mainly for logging. Returns attachment id."
   [app-id verdict-id contents]
   (add-attachment app-id contents "paatoksenteko" "paatosote" {:type "verdict"
                                                                :id verdict-id}))
 
-(defn add-verdict-condition [app-id verdict-id condition]
-  (add-condition #(command sonja :edit-pate-verdict
-                           :id app-id
-                           :verdict-id verdict-id
-                           :path [:add-condition]
-                           :value true)
-                 #(command sonja :edit-pate-verdict
-                           :id app-id
-                           :verdict-id verdict-id
-                           :path [:conditions %1 :condition]
-                           :value %2)
-                 condition))
-
-(defn remove-verdict-condition [app-id verdict-id condition-id]
-  (remove-condition #(command sonja :edit-pate-verdict
-                           :id app-id
-                           :verdict-id verdict-id
-                           :path [:conditions condition-id :remove-condition]
-                           :value true)
-                    condition-id))
-
-(defn check-verdict-conditions [app-id verdict-id & kv]
-  (check-conditions #(-> (query sonja :pate-verdict
-                                :id app-id
-                                :verdict-id verdict-id)
-                         :verdict :data :conditions)
-                    kv))
 
 ;;; Verdicts
 
@@ -632,41 +529,11 @@
       (-> buildings second :location) => [406216.0 6686856.0]
       (-> buildings second :location-wgs84) => (coord/convert "EPSG:3067" "WGS84" 5 [406216.0 6686856.0]))))
 
-(defn add-attachment-to-verdict-draft [verdict app-id]
-  (facts "Add attachment to verdict draft"
-         (let [verdict-id (:id verdict)
-               attachment-id (add-verdict-attachment app-id verdict-id "Hello world!")]
-           (fact "Delete verdict draft"
-                 (command sonja :delete-pate-verdict :id app-id
-                          :verdict-id verdict-id) => ok?)
-           (let [{:keys [pate-verdicts attachments]} (query-application sonja app-id)]
-             (fact "Verdict draft is no longer in the application"
-                   pate-verdicts =not=> (contains {:id verdict-id}))
-             (fact "Verdict draft attachment is no longer in the application"
-                   attachments =not=> (contains {:id attachment-id}))
-             (fact "There are still other attachments"
-                   (count attachments) => pos?)))))
-
-(defn add-repeating-setting
-  "Returns the id of the new item."
-  [rep-dict add-dict & kvs]
-  (let [id (get-in (command sipoo :save-verdict-template-settings-value
-                            :category :r
-                            :path [add-dict]
-                            :value nil)
-                   [:changes 0 0 1])]
-    (doseq [[k v] (apply hash-map (flatten kvs))]
-      (command sipoo :save-verdict-template-settings-value
-               :category :r
-               :path [rep-dict id k]
-               :value v))
-    id))
-
 (defn add-review [& kvs]
-  (add-repeating-setting :reviews :add-review kvs))
+  (add-repeating-setting sipoo :r :reviews :add-review kvs))
 
 (defn add-plan [& kvs]
-  (add-repeating-setting :plans :add-plan kvs))
+  (add-repeating-setting sipoo :r :plans :add-plan kvs))
 
 (facts "Settings dependencies (reviews and plans)"
   (let [{template-id :id
@@ -686,13 +553,25 @@
         (fact "Update and open"
           (command sipoo :update-and-open-verdict-template
                    :template-id template-id)
-          => (contains {:draft {:reviews {(keyword review-id) {:text "Katselmus"}}}}))
+          => (contains {:draft {:reviews {(keyword review-id) {:text-fi "Katselmus"
+                                                               :text-sv "Syn"
+                                                               :text-en "Review"}}}}))
         (fact "Include review in verdict"
           (command sipoo :save-verdict-template-draft-value
                    :template-id template-id
                    :path [:reviews review-id :included]
                    :value true)
           => ok?)
+        (fact "Review text is read-only"
+          (some-> (command sipoo :save-verdict-template-draft-value
+                           :template-id template-id
+                           :path [:reviews review-id :text-fi]
+                           :value "foo")
+                  :errors
+                  flatten
+                  last
+                  keyword)
+          => :error.read-only)
         (fact "Change review's name"
           (command sipoo :save-verdict-template-settings-value
                    :category :r
@@ -701,7 +580,9 @@
         (fact "Name updated in the template after update and open"
           (command sipoo :update-and-open-verdict-template
                    :template-id template-id)
-          => (contains {:draft {:reviews {(keyword review-id) {:text "sumlestaK"
+          => (contains {:draft {:reviews {(keyword review-id) {:text-fi "sumlestaK"
+                                                               :text-sv "Syn"
+                                                               :text-en "Review"
                                                                :included true}}}}))
         (fact "Remove review"
           (command sipoo :save-verdict-template-settings-value
@@ -712,9 +593,10 @@
           (let [plan-id (add-plan :fi "Suunnitelma" :sv "Plan" :en "Plan")]
             (fact "Update and open: no review, but a plan"
               (command sipoo :update-and-open-verdict-template
-                       :lang :sv
                        :template-id template-id)
-              => (contains {:draft (just {:plans {(keyword plan-id) {:text "Plan"}}})}))
+              => (contains {:draft (just {:plans {(keyword plan-id) {:text-fi "Suunnitelma"
+                                                                     :text-sv "Plan"
+                                                                     :text-en "Plan"}}})}))
             (fact "Remove plan"
               (command sipoo :save-verdict-template-settings-value
                        :category :r
@@ -736,19 +618,19 @@
         plan4                (add-plan :fi "S4" :sv "P4" :en "P4")
         {template-id :id
          draft       :draft} (init-verdict-template sipoo :r)
-        good-condition       (add-template-condition template-id "Good condition")
-        empty-condition      (add-template-condition template-id nil)
-        blank-condition      (add-template-condition template-id "    ")
-        other-condition      (add-template-condition template-id "Other condition")
-        remove-condition     (add-template-condition template-id "Remove condition")]
+        good-condition       (add-template-condition sipoo template-id "Good condition")
+        empty-condition      (add-template-condition sipoo template-id nil)
+        blank-condition      (add-template-condition sipoo template-id "    ")
+        other-condition      (add-template-condition sipoo template-id "Other condition")
+        remove-condition     (add-template-condition sipoo template-id "Remove condition")]
     (fact "Remove condition"
-      (remove-template-condition template-id remove-condition))
+      (remove-template-condition sipoo template-id remove-condition))
     (fact "Full template without attachments"
       (command sipoo :set-verdict-template-name
                :template-id template-id
                :name "Full template") => ok?)
 
-    (set-template-draft-values template-id
+    (set-template-draft-values sipoo template-id
                                :language "fi"
                                :verdict-dates ["julkipano" "anto"
                                                "muutoksenhaku" "lainvoimainen"
@@ -840,9 +722,6 @@
               (command sonja :new-pate-verdict-draft
                        :id app-id :template-id template-id)
               => (err :error.pate-disabled))
-            (fact "Pate verdict tab pseudo query fails"
-              (query sonja :pate-verdict-tab :id app-id)
-              => (err :error.pate-disabled))
             (fact "Enable Pate in Sipoo"
               (toggle-sipoo-pate true)
               (query sonja :pate-verdict-tab :id app-id) => ok?)
@@ -916,13 +795,13 @@
                       => empty?)
                     (let [good-id  (keyword (get conditions "Good condition"))
                           other-id (keyword (get conditions "Other condition"))
-                          new-id   (add-verdict-condition app-id verdict-id "New condition")]
-                      (check-verdict-conditions app-id verdict-id
+                          new-id   (add-verdict-condition sonja app-id verdict-id "New condition")]
+                      (check-verdict-conditions sonja app-id verdict-id
                                                 good-id "Good condition"
                                                 other-id "Other condition"
                                                 new-id "New condition")
-                      (remove-verdict-condition app-id verdict-id new-id)
-                      (check-verdict-conditions app-id verdict-id
+                      (remove-verdict-condition sonja app-id verdict-id new-id)
+                      (check-verdict-conditions sonja app-id verdict-id
                                                 good-id "Good condition"
                                                 other-id "Other condition"))))
                 (fact "Statements in the verdict draft"
@@ -968,7 +847,7 @@
                       foremen => (just ["vastaava-tj" "iv-tj" "erityis-tj"] :in-any-order))
                     (fact "Reviews"
                       reviews =>  (just [{:id   (find-review-id references "Helsinki")
-                                          :fi "Helsinki" :sv "Stockholm" :en "London"
+                                          :fi   "Helsinki" :sv "Stockholm" :en "London"
                                           :type "rakennekatselmus"}
                                          {:id   (find-review-id references "K3") :fi "K3" :sv "S3" :en "R3"
                                           :type "pohjakatselmus"}] :in-any-order))
@@ -1320,7 +1199,9 @@
                                             [["muutoksenhaku"] (timestamp "22.1.2018")]
                                             [["voimassa"] (timestamp "28.1.2021")]])))
                         (facts "Add attachment to verdict draft"
-                          (let [attachment-id (add-verdict-attachment app-id verdict-id "Paatosote")]
+                          (let [{:keys [attachment-id]} (add-verdict-attachment app-id
+                                                                                verdict-id
+                                                                                "Paatosote")]
                             (fact "Attachment can be deleted"
                               (command sonja :delete-attachment :id app-id
                                        :attachmentId attachment-id)=> ok?)))
@@ -1330,11 +1211,11 @@
                         (fact "Add required verdict date"
                           (edit-verdict "verdict-date" verdict-date) => no-errors?)
                         (facts "Add attachment to verdict draft again. Add regular attachment to the application, too. Add pseudo verdict attachment"
-                          (let [attachment-id (add-verdict-attachment app-id verdict-id "Otepaatos")
-                                regular-id    (add-attachment app-id "Lupa lausua"
-                                                              "ennakkoluvat_ja_lausunnot" "suunnittelutarveratkaisu")
-                                pseudo-id     (add-attachment app-id "sotaaP"
-                                                              "paatoksenteko" "paatos")]
+                          (let [{:keys [attachment-id]}     (add-verdict-attachment app-id verdict-id "Otepaatos")
+                                {regular-id :attachment-id} (add-attachment app-id "Lupa lausua"
+                                                                            "ennakkoluvat_ja_lausunnot" "suunnittelutarveratkaisu")
+                                {pseudo-id :attachment-id}  (add-attachment app-id "sotaaP"
+                                                                            "paatoksenteko" "paatos")]
                             (fact "Regular, pseudo and bogus-ids as application attachments"
                               (edit-verdict "attachments" [regular-id "bogus-id" pseudo-id])
                               => no-errors?)
@@ -1426,10 +1307,23 @@
                         (check-post-verdict-building-data (query-application sonja app-id)
                                                           doc-id operation-id)))))
                 (fact "Verdict draft to be deleted"
-                  (let  [{verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
-                                                           :id app-id
-                                                           :template-id template-id)
-                         {verdict :verdict}       (query sonja :pate-verdict
-                                                         :id app-id
-                                                         :verdict-id verdict-id)]
-                    (add-attachment-to-verdict-draft verdict app-id)))))))))))
+                  (let [{verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
+                                                          :id app-id
+                                                          :template-id template-id)
+                        {verdict :verdict}       (query sonja :pate-verdict
+                                                        :id app-id
+                                                        :verdict-id verdict-id)
+                        {:keys [attachment-id
+                                file-id]}        (add-verdict-attachment app-id
+                                                                         verdict-id
+                                                                         "Hello world!")]
+                    (check-file file-id true)
+                    (fact "Modern verdict cannot be deleted with legacy command"
+                      (command sonja :delete-legacy-verdict :id app-id
+                               :verdict-id verdict-id) => fail?)
+                    (fact "Deleting verdict deletes its attachment"
+                      (command sonja :delete-pate-verdict :id app-id
+                               :verdict-id verdict-id) => ok?
+                      (util/find-by-id attachment-id (:attachments (query-application sonja app-id)))
+                      => nil?
+                      (check-file file-id false))))))))))))

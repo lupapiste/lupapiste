@@ -690,3 +690,8 @@
     => empty?
 
     (provided (lupapalvelu.permissions/get-permissions-by-role irrelevant irrelevant) => irrelevant :times 0)))
+
+(fact "anonymized-user gives anonymous values for all fields that should get them"
+  (every? (partial contains? (#'lupapalvelu.user/anonymized-user "foo"))
+          (for [[k v] @#'lupapalvelu.user/erasure-strategy :when (= v :anonymize)] k))
+  => true)

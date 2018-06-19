@@ -1,23 +1,24 @@
 (ns lupapalvelu.autom-assignments-for-verdicts-and-reviews-itest
-  (:require [clojure.test :refer :all]
-            [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer [$set]]
-            [lupapalvelu.fixture.core :as fixture]
-            [lupapalvelu.itest-util :refer :all]
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer :all]
             [midje.sweet :refer :all]
-            [sade.core :refer [now]]
-            [lupapalvelu.fixture.minimal :as minimal]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.batchrun :as batchrun]
-            [sade.http :as http]
-            [sade.xml :as sxml]
-            [sade.strings :as ss]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [monger.operators :refer [$set]]
+            [ring.util.response :as resp]
             [schema.core :as sc]
+            [sade.core :refer [now]]
+            [sade.http :as http]
+            [sade.strings :as ss]
+            [sade.xml :as sxml]
+            [lupapalvelu.batchrun :as batchrun]
+            [lupapalvelu.batchrun.fetch-verdict]
+            [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.fixture.minimal :as minimal]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
-            [clojure.java.io :as io]
-            [ring.util.response :as resp])
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader])
   (:import (java.net URL)))
 
 (def db-name (str "test_autom-assignments-for-verd-and-rev-itest_" (now)))
@@ -81,7 +82,7 @@
           (:state (query-application local-query sonja app-id)) => "sent")
 
         (fact "batchrun creates assignments"
-          (let [batchrun-result (batchrun/fetch-verdicts)
+          (let [_ (fetch-verdicts)
                 assignments (get-assignments)]
             (fact "one attachment creates one assignment"
                  (count assignments) => 1)
@@ -92,7 +93,7 @@
             (fact "assignment came from the correct trigger"
                  (:trigger (first assignments)) => (:id verdict-assignment-trigger))) => truthy
 
-      (provided (permit/fetch-xml-from-krysp anything anything anything anything anything anything)
+      (provided (permit/fetch-xml-from-krysp "R" anything anything anything anything anything)
                 => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
                         (ss/replace #"LP-186-2014-90009" app-id)
                         (sxml/parse-string "utf-8"))

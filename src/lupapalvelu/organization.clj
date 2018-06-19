@@ -16,10 +16,11 @@
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
-            [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase]]
             [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.wfs :as wfs]
             [lupapiste-commons.archive-metadata-schema :as archive-schema]
             [lupapiste-commons.attachment-types :as attachment-types]
@@ -234,6 +235,7 @@
    (sc/optional-key :tags) [Tag]
    (sc/optional-key :validate-verdict-given-date) sc/Bool
    (sc/optional-key :automatic-review-fetch-enabled) sc/Bool
+   (sc/optional-key :only-use-inspection-from-backend) sc/Bool
    (sc/optional-key :vendor-backend-redirect) {(sc/optional-key :vendor-backend-url-for-backend-id) ssc/OptionalHttpUrl
                                                (sc/optional-key :vendor-backend-url-for-lp-id)      ssc/OptionalHttpUrl}
    (sc/optional-key :use-attachment-links-integration) sc/Bool
@@ -253,7 +255,8 @@
    (sc/optional-key :pate-enabled)                 sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
    (sc/optional-key :local-bulletins-page-settings) LocalBulletinsPageSettings
-   (sc/optional-key :default-digitalization-location) {:x sc/Str :y sc/Str}})
+   (sc/optional-key :default-digitalization-location) {:x sc/Str :y sc/Str}
+   (sc/optional-key :remove-handlers-from-reverted-draft) sc/Bool})
 
 
 (sc/defschema SimpleOrg
@@ -276,6 +279,14 @@
     (if (:krysp org)
       (update org :krysp #(into {} (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]) %)))
       org)))
+
+(def admin-projection
+  [:name :scope :allowedAutologinIPs :krysp
+   :pate-enabled :permanent-archive-enabled :permanent-archive-in-use-since
+   :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
+   :docstore-info :3d-map :default-digitalization-location
+   :kopiolaitos-email :kopiolaitos-orderer-address :kopiolaitos-orderer-email :kopiolaitos-orderer-phone
+   :app-required-fields-filling-obligatory ])
 
 (defn get-organizations
   ([]
@@ -326,6 +337,17 @@
 
 (defn pate-org? [org-id]
   (pos? (mongo/count :organizations {:_id org-id :pate-enabled true})))
+
+(defn krysp-urls-not-set?
+  "Takes organization as parameter.
+  Returns true if organization has 0 non-blank krysp urls set."
+  [{krysp :krysp}]
+  (every? (fn [[_ conf]] (ss/blank? (:url conf))) krysp))
+
+(def some-krysp-url?
+  "Takes organization as parameter.
+  Returns true if some of the krysp configs has non-blank url set, else false."
+  (complement krysp-urls-not-set?))
 
 (defn encode-credentials
   [username password]
@@ -931,3 +953,17 @@
                        {$set {:docstore-info.documentRequest.enabled enabled
                               :docstore-info.documentRequest.instructions instructions
                               :docstore-info.documentRequest.email email}}))
+
+(defn check-docstore-enabled [{user :user}]
+  (when-not (-> user
+                roles/authority-admins-organization-id
+                get-docstore-info-for-organization!
+                :docStoreInUse)
+    (fail :error.docstore-not-enabled)))
+
+(defn check-docterminal-enabled [{user :user}]
+  (when-not (-> user
+                roles/authority-admins-organization-id
+                get-docstore-info-for-organization!
+                :docTerminalInUse)
+    (fail :error.docterminal-not-enabled)))

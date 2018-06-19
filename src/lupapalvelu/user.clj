@@ -13,7 +13,7 @@
             [lupapalvelu.user-enums :as user-enums]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [sade.core :refer [ok fail fail! now]]
+            [sade.core :refer [def- ok fail fail! now]]
             [sade.env :as env]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
@@ -59,9 +59,8 @@
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
-(defschema Authz (sc/either (sc/pred string? "Authz access right")
-                            (sc/pred keyword? "Authz access right")))
-(defschema OrgAuthz {OrgId (sc/either [Authz] #{Authz})})
+(defschema Authz (sc/cond-pre sc/Str sc/Keyword))
+(defschema OrgAuthz {OrgId (sc/cond-pre [Authz] #{Authz})})
 (defschema PersonIdSource (sc/enum "identification-service" "user"))
 
 (defschema User
@@ -72,6 +71,7 @@
    :email                                     ssc/Email
    :username                                  ssc/Username
    :enabled                                   sc/Bool
+   (sc/optional-key :state)                   (sc/enum "erased")
    (sc/optional-key :private)                 {(sc/optional-key :password) sc/Str
                                                (sc/optional-key :apikey)   sc/Str}
    (sc/optional-key :orgAuthz)                OrgAuthz
@@ -272,6 +272,11 @@
     nil
     (fail :error.unauthorized :desc "user is not an authority")))
 
+(defn user-in-state? [expected-state {:keys [state]}]
+  (true? (and state (= (name state) expected-state))))
+
+(def erased? (partial user-in-state? "erased"))
+
 (defn organization-ids
   "Returns user's organizations as a set of strings"
   [{org-authz :orgAuthz :as user}]
@@ -288,23 +293,9 @@
   ([user projection]
    (org/get-organizations {:_id {$in (organization-ids user)}} projection)))
 
-(defn organization-ids-by-roles
-  "Returns a set of organization IDs where user has given roles.
-  Note: the user must have gone through with-org-auth (the orgAuthz
-  must be keywords)."
-  [{org-authz :orgAuthz :as user} roles]
-  {:pre [(set? roles) (every? keyword? roles)]}
-  (->> org-authz
-       (filter (fn [[org org-roles]] (some roles org-roles)))
-       (map (comp name first))
-       set))
+(def organization-ids-by-roles roles/organization-ids-by-roles)
 
-(defn authority-admins-organization-id [user]
-  ; TODO: user can have multiple orgz
-  (let [[org & more] (organization-ids-by-roles user #{:authorityAdmin})]
-    (when (seq more)
-      (throw (ex-info "user is authorityAdmin in multiple organizations, somebody needs to implement this" {:user user})))
-    org))
+(def authority-admins-organization-id roles/authority-admins-organization-id)
 
 (defn authority-admins-organization
   "Organization for the authority admin user."
@@ -397,8 +388,9 @@
                 query)]
     query))
 
-(defn find-user [query]
-  (mongo/select-one :users (user-query query)))
+(defn find-user
+  ([query]            (mongo/select-one :users (user-query query)))
+  ([query projection] (mongo/select-one :users (user-query query) projection)))
 
 (defn find-users
   ([query]
@@ -507,8 +499,9 @@
 ;; ==============================================================================
 ;;
 
-(defn get-user [q]
-  (non-private (find-user q)))
+(defn get-user
+  ([q] (non-private (find-user q)))
+  ([q projection] (non-private (find-user q projection))))
 
 (defn get-users
   ([q]
@@ -516,9 +509,11 @@
   ([q order-by]
    (map non-private (find-users q order-by))))
 
-(defn get-user-by-id [id]
-  {:pre [id]}
-  (get-user {:id id}))
+(defn get-user-by-id
+  ([id] {:pre [id]}
+   (get-user {:id id}))
+  ([id projection] {:pre [id]}
+   (get-user {:id id} projection)))
 
 (defn get-user-by-id!
   "Get user or throw fail!"
@@ -869,6 +864,50 @@
   (mongo/remove-many :users
                      {:_id  user-id
                       :role "dummy"}))
+
+
+;;
+;; ==============================================================================
+;; Erase user information
+;; ==============================================================================
+;;
+
+(def- erasure-strategy
+  (into {}
+        (map (fn [[k _]]
+               (cond
+                 ;; Retain id and role, anonymize other compulsory fields:
+                 (contains? #{:id :role} k) [k :retain]
+                 (not (sc/optional-key? k)) [k :anonymize]
+
+                 ;; Anonymize state, remove other optional fields:
+                 (= (:k k) :state)          [(:k k) :anonymize]
+                 :else [(:k k) :remove])))
+        User))
+
+(defn- anonymized-user [user-id]
+  (let [email (str "poistunut_" user-id "@example.com")]
+    {:firstName "Poistunut"
+     :lastName "K\u00e4ytt\u00e4j\u00e4"
+     :email email
+     :username email
+     :enabled false
+     :state "erased"}))
+
+(def- erasure-unsetter
+  (into {} (for [[k v] erasure-strategy :when (= v :remove)] [k ""])))
+
+(defn erase-user
+  "Erases/anonymizes user information but retains the user record in database. Returns nil."
+  [user-id]
+  ;; Remove attachment files:
+  (doseq [{:keys [attachment-id]} (:attachments (get-user-by-id user-id {:attachments 1}))]
+    (mongo/delete-file {:id attachment-id, :metadata.user-id user-id}))
+
+  ;; Erase user record:
+  (mongo/update-by-id :users user-id
+    {$set   (anonymized-user user-id)
+     $unset erasure-unsetter}))
 
 ;;
 ;; ==============================================================================

@@ -2,13 +2,13 @@
   "Attachments related components and utilities for Pate."
   (:require [clojure.set :as set]
             [clojure.string :as s]
+            [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.attachment.components :as att]
             [lupapalvelu.ui.attachment.file-upload :as upload]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.pate.components :as pate-components]
-            [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
             [lupapalvelu.ui.rum-util :as rum-util]
@@ -115,7 +115,7 @@
                              :contents
                              (map #(path/loc :attachments.contents %))
                              sort
-                             (map #(hash-map :text % :value %)))
+                             (map #(hash-map :text %)))
             default (if (<= (count items) 1)
                       (or (-> items first :text)
                           (type-loc type))
