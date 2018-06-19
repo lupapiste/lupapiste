@@ -278,9 +278,10 @@
 (defcommand update-user
   {:input-validators [validate-updatable-user]
    :pre-checks       [validate-person-id-update-is-allowed!]
-   :permissions      [{:required [:users/update]}]}
+   :permissions      [{:required [:users/update-own-data]}]
+   :description      "User can update own data, but only restricted fields."}
   [{caller :user {person-id :personId :as user-data} :data :as command}]
-  (let [email     (ss/canonize-email (or (:email user-data) (:email caller)))
+  (let [email     (ss/canonize-email (or (:email user-data) (:email caller))) ; TODO: seems like :email from user-data can be removed (UserUpdate schema)
         user-data (assoc user-data :email email)]
     (validate-update-user! caller user-data)
     (if (= 1 (mongo/update-n :users {:email email} {$set (cond-> (select-keys user-data user-data-editable-fields)
