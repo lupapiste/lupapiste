@@ -13,7 +13,8 @@
             [sade.schema-generators :as ssg]
             [lupapalvelu.itest-util :as itu :refer [pena]]
 
-            [lupapalvelu.integrations.allu :as allu :refer [PlacementContract]]))
+            [lupapalvelu.integrations.allu :as allu
+             :refer [ALLUPlacementContracts create-contract! ->LocalMockALLU PlacementContract]]))
 
 ;;; FIXME: vary :operation
 
@@ -35,8 +36,9 @@
                                :permitSubtype permitSubtype}})
     response))
 
-(defn- checking-succeeding-creation-post! [sent-allu-requests]
-  (fn [endpoint request]
+(deftype CheckingALLU [inner]
+  ALLUPlacementContracts
+  (create-contract! [_ endpoint request]
     (fact "endpoint is correct"
       endpoint => (str (env/value :allu :url) "/placementcontracts"))
 
@@ -45,9 +47,11 @@
       (:content-type request) => :json
       (-> request :body (json/decode true)) => #(nil? (sc/check PlacementContract %)))
 
-    (let [allu-id @sent-allu-requests]
-      (swap! sent-allu-requests inc)
-      {:status 200, :body (str allu-id)})))
+    (create-contract! inner endpoint request)))
+
+(deftype ConstALLU [response]
+  ALLUPlacementContracts
+  (create-contract! [_ _ _] response))
 
 ;;;; Actual Tests
 ;;;; ===================================================================================================================
@@ -57,8 +61,7 @@
     (lupapalvelu.fixture.core/apply-fixture "minimal")
 
     (let [sent-allu-requests (atom 0)]
-      (mount/start-with {#'allu/allu-instance
-                         (allu/->ALLUService (checking-succeeding-creation-post! sent-allu-requests))})
+      (mount/start-with {#'allu/allu-instance (->CheckingALLU (->LocalMockALLU sent-allu-requests))})
 
       (fact "enabled and sending correctly to ALLU for Helsinki YA sijoituslupa and sijoitussopimus."
         (doseq [permitSubtype ["sijoituslupa" "sijoitussopimus"]]
@@ -85,15 +88,13 @@
         @sent-allu-requests => 0))
 
     (fact "error responses from ALLU produce `fail!`ures"
-      (mount/start-with {#'allu/allu-instance
-                         (allu/->ALLUService (constantly {:status 400, :body "Your data was bad."}))})
+      (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 400, :body "Your data was bad."})})
 
       (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
         (itu/local-command pena :submit-application :id id) => {:ok   false, :text "error.allu.malformed-application"
                                                                 :body "Your data was bad."})
 
-      (mount/start-with {#'allu/allu-instance
-                         (allu/->ALLUService (constantly {:status 401, :body "You are unauthorized."}))})
+      (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 401, :body "You are unauthorized."})})
 
       (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
         (itu/local-command pena :submit-application :id id) => {:ok     false, :text "error.allu.http"

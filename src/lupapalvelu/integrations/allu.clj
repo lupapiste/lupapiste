@@ -20,6 +20,8 @@
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
 
+;;;; FIXME: An actual UI-filled application fails here because the `dds` schemas are a bit off.
+
 ;;;; Constants
 ;;;; ===================================================================================================================
 
@@ -312,23 +314,30 @@
     (fail! :error.allu.http :status status :body body)))
 
 (defprotocol ALLUPlacementContracts
-  (create-contract! [self application]
-    "Create placement contract in ALLU. Returns ALLU id for the contract.
+  (create-contract! [self endpoint request]))
 
-    Can `sade.core/fail!` with
-    * :error.allu.malformed-application - Application is malformed according to ALLU.
-    * :error.allu.http :status _ :body _ - An HTTP error. Probably due to a bug or connection issues."))
-
-(deftype ALLUService [http-post]
+(deftype RemoteALLU []
   ALLUPlacementContracts
-  (create-contract! [_ app]
-    ;; Essentially `placement-creation-request` wrapped into side effects (env reads, HTTP I/O, fail!).
-    (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)]
-      (handle-placement-contract-response (http-post endpoint request)))))
+  (create-contract! [_ endpoint request] (http/post endpoint request)))
 
-;; TODO: Use some mock in dev mode
+(deftype LocalMockALLU [current-id]
+  ALLUPlacementContracts
+  (create-contract! [_ _ {placement-contract :body}]
+    (if-let [validation-error (sc/check PlacementContract (json/decode placement-contract true))]
+      {:status 400, :body validation-error}
+      {:status 200, :body (str (swap! current-id inc))})))
+
 (defstate allu-instance
-  :start (->ALLUService http/post))
+  :start (if (env/dev-mode?)
+           (->LocalMockALLU (atom 0))
+           (->RemoteALLU)))
 
-(defn create-placement-contract! [app]
-  (create-contract! allu-instance app))
+(defn create-placement-contract!
+  "Create placement contract in ALLU. Returns ALLU id for the contract.
+
+  Can `sade.core/fail!` with
+  * :error.allu.malformed-application - Application is malformed according to ALLU.
+  * :error.allu.http :status _ :body _ - An HTTP error. Probably due to a bug or connection issues."
+  [app]
+  (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)]
+    (handle-placement-contract-response (create-contract! allu-instance endpoint request))))
