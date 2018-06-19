@@ -74,13 +74,12 @@
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
 
-        ;; structures (-> xml krysp-reader/->rakennelmatieto conversion-util/rakennelmatieto->kaupunkikuvatoimenpide)
-
         created-application (-> created-application
                                 (update-in [:documents] concat other-building-docs new-parties)
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :opened (:created command)))
 
+        ;; structures (-> xml krysp-reader/->rakennelmatieto conversion-util/rakennelmatieto->kaupunkikuvatoimenpide)
         ;; validation-result (model/validate created-application structures)
 
         ;; attaches the new application, and its id to path [:data :id], into the command
@@ -101,7 +100,7 @@
 
       (let [updated-application (mongo/by-id :applications (:id created-application))
             {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml)
-            review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-udpates")
+            review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-updates")
             update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id)]
         (if (:ok update-result)
           (info "Saved review updates")
