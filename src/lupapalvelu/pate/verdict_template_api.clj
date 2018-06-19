@@ -137,7 +137,8 @@
                               (map template/verdict-template-summary))))
 
 (defquery verdict-template-categories
-  {:description "Categories for the user's organization"
+  {:description "Categories for the user's organization. Does not
+   include legacy-only categories."
    :feature     :pate
    :user-roles  #{:authorityAdmin}
    :pre-checks  [pate-enabled]}
@@ -298,3 +299,14 @@
   (template/set-operation-verdict-template (usr/authority-admins-organization-id user)
                                            operation
                                            template-id))
+
+(defquery selectable-verdict-templates
+  {:description "Returns a map of where keys are permit types or
+  operation names and templates (id, name pairs) are values. Permit
+  types that are missing are not supported by Pate verdict template
+  mechanism."
+   :feature    :pate
+   :user-roles #{:authorityAdmin}
+   :pre-checks [pate-enabled]}
+  [command]
+  (ok :items (template/selectable-verdict-templates (template/command->organization command))))

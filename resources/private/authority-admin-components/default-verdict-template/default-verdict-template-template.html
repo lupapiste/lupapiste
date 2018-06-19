@@ -1,5 +1,7 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="default-verdict-template-template">
+  <!-- ko if: pateSupported -->
+  <!-- ko ifnot: _.isEmpty( templates() ) -->
   <select class="dropdown"
           data-bind="options: templates,
                      optionsCaption: loc('notSelected'),
@@ -7,4 +9,10 @@
                      optionsValue: 'id',
                      value: value,
                      testId: testId"></select>
+  <!-- /ko -->
+  <!-- ko if: _.isEmpty( templates()) -->
+  <span data-bind="ltext: 'pate.no-operation-templates',
+                   testId: 'no-' + testId"></span>
+  <!-- /ko -->
+  <!-- /ko -->
 </script>

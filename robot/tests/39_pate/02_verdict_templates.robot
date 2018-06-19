@@ -12,6 +12,9 @@ Sipoo admin logs in
   Sipoo logs in
   Go to page  pate-verdict-templates
 
+Only Pate-supported categories are selectable
+  Test id select values are  category-select  p  r  tj
+
 No templates yet, let's create new one
   Wait test id visible  add-template
   No templates

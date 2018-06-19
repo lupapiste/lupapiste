@@ -72,6 +72,24 @@
     (check-unique-section-ids (:sections schema))
     schema))
 
+;; Categories that are supported by the verdict template mechanism.
+(def pate-categories   #{:r :tj :p :ya :contract})
+;; Categories that are only supported by the legacy mechanism.
+(def legacy-categories #{:kt :ymp})
+(def all-categories (set/union pate-categories legacy-categories))
+
+(defn pate-category?
+  "True if the given category is supported by Pate verdict template
+  mechanism."
+  [category]
+  (contains? pate-categories (keyword category)))
+
+(defn legacy-category?
+  "True if the given category is supported _only_ by legacy verdict
+  mechanism."
+  [category]
+  (contains? legacy-categories (keyword category)))
+
 (defn- lowkeyword [s]
   (some-> s name s/lower-case keyword))
 
@@ -87,6 +105,11 @@
       (#{:kt :mm} kw)                [:kt]
       (#{:yi :yl :ym :vvvl :mal} kw) [:ymp])))
 
+(defn category->permit-type
+  "Default permit type for pate category. :tj, :contract and legacy category permit
+  types are nil."
+  [category]
+  (get {:r "R" :p "P" :ya "YA"} (keyword category)))
 
 (defn permit-subtype->category [permit-subtype]
   (when-let [kw (lowkeyword permit-subtype)]
@@ -94,10 +117,10 @@
       (= kw :tyonjohtaja-hakemus) :tj
       (= kw :sijoitussopimus)     :contract)))
 
+(def operation-categories {:tyonjohtajan-nimeaminen-v2 :tj})
+
 (defn category-by-operation [operation]
-  (when-let [kw (lowkeyword operation)]
-    (cond
-      (#{:tyonjohtajan-nimeaminen-v2} kw) :tj)))
+  (get operation-categories (lowkeyword operation)))
 
 (defn application->category [{:keys [permitType permitSubtype]}]
   (or (permit-subtype->category permitSubtype)
