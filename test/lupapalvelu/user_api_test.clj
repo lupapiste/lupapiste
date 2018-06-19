@@ -14,20 +14,13 @@
 ;; ==============================================================================
 ;;
 
-(testable-privates lupapalvelu.user-api validate-update-user! allowed-state?)
+(testable-privates lupapalvelu.user-api allowed-state?)
 
 (fact "filter-storage-key and default-filter-storage-key keys match"
   (set (keys filter-storage-key)) => (set (keys default-filter-storage-key)))
 
 (def admin-data {:role "admin" :email "admin"})
 
-(facts "validate-update-user!"
-  (facts "admin can change only others data"
-    (fact (validate-update-user! admin-data {:email "admin"}) => unauthorized?)
-    (fact (validate-update-user! admin-data {:email "foo"})   => truthy))
-  (fact "non-admin users can change only their own data"
-    (fact (validate-update-user! {:role ..anything.. :email "foo"} {:email "foo"}) => truthy)
-    (fact (validate-update-user! {:role ..anything.. :email "foo"} {:email "bar"}) => unauthorized?)))
 
 ;;
 ;; ==============================================================================

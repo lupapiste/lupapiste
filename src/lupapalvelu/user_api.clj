@@ -248,16 +248,6 @@
                                  :architect :degree :graduatingYear :fise :fiseKelpoisuus
                                  :companyName :companyId :allowDirectMarketing :personId])
 
-(defn- validate-update-user! [caller user-data]
-  (let [caller-email (:email caller)
-        user-email   (:email user-data)]
-
-    (if (usr/admin? caller)                                                                                             ; TODO: Admin is not allowed to update userdata since restruction fromUserUpdate schema. How this should work?
-      (when (= user-email caller-email) (fail! :error.unauthorized :desc "admin may not change his/her own data"))
-      (when (not= user-email caller-email) (fail! :error.unauthorized :desc "can't edit others data")))
-
-    true))
-
 ;; Define schema for update data
 (def- UserUpdate (dissoc usr/User :id :role :email :username :enabled))
 
@@ -281,9 +271,8 @@
    :permissions      [{:required [:users/update-own-data]}]
    :description      "User can update own data, but only restricted fields."}
   [{caller :user {person-id :personId :as user-data} :data :as command}]
-  (let [email     (ss/canonize-email (or (:email user-data) (:email caller))) ; TODO: seems like :email from user-data can be removed (UserUpdate schema)
+  (let [email     (ss/canonize-email (:email caller))
         user-data (assoc user-data :email email)]
-    (validate-update-user! caller user-data)
     (if (= 1 (mongo/update-n :users {:email email} {$set (cond-> (select-keys user-data user-data-editable-fields)
                                                                  person-id (assoc :personIdSource :user))}))
       (if (= email (:email caller))
