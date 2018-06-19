@@ -62,11 +62,13 @@
      (s3/download nil file-id)
      (mongo/download-find {:_id file-id})))
   ([application file-id]
+   {:pre [(map? application) (string? file-id)]}
    (let [{:keys [storageSystem]} (find-by-file-id-from-attachments file-id (:attachments application))]
      (if (and (env/feature? :s3) (= (keyword storageSystem) :s3))
        (s3/download application-bucket (s3-id (:id application) file-id) (:id application))
        (mongo/download-find {:_id file-id}))))
   ([application-id file-id attachment]
+   {:pre [(string? application-id) (string? file-id) (map? attachment)]}
    (let [{:keys [storageSystem]} (find-by-file-id file-id attachment)]
      (if (and (env/feature? :s3) (= (keyword storageSystem) :s3))
        (s3/download application-bucket (s3-id application-id file-id) application-id)

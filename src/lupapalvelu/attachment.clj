@@ -949,7 +949,7 @@
       (warn "Attachment" (:id attachment) "mime type" (keyword contentType) "is not convertible to PDF/A")
 
       :else
-      (if-let [file-content (storage/download (:id application) fileId)]
+      (if-let [file-content (storage/download application fileId)]
         (let [{:keys [result file] :as conversion-data} (->> (update file-content :content apply [])
                                                              (conversion session-id application))]
           (if (and (:archivable result) (:fileId file))
@@ -963,7 +963,7 @@
                   (warn "Attachment" (:id attachment) "could not be converted to PDF/A."))
                 (update-latest-version-file! application attachment conversion-data (now))
                 result)))
-        (error "PDF/A conversion: No mongo file for fileId" fileId)))))
+        (error "PDF/A conversion: No file found with file id" fileId)))))
 
 (defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
   (boolean (and (states/post-verdict-states (keyword app-state))
