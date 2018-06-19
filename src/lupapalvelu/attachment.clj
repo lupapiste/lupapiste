@@ -776,18 +776,19 @@
   "Does archivability conversion, if required, for given file.
    If file was converted, uploads converted file to mongo.
    Returns map with conversion result and :file if conversion was made."
-  [user-id application filedata]
+  [user-id session-id application filedata]
   (let [conversion-result  (conversion/archivability-conversion application filedata)
         converted-filedata (when (:autoConversion conversion-result)
                              ; upload and return new fileId for converted file
                              (file-upload/save-file (select-keys conversion-result [:content :filename])
                                                     {:linked false
-                                                     :uploader-user-id user-id}))]
+                                                     :uploader-user-id user-id
+                                                     :sessionId session-id}))]
     {:result conversion-result
      :file converted-filedata}))
 
 (defn- attach!
-  [{:keys [application user]} {attachment-id :attachment-id :as attachment-options} original-filedata conversion-data]
+  [{:keys [application user]} session-id {attachment-id :attachment-id :as attachment-options} original-filedata conversion-data]
   (let [options            (merge attachment-options
                                   original-filedata
                                   (:result conversion-data)
@@ -801,7 +802,7 @@
                                                      (auth/application-authority? application user))))
         linked-version     (set-attachment-version! application user attachment options)
         {:keys [fileId originalFileId]} linked-version]
-    (storage/link-files-to-application (:id user)
+    (storage/link-files-to-application (or (:id user) session-id)
                                        (:id application)
                                        (cond-> []
                                                (not (:original-file-already-linked? attachment-options)) (conj originalFileId)
@@ -827,14 +828,20 @@
    5) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to original file)
    Returns attached version."
   [{:keys [application user session] :as command} attachment-options file-options]
-  (let [user-id           (or (:id user) (:id session) (vetuma/session-id) "system-process")
+  (let [user-id           (:id user)
+        session-id        (when-not user-id
+                            (or (:id session)
+                                (vetuma/session-id)
+                                "system-process"))
         content           (reusable-content (:content file-options))
-        original-filedata (file-upload/save-file (assoc file-options :content content) {:linked false
-                                                                                        :uploader-user-id user-id})
+        original-filedata (file-upload/save-file (assoc file-options :content content)
+                                                 {:linked false
+                                                  :uploader-user-id user-id
+                                                  :sessionId session-id})
         _                 (when (instance? ByteArrayInputStream content)
                             (.reset content))
-        conversion-data   (conversion user-id application (assoc original-filedata :content content))]
-    (attach! (assoc-in command [:user :id] user-id) attachment-options original-filedata conversion-data)))
+        conversion-data   (conversion user-id session-id application (assoc original-filedata :content content))]
+    (attach! command session-id attachment-options original-filedata conversion-data)))
 
 (defn- append-stream [zip file-name in]
   (when in
@@ -951,7 +958,7 @@
       :else
       (if-let [file-content (storage/download application fileId)]
         (let [{:keys [result file] :as conversion-data} (->> (update file-content :content apply [])
-                                                             (conversion session-id application))]
+                                                             (conversion nil session-id application))]
           (if (and (:archivable result) (:fileId file))
             ; If the file is already valid PDF/A, there's no conversion and thus no fileId
             (do (update-latest-version-file! application attachment conversion-data (now))

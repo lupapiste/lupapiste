@@ -142,7 +142,7 @@
 ;; LINK
 
 (defn link-files-to-application [user-or-session-id app-id file-ids]
-  {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids app-id))]}
+  {:pre [(seq file-ids) (not-any? ss/blank? (conj file-ids app-id user-or-session-id))]}
   (if (env/feature? :s3)
     (do (doseq [file-id file-ids]
           (s3/move-file-object unlinked-bucket

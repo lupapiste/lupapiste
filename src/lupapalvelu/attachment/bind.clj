@@ -43,7 +43,7 @@
     (util/contains-value? config-by-group (keyword typeId))))
 
 (defn bind-single-attachment! [{:keys [application user created]} unlinked-file {:keys [fileId type attachmentId contents] :as filedata} exclude-ids]
-  (let [conversion-data       (att/conversion (:id user) application (assoc unlinked-file :content ((:content unlinked-file))))
+  (let [conversion-data       (att/conversion (:id user) nil application (assoc unlinked-file :content ((:content unlinked-file))))
         is-authority          (usr/user-is-authority-in-organization? user (:organization application))
         automatic-ok-enabled  (org/get-organization-auto-ok (:organization application))
         placeholder-id        (or attachmentId
