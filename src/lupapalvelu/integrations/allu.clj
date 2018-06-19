@@ -20,7 +20,8 @@
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
 
-;;;; # Constants
+;;;; Constants
+;;;; ===================================================================================================================
 
 (def- lang
   "The language to use when localizing output to ALLU"
@@ -28,7 +29,8 @@
 
 (def- WGS84-URN "EPSG:4326")
 
-;;;; # Schemas
+;;;; Schemas
+;;;; ===================================================================================================================
 
 (defschema RegistryKey
   "Henkil\u00f6- tai Y-tunnus"
@@ -105,6 +107,7 @@
    :type                             CustomerType})
 
 (defschema FeaturelessGeoJSON-2008
+  "A GeoJSON object that is not a Feature or a FeatureCollection."
   (sc/conditional
     geo/point? (geo/with-crs geo/Point)
     geo/multi-point? (geo/with-crs geo/MultiPoint)
@@ -146,7 +149,8 @@
    :startTime                                   (date-string :date-time-no-ms)
    (optional-key :workDescription)              NonBlankStr})
 
-;;;; ## Lupapiste applications
+;;;; Lupapiste applications
+;;;; -------------------------------------------------------------------------------------------------------------------
 
 (defschema FinnishMunicipalityCode
   "Three digit Finnish municipality code"
@@ -166,11 +170,13 @@
    :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
    :drawings         [{:geometry-wgs84 geo/SingleGeometry}]})
 
-;;;; # Cleaning up :value indirections
+;;;; Cleaning up :value indirections
+;;;; ===================================================================================================================
 
 (def- flatten-values (partial postwalk (some-fn :value identity)))
 
-;;;; # Application conversion
+;;;; Application conversion
+;;;; ===================================================================================================================
 
 ;;; FIXME: use :schema-info :name instead of :subtype
 
@@ -193,16 +199,14 @@
    :postalCode    postinumero
    :streetAddress {:streetName katu}})
 
-(defmulti ^:private doc->customer (fn [_payee doc] (-> doc :data :_selected)))
-
-(defmethod doc->customer "henkilo" [_ {{{:keys [osoite], {:keys [hetu] :as person} :henkilotiedot} :henkilo} :data}]
+(defn- person->customer [{:keys [osoite], {:keys [hetu] :as person} :henkilotiedot}]
   {:type          "PERSON"
    :registryKey   hetu
    :name          (fullname person)
    :country       (address-country osoite)
    :postalAddress (convert-address osoite)})
 
-(defmethod doc->customer "yritys" [payee? {{company :yritys} :data}]
+(defn- company->customer [payee? company]
   (let [{:keys                                                 [osoite liikeJaYhteisoTunnus yritysnimi]
          {:keys [verkkolaskuTunnus ovtTunnus valittajaTunnus]} :verkkolaskutustieto} company
         customer {:type          "COMPANY"
@@ -216,16 +220,18 @@
                       :ovt (if (seq ovtTunnus) ovtTunnus verkkolaskuTunnus))
       customer)))
 
+(defn- doc->customer [payee? {{tag :_selected :as data} :data}]
+  (case tag
+    "henkilo" (person->customer (:henkilo data))
+    "yritys" (company->customer payee? (:yritys data))))
+
 (defn- person->contact [{:keys [henkilotiedot], {:keys [puhelin email]} :yhteystiedot}]
   {:name (fullname henkilotiedot), :phone puhelin, :email email})
 
-(defmulti ^:private customer-contact (comp :_selected :data))
-
-(defmethod customer-contact "henkilo" [{{person :henkilo} :data}]
-  person)
-
-(defmethod customer-contact "yritys" [{{company :yritys} :data}]
-  (:yhteyshenkilo company))
+(defn- customer-contact [{{tag :_selected :as data} :data}]
+  (case tag
+    "henkilo" (:henkilo data)
+    "yritys" (-> data :yritys :yhteyshenkilo)))
 
 (defn- convert-applicant [applicant-doc]
   {:customer (doc->customer false applicant-doc)
@@ -250,8 +256,7 @@
 
 (def- format-date-time (partial tf/unparse (tf/formatters :date-time-no-ms)))
 
-(defn- convert-value-flattened-app
-  [{:keys [id propertyId documents] :as app}]
+(defn- convert-value-flattened-app [{:keys [id propertyId documents] :as app}]
   (let [applicant-doc (first (filter #(= (doc-subtype %) :hakija) documents))
         work-description (first (filter #(= (doc-subtype %) :hankkeen-kuvaus) documents))
         payee-doc (first (filter #(= (doc-subtype %) :maksaja) documents))
@@ -284,7 +289,8 @@
     :content-type :json
     :body         (json/encode (application->allu-placement-contract app))}])
 
-;;;; # Should you use this?
+;;;; Should you use this?
+;;;; ===================================================================================================================
 
 (def- allu-organization? #{"091-YA"})
 
@@ -294,7 +300,8 @@
   (boolean (and (allu-organization? organization)
                 (allu-permit-subtype? permitSubtype))))
 
-;;;; # Effectful operations
+;;;; Effectful operations
+;;;; ===================================================================================================================
 
 ;; TODO: unit test this
 ;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.

@@ -17,6 +17,9 @@
 
 ;;; FIXME: vary :operation
 
+;;;; Refutation Utilities
+;;;; ===================================================================================================================
+
 (defn- create-and-fill-placement-app [apikey permitSubtype]
   (let [{:keys [id] :as response}
         (itu/create-local-app apikey
@@ -45,6 +48,9 @@
     (let [allu-id @sent-allu-requests]
       (swap! sent-allu-requests inc)
       {:status 200, :body (str allu-id)})))
+
+;;;; Actual Tests
+;;;; ===================================================================================================================
 
 (facts "Usage of ALLU integration in submit-application command"
   (mongo/with-db itu/test-db-name
