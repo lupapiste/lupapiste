@@ -11,29 +11,18 @@ LUPAPISTE.DefaultVerdictTemplateModel = function( params ) {
 
   var organization = params.organization;
   var operationTemplates = organization.defaultOperationVerdictTemplates;
-  var verdictTemplates = organization.verdictTemplates;
   var operation = params.operation;
+  var verdictTemplates = organization.selectableVerdictTemplates;
 
-  // Categories originally defined in pate/shared.cljc.
-  var categories = {r:   ["r"],
-                    p:   ["p"],
-                    ya:  ["ya"],
-                    kt:  ["kt", "mm"],
-                    ymp: ["yi", "yl", "ym", "vvvl", "mal"]};
-
-  var category = _.findKey( categories,
-                            function( arr ) {
-                              return _.includes( arr,
-                                                 _.toLower(operation.permitType) );
-                            });
+  self.pateSupported = self.disposedComputed( function() {
+    return organization.pateSupported( operation.permitType )
+        || organization.pateSupported( operation.id );
+  });
 
   self.templates =  self.disposedComputed( function () {
-    return _( verdictTemplates())
-    .filter( function( t ) {
-      return t.published && !t.deleted && t.category === category;
-    } )
-    .sortBy( "name")
-    .value();
+    return _.sortBy( verdictTemplates()[operation.id]
+                  || verdictTemplates()[operation.permitType],
+                     "name");
   });
 
   self.value = self.disposedComputed( {
@@ -54,5 +43,5 @@ LUPAPISTE.DefaultVerdictTemplateModel = function( params ) {
       .call();
     }});
 
-  self.testId = "template-for-" + operation;
+  self.testId = "template-for-" + operation.id;
 };

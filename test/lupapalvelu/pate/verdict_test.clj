@@ -399,7 +399,7 @@
         :seven #{:fourth}})
   (fact "Template"
     (schemas/dict-sections (:sections mock-template))
-    => {:t-one #{:t-first}
+    => {:t-one   #{:t-first}
         :t-two   #{:t-second}
         :t-three #{:t-second  :t-third}
         :t-seven #{:t-sixth}}))

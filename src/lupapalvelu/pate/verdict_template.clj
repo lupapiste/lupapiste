@@ -32,7 +32,8 @@
   (->> scope
        (map (comp schema-util/permit-type->categories :permitType))
        flatten
-       set))
+       set
+       (set/intersection schema-util/pate-categories)))
 
 (defn operation->category [operation]
   (or (schema-util/category-by-operation operation)
@@ -72,7 +73,7 @@
           (reduce-langs [target source dict]
             (reduce #(update-target %1 source dict %2)
                     target
-                    [:fi :sv :en]))]
+                    helper/supported-languages))]
     (reduce-kv (fn [acc k v]
                  (update acc k reduce-langs v :text))
                (select-keys t-rep (keys s-rep))
@@ -450,12 +451,15 @@
 
 ;; Default operation verdict templates
 
+(defn- published-available-templates [organization]
+  (->> organization
+       :verdict-templates
+       :templates
+       (remove :deleted)
+       (filter :published)))
+
 (defn operation-verdict-templates [organization]
-  (let [published (->> organization
-                       :verdict-templates
-                       :templates
-                       (remove :deleted)
-                       (filter :published)
+  (let [published (->> (published-available-templates organization)
                        (map :id)
                        set)]
     (->> organization
@@ -488,3 +492,27 @@
                  :name     name
                  :default? (= id (get operation-verdict-templates
                                       app-operation))})))))
+
+(defn selectable-verdict-templates [organization]
+  (let [published (published-available-templates organization)]
+    (->> published
+         (map (fn [{:keys [category] :as template}]
+                (assoc template
+                       :permit-type
+                       (schema-util/category->permit-type category))))
+         (filter :permit-type)
+         (group-by :permit-type)
+         (map (fn [[permit-type templates]]
+                [permit-type (map #(select-keys % [:id :name]) templates)]))
+         (into {})
+         (merge (->> (map schema-util/category->permit-type
+                          schema-util/pate-categories)
+                     (remove nil?)
+                     (map #(vector % []))
+                     (into {}))
+                (->> schema-util/operation-categories
+                     (map (fn [[operation category]]
+                            [operation (->> published
+                                            (filter #(util/=as-kw category (:category %)))
+                                            (map #(select-keys % [:name :id])))]))
+                     (into {}))))))

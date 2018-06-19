@@ -16,12 +16,12 @@
 
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
-   :category (sc/enum "r" "p" "ya" "kt" "ymp" "tj" "contract")})
+   :category (apply sc/enum (map name schema-util/all-categories))})
 
 (defschema PateTerm
-  {:fi       sc/Str
-   :sv       sc/Str
-   :en       sc/Str})
+  (->> helper/supported-languages
+      (map #(vector % sc/Str))
+      (into {})))
 
 (defschema PateDependency
   "Published settings depency of a template"
@@ -68,7 +68,7 @@
 
 (defschema PateSavedVerdictTemplates
   {(sc/optional-key :templates) [PateSavedTemplate]
-   (sc/optional-key :settings)  (->> [:r :p :ya :tj :contract]
+   (sc/optional-key :settings)  (->> schema-util/pate-categories
                                      (map #(vector (sc/optional-key %) PateSavedSettings))
                                      (into {}))})
 

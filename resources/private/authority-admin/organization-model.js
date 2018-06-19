@@ -318,13 +318,19 @@ LUPAPISTE.OrganizationModel = function () {
 
 
   // Pate verdict templates
-  self.verdictTemplates = ko.observableArray( [] );
+  self.pateEnabled = function() {
+    return authorizationModel.ok("pate-enabled");
+  };
+  self.selectableVerdictTemplates = ko.observable( {} );
   self.defaultOperationVerdictTemplates = ko.observable( {} );
+  self.pateSupported = function( permitTypeOrOperation ) {
+    return Boolean( self.selectableVerdictTemplates()[permitTypeOrOperation]);
+  };
 
   function refreshVerdictTemplates() {
-    ajax.query( "verdict-templates")
+    ajax.query( "selectable-verdict-templates")
     .success( function( res ) {
-      self.verdictTemplates( _.get( res, "verdict-templates", [] )  );
+      self.selectableVerdictTemplates( _.get( res, "items", {} ));
     })
     .call();
     ajax.query( "default-operation-verdict-templates")
@@ -473,7 +479,7 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.assignmentTriggers( _.get( organization, "assignment-triggers", []));
 
-    if( authorizationModel.ok("pate-enabled")) {
+    if( self.pateEnabled() ) {
       refreshVerdictTemplates();
     }
     self.initialized = true;

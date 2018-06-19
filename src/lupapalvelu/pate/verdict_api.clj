@@ -133,6 +133,15 @@
       (Thread/sleep 2000)
       (fail :error.password))))
 
+(defn- legacy-category
+  "Precheck that fails if the application category is not (always) legacy."
+  [{:keys [application]}]
+  (when (some-> application
+                schema-util/application->category
+                schema-util/legacy-category?
+                false?)
+    (fail :error.invalid-category)))
+
 (defmethod action/allowed-actions-for-category :pate-verdicts
   [command]
   (if-let [verdict-id (get-in command [:data :verdict-id])]
@@ -305,6 +314,7 @@
    :optional-parameters [replacement-id]
    :input-validators    [(partial action/non-blank-parameters [:id])]
    :pre-checks          [pate-enabled
+                         (action/not-pre-check legacy-category)
                          (template/verdict-template-check :application :published)
                          (replacement-check :replacement-id)]
    :states              states/post-submitted-states}
@@ -353,13 +363,15 @@
 ;; ------------------------------------------
 
 (defcommand new-legacy-verdict-draft
-  {:description "Composes new legacy verdict draft. Returns the
-  verdict-id."
+  {:description "Composes new legacy verdict draft. Even if Pate is
+  enabled, some categories are only supported by legacy
+  verdicts. Returns the verdict-id."
    :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [(action/not-pre-check pate-enabled)]
+   :pre-checks       [(action/some-pre-check (action/not-pre-check pate-enabled)
+                                             legacy-category)]
    :states           states/post-submitted-states}
   [command]
   (ok :verdict-id (verdict/new-legacy-verdict-draft command)))

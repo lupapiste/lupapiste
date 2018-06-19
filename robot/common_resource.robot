@@ -1732,6 +1732,10 @@ Select from test id
   [Arguments]  ${id}  ${value}
   Select from list  jquery=select[data-test-id=${id}]  ${value}
 
+Select from test id by text
+  [Arguments]  ${id}  ${text}
+  Select from list by label  jquery=select[data-test-id=${id}]  ${text}
+
 Test id select is
   [Arguments]  ${id}  ${value}
   Wait until  List selection should be  jquery=select[data-test-id=${id}]  ${value}
@@ -1746,6 +1750,12 @@ Test id select values are
   Wait test id visible  ${tid}
   @{vals}=  Get list items  jquery=[data-test-id=${tid}]  values=True
   Should be true  @{vals} == @{values}
+
+Test id select texts are
+  [Arguments]  ${tid}  @{texts}
+  Wait test id visible  ${tid}
+  @{vals}=  Get list items  jquery=[data-test-id=${tid}]  values=False
+  Should be true  @{vals} == @{texts}
 
 
 jQuery should match X times

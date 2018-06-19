@@ -38,7 +38,7 @@
                        :pate-verdict-template       :pate.contract.template
                        :pate.add-verdict-template   :pate.add-contract-template
                        :pate.template-not-published :pate.contract.template.not-published
-                       :pate.edit-verdict-template :pate.contract.template.edit}
+                       :pate.edit-verdict-template  :pate.contract.template.edit}
                       (keyword loc-key) loc-key)
                  loc-key)
                args)))
