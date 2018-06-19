@@ -109,7 +109,7 @@
                           :email    "testi.makinen@lupapiste.fi"
                           :password "Jepojeppis"
                           :street   "Testikatu"
-                          :zip      12345
+                          :zip      "12345"
                           :city     "Tre"
                           :phone    "123"}
 
