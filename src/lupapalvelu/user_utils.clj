@@ -73,12 +73,9 @@
     (cond
       (usr/authority? user)              user
       ;; Use existing user data if available
-      (or (nil? user) (usr/dummy? user)) (->> (merge
-                                               {:email email
-                                                :firstname ""
-                                                :lastName email}
-                                               user
-                                               {:role "authority"})
+      (or (nil? user) (usr/dummy? user)) (->> (merge {:email email}
+                                                     (dissoc user :id)
+                                                     {:role "authority"})
                                               (create-and-notify-user caller)
                                               :user))))
 

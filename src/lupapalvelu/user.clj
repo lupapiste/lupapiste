@@ -650,7 +650,7 @@
     (-> user-data
         (select-keys user-keys)
         (assoc :email email)
-        (->> (merge {:firstName "" :lastName "" :username email}))
+        (->> (merge {:firstName "" :lastName email :username email}))
         (update :role (fn [role] (if (keyword? role) (name role) role)))
         (assoc :enabled (-> user-data :enabled str (= "true"))
                :private (if password

@@ -197,12 +197,12 @@
     (fact (create-new-user-entity {:email "Foo@Foo.Foo"}) => (contains {:email     "foo@foo.foo"
                                                                         :username  "foo@foo.foo"
                                                                         :firstName ""
-                                                                        :lastName  ""
+                                                                        :lastName  "foo@foo.foo"
                                                                         :enabled   false}))
     (fact (create-new-user-entity {:email "Foo" :username "bar"}) => (contains {:email     "foo"
                                                                                 :username  "bar"
                                                                                 :firstName ""
-                                                                                :lastName  ""
+                                                                                :lastName  "foo"
                                                                                 :enabled   false})))
 
   (fact "password (if provided) is put under :private"
