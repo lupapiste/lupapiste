@@ -1,8 +1,7 @@
 (ns lupapalvelu.statement-api-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.factlet :refer [facts* fact*]]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.user-api :as user-api]))
+            [lupapalvelu.itest-util :refer :all]))
 
 (apply-remote-minimal)
 
@@ -49,9 +48,6 @@
   (some #(when (= (email-for-key apikey)
                   (-> % :person :email)) %)
         (:statements (query-application apikey application-id))))
-
-(fact "authorityAdmin can't query get-statement-givers"
-    (query sipoo :get-statement-givers) => unauthorized?)
 
 (facts "Create statement giver"
   (apply-remote-minimal)
@@ -100,6 +96,9 @@
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         statement-giver-sonja (get-statement-giver-by-email sipoo sonja-email)
         statement-giver-ronja (get-statement-giver-by-email sipoo ronja-email)]
+
+    (fact "authorityAdmin can't query get-statement-givers"
+      (query sipoo :get-statement-givers :id application-id) => not-accessible?)
 
     (fact "request one statement giver"
       (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-ronja]) => ok?
