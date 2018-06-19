@@ -516,8 +516,8 @@
   (ok))
 
 (defcommand set-organization-remove-handlers-from-reverted-draft
-  {:parameters [enabled]
-   :user-roles #{:authorityAdmin}
+  {:parameters        [enabled]
+   :permissions       [{:required [:organization/admin]}]
    :input-validators  [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:remove-handlers-from-reverted-draft enabled}})
@@ -540,9 +540,9 @@
   (ok))
 
 (defcommand set-only-use-inspection-from-backend
-  {:parameters [enabled]
-   :user-roles #{:authorityAdmin}
-   :input-validators  [(partial boolean-parameters [:enabled])]}
+  {:parameters       [enabled]
+   :permissions      [{:required [:organization/admin]}]
+   :input-validators [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:only-use-inspection-from-backend enabled}})
   (ok))

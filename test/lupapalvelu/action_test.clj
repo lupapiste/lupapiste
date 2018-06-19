@@ -11,8 +11,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.server]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.user :as user])
+            [lupapalvelu.states :as states])
   (:import [org.apache.commons.io.output NullWriter]))
 
 (defn returns [])

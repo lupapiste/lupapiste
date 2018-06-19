@@ -141,7 +141,7 @@
    :parameters [startTs endTs]
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end]
-   :user-roles #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :pre-checks [org/check-docstore-enabled]}
   [{user :user {lang :lang} :data}]
   (let [resulting-file-name (str (i18n/localize lang "billing.excel.filename")

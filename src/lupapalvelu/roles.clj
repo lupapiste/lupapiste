@@ -38,4 +38,8 @@
        set))
 
 (defn authority-admins-organization-id [user]
-  (first (organization-ids-by-roles user #{:authorityAdmin})))
+  ; TODO: user can have multiple orgz
+  (let [[org & more] (organization-ids-by-roles user #{:authorityAdmin})]
+    (when (seq more)
+      (throw (ex-info "user is authorityAdmin in multiple organizations, somebody needs to implement this" {:user user})))
+    org))
