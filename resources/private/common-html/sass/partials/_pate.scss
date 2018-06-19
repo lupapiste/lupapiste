@@ -187,6 +187,13 @@ $section-border: 1px solid $gray51;
   }
 }
 
+.pate-template-help {
+  padding: .5em .5em;
+  background-color: transparentize( $orange-dark, 0.9);
+  border-left: $section-border;
+  border-right: $section-border;
+}
+
 .pate-verdict {
   .pate-section {
     min-height: 64px;

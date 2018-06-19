@@ -463,9 +463,28 @@
                        ;; the nested dictionary.
                        (sc/optional-key :repeating) sc/Keyword)}))
 
+(defschema PateHelp
+  {(sc/optional-key :help) (sc/conditional
+                            ;; Localization key for showing help as
+                            ;; text. The simple keyword :help value
+                            ;; can seen as a short hand for
+                            ;; {:loc :value :html? false}
+                            keyword? sc/Keyword
+                            :else    (merge
+                                      ;; If any classes are given, the
+                                      ;; default help styles (e.g.,
+                                      ;; pate-help) are not
+                                      ;; automatically applied.
+                                      PateCss
+                                      {;; Localisation key for the help
+                                       :loc                     sc/Keyword
+                                       ;; If true, then the help is rendered as html.
+                                       (sc/optional-key :html?) sc/Bool}))})
+
 (defschema PateSection
   (merge PateBase
          PateVisible
+         PateHelp
          {:id   sc/Keyword ;; Also title localization key
           :grid PateGrid}))
 
