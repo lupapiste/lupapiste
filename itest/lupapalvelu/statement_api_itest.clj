@@ -1,7 +1,8 @@
 (ns lupapalvelu.statement-api-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.factlet :refer [facts* fact*]]
-            [lupapalvelu.itest-util :refer :all]))
+            [lupapalvelu.itest-util :refer :all]
+            [sade.shared-util :as util]))
 
 (apply-remote-minimal)
 
@@ -197,17 +198,20 @@
           (command veikko :give-statement :id application-id :statementId (:id statement) :status "puollettu" :lang "fi") => (partial expected-failure? "error.statement-text-or-attachment-required"))
 
         (fact "Veikko can delete attachment"
-              (let [attachment-id (upload-attachment-for-statement veikko application-id nil true (:id statement))]
-                (command veikko :delete-attachment :id application-id
-                         :attachmentId attachment-id) => ok?))
+          (upload-attachment-for-statement veikko application-id nil true (:id statement))
+          (let [attachment (->> (:attachments (query-application veikko application-id))
+                                (util/find-first (fn [{:keys [target]}] (= (:id target) (:id statement)))))]
+            (command veikko :delete-attachment :id application-id
+                     :attachmentId (:id attachment)) => ok?))
         (fact* "Statement is given"
                (command veikko :give-statement :id application-id :statementId (:id statement) :status "puollettu" :text "I will approve" :lang "fi") => ok?)
 
         (fact "Applicant got email"
-              (let [emails (sent-emails)
+          (let [emails (sent-emails)
                 email  (last emails)]
-            (count emails) => 2
+            (count emails) => 1
             (:to email) => (contains mikko-email)
+            (:subject email) => (contains "sinulle on uusi viesti")
             email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")))
 
         (fact "One Attachment is generated"
