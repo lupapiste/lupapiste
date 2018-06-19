@@ -1,6 +1,5 @@
 (ns lupapalvelu.permissions
   (:require [clojure.set :as set]
-            [clojure.java.io :as io]
             [schema.core :as sc]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]

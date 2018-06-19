@@ -128,6 +128,8 @@
 
 (def UpdateableUser (select-keys user/User [:firstName :lastName :street :city :zip :phone :language]))
 
+(def invalid-user-data (partial expected-failure? :error.invalid-user-data))
+
 (facts update-user
   (facts "update person-id"
     (fact "basic user"
@@ -139,11 +141,26 @@
 
     (fact "company user without id - invalid id"
       (command kaino :update-user (assoc (ssg/generate UpdateableUser) :personId "010203+040B"))
-      => (partial expected-failure? :error.invalid-user-data))
+      => invalid-user-data)
 
     (fact "company user with personId from identification service"
       (command erkki :update-user (assoc (ssg/generate UpdateableUser) :personId "010203+040A"))
-      => (partial expected-failure? :error.user.trying-to-update-verified-person-id))))
+      => (partial expected-failure? :error.user.trying-to-update-verified-person-id)))
+  (facts "Pena can't edit too much"
+    (fact "own info ok"
+      (command pena :update-user :firstName "PenTest" :lastName "Penttinen") => ok?
+      (let [users (:data (datatables admin :users-for-datatables :params {:filter-search (email-for-key pena)}))]
+        (count (:rows users)) => 1
+        (get-in users [:rows 0 :firstName]) => "PenTest"))
+    (fact "email is not accepted"
+      (command pena :update-user :email (email-for-key pena) :firstName "PenTest" :lastName "Penttinen") => invalid-user-data
+      (command pena :update-user :email (email-for-key sonja) :firstName "PenTest" :lastName "Penttinen") => invalid-user-data)
+    (fact "orgAuthz"
+      (command pena :update-user :firstName "Pena" :lastName "Of Sipoo" :orgAuthz {:753-R [:authority]}) => ok?
+      (fact "but key is not actually updated"
+        (let [user-data (get-in (get-by-id :users pena-id) [:body :data])]
+          (:lastName user-data) => "Of Sipoo"
+          (contains? (set (keys user-data)) :orgAuthz) => false)))))
 
 (facts "save-application-filter"
   (apply-remote-minimal)
