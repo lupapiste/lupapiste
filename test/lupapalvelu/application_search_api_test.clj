@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-search-api-test
    (:require [midje.sweet :refer :all]
              [midje.util :refer [testable-privates]]
+             [lupapalvelu.application-search-api]
              ))
 
 (testable-privates lupapalvelu.application-search-api localize-application)
