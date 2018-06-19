@@ -184,9 +184,9 @@
   (let [operation (-> app :primaryOperation :name keyword)
         kind (str (name (canonical-common/ya-operation-type-to-schema-name-key operation)) " / "
                   (canonical-common/ya-operation-type-to-usage-description operation))]
-    (or (some->> (canonical-common/ya-operation-type-to-additional-usage-description operation)
-                 (str kind " / "))
-        kind)))
+    (if-let [usage-description (canonical-common/ya-operation-type-to-additional-usage-description operation)]
+      (str kind " / " usage-description)
+      kind)))
 
 (defn- fullname [{:keys [etunimi sukunimi]}]
   (str etunimi " " sukunimi))
@@ -238,16 +238,16 @@
    :contacts [(person->contact (customer-contact applicant-doc))]})
 
 (defn- convert-payee [payee-doc]
-  (let [{:keys [email phone]} (person->contact (customer-contact payee-doc))]
-    (assoc (doc->customer true payee-doc) :phone phone :email email)))
+  (merge (doc->customer true payee-doc)
+         (select-keys (person->contact (customer-contact payee-doc)) [:email :phone])))
 
 (defn- application-geometry [{:keys [drawings location-wgs84]}]
-  (let [obj (if (seq drawings)
-              {:type       "GeometryCollection"
-               :geometries (mapv :geometry-wgs84 drawings)}
-              {:type        "Point"
-               :coordinates location-wgs84})]
-    (assoc obj :crs {:type "name", :properties {:name WGS84-URN}})))
+  (assoc (if (seq drawings)
+           {:type       "GeometryCollection"
+            :geometries (mapv :geometry-wgs84 drawings)}
+           {:type        "Point"
+            :coordinates location-wgs84})
+    :crs {:type "name", :properties {:name WGS84-URN}}))
 
 (defn- application-postal-address [{:keys [municipality address]}]
   ;; We don't have the postal code within easy reach so it is omitted here.
@@ -292,13 +292,13 @@
 ;;;; Should you use this?
 ;;;; ===================================================================================================================
 
-(def- allu-organization? #{"091-YA"})
+(def- allu-organizations #{"091-YA"})
 
-(def- allu-permit-subtype? #{"sijoituslupa" "sijoitussopimus"})
+(def- allu-permit-subtypes #{"sijoituslupa" "sijoitussopimus"})
 
 (defn allu-application? [{:keys [permitSubtype organization]}]
-  (boolean (and (allu-organization? organization)
-                (allu-permit-subtype? permitSubtype))))
+  (and (contains? allu-organizations organization)
+       (contains? allu-permit-subtypes permitSubtype)))
 
 ;;;; Effectful operations
 ;;;; ===================================================================================================================
@@ -326,6 +326,7 @@
     (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)]
       (handle-placement-contract-response (http-post endpoint request)))))
 
+;; TODO: Use some mock in dev mode
 (defstate allu-instance
   :start (->ALLUService http/post))
 
