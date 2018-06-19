@@ -233,9 +233,10 @@
 
     (fact "with vetuma"
       (let [stamp (vetuma-stamp!)]
+        (set-anti-csrf! false)
 
         (fact "neighbor cant give ill response"
-          (command pena :neighbor-response
+          (command nil :neighbor-response
             :applicationId application-id
             :neighborId (name neighborId)
             :stamp stamp
@@ -244,7 +245,7 @@
             :message "kehno suunta") => invalid-response?)
 
         (fact "neighbor can give response"
-          (command pena :neighbor-response
+          (command nil :neighbor-response
             :applicationId application-id
             :neighborId (name neighborId)
             :stamp stamp
