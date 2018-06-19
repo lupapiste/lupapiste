@@ -61,6 +61,8 @@
                                                   :category   :paatosteksti}}}
    :section    {:id         :verdict
                 :loc-prefix :pate-verdict-template.verdict-info
+                :help       {:loc   :pate.help.temsub-verdict
+                             :html? true}
                 :grid       {:columns 12
                              :rows    [[{:col  6
                                          :dict :language}]
@@ -82,11 +84,12 @@
 (def temsub-bulletin
   {:dictionary {:bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
                                                       :i18nkey  :phrase.category.toimenpide-julkipanoon}}}
-   :section {:id         :bulletin
-             :loc-prefix :bulletin
-             :grid       {:columns 1
-                          :rows    [[{:col  1
-                                      :dict :bulletinOpDescription}]]}}})
+   :section    {:id         :bulletin
+                :loc-prefix :bulletin
+                :help       :pate.help.temsub-bulletin
+                :grid       {:columns 1
+                             :rows    [[{:col  1
+                                         :dict :bulletinOpDescription}]]}}})
 
 (def temsub-foremen
   (->> helper/foreman-codes

@@ -27,7 +27,7 @@
                                                               :path path))
                         :disabled? (path/disabled? options)
                         :negate?   true
-                        :test-id [:section (:id schema)]})))
+                        :test-id   [:section (:id schema)]})))
 
 (declare section)
 (declare section-header)
@@ -50,7 +50,7 @@
   [{:keys [schema] :as options}]
   [:div.section-body
    (layout/pate-grid (path/schema-options options
-                                           (:grid schema)))])
+                                          (:grid schema)))])
 
 ;; -------------------------
 ;; Verdict template
@@ -74,7 +74,17 @@
 (rum/defc template-section-body < rum/reactive
   [{:keys [schema state] :as options} _]
   (when-not (path/react [:removed-sections (:id schema)] state)
-    (default-section-body options)))
+    [:div
+     (when-let [help (:help schema)]
+       (let [{:keys [loc html? css]} help
+             text                    (common/loc (or loc help))]
+         [:div (merge {:class (if css
+                                (common/css css)
+                                :pate-template-help)}
+                      (when html?
+                        {:dangerouslySetInnerHTML {:__html text}}))
+          (when-not html? text)]))
+     (default-section-body options)]))
 
 
 (defn- section-type-fn [_ section-type] section-type)

@@ -905,3 +905,5 @@
 "pate.contract.template.include-always" "fi" "Aina sopimuksessa"
 "pate.no-contract-templates" "fi" "Ei sopimuspohjia. Sopimuksen laatiminen vaatii aina sopimuspohjan."
 "pate.no-operation-templates" "fi" "Ei julkaistuja päätöspohjia"
+"pate.help.temsub-verdict" "fi" "Tässä on HTML-muotoinen <b>help</b>"
+"pate.help.temsub-bulletin" "fi" "Plain <text> -ohjeteksti"
