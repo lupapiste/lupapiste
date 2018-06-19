@@ -43,5 +43,5 @@ LUPAPISTE.DefaultVerdictTemplateModel = function( params ) {
       .call();
     }});
 
-  self.testId = "template-for-" + operation;
+  self.testId = "template-for-" + operation.id;
 };

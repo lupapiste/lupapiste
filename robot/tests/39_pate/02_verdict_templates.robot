@@ -46,11 +46,7 @@ Set template name to Tesht
   No such test id  template-name-save
 
 Set template name to Test
-  Click visible test id  template-name-edit
-  Type fill test id  template-name-input  Test
-  Click visible test id  template-name-save
-  Test id text is  template-name-text  Test
-  No such test id  template-name-save
+  Change template name  Test
 
 Fill the only required template field (giver)
   Select from test id  giver  viranhaltija
@@ -229,9 +225,7 @@ Open template from link
 Copy template
   Click visible test id  copy-template-0
   Test id text is  template-name-text  Test (kopio)
-  Click visible test id  template-name-edit
-  Type fill test id  template-name-input  Foobar
-  Click visible test id  template-name-save
+  Change template name  Foobar
 
   No such test id  required-template
   No such test id  required-settings
@@ -277,19 +271,109 @@ Published date is shown on the template
   Test id text is  published-template-0  ${today}
   Test id text is  published-template-1  ${EMPTY}
 
-Change category
-  Select from test id  category-select  p
+Published verdict can be copied
+  Click visible test id  copy-template-0
+  Change template name  Clone
+
+Publish the copy as well
+  Test id text is  template-state  Verdict template has not yet been published.
+  Click visible test id  publish-template
+  Click back
+
+Delete the published copy
+  No such test id  show-deleted-templates-label
+  Click visible test id  delete-template-2
+
+Show deleted checkbox is visible but not the third template
+  Wait test id visible  show-deleted-templates-label
+  No such test id  copy-template-2
+
+Show deleted template
+  Toggle toggle  show-deleted-templates
+  No such test id  link-template-2
+  Wait test id visible  copy-template-2
+  Wait test id visible  restore-template-2
+
+Deleted template can be copied. Let's publish the copy, too.
+  Click visible test id  copy-template-2
+  Change template name  Zombie
+  Click visible test id  publish-template
+  Click back
+
+Deleted template cannot be re-deleted but can be restored.
+  Toggle toggle  show-deleted-templates
+  No such test id  delete-template-2
+  Click visible test id  restore-template-2
+  No such test id  show-deleted-templates-label
+  No such test id  restore-template-2
+
+Delete the template again
+  Click visible test id  delete-template-2
+  Toggle toggle  show-deleted-templates
+  Test id text is  link-template-0  Test
+  Test id text is  link-template-1  Foobar
+  Test id text is  link-template-2  Zombie
+
+Language back to Finnish
+  Language to  FI
+
+Change to foreman category and add template
+  Select from test id  category-select  tj
   No templates
   Click visible test id  open-settings
   Wait test id visible  settings-missing
   Click back
   Click visible test id  add-template
-  Test id disabled  publish-template
-  Test id text is  template-state  Verdict template has not yet been published.
-  Test id text is  template-name-text  Verdict template
+  Template not published
+  Test id text is  template-name-text  Päätöspohja
+  Change template name  Gongzuo
   Wait test id visible  required-template
   Wait test id visible  required-settings
-  [Teardown]  Logout
+
+Fill required foreman settings
+  Click visible test id  required-settings
+  Fill test id  anto  1
+  Fill test id  lainvoimainen  2
+  Fill test id  muutoksenhaku  10
+
+  Toggle toggle  annettu-lausunto
+
+  Fill test id  lautakunta-muutoksenhaku  20
+  Fill test id  boardname  Boardmen
+  Click back
+
+Fill and publish template
+  Wait until  Select from test id  giver  viranhaltija
+  Click visible test id  publish-template
+
+Select templates for operations
+  Go to page  operations
+
+Check permit type Pate support
+  Wait test id visible  pate-support-R
+  Wait test id visible  pate-support-P
+  No such test id  pate-support-KT
+  No such test id  pate-support-MM
+  No such test id  pate-support-YI
+  No such test id  pate-support-YL
+  No such test id  pate-support-YM
+  No such test id  pate-support-VVVL
+  No such test id  pate-support-MAL
+
+No templates published for P
+  Wait test id visible  no-template-for-poikkeamis
+
+R templates
+  Test id select texts are  template-for-pientalo  Ei valittu  Test  Zombie
+
+Foreman templates
+  Test id select texts are  template-for-tyonjohtajan-nimeaminen-v2  Ei valittu  Gongzuo
+
+Select template for aidan-rakentaminen
+  Select from test id by text  template-for-aita  Zombie
+  Positive indicator should be visible
+  Reload page
+  Wait until  Test id select text is  template-for-aita  Zombie
 
 
 *** Keywords ***
@@ -347,3 +431,11 @@ Toggle review
   Scroll to test id  ${r}-included-label
   Run keyword if  ${included}  Toggle toggle  ${r}-included
   Run keyword if  ${selected}  Toggle toggle  ${r}-selected
+
+Change template name
+  [Arguments]  ${name}
+  Click visible test id  template-name-edit
+  Type fill test id  template-name-input  ${name}
+  Click visible test id  template-name-save
+  Test id text is  template-name-text  ${name}
+  No such test id  template-name-save

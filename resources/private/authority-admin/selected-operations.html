@@ -17,7 +17,8 @@
                 <!-- ko if: $root.organization.pateEnabled() -->
                 <th data-bind="feature: 'pate',
                                if: $parent.organization.pateSupported( permitType )">
-                  <span data-bind="ltext: 'pate-verdict-template'"></span>
+                  <span data-bind="ltext: 'pate-verdict-template',
+                                   testId: 'pate-support-' + permitType"></span>
                 </th>
                 <!-- /ko -->
                 <!-- ko if: $root.authorization.ok("organization-inspection-summary-settings") -->

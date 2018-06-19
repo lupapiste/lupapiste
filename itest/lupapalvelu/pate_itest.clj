@@ -383,7 +383,7 @@
     (fact "Selectable verdict templates"
       (:items (query sipoo :selectable-verdict-templates))
       => {:R  [{:id old-id :name "Uusi nimi"}
-                {:id template-id :name "Päätöspohja"}]
+                {:id template-id :name "P\u00e4\u00e4t\u00f6spohja"}]
           :P  []
           :YA []
           :tyonjohtajan-nimeaminen-v2 []})
