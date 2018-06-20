@@ -658,11 +658,11 @@
 
 (defn- vetuma-data-to-user [vetuma-data {:keys [architect email] :as data}]
   (merge
-    (set/rename-keys vetuma-data {:userid :personId})
+    (set/rename-keys vetuma-data {:userid :personId :firstname :firstName :lastname :lastName})
     (select-keys data [:password :language :street :zip :city :phone :allowDirectMarketing])
     (when architect
       (select-keys data [:architect :degree :graduatingYear :fise :fiseKelpoisuus]))
-    {:email (ss/canonize-email email) :role "applicant" :enabled false :personIdSource :identification-service}))
+    {:email (ss/canonize-email email) :role "applicant" :enabled false :personIdSource "identification-service"}))
 
 (defcommand register-user
   {:parameters          [stamp email password street zip city phone allowDirectMarketing rakentajafi]

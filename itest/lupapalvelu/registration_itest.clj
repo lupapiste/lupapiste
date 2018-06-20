@@ -80,7 +80,7 @@
                        (verify-new-user new-user details person-id)))
 
               (fact "New user got email"
-                    (:to email) => (:email details)
+                    (:to email) => (str "Jukka Palmu" " <" (:email details) ">")
                     (:subject email) => "Lupapiste: Tervetuloa Lupapisteeseen!")
 
               (fact "Email has body"
@@ -118,7 +118,7 @@
                                (fact "phone" (:phone new-user) => new-user-phone2)))
 
                       (fact "New user got email"
-                            (:to email) => new-user-email
+                            (:to email) => (str "Jukka Palmu" " <" new-user-email ">")
                             (:subject email) => "Lupapiste: Tervetuloa Lupapisteeseen!")
 
                       (fact "Can NOT log in"

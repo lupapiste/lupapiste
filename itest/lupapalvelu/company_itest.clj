@@ -279,7 +279,7 @@
              :role "writer") => ok?
 
     (fact "Dummy 'foo' is found, but not in the company"
-      (query kaino :company-search-user :email foo-email) => (result :found :firstName "" :lastName "" :role "dummy"))
+      (query kaino :company-search-user :email foo-email) => (result :found :firstName "" :lastName "foo@example.com" :role "dummy"))
     (fact "Dummy gets invite to company"
       (command kaino :company-invite-user :email foo-email :admin false :submit true :firstName "Foo" :lastName "Bar") => ok?
       (accept-invitation foo-email))
