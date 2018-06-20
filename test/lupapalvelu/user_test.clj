@@ -373,25 +373,20 @@
   (fact (validate-create-new-user! nil (create-new-user-entity nil)) => missing-parameters?)
   (fact (validate-create-new-user! nil (create-new-user-entity {})) => missing-parameters?)
 
-  (fact "applicant can't create users"
+  (fact "applicant can create dummy users"
     (validate-create-new-user! {:role "applicant"}
                                (create-new-user-entity {:role  "dummy"
                                                         :email "x@x.x"}))
+    => (contains {:email "x@x.x"}))
+  (fact "applicant can't create authority users"
+    (validate-create-new-user! {:role "applicant"}
+                               (create-new-user-entity {:role  "authority"
+                                                        :email "x@x.x"}))
     => unauthorized?)
 
-  (fact
-    (validate-create-new-user! {:role "admin"}
-                               (create-new-user-entity {:role  "x"
-                                                        :email "x@x.x"}))
-    => missing-parameters?)
-  (fact
+  (fact "applicant can't create applicant users"
     (validate-create-new-user! {:role "applicant"}
-                               (create-new-user-entity {:role  "authority"
-                                                        :email "x@x.x"}))
-    => unauthorized?)
-  (fact
-    (validate-create-new-user! {:role "applicant"}
-                               (create-new-user-entity {:role  "authority"
+                               (create-new-user-entity {:role  "applicant"
                                                         :email "x@x.x"}))
     => unauthorized?)
 

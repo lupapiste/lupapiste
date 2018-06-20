@@ -591,10 +591,11 @@
                (error (ex-info "stack trace" {}) "new user does not match NewUser schema" schema-errors)
                true))}
 
-   {:desc  "applicant can not create users"
+   {:desc  "applicant can not create other than dummy users"
     :error :error.unauthorized
-    :fail? (fnk [[:caller {role nil}]]
-             (= role "applicant"))}
+    :fail? (fnk [[:caller {role nil}] [:user-data [:role :as data-role]]]
+             (and (= role "applicant")
+                  (not= "dummy" data-role)))}
 
    {:desc  "applicants are born via registration"
     :error :error.unauthorized
