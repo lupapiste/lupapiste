@@ -97,10 +97,10 @@
     => "Tunniste"
     (path/loc {:loc-path [:pate :contract]
                :schema {:dict :pate-conditions}})
-    => "Lupaehdot ja -määräykset"
+    => "Lupaehdot ja -m\u00e4\u00e4r\u00e4ykset"
     (path/loc {:loc-path [:pate :contract]
                :schema {:dict :pate-conditions}} "add")
-    => "Lisää lupaehto"
+    => "Lis\u00e4\u00e4 lupaehto"
     (path/loc {:loc-path [:pate :contract]} :language)
     => "Sopimuksen kieli"))
 
