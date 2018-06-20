@@ -119,6 +119,7 @@
                           :save-statement-as-draft
                           :get-possible-statement-statuses
                           :application
+                          :update-user
                           :openinforequest
                           :allowed-actions
                           :allowed-actions-for-category
@@ -189,7 +190,7 @@
                           :document-states
                           :authorized-to-apply-submit-restriction-to-other-auths}
         user {:id "user123"
-              :role :applicant}
+              :role "authority"}
         application {:organization "999-R"
                      :auth [{:id "user123"
                              :role "statementGiver"}]}
