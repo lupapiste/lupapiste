@@ -38,7 +38,7 @@
         (command nil :remove-uploaded-file :attachmentId "asdasd" :cookie-store cookie-store) => (partial expected-failure? :error.file-upload.not-found))
       (fact "Attachment can be deleted"
         (command nil :remove-uploaded-file :attachmentId (:fileId uploaded-file) :cookie-store cookie-store) => ok?)
-      (fact "Attachment can not be deleted after linking it to post"
+      (facts "Attachment can not be deleted after linking it to post"
         (let [bulletin (bulletin-util/create-application-and-bulletin :cookie-store cookie-store)
               upload-resp   (-> (bulletin-util/send-file cookie-store)
                                 :body
@@ -50,8 +50,19 @@
 
           ;attach to comment
           (set-anti-csrf! false)
-          (command nil :add-bulletin-comment :bulletinId (:id bulletin) :bulletinVersionId (:versionId bulletin) :comment "foobar" :files [uploaded-file] :cookie-store cookie-store) => ok?
+          (fact "file can be attached to a comment"
+            (command nil
+                     :add-bulletin-comment
+                     :bulletinId (:id bulletin)
+                     :bulletinVersionId (:versionId bulletin)
+                     :comment "foobar"
+                     :files [uploaded-file]
+                     :cookie-store cookie-store) => ok?)
 
           ;try to remove
-          (command nil :remove-uploaded-file :attachmentId (:fileId uploaded-file) :cookie-store cookie-store) => (partial expected-failure? :error.file-upload.not-found)))
+          (fact "attached uploaded file cannot be removed"
+            (command nil
+                     :remove-uploaded-file
+                     :attachmentId (:fileId uploaded-file)
+                     :cookie-store cookie-store) => (partial expected-failure? :error.file-upload.not-found))))
       (set-anti-csrf! true))))

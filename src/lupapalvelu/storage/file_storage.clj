@@ -184,9 +184,13 @@
   (->> (if (env/feature? :s3)
          (map #(s3/object-exists? unlinked-bucket (s3-id user-or-session-id %)) file-ids)
          (map #(mongo/any? :fs.files
-                           {:_id %
-                            $or [{:metadata.sessionId user-or-session-id}
-                                 {:metadata.uploader-user-id user-or-session-id}]})
+                           {$and [{:_id %}
+                                  {$or [{:metadata.linked false}
+                                        {:metadata.linked {$exists false}}]}
+                                  {:metadata.application {$exists false}}
+                                  {:metadata.bulletinId {$exists false}}
+                                  {$or [{:metadata.sessionId user-or-session-id}
+                                        {:metadata.uploader-user-id user-or-session-id}]}]})
               file-ids))
        (every? true?)))
 
