@@ -1,11 +1,16 @@
 (ns lupapalvelu.storage.file-storage
   (:require [lupapalvelu.storage.s3 :as s3]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.action :as action]
             [sade.env :as env]
             [sade.strings :as ss]
             [monger.operators :refer :all]
-            [sade.util :as util])
-  (:import [java.io ByteArrayInputStream]
+            [sade.util :as util]
+            [clojure.java.io :as io]
+            [pandect.core :as pandect]
+            [taoensso.timbre :as timbre]
+            [lupapalvelu.domain :as domain])
+  (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
            [java.time ZonedDateTime ZoneId]
            [java.util Date]))
 
@@ -257,3 +262,45 @@
                                       {:metadata.linked {$exists false}}]}
                                 {:metadata.application {$exists false}}
                                 {:metadata.uploaded {$lt (ts-two-hours-ago)}}]}))))
+
+;; MIGRATION
+
+(defn move-application-mongodb-files-to-s3 [app-id]
+  {:pre [(string? app-id)]}
+  (assert (env/feature? :s3) "s3 feature must be enabled")
+  (let [{:keys [attachments id] :as application} (domain/get-application-no-access-checking app-id)]
+    (doseq [{:keys [versions latestVersion] att-id :id} attachments
+            [idx {:keys [fileId originalFileId storageSystem]}] (map-indexed vector versions)
+            :when (= (keyword storageSystem) :mongodb)]
+      (timbre/info "Migrating attachment" att-id "version" idx)
+      (doseq [file-id (if (= fileId originalFileId)
+                        [fileId]
+                        [fileId originalFileId])]
+        (let [{:keys [content contentType filename metadata]} (mongo/download file-id)
+              bos (ByteArrayOutputStream.)]
+          (if content
+            (do (with-open [is (content)]
+                  (io/copy is bos))
+                (let [mongo-data (.toByteArray bos)]
+                  (timbre/info "Uploading file" file-id "to s3")
+                  (s3/put-file-or-input-stream application-bucket
+                                               (s3-id id file-id)
+                                               filename
+                                               contentType
+                                               (ByteArrayInputStream. mongo-data)
+                                               metadata)
+                  (with-open [s3-data ((:content (s3/download application-bucket (s3-id id file-id))))]
+                    (when (not= (pandect/sha1 mongo-data) (pandect/sha1 s3-data))
+                      (throw (Exception. (str "Data in MongoDB and S3 do not match for " (s3-id id file-id))))))))
+            (timbre/error "File" file-id "not found in GridFS but linked on" id "attachment" att-id))))
+      (timbre/info "Changing attachment" att-id "version" idx "storageSystem to s3")
+      (action/update-application
+        (action/application->command application)
+        {:attachments.id att-id}
+        {$set (cond-> {(str "attachments.$.versions." idx ".storageSystem") :s3}
+                      (= fileId (:fileId latestVersion))
+                      (assoc "attachments.$.latestVersion.storageSystem" :s3))})
+      (mongo/delete-file-by-id fileId)
+      (when-not (= fileId originalFileId)
+        (timbre/info "Deleting attachment" att-id "version" idx "original file" originalFileId "from GridFS")
+        (mongo/delete-file-by-id originalFileId)))))
