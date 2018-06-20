@@ -241,7 +241,7 @@
     (oir-authority? user)))
 
 (defn- user-in-roles? [roles user]
-  (-> user :role keyword roles))
+  (boolean (-> user :role keyword roles)))
 
 (def authority? (partial user-in-roles? #{:authority}))
 (def applicant? (partial user-in-roles? #{:applicant}))
