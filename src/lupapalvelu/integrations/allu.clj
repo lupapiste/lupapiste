@@ -6,6 +6,7 @@
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
+            [taoensso.timbre :refer [info]]
             [sade.util :refer [assoc-when]]
             [sade.core :refer [def- fail!]]
             [sade.env :as env]
@@ -307,5 +308,7 @@
   * :error.allu.malformed-application - Application is malformed according to ALLU.
   * :error.allu.http :status _ :body _ - An HTTP error. Probably due to a bug or connection issues."
   [app]
-  (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)]
-    (handle-placement-contract-response (create-contract! allu-instance endpoint request))))
+  (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)
+        allu-id (handle-placement-contract-response (create-contract! allu-instance endpoint request))]
+    (info (:id app) "was created succesfully in ALLU as" allu-id)
+    allu-id))
