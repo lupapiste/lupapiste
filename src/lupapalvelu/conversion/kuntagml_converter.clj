@@ -52,14 +52,14 @@
                            location-info)
         ;; TODO: should we check scope, that new-applications-enabled is true?
         id (app/make-application-id municipality)
-        app-info {:id              id
-                  :organization    organization
-                  :operation-name  "aiemmalla-luvalla-hakeminen"
-                  :location        (app/->location (:x location-info) (:y location-info))
-                  :propertyId      (:propertyId location-info)
-                  :address         (:address location-info)
-                  :municipality    municipality}
-        created-application (app/make-application app-info
+        make-app-info {:id              id
+                       :organization    organization
+                       :operation-name  "aiemmalla-luvalla-hakeminen"
+                       :location        (app/->location (:x location-info) (:y location-info))
+                       :propertyId      (:propertyId location-info)
+                       :address         (:address location-info)
+                       :municipality    municipality}
+        created-application (app/make-application make-app-info
                                                   []            ; messages
                                                   (:user command)
                                                   (:created command)
