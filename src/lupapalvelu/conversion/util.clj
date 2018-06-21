@@ -44,30 +44,30 @@
 
 (defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
   (let [doc (application/make-document "muu-rakentaminen" (now) {} (schemas/get-schema 1 "kaupunkikuvatoimenpide"))
-        data (tools/wrapped {:kayttotarkoitus nil
-                             :kokonaisala ""
-                             :kuvaus (get-in raktieto [:Rakennelma :kuvaus :kuvaus])
-                             :tunnus (get-in raktieto [:Rakennelma :tunnus :rakennusnro])
-                             :valtakunnallinenNumero ""})]
-    (assoc doc :data data)))
+        data (model/map2updates [] {:kayttotarkoitus nil
+                                    :kokonaisala ""
+                                    :kuvaus (get-in raktieto [:Rakennelma :kuvaus :kuvaus])
+                                    :tunnus (get-in raktieto [:Rakennelma :tunnus :rakennusnro])
+                                    :valtakunnallinenNumero ""})]
+    (application/make-document "muu-rakentaminen" (now) {"kaupunkikuvatoimenpide" data} (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
 
 ;; DEBUG
 
-(def testdata
- (lupapalvelu.xml.krysp.application-from-krysp/get-local-application-xml-by-filename (str "./src/lupapalvelu/conversion/test-data/" "18-0030-13-A.xml") "R"))
+; (def testdata
+;  (lupapalvelu.xml.krysp.application-from-krysp/get-local-application-xml-by-filename (str "./src/lupapalvelu/conversion/test-data/" "18-0030-13-A.xml") "R"))
 
-(def test-docdata
-  (lupapalvelu.xml.krysp.reader/->rakennelmatieto testdata))
+; (def test-docdata
+;   (lupapalvelu.xml.krysp.reader/->rakennelmatieto testdata))
 
-(def d (rakennelmatieto->kaupunkikuvatoimenpide test-docdata))
+; (def d (rakennelmatieto->kaupunkikuvatoimenpide test-docdata))
 
-(defn validate-doc [doc]
-  (schema-validation/validate-doc-schema (rakennelmatieto->kaupunkikuvatoimenpide test-docdata)))
+; (defn validate-doc [doc]
+;   (schema-validation/validate-doc-schema (rakennelmatieto->kaupunkikuvatoimenpide test-docdata)))
 
-(defn create-testdocument []
-  (let [datas (model/map2updates [] {:kayttotarkoitus nil
-                                     :kokonaisala ""
-                                     :kuvaus "Katos"
-                                     :tunnus "005"
-                                     :valtakunnallinenNumero "005"})]
-    (application/make-document "muu-rakentaminen" (now) {"kaupunkikuvatoimenpide" datas} (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
+; (defn create-testdocument []
+;   (let [datas (model/map2updates [] {:kayttotarkoitus nil
+;                                      :kokonaisala ""
+;                                      :kuvaus "Katos"
+;                                      :tunnus "005"
+;                                      :valtakunnallinenNumero "005"})]
+;     (application/make-document "muu-rakentaminen" (now) {"kaupunkikuvatoimenpide" datas} (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
