@@ -12,7 +12,6 @@
 
             [midje.sweet :refer [facts fact =>]]
             [lupapalvelu.itest-util :as itu :refer [pena]]
-            [lupapalvelu.integrations.allu-test :refer [SijoituslupaOperation]]
 
             [lupapalvelu.integrations.allu :as allu
              :refer [ALLUPlacementContracts create-contract! ->LocalMockALLU PlacementContract]]))
@@ -23,7 +22,7 @@
 (defn- create-and-fill-placement-app [apikey permitSubtype]
   (let [{:keys [id] :as response}
         (itu/create-local-app apikey
-                              :operation (ssg/generate SijoituslupaOperation)
+                              :operation (ssg/generate allu/SijoituslupaOperation)
                               :x "385770.46" :y "6672188.964"
                               :address "Kaivokatu 1"
                               :propertyId "09143200010023")]
@@ -55,6 +54,8 @@
 ;;;; Actual Tests
 ;;;; ===================================================================================================================
 
+(mongo/connect!)
+
 (facts "Usage of ALLU integration in submit-application command"
   (mongo/with-db itu/test-db-name
     (lupapalvelu.fixture.core/apply-fixture "minimal")
@@ -72,7 +73,7 @@
       (fact "disabled for everything else."
         (reset! sent-allu-requests 0)
 
-        (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate SijoituslupaOperation)) => ok?]
+        (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate allu/SijoituslupaOperation)) => ok?]
           (itu/local-command pena :submit-application :id id) => ok?)
 
         (let [{:keys [id]} (itu/create-local-app pena

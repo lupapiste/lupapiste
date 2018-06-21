@@ -21,6 +21,13 @@
 ;;;; Schemas
 ;;;; ===================================================================================================================
 
+(defschema SijoituslupaOperation
+  "An application primaryOperation.name that is classified as a :Sijoituslupa."
+  (->> canonical-common/ya-operation-type-to-schema-name-key
+       (filter (comp #(= % :Sijoituslupa) val))
+       (map (comp name key))
+       (apply sc/enum)))
+
 (defschema RegistryKey
   "Henkil\u00f6- tai Y-tunnus"
   (sc/cond-pre Hetu FinnishY))
