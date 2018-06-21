@@ -1,12 +1,13 @@
 (ns lupapalvelu.document.attachments-canonical
-  (:require [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.xml.disk-writer :as writer]
+  (:require [lupapalvelu.document.rakennuslupa-canonical :as rakval-canon]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.xml.disk-writer :as writer]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.strings :as ss]
-            [sade.util :as util]
-            [lupapalvelu.document.rakennuslupa-canonical :as rakval-canon]
-            [sade.strings :as str]))
+            [sade.strings :as str]
+            [sade.util :as util]))
 
 (defn- create-metatieto [k v]
   (when v
@@ -187,3 +188,9 @@
           file-id (:fileId attachment)
           file-name (:filename attachment)]
       (get-Liite attachment-title link attachment type-id file-id file-name (:version attachment)))))
+
+(defn pate-verdict-attachment-link
+  [lang verdict]
+  {:kuvaus (i18n/localize lang :pate-verdict)
+   :linkkiliitteeseen (format "%s/api/raw/verdict-pdf?verdict-id=%s"
+                              (env/value :host) (:id verdict))})

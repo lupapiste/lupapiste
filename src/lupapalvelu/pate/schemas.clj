@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.schemas
   (:require [clojure.set :as set]
+            [lupapalvelu.attachment :refer [AttachmentId]]
             [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :refer [body] :as tools]
             [lupapalvelu.i18n :as i18n]
@@ -109,14 +110,23 @@
 (defschema PateBaseVerdict
   (merge PateCategory
          {;; Verdict is draft until it is published
-          (sc/optional-key :published) ssc/Timestamp
-          :modified                    ssc/Timestamp
-          :data                        sc/Any
-          (sc/optional-key :archive)   {:verdict-date                    ssc/Timestamp
-                                        (sc/optional-key :lainvoimainen) ssc/Timestamp
-                                        :verdict-giver                   sc/Str}
+          (sc/optional-key :published)          ssc/Timestamp
+          :modified                             ssc/Timestamp
+          :data                                 sc/Any
+          (sc/optional-key :archive)            {:verdict-date                    ssc/Timestamp
+                                                 (sc/optional-key :lainvoimainen) ssc/Timestamp
+                                                 :verdict-giver                   sc/Str}
           ;; Either the drafter or publisher
-          (sc/optional-key :user)      UserRef}))
+          (sc/optional-key :user)               UserRef
+          ;; Pointer to the verdict attachment. Either an attachment
+          ;; id or html source. The source is stored in order to be
+          ;; able to regenerate PDF, when needed (after muuntaja
+          ;; failure, for example). After the PDF has been
+          ;; successfully generated, the html is replaced with
+          ;; attachment id.
+          (sc/optional-key :verdict-attachment) (sc/conditional
+                                                 :html {:html sc/Any}
+                                                 :else AttachmentId)}))
 
 (defschema PateModernVerdict
   (merge PateBaseVerdict

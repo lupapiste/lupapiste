@@ -12,13 +12,14 @@
             [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [monger.operators :refer [$set]]
             [sade.shared-schemas :refer [object-id-pattern]]
             [sade.strings :as ss]
             [sade.util :as util]
             [schema.core :as sc]))
 
 (testable-privates lupapalvelu.pate.verdict
-                   next-section insert-section
+                   next-section verdict->updates
                    general-handler application-deviations
                    archive-info application-operation
                    title-fn verdict-string
@@ -26,6 +27,20 @@
 
 (testable-privates lupapalvelu.pate.verdict-template
                    template-inclusions)
+
+(fact verdict->updates
+  (verdict->updates {:data {:foo "hello"}} :data)
+  => {:verdict {:data {:foo "hello"}}
+      :updates {$set {:pate-verdicts.$.data {:foo "hello"}}}}
+  (verdict->updates {:data {:foo "hello"}
+                     :template {:inclusions [:one :two]}
+                     :published 12345}
+                    :template.inclusions :published)
+  => {:verdict {:data {:foo "hello"}
+                :template {:inclusions [:one :two]}
+                :published 12345}
+      :updates {$set {:pate-verdicts.$.published 12345
+                      :pate-verdicts.$.template.inclusions [:one :two]}}})
 
 (facts next-section
   (fact "all arguments given"
@@ -56,62 +71,65 @@
     (next-section "123-T" 1515151515151 "") => nil
     (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0)))
 
-(facts insert-section
-  (fact "section is not set"
-    (insert-section "123-T" 1515151515151 {:data     {}
-                                           :template {:giver "test"}})
-    => {:data     {:verdict-section "2"}
-        :template {:giver      "test"
-                   :inclusions [:verdict-section]}}
+(facts finalize--section
+  (let [args    {:application {:organization "123-T"}
+                 :command     {:created 1515151515151}}
+        test-fn #(finalize--section (assoc args :verdict %))]
+    (fact "section is not set"
+      (test-fn {:data     {}
+                :template {:giver "test"}})
+      => {:verdict {:data     {:verdict-section "2"}
+                    :template {:giver      "test"
+                               :inclusions [:verdict-section]}}
+          :updates {$set {:pate-verdicts.$.data.verdict-section "2"
+                          :pate-verdicts.$.template.inclusions  [:verdict-section]}}}
 
-    (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 2))
+      (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 2))
 
-  (fact "section is blank"
-    (insert-section "123-T" 1515151515151 {:data     {:verdict-section ""}
-                                           :template {:giver "test"}})
-    => {:data     {:verdict-section "1"}
-        :template {:giver      "test"
-                   :inclusions [:verdict-section]}}
+    (fact "section is blank"
+      (test-fn {:data     {:verdict-section ""}
+                :template {:giver "test"}})
+      => {:verdict {:data     {:verdict-section "1"}
+                    :template {:giver      "test"
+                               :inclusions [:verdict-section]}}
+          :updates {$set {:pate-verdicts.$.data.verdict-section "1"
+                          :pate-verdicts.$.template.inclusions  [:verdict-section]}}}
 
-    (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 1))
+      (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 1))
 
-  (fact "Distinct inclusions"
-    (insert-section "123-T" 1515151515151 {:data     {:verdict-section ""}
-                                           :template {:giver      "test"
-                                                      :inclusions [:hello :verdict-section :foo]}})
-    => {:data     {:verdict-section "1"}
-        :template {:giver      "test"
-                   :inclusions [:hello :verdict-section :foo]}}
+    (fact "Distinct inclusions"
+      (test-fn {:data     {:verdict-section ""}
+                :template {:giver      "test"
+                           :inclusions [:hello :verdict-section :foo]}})
+      => {:verdict {:data     {:verdict-section "1"}
+                    :template {:giver      "test"
+                               :inclusions [:hello :verdict-section :foo]}}
+          :updates {$set {:pate-verdicts.$.data.verdict-section "1"
+                          :pate-verdicts.$.template.inclusions  [:hello :verdict-section :foo]}}}
 
-    (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 1))
+      (provided (lupapalvelu.mongo/get-next-sequence-value "verdict_test_123-T_2018") => 1))
 
-  (fact "section already given"
-    (insert-section "123-T" 1515151515151 {:data     {:verdict-section "9"}
-                                           :template {:giver "test"}})
+    (fact "section already given"
+      (test-fn {:data     {:verdict-section "9"}
+                :template {:giver "test"}})
+      => nil
 
-    => {:data     {:verdict-section "9"}
-        :template {:giver "test"}}
+      (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0))
 
-    (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0))
+    (fact "Board verdict (lautakunta)"
+      (test-fn {:data     {}
+                :template {:giver "lautakunta"}})
+      => nil
 
-  (fact "Board verdict (lautakunta)"
-    (insert-section "123-T" 1515151515151 {:data     {}
-                                           :template {:giver "lautakunta"}})
+      (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0))
 
-    => {:data     {}
-        :template {:giver "lautakunta"}}
+    (fact "Legacy verdict"
+      (test-fn {:legacy?  true
+                :data     {}
+                :template {:giver "test"}})
+      => nil
 
-    (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0))
-
-  (fact "Legacy verdict"
-    (insert-section "123-T" 1515151515151 {:legacy?  true
-                                           :data     {}
-                                           :template {:giver "test"}})
-    => {:legacy?  true
-        :data     {}
-        :template {:giver      "test"}}
-
-    (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0)))
+      (provided (lupapalvelu.mongo/get-next-sequence-value irrelevant) => irrelevant :times 0))))
 
 (facts "update automatic dates"
   ;; Calculation is cumulative

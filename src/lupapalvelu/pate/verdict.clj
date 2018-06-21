@@ -36,12 +36,14 @@
             [ring.util.codec :as codec]
             [rum.core :as rum]
             [sade.coordinate :as coord]
+            [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as validators]
             [schema.core :as sc]
+            [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [warnf]]))
+            [taoensso.timbre :refer [warnf errorf error]]))
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
@@ -945,11 +947,12 @@
    (enrich-verdict command verdict false)))
 
 (defn open-verdict [{:keys [application] :as command}]
-  (let [{:keys [data published template]
-         :as   verdict} (command->verdict command)]
-    {:verdict    (assoc (select-keys verdict [:id :modified :published
-                                              :category :schema-version
-                                              :legacy?])
+  (let [{:keys [data published template verdict-attachment]
+         :as   verdict} (command->verdict command)
+        fields        (cond-> [:id :modified :published :category
+                               :schema-version :legacy?]
+                        (string? verdict-attachment) (conj :verdict-attachment))]
+    {:verdict    (assoc (select-keys verdict fields)
                         :data (if published
                                 data
                                 (:data (enrich-verdict command
@@ -967,26 +970,6 @@
          (ss/join "_")
          (mongo/get-next-sequence-value)
          (str))))
-
-(defn- insert-section
-  "Section is generated only for non-board (lautakunta) non-legacy
-  verdicts."
-  [org-id created {:keys [data template legacy?
-                          category] :as verdict}]
-  (let [{section :verdict-section} data
-        {giver :giver}             template]
-    (cond-> verdict
-      (and (ss/blank? section)
-           (util/not=as-kw giver :lautakunta)
-           (not legacy?)
-           (util/not=as-kw category :contract))
-      (->
-       (assoc-in [:data :verdict-section]
-                 (next-section org-id
-                               created
-                               giver))
-       (update-in [:template :inclusions]
-                  #(distinct (conj % :verdict-section)))))))
 
 (defn- verdict-attachment-items
   "Type-groups, type-ids and ids of the verdict attachments. These
@@ -1028,15 +1011,21 @@
                               (map (fn [[k v]]
                                      (assoc k :amount (count v)))))))}))
 
-(defn log-task-errors [tasks]
-  (when-let [errs (seq (mapv #(tasks/task-doc-validation (-> % :schema-info :name) %) tasks))]
+(defn validate-tasks
+  "Log and fail on validation errors. Returns tasks if everything OK."
+  [tasks]
+  (when-let [errs (->> tasks
+                       (map #(tasks/task-doc-validation (-> % :schema-info :name) %))
+                       (filter seq)
+                       seq)]
     (doseq [err errs
-            :when (seq err)
             sub-error err]
       (warnf "PATE task (%s) validation warning - elem locKey: %s, results: %s"
              (get-in sub-error [:document :id])
              (get-in sub-error [:element :locKey])
-             (get-in sub-error [:result])))))
+             (get-in sub-error [:result])))
+    (fail! :error.task-not-valid))
+  tasks)
 
 (defn- archive-info
   "Convenience info map is stored into verdict for archiving purposes."
@@ -1087,6 +1076,206 @@
                                 $pull {:tasks {:id {$in task-ids}}}})
     (att/delete-attachments! application task-attachment-ids)))
 
+;; Each finalize-- function receives an options map:
+;; command:  Original command
+;; application: Up-to-date application
+;; verdict: Up-to-date verdict
+;;
+;; Function returns a map (each key is optional):
+
+;; application: updated application, can be nil if not updated. Note
+;;     that if only the verdict has been updated, the application does not
+;;     need to be updated accordingly (the "old verdict" is never used).
+;;
+;; verdict: updated verdict, can be nil if not updated.
+;;
+;; updates: Mongo updates for `verdict-update` ($ denotes verdict
+;;     $elemMatch). Updates will be merged in the end.
+;;
+;; commit-fn: (optional) Function that takes an option map (command,
+;;     application, verdict) as argument. The functions are called
+;;     after everything else has been successfully finalized.
+;;
+;; On error, a function can bail out with `action/fail!`.
+
+(defn- verdict->updates
+  "[:a :b.c] -> {$set {:pate-verdicts.$.a   a-value
+                       :pate-verdicts.$.b.c c-value}}
+  Returns :verdict :updates map."
+  [verdict & kw-paths]
+  {:verdict verdict
+   :updates (->> kw-paths
+                 (map (fn [kwp]
+                        [(util/kw-path :pate-verdicts.$ kwp)
+                         (get-in verdict (util/split-kw-path kwp))]))
+                 (into {})
+                 (hash-map $set))})
+
+(defn finalize--verdict [{:keys [command application verdict]}]
+  (let [{:keys [created]} command
+        verdict           (assoc (enrich-verdict command verdict true)
+                                 :published created
+                                 :user (user-ref command)
+                                 :archive (archive-info verdict))
+        data-kws          (map #(util/kw-path :data %)
+                               (-> verdict :data keys))]
+    (apply verdict->updates verdict
+           (concat data-kws
+                   [:template-inclusions :published :archive :user]))))
+
+(defn finalize--section
+  "Section is generated only for non-board (lautakunta) non-legacy
+  verdicts. Section is created into Mongo sequence right away and the
+  addition cannot be (safely) undone."
+  [{:keys [command application verdict]}]
+  (let [{:keys [data template legacy? category]} verdict
+        {section :verdict-section}               data
+        {giver :giver}                           template]
+
+    (when (and (ss/blank? section)
+               (util/not=as-kw giver :lautakunta)
+               (not legacy?)
+               (util/not=as-kw category :contract))
+      (let [verdict (-> verdict
+                        (assoc-in [:data :verdict-section]
+                                  (next-section (:organization application)
+                                                (:created command)
+                                                giver))
+                        (update-in [:template :inclusions]
+                                   #(distinct (conj % :verdict-section))))]
+        (verdict->updates verdict
+                          :data.verdict-section
+                          :template.inclusions)))))
+
+(defn finalize--application-state
+  "Updates for application state, history and affected documents."
+  [{:keys [command application]}]
+  (let [state (sm/verdict-given-state application)]
+    ;; History and document updates not needed in the application.
+    {:application (assoc application :state state)
+     :updates     (util/deep-merge (app-state/state-transition-update
+                                    state
+                                    (:created command)
+                                    application
+                                    (:user command))
+                                   (:mongo-updates (not-empty (transformations/get-state-transition-updates
+                                                               command
+                                                               state))))}))
+
+(defn finalize--buildings-and-tasks
+  [{:keys [command application verdict]}]
+  (let [buildings (->buildings-array application)
+        tasks (validate-tasks (pate-tasks/pate-verdict->tasks
+                               verdict
+                               (:created command)
+                               buildings))]
+    (cond-> {:application (assoc application :buildings buildings)
+             :updates     {$set {:buildings buildings}}}
+      (seq tasks) (-> (assoc-in [:application :tasks] tasks)
+                      (assoc-in [:updates $push :tasks] {$each tasks})))))
+
+(defn finalize--attachments [{:keys [command application verdict]}]
+  (let [{att-items :items
+         update-fn :update-fn} (attachment-items command verdict)
+        verdict-attchment?     #(util/includes-as-kw? (map :id att-items)
+                                                      (:id %))
+        target                 {:type "verdict"
+                                :id   (:id verdict)}]
+    (-> (update verdict :data update-fn)
+        (verdict->updates :data.attachments)
+        (assoc :application
+               (update application :attachments
+                       #(map (fn [attachment]
+                              (util/pcond-> attachment
+                                            verdict-attchment?
+                                            (assoc :target target)))
+                            %)))
+        (update-in [:updates $set]
+                   merge
+                   (att/attachment-array-updates (:id application)
+                                                 verdict-attchment?
+                                                 :readOnly true
+                                                 :locked   true
+                                                 :target target))
+        (assoc :commit-fn (fn [{:keys [command application]}]
+                            (tiedonohjaus/mark-app-and-attachments-final! (:id application)
+                                                                          (:created command)))))))
+
+(defn finalize--link-permit
+  [{:keys [application verdict]}]
+  (when (and (app/jatkoaika-application? application)
+               (accepted-verdict? verdict))
+    {:commit-fn (fn [{:keys [application verdict]}]
+                  (app/add-continuation-period
+                   (link-permit-application application)
+                   (:id application)
+                   (get-in verdict [:data :handler])
+                   (get-in verdict [:data :voimassa])))}))
+
+(defn finalize--replaced-verdict
+  [{:keys [command verdict]}]
+  (when-let [replace-verdict-id (get-in verdict [:replacement :replaces])]
+    {:commit-fn (fn [{:keys [command verdict]}]
+                  (replace-verdict command replace-verdict-id (:id verdict)))}))
+
+(defn finalize--kuntagml
+  [{:keys [command application verdict]}]
+  (when (and (not (:legacy? verdict))
+                 (util/not=as-kw (:category verdict) :contract)
+                 (org/krysp-integration? @(:organization command)
+                                         (:permitType application)))
+        (let [application (domain/get-application-no-access-checking (:id application))]
+          {:commit-fn (fn [{:keys [command application verdict]}]
+                        (krysp/verdict-as-kuntagml (assoc command
+                                                          :application application)
+                                                   verdict))})))
+
+(defn verdict-html->pdf
+  "Creates verdict attachment if needed. Returns nil or error keyword."
+  [command {:keys [verdict-attachment] :as verdict}]
+  (when-let [html (:html verdict-attachment)]
+    (try+
+     (when-let [attachment-id (pdf/create-verdict-attachment command
+                                                             verdict)]
+       (verdict-update command
+                       {$set {:pate-verdicts.$.verdict-attachment attachment-id}}))
+     (catch [:error :pdf/pdf-error] _
+         (errorf "PDF generation for verdict %s failed." (:id verdict))
+       :pate.pdf-verdict-error)
+     (catch Object _
+       (errorf "Could not create verdict attachment for verdict %s." (:id verdict))
+       (error (:throwble &throw-context))))))
+
+(defn finalize--pdf
+  [{:keys [command application verdict]}]
+  (let [html    (pdf/verdict-html application verdict)
+        verdict (assoc-in verdict [:verdict-attachment :html] html)]
+    (-> verdict
+        (verdict->updates :verdict-attachment.html)
+        (assoc :commit-fn (fn [{:keys [command application verdict]}]
+                            (verdict-html->pdf (assoc command :application application)
+                                               verdict))))))
+
+(defn process-finalize-pipeline [command application verdict & finalize--fns]
+  (let [{:keys [updates commit-fns]
+         :as result} (reduce (fn [acc fun]
+                                       (let [{:keys [updates commit-fn]
+                                              :as   m} (fun (select-keys acc [:command :application :verdict]))]
+                                         (-> acc
+                                             (merge (select-keys m [:application :verdict]))
+                                             (update :updates util/deep-merge updates)
+                                             (update :commit-fns conj commit-fn))))
+                                     {:command     command
+                                      :application application
+                                      :verdict     verdict
+                                      :updates     {}
+                                      :commit-fns  []}
+                                     finalize--fns)]
+    (verdict-update command updates)
+    (doseq [fun (remove nil? commit-fns)]
+      (fun (select-keys result [:command :application :verdict])))))
+
+
 (defn publish-verdict
   "Publishing verdict does the following:
    1. Finalize and publish verdict
@@ -1105,77 +1294,19 @@
   If the verdict replaces an old verdict, then
   13. Update old verdict's replacement property
   14. Delete old verdict tasks."
-  [{:keys [created application user organization] :as command}]
-  (let [verdict                (-<>> (command->verdict command)
-                                     (enrich-verdict command <> true)
-                                     (insert-section (:organization application)
-                                                     created))
-        next-state             (sm/verdict-given-state application)
-        buildings              (->buildings-array application)
-        tasks                  (pate-tasks/pate-verdict->tasks verdict
-                                                               created
-                                                               buildings)
-        {att-items :items
-         update-fn :update-fn} (attachment-items command verdict)
-        verdict                (update verdict :data update-fn)]
-    (log-task-errors tasks) ; TODO cancel publishing if validation errors?
-    (verdict-update command
-                    (util/deep-merge
-                     {$set (merge
-                            {:pate-verdicts.$.data                (:data verdict)
-                             :pate-verdicts.$.template.inclusions (-> verdict
-                                                                      :template
-                                                                      :inclusions)
-                             :pate-verdicts.$.published           created
-                             :pate-verdicts.$.archive             (archive-info verdict)
-                             :pate-verdicts.$.user                (user-ref command)}
-                            {:buildings buildings}
-                            (att/attachment-array-updates (:id application)
-                                                          #(util/includes-as-kw? (map :id att-items)
-                                                                                 (:id %))
-                                                          :readOnly true
-                                                          :locked   true
-                                                          :target {:type "verdict"
-                                                                   :id   (:id verdict)}))}
-                     (when (seq tasks)
-                       {$push {:tasks {$each tasks}}})
-                     (app-state/state-transition-update next-state
-                                                        created
-                                                        application
-                                                        user)))
-    (inspection-summary/process-verdict-given application)
-    (when-let [doc-updates (not-empty (transformations/get-state-transition-updates command next-state))]
-      (action/update-application command
-                                 (:mongo-query doc-updates)
-                                 (:mongo-updates doc-updates)))
-    (tiedonohjaus/mark-app-and-attachments-final! (:id application)
-                                                  created)
-
-    (when (and (app/jatkoaika-application? application)
-               (accepted-verdict? verdict))
-      (app/add-continuation-period
-        (link-permit-application application)
-        (:id application)
-        (get-in verdict [:data :handler])
-        (get-in verdict [:data :voimassa])))
-
-    (when-let [replace-verdict-id (get-in verdict [:replacement :replaces])]
-      (replace-verdict command replace-verdict-id (:id verdict)))
-
-    (let [application (domain/get-application-no-access-checking (:id application))
-          verdict-attachment-id (pdf/create-verdict-attachment (assoc command
-                                                                      :application application)
-                                                               (assoc verdict :published created))]
-      ;; KuntaGML (only for non-legacy verdicts)
-      (when (and (not (:legacy? verdict))
-                 (util/not=as-kw (:category verdict) :contract)
-                 (org/krysp-integration? @organization (:permitType application)))
-        (let [application (domain/get-application-no-access-checking (:id application))]
-          (krysp/verdict-as-kuntagml (assoc command :application application)
-                                     (assoc verdict :verdict-attachment
-                                            (util/find-by-id verdict-attachment-id
-                                                             (:attachments application)))))
-        nil))))
+  [{:keys [created application] :as command}]
+  (process-finalize-pipeline command application (command->verdict command)
+                             finalize--verdict
+                             finalize--application-state
+                             finalize--buildings-and-tasks
+                             inspection-summary/finalize--inspection-summary
+                             finalize--attachments
+                             finalize--link-permit
+                             finalize--replaced-verdict
+                             ;; Point of no return (section sequence update)
+                             finalize--section
+                             finalize--pdf
+                             finalize--kuntagml))
 
 (defn preview-verdict
   "Preview version of the verdict.
