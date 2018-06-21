@@ -51,15 +51,34 @@
                            {:operation operation :infoRequest false :messages []}
                            location-info)
         ;; TODO: should we check scope, that new-applications-enabled is true?
+        ;; TODO: dig out operations from app-info:
+        ;     check `(get app-info :toimenpiteet)`
+        ;     , the count of :toimenpiteet denotes how many operations we need to create for application.
+        ;     There needs to be always atleast one operation (primaryOperation). So what if XML doesn't have
+        ;     any :Toimenpide elements, should we create a 'conversion' operation as primaryOperation, and define
+        ;     some basic document schema for that 'conversion' operation.
+        ;
+        ;     But anyways, we have :toimenpiteet which has raw :Toimenpide element datas from XML.
+        ;     Then we should check what is the root element for each of the operations.
+        ;     For example if it's '<uusi>' (or ofc :uusi key), then we need to create "new building" kind of operation.
+        ;     That operation needs to have sufficient document schema for new buildings (ie current 'uusiRakennus' schema).
+        ;     If the root element is :laajentaminen, then we need to select appropriate operation (and thus document schema).
+        ;
+        ;     After we have identified how many operations, and what kind of operations we need to create to application,
+        ;     we can create those operations to primaryOperation/secondaryOperations AND create their document data using
+        ;     `lupapalvelu.application/make-document` for example. And then save to db :)
+        ;
+        ;
         id (app/make-application-id municipality)
-        app-info {:id              id
-                  :organization    organization
-                  :operation-name  "aiemmalla-luvalla-hakeminen"
-                  :location        (app/->location (:x location-info) (:y location-info))
-                  :propertyId      (:propertyId location-info)
-                  :address         (:address location-info)
-                  :municipality    municipality}
-        created-application (app/make-application app-info
+        make-app-info {:id              id
+                       :organization    organization
+                       :operation-name  "aiemmalla-luvalla-hakeminen" ; FIXME: no fixed operation in conversion, see above
+                       ; or maybe something like:               :operation-name  "conversion"
+                       :location        (app/->location (:x location-info) (:y location-info))
+                       :propertyId      (:propertyId location-info)
+                       :address         (:address location-info)
+                       :municipality    municipality}
+        created-application (app/make-application make-app-info
                                                   []            ; messages
                                                   (:user command)
                                                   (:created command)
@@ -68,8 +87,10 @@
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))))
         structure-descriptions (map :description buildings-and-structures)
+        ; TODO: create operations from app-info, see above.
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
+        ; TODO: create secondaryoperations from app-info, see above.
         ;; make secondaryOperations for buildings other than the first one in case there are many
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
