@@ -70,5 +70,5 @@
 ;                                      :kokonaisala ""
 ;                                      :kuvaus "Katos"
 ;                                      :tunnus "005"
-;                                      :valtakunnallinenNumero "005"})]
+;                                      :valtakunnallinenNumero ""})]
 ;     (application/make-document "muu-rakentaminen" (now) {"kaupunkikuvatoimenpide" datas} (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))

@@ -652,7 +652,7 @@
 (defn ->rakennelmatieto [xml-no-ns]
   (-> xml-no-ns
     (select [:toimenpidetieto :Toimenpide :rakennelmatieto])
-    cr/all-of))
+    (map cr/all-of)))
 
 (defn ->viitelupatunnukset
   "Takes a parsed XML document, returns a list of viitelupatunnus -ids (in 'permit-id'-format) found therein."
