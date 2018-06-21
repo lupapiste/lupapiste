@@ -89,6 +89,13 @@
    :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
    :drawings         [{:geometry-wgs84 geo/GeoJSON-2008}]})
 
+(defschema SijoituslupaOperation
+  "An application primaryOperation.name that is classified as a :Sijoituslupa."
+  (->> ya-operation-type-to-schema-name-key
+       (filter (comp #(= % :Sijoituslupa) val))
+       (map (comp name key))
+       (apply sc/enum)))
+
 (defschema ValidPlacementApplication
   {:id               ApplicationId
    :permitSubtype    NonBlankStr
@@ -96,10 +103,7 @@
    :propertyId       Kiinteistotunnus
    :municipality     (apply sc/enum municipality-codes)
    :address          NonBlankStr
-   :primaryOperation {:name (->> ya-operation-type-to-schema-name-key
-                                 (filter (comp #(= % :Sijoituslupa) val))
-                                 (map (comp name key))
-                                 (apply sc/enum))}
+   :primaryOperation {:name SijoituslupaOperation}
    :documents        [(sc/one (dds/doc-data-schema "hakija-ya" true) "applicant")
                       (sc/one (dds/doc-data-schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" true) "description")
                       (sc/one (dds/doc-data-schema "yleiset-alueet-maksaja" true) "payee")]

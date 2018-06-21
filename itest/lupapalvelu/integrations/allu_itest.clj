@@ -12,11 +12,10 @@
 
             [midje.sweet :refer [facts fact =>]]
             [lupapalvelu.itest-util :as itu :refer [pena]]
+            [lupapalvelu.integrations.allu-test :refer [SijoituslupaOperation]]
 
             [lupapalvelu.integrations.allu :as allu
              :refer [ALLUPlacementContracts create-contract! ->LocalMockALLU PlacementContract]]))
-
-;;; FIXME: vary :operation
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -24,7 +23,7 @@
 (defn- create-and-fill-placement-app [apikey permitSubtype]
   (let [{:keys [id] :as response}
         (itu/create-local-app apikey
-                              :operation "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen"
+                              :operation (ssg/generate SijoituslupaOperation)
                               :x "385770.46" :y "6672188.964"
                               :address "Kaivokatu 1"
                               :propertyId "09143200010023")]
@@ -73,9 +72,7 @@
       (fact "disabled for everything else."
         (reset! sent-allu-requests 0)
 
-        (let [{:keys [id]}
-              (itu/create-local-app pena
-                                    :operation "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen") => ok?]
+        (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate SijoituslupaOperation)) => ok?]
           (itu/local-command pena :submit-application :id id) => ok?)
 
         (let [{:keys [id]} (itu/create-local-app pena
