@@ -1,6 +1,7 @@
 (ns lupapalvelu.integrations.allu-test
   "Unit tests for lupapalvelu.integrations.allu. No side-effects except validation exceptions."
-  (:require [midje.sweet :refer [facts fact =>]]
+  (:require [cheshire.core :as json]
+            [midje.sweet :refer [facts fact => contains]]
             [midje.util :refer [testable-privates]]
             [clojure.test.check :refer [quick-check]]
             [clojure.test.check.generators :as gen]
@@ -13,11 +14,12 @@
             [sade.core :refer [def-]]
             [sade.schemas :refer [ApplicationId]]
             [sade.schema-generators :as sg]
-            [lupapalvelu.test-util :refer [passing-quick-check]]
+            [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
 
             [lupapalvelu.integrations.allu :as allu :refer [ValidPlacementApplication PlacementContract]]))
 
-(testable-privates lupapalvelu.integrations.allu application->allu-placement-contract)
+(testable-privates lupapalvelu.integrations.allu
+                   application->allu-placement-contract placement-creation-request handle-placement-contract-response)
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -92,8 +94,6 @@
 ;;;; Actual Tests
 ;;;; ==================================================================================================================
 
-;;; TODO: placement-creation-request & handle-placement-contract-response
-
 (facts "allu-application?"
   (fact "Use ALLU integration for Helsinki YA sijoituslupa and sijoitussopimus."
     (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoituslupa"}) => true
@@ -106,7 +106,7 @@
                            :when (not (and (= organization "091-YA")
                                            (or (= permitSubtype "sijoituslupa")
                                                (= permitSubtype "sijoitussopimus"))))]
-                   (not (allu/allu-application? {:organization  organization, :permitSubtype permitSubtype}))))
+                   (not (allu/allu-application? {:organization organization, :permitSubtype permitSubtype}))))
     => passing-quick-check))
 
 (facts "application->allu-placement-contract"
@@ -125,3 +125,30 @@
                      false
                      (catch Exception _ true))))
     => passing-quick-check))
+
+(facts "placement-creation-request"
+  (let [app (sg/generate ValidPlacementApplication)
+        [endpoint request] (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
+    (fact "endpoint"
+      endpoint => "https://example.com/api/v1/placementcontracts")
+    (fact "request"
+      request => {:headers      {:authorization "Bearer foo.bar.baz"}
+                  :content-type :json
+                  :body         (json/encode (application->allu-placement-contract app))})))
+
+(facts "handle-placement-contract-response"
+  (fact "HTTP 200" (handle-placement-contract-response {:status 200, :body "1"}) => "1")
+  (fact "HTTP 201" (handle-placement-contract-response {:status 201, :body "1"}) => "1")
+
+  (fact "HTTP 400"
+    (catch-all (handle-placement-contract-response {:status 400, :body "Your data was bad."}))
+    => (contains {:ok false, :text "error.allu.malformed-application", :body "Your data was bad."}))
+  (fact "HTTP 401"
+    (catch-all (handle-placement-contract-response {:status 401, :body "You are unauthorized."}))
+    => (contains {:ok false, :text "error.allu.http", :status 401}))
+  (fact "HTTP 403"
+    (catch-all (handle-placement-contract-response {:status 403, :body "It is forbidden."}))
+    => (contains {:ok false, :text "error.allu.http", :status 403}))
+  (fact "HTTP 404"
+    (catch-all (handle-placement-contract-response {:status 404, :body "Not found."}))
+    => (contains {:ok false, :text "error.allu.http", :status 404})))
