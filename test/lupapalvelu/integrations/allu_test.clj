@@ -90,7 +90,9 @@
 (def- invalid-placement-application? (comp not nil? (partial sc/check ValidPlacementApplication)))
 
 ;;;; Actual Tests
-;;;; ===================================================================================================================
+;;;; ==================================================================================================================
+
+;;; TODO: placement-creation-request & handle-placement-contract-response
 
 (facts "allu-application?"
   (fact "Use ALLU integration for Helsinki YA sijoituslupa and sijoitussopimus."

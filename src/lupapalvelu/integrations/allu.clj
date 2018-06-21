@@ -20,17 +20,6 @@
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
 
-;;;; FIXME: An actual UI-filled application fails here because the `dds` schemas are a bit off.
-
-;;;; Constants
-;;;; ===================================================================================================================
-
-(def- lang
-  "The language to use when localizing output to ALLU"
-  "fi")
-
-(def- WGS84-URN "EPSG:4326")
-
 ;;;; Schemas
 ;;;; ===================================================================================================================
 
@@ -165,12 +154,23 @@
    :propertyId       Kiinteistotunnus
    :municipality     FinnishMunicipalityCode
    :address          NonBlankStr
+   ;; FIXME: Vain sijoitusluvat ('eli niitä ovat ne, joihin tuo ya-operation-type-to-schema-name-key antaa arvon
+   ;;        :Sijoituslupa'):
    :primaryOperation {:name (apply sc/enum (map name (keys ya-operation-type-to-schema-name-key)))}
    :documents        [(sc/one (dds/doc-data-schema "hakija-ya" true) "applicant")
                       (sc/one (dds/doc-data-schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" true) "description")
                       (sc/one (dds/doc-data-schema "yleiset-alueet-maksaja" true) "payee")]
    :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
    :drawings         [{:geometry-wgs84 geo/SingleGeometry}]})
+
+;;;; Constants
+;;;; ===================================================================================================================
+
+(def- lang
+  "The language to use when localizing output to ALLU"
+  "fi")
+
+(def- WGS84-URN "EPSG:4326")
 
 ;;;; Cleaning up :value indirections
 ;;;; ===================================================================================================================
@@ -180,7 +180,7 @@
 ;;;; Application conversion
 ;;;; ===================================================================================================================
 
-;;; FIXME: use :schema-info :name instead of :subtype
+;;; TODO: Use Schemas for the smaller functions instead of the one failing mega-check in application->allu-...
 
 (defn- application-kind [app]
   (let [operation (-> app :primaryOperation :name keyword)
@@ -259,7 +259,8 @@
 (def- format-date-time (partial tf/unparse (tf/formatters :date-time-no-ms)))
 
 (defn- convert-value-flattened-app [{:keys [id propertyId documents] :as app}]
-  (let [applicant-doc (first (filter #(= (doc-subtype %) :hakija) documents))
+  (let [;; FIXME: use :schema-info :name instead of :subtype for these:
+        applicant-doc (first (filter #(= (doc-subtype %) :hakija) documents))
         work-description (first (filter #(= (doc-subtype %) :hankkeen-kuvaus) documents))
         payee-doc (first (filter #(= (doc-subtype %) :maksaja) documents))
         kind (application-kind app)
@@ -279,12 +280,11 @@
              :workDescription              (-> work-description :data :kayttotarkoitus)}]
     (assoc-when res :customerReference (not-empty (-> payee-doc :data :laskuviite)))))
 
-;; Putting it all together
+;; FIXME: An actual UI-filled application fails here because the `dds` schemas are a bit off.
 (sc/defn ^{:private true, :always-validate true} application->allu-placement-contract :- PlacementContract [app]
   ;; Using `select-schema` because `app` will have a lot more data than the schema covers, not ideal.
   (-> app (select-schema ValidPlacementApplication) flatten-values convert-value-flattened-app))
 
-;; TODO: unit test this
 (defn- placement-creation-request [allu-url allu-jwt app]
   [(str allu-url "/placementcontracts")
    {:headers      {:authorization (str "Bearer " allu-jwt)}
@@ -305,7 +305,6 @@
 ;;;; Effectful operations
 ;;;; ===================================================================================================================
 
-;; TODO: unit test this
 ;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
 (defn- handle-placement-contract-response [{:keys [status body]}]
   (case status
