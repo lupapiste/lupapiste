@@ -693,6 +693,9 @@
                                  "fi")
             asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
 
+            operations (->> (select asia [:Toimenpide])
+                            (map #(cr/all-of % [:Toimenpide])))
+
             ;;
             ;; _Kvintus 5.11.2014_: Rakennuspaikka osoitteen ja sijainnin oikea lahde.
             ;;
@@ -723,6 +726,7 @@
                :vahainenPoikkeaminen        (:vahainenPoikkeaminen asianTiedot)
                :hakijat                     hakijat
                :muutOsapuolet               muut-osapuolet
+               :toimenpiteet                operations
                :suunnittelijat              suunnittelijat
                :tyonjohtajat                tyonjohtajat}
 
