@@ -1,16 +1,16 @@
 (ns lupapalvelu.integrations.allu-itest
   "Integration tests for ALLU integration. Using local (i.e. not over HTTP) testing style."
-  (:require [sade.core :refer [def- ok?]]
-            [mount.core :as mount]
+  (:require [mount.core :as mount]
             [schema.core :as sc]
             [cheshire.core :as json]
-            [sade.env :as env]
-            [lupapalvelu.mongo :as mongo]
             [monger.operators :refer [$set]]
+            [sade.core :refer [ok?]]
+            [sade.schema-generators :as ssg]
+            [sade.env :as env]
             [lupapalvelu.document.data-schema :as dds]
+            [lupapalvelu.mongo :as mongo]
 
             [midje.sweet :refer [facts fact =>]]
-            [sade.schema-generators :as ssg]
             [lupapalvelu.itest-util :as itu :refer [pena]]
 
             [lupapalvelu.integrations.allu :as allu

@@ -2,7 +2,6 @@
   (:require [clojure.walk :refer [postwalk]]
             [mount.core :refer [defstate]]
             [schema.core :as sc :refer [defschema optional-key enum]]
-            [schema-tools.core :refer [select-schema]]
             [cheshire.core :as json]
             [clj-time.core :as t]
             [clj-time.format :as tf]
@@ -13,11 +12,9 @@
             [sade.http :as http]
             [sade.schemas :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
                                   ApplicationId ISO-3166-alpha-2 date-string]]
-            [sade.municipality :refer [municipality-codes]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-name]]
-            [lupapalvelu.document.canonical-common :as canonical-common :refer [ya-operation-type-to-schema-name-key]]
-            [lupapalvelu.document.data-schema :as dds]
+            [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
 
 ;;;; Schemas
@@ -140,29 +137,6 @@
    :startTime                                   (date-string :date-time-no-ms)
    (optional-key :workDescription)              NonBlankStr})
 
-;;;; Lupapiste applications
-;;;; -------------------------------------------------------------------------------------------------------------------
-
-(defschema FinnishMunicipalityCode
-  "Three digit Finnish municipality code"
-  (apply sc/enum municipality-codes))
-
-(defschema ValidPlacementApplication
-  {:id               ApplicationId
-   :permitSubtype    NonBlankStr
-   :organization     NonBlankStr
-   :propertyId       Kiinteistotunnus
-   :municipality     FinnishMunicipalityCode
-   :address          NonBlankStr
-   ;; FIXME: Vain sijoitusluvat ('eli niitä ovat ne, joihin tuo ya-operation-type-to-schema-name-key antaa arvon
-   ;;        :Sijoituslupa'):
-   :primaryOperation {:name (apply sc/enum (map name (keys ya-operation-type-to-schema-name-key)))}
-   :documents        [(sc/one (dds/doc-data-schema "hakija-ya" true) "applicant")
-                      (sc/one (dds/doc-data-schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" true) "description")
-                      (sc/one (dds/doc-data-schema "yleiset-alueet-maksaja" true) "payee")]
-   :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
-   :drawings         [{:geometry-wgs84 geo/SingleGeometry}]})
-
 ;;;; Constants
 ;;;; ===================================================================================================================
 
@@ -179,8 +153,6 @@
 
 ;;;; Application conversion
 ;;;; ===================================================================================================================
-
-;;; TODO: Use Schemas for the smaller functions instead of the one failing mega-check in application->allu-...
 
 (defn- application-kind [app]
   (let [operation (-> app :primaryOperation :name keyword)
@@ -279,10 +251,8 @@
              :workDescription              (-> work-description :data :kayttotarkoitus)}]
     (assoc-when res :customerReference (not-empty (-> payee-doc :data :laskuviite)))))
 
-;; FIXME: An actual UI-filled application fails here because the `dds` schemas are a bit off.
 (sc/defn ^{:private true, :always-validate true} application->allu-placement-contract :- PlacementContract [app]
-  ;; Using `select-schema` because `app` will have a lot more data than the schema covers, not ideal.
-  (-> app (select-schema ValidPlacementApplication) flatten-values convert-value-flattened-app))
+  (-> app flatten-values convert-value-flattened-app))
 
 (defn- placement-creation-request [allu-url allu-jwt app]
   [(str allu-url "/placementcontracts")

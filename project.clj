@@ -100,7 +100,6 @@
                  [prismatic/schema "1.1.9"]
                  [prismatic/schema-generators "0.1.2"]
                  [prismatic/plumbing "0.5.5"]
-                 [metosin/schema-tools "0.10.3"]
 
                  ; MIME type resolution
                  [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]

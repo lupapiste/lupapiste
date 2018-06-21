@@ -1,22 +1,24 @@
 (ns lupapalvelu.integrations.allu-test
   "Unit tests for lupapalvelu.integrations.allu. No side-effects except validation exceptions."
-  (:require [cheshire.core :as json]
+  (:require [schema.core :as sc :refer [defschema]]
+            [cheshire.core :as json]
+            [sade.core :refer [def-]]
+            [sade.schemas :refer [NonBlankStr Kiinteistotunnus ApplicationId]]
+            [sade.schema-generators :as sg]
+            [sade.municipality :refer [municipality-codes]]
+            [lupapalvelu.document.data-schema :as dds]
+            [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
+            [lupapalvelu.integrations.geojson-2008-schemas :as geo]
+
             [midje.sweet :refer [facts fact => contains]]
             [midje.util :refer [testable-privates]]
             [clojure.test.check :refer [quick-check]]
             [clojure.test.check.generators :as gen]
             [com.gfredericks.test.chuck.properties :refer [for-all]]
             [com.gfredericks.test.chuck.generators :refer [string-from-regex]]
-            [schema.core :as sc :refer [defschema]]
-            [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
-            [lupapalvelu.integrations.geojson-2008-schemas :refer [GeoJSON-2008]]
-
-            [sade.core :refer [def-]]
-            [sade.schemas :refer [ApplicationId]]
-            [sade.schema-generators :as sg]
             [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
 
-            [lupapalvelu.integrations.allu :as allu :refer [ValidPlacementApplication PlacementContract]]))
+            [lupapalvelu.integrations.allu :as allu :refer [PlacementContract]]))
 
 (testable-privates lupapalvelu.integrations.allu
                    application->allu-placement-contract placement-creation-request handle-placement-contract-response)
@@ -85,7 +87,23 @@
                       (sc/one TypedDescriptionDoc "description")
                       (sc/one TypedPayeeDoc "payee")]
    :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
-   :drawings         [{:geometry-wgs84 GeoJSON-2008}]})
+   :drawings         [{:geometry-wgs84 geo/GeoJSON-2008}]})
+
+(defschema ValidPlacementApplication
+  {:id               ApplicationId
+   :permitSubtype    NonBlankStr
+   :organization     NonBlankStr
+   :propertyId       Kiinteistotunnus
+   :municipality     (apply sc/enum municipality-codes)
+   :address          NonBlankStr
+   ;; FIXME: Vain sijoitusluvat ('eli niitä ovat ne, joihin tuo ya-operation-type-to-schema-name-key antaa arvon
+   ;;        :Sijoituslupa'):
+   :primaryOperation {:name (apply sc/enum (map name (keys ya-operation-type-to-schema-name-key)))}
+   :documents        [(sc/one (dds/doc-data-schema "hakija-ya" true) "applicant")
+                      (sc/one (dds/doc-data-schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" true) "description")
+                      (sc/one (dds/doc-data-schema "yleiset-alueet-maksaja" true) "payee")]
+   :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
+   :drawings         [{:geometry-wgs84 geo/SingleGeometry}]})
 
 (def- organizations (string-from-regex #"\d{3}-(R|YA|YMP)"))
 
