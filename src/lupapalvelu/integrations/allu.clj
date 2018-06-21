@@ -15,7 +15,7 @@
                                   ApplicationId ISO-3166-alpha-2 date-string]]
             [sade.municipality :refer [municipality-codes]]
             [lupapalvelu.i18n :refer [localize]]
-            [lupapalvelu.document.tools :refer [doc-subtype]]
+            [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common :refer [ya-operation-type-to-schema-name-key]]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
@@ -259,10 +259,9 @@
 (def- format-date-time (partial tf/unparse (tf/formatters :date-time-no-ms)))
 
 (defn- convert-value-flattened-app [{:keys [id propertyId documents] :as app}]
-  (let [;; FIXME: use :schema-info :name instead of :subtype for these:
-        applicant-doc (first (filter #(= (doc-subtype %) :hakija) documents))
-        work-description (first (filter #(= (doc-subtype %) :hankkeen-kuvaus) documents))
-        payee-doc (first (filter #(= (doc-subtype %) :maksaja) documents))
+  (let [applicant-doc (first (filter #(= (doc-name %) "hakija-ya") documents))
+        work-description (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa") documents))
+        payee-doc (first (filter #(= (doc-name %) "yleiset-alueet-maksaja") documents))
         kind (application-kind app)
         start (t/now)
         end (t/plus start (t/years 1))
