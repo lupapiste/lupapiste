@@ -96,9 +96,10 @@
    :propertyId       Kiinteistotunnus
    :municipality     (apply sc/enum municipality-codes)
    :address          NonBlankStr
-   ;; FIXME: Vain sijoitusluvat ('eli niitä ovat ne, joihin tuo ya-operation-type-to-schema-name-key antaa arvon
-   ;;        :Sijoituslupa'):
-   :primaryOperation {:name (apply sc/enum (map name (keys ya-operation-type-to-schema-name-key)))}
+   :primaryOperation {:name (->> ya-operation-type-to-schema-name-key
+                                 (filter (comp #(= % :Sijoituslupa) val))
+                                 (map (comp name key))
+                                 (apply sc/enum))}
    :documents        [(sc/one (dds/doc-data-schema "hakija-ya" true) "applicant")
                       (sc/one (dds/doc-data-schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" true) "description")
                       (sc/one (dds/doc-data-schema "yleiset-alueet-maksaja" true) "payee")]
