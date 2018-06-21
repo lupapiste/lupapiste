@@ -651,7 +651,7 @@
 
 (defn ->rakennelmatieto [xml-no-ns]
   (-> xml-no-ns
-    (select1 [:toimenpidetieto :Toimenpide :rakennelmatieto])
+    (select [:toimenpidetieto :Toimenpide :rakennelmatieto])
     cr/all-of))
 
 (defn ->viitelupatunnukset

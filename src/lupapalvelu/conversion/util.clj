@@ -40,8 +40,6 @@
   [id]
   (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) (destructure-permit-id id))))
 
-(def dataa {[:kayttotarkoitus :value] nil [:kokonaisala :value] "" [:kuvaus :value] "Katos" [:tunnus :value] "005" [:valtakunnallinenNumero :value] ""})
-
 (defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
   (let [doc (application/make-document "muu-rakentaminen" (now) {} (schemas/get-schema 1 "kaupunkikuvatoimenpide"))
         data (model/map2updates [] {:kayttotarkoitus nil
@@ -49,7 +47,10 @@
                                     :kuvaus (get-in raktieto [:Rakennelma :kuvaus :kuvaus])
                                     :tunnus (get-in raktieto [:Rakennelma :tunnus :rakennusnro])
                                     :valtakunnallinenNumero ""})]
-    (application/make-document "muu-rakentaminen" (now) {"kaupunkikuvatoimenpide" data} (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
+    (application/make-document "muu-rakentaminen"
+                               (now)
+                               {"kaupunkikuvatoimenpide" data}
+                               (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
 
 ;; DEBUG
 
