@@ -396,7 +396,7 @@
                             $push (->> (filter (comp vector? second) ops-to-update) ; Update op array
                                        (util/map-values (constantly added-op)))))))
 
-(defn- schema-data-to-body [schema-data]
+(defn schema-data-to-body [schema-data]
   (keywordize-keys
     (reduce
       (fn [body [data-path data-value]]

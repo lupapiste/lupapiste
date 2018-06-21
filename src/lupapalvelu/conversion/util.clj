@@ -2,6 +2,7 @@
   (:require [lupapalvelu.application :as application]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.schema-validation :as schema-validation]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer :all]
@@ -39,34 +40,34 @@
   [id]
   (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) (destructure-permit-id id))))
 
-#_(defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
-  (let [kaupunkikuvatoimenpide-ei-tunnusta {:kayttotarkoitus {:value ""}
-                                            :kokonaisala {:value ""}
-                                            :kuvaus {:value (get-in raktieto [:Rakennelma :kuvaus :kuvaus])}}
-        tunnus (get-in raktieto [:Rakennelma :tunnus :kunnanSisainenPysyvaRakennusnumero])
-        schema (schemas/get-schema 1 "kaupunkikuvatoimenpide")
-        data (if (nil? tunnus)
-               kaupunkikuvatoimenpide-ei-tunnusta
-               (merge kaupunkikuvatoimenpide-ei-tunnusta {:tunnus {:value tunnus}
-                                                          :valtakunnallinenNumero {:value (get-in raktieto [:Rakennelma :tunnus :kiinttun])}}))]
-    {:id (mongo/create-id)
-     :created (now)
-     :schema-info (:info schema)
-     :data data}))
+(def dataa {[:kayttotarkoitus :value] nil [:kokonaisala :value] "" [:kuvaus :value] "Katos" [:tunnus :value] "005" [:valtakunnallinenNumero :value] ""})
 
-;; For development purposes, remove
+(defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
+  (let [doc (application/make-document "muu-rakentaminen" (now) {} (schemas/get-schema 1 "kaupunkikuvatoimenpide"))
+        data (tools/wrapped {:kayttotarkoitus nil
+                             :kokonaisala ""
+                             :kuvaus (get-in raktieto [:Rakennelma :kuvaus :kuvaus])
+                             :tunnus (get-in raktieto [:Rakennelma :tunnus :rakennusnro])
+                             :valtakunnallinenNumero ""})]
+    (assoc doc :data data)))
 
-#_(def rak-sanomat
-  (->> (list "40-0019-13-A.xml" "18-0483-13-PI.xml" "40-0049-13-P.xml" "68-1147-13-BL.xml" "85-0253-13-PI.xml")
-       (map #(str "./src/lupapalvelu/conversion/test-data/" %))
-       (map #(lupapalvelu.xml.krysp.application-from-krysp/get-local-application-xml-by-filename % "R"))
-       (map lupapalvelu.xml.krysp.reader/->rakennelmatieto)))
+;; DEBUG
 
-#_(def testdata
+(def testdata
  (lupapalvelu.xml.krysp.application-from-krysp/get-local-application-xml-by-filename (str "./src/lupapalvelu/conversion/test-data/" "18-0030-13-A.xml") "R"))
 
-#_(def test-docdata
+(def test-docdata
   (lupapalvelu.xml.krysp.reader/->rakennelmatieto testdata))
 
-#_(def app
-  (application/make-document))
+(def d (rakennelmatieto->kaupunkikuvatoimenpide test-docdata))
+
+(defn validate-doc [doc]
+  (schema-validation/validate-doc-schema (rakennelmatieto->kaupunkikuvatoimenpide test-docdata)))
+
+(defn create-testdocument []
+  (let [datas (model/map2updates [] {:kayttotarkoitus nil
+                                     :kokonaisala ""
+                                     :kuvaus "Katos"
+                                     :tunnus "005"
+                                     :valtakunnallinenNumero "005"})]
+    (application/make-document "muu-rakentaminen" (now) {"kaupunkikuvatoimenpide" datas} (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
