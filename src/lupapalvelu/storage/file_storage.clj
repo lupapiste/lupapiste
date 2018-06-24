@@ -70,13 +70,13 @@
    {:pre [(map? application) (string? file-id)]}
    (let [{:keys [storageSystem]} (find-by-file-id-from-attachments file-id (:attachments application))]
      (if (and (env/feature? :s3) (= (keyword storageSystem) :s3))
-       (s3/download application-bucket (s3-id (:id application) file-id) (:id application))
+       (s3/download application-bucket (s3-id (:id application) file-id))
        (mongo/download-find {:_id file-id}))))
   ([application-id file-id attachment]
    {:pre [(string? application-id) (string? file-id) (map? attachment)]}
    (let [{:keys [storageSystem]} (find-by-file-id file-id attachment)]
      (if (and (env/feature? :s3) (= (keyword storageSystem) :s3))
-       (s3/download application-bucket (s3-id application-id file-id) application-id)
+       (s3/download application-bucket (s3-id application-id file-id))
        (mongo/download-find {:_id file-id})))))
 
 (defn download-many
@@ -89,7 +89,7 @@
 (defn ^{:perfmon-exclude true} download-from-system
   [application-id file-id storage-system]
   (if (= (keyword storage-system) :s3)
-    (s3/download application-bucket (s3-id application-id file-id) application-id)
+    (s3/download application-bucket (s3-id application-id file-id))
     (mongo/download-find {:_id file-id})))
 
 (defn- find-user-attachment-storage-system [user-id file-id]
@@ -116,7 +116,7 @@
   [application-id file-id attachment]
   (let [{:keys [storageSystem]} (find-by-file-id file-id attachment)]
     (if (and (env/feature? :s3) (= (keyword storageSystem) :s3))
-      (s3/download application-bucket (s3-id application-id file-id :preview) application-id)
+      (s3/download application-bucket (s3-id application-id file-id :preview))
       (mongo/download-find {:_id (str file-id "-preview")}))))
 
 (defn ^{:perfmon-exclude true} download-unlinked-file

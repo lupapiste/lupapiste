@@ -152,7 +152,7 @@
       (catch AmazonS3Exception ex
         (timbre/error ex "Could not move" old-id "from" from-bucket "to" target-bucket "as" new-id)))))
 
-(defn download [bucket file-id & [application-id]]
+(defn download [bucket file-id]
   {:pre [(string? file-id)]}
   (try
     (let [object (.getObject s3-client (bucket-name bucket) ^String file-id)
@@ -168,14 +168,12 @@
                                        "linked" (= v "true")
                                        (codec/url-decode v))]))
                              (into {}))]
-      (util/assoc-when
-        {:content     (fn [] (.getObjectContent object))
-         :contentType (.getContentType metadata)
-         :size        (.getContentLength metadata)
-         :filename    (:filename user-metadata)
-         :fileId      (last (str/split file-id #"/"))
-         :metadata    (dissoc user-metadata :filename)}
-        :application application-id))
+      {:content     (fn [] (.getObjectContent object))
+       :contentType (.getContentType metadata)
+       :size        (.getContentLength metadata)
+       :filename    (:filename user-metadata)
+       :fileId      (last (str/split file-id #"/"))
+       :metadata    (dissoc user-metadata :filename)})
     (catch AmazonS3Exception ex
       (if (= 404 (.getStatusCode ex))
         (timbre/warn "Tried to retrieve non-existing" file-id "from S3 bucket" (bucket-name bucket) ":" (.getMessage ex))
