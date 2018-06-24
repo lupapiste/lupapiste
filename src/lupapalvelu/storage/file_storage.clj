@@ -124,7 +124,6 @@
   (if (env/feature? :s3)
     (s3/download unlinked-bucket (s3-id user-or-session-id file-id))
     (mongo/download-find {$and [{:_id file-id}
-                                {:metadata.application {$exists false}}
                                 {$or [{:metadata.linked false}
                                       {:metadata.linked {$exists false}}]}
                                 {$or [{:metadata.sessionId user-or-session-id}
@@ -157,7 +156,6 @@
         (count file-ids))
     (mongo/update-by-query :fs.files
                            {$and [{:_id {$in file-ids}}
-                                  {:metadata.application {$exists false}}
                                   {$or [{:metadata.linked false}
                                         {:metadata.linked {$exists false}}]}
                                   {$or [{:metadata.sessionId user-or-session-id}
@@ -187,7 +185,6 @@
                            {$and [{:_id %}
                                   {$or [{:metadata.linked false}
                                         {:metadata.linked {$exists false}}]}
-                                  {:metadata.application {$exists false}}
                                   {:metadata.bulletinId {$exists false}}
                                   {$or [{:metadata.sessionId user-or-session-id}
                                         {:metadata.uploader-user-id user-or-session-id}]}]})
@@ -250,8 +247,7 @@
   (util/get-timestamp-ago :hour 2))
 
 (defn- date-two-hours-ago []
-  (-> (ZoneId/of "Europe/Helsinki")
-      (ZonedDateTime/now)
+  (-> (ZonedDateTime/now)
       (.minusHours 2)
       (.toInstant)
       (Date/from)))
