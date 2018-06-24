@@ -428,15 +428,6 @@
 ;; Download
 ;;
 
-(defraw "view-attachment"
-  {:parameters       [:attachment-id]  ; Note that this is actually file id
-   :categories       #{:attachments}
-   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
-   :user-authz-roles roles/all-authz-roles}
-  [{{:keys [attachment-id]} :data user :user}]
-  (att/output-attachment attachment-id false (partial att/get-attachment-file-as! user)))
-
 (defraw view-file
   {:description      "Fetch uploaded file from MongoDB. Fetching is session bound."
    :parameters       [fileId]
