@@ -265,10 +265,11 @@
 
 ;; MIGRATION
 
-(defn move-application-mongodb-files-to-s3 [app-id]
-  {:pre [(string? app-id)]}
+(defn move-application-mongodb-files-to-s3 [id]
+  {:pre [(string? id)]}
   (assert (env/feature? :s3) "s3 feature must be enabled")
-  (let [{:keys [attachments id] :as application} (domain/get-application-no-access-checking app-id)]
+  (let [{:keys [attachments] :as application} (domain/get-application-no-access-checking id
+                                                                                         [:attachments :organization])]
     (doseq [{:keys [versions latestVersion] att-id :id} attachments
             [idx {:keys [fileId originalFileId storageSystem]}] (map-indexed vector versions)
             :when (= (keyword storageSystem) :mongodb)]
@@ -303,4 +304,6 @@
       (mongo/delete-file-by-id fileId)
       (when-not (= fileId originalFileId)
         (timbre/info "Deleting attachment" att-id "version" idx "original file" originalFileId "from GridFS")
-        (mongo/delete-file-by-id originalFileId)))))
+        (mongo/delete-file-by-id originalFileId))
+      (when (not= (:fileId latestVersion) (:fileId (last versions)))
+        (timbre/error "Latest version fileId does not match the fileId of last element in versions in attachment" att-id)))))
