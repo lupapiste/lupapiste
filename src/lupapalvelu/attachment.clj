@@ -684,14 +684,10 @@
 
 (defn get-attachment-file-as!
   "Returns the attachment file if user has access to application and the attachment, otherwise nil."
-  [user file-id]
-  (when-let [application (get-application-as {$or [{:attachments.versions.fileId file-id}
-                                                   {:attachments.versions.originalFileId file-id}]}
-                                             user
-                                             :include-canceled-apps? true)]
-    (when (and (seq application)
-               (access/can-access-attachment-file? user file-id application))
-      (storage/download application file-id))))
+  [user application file-id]
+  (when (and (seq application)
+             (access/can-access-attachment-file? user file-id application))
+    (storage/download application file-id)))
 
 (defn get-attachment-file!
   "Returns the attachment file without access checking, otherwise nil."

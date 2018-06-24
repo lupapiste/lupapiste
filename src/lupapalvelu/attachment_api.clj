@@ -448,13 +448,14 @@
   (att/output-file fileId (or (:id user) (:id session))))
 
 (defraw "download-attachment"
-  {:parameters       [:attachment-id]  ; Note that this is actually file id
+  {:parameters       [:file-id :id]
    :categories       #{:attachments}
-   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
+   :input-validators [(partial action/non-blank-parameters [:file-id :id])]
    :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
+   :states           states/all-application-states
    :user-authz-roles roles/all-authz-roles}
-  [{{:keys [attachment-id]} :data user :user}]
-  (att/output-attachment attachment-id true (partial att/get-attachment-file-as! user)))
+  [{{:keys [file-id]} :data user :user application :application}]
+  (att/output-attachment file-id true (partial att/get-attachment-file-as! user application)))
 
 (defraw "latest-attachment-version"
   {:parameters       [:attachment-id]
