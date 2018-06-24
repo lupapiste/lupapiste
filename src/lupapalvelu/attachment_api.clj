@@ -1,12 +1,9 @@
 (ns lupapalvelu.attachment-api
-  (:require [clojure.java.io :as io]
-            [clojure.set :refer [intersection union difference]]
+  (:require [clojure.set :refer [intersection union difference]]
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
-            [schema.core :as sc]
             [sade.core :refer [ok fail fail! now def-]]
             [sade.files :as files]
-            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
             [lupapalvelu.authorization :as auth]
@@ -32,15 +29,13 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.operations :as op]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.states :as states]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.attachment.stamps :as stamps]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.storage.file-storage :as storage]
-            [lupapalvelu.vetuma :as vetuma]))
+            [lupapalvelu.storage.file-storage :as storage]))
 
 ;; Action category: attachments
 
@@ -456,7 +451,6 @@
    :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id download preview]} :data user :user}]
-  (println (vetuma/session-id))
   (att/output-attachment (att/get-attachment-latest-version-file user attachment-id (= preview "true")) (= download "true")))
 
 (defraw "download-bulletin-attachment"
