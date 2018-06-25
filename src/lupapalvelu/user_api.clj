@@ -395,24 +395,27 @@
       (fail :error.invalid-role))))
 
 (defcommand upsert-organization-user
-  {:parameters       [email firstName lastName roles]
-   :input-validators [(partial action/non-blank-parameters [:email :firstName :lastName])
+  {:parameters       [organizationId email firstName lastName roles]
+   :input-validators [(partial action/non-blank-parameters [:organizationId :email :firstName :lastName])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       action/email-validator
                       (partial allowed-roles organization/authority-roles)]
    :notified         true
    :permissions      [{:required [:organization/admin]}]
+   :pre-checks       [(fn [{params :data user :user}]
+                        (when (:organizationId params)      ; FIXME permissions pipeline should handle this
+                          (when-not (usr/user-has-role-in-organization? user (:organizationId params) #{:authorityAdmin})
+                            (fail :error.unauthorized))))]
    :description      "Updates or creates user in admins organization"}
   [{caller :user}]
-  (let [organization-id (usr/authority-admins-organization-id caller)
-        actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)
+  (let [actual-roles    (organization/filter-valid-user-roles-in-organization organizationId roles)
         email           (ss/canonize-email email)
-        result          (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})]
+        result          (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organizationId) actual-roles}})]
     (if (ok? result)
-      (do (uu/notify-authority-added email organization-id)
+      (do (uu/notify-authority-added email organizationId)
           (ok :operation "add"))
       (if-not (usr/get-user-by-email email)
-        (create-authority-user-with-organization caller organization-id email firstName lastName actual-roles)
+        (create-authority-user-with-organization caller organizationId email firstName lastName actual-roles)
         (fail :error.user-not-found)))))
 
 (defcommand remove-user-organization

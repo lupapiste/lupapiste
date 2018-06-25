@@ -48,7 +48,11 @@ LUPAPISTE.OrganizationUserModel = function(organization) {
     self.searching(true).phase(2);
     ajax
       .command("upsert-organization-user",
-               {email: self.email(), firstName: self.firstName(), lastName: self.lastName(), roles: self.userRoles()})
+               {organizationId: organization.organizationId(),
+                email: self.email(),
+                firstName: self.firstName(),
+                lastName: self.lastName(),
+                roles: self.userRoles()})
       .pending(self.searching)
       .success(function(r) {
         if (r.operation === "invited") {

@@ -235,6 +235,7 @@
 
   (fact
     (command sipoo :upsert-organization-user
+             :organizationId "753-R"
              :email "foo@example.com"
              :firstName "bar"
              :lastName "har"
@@ -251,15 +252,25 @@
 
   (fact
     (command sipoo :upsert-organization-user
+             :organizationId "753-R"
              :email "foo@example.com"
              :firstName "bar"
              :lastName "har"
              :roles ["authority"])
     => ok?)
 
+  (fact "can't edit other orgs users"
+    (command sipoo :upsert-organization-user
+             :organizationId "168-R"
+             :email "foo@example.com"
+             :firstName "bar"
+             :lastName "har"
+             :roles ["authority"]) => unauthorized?)
+
   (facts "roles param"
     (fact "roles required"
       (command sipoo :upsert-organization-user
+               :organizationId "753-R"
                :email "foo@example.com"
                :firstName "bar"
                :lastName "har"
@@ -269,6 +280,7 @@
                     :text       "error.vector-parameters-with-items-missing-required-keys"}))
     (fact "roles are validated"
       (command sipoo :upsert-organization-user
+               :organizationId "753-R"
                :email "foo@example.com"
                :firstName "bar"
                :lastName "har"
@@ -278,6 +290,7 @@
 
   (fact "Not authority email"
     (command sipoo :upsert-organization-user
+             :organizationId "753-R"
              :email (email-for-key teppo)
              :firstName "Teppo"
              :lastName "Example"
@@ -286,6 +299,7 @@
 
   (fact
     (command sipoo :upsert-organization-user
+             :organizationId "753-R"
              :email "tonja.sibbo@sipoo.fi"
              :firstName "bar"
              :roles ["authority"])
@@ -295,6 +309,7 @@
 
   (fact "invite new user Tonja to Sipoo"
     (command sipoo :upsert-organization-user
+             :organizationId "753-R"
              :email "tonja.sibbo@sipoo.fi"
              :firstName "bar"
              :lastName "har"
@@ -308,8 +323,14 @@
         (get-in email [:body :plain]) => (contains #"/app/fi/welcome#!/setpw/[A-Za-z0-9-]+"))))
 
   (fact "add existing authority to new organization"
-
-    (command naantali :upsert-organization-user :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add" :roles ["authority"]) => ok?
+    (command naantali
+             :upsert-organization-user
+             :organizationId "529-R"
+             :email "tonja.sibbo@sipoo.fi"
+             :firstName "bar"
+             :lastName "har"
+             :operation "add"
+             :roles ["authority"]) => ok?
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
       (:subject email) => invite-authority-email-subject
@@ -318,11 +339,32 @@
 (facts remove-user-organization
   (apply-remote-minimal)
 
-  (fact (command naantali :create-user :email "foo@example.com" :role "authority" :enabled "true" :organization "529-R") => ok?)
-  (fact (command sipoo :upsert-organization-user :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add" :roles ["authority"]) => ok?)
-  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => (just ["529-R" "753-R"] :in-any-order))
-  (fact (command sipoo :remove-user-organization :email "foo@example.com") => ok?)
-  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"]))
+  (fact "Naantali adds first"
+    (command naantali
+             :upsert-organization-user
+             :email "foo@example.com"
+             :enabled "true"
+             :organizationId "529-R"
+             :firstName "bar"
+             :lastName "har"
+             :roles ["authority"]) => ok?)
+  (fact "Sipoo also adds"
+    (command sipoo
+             :upsert-organization-user
+             :organizationId "753-R"
+             :email "foo@example.com"
+             :firstName "bar"
+             :lastName "har"
+             :roles ["authority"]) => ok?)
+  (fact "in both"
+    (->> (query admin :user-by-email :email "foo@example.com")
+         :user
+         :orgAuthz
+         keys
+         (map name)) => (just ["529-R" "753-R"] :in-any-order))
+  (fact "Removed from Sipoo"
+    (command sipoo :remove-user-organization :email "foo@example.com") => ok?
+    (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"]))
 
 (fact update-user-roles
   (apply-remote-minimal)
@@ -391,7 +433,7 @@
                    :lastName  "Borga"
                    :email     "pekka.borga@porvoo.fi"
                    :roles     ["commenter"]}]
-        (command sipoo :upsert-organization-user pekka) => ok?
+        (command sipoo :upsert-organization-user (assoc pekka :organizationId "753-R")) => ok?
         (command sipoo :update-auth-info (-> pekka
                                              (dissoc :roles)
                                              (assoc :new-email "pekka.porvoo@porvoo.fi")))
