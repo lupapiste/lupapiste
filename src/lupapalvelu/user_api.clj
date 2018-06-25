@@ -386,7 +386,7 @@
   (let [roles (get-in command [:data :roles])
         pred  (set (map name allowed-roles))]
     (when-not (every? pred roles)
-      (fail :invalid.roles))))
+      (fail :error.invalid-role))))
 
 (defcommand update-user-organization
   {:parameters       [email firstName lastName roles]
