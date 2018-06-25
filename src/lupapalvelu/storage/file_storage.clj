@@ -31,8 +31,12 @@
 
 (defn s3-id [metadata-or-id file-id & [preview?]]
   (if (map? metadata-or-id)
-    (let [{:keys [application user-id uploader-user-id sessionId]} metadata-or-id]
-      (str (or application user-id uploader-user-id sessionId) "/" file-id (when preview? "-preview")))
+    (let [{:keys [application user-id uploader-user-id sessionId]} metadata-or-id
+          context-id (or application user-id uploader-user-id sessionId)]
+      (if (and (string? context-id) (> (count context-id) 5))
+        (str context-id "/" file-id (when preview? "-preview"))
+        (throw (ex-info "The metadata map for upload must contain either application, user-id, uploaded-user-id or sessionId"
+                        metadata-or-id))))
     (str metadata-or-id "/" file-id (when preview? "-preview"))))
 
 (defn upload [file-id filename content-type content metadata]
