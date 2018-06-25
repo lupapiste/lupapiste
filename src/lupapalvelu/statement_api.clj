@@ -61,7 +61,7 @@
   (let [organization       (organization/get-organization (usr/authority-admins-organization-id user))
         email              (ss/canonize-email email)
         statement-giver-id (mongo/create-id)]
-    (if-let [{fname :firstName lname :lastName :as authority} (uu/authority-by-email user email)]
+    (if-let [{fname :firstName lname :lastName :as authority} (uu/authority-by-email (:id organization) user email)]
       (do
         (organization/update-organization (:id organization) {$push
                                                               {:statementGivers

@@ -19,6 +19,7 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.states :as states]
             [lupapalvelu.token :as token]
+            [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as usr]
             [lupapalvelu.user-utils :as uu]
             [lupapalvelu.vetuma :as vetuma]
@@ -187,7 +188,12 @@
    :notified         true
    :permissions      [{:required [:users/create]}]}
   [{user-data :data caller :user}]
-  (uu/create-and-notify-user caller user-data))
+  (let [user (uu/administrator-create-user caller user-data)]
+    (let [token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
+      (ok :id (:id user)
+          :user user
+          :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
+          :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token)))))
 
 (defcommand create-rest-api-user
   {:description      "Creates REST API user for organization. Admin only."
