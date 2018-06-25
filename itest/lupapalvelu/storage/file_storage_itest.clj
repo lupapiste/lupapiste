@@ -46,8 +46,7 @@
 
             (let [dl (fs/download app-id id attachment)]
               (fact "download returns correct info about the file"
-                dl => (contains {:application app-id
-                                 :contentType content-type
+                dl => (contains {:contentType content-type
                                  :content     fn?
                                  :fileId      id
                                  :filename    filename
@@ -66,15 +65,13 @@
                                                {:versions [{:fileId        id2
                                                             :storageSystem storage-system}]}]}
                     dl (fs/download-many application [id id2])]
-                dl => (just [(contains {:application app-id
-                                        :contentType content-type
+                dl => (just [(contains {:contentType content-type
                                         :content     fn?
                                         :fileId      id
                                         :filename    filename
                                         :metadata    (just {:application app-id :linked true :uploaded pos-int?})
                                         :size        file-length})
-                             (contains {:application app-id
-                                        :contentType content-type2
+                             (contains {:contentType content-type2
                                         :content     fn?
                                         :fileId      id2
                                         :filename    filename2
@@ -177,8 +174,7 @@
 
             (let [dl (fs/download app-id id attachment)]
               (fact "linked file can be downloaded from the application"
-                dl => (contains {:application app-id
-                                 :contentType content-type
+                dl => (contains {:contentType content-type
                                  :content     fn?
                                  :fileId      id
                                  :filename    filename
@@ -238,8 +234,7 @@
 
             (fact "preview content is correct"
               (let [dl (fs/download-preview app-id id attachment)]
-                dl => (contains {:application app-id
-                                 :content     fn?
+                dl => (contains {:content     fn?
                                  :contentType content-type
                                  :fileId      (str id "-preview")
                                  :filename    filename
