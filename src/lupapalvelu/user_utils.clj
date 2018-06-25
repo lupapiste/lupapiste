@@ -50,7 +50,7 @@
         user-data (if (= role "authorityAdmin")
                     (assoc user-data :role "authority")
                     user-data)
-        user (usr/create-new-user caller user-data :send-email false)]
+        user (usr/create-new-user caller user-data)]
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
     (if (usr/authority? user)
       ; FIXME: user can have multiple orgz

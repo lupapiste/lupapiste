@@ -138,7 +138,7 @@
 (defn- create-authority-user-with-organization [caller new-organization email firstName lastName roles]
   (let [org-authz {(keyword new-organization) (into #{} roles)}
         user-data {:email email :orgAuthz org-authz :role :authority :enabled true :firstName firstName :lastName lastName}
-        new-user  (usr/create-new-user caller user-data :send-email false)]
+        new-user  (usr/create-new-user caller user-data)]
     (infof "invitation for new authority user: email=%s, organization=%s" email new-organization)
     (uu/notify-new-authority new-user caller new-organization)
     (ok :operation "invited")))

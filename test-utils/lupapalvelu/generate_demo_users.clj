@@ -409,8 +409,7 @@
                       :firstName (str "Koulutus " kuntano)
                       :lastName (str "Hakija " i)
                       :enabled false
-                      :password "koulutus"}
-                     :send-email false)]
+                      :password "koulutus"})]
           (mongo/update-by-id :users (:id user) {$set {:enabled true}}))
         (catch [:sade.core/type :sade.core/fail] {:keys [text desc] :as all}
           (println text (or desc "")))))))

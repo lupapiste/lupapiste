@@ -448,8 +448,7 @@
                                 :enabled     true}
                                :language    (:language user)
                                :personId    (:personId user)
-                               :personIdSource (:personIdSource user))
-      :send-email false))
+                               :personIdSource (:personIdSource user))))
   (ok))
 
 (defn invite-user! [caller user-email company-id role submit firstname lastname]

@@ -662,7 +662,7 @@
   "Insert new user to database, returns new user data without private information. If user
    exists and has role \"dummy\", overwrites users information. If users exists with any other
    role, throws exception."
-  [caller user-data & {:keys [send-email] :or {send-email true}}]
+  [caller user-data]
   (let [; Oh damn, sometimes orgAuthz is a set of keywords, sometimes
         ; vector of strings, probably there are some other variations also.
         ; This normalizes callers orgAuthz for this case

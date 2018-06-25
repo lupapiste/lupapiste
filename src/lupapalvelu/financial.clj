@@ -15,7 +15,7 @@
   (usr/get-user {:role "financialAuthority"}))
 
 (defn create-financial-handler [user-data caller]
-  (let [user (usr/create-new-user caller user-data :send-email false)
+  (let [user (usr/create-new-user caller user-data)
         token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
     (ok :id (:id user)
         :user user
