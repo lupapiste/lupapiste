@@ -147,7 +147,8 @@
    (sc/optional-key :bulletins) {:enabled sc/Bool
                                  :url sc/Str
                                  (sc/optional-key :notification-email) sc/Str
-                                 (sc/optional-key :descriptions-from-backend-system) sc/Bool}})
+                                 (sc/optional-key :descriptions-from-backend-system) sc/Bool}
+   (sc/optional-key :pate-enabled) sc/Bool})
 
 (def permit-types (map keyword (keys (permit/permit-types))))
 
@@ -252,7 +253,7 @@
    (sc/optional-key :verdict-templates) PateSavedVerdictTemplates
    (sc/optional-key :phrases) [Phrase]
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
-   (sc/optional-key :pate-enabled)                 sc/Bool
+   (sc/optional-key :matti-enabled)                sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
    (sc/optional-key :local-bulletins-page-settings) LocalBulletinsPageSettings
    (sc/optional-key :default-digitalization-location) {:x sc/Str :y sc/Str}
@@ -286,7 +287,7 @@
    :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
    :docstore-info :3d-map :default-digitalization-location
    :kopiolaitos-email :kopiolaitos-orderer-address :kopiolaitos-orderer-email :kopiolaitos-orderer-phone
-   :app-required-fields-filling-obligatory ])
+   :app-required-fields-filling-obligatory :matti-enabled])
 
 (defn get-organizations
   ([]

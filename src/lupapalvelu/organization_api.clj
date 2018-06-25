@@ -228,7 +228,7 @@
   {:description "Update organization details."
    :parameters [permitType municipality
                 inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
-                opening]
+                opening pateEnabled]
    :optional-parameters [bulletinsEnabled bulletinsUrl]
    :input-validators [permit/permit-type-validator]
    :user-roles #{:admin}}
@@ -239,7 +239,8 @@
                     :scope.$.new-application-enabled applicationEnabled
                     :scope.$.open-inforequest openInforequestEnabled
                     :scope.$.open-inforequest-email openInforequestEmail
-                    :scope.$.opening (when (number? opening) opening)}
+                    :scope.$.opening (when (number? opening) opening)
+                    :scope.$.pate-enabled pateEnabled}
                    (when-not (nil? bulletinsEnabled)
                      {:scope.$.bulletins.enabled bulletinsEnabled
                       :scope.$.bulletins.url     (or bulletinsUrl "")}))})

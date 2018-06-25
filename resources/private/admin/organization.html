@@ -118,6 +118,7 @@
                   <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
                   <th data-bind="ltext: 'organization.application.enabled'"></th>
                   <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
+                  <th data-bind="text: 'Pate'"></th>
                   <th data-bind="ltext: 'organization.openinforequest.email'"></th>
                   <th>Palvelu avataan</th>
                   <th>Tallenna rivi</th>
@@ -133,6 +134,9 @@
                   </td>
                   <td data-bind="attr: {'data-test-id': 'open-inforequest-' + $data.municipality() + '-' + $data.permitType()}">
                     <input type="checkbox" data-bind="checked: $data['open-inforequest']" class="form-input" >
+                  </td>
+                  <td>
+                    <input type="checkbox" data-bind="checked: $data['pate-enabled']" class="form-input" >
                   </td>
                   <td data-bind="">
                     <input type="text" data-bind="value: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality() + '-' + $data.permitType()}" class="form-input" >
@@ -154,15 +158,10 @@
 
 
           <div data-bind="if: organization">
-            <h2>Pate k&auml;yt&ouml;ss&auml;?</h2>
+            <h2>Matti</h2>
             <div>
-              <div>
-                <label data-bind="text: loc('yes') + '/' + loc('no') " for="pate-enabled"></label>
-                <input data-bind="checked: organization()['pate-enabled']" id="pate-enabled" type="checkbox"/>
-              </div>
-              <button data-bind="ltext: 'save',
-                                 click: savePateEnabled" class="btn positive"
-                      data-test-id="save-pate-enabled"></button>
+                <label data-bind="text: 'Matti k&auml;yt&ouml;ss&auml;' " for="matti-enabled"></label>
+                <input data-bind="checked: mattiEnabled" id="matti-enabled" type="checkbox"/>
             </div>
           </div>
 
