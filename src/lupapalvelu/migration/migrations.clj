@@ -3943,6 +3943,12 @@
                                  attachment))
                              {"attachments.readOnly" {$type "null"}}))
 
+(defmigration authority-admins-to-authorities
+  {:apply-when (pos? (mongo/count :users {:role "authorityAdmin"}))}
+  (mongo/update-by-query :users
+                         {:role "authorityAdmin"}
+                         {$set {:role "authority"}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
