@@ -678,7 +678,7 @@
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
         ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
-        asiat-with-kuntalupatunnus (get-asiat-with-kuntalupatunnus xml-no-ns kuntalupatunnus)
+        asiat-with-kuntalupatunnus (get-asiat-with-kuntalupatunnus xml-no-ns kuntalupatunnus)]
     (when (pos? (count asiat-with-kuntalupatunnus))
       ;; There should be only one RakennusvalvontaAsia element in the message, even though Krysp makes multiple elements possible.
       ;; Log an error if there were many. Use the first one anyway.
@@ -749,4 +749,4 @@
                                :geometry-wgs84 wgs84-geometry}]})))
 
             cr/convert-booleans
-            cr/cleanup)))]))
+            cr/cleanup)))))
