@@ -104,9 +104,15 @@ LUPAPISTE.NaviSidebarService = function() {
              page: "logs",
              loc: "admin.log"}]};
 
-  self.userMenu = ko.computed( function ()  {
-    return menus[lupapisteApp.models.currentUser.role()];
-  } );
+  self.userMenu = ko.pureComputed( function ()  {
+    var mainRole = lupapisteApp.models.currentUser.role();
+    if (mainRole === "authority"
+        && _.some(lupapisteApp.models.currentUser.organizationAdminOrgs())) {
+      return menus.authorityAdmin;
+    } else if (mainRole === "admin") {
+      return menus.admin;
+    }
+  });
 
   self.containerCss = ko.pureComputed( function ()  {
     return {"container--icon": self.iconsOnly()};
