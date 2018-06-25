@@ -4,7 +4,7 @@ LUPAPISTE.SutiApiModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   self.readOnly = self.disposedPureComputed( function() {
-    return !lupapisteApp.models.globalAuthModel.ok( "update-user-organization");
+    return !lupapisteApp.models.globalAuthModel.ok( "upsert-organization-user");
   });
 
   self.serverParams = {

@@ -388,14 +388,15 @@
     (when-not (every? pred roles)
       (fail :error.invalid-role))))
 
-(defcommand update-user-organization
+(defcommand upsert-organization-user
   {:parameters       [email firstName lastName roles]
    :input-validators [(partial action/non-blank-parameters [:email :firstName :lastName])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       action/email-validator
                       (partial allowed-roles organization/authority-roles)]
    :notified         true
-   :permissions      [{:required [:organization/admin]}]}
+   :permissions      [{:required [:organization/admin]}]
+   :description      "Updates or creates user in admins organization"}
   [{caller :user}]
   (let [organization-id (usr/authority-admins-organization-id caller)
         actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)

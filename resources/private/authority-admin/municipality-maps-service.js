@@ -231,7 +231,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
   }
 
   self.readOnly = ko.pureComputed( function() {
-    return !lupapisteApp.models.globalAuthModel.ok( "update-user-organization");
+    return !lupapisteApp.models.globalAuthModel.ok( "upsert-organization-user");
   });
 
   // Parameter providers

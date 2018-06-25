@@ -47,7 +47,7 @@ LUPAPISTE.OrganizationUserModel = function(organization) {
   self.next = function() {
     self.searching(true).phase(2);
     ajax
-      .command("update-user-organization",
+      .command("upsert-organization-user",
                {email: self.email(), firstName: self.firstName(), lastName: self.lastName(), roles: self.userRoles()})
       .pending(self.searching)
       .success(function(r) {
