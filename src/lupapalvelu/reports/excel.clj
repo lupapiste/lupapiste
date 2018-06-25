@@ -54,7 +54,7 @@
       (.setCellType CellType/FORMULA)
       (.setCellFormula (subs value 1)))))
 
-(defn add-sum-row [sheet-name wb values]
+(defn add-sum-row! [sheet-name wb values]
   (let [sheet (spreadsheet/select-sheet sheet-name wb)]
     (spreadsheet/add-row! sheet values)))
 

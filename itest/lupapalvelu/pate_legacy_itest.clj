@@ -16,9 +16,9 @@
     (fact "New legacy verdict draft"
       (let [{:keys [verdict-id]}     (command sonja :new-legacy-verdict-draft
                                               :id app-id)
-            open                     (partial open-verdict app-id verdict-id)
+            open                     (partial open-verdict sonja app-id verdict-id)
             {:keys [verdict filled]} (open)
-            edit                     (partial edit-legacy-verdict app-id verdict-id)]
+            edit                     (partial edit-verdict sonja app-id verdict-id)]
         filled => false?
         verdict => (contains {:legacy?    true
                               :data       (contains {:handler "Sonja Sibbo"})
@@ -37,7 +37,7 @@
                                                     :in-any-order
                                                     :gaps-ok)})
         (fact "Fill verdict"
-          (fill-verdict app-id verdict-id
+          (fill-verdict sonja app-id verdict-id
                         :kuntalupatunnus "888-10-12"
                         :verdict-code "1" ;; Granted
                         :verdict-text "Lorem ipsum"
@@ -51,7 +51,7 @@
                                                              :anto            (timestamp "21.5.2018")
                                                              :lainvoimainen   (timestamp "30.5.2018")})})}))
 
-        (add-review app-id verdict-id "First review" :paikan-merkitseminen)
+        (add-legacy-review sonja app-id verdict-id "First review" :paikan-merkitseminen)
 
         (fact "Add condition"
           (let [condition-id (-> (edit :add-condition true) :changes flatten second)]
@@ -162,26 +162,26 @@
                         (contains {:contents "Complaint"})])
               (check-file file-id true))))
         (fact "Fill and publish the first verdict"
-          (fill-verdict app-id vid1
+          (fill-verdict sonja app-id vid1
                         :kuntalupatunnus "888-10-13"
                         :verdict-code "2" ;; Admitted
                         :verdict-text "Quisque sed nibh"
                         :anto (timestamp "22.5.2018")
                         :lainvoimainen (timestamp "1.6.2018"))
-          (add-review app-id vid1 "Review One" :aloituskokous)
+          (add-legacy-review sonja app-id vid1 "Review One" :aloituskokous)
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id vid1) => ok?)
         (fact "State is verdictGiven"
           (query-application sonja app-id)
           => (contains {:state "verdictGiven"}))
         (fact "Fill and publish the second verdict"
-          (fill-verdict app-id vid2
+          (fill-verdict sonja app-id vid2
                         :kuntalupatunnus "888-10-14"
                         :verdict-code "3" ;; Partially granted
                         :verdict-text "Quisque sed nibh"
                         :anto (timestamp "23.5.2018")
                         :lainvoimainen (timestamp "2.6.2018"))
-          (add-review app-id vid2 "Review Two" :aloituskokous)
+          (add-legacy-review sonja app-id vid2 "Review Two" :aloituskokous)
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id vid2) => ok?)
         (fact "There are now two tasks and four attachments"
@@ -221,7 +221,7 @@
           (command sonja :approve-application :id app-id
                    :lang "fi") => ok?)
         (facts "Legacy publishing works"
-          (fill-verdict app-id vid3
+          (fill-verdict sonja app-id vid3
                         :kuntalupatunnus "888-10-15"
                         :verdict-code "4" ;; Upheld partially ...
                         :verdict-text "Vestibulum quis eros sit amet "

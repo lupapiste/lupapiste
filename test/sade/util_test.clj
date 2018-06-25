@@ -613,7 +613,8 @@
 
 (fact "split-kw-path"
   (split-kw-path :a.b.9) => [:a :b :9]
-  (split-kw-path :a..b) => [:a (keyword "" ):b])
+  (split-kw-path :a..b) => [:a (keyword "" ):b]
+  (split-kw-path nil) => nil)
 
 (facts "safe-update-in"
   (safe-update-in {:a [{:b 2}]} [:a 0 :b] + 2) => {:a [{:b 4}]}

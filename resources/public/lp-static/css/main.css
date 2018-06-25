@@ -13278,6 +13278,11 @@ ul.tabs {
   width: auto;
 }
 
+.neighbor-status {
+  max-height: 1000px;
+  overflow: scroll;
+}
+
 .autosized.autosized--wider {
   min-width: 25em;
 }
@@ -29216,6 +29221,13 @@ input:disabled + .pate-radio-label:hover.pate-radio-label:before {
   border-top: none;
 }
 
+.pate-template-help {
+  padding: .5em .5em;
+  background-color: rgba(243, 145, 41, 0.1);
+  border-left: 1px solid #333333;
+  border-right: 1px solid #333333;
+}
+
 .pate-verdict .pate-section {
   min-height: 64px;
 }
@@ -29425,6 +29437,10 @@ div.pate-phrases table.pate-phrases-table th > div.like-btn {
 div.pate-phrases table.pate-phrases-table th i.icon-placeholder,
 div.pate-phrases table.pate-phrases-table th > div.like-btn i.icon-placeholder {
   min-width: 22px;
+}
+
+div.pate-phrases table.pate-phrases-table td.category {
+  white-space: nowrap;
 }
 
 div.pate-phrases table.pate-phrases-table td.phrase {

@@ -62,7 +62,6 @@
                  :redraw-on-approval
                  :post-verdict-party
                  :addable-in-states
-                 :exclude-from-pdf
                  :editable-in-states
                  :accordion-fields
                  :blacklist
@@ -993,7 +992,7 @@
                                     {:name "kerrosala" :type :string :size :s :unit :m2 :subtype :number :min -9999999 :max 9999999}
                                     {:name "rakennusoikeudellinenKerrosala" :type :string :size :s :unit :m2 :subtype :number :min -9999999 :max 9999999}
                                     {:name "kokonaisala" :type :string :size :s :unit :m2 :subtype :number :min -9999999 :max 9999999}
-                                    {:name "huoneistoala" :type :group :repeating true :removable true
+                                    {:name "huoneistoala" :type :group :repeating true
                                      :body [{:name "pintaAla" :type :string :size :s :unit :m2 :subtype :number :min -9999999 :max 9999999}
                                             {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname
                                              :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
@@ -1119,7 +1118,6 @@
 (def kt-kiinteistonmuodostus {:name "kiinteistonmuodostus"
                               :type :group
                               :approvable true
-                              :removable true
                               :body [{:name "kiinteistonmuodostusTyyppi"
                                       :type :select
                                       :layout :full-width
@@ -1139,7 +1137,6 @@
                         :type :group
                         :group-help "help.rasitetoimitus"
                         :approvable true
-                        :removable true
                         :body [{:name "kayttooikeuslaji"
                                 :type :select
                                 :layout :full-width
@@ -1377,10 +1374,10 @@
    {:info {:name "rakennustietojen-korjaus" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups olemassaoleva-rakennus)}
 
-   {:info {:name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths}
+   {:info {:name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths :post-verdict-editable true}
     :body (approvable-top-level-groups rakennuksen-laajentaminen)}
 
-   {:info {:name "rakennuksen-laajentaminen-ei-huoneistoja" :i18name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths}
+   {:info {:name "rakennuksen-laajentaminen-ei-huoneistoja" :i18name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths :post-verdict-editable true}
     :body (approvable-top-level-groups rakennuksen-laajentaminen-ei-huoneistoja)}
 
    {:info {:name "purkaminen" :i18name "purku" :approvable true :accordion-fields buildingid-accordion-paths}
@@ -1388,12 +1385,13 @@
 
    {:info {:name "kaupunkikuvatoimenpide"
            :approvable true
-           :accordion-fields buildingid-accordion-paths}
+           :accordion-fields buildingid-accordion-paths
+           :post-verdict-editable true}
     :body (body tunnus
                 (approvable-top-level-groups rakennelma)
                 rakennustunnus)}
 
-   {:info {:name "kaupunkikuvatoimenpide-ei-tunnusta" :i18name "kaupunkikuvatoimenpide" :approvable true}
+   {:info {:name "kaupunkikuvatoimenpide-ei-tunnusta" :i18name "kaupunkikuvatoimenpide" :approvable true :post-verdict-editable true}
     :body (approvable-top-level-groups rakennelma)}
 
    {:info {:name "maalampokaivo" :approvable true :i18name "maalampokaivo"}

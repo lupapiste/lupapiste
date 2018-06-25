@@ -1,17 +1,19 @@
 (ns lupapalvelu.ui.pate.verdict-templates
   (:require [clojure.set :as set]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.path :as path]
+            [lupapalvelu.pate.settings-schemas :as settings-schemas]
+            [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.layout :as layout]
-            [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.settings :as settings]
             [lupapalvelu.ui.pate.state :as state]
-            [rum.core :as rum]))
+            [rum.core :as rum]
+            [sade.shared-util :as util]))
 
 (defn updater
   ([{:keys [state info path] :as options} value]
@@ -28,6 +30,19 @@
   (reset! state/current-view {:view ::settings
                               :back template-id}))
 
+(defn- loc-text [loc-key & args]
+  (apply common/loc
+         (cons (if (util/=as-kw (rum/react state/current-category)
+                                :contract)
+                 (get {:pate.verdict-templates      :pate.contract-templates
+                       :pate-verdict-template       :pate.contract.template
+                       :pate.add-verdict-template   :pate.add-contract-template
+                       :pate.template-not-published :pate.contract.template.not-published
+                       :pate.edit-verdict-template  :pate.contract.template.edit}
+                      (keyword loc-key) loc-key)
+                 loc-key)
+               args)))
+
 (rum/defc verdict-template-name < rum/reactive
   [{info* :info}]
   (letfn [(handler-fn [value]
@@ -35,19 +50,21 @@
             (service/set-template-name @(path/state [:id] info*)
                                        value
                                        (common/response->state info* :modified)))]
-    (components/pen-input {:value      (rum/react (path/state [:name] info*))
-                           :handler-fn handler-fn
-                           :disabled?  (not (state/auth? :set-verdict-template-name))})))
+    (components/pen-input {:value     (rum/react (path/state [:name] info*))
+                           :callback  handler-fn
+                           :disabled? (not (state/auth? :set-verdict-template-name))
+                           :test-id   :template-name})))
 
 
 (rum/defc verdict-template-publish < rum/reactive
   [{info* :info}]
   (let [published (path/react [:published] info*)]
     [:div [:span.row-text.row-text--margin
+           (common/add-test-id {} :template-state)
            (if published
-             (common/loc :pate.last-published
-                         (js/util.finnishDateAndTime published))
-             (common/loc :pate.template-not-published))]
+             (loc-text :pate.last-published
+                       (js/util.finnishDateAndTime published))
+             (loc-text :pate.template-not-published))]
      (components/icon-button
       {:disabled? (or (not (state/auth? :publish-verdict-template))
                       (> published
@@ -55,11 +72,12 @@
                               (path/react [:info :modified] state/settings-info)))
                       (false? (path/react :filled? info*))
                       (false? (path/react [:info :filled?] state/settings-info)))
-       :on-click #(service/publish-template (path/value [:id] info*)
-                                            (common/response->state info* :published))
-       :class :primary
-       :icon :lupicon-megaphone
-       :text-loc :pate.publish})]))
+       :on-click  #(service/publish-template (path/value [:id] info*)
+                                             (common/response->state info* :published))
+       :class     :primary
+       :icon      :lupicon-megaphone
+       :text-loc  :pate.publish
+       :test-id   :publish-template})]))
 
 
 (defn reset-template [{draft :draft :as template}]
@@ -91,15 +109,16 @@
 
 (defn with-back-button [component]
   [:div
-   [:button.ghost
-    {:on-click #(if-let [template-id (path/value :back state/current-view)]
-                  (do (when (state/auth? :update-and-open-verdict-template)
-                        (service/fetch-updated-template template-id
-                                                        update-settings-dependencies))
-                      (reset! state/current-view {:view ::template}))
-                  (reset-template nil))}
-    [:i.lupicon-chevron-left]
-    [:span (common/loc "back")]]
+   (components/icon-button {:class    :ghost
+                            :on-click #(if-let [template-id (path/value :back state/current-view)]
+                                         (do (when (state/auth? :update-and-open-verdict-template)
+                                               (service/fetch-updated-template template-id
+                                                                               update-settings-dependencies))
+                                             (reset! state/current-view {:view ::template}))
+                                         (reset-template nil))
+                            :icon     :lupicon-chevron-left
+                            :text-loc :back
+                            :test-id  :back})
    component])
 
 (defn verdict-template
@@ -109,16 +128,17 @@
     [:div.row.row--tight
      [:div.col-1
       [:span.row-text.header
-       (common/loc "pate.edit-verdict-template")
+       (loc-text :pate.edit-verdict-template)
        (verdict-template-name options)]]
      [:div.col-1.col--right
       (verdict-template-publish options)]]
     [:div.row.row--tight
      [:div.col-1
-      (pate-components/required-fields-note options)
+      (pate-components/required-fields-note (assoc options :test-id :required-template))
       (pate-components/required-fields-note {:info (rum/cursor-in state/settings-info [:info])}
                                             (components/text-and-link {:text-loc :pate.settings-required-fields
-                                                                       :click    #(open-settings (path/value :id info))}))]
+                                                                       :click    #(open-settings (path/value :id info))
+                                                                       :test-id  :required-settings}))]
      [:div.col-1.col--right
       (pate-components/last-saved options)]]]
    (sections/sections options :verdict-template)])
@@ -126,16 +146,17 @@
 (defn new-template [options]
   (reset-template options))
 
-(defn toggle-delete [id deleted]
+(defn toggle-delete [id deleted test-id]
   (components/icon-button
    {:class    [:primary :outline]
     :on-click #(service/toggle-delete-template id (not deleted) identity)
     :text-loc (if deleted :pate-restore :remove)
-    :icon (if deleted :lupicon-undo :lupicon-remove)}))
+    :icon (if deleted :lupicon-undo :lupicon-remove)
+    :test-id [(if deleted :restore :delete) test-id]}))
 
 (defn set-category [category]
   (reset! state/current-category category)
-  (settings/fetch-settings category ))
+  (settings/fetch-settings category))
 
 (rum/defc category-select < rum/reactive
   []
@@ -143,8 +164,9 @@
    [:div.row
     [:div.col-2.col--full
      [:select.dropdown
-      {:value     (rum/react state/current-category)
-       :on-change #(set-category (.. % -target -value))}
+      (common/add-test-id {:value     (rum/react state/current-category)
+                           :on-change #(set-category (.. % -target -value))}
+                          :category-select)
       (->> (rum/react state/categories)
            (map (fn [cid]
                   {:value cid
@@ -157,7 +179,8 @@
       {:icon     :lupicon-gear
        :class    :ghost
        :on-click #(open-settings)
-       :text-loc :auth-admin.organization.properties})]]])
+       :text-loc :auth-admin.organization.properties
+       :test-id  :open-settings})]]])
 
 (rum/defcs verdict-template-list < rum/reactive
   (rum/local false ::show-deleted)
@@ -166,7 +189,7 @@
                               (:category %))
                           (rum/react state/template-list))]
     [:div.pate-template-list
-     [:h2 (common/loc "pate.verdict-templates")]
+     [:h2 (loc-text :pate.verdict-templates)]
      (category-select)
      (when (some :deleted templates)
        (components/toggle show-deleted
@@ -180,35 +203,44 @@
          [:table.pate-templates-table
           [:thead
            [:tr
-            [:th (common/loc "pate-verdict-template")]
+            [:th (loc-text :pate-verdict-template)]
             [:th (common/loc "pate-verdict-template.published")]
             [:th]]]
           [:tbody
-           (for [{:keys [id name published deleted]} filtered]
-             [:tr {:key id}
-              [:td (if deleted
-                     name
-                     [:a {:on-click #(open-template id)}
-                      name])]
-              [:td (js/util.finnishDate published)]
-              [:td
-               [:div.pate-buttons
-                (when-not deleted
-                  (components/icon-button
-                   {:class    [:primary :outline]
-                    :on-click #(open-template id)
-                    :text-loc :edit
-                    :icon     :lupicon-pen}))
-                (components/icon-button
-                 {:class    [:primary :outline]
-                  :on-click #(service/copy-template id reset-template)
-                  :text-loc :pate.copy
-                  :icon     :lupicon-copy})
-                (toggle-delete id deleted)]]])]]))
-     [:button.positive
-      {:on-click #(service/new-template @state/current-category new-template)}
-      [:i.lupicon-circle-plus]
-      [:span (common/loc :pate.add-verdict-template)]]]))
+           (map-indexed (fn [i {:keys [id name published deleted]}]
+                          (let [tid (str "template-" i)]
+                            [:tr {:key id}
+                             [:td (if deleted
+                                    name
+                                    [:a (common/add-test-id {:on-click #(open-template id)}
+                                                            :link tid)
+                                     name])]
+                             [:td (common/add-test-id {} :published tid)
+                              (js/util.finnishDate published)]
+                             [:td
+                              [:div.pate-buttons
+                               (when-not deleted
+                                 (components/icon-button
+                                  {:class    [:primary :outline]
+                                   :on-click #(open-template id)
+                                   :text-loc :edit
+                                   :icon     :lupicon-pen
+                                   :test-id [:open tid]}))
+                               (components/icon-button
+                                {:class    [:primary :outline]
+                                 :on-click #(service/copy-template id reset-template)
+                                 :text-loc :pate.copy
+                                 :icon     :lupicon-copy
+                                 :test-id  [:copy tid]})
+                               (toggle-delete id deleted tid)]]]))
+                        filtered)]]))
+     (components/icon-button {:icon     :lupicon-circle-plus
+                              :class    :positive
+                              :text     (loc-text :pate.add-verdict-template)
+                              :on-click #(service/new-template @state/current-category
+                                                               new-template)
+                              :enabled? (state/auth? :new-verdict-template)
+                              :test-id  :add-template})]))
 
 (rum/defc verdict-templates < rum/reactive
   []
@@ -220,9 +252,9 @@
        (with-back-button
          (verdict-template
           (merge
-           {:schema     (dissoc (shared/verdict-template-schema @state/current-category)
+           {:schema     (dissoc (template-schemas/verdict-template-schema @state/current-category)
                                 :dictionary)
-            :dictionary (:dictionary (shared/verdict-template-schema @state/current-category))
+            :dictionary (:dictionary (template-schemas/verdict-template-schema @state/current-category))
             :references state/references}
            (state/select-keys state/current-template [:state :info :_meta]))))
 
@@ -230,7 +262,7 @@
        [:div (verdict-template-list) (phrases/phrases-table)]
 
        ::settings
-       (when-let [full-schema (shared/settings-schema @state/current-category)]
+       (when-let [full-schema (settings-schemas/settings-schema @state/current-category)]
          (with-back-button
            (settings/verdict-template-settings
             (merge

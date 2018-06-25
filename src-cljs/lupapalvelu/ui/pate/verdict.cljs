@@ -1,14 +1,14 @@
 (ns lupapalvelu.ui.pate.verdict
   "View of an individual Pate verdict."
   (:require [clojure.set :as set]
-            [lupapalvelu.pate.legacy :as legacy]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.legacy-schemas :as legacy]
+            [lupapalvelu.pate.path :as path]
+            [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.layout :as layout]
-            [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
@@ -120,8 +120,8 @@
                                               :verdict.submit)
                                   :class    (common/css :primary :pate-left-space)
                                   :icon     (if contract?
-                                              :lupicon-circle-pen
-                                              :lupicon-circle-section-sign)
+                                              :lupicon-undersign
+                                              :lupicon-document-section-sign)
                                   :wait?    state/verdict-wait?
                                   :enabled? (can-publish?)
                                   :on-click (fn []
@@ -165,7 +165,7 @@
                 category]} (:info @state/current-verdict)]
     (if legacy?
       (legacy/legacy-verdict-schema category)
-      (shared/verdict-schema category schema-version))))
+      (verdict-schemas/verdict-schema category schema-version))))
 
 (rum/defc pate-verdict < rum/reactive
   []
@@ -185,7 +185,7 @@
                        :schema (dissoc schema :dictionary)
                        :dictionary dictionary
                        :references state/references)))
-     [:div.pate-spin [:i.lupicon-circle-section-sign]])]])
+     [:div.pate-spin [:i.lupicon-refresh]])]])
 
 (defn bootstrap-verdict []
   (let [[app-id verdict-id] (js/pageutil.getPagePath)]

@@ -6,7 +6,7 @@
             [lupapalvelu.mongo :as mongo]))
 (def ts (now))
 (def test-queue (str "testijono_" ts))
-(def test-db (str "jms_itest_" ts))
+(def test-db (str "test_jms_itest_" ts))
 (when (env/feature? :jms)
   (mongo/connect!)
   (facts "test_db_name is respected"
@@ -28,7 +28,7 @@
         (normal-producer "normal producer default db") => nil
         (mongo/with-db test-db
           (normal-producer "normal producer with-db")) => nil)
-      (Thread/sleep 100)
+      (Thread/sleep 200)
       (fact "From normal DB"
         (mongo/select :testi) => (just (contains {:data "default db"})
                                        (contains {:data "normal producer default db"})

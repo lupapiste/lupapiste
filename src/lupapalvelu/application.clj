@@ -404,6 +404,8 @@
           (assoc-in body path data-value)))
       {} schema-data)))
 
+(def db-schema-info-keys [:name :version :type :subtype :op])
+
 (defn make-document [primary-operation-name created manual-schema-datas schema]
   (let [op-info (op/operations (keyword primary-operation-name))
         op-schema-name (:schema op-info)
@@ -413,7 +415,7 @@
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
         schema-name (get-in schema [:info :name])]
     {:id          (mongo/create-id)
-     :schema-info (:info schema)
+     :schema-info (select-keys (:info schema) db-schema-info-keys)
      :created     created
      :data        (util/deep-merge
                    (tools/create-document-data schema tools/default-values)
@@ -428,15 +430,10 @@
   (let [op-info (op/operations (keyword (:name op)))
         op-schema-name (:schema op-info)
         schema-version (:schema-version application)
-        default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
-                                                   op-schema-name (:schema-data op-info))
-        merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
 
         make (partial make-document (:name op) created manual-schema-datas)
 
-        ;; TODO: :removable is deprecated (LPK-3107), no need for storing doc schema into mongo
-        ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
-        op-doc (update-in (make (schemas/get-schema schema-version op-schema-name)) [:schema-info] #(merge {:op op :removable true} %))
+        op-doc (update (make (schemas/get-schema schema-version op-schema-name)) :schema-info assoc :op op)
 
         existing-schemas-infos (map :schema-info (:documents application))
         existing-schema-names (set (map :name existing-schemas-infos))

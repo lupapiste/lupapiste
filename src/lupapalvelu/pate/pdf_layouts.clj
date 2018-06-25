@@ -298,6 +298,60 @@
                 entry--link-permits
                 entry--appeal))
 
+;; ----------------------------------
+;; Contract layout
+;; ----------------------------------
+
+(def entry--contract-text [{:loc    :empty
+                            :source {:dict :contract-text}
+                            :styles :pad-before}])
+
+(def entry--case [{:loc       :pdf.contract.case
+                   :loc-many :pdf.contract.cases
+                   :source   :operations
+                   :styles   :bold}
+                  {:path :text}])
+
+(def entry--contract-conditions
+  [{:loc      :pate.contract.condition
+    :loc-many :pate.contract.conditions
+    :source   :conditions
+    :styles   :pad-before}])
+
+(def entry--contract-giver
+  '([{:loc    :verdict.name.sijoitussopimus
+      :source {:dict :handler}
+      :styles :pad-before}]
+    [{:loc    :empty
+      :source :organization
+      :styles :pad-after}]))
+
+(def entry--contract-date
+  '([{:loc    :verdict.contract.date
+      :source {:dict :verdict-date}}]))
+
+(def entry--contract-signatures
+  '([{:loc      :pdf.signature
+      :loc-many :verdict.signatures
+      :source   :signatures
+      :styles   [:bold :pad-before]}
+     {:path :name}
+     {:path :date}]))
+
+(def contract-pdf-layout
+  (build-layout entry--application-id
+                entry--rakennuspaikka
+                (entry--applicant :applicant :pdf.applicants)
+                entry--case
+                entry--contract-text
+                entry--reviews
+                entry--contract-conditions
+                entry--contract-giver
+                entry--contract-date
+                entry--attachments
+                entry--contract-signatures))
+
+
 ;; --------------------------------
 ;; Layouts for legacy verdicts
 ;; --------------------------------
@@ -462,11 +516,11 @@
 ;; Legacy contracts
 ;; ----------------------------------
 
-(def legacy--contract-text [{:loc    :empty
+#_(def legacy--contract-text [{:loc    :empty
                             :source {:dict :contract-text}
                             :styles :pad-before}])
 
-(def entry--case [{:loc       :pdf.contract.case
+#_(def entry--case [{:loc       :pdf.contract.case
                    :loc-many :pdf.contract.cases
                    :source   :operations
                    :styles   :bold}
@@ -479,7 +533,7 @@
     :post-fn (repeating-texts-post-fn :name)
     :styles   :pad-before}])
 
-(def legacy--contract-giver
+#_(def legacy--contract-giver
   '([{:loc    :verdict.name.sijoitussopimus
       :source {:dict :handler}
       :styles :pad-before}]
@@ -487,11 +541,11 @@
       :source :organization
       :styles :pad-after}]))
 
-(def legacy--contract-date
+#_(def legacy--contract-date
   '([{:loc    :verdict.contract.date
       :source {:dict :verdict-date}}]))
 
-(def legacy--contract-signatures
+#_(def legacy--contract-signatures
   '([{:loc      :pdf.signature
       :loc-many :verdict.signatures
       :source   :signatures
@@ -500,18 +554,18 @@
      {:path :date}]))
 
 (def contract-legacy-layout
-  (build-layout legacy--application-id
+  (build-layout entry--application-id
                 legacy--kuntalupatunnus
                 entry--rakennuspaikka
                 (entry--applicant :applicant :pdf.applicants)
                 entry--case
-                entry--attachments
-                legacy--contract-text
+                entry--contract-text
                 legacy--reviews
                 legacy--contract-conditions
-                legacy--contract-giver
-                legacy--contract-date
-                legacy--contract-signatures))
+                entry--contract-giver
+                entry--contract-date
+                entry--attachments
+                entry--contract-signatures))
 
 (defn pdf-layout [{:keys [category legacy?]}]
   (case (util/kw-path (when legacy? :legacy) category)
@@ -519,6 +573,7 @@
     :p               p-pdf-layout
     :ya              ya-pdf-layout
     :tj              tj-pdf-layout
+    :contract        contract-pdf-layout
     :legacy.r        r-legacy-layout
     :legacy.ya       ya-legacy-layout
     :legacy.p        p-legacy-layout

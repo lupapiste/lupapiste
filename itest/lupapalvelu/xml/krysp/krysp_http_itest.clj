@@ -8,7 +8,7 @@
             [sade.strings :as ss]
             [sade.shared-util :as util]))
 
-(def jms-test-db (str "krysp_http_itest_jms" (now)))
+(def jms-test-db (str "test_krysp_http_jms" (now)))
 
 (when (env/feature? :jms)
   (mongo/connect!)

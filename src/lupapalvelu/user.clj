@@ -288,19 +288,9 @@
   ([user projection]
    (org/get-organizations {:_id {$in (organization-ids user)}} projection)))
 
-(defn organization-ids-by-roles
-  "Returns a set of organization IDs where user has given roles.
-  Note: the user must have gone through with-org-auth (the orgAuthz
-  must be keywords)."
-  [{org-authz :orgAuthz :as user} roles]
-  {:pre [(set? roles) (every? keyword? roles)]}
-  (->> org-authz
-    (filter (fn [[org org-roles]] (some roles org-roles)))
-    (map (comp name first))
-    set))
+(def organization-ids-by-roles roles/organization-ids-by-roles)
 
-(defn authority-admins-organization-id [user]
-  (first (organization-ids-by-roles user #{:authorityAdmin})))
+(def authority-admins-organization-id roles/authority-admins-organization-id)
 
 (defn authority-admins-organization
   "Organization for the authority admin user."

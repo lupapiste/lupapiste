@@ -4,7 +4,6 @@
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.pate.schemas :as schemas]
-            [lupapalvelu.pate.shared :as shared]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
@@ -96,8 +95,8 @@
                       (template/verdict-template-check :editable)]}
   [{:keys [created] :as command}]
   (let [organization   (template/command->organization command)
-        {data :data
-         :as  updated} (template/save-draft-value organization
+        {:keys [data category]
+         :as   updated} (template/save-draft-value organization
                                                   template-id
                                                   created
                                                   path
@@ -105,7 +104,8 @@
     (if data
       (ok  (template/changes-response
             {:modified created
-             :filled   (template/template-filled? {:data data})}
+             :filled   (template/template-filled? {:category category
+                                                   :data     data})}
             updated))
       (template/error-response updated))))
 
@@ -137,7 +137,8 @@
                               (map template/verdict-template-summary))))
 
 (defquery verdict-template-categories
-  {:description "Categories for the user's organization"
+  {:description "Categories for the user's organization. Does not
+   include legacy-only categories."
    :feature     :pate
    :user-roles  #{:authorityAdmin}
    :pre-checks  [pate-enabled]}
@@ -298,3 +299,14 @@
   (template/set-operation-verdict-template (usr/authority-admins-organization-id user)
                                            operation
                                            template-id))
+
+(defquery selectable-verdict-templates
+  {:description "Returns a map of where keys are permit types or
+  operation names and templates (id, name pairs) are values. Permit
+  types that are missing are not supported by Pate verdict template
+  mechanism."
+   :feature    :pate
+   :user-roles #{:authorityAdmin}
+   :pre-checks [pate-enabled]}
+  [command]
+  (ok :items (template/selectable-verdict-templates (template/command->organization command))))

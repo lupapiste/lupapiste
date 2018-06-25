@@ -245,6 +245,7 @@
       (assoc :id      (mongo/create-id)
              :created (:created application))
       (dissoc :meta)
+      (update :schema-info select-keys app/db-schema-info-keys)
       (clear-personal-information application manual-schema-datas)))
 
 (defn- update-attachment-operation-references

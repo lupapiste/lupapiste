@@ -20,7 +20,7 @@
           (logging/log-event :info {:run-by batchrun-name :event "Found new verdict"})
           (notifications/notify! :application-state-change command))
         (when (or (nil? result) (fail? result))
-          (infof "No verdicts found, result: " (if (nil? result) :error.no-app-xml result))
+          (info "No verdicts found, result: " (if (nil? result) :error.no-app-xml result))
           (logging/log-event :error {:run-by       batchrun-name
                                      :event        "Failed to check verdict"
                                      :failure      (if (nil? result) :error.no-app-xml result)

@@ -5,7 +5,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.date :as date]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.schema-helper :as helper]
+            [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
@@ -15,19 +16,19 @@
 
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
-   :category (sc/enum "r" "p" "ya" "kt" "ymp" "tj" "contract")})
+   :category (apply sc/enum (map name schema-util/all-categories))})
 
 (defschema PateTerm
-  {:fi       sc/Str
-   :sv       sc/Str
-   :en       sc/Str})
+  (->> helper/supported-languages
+      (map #(vector % sc/Str))
+      (into {})))
 
 (defschema PateDependency
   "Published settings depency of a template"
   (merge PateTerm {:selected sc/Bool}))
 
-(def review-type (->> (concat shared/review-types
-                              shared/ya-review-types)
+(def review-type (->> (concat helper/review-types
+                              helper/ya-review-types)
                       distinct
                       (map name)
                       (apply sc/enum)))
@@ -37,13 +38,13 @@
    :draft    sc/Any})
 
 (defschema PatePublishedSettings
-  {:verdict-code                [(apply sc/enum (map name (keys shared/verdict-code-map)))]
-   :date-deltas                 (->> shared/verdict-dates
-                                     (map (fn [k]
-                                            [k {:delta sc/Int
-                                                :unit  (sc/enum "days" "years")}]))
-                                     (into {}))
-   (sc/optional-key :foremen)   [(apply sc/enum (map name shared/foreman-codes))]
+  {(sc/optional-key :verdict-code) [(apply sc/enum (map name (keys helper/verdict-code-map)))]
+   (sc/optional-key :date-deltas)  (->> helper/verdict-dates
+                                        (map (fn [k]
+                                               [k {:delta sc/Int
+                                                   :unit  (sc/enum "days" "years")}]))
+                                        (into {}))
+   (sc/optional-key :foremen)      [(apply sc/enum (map name helper/foreman-codes))]
 
    ;; Boardname included only when the verdict giver is Lautakunta.
    (sc/optional-key :boardname) sc/Str})
@@ -66,11 +67,10 @@
                                         :settings   PatePublishedTemplateSettings}}))
 
 (defschema PateSavedVerdictTemplates
-  {:templates                  [PateSavedTemplate]
-   (sc/optional-key :settings) {(sc/optional-key :r)  PateSavedSettings
-                                (sc/optional-key :p)  PateSavedSettings
-                                (sc/optional-key :ya) PateSavedSettings
-                                (sc/optional-key :tj) PateSavedSettings}})
+  {(sc/optional-key :templates) [PateSavedTemplate]
+   (sc/optional-key :settings)  (->> schema-util/pate-categories
+                                     (map #(vector (sc/optional-key %) PateSavedSettings))
+                                     (into {}))})
 
 ;; Phrases
 
@@ -315,8 +315,8 @@
 (defn validate-path-value
   "Convenience wrapper for validate-dictionary-value."
   ([{dic :dictionary} path value references]
-   (let [{:keys [schema path]} (shared/dict-resolve (canonize-path path)
-                                                    dic)]
+   (let [{:keys [schema path]} (schema-util/dict-resolve (canonize-path path)
+                                                         dic)]
      (if schema
        (validate-dictionary-value schema
                                   value
@@ -337,7 +337,7 @@
     (or
      (cond
        ;; Add button dict must be a sibling for the target repeating.
-       add (when-let [subpath (shared/repeating-subpath add
+       add (when-let [subpath (schema-util/repeating-subpath add
                                                         (concat (butlast path) [add])
                                                         dictionary)]
              (let [add-path (->> (mongo/create-id)
@@ -350,7 +350,7 @@
                 :data  (assoc-in old-data add-path {})}))
        ;; Remove button must belong to the target repeating. However,
        ;; the target can be an ancestor repeating as well.
-       remove (when-let [subpath (shared/repeating-subpath remove
+       remove (when-let [subpath (schema-util/repeating-subpath remove
                                                            path
                                                            dictionary)]
                 (let [removepath (subvec (vec path) 0 (inc (count subpath)))]
@@ -382,7 +382,7 @@
   ([{dic :dictionary} path value old-data references]
    (let [path                (canonize-path path)
          {dict-schema :schema
-          dict-path   :path} (shared/dict-resolve path dic)
+          dict-path   :path} (schema-util/dict-resolve path dic)
          error               (if dict-schema
                                (validate-dictionary-value dict-schema
                                                           value

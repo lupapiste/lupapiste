@@ -12,29 +12,6 @@
                            :propertyId sipoo-property-id
                            :operation  :varasto-tms))
 
-(defn add-condition [add-cmd fill-cmd condition]
-  (let [changes      (:changes (add-cmd))
-        condition-id (-> changes first first last keyword)]
-    (fact "Add new condition"
-      condition-id => truthy
-      (when condition
-        (fact "Fill the added condition"
-          (fill-cmd condition-id condition) => ok?)))
-    condition-id))
-
-(defn add-verdict-condition [app-id verdict-id condition]
-  (add-condition #(command sonja :edit-pate-verdict
-                           :id app-id
-                           :verdict-id verdict-id
-                           :path [:add-condition]
-                           :value true)
-                 #(command sonja :edit-pate-verdict
-                           :id app-id
-                           :verdict-id verdict-id
-                           :path [:conditions %1 :condition]
-                           :value %2)
-                 condition))
-
 (facts "PATE tasks"
 
   (facts "Submit and approve application"
@@ -66,9 +43,9 @@
                  :path [:plans]
                  :value (->> references :plans (map :id))) => no-errors?)
       ;Add conditions
-      (add-verdict-condition app-id verdict-id "ehto 1")
-      (add-verdict-condition app-id verdict-id "ehto 2")
-      (add-verdict-condition app-id verdict-id "ehto 3")
+      (add-verdict-condition sonja app-id verdict-id "ehto 1")
+      (add-verdict-condition sonja app-id verdict-id "ehto 2")
+      (add-verdict-condition sonja app-id verdict-id "ehto 3")
 
       (fact "Publish PATE verdict"
         (command sonja :publish-pate-verdict :id app-id :verdict-id verdict-id) => no-errors?))
@@ -140,8 +117,8 @@
                    :path [:plans]
                    :value [(->> references :plans (util/find-by-key :fi "Suunnitelmat") :id)])
           => no-errors?)
-                                        ;Add condition
-        (add-verdict-condition app-id verdict-id "new condition")
+        ;; Add condition
+        (add-verdict-condition sonja app-id verdict-id "new condition")
 
         (fact "Publish PATE verdict"
           (command sonja :publish-pate-verdict :id app-id :verdict-id verdict-id) => no-errors?))

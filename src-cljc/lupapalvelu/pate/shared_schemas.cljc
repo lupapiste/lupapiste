@@ -7,7 +7,8 @@
 
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit
                          :muutoksenhaku :vaativuus :rakennusoikeus
-                         :kaava :toimenpide-julkipanoon :yleinen})
+                         :kaava :toimenpide-julkipanoon :yleinen
+                         :sopimus})
 
 (def path-type (sc/conditional
                 ;; Joined kw-path (e.g. :one.two.three)
@@ -101,7 +102,9 @@
           (sc/optional-key :loc-prefix) keyword-or-string
           ;; Absolute localisation terms. Overrides loc-prefix, does not
           ;; affect children.
-          (sc/optional-key :i18nkey)    keyword-or-string}))
+          (sc/optional-key :i18nkey)    keyword-or-string
+          ;; Value of data-test-id attribute.
+          (sc/optional-key :test-id)    sc/Keyword}))
 
 (defschema PateComponent
   (merge PateBase
@@ -188,7 +191,7 @@
   "Displays the referenced value. By default, :path is resolved as a
   regular path into the component state. However, if the path is
   prefixed with :*ref the resolution target (for the rest) is
-  references (like in PateEnabled for example)."
+  references (like in `PateEnabled` for example)."
   (merge PateComponent
          {:path path-type}))
 
@@ -270,7 +273,10 @@
           ;; By default the toggle text is determined by the
           ;; localisation mechanisms. However, in some cases dynamic
           ;; toggle text might be needed. :text-dict refers to a
-          ;; sibling dict that contains the the toggle text.
+          ;; sibling dicts that contain the the toggle text Note that
+          ;; there must be a corresponding dict for every supported
+          ;; language. For example, if :text-dict is :foo, the actual
+          ;; dicts are :foo-fi, :foo-sv and :foo-en.
           (sc/optional-key :text-dict) sc/Keyword}))
 
 (def pate-units
@@ -311,7 +317,10 @@
           ;; order.
           (sc/optional-key :sort-by)      (sc/enum :value :text)
           ;; How the select is rendered? Select is the default.
-          (sc/optional-key :type)         (sc/enum :select :autocomplete)}))
+          (sc/optional-key :type)         (sc/enum :select :autocomplete)
+          ;; Item texts can have different loc-prefix in these cases
+          ;; the loc-prefix affects only the label.
+          (sc/optional-key :item-loc-prefix) sc/Keyword}))
 
 (defschema PateLocText
   "Localisation term shown as text."
@@ -335,26 +344,35 @@
   ([schema-ref fun]
    {sc/Keyword
     (let [fun (or fun identity)]
-           (sc/conditional
-            :reference-list (fun (required {:reference-list PateReferenceList}))
-            :phrase-text    (fun (required {:phrase-text PatePhraseText}))
-            :loc-text       (fun PateLocText)
-            :date-delta     (fun (required {:date-delta PateDateDelta}))
-            :multi-select   (fun (required {:multi-select PateMultiSelect}))
-            :reference      (fun (required {:reference PateReference}))
-            :link           (fun {:link PateLink})
-            :button         (fun {:button PateButton})
-            :placeholder    (fun {:placeholder PatePlaceholder})
-            :keymap         (fun {:keymap KeyMap})
-            :attachments    (fun {:attachments PateAttachments})
-            :application-attachments (fun {:application-attachments PateComponent})
-            :toggle         (fun {:toggle PateToggle})
-            :text           (fun (required {:text PateText}))
-            :date           (fun (required {:date PateDate}))
-            :select         (fun (required {:select PateSelect}))
-            :repeating      (fun {:repeating (sc/recursive schema-ref)
-                                  ;; The value is a key in the repeating dictionary.
-                                  (sc/optional-key :sort-by) sc/Keyword})))})
+      (sc/conditional
+       :reference-list (fun (required {:reference-list PateReferenceList}))
+       :phrase-text    (fun (required {:phrase-text PatePhraseText}))
+       :loc-text       (fun PateLocText)
+       :date-delta     (fun (required {:date-delta PateDateDelta}))
+       :multi-select   (fun (required {:multi-select PateMultiSelect}))
+       :reference      (fun (required {:reference PateReference}))
+       :link           (fun {:link PateLink})
+       :button         (fun {:button PateButton})
+       :placeholder    (fun {:placeholder PatePlaceholder})
+       :keymap         (fun {:keymap KeyMap})
+       :attachments    (fun {:attachments PateAttachments})
+       :application-attachments (fun {:application-attachments PateComponent})
+       :toggle         (fun {:toggle PateToggle})
+       :text           (fun (required {:text PateText}))
+       :date           (fun (required {:date PateDate}))
+       :select         (fun (required {:select PateSelect}))
+       :repeating      (fun {:repeating (sc/recursive schema-ref)
+                             (sc/optional-key :sort-by)
+                             (sc/conditional
+                              ;; The value is a prefix for lang. The
+                              ;; actual sorting is done according to
+                              ;; value of prefix-lang. For example,
+                              ;; if :prefix is :text and current
+                              ;; language is English, then the items
+                              ;; are sorted by their :text-en dicts.
+                              :prefix {:prefix sc/Keyword}
+                              ;; The value is a key in the repeating dictionary.
+                              :else sc/Keyword)})))})
   ([schema-ref]
    (schema-types schema-ref nil)))
 
@@ -445,9 +463,28 @@
                        ;; the nested dictionary.
                        (sc/optional-key :repeating) sc/Keyword)}))
 
+(defschema PateHelp
+  {(sc/optional-key :help) (sc/conditional
+                            ;; Localization key for showing help as
+                            ;; text. The simple keyword :help value
+                            ;; can seen as a short hand for
+                            ;; {:loc :value :html? false}
+                            keyword? sc/Keyword
+                            :else    (merge
+                                      ;; If any classes are given, the
+                                      ;; default help styles (e.g.,
+                                      ;; pate-help) are not
+                                      ;; automatically applied.
+                                      PateCss
+                                      {;; Localisation key for the help
+                                       :loc                     sc/Keyword
+                                       ;; If true, then the help is rendered as html.
+                                       (sc/optional-key :html?) sc/Bool}))})
+
 (defschema PateSection
   (merge PateBase
          PateVisible
+         PateHelp
          {:id   sc/Keyword ;; Also title localization key
           :grid PateGrid}))
 

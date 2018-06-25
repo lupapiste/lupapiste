@@ -3,7 +3,7 @@
   (:require [lupapalvelu.application :as app]
             [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.pdf-html :as html]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [midje.sweet :refer :all]))
 
 (fact "join-non-blanks"
@@ -96,7 +96,7 @@
     (html/doc-value app :foo :bar.baz.bam) => nil))
 
 (facts "dict-value"
-  (against-background (shared/verdict-schema :r nil)
+  (against-background (verdict-schemas/verdict-schema :r nil)
                       => {:dictionary {:ts   {:date {}}
                                        :txt  {:phrase-text {:category :yleinen}}
                                        :foo  {:text {}}
