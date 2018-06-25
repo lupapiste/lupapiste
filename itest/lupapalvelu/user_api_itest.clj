@@ -104,17 +104,12 @@
   ; Inbox zero
   (last-email)
 
-  (fact "authority without organization, i.e., a statement giver, can be created"
+  (fact "authorityAdmin can't call create-user (anymore)"
     (command sipoo :create-user
              :email "foo@example.com"
              :role "authority"
              :enabled true)
-    => ok?)
-  (fact "newly created authority receives mail"
-    (let [email (last-email)]
-      (:to email) => "foo@example.com"
-      (:subject email) => invite-authority-email-subject
-      (get-in email [:body :plain]) => (contains #"/app/fi/welcome#!/setpw/[A-Za-z0-9-]+"))))
+    => unauthorized?))
 
 ;;
 ;; ==============================================================================
@@ -223,8 +218,8 @@
 (facts "upsert-organization-user"
   (apply-remote-minimal)
 
-  (fact
-    (command naantali :create-user
+  (fact "adminAdmin creates authority to org"
+    (command admin :create-user
              :email "foo@example.com"
              :role "authority"
              :enabled "true"
@@ -262,23 +257,32 @@
              :roles ["authority"])
     => ok?)
 
-  (fact
-    (command sipoo :upsert-organization-user
-             :email "foo@example.com"
-             :firstName "bar"
-             :lastName "har"
-             :roles [])
-    => (contains {:ok         false,
-                  :parameters ["roles"]
-                  :text       "error.vector-parameters-with-items-missing-required-keys"}))
+  (facts "roles param"
+    (fact "roles required"
+      (command sipoo :upsert-organization-user
+               :email "foo@example.com"
+               :firstName "bar"
+               :lastName "har"
+               :roles [])
+      => (contains {:ok         false,
+                    :parameters ["roles"]
+                    :text       "error.vector-parameters-with-items-missing-required-keys"}))
+    (fact "roles are validated"
+      (command sipoo :upsert-organization-user
+               :email "foo@example.com"
+               :firstName "bar"
+               :lastName "har"
+               :roles ["foobar-role"])
+      => (contains {:ok         false,
+                    :text       "error.invalid-role"})))
 
-  (fact
+  (fact "Not authority email"
     (command sipoo :upsert-organization-user
              :email (email-for-key teppo)
              :firstName "Teppo"
              :lastName "Example"
              :roles ["authority"])
-    => fail?)
+    => (contains {:ok false :text "error.user-not-found"}))
 
   (fact
     (command sipoo :upsert-organization-user
@@ -290,7 +294,6 @@
                   :text       "error.missing-parameters"}))
 
   (fact "invite new user Tonja to Sipoo"
-
     (command sipoo :upsert-organization-user
              :email "tonja.sibbo@sipoo.fi"
              :firstName "bar"
@@ -298,11 +301,11 @@
              :operation "add"
              :roles ["authority"])
     => ok?
-
-    (let [email (last-email)]
-      (:to email) => (contains "tonja.sibbo@sipoo.fi")
-      (:subject email) => invite-authority-email-subject
-      (get-in email [:body :plain]) => (contains #"/app/fi/welcome#!/setpw/[A-Za-z0-9-]+")))
+    (fact "newly created authority receives mail"
+      (let [email (last-email)]
+        (:to email) => (contains "tonja.sibbo@sipoo.fi")
+        (:subject email) => invite-authority-email-subject
+        (get-in email [:body :plain]) => (contains #"/app/fi/welcome#!/setpw/[A-Za-z0-9-]+"))))
 
   (fact "add existing authority to new organization"
 

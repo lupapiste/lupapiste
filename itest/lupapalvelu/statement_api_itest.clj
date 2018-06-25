@@ -76,7 +76,7 @@
         (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;"))))
 
   (facts "Add statement giver role for new user"
-    (command sipoo :create-user :email "foo@example.com" :lastName "foo@example.com" :role "authority") => ok?
+    (command admin :create-user :email "foo@example.com" :lastName "foo@example.com" :role "authority") => ok?
     (create-statement-giver sipoo "foo@example.com")
 
     (fact "Statement giver is added and sorted"
