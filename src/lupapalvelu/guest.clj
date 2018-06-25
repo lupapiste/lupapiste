@@ -57,9 +57,7 @@
                            :email     email
                            :role      "authority"}
             user (uu/administrator-create-user org-admin new-user-data)]
-        (uu/notify-new-authority user org-admin org-id)
-        (ok :id (:id user)
-            :user user)))))
+        (uu/notify-new-authority user org-admin org-id)))))
 
 (defn remove-guest-authority-organization
   "Namesake command implementation."
