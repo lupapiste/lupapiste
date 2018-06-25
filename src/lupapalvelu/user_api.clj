@@ -608,7 +608,7 @@
       (do
         (info "login successful, username:" username)
         (usr/clear-logins username)
-        (if-let [application-page (usr/applicationpage-for (:role user))]
+        (if-let [application-page (usr/applicationpage-for (usr/with-org-auth user))]
           (ssess/merge-to-session
             command
             (ok :user (-> user usr/with-org-auth usr/non-private)

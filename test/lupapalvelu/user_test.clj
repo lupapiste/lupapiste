@@ -601,11 +601,17 @@
 ;; ==============================================================================
 ;;
 
-(facts
-  (applicationpage-for "applicant") => "applicant"
-  (applicationpage-for "authority") => "authority"
-  (applicationpage-for "authorityAdmin") => "authority-admin"
-  (applicationpage-for "admin") => "admin")
+(facts "applicationpage-for"
+  (applicationpage-for {:role "applicant"}) => "applicant"
+  (applicationpage-for {:role "admin"}) => "admin"
+  (applicationpage-for {:role "FooBarBaz"}) => "foo-bar-baz"
+  (applicationpage-for {:role "authorityAdmin"}) => "authority-admin"
+  (fact "authorityAdmin is resolved from orgAuthz"
+    (applicationpage-for {:role "authority"}) => "authority"
+    (applicationpage-for {:role "authority" :orgAuthz {:123-TEST #{:foo}}}) => "authority"
+    (applicationpage-for {:role "authority" :orgAuthz {:123-TEST #{:authority}}}) => "authority"
+    (applicationpage-for {:role "authority" :orgAuthz {:123-TEST #{:authorityAdmin}}}) => "authority-admin"
+    (applicationpage-for {:role "authority" :orgAuthz {:123-TEST #{:authorityAdmin :anyother}}}) => "authority-admin")) ; FIXME when authorityAdmin isn't single auth anymore, fix is required
 
 (facts user-in-role
 

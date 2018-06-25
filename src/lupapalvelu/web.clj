@@ -292,7 +292,7 @@
   ([lang] (landing-page lang         (usr/current-user (request/ring-request))) )
   ([lang user]
    (let [lang (get user :language lang)]
-     (if-let [application-page (and (:id user) (usr/applicationpage-for (:role user)))]
+     (if-let [application-page (and (:id user) (usr/applicationpage-for user))]
        (redirect lang application-page)
        (redirect-to-frontpage lang)))))
 
@@ -671,7 +671,7 @@
             (action/update-application command {$set {:state state}, $push {:history (app-state/history-entry state (:created command) user)}}))
 
           (if redirect
-            (resp/redirect (str "/app/fi/" (str (usr/applicationpage-for (:role user))
+            (resp/redirect (str "/app/fi/" (str (usr/applicationpage-for user)
                                                 "#!/" (if infoRequest "inforequest" "application") "/" application-id)))
             (resp/status 200 application-id)))
         (resp/status 400 (str response)))))

@@ -772,11 +772,17 @@
 ;; ==============================================================================
 ;;
 
-(defn applicationpage-for [role]
+(defn- resolve-authority-page [user]
+  (if (roles/authority-admins-organization-id user)
+    "authority-admin"
+    "authority"))
+
+(defn applicationpage-for [{:keys [role] :as user}]
   (let [s (name role)]
     (cond
       (or (ss/blank? s) (= s "dummy")) "applicant"
       (= s "oirAuthority") "oir"
+      (= s "authority") (resolve-authority-page user)
       :else (csk/->kebab-case s))))
 
 (defn user-in-role [user role & params]
