@@ -18,7 +18,7 @@
            (if (lupapalvelu.user/get-user-by-email full-email)
              (println "user exits " full-email)
              (user/create-new-user
-               {:role "authorityAdmin"
+               {:role "authority"
                 :orgAuthz {(keyword id) ["authorityAdmin"]}}
                {:email full-email
                 :username full-email
@@ -388,7 +388,7 @@
         {:role "admin"}
         {:email email
          :username email
-         :role "authorityAdmin"
+         :role "authority"
          :firstName (str "Ymp\u00e4rist\u00f6toimi")
          :lastName (str "P\u00e4\u00e4k\u00e4ytt\u00e4j\u00e4 " kuntano)
          :enabled true
