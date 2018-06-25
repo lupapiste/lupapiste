@@ -6,5 +6,4 @@
                 :financialAuthority #{:users/update-own-data}}
  :organization {:authorityAdmin #{:users/admin-query
                                   ; :users/update-own-data maybe not needed, if :authorityAdmin is 'authority' by main role?
-                                  :users/create
                                   :users/create-financial-handler}}}
