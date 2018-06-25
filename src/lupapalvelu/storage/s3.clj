@@ -82,7 +82,8 @@
                            (.setUserMetadata user-metadata))
                          (PutObjectRequest. actual-bucket file-id input-stream))]
         (-> (.getRequestClientOptions request)
-            (.setReadLimit 150001))
+            ; Maximum buffer size 150 MB (when uploading a stream)
+            (.setReadLimit 157286401))
         (.putObject s3-client request)
         (timbre/debug "Object" file-id "uploaded to bucket" actual-bucket)
         {:length content-length}))
@@ -139,7 +140,7 @@
 (defn move-file-object
   "Moves object within the storage system from one bucket to another by copying the object
    and then deleting it from the source bucket.
-   Source bucket for the two-arity version is the default temp file buvket."
+   Source bucket for the two-arity version is the default temp file bucket."
   [from-bucket to-bucket old-id new-id]
   {:pre [(every? string? [to-bucket old-id new-id])]}
   (let [from-bucket (bucket-name from-bucket)
