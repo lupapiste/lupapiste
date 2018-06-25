@@ -396,18 +396,17 @@
                             $push (->> (filter (comp vector? second) ops-to-update) ; Update op array
                                        (util/map-values (constantly added-op)))))))
 
-(defn- schema-data-to-body [schema-data application]
+(defn schema-data-to-body [schema-data]
   (keywordize-keys
     (reduce
       (fn [body [data-path data-value]]
-        (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))
-              val (if (fn? data-value) (data-value application) data-value)]
-          (assoc-in body path val)))
+        (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))]
+          (assoc-in body path data-value)))
       {} schema-data)))
 
 (def db-schema-info-keys [:name :version :type :subtype :op])
 
-(defn make-document [application primary-operation-name created manual-schema-datas schema]
+(defn make-document [primary-operation-name created manual-schema-datas schema]
   (let [op-info (op/operations (keyword primary-operation-name))
         op-schema-name (:schema op-info)
         default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
@@ -422,7 +421,7 @@
                    (tools/create-document-data schema tools/default-values)
                    (tools/timestamped
                     (if-let [schema-data (get-in merged-schema-datas [schema-name])]
-                      (schema-data-to-body schema-data application)
+                      (schema-data-to-body schema-data)
                       {})
                     created))}))
 
@@ -432,7 +431,7 @@
         op-schema-name (:schema op-info)
         schema-version (:schema-version application)
 
-        make (partial make-document application (:name op) created manual-schema-datas)
+        make (partial make-document (:name op) created manual-schema-datas)
 
         op-doc (update (make (schemas/get-schema schema-version op-schema-name)) :schema-info assoc :op op)
 

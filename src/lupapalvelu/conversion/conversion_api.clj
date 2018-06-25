@@ -10,4 +10,3 @@
    :permissions [{:required []}]}
   [{:keys [user] :as command}]
   (converter/debug command))
-

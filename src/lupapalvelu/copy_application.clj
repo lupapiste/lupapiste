@@ -127,7 +127,7 @@
   "Returns an empty copy of the given document"
   [document {:keys [created primaryOperation schema-version] :as application} & [manual-schema-datas]]
   (let [schema (schemas/get-schema schema-version (-> document :schema-info :name))]
-    (app/make-document application (:name primaryOperation) created manual-schema-datas schema)))
+    (app/make-document (:name primaryOperation) created manual-schema-datas schema)))
 
 (defn- user-id-from-personal-information [v]
   (some->> v :userId :value not-empty))
@@ -192,8 +192,7 @@
 (defn construction-waste-plan
   [application organization manual-schema-datas]
   (let [plan-name (waste-schemas/construction-waste-plan-for-organization organization)]
-    (app/make-document application
-                       (primary-op-name application)
+    (app/make-document (primary-op-name application)
                        (:created application)
                        manual-schema-datas
                        (schemas/get-schema (:schema-version application)

@@ -6,6 +6,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.conversion.util :as conversion-util]
+            [lupapalvelu.document.model :as model]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
@@ -17,7 +18,6 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]))
-
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
@@ -37,7 +37,7 @@
   ;;   - :history array for the application (kasittelynTilatieto / tilamuutos) (get-sorted-tilamuutos-entries)
   ;;
   ;;  Other things to note:
-  ;;    - linked permitIDs might be in funny order, check that it's normalised (util/normalize-permit-id)
+  ;;    - linked permitIDs might be in funny order, check that it's normalised ('lupapalvelu.conversion.util/normalize-permit-id')
   ;;    - we need to generate LP id for conversion cases (do not use do-create-application)
   ;;
   ;;  Types that need special handling: VAK (not own thing, but adds data to linked application)
@@ -51,15 +51,34 @@
                            {:operation operation :infoRequest false :messages []}
                            location-info)
         ;; TODO: should we check scope, that new-applications-enabled is true?
+        ;; TODO: dig out operations from app-info:
+        ;     check `(get app-info :toimenpiteet)`
+        ;     , the count of :toimenpiteet denotes how many operations we need to create for application.
+        ;     There needs to be always atleast one operation (primaryOperation). So what if XML doesn't have
+        ;     any :Toimenpide elements, should we create a 'conversion' operation as primaryOperation, and define
+        ;     some basic document schema for that 'conversion' operation.
+        ;
+        ;     But anyways, we have :toimenpiteet which has raw :Toimenpide element datas from XML.
+        ;     Then we should check what is the root element for each of the operations.
+        ;     For example if it's '<uusi>' (or ofc :uusi key), then we need to create "new building" kind of operation.
+        ;     That operation needs to have sufficient document schema for new buildings (ie current 'uusiRakennus' schema).
+        ;     If the root element is :laajentaminen, then we need to select appropriate operation (and thus document schema).
+        ;
+        ;     After we have identified how many operations, and what kind of operations we need to create to application,
+        ;     we can create those operations to primaryOperation/secondaryOperations AND create their document data using
+        ;     `lupapalvelu.application/make-document` for example. And then save to db :)
+        ;
+        ;
         id (app/make-application-id municipality)
-        app-info {:id              id
-                  :organization    organization
-                  :operation-name  "aiemmalla-luvalla-hakeminen"
-                  :location        (app/->location (:x location-info) (:y location-info))
-                  :propertyId      (:propertyId location-info)
-                  :address         (:address location-info)
-                  :municipality    municipality}
-        created-application (app/make-application app-info
+        make-app-info {:id              id
+                       :organization    organization
+                       :operation-name  "aiemmalla-luvalla-hakeminen" ; FIXME: no fixed operation in conversion, see above
+                       ; or maybe something like:               :operation-name  "conversion"
+                       :location        (app/->location (:x location-info) (:y location-info))
+                       :propertyId      (:propertyId location-info)
+                       :address         (:address location-info)
+                       :municipality    municipality}
+        created-application (app/make-application make-app-info
                                                   []            ; messages
                                                   (:user command)
                                                   (:created command)
@@ -68,14 +87,18 @@
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))))
         structure-descriptions (map :description buildings-and-structures)
+        ; TODO: create operations from app-info, see above.
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
+        ; TODO: create secondaryoperations from app-info, see above.
         ;; make secondaryOperations for buildings other than the first one in case there are many
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
 
+        structures (->> xml krysp-reader/->rakennelmatiedot (map conversion-util/rakennelmatieto->kaupunkikuvatoimenpide))
+
         created-application (-> created-application
-                                (update-in [:documents] concat other-building-docs new-parties)
+                                (update-in [:documents] concat other-building-docs new-parties structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :opened (:created command)))
 
@@ -97,21 +120,21 @@
 
       (let [updated-application (mongo/by-id :applications (:id created-application))
             {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml)
-            review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-udpates")
+            review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-updates")
             update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id)]
         (if (:ok update-result)
           (info "Saved review updates")
           (infof "Reviews were not saved: %s" (:desc update-result))))
-
 
       (let [fetched-application (mongo/by-id :applications (:id created-application))]
         (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
         fetched-application))))
 
 (def supported-import-types #{:TJO :A :B :C :D :E :P :Z :AJ :AL :MAI :BJ :PI :BL :DJ :CL :PJ})
-(defn- validate-permit-type [type]
-  (when-not (contains? supported-import-types (keyword type))
-    (error-and-fail! (str "Unsupported import type " type) :error.unsupported-permit-type)))
+
+(defn- validate-permit-type [permittype]
+  (when-not (contains? supported-import-types (keyword permittype))
+    (error-and-fail! (str "Unsupported import type " permittype) :error.unsupported-permit-type)))
 
 (defn fetch-prev-local-application!
   "A variation of `lupapalvelu.prev-permit/fetch-prev-local-application!` that exists for conversion
@@ -122,7 +145,7 @@
   prev-permit/fetch-prev-application!"
   [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
-        destructured-permit-id (conversion-util/destructure-normalized-permit-id kuntalupatunnus)
+        destructured-permit-id (conversion-util/destructure-permit-id kuntalupatunnus)
         operation             "aiemmalla-luvalla-hakeminen"
         path                  "./src/lupapalvelu/conversion/test-data/"
         filename              (str path kuntalupatunnus ".xml")

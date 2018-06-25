@@ -19,7 +19,6 @@
         _             (assert (= 1 (count organizations)))
         command       (update-in command [:data] merge {:organizationId (first organizations)})
         existing-app  (domain/get-application-as {:verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user :include-canceled-apps? false)]
-
     (if existing-app
       (ok :id (:id existing-app) :text :already-existing-application)
       (let [result (prev-permit/fetch-prev-application! command)]
@@ -51,6 +50,4 @@
     ;;Found an application of same organization that has a verdict with the given kuntalupatunnus -> Open it.
     (ok :id (:id app-with-verdict))
     (prev-permit/fetch-prev-application! command)
-    ;; For development/testing purposes replace the previous line with the following to open a local Krysp message.
-    ;; (util/fetch-prev-local-application! command)
-    ))
+    #_(lupapalvelu.conversion.kuntagml-converter/fetch-prev-local-application! command)))
