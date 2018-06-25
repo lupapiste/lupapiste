@@ -532,7 +532,7 @@
           source-projection (common/->source-projection building-location-xml [:Point])]
       (when-not (contains? coordinate/known-bad-coordinates building-coordinates)
         (coordinate/convert source-projection common/to-projection 3 building-coordinates)))
-    (catch Exception e (error e "Reolving building coordinates failed"))))
+    (catch Exception e (error e "Resolving building coordinates failed"))))
 
 (defn- area-coordinates [xml]
   (let [coordinates-array-xml (select1 xml [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :alue])
@@ -554,7 +554,7 @@
           interior-point (drawing/interior-point area-geometry-str)
           interior-point-coordinates (coordinate/convert "WGS84" common/to-projection 6 interior-point)]
       interior-point-coordinates)
-    (catch Exception e (error e "Reolving area coordinates failed"))))
+    (catch Exception e (error e "Resolving area coordinates failed"))))
 
 (defn- extract-osoitenimi [osoitenimi-elem lang]
   (let [osoitenimi-elem (or (select1 osoitenimi-elem [(enlive/attr= :xml:lang lang)])
@@ -649,7 +649,9 @@
   (let [asiat (enlive/select xml-no-ns common/case-elem-selector)]
     (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)))
 
-(defn ->rakennelmatieto [xml-no-ns]
+(defn ->rakennelmatiedot
+  "Returns a sequence of rakennelmatieto-elements."
+  [xml-no-ns]
   (->> (select xml-no-ns [:toimenpidetieto :Toimenpide :rakennelmatieto])
        (map cr/all-of)))
 

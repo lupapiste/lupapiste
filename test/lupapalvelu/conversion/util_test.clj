@@ -1,6 +1,8 @@
 (ns lupapalvelu.conversion.util-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.conversion.util :as util]
+            [lupapalvelu.xml.krysp.application-from-krysp :refer [get-local-application-xml-by-filename]]
+            [lupapalvelu.xml.krysp.reader :as reader]
             [sade.strings :as ss]))
 
 (fact "Conversion of permit ids from 'database-format' works as expected"
@@ -26,24 +28,11 @@
     (util/destructure-permit-id "75 0549-4242-A") => nil
     (util/destructure-permit-id "751-0549-42-A") => nil))
 
-#_(fact "The reader function rakennelmatieto->kaupunkikuvatoimenpide produces documents as expected"
-  (let [rakennelmatieto {:Rakennelma {:alkuHetki "2013-01-10T00:00:00Z"
-                                      :kuvaus {:kuvaus "Katos"}
-                                      :sijaintitieto {:Sijainti {:piste {:Point {:pos "2.449317E7 6445909.0"}}}}
-                                      :tunnus {:aanestysalue nil
-                                               :jarjestysnumero "1"
-                                               :kiinttun "07201800869996"
-                                               :kunnanSisainenPysyvaRakennusnumero "05643"
-                                               :rakennuksenSelite "akt"
-                                               :rakennusnro "001"}
-                                      :yksilointitieto "0543154"}}]
-    (fact "A rakennelmatieto with tunnus results in a document of type 'kaupunkikuvatoimenpide'"
-      (util/rakennelmatieto->kaupunkikuvatoimenpide rakennelmatieto) => {:kayttotarkoitus {:value ""}
-                                                                    :kokonaisala {:value ""}
-                                                                    :kuvaus {:value "Katos"}
-                                                                    :tunnus {:value "05643"}
-                                                                    :valtakunnallinenNumero {:value "07201800869996"}})
-    (fact "A rakennelmatieto without tunnus results in a document of type 'kaupunkikuvatoimenpide-ei-tunnusta'"
-      (util/rakennelmatieto->kaupunkikuvatoimenpide (update-in rakennelmatieto [:Rakennelma] dissoc :tunnus)) => {:kayttotarkoitus {:value ""}
-                                                                                                             :kokonaisala {:value ""}
-                                                                                                             :kuvaus {:value "Katos"}})))
+
+(fact "The reader function rakennelmatieto->kaupunkikuvatoimenpide produces documents as expected"
+  (let [xml (get-local-application-xml-by-filename "./dev-resources/krysp/verdict-r-structure.xml" "R")
+        rakennelmatiedot (reader/->rakennelmatiedot xml)
+        doc (->> rakennelmatiedot (map util/rakennelmatieto->kaupunkikuvatoimenpide) first)]
+    (facts "The generated document looks sane"
+      (get-in doc [:data :kuvaus :value]) => "Katos"
+      (get-in doc [:schema-info :name]) => "kaupunkikuvatoimenpide")))

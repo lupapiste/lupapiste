@@ -51,24 +51,3 @@
                                (now)
                                {"kaupunkikuvatoimenpide" data}
                                (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
-
-;; DEBUG
-
-; (def testdata
-;  (lupapalvelu.xml.krysp.application-from-krysp/get-local-application-xml-by-filename (str "./src/lupapalvelu/conversion/test-data/" "18-0030-13-A.xml") "R"))
-
-; (def test-docdata
-;   (lupapalvelu.xml.krysp.reader/->rakennelmatieto testdata))
-
-; (def d (rakennelmatieto->kaupunkikuvatoimenpide test-docdata))
-
-; (defn validate-doc [doc]
-;   (schema-validation/validate-doc-schema (rakennelmatieto->kaupunkikuvatoimenpide test-docdata)))
-
-; (defn create-testdocument []
-;   (let [datas (model/map2updates [] {:kayttotarkoitus nil
-;                                      :kokonaisala ""
-;                                      :kuvaus "Katos"
-;                                      :tunnus "005"
-;                                      :valtakunnallinenNumero ""})]
-;     (application/make-document "muu-rakentaminen" (now) {"kaupunkikuvatoimenpide" datas} (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
