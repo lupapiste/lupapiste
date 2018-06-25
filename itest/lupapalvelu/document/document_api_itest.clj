@@ -400,7 +400,11 @@
         output-dir          (str "target/" sftp-user permit-type-dir "/")
         sftp-server         (subs (env/value :fileserver-address) 7)
         target-file-name    (str "target/Downloaded-" (:id application) "-" (core/now) ".xml")
-        filename-start-with (:id application)
+        filename-start-with (fn [file]
+                              (let [filename (file-name-accessor file)]
+                                (when (and (ss/contains? filename (:id application))
+                                           (.endsWith filename "_verdict.xml"))
+                                  filename)))
         xml-file (if get-files-from-sftp-server?
                    (io/file (get-file-from-server
                               sftp-user
