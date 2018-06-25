@@ -300,14 +300,15 @@
        (when-not (map? (:user command))
          (warnf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))))
 
-   (with-application command
-                     (fn [{:keys [id organization]}]
-                       (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
-                         (when-let [new-state (get-in changes [$set :state])]
-                           (when (and (env/feature? :pate-json) organization (org/pate-org? organization))
-                             (util/future*
-                               (state-change/trigger-state-change command new-state))))
-                         (if return-count? n nil))))))
+   (with-application
+     command
+     (fn [{:keys [id organization]}]
+       (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
+         (when-let [new-state (get-in changes [$set :state])]
+           (when (and (env/feature? :pate-json) organization (org/pate-org? organization))
+             (util/future*
+               (state-change/trigger-state-change command new-state))))
+         (if return-count? n nil))))))
 
 (defn application->command
   "Creates a command data structure that is suitable for update-application and with-application functions.
