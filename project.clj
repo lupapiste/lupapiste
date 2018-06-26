@@ -199,7 +199,7 @@
                                                                    :on-jsload        lupapalvelu.ui.ui-components/reload-hook
                                                                    ;; If the figwheel does not connect,
                                                                    ;; turn the heads-up display off.
-                                                                   :heads-up-display false
+                                                                   :heads-up-display true
                                                                    }
                                                         :compiler {:output-dir     "resources/public/lp-static/js/out"
                                                                    :output-to      "resources/public/lp-static/js/rum-app.js"
