@@ -225,6 +225,20 @@
                   :verdict-id verdict-id
                   :password password))
 
+(declare refresh-attachments)
+
+(defn generate-pdf
+  [app-id verdict-id waiting?*]
+  (common/command {:command :generate-pate-pdf
+                   :waiting? waiting?*
+                   :success (fn [{:keys [attachment-id]}]
+                              (when attachment-id
+                                (state/refresh-verdict-auths app-id
+                                                             {:verdict-id verdict-id})
+                                (refresh-attachments)))}
+                  :id app-id
+                  :verdict-id verdict-id))
+
 ;; Attachments
 
 (defn delete-file [file-id]

@@ -907,3 +907,4 @@
 "pate.no-operation-templates" "fi" "Ei julkaistuja päätöspohjia"
 "pate.help.temsub-verdict" "fi" "Tässä on HTML-muotoinen <b>help</b>"
 "pate.help.temsub-bulletin" "fi" "Plain <text> -ohjeteksti"
+"pate.verdict.generate-pdf" "fi" "Päätösliitteen tuominen epäonnistui. [Tuo uudelleen.]"

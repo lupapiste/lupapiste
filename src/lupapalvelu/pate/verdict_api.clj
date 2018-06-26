@@ -45,12 +45,15 @@
     :legacy? fails if the verdict is a 'modern' Pate verdict
     :modern? fails if the verdict is a legacy verdict
     :contract? fails if the verdict is not a contract
-    :verdict? fails for contracts"
+    :verdict? fails for contracts
+    :html? fails if the html version of the verdict attachment is not
+           available."
   [& conditions]
   (let [{:keys [editable? published?
                 legacy? modern?
-                contract? verdict?]} (zipmap conditions
-                                             (repeat true))]
+                contract? verdict?
+                html?]} (zipmap conditions
+                                (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
@@ -81,7 +84,10 @@
 
                           (and verdict? (util/=as-kw (:category verdict)
                                                      :contract))
-                          :error.verdict.contract)
+                          :error.verdict.contract
+
+                          (and html? (not (some-> verdict :verdict-attachment :html)))
+                          :error.verdict.no-html)
                         identity fail))))))
 
 (defn- replacement-check
@@ -288,6 +294,20 @@
   [command]
   (verdict/sign-contract command)
   (ok))
+
+(defcommand generate-pate-pdf
+  {:description      "Regenerates (or at least tries to) verdict pdf if the
+  creation during publishing has failed."
+   :feature          :pate
+   :categories       #{:pate-verdicts}
+   :parameters       [:id :verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [(verdict-exists :published? :html?)]
+   :states           states/post-verdict-states
+   :user-roles       #{:authority}}
+  [command]
+  (ok :attachment-id (verdict/verdict-html->pdf command
+                                                (verdict/command->verdict command))))
 
 ;; ------------------------------------------
 ;; Modern actions

@@ -225,6 +225,7 @@
                   {}))
      :section
      {:id   :requirements
+      :show? [:OR :?.foremen :?.plans :?.reviews]
       :grid {:columns 7
              :rows    (map (fn [dict]
                              (let [check-path (keyword (str (name dict) "-included"))

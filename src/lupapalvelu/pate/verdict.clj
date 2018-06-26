@@ -1121,7 +1121,7 @@
                                (-> verdict :data keys))]
     (apply verdict->updates verdict
            (concat data-kws
-                   [:template-inclusions :published :archive :user]))))
+                   [:template.inclusions :published :archive :user]))))
 
 (defn finalize--section
   "Section is generated only for non-board (lautakunta) non-legacy
@@ -1226,22 +1226,26 @@
                                          (:permitType application)))
         (let [application (domain/get-application-no-access-checking (:id application))]
           {:commit-fn (fn [{:keys [command application verdict]}]
-                        (krysp/verdict-as-kuntagml (assoc command
-                                                          :application application)
-                                                   verdict))})))
+                        (try+ (krysp/verdict-as-kuntagml (assoc command
+                                                                :application application)
+                                                         verdict)
+                              (catch [:ok false] {text :text}
+                                (error (:throwable &throw-context)
+                                       (format "KuntaGML failed for verdict %s (permit-type %s)"
+                                               (:id verdict) (:permitType application))))))})))
 
 (defn verdict-html->pdf
-  "Creates verdict attachment if needed. Returns nil or error keyword."
+  "Creates verdict attachment if needed. Returns attachment-id or nil."
   [command {:keys [verdict-attachment] :as verdict}]
   (when-let [html (:html verdict-attachment)]
     (try+
      (when-let [attachment-id (pdf/create-verdict-attachment command
                                                              verdict)]
        (verdict-update command
-                       {$set {:pate-verdicts.$.verdict-attachment attachment-id}}))
+                       {$set {:pate-verdicts.$.verdict-attachment attachment-id}})
+       attachment-id)
      (catch [:error :pdf/pdf-error] _
-         (errorf "PDF generation for verdict %s failed." (:id verdict))
-       :pate.pdf-verdict-error)
+       (errorf "PDF generation for verdict %s failed." (:id verdict)))
      (catch Object _
        (errorf "Could not create verdict attachment for verdict %s." (:id verdict))
        (error (:throwble &throw-context))))))
