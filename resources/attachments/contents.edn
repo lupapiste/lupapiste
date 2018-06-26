@@ -1,4 +1,4 @@
-{{:type-id :muu_paapiirustus :type-group :paapiirustus} []
+{{:type-id :muu_paapiirustus :type-group :paapiirustus} [:yhdistelmapiirros]
  {:type-id :julkisivujen_varityssuunnitelma :type-group :suunnitelmat} [:varitetty_julkisivu
                                                                         :varityssuunnitelma]
  {:type-id :muu_pelastusviranomaisen_suunnitelma :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat} [:paloturvallisuuden_perustietolomake]
@@ -46,6 +46,7 @@
                                                                   :perustusten_kuivaussuunnitelma
                                                                   :rakennelaskelma
                                                                   :rakennetyypit
+                                                                  :rakenneleikkaus
                                                                   :tuotteiden_kelpoisuus_ja_testausasiakirja
                                                                   :muut_rakennesuunnitelma]
  {:type-id :todistus_hallintaoikeudesta :type-group :rakennuspaikan_hallinta} [:hallinnanjakosopimus
