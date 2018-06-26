@@ -254,8 +254,7 @@
                 (decode-body (http-get (str url fileId) {})) => nil))
             (let [body (decode-body (http-get (str url originalFileId) {}))]
               (fact "Original file is still accessible"
-                body => (contains {:fileId      originalFileId
-                                   :application application-id}))
+                body => (contains {:fileId      originalFileId}))
               (fact "Filename basename is the same (conversion may have changed the extension)"
                 (first (ss/split filename #"\."))
                 => (first (ss/split (:filename body) #"\.")))))
@@ -309,7 +308,7 @@
               (:state ak) => "faulty_review_task")
             (fact "Attachment file is stored and available"
               (decode-body (http-get (str url (-> ak :faulty :files first :originalFileId)) {}))
-              => (contains {:application application-id}))))))))
+              => (contains {:fileId (-> ak :faulty :files first :originalFileId)}))))))))
 
 (facts "Reviews with PATE"
   (command admin :set-organization-boolean-path

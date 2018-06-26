@@ -36,6 +36,8 @@
   IMG_2253.JPG
   JPG-kuva 2.9 MB"
   [{:keys [filename size type file-id fileId] :as file}  & extra]
+  ; FIXME: Why is there a file-id or a fileId?
+  ; FIXME: view-attachment does not exist anymore, it generally should be replaced with latest-attachment-version
   (let [file-id (or file-id fileId)
         view (if fileId
                "view-attachment?attachment-id"

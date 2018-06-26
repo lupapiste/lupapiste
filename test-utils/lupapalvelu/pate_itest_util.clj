@@ -39,10 +39,10 @@
                :value v))
     id))
 
-(defn check-file [file-id exists?]
+(defn check-file [app-id file-id exists?]
   (fact {:midje/description (str "Check that file "
                                  (if exists? "exists" "does not exist"))}
-    (raw sonja :view-attachment :attachment-id file-id)
+    (raw sonja :download-attachment :file-id file-id :id app-id)
     => (contains {:status (if exists? 200 404)})))
 
 (defn init-verdict-template [apikey category]
