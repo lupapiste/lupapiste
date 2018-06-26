@@ -92,31 +92,11 @@
     self.createdUserlinkSv = ko.observable();
     self.createdUserUsername = ko.observable();
 
-    self.clean = function() {
-      return self
-        .phase(1)
-        .organizationCode("")
-        .username("")
-        .firstName("")
-        .lastName("")
-        .searching(false)
-        .userAdded(false)
-        .createdUserlinkFi("")
-        .createdUserlinkSv("")
-        .createdUserUsername("");
-    };
+    self.showForm = ko.observable(false);
 
-    self.dialog = function() {
-      if (!self._dialog) {
-        self._dialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
-        self._dialog.createMask();
-      }
-      return self._dialog;
-    };
-
-    self.addAdmin = function() {
-      self.clean().dialog().open("#add-authority-admin-user-to-organization-dialog");
-    };
+    hub.subscribe("admin::authAdminCreated", function() {
+      self.showForm(false);
+    });
 
     self.next = function() {
       self.searching(true).phase(2);

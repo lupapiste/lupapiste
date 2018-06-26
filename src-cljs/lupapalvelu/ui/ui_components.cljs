@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.ui-components
-  (:require [lupapalvelu.ui.inspection-summaries :as inspection-summaries]
+  (:require [lupapalvelu.ui.components]
+            [lupapalvelu.ui.inspection-summaries :as inspection-summaries]
             [lupapalvelu.ui.auth-admin.stamp.editor :as stamp-editor]
             [lupapalvelu.ui.auth-admin.edit-authority.edit-view :as edit-authority-view]
             [lupapalvelu.ui.pate.verdict-templates :as verdict-templates]
@@ -8,7 +9,8 @@
             [lupapalvelu.ui.printing-order.composer :as printing-order-composer]
             [lupapalvelu.ui.bulletins.bulletin-preamble :as bulletin-preamble]
             [lupapalvelu.ui.bulletins.local-bulletins :as local-bulletins]
-            [lupapalvelu.ui.company.reports :as company-reports]))
+            [lupapalvelu.ui.company.reports :as company-reports]
+            [lupapalvelu.ui.admin.users.create-authority-user]))
 
 (defn reload-hook []
 
