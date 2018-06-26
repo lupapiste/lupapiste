@@ -540,7 +540,7 @@
 "triggers.title" "sv" "Automatuppgifter"
 "auth-admin.draft-revertion.title" "fi" "Luonnokseksi palauttaminen"
 "auth-admin.draft-revertion.title" "en" "Reverting to draft"
-"auth-admin.draft-revertion" "sv" "Returnering till utkast"
+"auth-admin.draft-revertion.title" "sv" "Returnering till utkast"
 "auth-admin.remove-handlers-from-reverted-draft" "fi" "Poista käsittelijät hakemukselta kun se palautetaan luonnokseksi"
 "auth-admin.remove-handlers-from-reverted-draft" "sv" "Ta bort handläggare från ansökan när den returneras till utkast"
 "auth-admin.remove-handlers-from-reverted-draft" "en" "Remove handlers from application when reverting it to draft"
