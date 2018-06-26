@@ -313,14 +313,14 @@
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
 
 (def migration-user-summary
-  {:id "-"
+  {:id "migration-user"
    :username "migraatio@lupapiste.fi"
    :lastName "Migraatio"
    :firstName "Lupapiste"
    :role "authority"})
 
 (def batchrun-user-data
-  {:id "-"
+  {:id "batchrun-user"
    :username "eraajo@lupapiste.fi"
    :enabled true
    :lastName "Er\u00e4ajo"
