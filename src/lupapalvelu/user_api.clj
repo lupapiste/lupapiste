@@ -206,8 +206,7 @@
         user-data       (assoc user-data :email rest-user-email)]
     (when (usr/get-user-by-email rest-user-email)
       (fail! :email-in-use))
-    (->> (usr/create-rest-user user-data)
-         (ok :user))))
+    (ok :user (usr/create-rest-user user-data))))
 
 (defcommand create-system-user
   {:description      "Creates system user for embedded Lupapiste view in Facta. Admin only."
@@ -219,8 +218,7 @@
   (let [email (usr/municipality-name->system-user-email municipality-name)]
     (when (usr/get-user-by-email email)
       (fail! :email-in-use))
-    (-> (usr/create-system-user municipality-name email organization-ids)
-        (ok))))
+    (ok (usr/create-system-user municipality-name email organization-ids))))
 
 ;;
 ;; ==============================================================================
