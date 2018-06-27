@@ -27,8 +27,7 @@
                 :lastName (str "Kayttaja " %)
                 :enabled true
                 :orgAuthz {(keyword id) ["authority"]}
-                :password "koulutus"}
-               :send-email false)))
+                :password "koulutus"})))
         (range 1 21)))))
 
 
@@ -393,8 +392,7 @@
          :lastName (str "P\u00e4\u00e4k\u00e4ytt\u00e4j\u00e4 " kuntano)
          :enabled true
          :orgAuthz {(keyword org-id) ["authorityAdmin"]}
-         :password "koulutus"}
-        :send-email false)
+         :password "koulutus"})
       (generate-users-for-organization {:id org-id}))))
 
 (defn generate-applicants! []
