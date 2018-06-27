@@ -9,9 +9,9 @@
   (:import [java.util Date]
            [java.time Instant]))
 
-(def session-id (uuid/v1))
+(def session-id (str (uuid/v1)))
 
-(def app-id (uuid/v1))
+(def app-id (str (uuid/v1)))
 
 (defn- upload-file [file link-id]
   (-> (file-upload/save-file {:filename "test-pdf.pdf"
