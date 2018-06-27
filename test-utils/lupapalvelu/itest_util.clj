@@ -297,6 +297,7 @@
 (def not-accessible? (partial expected-failure? (:text not-accessible)))
 (def missing-parameters? (partial expected-failure? :error.missing-parameters))
 (def organization-not-found? (partial expected-failure? :error.organization-not-found))
+(def schema-error? (partial expected-failure? :error.illegal-value:schema-validation))
 
 (facts "unauthorized?"
   (fact "with map"

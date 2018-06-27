@@ -32,8 +32,8 @@
           (update :linkFi reset! (:linkFi resp))
           (update :linkSv reset! (:linkSv resp))))
     :email (s/lower-case @(:username state))
-    :role "authorityAdmin"                                  ;; TODO fix :role usage
-    :organization  @(:organization state),
+    :role "authority"
+    :orgAuthz {@(:organization state) ["authorityAdmin"]}
     :firstName @(:firstname state),
     :lastName @(:lastname state)))
 

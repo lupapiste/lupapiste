@@ -37,23 +37,11 @@
                          (get-in [:name (or (keyword %) :fi)]))]
     (notifications/notify! :notify-authority-added {:user user, :org-fn org-name-fn})))
 
-(defn administrator-create-user [caller {:as user-data :keys [organization role]}]
-  (let [user-data (if organization
-                    (assoc user-data :orgAuthz {(keyword organization) [role]})
-                    user-data)
-        ; TODO: drop this when callers are updated
-        user-data (if (= role "authorityAdmin")
-                    (assoc user-data :role "authority")
-                    user-data)
-        user (usr/create-new-user caller user-data)]
-    (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
-    user))
-
 (defn create-and-notify-authority-user
   "Used by authorityAdmin. Creates authority user, notifies and returns new user."
   [org-id caller user-data]
   {:pre [(= "authority" (:role user-data)) (nil? (:organization user-data))]}
-  (let [user (administrator-create-user caller user-data)]
+  (let [user (usr/create-new-user caller user-data)]
     (notify-new-authority user caller org-id)
     user))
 

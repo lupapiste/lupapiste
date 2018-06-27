@@ -498,7 +498,7 @@
     (create-new-user {:role "admin"}
                      {:email    "x@x.x"
                       :orgAuthz {:x ["authorityAdmin"]}
-                      :role     "authorityAdmin"})
+                      :role     "authority"})
     => ..result..
     (provided
       (get-user-by-email "x@x.x") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
@@ -507,7 +507,7 @@
       (mongo/update-by-id :users ..old-id.. (contains {:email "x@x.x"})) => nil))
 
   (fact "create new authorityAdmin user, user exists before, but role is not 'dummy'"
-    (create-new-user {:role "admin"} {:email "x@x.x" :orgAuthz {:x ["authorityAdmin"]} :role "authorityAdmin"}) => (partial expected-failure? :error.duplicate-email)
+    (create-new-user {:role "admin"} {:email "x@x.x" :orgAuthz {:x ["authorityAdmin"]} :role "authority"}) => (partial expected-failure? :error.duplicate-email)
     (provided
       (get-user-by-email "x@x.x") => {:id ..old-id.. :role "authorityAdmin"} :times 1
       (org/known-organizations? [:x]) => true

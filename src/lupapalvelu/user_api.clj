@@ -161,19 +161,9 @@
                        :architect
                        :allowDirectMarketing
                        :graduatingYear :degree :fise :fiseKelpoisuus])
-      ; Password can be passed in here, but it's removed in down-stream:
-      (st/assoc :password (sc/pred
-                            (fn [password]
-                              (or (nil? password)
-                                  (and (security/valid-password? password)
-                                       (< (count password) 256))))
-                            'valid-password?))
-      ; Organization is passed in here, but removed and handled in down-stream:
-      (st/assoc :organization sc/Str)
       ; Limit the roles that can be created here:
       (st/assoc :role (apply sc/enum #{"applicant"
                                        "authority"
-                                       "authorityAdmin" ; FIXME: The authorityAdmin role is handled down-stream in transition period
                                        "dummy"
                                        "financialAuthority"}))
       ; enabled comes in as string (coercion shomewhere?)
@@ -187,7 +177,7 @@
    :notified         true
    :permissions      [{:required [:users/create]}]}
   [{user-data :data caller :user}]
-  (let [user (uu/administrator-create-user caller user-data)]
+  (let [user (usr/create-new-user caller user-data)]
     (let [token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
       (ok :id (:id user)
           :user user

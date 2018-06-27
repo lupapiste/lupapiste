@@ -123,13 +123,11 @@
 ;; NewUser, shape of new users:
 ;; * new user does not have :id
 ;; * role "admin" is not allowed
-;; * role "authorityAdmin" is allowed (transitional period)
 
 (defschema NewUser (-> User
                        (st/dissoc :id)
                        (st/assoc :role (apply sc/enum (-> all-roles
-                                                          (disj "admin")
-                                                          (conj "authorityAdmin"))))))
+                                                          (disj "admin"))))))
 
 (def user-keys (->> User keys (map sc/explicit-schema-key) set))
 

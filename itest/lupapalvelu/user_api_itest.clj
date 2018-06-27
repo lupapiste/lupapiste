@@ -79,36 +79,53 @@
 
 (facts "create-user"
   (apply-remote-minimal)
-  (fact
+  (fact "minimal data"
+    (command admin :create-user
+             :email "minimal@example.com"
+             :role "authority")
+    => ok?)
+  (fact "Pena can't do it"
     (command pena :create-user
              :email "x@example.com"
-             :role "dummy"
-             :password "foobarbozbiz")
-    => fail?)
-  (fact
+             :role "dummy")
+    => unauthorized?)
+  (fact "input params have schema"
     (command admin :create-user
              :email "x@example.com"
              :role "authorityAdmin"
              :enabled true
              :organization "753-R"
              :password "foobarbozbiz")
+    => schema-error?)
+  (fact "authorityAdmin wrong"
+    (command admin :create-user
+             :email "x@example.com"
+             :role "authorityAdmin")
+    => schema-error?)
+  (fact "orgAuthz wrong"
+    (command admin :create-user
+             :email "x@example.com"
+             :role "authority"
+             :orgAuthz {:753-R ["foobarrole"]})
+    => schema-error?)
+  (fact "create user with orgAuthz"
+    (command admin :create-user
+             :email "x@example.com"
+             :role "authority"
+             :orgAuthz {:753-R ["authorityAdmin"]})
     => ok?)
   ; Check that user was created
   (fact
     (-> (query admin :users :email "x@example.com") :users first)
     => (contains {:role     "authority"
                   :email    "x@example.com"
-                  :enabled  true
+                  :enabled  false
                   :orgAuthz {:753-R ["authorityAdmin"]}}))
-
-  ; Inbox zero
-  (last-email)
 
   (fact "authorityAdmin can't call create-user (anymore)"
     (command sipoo :create-user
              :email "foo@example.com"
-             :role "authority"
-             :enabled true)
+             :role "authority")
     => unauthorized?))
 
 ;;
@@ -222,8 +239,7 @@
     (command admin :create-user
              :email "foo@example.com"
              :role "authority"
-             :enabled "true"
-             :organization "529-R")
+             :orgAuthz {:529-R ["authority"]})
     => ok?)
 
   (fact

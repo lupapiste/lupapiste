@@ -56,7 +56,7 @@
                            :lastName  last-name
                            :email     email
                            :role      "authority"}
-            user (uu/administrator-create-user org-admin new-user-data)]
+            user (usr/create-new-user org-admin new-user-data)]
         (uu/notify-new-authority user org-admin org-id)))))
 
 (defn remove-guest-authority-organization
