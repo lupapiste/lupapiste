@@ -405,7 +405,7 @@
 ;; jQuery data-tables support:
 ;;
 
-; TODO: user can have multiple orgz
+; FIXME: LPK-3828 user can have multiple orgz
 (defn authority-admin? [caller]
   (let [orgs (organization-ids-by-roles caller #{:authorityAdmin})]
     (case (count orgs)

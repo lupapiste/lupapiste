@@ -45,7 +45,7 @@
        set))
 
 (defn authority-admins-organization-id [user]
-  ; FIXME: user can have multiple orgz
+  ; FIXME: LPK-3828 user can have multiple orgz
   (let [[org & more] (organization-ids-by-roles user #{:authorityAdmin})]
     (when (seq more)
       (throw (ex-info "user is authorityAdmin in multiple organizations, somebody needs to implement this" {:user user})))

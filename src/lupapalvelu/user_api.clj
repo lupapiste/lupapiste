@@ -390,7 +390,7 @@
    :notified         true
    :permissions      [{:required [:organization/admin]}]
    :pre-checks       [(fn [{params :data user :user}]
-                        (when (:organizationId params)      ; FIXME permissions pipeline should handle this
+                        (when (:organizationId params)      ; FIXME LPK-3828 permissions pipeline should handle this
                           (when-not (usr/user-has-role-in-organization? user (:organizationId params) #{:authorityAdmin})
                             (fail :error.unauthorized))))]
    :description      "Updates or creates user in admins organization"}
