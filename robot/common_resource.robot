@@ -1774,7 +1774,7 @@ Test id autocomplete disabled
 
 Press key test id
   [Arguments]  ${tid}  ${key}
-  Press key  jquery=[data-test-id=${tid}]  ${key}
+  Press key  jquery=[data-test-id=${tid}]:visible  ${key}
 
 # Frontend error log
 

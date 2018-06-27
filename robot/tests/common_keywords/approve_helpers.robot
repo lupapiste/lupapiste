@@ -143,11 +143,6 @@ Reject group
 
 # Reject notes and related
 
-
-Press Key Test Id
-  [Arguments]  ${id}  ${key}
-  Press Key  jquery=input[data-test-id=${id}]:visible  ${key}
-
 Reject note is
   [Arguments]  ${prefix}  ${text}
   Element should be visible by test id  ${prefix}-note
