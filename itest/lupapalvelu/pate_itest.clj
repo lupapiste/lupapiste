@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate-itest
-  (:require [clojure.data.xml :as cxml]
+  (:require [clj-http.client :as http-client]
+            [clojure.data.xml :as cxml]
             [clojure.java.io :as io]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
@@ -7,12 +8,13 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.validator :as validator]
             [midje.sweet :refer :all]
+            [sade.coordinate :as coord]
             [sade.core :refer [now]]
+            [sade.env :as env]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.xml :as xml]
-            [sade.coordinate :as coord]))
+            [sade.xml :as xml]))
 
 (apply-remote-minimal)
 
@@ -1352,9 +1354,19 @@
             (fact "Verdict attachment"
               (xml/get-text xml [:paatostieto :poytakirja :liite :kuvaus])
               => "Verdict"
-              (xml/get-text xml [:paatostieto :poytakirja :liite :linkkiliitteeseen])
-              => (str "http://localhost:8000/api/raw/verdict-pdf?verdict-id="
-                      verdict-id))))
+              (let [url                        (xml/get-text xml [:paatostieto :poytakirja
+                                                                  :liite :linkkiliitteeseen])
+                    {:keys [uri query-string]} (http-client/parse-url url)]
+                url => (has-prefix (env/value :host))
+                uri => "/api/raw/verdict-pdf"
+                (http-client/form-decode query-string)
+                => {"verdict-id" verdict-id
+                    "id"         app-id}
+                (fact "verdict-pdf action"
+                  (:headers(raw sonja :verdict-pdf :id app-id :verdict-id verdict-id))
+                  => (contains {"Content-Disposition" (contains (format "%s Verdict %s"
+                                                                        app-id
+                                                                        (util/to-local-date (now))))}))))))
 
         (fact "Verdict PDF attachment has been created"
           (let [{att-id :id

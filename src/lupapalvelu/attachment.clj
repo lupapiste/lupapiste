@@ -63,10 +63,6 @@
 
 (def attachment-states #{:ok :requires_user_action :requires_authority_action})
 
-
-(defschema AttachmentId
-  (ssc/min-length-string 24))
-
 (defschema AttachmentAuthUser
   "User summary for authorized users in attachment.
    Only name and role is used for users without Lupapiste account."
@@ -147,7 +143,7 @@
 (def GroupType (apply sc/enum att-tags/attachment-groups))
 
 (defschema Attachment
-  {:id                                   AttachmentId
+  {:id                                   ssc/AttachmentId
    :type                                 Type               ;; Attachment type
    :modified                             ssc/Timestamp      ;; last modified
    (sc/optional-key :sent)               ssc/Timestamp      ;; sent to backing system
@@ -157,7 +153,7 @@
    (sc/optional-key :originalApplicationState) (apply sc/enum states/pre-verdict-states) ;; original application state if visible application state if forced to any other
    :target                               (sc/maybe Target)  ;;
    (sc/optional-key :source)             Source             ;;
-   (sc/optional-key :ramLink)            AttachmentId       ;; reference from ram attachment to base attachment
+   (sc/optional-key :ramLink)            ssc/AttachmentId   ;; reference from ram attachment to base attachment
    :required                             sc/Bool            ;;
    :requestedByAuthority                 sc/Bool            ;;
    :notNeeded                            sc/Bool            ;;

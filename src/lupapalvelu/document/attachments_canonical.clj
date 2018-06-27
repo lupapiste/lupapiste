@@ -3,6 +3,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.disk-writer :as writer]
+            [ring.util.codec :as codec]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -190,7 +191,10 @@
       (get-Liite attachment-title link attachment type-id file-id file-name (:version attachment)))))
 
 (defn pate-verdict-attachment-link
-  [lang verdict]
-  {:kuvaus (i18n/localize lang :pate-verdict)
-   :linkkiliitteeseen (format "%s/api/raw/verdict-pdf?verdict-id=%s"
-                              (env/value :host) (:id verdict))})
+  [application verdict]
+  {:kuvaus            (i18n/localize (get-in verdict [:data :language] :fi)
+                                     :pate-verdict)
+   :linkkiliitteeseen (format "%s/api/raw/verdict-pdf?%s"
+                              (env/value :host)
+                              (codec/form-encode {:id         (:id application)
+                                                  :verdict-id (:id verdict)}))})

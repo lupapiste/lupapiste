@@ -13,6 +13,7 @@
             [lupapalvelu.pate.verdict :as verdict]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.roles :as roles]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
@@ -308,6 +309,18 @@
   [command]
   (ok :attachment-id (verdict/verdict-html->pdf command
                                                 (verdict/command->verdict command))))
+
+(defraw verdict-pdf
+  {:description      "Endpoint for downloading the verdict attachment."
+   :feature          :pate
+   :parameters       [:id :verdict-id]
+   :categories       #{:pate-verdicts}
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
+   :user-authz-roles roles/all-authz-roles
+   :pre-checks       [(verdict-exists :published?)]}
+  [command]
+  (verdict/download-verdict command))
 
 ;; ------------------------------------------
 ;; Modern actions

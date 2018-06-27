@@ -1,6 +1,5 @@
 (ns lupapalvelu.pate.schemas
   (:require [clojure.set :as set]
-            [lupapalvelu.attachment :refer [AttachmentId]]
             [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :refer [body] :as tools]
             [lupapalvelu.i18n :as i18n]
@@ -126,7 +125,7 @@
           ;; attachment id.
           (sc/optional-key :verdict-attachment) (sc/conditional
                                                  :html {:html sc/Any}
-                                                 :else AttachmentId)}))
+                                                 :else ssc/AttachmentId)}))
 
 (defschema PateModernVerdict
   (merge PateBaseVerdict

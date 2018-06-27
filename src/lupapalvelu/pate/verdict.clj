@@ -6,7 +6,6 @@
             [lupapalvelu.application-meta-fields :as meta]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as com]
             [lupapalvelu.document.tools :as tools]
@@ -1224,15 +1223,14 @@
                  (util/not=as-kw (:category verdict) :contract)
                  (org/krysp-integration? @(:organization command)
                                          (:permitType application)))
-        (let [application (domain/get-application-no-access-checking (:id application))]
-          {:commit-fn (fn [{:keys [command application verdict]}]
-                        (try+ (krysp/verdict-as-kuntagml (assoc command
-                                                                :application application)
-                                                         verdict)
-                              (catch [:ok false] {text :text}
-                                (error (:throwable &throw-context)
-                                       (format "KuntaGML failed for verdict %s (permit-type %s)"
-                                               (:id verdict) (:permitType application))))))})))
+    {:commit-fn (fn [{:keys [command application verdict]}]
+                  (try+ (krysp/verdict-as-kuntagml (assoc command
+                                                          :application application)
+                                                   verdict)
+                        (catch [:ok false] {text :text}
+                          (error (:throwable &throw-context)
+                                 (format "KuntaGML failed for verdict %s (permit-type %s)"
+                                         (:id verdict) (:permitType application))))))}))
 
 (defn verdict-html->pdf
   "Creates verdict attachment if needed. Returns attachment-id or nil."
@@ -1312,6 +1310,44 @@
                              finalize--pdf
                              finalize--kuntagml))
 
+(defn try-again-page [{:keys [lang data]} {:keys [raw status error]}]
+  {:status  status
+   :headers {"Content-Type" "text/html; charset=utf-8"}
+   :body    (let [msg (i18n/localize lang error)]
+              (rum/render-static-markup
+               [:html
+                [:head [:title msg]]
+                [:body
+                 [:div
+                  {:style {:margin  "2em 2em"
+                           :border  "2px solid red"
+                           :padding "1em 1em"}}
+                  [:h3 {:style {:margin-top 0}} msg]
+                  [:a {:href (format "/api/raw/%s?%s"
+                                     (name raw)
+                                     (codec/form-encode data))}
+                   (i18n/localize lang :pate.try-again)]]]]))})
+
+(defn download-verdict
+  "Generates PDF when necessary."
+  [{:keys [user] :as command}]
+  (let [{:keys [verdict-attachment]
+         :as   verdict} (command->verdict command)
+        attachment-id   (cond
+                          (string? verdict-attachment)
+                          verdict-attachment
+
+                          (:html verdict-attachment)
+                          (verdict-html->pdf command verdict))]
+    (if attachment-id
+      (att/output-attachment (att/get-attachment-latest-version-file user
+                                                                     attachment-id
+                                                                     false)
+                             true)
+      (try-again-page command  {:status 404 ;; Not Found
+                                :error  :pate.verdict.download-error
+                                :raw    :verdict-pdf}))))
+
 (defn preview-verdict
   "Preview version of the verdict.
   1. Finalize verdict but do not store the changes.
@@ -1323,21 +1359,9 @@
                                  (enrich-verdict command <> true)
                                  (pdf/create-verdict-preview command))]
     (if error
-      {:status 503 ;; Service Unavailable
-       :headers {"Content-Type" "text/html; charset=utf-8"}
-       :body (let [msg (i18n/localize lang error)]
-               (rum/render-static-markup
-                [:html
-                 [:head [:title msg]]
-                 [:body
-                  [:div
-                   {:style {:margin "2em 2em"
-                            :border "2px solid red"
-                            :padding "1em 1em"}}
-                   [:h3 {:style {:margin-top 0}} msg]
-                   [:a {:href (str "/api/raw/preview-pate-verdict?"
-                                   (codec/form-encode (:data command)))}
-                    (i18n/localize lang :pate.try-again)]]]]))}
+      (try-again-page command {:raw    :preview-pate-verdict
+                               :status 503 ;; Service Unavailable
+                               :error  error})
       {:status  200
        :headers {"Content-Type"        "application/pdf"
                  "Content-Disposition" (format "filename=\"%s\"" filename)}
