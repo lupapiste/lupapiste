@@ -41,7 +41,7 @@
     self.docterminalEnabled = ko.observable(false);
     self.docstorePrice = ko.observable("");
     self.docstoreDescs = ko.observableArray();
-    self.mattiEnabled = ko.observable(false);
+    self.stateChangeMsgEnabled = ko.observable(false);
 
     self.validDocstorePrice = ko.pureComputed(function () {
       var price = util.parseFloat(self.docstorePrice());
@@ -148,7 +148,7 @@
           self.threeDMapEnabled( _.get(result, "data.3d-map.enabled"));
           self.threeDMapServerParams.server(_.get( result, "data.3d-map.server"));
           self.backendSystems(_.map(util.getIn(result, ["data", "krysp"]), function(v,k) { return {permitType: k, backendSystem: v["backend-system"]}; }));
-          self.mattiEnabled(result.data["matti-enabled"]);
+          self.stateChangeMsgEnabled(result.data["state-change-msg-enabled"]);
 
           var archiveTs= result.data["earliest-allowed-archiving-date"];
           if (archiveTs && archiveTs > 0) {
@@ -292,8 +292,8 @@
       setBooleanAttribute("digitizer-tools-enabled", value);
     });
 
-    self.mattiEnabled.subscribe(function(value) {
-      setBooleanAttribute("matti-enabled", value);
+    self.stateChangeMsgEnabled.subscribe(function(value) {
+      setBooleanAttribute("state-change-msg-enabled", value);
     });
 
     self.calendarsEnabled.subscribe(function(value) {

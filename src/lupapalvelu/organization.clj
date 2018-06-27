@@ -253,7 +253,7 @@
    (sc/optional-key :verdict-templates) PateSavedVerdictTemplates
    (sc/optional-key :phrases) [Phrase]
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
-   (sc/optional-key :matti-enabled)                sc/Bool
+   (sc/optional-key :state-change-msg-enabled)      sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
    (sc/optional-key :local-bulletins-page-settings) LocalBulletinsPageSettings
    (sc/optional-key :default-digitalization-location) {:x sc/Str :y sc/Str}
@@ -287,7 +287,7 @@
    :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
    :docstore-info :3d-map :default-digitalization-location
    :kopiolaitos-email :kopiolaitos-orderer-address :kopiolaitos-orderer-email :kopiolaitos-orderer-phone
-   :app-required-fields-filling-obligatory :matti-enabled])
+   :app-required-fields-filling-obligatory :state-change-msg-enabled])
 
 (defn get-organizations
   ([]

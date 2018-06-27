@@ -95,6 +95,13 @@
             <input type="checkbox" data-bind="checked: digitizerToolsEnabled" class="form-input" id="digitizerToolsEnabled">
           </div>
 
+          <div data-bind="if: organization">
+            <div>
+              <label data-bind="text: 'Tilanmuutos sanomat k&auml;yt&ouml;ss&auml;' " for="state-change-msg-enabled"></label>
+              <input data-bind="checked: stateChangeMsgEnabled" id="state-change-msg-enabled" type="checkbox"/>
+            </div>
+          </div>
+
           <div class="calendars-setting" data-bind="if: util.getIn($data, ['organization', 'id']) && features.enabled('ajanvaraus')">
             <label data-bind="ltext: 'organization.calendars.enabled'" for="calendarsEnabled"></label>
             <input type="checkbox" data-bind="checked: calendarsEnabled" class="form-input" id="calendarsEnabled">
@@ -155,15 +162,6 @@
           <button data-bind="click: newScope" class="btn positive">Lis&auml;&auml; lupatyyppi</button>
 
           <button data-bind="visible: !openInfoRequests(), click: convertOpenInforequests" class="btn positive">Muuta avoimet neuvontapyynn&ouml;t tavallisiksi</button>
-
-
-          <div data-bind="if: organization">
-            <h2>Matti</h2>
-            <div>
-                <label data-bind="text: 'Matti k&auml;yt&ouml;ss&auml;' " for="matti-enabled"></label>
-                <input data-bind="checked: mattiEnabled" id="matti-enabled" type="checkbox"/>
-            </div>
-          </div>
 
           <h2 data-bind="ltext: 'admin.organization.backend-system'"></h2>
           <table data-test-id="organization-backend-system-table">
