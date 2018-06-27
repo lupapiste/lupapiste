@@ -1,16 +1,15 @@
 (ns lupapalvelu.financial-api
   (:require [lupapalvelu.action :refer [defquery defcommand] :as action]
-            [lupapalvelu.financial :as financial]
             [lupapalvelu.application :as application]
-            [lupapalvelu.states :as states]
+            [lupapalvelu.financial :as financial]
+            [lupapalvelu.user :as usr]
             [sade.core :refer [ok]]))
 
 (defcommand create-financial-handler
-  {:parameters [:email]
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
-   :permissions [{:required [:users/create-financial-handler]}]
-   :feature :financial}
+  {:parameters       [:email]
+   :input-validators [usr/CreateUser]
+   :permissions      [{:required [:users/create-financial-handler]}]
+   :feature          :financial}
   [{user-data :data user :user}]
     (financial/create-financial-handler user-data user))
 

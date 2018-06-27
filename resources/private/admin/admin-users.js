@@ -260,8 +260,7 @@
             role: "financialAuthority",
             email: self.email(),
             firstName: self.name(),
-            lastName: "",
-            enabled: "true"})
+            lastName: ""})
         .pending(self.searching)
         .success(function(r) {
           self.userAdded(true);

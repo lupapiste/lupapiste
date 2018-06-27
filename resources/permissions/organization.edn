@@ -1,7 +1,5 @@
 {:global       {:admin              #{:organization/convert-inforequests
-                                      :organization/update-name}
-                ; FIXME: drop this
-                :authorityAdmin     #{:organization/check-permanent-archive-enabled}}
+                                      :organization/update-name}}
  :organization {:authority          #{:organization/check-permanent-archive-enabled
                                       :organization/tags
                                       :organization/areas}

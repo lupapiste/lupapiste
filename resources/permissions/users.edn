@@ -4,6 +4,4 @@
                 :authority #{:users/update-own-data}
                 :applicant #{:users/update-own-data}
                 :financialAuthority #{:users/update-own-data}}
- :organization {:authorityAdmin #{:users/admin-query
-                                  ; :users/update-own-data maybe not needed, if :authorityAdmin is 'authority' by main role?
-                                  :users/create-financial-handler}}}
+ :organization {:authorityAdmin #{:users/admin-query}}}

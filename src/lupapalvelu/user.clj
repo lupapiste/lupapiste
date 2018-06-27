@@ -113,6 +113,29 @@
                                                :display-name  (i18n/lenient-localization-schema sc/Str)
                                                :callback-url  ssc/HttpUrl}})
 
+
+(defschema CreateUser
+  "Schema for creating new users"
+  (-> User
+      ; Limit the keys that can be given here:
+      (st/select-keys [:email
+                       :username :firstName :lastName
+                       :role :orgAuthz
+                       :personId :personIdSource
+                       :phone :city :street :zip
+                       :language
+                       :architect
+                       :allowDirectMarketing
+                       :graduatingYear :degree :fise :fiseKelpoisuus])
+      ; Limit the roles that can be created here:
+      (st/assoc :role (apply sc/enum #{"applicant"
+                                       "authority"
+                                       "dummy"
+                                       "financialAuthority"}))
+      ; All keys are optional, except :email and :role
+      (st/optional-keys)
+      (st/required-keys [:email :role])))
+
 ;; NewUser, shape of new users:
 ;; * new user does not have :id
 ;; * role "admin" is not allowed

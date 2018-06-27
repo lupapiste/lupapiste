@@ -145,35 +145,8 @@
     (ok :operation "invited")))
 
 
-; TODO: Refactor commands so that the user-data is passed separately from
-; additional parameters, like password. Currently the user-data is manipulated
-; down-stream so that password and organization are removed from final persisted
-; user-data.
-(sc/defschema CreateUser
-  (-> usr/User
-      ; Limit the keys that can be given here:
-      (st/select-keys [:email
-                       :username :firstName :lastName
-                       :role :orgAuthz :company
-                       :personId :personIdSource
-                       :phone :city :street :zip
-                       :language
-                       :architect
-                       :allowDirectMarketing
-                       :graduatingYear :degree :fise :fiseKelpoisuus])
-      ; Limit the roles that can be created here:
-      (st/assoc :role (apply sc/enum #{"applicant"
-                                       "authority"
-                                       "dummy"
-                                       "financialAuthority"}))
-      ; enabled comes in as string (coercion shomewhere?)
-      (st/assoc :enabled (sc/enum "true" "false" true false))
-      ; All keys are optional, except :email and :role
-      (st/optional-keys)
-      (st/required-keys [:email :role])))
-
 (defcommand create-user
-  {:input-validators [CreateUser]
+  {:input-validators [usr/CreateUser]
    :notified         true
    :permissions      [{:required [:users/create]}]}
   [{user-data :data caller :user}]
