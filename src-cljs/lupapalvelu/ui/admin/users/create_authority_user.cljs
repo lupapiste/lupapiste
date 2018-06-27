@@ -34,7 +34,6 @@
     :email (s/lower-case @(:username state))
     :role "authorityAdmin"                                  ;; TODO fix :role usage
     :organization  @(:organization state),
-    :enabled "true",
     :firstName @(:firstname state),
     :lastName @(:lastname state)))
 

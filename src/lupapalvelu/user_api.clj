@@ -159,7 +159,6 @@
                        :phone :city :street :zip
                        :language
                        :architect
-                       :enabled
                        :allowDirectMarketing
                        :graduatingYear :degree :fise :fiseKelpoisuus])
       ; Password can be passed in here, but it's removed in down-stream:
