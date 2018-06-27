@@ -197,9 +197,9 @@
             (count tasks) => 1
             state => "verdictGiven"))
         (fact "Enable Pate in Sipoo"
-          (command admin :set-organization-boolean-path
-                   :organizationId "753-R"
-                   :path "pate-enabled"
+          (command admin :set-organization-scope-pate-value
+                   :permitType "R"
+                   :municipality "753"
                    :value true) => ok?)
         (fact "New legacy draft fails"
           (command sonja :new-legacy-verdict-draft :id app-id)

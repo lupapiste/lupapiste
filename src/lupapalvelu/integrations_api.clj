@@ -490,11 +490,13 @@
 ;;
 ;;  RH data modifications to documents
 ;;
-(defn pate-enabled
+(defn- pate-enabled
   "Pre-checker that fails if Pate is not enabled in the application organization."
-  [{:keys [organization]}]
+  [{:keys [organization application]}]
   (when (and organization
-             (not (:pate-enabled @organization)))
+             (not (-> (filter #(= (:permitType %) (:permitType application)) (:scope @organization))
+                      (first)
+                      :pate-enabled)))
     (fail :error.pate-disabled)))
 
 (defn editable-by-state?

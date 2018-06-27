@@ -577,6 +577,17 @@
     (org/update-organization organizationId {$set {kw-path value}}))
   (ok))
 
+(defcommand set-organization-scope-pate-value
+  {:parameters [permitType municipality value]
+   :description "Set boolean value for pate-enabled in organization scope level."
+   :user-roles #{:admin}
+   :input-validators  [(partial non-blank-parameters [:permitType :municipality])
+                       (partial boolean-parameters [:value])]}
+  [{user :user data :data}]
+  (mongo/update-by-query :organizations
+                         {:scope {$elemMatch {:permitType permitType :municipality municipality}}}  {$set {:scope.$.pate-enabled value}})
+  (ok))
+
 (defcommand set-organization-boolean-attribute
   {:parameters [enabled organizationId attribute]
    :user-roles #{:admin}

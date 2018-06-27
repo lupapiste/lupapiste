@@ -19,9 +19,9 @@
 
 (apply-remote-minimal)
 
-(command admin :set-organization-boolean-path
-         :organizationId "753-R"
-         :path "pate-enabled"
+(command admin :set-organization-scope-pate-value
+         :permitType "R"
+         :municipality "753"
          :value true)
 
 (fact "can't inject js in 'x' or 'y' params"

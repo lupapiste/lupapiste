@@ -1,6 +1,9 @@
 (ns lupapalvelu.pate-itest-util
   (:require [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
+            [monger.operators :refer :all]
+            [sade.strings :as ss]
             [sade.util :as util]))
 
 (defn err [error]
@@ -19,10 +22,12 @@
 (defn toggle-pate [org-id flag]
   (fact {:midje/description (format "Toggle Pate for %s: %s"
                                     org-id flag)}
-    (command admin :set-organization-boolean-path
-             :organizationId org-id
-             :path "pate-enabled"
-             :value flag)=> ok?))
+    (let [permit-type (last (ss/split org-id #"-"))
+          municipality (first (ss/split org-id #"-"))]
+      (command admin :set-organization-scope-pate-value
+               :permitType permit-type
+               :municipality municipality
+               :value flag)) => ok?))
 
 (defn add-repeating-setting
   "Returns the id of the new item."

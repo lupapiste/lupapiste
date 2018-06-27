@@ -303,9 +303,11 @@
       unauthorized)))
 
 (defn- pate-enabled
-  [{:keys [organization]}]
+  [{:keys [organization application]}]
   (when (and organization
-             (not (:pate-enabled @organization)))
+             (not (-> (filter #(= (:permitType %) (:permitType application)) (:scope @organization))
+                      (first)
+                      :pate-enabled)))
     (fail :error.pate-disabled)))
 
 (defcommand unsubscribe-notifications

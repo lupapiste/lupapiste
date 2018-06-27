@@ -29,11 +29,12 @@
 ;; and constraints are in sync with the legacy verdict API.
 
 (defn- pate-enabled
-  "Pre-checker that fails if Pate is not enabled in the application
-  organization."
-  [{:keys [organization]}]
+  "Pre-checker that fails if Pate is not enabled in the application organization scope."
+  [{:keys [organization application]}]
   (when (and organization
-             (not (:pate-enabled @organization)))
+             (not (-> (filter #(= (:permitType %) (:permitType application)) (:scope @organization))
+                      (first)
+                      :pate-enabled)))
     (fail :error.pate-disabled)))
 
 (defn- verdict-exists

@@ -49,7 +49,7 @@
 (def organizations (map (fn [{org-id :id :as org}]
                           (cond-> org
                             (ss/starts-with org-id "753-")
-                            (assoc :pate-enabled true
+                            (assoc :scope (mapv (fn [sco] (assoc sco :pate-enabled true)) (:scope org))
                                    :phrases phrases)))
                         minimal/organizations))
 

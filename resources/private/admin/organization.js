@@ -86,10 +86,6 @@
       organizationCommand( "set-3d-map-enabled", {flag: Boolean( value )}, self.threeDMapServerParams.waiting);
     });
 
-    function saveBooleanValue(updatePath, boolValue) {
-      organizationCommand("set-organization-boolean-path", {path: updatePath, value: boolValue});
-    }
-
     function updateSsoKeys() {
       _.forEach(self.ssoKeys(), function(ssoKey) {
         ssoKey.selected(_.includes(self.allowedAutologinIps(), ssoKey.ip));
