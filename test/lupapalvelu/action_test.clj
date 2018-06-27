@@ -803,4 +803,4 @@
          [input-validators-fail]
          true)
     => {:ok   false
-        :text "input does not match schema InputValidatorTestSchema"}))
+        :text "error.illegal-value:schema-validation"}))

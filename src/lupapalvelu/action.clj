@@ -692,7 +692,7 @@
       (fn [command]
         (when-let [schema-errors (-> command :data checker)]
           (error error-message (pr-str schema-errors))
-          (fail error-message))))))
+          (fail :error.illegal-value:schema-validation))))))
 
 (defn register-action [action-type action-name meta-data line ns-str handler]
   {:pre [(keyword? action-type)
