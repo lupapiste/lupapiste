@@ -65,59 +65,18 @@
     }
   });
 
-
   //
   // For adding authotity admins
   //
-
   function AuthorityAdminUsers() {
     var self = this;
 
-    self.organizationCode = ko.observable();
-    self.username = ko.observable();
-    self.phase = ko.observable(0);
-    self.firstName = ko.observable();
-    self.lastName = ko.observable();
-    self.userDetailsOk = ko.computed(function() {
-        var firstNameOk = self.firstName();
-        var lastNameOk = self.lastName();
-        var organizationCodeOk = self.organizationCode();
-        var usernameOk = self.username();
-        return organizationCodeOk && usernameOk && firstNameOk && lastNameOk;});
-
-    self.searching = ko.observable();
-    self.userAdded = ko.observable();
-
-    self.createdUserlinkFi = ko.observable();
-    self.createdUserlinkSv = ko.observable();
-    self.createdUserUsername = ko.observable();
-
     self.showForm = ko.observable(false);
 
-    hub.subscribe("admin::authAdminCreated", function() {
+    // CLJS component will yell this to hub when it can be killed
+    hub.subscribe("admin::authAdminFinished", function() {
       self.showForm(false);
     });
-
-    self.next = function() {
-      self.searching(true).phase(2);
-      ajax
-        .command("create-user",
-                 {email: self.username(),
-                  role: "authorityAdmin",
-                  organization: self.organizationCode(),
-                  enabled: "true",
-                  firstName: self.firstName(),
-                  lastName: self.lastName()})
-        .pending(self.searching)
-        .success(function(r) {
-          self.createdUserUsername(r.user.username);
-          self.createdUserlinkFi(r.linkFi);
-          self.createdUserlinkSv(r.linkSv);
-          self.userAdded(true);
-          usersList.redraw();
-        })
-        .call();
-    };
   }
 
   var authorityAdminUsers = new AuthorityAdminUsers();
