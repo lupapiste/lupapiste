@@ -11,6 +11,8 @@
             [lupapalvelu.test-util :refer [catch-all passing-quick-check]]
             [lupapalvelu.user :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check :refer [quick-check]]
@@ -18,8 +20,7 @@
             [clojure.test.check.generators :as gen]
             [clojure.test :refer [is]]
             [sade.schema-generators :as ssg]
-            [sade.schema-utils :as ssu]
-            [lupapalvelu.organization :as org]))
+            [sade.schema-utils :as ssu]))
 
 ;;
 ;; ==============================================================================
@@ -96,9 +97,9 @@
   (same-user? {:id "foo"} {:id "bar"}) => falsey)
 
 (def role-set-generator
-  (let [role-keyword-generator (gen/fmap keyword (ssg/generator Role))]
+  (let [role-keyword-generator (gen/fmap keyword (ssg/generator StrOrgAuthzRoles))]
     (gen/set role-keyword-generator
-             {:max-elements (count all-roles)
+             {:max-elements (count roles/all-org-authz-roles)
               :min-elements 0})))
 
 (def organization-ids-by-roles-prop
@@ -113,8 +114,8 @@
                   (every? valid? (:orgAuthz user)))))
 
 (fact :qc organization-ids-by-roles-spec
-          (quick-check 100 organization-ids-by-roles-prop :max-size 50)
-          => passing-quick-check)
+  (quick-check 100 organization-ids-by-roles-prop :max-size 50)
+  => passing-quick-check)
 
 (def user-and-organization-id-generator
   (gen/let [org-ids (gen/vector-distinct (ssg/generator OrgId)
@@ -248,7 +249,7 @@
     (new-user-error {:caller    nil
                      :user-data (create-new-user-entity {:email    "a@b.c"
                                                          :role     "applicant"
-                                                         :orgAuthz {:some-org ["some-role"]}})})
+                                                         :orgAuthz {:some-org ["authority"]}})})
     => (contains {:desc  "applicants may not have an organizations"
                   :error :error.unauthorized}))
 
@@ -286,8 +287,8 @@
                                                          :org-2 ["anything 2" "authorityAdmin" "anything 4"]}}
                        :user-data            (create-new-user-entity {:email    "a@b.c"
                                                                       :role     "authority"
-                                                                      :orgAuthz {:org-1 ["some-role-1"]
-                                                                                 :org-2 ["some-role-2"]}})
+                                                                      :orgAuthz {:org-1 ["authority"]
+                                                                                 :org-2 ["authority"]}})
                        :known-organizations? {[:org-1 :org-2] true}})
       => nil)
 
@@ -297,8 +298,8 @@
                                                          :org-2 ["anything 2" "anything 4"]}}
                        :user-data            (create-new-user-entity {:email    "a@b.c"
                                                                       :role     "authority"
-                                                                      :orgAuthz {:org-1 ["some-role-1"]
-                                                                                 :org-2 ["some-role-2"]}})
+                                                                      :orgAuthz {:org-1 ["authority"]
+                                                                                 :org-2 ["authority"]}})
                        :known-organizations? {[:org-1 :org-2] true}})
       => (contains {:desc  "authorityAdmin can create users into his/her own organizations only"
                     :error :error.unauthorized}))
@@ -309,7 +310,7 @@
                                                          :org-2 ["anything 2" "anything 4"]}}
                        :user-data            (create-new-user-entity {:email    "a@b.c"
                                                                       :role     "authority"
-                                                                      :orgAuthz {:org-1 ["some-role-1"]}})
+                                                                      :orgAuthz {:org-1 ["authority"]}})
                        :known-organizations? {[:org-1] true}})
       => nil))
 
@@ -318,7 +319,7 @@
                                  :orgAuthz {:foo ["authorityAdmin"]}}
                      :user-data (create-new-user-entity {:email    "a@b.c"
                                                          :role     "dummy"
-                                                         :orgAuthz {:foo ["bar"]}})})
+                                                         :orgAuthz {:foo ["approver"]}})})
     => (contains {:error :error.unauthorized
                   :desc  "dummy user may not have an organization roles"}))
 

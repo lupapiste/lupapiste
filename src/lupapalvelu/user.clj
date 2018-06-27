@@ -45,22 +45,15 @@
 
 (def all-roles
   "set of role strings that can be used in User's :role field"
-  #{"applicant"
-    "authority"
-    "oirAuthority"
-    "admin"
-    "dummy"
-    "rest-api"
-    "trusted-etl"
-    "trusted-salesforce"
-    "docstore-api"
-    "financialAuthority"
-    "onkalo-api"})
+  (-> (set (map name roles/all-user-roles))
+      (disj "anonymous")))                                  ; anonymous used only in commands
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
-(defschema Authz (sc/cond-pre sc/Str sc/Keyword))
-(defschema OrgAuthz {OrgId (sc/cond-pre [Authz] #{Authz})})
+(defschema KwOrgAuthzRoles (apply sc/enum roles/all-org-authz-roles))
+(defschema StrOrgAuthzRoles (apply sc/enum (map name roles/all-org-authz-roles)))
+(defschema OrgAuthzRoles  (sc/cond-pre StrOrgAuthzRoles KwOrgAuthzRoles))
+(defschema OrgAuthz {OrgId (sc/cond-pre [OrgAuthzRoles] #{OrgAuthzRoles})})
 (defschema PersonIdSource (sc/enum "identification-service" "user"))
 
 (defschema User
