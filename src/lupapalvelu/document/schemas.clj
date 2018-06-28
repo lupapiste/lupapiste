@@ -1356,19 +1356,31 @@
    {:info {:name "uusi-rakennus-ei-huoneistoa"
            :i18name "uusiRakennus"
            :approvable true
+           :post-verdict-editable true
            :accordion-fields buildingid-accordion-paths}
     :body (body tunnus
                 rakennuksen-omistajat
                 (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa)
                 rakennustunnus)}
 
-   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
+   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja"
+           :i18name "rakennuksen-muuttaminen"
+           :approvable true
+           :post-verdict-editable true
+           :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-muutos)}
 
-   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia" :i18name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
+   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
+           :i18name "rakennuksen-muuttaminen"
+           :approvable true
+           :post-verdict-editable true
+           :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja-muutos)}
 
-   {:info {:name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
+   {:info {:name "rakennuksen-muuttaminen"
+           :approvable true
+           :post-verdict-editable true
+           :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-muutos)}
 
    {:info {:name "rakennustietojen-korjaus" :approvable true :accordion-fields buildingid-accordion-paths}
