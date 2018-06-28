@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.schemas
   (:require [clojure.set :as set]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :refer [body] :as tools]
             [lupapalvelu.i18n :as i18n]
@@ -12,7 +13,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [schema-tools.core :as st]
-            [schema.core :refer [defschema] :as sc]))
+            [schema.core :refer [defschema] :as sc]
+            [swiss.arrows :refer :all]))
 
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
@@ -466,3 +468,15 @@
                     (section-dicts section)))
           {}
           sections))
+
+(defn resolve-verdict-attachment-type
+  ([{:keys [permitType]} type-id]
+   (-<>> (keyword permitType)
+         att-type/get-all-attachment-types-for-permit-type
+         (util/find-by-key :type-id type-id)
+         (select-keys <> [:type-group :type-id])
+         (reduce-kv (fn [acc k v]
+                      (assoc acc k (name v)))
+                    {})))
+  ([application]
+   (resolve-verdict-attachment-type application :paatos)))

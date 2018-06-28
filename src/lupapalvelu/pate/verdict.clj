@@ -994,7 +994,7 @@
 
     update-fn: Function that takes verdict data as argument and
                updates it."
-  [command verdict]
+  [{:keys [application] :as command} verdict]
   (let [items (verdict-attachment-items command
                                         verdict
                                         :attachments)]
@@ -1002,8 +1002,7 @@
      :update-fn (fn [data]
                   (assoc data
                          :attachments
-                         (->> (cons {:type-group :paatoksenteko
-                                     :type-id    :paatos}
+                         (->> (cons (schemas/resolve-verdict-attachment-type application)
                                     items)
                               (group-by #(select-keys % [:type-group
                                                          :type-id]))

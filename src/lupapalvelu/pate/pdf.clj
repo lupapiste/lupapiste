@@ -8,7 +8,6 @@
             [lupapalvelu.application-meta-fields :as app-meta]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
@@ -21,6 +20,7 @@
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.pdf-html :as html]
             [lupapalvelu.pate.pdf-layouts :as layouts]
+            [lupapalvelu.pate.schemas :refer [resolve-verdict-attachment-type]]
             [lupapalvelu.pdf.html-template :as html-pdf]
             [lupapalvelu.pdf.html-template-common :as common]
             [rum.core :as rum]
@@ -385,14 +385,7 @@
        (:id (att/upload-and-attach!
              command
              {:created         created
-              :attachment-type (-<>> (:permitType application)
-                                     keyword
-                                     att-type/get-all-attachment-types-for-permit-type
-                                     (util/find-by-key :type-id :paatos)
-                                     (select-keys <> [:type-group :type-id])
-                                     (reduce-kv (fn [acc k v]
-                                                  (assoc acc k (name v)))
-                                                {}))
+              :attachment-type (resolve-verdict-attachment-type application)
               :source          {:type "verdicts"
                                 :id   (:id verdict)}
               :locked          true
