@@ -6,5 +6,5 @@ LUPAPISTE.BulletinAttachmentsTabModel = function(params) {
   self.attachments = params.attachments;
   self.bulletinId = ko.pureComputed(function() {
     return util.getIn(params, ["bulletin", "application-id"]);
-  })
+  });
 };
