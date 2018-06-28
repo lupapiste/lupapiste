@@ -1110,7 +1110,7 @@
                  (into {})
                  (hash-map $set))})
 
-(defn finalize--verdict [{:keys [command application verdict]}]
+(defn finalize--verdict [{:keys [command verdict]}]
   (let [{:keys [created]} command
         verdict           (assoc (enrich-verdict command verdict true)
                                  :published created
@@ -1150,7 +1150,7 @@
   "Updates for application state, history and affected documents."
   [{:keys [command application]}]
   (let [state (sm/verdict-given-state application)]
-    ;; History and document updates not needed in the application.
+    ;; History, modified and document updates not needed in the application.
     {:application (assoc application :state state)
      :updates     (util/deep-merge (app-state/state-transition-update
                                     state
@@ -1158,7 +1158,7 @@
                                     application
                                     (:user command))
                                    (:mongo-updates (not-empty (transformations/get-state-transition-updates
-                                                               command
+                                                               (assoc command :application application)
                                                                state))))}))
 
 (defn finalize--buildings-and-tasks

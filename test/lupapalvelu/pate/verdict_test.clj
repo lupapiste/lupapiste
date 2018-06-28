@@ -12,7 +12,7 @@
             [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [monger.operators :refer [$set]]
+            [monger.operators :refer :all]
             [sade.shared-schemas :refer [object-id-pattern]]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -354,6 +354,7 @@
                              :rows    [[{:dict :baz}]]}}
                      {:id   :four
                       :grid {:columns 1
+
                              :rows    [[{:dict :dum}]]}}]}))
 
 (facts "Verdict validation"
@@ -1669,3 +1670,1617 @@
               (contains {:id       "v4"
                          :modified 25
                          :title    "\u00a744 Ei puollettu"})])))
+
+(def application
+  {:address "Latokuja 3",
+   :primaryOperation {:id "5b34a9d2cea1d0f410db2403",
+                      :name "sisatila-muutos",
+                      :description nil,
+                      :created 1530178002437},
+   :buildings [],
+   :comments [],
+   :secondaryOperations [],
+   :attachments [],
+   :history [{:state "sent",
+              :ts 1200,
+              :user {:id "777777777777777777000023",
+                     :username "sonja",
+                     :firstName "Sonja",
+                     :lastName "Sibbo",
+                     :role "authority"}}],
+   :operation-name "sisatila-muutos",
+   :state "sent",
+   :permitType "R",
+   :organization "753-R",
+   :modified 1530179094764,
+   :documents '({:id "5b34a9d3cea1d0f410db2404",
+                 :schema-info {:name "rakennuksen-muuttaminen",
+                               :op {:id "5b34a9d2cea1d0f410db2403",
+                                    :name "sisatila-muutos",
+                                    },
+                               },
+                 :data {:buildingId {:value "199887766E",
+                                     :source nil,
+                                     :sourceValue "199887766E",
+                                     :modified 1530179094764},
+                        :muutostyolaji {:value "rakennukse pääasiallinen käyttötarkoitusmuutos",
+                                        :modified 1530179094764,
+                                        :source nil,
+                                        :sourceValue "rakennukse pääasiallinen käyttötarkoitusmuutos"},
+                        :rakennuksenOmistajat {:0 {:_selected {:value "yritys",
+                                                               :source "krysp",
+                                                               :sourceValue "yritys",
+                                                               :modified 1530179094764},
+                                                   :henkilo {:userId {:value nil,
+                                                                      :source "krysp",
+                                                                      :sourceValue nil,
+                                                                      :modified 1530179094764},
+                                                             :henkilotiedot {:etunimi {:value "",
+                                                                                       :modified 1530179094764,
+                                                                                       :sourceValue "",
+                                                                                       :source "krysp"},
+                                                                             :sukunimi {:value "",
+                                                                                        :sourceValue "",
+                                                                                        :source "krysp",
+                                                                                        :modified 1530179094764},
+                                                                             :hetu {:value nil,
+                                                                                    :sourceValue nil,
+                                                                                    :modified 1530179094764,
+                                                                                    :source "krysp"},
+                                                                             :turvakieltoKytkin {:value false,
+                                                                                                 :modified 1530179094764,
+                                                                                                 :source "krysp",
+                                                                                                 :sourceValue false}},
+                                                             :osoite {:katu {:value "",
+                                                                             :sourceValue "",
+                                                                             :modified 1530179094764,
+                                                                             :source "krysp"},
+                                                                      :postinumero {:value "",
+                                                                                    :modified 1530179094764,
+                                                                                    :sourceValue "",
+                                                                                    :source "krysp"},
+                                                                      :postitoimipaikannimi {:value "",
+                                                                                             :sourceValue "",
+                                                                                             :source "krysp",
+                                                                                             :modified 1530179094764},
+                                                                      :maa {:value "FIN",
+                                                                            :sourceValue "FIN",
+                                                                            :source "krysp",
+                                                                            :modified 1530179094764}},
+                                                             :yhteystiedot {:puhelin {:value "",
+                                                                                      :sourceValue "",
+                                                                                      :source "krysp",
+                                                                                      :modified 1530179094764},
+                                                                            :email {:value "",
+                                                                                    :modified 1530179094764,
+                                                                                    :sourceValue "",
+                                                                                    :source "krysp"}},
+                                                             :kytkimet {:suoramarkkinointilupa {:value false,
+                                                                                                :sourceValue false,
+                                                                                                :modified 1530179094764,
+                                                                                                :source "krysp"}}},
+                                                   :yritys {:companyId {:value nil,
+                                                                        :sourceValue nil,
+                                                                        :modified 1530179094764,
+                                                                        :source "krysp"},
+                                                            :yritysnimi {:value "Testiyritys 9242",
+                                                                         :source "krysp",
+                                                                         :modified 1530179094764,
+                                                                         :sourceValue "Testiyritys 9242"},
+                                                            :liikeJaYhteisoTunnus {:value "1234567-1",
+                                                                                   :modified 1530179094764,
+                                                                                   :source "krysp",
+                                                                                   :sourceValue "1234567-1"},
+                                                            :osoite {:katu {:value "Testikatu 1 A 9242",
+                                                                            :modified 1530179094764,
+                                                                            :sourceValue "Testikatu 1 A 9242",
+                                                                            :source "krysp"},
+                                                                     :postinumero {:value "00380",
+                                                                                   :sourceValue "00380",
+                                                                                   :source "krysp",
+                                                                                   :modified 1530179094764},
+                                                                     :postitoimipaikannimi {:value "HELSINKI",
+                                                                                            :sourceValue "HELSINKI",
+                                                                                            :source "krysp",
+                                                                                            :modified 1530179094764},
+                                                                     :maa {:value "FIN",
+                                                                           :modified 1530179094764,
+                                                                           :source "krysp",
+                                                                           :sourceValue "FIN"}},
+                                                            :yhteyshenkilo {:henkilotiedot {:etunimi {:value "",
+                                                                                                      :source "krysp",
+                                                                                                      :sourceValue "",
+                                                                                                      :modified 1530179094764},
+                                                                                            :sukunimi {:value "",
+                                                                                                       :source "krysp",
+                                                                                                       :modified 1530179094764,
+                                                                                                       :sourceValue ""},
+                                                                                            :turvakieltoKytkin {:value false,
+                                                                                                                :sourceValue false,
+                                                                                                                :source "krysp",
+                                                                                                                :modified 1530179094764}},
+                                                                            :yhteystiedot {:puhelin {:value "",
+                                                                                                     :sourceValue "",
+                                                                                                     :modified 1530179094764,
+                                                                                                     :source "krysp"},
+                                                                                           :email {:value "",
+                                                                                                   :sourceValue "",
+                                                                                                   :modified 1530179094764,
+                                                                                                   :source "krysp"}}}},
+                                                   :omistajalaji {:value nil,
+                                                                  :sourceValue nil,
+                                                                  :modified 1530179094764,
+                                                                  :source "krysp"},
+                                                   :muu-omistajalaji {:value "",
+                                                                      :modified 1530179094764,
+                                                                      :source "krysp",
+                                                                      :sourceValue ""}},
+                                               },
+                        :varusteet {:viemariKytkin {:value true,
+                                                    :sourceValue true,
+                                                    :modified 1530179094764,
+                                                    :source "krysp"},
+                                    :saunoja {:value "",
+                                              :modified 1530179094764,
+                                              :sourceValue "",
+                                              :source "krysp"},
+                                    :vesijohtoKytkin {:value true,
+                                                      :source "krysp",
+                                                      :sourceValue true,
+                                                      :modified 1530179094764},
+                                    :hissiKytkin {:value false,
+                                                  :source "krysp",
+                                                  :modified 1530179094764,
+                                                  :sourceValue false},
+                                    :vaestonsuoja {:value "",
+                                                   :source "krysp",
+                                                   :modified 1530179094764,
+                                                   :sourceValue ""},
+                                    :kaasuKytkin {:value false,
+                                                  :sourceValue false,
+                                                  :source "krysp",
+                                                  :modified 1530179094764},
+                                    :aurinkopaneeliKytkin {:value false,
+                                                           :modified 1530179094764,
+                                                           :sourceValue false,
+                                                           :source "krysp"},
+                                    :liitettyJatevesijarjestelmaanKytkin {:value false,
+                                                                          :modified 1530179094764,
+                                                                          :source "krysp",
+                                                                          :sourceValue false},
+                                    :koneellinenilmastointiKytkin {:value true,
+                                                                   :source "krysp",
+                                                                   :sourceValue true,
+                                                                   :modified 1530179094764},
+                                    :sahkoKytkin {:value true,
+                                                  :sourceValue true,
+                                                  :source "krysp",
+                                                  :modified 1530179094764},
+                                    :lamminvesiKytkin {:value true,
+                                                       :modified 1530179094764,
+                                                       :source "krysp",
+                                                       :sourceValue true}},
+                        :rakennusnro {:value "002",
+                                      :modified 1530179094764,
+                                      :source "krysp",
+                                      :sourceValue "002"},
+                        :verkostoliittymat {:viemariKytkin {:value true,
+                                                            :modified 1530179094764,
+                                                            :sourceValue true,
+                                                            :source "krysp"},
+                                            :vesijohtoKytkin {:value true,
+                                                              :source "krysp",
+                                                              :modified 1530179094764,
+                                                              :sourceValue true},
+                                            :sahkoKytkin {:value true,
+                                                          :source "krysp",
+                                                          :sourceValue true,
+                                                          :modified 1530179094764},
+                                            :maakaasuKytkin {:value false,
+                                                             :source "krysp",
+                                                             :modified 1530179094764,
+                                                             :sourceValue false},
+                                            :kaapeliKytkin {:value false,
+                                                            :modified 1530179094764,
+                                                            :source "krysp",
+                                                            :sourceValue false}},
+                        :kaytto {:rakentajaTyyppi {:value nil,
+                                                   :source "krysp",
+                                                   :sourceValue nil,
+                                                   :modified 1530179094764},
+                                 :kayttotarkoitus {:value "021 rivitalot",
+                                                   :source "krysp",
+                                                   :sourceValue "021 rivitalot",
+                                                   :modified 1530179094764}},
+                        :huoneistot { :0 {:WCKytkin {:value true,
+                                                     :sourceValue true,
+                                                     :source "krysp",
+                                                     :modified 1530179094764},
+                                          :huoneistoTyyppi {:value "asuinhuoneisto",
+                                                            :source "krysp",
+                                                            :modified 1530179094764,
+                                                            :sourceValue "asuinhuoneisto"},
+                                          :keittionTyyppi {:value "keittio",
+                                                           :modified 1530179094764,
+                                                           :sourceValue "keittio",
+                                                           :source "krysp"},
+                                          :huoneistoala {:value "108",
+                                                         :source "krysp",
+                                                         :sourceValue "108",
+                                                         :modified 1530179094764},
+                                          :huoneluku {:value "4",
+                                                      :sourceValue "4",
+                                                      :source "krysp",
+                                                      :modified 1530179094764},
+                                          :jakokirjain {:value "",
+                                                        :modified 1530179094764,
+                                                        :sourceValue "",
+                                                        :source "krysp"},
+                                          :ammeTaiSuihkuKytkin {:value true,
+                                                                :modified 1530179094764,
+                                                                :source "krysp",
+                                                                :sourceValue true},
+                                          :saunaKytkin {:value true,
+                                                        :sourceValue true,
+                                                        :modified 1530179094764,
+                                                        :source "krysp"},
+                                          :huoneistonumero {:value "001",
+                                                            :source "krysp",
+                                                            :sourceValue "001",
+                                                            :modified 1530179094764},
+                                          :porras {:value "A",
+                                                   :sourceValue "A",
+                                                   :modified 1530179094764,
+                                                   :source "krysp"},
+                                          :muutostapa {:value nil,
+                                                       :source nil,
+                                                       :modified 1530179094764,
+                                                       :sourceValue nil},
+                                          :lamminvesiKytkin {:value true,
+                                                             :sourceValue true,
+                                                             :modified 1530179094764,
+                                                             :source "krysp"},
+                                          :parvekeTaiTerassiKytkin {:value true,
+                                                                    :source "krysp",
+                                                                    :modified 1530179094764,
+                                                                    :sourceValue true}},
+                                     :1 {:WCKytkin {:modified 1530179094764,
+                                                    :source "krysp",
+                                                    :sourceValue true,
+                                                    :value true},
+                                         :huoneistoTyyppi {:value "asuinhuoneisto",
+                                                           :sourceValue "asuinhuoneisto",
+                                                           :modified 1530179094764,
+                                                           :source "krysp"},
+                                         :keittionTyyppi {:sourceValue "keittio",
+                                                          :source "krysp",
+                                                          :modified 1530179094764,
+                                                          :value "keittio"},
+                                         :huoneistoala {:modified 1530179094764,
+                                                        :value "106",
+                                                        :source "krysp",
+                                                        :sourceValue "106"},
+                                         :huoneluku {:source "krysp",
+                                                     :modified 1530179094764,
+                                                     :sourceValue "4",
+                                                     :value "4"},
+                                         :ammeTaiSuihkuKytkin {:modified 1530179094764,
+                                                               :sourceValue true,
+                                                               :source "krysp",
+                                                               :value true},
+                                         :saunaKytkin {:modified 1530179094764,
+                                                       :source "krysp",
+                                                       :sourceValue true,
+                                                       :value true},
+                                         :huoneistonumero {:sourceValue "002",
+                                                           :value "002",
+                                                           :modified 1530179094764,
+                                                           :source "krysp"},
+                                         :porras {:sourceValue "A",
+                                                  :source "krysp",
+                                                  :value "A",
+                                                  :modified 1530179094764},
+                                         :lamminvesiKytkin {:value true,
+                                                            :sourceValue true,
+                                                            :modified 1530179094764,
+                                                            :source "krysp"},
+                                         :parvekeTaiTerassiKytkin {:modified 1530179094764,
+                                                                   :sourceValue true,
+                                                                   :source "krysp",
+                                                                   :value true}},
+                                     },
+                        :lammitys {:lammitystapa {:value "vesikeskus",
+                                                  :modified 1530179094764,
+                                                  :source "krysp",
+                                                  :sourceValue "vesikeskus"},
+                                   :lammonlahde {:value "kevyt polttoöljy",
+                                                 :source "krysp",
+                                                 :modified 1530179094764,
+                                                 :sourceValue "kevyt polttoöljy"},
+                                   :muu-lammonlahde {:value "",
+                                                     :modified 1530179094764,
+                                                     :source "krysp",
+                                                     :sourceValue ""}},
+                        :kunnanSisainenPysyvaRakennusnumero {:value "",
+                                                             :sourceValue "",
+                                                             :source "krysp",
+                                                             :modified 1530179094764},
+                        :perusparannuskytkin {:value false,
+                                              :sourceValue false,
+                                              :source nil,
+                                              :modified 1530179094764},
+                        :rakennustietojaEimuutetaKytkin {:value false,
+                                                         :modified 1530179094764,
+                                                         :source nil,
+                                                         :sourceValue false},
+                        :rakenne {:rakentamistapa {:value "paikalla",
+                                                   :modified 1530179094764,
+                                                   :source "krysp",
+                                                   :sourceValue "paikalla"},
+                                  :kantavaRakennusaine {:value "tiili",
+                                                        :sourceValue "tiili",
+                                                        :source "krysp",
+                                                        :modified 1530179094764},
+                                  :muuRakennusaine {:value "",
+                                                    :sourceValue "",
+                                                    :source "krysp",
+                                                    :modified 1530179094764},
+                                  :julkisivu {:value "tiili",
+                                              :sourceValue "tiili",
+                                              :source "krysp",
+                                              :modified 1530179094764},
+                                  :muuMateriaali {:value "",
+                                                  :sourceValue "",
+                                                  :source "krysp",
+                                                  :modified 1530179094764}},
+                        :osoite {:osoitenumero2 {:value "5",
+                                                 :source "krysp",
+                                                 :modified 1530179094764,
+                                                 :sourceValue "5"},
+                                 :huoneisto {:value "",
+                                             :modified 1530179094764,
+                                             :sourceValue "",
+                                             :source "krysp"},
+                                 :jakokirjain {:value "",
+                                               :sourceValue "",
+                                               :source "krysp",
+                                               :modified 1530179094764},
+                                 :kunta {:value "245",
+                                         :sourceValue "245",
+                                         :source "krysp",
+                                         :modified 1530179094764},
+                                 :jakokirjain2 {:value "",
+                                                :sourceValue "",
+                                                :source "krysp",
+                                                :modified 1530179094764},
+                                 :postinumero {:value "04200",
+                                               :source "krysp",
+                                               :modified 1530179094764,
+                                               :sourceValue "04200"},
+                                 :porras {:value "",
+                                          :source "krysp",
+                                          :modified 1530179094764,
+                                          :sourceValue ""},
+                                 :osoitenumero {:value "3",
+                                                :modified 1530179094764,
+                                                :source "krysp",
+                                                :sourceValue "3"},
+                                 :postitoimipaikannimi {:value "KERAVA",
+                                                        :source "krysp",
+                                                        :modified 1530179094764,
+                                                        :sourceValue "KERAVA"},
+                                 :maa {:value "FIN",
+                                       :sourceValue "FIN",
+                                       :modified 1530179094764,
+                                       :source "krysp"},
+                                 :lahiosoite {:value "Kyllikintie",
+                                              :modified 1530179094764,
+                                              :sourceValue "Kyllikintie",
+                                              :source "krysp"}},
+                        :mitat {:tilavuus {:value "837",
+                                           :source "krysp",
+                                           :modified 1530179094764,
+                                           :sourceValue "837"},
+                                :kerrosala {:value "281",
+                                            :source "krysp",
+                                            :modified 1530179094764,
+                                            :sourceValue "281"},
+                                :rakennusoikeudellinenKerrosala {:value "",
+                                                                 :modified 1530179094764,
+                                                                 :source "krysp",
+                                                                 :sourceValue ""},
+                                :kokonaisala {:value "281",
+                                              :modified 1530179094764,
+                                              :source "krysp",
+                                              :sourceValue "281"},
+                                :kerrosluku {:value "2",
+                                             :source "krysp",
+                                             :sourceValue "2",
+                                             :modified 1530179094764},
+                                :kellarinpinta-ala {:value "",
+                                                    :modified 1530179094764,
+                                                    :source "krysp",
+                                                    :sourceValue ""}},
+                        :manuaalinen_rakennusnro {:value "",
+                                                  :sourceValue "",
+                                                  :source "krysp",
+                                                  :modified 1530179094764},
+                        :luokitus {:energialuokka {:value nil,
+                                                   :modified 1530179094764,
+                                                   :sourceValue nil,
+                                                   :source "krysp"},
+                                   :energiatehokkuusluku {:value "",
+                                                          :source "krysp",
+                                                          :modified 1530179094764,
+                                                          :sourceValue ""},
+                                   :energiatehokkuusluvunYksikko {:value "kWh/m2",
+                                                                  :modified 1530179094764,
+                                                                  :sourceValue "kWh/m2",
+                                                                  :source "krysp"},
+                                   :paloluokka {:value nil,
+                                                :modified 1530179094764,
+                                                :sourceValue nil,
+                                                :source "krysp"}},
+                        :valtakunnallinenNumero {:value "199887766E",
+                                                 :modified 1530179094764,
+                                                 :source "krysp",
+                                                 :sourceValue "199887766E"}}}
+
+                {:id "5b34a9d3cea1d0f410db2409",
+                 :schema-info {:name "rakennuspaikka",
+                               :version 1,
+                               :type :location,
+                               :approvable true,
+                               :order 2,
+                               :copy-action :clear},
+                :created 1530178002437,
+                 :data {:kiinteisto {:maaraalaTunnus {:value nil},
+                                     :tilanNimi {:value ""},
+                                     :rekisterointipvm {:value ""},
+                                     :maapintaala {:value ""},
+                                     :vesipintaala {:value ""}},
+                        :hallintaperuste {:value nil},
+                        :kaavanaste {:value nil},
+                        :kaavatilanne {:value nil},
+                        :hankkeestaIlmoitettu {:hankkeestaIlmoitettuPvm {:value nil}}}}
+
+
+               {:id "5b34a9d3cea1d0f410db240c",
+                :schema-info {:name "rakennusjatesuunnitelma",
+                              :version 1,
+                              :order 200,
+                              :section-help "rakennusjate.help",
+                              :blacklist [:neighbor]},
+                :created 1530178002437,
+                :data {:rakennusJaPurkujate {:0 {:jatetyyppi {:value "kipsi",
+                                                              :modified 1530178832555},
+                                                 :suunniteltuMaara {:value "1",
+                                                                    :modified 1530178835793},
+                                                 :yksikko {:value "tonni",
+                                                           :modified 1530178840071},
+                                                 :painoT {:value "1",
+                                                          :modified 1530178844422}},
+                                             :1 {:jatetyyppi {:value "lasi",
+                                                              :modified 1530178850654},
+                                                 :suunniteltuMaara {:value "20",
+                                                                    :modified 1530178853738},
+                                                 :yksikko {:value "kg",
+                                                           :modified 1530178855943},
+                                                 :painoT {:value "0",
+                                                          :modified 1530178860517}}},
+                       :vaarallisetAineet {:0 {:vaarallinenainetyyppi {:value "aerosolipullot",
+                                                                       :modified 1530178864753},
+                                               :suunniteltuMaara {:value "10",
+                                                                  :modified 1530178867910},
+                                               :yksikko {:value "kg",
+                                                         :modified 1530178872036},
+                                               :painoT {:value "0",
+                                                        :modified 1530178891502}}}}}),
+   :location-wgs84 [25.266 60.36938]
+   :id "LP-753-2018-90008"
+   :propertyId "75341600550007"
+   :location [404369.304 6693806.957]
+   :inspection-summaries []
+   :schema-version 1})
+
+(facts "Finalize verdict"
+  (let [command {:user    {:id        "user-id" :username "user-email"
+                           :firstName "Hello"   :lastName "World"}
+                 :created 12345}
+        verdict {:id         "vid"
+                 :category   "r"
+                 :data       {:verdict-code "myonnetty"
+                              :handler      "Foo Bar"
+                              :verdict-date 876543}
+                 :modified   12300
+                 :template   {:inclusions ["verdict-code"
+                                           "handler"
+                                           "verdict-date"]
+                              :giver      "viranhaltija"}
+                 :references {:boardname "Broad board abroad"}}
+        c-v-a   (hash-map :command command
+                          :verdict verdict
+                          :application application)]
+    (fact finalize--verdict
+      (finalize--verdict c-v-a)
+      => {:verdict (util/deep-merge verdict
+                                    {:user      {:id       "user-id"
+                                                 :username "user-email"}
+                                     :archive   {:verdict-date  876543
+                                                 :verdict-giver "Foo Bar"}
+                                     :published 12345})
+          :updates {$set {:pate-verdicts.$.archive             {:verdict-date  876543
+                                                                :verdict-giver "Foo Bar"}
+                          :pate-verdicts.$.data.handler        "Foo Bar"
+                          :pate-verdicts.$.data.verdict-code   "myonnetty"
+                          :pate-verdicts.$.data.verdict-date   876543
+                          :pate-verdicts.$.published           12345
+                          :pate-verdicts.$.template.inclusions ["verdict-code"
+                                                                "handler"
+                                                                "verdict-date"]
+                          :pate-verdicts.$.user                {:id "user-id" :username "user-email"}}}})
+
+    (fact "finalize--application-state: waste plan"
+      (-> application :documents count) => 3
+      (finalize--application-state c-v-a)
+      => {:application (merge application
+                              {:state :verdictGiven})
+          :updates     {$push {:history {:state :verdictGiven
+                                         :ts    12345
+                                         :user  {:firstName "Hello"
+                                                 :id        "user-id"
+                                                 :lastName  "World"
+                                                 :username  "user-email"}}}
+                        $set  {:modified     12345
+                               :state        :verdictGiven
+                               "documents.3" {:id          "abdef12345"
+                                              :created     12345
+                                              :data        {:availableMaterials  {:0 {:aines      {:value ""}
+                                                                                      :kuvaus     {:value ""}
+                                                                                      :maara      {:value ""}
+                                                                                      :saatavilla {:value nil}
+                                                                                      :yksikko    {:value nil}}}
+                                                            :contact             {:email {:value ""}
+                                                                                  :name  {:value ""}
+                                                                                  :phone {:value ""}}
+                                                            :rakennusJaPurkujate {:suunniteltuJate      {:0 {:jatetyyppi       {:modified nil
+                                                                                                                                :value    "kipsi"}
+                                                                                                             :painoT           {:modified nil
+                                                                                                                                :value    "1"}
+                                                                                                             :suunniteltuMaara {:modified nil
+                                                                                                                                :value    "1"}
+                                                                                                             :yksikko          {:modified nil
+                                                                                                                                :value    "tonni"}}
+                                                                                                         :1 {:jatetyyppi       {:modified nil
+                                                                                                                                :value    "lasi"}
+                                                                                                             :painoT           {:modified nil
+                                                                                                                                :value    "0"}
+                                                                                                             :suunniteltuMaara {:modified nil
+                                                                                                                                :value    "20"}
+                                                                                                             :yksikko          {:modified nil
+                                                                                                                                :value    "kg"}}}
+                                                                                  :suunnittelematonJate {:0 {:jatetyyppi            {:value nil}
+                                                                                                             :jatteenToimituspaikka {:value ""}
+                                                                                                             :painoT                {:value ""}
+                                                                                                             :toteutunutMaara       {:value ""}
+                                                                                                             :yksikko               {:value nil}}}}
+                                                            :vaarallisetAineet   {:suunniteltuJate      {:0 {:painoT                {:modified nil
+                                                                                                                                     :value    "0"}
+                                                                                                             :suunniteltuMaara      {:modified nil
+                                                                                                                                     :value    "10"}
+                                                                                                             :vaarallinenainetyyppi {:modified nil
+                                                                                                                                     :value    "aerosolipullot"}
+                                                                                                             :yksikko               {:modified nil
+                                                                                                                                     :value    "kg"}}}
+                                                                                  :suunnittelematonJate {:0 {:jatteenToimituspaikka {:value ""}
+                                                                                                             :painoT                {:value ""}
+                                                                                                             :toteutunutMaara       {:value ""}
+                                                                                                             :vaarallinenainetyyppi {:value nil}
+                                                                                                             :yksikko               {:value nil}}}}}
+                                              :schema-info {:blacklist          [:neighbor]
+                                                            :editable-in-states #{:acknowledged
+                                                                                  :agreementPrepared
+                                                                                  :agreementSigned
+                                                                                  :appealed
+                                                                                  :archived
+                                                                                  :closed
+                                                                                  :constructionStarted
+                                                                                  :extinct
+                                                                                  :final
+                                                                                  :finished
+                                                                                  :foremanVerdictGiven
+                                                                                  :inUse
+                                                                                  :onHold
+                                                                                  :ready
+                                                                                  :verdictGiven}
+                                                            :name               "rakennusjateselvitys"
+                                                            :order              201
+                                                            :section-help       "rakennusjate.help"
+                                                            :version            1}}}}}
+      (provided (lupapalvelu.mongo/create-id) => "abdef12345"))
+
+    (fact "finalize--application-state: no waste plan"
+      (let [application (update application :documents drop-last)]
+        (finalize--application-state (assoc c-v-a :application application) )
+        => {:application (merge application
+                                {:state :verdictGiven})
+            :updates     {$push {:history {:state :verdictGiven
+                                           :ts    12345
+                                           :user  {:firstName "Hello"
+                                                   :id        "user-id"
+                                                   :lastName  "World"
+                                                   :username  "user-email"}}}
+                          $set  {:modified 12345
+                                 :state    :verdictGiven}}}))
+
+    (let [verdict (-> verdict
+                      (assoc-in [:data :reviews] ["5a156dd40e40adc8ee064463"
+                                                  "6a156dd40e40adc8ee064463"])
+                      (assoc-in [:data :reviews-included] true)
+                      (assoc-in [:data :foremen] ["erityis-tj"
+                                                  "iv-tj"
+                                                  "vastaava-tj"
+                                                  "vv-tj"])
+                      (assoc-in [:data :foremen-included] true)
+                      (assoc-in [:data :plans] ["5a156ddf0e40adc8ee064464"
+                                                "6a156ddf0e40adc8ee064464"])
+                      (assoc-in [:data :plans-included] true)
+                      (assoc :references {:foremen ["erityis-tj" "iv-tj" "vastaava-tj" "vv-tj" "tj"]
+                                          :plans   [{:id "5a156ddf0e40adc8ee064464"
+                                                     :fi "Suunnitelmat"
+                                                     :sv "Planer"
+                                                     :en "Plans"}
+                                                    {:id "6a156ddf0e40adc8ee064464"
+                                                     :fi "Suunnitelmat2"
+                                                     :sv "Planer2"
+                                                     :en "Plans2"}]
+                                          :reviews [{:id   "5a156dd40e40adc8ee064463"
+                                                     :fi   "Katselmus"
+                                                     :sv   "Syn"
+                                                     :en   "Review"
+                                                     :type "muu-katselmus"}
+                                                    {:id   "6a156dd40e40adc8ee064463"
+                                                     :fi   "Katselmus2"
+                                                     :sv   "Syn2"
+                                                     :en   "Review2"
+                                                     :type "paikan-merkitseminen"}]})
+                      (update-in [:template :inclusions] concat [:reviews :reviews-included
+                                                                 :foremen :foremen-included
+                                                                 :plans :plans-included]))]
+      (fact "finalize--building-and-tasks: tasks and buildings"
+        (finalize--buildings-and-tasks (assoc c-v-a :verdict verdict))
+        => {:application (assoc application
+                                :buildings '({:area "281"
+                                              :buildingId "199887766E"
+                                              :description ""
+                                              :index "1"
+                                              :localShortId "002"
+                                              :location nil
+                                              :location-wgs84 nil
+                                              :nationalId "199887766E"
+                                              :operationId "5b34a9d2cea1d0f410db2403"
+                                              :usage "021 rivitalot"})
+                                :tasks '({:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:katselmuksenLaji {:modified 12345
+                                                                    :value "muu katselmus"}
+                                                 :katselmus {:huomautukset {:kuvaus {:value ""}
+                                                                            :maaraAika {:value nil}
+                                                                            :toteaja {:value ""}
+                                                                            :toteamisHetki {:value nil}}
+                                                             :lasnaolijat {:value ""}
+                                                             :pitaja {:value ""}
+                                                             :pitoPvm {:value nil}
+                                                             :poikkeamat {:value ""}
+                                                             :tiedoksianto {:value false}
+                                                             :tila {:value nil}}
+                                                 :muuTunnus {:value ""}
+                                                 :muuTunnusSovellus {:value ""}
+                                                 :rakennus {:0 {:rakennus {:jarjestysnumero {:modified 12345
+                                                                                             :value "1"}
+                                                                           :kiinttun {:modified 12345
+                                                                                      :value nil}
+                                                                           :kunnanSisainenPysyvaRakennusnumero {:modified 12345
+                                                                                                                :value nil}
+                                                                           :rakennusnro {:modified 12345
+                                                                                         :value "002"}
+                                                                           :valtakunnallinenNumero {:modified 12345
+                                                                                                    :value "199887766E"}}
+                                                                :tila {:kayttoonottava {:modified 12345
+                                                                                        :value false}
+                                                                       :tila {:modified 12345
+                                                                              :value ""}}}}
+                                                 :vaadittuLupaehtona {:modified 12345 :value true}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
+                                                        :name "task-katselmus"
+                                                        :order 1
+                                                        :section-help "authority-fills"
+                                                        :subtype :review
+                                                        :type :task
+                                                        :user-authz-roles #{}
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname nil}
+                                         {:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:katselmuksenLaji {:modified 12345
+                                                                    :value "rakennuksen paikan merkitseminen"}
+                                                 :katselmus {:huomautukset {:kuvaus {:value ""}
+                                                                            :maaraAika {:value nil}
+                                                                            :toteaja {:value ""}
+                                                                            :toteamisHetki {:value nil}}
+                                                             :lasnaolijat {:value ""}
+                                                             :pitaja {:value ""}
+                                                             :pitoPvm {:value nil}
+                                                             :poikkeamat {:value ""}
+                                                             :tiedoksianto {:value false}
+                                                             :tila {:value nil}}
+                                                 :muuTunnus {:value ""}
+                                                 :muuTunnusSovellus {:value ""}
+                                                 :rakennus {:0 {:rakennus {:jarjestysnumero {:modified 12345
+                                                                                             :value "1"}
+                                                                           :kiinttun {:modified 12345
+                                                                                      :value nil}
+                                                                           :kunnanSisainenPysyvaRakennusnumero {:modified 12345
+                                                                                                                :value nil}
+                                                                           :rakennusnro {:modified 12345
+                                                                                         :value "002"}
+                                                                           :valtakunnallinenNumero {:modified 12345
+                                                                                                    :value "199887766E"}}
+                                                                :tila {:kayttoonottava {:modified 12345
+                                                                                        :value false}
+                                                                       :tila {:modified 12345
+                                                                              :value ""}}}}
+                                                 :vaadittuLupaehtona {:modified 12345 :value true}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
+                                                        :name "task-katselmus"
+                                                        :order 1
+                                                        :section-help "authority-fills"
+                                                        :subtype :review
+                                                        :type :task
+                                                        :user-authz-roles #{}
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname nil}
+                                         {:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:kuvaus {:value ""}
+                                                 :maarays {:value ""}
+                                                 :vaaditutErityissuunnitelmat {:value ""}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:name "task-lupamaarays"
+                                                        :order 20
+                                                        :type :task
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname nil}
+                                         {:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:kuvaus {:value ""}
+                                                 :maarays {:value ""}
+                                                 :vaaditutErityissuunnitelmat {:value ""}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:name "task-lupamaarays"
+                                                        :order 20
+                                                        :type :task
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname nil}
+                                         {:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:asiointitunnus {:value ""}
+                                                 :osapuolena {:value false}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                        :order 10
+                                                        :subtype :foreman
+                                                        :type :task
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname "Erityisalojen työnjohtaja"}
+                                         {:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:asiointitunnus {:value ""}
+                                                 :osapuolena {:value false}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                        :order 10
+                                                        :subtype :foreman
+                                                        :type :task
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname "Ilmanvaihtotyönjohtaja"}
+                                         {:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:asiointitunnus {:value ""}
+                                                 :osapuolena {:value false}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                        :order 10
+                                                        :subtype :foreman
+                                                        :type :task
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname "Vastaava työnjohtaja"}
+                                         {:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:asiointitunnus {:value ""}
+                                                 :osapuolena {:value false}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                        :order 10
+                                                        :subtype :foreman
+                                                        :type :task
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname "Vesi- ja viemärityönjohtaja"}))
+            :updates {$push {:tasks {$each '({:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:katselmuksenLaji {:modified 12345
+                                                                        :value "muu katselmus"}
+                                                     :katselmus {:huomautukset {:kuvaus {:value ""}
+                                                                                :maaraAika {:value nil}
+                                                                                :toteaja {:value ""}
+                                                                                :toteamisHetki {:value nil}}
+                                                                 :lasnaolijat {:value ""}
+                                                                 :pitaja {:value ""}
+                                                                 :pitoPvm {:value nil}
+                                                                 :poikkeamat {:value ""}
+                                                                 :tiedoksianto {:value false}
+                                                                 :tila {:value nil}}
+                                                     :muuTunnus {:value ""}
+                                                     :muuTunnusSovellus {:value ""}
+                                                     :rakennus {:0 {:rakennus {:jarjestysnumero {:modified 12345
+                                                                                                 :value "1"}
+                                                                               :kiinttun {:modified 12345
+                                                                                          :value nil}
+                                                                               :kunnanSisainenPysyvaRakennusnumero {:modified 12345
+                                                                                                                    :value nil}
+                                                                               :rakennusnro {:modified 12345
+                                                                                             :value "002"}
+                                                                               :valtakunnallinenNumero {:modified 12345
+                                                                                                        :value "199887766E"}}
+                                                                    :tila {:kayttoonottava {:modified 12345
+                                                                                            :value false}
+                                                                           :tila {:modified 12345
+                                                                                  :value ""}}}}
+                                                     :vaadittuLupaehtona {:modified 12345
+                                                                          :value true}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
+                                                            :name "task-katselmus"
+                                                            :order 1
+                                                            :section-help "authority-fills"
+                                                            :subtype :review
+                                                            :type :task
+                                                            :user-authz-roles #{}
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname nil}
+                                             {:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:katselmuksenLaji {:modified 12345
+                                                                        :value "rakennuksen paikan merkitseminen"}
+                                                     :katselmus {:huomautukset {:kuvaus {:value ""}
+                                                                                :maaraAika {:value nil}
+                                                                                :toteaja {:value ""}
+                                                                                :toteamisHetki {:value nil}}
+                                                                 :lasnaolijat {:value ""}
+                                                                 :pitaja {:value ""}
+                                                                 :pitoPvm {:value nil}
+                                                                 :poikkeamat {:value ""}
+                                                                 :tiedoksianto {:value false}
+                                                                 :tila {:value nil}}
+                                                     :muuTunnus {:value ""}
+                                                     :muuTunnusSovellus {:value ""}
+                                                     :rakennus {:0 {:rakennus {:jarjestysnumero {:modified 12345
+                                                                                                 :value "1"}
+                                                                               :kiinttun {:modified 12345
+                                                                                          :value nil}
+                                                                               :kunnanSisainenPysyvaRakennusnumero {:modified 12345
+                                                                                                                    :value nil}
+                                                                               :rakennusnro {:modified 12345
+                                                                                             :value "002"}
+                                                                               :valtakunnallinenNumero {:modified 12345
+                                                                                                        :value "199887766E"}}
+                                                                    :tila {:kayttoonottava {:modified 12345
+                                                                                            :value false}
+                                                                           :tila {:modified 12345
+                                                                                  :value ""}}}}
+                                                     :vaadittuLupaehtona {:modified 12345
+                                                                          :value true}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
+                                                            :name "task-katselmus"
+                                                            :order 1
+                                                            :section-help "authority-fills"
+                                                            :subtype :review
+                                                            :type :task
+                                                            :user-authz-roles #{}
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname nil}
+                                             {:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:kuvaus {:value ""}
+                                                     :maarays {:value ""}
+                                                     :vaaditutErityissuunnitelmat {:value ""}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:name "task-lupamaarays"
+                                                            :order 20
+                                                            :type :task
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname nil}
+                                             {:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:kuvaus {:value ""}
+                                                     :maarays {:value ""}
+                                                     :vaaditutErityissuunnitelmat {:value ""}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:name "task-lupamaarays"
+                                                            :order 20
+                                                            :type :task
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname nil}
+                                             {:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:asiointitunnus {:value ""}
+                                                     :osapuolena {:value false}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                            :order 10
+                                                            :subtype :foreman
+                                                            :type :task
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname "Erityisalojen työnjohtaja"}
+                                             {:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:asiointitunnus {:value ""}
+                                                     :osapuolena {:value false}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                            :order 10
+                                                            :subtype :foreman
+                                                            :type :task
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname "Ilmanvaihtotyönjohtaja"}
+                                             {:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:asiointitunnus {:value ""}
+                                                     :osapuolena {:value false}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                            :order 10
+                                                            :subtype :foreman
+                                                            :type :task
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname "Vastaava työnjohtaja"}
+                                             {:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:asiointitunnus {:value ""}
+                                                     :osapuolena {:value false}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                            :order 10
+                                                            :subtype :foreman
+                                                            :type :task
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname "Vesi- ja viemärityönjohtaja"})}}
+                      $set {:buildings '({:area "281"
+                                          :buildingId "199887766E"
+                                          :description ""
+                                          :index "1"
+                                          :localShortId "002"
+                                          :location nil
+                                          :location-wgs84 nil
+                                          :nationalId "199887766E"
+                                          :operationId "5b34a9d2cea1d0f410db2403"
+                                          :usage "021 rivitalot"})}}}
+        (provided (lupapalvelu.mongo/create-id) => "id"))
+      (fact "finalize--building-and-tasks: tasks, no buildings"
+        (let [application (update application :documents rest)]
+          (finalize--buildings-and-tasks (assoc c-v-a
+                                                :application application
+                                                :verdict verdict))
+          => {:application (assoc application
+                                  :tasks '({:assignee {}
+                                            :closed nil
+                                            :created 12345
+                                            :data {:katselmuksenLaji {:modified 12345
+                                                                      :value "muu katselmus"}
+                                                   :katselmus {:huomautukset {:kuvaus {:value ""}
+                                                                              :maaraAika {:value nil}
+                                                                              :toteaja {:value ""}
+                                                                              :toteamisHetki {:value nil}}
+                                                               :lasnaolijat {:value ""}
+                                                               :pitaja {:value ""}
+                                                               :pitoPvm {:value nil}
+                                                               :poikkeamat {:value ""}
+                                                               :tiedoksianto {:value false}
+                                                               :tila {:value nil}}
+                                                   :muuTunnus {:value ""}
+                                                   :muuTunnusSovellus {:value ""}
+                                                   :rakennus {}
+                                                   :vaadittuLupaehtona {:modified 12345 :value true}}
+                                            :duedate nil
+                                            :id "id"
+                                            :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
+                                                          :name "task-katselmus"
+                                                          :order 1
+                                                          :section-help "authority-fills"
+                                                          :subtype :review
+                                                          :type :task
+                                                          :user-authz-roles #{}
+                                                          :version 1}
+                                            :source {:id "vid" :type "verdict"}
+                                            :state :requires_user_action
+                                            :taskname nil}
+                                           {:assignee {}
+                                            :closed nil
+                                            :created 12345
+                                            :data {:katselmuksenLaji {:modified 12345
+                                                                      :value "rakennuksen paikan merkitseminen"}
+                                                   :katselmus {:huomautukset {:kuvaus {:value ""}
+                                                                              :maaraAika {:value nil}
+                                                                              :toteaja {:value ""}
+                                                                              :toteamisHetki {:value nil}}
+                                                               :lasnaolijat {:value ""}
+                                                               :pitaja {:value ""}
+                                                               :pitoPvm {:value nil}
+                                                               :poikkeamat {:value ""}
+                                                               :tiedoksianto {:value false}
+                                                               :tila {:value nil}}
+                                                   :muuTunnus {:value ""}
+                                                   :muuTunnusSovellus {:value ""}
+                                                   :rakennus {}
+                                                   :vaadittuLupaehtona {:modified 12345 :value true}}
+                                            :duedate nil
+                                            :id "id"
+                                            :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
+                                                          :name "task-katselmus"
+                                                          :order 1
+                                                          :section-help "authority-fills"
+                                                          :subtype :review
+                                                          :type :task
+                                                          :user-authz-roles #{}
+                                                          :version 1}
+                                            :source {:id "vid" :type "verdict"}
+                                            :state :requires_user_action
+                                            :taskname nil}
+                                           {:assignee {}
+                                            :closed nil
+                                            :created 12345
+                                            :data {:kuvaus {:value ""}
+                                                   :maarays {:value ""}
+                                                   :vaaditutErityissuunnitelmat {:value ""}}
+                                            :duedate nil
+                                            :id "id"
+                                            :schema-info {:name "task-lupamaarays"
+                                                          :order 20
+                                                          :type :task
+                                                          :version 1}
+                                            :source {:id "vid" :type "verdict"}
+                                            :state :requires_user_action
+                                            :taskname nil}
+                                           {:assignee {}
+                                            :closed nil
+                                            :created 12345
+                                            :data {:kuvaus {:value ""}
+                                                   :maarays {:value ""}
+                                                   :vaaditutErityissuunnitelmat {:value ""}}
+                                            :duedate nil
+                                            :id "id"
+                                            :schema-info {:name "task-lupamaarays"
+                                                          :order 20
+                                                          :type :task
+                                                          :version 1}
+                                            :source {:id "vid" :type "verdict"}
+                                            :state :requires_user_action
+                                            :taskname nil}
+                                           {:assignee {}
+                                            :closed nil
+                                            :created 12345
+                                            :data {:asiointitunnus {:value ""}
+                                                   :osapuolena {:value false}}
+                                            :duedate nil
+                                            :id "id"
+                                            :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                          :order 10
+                                                          :subtype :foreman
+                                                          :type :task
+                                                          :version 1}
+                                            :source {:id "vid" :type "verdict"}
+                                            :state :requires_user_action
+                                            :taskname "Erityisalojen työnjohtaja"}
+                                           {:assignee {}
+                                            :closed nil
+                                            :created 12345
+                                            :data {:asiointitunnus {:value ""}
+                                                   :osapuolena {:value false}}
+                                            :duedate nil
+                                            :id "id"
+                                            :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                          :order 10
+                                                          :subtype :foreman
+                                                          :type :task
+                                                          :version 1}
+                                            :source {:id "vid" :type "verdict"}
+                                            :state :requires_user_action
+                                            :taskname "Ilmanvaihtotyönjohtaja"}
+                                           {:assignee {}
+                                            :closed nil
+                                            :created 12345
+                                            :data {:asiointitunnus {:value ""}
+                                                   :osapuolena {:value false}}
+                                            :duedate nil
+                                            :id "id"
+                                            :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                          :order 10
+                                                          :subtype :foreman
+                                                          :type :task
+                                                          :version 1}
+                                            :source {:id "vid" :type "verdict"}
+                                            :state :requires_user_action
+                                            :taskname "Vastaava työnjohtaja"}
+                                           {:assignee {}
+                                            :closed nil
+                                            :created 12345
+                                            :data {:asiointitunnus {:value ""}
+                                                   :osapuolena {:value false}}
+                                            :duedate nil
+                                            :id "id"
+                                            :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                          :order 10
+                                                          :subtype :foreman
+                                                          :type :task
+                                                          :version 1}
+                                            :source {:id "vid" :type "verdict"}
+                                            :state :requires_user_action
+                                            :taskname "Vesi- ja viemärityönjohtaja"}))
+              :updates {$push {:tasks {$each '({:assignee {}
+                                                :closed nil
+                                                :created 12345
+                                                :data {:katselmuksenLaji {:modified 12345
+                                                                          :value "muu katselmus"}
+                                                       :katselmus {:huomautukset {:kuvaus {:value ""}
+                                                                                  :maaraAika {:value nil}
+                                                                                  :toteaja {:value ""}
+                                                                                  :toteamisHetki {:value nil}}
+                                                                   :lasnaolijat {:value ""}
+                                                                   :pitaja {:value ""}
+                                                                   :pitoPvm {:value nil}
+                                                                   :poikkeamat {:value ""}
+                                                                   :tiedoksianto {:value false}
+                                                                   :tila {:value nil}}
+                                                       :muuTunnus {:value ""}
+                                                       :muuTunnusSovellus {:value ""}
+                                                       :rakennus {}
+                                                       :vaadittuLupaehtona {:modified 12345
+                                                                            :value true}}
+                                                :duedate nil
+                                                :id "id"
+                                                :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
+                                                              :name "task-katselmus"
+                                                              :order 1
+                                                              :section-help "authority-fills"
+                                                              :subtype :review
+                                                              :type :task
+                                                              :user-authz-roles #{}
+                                                              :version 1}
+                                                :source {:id "vid" :type "verdict"}
+                                                :state :requires_user_action
+                                                :taskname nil}
+                                               {:assignee {}
+                                                :closed nil
+                                                :created 12345
+                                                :data {:katselmuksenLaji {:modified 12345
+                                                                          :value "rakennuksen paikan merkitseminen"}
+                                                       :katselmus {:huomautukset {:kuvaus {:value ""}
+                                                                                  :maaraAika {:value nil}
+                                                                                  :toteaja {:value ""}
+                                                                                  :toteamisHetki {:value nil}}
+                                                                   :lasnaolijat {:value ""}
+                                                                   :pitaja {:value ""}
+                                                                   :pitoPvm {:value nil}
+                                                                   :poikkeamat {:value ""}
+                                                                   :tiedoksianto {:value false}
+                                                                   :tila {:value nil}}
+                                                       :muuTunnus {:value ""}
+                                                       :muuTunnusSovellus {:value ""}
+                                                       :rakennus {}
+                                                       :vaadittuLupaehtona {:modified 12345
+                                                                            :value true}}
+                                                :duedate nil
+                                                :id "id"
+                                                :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
+                                                              :name "task-katselmus"
+                                                              :order 1
+                                                              :section-help "authority-fills"
+                                                              :subtype :review
+                                                              :type :task
+                                                              :user-authz-roles #{}
+                                                              :version 1}
+                                                :source {:id "vid" :type "verdict"}
+                                                :state :requires_user_action
+                                                :taskname nil}
+                                               {:assignee {}
+                                                :closed nil
+                                                :created 12345
+                                                :data {:kuvaus {:value ""}
+                                                       :maarays {:value ""}
+                                                       :vaaditutErityissuunnitelmat {:value ""}}
+                                                :duedate nil
+                                                :id "id"
+                                                :schema-info {:name "task-lupamaarays"
+                                                              :order 20
+                                                              :type :task
+                                                              :version 1}
+                                                :source {:id "vid" :type "verdict"}
+                                                :state :requires_user_action
+                                                :taskname nil}
+                                               {:assignee {}
+                                                :closed nil
+                                                :created 12345
+                                                :data {:kuvaus {:value ""}
+                                                       :maarays {:value ""}
+                                                       :vaaditutErityissuunnitelmat {:value ""}}
+                                                :duedate nil
+                                                :id "id"
+                                                :schema-info {:name "task-lupamaarays"
+                                                              :order 20
+                                                              :type :task
+                                                              :version 1}
+                                                :source {:id "vid" :type "verdict"}
+                                                :state :requires_user_action
+                                                :taskname nil}
+                                               {:assignee {}
+                                                :closed nil
+                                                :created 12345
+                                                :data {:asiointitunnus {:value ""}
+                                                       :osapuolena {:value false}}
+                                                :duedate nil
+                                                :id "id"
+                                                :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                              :order 10
+                                                              :subtype :foreman
+                                                              :type :task
+                                                              :version 1}
+                                                :source {:id "vid" :type "verdict"}
+                                                :state :requires_user_action
+                                                :taskname "Erityisalojen työnjohtaja"}
+                                               {:assignee {}
+                                                :closed nil
+                                                :created 12345
+                                                :data {:asiointitunnus {:value ""}
+                                                       :osapuolena {:value false}}
+                                                :duedate nil
+                                                :id "id"
+                                                :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                              :order 10
+                                                              :subtype :foreman
+                                                              :type :task
+                                                              :version 1}
+                                                :source {:id "vid" :type "verdict"}
+                                                :state :requires_user_action
+                                                :taskname "Ilmanvaihtotyönjohtaja"}
+                                               {:assignee {}
+                                                :closed nil
+                                                :created 12345
+                                                :data {:asiointitunnus {:value ""}
+                                                       :osapuolena {:value false}}
+                                                :duedate nil
+                                                :id "id"
+                                                :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                              :order 10
+                                                              :subtype :foreman
+                                                              :type :task
+                                                              :version 1}
+                                                :source {:id "vid" :type "verdict"}
+                                                :state :requires_user_action
+                                                :taskname "Vastaava työnjohtaja"}
+                                               {:assignee {}
+                                                :closed nil
+                                                :created 12345
+                                                :data {:asiointitunnus {:value ""}
+                                                       :osapuolena {:value false}}
+                                                :duedate nil
+                                                :id "id"
+                                                :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                              :order 10
+                                                              :subtype :foreman
+                                                              :type :task
+                                                              :version 1}
+                                                :source {:id "vid" :type "verdict"}
+                                                :state :requires_user_action
+                                                :taskname "Vesi- ja viemärityönjohtaja"})}}
+                        $set {:buildings []}}}
+          (provided (lupapalvelu.mongo/create-id) => "id")))
+      (fact "finalize--building-and-tasks: reviews not included, plans, foremen, buildings"
+        (finalize--buildings-and-tasks (assoc c-v-a
+                                              :verdict (assoc-in verdict [:data :reviews-included] false)))
+        => {:application (assoc application
+                                :buildings '({:area "281"
+                                              :buildingId "199887766E"
+                                              :description ""
+                                              :index "1"
+                                              :localShortId "002"
+                                              :location nil
+                                              :location-wgs84 nil
+                                              :nationalId "199887766E"
+                                              :operationId "5b34a9d2cea1d0f410db2403"
+                                              :usage "021 rivitalot"})
+                                :tasks '({:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:kuvaus {:value ""}
+                                                 :maarays {:value ""}
+                                                 :vaaditutErityissuunnitelmat {:value ""}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:name "task-lupamaarays"
+                                                        :order 20
+                                                        :type :task
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname nil}
+                                         {:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:kuvaus {:value ""}
+                                                 :maarays {:value ""}
+                                                 :vaaditutErityissuunnitelmat {:value ""}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:name "task-lupamaarays"
+                                                        :order 20
+                                                        :type :task
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname nil}
+                                         {:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:asiointitunnus {:value ""}
+                                                 :osapuolena {:value false}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                        :order 10
+                                                        :subtype :foreman
+                                                        :type :task
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname "Erityisalojen työnjohtaja"}
+                                         {:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:asiointitunnus {:value ""}
+                                                 :osapuolena {:value false}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                        :order 10
+                                                        :subtype :foreman
+                                                        :type :task
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname "Ilmanvaihtotyönjohtaja"}
+                                         {:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:asiointitunnus {:value ""}
+                                                 :osapuolena {:value false}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                        :order 10
+                                                        :subtype :foreman
+                                                        :type :task
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname "Vastaava työnjohtaja"}
+                                         {:assignee {}
+                                          :closed nil
+                                          :created 12345
+                                          :data {:asiointitunnus {:value ""}
+                                                 :osapuolena {:value false}}
+                                          :duedate nil
+                                          :id "id"
+                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                        :order 10
+                                                        :subtype :foreman
+                                                        :type :task
+                                                        :version 1}
+                                          :source {:id "vid" :type "verdict"}
+                                          :state :requires_user_action
+                                          :taskname "Vesi- ja viemärityönjohtaja"}))
+            :updates {$push {:tasks {$each '({:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:kuvaus {:value ""}
+                                                     :maarays {:value ""}
+                                                     :vaaditutErityissuunnitelmat {:value ""}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:name "task-lupamaarays"
+                                                            :order 20
+                                                            :type :task
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname nil}
+                                             {:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:kuvaus {:value ""}
+                                                     :maarays {:value ""}
+                                                     :vaaditutErityissuunnitelmat {:value ""}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:name "task-lupamaarays"
+                                                            :order 20
+                                                            :type :task
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname nil}
+                                             {:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:asiointitunnus {:value ""}
+                                                     :osapuolena {:value false}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                            :order 10
+                                                            :subtype :foreman
+                                                            :type :task
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname "Erityisalojen työnjohtaja"}
+                                             {:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:asiointitunnus {:value ""}
+                                                     :osapuolena {:value false}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                            :order 10
+                                                            :subtype :foreman
+                                                            :type :task
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname "Ilmanvaihtotyönjohtaja"}
+                                             {:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:asiointitunnus {:value ""}
+                                                     :osapuolena {:value false}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                            :order 10
+                                                            :subtype :foreman
+                                                            :type :task
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname "Vastaava työnjohtaja"}
+                                             {:assignee {}
+                                              :closed nil
+                                              :created 12345
+                                              :data {:asiointitunnus {:value ""}
+                                                     :osapuolena {:value false}}
+                                              :duedate nil
+                                              :id "id"
+                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
+                                                            :order 10
+                                                            :subtype :foreman
+                                                            :type :task
+                                                            :version 1}
+                                              :source {:id "vid" :type "verdict"}
+                                              :state :requires_user_action
+                                              :taskname "Vesi- ja viemärityönjohtaja"})}}
+                      $set {:buildings '({:area "281"
+                                          :buildingId "199887766E"
+                                          :description ""
+                                          :index "1"
+                                          :localShortId "002"
+                                          :location nil
+                                          :location-wgs84 nil
+                                          :nationalId "199887766E"
+                                          :operationId "5b34a9d2cea1d0f410db2403"
+                                          :usage "021 rivitalot"})}}}
+        (provided (lupapalvelu.mongo/create-id) => "id"))
+
+      (fact "finalize--building-and-tasks: buildings, no tasks"
+        (finalize--buildings-and-tasks (assoc c-v-a
+                                              :verdict (-> verdict
+                                                           (assoc-in [:data :reviews] [])
+                                                           (assoc-in [:data :plans-included] false)
+                                                           (assoc-in [:data :foremen-included] false))))
+        => {:application (assoc application
+                                :buildings '({:area "281"
+                                              :buildingId "199887766E"
+                                              :description ""
+                                              :index "1"
+                                              :localShortId "002"
+                                              :location nil
+                                              :location-wgs84 nil
+                                              :nationalId "199887766E"
+                                              :operationId "5b34a9d2cea1d0f410db2403"
+                                              :usage "021 rivitalot"}))
+            :updates {$set {:buildings '({:area "281"
+                                          :buildingId "199887766E"
+                                          :description ""
+                                          :index "1"
+                                          :localShortId "002"
+                                          :location nil
+                                          :location-wgs84 nil
+                                          :nationalId "199887766E"
+                                          :operationId "5b34a9d2cea1d0f410db2403"
+                                          :usage "021 rivitalot"})}}}))))
