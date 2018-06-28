@@ -58,7 +58,8 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
-            [lupapalvelu.ya-extension :as yax])
+            [lupapalvelu.ya-extension :as yax]
+            [lupapalvelu.storage.file-storage :as storage])
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
@@ -692,8 +693,11 @@
       (resource-response (str "dev-pages/" file))
       (content-type-response {:uri file})))
 
-  (defjson "/dev/fileinfo/:id" {:keys [id]}
-    (dissoc (mongo/download id) :content))
+  (defjson "/dev/fileinfo/:application/:id" {:keys [application id]}
+    (when-let [data (storage/download-from-system application id (if (env/feature? :s3) :s3 :mongodb))]
+      (with-open [is ((:content data))]
+        ; Make sure input stream is closed even if it's not used.
+        (dissoc data :content))))
 
   (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]

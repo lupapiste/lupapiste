@@ -141,7 +141,7 @@
                     <span data-bind="text: $data.filename, visible: !$data.fileId"></span>
                     <a data-bind="text: $data.filename,
                                   visible: _.isString($data.fileId),
-                                  attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId,
+                                  attr: {href: '/api/raw/download-attachment?file-id=' + $data.fileId + '&id=' + $component.applicationId,
                                          title: $data.filename},
                                   click: function() {hub.send('track-click', {category:'Attachments', label: '', event:'downloadVersion'});return true;}"></a>
                   </td>
@@ -201,7 +201,7 @@
                                    visible: $data.autoConversion"></span>
                   <span id="original-file">
                     <!-- TODO: download via service -->
-                    <a data-bind="ltext: 'attachment.downloadOriginalVersion.link', attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.originalFileId}"></a>
+                    <a data-bind="ltext: 'attachment.downloadOriginalVersion.link', attr: {href: '/api/raw/download-attachment?file-id=' + $data.originalFileId + '&id=' + $component.applicationId}"></a>
                   </span>
                 </span>
               </div>

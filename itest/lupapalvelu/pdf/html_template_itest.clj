@@ -13,7 +13,9 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.inspection-summary :refer [InspectionSummary]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pdf.html-template :refer :all]))
+            [lupapalvelu.pdf.html-template :refer :all]
+            [lupapalvelu.storage.file-storage :as storage])
+  (:import [java.io InputStream]))
 
 (def local-db-name (str "test_pdf_html_template_" (now)))
 
@@ -89,48 +91,50 @@
       (fact "inpection summary test data matches schema"
         (sc/check [(replace-in-schema InspectionSummary ssc/ObjectIdStr sc/Str)] (:inspection-sumamries app)) => nil)
 
-      (fact "pdf creation succeeded"
-        (create-inspection-summary-pdf app "en" "..summary-id.." :file-id file-id) => ok?
-        (provided (lupapalvelu.foreman/get-linked-foreman-applications app) => foreman-apps))
-
       (facts "pdf contents"
-        (files/with-temp-file file
-          (io/copy ((:content (mongo/download  file-id))) file)
+        (background (lupapalvelu.foreman/get-linked-foreman-applications app) => foreman-apps)
+        (with-open [is (create-inspection-summary-pdf app "en" "..summary-id..")]
 
-          (let [contents (pdfbox/extract file)]
+          (fact "creation succeeded"
+            is => #(instance? InputStream %))
 
-            (fact "no missing translations"
-              (re-find #"\?\?\?" contents) => nil)
+          (files/with-temp-file file
+            (io/copy is file)
 
-            (fact "project description header"
-              (or (re-find #"Description of the project" contents) contents) => "Description of the project")
+            (let [contents (pdfbox/extract file)]
 
-            (fact "project description group content"
-              (or (re-find #"Some project description." contents) contents) => "Some project description.")
+              (fact "no missing translations"
+                (re-find #"\?\?\?" contents) => nil)
 
-            (fact "project description deviations content"
-              (or (re-find #"Some deviations and reasons for them." contents) contents) => "Some deviations and reasons for them.")
+              (fact "project description header"
+                (or (re-find #"Description of the project" contents) contents) => "Description of the project")
 
-            (fact "municipality"
-              (or (re-find #"Kuortane" contents) contents) => "Kuortane")
+              (fact "project description group content"
+                (or (re-find #"Some project description." contents) contents) => "Some project description.")
 
-            (fact "inspection summary name"
-              (or (re-find #"Some inspection summary" contents) contents) => "Some inspection summary")
+              (fact "project description deviations content"
+                (or (re-find #"Some deviations and reasons for them." contents) contents) => "Some deviations and reasons for them.")
 
-            (fact "building id"
-              (or (re-find #"bld_123456" contents) contents) => "bld_123456")
+              (fact "municipality"
+                (or (re-find #"Kuortane" contents) contents) => "Kuortane")
 
-            (fact "target name header"
-              (or (re-find #"Inspection target" contents) contents) => "Inspection target")
+              (fact "inspection summary name"
+                (or (re-find #"Some inspection summary" contents) contents) => "Some inspection summary")
 
-            (fact "target name value"
-              (or (re-find #"First inspection target" contents) contents) => "First inspection target")
+              (fact "building id"
+                (or (re-find #"bld_123456" contents) contents) => "bld_123456")
 
-            (fact "attachment file name"
-              (or (re-find #"liite.pdf" contents) contents) => "liite.pdf")
+              (fact "target name header"
+                (or (re-find #"Inspection target" contents) contents) => "Inspection target")
 
-            (fact "pena as foreman"
-              (or (re-find #"Pena Panaani \(Supervisor of specialist fields\)" contents) contents) => "Pena Panaani (Supervisor of specialist fields)")
+              (fact "target name value"
+                (or (re-find #"First inspection target" contents) contents) => "First inspection target")
 
-            (fact "ilkka as foreman"
-              (or (re-find #"Ilkka Ilmastoija \(IV supervisor\)" contents) contents) => "Ilkka Ilmastoija (IV supervisor)")))))))
+              (fact "attachment file name"
+                (or (re-find #"liite.pdf" contents) contents) => "liite.pdf")
+
+              (fact "pena as foreman"
+                (or (re-find #"Pena Panaani \(Supervisor of specialist fields\)" contents) contents) => "Pena Panaani (Supervisor of specialist fields)")
+
+              (fact "ilkka as foreman"
+                (or (re-find #"Ilkka Ilmastoija \(IV supervisor\)" contents) contents) => "Ilkka Ilmastoija (IV supervisor)"))))))))

@@ -41,7 +41,7 @@
        (finally
          (io/delete-file ~sym :silently)))))
 
-(defn- slurp-bytes [fpath]
+(defn slurp-bytes [fpath]
   (with-open [data (io/input-stream (fs/file fpath))]
     (with-open [out (ByteArrayOutputStream.)]
       (io/copy data out)

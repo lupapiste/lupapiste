@@ -35,7 +35,9 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [throw+ try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]))
+            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
+            [lupapalvelu.storage.file-storage :as storage]
+            [clj-uuid :as uuid]))
 
 ;;
 ;; ==============================================================================
@@ -702,22 +704,22 @@
     (let [user              (usr/current-user (request/ring-request))
           filename          (mime/sanitize-filename filename)
           attachment-type   (att-type/parse-attachment-type attachmentType)
-          attachment-id     (mongo/create-id)
+          attachment-id     (str (uuid/v1))
           content-type      (mime/mime-type filename)
           file-info         {:attachment-type  attachment-type
                              :attachment-id    attachment-id
                              :file-name        filename
                              :content-type     content-type
                              :size             size
-                             :created          (now)}]
+                             :created          (now)
+                             :storageSystem    (if (env/feature? :s3) :s3 :mongodb)}]
     (logging/with-logging-context {:userId (:id user)}
       (when-not (add-user-attachment-allowed? user) (throw+ {:status 401 :body "forbidden"}))
 
       (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename size "id=" attachment-id)
       (when-not ((set att-type/osapuolet) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
       (when-not (mime/allowed-file? filename) (fail! :error.file-upload.illegal-file-type))
-
-      (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
+      (storage/upload attachment-id filename content-type tempfile {:user-id (:id user)})
       (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
       (resp/json (assoc file-info :ok true))))
     (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
@@ -733,7 +735,7 @@
    :user-roles #{:applicant}}
   [{user :user}]
   (when-not user (throw+ {:status 401 :body "forbidden"}))
-  (if-let [attachment (mongo/download-find {:id attachment-id :metadata.user-id (:id user)})]
+  (if-let [attachment (storage/download-user-attachment (:id user) attachment-id)]
     {:status 200
      :body ((:content attachment))
      :headers {"Content-Type" (:contentType attachment)
@@ -748,8 +750,8 @@
    :user-roles #{:applicant}}
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
+  (storage/delete-user-attachment (:id user) attachment-id)
   (mongo/update-by-id :users (:id user) {$pull {:attachments {:attachment-id attachment-id}}})
-  (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
   (ok))
 
 (defn- allowed-state?
@@ -785,8 +787,8 @@
   (doseq [attachment (:attachments (mongo/by-id :users (:id user) {:attachments true}))]
     (let [application-id id
           user-id (:id user)
-          {:keys [attachment-type attachment-id file-name content-type size]} attachment
-          attachment             (mongo/download-find {:id attachment-id :metadata.user-id user-id})
+          {:keys [attachment-type attachment-id file-name content-type size storageSystem]} attachment
+          attachment             (storage/download-user-attachment user-id attachment-id)
           maybe-attachment-id    (str application-id "." user-id "." attachment-id)               ; proposed attachment id (if empty placeholder is not found)
           updated-application    (mongo/by-id :applications application-id)
           same-attachments       (allowed-attachments-same-type updated-application attachment-type)      ; attachments of same type

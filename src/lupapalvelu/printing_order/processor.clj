@@ -55,9 +55,9 @@
      :internalOrderId (mongo/create-id)
      :files           files}))
 
-(defn enrich-with-file-content [user {files :files :as prepared-order}]
+(defn enrich-with-file-content [user {files :files :as prepared-order} application]
   (assoc prepared-order :files (map (fn [{fileId :fileId :as file}]
-                                      (with-open [content-is ((:content (att/get-attachment-file-as! user fileId)))]
+                                      (with-open [content-is ((:content (att/get-attachment-file-as! user application fileId)))]
                                         (assoc file :content (mylly/encode-file-from-stream content-is)))) files)))
 
 (defn save-integration-message [user created-ts cmd-name {:keys [id organization state]} {:keys [internalOrderId delivery] :as prepared-order}]
@@ -87,7 +87,7 @@
   (threads/submit
    send-order-thread-pool
    ;; bound-fn needed for itest, so that the db-name binding is visible inside the thread
-   (let [result (mylly/login-and-send-order! (enrich-with-file-content user prepared-order))]
+   (let [result (mylly/login-and-send-order! (enrich-with-file-content user prepared-order application))]
      (timbre/infof "Printing order %s sent with result %s" internalOrderId result)
      (if (:ok result)
        (mark-acknowledged internalOrderId (:orderNumber result))

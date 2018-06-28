@@ -30,26 +30,38 @@
      types*))
   ([] (attachment-types (atom nil))))
 
-(defn fileinfo-link
+(defn- common-file-link-hiccup [link-element content-type size extra]
+  [:div.batch--filedata
+   link-element
+   [:div.batch--fileinfo
+    (if (loc.hasTerm content-type)
+      (path/loc content-type)
+      content-type) " " (js/util.sizeString size) extra]])
+
+(defn batch-file-link
   "File link with type and size information. For example:
 
   IMG_2253.JPG
   JPG-kuva 2.9 MB"
-  [{:keys [filename size type file-id fileId] :as file}  & extra]
-  (let [file-id (or file-id fileId)
-        view (if fileId
-               "view-attachment?attachment-id"
-               "view-file?fileId")
-        type    (or type (:contentType file))]
-    [:div.batch--filedata
+  [{:keys [filename size type file-id] :as file}  & extra]
+  (common-file-link-hiccup
     (if file-id
-      [:a.batch--filename {:href   (str "/api/raw/" view "=" file-id)
+      [:a.batch--filename {:href   (str "/api/raw/view-file?fileId=" file-id)
                            :target :_blank} filename]
       [:span.batch--filename filename])
-    [:div.batch--fileinfo
-     (if (loc.hasTerm type)
-       (path/loc type)
-       type) " " (js/util.sizeString size) extra]]))
+    (or type (:contentType file))
+    size
+    extra))
+
+(defn attachment-file-link
+  "File link with type and size information for the latest attachment version."
+  [{:keys [id latestVersion]}  & extra]
+  (common-file-link-hiccup
+    [:a.batch--filename {:href   (str "/api/raw/latest-attachment-version?attachment-id=" id)
+                         :target :_blank} (:filename latestVersion)]
+    (:contentType latestVersion)
+    (:size latestVersion)
+    extra))
 
 (defn field-info [fields* {filename :filename}]
   (let [c (rum/cursor-in fields* [(keyword filename)])]
@@ -218,7 +230,7 @@
         [:tbody
          (for [{:keys [filename state] :as filedata} @files*]
            [:tr
-            [:td.batch--file (fileinfo-link filedata)]
+            [:td.batch--file (batch-file-link filedata)]
             (case state
               :bad (td-error (:message filedata))
               :failed (td-error (path/loc :file.upload.failed))
@@ -275,9 +287,9 @@
         (for [{:keys [type contents latestVersion can-delete?]
                :as   attachment} attachments]
           [:tr
-           [:td (fileinfo-link latestVersion
-                               ". " (-> type kw-type type-loc)
-                               ": " contents)]
+           [:td (attachment-file-link attachment
+                                      ". " (-> type kw-type type-loc)
+                                      ": " contents)]
            [:td (uploader-info latestVersion)]
            (when can-delete?
              [:td.td--center [:i.lupicon-remove.primary

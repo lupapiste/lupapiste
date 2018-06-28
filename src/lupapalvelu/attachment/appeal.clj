@@ -5,8 +5,8 @@
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.preview :as preview]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.file-upload :as file-upload]))
+            [lupapalvelu.file-upload :as file-upload]
+            [lupapalvelu.storage.file-storage :as storage]))
 
 
 (defn- create-appeal-attachment-data!
@@ -14,6 +14,8 @@
    If PDF, converts to PDF/A (if applicable) and thus creates a new file to GridFS as side effect.
    Initial uploaded file is references as originalFileId in version."
   [{app :application created :created user :user} appeal-id appeal-type file]
+  ; File has been uploaded unlinked, so link it first.
+  (storage/link-files-to-application (:id user) (:id app) [(:fileId file)])
   (let [type                 (att-type/attachment-type-for-appeal appeal-type)
         target               {:id appeal-id
                               :type appeal-type}
@@ -27,7 +29,9 @@
                                                                        :filename (:filename file)
                                                                        :contentType (or (:contentType file) (:content-type file))})
         converted-filedata   (when (:autoConversion archivability-result)
-                               (file-upload/save-file (select-keys archivability-result [:content :filename]) :application (:id app)))
+                               (file-upload/save-file (select-keys archivability-result [:content :filename])
+                                                      :application (:id app)
+                                                      :linked true))
         version-data         (merge {:fileId           (or (:fileId converted-filedata) (:fileId file))
                                      :original-file-id (:fileId file)
                                      :filename         (or (:filename converted-filedata) (:filename file))
@@ -45,8 +49,10 @@
 (defn new-appeal-attachment-updates!
   "Return $push operation for attachments, with attachments created for given fileIds.
    As a side effect, creates converted PDF/A version to mongo for PDF files (if applicable)."
-  [command appeal-id appeal-type fileIds]
-  (let [file-objects    (seq (mongo/download-find-many {:_id {$in fileIds}}))
+  [{:keys [user] :as command} appeal-id appeal-type fileIds]
+  (let [file-objects    (->> fileIds
+                             (map #(storage/download-unlinked-file (:id user) %))
+                             seq)
         new-attachments (map
                           (partial
                             create-appeal-attachment-data!

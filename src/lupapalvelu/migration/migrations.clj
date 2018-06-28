@@ -3943,6 +3943,47 @@
                                  attachment))
                              {"attachments.readOnly" {$type "null"}}))
 
+(defn add-storage-system-if-needed [file-data]
+  (if (or (:storageSystem file-data) (empty? file-data))
+    file-data
+    (assoc file-data :storageSystem :mongodb)))
+
+(defmigration add-storage-system-to-attachments
+  {:apply-when (pos? (mongo/count :applications {:attachments {$elemMatch {:versions {$not {$size 0}}
+                                                                           :versions.storageSystem {$exists false}}}}))}
+  (update-applications-array :attachments
+                             (fn [attachment]
+                               (-> (update attachment :latestVersion add-storage-system-if-needed)
+                                   (update :versions #(map add-storage-system-if-needed %))))
+                             {:attachments {$elemMatch {:versions {$not {$size 0}}
+                                                        :versions.storageSystem {$exists false}}}}))
+
+(defmigration add-storage-system-to-user-attachments
+  {:apply-when (pos? (mongo/count :users {:attachments.storageSystem {$exists false}
+                                          :attachments {$not {$size 0}}}))}
+  (doseq [{:keys [attachments id]} (mongo/select :users {:attachments.storageSystem {$exists false}})]
+    (mongo/update-by-id :users id {$set {:attachments (map add-storage-system-if-needed attachments)}})))
+
+(defmigration add-storage-system-to-bulletin-attachments
+  {:apply-when (pos? (mongo/count :application-bulletins {:versions {$elemMatch {:attachments {$not {$size 0}}
+                                                                                 :attachments.latestVersion.storageSystem {$exists false}}}}))}
+  (doseq [{:keys [versions id]} (mongo/select :application-bulletins {:versions {$elemMatch {:attachments {$not {$size 0}}
+                                                                                             :attachments.latestVersion.storageSystem {$exists false}}}})]
+    (let [updated-versions (map #(update % :attachments (fn [attachments]
+                                                          (map (fn [{:keys [latestVersion] :as att}]
+                                                                 (if (and (seq latestVersion) (not (:storageSystem latestVersion)))
+                                                                   (assoc-in att [:latestVersion :storageSystem] :mongodb)
+                                                                   att))
+                                                               attachments)))
+                                versions)]
+      (mongo/update-by-id :application-bulletins id {$set {:versions updated-versions}}))))
+
+(defmigration add-storage-system-to-bulletin-comments
+  {:apply-when (pos? (mongo/count :application-bulletin-comments {:attachments.storageSystem {$exists false}
+                                                                  :attachments {$not {$size 0}}}))}
+  (doseq [{:keys [attachments id]} (mongo/select :application-bulletin-comments {:attachments.storageSystem {$exists false}})]
+    (mongo/update-by-id :application-bulletin-comments id {$set {:attachments (map add-storage-system-if-needed attachments)}})))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

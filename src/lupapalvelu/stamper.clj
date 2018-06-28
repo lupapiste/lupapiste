@@ -9,11 +9,9 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.pdftk :as pdftk]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.mime :as mime])
+            [lupapalvelu.storage.file-storage :as storage])
   (:import [java.io InputStream OutputStream]
-           [java.awt Graphics2D Color Image BasicStroke Font AlphaComposite RenderingHints]
-           [java.awt.geom RoundRectangle2D$Float]
+           [java.awt Color Image BasicStroke Font AlphaComposite RenderingHints]
            [java.awt.font FontRenderContext TextLayout]
            [java.awt.image BufferedImage RenderedImage]
            [javax.imageio ImageIO]
@@ -93,11 +91,11 @@
 
 (def- tmp (str (System/getProperty "java.io.tmpdir") env/file-separator))
 
-(defn- retry-stamping [stamp-graphic file-id out options]
-  (let [tmp-file-name (str tmp file-id "-" (now) ".pdf")]
-    (debugf "Redownloading file %s from DB and running `pdftk - output %s`" file-id tmp-file-name)
+(defn- retry-stamping [stamp-graphic {:keys [content fileId]} out options]
+  (let [tmp-file-name (str tmp fileId "-" (now) ".pdf")]
+    (debugf "Redownloading file %s from DB and running `pdftk - output %s`" fileId tmp-file-name)
     (try
-      (with-open [in ((:content (mongo/download file-id)))]
+      (with-open [in (content)]
         (pdftk/create-pdftk-file in tmp-file-name))
       (with-open [in (io/input-stream tmp-file-name)]
         (stamp-stream stamp-graphic "application/pdf" in out options))
@@ -105,15 +103,15 @@
         (fs/delete tmp-file-name)
         nil))))
 
-(defn stamp [stamp file-id out {:keys [x-margin y-margin transparency] :as options}]
+(defn stamp [stamp application file-id out {:keys [x-margin y-margin transparency] :as options}]
   {:pre [(number? x-margin) (number? y-margin) (number? transparency)]}
   (try
-    (let [{content-type :contentType :as attachment} (mongo/download file-id)]
+    (let [{content-type :contentType :as attachment} (storage/download application file-id)]
       (with-open [in ((:content attachment))]
         (stamp-stream stamp content-type in out options)))
     (catch InvalidPdfException e
       (info (str "Retry stamping because: " (.getMessage e)))
-      (retry-stamping stamp file-id out options))))
+      (retry-stamping stamp (storage/download application file-id) out options))))
 
 ;;
 ;; Stamp PDF:

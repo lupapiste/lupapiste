@@ -12,7 +12,9 @@
             [sade.env :as env]
             [lupapalvelu.building :as building]
             [lupapalvelu.attachment.tags :as att-tags]
-            [lupapalvelu.roles :as roles])
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.storage.file-storage :as storage]
+            [clj-uuid :as uuid])
   (:import (java.io File InputStream)))
 
 (def FileData
@@ -36,11 +38,10 @@
   (let [metadata (if (map? (first metadata))
                    (first metadata)
                    (apply hash-map metadata))
-        file-id            (or (:fileId filedata) (mongo/create-id))
+        file-id            (or (:fileId filedata) (str (uuid/v1)))
         sanitized-filename (mime/sanitize-filename (:filename filedata))
         content-type       (mime/mime-type sanitized-filename)
-
-        result (mongo/upload file-id sanitized-filename content-type (:content filedata) metadata)]
+        result (storage/upload file-id sanitized-filename content-type (:content filedata) metadata)]
     {:fileId file-id
      :filename sanitized-filename
      :size (or (:size filedata) (:length result))
@@ -89,12 +90,12 @@
 
       grouping (first (filter #(= grouping (:groupType %)) groups)))))
 
-(defn- download-and-save-files [application attachments session-id]
+(defn- download-and-save-files [application attachments user-id]
   (pmap
     (fn [{:keys [filename uri localizedType contents drawingNumber operation]}]
       (let [attachment-type (lat/localisation->attachment-type :R localizedType)]
         (when-let [is (muuntaja/download-file uri)]
-          (let [file-data (save-file {:filename filename :content is} :sessionId session-id :linked false)]
+          (let [file-data (save-file {:filename filename :content is} :uploader-user-id user-id :linked false)]
             (.close is)
             (merge
               file-data
@@ -113,29 +114,18 @@
        (env/feature? :unzip-attachments)
        (is-zip-file? (first files))))
 
-(defn save-files [application files session-id]
+(defn save-files [application files user-id]
   (if (unzip? files)
     (let [{:keys [attachments error]} (-> files first :tempfile muuntaja/unzip-attachment-collection)]
       (if (or (not-empty error) (empty? attachments))
         {:ok false
          :error (or error "error.unzipping-error")}
         {:ok true
-         :files (download-and-save-files application attachments session-id)}))
+         :files (download-and-save-files application attachments user-id)}))
     {:ok true
      :files (pmap
-              #(save-file % :sessionId session-id :linked false)
+              #(save-file % :uploader-user-id user-id :linked false)
               (map #(rename-keys % {:tempfile :content}) files))}))
-
-(defn- two-hours-ago []
-  ; Matches vetuma session TTL
-  (util/get-timestamp-ago :hour 2))
-
-(defn cleanup-uploaded-files []
-  (when-not @mongo/connection
-    (mongo/connect!))
-  (mongo/delete-file {$and [{:metadata.linked {$exists true}}
-                            {:metadata.linked false}
-                            {:metadata.uploaded {$lt (two-hours-ago)}}]}))
 
 (defn mark-duplicates [application result]
   (let [existing-files (mapv (fn [attachment] (first (str/split (get-in attachment [:latestVersion :filename]) #"\."))) (:attachments application))

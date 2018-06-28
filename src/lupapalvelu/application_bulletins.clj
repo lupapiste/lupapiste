@@ -20,7 +20,10 @@
             [lupapalvelu.permit :as permit]
             [sade.strings :as ss]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.application :as app]))
+            [lupapalvelu.application :as app]
+            [lupapalvelu.storage.file-storage :as storage]
+            [sade.shared-schemas :as sssc]
+            [sade.env :as env]))
 
 (sc/defschema ApplicationBulletin
   {:id             sc/Str
@@ -39,10 +42,11 @@
    (sc/optional-key :pate-verdict) sc/Any})
 
 (sc/defschema CommentFile
-  {:fileId ssc/ObjectIdStr
-   :filename sc/Str
-   :size sc/Int
-   :contentType sc/Str})
+  {:fileId                          sssc/FileId
+   :filename                        sc/Str
+   :size                            sc/Int
+   :contentType                     sc/Str
+   (sc/optional-key :storageSystem) sssc/StorageSystem})
 
 (def comment-file-checker (sc/checker CommentFile))
 
@@ -151,7 +155,7 @@
         attachments (->> (:attachments application)
                          (filter #(and (:latestVersion %) (metadata/public-attachment? %)))
                          (map #(select-keys % attachment-snapshot-fields))
-                         (map #(update % :latestVersion (fn [v] (select-keys v [:filename :contentType :fileId :size])))))
+                         (map #(update % :latestVersion (fn [v] (select-keys v [:filename :contentType :fileId :size :storageSystem])))))
         app-snapshot (assoc app-snapshot
                        :id (mongo/create-id)
                        :application-id applicationId
@@ -192,7 +196,8 @@
                      :comment      comment
                      :created      created
                      :contact-info contact-info
-                     :attachments  files}]
+                     :attachments  (map #(assoc % :storageSystem (if (env/feature? :s3) :s3 :mongodb))
+                                        files)}]
     new-comment))
 
 (defn get-bulletin
@@ -207,17 +212,23 @@
   ([query projection]
     (mongo/select-one :application-bulletins query projection)))
 
-(defn get-bulletin-attachment [attachment-id]
-  (when-let [attachment-file (mongo/download attachment-id)]
-    (when-let [bulletin (get-bulletin (:application attachment-file))]
-      (when (seq bulletin) attachment-file))))
+(defn get-bulletin-attachment [bulletin-id file-id]
+  (when-let [bulletin (get-bulletin bulletin-id)]
+    (when-let [attachment (->> (:versions bulletin)
+                               last
+                               :attachments
+                               (filter #(= (get-in % [:latestVersion :fileId]) file-id))
+                               first)]
+      (storage/download-from-system bulletin-id file-id (get-in attachment [:latestVersion :storageSystem])))))
 
 (defn get-bulletin-comment-attachment-file-as
-  "Returns the attachment file if user has access to application, otherwise nil."
+  "Returns the bulletin attachment file if user has access to application, otherwise nil."
   [user file-id]
-  (when-let [attachment-file (mongo/download file-id)]
-    (when-let [application (lupapalvelu.domain/get-application-as (get-in attachment-file [:metadata :bulletinId]) user :include-canceled-apps? true)]
-      (when (seq application) attachment-file))))
+  (when-let [comment (mongo/select-one :application-bulletin-comments
+                                       {:attachments.fileId file-id}
+                                       [:attachments.$ :bulletinId])]
+    (when (seq (lupapalvelu.domain/get-application-as (:bulletinId comment) user :include-canceled-apps? true))
+      (storage/download-bulletin-comment-file (:bulletinId comment) file-id (-> comment :attachments first :storageSystem)))))
 
 ;;
 ;; Updates
@@ -236,11 +247,6 @@
   "Updates bulletin with upsert set to true."
   [bulletin-id changes]
   (update-bulletin bulletin-id {} changes :upsert true))
-
-(defn update-file-metadata [bulletin-id comment-id files]
-  (mongo/update-file-by-query {:_id {$in (map :fileId files)}} {$set {:metadata.linked     true
-                                                                      :metadata.bulletinId bulletin-id
-                                                                      :metadata.commentId  comment-id}}))
 
 ;;;
 ;;; Date checkers

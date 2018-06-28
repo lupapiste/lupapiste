@@ -214,10 +214,20 @@
 
           (let [file-id (->> application :attachments first :latestVersion :fileId)]
             (fact "downloading should be possible"
-              (raw nil "neighbor-download-attachment" :neighborId neighborId :token token :fileId file-id) => http200?)
+              (raw nil
+                   "neighbor-download-attachment"
+                   :neighborId neighborId
+                   :token token
+                   :fileId file-id
+                   :applicationId (:id application)) => http200?)
 
             (fact "downloading with wrong token should not be possible"
-              (raw nil "neighbor-download-attachment" :neighborId neighborId :token "h4x3d token" :fileId file-id) => http401?)))
+              (raw nil
+                   "neighbor-download-attachment"
+                   :neighborId neighborId
+                   :token "h4x3d token"
+                   :fileId file-id
+                   :applicationId (:id application)) => http401?)))
 
         (fact "does not have auth information"
           (:auth application) => empty?))
@@ -233,9 +243,10 @@
 
     (fact "with vetuma"
       (let [stamp (vetuma-stamp!)]
+        (set-anti-csrf! false)
 
         (fact "neighbor cant give ill response"
-          (command pena :neighbor-response
+          (command nil :neighbor-response
             :applicationId application-id
             :neighborId (name neighborId)
             :stamp stamp
@@ -244,7 +255,7 @@
             :message "kehno suunta") => invalid-response?)
 
         (fact "neighbor can give response"
-          (command pena :neighbor-response
+          (command nil :neighbor-response
             :applicationId application-id
             :neighborId (name neighborId)
             :stamp stamp

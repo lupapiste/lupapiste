@@ -90,17 +90,11 @@
                    (doseq [attachment-id (get-attachment-ids application)
                            :let          [file-id (attachment-latest-file-id application attachment-id)]]
 
-                     (fact "view-attachment anonymously should not be possible"
-                           (raw nil "view-attachment" :attachment-id file-id) => http401?)
-
-                     (fact "view-attachment as pena should be possible"
-                           (raw pena "view-attachment" :attachment-id file-id) => http200?)
-
                      (fact "download-attachment anonymously should not be possible"
-                           (raw nil "download-attachment" :attachment-id file-id) => http401?)
+                           (raw nil "download-attachment" :file-id file-id :id application-id) => http401?)
 
                      (fact "download-attachment as pena should be possible"
-                           (raw pena "download-attachment" :attachment-id file-id) => http200?))
+                           (raw pena "download-attachment" :file-id file-id :id application-id) => http200?))
                    (fact "operation info"
                      (upload-file-and-bind pena application-id {:type  {:type-group "muut"
                                                                         :type-id    "muu"}
@@ -740,9 +734,18 @@
         (fact "Mikko hides attachment from other parties (visibility: 'viranomainen')"
           (command mikko :set-attachment-visibility :id application-id :attachmentId (:id mikko-att) :value "viranomainen") => ok?)
         (fact "Mikko can download, but Pena can't"
-          (raw mikko "download-attachment" :attachment-id (:fileId (:latestVersion mikko-att))) => http200?
-          (raw pena "download-attachment" :attachment-id (:fileId (:latestVersion mikko-att))) => http404?
-          (raw nil "download-attachment" :attachment-id (:fileId (:latestVersion mikko-att))) => http401?)
+          (raw mikko
+               "download-attachment"
+               :file-id (:fileId (:latestVersion mikko-att))
+               :id application-id) => http200?
+          (raw pena
+               "download-attachment"
+               :file-id (:fileId (:latestVersion mikko-att))
+               :id application-id) => http404?
+          (raw nil
+               "download-attachment"
+               :file-id (:fileId (:latestVersion mikko-att))
+               :id application-id) => http401?)
         (fact "Mikko can access the attachment"
           (let [app (query-application mikko application-id)]
             (util/find-by-id (:id mikko-att) (:attachments app)) => map?
@@ -755,8 +758,14 @@
     (facts "Pena sets attachment visiblity to parties ('asiakas-ja-viranomainen')"
      (command pena :set-attachment-visibility :id application-id :attachmentId aid2 :value "asiakas-ja-viranomainen") => ok?
      (fact "Parties can download"
-       (raw mikko "download-attachment" :attachment-id (:fileId (:latestVersion att2))) => http200?
-       (raw pena "download-attachment" :attachment-id (:fileId (:latestVersion att2))) => http200?)
+       (raw mikko
+            "download-attachment"
+            :file-id (:fileId (:latestVersion att2))
+            :id application-id) => http200?
+       (raw pena
+            "download-attachment"
+            :file-id (:fileId (:latestVersion att2))
+            :id application-id) => http200?)
      (fact "Parties have attachment available in query"
        (let [app (query-application mikko application-id)]
          (util/find-by-id aid2 (:attachments app)) => (contains {:metadata {:nakyvyys "asiakas-ja-viranomainen"}})

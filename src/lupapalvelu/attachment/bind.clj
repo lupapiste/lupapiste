@@ -7,21 +7,21 @@
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.preview :as preview]
             [lupapalvelu.job :as job]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [lupapalvelu.authorization :as auth]
             [lupapiste-commons.attachment-types :as att-types]
             [monger.operators :refer :all]
             [sade.schemas :as ssc]
-            [sade.strings :as ss]))
+            [sade.shared-schemas :as sssc]))
 
 (sc/defschema NewVersion
-  {(sc/required-key :fileId)           ssc/ObjectIdStr
+  {(sc/required-key :fileId)           sssc/FileId
    (sc/required-key :attachmentId)     sc/Str})
 
 (sc/defschema NewAttachment
-  {(sc/required-key :fileId)           ssc/ObjectIdStr
+  {(sc/required-key :fileId)           sssc/FileId
    (sc/required-key :type)             att/Type
    (sc/required-key :group)            (sc/maybe {:groupType  (apply sc/enum att-tags/attachment-groups)
                                                   (sc/optional-key :operations) [{(sc/optional-key :id)   ssc/ObjectIdStr
@@ -42,8 +42,8 @@
         config-by-group (get type-config (keyword typeGroup))]
     (util/contains-value? config-by-group (keyword typeId))))
 
-(defn bind-single-attachment! [{:keys [application user created]} mongo-file {:keys [fileId type attachmentId contents] :as filedata} exclude-ids]
-  (let [conversion-data       (att/conversion application (assoc mongo-file :content ((:content mongo-file))))
+(defn bind-single-attachment! [{:keys [application user created]} unlinked-file {:keys [fileId type attachmentId contents] :as filedata} exclude-ids]
+  (let [conversion-data       (att/conversion (:id user) nil application (assoc unlinked-file :content ((:content unlinked-file))))
         is-authority          (usr/user-is-authority-in-organization? user (:organization application))
         automatic-ok-enabled  (org/get-organization-auto-ok (:organization application))
         placeholder-id        (or attachmentId
@@ -56,7 +56,7 @@
                                                         :created         created
                                                         :attachment-type type)))
         version-options (merge
-                          (select-keys mongo-file [:fileId :filename :contentType :size])
+                          (select-keys unlinked-file [:fileId :filename :contentType :size])
                           (select-keys filedata [:contents :drawingNumber :group :constructionTime :sign :target])
                           (util/assoc-when {:created          created
                                             :original-file-id fileId}
@@ -69,21 +69,20 @@
                                                                                                                    filedata))))
                           (:result conversion-data)
                           (:file conversion-data))
-        linked-version (att/set-attachment-version! application user attachment version-options)]
+        linked-version (att/set-attachment-version! application user attachment version-options)
+        {:keys [fileId originalFileId]} linked-version]
+    (storage/link-files-to-application (:id user) (:id application) (cond-> [originalFileId]
+                                                                               (not= fileId originalFileId) (conj fileId)))
     (preview/preview-image! (:id application) (:fileId version-options) (:filename version-options) (:contentType version-options))
-    (att/link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
     (att/cleanup-temp-file (:result conversion-data))
     (assoc linked-version :type (or (:type linked-version) (:type attachment)))))
 
-(defn- bind-attachments! [command file-infos job-id]
+(defn- bind-attachments! [{:keys [user] :as command} file-infos job-id]
   (reduce
     (fn [results {:keys [fileId type] :as filedata}]
       (job/update job-id assoc fileId {:status :working :fileId fileId})
-      (if-let [mongo-file (mongo/download-find {:_id fileId
-                                                $or [{:metadata.linked false}
-                                                     {:metadata.linked {$exists false}}]
-                                                :metadata.application {$exists false}})]
-        (let [result (bind-single-attachment! command mongo-file filedata (map :attachment-id results))]
+      (if-let [unlinked-file (storage/download-unlinked-file (:id user) fileId)]
+        (let [result (bind-single-attachment! command unlinked-file filedata (map :attachment-id results))]
           (job/update job-id assoc fileId {:status :done :fileId fileId})
           (conj results {:original-file-id fileId
                          :fileId (:fileId result)
@@ -91,7 +90,7 @@
                          :type (or type (:type result))
                          :status :done}))
         (do
-          (warnf "no file with file-id %s in mongo" fileId)
+          (warnf "no file with file-id %s in storage" fileId)
           (job/update job-id assoc fileId {:status :error :fileId fileId})
           (conj results {:fileId fileId :type type :status :error}))))
     []

@@ -247,7 +247,10 @@
         (fact "Attachment has a version"
           latest-version => not-empty)
 
-        (let [{:keys [headers body]} (raw sonja "download-attachment" :attachment-id (:fileId latest-version))]
+        (let [{:keys [headers body]} (raw sonja
+                                          "download-attachment"
+                                          :file-id (:fileId latest-version)
+                                          :id (:id app))]
 
           (fact "content type"
             (get headers "Content-Type") => "application/pdf"))))

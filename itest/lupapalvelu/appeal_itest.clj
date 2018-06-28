@@ -326,7 +326,10 @@
       (count attachments) => 0)
 
     (fact "file not linked to application"
-      (raw raktark-jarvenpaa "download-attachment" :attachment-id file-id-1) => http404?)
+      (raw raktark-jarvenpaa
+           "download-attachment"
+           :file-id file-id-1
+           :id app-id) => http404?)
 
     (fact "successful appeal"
       (command raktark-jarvenpaa :upsert-appeal
@@ -362,7 +365,10 @@
                                       :type-id    "valitus"})
 
       (fact "file is linked to application"
-        (raw raktark-jarvenpaa "download-attachment" :attachment-id file-id-1) => http200?)
+        (raw raktark-jarvenpaa
+             "download-attachment"
+             :file-id file-id-1
+             :id app-id) => http200?)
 
       (fact "updating appeal with new attachment"
         (command raktark-jarvenpaa :upsert-appeal
@@ -437,4 +443,7 @@
             (map :id (get-user-assignments raktark-jarvenpaa)) =not=> (contains (:id assignment)))
 
           (fact "file doesn't exist"
-            (raw raktark-jarvenpaa "download-attachment" :attachment-id file-id-2) => http404?))))))
+            (raw raktark-jarvenpaa
+                 "download-attachment"
+                 :file-id file-id-2
+                 :id app-id) => http404?))))))

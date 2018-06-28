@@ -2,9 +2,7 @@
   (:require [schema.core :as sc]
             [sade.core :refer [fail!]]
             [sade.schemas :as ssc]
-            [sade.util :as util]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.attachment :as att]))
+            [sade.shared-schemas :as sssc]))
 
 (defn str-max-length [l]
   (sc/constrained sc/Str
@@ -29,7 +27,7 @@
     (sc/optional-key :additionalInformation) (str-max-length 1024)))
 
 (sc/defschema PrintedMaterial
-  {:fileId     ssc/ObjectIdStr
+  {:fileId     sssc/FileId
    :copyAmount sc/Int})
 
 (sc/defschema Delivery
@@ -38,7 +36,7 @@
           :printedMaterials [PrintedMaterial]}))
 
 (sc/defschema PrintingOrderFile
-  {:fileId  ssc/ObjectIdStr
+  {:fileId  sssc/FileId
    :name    sc/Str
    :size    sc/Int
    :content sc/Any})

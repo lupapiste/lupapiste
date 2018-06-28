@@ -1,12 +1,9 @@
 (ns lupapalvelu.attachment-api
-  (:require [clojure.java.io :as io]
-            [clojure.set :refer [intersection union difference]]
+  (:require [clojure.set :refer [intersection union difference]]
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
-            [schema.core :as sc]
             [sade.core :refer [ok fail fail! now def-]]
             [sade.files :as files]
-            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
             [lupapalvelu.authorization :as auth]
@@ -32,13 +29,13 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.operations :as op]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.states :as states]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.attachment.stamps :as stamps]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.storage.file-storage :as storage]))
 
 ;; Action category: attachments
 
@@ -426,15 +423,6 @@
 ;; Download
 ;;
 
-(defraw "view-attachment"
-  {:parameters       [:attachment-id]  ; Note that this is actually file id
-   :categories       #{:attachments}
-   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
-   :user-authz-roles roles/all-authz-roles}
-  [{{:keys [attachment-id]} :data user :user}]
-  (att/output-attachment attachment-id false (partial att/get-attachment-file-as! user)))
-
 (defraw view-file
   {:description      "Fetch uploaded file from MongoDB. Fetching is session bound."
    :parameters       [fileId]
@@ -442,17 +430,18 @@
    :input-validators [(partial action/non-blank-parameters [:fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles roles/all-authz-roles}
-  [{{:keys [fileId]} :data session :session}]
-  (att/output-file fileId (:id session)))
+  [{{:keys [fileId]} :data session :session user :user}]
+  (att/output-file fileId (or (:id user) (:id session))))
 
 (defraw "download-attachment"
-  {:parameters       [:attachment-id]  ; Note that this is actually file id
+  {:parameters       [:file-id :id]
    :categories       #{:attachments}
-   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
+   :input-validators [(partial action/non-blank-parameters [:file-id :id])]
    :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
+   :states           states/all-application-states
    :user-authz-roles roles/all-authz-roles}
-  [{{:keys [attachment-id]} :data user :user}]
-  (att/output-attachment attachment-id true (partial att/get-attachment-file-as! user)))
+  [{{:keys [file-id]} :data user :user application :application}]
+  (att/output-attachment file-id true (partial att/get-attachment-file-as! user application)))
 
 (defraw "latest-attachment-version"
   {:parameters       [:attachment-id]
@@ -465,12 +454,12 @@
   (att/output-attachment (att/get-attachment-latest-version-file user attachment-id (= preview "true")) (= download "true")))
 
 (defraw "download-bulletin-attachment"
-  {:parameters       [attachment-id]  ; Note that this is actually file id
+  {:parameters       [bulletin-id attachment-id]  ; Note that this is actually file id
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:anonymous}}
   [_]
-  (att/output-attachment attachment-id true bulletins/get-bulletin-attachment))
+  (att/output-attachment attachment-id true (partial bulletins/get-bulletin-attachment bulletin-id)))
 
 (defraw "download-all-attachments"
   {:parameters [:id]
@@ -582,6 +571,7 @@
            attachment-options (util/assoc-when {:comment-text nil
                                                 :required false
                                                 :original-file-id originalFileId
+                                                :original-file-already-linked? true
                                                 :attachment-id attachmentId
                                                 :attachment-type (:type attachment)
                                                 :created (:created latest-version)
@@ -590,15 +580,14 @@
                                                 :user user}
                                                :autoConversion autoConversion)]
         (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
-        (with-open [content ((:content (mongo/download fileId)))]
+        (with-open [content ((:content (storage/download (:id application) fileId attachment)))]
           (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
           (att/upload-and-attach! {:application application :user user} ; NOTE: user is user from attachment version
                                          attachment-options
                                          {:content temp-pdf
                                           :filename filename
                                           :content-type contentType
-                                          :size (.length temp-pdf)}
-                                         ))
+                                          :size (.length temp-pdf)}))
         (ok)))
     (fail :error.unknown)))
 

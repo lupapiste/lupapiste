@@ -21,7 +21,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.company :as c]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.docx :as docx]))
+            [lupapalvelu.docx :as docx]
+            [lupapalvelu.storage.file-storage :as storage]))
 
 (set! *warn-on-reflection* true)
 
@@ -116,25 +117,28 @@
 
 (defn cancel-sign-process! [process-id ts]
   (infof "sign:cancel-sign-process:%s:" process-id)
-  (let [process (find-sign-process! process-id)]
-    (process-update! process :cancelled ts)
-    (mongo/delete-file {:_id (:fileId process)})
-    nil))
+  (-> process-id
+      (find-sign-process!)
+      (process-update! :cancelled ts))
+  (storage/delete-process-file process-id)
+  nil)
 
 ;
 ; Onnistuu.fi loads the document:
 ;
 
-(defn fetch-document [process-id ts]
+(defn fetch-document
+  "Either fetches the existing document (by process id) or uploads a new contract to storage and returns it."
+  [process-id ts]
   (infof "sign:fetch-document:%s" process-id)
   (let [process (find-sign-process! process-id)
         content-type "application/pdf"]
     (when (not= (:status process) "started")
       (process-update! process :started ts))
 
-    (if-let [pdf (and (:fileId process) (mongo/download-find {:_id (:fileId process)}))]
+    (if-let [pdf (storage/download-process-file process-id)]
       (do
-        (debug "sign:fetch-document:download-from-mongo")
+        (debug "sign:fetch-document:download-from-storage")
         [content-type ((:content pdf))])
       (let [filename (str "yritystilisopimus-" (-> process :company :name) ".pdf")
             account-type (keyword (get-in process [:company :accountType]))
@@ -146,13 +150,11 @@
                                                     (get-in selected-account [:price billing-type]))
                      :billingType (ss/lower-case (i18n/localize "fi" :register :company :billing billing-type :title))}
             pdf (docx/yritystilisopimus (:company process) (:signer process) account ts)
-            sha256 (pandect/sha256 pdf)
-            mongo-id (mongo/create-id)]
-        (debug "sign:fetch-document:upload-to-mongo")
+            sha256 (pandect/sha256 pdf)]
+        (debug "sign:fetch-document:upload-to-storage")
         (.reset pdf) ; Hashing read the whole stream
-        (mongo/upload mongo-id filename content-type pdf {:sha256 sha256, :process process})
+        (storage/upload-process-file (:id process) filename content-type pdf {:sha256 sha256})
         (.reset pdf) ; Again, the whole stream was read
-        (mongo/update-by-id :sign-processes (:id process) {$set {:fileId mongo-id}})
         [content-type pdf]))))
 ;
 ; Success:

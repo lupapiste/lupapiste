@@ -4,7 +4,9 @@
             [clojure.java.io :as io]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment.muuntaja-client :as muuntaja]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [clj-uuid :as uuid]
+            [lupapalvelu.storage.file-storage :as storage]))
 
 (when (env/feature? :unzip-attachments)
   (facts "about uploading a zipped attachment collection with index file"
@@ -35,8 +37,8 @@
           contents "test contents"]
 
       (against-background
-        [(mongo/create-id) => file-id
-         (mongo/upload anything anything anything anything anything) => {:length length}]
+        [(uuid/v1) => file-id
+         (storage/upload anything anything anything anything anything) => {:length length}]
 
         (fact "non-zip is saved normally"
           (save-files application [file1] session-id) => {:ok true

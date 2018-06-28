@@ -147,7 +147,6 @@
                   (update-appeal-data-mongo-updates collection appealId appeal-item)
                   (new-appeal-data-mongo-updates collection appeal-item))
         {:keys [new-updates
-                new-file-ids
                 removable-attachment-ids]} (attachment-updates command (or (:id appeal-item) appealId) appeal-type fileIds)]
     (action/update-application
       command
@@ -157,9 +156,6 @@
         new-updates))
     (when (seq removable-attachment-ids)
       (att/delete-attachments! (domain/get-application-no-access-checking (:id app)) removable-attachment-ids))
-    (when (seq new-file-ids)
-      ; Link files to application, as files uploaded by file-upload-api to GridFS are not associated to application initially.
-      (att/link-files-to-application (:id app) new-file-ids))
     (ok)))
 
 (defcommand upsert-appeal

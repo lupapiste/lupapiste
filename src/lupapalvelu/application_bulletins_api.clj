@@ -21,6 +21,10 @@
             [clj-time.coerce :as tc]
             [clj-time.core :as t]
             [lupapalvelu.states :as states]
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.application-bulletin-utils :as bulletin-utils]
+            [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.application-bulletin-utils :as bulletin-utils]))
 
 (def bulletin-page-size 10)
@@ -153,9 +157,8 @@
 
 (defn- referenced-file-can-be-attached
   [{{files :files} :data}]
-  (let [files-found (map #(mongo/any? :fs.files {:_id (:fileId %) "metadata.sessionId" (vetuma/session-id)}) files)]
-    (when-not (every? true? files-found)
-      (fail :error.invalid-files-attached-to-comment))))
+  (when-not (storage/unlinked-files-exist? (vetuma/session-id) (map :fileId files))
+    (fail :error.invalid-files-attached-to-comment)))
 
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
 
@@ -182,7 +185,8 @@
                                               :emailPreferred emailPreferred})
         comment (bulletins/create-comment bulletin-id bulletin-version-id comment contact-info files created)]
     (mongo/insert :application-bulletin-comments comment)
-    (bulletins/update-file-metadata bulletin-id (:id comment) files)
+    (when (seq files)
+      (storage/link-files-to-bulletin (vetuma/session-id) bulletin-id (map :fileId files)))
     (ok)))
 
 (defcommand move-to-proclaimed
@@ -349,7 +353,7 @@
   {:parameters [attachmentId]
    :user-roles #{:authority :applicant}
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
-  [{:keys [application user] :as command}]
+  [{:keys [user] :as command}]
   (attachment/output-attachment attachmentId true
                                             (partial bulletins/get-bulletin-comment-attachment-file-as user)))
 

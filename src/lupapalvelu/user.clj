@@ -15,6 +15,7 @@
             [sade.core :refer [def- ok fail fail! now]]
             [sade.env :as env]
             [sade.schemas :as ssc]
+            [sade.shared-schemas :as sssc]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as v]
@@ -94,7 +95,8 @@
                                                     :file-name  sc/Str
                                                     :content-type  sc/Str
                                                     :size  sc/Num
-                                                    :created ssc/Timestamp}]
+                                                    :created ssc/Timestamp
+                                                    :storageSystem sssc/StorageSystem}]
            (sc/optional-key :company)             {:id sc/Str :role (sc/enum "admin" "user") :submit sc/Bool}
            (sc/optional-key :partnerApplications) {(sc/optional-key :rakentajafi) {:id sc/Str
                                                                                    :created ssc/Timestamp
@@ -311,14 +313,14 @@
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
 
 (def migration-user-summary
-  {:id "-"
+  {:id "migration-user"
    :username "migraatio@lupapiste.fi"
    :lastName "Migraatio"
    :firstName "Lupapiste"
    :role "authority"})
 
 (def batchrun-user-data
-  {:id "-"
+  {:id "batchrun-user"
    :username "eraajo@lupapiste.fi"
    :enabled true
    :lastName "Er\u00e4ajo"

@@ -209,8 +209,8 @@
                                 :dueDate (util/get-timestamp-from-now :day 3))
         statements (:statements (query-application pena application-id))
         statement (first statements)
-        file-id-1 (get-in (upload-file pena "dev-resources/test-attachment.txt") [:files 0 :fileId])
-        file-id-2 (get-in (upload-file pena "dev-resources/invalid-pdfa.pdf") [:files 0 :fileId])]
+        file-id-1 (get-in (upload-file sonja "dev-resources/test-attachment.txt") [:files 0 :fileId])
+        file-id-2 (get-in (upload-file sonja "dev-resources/invalid-pdfa.pdf") [:files 0 :fileId])]
     (count (:attachments application)) => 4
     statement-resp => ok?
 

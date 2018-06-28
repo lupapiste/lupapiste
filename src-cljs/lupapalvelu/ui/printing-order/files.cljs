@@ -47,7 +47,7 @@
                 "not-in-printing-order")]
       :data-test-type type-group-and-id}
      [:td type-and-contents]
-     [:td (attc/view-with-download-small-inline latestVersion)]
+     [:td (attc/view-with-download-small-inline att)]
      [:td
       (common/format-timestamp modified)
       " (" (-> latestVersion :user :firstName) " " (-> latestVersion :user :lastName) ")"]

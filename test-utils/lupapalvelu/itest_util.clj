@@ -204,13 +204,14 @@
             cookie-store (:cookie-store args)
             test-db-name (:test-db-name args)
             args (dissoc args :cookie-store :test-db-name)]
-        {:headers {"content-type" "application/json;charset=utf-8"}
-         :oauth-token apikey
-         :body (json/encode args)
-         :follow-redirects false
-         :cookie-store cookie-store
-         :test-db-name test-db-name
-         :throw-exceptions false}))))
+        (util/assoc-when
+          {:headers {"content-type" "application/json;charset=utf-8"}
+           :body (json/encode args)
+           :follow-redirects false
+           :cookie-store cookie-store
+           :test-db-name test-db-name
+           :throw-exceptions false}
+          :oauth-token apikey)))))
 
 
 (defn raw-command [apikey command-name & args]
