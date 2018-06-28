@@ -31,12 +31,23 @@
 
 (def archive-api-usage-collection :archive-api-usage)
 
+(defn api-usage-entry-id
+  "If the request originated from Lupapiste kauppa, use the provided
+  external ID. Otherwise, use standard mongo ID. The external ID is
+  used to ensure that each document download belonging to a given
+  Lupapiste kauppa transaction is logged only once."
+  [entry]
+  (if-let [docstore-id (when (= (:apiUser entry) "document_store")
+                         (not-empty (:externalId entry)))]
+    docstore-id
+    (mongo/create-id)))
+
 (sc/defn ^:always-validate log-archive-api-usage! :- sc/Bool
   [entry :- ArchiveApiUsageLogEntry
    log-timestamp :- ssc/Nat]
   (try (mongo/insert archive-api-usage-collection
                      (assoc entry
-                            :_id (mongo/create-id)
+                            :_id (api-usage-entry-id entry)
                             :logged log-timestamp))
        true
        (catch Throwable e

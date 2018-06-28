@@ -1,13 +1,12 @@
 (ns lupapalvelu.ui.pate.verdicts
   (:require [clojure.set :as set]
             [clojure.string :as ss]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.layout :as layout]
-            [lupapalvelu.ui.pate.path :as path]
             [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
@@ -180,8 +179,7 @@
                   (list [:tr {:key id}
                          [:td {:class (common/css-flags :replaced replaced?)}
                           [:a {:on-click #(open-verdict id)} title]]
-                         [:td (if published
-                                (js/util.finnishDate verdict-date))]
+                         [:td (js/util.finnishDate verdict-date)]
                          [:td giver]
                          [:td (if published
                                 (common/loc :pate.published-date (js/util.finnishDate published))

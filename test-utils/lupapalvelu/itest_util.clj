@@ -944,6 +944,11 @@
 
 (def dev-password "Lupapiste")
 
+(defn file-name-accessor [file]
+  (if get-files-from-sftp-server?
+    (.getFilename file)                           ;file is instance of com.jcraft.jsch.ChannelSftp$LsEntry
+    (.getName file)))
+
 (defn get-file-from-server
   ([user server file-to-get target-file-name]
     (timbre/info "sftp" (str user "@" server ":" file-to-get) target-file-name)

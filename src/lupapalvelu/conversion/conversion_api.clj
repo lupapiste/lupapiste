@@ -7,7 +7,7 @@
   {:parameters       [kuntalupatunnus]
    :input-validators [(partial action/non-blank-parameters [:kuntalupatunnus])]
    :feature :conversion-debug
+   :user-roles   #{:authority}
    :permissions [{:required []}]}
   [{:keys [user] :as command}]
   (converter/debug command))
-

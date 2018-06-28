@@ -107,6 +107,49 @@
             </form>
           </section>
 
+          <section data-bind="visible: lupapisteApp.models.globalAuthModel.ok('store-billing-report')">
+            <h2 data-bind="ltext: 'authorityAdmin.storeBillingReports.title'"></h2>
+            <span data-bind="ltext: 'authorityAdmin.storeBillingReports.caption'"></span>
+            <form action="/api/raw/store-billing-report" method="get">
+              <input type="hidden" name="__anti-forgery-token"data-bind="value: $.cookie('anti-csrf-token')">
+              <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
+              <input type="hidden" name="startTs" data-bind="value: reportsModel.storeBillingStartComputed">
+              <input type="hidden" name="endTs" data-bind="value: reportsModel.storeBillingEndComputed">
+              <div class="labeled-input row">
+                <div class="labeled-input cell">
+                  <label data-bind="ltext: 'authorityAdmin.storeBillingReports.timePeriod.startTs'"></label>
+                  <input type="text" data-bind="datepicker: reportsModel.storeBillingStartDate" class="dateinput">
+                </div>
+                <div class="labeled-input cell">
+                  <label data-bind="ltext: 'authorityAdmin.storeBillingReports.timePeriod.endTs'"></label>
+                  <input type="text" data-bind="datepicker: reportsModel.storeBillingEndDate" class="dateinput">
+                </div>
+                <div class="labeled-input cell">
+                  <button type="submit"
+                          class="primary outline">
+                    <i class="lupicon-download"></i>
+                    <span data-bind="ltext: 'authorityAdmin.storeBillingReports.buttonText'"></span>
+                  </button>
+                </div>
+              </div>
+            </form>
+           <form action="/api/raw/store-billing-report" method="get">
+              <input type="hidden" name="__anti-forgery-token"data-bind="value: $.cookie('anti-csrf-token')">
+              <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
+              <input type="hidden" name="startTs" data-bind="value: reportsModel.storeBillingMonthStart">
+              <input type="hidden" name="endTs" data-bind="value: reportsModel.storeBillingToday">
+              <div class="labeled-input row">
+                <div class="labeled-input cell">
+                  <button type="submit"
+                          class="primary outline">
+                    <i class="lupicon-download"></i>
+                    <span data-bind="ltext: 'authorityAdmin.storeBillingReports.lastMonthButtonText'"></span>
+                  </button>
+                </div>
+
+              </div>
+            </form>
+          </section>
         </section>
       </div>
     </section>

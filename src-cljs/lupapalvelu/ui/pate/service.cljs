@@ -85,7 +85,8 @@
 (defn new-template [category callback]
   (common/command {:command "new-verdict-template"
                    :success (list-update-response callback)}
-                  :category category))
+                  :category category
+                  :lang (common/get-current-language)))
 
 (defn set-template-name [template-id name callback]
   (common/command {:command "set-verdict-template-name"

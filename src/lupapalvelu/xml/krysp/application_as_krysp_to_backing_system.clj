@@ -225,7 +225,7 @@
                         #(writer/write-to-disk %1 application %2 output-dir nil nil "verdict"))
 
         mapping-result (permit/verdict-krysp-mapper filtered-app verdict
-                                                    (get-in verdict [:data :language])
+                                                    (or (get-in verdict [:data :language]) "fi")
                                                     krysp-version
                                                     begin-of-link)]
     (if-some [{:keys [xml attachments]} mapping-result]

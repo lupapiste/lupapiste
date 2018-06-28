@@ -29,4 +29,15 @@ LUPAPISTE.OrganizationReportsModel = function() {
   self.verdictsEndComputed = ko.pureComputed(function() {
       return moment(self.verdictsEndDate()).endOf("day").valueOf();
   });
+
+  self.storeBillingStartDate = ko.observable(moment().startOf("month").toDate());
+  self.storeBillingEndDate = ko.observable(new Date());
+  self.storeBillingStartComputed = ko.pureComputed(function() {
+    return moment(self.storeBillingStartDate()).startOf("day").valueOf();
+  });
+  self.storeBillingEndComputed = ko.pureComputed(function() {
+    return moment(self.storeBillingEndDate()).endOf("day").valueOf();
+  });
+  self.storeBillingMonthStart = ko.observable(moment().subtract(1, "months").startOf("month").startOf("day").valueOf());
+  self.storeBillingToday = ko.observable(moment().subtract(1, "months").endOf("month").endOf("day").valueOf());
 };

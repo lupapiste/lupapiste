@@ -148,6 +148,7 @@ Language To
   Wait Until  Element Should Be Visible  css=div.language-menu
   Click Element  partial link=${lang}
   Wait Until  Element Should Contain  language-select  ${lang}
+  Kill dev-box
 
 Language Is
   [Arguments]  ${lang}
@@ -1614,6 +1615,11 @@ Test id empty
   Wait test id visible  ${id}
   Textfield Value Should Be  jquery=[data-test-id=${id}]  ${EMPTY}
 
+Textarea is empty
+  [Arguments]  ${test-id}
+  Wait test id visible  ${test-id}
+  Textarea Value Should Be  jquery=[data-test-id=${test-id}]  ${EMPTY}
+
 Test id disabled
   [Arguments]  ${id}
   Scroll to test id  ${id}
@@ -1709,6 +1715,14 @@ Toggle not selected
   [Arguments]  ${tid}
   Checkbox wrapper not selected by test id  ${tid}
 
+Toggle disabled
+  [Arguments]  ${tid}
+  Test id disabled  ${tid}-input
+
+Toggle enabled
+  [Arguments]  ${tid}
+  Test id enabled  ${tid}-input
+
 Toggle toggle
   [Arguments]  ${tid}
   Wait until  Element should be visible  xpath=//label[@data-test-id='${tid}-label']
@@ -1718,14 +1732,31 @@ Select from test id
   [Arguments]  ${id}  ${value}
   Select from list  jquery=select[data-test-id=${id}]  ${value}
 
+Select from test id by text
+  [Arguments]  ${id}  ${text}
+  Select from list by label  jquery=select[data-test-id=${id}]  ${text}
+
 Test id select is
   [Arguments]  ${id}  ${value}
-  List selection should be  jquery=select[data-test-id=${id}]  ${value}
+  Wait until  List selection should be  jquery=select[data-test-id=${id}]  ${value}
 
 Test id select text is
   [Arguments]  ${id}  ${text}
   ${label}=  Get Selected List Label  jquery=select[data-test-id=${id}]
   Should be true  '${label}' == '${text}'
+
+Test id select values are
+  [Arguments]  ${tid}  @{values}
+  Wait test id visible  ${tid}
+  @{vals}=  Get list items  jquery=[data-test-id=${tid}]  values=True
+  Should be true  @{vals} == @{values}
+
+Test id select texts are
+  [Arguments]  ${tid}  @{texts}
+  Wait test id visible  ${tid}
+  @{vals}=  Get list items  jquery=[data-test-id=${tid}]  values=False
+  Should be true  @{vals} == @{texts}
+
 
 jQuery should match X times
   [Arguments]  ${selector}  ${count}
@@ -1740,6 +1771,10 @@ Test id autocomplete disabled
   [Arguments]  ${tid}
   jQuery should match X times  div[data-test-id='${tid}'] .autocomplete-selection-wrapper.disabled:visible  1
 
+
+Press key test id
+  [Arguments]  ${tid}  ${key}
+  Press key  jquery=[data-test-id=${tid}]:visible  ${key}
 
 # Frontend error log
 

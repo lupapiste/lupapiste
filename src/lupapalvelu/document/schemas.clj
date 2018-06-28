@@ -97,7 +97,7 @@
 
 (defn get-schema
   "Returns document schema map that contais :info and :body,
-   see lupapalvelu.document.schema-validation/Doc"
+   see 'lupapalvelu.document.schema-validation/Doc'"
   ([{:keys [version name] :or {version 1}}] (get-schema version name))
   ([schema-version schema-name]
     {:pre [schema-version schema-name]}
@@ -1374,10 +1374,10 @@
    {:info {:name "rakennustietojen-korjaus" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups olemassaoleva-rakennus)}
 
-   {:info {:name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths}
+   {:info {:name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths :post-verdict-editable true}
     :body (approvable-top-level-groups rakennuksen-laajentaminen)}
 
-   {:info {:name "rakennuksen-laajentaminen-ei-huoneistoja" :i18name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths}
+   {:info {:name "rakennuksen-laajentaminen-ei-huoneistoja" :i18name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths :post-verdict-editable true}
     :body (approvable-top-level-groups rakennuksen-laajentaminen-ei-huoneistoja)}
 
    {:info {:name "purkaminen" :i18name "purku" :approvable true :accordion-fields buildingid-accordion-paths}
@@ -1385,12 +1385,13 @@
 
    {:info {:name "kaupunkikuvatoimenpide"
            :approvable true
-           :accordion-fields buildingid-accordion-paths}
+           :accordion-fields buildingid-accordion-paths
+           :post-verdict-editable true}
     :body (body tunnus
                 (approvable-top-level-groups rakennelma)
                 rakennustunnus)}
 
-   {:info {:name "kaupunkikuvatoimenpide-ei-tunnusta" :i18name "kaupunkikuvatoimenpide" :approvable true}
+   {:info {:name "kaupunkikuvatoimenpide-ei-tunnusta" :i18name "kaupunkikuvatoimenpide" :approvable true :post-verdict-editable true}
     :body (approvable-top-level-groups rakennelma)}
 
    {:info {:name "maalampokaivo" :approvable true :i18name "maalampokaivo"}

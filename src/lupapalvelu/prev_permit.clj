@@ -95,7 +95,7 @@
 
 (defn sanitize-updates
   "Removes updates that would invalidate document. The updates are
-  transfroms and applied to the document before validation."
+  transforms and applied to the document before validation."
   [application document updates]
   (let [bad-paths (->> (doc-model/validate
                         application
@@ -276,7 +276,7 @@
 
     (let [updated-application (mongo/by-id :applications (:id created-application))
           {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml user/batchrun-user-data (now) updated-application xml)
-          review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-udpates")
+          review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-updates")
           update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id)]
       (if (:ok update-result)
         (info "Saved review updates")

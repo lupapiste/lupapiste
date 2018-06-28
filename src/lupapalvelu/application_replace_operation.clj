@@ -120,7 +120,7 @@
 (defn- create-document [doc-name application created & [old-document]]
   (let [op-name (:name (get-operation-by-key application :created created))
         document-schema (schemas/get-schema (:schema-version application) doc-name)
-        new-document (app/make-document application op-name created nil document-schema)]
+        new-document (app/make-document op-name created nil document-schema)]
     (if old-document
       (copy-old-document-data old-document new-document)
       new-document)))

@@ -3780,7 +3780,7 @@
                            (util/find-first (fn [[_ v]] ((set v) waste-schema-name)))))
         waste-document (when op-name
                          (->> (schemas/get-schema schema-version waste-schema-name)
-                              (application/make-document application op-name (sade.core/now) nil)))]
+                              (application/make-document op-name (sade.core/now) nil)))]
     (when (and waste-document (not= (:state application) "canceled"))
       (action/update-application (action/application->command application)
                                  {$push {:documents waste-document}}))))
@@ -3813,7 +3813,7 @@
                                   (get-correct-rakennuspaikka-doc)))
         rakennuspaikka-schema (when op-name (schemas/get-schema schema-version (keyword doc-name)))
         rakennuspaikka-document (when rakennuspaikka-schema
-                                  (application/make-document application op-name (sade.core/now) nil rakennuspaikka-schema))]
+                                  (application/make-document op-name (sade.core/now) nil rakennuspaikka-schema))]
     (when (and rakennuspaikka-document (not= (:state application) "canceled"))
       (action/update-application (action/application->command application)
                                  {$push {:documents rakennuspaikka-document}}))))

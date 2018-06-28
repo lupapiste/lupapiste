@@ -11,6 +11,9 @@
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
             [lupapalvelu.drawing :as drawing]
+            [lupapalvelu.document.schemas]
+            [lupapalvelu.conversion.util :as conv-util]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
             [lupapalvelu.wfs :as wfs]
@@ -460,7 +463,7 @@
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
       (get-text asia [:luvanTunnistetiedot :LupaTunnus :muuTunnustieto :tunnus])))
 
-(defn- ->kuntalupatunnus [asia]
+(defn ->kuntalupatunnus [asia]
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
       (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus])))
 
@@ -529,7 +532,7 @@
           source-projection (common/->source-projection building-location-xml [:Point])]
       (when-not (contains? coordinate/known-bad-coordinates building-coordinates)
         (coordinate/convert source-projection common/to-projection 3 building-coordinates)))
-    (catch Exception e (error e "Reolving building coordinates failed"))))
+    (catch Exception e (error e "Resolving building coordinates failed"))))
 
 (defn- area-coordinates [xml]
   (let [coordinates-array-xml (select1 xml [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :alue])
@@ -551,7 +554,7 @@
           interior-point (drawing/interior-point area-geometry-str)
           interior-point-coordinates (coordinate/convert "WGS84" common/to-projection 6 interior-point)]
       interior-point-coordinates)
-    (catch Exception e (error e "Reolving area coordinates failed"))))
+    (catch Exception e (error e "Resolving area coordinates failed"))))
 
 (defn- extract-osoitenimi [osoitenimi-elem lang]
   (let [osoitenimi-elem (or (select1 osoitenimi-elem [(enlive/attr= :xml:lang lang)])
@@ -646,6 +649,30 @@
   (let [asiat (enlive/select xml-no-ns common/case-elem-selector)]
     (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)))
 
+(defn ->rakennelmatiedot
+  "Returns a sequence of rakennelmatieto-elements."
+  [xml-no-ns]
+  (->> (select xml-no-ns [:toimenpidetieto :Toimenpide :rakennelmatieto])
+       (map cr/all-of)))
+
+(defn ->viitelupatunnukset
+  "Takes a parsed XML document, returns a list of viitelupatunnus -ids (in 'permit-id'-format) found therein."
+  [xml]
+  (->> (select xml [:rakennusvalvontaAsiatieto :viitelupatieto])
+       (map (comp conv-util/normalize-permit-id #(get-in % [:LupaTunnus :kuntalupatunnus]) cr/all-of))))
+
+(defn is-foreman-application? [xml]
+  (let [permit-type (-> xml ->kuntalupatunnus (ss/split #"-") last)]
+    (= "TJO" permit-type)))
+
+(defn ->tyonjohtajat [xml]
+  (when (is-foreman-application? xml)
+    (as-> xml x
+      (get-asiat-with-kuntalupatunnus x (->kuntalupatunnus xml))
+      (first x)
+      (select x [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja])
+      (map cr/all-of x))))
+
 ;;
 ;; Information parsed from verdict xml message for application creation
 ;;
@@ -663,10 +690,12 @@
       (let [asia (first asiat-with-kuntalupatunnus)
             asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
             asioimiskieli-code (case asioimiskieli
-                                 "suomi"  "fi"
                                  "ruotsi" "sv"
                                  "fi")
             asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
+
+            operations (->> (select asia [:Toimenpide])
+                            (map #(cr/all-of % [:Toimenpide])))
 
             ;;
             ;; _Kvintus 5.11.2014_: Rakennuspaikka osoitteen ja sijainnin oikea lahde.
@@ -698,6 +727,7 @@
                :vahainenPoikkeaminen        (:vahainenPoikkeaminen asianTiedot)
                :hakijat                     hakijat
                :muutOsapuolet               muut-osapuolet
+               :toimenpiteet                operations
                :suunnittelijat              suunnittelijat
                :tyonjohtajat                tyonjohtajat}
 

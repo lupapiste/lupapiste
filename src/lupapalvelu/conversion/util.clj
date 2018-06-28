@@ -1,45 +1,53 @@
 (ns lupapalvelu.conversion.util
-  (:require [sade.core :refer :all]
-            [sade.common-reader :as cr]
-            [sade.strings :as ss]
-            [sade.xml :refer :all]
-            [lupapalvelu.prev-permit :as prev-permit]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+  (:require [lupapalvelu.application :as application]
+            [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.schema-validation :as schema-validation]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.mongo :as mongo]
+            [sade.core :refer :all]
+            [sade.strings :as ss]))
 
-(defn destructure-normalized-permit-id [id]
-  (when (string? id)
-    (zipmap '(:kauposa :no :vuosi :tyyppi) (ss/split id #"[-]"))))
+(def general-permit-id-regex
+  "So-called 'general' format, e.g. 63-0447-12-A"
+  #"\d{2}-\d{4}-\d{2}-[A-Z]{1,3}")
+
+(def database-permit-id-regex
+  "So-called 'database' format, e.g. 12-0477-A 63"
+  #"\d{2}-\d{4}-[A-Z]{1,3} \d{2}")
+
+(defn destructure-permit-id
+  "Split a permit id into a map of parts. Works regardless of which of the two
+  id-format is used. Returns nil if input is invalid."
+  [id]
+  (let [id-type (cond
+                  (= id (re-find general-permit-id-regex id)) :general
+                  (= id (re-find database-permit-id-regex id)) :database
+                  :else :unknown)]
+    (when-not (= :unknown id-type)
+      (zipmap (if (= id-type :general)
+                '(:kauposa :no :vuosi :tyyppi)
+                '(:vuosi :no :tyyppi :kauposa))
+              (ss/split id #"[- ]")))))
+
+; (defn xml->tj-documents [xml]
+;   (map prev-permit/tyonjohtaja->tj-document (get-tyonjohtajat xml)))
 
 (defn normalize-permit-id
   "Viitelupien tunnukset on Factassa tallennettu 'tietokantaformaatissa', josta ne on tunnuksella
   hakemista varten muunnettava yleiseen formaattiin.
   Esimerkki: 12-0477-A 63 -> 63-0447-12-A"
   [id]
-  (if (Character/isLetter (last id)) ;; If the input is already in 'ui-format', it's not altered.
-    id
-    (let [parts (zipmap '(:vuosi :no :tyyppi :kauposa) (ss/split id #"[- ]"))]
-      (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) parts)))))
+  (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) (destructure-permit-id id))))
 
-(defn get-kuntalupatunnus [xml]
-  (cr/all-of (select1 xml [:rakennusvalvontaAsiatieto :luvanTunnisteTiedot :kuntalupatunnus])))
-
-(defn get-viitelupatunnukset
-  "Takes a parsed XML document, returns a list of viitelupatunnus -ids (in 'permit-id'-format) found therein."
-  [xml]
-  (->> (select xml [:rakennusvalvontaAsiatieto :viitelupatieto])
-       (map (comp normalize-permit-id #(get-in % [:LupaTunnus :kuntalupatunnus]) cr/all-of))))
-
-(defn is-foreman-application? [xml]
-  (let [permit-type (-> xml get-kuntalupatunnus (ss/split #"-") last)]
-    (= "TJO" permit-type)))
-
-(defn get-tyonjohtajat [xml]
-  (when (is-foreman-application? xml)
-    (as-> xml x
-        (krysp-reader/get-asiat-with-kuntalupatunnus x (get-kuntalupatunnus xml))
-        (first x)
-        (select x [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja])
-        (map cr/all-of x))))
-
-(defn xml->tj-documents [xml]
-  (map prev-permit/tyonjohtaja->tj-document (get-tyonjohtajat xml)))
+(defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
+  (let [doc (application/make-document "muu-rakentaminen" (now) {} (schemas/get-schema 1 "kaupunkikuvatoimenpide"))
+        data (model/map2updates [] {:kayttotarkoitus nil
+                                    :kokonaisala ""
+                                    :kuvaus (get-in raktieto [:Rakennelma :kuvaus :kuvaus])
+                                    :tunnus (get-in raktieto [:Rakennelma :tunnus :rakennusnro])
+                                    :valtakunnallinenNumero ""})]
+    (application/make-document "muu-rakentaminen"
+                               (now)
+                               {"kaupunkikuvatoimenpide" data}
+                               (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))

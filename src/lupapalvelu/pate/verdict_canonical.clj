@@ -2,11 +2,11 @@
   (:require [sade.util :as util]
             [sade.strings :as ss]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.pate.shared :as pate-shared]))
+            [lupapalvelu.pate.schema-helper :as helper]))
 
 (defn- vaadittu-katselmus-canonical [lang {{reviews :reviews} :references :as verdict} review-id]
   (let [review (util/find-by-id review-id reviews)]
-    {:Katselmus {:katselmuksenLaji (pate-shared/review-type-map (or (keyword (:type review)) :ei-tiedossa))
+    {:Katselmus {:katselmuksenLaji (helper/review-type-map (or (keyword (:type review)) :ei-tiedossa))
                  :tarkastuksenTaiKatselmuksenNimi (get review (keyword lang))
                  :muuTunnustieto [#_{:MuuTunnus "yht:MuuTunnusType"}]}})) ; TODO: initialize review tasks and pass ids here
 
@@ -70,7 +70,7 @@
 
 (defn- paatospoytakirja-type-canonical [lang {data :data :as verdict}]
   {:paatos (:verdict-text data)
-   :paatoskoodi (pate-shared/verdict-code-map (or (keyword (:verdict-code data)) :ei-tiedossa))
+   :paatoskoodi (helper/verdict-code-map (or (keyword (:verdict-code data)) :ei-tiedossa))
    :paatoksentekija (paatoksentekija lang verdict)
    :paatospvm (util/to-xml-date (:verdict-date data))
    :pykala (:verdict-section data)})

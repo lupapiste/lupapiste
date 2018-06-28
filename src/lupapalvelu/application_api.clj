@@ -531,7 +531,9 @@
 
 (defn- replace-operation-allowed-pre-check [{application :application}]
   (when (or (foreman/foreman-app? application)
-            (app/designer-app? application))
+            (app/designer-app? application)
+            (-> application :permitSubtype keyword (= :muutoslupa))
+            (app/jatkoaika-application? application))
     (fail :error.replace-operation-not-allowed)))
 
 (defn- operation-exists? [{parameters :data app :application}]

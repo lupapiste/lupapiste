@@ -32,6 +32,7 @@
             [lupapalvelu.change-email-api]
             [lupapalvelu.comment-api]
             [lupapalvelu.company-api]
+            [lupapalvelu.conversion.conversion-api]
             [lupapalvelu.construction-api]
             [lupapalvelu.control-api :refer [defcontrol] :as control]
             [lupapalvelu.copy-application-api]

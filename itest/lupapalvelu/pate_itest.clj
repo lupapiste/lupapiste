@@ -135,7 +135,7 @@
 
 (fact "Sipoo categories"
   (:categories (query sipoo :verdict-template-categories))
-  => (contains ["r" "p" "ymp" "kt" "tj"] :in-any-order))
+  => (contains ["r" "p" "tj"] :in-any-order))
 
 
 (fact "Create new template"
@@ -363,7 +363,10 @@
   (fact "No defaults yet"
     (:templates (query sipoo :default-operation-verdict-templates))
     => {})
-  (let [{template-id :id} (init-verdict-template sipoo :r)]
+  (let [{old-id :id}      (->> (query sipoo :verdict-templates)
+                               :verdict-templates
+                               (util/find-first :published))
+        {template-id :id} (init-verdict-template sipoo :r)]
     (fact "Fill required fields"
       (command sipoo :save-verdict-template-draft-value
                :template-id template-id
@@ -377,6 +380,13 @@
     (fact "Publish the verdict template"
       (publish-verdict-template sipoo template-id)
       => ok?)
+    (fact "Selectable verdict templates"
+      (:items (query sipoo :selectable-verdict-templates))
+      => {:R  [{:id old-id :name "Uusi nimi"}
+                {:id template-id :name "P\u00e4\u00e4t\u00f6spohja"}]
+          :P  []
+          :YA []
+          :tyonjohtajan-nimeaminen-v2 []})
     (fact "Delete verdict template"
       (command sipoo :toggle-delete-verdict-template
                :template-id template-id :delete true)
@@ -431,7 +441,7 @@
       => {:pientalo template-id})
 
     (facts "Application verdict templates"
-            (let [{app-id :id} (create-and-submit-application pena
+      (let [{app-id :id} (create-and-submit-application pena
                                                         :operation :pientalo
                                                         :propertyId sipoo-property-id)]
         (fact "Create and delete verdict template"
@@ -443,12 +453,12 @@
                    :template-id template-id
                    :name "Oletus"))
         (:templates (query sonja :application-verdict-templates :id app-id))
-        => (just [(just {:id template-id
+        => (just [(just {:id       template-id
                          :default? true
-                         :name "Oletus"})
-                  (just {:id #"\w+"
+                         :name     "Oletus"})
+                  (just {:id       #"\w+"
                          :default? false
-                         :name "Uusi nimi"})] :in-any-order)))))
+                         :name     "Uusi nimi"})] :in-any-order)))))
 
 (defn add-verdict-attachment
   "Adds attachment to the verdict. Contents is mainly for logging. Returns attachment id."
@@ -553,7 +563,9 @@
         (fact "Update and open"
           (command sipoo :update-and-open-verdict-template
                    :template-id template-id)
-          => (contains {:draft {:reviews {(keyword review-id) {:text "Katselmus"}}}}))
+          => (contains {:draft {:reviews {(keyword review-id) {:text-fi "Katselmus"
+                                                               :text-sv "Syn"
+                                                               :text-en "Review"}}}}))
         (fact "Include review in verdict"
           (command sipoo :save-verdict-template-draft-value
                    :template-id template-id
@@ -563,7 +575,7 @@
         (fact "Review text is read-only"
           (some-> (command sipoo :save-verdict-template-draft-value
                            :template-id template-id
-                           :path [:reviews review-id :text]
+                           :path [:reviews review-id :text-fi]
                            :value "foo")
                   :errors
                   flatten
@@ -578,7 +590,9 @@
         (fact "Name updated in the template after update and open"
           (command sipoo :update-and-open-verdict-template
                    :template-id template-id)
-          => (contains {:draft {:reviews {(keyword review-id) {:text "sumlestaK"
+          => (contains {:draft {:reviews {(keyword review-id) {:text-fi "sumlestaK"
+                                                               :text-sv "Syn"
+                                                               :text-en "Review"
                                                                :included true}}}}))
         (fact "Remove review"
           (command sipoo :save-verdict-template-settings-value
@@ -589,9 +603,10 @@
           (let [plan-id (add-plan :fi "Suunnitelma" :sv "Plan" :en "Plan")]
             (fact "Update and open: no review, but a plan"
               (command sipoo :update-and-open-verdict-template
-                       :lang :sv
                        :template-id template-id)
-              => (contains {:draft (just {:plans {(keyword plan-id) {:text "Plan"}}})}))
+              => (contains {:draft (just {:plans {(keyword plan-id) {:text-fi "Suunnitelma"
+                                                                     :text-sv "Plan"
+                                                                     :text-en "Plan"}}})}))
             (fact "Remove plan"
               (command sipoo :save-verdict-template-settings-value
                        :category :r

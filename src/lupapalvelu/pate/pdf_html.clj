@@ -17,10 +17,12 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
-            [lupapalvelu.pate.legacy :as legacy]
+            [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.markup :as markup]
-            [lupapalvelu.pate.shared :as shared]
+            [lupapalvelu.pate.schema-helper :as helper]
+            [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
+            [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.pdf.html-template :as html-pdf]
             [lupapalvelu.pdf.html-template-common :as common]
             [rum.core :as rum]
@@ -191,7 +193,7 @@
 (defn- verdict-schema [{:keys [category schema-version legacy?] :as opts}]
   (if legacy?
     (legacy/legacy-verdict-schema category)
-    (shared/verdict-schema category schema-version)))
+    (verdict-schemas/verdict-schema category schema-version)))
 
 (defn pathify [kw-path]
   (map keyword (ss/split (name kw-path) #"\.")))
@@ -204,9 +206,9 @@
   (let [{data :data :as opts} (get options :verdict options)
         path                  (pathify kw-path)
         value                 (get-in data path)
-        {schema :schema}      (shared/dict-resolve path
-                                                   (:dictionary
-                                                    (verdict-schema opts)))]
+        {schema :schema}      (schema-util/dict-resolve path
+                                                        (:dictionary
+                                                         (verdict-schema opts)))]
     (cond
       (and (:phrase-text schema) (ss/not-blank? value))
       (list [:div.markup (markup/markup->tags value)])
@@ -356,7 +358,7 @@
                                                 :ya        [:pate.verdict-type
                                                             (dict-value verdict :verdict-type)]
                                                 :legacy.ya [:pate.verdict-type
-                                                            (shared/ya-verdict-type application)]
+                                                            (schema-util/ya-verdict-type application)]
                                                 [:pdf category :permit])))]]])
     [:div.row
      [:div.cell.cell--40

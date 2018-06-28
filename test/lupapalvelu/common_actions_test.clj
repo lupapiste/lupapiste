@@ -11,8 +11,6 @@
             [clojure.test :refer [is]]
             [sade.schema-generators :as ssg]
             [slingshot.slingshot :refer [try+]]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.generators.application :as app-gen]
             [lupapalvelu.generators.organization]
             [lupapalvelu.generators.permit :as permit-gen]
@@ -20,7 +18,6 @@
             [lupapalvelu.mock.organization :as mock-org
              :refer [with-all-mocked-orgs with-mocked-orgs]]
             [lupapalvelu.mock.user :as mock-usr]
-            [lupapalvelu.user :as user]
             [lupapalvelu.itest-util :refer [unauthorized?]]
             [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
             [lupapalvelu.action :refer :all]
