@@ -168,14 +168,12 @@
                                           :states          states/all-states}}
     (domain/get-application-as "123"
                                {:id            "user123"
-                                :organizations ["ankkalinna"]
                                 :orgAuthz      {:ankkalinna #{:authority}}
                                 :role          :authority}
                                :include-canceled-apps? true)
     => {:state "submitted" :organization "ankkalinna"}
     (domain/get-application-as "123"
                                {:id            "user123"
-                                :organizations ["hanhivaara"]
                                 :orgAuthz      {:hanhivaara #{:authority}}
                                 :role          :authority}
                                :include-canceled-apps? true)
@@ -190,7 +188,6 @@
   (fact "with correct authority command is executed"
     (execute {:action "test-command-auth"
               :user   {:id            "user123"
-                       :organizations ["ankkalinna"]
                        :orgAuthz      {:ankkalinna #{:authority}}
                        :role          :authority}
               :data   {:id "123"}})
@@ -199,16 +196,33 @@
   (fact "with incorrect authority error is returned"
     (execute {:action "test-command-auth"
               :user   {:id            "user123"
-                       :organizations ["hanhivaara"]
                        :orgAuthz      {:hanhivaara #{:authority}}
                        :role          :authority}
               :data   {:id "123"}})
     => not-accessible))
 
+(fact "Authority with no org and incorrect role has no access"
+  (execute {:action "test-command-auth"
+            :user   {:id            "user234"
+                     :role          :authority}
+            :data   {:id "123"}})
+  => unauthorized
+  (provided
+    (get-actions) => {:test-command-auth {:parameters      [:id]
+                                          :user-roles      #{:authority}
+                                          :org-authz-roles #{:authority}
+                                          :permissions     [{:required []}]
+                                          :states          states/all-states}}
+    (domain/get-application-as "123" {:id            "user234"
+                                      :role          :authority}
+                               :include-canceled-apps? true)
+    => {:organization "999-R"
+        :state        "submitted"
+        :auth         [{:id "user234" :role "otherRole"}]}))
+
 (fact "Authority from same org has access"
   (execute {:action "test-command"
             :user   {:id            "user123"
-                     :organizations []
                      :role          :authority}
             :data   {:id "123"}})
   => ok?
@@ -221,7 +235,6 @@
                                      :user-authz-roles #{:someRole}}}
     (domain/get-application-as "123"
                                {:id            "user123"
-                                :organizations []
                                 :role          :authority}
                                :include-canceled-apps? true)
     => {:organization "999-R"
@@ -231,7 +244,6 @@
 (fact "Non-authority from same org has no access"
   (execute {:action "test-command"
             :user   {:id            "some1"
-                     :organizations ["999-R"]
                      :orgAuthz      {:999-R #{:authority}}
                      :role          :applicant}
             :data   {:id "app-id"}})
@@ -245,7 +257,6 @@
 (fact "Authority with no org but correct role has access"
   (execute {:action "test-command"
             :user   {:id            "user123"
-                     :organizations []
                      :role          :authority}
             :data   {:id "123"}})
   => ok?
@@ -259,29 +270,15 @@
                        :user-authz-roles #{:someRole}}}
     (domain/get-application-as "123"
                                {:id            "user123"
-                                :organizations []
                                 :role          :authority}
                                :include-canceled-apps? true)
     => {:organization "999-R"
         :state        "submitted"
         :auth         [{:id "user123" :role "someRole"}]}))
 
-;; FIXME: was broken before refactoring the test
-; expected: "error.(unauthorized--------------)"
-; actual:   "error.(application-not-accessible)"
-#_
-(fact "Authority with no org and incorrect role has no access"
-  (execute {:action "test-command-auth"
-            :user   {:id            "user234"
-                     :organizations []
-                     :role          :authority}
-            :data   {:id "123"}})
-  => unauthorized)
-
 (fact "Authority with no org and writer role in auth array has access"
   (execute {:action "with-default-roles"
             :user   {:id            "user345"
-                     :organizations []
                      :role          :authority}
             :data   {:id "123"}})
   => ok?
@@ -295,17 +292,14 @@
                              :user-authz-roles roles/default-authz-writer-roles}}
     (domain/get-application-as "123"
                                {:id            "user345"
-                                :organizations []
                                 :role          :authority}
                                :include-canceled-apps? true)
     => {:organization "999-R"
         :state        "submitted"
         :auth         [{:id "user345" :role "writer"}]}))
 
-;; FIXME: was broken before refactoring the test
-; expected: "error.un(authorized)"
-; actual:   "error.un(known-----)"
-#_(fact "Authority with no org and non-writer role in auth array has no access"
+
+(fact "Authority with no org and non-writer role in auth array has no access"
   (against-background
     (get-actions)
     => {:with-default-roles {:parameters       [:id]
@@ -315,7 +309,6 @@
                              :states           states/all-states
                              :user-authz-roles roles/default-authz-writer-roles}}
     (domain/get-application-as "123" {:id            "user456"
-                                      :organizations []
                                       :role          :authority}
                                :include-canceled-apps? true)
     => {:organization "999-R"
@@ -324,7 +317,6 @@
 
   (execute {:action "with-default-roles"
             :user   {:id            "user456"
-                     :organizations []
                      :role          :authority}
             :data   {:id "123"}})
   => unauthorized)
@@ -441,7 +433,6 @@
                                       :org-authz-roles #{:authority}
                                       :permissions     [{:required []}]}}
     (domain/get-application-as "123" {:id            "user123"
-                                      :organizations ["ankkalinna"]
                                       :orgAuthz      {:ankkalinna #{:authority}}
                                       :role          :authority}
                                :include-canceled-apps? true)
@@ -451,7 +442,6 @@
   (fact
     (execute {:action "test-command1"
               :user   {:id            "user123"
-                       :organizations ["ankkalinna"]
                        :orgAuthz      {:ankkalinna #{:authority}}
                        :role          :authority}
               :data   {:id "123"}})
@@ -460,7 +450,6 @@
   (fact
     (execute {:action "test-command2"
               :user   {:id            "user123"
-                       :organizations ["ankkalinna"]
                        :orgAuthz      {:ankkalinna #{:authority}}
                        :role          :authority}
               :data   {:id "123"}})
@@ -468,7 +457,6 @@
   (fact
     (execute {:action "test-command3"
               :user   {:id            "user123"
-                       :organizations ["ankkalinna"]
                        :orgAuthz      {:ankkalinna #{:authority}}
                        :role          :authority}
               :data   {:id "123"}})
@@ -491,7 +479,6 @@
                                       :permissions      [{:required []}]}}
     (domain/get-application-as "123"
                                {:id            "user123"
-                                :organizations ["ankkalinna"]
                                 :orgAuthz      {:ankkalinna #{:authority}}
                                 :role          :authority}
                                :include-canceled-apps? true)
@@ -501,7 +488,6 @@
   (fact
     (execute {:action "test-command1"
               :user   {:id            "user123"
-                       :organizations ["ankkalinna"]
                        :orgAuthz      {:ankkalinna #{:authority}}
                        :role          :authority}
               :data   {:id "123"}})
@@ -509,7 +495,6 @@
   (fact
     (execute {:action "test-command2"
               :user   {:id            "user123"
-                       :organizations ["ankkalinna"]
                        :orgAuthz      {:ankkalinna #{:authority}}
                        :role          :authority}
               :data   {:id "123"}})
@@ -517,7 +502,6 @@
   (fact
     (execute {:action "test-command3"
               :user   {:id            "user123"
-                       :organizations ["ankkalinna"]
                        :orgAuthz      {:ankkalinna #{:authority}}
                        :role          :authority}
               :data   {:id "123"}})
@@ -531,7 +515,6 @@
                                       :permissions      [{:required []}]}}
     (domain/get-application-as "123"
                                {:id            "user123"
-                                :organizations ["ankkalinna"]
                                 :orgAuthz      {:ankkalinna #{:authority}}
                                 :role          :authority}
                                :include-canceled-apps? true)
@@ -539,7 +522,6 @@
         :state        "submitted"})
   (validate {:action "test-command1"
              :user   {:id            "user123"
-                      :organizations ["ankkalinna"]
                       :orgAuthz      {:ankkalinna #{:authority}}
                       :role          :authority}
              :data   {:id "123"}})
@@ -731,7 +713,6 @@
   (fact
     (validate {:action "test-command"
                :user   {:id            "authority"
-                        :organizations ["ankkalinna"]
                         :orgAuthz      {:ankkalinna #{:authority}}
                         :role          :authority}
                :data   {}})
@@ -741,7 +722,6 @@
   (fact
     (validate {:action "test-command"
                :user   {:id            "authority-admin"
-                        :organizations ["ankkalinna"]
                         :orgAuthz      {:ankkalinna #{:authorityAdmin}}
                         :role          :authority}
                :data   {}})
