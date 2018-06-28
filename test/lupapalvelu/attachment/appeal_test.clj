@@ -6,39 +6,43 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment.preview :as preview]
-            [clj-uuid :as uuid]))
+            [clj-uuid :as uuid]
+            [lupapalvelu.storage.file-storage :as storage]))
 
 (testable-privates lupapalvelu.attachment.appeal create-appeal-attachment-data!)
 
 (facts "appeal attachment updates"
-       (against-background
-         [(lupapalvelu.attachment.conversion/archivability-conversion anything anything) => {:archivable false
-                                                                                             :archivabilityError :not-validated}
-          (preview/preview-image! anything anything anything anything) => nil]
-         (fact "appeal-attachment-data"
-               (let [file-id  (str (uuid/v1))
-                     file-obj {:content (constantly nil),
-                               :contentType "application/pdf",
-                               :size 123,
-                               :filename "test-pdf.pdf",
-                               :metadata {:uploaded 12344567, :linked false},
-                               :application nil
-                               :fileId file-id}
-                     command {:application {:state :verdictGiven}
-                              :created 12345
-                              :user {:id "foo" :username "tester" :role "authority" :firstName "Tester" :lastName "Testby"}}
-                     result-attachment (create-appeal-attachment-data!
-                                         command
-                                         (mongo/create-id)
-                                         :appeal
-                                         file-obj)]
-                 (fact "Generated attachment data is valid (no PDF/A generation)"
-                       (sc/check att/Attachment result-attachment) => nil)
-                 (fact "Version has correct keys"
-                       (:latestVersion result-attachment) => (contains {:size (:size file-obj)
-                                                                        :filename (:filename file-obj)
-                                                                        :contentType (:contentType file-obj)
-                                                                        :fileId (:fileId file-obj)}))))))
+  (let [file-id  (str (uuid/v1))
+        file-obj {:content (constantly nil),
+                  :contentType "application/pdf",
+                  :size 123,
+                  :filename "test-pdf.pdf",
+                  :metadata {:uploaded 12344567, :linked false},
+                  :application nil
+                  :fileId file-id}
+        app-id "LP-186-2018-90001"
+        command {:application {:state :verdictGiven
+                               :id app-id}
+                 :created 12345
+                 :user {:id "foo" :username "tester" :role "authority" :firstName "Tester" :lastName "Testby"}}]
+    (against-background
+      [(lupapalvelu.attachment.conversion/archivability-conversion anything anything) => {:archivable false
+                                                                                          :archivabilityError :not-validated}
+       (preview/preview-image! anything anything anything anything) => nil
+       (storage/link-files-to-application "foo" app-id [(:fileId file-obj)]) => 1]
+      (facts "appeal-attachment-data"
+        (let [result-attachment (create-appeal-attachment-data!
+                                  command
+                                  (mongo/create-id)
+                                  :appeal
+                                  file-obj)]
+          (fact "Generated attachment data is valid (no PDF/A generation)"
+            (sc/check att/Attachment result-attachment) => nil)
+          (fact "Version has correct keys"
+            (:latestVersion result-attachment) => (contains {:size (:size file-obj)
+                                                             :filename (:filename file-obj)
+                                                             :contentType (:contentType file-obj)
+                                                             :fileId (:fileId file-obj)})))))))
 
 (facts "appeal attachments"
   (let [attachments [{:id "foo"
