@@ -23,7 +23,7 @@ Create project application
   Append To List  ${applicationIds}  ${newApplicationId}
 
 Go back to project application
-  Scroll and click test id  test-application-link-permit-lupapistetunnus
+  Wait until  Scroll and click test id  test-application-link-permit-lupapistetunnus
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='kerrostalo-rivitalo']
 
 Open foreman application

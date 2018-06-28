@@ -39,6 +39,7 @@ Foreman continues filling his info
   Deny yes no dialog
   Open tab  parties
   Open accordions  parties
+  Kill dev-box
   Foreman accepts invitation and fills info
 
 Foreman history is not visible to applicant
