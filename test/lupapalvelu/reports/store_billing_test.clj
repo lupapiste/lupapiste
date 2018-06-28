@@ -1,6 +1,7 @@
 (ns lupapalvelu.reports.store-billing-test
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.reports.store-billing :refer :all]))
+            [lupapalvelu.reports.store-billing :refer :all]
+            [sade.util :as util]))
 
 (def docstore-response
   [{:description "Aloituskokous"
@@ -102,7 +103,9 @@
 (facts "Billing entries sheet"
   (fact "No entries"
     (billing-entries-sheet "091-R" 0 1528874580463 [] :fi)
-    => {:sheet-name "01.01.1970 - 13.06.2018"
+    => {:sheet-name (str (util/to-local-date 0)
+                         " - "
+                         (util/to-local-date 1528874580463))
         :header header-row-in-finnish
         :row-fn identity
         :data [[]
