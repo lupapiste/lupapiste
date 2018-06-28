@@ -584,7 +584,7 @@
   {:parameters       [organizationId role password]
    :user-roles       #{:admin}
    :input-validators [(partial action/non-blank-parameters [:organizationId])
-                      (fn [{data :data}] (when-not (#{"approver" "authorityAdmin" "archivist"} (:role data)) (fail :error.invalid-role)))]
+                      (fn [{data :data}] (when-not (#{"authority" "authorityAdmin" "archivist"} (:role data)) (fail :error.invalid-role)))]
    :description      "Changes admin session into authority session with access to given organization"}
   [{user :user :as command}]
   (if (usr/get-user-with-password (:username user) password)

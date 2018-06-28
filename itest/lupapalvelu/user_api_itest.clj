@@ -559,11 +559,11 @@
         csrf-token   (get-anti-csrf store) => truthy
         params       (assoc params :headers {"x-anti-forgery-token" csrf-token})
         sipoo-rakval (-> "sipoo" find-user-from-minimal :orgAuthz keys first name)
-        impersonate  (fn [password]
+        impersonate  (fn [password & {:keys [role] :or {role "authority"}}]
                        (-> (http-post
                              (str (server-address) "/api/command/impersonate-authority")
                              (assoc params
-                               :form-params (merge {:organizationId sipoo-rakval :role "approver"} (when password {:password password}))
+                               :form-params (merge {:organizationId sipoo-rakval :role role} (when password {:password password}))
                                :content-type :json))
                            decode-response :body))
         role         (fn [] (-> (http-get (str (server-address) "/api/query/user") params) decode-response :body :user :role))
