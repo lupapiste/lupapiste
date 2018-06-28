@@ -588,10 +588,10 @@
    :description      "Changes admin session into authority session with access to given organization"}
   [{user :user :as command}]
   (if (usr/get-user-with-password (:username user) password)
-    (let [kw-role   (keyword role)
-          main-role (if (= :authorityAdmin kw-role) :authorityAdmin :authority)
-          role-set  (set [kw-role main-role])
-          imposter  (assoc user :impersonating true :role (name main-role) :orgAuthz {(keyword organizationId) role-set})]
+    (let [org-roles  (if (= "archivist" role)
+                       [:authority :archivist]
+                       [(keyword role)])
+          imposter  (assoc user :impersonating true :role "authority" :orgAuthz {(keyword organizationId) (set org-roles)})]
       (ssess/merge-to-session command (ok) {:user imposter}))
     (fail :error.login)))
 

@@ -548,7 +548,7 @@
 ;; ==============================================================================
 ;;
 
-(facts* "impersonating"
+(facts* "impersonating as authority"
   (let [store        (atom {})
         params       {:cookie-store (->cookie-store store)
                       :follow-redirects false
@@ -600,14 +600,14 @@
       (fact "but not again (as we're now impersonating)"
         (impersonate "admin") => fail?)
 
-      (fact "instead, application is visible"
+      (fact "role has changed to authority"
+        (role) => "authority")
+
+      (fact "application is visible"
         (let [query-as-imposter (http-get (str (server-address) "/api/query/application?id=" application-id) params) => http200?
               body (-> query-as-imposter decode-response :body) => ok?
               application (:application body)]
           (:id application) => application-id)))
-
-    (fact "role has changed to authority"
-      (role) => "authority")
 
     (fact "every available action is a query or raw, i.e. not a command
           (or any other mutating action type we might have in the future)"
@@ -621,6 +621,51 @@
                     (assoc-in [:headers "content-type"] "application/json;charset=utf-8")
                     (assoc :body (json/encode {:propertyIds ["12312312341234"]})))]
         (-> (http-post (str (server-address) "/api/datatables/owners") req) decode-response :body)) => unauthorized?)))
+
+(facts* "impersonating as authorityAdmin"
+  (let [store (atom {})
+        params {:cookie-store     (->cookie-store store)
+                :follow-redirects false
+                :throw-exceptions false}
+        login (http-post
+                (str (server-address) "/api/login")
+                (assoc params :form-params {:username "admin" :password "admin"})) => http200?
+        csrf-token (get-anti-csrf store) => truthy
+        params (assoc params :headers {"x-anti-forgery-token" csrf-token})
+        sipoo-rakval (-> "sipoo" find-user-from-minimal :orgAuthz keys first name)
+        impersonate (fn [password & {:keys [role] :or {role "authorityAdmin"}}]
+                      (-> (http-post
+                            (str (server-address) "/api/command/impersonate-authority")
+                            (assoc params
+                              :form-params (merge {:organizationId sipoo-rakval :role role} (when password {:password password}))
+                              :content-type :json))
+                          decode-response :body))
+        orgAuthz (fn [] (-> (http-get (str (server-address) "/api/query/user") params) decode-response :body :user :orgAuthz))
+        actions (fn [] (-> (http-get (str (server-address) "/api/query/allowed-actions") params) decode-response :body :actions))]
+
+    (fact "impersonation action is available"
+      (:impersonate-authority (actions)) => ok?)
+
+    (fact "admin can not query non existing organization details"
+      (-> (http-get (str (server-address) "/api/query/organization-by-user") params) decode-response :body) => unauthorized?)
+
+    (fact "impersonate as authorityAdmin"
+      (impersonate "admin" :role "authorityAdmin") => ok?)
+    (fact "orgAuthz has authorityAdmin"
+      (orgAuthz) => (contains {(keyword sipoo-rakval) ["authorityAdmin"]}))
+
+    (fact "admin as authorityAdmin can now query organization details"
+      (let [resp (-> (http-get (str (server-address) "/api/query/organization-by-user") params) decode-response :body)]
+        resp => ok?
+        (get-in resp [:organization :id]) => sipoo-rakval))
+
+    (fact "every available action is a query or raw, i.e. not a command
+          (or any other mutating action type we might have in the future)"
+      (let [action-names (keys (filter (fn [[name ok]] (ok? ok)) (actions)))]
+        ; Make sure we have required all the actions
+        (require 'lupapalvelu.server)
+        (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))))
+
 
 (facts* "reset password email"
   (last-email) ; Inbox zero
