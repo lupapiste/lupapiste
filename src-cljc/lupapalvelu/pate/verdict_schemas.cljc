@@ -354,45 +354,49 @@
 
 (def versub-buildings
   {:dictionary
-   {:buildings
-    {:repeating        (reduce (fn [acc k]
-                                 (assoc acc k {:text {:i18nkey (util/kw-path :pate-buildings.info
-                                                                             k)}}))
-                               {:building-name          {:placeholder {:label? false
-                                                                :type   :building}}
-                                :show-building          required-in-verdict}
-                               [:rakennetut-autopaikat
-                                :kiinteiston-autopaikat
-                                :autopaikat-yhteensa
-                                :vss-luokka
-                                :paloluokka])
-     :sort-by          :order
-     :template-section :buildings}}
+   {:buildings-title {:css      :pate-label
+                      :loc-text :pate-buildings}
+    :buildings
+    {:repeating (reduce (fn [acc k]
+                          (assoc acc k {:text {:i18nkey (util/kw-path :pate-buildings.info
+                                                                      k)}}))
+                        {:building-name {:placeholder {:label? false
+                                                       :type   :building}}
+                         :show-building required-in-verdict}
+                        [:rakennetut-autopaikat
+                         :kiinteiston-autopaikat
+                         :autopaikat-yhteensa
+                         :vss-luokka
+                         :paloluokka])
+     :sort-by   :order}}
    :section
-   {:id    :buildings
-    :show? :?.buildings
-    :grid  {:columns 7
-            :rows    [[{:col  7
-                        :grid {:columns    6
-                               :repeating  :buildings
-                               :rows       [{:css   [:row--tight]
-                                             :show? [:OR :_meta.editing? :+.show-building]
-                                             :row   [{:col  6
-                                                      :dict :building-name}]}
-                                            {:show? [:OR :_meta.editing? :+.show-building]
-                                             :css   [:row--indent]
-                                             :row   [{:col  5
-                                                      :list {:css   :list--sparse
-                                                             :items (map #(hash-map :dict %
-                                                                                    :enabled? :-.show-building)
-                                                                         [:rakennetut-autopaikat
-                                                                          :kiinteiston-autopaikat
-                                                                          :autopaikat-yhteensa
-                                                                          :vss-luokka
-                                                                          :paloluokka])}}
-                                                     {:dict  :show-building
-                                                      :show? :_meta.editing?}]}
-                                            ]}}]]}}})
+   {:id               :buildings
+    :show?            :buildings
+    :template-section :buildings
+    :grid             {:columns 7
+                       :rows    [[{:col  7
+                                   :dict :buildings-title}]
+                                 [{:col  7
+                                   :grid {:columns   6
+                                          :repeating :buildings
+                                          :rows      [{:css   [:row--tight]
+                                                       :show? [:OR :_meta.editing? :+.show-building]
+                                                       :row   [{:col  6
+                                                                :dict :building-name}]}
+                                                      {:show? [:OR :_meta.editing? :+.show-building]
+                                                       :css   [:row--indent]
+                                                       :row   [{:col  5
+                                                                :list {:css   :list--sparse
+                                                                       :items (map #(hash-map :dict %
+                                                                                              :enabled? :-.show-building)
+                                                                                   [:rakennetut-autopaikat
+                                                                                    :kiinteiston-autopaikat
+                                                                                    :autopaikat-yhteensa
+                                                                                    :vss-luokka
+                                                                                    :paloluokka])}}
+                                                               {:dict  :show-building
+                                                                :show? :_meta.editing?}]}
+                                                      ]}}]]}}})
 
 
 (def versub-attachments

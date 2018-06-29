@@ -925,8 +925,7 @@
                       (map keyword)
                       set)
          addons  (merge
-                  (when (seq (util/intersection-as-kw inc-set
-                                                      buildings-inclusion-keys))
+                  (when (:buildings.show-building inc-set)
                     {:buildings (merge-buildings (buildings application)
                                                  (:buildings data))})
                   (when (:neighbors inc-set)
