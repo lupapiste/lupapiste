@@ -11,7 +11,7 @@
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as organization]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.password-reset :as pw-reset]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.rest.rest-api :refer [defendpoint]]
@@ -34,7 +34,6 @@
             [sade.util :refer [future*]]
             [sade.util :as util]
             [schema.core :as sc]
-            [schema-tools.core :as st]
             [slingshot.slingshot :refer [throw+ try+]]
             [swiss.arrows :refer :all]
             [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]))
@@ -146,7 +145,8 @@
 
 
 (defcommand create-user
-  {:input-validators [usr/CreateUser]
+  {:input-validators [usr/AdminCreateUser]
+   :pre-checks       [org/orgAuthz-pre-checker]
    :notified         true
    :permissions      [{:required [:users/create]}]}
   [{user-data :data caller :user}]
@@ -359,16 +359,17 @@
    :input-validators [(partial action/non-blank-parameters [:organizationId :email :firstName :lastName])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       action/email-validator
-                      (partial allowed-roles organization/authority-roles)]
+                      (partial allowed-roles org/authority-roles)]
    :notified         true
    :permissions      [{:required [:organization/admin]}]
    :pre-checks       [(fn [{params :data user :user}]
                         (when (:organizationId params)      ; FIXME LPK-3828 permissions pipeline should handle this
                           (when-not (usr/user-has-role-in-organization? user (:organizationId params) #{:authorityAdmin})
-                            (fail :error.unauthorized))))]
+                            (fail :error.unauthorized))))
+                      org/orgAuthz-pre-checker]
    :description      "Updates or creates user in admins organization"}
   [{caller :user}]
-  (let [actual-roles    (organization/filter-valid-user-roles-in-organization organizationId roles)
+  (let [actual-roles    (org/filter-valid-user-roles-in-organization organizationId roles)
         email           (ss/canonize-email email)
         result          (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organizationId) actual-roles}})]
     (if (ok? result)
@@ -391,11 +392,11 @@
   {:parameters       [email roles]
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
-                      (partial allowed-roles organization/authority-roles)]
+                      (partial allowed-roles org/authority-roles)]
    :permissions      [{:required [:organization/admin]}]}
   [{caller :user}]
   (let [organization-id (usr/authority-admins-organization-id caller)
-        actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)]
+        actual-roles    (org/filter-valid-user-roles-in-organization organization-id roles)]
     (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})))
 
 (defn- update-authority [authority email data]

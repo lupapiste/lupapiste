@@ -306,6 +306,13 @@
         (= (count orgs)
            (count found-orgs)))))
 
+(defn orgAuthz-pre-checker
+  "If command data has orgAuthz parameter, checks that all organization keys exists in db."
+  [{{:keys [orgAuthz]} :data}]
+  (when orgAuthz
+    (when-not (known-organizations? (keys orgAuthz))
+      (fail :error.unknown-organization))))
+
 (defn get-autologin-ips-for-organization [org-id]
   (-> (mongo/by-id :organizations org-id [:allowedAutologinIPs])
       :allowedAutologinIPs))
@@ -321,9 +328,6 @@
    (->> (mongo/by-id :organizations id projection)
         remove-sensitive-data
         with-scope-defaults)))
-
-(defn known-organization? [id]
-  (some? (get-organization id {:_id true})))
 
 (defn update-organization [id changes]
   {:pre [(not (ss/blank? id))]}

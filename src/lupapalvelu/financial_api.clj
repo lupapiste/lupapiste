@@ -2,12 +2,14 @@
   (:require [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.financial :as financial]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [sade.core :refer [ok]]))
 
 (defcommand create-financial-handler
   {:parameters       [:email]
-   :input-validators [usr/CreateUser]
+   :input-validators [usr/AdminCreateUser]
+   :pre-checks       [org/orgAuthz-pre-checker]
    :permissions      [{:required [:users/create-financial-handler]}]
    :feature          :financial}
   [{user-data :data user :user}]

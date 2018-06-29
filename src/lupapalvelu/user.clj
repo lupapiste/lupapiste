@@ -114,8 +114,8 @@
                                                :callback-url  ssc/HttpUrl}})
 
 
-(defschema CreateUser
-  "Schema for creating new users"
+(defschema AdminCreateUser
+  "Schema for creating new users by adminAdmin and authorityAdmin."
   (-> User
       ; Limit the keys that can be given here:
       (st/select-keys [:email

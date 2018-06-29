@@ -312,6 +312,13 @@
                                                                       :role     "authority"
                                                                       :orgAuthz {:org-1 ["authority"]}})
                        :known-organizations? {[:org-1] true}})
+      => nil)
+    (fact "admin is allowed to create users with orgAuthz"
+      (new-user-error {:caller               {:role "admin"}
+                       :user-data            (create-new-user-entity {:email "a@b.c"
+                                                                      :role  "authority"
+                                                                      :orgAuthz {:123-TEST ["authority"]}})
+                       :known-organizations? (constantly true)})
       => nil))
 
   (fact "dummy user may not have an organization roles"

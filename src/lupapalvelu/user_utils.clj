@@ -40,7 +40,7 @@
 (defn create-and-notify-authority-user
   "Used by authorityAdmin. Creates authority user, notifies and returns new user."
   [org-id caller user-data]
-  {:pre [(= "authority" (:role user-data)) (nil? (:organization user-data))]}
+  {:pre [(= "authority" (:role user-data)) (nil? (:organization user-data)) (nil? (:orgAuthz user-data))]}
   (let [user (usr/create-new-user caller user-data)]
     (notify-new-authority user caller org-id)
     user))
