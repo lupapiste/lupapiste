@@ -589,13 +589,6 @@
 ;; ==============================================================================
 ;;
 
-(defn- auth-admin-orgs [orgAuthz]
-  (->> orgAuthz
-       (keep (fn [[org org-roles]]
-               (when (some (partial = "authorityAdmin") org-roles)
-                 org)))
-       (set)))
-
 (def create-new-user-rules
   [{:desc  "user data matches User schema"
     :error :error.missing-parameters
@@ -604,6 +597,20 @@
                ; Help problem tracing by adding a stack trace to logs
                (error (ex-info "stack trace" {}) "new user does not match NewUser schema" schema-errors)
                true))}
+   {:desc  "user-data has orgAuths in expected form"        ; keys as keyword, roles as string
+    :error :error.missing-parameters
+    :fail? (fnk [[:user-data {orgAuthz nil}]]
+             (when orgAuthz
+               (not (and (every? keyword? (keys orgAuthz))
+                         (every? string?  (apply concat (vals orgAuthz)))))))}
+
+   {:desc  "caller has been run trough 'with-org-auth'"
+    :error :error.missing-parameters
+    :fail? (fnk [[:caller {orgAuthz nil}]]
+             (when (seq orgAuthz)
+               (not (and (every? keyword? (keys orgAuthz))
+                         (every? set?      (vals orgAuthz))
+                         (every? keyword?  (apply concat (vals orgAuthz)))))))}
 
    {:desc  "applicant can not create other than dummy users"
     :error :error.unauthorized
@@ -625,8 +632,8 @@
     :error :error.unauthorized
     :fail? (fnk [caller user-data]
              (and (-> caller :role (not= "admin"))
-                  (not (every? (-> caller :orgAuthz auth-admin-orgs)
-                               (-> user-data :orgAuthz keys)))))}
+                  (not (every? (organization-ids-by-roles caller #{:authorityAdmin})
+                               (map name (-> user-data :orgAuthz keys))))))}
 
    {:desc  "dummy user may not have an organization roles"
     :error :error.unauthorized
@@ -675,18 +682,9 @@
 (defn create-new-user
   "Insert new user to database, returns new user data without private information. If user
    exists and has role \"dummy\", overwrites users information. If users exists with any other
-   role, throws exception."
+   role, throws exception. Caller should have gone through with-org-authz."
   [caller user-data]
-  (let [; Oh damn, sometimes orgAuthz is a set of keywords, sometimes
-        ; vector of strings, probably there are some other variations also.
-        ; This normalizes callers orgAuthz for this case
-        caller    (when caller
-                     (update caller :orgAuthz (fn [org-authz]
-                                                (->> org-authz
-                                                     (map (fn [[k v]]
-                                                            [k (mapv name v)]))
-                                                     (into {})))))
-        user-data (->> user-data
+  (let [user-data (->> user-data
                        (create-new-user-entity)
                        (validate-create-new-user! caller))
         old-user  (get-user-by-email (:email user-data))

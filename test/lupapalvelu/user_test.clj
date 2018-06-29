@@ -256,7 +256,7 @@
   (fact "authorityAdmin can create users into his/her own organizations only"
     (fact "caller is only authority"
       (new-user-error {:caller    {:role     "authority"
-                                   :orgAuthz {:org-1 ["authority"]}}
+                                   :orgAuthz {:org-1 #{:authority'}}}
                        :user-data (create-new-user-entity {:email    "a@b.c"
                                                            :role     "authority"
                                                            :orgAuthz {:org-1 ["authority"]}})})
@@ -265,7 +265,7 @@
 
     (fact "caller is authorityAdmin, but in wrong org"
       (new-user-error {:caller    {:role     "authority"
-                                   :orgAuthz {:org-1 ["authorityAdmin"]}}
+                                   :orgAuthz {:org-1 #{:authority'}}}
                        :user-data (create-new-user-entity {:email    "a@b.c"
                                                            :role     "authority"
                                                            :orgAuthz {:org-2 ["authority"]}})})
@@ -274,7 +274,7 @@
 
     (fact "caller is authorityAdmin, and in correct org"
       (new-user-error {:caller               {:role     "authority"
-                                              :orgAuthz {:org-1 ["authorityAdmin"]}}
+                                              :orgAuthz {:org-1 #{:authorityAdmin}}}
                        :user-data            (create-new-user-entity {:email    "a@b.c"
                                                                       :role     "authority"
                                                                       :orgAuthz {:org-1 ["authority"]}})
@@ -283,8 +283,8 @@
 
     (fact "caller has authorityAdmin in two orgs, created user can have roles in both"
       (new-user-error {:caller               {:role     "authority"
-                                              :orgAuthz {:org-1 ["anything 1" "authorityAdmin" "anything 2"]
-                                                         :org-2 ["anything 2" "authorityAdmin" "anything 4"]}}
+                                              :orgAuthz {:org-1 #{:anything1 :authorityAdmin :anything2}
+                                                         :org-2 #{:anything2 :authorityAdmin :anything4}}}
                        :user-data            (create-new-user-entity {:email    "a@b.c"
                                                                       :role     "authority"
                                                                       :orgAuthz {:org-1 ["authority"]
@@ -294,8 +294,8 @@
 
     (fact "caller has authorityAdmin in only one org, created user has roles in both, therefore this fails"
       (new-user-error {:caller               {:role     "authority"
-                                              :orgAuthz {:org-1 ["anything 1" "authorityAdmin" "anything 2"]
-                                                         :org-2 ["anything 2" "anything 4"]}}
+                                              :orgAuthz {:org-1 #{:anything1 :authorityAdmin :anything2}
+                                                         :org-2 #{::anything2 :anything4}}}
                        :user-data            (create-new-user-entity {:email    "a@b.c"
                                                                       :role     "authority"
                                                                       :orgAuthz {:org-1 ["authority"]
@@ -306,8 +306,8 @@
 
     (fact "caller has authorityAdmin in only one org, created user has role in that org"
       (new-user-error {:caller               {:role     "authority"
-                                              :orgAuthz {:org-1 ["anything 1" "authorityAdmin" "anything 2"]
-                                                         :org-2 ["anything 2" "anything 4"]}}
+                                              :orgAuthz {:org-1 #{:anything1 :authorityAdmin :anything2}
+                                                         :org-2 #{::anything2 :anything4}}}
                        :user-data            (create-new-user-entity {:email    "a@b.c"
                                                                       :role     "authority"
                                                                       :orgAuthz {:org-1 ["authority"]}})
@@ -323,7 +323,7 @@
 
   (fact "dummy user may not have an organization roles"
     (new-user-error {:caller    {:role     "authority"
-                                 :orgAuthz {:foo ["authorityAdmin"]}}
+                                 :orgAuthz {:foo #{:authorityAdmin}}}
                      :user-data (create-new-user-entity {:email    "a@b.c"
                                                          :role     "dummy"
                                                          :orgAuthz {:foo ["approver"]}})})
@@ -333,7 +333,7 @@
   (facts "all organizations must be known"
     (fact "org-1 is unknown"
       (new-user-error {:caller               {:role     "authority"
-                                              :orgAuthz {:org-1 ["authorityAdmin"]}}
+                                              :orgAuthz {:org-1 #{:authorityAdmin}}}
                        :user-data            (create-new-user-entity {:email    "a@b.c"
                                                                       :role     "authority"
                                                                       :orgAuthz {:org-1 ["authority"]}})
@@ -342,7 +342,7 @@
                     :error :error.organization-not-found}))
     (fact "org-1 is known"
       (new-user-error {:caller               {:role     "authority"
-                                              :orgAuthz {:org-1 ["authorityAdmin"]}}
+                                              :orgAuthz {:org-1 #{:authorityAdmin}}}
                        :user-data            (create-new-user-entity {:email    "a@b.c"
                                                                       :role     "authority"
                                                                       :orgAuthz {:org-1 ["authority"]}})
@@ -370,7 +370,7 @@
 
   (fact "authority can create user with role `dummy`"
     (new-user-error {:caller               {:role     "authority"
-                                            :orgAuthz {:org-1 ["authorityAdmin"]}}
+                                            :orgAuthz {:org-1 #{:authorityAdmin}}}
                      :user-data            (create-new-user-entity {:email    "a@b.c"
                                                                     :role     "dummy"
                                                                     :orgAuthz {}})
@@ -401,8 +401,8 @@
   (facts "authority can create new authority, provided that she has authorityAdmin permission to target org"
     (fact "caller has authority admin, validation succeeds"
       (validate-create-new-user! {:role     "authority"
-                                  :orgAuthz {:org-1 ["authorityAdmin"]
-                                             :org-2 ["authorityAdmin"]}}
+                                  :orgAuthz {:org-1 #{:authorityAdmin}
+                                             :org-2 #{:authorityAdmin}}}
                                  (create-new-user-entity {:role     "authority"
                                                           :email    "x@x.x"
                                                           :orgAuthz {:org-1 ["authority"]
@@ -412,8 +412,8 @@
         (org/known-organizations? [:org-1 :org-2]) => true))
     (fact "caller does not have authorityAdmin to org-2 validation fails"
       (validate-create-new-user! {:role     "authority"
-                                  :orgAuthz {:org-1 ["authorityAdmin"]
-                                             :org-2 ["authority"]}}
+                                  :orgAuthz {:org-1 #{:authorityAdmin}
+                                             :org-2 #{:authority}}}
                                  (create-new-user-entity {:role     "authority"
                                                           :email    "x@x.x"
                                                           :orgAuthz {:org-1 ["authority"]
@@ -421,8 +421,8 @@
       => unauthorized?)
     (fact "can't create users to org that is unknown"
       (validate-create-new-user! {:role     "authority"
-                                  :orgAuthz {:org-1 ["authorityAdmin"]
-                                             :org-2 ["authorityAdmin"]}}
+                                  :orgAuthz {:org-1 #{:authorityAdmin}
+                                             :org-2 #{:authorityAdmin}}}
                                  (create-new-user-entity {:role     "authority"
                                                           :email    "x@x.x"
                                                           :orgAuthz {:org-1 ["authority"]
@@ -452,7 +452,7 @@
 
   (fact "dummy users can't have orgs"
     (validate-create-new-user! {:role     "authority"
-                                :orgAuthz {:org ["authorityAdmin"]}}
+                                :orgAuthz {:org #{:authorityAdmin}}}
                                (create-new-user-entity {:role     "dummy"
                                                         :email    "x@x.x"
                                                         :orgAuthz {:org ["authority"]}}))
