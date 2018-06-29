@@ -709,6 +709,16 @@
     (org/update-organization organization-id {$set {:reservations.default-location location}})
     (ok)))
 
+(defcommand set-organization-state-change-endpoint
+  {:parameters [url headers]
+   :description "Set REST endpoint configurations for organization state change messages"
+   :user-roles #{:authorityAdmin}
+   :input-validators [(partial action/string-parameters [:url])]}
+  [{data :data user :user}]
+  (let [url (-> data :url ss/trim)
+        organization-id (usr/authority-admins-organization-id user)]
+    (org/set-state-change-endpoint organization-id url headers)))
+
 (defquery krysp-config
   {:user-roles #{:authorityAdmin}}
   [{user :user}]

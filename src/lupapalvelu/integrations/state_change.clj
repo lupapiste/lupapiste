@@ -21,7 +21,8 @@
             [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.states :as states])
+            [lupapalvelu.states :as states]
+            [lupapalvelu.organization :as org])
   (:import (com.mongodb WriteConcern)))
 
 (def displayName {:displayName (zipmap i18n/supported-langs (repeat sc/Str))})
@@ -141,16 +142,15 @@
 
 (sc/defschema EndpointData
   {:url sc/Str
-   :headers {(sc/enum "X-Username" "X-Password" "X-Vault") (sc/maybe sc/Str)}})
+   :headers {(sc/maybe sc/Str) (sc/maybe sc/Str)}})
 
-(sc/defn ^:always-validate get-state-change-endpoint-data :- (sc/maybe EndpointData) []
-  (when-let [url (env/value :matti :rest :url)]
-    {:url     (ss/strip-trailing-slashes (str url "/" (env/value :matti :rest :path :state-change)))
-     :headers (util/assoc-when-pred
-                {} ss/not-blank?
-                "X-Username" (env/value :matti :rest :username)
-                "X-Password" (env/value :matti :rest :password)
-                "X-Vault"    (env/value :matti :rest :vault))}))
+(sc/defn ^:always-validate get-state-change-endpoint-data :- (sc/maybe EndpointData) [org-id]
+  (let [org (org/get-organization org-id)]
+    (when-let [url (get-in org [:state-change-endpoint :url])]
+      {:url     (ss/strip-trailing-slashes url)
+       :headers (->> (get-in org [:state-change-endpoint :header-parameters])
+                     (map (fn [header] {(str (:name header)) (str (:value header))}))
+                     (apply merge))})))
 
 (defn send-via-http [message-id data {:keys [url headers]}]
   (http/post url
@@ -217,7 +217,7 @@
                    :data outgoing-data}
                   :action (:action command))]
         (messages/save msg)
-        (if-let [endpoint (get-state-change-endpoint-data)]
+        (if-let [endpoint (get-state-change-endpoint-data (:organization app))]
           (if (and jms? json-consumer-session)
             (send-via-jms outgoing-data endpoint {:user-id (:id user) :message-id message-id :application-id (:id app)})
             (send-via-http message-id outgoing-data endpoint))

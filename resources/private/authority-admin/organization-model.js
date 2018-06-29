@@ -67,6 +67,9 @@ LUPAPISTE.OrganizationModel = function () {
   self.assignmentTriggers = ko.observableArray();
   self.multipleOperationsSupported = ko.observable(false);
   self.removeHandlersFromRevertedDraft = ko.observable( false );
+  self.stateChangeMsgEnabled = ko.observable(false);
+  self.stateChangeMsgUrl = ko.observable("");
+  self.stateChangeMsgHeaders = ko.observableArray([]);
 
   self.sectionOperations = ko.observableArray();
 
@@ -406,6 +409,10 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.defaultDigitalizationLocationX(util.getIn(organization, ["default-digitalization-location", "x"], []));
     self.defaultDigitalizationLocationY(util.getIn(organization, ["default-digitalization-location", "y"], []));
+
+    self.stateChangeMsgEnabled(organization["state-change-msg-enabled"] || false);
+    self.stateChangeMsgUrl(util.getIn(organization, ["state-change-endpoint", "url"], []));
+    self.stateChangeMsgHeaders(util.getIn(organization, ["state-change-endpoint", "header-parameters"], []));
 
     _.forOwn(operationsAttachmentsPerPermitType, function(value, permitType) {
       var operationsAttachments = _(value)

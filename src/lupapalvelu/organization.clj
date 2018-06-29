@@ -257,7 +257,9 @@
    (sc/optional-key :multiple-operations-supported) sc/Bool
    (sc/optional-key :local-bulletins-page-settings) LocalBulletinsPageSettings
    (sc/optional-key :default-digitalization-location) {:x sc/Str :y sc/Str}
-   (sc/optional-key :remove-handlers-from-reverted-draft) sc/Bool})
+   (sc/optional-key :remove-handlers-from-reverted-draft) sc/Bool
+   (sc/optional-key :state-change-endpoint) {:url sc/Str
+                                             :header-parameters [sc/Str]}})
 
 
 (sc/defschema SimpleOrg
@@ -328,7 +330,7 @@
   (pos? (mongo/count :organizations {:_id organization-id, $and [{:allowedAutologinIPs {$exists true}} {:allowedAutologinIPs ip}]})))
 
 (defn pate-org? [org-id]
-  (pos? (mongo/count :organizations {:_id org-id :pate-enabled true})))
+  (pos? (mongo/count :organizations {:_id org-id :scope.pate-enabled true})))
 
 (defn krysp-urls-not-set?
   "Takes organization as parameter.
@@ -434,6 +436,10 @@
           (fail! :error.no-address-feature-type)
           (update-organization id address-updates)))
       (update-organization id updates))))
+
+(defn set-state-change-endpoint [id url headers]
+  (let [updates {$set {:state-change-endpoint {:url url :header-parameters headers}}}]
+    (update-organization id updates)))
 
 (defn get-organization-name
   ([organization]
