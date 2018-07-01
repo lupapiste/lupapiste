@@ -3,12 +3,17 @@
             [schema.core :as sc]
             [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [sade.schemas :as ssc]))
 
 (def user-keys (map #(if (keyword? %) % (:k %)) (keys usr/User)))
 
+(def coerce-user (ssc/json-coercer usr/User))
+
 (mongocheck :users
-  #(when-let [res (sc/check usr/User (mongo/with-id %))]
+  #(when-let [res (->> (mongo/with-id %)
+                       (coerce-user)
+                       (sc/check usr/User))]
      (assoc (select-keys % [:username]) :errors res))
   user-keys)
 
