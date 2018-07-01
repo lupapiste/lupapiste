@@ -18,6 +18,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notif]
             [lupapalvelu.password-reset :as pw-reset]
+            [lupapalvelu.security :as security]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as usr])
@@ -430,6 +431,8 @@
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role submit]} :data :as token-data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
+  (when (and password (not (security/valid-password? password)))
+    (fail! :error.password.minlength))
   (if-let [existing-user (usr/get-user-by-email (:email user))]
     ;; LPK-3759:
     (token/handle-token (-> token-data
@@ -443,7 +446,7 @@
                                 :lastName    (:lastName user)
                                 :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
                                 :password    password
-                                :role        :applicant
+                                :role        "applicant"
                                 :architect   true
                                 :enabled     true}
                                :language    (:language user)

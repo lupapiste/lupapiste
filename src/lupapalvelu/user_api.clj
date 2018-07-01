@@ -621,7 +621,7 @@
   {:parameters          [stamp email password street zip city phone allowDirectMarketing rakentajafi]
    :optional-parameters [language]
    :user-roles          #{:anonymous}
-   :input-validators    [action/email-validator validate-registrable-user]}
+   :input-validators    [action/email-validator validate-registrable-user security/valid-password-validator]}
   [{data :data}]
   (if-let [vetuma-data (vetuma/get-user stamp)]
     (try
@@ -638,7 +638,8 @@
   {:parameters       [stamp tokenId email password street zip city phone]
    :user-roles       #{:anonymous}
    :input-validators [(partial action/non-blank-parameters [:tokenId :password])
-                      action/email-validator]}
+                      action/email-validator
+                      security/valid-password-validator]}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
         email       (ss/canonize-email email)

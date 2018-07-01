@@ -1,9 +1,7 @@
 (ns lupapalvelu.registration-itest
   (:require [midje.sweet :refer :all]
-            [cheshire.core :as json]
             [ring.util.codec :as codec]
             [sade.env :as env]
-            [sade.util :as util]
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.factlet :refer [fact* facts*]]

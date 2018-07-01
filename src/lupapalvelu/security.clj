@@ -20,7 +20,7 @@
     (apply str (repeatedly len (comp char (partial rand-nth token-chars))))))
 
 (defn valid-password? [password]
-    (>= (count password) (env/value :password :minlength)))  ; length should match the length in util.js
+  (>= (count password) (env/value :password :minlength)))  ; length should match the length in util.js
 
 (defn dispense-salt []
   (BCrypt/gensalt (or (env/value :salt-strength) 10)))
@@ -46,3 +46,8 @@
         cred (and auth (decode-base64 (last (re-find #"^Basic (.*)$" auth))))
         [user pass] (and cred (ss/split (str cred) #":" 2))]
     (= pass (pwd-hash-fn user))))
+
+(defn valid-password-validator [{{pw :password} :data}]
+  (when pw
+    (when-not (valid-password? pw)
+      (fail :error.password.minlength))))

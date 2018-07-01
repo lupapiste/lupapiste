@@ -474,6 +474,8 @@
     => (contains {:email "x@x.x"}))
 
   ; TODO: figure out where invalid password should be checked
+  ; note: checks have now been added to commands that try to save passwords
+  ;  but lets remove this after discussions on where should we do this in future :D
   #_(fact "invalid passwords are rejected"
       (validate-create-new-user! {:role "admin"}
                                  {:password "z"
