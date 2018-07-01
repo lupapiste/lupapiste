@@ -155,30 +155,33 @@
 
 (facts create-system-user
   (fact "no organization-ids"
-    (create-system-user "Kunta" "tunnus@email.org" []) => {:username "tunnus@email.org"}
+    (create-system-user {:role "admin"} "Kunta" "tunnus@email.org" []) => {:username "tunnus@email.org"}
     (provided (mongo/create-id) => ..id..)
     (provided (mongo/insert :users {:id        ..id..
                                     :username  "tunnus@email.org"
                                     :email     "tunnus@email.org"
                                     :firstName "J\u00e4rjestelm\u00e4tunnus"
                                     :lastName  "Kunta"
-                                    :role      :authority
+                                    :role      "authority"
                                     :enabled   true
                                     :orgAuthz  {}
-                                    :language  :fi}) => irrelevant))
+                                    :language  "fi"}) => irrelevant))
 
   (fact "with organization-ids"
-    (create-system-user "Kunta" "tunnus@email.org" ["123-R" "789-YA"]) => {:username "tunnus@email.org"}
-    (provided (mongo/create-id) => ..id..)
-    (provided (mongo/insert :users {:id        ..id..
-                                    :username  "tunnus@email.org"
-                                    :email     "tunnus@email.org"
-                                    :firstName "J\u00e4rjestelm\u00e4tunnus"
-                                    :lastName  "Kunta"
-                                    :role      :authority
-                                    :enabled   true
-                                    :orgAuthz  {"123-R" ["reader"] "789-YA" ["reader"]}
-                                    :language  :fi}) => irrelevant)))
+    (create-system-user {:role "admin"} "Kunta" "tunnus@email.org" ["123-R" "789-YA"]) => {:username "tunnus@email.org"}
+    (provided
+      (org/known-organizations? [:123-R :789-YA]) => true
+      (mongo/create-id) => ..id..
+      (mongo/insert :users {:id        ..id..
+                            :username  "tunnus@email.org"
+                            :email     "tunnus@email.org"
+                            :firstName "J\u00e4rjestelm\u00e4tunnus"
+                            :lastName  "Kunta"
+                            :role      "authority"
+                            :enabled   true
+                            :orgAuthz  {:123-R ["reader"]
+                                        :789-YA ["reader"]}
+                            :language  "fi"}) => irrelevant)))
 
 ;;
 ;; ==============================================================================

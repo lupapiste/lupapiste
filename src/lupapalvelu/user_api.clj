@@ -163,12 +163,12 @@
    :input-validators [(partial action/string-parameters [:username])
                       (partial action/ascii-parameters [:username])]
    :user-roles       #{:admin}}
-  [{user-data :data}]
+  [{user-data :data caller :user}]
   (let [rest-user-email (str username "@example.com")
         user-data       (assoc user-data :email rest-user-email)]
     (when (usr/get-user-by-email rest-user-email)
       (fail! :email-in-use))
-    (ok :user (usr/create-rest-user user-data))))
+    (ok :user (usr/create-rest-user caller user-data))))
 
 (defcommand create-system-user
   {:description      "Creates system user for embedded Lupapiste view in Facta. Admin only."
@@ -176,11 +176,11 @@
    :input-validators [(partial action/string-parameters [:municipality-name])
                       (partial action/vector-parameter-of :organization-ids string?)]
    :user-roles       #{:admin}}
-  [_]
+  [{caller :user}]
   (let [email (usr/municipality-name->system-user-email municipality-name)]
     (when (usr/get-user-by-email email)
       (fail! :email-in-use))
-    (ok (usr/create-system-user municipality-name email organization-ids))))
+    (ok (usr/create-system-user caller municipality-name email organization-ids))))
 
 ;;
 ;; ==============================================================================

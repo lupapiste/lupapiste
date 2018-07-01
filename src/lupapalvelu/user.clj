@@ -730,16 +730,16 @@
 (defn create-rest-user
   "Creates and inserts new rest-api user to database, returns username and password to frontend.
    Only for Solita admin"
-  [user-data]
+  [caller user-data]
   (let [pw        (security/random-password)
         user-data (merge user-data
                          {:enabled  true
                           :role     "rest-api"
-                          :orgAuthz {(:organization user-data) ["authority"]}
+                          :orgAuthz {(keyword (:organization user-data)) ["authority"]}
                           :password pw})
-        user      (-> (create-new-user-entity user-data)
-                      (assoc :id (mongo/create-id)))]
-    (mongo/insert :users user)
+        user      (->> (create-new-user-entity user-data)
+                       (validate-create-new-user! caller))]
+    (mongo/insert :users (assoc user :id (mongo/create-id)))
     {:username (:username user)
      :password pw}))
 
@@ -758,18 +758,18 @@
               (ss/replace #"[\u00f6]" "o")
               (ss/replace system-user-sanization-regexp "_"))))
 
-(defn create-system-user [name email organization-ids]
-  (->> {:id        (mongo/create-id)
-        :username  email
-        :email     email
-        :firstName "J\u00e4rjestelm\u00e4tunnus"
-        :lastName  name
-        :role      :authority
-        :enabled   true
-        :orgAuthz  (zipmap organization-ids (repeat ["reader"]))
-        :language  :fi}
-       (mongo/insert :users))
-  {:username email})
+(defn create-system-user [caller name email organization-ids]
+  (let [user-data (->> {:username  email
+                        :email     email
+                        :firstName "J\u00e4rjestelm\u00e4tunnus"
+                        :lastName  name
+                        :role      "authority"
+                        :enabled   true
+                        :orgAuthz  (zipmap (map keyword organization-ids) (repeat ["reader"]))
+                        :language  "fi"}
+                       (validate-create-new-user! caller))]
+    (mongo/insert :users (assoc user-data :id (mongo/create-id)))
+    {:username email}))
 
 (defn get-or-create-user-by-email [email current-user]
   (let [email (ss/canonize-email email)]
