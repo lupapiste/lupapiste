@@ -3,8 +3,11 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.financial :as financial]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.token :as token]
+            [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as usr]
-            [sade.core :refer [ok]]))
+            [sade.core :refer [ok]]
+            [sade.env :as env]))
 
 (defcommand create-financial-handler
   {:parameters       [:email]
@@ -12,8 +15,13 @@
    :pre-checks       [org/orgAuthz-pre-checker]
    :permissions      [{:required [:users/create-financial-handler]}]
    :feature          :financial}
-  [{user-data :data user :user}]
-    (financial/create-financial-handler user-data user))
+  [{user-data :data caller :user}]
+  (let [user (usr/create-new-user caller user-data)
+        token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
+    (ok :id (:id user)
+        :user user
+        :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
+        :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))
 
 (defcommand invite-financial-handler
   {:parameters [:id :documentId :path]

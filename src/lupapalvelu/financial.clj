@@ -14,14 +14,6 @@
 (defn get-financial-user []
   (usr/get-user {:role "financialAuthority"}))
 
-(defn create-financial-handler [user-data caller]
-  (let [user (usr/create-new-user caller user-data)
-        token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
-    (ok :id (:id user)
-        :user user
-        :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
-        :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))
-
 (defn invite-financial-handler [command]
   (let [financial-authority (get-financial-user)
         updated-data (assoc (:data command) :email (:email financial-authority))

@@ -18,7 +18,6 @@
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.validators]
             [schema.core :refer [defschema] :as sc]
             [schema-tools.core :as st]
             [plumbing.core :refer [defnk fnk]]
@@ -184,10 +183,6 @@
     {:context-scope :organization
      :context-roles (->> (vals org-authz)
                          (reduce into #{}))}))
-
-(defcontext users-context [command]
-  {:context-scope :users
-   :context-roles (->> command :user :orgAuthz vals (reduce into #{}))})
 
 (defn full-name [{:keys [firstName lastName]}] (str firstName " " lastName))
 
@@ -597,6 +592,7 @@
                ; Help problem tracing by adding a stack trace to logs
                (error (ex-info "stack trace" {}) "new user does not match NewUser schema" schema-errors)
                true))}
+
    {:desc  "user-data has orgAuths in expected form"        ; keys as keyword, roles as string
     :error :error.missing-parameters
     :fail? (fnk [[:user-data {orgAuthz nil}]]
@@ -664,7 +660,7 @@
   (when-let [e (new-user-error {:caller caller
                                 :user-data user-data
                                 :known-organizations? org/known-organizations?})]
-    (fail! (-> e :error) :desc (-> e :desc)))
+    (fail! (:error e) :desc (:desc e)))
   user-data)
 
 (defn- create-new-user-entity [{:as user-data :keys [password]}]

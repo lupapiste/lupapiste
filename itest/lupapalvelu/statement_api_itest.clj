@@ -2,7 +2,7 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.factlet :refer [facts* fact*]]
             [lupapalvelu.itest-util :refer :all]
-            [sade.shared-util :as util]))
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
@@ -11,7 +11,6 @@
 (def veikko-email (email-for-key veikko))
 (def mikko-email  (email-for-key mikko))
 (def pena-email  (email-for-key pena))
-(def olli-email (email-for-key olli))
 
 ;; Simulating manually added (applicant) statement giver. Those do not have the key :id.
 (def statement-giver-pena {:name "Pena Panaani"

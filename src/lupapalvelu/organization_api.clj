@@ -1,6 +1,5 @@
 (ns lupapalvelu.organization-api
   (:require [camel-snake-kebab.core :as csk]
-            [clojure.core.memoize :as memo]
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
@@ -16,7 +15,6 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.waste-ads :as waste-ads]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.xml.validator :as krysp-xml]
             [me.raynes.fs :as fs]
