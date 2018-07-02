@@ -306,7 +306,7 @@
   types that are missing are not supported by Pate verdict template
   mechanism."
    :feature    :pate
-   :user-roles #{:authorityAdmin}
+   :permissions [{:required [:organization/admin]}]
    :pre-checks [pate-enabled]}
   [command]
   (ok :items (template/selectable-verdict-templates (template/command->organization command))))
