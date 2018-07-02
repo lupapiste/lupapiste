@@ -1562,7 +1562,8 @@ Scroll by
 
 Scroll to test id
   [Arguments]  ${id}
-  Scroll to  [data-test-id=${id}]
+  Wait Until  Page Should Contain Element  xpath=//*[@data-test-id='${id}']
+  Execute Javascript  document.body.querySelector("[data-test-id=${id}]").scrollIntoView(false);
 
 Scroll to xpath
   [Arguments]  ${xpath}
@@ -1590,8 +1591,7 @@ Scroll and click input
 
 Scroll and click test id
   [Arguments]  ${id}
-  Element should be visible by test id  ${id}
-  Scroll to  [data-test-id="${id}"]
+  Scroll to test id  ${id}
   Click by test id  ${id}
 
 Scroll to and click xpath results
