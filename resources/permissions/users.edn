@@ -1,0 +1,7 @@
+{:global       {:admin #{:users/admin-query
+                         :users/create
+                         :users/create-financial-handler}
+                :authority #{:users/update-own-data}
+                :applicant #{:users/update-own-data}
+                :financialAuthority #{:users/update-own-data}}
+ :organization {:authorityAdmin #{:users/admin-query}}}

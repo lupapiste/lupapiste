@@ -296,7 +296,9 @@
 
 (def unauthorized? (partial expected-failure? (:text unauthorized)))
 (def not-accessible? (partial expected-failure? (:text not-accessible)))
-
+(def missing-parameters? (partial expected-failure? :error.missing-parameters))
+(def organization-not-found? (partial expected-failure? :error.organization-not-found))
+(def schema-error? (partial expected-failure? :error.illegal-value:schema-validation))
 
 (facts "unauthorized?"
   (fact "with map"
@@ -840,7 +842,7 @@
   If upload to existing attachment, filedata can be empty but :attachment-id should be defined."
   [apikey id filedata & {:keys [fails attachment-id]}]
   (let [file-id (get-in (upload-file apikey (or (:filename filedata) "dev-resources/test-attachment.txt")) [:files 0 :fileId])
-        data (if attachment-id
+        data (if (ss/not-blank? attachment-id)
                {:attachmentId attachment-id}
                (select-keys filedata [:type :group :target :contents :constructionTime :sign]))
         {job :job :as resp} (command apikey :bind-attachments :id id :filedatas [(assoc data :fileId file-id)])]
@@ -859,7 +861,13 @@
 ;; statements
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
-  (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))
+  (upload-file-and-bind apikey
+                        application-id
+                        {:target {:type "statement" :id statement-id}
+                         :type {:type-group :ennakkoluvat_ja_lausunnot
+                                :type-id :lausunto}}
+                        :attachment-id attachment-id
+                        :fails (not expect-to-succeed)))
 
 (defn get-statement-by-user-id [application user-id]
   (some #(when (= user-id (get-in % [:person :userId])) %) (:statements application)))

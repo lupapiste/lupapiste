@@ -1,6 +1,13 @@
-{:global       {:admin              #{:organization/convert-inforequests}
-                :authorityAdmin     #{:organization/check-permanent-archive-enabled}}
- :organization {:authority          #{:organization/check-permanent-archive-enabled}
+{:global       {:admin              #{:organization/convert-inforequests
+                                      :organization/update-name}}
+ :organization {:authority          #{:organization/check-permanent-archive-enabled
+                                      :organization/tags
+                                      :organization/areas}
+                :authorityAdmin     #{:organization/admin
+                                      :organization/update-name
+                                      :organization/tags
+                                      :organization/areas
+                                      :organization/check-permanent-archive-enabled}
                 :approver           #{:organization/check-permanent-archive-enabled}
                 :tos-editor         #{:organization/check-permanent-archive-enabled}
                 :tos-publisher      #{:organization/check-permanent-archive-enabled}

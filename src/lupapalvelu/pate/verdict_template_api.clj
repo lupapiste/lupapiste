@@ -46,7 +46,7 @@
   {:description "Pseudo-query that fails if Pate is not enabled in
   the organization"
    :feature     :pate
-   :user-roles  #{:authorityAdmin}
+   :permissions [{:required [:organization/admin]}]
    :pre-checks  [pate-enabled]}
   [_])
 
@@ -55,7 +55,7 @@
   {:description      "Creates new empty template. Returns template id, name
   and draft."
    :feature          :pate
-   :user-roles       #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
    :pre-checks       [pate-enabled
@@ -65,16 +65,16 @@
                                             created
                                             lang
                                             category)
-             :filled false)))
+        :filled false)))
 
 (defcommand set-verdict-template-name
-  {:description "Name cannot be empty."
+  {:description      "Name cannot be empty."
    :feature          :pate
    :parameters       [template-id name]
    :input-validators [(partial action/non-blank-parameters [:name])]
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]
-   :user-roles       #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{created :created :as command}]
   (template/set-name (template/command->organization command)
                      template-id
@@ -86,7 +86,7 @@
   {:description      "Incremental save support for verdict template
   drafts. Returns modified timestamp."
    :feature          :pate
-   :user-roles       #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [template-id path value]
    ;; Value is validated upon saving according to the schema.
    :input-validators [(partial action/vector-parameters [:path])
@@ -94,7 +94,7 @@
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [{:keys [created] :as command}]
-  (let [organization   (template/command->organization command)
+  (let [organization (template/command->organization command)
         {:keys [data category]
          :as   updated} (template/save-draft-value organization
                                                   template-id
@@ -102,7 +102,7 @@
                                                   path
                                                   value)]
     (if data
-      (ok  (template/changes-response
+      (ok (template/changes-response
             {:modified created
              :filled   (template/template-filled? {:category category
                                                    :data     data})}
@@ -113,7 +113,7 @@
   {:description      "Publish creates a frozen snapshot of the current
   template draft. The snapshot includes also the current settings."
    :feature          :pate
-   :user-roles       #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
    :pre-checks       [pate-enabled
@@ -128,7 +128,7 @@
   {:description "Id, name, modified, published and deleted maps for
   every verdict template."
    :feature     :pate
-   :user-roles  #{:authorityAdmin}
+   :permissions [{:required [:organization/admin]}]
    :pre-checks  [pate-enabled]}
   [command]
   (ok :verdict-templates (->> (template/command->organization command)
@@ -140,7 +140,7 @@
   {:description "Categories for the user's organization. Does not
    include legacy-only categories."
    :feature     :pate
-   :user-roles  #{:authorityAdmin}
+   :permissions [{:required [:organization/admin]}]
    :pre-checks  [pate-enabled]}
   [command]
   (ok :categories (template/organization-categories (template/command->organization command))))
@@ -149,7 +149,7 @@
   {:description      "Verdict template summary plus draft data. The
   template must be editable."
    :feature          :pate
-   :user-roles       #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
    :pre-checks       [pate-enabled
@@ -159,21 +159,21 @@
                                                template-id)))
 
 (defcommand update-and-open-verdict-template
-  {:description "Like verdict-template but also updates the template's
+  {:description      "Like verdict-template but also updates the template's
   settings dependencies."
-   :feature :pate
-   :user-roles #{:authorityAdmin}
-   :parameters [template-id]
+   :feature          :pate
+   :permissions      [{:required [:organization/admin]}]
+   :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
-   :pre-checks [pate-enabled
-                (template/verdict-template-check :editable)]}
+   :pre-checks       [pate-enabled
+                      (template/verdict-template-check :editable)]}
   [command]
   (ok (template/verdict-template-update-and-open command)))
 
 (defcommand toggle-delete-verdict-template
   {:description      "Toggle template's deletion status"
    :feature          :pate
-   :user-roles       #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [template-id delete]
    :input-validators [(partial action/non-blank-parameters [:template-id])
                       (partial action/boolean-parameters [:delete])]
@@ -189,7 +189,7 @@
   have any published versions. In other words, the draft of the
   original is copied."
    :feature          :pate
-   :user-roles       #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
    :pre-checks       [pate-enabled
@@ -200,8 +200,8 @@
                                                template-id
                                                created
                                                lang)
-               :filled (template/template-filled? {:org-id      (:id organization)
-                                                   :template-id template-id})))))
+          :filled (template/template-filled? {:org-id      (:id organization)
+                                              :template-id template-id})))))
 
 ;; ----------------------------------
 ;; Verdict template settings API
@@ -210,7 +210,7 @@
 (defquery verdict-template-settings
   {:description      "Settings matching the category or empty response."
    :feature          :pate
-   :user-roles       #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
    :pre-checks       [pate-enabled
@@ -225,7 +225,7 @@
   {:description      "Incremental save support for verdict template
   settings. Returns modified timestamp. Creates settings if needed."
    :feature          :pate
-   :user-roles       #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [category path value]
    ;; Value is validated against schema on saving.
    :input-validators [(partial action/non-blank-parameters [:category])
@@ -241,10 +241,10 @@
                                                                  value)]
       (if data
         (ok (template/changes-response
-             {:modified created
-              :filled (template/settings-filled? {:data data}
-                                                 category)}
-             updated))
+              {:modified created
+               :filled   (template/settings-filled? {:data data}
+                                                    category)}
+              updated))
         (template/error-response updated)))))
 
 
@@ -279,7 +279,7 @@
   {:description "Map where keys are operations and values template
   ids. Deleted templates are filtered out."
    :feature     :pate
-   :user-roles  #{:authorityAdmin}
+   :permissions [{:required [:organization/admin]}]
    :pre-checks  [pate-enabled]}
   [command]
   (ok :templates (template/operation-verdict-templates (template/command->organization command))))
@@ -288,7 +288,7 @@
   {:description      "Set default verdict template for a selected operation
   in the organization."
    :feature          :pate
-   :user-roles       #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :parameters       [operation template-id]
    :input-validators [(partial action/non-blank-parameters [:operation])]
    :pre-checks       [pate-enabled

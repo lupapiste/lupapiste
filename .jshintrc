@@ -2,7 +2,7 @@
   "bitwise": true,
   "curly": true,
   "eqeqeq": true,
-  "esversion": 3,
+  "esversion": 6,
   "forin":true,
   "freeze":true,
   "futurehostile":true,
@@ -25,7 +25,7 @@
   "jquery":true,
   "-W014" : true,
   "globals": {
-    "_": false,
+    "_": true,
     "accordion": true,
     "AccordionState" : true,
     "ajax": true,

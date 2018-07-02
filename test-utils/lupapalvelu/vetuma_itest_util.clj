@@ -55,8 +55,8 @@
   {"TRID" trid
    "STATUS" "SUCCESSFUL"
    "SUBJECTDATA" "ETUNIMI=Jukka, SUKUNIMI=Palmu"
-   "EXTRADATA" "HETU=123456-7890"
-   "USERID" "123456-7890"
+   "EXTRADATA" "HETU=160935-0806"
+   "USERID" "160935-0806"
    "VTJDATA" "<VTJHenkiloVastaussanoma/>"})
 
 (defn vetuma-init

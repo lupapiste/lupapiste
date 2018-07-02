@@ -79,9 +79,10 @@
       (against-background
         [(lupapalvelu.security/random-password) => "salainen"
          (lupapalvelu.security/get-hash "salainen") => "tosisalainen"
-         (lupapalvelu.mongo/create-id) => "123456"]
+         (lupapalvelu.mongo/create-id) => "123456"
+         (lupapalvelu.organization/known-organizations? [:123-A]) => true]
         (fact "id, username and password is returned"
-          (let [saved-user (user/create-rest-user user)]
+          (let [saved-user (user/create-rest-user {:role "admin"} user)]
             saved-user => (just {:username "foobar"
                                  :password "salainen"} :in-any-order))))
       (fact "User is saved as rest api user"

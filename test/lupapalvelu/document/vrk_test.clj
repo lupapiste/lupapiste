@@ -23,8 +23,7 @@
                      dummy
                      (range 0 (count paths))))]
 
-      (facts "Embedded validator facts"
-        (println "Checking:" doc)
+      (facts {:midje/description (str "Embedded validator facts for " doc)}
         (doseq [values ok]
           (validate-fn (update values)) => nil?)
         (doseq [values fail]

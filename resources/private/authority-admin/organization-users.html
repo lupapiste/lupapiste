@@ -10,7 +10,7 @@
 
           <div class="admin-users-table"></div>
           <div class="clear spacerM"></div>
-          <button data-bind="click: organizationUsers.addUserToOrganization, enable: lupapisteApp.models.globalAuthModel.ok('update-user-organization')"
+          <button data-bind="click: organizationUsers.addUserToOrganization, enable: lupapisteApp.models.globalAuthModel.ok('upsert-organization-user')"
                   class="positive" data-test-id="authadmin-add-authority">
             <i class="lupicon-circle-plus"></i><span data-bind="ltext: 'add.authority'"></span>
           </button>

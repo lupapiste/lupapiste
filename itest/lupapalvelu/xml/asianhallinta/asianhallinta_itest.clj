@@ -285,10 +285,10 @@
   (facts "Auth admin configs"
     (fact "Pena can't use asianhallinta configure query & command"
       (query pena "asianhallinta-config") => unauthorized?
-      (command pena "save-asianhallinta-config" :permitType "P" :propertyId sipoo-property-id :enabled true :version "1.3") => unauthorized?)
+      (command pena "save-asianhallinta-config" :permitType "P" :municipality "753" :propertyId sipoo-property-id :enabled true :version "1.3") => unauthorized?)
     (fact "Sonja can't use asianhallinta configure query & command"
       (query sonja "asianhallinta-config") => unauthorized?
-      (command sonja "save-asianhallinta-config" :permitType "P" :propertyId sipoo-property-id :enabled true :version "1.3") => unauthorized?)
+      (command sonja "save-asianhallinta-config" :permitType "P" :municipality "753" :propertyId sipoo-property-id :enabled true :version "1.3") => unauthorized?)
 
     (fact "Sipoo auth admin can query asianhallinta-config, response has scope, caseManagement with skeleton values"
       (let [resp (query sipoo "asianhallinta-config")

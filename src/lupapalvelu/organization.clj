@@ -18,7 +18,7 @@
             [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase]]
-            [lupapalvelu.permissions :refer [defcontext] :as permissions]
+            [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.wfs :as wfs]
@@ -299,6 +299,19 @@
    (->> (mongo/select :organizations query projection)
         (map remove-sensitive-data)
         (map with-scope-defaults))))
+
+(defn known-organizations? [orgs]
+  (or (-> orgs seq nil?)
+      (let [found-orgs (get-organizations {:_id {"$in" orgs}} {:_id true})]
+        (= (count orgs)
+           (count found-orgs)))))
+
+(defn orgAuthz-pre-checker
+  "If command data has orgAuthz parameter, checks that all organization keys exists in db."
+  [{{:keys [orgAuthz]} :data}]
+  (when orgAuthz
+    (when-not (known-organizations? (keys orgAuthz))
+      (fail :error.unknown-organization))))
 
 (defn get-autologin-ips-for-organization [org-id]
   (-> (mongo/by-id :organizations org-id [:allowedAutologinIPs])

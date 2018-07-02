@@ -49,7 +49,7 @@
         (command jarvenpaa :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId (-> templates first :id)) => ok?)
 
       (fact "Feature not enabled in Sipoo"
-        (query sipoo :inspection-summaries-for-application :id (:id app-sipoo)) => unauthorized?)
+        (get-in (query sipoo :organization-by-user) [:organization :inspection-summaries-enabled]) => false)
       (fact "Default template created upon verdict given"
         (give-verdict raktark-jarvenpaa (:id app-jarvenpaa) :verdictId "3323") => ok?
         (let [{summaries :summaries} (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa))

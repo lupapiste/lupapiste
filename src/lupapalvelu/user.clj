@@ -1,12 +1,13 @@
 (ns lupapalvelu.user
-  (:require [camel-snake-kebab.core :as csk]
+  (:require [taoensso.timbre :refer [debug debugf info infof warn warnf error]]
+            [camel-snake-kebab.core :as csk]
             [clj-time.coerce :refer [to-date]]
             [clj-time.core :as time]
             [clojure.set :as set]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.permissions :refer [defcontext] :as permissions]
+            [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
             [lupapalvelu.user-enums :as user-enums]
@@ -18,124 +19,150 @@
             [sade.shared-schemas :as sssc]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.validators :as v]
             [schema.core :refer [defschema] :as sc]
-            [swiss.arrows :refer [-<> some-<>> -<>>]]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf]]))
+            [schema-tools.core :as st]
+            [plumbing.core :refer [defnk fnk]]
+            [swiss.arrows :refer [-<> some-<>> -<>>]]))
 
 ;;
 ;; User schema
 ;;
 
-
 (defschema SearchFilter
-  {:id        sc/Str
-   :title     sc/Str
-   :sort     {:field (sc/enum "type" "location" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole" "id")
-              :asc    sc/Bool}
-   :filter   {(sc/optional-key :handlers)      [sc/Str]
-              (sc/optional-key :tags)          [sc/Str]
-              (sc/optional-key :companyTags)   [sc/Str]
-              (sc/optional-key :operations)    [sc/Str]
-              (sc/optional-key :organizations) [sc/Str]
-              (sc/optional-key :areas)         [sc/Str]
-              (sc/optional-key :event)        [sc/Str]}})
+  {:id     sc/Str
+   :title  sc/Str
+   :sort   {:field (sc/enum "type" "location" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole" "id")
+            :asc   sc/Bool}
+   :filter {(sc/optional-key :handlers)      [sc/Str]
+            (sc/optional-key :tags)          [sc/Str]
+            (sc/optional-key :companyTags)   [sc/Str]
+            (sc/optional-key :operations)    [sc/Str]
+            (sc/optional-key :organizations) [sc/Str]
+            (sc/optional-key :areas)         [sc/Str]
+            (sc/optional-key :event)         [sc/Str]}})
 
-(def Id (ssc/min-length-string 1)) ; Variation of user ids in different environments is too diverse for a simple customized schema.
+(def Id (ssc/min-length-string 1))                                                                                      ; Variation of user ids in different environments is too diverse for a simple customized schema.
 
 (def all-roles
-  "vector of role strings that can be used in User's :role field"
-  ["applicant"
-   "authority"
-   "oirAuthority"
-   "authorityAdmin"
-   "admin"
-   "dummy"
-   "rest-api"
-   "trusted-etl"
-   "trusted-salesforce"
-   "docstore-api"
-   "financialAuthority"
-   "onkalo-api"])
+  "set of role strings that can be used in User's :role field"
+  (-> (set (map name roles/all-user-roles))
+      (disj "anonymous")))                                  ; anonymous used only in commands
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
-(defschema Authz (sc/cond-pre sc/Str sc/Keyword))
-(defschema OrgAuthz {OrgId (sc/cond-pre [Authz] #{Authz})})
+(defschema KwOrgAuthzRoles (apply sc/enum roles/all-org-authz-roles))
+(defschema StrOrgAuthzRoles (apply sc/enum (map name roles/all-org-authz-roles)))
+(defschema OrgAuthzRoles  (sc/cond-pre StrOrgAuthzRoles KwOrgAuthzRoles))
+(defschema OrgAuthz {OrgId (sc/cond-pre [OrgAuthzRoles] #{OrgAuthzRoles})})
 (defschema PersonIdSource (sc/enum "identification-service" "user"))
 
 (defschema User
-          {:id                                    Id
-           :firstName                             (ssc/max-length-string 255)
-           :lastName                              (ssc/max-length-string 255)
-           :role                                  Role
-           :email                                 ssc/Email
-           :username                              ssc/Username
-           :enabled                               sc/Bool
-           (sc/optional-key :state)               (sc/enum "erased")
-           (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
-                                                   (sc/optional-key :apikey) sc/Str}
-           (sc/optional-key :orgAuthz)            OrgAuthz
-           (sc/optional-key :personId)            (sc/if ss/blank? ssc/BlankStr ssc/Hetu)
-           (sc/optional-key :personIdSource)      PersonIdSource
-           (sc/optional-key :street)              (sc/maybe (ssc/max-length-string 255))
-           (sc/optional-key :city)                (sc/maybe (ssc/max-length-string 255))
-           (sc/optional-key :zip)                 (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
-           (sc/optional-key :phone)               (sc/maybe (ssc/max-length-string 255))
-           (sc/optional-key :architect)           sc/Bool
-           (sc/optional-key :degree)              (sc/maybe (apply sc/enum "" "other" user-enums/koulutusvalinta))
-           (sc/optional-key :graduatingYear)      (sc/if ss/blank? ssc/BlankStr (ssc/fixed-length-string 4))
-           (sc/optional-key :fise)                (ssc/max-length-string 255)
-           (sc/optional-key :fiseKelpoisuus)      (sc/maybe (apply sc/enum "" user-enums/fise-kelpoisuus-lajit))
-           (sc/optional-key :companyName)         (ssc/max-length-string 255)
-           (sc/optional-key :companyId)           (sc/if ss/blank? ssc/BlankStr ssc/FinnishY)
-           (sc/optional-key :allowDirectMarketing) sc/Bool
-           (sc/optional-key :attachments)         [{:attachment-type  {:type-group sc/Str, :type-id sc/Str}
-                                                    :attachment-id sc/Str
-                                                    :file-name  sc/Str
-                                                    :content-type  sc/Str
-                                                    :size  sc/Num
-                                                    :created ssc/Timestamp
-                                                    :storageSystem sssc/StorageSystem}]
-           (sc/optional-key :company)             {:id sc/Str :role (sc/enum "admin" "user") :submit sc/Bool}
-           (sc/optional-key :partnerApplications) {(sc/optional-key :rakentajafi) {:id sc/Str
-                                                                                   :created ssc/Timestamp
-                                                                                   :origin sc/Bool}}
-           (sc/optional-key :notification)        {(sc/optional-key :messageI18nkey) sc/Str
-                                                   (sc/optional-key :titleI18nkey)   sc/Str
-                                                   (sc/optional-key :message)        sc/Str
-                                                   (sc/optional-key :title)          sc/Str}
-           (sc/optional-key :defaultFilter)       {(sc/optional-key :id) (sc/maybe sc/Str)
-                                                   (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)
-                                                   (sc/optional-key :companyFilterId) (sc/maybe sc/Str)}
-           (sc/optional-key :applicationFilters)  [SearchFilter]
-           (sc/optional-key :foremanFilters)      [SearchFilter]
-           (sc/optional-key :companyFilters)      [SearchFilter]
-           (sc/optional-key :language)            i18n/EnumSupportedLanguages
-           (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}
-           (sc/optional-key :firstLogin)          sc/Bool
-           (sc/optional-key :oauth)               {:client-id sc/Str
-                                                   :client-secret sc/Str
-                                                   :scopes [(sc/enum "read" "pay")]
-                                                   :display-name (i18n/lenient-localization-schema sc/Str)
-                                                   :callback-url ssc/HttpUrl}})
+  {:id                                        Id
+   :firstName                                 (ssc/max-length-string 255)
+   :lastName                                  (ssc/max-length-string 255)
+   :role                                      Role
+   :email                                     ssc/Email
+   :username                                  ssc/Username
+   :enabled                                   sc/Bool
+   (sc/optional-key :state)                   (sc/enum "erased")
+   (sc/optional-key :private)                 {(sc/optional-key :password) sc/Str
+                                               (sc/optional-key :apikey)   sc/Str}
+   (sc/optional-key :orgAuthz)                OrgAuthz
+   (sc/optional-key :personId)                (sc/if ss/blank? ssc/BlankStr ssc/Hetu)
+   (sc/optional-key :personIdSource)          PersonIdSource
+   (sc/optional-key :street)                  (sc/maybe (ssc/max-length-string 255))
+   (sc/optional-key :city)                    (sc/maybe (ssc/max-length-string 255))
+   (sc/optional-key :zip)                     (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
+   (sc/optional-key :phone)                   (sc/maybe (ssc/max-length-string 255))
+   (sc/optional-key :architect)               sc/Bool
+   (sc/optional-key :degree)                  (sc/maybe (apply sc/enum "" "other" user-enums/koulutusvalinta))
+   (sc/optional-key :graduatingYear)          (sc/if ss/blank? ssc/BlankStr (ssc/fixed-length-string 4))
+   (sc/optional-key :fise)                    (ssc/max-length-string 255)
+   (sc/optional-key :fiseKelpoisuus)          (sc/maybe (apply sc/enum "" user-enums/fise-kelpoisuus-lajit))
+   (sc/optional-key :companyName)             (ssc/max-length-string 255)
+   (sc/optional-key :companyId)               (sc/if ss/blank? ssc/BlankStr ssc/FinnishY)
+   (sc/optional-key :allowDirectMarketing)    sc/Bool
+   (sc/optional-key :attachments)             [{:attachment-type {:type-group sc/Str, :type-id sc/Str}
+                                                :attachment-id   sc/Str
+                                                :file-name       sc/Str
+                                                :content-type    sc/Str
+                                                :size            sc/Num
+                                                :created         ssc/Timestamp}]
+   (sc/optional-key :company)                 {:id     sc/Str
+                                               :role   (sc/enum "admin" "user")
+                                               :submit sc/Bool}
+   (sc/optional-key :partnerApplications)     {(sc/optional-key :rakentajafi) {:id      sc/Str
+                                                                               :created ssc/Timestamp
+                                                                               :origin  sc/Bool}}
+   (sc/optional-key :notification)            {(sc/optional-key :messageI18nkey) sc/Str
+                                               (sc/optional-key :titleI18nkey)   sc/Str
+                                               (sc/optional-key :message)        sc/Str
+                                               (sc/optional-key :title)          sc/Str}
+   (sc/optional-key :defaultFilter)           {(sc/optional-key :id)              (sc/maybe sc/Str)
+                                               (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)
+                                               (sc/optional-key :companyFilterId) (sc/maybe sc/Str)}
+   (sc/optional-key :applicationFilters)      [SearchFilter]
+   (sc/optional-key :foremanFilters)          [SearchFilter]
+   (sc/optional-key :companyFilters)          [SearchFilter]
+   (sc/optional-key :language)                i18n/EnumSupportedLanguages
+   (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}
+   (sc/optional-key :firstLogin)              sc/Bool
+   (sc/optional-key :oauth)                   {:client-id     sc/Str
+                                               :client-secret sc/Str
+                                               :scopes        [(sc/enum "read" "pay")]
+                                               :display-name  (i18n/lenient-localization-schema sc/Str)
+                                               :callback-url  ssc/HttpUrl}})
+
+
+(defschema AdminCreateUser
+  "Schema for creating new users by adminAdmin and authorityAdmin."
+  (-> User
+      ; Limit the keys that can be given here:
+      (st/select-keys [:email
+                       :username :firstName :lastName
+                       :role :orgAuthz
+                       :personId :personIdSource
+                       :phone :city :street :zip
+                       :language
+                       :architect
+                       :allowDirectMarketing
+                       :graduatingYear :degree :fise :fiseKelpoisuus])
+      ; Limit the roles that can be created here:
+      (st/assoc :role (apply sc/enum #{"applicant"
+                                       "authority"
+                                       "dummy"
+                                       "financialAuthority"}))
+      ; All keys are optional, except :email and :role
+      (st/optional-keys)
+      (st/required-keys [:email :role])))
+
+;; NewUser, shape of new users:
+;; * new user does not have :id
+;; * role "admin" is not allowed
+
+(defschema NewUser (-> User
+                       (st/dissoc :id)
+                       (st/assoc :role (apply sc/enum (-> all-roles
+                                                          (disj "admin"))))))
+
+(def user-keys (->> User keys (map sc/explicit-schema-key) set))
 
 (defschema RegisterUser
-                  {:email                            ssc/Email
-                   :street                           (sc/maybe (ssc/max-length-string 255))
-                   :city                             (sc/maybe (ssc/max-length-string 255))
-                   :zip                              (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
-                   :phone                            (sc/maybe (ssc/max-length-string 255))
-                   (sc/optional-key :architect)      sc/Bool
-                   (sc/optional-key :degree)         (sc/maybe (apply sc/enum "" "other" user-enums/koulutusvalinta))
-                   (sc/optional-key :graduatingYear) (sc/if ss/blank? ssc/BlankStr (ssc/fixed-length-string 4))
-                   (sc/optional-key :fise)           (ssc/max-length-string 255)
-                   (sc/optional-key :fiseKelpoisuus) (sc/maybe (apply sc/enum "" user-enums/fise-kelpoisuus-lajit))
-                   :allowDirectMarketing             sc/Bool
-                   :rakentajafi                      sc/Bool
-                   :stamp                            (sc/maybe (ssc/max-length-string 255))
-                   :password                         (ssc/max-length-string 255)
-                   (sc/optional-key :language)       i18n/EnumSupportedLanguages})
+  {:email                            ssc/Email
+   :street                           (sc/maybe (ssc/max-length-string 255))
+   :city                             (sc/maybe (ssc/max-length-string 255))
+   :zip                              (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
+   :phone                            (sc/maybe (ssc/max-length-string 255))
+   (sc/optional-key :architect)      sc/Bool
+   (sc/optional-key :degree)         (sc/maybe (apply sc/enum "" "other" user-enums/koulutusvalinta))
+   (sc/optional-key :graduatingYear) (sc/if ss/blank? ssc/BlankStr (ssc/fixed-length-string 4))
+   (sc/optional-key :fise)           (ssc/max-length-string 255)
+   (sc/optional-key :fiseKelpoisuus) (sc/maybe (apply sc/enum "" user-enums/fise-kelpoisuus-lajit))
+   :allowDirectMarketing             sc/Bool
+   :rakentajafi                      sc/Bool
+   :stamp                            (sc/maybe (ssc/max-length-string 255))
+   :password                         (ssc/max-length-string 255)
+   (sc/optional-key :language)       i18n/EnumSupportedLanguages})
 
 (defschema Handler
   {:id     ssc/ObjectIdStr
@@ -194,7 +221,7 @@
   (into {} (for [[k v] org-authz] [k (set (map keyword v))])))
 
 (defn with-org-auth [user]
-  (update-in user [:orgAuthz] coerce-org-authz))
+  (update user :orgAuthz coerce-org-authz))
 
 (def session-summary-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz :language])
 
@@ -207,10 +234,11 @@
 (defn session-summary
   "Returns common information about the user to be stored in session or nil"
   [user]
-  (some-> user
-    (select-keys session-summary-keys)
-    with-org-auth
-    (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))))
+  (when user
+    (-> user
+        (select-keys session-summary-keys)
+        with-org-auth
+        (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5))))))
 
 (defn oir-authority? [{role :role}]
   (contains? #{:oirAuthority} (keyword role)))
@@ -222,11 +250,29 @@
     impersonating
     (oir-authority? user)))
 
-(defn authority? [{role :role}]
-  (contains? #{:authority} (keyword role)))
+(defn- user-in-roles? [roles user]
+  (boolean (-> user :role keyword roles)))
 
-(defn verified-person-id? [{pid :personId source :personIdSource :as user}]
+(def authority? (partial user-in-roles? #{:authority}))
+(def applicant? (partial user-in-roles? #{:applicant}))
+(def rest-user? (partial user-in-roles? #{:rest-api}))
+(def admin? (partial user-in-roles? #{:admin}))
+(def dummy? (partial user-in-roles? #{:dummy}))
+(def docstore-user? (partial user-in-roles? #{:onkalo-api :docstore-api}))
+(def financial-authority? (partial user-in-roles? #{:financialAuthority}))
+(def onkalo-user? (partial user-in-roles? #{:onkalo-api}))
+
+(defn- user-in-company-roles? [roles user]
+  (-> user :company :role keyword roles))
+
+(def company-user? (partial user-in-company-roles? #{:user}))
+(def company-admin? (partial user-in-company-roles? #{:admin}))
+
+(defn verified-person-id? [{pid :personId source :personIdSource}]
   (and (ss/not-blank? pid) (util/=as-kw :identification-service source)))
+
+(defn same-user? [{id1 :id} {id2 :id}]
+  (= id1 id2))
 
 (defn validate-authority
   "Validator: current user must be an authority. To be used in commands'
@@ -235,39 +281,6 @@
   (if (authority? (:user command))
     nil
     (fail :error.unauthorized :desc "user is not an authority")))
-
-(defn applicant? [{role :role}]
-  (= :applicant (keyword role)))
-
-(defn rest-user? [{role :role}]
-  (= :rest-api (keyword role)))
-
-(defn docstore-user? [{role :role}]
-  (#{:onkalo-api :docstore-api} (keyword role)))
-
-(defn admin? [{role :role}]
-  (= :admin (keyword role)))
-
-(defn authority-admin? [{role :role}]
-  (= :authorityAdmin (keyword role)))
-
-(defn dummy? [{role :role}]
-  (= :dummy (keyword role)))
-
-(defn same-user? [{id1 :id} {id2 :id}]
-  (= id1 id2))
-
-(defn company-user? [user]
-  (= (-> user :company :role) "user"))
-
-(defn company-admin? [user]
-  (= (-> user :company :role) "admin"))
-
-(defn financial-authority? [{role :role}]
-  (= :financialAuthority (keyword role)))
-
-(defn onkalo-user? [{role :role}]
-  (= :onkalo-api (keyword role)))
 
 (defn user-in-state? [expected-state {:keys [state]}]
   (true? (and state (= (name state) expected-state))))
@@ -317,7 +330,7 @@
    :username "migraatio@lupapiste.fi"
    :lastName "Migraatio"
    :firstName "Lupapiste"
-   :role "authority"})
+   :role      "authority"})
 
 (def batchrun-user-data
   {:id "batchrun-user"
@@ -325,7 +338,7 @@
    :enabled true
    :lastName "Er\u00e4ajo"
    :firstName "Lupapiste"
-   :role "authority"})
+   :role      "authority"})
 
 (defn batchrun-user [org-ids]
   (let [org-authz (reduce (fn [m org-id] (assoc m (keyword org-id) #{:authority})) {} org-ids)]
@@ -333,7 +346,7 @@
 
 (defn user-is-archivist? [user organization]
   (let [archive-orgs (organization-ids-by-roles user #{:archivist})
-        org-set (if organization (set/intersection #{organization} archive-orgs) archive-orgs)]
+        org-set      (if organization (set/intersection #{organization} archive-orgs) archive-orgs)]
     (and (seq org-set) (org/some-organization-has-archive-enabled? org-set))))
 
 (defn precheck-user-is-archivist [{user :user {:keys [organization]} :application}]
@@ -369,8 +382,8 @@
   {:pre [(map? query)]}
   (let [query (if-let [id (:id query)]
                 (-> query
-                  (assoc :_id id)
-                  (dissoc :id))
+                    (assoc :_id id)
+                    (dissoc :id))
                 query)
         query (if-let [username (:username query)]
                 (assoc query :username (ss/canonize-email username))
@@ -380,8 +393,8 @@
                 query)
         query (if-let [organization (:organization query)]
                 (-> query
-                  (assoc (str "orgAuthz." organization) {$exists true})
-                  (dissoc :organization))
+                    (assoc (str "orgAuthz." organization) {$exists true})
+                    (dissoc :organization))
                 query)]
     query))
 
@@ -411,17 +424,27 @@
 ;; jQuery data-tables support:
 ;;
 
+; FIXME: LPK-3828 user can have multiple orgz
+(defn authority-admin? [caller]
+  (let [orgs (organization-ids-by-roles caller #{:authorityAdmin})]
+    (case (count orgs)
+      0 false
+      1 true
+      (throw (ex-info "user is authorityAdmin in multiple organizations, somebody needs to implement this" {:user caller})))))
+
 (defn- users-for-datatables-base-query [caller params]
   (let [caller-organizations (organization-ids caller)
         organizations        (:organizations params)
         organizations        (if (admin? caller) organizations (filter caller-organizations (or organizations caller-organizations)))
         role                 (:filter-role params)
         role                 (if (admin? caller) role :authority)
-        enabled              (if (or (admin? caller) (authority-admin? caller)) (:filter-enabled params) true)]
+        enabled              (if (or (admin? caller)
+                                     (authority-admin? caller))
+                               (:filter-enabled params) true)]
     (merge {}
-      (when (seq organizations) {:organizations organizations})
-      (when role                {:role role})
-      (when-not (nil? enabled)  {:enabled enabled}))))
+           (when (seq organizations) {:organizations organizations})
+           (when role {:role role})
+           (when-not (nil? enabled) {:enabled enabled}))))
 
 (defn- users-for-datatables-query [base-query {:keys [filter-search]}]
   (if (ss/blank? filter-search)
@@ -429,8 +452,8 @@
     (let [searches (ss/split filter-search #"\s+")]
       (assoc base-query $and (map (fn [t]
                                     {$or (map hash-map
-                                           [:email :firstName :lastName]
-                                           (repeat t))})
+                                              [:email :firstName :lastName]
+                                              (repeat t))})
                                   (map #(re-pattern (str "(?i)" %)) searches))))))
 
 (defn- limit-organizations [query]
@@ -444,14 +467,14 @@
         query            (limit-organizations (users-for-datatables-query base-query params))
         query-total      (mongo/count :users query)
         users            (mongo/with-collection "users"
-                           (query/find query)
-                           (query/fields [:email :firstName :lastName :role :orgAuthz :enabled])
-                           (query/skip (util/->int (:start params) 0))
-                           (query/limit (util/->int (:length params) 16)))]
-    {:rows     users
-     :total    base-query-total
-     :display  query-total
-     :draw     (str (util/->int (str (:draw params))))}))
+                                                (query/find query)
+                                                (query/fields [:email :firstName :lastName :role :orgAuthz :enabled])
+                                                (query/skip (util/->int (:start params) 0))
+                                                (query/limit (util/->int (:length params) 16)))]
+    {:rows    users
+     :total   base-query-total
+     :display query-total
+     :draw    (str (util/->int (str (:draw params))))}))
 
 ;;
 ;; ==============================================================================
@@ -464,9 +487,9 @@
 
 (defn throttle-login? [username]
   {:pre [username]}
-  (mongo/any? :logins {:_id (ss/canonize-email username)
+  (mongo/any? :logins {:_id           (ss/canonize-email username)
                        :failed-logins {$gte (env/value :login :allowed-failures)}
-                       :locked {$gt (logins-lock-expires-date)}}))
+                       :locked        {$gt (logins-lock-expires-date)}}))
 
 (defn login-failed [username]
   {:pre [username]}
@@ -517,8 +540,8 @@
 
 (defn email-in-use? [email]
   (as-> email $
-    (get-user-by-email $)
-    (and $ (not (dummy? $)))))
+        (get-user-by-email $)
+        (and $ (not (dummy? $)))))
 
 ;; note: new user registration messages need to send a message even though
 ;; the user is not enabled, and some messages are intentionally sent directly
@@ -540,8 +563,8 @@
 (defn get-user-with-password [username password]
   (when-not (or (ss/blank? username) (ss/blank? password))
     (let [user (find-user {:username username})]
-     (when (and user (:enabled user) (security/check-password password (get-in user [:private :password])))
-       (non-private user)))))
+      (when (and user (:enabled user) (security/check-password password (get-in user [:private :password])))
+        (non-private user)))))
 
 (defn get-user-with-apikey [apikey]
   (when-not (ss/blank? apikey)
@@ -562,100 +585,126 @@
 ;; ==============================================================================
 ;;
 
+(def create-new-user-rules
+  [{:desc  "user data matches User schema"
+    :error :error.missing-parameters
+    :fail? (fnk [user-data]
+             (when-let [schema-errors (sc/check NewUser user-data)]
+               ; Help problem tracing by adding a stack trace to logs
+               (error (ex-info "stack trace" {}) "new user does not match NewUser schema" schema-errors)
+               true))}
+
+   {:desc  "user-data has orgAuths in expected form"        ; keys as keyword, roles as string
+    :error :error.missing-parameters
+    :fail? (fnk [[:user-data {orgAuthz nil}]]
+             (when orgAuthz
+               (not (and (every? keyword? (keys orgAuthz))
+                         (every? string?  (apply concat (vals orgAuthz)))))))}
+
+   {:desc  "caller has been run trough 'with-org-auth'"
+    :error :error.missing-parameters
+    :fail? (fnk [[:caller {orgAuthz nil}]]
+             (when (seq orgAuthz)
+               (not (and (every? keyword? (keys orgAuthz))
+                         (every? set?      (vals orgAuthz))
+                         (every? keyword?  (apply concat (vals orgAuthz)))))))}
+
+   {:desc  "applicant can not create other than dummy users"
+    :error :error.unauthorized
+    :fail? (fnk [[:caller {role nil}] [:user-data [:role :as data-role]]]
+             (and (= role "applicant")
+                  (not= "dummy" data-role)))}
+
+   {:desc  "applicants are born via registration"
+    :error :error.unauthorized
+    :fail? (fnk [caller [:user-data role]]
+             (and (= role "applicant") caller))}
+
+   {:desc  "applicants may not have an organizations"
+    :error :error.unauthorized
+    :fail? (fnk [[:user-data role {orgAuthz nil}]]
+             (and (= role "applicant") (seq orgAuthz)))}
+
+   {:desc  "authorityAdmin can create users into his/her own organizations only"
+    :error :error.unauthorized
+    :fail? (fnk [caller user-data]
+             (and (-> caller :role (not= "admin"))
+                  (not (every? (organization-ids-by-roles caller #{:authorityAdmin})
+                               (map name (-> user-data :orgAuthz keys))))))}
+
+   {:desc  "dummy user may not have an organization roles"
+    :error :error.unauthorized
+    :fail? (fnk [[:user-data role {orgAuthz nil}]]
+             (and (= role "dummy")
+                  (seq orgAuthz)))}
+
+   ; In principle, the "authorityAdmin can create users into his/her own organizations only" test
+   ; should cover this. The only way this test traps errors is that the organization was deleted, but
+   ; some authority still has the roles for deleted organization in her :authOrgz.
+   {:desc  "all organizations must be known"
+    :error :error.organization-not-found
+    :fail? (fnk [[:user-data {orgAuthz nil}] known-organizations?]
+             (not (known-organizations? (keys orgAuthz))))}
+
+   {:desc  "only admin can create create users with apikey"
+    :error :error.unauthorized
+    :fail? (fnk [{caller nil} {apikey nil}]
+             (and apikey (-> caller :role (not= "admin"))))}])
+
+(defn- new-user-error [data]
+  (some (fn [{:keys [fail?] :as rule}]
+          (when (fail? data)
+            rule))
+        create-new-user-rules))
+
 (defn- validate-create-new-user! [caller user-data]
-  (when-let [missing (util/missing-keys user-data [:email :role])]
-    (fail! :error.missing-parameters :parameters missing))
-  (when (ss/blank? (:email user-data))
-    (fail! :error.email))
+  (when-let [e (new-user-error {:caller caller
+                                :user-data user-data
+                                :known-organizations? org/known-organizations?})]
+    (fail! (:error e) :desc (:desc e)))
+  user-data)
 
-  (let [password         (:password user-data)
-        user-role        (keyword (:role user-data))
-        caller-role      (keyword (:role caller))
-        org-authz        (:orgAuthz user-data)
-        organization-id  (when (map? org-authz)
-                           (name (first (keys org-authz))))
-        admin?           (= caller-role :admin)
-        authorityAdmin?  (= caller-role :authorityAdmin)]
-
-    (when (and org-authz (not (every? coll? (vals org-authz))))
-      (fail! :error.invalid-role :desc "new user has unsupported organization roles"))
-
-    (when-not (#{:authority :authorityAdmin :applicant :dummy :financialAuthority} user-role)
-      (fail! :error.invalid-role :desc "new user has unsupported role" :user-role user-role))
-
-    (when (and (= user-role :applicant) caller)
-      (fail! :error.unauthorized :desc "applicants are born via registration"))
-
-    (when (and (= user-role :authorityAdmin) (not admin?))
-      (fail! :error.unauthorized :desc "only admin can create authorityAdmin users"))
-
-    (when (and (= user-role :authority) (not authorityAdmin?))
-      (fail! :error.unauthorized :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
-
-    (when (and (= user-role :authorityAdmin) (not organization-id))
-      (fail! :error.missing-parameters :desc "new authorityAdmin user must have organization" :parameters [:organization]))
-
-    (when (and (= user-role :authority) (and organization-id (not ((organization-ids caller) organization-id))))
-      (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only, or statement givers without any organization at all"))
-
-    (when (and (= user-role :dummy) organization-id)
-      (fail! :error.unauthorized :desc "dummy user may not have an organization" :missing :organization))
-
-    (when (and password (not (security/valid-password? password)))
-      (fail! :error.password.minlengt :desc "password specified, but it's not valid"))
-
-    (when (and organization-id (not (org/get-organization organization-id)))
-      (fail! :error.organization-not-found))
-
-    (when (and (:apikey user-data) (not admin?))
-      (fail! :error.unauthorized :desc "only admin can create create users with apikey"))
-
-    ;; TODO validate against schema!
-    )
-
-  true)
-
-(defn- create-new-user-entity [{:keys [enabled password] :as user-data}]
-  (let [email (ss/canonize-email (:email user-data))]
-    (-<> user-data
-      (select-keys [:email :username :role :firstName :lastName :personId :personIdSource
-                    :phone :city :street :zip :enabled :orgAuthz :language
-                    :allowDirectMarketing :architect :company
-                    :graduatingYear :degree :fise :fiseKelpoisuus])
-      (merge {:firstName "" :lastName "" :username email} <>)
-      (assoc
-        :email email
-        :enabled (= "true" (str enabled))
-        :private (if password {:password (security/get-hash password)} {})))))
+(defn- create-new-user-entity [{:as user-data :keys [password]}]
+  (let [email (-> user-data :email ss/canonize-email)]
+    (-> user-data
+        (select-keys user-keys)
+        (assoc :email email)
+        (->> (merge {:firstName "" :lastName email :username email}))
+        (update :role (fn [role] (if (keyword? role) (name role) role)))
+        (assoc :enabled (-> user-data :enabled str (= "true"))
+               :private (if password
+                          {:password (security/get-hash password)}
+                          {})))))
 
 (defn create-new-user
   "Insert new user to database, returns new user data without private information. If user
    exists and has role \"dummy\", overwrites users information. If users exists with any other
-   role, throws exception."
-  [caller user-data & {:keys [send-email] :or {send-email true}}]
-  (validate-create-new-user! caller user-data)
-  (let [user-entry  (create-new-user-entity user-data)
-        old-user    (get-user-by-email (:email user-entry))
-        new-user    (if old-user
-                      (assoc user-entry :id (:id old-user))
-                      (assoc user-entry :id (mongo/create-id)))
-        email       (:email new-user)
-        {old-id :id old-role :role}  old-user
-        notification {:titleI18nkey "user.notification.firstLogin.title"
-                      :messageI18nkey "user.notification.firstLogin.message"}
-        new-user   (if (applicant? user-data)
-                     (assoc new-user :notification notification)
+   role, throws exception. Caller should have gone through with-org-authz."
+  [caller user-data]
+  (let [user-data (->> user-data
+                       (create-new-user-entity)
+                       (validate-create-new-user! caller))
+        old-user  (get-user-by-email (:email user-data))
+        new-user  (if old-user
+                     (assoc user-data :id (:id old-user))
+                     (assoc user-data :id (mongo/create-id)))
+        email     (:email new-user)
+        {old-id :id old-role :role} old-user
+        new-user  (if (applicant? user-data)
+                     (assoc new-user :notification {:titleI18nkey   "user.notification.firstLogin.title"
+                                                    :messageI18nkey "user.notification.firstLogin.message"})
                      new-user)]
     (try
       (condp = old-role
-        nil     (do
-                  (info "creating new user" (dissoc new-user :private))
-                  (mongo/insert :users new-user))
+        nil (do
+              (info "creating new user" (dissoc new-user :private))
+              (mongo/insert :users new-user))
         "dummy" (do
                   (info "rewriting over dummy user:" old-id (dissoc new-user :private :id))
                   (mongo/update-by-id :users old-id (dissoc new-user :id)))
         ; LUPA-1146
-        "applicant" (if (and (= (:personId old-user) (:personId new-user)) (not (:enabled old-user)))
+        "applicant" (if (and (= (:personId old-user) (:personId new-user))
+                             (not (:enabled old-user)))
                       (do
                         (info "rewriting over inactive applicant user:" old-id (dissoc new-user :private :id))
                         (mongo/update-by-id :users old-id (dissoc new-user :id)))
@@ -678,16 +727,16 @@
 (defn create-rest-user
   "Creates and inserts new rest-api user to database, returns username and password to frontend.
    Only for Solita admin"
-  [user-data]
+  [caller user-data]
   (let [pw        (security/random-password)
         user-data (merge user-data
-                         {:enabled true
-                          :role "rest-api"
-                          :orgAuthz {(:organization user-data) ["authority"]}
+                         {:enabled  true
+                          :role     "rest-api"
+                          :orgAuthz {(keyword (:organization user-data)) ["authority"]}
                           :password pw})
-        user (-> (create-new-user-entity user-data)
-                 (assoc :id (mongo/create-id)))]
-    (mongo/insert :users user)
+        user      (->> (create-new-user-entity user-data)
+                       (validate-create-new-user! caller))]
+    (mongo/insert :users (assoc user :id (mongo/create-id)))
     {:username (:username user)
      :password pw}))
 
@@ -706,18 +755,18 @@
               (ss/replace #"[\u00f6]" "o")
               (ss/replace system-user-sanization-regexp "_"))))
 
-(defn create-system-user [name email organization-ids]
-  (->> {:id (mongo/create-id)
-        :username email
-        :email email
-        :firstName  "J\u00e4rjestelm\u00e4tunnus"
-        :lastName  name
-        :role  :authority
-        :enabled true
-        :orgAuthz  (zipmap organization-ids (repeat ["reader"]))
-        :language :fi}
-       (mongo/insert :users))
-  {:username email})
+(defn create-system-user [caller name email organization-ids]
+  (let [user-data (->> {:username  email
+                        :email     email
+                        :firstName "J\u00e4rjestelm\u00e4tunnus"
+                        :lastName  name
+                        :role      "authority"
+                        :enabled   true
+                        :orgAuthz  (zipmap (map keyword organization-ids) (repeat ["reader"]))
+                        :language  "fi"}
+                       (validate-create-new-user! caller))]
+    (mongo/insert :users (assoc user-data :id (mongo/create-id)))
+    {:username email}))
 
 (defn get-or-create-user-by-email [email current-user]
   (let [email (ss/canonize-email email)]
@@ -732,11 +781,17 @@
 ;; ==============================================================================
 ;;
 
-(defn applicationpage-for [role]
+(defn- resolve-authority-page [user]
+  (if (roles/authority-admins-organization-id user)
+    "authority-admin"
+    "authority"))
+
+(defn applicationpage-for [{:keys [role] :as user}]
   (let [s (name role)]
     (cond
       (or (ss/blank? s) (= s "dummy")) "applicant"
       (= s "oirAuthority") "oir"
+      (= s "authority") (resolve-authority-page user)
       :else (csk/->kebab-case s))))
 
 (defn user-in-role [user role & params]
@@ -750,7 +805,7 @@
 
 (defn current-user
   "fetches the current user from session"
-  [request] (:user request ))
+  [request] (:user request))
 
 ;;
 ;; ==============================================================================
@@ -780,13 +835,13 @@
 (defn change-password
   "Update users password. Returns nil. If user is not found, raises an exception."
   [email password]
-  (let [salt              (security/dispense-salt)
-        hashed-password   (security/get-hash password salt)
-        email             (ss/canonize-email email)
-        updated-user      (mongo/update-one-and-return :users
-                            {:email email}
-                            {$set {:private.password hashed-password
-                                   :enabled true}})]
+  (let [salt            (security/dispense-salt)
+        hashed-password (security/get-hash password salt)
+        email           (ss/canonize-email email)
+        updated-user    (mongo/update-one-and-return :users
+                                                     {:email email}
+                                                     {$set {:private.password hashed-password
+                                                            :enabled          true}})]
     (if updated-user
       (do
         (mongo/remove-many :activation {:email email})
@@ -804,14 +859,14 @@
   "Returns (ok) or (fail :error.user-not-found)"
   ([email data] (update-user-by-email email {} data))
   ([email extra-query data]
-    {:pre [(string? email) (map? extra-query) (map? data)]}
-    (let [query (merge {:email (ss/canonize-email email)} extra-query)
-          updates (condp every? (keys data)
-                    mongo/operator? data
-                    (complement mongo/operator?) {$set data})]
-      (if (pos? (mongo/update-n :users query updates))
-        (ok)
-        (fail :error.user-not-found)))))
+   {:pre [(string? email) (map? extra-query) (map? data)]}
+   (let [query   (merge {:email (ss/canonize-email email)} extra-query)
+         updates (condp every? (keys data)
+                   mongo/operator? data
+                   (complement mongo/operator?) {$set data})]
+     (if (pos? (mongo/update-n :users query updates))
+       (ok)
+       (fail :error.user-not-found)))))
 
 ;;
 ;; ==============================================================================
@@ -823,7 +878,7 @@
   [user-id]
   {:pre [(string? user-id)]}
   (mongo/remove-many :users
-                     {:_id user-id
+                     {:_id  user-id
                       :role "dummy"}))
 
 

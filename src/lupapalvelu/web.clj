@@ -111,10 +111,27 @@
 (defn- in-role? [role request]
   (= role (keyword (:role (usr/current-user request)))))
 
+(defn- user-has-org-role?
+  "check that given user has top-level role `:authority` and given `org-role` in some
+   of her organizations."
+  [org-role user]
+  (and (->> user
+            :role
+            (= "authority"))
+       (->> user
+            :orgAuthz
+            (some (comp org-role val)))))
+
+(defn- has-org-role?
+  "check that current user has top-level role `:authority` and given `org-role` in some
+   of her organizations."
+  [org-role request]
+  (user-has-org-role? org-role (usr/current-user request)))
+
 (def applicant? (partial in-role? :applicant))
 (def authority? (partial in-role? :authority))
 (def oir? (partial in-role? :oirAuthority))
-(def authority-admin? (partial in-role? :authorityAdmin))
+(def authority-admin? (partial has-org-role? :authorityAdmin))
 (def admin? (partial in-role? :admin))
 (def financial-authority? (partial in-role? :financialAuthority))
 (defn- anyone [_] true)
@@ -276,7 +293,7 @@
   ([lang] (landing-page lang         (usr/current-user (request/ring-request))) )
   ([lang user]
    (let [lang (get user :language lang)]
-     (if-let [application-page (and (:id user) (usr/applicationpage-for (:role user)))]
+     (if-let [application-page (and (:id user) (usr/applicationpage-for user))]
        (redirect lang application-page)
        (redirect-to-frontpage lang)))))
 
@@ -655,7 +672,7 @@
             (action/update-application command {$set {:state state}, $push {:history (app-state/history-entry state (:created command) user)}}))
 
           (if redirect
-            (resp/redirect (str "/app/fi/" (str (usr/applicationpage-for (:role user))
+            (resp/redirect (str "/app/fi/" (str (usr/applicationpage-for user)
                                                 "#!/" (if infoRequest "inforequest" "application") "/" application-id)))
             (resp/status 200 application-id)))
         (resp/status 400 (str response)))))

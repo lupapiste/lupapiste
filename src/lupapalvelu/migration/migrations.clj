@@ -3984,6 +3984,12 @@
   (doseq [{:keys [attachments id]} (mongo/select :application-bulletin-comments {:attachments.storageSystem {$exists false}})]
     (mongo/update-by-id :application-bulletin-comments id {$set {:attachments (map add-storage-system-if-needed attachments)}})))
 
+(defmigration authority-admins-to-authorities
+  {:apply-when (pos? (mongo/count :users {:role "authorityAdmin"}))}
+  (mongo/update-by-query :users
+                         {:role "authorityAdmin"}
+                         {$set {:role "authority"}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

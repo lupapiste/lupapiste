@@ -1,6 +1,5 @@
 (ns lupapalvelu.organization-api
   (:require [camel-snake-kebab.core :as csk]
-            [clojure.core.memoize :as memo]
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
@@ -16,7 +15,6 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.waste-ads :as waste-ads]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.xml.validator :as krysp-xml]
             [me.raynes.fs :as fs]
@@ -41,16 +39,16 @@
 
 (defn- municipalities-with-organization []
   (let [organizations (org/get-organizations {} [:scope :krysp])]
-    {:all (distinct
-            (for [{scopes :scope} organizations
-                  {municipality :municipality} scopes]
-              municipality))
+    {:all          (distinct
+                     (for [{scopes :scope} organizations
+                           {municipality :municipality} scopes]
+                       municipality))
      :with-backend (remove nil?
-                     (distinct
-                       (for [{scopes :scope :as org} organizations
-                             {municipality :municipality :as scope} scopes]
-                         (when (-> org :krysp (get (-> scope :permitType keyword)) :url s/blank? not)
-                           municipality))))}))
+                           (distinct
+                             (for [{scopes :scope :as org} organizations
+                                   {municipality :municipality :as scope} scopes]
+                               (when (-> org :krysp (get (-> scope :permitType keyword)) :url s/blank? not)
+                                 municipality))))}))
 
 (defn- organization-attachments
   "Returns a map where key is permit type, value is a list of attachment types for the permit type"
@@ -82,12 +80,12 @@
   (reduce
     #(if-not (get-in %1 [%2])
        (let [selected-operations (set (map keyword selected-ops))
-             operation-names (keys (filter
-                                     (fn [[name op]]
-                                       (and
-                                         (= %2 (:permit-type op))
-                                         (selected-operations name)))
-                                     operations/operations))]
+             operation-names     (keys (filter
+                                         (fn [[name op]]
+                                           (and
+                                             (= %2 (:permit-type op))
+                                             (selected-operations name)))
+                                         operations/operations))]
          (if operation-names (assoc %1 %2 operation-names) %1))
        %1)
     {}
@@ -100,24 +98,24 @@
 
 (defquery organization-by-user
   {:description "Lists organization details."
-   :user-roles #{:authorityAdmin}}
+   :permissions [{:required [:organization/admin]}]}
   [{user :user}]
-  (let [organization (org/get-organization (usr/authority-admins-organization-id user))
-        ops-with-attachments (organization-operations-with-attachments organization)
+  (let [organization                         (org/get-organization (usr/authority-admins-organization-id user))
+        ops-with-attachments                 (organization-operations-with-attachments organization)
         selected-operations-with-permit-type (selected-operations-with-permit-types organization)
-        allowed-roles (org/allowed-roles-in-organization organization)]
+        allowed-roles                        (org/allowed-roles-in-organization organization)]
     (ok :organization (-> organization
-                        (assoc :operationsAttachments ops-with-attachments
-                               :selectedOperations selected-operations-with-permit-type
-                               :allowedRoles allowed-roles)
-                        (dissoc :operations-attachments :selected-operations)
-                        (update-in [:map-layers :server] select-keys [:url :username])
-                        (update-in [:suti :server] select-keys [:url :username]))
+                          (assoc :operationsAttachments ops-with-attachments
+                                 :selectedOperations selected-operations-with-permit-type
+                                 :allowedRoles allowed-roles)
+                          (dissoc :operations-attachments :selected-operations)
+                          (update-in [:map-layers :server] select-keys [:url :username])
+                          (update-in [:suti :server] select-keys [:url :username]))
         :attachmentTypes (organization-attachments organization))))
 
 (defquery organization-attachment-types
   {:description "Combined list of attachment types for every organization scope."
-   :user-roles #{:authorityAdmin}}
+   :permissions [{:required [:organization/admin]}]}
   [{:keys [user user-organizations]}]
   (-<>> (usr/authority-admins-organization-id user)
         (util/find-by-id <> user-organizations)
@@ -132,19 +130,19 @@
 
 (defquery organization-name-by-user
   {:description "Lists organization names for all languages."
-   :user-roles #{:authorityAdmin}}
+   :permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (ok (-> (usr/authority-admins-organization-id user)
           org/get-organization
           (select-keys [:id :name]))))
 
 (defquery user-organizations-for-permit-type
-  {:parameters [permitType]
-   :user-roles #{:authority}
+  {:parameters       [permitType]
+   :user-roles       #{:authority}
    :input-validators [permit/permit-type-validator]}
   [{user :user}]
-  (ok :organizations (org/get-organizations {:_id {$in (usr/organization-ids-by-roles user #{:authority})}
-                                           :scope {$elemMatch {:permitType permitType}}})))
+  (ok :organizations (org/get-organizations {:_id   {$in (usr/organization-ids-by-roles user #{:authority})}
+                                             :scope {$elemMatch {:permitType permitType}}})))
 
 (defquery user-organizations-for-archiving-project
   {:user-roles #{:authority}}
@@ -156,14 +154,14 @@
     (fail :error.bulletins-not-enebled-for-scope)))
 
 (defquery user-organization-bulletin-settings
-  {:user-roles #{:authorityAdmin}
-   :pre-checks [check-bulletins-enabled]}
+  {:permissions [{:required [:organization/admin]}]
+   :pre-checks  [check-bulletins-enabled]}
   [{user :user user-orgs :user-organizations}]
   (let [user-org (first user-orgs)
-        scopes (->> user-org :scope
-                    (filter (comp :enabled :bulletins))
-                    (map #(select-keys % [:permitType :municipality :bulletins])))
-        texts (->> user-org :local-bulletins-page-settings :texts)]
+        scopes   (->> user-org :scope
+                      (filter (comp :enabled :bulletins))
+                      (map #(select-keys % [:permitType :municipality :bulletins])))
+        texts    (->> user-org :local-bulletins-page-settings :texts)]
     (ok :bulletin-scopes scopes
         :local-bulletins-page-texts texts)))
 
@@ -175,12 +173,12 @@
     (fail! :error.invalid-value)))
 
 (defcommand update-organization-bulletin-scope
-  {:user-roles #{:authorityAdmin}
-   :parameters [permitType municipality]
+  {:permissions         [{:required [:organization/admin]}]
+   :parameters          [permitType municipality]
    :optional-parameters [notificationEmail descriptionsFromBackendSystem]
-   :input-validators [permit/permit-type-validator
-                      bulletin-scope-settings-validator]
-   :pre-checks [check-bulletins-enabled]}
+   :input-validators    [permit/permit-type-validator
+                         bulletin-scope-settings-validator]
+   :pre-checks          [check-bulletins-enabled]}
   [{user :user data :data}]
   (let [updates (merge (when (util/not-empty-or-nil? notificationEmail)
                          {:scope.$.bulletins.notification-email notificationEmail})
@@ -188,18 +186,18 @@
                          {:scope.$.bulletins.descriptions-from-backend-system descriptionsFromBackendSystem}))]
     (when updates
       (mongo/update-by-query :organizations
-        {:scope {$elemMatch {:permitType permitType :municipality municipality}}}  {$set updates}))
+        {:scope {$elemMatch {:permitType permitType :municipality municipality}}} {$set updates}))
     (ok)))
 
 (defcommand remove-organization-local-bulletins-caption
-  {:user-roles #{:authorityAdmin}
-   :parameters [lang index]
+  {:permissions      [{:required [:organization/admin]}]
+   :parameters       [lang index]
    :input-validators [(partial action/supported-lang :lang)
                       (partial action/positive-integer-parameters [:index])]
-   :pre-checks [check-bulletins-enabled]}
+   :pre-checks       [check-bulletins-enabled]}
   [{[user-org & _] :user-organizations}]
   (if (integer? index)
-    (let [{{texts :texts} :local-bulletins-page-settings org-id :id}  user-org
+    (let [{{texts :texts} :local-bulletins-page-settings org-id :id} user-org
           caption (get-in texts [(keyword lang) :caption])
           caption (util/drop-nth index caption)
           updates {$set {(util/kw-path [:local-bulletins-page-settings.texts (keyword lang) :caption]) caption}}]
@@ -208,41 +206,41 @@
     (ok :removed false)))
 
 (defcommand upsert-organization-local-bulletins-text
-  {:user-roles #{:authorityAdmin}
-   :parameters [lang key value]
+  {:permissions         [{:required [:organization/admin]}]
+   :parameters          [lang key value]
    :optional-parameters [index]
-   :input-validators [(partial action/supported-lang :lang)
-                      (partial non-blank-parameters [:key])]
-   :pre-checks [check-bulletins-enabled]}
+   :input-validators    [(partial action/supported-lang :lang)
+                         (partial non-blank-parameters [:key])]
+   :pre-checks          [check-bulletins-enabled]}
   [{[user-org & _] :user-organizations}]
   (let [{{texts :texts} :local-bulletins-page-settings org-id :id} user-org
-        path (remove nil?
-               [(keyword lang) (keyword key) (when (integer? index) index)])
-        valid? (nil? (sc/check org/LocalBulletinsPageTexts (assoc-in texts path value)))
+        path    (remove nil?
+                        [(keyword lang) (keyword key) (when (integer? index) index)])
+        valid?  (nil? (sc/check org/LocalBulletinsPageTexts (assoc-in texts path value)))
         updates {$set {(util/kw-path (cons :local-bulletins-page-settings.texts path)) value}}]
     (when valid?
       (org/update-organization org-id updates))
     (ok :valid valid?)))
 
 (defcommand update-organization
-  {:description "Update organization details."
-   :parameters [permitType municipality
-                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
-                opening]
+  {:description         "Update organization details."
+   :parameters          [permitType municipality
+                         inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
+                         opening]
    :optional-parameters [bulletinsEnabled bulletinsUrl]
-   :input-validators [permit/permit-type-validator]
-   :user-roles #{:admin}}
+   :input-validators    [permit/permit-type-validator]
+   :user-roles          #{:admin}}
   [_]
   (mongo/update-by-query :organizations
-      {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
-      {$set (merge {:scope.$.inforequest-enabled inforequestEnabled
-                    :scope.$.new-application-enabled applicationEnabled
-                    :scope.$.open-inforequest openInforequestEnabled
-                    :scope.$.open-inforequest-email openInforequestEmail
-                    :scope.$.opening (when (number? opening) opening)}
-                   (when-not (nil? bulletinsEnabled)
-                     {:scope.$.bulletins.enabled bulletinsEnabled
-                      :scope.$.bulletins.url     (or bulletinsUrl "")}))})
+    {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
+    {$set (merge {:scope.$.inforequest-enabled     inforequestEnabled
+                  :scope.$.new-application-enabled applicationEnabled
+                  :scope.$.open-inforequest        openInforequestEnabled
+                  :scope.$.open-inforequest-email  openInforequestEmail
+                  :scope.$.opening                 (when (number? opening) opening)}
+                 (when-not (nil? bulletinsEnabled)
+                   {:scope.$.bulletins.enabled bulletinsEnabled
+                    :scope.$.bulletins.url     (or bulletinsUrl "")}))})
   (ok))
 
 (defn- duplicate-scope-validator [municipality & permit-types]
@@ -250,28 +248,28 @@
     (fail :error.organization.duplicate-scope :organization duplicate-scopes)))
 
 (defcommand add-scope
-  {:description "Admin can add new scopes for organization"
-   :parameters [organization permitType municipality
-                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
-                opening]
-   :pre-checks [(fn [{{:keys [municipality permitType]} :data}]
-                  (duplicate-scope-validator municipality permitType))]
+  {:description      "Admin can add new scopes for organization"
+   :parameters       [organization permitType municipality
+                      inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
+                      opening]
+   :pre-checks       [(fn [{{:keys [municipality permitType]} :data}]
+                        (duplicate-scope-validator municipality permitType))]
    :input-validators [permit/permit-type-validator
                       (fn [{{:keys [municipality]} :data}]
                         (when-not (contains? muni/municipality-codes municipality)
                           (fail :error.invalid-municipality)))]
-   :user-roles #{:admin}}
+   :user-roles       #{:admin}}
   [_]
   (org/update-organization
-   organization
-   {$push {:scope
-           (org/new-scope municipality
-                          permitType
-                          :inforequest-enabled     inforequestEnabled
-                          :new-application-enabled applicationEnabled
-                          :open-inforequest        openInforequestEnabled
-                          :open-inforequest-email  openInforequestEmail
-                          :opening                 opening)}})
+    organization
+    {$push {:scope
+            (org/new-scope municipality
+                           permitType
+                           :inforequest-enabled inforequestEnabled
+                           :new-application-enabled applicationEnabled
+                           :open-inforequest openInforequestEnabled
+                           :open-inforequest-email openInforequestEmail
+                           :opening opening)}})
   (ok))
 
 (defn- permit-types-validator [{{:keys [permit-types]} :data}]
@@ -283,15 +281,15 @@
     (fail :error.organization-already-exists)))
 
 (defcommand create-organization
-  {:parameters [org-id municipality name permit-types]
-   :pre-checks [org-id-not-exist
-                (fn [{{:keys [municipality permit-types]} :data}]
-                  (apply duplicate-scope-validator municipality permit-types))]
+  {:parameters       [org-id municipality name permit-types]
+   :pre-checks       [org-id-not-exist
+                      (fn [{{:keys [municipality permit-types]} :data}]
+                        (apply duplicate-scope-validator municipality permit-types))]
    :input-validators [(partial action/vector-parameters [:permit-types])
                       permit-types-validator
                       (partial action/non-blank-parameters [:org-id :municipality :name])
                       (partial action/numeric-parameters [:municipality])]
-   :user-roles #{:admin}}
+   :user-roles       #{:admin}}
   [_]
   (mongo/insert :organizations {:_id           org-id
                                 :name          {:fi name :sv name :en name}
@@ -308,9 +306,9 @@
           urls)))
 
 (defcommand add-organization-link
-  {:description "Adds link to organization."
-   :parameters [url name]
-   :user-roles #{:authorityAdmin}
+  {:description      "Adds link to organization."
+   :parameters       [url name]
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(partial map-parameters-with-required-keys
                                [:url :name] i18n/supported-langs)
                       (partial validate-map-with-optional-url-values :url)]}
@@ -320,9 +318,9 @@
   (ok))
 
 (defcommand update-organization-link
-  {:description "Updates organization link."
-   :parameters [url name index]
-   :user-roles #{:authorityAdmin}
+  {:description      "Updates organization link."
+   :parameters       [url name index]
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(partial map-parameters-with-required-keys
                                [:url :name] i18n/supported-langs)
                       (partial validate-map-with-optional-url-values :url)
@@ -333,12 +331,12 @@
   (ok))
 
 (defcommand remove-organization-link
-  {:description "Removes organization link."
-   :parameters [url name]
+  {:description      "Removes organization link."
+   :parameters       [url name]
    :input-validators [(partial map-parameters-with-required-keys
                                [:url :name] i18n/supported-langs)
                       (partial validate-map-with-optional-url-values :url)]
-   :user-roles #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (org/remove-organization-link (usr/authority-admins-organization-id user)
                                 name url)
@@ -350,26 +348,26 @@
   (ok :organizations (org/get-organizations {} org/admin-projection)))
 
 (defquery allowed-autologin-ips-for-organization
-  {:parameters [org-id]
+  {:parameters       [org-id]
    :input-validators [(partial non-blank-parameters [:org-id])]
-   :user-roles #{:admin}}
+   :user-roles       #{:admin}}
   [_]
   (ok :ips (org/get-autologin-ips-for-organization org-id)))
 
 (defcommand update-allowed-autologin-ips
-  {:parameters [org-id ips]
+  {:parameters       [org-id ips]
    :input-validators [(partial non-blank-parameters [:org-id])
                       (comp org/valid-ip-addresses :ips :data)]
-   :user-roles #{:admin}}
+   :user-roles       #{:admin}}
   [_]
   (->> (org/autogin-ip-mongo-changes ips)
        (org/update-organization org-id))
   (ok))
 
 (defquery organization-by-id
-  {:parameters [organizationId]
+  {:parameters       [organizationId]
    :input-validators [(partial non-blank-parameters [:organizationId])]
-   :user-roles #{:admin}}
+   :user-roles       #{:admin}}
   [_]
   (ok :data (org/get-organization organizationId org/admin-projection)))
 
@@ -380,7 +378,7 @@
 
 (defquery municipalities-with-organization
   {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
-   :user-roles #{:applicant :authority :admin}}
+   :user-roles  #{:applicant :authority :admin}}
   [_]
   (let [munis (municipalities-with-organization)]
     (ok
@@ -389,22 +387,22 @@
 
 (defquery municipalities
   {:description "Returns a list of all municipality IDs. For admin use."
-   :user-roles #{:admin}}
+   :user-roles  #{:admin}}
   (ok :municipalities muni/municipality-codes))
 
 (defquery all-operations-for-organization
-  {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
-   :parameters [organizationId]
-   :user-roles #{:authorityAdmin}
+  {:description      "Returns operations that match the permit types of the organization whose id is given as parameter"
+   :parameters       [organizationId]
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(partial non-blank-parameters [:organizationId])]}
   (when-let [org (org/get-organization organizationId)]
     (ok :operations (operations/organization-operations org))))
 
 (defquery selected-operations-for-municipality
-  {:description "Returns selected operations of all the organizations who have a scope with the given municipality.
+  {:description      "Returns selected operations of all the organizations who have a scope with the given municipality.
                  If a \"permitType\" parameter is given, returns selected operations for only that organization (the municipality + permitType combination)."
-   :parameters [:municipality]
-   :user-roles #{:applicant :authority :authorityAdmin}
+   :parameters       [:municipality]
+   :user-roles       #{:applicant :authority}
    :input-validators [(partial non-blank-parameters [:municipality])]}
   [{{:keys [municipality permitType]} :data}]
   (when-let [organizations (org/resolve-organizations municipality permitType)]
@@ -413,7 +411,7 @@
 (defquery addable-operations
   {:description "returns operations addable for the application whose id is given as parameter"
    :parameters  [:id]
-   :user-roles #{:applicant :authority}
+   :user-roles  #{:applicant :authority}
    :states      states/pre-sent-application-states}
   [{{:keys [organization permitType]} :application}]
   (when-let [org (org/get-organization organization)]
@@ -421,10 +419,10 @@
       (ok :operations (operations/addable-operations selected-operations permitType)))))
 
 (defquery organization-details
-  {:description "Resolves organization based on municipality and selected operation."
-   :parameters [municipality operation]
+  {:description      "Resolves organization based on municipality and selected operation."
+   :parameters       [municipality operation]
    :input-validators [(partial non-blank-parameters [:municipality :operation])]
-   :user-roles #{:applicant :authority}}
+   :user-roles       #{:applicant :authority}}
   [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
     (if-let [organization (org/resolve-organization municipality permit-type)]
@@ -437,26 +435,26 @@
       (fail :municipalityNotSupported))))
 
 (defcommand set-organization-selected-operations
-  {:parameters [operations]
-   :user-roles #{:authorityAdmin}
-   :input-validators  [(partial vector-parameters [:operations])
-                       (fn [{{:keys [operations]} :data}]
-                         (when-not (every? (->> operations/operations keys (map name) set) operations)
-                           (fail :error.unknown-operation)))]}
+  {:parameters       [operations]
+   :permissions      [{:required [:organization/admin]}]
+   :input-validators [(partial vector-parameters [:operations])
+                      (fn [{{:keys [operations]} :data}]
+                        (when-not (every? (->> operations/operations keys (map name) set) operations)
+                          (fail :error.unknown-operation)))]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:selected-operations operations}})
   (ok))
 
 (defcommand organization-operations-attachments
-  {:parameters [operation attachments]
-   :user-roles #{:authorityAdmin}
+  {:parameters       [operation attachments]
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(partial non-blank-parameters [:operation])
                       (partial vector-parameters [:attachments])
                       (fn [{{:keys [operation attachments]} :data, user :user}]
-                        (let [organization (org/get-organization (usr/authority-admins-organization-id user))
+                        (let [organization        (org/get-organization (usr/authority-admins-organization-id user))
                               selected-operations (set (:selected-operations organization))
-                              allowed-types (att-type/get-attachment-types-for-operation operation)
-                              attachment-types (map (fn [[group id]] {:type-group group :type-id id}) attachments)]
+                              allowed-types       (att-type/get-attachment-types-for-operation operation)
+                              attachment-types    (map (fn [[group id]] {:type-group group :type-id id}) attachments)]
                           (cond
                             (not (selected-operations operation)) (do
                                                                     (error "Unknown operation: " (logging/sanitize 100 operation))
@@ -467,120 +465,120 @@
   (ok))
 
 (defcommand set-organization-app-required-fields-filling-obligatory
-  {:parameters [enabled]
-   :user-roles #{:authorityAdmin}
-   :input-validators  [(partial boolean-parameters [:enabled])]}
+  {:parameters       [enabled]
+   :permissions      [{:required [:organization/admin]}]
+   :input-validators [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:app-required-fields-filling-obligatory enabled}})
   (ok))
 
 (defcommand set-automatic-ok-for-attachments
-  {:parameters [enabled]
-   :user-roles #{:authorityAdmin}
+  {:parameters       [enabled]
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:automatic-ok-for-attachments-enabled enabled}})
   (ok))
 
 (defcommand set-organization-assignments
-  {:parameters [enabled]
-   :user-roles #{:authorityAdmin}
-   :input-validators  [(partial boolean-parameters [:enabled])]}
+  {:parameters       [enabled]
+   :permissions      [{:required [:organization/admin]}]
+   :input-validators [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:assignments-enabled enabled}})
   (ok))
 
 (defcommand set-organization-inspection-summaries
-  {:parameters [enabled]
-   :user-roles #{:authorityAdmin}
-   :input-validators  [(partial boolean-parameters [:enabled])]}
+  {:parameters       [enabled]
+   :permissions      [{:required [:organization/admin]}]
+   :input-validators [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:inspection-summaries-enabled enabled}})
   (ok))
 
 (defcommand set-organization-extended-construction-waste-report
-  {:parameters [enabled]
-   :user-roles #{:authorityAdmin}
-   :pre-checks [(org/permit-type-validator :R)]
-   :input-validators  [(partial boolean-parameters [:enabled])]}
+  {:parameters       [enabled]
+   :permissions      [{:required [:organization/admin]}]
+   :pre-checks       [(org/permit-type-validator :R)]
+   :input-validators [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:extended-construction-waste-report-enabled enabled}})
   (ok))
 
 (defcommand set-organization-multiple-operations-support
-  {:parameters [enabled]
-   :user-roles #{:authorityAdmin}
-   :input-validators  [(partial boolean-parameters [:enabled])]}
+  {:parameters       [enabled]
+   :permissions      [{:required [:organization/admin]}]
+   :input-validators [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:multiple-operations-supported enabled}})
   (ok))
 
 (defcommand set-organization-remove-handlers-from-reverted-draft
-  {:parameters [enabled]
-   :user-roles #{:authorityAdmin}
+  {:parameters        [enabled]
+   :permissions       [{:required [:organization/admin]}]
    :input-validators  [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:remove-handlers-from-reverted-draft enabled}})
   (ok))
 
 (defcommand set-organization-validate-verdict-given-date
-  {:parameters [enabled]
-   :user-roles #{:authorityAdmin}
-   :input-validators  [(partial boolean-parameters [:enabled])]}
+  {:parameters       [enabled]
+   :permissions      [{:required [:organization/admin]}]
+   :input-validators [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:validate-verdict-given-date enabled}})
   (ok))
 
 (defcommand set-organization-review-fetch-enabled
-  {:parameters [enabled]
-   :user-roles #{:authorityAdmin}
-   :input-validators  [(partial boolean-parameters [:enabled])]}
+  {:parameters       [enabled]
+   :permissions      [{:required [:organization/admin]}]
+   :input-validators [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:automatic-review-fetch-enabled enabled}})
   (ok))
 
 (defcommand set-only-use-inspection-from-backend
-  {:parameters [enabled]
-   :user-roles #{:authorityAdmin}
-   :input-validators  [(partial boolean-parameters [:enabled])]}
+  {:parameters       [enabled]
+   :permissions      [{:required [:organization/admin]}]
+   :input-validators [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:only-use-inspection-from-backend enabled}})
   (ok))
 
 (defcommand set-organization-use-attachment-links-integration
   {:parameters       [enabled]
-   :user-roles       #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:use-attachment-links-integration enabled}})
   (ok))
 
 (defcommand set-organization-calendars-enabled
-  {:parameters [enabled organizationId]
-   :user-roles #{:admin}
-   :input-validators  [(partial non-blank-parameters [:organizationId])
-                       (partial boolean-parameters [:enabled])]
-   :feature :ajanvaraus}
+  {:parameters       [enabled organizationId]
+   :user-roles       #{:admin}
+   :input-validators [(partial non-blank-parameters [:organizationId])
+                      (partial boolean-parameters [:enabled])]
+   :feature          :ajanvaraus}
   [{user :user}]
   (org/update-organization organizationId {$set {:calendars-enabled enabled}})
   (ok))
 
 (defcommand set-organization-boolean-path
-  {:parameters [path value organizationId]
-   :description "Set boolean value to given path in organization settgins. Path must be string with dot denoted path. Eg 'foo.bar.baz'."
-   :user-roles #{:admin}
-   :input-validators  [(partial non-blank-parameters [:organizationId :path])
-                       (partial boolean-parameters [:value])]}
+  {:parameters       [path value organizationId]
+   :description      "Set boolean value to given path in organization settgins. Path must be string with dot denoted path. Eg 'foo.bar.baz'."
+   :user-roles       #{:admin}
+   :input-validators [(partial non-blank-parameters [:organizationId :path])
+                      (partial boolean-parameters [:value])]}
   [{user :user}]
   (when-let [kw-path (-> path (ss/split #"\.") (util/kw-path))]
     (org/update-organization organizationId {$set {kw-path value}}))
   (ok))
 
 (defcommand set-organization-boolean-attribute
-  {:parameters [enabled organizationId attribute]
-   :user-roles #{:admin}
-   :input-validators  [(partial non-blank-parameters [:organizationId :attribute])
-                       (partial boolean-parameters [:enabled])]}
+  {:parameters       [enabled organizationId attribute]
+   :user-roles       #{:admin}
+   :input-validators [(partial non-blank-parameters [:organizationId :attribute])
+                      (partial boolean-parameters [:enabled])]}
   [_]
   (when-let [org (->> (org/get-organization organizationId)
                       org/parse-organization)]
@@ -591,12 +589,12 @@
           (ok)))))
 
 (defcommand set-organization-permanent-archive-start-date
-  {:parameters [date]
-   :user-roles #{:authorityAdmin}
-   :input-validators  [(partial number-parameters [:date])]
-   :pre-checks [(fn [{:keys [user]}]
-                  (when-not (org/some-organization-has-archive-enabled? [(usr/authority-admins-organization-id user)])
-                    unauthorized))]}
+  {:parameters       [date]
+   :permissions      [{:required [:organization/admin]}]
+   :input-validators [(partial number-parameters [:date])]
+   :pre-checks       [(fn [{:keys [user]}]
+                        (when-not (org/some-organization-has-archive-enabled? [(usr/authority-admins-organization-id user)])
+                          unauthorized))]}
   [{user :user}]
   (let [org-id (usr/authority-admins-organization-id user)
         {:keys [earliest-allowed-archiving-date]} (org/get-organization org-id)]
@@ -607,7 +605,7 @@
 
 (defcommand set-default-digitalization-location
   {:parameters       [x y]
-   :user-roles       #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(fn [{{x :x y :y} :data}]
                         (when-not (or (ss/decimal-number? x) (ss/decimal-number? y))
                           (fail :error.illegal-number)))]}
@@ -617,9 +615,9 @@
   (ok))
 
 (defcommand set-organization-earliest-allowed-archiving-date
-  {:parameters [organizationId date]
-   :user-roles #{:admin}
-   :input-validators  [(partial number-parameters [:date])]}
+  {:parameters       [organizationId date]
+   :user-roles       #{:admin}
+   :input-validators [(partial number-parameters [:date])]}
   [_]
   (when-let [{:keys [permanent-archive-in-use-since]} (org/get-organization organizationId)]
     (when-not (neg? date)
@@ -642,63 +640,63 @@
                                   (fail :error.email))))])
 
 (defcommand set-organization-neighbor-order-email
-  {:parameters [emails]
-   :description "When application is submitted and the applicant wishes that the organization hears neighbours,
+  {:parameters       [emails]
+   :description      "When application is submitted and the applicant wishes that the organization hears neighbours,
                  send notification to these email addresses"
-   :user-roles #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :input-validators email-list-validators}
   [{user :user}]
-  (let [addresses (when-not (ss/blank? emails) (split-emails emails))
+  (let [addresses       (when-not (ss/blank? emails) (split-emails emails))
         organization-id (usr/authority-admins-organization-id user)]
     (org/update-organization organization-id {$set {:notifications.neighbor-order-emails addresses}})
     (ok)))
 
 (defcommand set-organization-submit-notification-email
-  {:parameters [emails]
-   :description "When application is submitted, send notification to these email addresses"
-   :user-roles #{:authorityAdmin}
+  {:parameters       [emails]
+   :description      "When application is submitted, send notification to these email addresses"
+   :permissions      [{:required [:organization/admin]}]
    :input-validators email-list-validators}
   [{user :user}]
-  (let [addresses (when-not (ss/blank? emails) (split-emails emails))
+  (let [addresses       (when-not (ss/blank? emails) (split-emails emails))
         organization-id (usr/authority-admins-organization-id user)]
     (org/update-organization organization-id {$set {:notifications.submit-notification-emails addresses}})
     (ok)))
 
 (defcommand set-organization-inforequest-notification-email
-  {:parameters [emails]
-   :description "When inforequest is received to organization, send notification to these email addresses"
-   :user-roles #{:authorityAdmin}
+  {:parameters       [emails]
+   :description      "When inforequest is received to organization, send notification to these email addresses"
+   :permissions      [{:required [:organization/admin]}]
    :input-validators email-list-validators}
   [{user :user}]
-  (let [addresses (when-not (ss/blank? emails) (split-emails emails))
+  (let [addresses       (when-not (ss/blank? emails) (split-emails emails))
         organization-id (usr/authority-admins-organization-id user)]
     (org/update-organization organization-id {$set {:notifications.inforequest-notification-emails addresses}})
     (ok)))
 
 (defcommand set-organization-funding-enabled-notification-email
-  {:parameters [emails]
-   :description "When ARA funding is enabled to application, send notification to these email addresses"
-   :user-roles #{:authorityAdmin}
+  {:parameters       [emails]
+   :description      "When ARA funding is enabled to application, send notification to these email addresses"
+   :permissions      [{:required [:organization/admin]}]
    :input-validators email-list-validators}
   [{user :user}]
-  (let [addresses (when-not (ss/blank? emails) (split-emails emails))
+  (let [addresses       (when-not (ss/blank? emails) (split-emails emails))
         organization-id (usr/authority-admins-organization-id user)]
     (org/update-organization organization-id {$set {:notifications.funding-notification-emails addresses}})
     (ok)))
 
 (defcommand set-organization-default-reservation-location
-  {:parameters [location]
-   :description "When reservation is made, use this location as default value"
-   :user-roles #{:authorityAdmin}
+  {:parameters       [location]
+   :description      "When reservation is made, use this location as default value"
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(partial action/string-parameters [:location])]
-   :feature :ajanvaraus}
+   :feature          :ajanvaraus}
   [{user :user}]
   (let [organization-id (usr/authority-admins-organization-id user)]
     (org/update-organization organization-id {$set {:reservations.default-location location}})
     (ok)))
 
 (defquery krysp-config
-  {:user-roles #{:authorityAdmin}}
+  {:permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organization-id (usr/authority-admins-organization-id user)]
     (if-let [organization (org/get-organization organization-id)]
@@ -711,8 +709,8 @@
       (fail :error.unknown-organization))))
 
 (defcommand set-krysp-endpoint
-  {:parameters [url username password permitType version]
-   :user-roles #{:authorityAdmin}
+  {:parameters       [url username password permitType version]
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(fn [{{permit-type :permitType} :data}]
                         (when-not (or
                                     (= "osoitteet" permit-type)
@@ -766,19 +764,19 @@
     (mongo/update-by-id :organizations organization {$set updates})))
 
 (defcommand delete-kuntagml-http-endpoint
-  {:description "Remove HTTP config for permit-type"
-   :parameters  [organization permitType]
-   :user-roles   #{:admin}
+  {:description      "Remove HTTP config for permit-type"
+   :parameters       [organization permitType]
+   :user-roles       #{:admin}
    :input-validators [permit/permit-type-validator]
-   :pre-checks  [(fn [{:keys [data]}]
-                  (when-not (pos? (mongo/count :organizations {:_id (:organization data)}))
-                    (fail :error.unknown-organization)))]}
+   :pre-checks       [(fn [{:keys [data]}]
+                        (when-not (pos? (mongo/count :organizations {:_id (:organization data)}))
+                          (fail :error.unknown-organization)))]}
   [_]
   (mongo/update-by-id :organizations organization {$unset {(str "krysp." permitType ".http") 1}}))
 
 (defcommand set-kopiolaitos-info
-  {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
-   :user-roles #{:authorityAdmin}
+  {:parameters       [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(fn [{{email-str :kopiolaitosEmail} :data :as command}]
                         (let [emails (util/separate-emails email-str)]
                           ;; action/email-validator returns nil if email was valid
@@ -786,14 +784,14 @@
                             (fail :error.set-kopiolaitos-info.invalid-email))))]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user)
-    {$set {:kopiolaitos-email kopiolaitosEmail
-           :kopiolaitos-orderer-address kopiolaitosOrdererAddress
-           :kopiolaitos-orderer-phone kopiolaitosOrdererPhone
-           :kopiolaitos-orderer-email kopiolaitosOrdererEmail}})
+                           {$set {:kopiolaitos-email           kopiolaitosEmail
+                                  :kopiolaitos-orderer-address kopiolaitosOrdererAddress
+                                  :kopiolaitos-orderer-phone   kopiolaitosOrdererPhone
+                                  :kopiolaitos-orderer-email   kopiolaitosOrdererEmail}})
   (ok))
 
 (defquery kopiolaitos-config
-  {:user-roles #{:authorityAdmin}}
+  {:permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organization-id (usr/authority-admins-organization-id user)]
     (if-let [organization (org/get-organization organization-id)]
@@ -806,13 +804,13 @@
 
 (defquery get-organization-names
   {:description "Returns an organization id -> name map. (Used by TOJ.)"
-   :user-roles #{:anonymous}}
+   :user-roles  #{:anonymous}}
   [_]
   (ok :names (into {} (for [{:keys [id name]} (org/get-organizations {} {:name 1})]
                         [id name]))))
 
 (defquery vendor-backend-redirect-config
-  {:user-roles #{:authorityAdmin}}
+  {:permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (let [organization-id (usr/authority-admins-organization-id user)]
     (if-let [organization (org/get-organization organization-id)]
@@ -821,7 +819,7 @@
 
 (defcommand save-vendor-backend-redirect-config
   {:parameters       [key val]
-   :user-roles       #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(fn [{{key :key} :data}]
                         (when-not (contains? #{:vendorBackendUrlForBackendId :vendorBackendUrlForLpId} (keyword key))
                           (fail :error.illegal-key)))
@@ -832,9 +830,9 @@
     (org/update-organization org-id {$set {(str "vendor-backend-redirect." key) (ss/trim val)}})))
 
 (defcommand update-organization-name
-  {:description "Updates organization name for different languages. 'name' should be a map with lang-id as key and name as value."
+  {:description      "Updates organization name for different languages. 'name' should be a map with lang-id as key and name as value."
    :parameters       [org-id name]
-   :user-roles       #{:authorityAdmin :admin}
+   :permissions [{:required [:organization/update-name]}]
    :pre-checks       [(fn [{{org-id :org-id} :data user :user}]
                         (when-not (or (usr/admin? user)
                                       (= org-id (usr/authority-admins-organization-id user)))
@@ -850,7 +848,7 @@
 
 (defcommand pseudo-update-organization-name
   {:description "Pseudo command for differentiating impersonation."
-   :user-roles  #{:authorityAdmin :admin}}
+   :permissions [{:required [:organization/update-name]}]}
   [_])
 
 (defquery available-backend-systems
@@ -858,12 +856,12 @@
   (ok :backend-systems org/backend-systems))
 
 (defcommand update-organization-backend-systems
-  {:description "Updates organization backend systems by permit type."
-   :parameters [org-id backend-systems]
-   :user-roles #{:admin}
+  {:description      "Updates organization backend systems by permit type."
+   :parameters       [org-id backend-systems]
+   :user-roles       #{:admin}
    :input-validators [(partial action/non-empty-map-parameters [:backend-systems])]}
   [_]
-  (->> (util/map-keys (fn->> name (format "krysp.%s.backend-system"))  backend-systems)
+  (->> (util/map-keys (fn->> name (format "krysp.%s.backend-system")) backend-systems)
        (reduce (fn [updates [path system]] (if (contains? org/backend-systems (keyword system))
                                              (assoc-in updates [$set path] system)
                                              (assoc-in updates [$unset path] "")))
@@ -871,15 +869,15 @@
        (org/update-organization org-id)))
 
 (defcommand save-organization-tags
-  {:parameters [tags]
+  {:parameters       [tags]
    :input-validators [(partial action/vector-parameter-of :tags map?)]
-   :user-roles #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
-  (let [org-id (usr/authority-admins-organization-id user)
-        old-tag-ids (set (map :id (:tags (org/get-organization org-id))))
-        new-tag-ids (set (map :id tags))
-        removed-ids (set/difference old-tag-ids new-tag-ids)
-        tags-with-ids (org/create-tag-ids tags)
+  (let [org-id            (usr/authority-admins-organization-id user)
+        old-tag-ids       (set (map :id (:tags (org/get-organization org-id))))
+        new-tag-ids       (set (map :id tags))
+        removed-ids       (set/difference old-tag-ids new-tag-ids)
+        tags-with-ids     (org/create-tag-ids tags)
         validation-errors (seq (remove nil? (map (partial sc/check org/Tag) tags-with-ids)))]
     (when validation-errors (fail! :error.missing-parameters))
 
@@ -888,9 +886,9 @@
     (org/update-organization org-id {$set {:tags tags-with-ids}})))
 
 (defquery remove-tag-ok
-  {:parameters [tagId]
+  {:parameters       [tagId]
    :input-validators [(partial non-blank-parameters [:tagId])]
-   :user-roles #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (let [org-id (usr/authority-admins-organization-id user)]
     (when-let [tag-applications (seq (mongo/select
@@ -900,14 +898,14 @@
       (fail :warning.tags.removing-from-applications :applications tag-applications))))
 
 (defquery get-organization-tags
-  {:user-roles #{:authorityAdmin :authority}}
-  [{{:keys [orgAuthz] :as user} :user}]
+  {:permissions [{:required [:organization/tags]}]}
+  [{{:keys [orgAuthz]} :user}]
   (if (seq orgAuthz)
     (let [organization-tags (mongo/select
-                                  :organizations
-                                  {:_id {$in (keys orgAuthz)} :tags {$exists true}}
-                                  [:tags :name])
-          result (map (juxt :id #(select-keys % [:tags :name])) organization-tags)]
+                              :organizations
+                              {:_id {$in (keys orgAuthz)} :tags {$exists true}}
+                              [:tags :name])
+          result            (map (juxt :id #(select-keys % [:tags :name])) organization-tags)]
       (ok :tags (into {} result)))
     (ok :tags {})))
 
@@ -915,14 +913,14 @@
   {:description      "Organization tags for the application. For statement
   givers, only the organization statement givers are authorized."
    :user-authz-roles #{:statementGiver}
-   :user-roles       #{:authorityAdmin :authority :applicant}
+   :user-roles       #{:authority :applicant}
    :pre-checks       [org/statement-giver-in-organization]}
   [{organization :organization}]
   (ok :tags (:tags @organization)))
 
 (defquery get-organization-areas
   {:user-authz-roles #{:statementGiver}
-   :user-roles       #{:authorityAdmin :authority}}
+   :user-roles       #{:authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)
     (let [organization-areas (mongo/select
@@ -930,22 +928,22 @@
                                {:_id {$in (keys orgAuthz)} :areas-wgs84 {$exists true}}
                                [:areas-wgs84 :name])
           organization-areas (map #(clojure.set/rename-keys % {:areas-wgs84 :areas}) organization-areas)
-          result (map (juxt :id #(select-keys % [:areas :name])) organization-areas)]
+          result             (map (juxt :id #(select-keys % [:areas :name])) organization-areas)]
       (ok :areas (into {} result)))
     (ok :areas {})))
 
 (defraw organization-area
-  {:user-roles #{:authorityAdmin}}
+  {:permissions [{:required [:organization/admin]}]}
   [{user :user {[{:keys [tempfile filename size]}] :files created :created} :data :as action}]
-  (let [org-id (usr/authority-admins-organization-id user)
-        filename (mime/sanitize-filename filename)
+  (let [org-id       (usr/authority-admins-organization-id user)
+        filename     (mime/sanitize-filename filename)
         content-type (mime/mime-type filename)
-        file-info {:filename    filename
-                   :contentType  content-type
-                   :size         size
-                   :organization org-id
-                   :created      created}
-        tmpdir (fs/temp-dir "area")]
+        file-info    {:filename     filename
+                      :contentType  content-type
+                      :size         size
+                      :organization org-id
+                      :created      created}
+        tmpdir       (fs/temp-dir "area")]
     (try+
       (when-not (= (:contentType file-info) "application/zip")
         (fail! :error.illegal-shapefile))
@@ -971,56 +969,56 @@
 (defcommand pseudo-organization-area
   {:description "Pseudo command for differentiating authority admin
   impersonation regarding organization-area."
-   :user-roles #{:authorityAdmin}}
+   :permissions [{:required [:organization/admin]}]}
   [_])
 
 
 (defquery get-map-layers-data
   {:description "Organization server and layer details."
-   :user-roles #{:authorityAdmin}}
+   :permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (let [org-id (usr/authority-admins-organization-id user)
         {:keys [server layers]} (org/organization-map-layers-data org-id)]
     (ok :server (select-keys server [:url :username]), :layers layers)))
 
 (defcommand update-map-server-details
-  {:parameters [url username password]
+  {:parameters       [url username password]
    :input-validators [(partial validate-optional-url :url)]
-   :user-roles #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (org/update-organization-map-server (usr/authority-admins-organization-id user)
-                                    (ss/trim url) username password)
+                                      (ss/trim url) username password)
   (ok))
 
 (defcommand update-user-layers
-  {:parameters [layers]
+  {:parameters       [layers]
    :input-validators [(partial action/vector-parameter-of :layers map?)]
-   :user-roles #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
-  (let [selected-layers (remove (comp ss/blank? :id) layers)
+  (let [selected-layers   (remove (comp ss/blank? :id) layers)
         validation-errors (remove nil? (map (partial sc/check org/Layer) selected-layers))]
     (if (zero? (count validation-errors))
       (do
         (org/update-organization (usr/authority-admins-organization-id user)
-          {$set {:map-layers.layers selected-layers}})
+                                 {$set {:map-layers.layers selected-layers}})
         (ok))
       (fail :error.missing-parameters))))
 
 (defcommand update-suti-server-details
-  {:parameters [url username password]
+  {:parameters       [url username password]
    :input-validators [(partial validate-optional-url :url)]
-   :user-roles #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (org/update-organization-suti-server (usr/authority-admins-organization-id user)
-                                     (ss/trim url) username password)
+                                       (ss/trim url) username password)
   (ok))
 
 (defraw waste-ads-feed
-  {:description "Simple RSS feed for construction waste information."
-   :parameters [fmt]
+  {:description         "Simple RSS feed for construction waste information."
+   :parameters          [fmt]
    :optional-parameters [org lang]
-   :input-validators [org/valid-feed-format org/valid-org i18n/valid-language]
-   :user-roles #{:anonymous}}
+   :input-validators    [org/valid-feed-format org/valid-org i18n/valid-language]
+   :user-roles          #{:anonymous}}
   (resp/status 404 "Not Found"))              ;; LPK-3787 New waste-ads coming
 
 (defcommand section-toggle-enabled
@@ -1028,16 +1026,16 @@
   verdicts support."
    :parameters       [flag]
    :input-validators [(partial action/boolean-parameters [:flag])]
-   :user-roles       #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (org/toggle-group-enabled (usr/authority-admins-organization-id user) :section flag))
 
 (defcommand section-toggle-operation
-  {:description "Toggles operation either requiring section or not."
-   :parameters [operationId flag]
+  {:description      "Toggles operation either requiring section or not."
+   :parameters       [operationId flag]
    :input-validators [(partial action/non-blank-parameters [:operationId])
                       (partial action/boolean-parameters [:flag])]
-   :user-roles #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (org/toggle-group-operation (usr/authority-admins-organization user)
                               :section
@@ -1061,12 +1059,12 @@
       (fail :error.illegal-handler-role))))
 
 (defcommand upsert-handler-role
-  {:description "Create and modify organization handler role"
-   :parameters [name]
+  {:description         "Create and modify organization handler role"
+   :parameters          [name]
    :optional-parameters [roleId]
-   :pre-checks [validate-handler-role-in-organization]
-   :input-validators [(partial supported-localization-parameters [:name])]
-   :user-roles #{:authorityAdmin}}
+   :pre-checks          [validate-handler-role-in-organization]
+   :input-validators    [(partial supported-localization-parameters [:name])]
+   :permissions         [{:required [:organization/admin]}]}
   [{user :user user-orgs :user-organizations}]
   (let [handler-role (org/create-handler-role roleId name)]
     (if (sc/check org/HandlerRole handler-role)
@@ -1077,44 +1075,44 @@
           (ok :id (:id handler-role))))))
 
 (defcommand toggle-handler-role
-  {:description "Enable/disable organization handler role."
-   :parameters [roleId enabled]
-   :pre-checks [validate-handler-role-in-organization
-                validate-handler-role-not-general]
+  {:description      "Enable/disable organization handler role."
+   :parameters       [roleId enabled]
+   :pre-checks       [validate-handler-role-in-organization
+                      validate-handler-role-not-general]
    :input-validators [(partial non-blank-parameters [:roleId])
                       (partial boolean-parameters [:enabled])]
-   :user-roles #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (-> (usr/authority-admins-organization-id user)
       (org/toggle-handler-role! roleId enabled)))
 
 (defcommand upsert-assignment-trigger
-  {:description "Set and update automated assignment trigger"
-   :parameters [targets]
+  {:description         "Set and update automated assignment trigger"
+   :parameters          [targets]
    :optional-parameters [triggerId description handler]
-   :input-validators [(partial vector-parameters-with-at-least-n-non-blank-items 1 [:targets])
-                      (partial non-blank-parameters [:description])]
-   :user-roles #{:authorityAdmin}}
-   [{user :user user-orgs :user-organizations}]
-   (let [trigger (org/create-trigger triggerId targets handler description)
-         organization (util/find-by-id (usr/authority-admins-organization-id user) user-orgs)
-         update? (some? triggerId)]
-     (if (sc/check org/AssignmentTrigger trigger)
-       (fail :error.validator)
-       (do (if update?
-             (org/update-assignment-trigger organization trigger triggerId)
-             (org/add-assignment-trigger organization trigger))
-           (ok :trigger trigger)))))
+   :input-validators    [(partial vector-parameters-with-at-least-n-non-blank-items 1 [:targets])
+                         (partial non-blank-parameters [:description])]
+   :permissions         [{:required [:organization/admin]}]}
+  [{user :user user-orgs :user-organizations}]
+  (let [trigger      (org/create-trigger triggerId targets handler description)
+        organization (util/find-by-id (usr/authority-admins-organization-id user) user-orgs)
+        update?      (some? triggerId)]
+    (if (sc/check org/AssignmentTrigger trigger)
+      (fail :error.validator)
+      (do (if update?
+            (org/update-assignment-trigger organization trigger triggerId)
+            (org/add-assignment-trigger organization trigger))
+          (ok :trigger trigger)))))
 
 (defcommand remove-assignment-trigger
-  {:description "Removes task trigger"
-   :parameters [triggerId]
+  {:description      "Removes task trigger"
+   :parameters       [triggerId]
    :input-validators [(partial non-blank-parameters [:triggerId])]
-   :user-roles #{:authorityAdmin}}
-   [{user :user user-orgs :user-organizations}]
-   (-> (usr/authority-admins-organization-id user)
-       (util/find-by-id user-orgs)
-       (org/remove-assignment-trigger triggerId)))
+   :permissions      [{:required [:organization/admin]}]}
+  [{user :user user-orgs :user-organizations}]
+  (-> (usr/authority-admins-organization-id user)
+      (util/find-by-id user-orgs)
+      (org/remove-assignment-trigger triggerId)))
 
 (defcommand update-docstore-info
   {:description      "Updates organization's document store information"
@@ -1125,16 +1123,16 @@
                       (partial localization-parameters [:organizationDescription])]}
   [_]
   (mongo/update-by-query :organizations
-      {:_id org-id}
-      {$set {:docstore-info.docStoreInUse docStoreInUse
-             :docstore-info.docTerminalInUse docTerminalInUse
-             :docstore-info.documentPrice documentPrice
-             :docstore-info.organizationDescription organizationDescription}})
+    {:_id org-id}
+    {$set {:docstore-info.docStoreInUse           docStoreInUse
+           :docstore-info.docTerminalInUse        docTerminalInUse
+           :docstore-info.documentPrice           documentPrice
+           :docstore-info.organizationDescription organizationDescription}})
   (ok))
 
 (defquery document-request-info
   {:description "Obtains the organization's document request info."
-   :user-roles #{:authorityAdmin}}
+   :permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (->> user
        usr/authority-admins-organization-id
@@ -1142,9 +1140,9 @@
        (ok :documentRequest)))
 
 (defcommand set-document-request-info
-  {:description "Updates organization's document request info. Docucment requests are made from document store."
-   :parameters [enabled email instructions]
-   :user-roles #{:authorityAdmin}
+  {:description      "Updates organization's document request info. Docucment requests are made from document store."
+   :parameters       [enabled email instructions]
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(partial boolean-parameters [:enabled])
                       (partial parameters-matching-schema [:email] ssc/OptionalEmail :error.email)
                       (partial localization-parameters [:instructions])]}
@@ -1157,7 +1155,7 @@
 (defquery docterminal-attachment-types
   {:description "Returns the allowed docterminal attachment types in a structure
                  that can be easily displayed in the client"
-   :user-roles #{:authorityAdmin}}
+   :permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (->> user
        usr/authority-admins-organization-id
@@ -1165,26 +1163,26 @@
        (ok :attachment-types)))
 
 (defcommand set-docterminal-attachment-type
-  {:description "Allows or disallows showing the given attachment type in
+  {:description      "Allows or disallows showing the given attachment type in
                  the archive document terminal application."
-   :parameters [attachmentType enabled]
-   :pre-checks [org/check-docterminal-enabled]
+   :parameters     [attachmentType enabled]
+   :pre-checks     [org/check-docterminal-enabled]
    :input-validators [(partial parameters-matching-schema [:attachmentType]
                                (sc/cond-pre (sc/enum "all")
                                             org/DocTerminalAttachmentType))
                       (partial boolean-parameters [:enabled])]
-   :user-roles #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user}]
   (-> user
       usr/authority-admins-organization-id
       (org/set-allowed-docterminal-attachment-type attachmentType enabled)))
 
 (defquery docterminal-enabled
-  {:pre-checks [org/check-docterminal-enabled]
-   :user-roles #{:authorityAdmin}}
+  {:pre-checks  [org/check-docterminal-enabled]
+   :permissions [{:required [:organization/admin]}]}
   [_])
 
 (defquery docstore-enabled
-  {:pre-checks [org/check-docstore-enabled]
-   :user-roles #{:authorityAdmin}}
+  {:pre-checks  [org/check-docstore-enabled]
+   :permissions [{:required [:organization/admin]}]}
   [_])

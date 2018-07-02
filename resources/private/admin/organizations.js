@@ -131,7 +131,7 @@
 
   function LoginAsModel() {
     var self = this;
-    self.role = ko.observable("approver");
+    self.role = ko.observable("authority");
     self.password = ko.observable("");
     self.organizationId = null;
 

@@ -19,7 +19,7 @@
     (excel/excel-response filename body error-message)))
 
 (defraw open-applications-xlsx
-  {:user-roles #{:authorityAdmin}}
+  {:permissions [{:required [:organization/admin]}]}
   [{user :user {lang :lang} :data}]
   (let [orgId               (usr/authority-admins-organization-id user)
         excluded-operations [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]
@@ -45,13 +45,13 @@
     (fail :error.start-greater-than-end)))
 
 (defraw applications-between-xlsx
-  {:description "Excel with applications that have been submitted between given timeperiod.
+  {:description      "Excel with applications that have been submitted between given timeperiod.
                  Period can be max one year window."
    :parameters       [startTs endTs]
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end
                       max-month-window]
-   :user-roles       #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user {lang :lang} :data}]
   (let [orgId               (usr/authority-admins-organization-id user)
         excluded-operations [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen]
@@ -67,13 +67,13 @@
                       lang
                       excluded-operations))))
 
-(defraw parties-between-xlsx                                ; LPK-3053
-  {:description "Excel to list parties for applications. Period can be max one year window."
+(defraw parties-between-xlsx                                                    ; LPK-3053
+  {:description      "Excel to list parties for applications. Period can be max one year window."
    :parameters       [startTs endTs]
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end
                       max-month-window]
-   :user-roles       #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user {lang :lang} :data ts :created}]
   (let [orgId               (usr/authority-admins-organization-id user)
         resulting-file-name (str (i18n/localize lang "applications.report.parties-between.file-name")
@@ -87,13 +87,13 @@
                       (util/to-long endTs)
                       lang))))
 
-(defraw post-verdict-xlsx                                   ; LPK-3517
-  {:description "Excel to list applications in post verdict state"
+(defraw post-verdict-xlsx                                                       ; LPK-3517
+  {:description      "Excel to list applications in post verdict state"
    :parameters       [startTs endTs]
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end
                       max-month-window]
-   :user-roles       #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{user :user {lang :lang} :data ts :created}]
   (let [orgId               (usr/authority-admins-organization-id user)
         resulting-file-name (str (i18n/localize lang "applications.report.post-verdict.file-name")
@@ -115,7 +115,7 @@
    :user-roles       #{:applicant :authority}
    :pre-checks       [(com/validate-has-company-role :admin)]}
   [{user :user {lang :lang} :data}]
-  (let [company (get-in user [:company :id])
+  (let [company             (get-in user [:company :id])
         resulting-file-name (str (i18n/localize lang "company.reports.excel.filename")
                                  "_"
                                  (util/to-xml-date (now))
@@ -141,7 +141,7 @@
    :parameters [startTs endTs]
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
                       start-gt-end]
-   :user-roles #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :pre-checks [org/check-docstore-enabled]}
   [{user :user {lang :lang} :data}]
   (let [resulting-file-name (str (i18n/localize lang "billing.excel.filename")

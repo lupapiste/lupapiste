@@ -7,14 +7,14 @@
 (testable-privates lupapalvelu.permissions defpermissions)
 
 (defpermissions :test
-  {:test-scope   {:test-role         #{:test/test
-                                       :test/fail}
-                  :another-test-role #{:test/fail}}
-   :test-scope-b {:tester            #{:test/test
-                                       :test/do}}})
+                {:test-scope   {:test-role         #{:test/test
+                                                     :test/fail}
+                                :another-test-role #{:test/fail}}
+                 :test-scope-b {:tester #{:test/test
+                                          :test/do}}})
 
 (defpermissions :test-more
-  {:test-scope   {:test-role         #{:test-more/test}}})
+                {:test-scope {:test-role #{:test-more/test}}})
 
 (facts restriction
   (fact "restircted permission not in common-permissions"
@@ -146,12 +146,12 @@
     (provided (get-permissions-by-role :application "another-role") => #{:test/do :test/test}))
 
   (fact "same user with multiple roles in auth plus restrictions - :test/fail permission is removed"
-    (get-application-permissions {:user {:id 1} :application {:auth [{:id 2 :role "some-role"}
-                                                                     {:id 1 :role "app-tester"}
-                                                                     {:id 1 :role "another-role"}]
+    (get-application-permissions {:user {:id 1} :application {:auth             [{:id 2 :role "some-role"}
+                                                                                 {:id 1 :role "app-tester"}
+                                                                                 {:id 1 :role "another-role"}]
                                                               :authRestrictions [{:restriction :test/fail
-                                                                                  :user {:id 2}
-                                                                                  :target {:type "others"}}]}})
+                                                                                  :user        {:id 2}
+                                                                                  :target      {:type "others"}}]}})
     => #{:test/do :test/test}
 
     (provided (get-permissions-by-role :application "app-tester") => #{:test/do :test/fail})
@@ -159,40 +159,44 @@
 
 (facts get-organization-permissions
   (fact "existing role"
-    (get-organization-permissions {:application {:organization "123-T"} :user {:orgAuthz {:123-T ["org-tester"]}}})
+    (get-organization-permissions {:application {:organization "123-T"}
+                                   :user        {:orgAuthz {:123-T #{:org-tester}}}})
     => #{:test/do}
 
-    (provided (get-permissions-by-role :organization "org-tester") => #{:test/do}))
+    (provided (get-permissions-by-role :organization :org-tester) => #{:test/do}))
 
   (fact "existing multiple roles"
-    (get-organization-permissions {:application {:organization "123-T"} :user {:orgAuthz {:123-T ["org-tester"
-                                                                                                  "org-mighty"]}}})
+    (get-organization-permissions {:application {:organization "123-T"}
+                                   :user {:orgAuthz {:123-T #{:org-tester
+                                                              :org-mighty}}}})
     => #{:test/do :test/test :test/do-anything}
 
-    (provided (get-permissions-by-role :organization "org-tester") => #{:test/do :test/test})
-    (provided (get-permissions-by-role :organization "org-mighty") => #{:test/do-anything :test/test}))
+    (provided (get-permissions-by-role :organization :org-tester) => #{:test/do :test/test})
+    (provided (get-permissions-by-role :organization :org-mighty) => #{:test/do-anything :test/test}))
 
   (fact "existing role - multiple organizations"
-    (get-organization-permissions {:application {:organization "123-T"} :user {:orgAuthz {:123-T ["org-nocando"
-                                                                                                  "org-mighty"]
-                                                                                          :100-T ["org-tester"]}}})
+    (get-organization-permissions {:application {:organization "123-T"}
+                                   :user {:orgAuthz {:123-T #{:org-nocando
+                                                              :org-mighty}
+                                                     :100-T #{:org-tester}}}})
     => #{:test/test :test/do-anything}
 
-    (provided (get-permissions-by-role :organization "org-mighty")  => #{:test/do-anything :test/test})
-    (provided (get-permissions-by-role :organization "org-nocando") => #{}))
+    (provided (get-permissions-by-role :organization :org-mighty) => #{:test/do-anything :test/test})
+    (provided (get-permissions-by-role :organization :org-nocando) => #{}))
 
   (fact "without application"
-    (get-organization-permissions {:user {:orgAuthz {:123-T ["org-tester"]}}})
+    (get-organization-permissions {:user {:orgAuthz {:123-T #{:org-tester}}}})
     => #{:test/do}
 
-    (provided (get-permissions-by-role :organization "org-tester") => #{:test/do}))
+    (provided (get-permissions-by-role :organization :org-tester) => #{:test/do}))
 
   (fact "without application - two orgs"
-    (get-organization-permissions {:user {:orgAuthz {:123-T ["org-tester"] :321-T ["archiver"]}}})
+    (get-organization-permissions {:user {:orgAuthz {:123-T #{:org-tester}
+                                                     :321-T #{:archiver}}}})
     => #{:test/do :test/archive}
 
-    (provided (get-permissions-by-role :organization "org-tester") => #{:test/do}
-              (get-permissions-by-role :organization "archiver") => #{:test/archive}))
+    (provided (get-permissions-by-role :organization :org-tester) => #{:test/do}
+              (get-permissions-by-role :organization :archiver) => #{:test/archive}))
 
   (fact "without application - no orgs"
     (get-organization-permissions {:user {:orgAuthz {}}})
@@ -217,41 +221,41 @@
 
 (facts get-company-permissions
   (fact "company has existing role in auth"
-    (get-company-permissions {:user {:company {:id 1 :role "user"}}
+    (get-company-permissions {:user        {:company {:id 1 :role "user"}}
                               :application {:auth [{:id 1 :role "app-tester"}]}}) => #{:test/do}
 
     (provided (get-permissions-by-role :application "app-tester") => #{:test/do}))
 
   (fact "company has existing role in auth - with matching company role"
-    (get-company-permissions {:user {:company {:id 1 :role "user"}}
+    (get-company-permissions {:user        {:company {:id 1 :role "user"}}
                               :application {:auth [{:id 1 :role "app-tester" :company-role "user"}]}}) => #{:test/do}
 
     (provided (get-permissions-by-role :application "app-tester") => #{:test/do}))
 
   (fact "company has existing role in auth - company role does not match"
-    (get-company-permissions {:user {:company {:id 1 :role "user"}}
+    (get-company-permissions {:user        {:company {:id 1 :role "user"}}
                               :application {:auth [{:id 1 :role "app-tester" :company-role "admin"}]}}) => #{}
 
     (provided (get-permissions-by-role :application irrelevant) => irrelevant :times 0))
 
   (fact "company has existing role in auth - with submit rights"
-    (get-company-permissions {:user {:company {:id 1 :role "user" :submit true}}
+    (get-company-permissions {:user        {:company {:id 1 :role "user" :submit true}}
                               :application {:auth [{:id 1 :role "app-tester"}]}}) => #{:test/do :application/submit}
 
     (provided (get-permissions-by-role :application "app-tester") => #{:test/do :application/submit}))
 
   (fact "company has existing role in auth - no submit rights"
-    (get-company-permissions {:user {:company {:id 1 :role "user" :submit false}}
+    (get-company-permissions {:user        {:company {:id 1 :role "user" :submit false}}
                               :application {:auth [{:id 1 :role "app-tester"}]}}) => #{:test/do}
 
     (provided (get-permissions-by-role :application "app-tester") => #{:test/do :application/submit}))
 
   (fact "company has existing role in auth - with auth restriction"
-    (get-company-permissions {:user {:company {:id 1 :role "user" :submit true}}
-                              :application {:auth [{:id 1 :role "app-tester"}]
+    (get-company-permissions {:user        {:company {:id 1 :role "user" :submit true}}
+                              :application {:auth             [{:id 1 :role "app-tester"}]
                                             :authRestrictions [{:restriction :test/fail
-                                                                :user {:id 2}
-                                                                :target {:type "others"}}]}})
+                                                                :user        {:id 2}
+                                                                :target      {:type "others"}}]}})
     => #{:test/do}
 
     (provided (get-permissions-by-role :application "app-tester") => #{:test/do :test/fail}))
@@ -267,7 +271,7 @@
     (provided (get-permissions-by-role :application nil) => irrelevant :times 0))
 
   (fact "company has multiple roles in auth"
-    (get-company-permissions {:user {:company {:id 1 :role "user"}}
+    (get-company-permissions {:user        {:company {:id 1 :role "user"}}
                               :application {:auth [{:id 2 :role "some-role"}
                                                    {:id 1 :role "app-tester"}
                                                    {:id 3 :role "another-role"}]}})
@@ -276,7 +280,7 @@
     (provided (get-permissions-by-role :application "app-tester") => #{:test/do}))
 
   (fact "same company with multiple roles in auth"
-    (get-company-permissions {:user {:company {:id 1 :role "user"}}
+    (get-company-permissions {:user        {:company {:id 1 :role "user"}}
                               :application {:auth [{:id 2 :role "some-role"}
                                                    {:id 1 :role "app-tester"}
                                                    {:id 1 :role "another-role"}]}})
@@ -287,9 +291,9 @@
 
 (defcontext test-context [{{id :test-id field :test-field} :test-user coll :test-coll}]
   (let [things (filter (comp #{id} :id) coll)]
-    {:context-scope  :test-scope
-     :context-roles  (map :role things)
-     :thing          (first things)}))
+    {:context-scope :test-scope
+     :context-roles (map :role things)
+     :thing         (first things)}))
 
 (facts "defcontext"
   (facts test-context

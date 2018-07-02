@@ -74,7 +74,7 @@
     color: $label-required-star-color;
   }
 
-  input[type=text], textarea {
+  input[type=text], input[type=email], textarea {
     box-sizing: border-box;
     width: 100%;
     padding: 4px;
