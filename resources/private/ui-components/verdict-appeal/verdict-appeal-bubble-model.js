@@ -48,7 +48,13 @@ LUPAPISTE.VerdictAppealBubbleModel = function( params ) {
                                return _.trim( v );
                              });
     var warn = self.dateWarning() === "";
-    var files = _.size(self.model.files());
+    var files = self.model.newFiles().length + self.model.oldFiles().length;
     return required && warn && files;
   });
+
+  self.removeFile = function(file) {
+    self.model.oldFiles.remove(function (f) {
+      return f.fileId === file.fileId;
+    })
+  };
 };

@@ -67,12 +67,23 @@
                  data-bind="ltext: 'verdict.muutoksenhaku.liitteet'"></label>
           <span data-bind="ltext: 'verdict.muutoksenhaku.liitteet.info'"></span>
         </div>
+        <div>
+          <ul data-bind="foreach: $parent.model.oldFiles" class="upload-files">
+            <li data-bind="attr: {'data-test-id': 'appeals-files-' + $index()}">
+              <span><a data-bind="download: $data"></a></span>
+              <span class="upload-files__size" data-bind="size: size"></span>
+              <a data-bind="ltext: 'remove',
+                            click: $parents[1].removeFile,
+                            attr: {'data-test-id': 'remove-appeal-file-' + $index()}"></a>
+            </li>
+          </tbody>
+        </div>
       </div>
 
       <div class="row">
         <div class="col-4"
              data-bind="component: {name: 'file-upload',
-                        params: {files: $parent.model.files,
+                        params: {files: $parent.model.newFiles,
                         dropZone: sprintf( '.%s .bubble-dialog', $parent.dropZone),
                         allowMultiple: true}},
                         testId: 'appeal-files-' + $parent.test">

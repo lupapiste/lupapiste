@@ -44,7 +44,7 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
   // Backend appeal into frontend format.
   // If the argument is omitted, new empty
   // appeal is created.
-  // Note: the field values are not observalbe
+  // Note: the field values are not observable
   function frontAppeal( backObj ) {
     var back = backObj || {};
     var appeal = {
@@ -52,7 +52,9 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
       authors: back.appellant || back.giver,
       date:  back.datestamp ? moment.unix( back.datestamp ).format ( FMT ) : "",
       extra: back.text,
-      files: back.files || [],
+      backFiles: back.files || [],
+      oldFiles: back.files ? back.files.slice() : [],
+      newFiles: [],
       editable: back.editable
     };
     if( back.id ) {
@@ -70,7 +72,7 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
       type: frontObj.appealType,
       datestamp: moment( frontObj.date, FMT, true).unix(),
       text: frontObj.extra,
-      fileIds: _.map( frontObj.files, function( f ) { return f.fileId; })
+      fileIds: _.map( _.concat(frontObj.oldFiles, frontObj.newFiles), function( f ) { return f.fileId; })
     };
     if( frontObj.appealId ) {
       appeal.appealId = frontObj.appealId;
@@ -103,6 +105,7 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
           model[k]( v );
         }
       } );
+      model.oldFiles(data.backFiles.slice());
       error( "");
       waiting( false );
     }
