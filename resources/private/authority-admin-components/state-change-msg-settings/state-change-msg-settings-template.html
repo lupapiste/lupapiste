@@ -17,6 +17,39 @@
       </tbody>
     </table>
 
+    <table class="table">
+      <thead>
+        <tr>
+          <th colspan="4" data-bind="ltext: 'auth-admin.auth-type.title'"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="4">
+            <select name="auth-type"
+                    class="form-input combobox"
+                    data-bind="options: authTypes,
+                               optionsText: function(auth) {return loc('auth-admin.auth-type.' + auth);},
+                               optionsValue: authTypes,
+                               optionsCaption: loc( 'choose' ),
+                               value: authType"></select>
+          </td>
+        </tr>
+        <!-- ko if: basicAuth() -->
+        <tr>
+          <td data-bind="ltext: 'auth-admin.server.username'"></td>
+          <td>
+            <input type="text" data-bind="value: basicUser" class="form-input">
+          </td>
+          <td data-bind="ltext: 'auth-admin.server.password'"></td>
+          <td>
+            <input type="text" data-bind="value: basicPassword" class="form-input">
+          </td>
+        </tr>
+         <!-- /ko -->
+      </tbody>
+    </table>
+
     <table class="table table-striped admin-settings">
       <thead>
         <tr>

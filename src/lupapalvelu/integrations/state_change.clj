@@ -144,13 +144,12 @@
   {:url sc/Str
    :headers {(sc/maybe sc/Str) (sc/maybe sc/Str)}})
 
-(sc/defn ^:always-validate get-state-change-endpoint-data :- (sc/maybe EndpointData) [org-id]
-  (let [org (org/get-organization org-id)]
-    (when-let [url (get-in org [:state-change-endpoint :url])]
-      {:url     (ss/strip-trailing-slashes url)
-       :headers (->> (get-in org [:state-change-endpoint :header-parameters])
-                     (map (fn [header] {(str (:name header)) (str (:value header))}))
-                     (apply merge))})))
+(sc/defn ^:always-validate get-state-change-endpoint-data :- (sc/maybe EndpointData) [organization]
+  (when-let [url (get-in organization [:state-change-endpoint :url])]
+    {:url     (ss/strip-trailing-slashes url)
+     :headers (->> (get-in organization [:state-change-endpoint :header-parameters])
+                   (map (fn [header] {(str (:name header)) (str (:value header))}))
+                   (apply merge))}))
 
 (defn send-via-http [message-id data {:keys [url headers]}]
   (http/post url
@@ -200,7 +199,7 @@
           matti-json-queue))
 )
 
-(defn trigger-state-change [{user :user :as command} new-state]
+(defn trigger-state-change [{user :user organization :organization :as command} new-state]
   (when (valid-states new-state (get-in command [:application :state]))
     (when-let [outgoing-data (state-change-data (:application command) new-state)]
       (let [message-id (messages/create-id)
@@ -217,7 +216,7 @@
                    :data outgoing-data}
                   :action (:action command))]
         (messages/save msg)
-        (if-let [endpoint (get-state-change-endpoint-data (:organization app))]
+        (if-let [endpoint (get-state-change-endpoint-data @organization)]
           (if (and jms? json-consumer-session)
             (send-via-jms outgoing-data endpoint {:user-id (:id user) :message-id message-id :application-id (:id app)})
             (send-via-http message-id outgoing-data endpoint))

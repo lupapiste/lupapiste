@@ -15,7 +15,7 @@
 
 (facts "Open application data tests"
   (against-background
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (let [rl (select-keys application-rakennuslupa applications-data/required-fields-from-db)]
     (fact "Schema verify OK"
       (process-applications [rl]) =not=> nil?)

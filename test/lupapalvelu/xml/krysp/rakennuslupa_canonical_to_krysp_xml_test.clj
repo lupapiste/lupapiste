@@ -198,7 +198,7 @@
 
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
   (against-background
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (fact "Rakennuslupa application -> canonical -> xml"
     (do-test application-rakennuslupa :validate-tyonjohtaja-type :v1 :validate-pysyva-tunnus? true :validate-operations? true))
 
@@ -214,7 +214,7 @@
 
 (facts "Rakennusvalvonta tests"
   (against-background
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (let [canonical (application-to-canonical application-rakennuslupa "fi")
         xml_220 (rakennuslupa-element-to-xml canonical "2.2.0")
         xml_222 (rakennuslupa-element-to-xml canonical "2.2.2")

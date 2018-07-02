@@ -10,7 +10,7 @@
             [lupapalvelu.action :refer [defquery defcommand defraw update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.authorization-messages] ; notification definitions
+            [lupapalvelu.authorization-messages]            ; notification definitions
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.domain :as domain]
@@ -22,7 +22,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.company :as company]))
+            [lupapalvelu.company :as company]
+            [lupapalvelu.organization :as org]))
 
 ;;
 ;; Invites
@@ -305,8 +306,7 @@
 (defn- pate-enabled
   [{:keys [organization application]}]
   (when (and organization
-             (not (-> (filter #(= (:permitType %) (:permitType application)) (:scope @organization))
-                      (first)
+             (not (-> (org/resolve-organization-scope (:municipality application) (:permitType application) @organization)
                       :pate-enabled)))
     (fail :error.pate-disabled)))
 

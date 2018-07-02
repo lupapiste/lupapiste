@@ -304,7 +304,7 @@
       (fn [{:keys [id organization]}]
         (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
           (when-let [new-state (get-in changes [$set :state])]
-            (when (and (env/feature? :pate-json) organization (org/pate-org? organization))
+            (when (and (env/feature? :pate-json) organization (org/pate-scope? (:application command)))
               (util/future*
                 (state-change/trigger-state-change command new-state))))
           (if return-count? n nil))))))

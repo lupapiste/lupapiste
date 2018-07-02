@@ -494,8 +494,7 @@
   "Pre-checker that fails if Pate is not enabled in the application organization."
   [{:keys [organization application]}]
   (when (and organization
-             (not (-> (filter #(= (:permitType %) (:permitType application)) (:scope @organization))
-                      (first)
+             (not (-> (org/resolve-organization-scope (:municipality application) (:permitType application) @organization)
                       :pate-enabled)))
     (fail :error.pate-disabled)))
 

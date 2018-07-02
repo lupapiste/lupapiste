@@ -329,9 +329,6 @@
 (defn allowed-ip? [ip organization-id]
   (pos? (mongo/count :organizations {:_id organization-id, $and [{:allowedAutologinIPs {$exists true}} {:allowedAutologinIPs ip}]})))
 
-(defn pate-org? [org-id]
-  (pos? (mongo/count :organizations {:_id org-id :scope.pate-enabled true})))
-
 (defn krysp-urls-not-set?
   "Takes organization as parameter.
   Returns true if organization has 0 non-blank krysp urls set."
@@ -437,8 +434,12 @@
           (update-organization id address-updates)))
       (update-organization id updates))))
 
-(defn set-state-change-endpoint [id url headers]
-  (let [updates {$set {:state-change-endpoint {:url url :header-parameters headers}}}]
+(defn set-state-change-endpoint [id url headers auth-type basic-creds]
+  (let [credentials (encode-credentials (:username basic-creds) (:password basic-creds))
+        updates {$set {:state-change-endpoint {:url url
+                                               :header-parameters headers
+                                               :auth-type auth-type
+                                               :basic-creds credentials}}}]
     (update-organization id updates)))
 
 (defn get-organization-name
@@ -474,6 +475,11 @@
   ([municipality permit-type organization]
     {:pre  [municipality organization (permit/valid-permit-type? permit-type)]}
    (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization)))))
+
+(defn pate-scope? [application]
+  (let [organization (mongo/by-id :organizations (:organization application))]
+    (-> (resolve-organization-scope (:municipality application) (:permitType application) organization)
+        :pate-enabled)))
 
 (defn permit-types [{scope :scope :as organization}]
   (map (comp keyword :permitType) scope))
