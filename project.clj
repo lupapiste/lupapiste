@@ -1,5 +1,3 @@
-(require 'cemerick.pomegranate.aether)
-
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.9.0"]
