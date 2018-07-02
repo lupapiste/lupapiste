@@ -84,8 +84,9 @@
         <div class="col-4"
              data-bind="component: {name: 'file-upload',
                         params: {files: $parent.model.newFiles,
-                        dropZone: sprintf( '.%s .bubble-dialog', $parent.dropZone),
-                        allowMultiple: true}},
+                                 dropZone: sprintf( '.%s .bubble-dialog', $parent.dropZone),
+                                 allowMultiple: true,
+                                 waiting: $parent.filesWaiting}},
                         testId: 'appeal-files-' + $parent.test">
         </div>
       </div>
