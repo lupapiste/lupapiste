@@ -56,6 +56,6 @@ LUPAPISTE.VerdictAppealBubbleModel = function( params ) {
   self.removeFile = function(file) {
     self.model.oldFiles.remove(function (f) {
       return f.fileId === file.fileId;
-    })
+    });
   };
 };
