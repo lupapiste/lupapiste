@@ -261,11 +261,13 @@ Add file
   [Arguments]  ${postfix}  ${path}=${TXT_TESTFILE_PATH}
   Execute JavaScript  $('div[data-test-id=appeal-files-${postfix}] input[type=file]').attr("class", "")
   Choose File  jquery=div[data-test-id=appeal-files-${postfix}] input[type=file]  ${path}
+  Sleep  1s
 
 OK bubble ${postfix}
+  Wait until  Test id enabled  appeal-${postfix}-bubble-dialog-ok
   Scroll and click test id  appeal-${postfix}-bubble-dialog-ok
   # DOM changes after OK, so let's wait a bit.
-  Sleep  2s
+  Sleep  4s
 
 Cancel bubble ${postfix}
   Scroll and click test id  appeal-${postfix}-bubble-dialog-cancel
