@@ -66,7 +66,7 @@
    Returns them as collection of translation maps, where key is language
    and value is map of loc-key - loc-value pairs"
   []
-  (let [this-path (util/this-jar lupapalvelu.main)
+  (let [this-path (util/this-jar 'lupapalvelu.main)
         i18n-files (if (ss/ends-with this-path ".jar")      ; are we inside jar
                      (filter #(ss/ends-with % ".txt") (util/list-jar this-path "i18n/"))
                      (util/get-files-by-regex "resources/i18n/" #".+\.txt$")) ; dev
@@ -81,12 +81,9 @@
          (i18n-localizations)))
 
 (def- localizations (atom nil))
-(def- excel-data (util/future* (load-translations)))
 
 (defn reload! []
-  (if (seq @localizations)
-    (reset! localizations (load-translations))
-    (reset! localizations @excel-data)))
+  (reset! localizations (load-translations)))
 
 (defn- get-or-load-localizations []
   (if-not @localizations
