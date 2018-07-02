@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.verdict-test
   (:require [clj-time.coerce :as time-coerce]
+            [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schema-helper :as helper]
@@ -41,6 +42,20 @@
                 :published 12345}
       :updates {$set {:pate-verdicts.$.published 12345
                       :pate-verdicts.$.template.inclusions [:one :two]}}})
+
+(fact "Resolve verdict attachment type"
+  (schemas/resolve-verdict-attachment-type {:permitType "R"})
+  => {:type-group "paatoksenteko" :type-id "paatos"}
+  (schemas/resolve-verdict-attachment-type {:permitType "R"} :ilmoitus)
+  => {:type-group "paatoksenteko" :type-id "ilmoitus"}
+  (schemas/resolve-verdict-attachment-type {:permitType "R"} :bad)
+  => {}
+  (schemas/resolve-verdict-attachment-type {:permitType "R"} :cv)
+  => {:type-group "osapuolet" :type-id "cv"}
+  (schemas/resolve-verdict-attachment-type {:permitType "BAD"})
+  => {}
+  (schemas/resolve-verdict-attachment-type {:permitType "YA"})
+  => {:type-group "muut" :type-id "paatos"})
 
 (facts next-section
   (fact "all arguments given"
@@ -2184,9 +2199,10 @@
    :schema-version 1})
 
 (facts "Finalize verdict"
-  (let [command {:user    {:id        "user-id" :username "user-email"
-                           :firstName "Hello"   :lastName "World"}
-                 :created 12345}
+  (let [command {:user        {:id        "user-id" :username "user-email"
+                               :firstName "Hello"   :lastName "World"}
+                 :created     12345
+                 :application application}
         verdict {:id         "vid"
                  :category   "r"
                  :data       {:verdict-code "myonnetty"
@@ -2350,388 +2366,388 @@
       (fact "finalize--building-and-tasks: tasks and buildings"
         (finalize--buildings-and-tasks (assoc c-v-a :verdict verdict))
         => {:application (assoc application
-                                :buildings '({:area "281"
-                                              :buildingId "199887766E"
-                                              :description ""
-                                              :index "1"
-                                              :localShortId "002"
-                                              :location nil
+                                :buildings '({:area           "281"
+                                              :buildingId     "199887766E"
+                                              :description    ""
+                                              :index          "1"
+                                              :localShortId   "002"
+                                              :location       nil
                                               :location-wgs84 nil
-                                              :nationalId "199887766E"
-                                              :operationId "5b34a9d2cea1d0f410db2403"
-                                              :usage "021 rivitalot"})
-                                :tasks '({:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:katselmuksenLaji {:modified 12345
-                                                                    :value "muu katselmus"}
-                                                 :katselmus {:huomautukset {:kuvaus {:value ""}
-                                                                            :maaraAika {:value nil}
-                                                                            :toteaja {:value ""}
-                                                                            :toteamisHetki {:value nil}}
-                                                             :lasnaolijat {:value ""}
-                                                             :pitaja {:value ""}
-                                                             :pitoPvm {:value nil}
-                                                             :poikkeamat {:value ""}
-                                                             :tiedoksianto {:value false}
-                                                             :tila {:value nil}}
-                                                 :muuTunnus {:value ""}
-                                                 :muuTunnusSovellus {:value ""}
-                                                 :rakennus {:0 {:rakennus {:jarjestysnumero {:modified 12345
-                                                                                             :value "1"}
-                                                                           :kiinttun {:modified 12345
-                                                                                      :value nil}
-                                                                           :kunnanSisainenPysyvaRakennusnumero {:modified 12345
-                                                                                                                :value nil}
-                                                                           :rakennusnro {:modified 12345
-                                                                                         :value "002"}
-                                                                           :valtakunnallinenNumero {:modified 12345
-                                                                                                    :value "199887766E"}}
-                                                                :tila {:kayttoonottava {:modified 12345
-                                                                                        :value false}
-                                                                       :tila {:modified 12345
-                                                                              :value ""}}}}
-                                                 :vaadittuLupaehtona {:modified 12345 :value true}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
-                                                        :name "task-katselmus"
-                                                        :order 1
-                                                        :section-help "authority-fills"
-                                                        :subtype :review
-                                                        :type :task
+                                              :nationalId     "199887766E"
+                                              :operationId    "5b34a9d2cea1d0f410db2403"
+                                              :usage          "021 rivitalot"})
+                                :tasks '({:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:katselmuksenLaji   {:modified 12345
+                                                                             :value    "muu katselmus"}
+                                                        :katselmus          {:huomautukset {:kuvaus        {:value ""}
+                                                                                            :maaraAika     {:value nil}
+                                                                                            :toteaja       {:value ""}
+                                                                                            :toteamisHetki {:value nil}}
+                                                                             :lasnaolijat  {:value ""}
+                                                                             :pitaja       {:value ""}
+                                                                             :pitoPvm      {:value nil}
+                                                                             :poikkeamat   {:value ""}
+                                                                             :tiedoksianto {:value false}
+                                                                             :tila         {:value nil}}
+                                                        :muuTunnus          {:value ""}
+                                                        :muuTunnusSovellus  {:value ""}
+                                                        :rakennus           {:0 {:rakennus {:jarjestysnumero                    {:modified 12345
+                                                                                                                                 :value    "1"}
+                                                                                            :kiinttun                           {:modified 12345
+                                                                                                                                 :value    nil}
+                                                                                            :kunnanSisainenPysyvaRakennusnumero {:modified 12345
+                                                                                                                                 :value    nil}
+                                                                                            :rakennusnro                        {:modified 12345
+                                                                                                                                 :value    "002"}
+                                                                                            :valtakunnallinenNumero             {:modified 12345
+                                                                                                                                 :value    "199887766E"}}
+                                                                                 :tila     {:kayttoonottava {:modified 12345
+                                                                                                             :value    false}
+                                                                                            :tila           {:modified 12345
+                                                                                                             :value    ""}}}}
+                                                        :vaadittuLupaehtona {:modified 12345 :value true}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:i18nprefix       "task-katselmus.katselmuksenLaji"
+                                                        :name             "task-katselmus"
+                                                        :order            1
+                                                        :section-help     "authority-fills"
+                                                        :subtype          :review
+                                                        :type             :task
                                                         :user-authz-roles #{}
-                                                        :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname nil}
-                                         {:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:katselmuksenLaji {:modified 12345
-                                                                    :value "rakennuksen paikan merkitseminen"}
-                                                 :katselmus {:huomautukset {:kuvaus {:value ""}
-                                                                            :maaraAika {:value nil}
-                                                                            :toteaja {:value ""}
-                                                                            :toteamisHetki {:value nil}}
-                                                             :lasnaolijat {:value ""}
-                                                             :pitaja {:value ""}
-                                                             :pitoPvm {:value nil}
-                                                             :poikkeamat {:value ""}
-                                                             :tiedoksianto {:value false}
-                                                             :tila {:value nil}}
-                                                 :muuTunnus {:value ""}
-                                                 :muuTunnusSovellus {:value ""}
-                                                 :rakennus {:0 {:rakennus {:jarjestysnumero {:modified 12345
-                                                                                             :value "1"}
-                                                                           :kiinttun {:modified 12345
-                                                                                      :value nil}
-                                                                           :kunnanSisainenPysyvaRakennusnumero {:modified 12345
-                                                                                                                :value nil}
-                                                                           :rakennusnro {:modified 12345
-                                                                                         :value "002"}
-                                                                           :valtakunnallinenNumero {:modified 12345
-                                                                                                    :value "199887766E"}}
-                                                                :tila {:kayttoonottava {:modified 12345
-                                                                                        :value false}
-                                                                       :tila {:modified 12345
-                                                                              :value ""}}}}
-                                                 :vaadittuLupaehtona {:modified 12345 :value true}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
-                                                        :name "task-katselmus"
-                                                        :order 1
-                                                        :section-help "authority-fills"
-                                                        :subtype :review
-                                                        :type :task
+                                                        :version          1}
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    nil}
+                                         {:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:katselmuksenLaji   {:modified 12345
+                                                                             :value    "rakennuksen paikan merkitseminen"}
+                                                        :katselmus          {:huomautukset {:kuvaus        {:value ""}
+                                                                                            :maaraAika     {:value nil}
+                                                                                            :toteaja       {:value ""}
+                                                                                            :toteamisHetki {:value nil}}
+                                                                             :lasnaolijat  {:value ""}
+                                                                             :pitaja       {:value ""}
+                                                                             :pitoPvm      {:value nil}
+                                                                             :poikkeamat   {:value ""}
+                                                                             :tiedoksianto {:value false}
+                                                                             :tila         {:value nil}}
+                                                        :muuTunnus          {:value ""}
+                                                        :muuTunnusSovellus  {:value ""}
+                                                        :rakennus           {:0 {:rakennus {:jarjestysnumero                    {:modified 12345
+                                                                                                                                 :value    "1"}
+                                                                                            :kiinttun                           {:modified 12345
+                                                                                                                                 :value    nil}
+                                                                                            :kunnanSisainenPysyvaRakennusnumero {:modified 12345
+                                                                                                                                 :value    nil}
+                                                                                            :rakennusnro                        {:modified 12345
+                                                                                                                                 :value    "002"}
+                                                                                            :valtakunnallinenNumero             {:modified 12345
+                                                                                                                                 :value    "199887766E"}}
+                                                                                 :tila     {:kayttoonottava {:modified 12345
+                                                                                                             :value    false}
+                                                                                            :tila           {:modified 12345
+                                                                                                             :value    ""}}}}
+                                                        :vaadittuLupaehtona {:modified 12345 :value true}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:i18nprefix       "task-katselmus.katselmuksenLaji"
+                                                        :name             "task-katselmus"
+                                                        :order            1
+                                                        :section-help     "authority-fills"
+                                                        :subtype          :review
+                                                        :type             :task
                                                         :user-authz-roles #{}
+                                                        :version          1}
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    nil}
+                                         {:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:kuvaus                      {:value ""}
+                                                        :maarays                     {:value ""}
+                                                        :vaaditutErityissuunnitelmat {:value ""}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:name    "task-lupamaarays"
+                                                        :order   20
+                                                        :type    :task
                                                         :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname nil}
-                                         {:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:kuvaus {:value ""}
-                                                 :maarays {:value ""}
-                                                 :vaaditutErityissuunnitelmat {:value ""}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:name "task-lupamaarays"
-                                                        :order 20
-                                                        :type :task
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    nil}
+                                         {:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:kuvaus                      {:value ""}
+                                                        :maarays                     {:value ""}
+                                                        :vaaditutErityissuunnitelmat {:value ""}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:name    "task-lupamaarays"
+                                                        :order   20
+                                                        :type    :task
                                                         :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname nil}
-                                         {:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:kuvaus {:value ""}
-                                                 :maarays {:value ""}
-                                                 :vaaditutErityissuunnitelmat {:value ""}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:name "task-lupamaarays"
-                                                        :order 20
-                                                        :type :task
-                                                        :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname nil}
-                                         {:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:asiointitunnus {:value ""}
-                                                 :osapuolena {:value false}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                        :order 10
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    nil}
+                                         {:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:asiointitunnus {:value ""}
+                                                        :osapuolena     {:value false}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                        :order   10
                                                         :subtype :foreman
-                                                        :type :task
+                                                        :type    :task
                                                         :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname "Erityisalojen työnjohtaja"}
-                                         {:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:asiointitunnus {:value ""}
-                                                 :osapuolena {:value false}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                        :order 10
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    "Erityisalojen työnjohtaja"}
+                                         {:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:asiointitunnus {:value ""}
+                                                        :osapuolena     {:value false}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                        :order   10
                                                         :subtype :foreman
-                                                        :type :task
+                                                        :type    :task
                                                         :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname "Ilmanvaihtotyönjohtaja"}
-                                         {:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:asiointitunnus {:value ""}
-                                                 :osapuolena {:value false}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                        :order 10
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    "Ilmanvaihtotyönjohtaja"}
+                                         {:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:asiointitunnus {:value ""}
+                                                        :osapuolena     {:value false}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                        :order   10
                                                         :subtype :foreman
-                                                        :type :task
+                                                        :type    :task
                                                         :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname "Vastaava työnjohtaja"}
-                                         {:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:asiointitunnus {:value ""}
-                                                 :osapuolena {:value false}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                        :order 10
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    "Vastaava työnjohtaja"}
+                                         {:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:asiointitunnus {:value ""}
+                                                        :osapuolena     {:value false}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                        :order   10
                                                         :subtype :foreman
-                                                        :type :task
+                                                        :type    :task
                                                         :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname "Vesi- ja viemärityönjohtaja"}))
-            :updates {$push {:tasks {$each '({:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:katselmuksenLaji {:modified 12345
-                                                                        :value "muu katselmus"}
-                                                     :katselmus {:huomautukset {:kuvaus {:value ""}
-                                                                                :maaraAika {:value nil}
-                                                                                :toteaja {:value ""}
-                                                                                :toteamisHetki {:value nil}}
-                                                                 :lasnaolijat {:value ""}
-                                                                 :pitaja {:value ""}
-                                                                 :pitoPvm {:value nil}
-                                                                 :poikkeamat {:value ""}
-                                                                 :tiedoksianto {:value false}
-                                                                 :tila {:value nil}}
-                                                     :muuTunnus {:value ""}
-                                                     :muuTunnusSovellus {:value ""}
-                                                     :rakennus {:0 {:rakennus {:jarjestysnumero {:modified 12345
-                                                                                                 :value "1"}
-                                                                               :kiinttun {:modified 12345
-                                                                                          :value nil}
-                                                                               :kunnanSisainenPysyvaRakennusnumero {:modified 12345
-                                                                                                                    :value nil}
-                                                                               :rakennusnro {:modified 12345
-                                                                                             :value "002"}
-                                                                               :valtakunnallinenNumero {:modified 12345
-                                                                                                        :value "199887766E"}}
-                                                                    :tila {:kayttoonottava {:modified 12345
-                                                                                            :value false}
-                                                                           :tila {:modified 12345
-                                                                                  :value ""}}}}
-                                                     :vaadittuLupaehtona {:modified 12345
-                                                                          :value true}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
-                                                            :name "task-katselmus"
-                                                            :order 1
-                                                            :section-help "authority-fills"
-                                                            :subtype :review
-                                                            :type :task
-                                                            :user-authz-roles #{}
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname nil}
-                                             {:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:katselmuksenLaji {:modified 12345
-                                                                        :value "rakennuksen paikan merkitseminen"}
-                                                     :katselmus {:huomautukset {:kuvaus {:value ""}
-                                                                                :maaraAika {:value nil}
-                                                                                :toteaja {:value ""}
-                                                                                :toteamisHetki {:value nil}}
-                                                                 :lasnaolijat {:value ""}
-                                                                 :pitaja {:value ""}
-                                                                 :pitoPvm {:value nil}
-                                                                 :poikkeamat {:value ""}
-                                                                 :tiedoksianto {:value false}
-                                                                 :tila {:value nil}}
-                                                     :muuTunnus {:value ""}
-                                                     :muuTunnusSovellus {:value ""}
-                                                     :rakennus {:0 {:rakennus {:jarjestysnumero {:modified 12345
-                                                                                                 :value "1"}
-                                                                               :kiinttun {:modified 12345
-                                                                                          :value nil}
-                                                                               :kunnanSisainenPysyvaRakennusnumero {:modified 12345
-                                                                                                                    :value nil}
-                                                                               :rakennusnro {:modified 12345
-                                                                                             :value "002"}
-                                                                               :valtakunnallinenNumero {:modified 12345
-                                                                                                        :value "199887766E"}}
-                                                                    :tila {:kayttoonottava {:modified 12345
-                                                                                            :value false}
-                                                                           :tila {:modified 12345
-                                                                                  :value ""}}}}
-                                                     :vaadittuLupaehtona {:modified 12345
-                                                                          :value true}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
-                                                            :name "task-katselmus"
-                                                            :order 1
-                                                            :section-help "authority-fills"
-                                                            :subtype :review
-                                                            :type :task
-                                                            :user-authz-roles #{}
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname nil}
-                                             {:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:kuvaus {:value ""}
-                                                     :maarays {:value ""}
-                                                     :vaaditutErityissuunnitelmat {:value ""}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:name "task-lupamaarays"
-                                                            :order 20
-                                                            :type :task
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname nil}
-                                             {:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:kuvaus {:value ""}
-                                                     :maarays {:value ""}
-                                                     :vaaditutErityissuunnitelmat {:value ""}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:name "task-lupamaarays"
-                                                            :order 20
-                                                            :type :task
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname nil}
-                                             {:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:asiointitunnus {:value ""}
-                                                     :osapuolena {:value false}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                            :order 10
-                                                            :subtype :foreman
-                                                            :type :task
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname "Erityisalojen työnjohtaja"}
-                                             {:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:asiointitunnus {:value ""}
-                                                     :osapuolena {:value false}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                            :order 10
-                                                            :subtype :foreman
-                                                            :type :task
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname "Ilmanvaihtotyönjohtaja"}
-                                             {:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:asiointitunnus {:value ""}
-                                                     :osapuolena {:value false}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                            :order 10
-                                                            :subtype :foreman
-                                                            :type :task
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname "Vastaava työnjohtaja"}
-                                             {:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:asiointitunnus {:value ""}
-                                                     :osapuolena {:value false}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                            :order 10
-                                                            :subtype :foreman
-                                                            :type :task
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname "Vesi- ja viemärityönjohtaja"})}}
-                      $set {:buildings '({:area "281"
-                                          :buildingId "199887766E"
-                                          :description ""
-                                          :index "1"
-                                          :localShortId "002"
-                                          :location nil
-                                          :location-wgs84 nil
-                                          :nationalId "199887766E"
-                                          :operationId "5b34a9d2cea1d0f410db2403"
-                                          :usage "021 rivitalot"})}}}
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    "Vesi- ja viemärityönjohtaja"}))
+            :updates     {$push {:tasks {$each '({:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:katselmuksenLaji   {:modified 12345
+                                                                                     :value    "muu katselmus"}
+                                                                :katselmus          {:huomautukset {:kuvaus        {:value ""}
+                                                                                                    :maaraAika     {:value nil}
+                                                                                                    :toteaja       {:value ""}
+                                                                                                    :toteamisHetki {:value nil}}
+                                                                                     :lasnaolijat  {:value ""}
+                                                                                     :pitaja       {:value ""}
+                                                                                     :pitoPvm      {:value nil}
+                                                                                     :poikkeamat   {:value ""}
+                                                                                     :tiedoksianto {:value false}
+                                                                                     :tila         {:value nil}}
+                                                                :muuTunnus          {:value ""}
+                                                                :muuTunnusSovellus  {:value ""}
+                                                                :rakennus           {:0 {:rakennus {:jarjestysnumero                    {:modified 12345
+                                                                                                                                         :value    "1"}
+                                                                                                    :kiinttun                           {:modified 12345
+                                                                                                                                         :value    nil}
+                                                                                                    :kunnanSisainenPysyvaRakennusnumero {:modified 12345
+                                                                                                                                         :value    nil}
+                                                                                                    :rakennusnro                        {:modified 12345
+                                                                                                                                         :value    "002"}
+                                                                                                    :valtakunnallinenNumero             {:modified 12345
+                                                                                                                                         :value    "199887766E"}}
+                                                                                         :tila     {:kayttoonottava {:modified 12345
+                                                                                                                     :value    false}
+                                                                                                    :tila           {:modified 12345
+                                                                                                                     :value    ""}}}}
+                                                                :vaadittuLupaehtona {:modified 12345
+                                                                                     :value    true}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:i18nprefix       "task-katselmus.katselmuksenLaji"
+                                                                :name             "task-katselmus"
+                                                                :order            1
+                                                                :section-help     "authority-fills"
+                                                                :subtype          :review
+                                                                :type             :task
+                                                                :user-authz-roles #{}
+                                                                :version          1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    nil}
+                                                 {:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:katselmuksenLaji   {:modified 12345
+                                                                                     :value    "rakennuksen paikan merkitseminen"}
+                                                                :katselmus          {:huomautukset {:kuvaus        {:value ""}
+                                                                                                    :maaraAika     {:value nil}
+                                                                                                    :toteaja       {:value ""}
+                                                                                                    :toteamisHetki {:value nil}}
+                                                                                     :lasnaolijat  {:value ""}
+                                                                                     :pitaja       {:value ""}
+                                                                                     :pitoPvm      {:value nil}
+                                                                                     :poikkeamat   {:value ""}
+                                                                                     :tiedoksianto {:value false}
+                                                                                     :tila         {:value nil}}
+                                                                :muuTunnus          {:value ""}
+                                                                :muuTunnusSovellus  {:value ""}
+                                                                :rakennus           {:0 {:rakennus {:jarjestysnumero                    {:modified 12345
+                                                                                                                                         :value    "1"}
+                                                                                                    :kiinttun                           {:modified 12345
+                                                                                                                                         :value    nil}
+                                                                                                    :kunnanSisainenPysyvaRakennusnumero {:modified 12345
+                                                                                                                                         :value    nil}
+                                                                                                    :rakennusnro                        {:modified 12345
+                                                                                                                                         :value    "002"}
+                                                                                                    :valtakunnallinenNumero             {:modified 12345
+                                                                                                                                         :value    "199887766E"}}
+                                                                                         :tila     {:kayttoonottava {:modified 12345
+                                                                                                                     :value    false}
+                                                                                                    :tila           {:modified 12345
+                                                                                                                     :value    ""}}}}
+                                                                :vaadittuLupaehtona {:modified 12345
+                                                                                     :value    true}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:i18nprefix       "task-katselmus.katselmuksenLaji"
+                                                                :name             "task-katselmus"
+                                                                :order            1
+                                                                :section-help     "authority-fills"
+                                                                :subtype          :review
+                                                                :type             :task
+                                                                :user-authz-roles #{}
+                                                                :version          1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    nil}
+                                                 {:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:kuvaus                      {:value ""}
+                                                                :maarays                     {:value ""}
+                                                                :vaaditutErityissuunnitelmat {:value ""}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:name    "task-lupamaarays"
+                                                                :order   20
+                                                                :type    :task
+                                                                :version 1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    nil}
+                                                 {:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:kuvaus                      {:value ""}
+                                                                :maarays                     {:value ""}
+                                                                :vaaditutErityissuunnitelmat {:value ""}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:name    "task-lupamaarays"
+                                                                :order   20
+                                                                :type    :task
+                                                                :version 1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    nil}
+                                                 {:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:asiointitunnus {:value ""}
+                                                                :osapuolena     {:value false}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                                :order   10
+                                                                :subtype :foreman
+                                                                :type    :task
+                                                                :version 1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    "Erityisalojen työnjohtaja"}
+                                                 {:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:asiointitunnus {:value ""}
+                                                                :osapuolena     {:value false}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                                :order   10
+                                                                :subtype :foreman
+                                                                :type    :task
+                                                                :version 1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    "Ilmanvaihtotyönjohtaja"}
+                                                 {:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:asiointitunnus {:value ""}
+                                                                :osapuolena     {:value false}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                                :order   10
+                                                                :subtype :foreman
+                                                                :type    :task
+                                                                :version 1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    "Vastaava työnjohtaja"}
+                                                 {:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:asiointitunnus {:value ""}
+                                                                :osapuolena     {:value false}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                                :order   10
+                                                                :subtype :foreman
+                                                                :type    :task
+                                                                :version 1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    "Vesi- ja viemärityönjohtaja"})}}
+                          $set  {:buildings '({:area           "281"
+                                               :buildingId     "199887766E"
+                                               :description    ""
+                                               :index          "1"
+                                               :localShortId   "002"
+                                               :location       nil
+                                               :location-wgs84 nil
+                                               :nationalId     "199887766E"
+                                               :operationId    "5b34a9d2cea1d0f410db2403"
+                                               :usage          "021 rivitalot"})}}}
         (provided (lupapalvelu.mongo/create-id) => "id"))
       (fact "finalize--building-and-tasks: tasks, no buildings"
         (let [application (update application :documents rest)]
@@ -2739,522 +2755,522 @@
                                                 :application application
                                                 :verdict verdict))
           => {:application (assoc application
-                                  :tasks '({:assignee {}
-                                            :closed nil
-                                            :created 12345
-                                            :data {:katselmuksenLaji {:modified 12345
-                                                                      :value "muu katselmus"}
-                                                   :katselmus {:huomautukset {:kuvaus {:value ""}
-                                                                              :maaraAika {:value nil}
-                                                                              :toteaja {:value ""}
-                                                                              :toteamisHetki {:value nil}}
-                                                               :lasnaolijat {:value ""}
-                                                               :pitaja {:value ""}
-                                                               :pitoPvm {:value nil}
-                                                               :poikkeamat {:value ""}
-                                                               :tiedoksianto {:value false}
-                                                               :tila {:value nil}}
-                                                   :muuTunnus {:value ""}
-                                                   :muuTunnusSovellus {:value ""}
-                                                   :rakennus {}
-                                                   :vaadittuLupaehtona {:modified 12345 :value true}}
-                                            :duedate nil
-                                            :id "id"
-                                            :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
-                                                          :name "task-katselmus"
-                                                          :order 1
-                                                          :section-help "authority-fills"
-                                                          :subtype :review
-                                                          :type :task
+                                  :tasks '({:assignee    {}
+                                            :closed      nil
+                                            :created     12345
+                                            :data        {:katselmuksenLaji   {:modified 12345
+                                                                               :value    "muu katselmus"}
+                                                          :katselmus          {:huomautukset {:kuvaus        {:value ""}
+                                                                                              :maaraAika     {:value nil}
+                                                                                              :toteaja       {:value ""}
+                                                                                              :toteamisHetki {:value nil}}
+                                                                               :lasnaolijat  {:value ""}
+                                                                               :pitaja       {:value ""}
+                                                                               :pitoPvm      {:value nil}
+                                                                               :poikkeamat   {:value ""}
+                                                                               :tiedoksianto {:value false}
+                                                                               :tila         {:value nil}}
+                                                          :muuTunnus          {:value ""}
+                                                          :muuTunnusSovellus  {:value ""}
+                                                          :rakennus           {}
+                                                          :vaadittuLupaehtona {:modified 12345 :value true}}
+                                            :duedate     nil
+                                            :id          "id"
+                                            :schema-info {:i18nprefix       "task-katselmus.katselmuksenLaji"
+                                                          :name             "task-katselmus"
+                                                          :order            1
+                                                          :section-help     "authority-fills"
+                                                          :subtype          :review
+                                                          :type             :task
                                                           :user-authz-roles #{}
-                                                          :version 1}
-                                            :source {:id "vid" :type "verdict"}
-                                            :state :requires_user_action
-                                            :taskname nil}
-                                           {:assignee {}
-                                            :closed nil
-                                            :created 12345
-                                            :data {:katselmuksenLaji {:modified 12345
-                                                                      :value "rakennuksen paikan merkitseminen"}
-                                                   :katselmus {:huomautukset {:kuvaus {:value ""}
-                                                                              :maaraAika {:value nil}
-                                                                              :toteaja {:value ""}
-                                                                              :toteamisHetki {:value nil}}
-                                                               :lasnaolijat {:value ""}
-                                                               :pitaja {:value ""}
-                                                               :pitoPvm {:value nil}
-                                                               :poikkeamat {:value ""}
-                                                               :tiedoksianto {:value false}
-                                                               :tila {:value nil}}
-                                                   :muuTunnus {:value ""}
-                                                   :muuTunnusSovellus {:value ""}
-                                                   :rakennus {}
-                                                   :vaadittuLupaehtona {:modified 12345 :value true}}
-                                            :duedate nil
-                                            :id "id"
-                                            :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
-                                                          :name "task-katselmus"
-                                                          :order 1
-                                                          :section-help "authority-fills"
-                                                          :subtype :review
-                                                          :type :task
+                                                          :version          1}
+                                            :source      {:id "vid" :type "verdict"}
+                                            :state       :requires_user_action
+                                            :taskname    nil}
+                                           {:assignee    {}
+                                            :closed      nil
+                                            :created     12345
+                                            :data        {:katselmuksenLaji   {:modified 12345
+                                                                               :value    "rakennuksen paikan merkitseminen"}
+                                                          :katselmus          {:huomautukset {:kuvaus        {:value ""}
+                                                                                              :maaraAika     {:value nil}
+                                                                                              :toteaja       {:value ""}
+                                                                                              :toteamisHetki {:value nil}}
+                                                                               :lasnaolijat  {:value ""}
+                                                                               :pitaja       {:value ""}
+                                                                               :pitoPvm      {:value nil}
+                                                                               :poikkeamat   {:value ""}
+                                                                               :tiedoksianto {:value false}
+                                                                               :tila         {:value nil}}
+                                                          :muuTunnus          {:value ""}
+                                                          :muuTunnusSovellus  {:value ""}
+                                                          :rakennus           {}
+                                                          :vaadittuLupaehtona {:modified 12345 :value true}}
+                                            :duedate     nil
+                                            :id          "id"
+                                            :schema-info {:i18nprefix       "task-katselmus.katselmuksenLaji"
+                                                          :name             "task-katselmus"
+                                                          :order            1
+                                                          :section-help     "authority-fills"
+                                                          :subtype          :review
+                                                          :type             :task
                                                           :user-authz-roles #{}
+                                                          :version          1}
+                                            :source      {:id "vid" :type "verdict"}
+                                            :state       :requires_user_action
+                                            :taskname    nil}
+                                           {:assignee    {}
+                                            :closed      nil
+                                            :created     12345
+                                            :data        {:kuvaus                      {:value ""}
+                                                          :maarays                     {:value ""}
+                                                          :vaaditutErityissuunnitelmat {:value ""}}
+                                            :duedate     nil
+                                            :id          "id"
+                                            :schema-info {:name    "task-lupamaarays"
+                                                          :order   20
+                                                          :type    :task
                                                           :version 1}
-                                            :source {:id "vid" :type "verdict"}
-                                            :state :requires_user_action
-                                            :taskname nil}
-                                           {:assignee {}
-                                            :closed nil
-                                            :created 12345
-                                            :data {:kuvaus {:value ""}
-                                                   :maarays {:value ""}
-                                                   :vaaditutErityissuunnitelmat {:value ""}}
-                                            :duedate nil
-                                            :id "id"
-                                            :schema-info {:name "task-lupamaarays"
-                                                          :order 20
-                                                          :type :task
+                                            :source      {:id "vid" :type "verdict"}
+                                            :state       :requires_user_action
+                                            :taskname    nil}
+                                           {:assignee    {}
+                                            :closed      nil
+                                            :created     12345
+                                            :data        {:kuvaus                      {:value ""}
+                                                          :maarays                     {:value ""}
+                                                          :vaaditutErityissuunnitelmat {:value ""}}
+                                            :duedate     nil
+                                            :id          "id"
+                                            :schema-info {:name    "task-lupamaarays"
+                                                          :order   20
+                                                          :type    :task
                                                           :version 1}
-                                            :source {:id "vid" :type "verdict"}
-                                            :state :requires_user_action
-                                            :taskname nil}
-                                           {:assignee {}
-                                            :closed nil
-                                            :created 12345
-                                            :data {:kuvaus {:value ""}
-                                                   :maarays {:value ""}
-                                                   :vaaditutErityissuunnitelmat {:value ""}}
-                                            :duedate nil
-                                            :id "id"
-                                            :schema-info {:name "task-lupamaarays"
-                                                          :order 20
-                                                          :type :task
-                                                          :version 1}
-                                            :source {:id "vid" :type "verdict"}
-                                            :state :requires_user_action
-                                            :taskname nil}
-                                           {:assignee {}
-                                            :closed nil
-                                            :created 12345
-                                            :data {:asiointitunnus {:value ""}
-                                                   :osapuolena {:value false}}
-                                            :duedate nil
-                                            :id "id"
-                                            :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                          :order 10
+                                            :source      {:id "vid" :type "verdict"}
+                                            :state       :requires_user_action
+                                            :taskname    nil}
+                                           {:assignee    {}
+                                            :closed      nil
+                                            :created     12345
+                                            :data        {:asiointitunnus {:value ""}
+                                                          :osapuolena     {:value false}}
+                                            :duedate     nil
+                                            :id          "id"
+                                            :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                          :order   10
                                                           :subtype :foreman
-                                                          :type :task
+                                                          :type    :task
                                                           :version 1}
-                                            :source {:id "vid" :type "verdict"}
-                                            :state :requires_user_action
-                                            :taskname "Erityisalojen työnjohtaja"}
-                                           {:assignee {}
-                                            :closed nil
-                                            :created 12345
-                                            :data {:asiointitunnus {:value ""}
-                                                   :osapuolena {:value false}}
-                                            :duedate nil
-                                            :id "id"
-                                            :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                          :order 10
+                                            :source      {:id "vid" :type "verdict"}
+                                            :state       :requires_user_action
+                                            :taskname    "Erityisalojen työnjohtaja"}
+                                           {:assignee    {}
+                                            :closed      nil
+                                            :created     12345
+                                            :data        {:asiointitunnus {:value ""}
+                                                          :osapuolena     {:value false}}
+                                            :duedate     nil
+                                            :id          "id"
+                                            :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                          :order   10
                                                           :subtype :foreman
-                                                          :type :task
+                                                          :type    :task
                                                           :version 1}
-                                            :source {:id "vid" :type "verdict"}
-                                            :state :requires_user_action
-                                            :taskname "Ilmanvaihtotyönjohtaja"}
-                                           {:assignee {}
-                                            :closed nil
-                                            :created 12345
-                                            :data {:asiointitunnus {:value ""}
-                                                   :osapuolena {:value false}}
-                                            :duedate nil
-                                            :id "id"
-                                            :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                          :order 10
+                                            :source      {:id "vid" :type "verdict"}
+                                            :state       :requires_user_action
+                                            :taskname    "Ilmanvaihtotyönjohtaja"}
+                                           {:assignee    {}
+                                            :closed      nil
+                                            :created     12345
+                                            :data        {:asiointitunnus {:value ""}
+                                                          :osapuolena     {:value false}}
+                                            :duedate     nil
+                                            :id          "id"
+                                            :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                          :order   10
                                                           :subtype :foreman
-                                                          :type :task
+                                                          :type    :task
                                                           :version 1}
-                                            :source {:id "vid" :type "verdict"}
-                                            :state :requires_user_action
-                                            :taskname "Vastaava työnjohtaja"}
-                                           {:assignee {}
-                                            :closed nil
-                                            :created 12345
-                                            :data {:asiointitunnus {:value ""}
-                                                   :osapuolena {:value false}}
-                                            :duedate nil
-                                            :id "id"
-                                            :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                          :order 10
+                                            :source      {:id "vid" :type "verdict"}
+                                            :state       :requires_user_action
+                                            :taskname    "Vastaava työnjohtaja"}
+                                           {:assignee    {}
+                                            :closed      nil
+                                            :created     12345
+                                            :data        {:asiointitunnus {:value ""}
+                                                          :osapuolena     {:value false}}
+                                            :duedate     nil
+                                            :id          "id"
+                                            :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                          :order   10
                                                           :subtype :foreman
-                                                          :type :task
+                                                          :type    :task
                                                           :version 1}
-                                            :source {:id "vid" :type "verdict"}
-                                            :state :requires_user_action
-                                            :taskname "Vesi- ja viemärityönjohtaja"}))
-              :updates {$push {:tasks {$each '({:assignee {}
-                                                :closed nil
-                                                :created 12345
-                                                :data {:katselmuksenLaji {:modified 12345
-                                                                          :value "muu katselmus"}
-                                                       :katselmus {:huomautukset {:kuvaus {:value ""}
-                                                                                  :maaraAika {:value nil}
-                                                                                  :toteaja {:value ""}
-                                                                                  :toteamisHetki {:value nil}}
-                                                                   :lasnaolijat {:value ""}
-                                                                   :pitaja {:value ""}
-                                                                   :pitoPvm {:value nil}
-                                                                   :poikkeamat {:value ""}
-                                                                   :tiedoksianto {:value false}
-                                                                   :tila {:value nil}}
-                                                       :muuTunnus {:value ""}
-                                                       :muuTunnusSovellus {:value ""}
-                                                       :rakennus {}
-                                                       :vaadittuLupaehtona {:modified 12345
-                                                                            :value true}}
-                                                :duedate nil
-                                                :id "id"
-                                                :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
-                                                              :name "task-katselmus"
-                                                              :order 1
-                                                              :section-help "authority-fills"
-                                                              :subtype :review
-                                                              :type :task
-                                                              :user-authz-roles #{}
-                                                              :version 1}
-                                                :source {:id "vid" :type "verdict"}
-                                                :state :requires_user_action
-                                                :taskname nil}
-                                               {:assignee {}
-                                                :closed nil
-                                                :created 12345
-                                                :data {:katselmuksenLaji {:modified 12345
-                                                                          :value "rakennuksen paikan merkitseminen"}
-                                                       :katselmus {:huomautukset {:kuvaus {:value ""}
-                                                                                  :maaraAika {:value nil}
-                                                                                  :toteaja {:value ""}
-                                                                                  :toteamisHetki {:value nil}}
-                                                                   :lasnaolijat {:value ""}
-                                                                   :pitaja {:value ""}
-                                                                   :pitoPvm {:value nil}
-                                                                   :poikkeamat {:value ""}
-                                                                   :tiedoksianto {:value false}
-                                                                   :tila {:value nil}}
-                                                       :muuTunnus {:value ""}
-                                                       :muuTunnusSovellus {:value ""}
-                                                       :rakennus {}
-                                                       :vaadittuLupaehtona {:modified 12345
-                                                                            :value true}}
-                                                :duedate nil
-                                                :id "id"
-                                                :schema-info {:i18nprefix "task-katselmus.katselmuksenLaji"
-                                                              :name "task-katselmus"
-                                                              :order 1
-                                                              :section-help "authority-fills"
-                                                              :subtype :review
-                                                              :type :task
-                                                              :user-authz-roles #{}
-                                                              :version 1}
-                                                :source {:id "vid" :type "verdict"}
-                                                :state :requires_user_action
-                                                :taskname nil}
-                                               {:assignee {}
-                                                :closed nil
-                                                :created 12345
-                                                :data {:kuvaus {:value ""}
-                                                       :maarays {:value ""}
-                                                       :vaaditutErityissuunnitelmat {:value ""}}
-                                                :duedate nil
-                                                :id "id"
-                                                :schema-info {:name "task-lupamaarays"
-                                                              :order 20
-                                                              :type :task
-                                                              :version 1}
-                                                :source {:id "vid" :type "verdict"}
-                                                :state :requires_user_action
-                                                :taskname nil}
-                                               {:assignee {}
-                                                :closed nil
-                                                :created 12345
-                                                :data {:kuvaus {:value ""}
-                                                       :maarays {:value ""}
-                                                       :vaaditutErityissuunnitelmat {:value ""}}
-                                                :duedate nil
-                                                :id "id"
-                                                :schema-info {:name "task-lupamaarays"
-                                                              :order 20
-                                                              :type :task
-                                                              :version 1}
-                                                :source {:id "vid" :type "verdict"}
-                                                :state :requires_user_action
-                                                :taskname nil}
-                                               {:assignee {}
-                                                :closed nil
-                                                :created 12345
-                                                :data {:asiointitunnus {:value ""}
-                                                       :osapuolena {:value false}}
-                                                :duedate nil
-                                                :id "id"
-                                                :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                              :order 10
-                                                              :subtype :foreman
-                                                              :type :task
-                                                              :version 1}
-                                                :source {:id "vid" :type "verdict"}
-                                                :state :requires_user_action
-                                                :taskname "Erityisalojen työnjohtaja"}
-                                               {:assignee {}
-                                                :closed nil
-                                                :created 12345
-                                                :data {:asiointitunnus {:value ""}
-                                                       :osapuolena {:value false}}
-                                                :duedate nil
-                                                :id "id"
-                                                :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                              :order 10
-                                                              :subtype :foreman
-                                                              :type :task
-                                                              :version 1}
-                                                :source {:id "vid" :type "verdict"}
-                                                :state :requires_user_action
-                                                :taskname "Ilmanvaihtotyönjohtaja"}
-                                               {:assignee {}
-                                                :closed nil
-                                                :created 12345
-                                                :data {:asiointitunnus {:value ""}
-                                                       :osapuolena {:value false}}
-                                                :duedate nil
-                                                :id "id"
-                                                :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                              :order 10
-                                                              :subtype :foreman
-                                                              :type :task
-                                                              :version 1}
-                                                :source {:id "vid" :type "verdict"}
-                                                :state :requires_user_action
-                                                :taskname "Vastaava työnjohtaja"}
-                                               {:assignee {}
-                                                :closed nil
-                                                :created 12345
-                                                :data {:asiointitunnus {:value ""}
-                                                       :osapuolena {:value false}}
-                                                :duedate nil
-                                                :id "id"
-                                                :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                              :order 10
-                                                              :subtype :foreman
-                                                              :type :task
-                                                              :version 1}
-                                                :source {:id "vid" :type "verdict"}
-                                                :state :requires_user_action
-                                                :taskname "Vesi- ja viemärityönjohtaja"})}}
-                        $set {:buildings []}}}
+                                            :source      {:id "vid" :type "verdict"}
+                                            :state       :requires_user_action
+                                            :taskname    "Vesi- ja viemärityönjohtaja"}))
+              :updates     {$push {:tasks {$each '({:assignee    {}
+                                                    :closed      nil
+                                                    :created     12345
+                                                    :data        {:katselmuksenLaji   {:modified 12345
+                                                                                       :value    "muu katselmus"}
+                                                                  :katselmus          {:huomautukset {:kuvaus        {:value ""}
+                                                                                                      :maaraAika     {:value nil}
+                                                                                                      :toteaja       {:value ""}
+                                                                                                      :toteamisHetki {:value nil}}
+                                                                                       :lasnaolijat  {:value ""}
+                                                                                       :pitaja       {:value ""}
+                                                                                       :pitoPvm      {:value nil}
+                                                                                       :poikkeamat   {:value ""}
+                                                                                       :tiedoksianto {:value false}
+                                                                                       :tila         {:value nil}}
+                                                                  :muuTunnus          {:value ""}
+                                                                  :muuTunnusSovellus  {:value ""}
+                                                                  :rakennus           {}
+                                                                  :vaadittuLupaehtona {:modified 12345
+                                                                                       :value    true}}
+                                                    :duedate     nil
+                                                    :id          "id"
+                                                    :schema-info {:i18nprefix       "task-katselmus.katselmuksenLaji"
+                                                                  :name             "task-katselmus"
+                                                                  :order            1
+                                                                  :section-help     "authority-fills"
+                                                                  :subtype          :review
+                                                                  :type             :task
+                                                                  :user-authz-roles #{}
+                                                                  :version          1}
+                                                    :source      {:id "vid" :type "verdict"}
+                                                    :state       :requires_user_action
+                                                    :taskname    nil}
+                                                   {:assignee    {}
+                                                    :closed      nil
+                                                    :created     12345
+                                                    :data        {:katselmuksenLaji   {:modified 12345
+                                                                                       :value    "rakennuksen paikan merkitseminen"}
+                                                                  :katselmus          {:huomautukset {:kuvaus        {:value ""}
+                                                                                                      :maaraAika     {:value nil}
+                                                                                                      :toteaja       {:value ""}
+                                                                                                      :toteamisHetki {:value nil}}
+                                                                                       :lasnaolijat  {:value ""}
+                                                                                       :pitaja       {:value ""}
+                                                                                       :pitoPvm      {:value nil}
+                                                                                       :poikkeamat   {:value ""}
+                                                                                       :tiedoksianto {:value false}
+                                                                                       :tila         {:value nil}}
+                                                                  :muuTunnus          {:value ""}
+                                                                  :muuTunnusSovellus  {:value ""}
+                                                                  :rakennus           {}
+                                                                  :vaadittuLupaehtona {:modified 12345
+                                                                                       :value    true}}
+                                                    :duedate     nil
+                                                    :id          "id"
+                                                    :schema-info {:i18nprefix       "task-katselmus.katselmuksenLaji"
+                                                                  :name             "task-katselmus"
+                                                                  :order            1
+                                                                  :section-help     "authority-fills"
+                                                                  :subtype          :review
+                                                                  :type             :task
+                                                                  :user-authz-roles #{}
+                                                                  :version          1}
+                                                    :source      {:id "vid" :type "verdict"}
+                                                    :state       :requires_user_action
+                                                    :taskname    nil}
+                                                   {:assignee    {}
+                                                    :closed      nil
+                                                    :created     12345
+                                                    :data        {:kuvaus                      {:value ""}
+                                                                  :maarays                     {:value ""}
+                                                                  :vaaditutErityissuunnitelmat {:value ""}}
+                                                    :duedate     nil
+                                                    :id          "id"
+                                                    :schema-info {:name    "task-lupamaarays"
+                                                                  :order   20
+                                                                  :type    :task
+                                                                  :version 1}
+                                                    :source      {:id "vid" :type "verdict"}
+                                                    :state       :requires_user_action
+                                                    :taskname    nil}
+                                                   {:assignee    {}
+                                                    :closed      nil
+                                                    :created     12345
+                                                    :data        {:kuvaus                      {:value ""}
+                                                                  :maarays                     {:value ""}
+                                                                  :vaaditutErityissuunnitelmat {:value ""}}
+                                                    :duedate     nil
+                                                    :id          "id"
+                                                    :schema-info {:name    "task-lupamaarays"
+                                                                  :order   20
+                                                                  :type    :task
+                                                                  :version 1}
+                                                    :source      {:id "vid" :type "verdict"}
+                                                    :state       :requires_user_action
+                                                    :taskname    nil}
+                                                   {:assignee    {}
+                                                    :closed      nil
+                                                    :created     12345
+                                                    :data        {:asiointitunnus {:value ""}
+                                                                  :osapuolena     {:value false}}
+                                                    :duedate     nil
+                                                    :id          "id"
+                                                    :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                                  :order   10
+                                                                  :subtype :foreman
+                                                                  :type    :task
+                                                                  :version 1}
+                                                    :source      {:id "vid" :type "verdict"}
+                                                    :state       :requires_user_action
+                                                    :taskname    "Erityisalojen työnjohtaja"}
+                                                   {:assignee    {}
+                                                    :closed      nil
+                                                    :created     12345
+                                                    :data        {:asiointitunnus {:value ""}
+                                                                  :osapuolena     {:value false}}
+                                                    :duedate     nil
+                                                    :id          "id"
+                                                    :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                                  :order   10
+                                                                  :subtype :foreman
+                                                                  :type    :task
+                                                                  :version 1}
+                                                    :source      {:id "vid" :type "verdict"}
+                                                    :state       :requires_user_action
+                                                    :taskname    "Ilmanvaihtotyönjohtaja"}
+                                                   {:assignee    {}
+                                                    :closed      nil
+                                                    :created     12345
+                                                    :data        {:asiointitunnus {:value ""}
+                                                                  :osapuolena     {:value false}}
+                                                    :duedate     nil
+                                                    :id          "id"
+                                                    :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                                  :order   10
+                                                                  :subtype :foreman
+                                                                  :type    :task
+                                                                  :version 1}
+                                                    :source      {:id "vid" :type "verdict"}
+                                                    :state       :requires_user_action
+                                                    :taskname    "Vastaava työnjohtaja"}
+                                                   {:assignee    {}
+                                                    :closed      nil
+                                                    :created     12345
+                                                    :data        {:asiointitunnus {:value ""}
+                                                                  :osapuolena     {:value false}}
+                                                    :duedate     nil
+                                                    :id          "id"
+                                                    :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                                  :order   10
+                                                                  :subtype :foreman
+                                                                  :type    :task
+                                                                  :version 1}
+                                                    :source      {:id "vid" :type "verdict"}
+                                                    :state       :requires_user_action
+                                                    :taskname    "Vesi- ja viemärityönjohtaja"})}}
+                            $set  {:buildings []}}}
           (provided (lupapalvelu.mongo/create-id) => "id")))
       (fact "finalize--building-and-tasks: reviews not included, plans, foremen, buildings"
         (finalize--buildings-and-tasks (assoc c-v-a
                                               :verdict (assoc-in verdict [:data :reviews-included] false)))
         => {:application (assoc application
-                                :buildings '({:area "281"
-                                              :buildingId "199887766E"
-                                              :description ""
-                                              :index "1"
-                                              :localShortId "002"
-                                              :location nil
+                                :buildings '({:area           "281"
+                                              :buildingId     "199887766E"
+                                              :description    ""
+                                              :index          "1"
+                                              :localShortId   "002"
+                                              :location       nil
                                               :location-wgs84 nil
-                                              :nationalId "199887766E"
-                                              :operationId "5b34a9d2cea1d0f410db2403"
-                                              :usage "021 rivitalot"})
-                                :tasks '({:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:kuvaus {:value ""}
-                                                 :maarays {:value ""}
-                                                 :vaaditutErityissuunnitelmat {:value ""}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:name "task-lupamaarays"
-                                                        :order 20
-                                                        :type :task
+                                              :nationalId     "199887766E"
+                                              :operationId    "5b34a9d2cea1d0f410db2403"
+                                              :usage          "021 rivitalot"})
+                                :tasks '({:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:kuvaus                      {:value ""}
+                                                        :maarays                     {:value ""}
+                                                        :vaaditutErityissuunnitelmat {:value ""}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:name    "task-lupamaarays"
+                                                        :order   20
+                                                        :type    :task
                                                         :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname nil}
-                                         {:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:kuvaus {:value ""}
-                                                 :maarays {:value ""}
-                                                 :vaaditutErityissuunnitelmat {:value ""}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:name "task-lupamaarays"
-                                                        :order 20
-                                                        :type :task
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    nil}
+                                         {:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:kuvaus                      {:value ""}
+                                                        :maarays                     {:value ""}
+                                                        :vaaditutErityissuunnitelmat {:value ""}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:name    "task-lupamaarays"
+                                                        :order   20
+                                                        :type    :task
                                                         :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname nil}
-                                         {:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:asiointitunnus {:value ""}
-                                                 :osapuolena {:value false}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                        :order 10
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    nil}
+                                         {:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:asiointitunnus {:value ""}
+                                                        :osapuolena     {:value false}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                        :order   10
                                                         :subtype :foreman
-                                                        :type :task
+                                                        :type    :task
                                                         :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname "Erityisalojen työnjohtaja"}
-                                         {:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:asiointitunnus {:value ""}
-                                                 :osapuolena {:value false}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                        :order 10
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    "Erityisalojen työnjohtaja"}
+                                         {:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:asiointitunnus {:value ""}
+                                                        :osapuolena     {:value false}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                        :order   10
                                                         :subtype :foreman
-                                                        :type :task
+                                                        :type    :task
                                                         :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname "Ilmanvaihtotyönjohtaja"}
-                                         {:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:asiointitunnus {:value ""}
-                                                 :osapuolena {:value false}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                        :order 10
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    "Ilmanvaihtotyönjohtaja"}
+                                         {:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:asiointitunnus {:value ""}
+                                                        :osapuolena     {:value false}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                        :order   10
                                                         :subtype :foreman
-                                                        :type :task
+                                                        :type    :task
                                                         :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname "Vastaava työnjohtaja"}
-                                         {:assignee {}
-                                          :closed nil
-                                          :created 12345
-                                          :data {:asiointitunnus {:value ""}
-                                                 :osapuolena {:value false}}
-                                          :duedate nil
-                                          :id "id"
-                                          :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                        :order 10
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    "Vastaava työnjohtaja"}
+                                         {:assignee    {}
+                                          :closed      nil
+                                          :created     12345
+                                          :data        {:asiointitunnus {:value ""}
+                                                        :osapuolena     {:value false}}
+                                          :duedate     nil
+                                          :id          "id"
+                                          :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                        :order   10
                                                         :subtype :foreman
-                                                        :type :task
+                                                        :type    :task
                                                         :version 1}
-                                          :source {:id "vid" :type "verdict"}
-                                          :state :requires_user_action
-                                          :taskname "Vesi- ja viemärityönjohtaja"}))
-            :updates {$push {:tasks {$each '({:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:kuvaus {:value ""}
-                                                     :maarays {:value ""}
-                                                     :vaaditutErityissuunnitelmat {:value ""}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:name "task-lupamaarays"
-                                                            :order 20
-                                                            :type :task
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname nil}
-                                             {:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:kuvaus {:value ""}
-                                                     :maarays {:value ""}
-                                                     :vaaditutErityissuunnitelmat {:value ""}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:name "task-lupamaarays"
-                                                            :order 20
-                                                            :type :task
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname nil}
-                                             {:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:asiointitunnus {:value ""}
-                                                     :osapuolena {:value false}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                            :order 10
-                                                            :subtype :foreman
-                                                            :type :task
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname "Erityisalojen työnjohtaja"}
-                                             {:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:asiointitunnus {:value ""}
-                                                     :osapuolena {:value false}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                            :order 10
-                                                            :subtype :foreman
-                                                            :type :task
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname "Ilmanvaihtotyönjohtaja"}
-                                             {:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:asiointitunnus {:value ""}
-                                                     :osapuolena {:value false}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                            :order 10
-                                                            :subtype :foreman
-                                                            :type :task
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname "Vastaava työnjohtaja"}
-                                             {:assignee {}
-                                              :closed nil
-                                              :created 12345
-                                              :data {:asiointitunnus {:value ""}
-                                                     :osapuolena {:value false}}
-                                              :duedate nil
-                                              :id "id"
-                                              :schema-info {:name "task-vaadittu-tyonjohtaja"
-                                                            :order 10
-                                                            :subtype :foreman
-                                                            :type :task
-                                                            :version 1}
-                                              :source {:id "vid" :type "verdict"}
-                                              :state :requires_user_action
-                                              :taskname "Vesi- ja viemärityönjohtaja"})}}
-                      $set {:buildings '({:area "281"
-                                          :buildingId "199887766E"
-                                          :description ""
-                                          :index "1"
-                                          :localShortId "002"
-                                          :location nil
-                                          :location-wgs84 nil
-                                          :nationalId "199887766E"
-                                          :operationId "5b34a9d2cea1d0f410db2403"
-                                          :usage "021 rivitalot"})}}}
+                                          :source      {:id "vid" :type "verdict"}
+                                          :state       :requires_user_action
+                                          :taskname    "Vesi- ja viemärityönjohtaja"}))
+            :updates     {$push {:tasks {$each '({:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:kuvaus                      {:value ""}
+                                                                :maarays                     {:value ""}
+                                                                :vaaditutErityissuunnitelmat {:value ""}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:name    "task-lupamaarays"
+                                                                :order   20
+                                                                :type    :task
+                                                                :version 1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    nil}
+                                                 {:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:kuvaus                      {:value ""}
+                                                                :maarays                     {:value ""}
+                                                                :vaaditutErityissuunnitelmat {:value ""}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:name    "task-lupamaarays"
+                                                                :order   20
+                                                                :type    :task
+                                                                :version 1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    nil}
+                                                 {:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:asiointitunnus {:value ""}
+                                                                :osapuolena     {:value false}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                                :order   10
+                                                                :subtype :foreman
+                                                                :type    :task
+                                                                :version 1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    "Erityisalojen työnjohtaja"}
+                                                 {:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:asiointitunnus {:value ""}
+                                                                :osapuolena     {:value false}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                                :order   10
+                                                                :subtype :foreman
+                                                                :type    :task
+                                                                :version 1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    "Ilmanvaihtotyönjohtaja"}
+                                                 {:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:asiointitunnus {:value ""}
+                                                                :osapuolena     {:value false}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                                :order   10
+                                                                :subtype :foreman
+                                                                :type    :task
+                                                                :version 1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    "Vastaava työnjohtaja"}
+                                                 {:assignee    {}
+                                                  :closed      nil
+                                                  :created     12345
+                                                  :data        {:asiointitunnus {:value ""}
+                                                                :osapuolena     {:value false}}
+                                                  :duedate     nil
+                                                  :id          "id"
+                                                  :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                                :order   10
+                                                                :subtype :foreman
+                                                                :type    :task
+                                                                :version 1}
+                                                  :source      {:id "vid" :type "verdict"}
+                                                  :state       :requires_user_action
+                                                  :taskname    "Vesi- ja viemärityönjohtaja"})}}
+                          $set  {:buildings '({:area           "281"
+                                               :buildingId     "199887766E"
+                                               :description    ""
+                                               :index          "1"
+                                               :localShortId   "002"
+                                               :location       nil
+                                               :location-wgs84 nil
+                                               :nationalId     "199887766E"
+                                               :operationId    "5b34a9d2cea1d0f410db2403"
+                                               :usage          "021 rivitalot"})}}}
         (provided (lupapalvelu.mongo/create-id) => "id"))
 
       (fact "finalize--building-and-tasks: buildings, no tasks"
@@ -3264,23 +3280,76 @@
                                                            (assoc-in [:data :plans-included] false)
                                                            (assoc-in [:data :foremen-included] false))))
         => {:application (assoc application
-                                :buildings '({:area "281"
-                                              :buildingId "199887766E"
-                                              :description ""
-                                              :index "1"
-                                              :localShortId "002"
-                                              :location nil
+                                :buildings '({:area           "281"
+                                              :buildingId     "199887766E"
+                                              :description    ""
+                                              :index          "1"
+                                              :localShortId   "002"
+                                              :location       nil
                                               :location-wgs84 nil
-                                              :nationalId "199887766E"
-                                              :operationId "5b34a9d2cea1d0f410db2403"
-                                              :usage "021 rivitalot"}))
-            :updates {$set {:buildings '({:area "281"
-                                          :buildingId "199887766E"
-                                          :description ""
-                                          :index "1"
-                                          :localShortId "002"
-                                          :location nil
-                                          :location-wgs84 nil
-                                          :nationalId "199887766E"
-                                          :operationId "5b34a9d2cea1d0f410db2403"
-                                          :usage "021 rivitalot"})}}}))))
+                                              :nationalId     "199887766E"
+                                              :operationId    "5b34a9d2cea1d0f410db2403"
+                                              :usage          "021 rivitalot"}))
+            :updates     {$set {:buildings '({:area           "281"
+                                              :buildingId     "199887766E"
+                                              :description    ""
+                                              :index          "1"
+                                              :localShortId   "002"
+                                              :location       nil
+                                              :location-wgs84 nil
+                                              :nationalId     "199887766E"
+                                              :operationId    "5b34a9d2cea1d0f410db2403"
+                                              :usage          "021 rivitalot"})}}}))
+
+    (fact "finalize--inspection-summary: inspection summaries disabled"
+      (inspection-summary/finalize--inspection-summary c-v-a) => nil
+      (provided (lupapalvelu.organization/get-organization "753-R")
+                => {:inspection-summaries-enabled false}))
+    (fact "finalize--inspection-summary: inspection summaries enabled"
+      (inspection-summary/finalize--inspection-summary c-v-a)
+      => {:application (assoc
+                        application
+                        :inspection-summaries [{:id      "id"
+                                                :name    "Inspector Template"
+                                                :op      {:description nil
+                                                          :id          "5b34a9d2cea1d0f410db2403"
+                                                          :name        "sisatila-muutos"}
+                                                :targets '({:finished    false
+                                                            :id          "id"
+                                                            :target-name "First item"}
+                                                           {:finished    false
+                                                            :id          "id"
+                                                            :target-name "Second item"})}])
+          :updates     {$push {:inspection-summaries {:id      "id"
+                                                      :name    "Inspector Template"
+                                                      :op      {:description nil
+                                                                :id          "5b34a9d2cea1d0f410db2403"
+                                                                :name        "sisatila-muutos"}
+                                                      :targets '({:finished    false
+                                                                  :id          "id"
+                                                                  :target-name "First item"}
+                                                                 {:finished    false
+                                                                  :id          "id"
+                                                                  :target-name "Second item"})}}}}
+      (provided (lupapalvelu.mongo/create-id) => "id"
+                (lupapalvelu.organization/get-organization "753-R")
+                => {:inspection-summaries-enabled true
+                    :inspection-summary
+                    {:templates            [{:name     "Inspector Template",
+                                             :modified 1530254158347,
+                                             :id       "5b35d34ecea1d0863491149c",
+                                             :items    ["First item" "Second item"]}]
+                     :operations-templates {:sisatila-muutos "5b35d34ecea1d0863491149c"}}}))
+
+    (fact "finalize--attachments: no attachments"
+      (finalize--attachments c-v-a)
+      => (contains {:application (assoc application :attachments [])
+                    :updates     {$set {:pate-verdicts.$.data.attachments
+                                        '({:amount     1
+                                           :type-group "paatoksenteko"
+                                           :type-id    "paatos"})}}
+                    :verdict (assoc-in verdict
+                                       [:data :attachments]
+                                       '({:amount     1
+                                          :type-group "paatoksenteko"
+                                          :type-id    "paatos"}))}) )))
