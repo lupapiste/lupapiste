@@ -225,8 +225,7 @@
                                                                          :parallel-build true
                                                                          :pretty-print   false
                                                                          :optimizations  :advanced}}}}
-                        :prep-tasks [["sass4clj" "once"]
-                                     ["cljsbuild" "once" "rum"]
+                        :prep-tasks [["cljsbuild" "once" "rum"]
                                      "javac"
                                      "compile"]}
              :itest    {:test-paths ^:replace ["itest"]}
