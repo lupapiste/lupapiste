@@ -266,6 +266,7 @@
         (count apps) => 0))))
 
 (facts "Authed dummy into company"
+  (apply-remote-minimal)
   (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
         foo-email "foo@example.com"
         foo-pw "foofaafoo"]
@@ -334,7 +335,7 @@
                             (assoc :body (json/encode {:searchText ""})
                                    :as :json)))
              :body :data :applications
-             count) => 4))))
+             count) => 2))))
 
 (def locked-err {:ok false :text "error.company-locked"})
 
