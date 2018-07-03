@@ -1625,12 +1625,12 @@ Textarea is empty
 Test id disabled
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until  Element should be disabled  jquery=[data-test-id=${id}]
+  Wait Until  Element should be disabled  xpath=//*[@data-test-id='${id}']
 
 Test id enabled
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until  Element should be enabled  jquery=[data-test-id=${id}]
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='${id}']
 
 Fill test id
   [Arguments]  ${id}  ${text}
