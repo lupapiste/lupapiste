@@ -19,6 +19,13 @@
   user-keys)
 
 (mongocheck :users
+  (fn [user]
+    (when (and (usr/applicant? user)
+               (contains? user :orgAuthz))
+      (format "User %s is applicant, but has orgAuthz: %s" (:username user) (:orgAuthz user))))
+  :role :orgAuthz)
+
+(mongocheck :users
             (fn [{pid :personId source :personIdSource :as user}]
               (cond
                 (and pid (sc/check usr/PersonIdSource source))
