@@ -789,7 +789,7 @@
     (let [application-id         id
           user-id                (:id user)
           {:keys [attachment-type attachment-id file-name content-type size storageSystem]} attachment
-          attachment             (storage/download-user-attachment user-id attachment-id)
+          attachment             (storage/download-user-attachment user-id attachment-id storageSystem)
           maybe-attachment-id    (str application-id "." user-id "." attachment-id)                                     ; proposed attachment id (if empty placeholder is not found)
           updated-application    (mongo/by-id :applications application-id)
           same-attachments       (allowed-attachments-same-type updated-application attachment-type)                    ; attachments of same type
