@@ -1563,7 +1563,7 @@ Scroll by
 Scroll to test id
   [Arguments]  ${id}
   Wait Until  Page Should Contain Element  xpath=//*[@data-test-id='${id}']
-  Execute Javascript  document.body.querySelector("[data-test-id=${id}]").scrollIntoView(false);
+  Execute Javascript  document.body.querySelector("[data-test-id='${id}']").scrollIntoView(false);
 
 Scroll to xpath
   [Arguments]  ${xpath}
