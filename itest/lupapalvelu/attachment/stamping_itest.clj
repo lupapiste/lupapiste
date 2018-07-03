@@ -57,7 +57,8 @@
     ; Poll for 10 seconds
     (when-not (= "done" (:status job))
       (timbre/info "Polling for stamp job id" (:id job) "version" (:version job) "application" application-id "attachment" (:id attachment))
-      (poll-job sonja :stamp-attachments-job (:id job) (:version job) 50) => ok?)
+      (fact "stamp-attachments-job finishes successfully"
+        (poll-job sonja :stamp-attachments-job (:id job) (:version job) 50) => ok?))
 
     (let [attachment (get-attachment-by-id sonja application-id (:id attachment))
           pena-app (query-application pena application-id)

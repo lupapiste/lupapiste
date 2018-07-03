@@ -832,7 +832,6 @@
     (let [resp (query apikey (keyword command) :jobId id :version version)]
       (cond
         (job-done? resp)  resp
-        (timeout? resp)   (assoc resp :jobId id :ok false)
         (< limit retries) (merge resp {:ok false :desc "Retry limit exeeded"})
         :else (do (Thread/sleep 200)
                   (recur (get-in resp [:job :version]) (inc retries)))))))
