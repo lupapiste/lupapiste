@@ -6,7 +6,6 @@
             [ring.util.response :as resp]
             [schema.core :as sc]
             [sade.core :refer [now]]
-            [sade.http :as http]
             [sade.strings :as ss]
             [sade.xml :as sxml]
             [lupapalvelu.batchrun :as batchrun]
@@ -17,9 +16,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader])
-  (:import (java.net URL)))
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
 
 (def db-name (str "test_autom-assignments-for-verd-and-rev-itest_" (now)))
 
@@ -44,6 +41,13 @@
     ["katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja"]
     {:id "abba1111111111111111acdc"
      :name {:fi "K\u00e4sittelij\u00e4" :sv "Handl\u00e4ggare" :en "Handler"}} "review-test-trigger"))
+
+(defn sample-response []
+  (-> (io/resource "public/dev/sample-attachment.txt")
+      (io/input-stream)
+      (resp/response)
+      (resp/header "content-length" 7)
+      (resp/header "content-disposition" "filename=foo.txt")))
 
 (mongo/connect!)
 (mongo/with-db db-name
@@ -98,11 +102,7 @@
                         (ss/replace #"LP-186-2014-90009" app-id)
                         (sxml/parse-string "utf-8"))
                 (sade.http/get anything :as :stream :throw-exceptions false :conn-timeout 10000)
-                => (-> (io/resource "public/dev/sample-attachment.txt")
-                       (slurp)
-                       (resp/response)
-                       (resp/header "content-length" 7)
-                       (resp/header "content-disposition" "filename=foo.txt")))))))
+                => (sample-response))))))
 
 (facts "Automatic checking for reviews trigger automatic assignments"
   (mongo/with-db db-name
@@ -131,11 +131,7 @@
                    (ss/replace #"LP-186-2014-90009" application-id-submitted)
                    (sxml/parse-string "utf-8"))
             (sade.http/get anything :as :stream :throw-exceptions false :conn-timeout 10000)
-            => (-> (io/resource "public/dev/sample-attachment.txt")
-                   (slurp)
-                   (resp/response)
-                   (resp/header "content-length" 7)
-                   (resp/header "content-disposition" "filename=foo.txt")))
+            => (sample-response))
           (let [poll-result (batchrun/poll-verdicts-for-reviews)
                 assignments (get-assignments)]
 
@@ -152,11 +148,7 @@
                    (ss/replace #"LP-186-2014-90009" application-id-submitted)
                    (sxml/parse-string "utf-8"))
             (sade.http/get anything :as :stream :throw-exceptions false :conn-timeout 10000)
-            => (-> (io/resource "public/dev/sample-attachment.txt")
-                   (slurp)
-                   (resp/response)
-                   (resp/header "content-length" 7)
-                   (resp/header "content-disposition" "filename=foo.txt")))
+            => (sample-response))
           (let [old-assignments (get-assignments)
                 poll-result (batchrun/poll-verdicts-for-reviews)
                 assignments (get-assignments)]
