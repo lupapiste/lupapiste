@@ -1,6 +1,7 @@
 (ns lupapalvelu.file-upload-cleanup-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.file-upload :as file-upload]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.storage.file-storage :as fs]
             [clojure.java.io :as io]
             [sade.util :as util]
@@ -12,6 +13,8 @@
 (def session-id (str (uuid/v1)))
 
 (def app-id (str (uuid/v1)))
+
+(mongo/connect!)
 
 (defn- upload-file [file link-id]
   (-> (file-upload/save-file {:filename "test-pdf.pdf"
