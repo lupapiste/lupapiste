@@ -87,7 +87,8 @@
                                                 :file-name       sc/Str
                                                 :content-type    sc/Str
                                                 :size            sc/Num
-                                                :created         ssc/Timestamp}]
+                                                :created         ssc/Timestamp
+                                                :storageSystem sssc/StorageSystem}]
    (sc/optional-key :company)                 {:id     sc/Str
                                                :role   (sc/enum "admin" "user")
                                                :submit sc/Bool}
