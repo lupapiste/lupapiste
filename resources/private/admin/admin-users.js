@@ -23,7 +23,10 @@
            }},
           {name: "resetPassword",
            button: "secondary",
-           showFor: function(user) { return user.enabled; },
+           showFor: function(user) {
+             return (user.role !== "dummy")
+                    && lupapisteApp.models.globalAuthModel.ok("admin-reset-password");
+           },
            operation: function(email, callback) {
              ajax
                .command("admin-reset-password", {email: email})

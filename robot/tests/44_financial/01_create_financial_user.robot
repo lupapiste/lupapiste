@@ -21,9 +21,10 @@ Admin filters financial users
 
 Admin creates new financial user
   Create financial user  ARA-käsittelijä2  massi.mies@mail.com
+  Wait until  Element Should Contain  //div[contains(@class, 'users-table')]//table/tbody/tr[@data-user-email="massi.mies@mail.com"]/td[3]  ARA-käsittelijä
   User count is  2
 
-Admin resets financial authority password
+Admin resets password for financial authority
   Element should be visible  xpath=//section[@id='users']//tr[@data-user-email='massi.mies@mail.com']//td/button[@data-op='resetPassword']
   Click element  xpath=//section[@id='users']//tr[@data-user-email='massi.mies@mail.com']//td/button[@data-op='resetPassword']
   Confirm  dynamic-yes-no-confirm-dialog
@@ -53,6 +54,6 @@ Create financial user
 
   Click enabled by test id  add-financial-user-continue
   Wait test id visible  add-financial-user-ok
+  # has link that can be given to Financial authority
+  Wait until  Element should contain  xpath=//div[@id='add-financial-user-to-organization-dialog']//a[1]  setpw
   Click enabled by test id  add-financial-user-ok
-  Wait Until  Page Should Contain  ${email}
-  Element Should Contain  //div[contains(@class, 'users-table')]//table/tbody/tr[@data-user-email="${email}"]/td[3]  ARA-käsittelijä
