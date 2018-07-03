@@ -4,14 +4,14 @@
 // Note: currently this implementation is used only for "application
 // level" authorization. The docgen invitations are still used by the
 // old system (old style dialog and InviteModel). In the future both
-// approaches are converged towards this model.
+// approaches are (hopefully) converged towards this model.
 //
 // See also:
 //   PersonInviteModel: Person invitation model.
 //
-//   CompanyInviteBubbleModel: Company invitation model. The weird is
-//   due to the fact that CompanyInvite was already taken by the old
-//   (soon deprecated) implementation.
+//   CompanyInviteBubbleModel: Company invitation model. The weird
+//   name is due to the fact that CompanyInvite was already taken by
+//   the old (hopefully to be deprecated) implementation.
 //
 // Both invitation models send their values (dialog contents) via hub
 // to this model. The ajax calls are done here and information
@@ -189,11 +189,15 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
           .value();
   });
 
+  function closeBubbles() {
+    hub.send( "bubble-dialog::bubble-dialog", {id: "close all"});
+  }
+
   function ajaxInvite( command, params ) {
     ajax.command(command, params )
     .pending( self.waiting )
     .success( function() {
-      hub.send( "bubble-dialog::bubble-dialog", {id: "close all"});
+      closeBubbles();
       hub.send( "indicator", {style: "positive"});
       // It would be better to implement a service for authorized parties,
       // instead of repository.load
@@ -235,7 +239,7 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     self.personBubble( !self.personBubble());
   };
 
-// ---------------------------------------------------
+  // ---------------------------------------------------
   // Invite company
   // ---------------------------------------------------
 
@@ -244,4 +248,6 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
   self.toggleCompanyBubble = function() {
     self.companyBubble( !self.companyBubble());
   };
+
+  self.addEventListener( "contextService", "leave", closeBubbles );
 };
