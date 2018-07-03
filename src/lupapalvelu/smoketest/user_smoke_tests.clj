@@ -4,17 +4,18 @@
             [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
-            [sade.schemas :as ssc]))
+            [sade.schemas :as ssc])
+  (:import [schema.utils ErrorContainer]))
 
 (def user-keys (map #(if (keyword? %) % (:k %)) (keys usr/User)))
 
 (def coerce-user (ssc/json-coercer usr/User))
 
 (mongocheck :users
-  #(when-let [res (->> (mongo/with-id %)
-                       (coerce-user)
-                       (sc/check usr/User))]
-     (assoc (select-keys % [:username]) :errors res))
+  #(let [res (->> (mongo/with-id %)
+                  (coerce-user))]
+     (when (instance? ErrorContainer res)
+       (assoc (select-keys % [:username]) :errors res)))
   user-keys)
 
 (mongocheck :users
