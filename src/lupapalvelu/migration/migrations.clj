@@ -3994,7 +3994,9 @@
   {:apply-when (pos? (mongo/count :applications {:documents.data.yritys.verkkolaskutustieto.valittajaTunnus.value "003710948874"}))}
   (update-applications-array :documents
                              (fn [doc]
-                               (assoc-in doc [:data :yritys :verkkolaskutustieto :valittajaTunnus :value] "E204503"))
+                               (let [path [:data :yritys :verkkolaskutustieto :valittajaTunnus :value]]
+                                 (cond-> doc
+                                   (= (get-in doc path) "003710948874") (assoc-in path "E204503"))))
                              {:documents {$elemMatch {:data.yritys.verkkolaskutustieto.valittajaTunnus.value "003710948874"}}}))
 
 (defmigration opus-capita-E204503-companies
