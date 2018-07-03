@@ -1280,9 +1280,11 @@ Invite count is
 Invite company to application
   [Arguments]  ${company}
   Open tab  parties
+  Sleep  0.5s
   Scroll and click test id  application-invite-company
   Wait test id visible  company-invite-bubble-dialog-ok
   Select From Autocomplete  div[data-test-id="company-invite-companies"]  ${company}
+  Sleep  0.5s
   Scroll and click test id  company-invite-bubble-dialog-ok
   Is authorized party  ${company}
 
