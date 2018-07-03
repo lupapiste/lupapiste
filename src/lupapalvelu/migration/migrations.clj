@@ -3990,6 +3990,21 @@
                          {:role "authorityAdmin"}
                          {$set {:role "authority"}}))
 
+(defmigration opus-capita-E204503-documents
+  {:apply-when (pos? (mongo/count :applications {:documents.data.yritys.verkkolaskutustieto.valittajaTunnus.value "003710948874"}))}
+  (update-applications-array :documents
+                             (fn [doc]
+                               (assoc-in doc [:data :yritys :verkkolaskutustieto :valittajaTunnus :value] "E204503"))
+                             {:documents {$elemMatch {:data.yritys.verkkolaskutustieto.valittajaTunnus.value "003710948874"}}}))
+
+(defmigration opus-capita-E204503-companies
+  {:apply-when (pos? (mongo/count :companies {:pop "003710948874"}))}
+  (mongo/update-by-query :companies
+                         {:pop "003710948874"}
+                         {$set {:pop "E204503"}}))
+
+
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
