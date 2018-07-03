@@ -364,7 +364,7 @@
                           {:name "INEXCHANGE"} ; InExchange Factorum AB
                           {:name "DNBAFIHX"} ; DNB Bank ASA
                           {:name "ITELFIHH"} ; S\u00e4\u00e4st\u00f6pankit
-                          {:name "003710948874"} ; OpusCapita Group Oy
+                          {:name "E204503"} ; OpusCapita Solutions Oy
                           {:name "00885790000000418"} ; HighJump AS
                           {:name "NDEAFIHH"} ; Nordea
                           {:name "OKOYFIHH"} ; OP-Pohjola-ryhm\u00e4
