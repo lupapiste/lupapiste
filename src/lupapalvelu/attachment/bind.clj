@@ -96,9 +96,6 @@
     []
     file-infos))
 
-(defn- bind-job-status [data]
-  (if (every? #{:done :error} (map #(get-in % [:status]) (vals data))) :done :running))
-
 (defn- cancel-job [job-id {:keys [status text]}]
   (warnf "canceling bind job %s due '%s'" job-id text)
   (job/update job-id #(util/map-values (fn [{file-id :fileId}] {:fileId file-id :status status :text text}) %)))
@@ -126,7 +123,7 @@
         job                (-> (zipmap (map :fileId coerced-file-infos)
                                        (map #(assoc % :status :pending)
                                             coerced-file-infos))
-                               (job/start bind-job-status))]
+                               (job/start))]
     (util/future*
      (if (ok? @preprocess-ref)
        (let [results (bind-attachments! command coerced-file-infos (:id job))]

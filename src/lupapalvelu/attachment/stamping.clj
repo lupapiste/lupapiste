@@ -141,13 +141,10 @@
             stamp-without-buildings)
           (stamp-attachment! file-info context job-id (:id application))))))
 
-(defn- stamp-job-status [data]
-  (if (every? #{:done :error} (map #(get-in % [:status]) (vals data))) :done :running))
-
 (defn make-stamp-job [attachment-infos context]
   (let [file-infos (map ->file-info attachment-infos)
         job (-> (zipmap (map :attachment-id file-infos) (map #(assoc % :status :pending) file-infos))
-                (job/start stamp-job-status))]
+                (job/start))]
     (future* (stamp-attachments! file-infos (assoc context :job-id (:id job))))
     (debug "Returning stamp job:" job)
     job))

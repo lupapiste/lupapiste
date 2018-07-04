@@ -13,12 +13,16 @@
   (doto (promise)
     (deliver value)))
 
-(defn- create-job [id initial-value status-fn]
+(defn check-status [data]
+  (if (every? #{:done :error} (map #(get-in % [:status]) (vals data)))
+    :done
+    :running))
+
+(defn- create-job [id initial-value]
   {:id id
    :version 0
    :value initial-value
-   :status (status-fn initial-value)
-   :status-fn status-fn
+   :status (check-status initial-value)
    :next (promise)})
 
 (defn- find-job [id]
@@ -28,9 +32,9 @@
   (when job
     (select-keys job [:id :version :status :value])))
 
-(defn start [initial-value status-fn]
+(defn start [initial-value]
   (let [id (next-job-id)
-        job (create-job id initial-value status-fn)]
+        job (create-job id initial-value)]
     (dosync
       (alter jobs assoc id job))
     (trim job)))
@@ -44,7 +48,7 @@
           new-value (apply f (:value old-job) args)
           new-job (assoc old-job :version (inc (:version old-job))
                          :value new-value
-                         :status ((:status-fn old-job) new-value)
+                         :status (check-status new-value)
                          :next (promise))]
       (alter jobs assoc id new-job)
       (send deliverer job-changed old-job new-job)
