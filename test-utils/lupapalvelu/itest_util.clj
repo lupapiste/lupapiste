@@ -832,9 +832,12 @@
     (let [resp (query apikey (keyword command) :jobId id :version version)]
       (cond
         (job-done? resp)  resp
-        (< limit retries) (merge resp {:ok false :desc "Retry limit exeeded"})
+        (< limit retries) (merge resp {:ok false :desc "Retry limit exceeded"})
         :else (do (Thread/sleep 200)
-                  (recur (get-in resp [:job :version]) (inc retries)))))))
+                  (timbre/info "Re-polling job")
+                  (recur (or (get-in resp [:job :version])
+                             version)
+                         (inc retries)))))))
 
 (defn upload-file-and-bind
   "Uploads file and then bind using bind-attachments. To upload new file, specify metadata using filedata.
