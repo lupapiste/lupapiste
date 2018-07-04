@@ -146,10 +146,17 @@
 
 (sc/defn ^:always-validate get-state-change-endpoint-data :- (sc/maybe EndpointData) [organization]
   (when-let [url (get-in organization [:state-change-endpoint :url])]
-    {:url     (ss/strip-trailing-slashes url)
-     :headers (->> (get-in organization [:state-change-endpoint :header-parameters])
-                   (map (fn [header] {(str (:name header)) (str (:value header))}))
-                   (apply merge))}))
+    (let [endpoint-conf (:state-change-endpoint organization)
+          crypto-iv     (:crypto-iv endpoint-conf)
+          endpoint {:url     (ss/strip-trailing-slashes url)
+                    :headers (->> (get-in organization [:state-change-endpoint :header-parameters])
+                                  (map (fn [header] {(str (:name header)) (str (org/decode-credentials (:value header) crypto-iv))}))
+                                  (apply merge))}]
+    (when (= (:auth-type endpoint-conf) "basic")
+      (assoc endpoint :basic-auth (org/get-credentials {:username  (:basic-auth-username endpoint-conf)
+                                                        :password  (:basic-auth-password endpoint-conf)
+                                                        :crypto-iv crypto-iv})))
+    endpoint)))
 
 (defn send-via-http [message-id data {:keys [url headers]}]
   (http/post url
