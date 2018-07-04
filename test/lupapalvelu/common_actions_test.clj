@@ -10,6 +10,7 @@
             [clojure.test.check.properties :as prop]
             [clojure.test :refer [is]]
             [sade.schema-generators :as ssg]
+            [sade.schema-utils :as ssu]
             [slingshot.slingshot :refer [try+]]
             [lupapalvelu.generators.application :as app-gen]
             [lupapalvelu.generators.organization]
@@ -21,15 +22,10 @@
             [lupapalvelu.itest-util :refer [unauthorized?]]
             [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
             [lupapalvelu.action :refer :all]
-            [lupapalvelu.actions-api :as ca]
     ;; ensure all actions are registered by requiring server ns
             [lupapalvelu.server]
-            [lupapalvelu.action :as action]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.roles :as roles]
-            [lupapalvelu.authorization :as auth]
-            [sade.schema-utils :as ssu]))
+            [lupapalvelu.user :as usr]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access? enrich-default-permissions enrich-action-contexts)
 
@@ -82,14 +78,14 @@
         action (build-action "enable-accordions" action-skeleton)
         org-id (:organization application)
         permit-type (:permitType application)
-        allowed-to-access? (action/user-is-allowed-to-access?
+        allowed-to-access? (user-is-allowed-to-access?
                              action application)
-        authority-in-org? (not-empty (get-in user [:orgAuthz (keyword org-id)]))
-        auths-in-application? (auth/user-authz? roles/all-authenticated-user-roles
-                                                application
-                                                user)]
+        insufficient-permissions? (-> (enrich-default-permissions action)
+                                      (access-denied-by-insufficient-permissions))
+        authority-in-org? (not-empty (get-in user [:orgAuthz (keyword org-id)]))]
     (with-mocked-orgs orgs
-      (cond (not allowed-to-access?)         (fail? (validate action))
+      (cond (or (not allowed-to-access?)
+                insufficient-permissions?)         (fail? (validate action))
             (and authority-in-org?
                  (or (= permit-type "YA")
                      (= permit-type "ARK"))) (ok? (validate action))

@@ -23,10 +23,10 @@
 (def comment-user-authz-roles (conj all-authz-writer-roles :foreman :financialAuthority))
 (def writer-roles-with-foreman (conj default-authz-writer-roles :foreman))
 
-(def default-org-authz-roles #{:authority :approver})
+(def default-org-authz-roles #{:authority})
 (def commenter-org-authz-roles (conj default-org-authz-roles :commenter))
 (def reader-org-authz-roles (conj commenter-org-authz-roles :reader))
-(def all-org-authz-roles (conj reader-org-authz-roles :authorityAdmin :tos-editor :tos-publisher :archivist :digitizer))
+(def all-org-authz-roles (conj reader-org-authz-roles :approver :authorityAdmin :tos-editor :tos-publisher :archivist :digitizer))
 
 (def default-user-authz {:query default-authz-reader-roles
                          :export default-authz-reader-roles
