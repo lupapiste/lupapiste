@@ -1725,9 +1725,17 @@ Toggle enabled
   [Arguments]  ${tid}
   Test id enabled  ${tid}-input
 
-Toggle toggle
+Toggle visible
   [Arguments]  ${tid}
   Wait until  Element should be visible  xpath=//label[@data-test-id='${tid}-label']
+
+No such toggle
+  [Arguments]  ${tid}
+  Wait until  Element should not be visible  xpath=//label[@data-test-id='${tid}-label']
+
+Toggle toggle
+  [Arguments]  ${tid}
+  Toggle visible  ${tid}
   Click label by test id  ${tid}-label
 
 Select from test id

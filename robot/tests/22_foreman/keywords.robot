@@ -68,7 +68,7 @@ Foreman accepts invitation
   Wait until  Page should contain  Hyväksynyt valtuutuksen
 
 Foreman disables attachment import checkbox
-  Unselect checkbox  fill-attachments-checkbox
+  Toggle toggle  also-fill-attachments
 
 Foreman applies personal information to the foreman application
   Wait until  Click by test id  fill-info-button
