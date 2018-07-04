@@ -1,3 +1,13 @@
+/**
+ * Component for updating state change message endpoint.
+ *
+ * Parameters:
+ * - url: string that contains url
+ * - headers: array, that contains http header parameters as key value pairs
+ * - authType: authorization type: basic-auth or other
+ * - basicUser: username for basic-auth
+ * - password: password for basic-auth
+ */
 LUPAPISTE.StateChangeMsgSettingsModel = function(params) {
   "use strict";
 

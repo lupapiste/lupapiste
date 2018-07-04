@@ -13,6 +13,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.schema-util :as pate-schema]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
@@ -245,7 +246,13 @@
                 inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
                 opening pateEnabled]
    :optional-parameters [bulletinsEnabled bulletinsUrl]
-   :input-validators [permit/permit-type-validator]
+   :input-validators [permit/permit-type-validator
+                      (fn [{{:keys [permitType pateEnabled]} :data}]
+                        (if (true? pateEnabled)
+                          (when-not (true? (-> (pate-schema/permit-type->categories permitType)
+                                               first
+                                               pate-schema/pate-category?))
+                            (fail :error.pate-not-supported-for-scope))))]
    :user-roles #{:admin}}
   [_]
   (mongo/update-by-query :organizations
@@ -593,12 +600,17 @@
   (ok))
 
 (defcommand set-organization-scope-pate-value
-  {:parameters [permitType municipality value]
-   :description "Set boolean value for pate-enabled in organization scope level."
-   :user-roles #{:admin}
-   :input-validators  [(partial non-blank-parameters [:permitType :municipality])
-                       (partial boolean-parameters [:value])]}
-  [{user :user data :data}]
+  {:parameters       [permitType municipality value]
+   :description      "Set boolean value for pate-enabled in organization scope level."
+   :user-roles       #{:admin}
+   :input-validators [(partial non-blank-parameters [:permitType :municipality])
+                      (partial boolean-parameters [:value])
+                      (fn [{{:keys [permitType]} :data}]
+                        (when-not (true? (-> (pate-schema/permit-type->categories permitType)
+                                             first
+                                             pate-schema/pate-category?))
+                          (fail :error.pate-not-supported-for-scope)))]}
+  [_]
   (mongo/update-by-query :organizations
                          {:scope {$elemMatch {:permitType permitType :municipality municipality}}}  {$set {:scope.$.pate-enabled value}})
   (ok))
@@ -730,10 +742,9 @@
    :description "Set REST endpoint configurations for organization state change messages"
    :user-roles #{:authorityAdmin}
    :input-validators [(partial action/string-parameters [:url])]}
-  [{data :data user :user}]
-  (let [url (-> data :url ss/trim)
-        organization-id (usr/authority-admins-organization-id user)]
-    (org/set-state-change-endpoint organization-id url headers authType basicCreds)))
+  [{user :user}]
+  (let [organization-id (usr/authority-admins-organization-id user)]
+    (org/set-state-change-endpoint organization-id (ss/trim url) headers authType basicCreds)))
 
 (defquery krysp-config
   {:user-roles #{:authorityAdmin}}

@@ -141,8 +141,9 @@
            (#{:draft} (keyword new-state)))))
 
 (sc/defschema EndpointData
-  {:url sc/Str
-   :headers {(sc/maybe sc/Str) (sc/maybe sc/Str)}})
+  {:url                          sc/Str
+   (sc/optional-key :headers)    {sc/Str sc/Str}
+   (sc/optional-key :basic-auth) [sc/Str sc/Str]})
 
 (sc/defn ^:always-validate get-state-change-endpoint-data :- (sc/maybe EndpointData) [organization]
   (when-let [url (get-in organization [:state-change-endpoint :url])]
