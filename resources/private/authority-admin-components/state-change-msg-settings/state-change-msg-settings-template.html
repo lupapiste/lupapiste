@@ -43,7 +43,10 @@
           </td>
           <td data-bind="ltext: 'auth-admin.server.password'"></td>
           <td>
-            <input type="text" data-bind="value: basicPassword" class="form-input">
+            <input data-bind="value: basicPassword,
+                             attr: {placeholder:passwordPlaceholder,
+                             'data-test-id': 'basic-password'}"
+                   type="password">
           </td>
         </tr>
          <!-- /ko -->

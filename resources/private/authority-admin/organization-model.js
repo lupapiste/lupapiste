@@ -70,6 +70,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.stateChangeMsgEnabled = ko.observable(false);
   self.stateChangeMsgUrl = ko.observable("");
   self.stateChangeMsgHeaders = ko.observableArray([]);
+  self.stateChanegeConf = ko.observable();
 
   self.sectionOperations = ko.observableArray();
 
@@ -411,8 +412,14 @@ LUPAPISTE.OrganizationModel = function () {
     self.defaultDigitalizationLocationY(util.getIn(organization, ["default-digitalization-location", "y"], []));
 
     self.stateChangeMsgEnabled(organization["state-change-msg-enabled"] || false);
-    self.stateChangeMsgUrl(util.getIn(organization, ["state-change-endpoint", "url"], []));
-    self.stateChangeMsgHeaders(util.getIn(organization, ["state-change-endpoint", "header-parameters"], []));
+
+    self.stateChanegeConf( {
+      url: util.getIn(organization, ["state-change-endpoint", "url"], []),
+      headers: util.getIn(organization, ["state-change-endpoint", "header-parameters"], []),
+      authType: util.getIn(organization, ["state-change-endpoint", "auth-type"], []),
+      username: util.getIn(organization, ["state-change-endpoint", "basic-auth-username"], []),
+      password: util.getIn(organization, ["state-change-endpoint", "basic-auth-password"], [])
+    });
 
     _.forOwn(operationsAttachmentsPerPermitType, function(value, permitType) {
       var operationsAttachments = _(value)

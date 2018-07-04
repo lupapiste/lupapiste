@@ -231,8 +231,7 @@
       <suti-admin></suti-admin>
       <div data-bind="if: organization.stateChangeMsgEnabled">
         <section data-bind="component: {name: 'state-change-msg-settings',
-                                        params: {url: organization.stateChangeMsgUrl(),
-                                                 headers: organization.stateChangeMsgHeaders()}}"></section>
+                                        params: organization.stateChanegeConf()}"></section>
       </div>
       </div>
 

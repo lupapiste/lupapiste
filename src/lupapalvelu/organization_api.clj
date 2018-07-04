@@ -93,6 +93,20 @@
     {}
     (map :permitType scope)))
 
+(defn decode-state-change-conf [organization]
+  (if-let [headers (get-in organization [:state-change-endpoint :header-parameters])]
+    (assoc-in
+      organization
+      [:state-change-endpoint :header-parameters]
+      (map
+        (fn [header]
+          (assoc
+            header
+            :value
+            (org/decode-credentials (:value header) (get-in organization [:state-change-endpoint :crypto-iv-s]))))
+        headers))
+    organization))
+
 
 ;;
 ;; Actions
@@ -112,7 +126,8 @@
                                :allowedRoles allowed-roles)
                         (dissoc :operations-attachments :selected-operations)
                         (update-in [:map-layers :server] select-keys [:url :username])
-                        (update-in [:suti :server] select-keys [:url :username]))
+                        (update-in [:suti :server] select-keys [:url :username])
+                        (decode-state-change-conf))
         :attachmentTypes (organization-attachments organization))))
 
 (defquery organization-attachment-types
