@@ -60,13 +60,13 @@ Sonja marks review as faulty for real
   No such test id  mark-faulty
 
 Notes have been updated
-  Test id disabled  'katselmus.huomautukset.kuvaus'
-  Test id input is  'katselmus.huomautukset.kuvaus'  This review is bu hao.
-  Test id disabled  'katselmus.huomautukset.maaraAika'
-  Test id disabled  'katselmus.huomautukset.toteaja'
-  Test id disabled  'katselmus.huomautukset.toteamisHetki'
-  Test id disabled  'katselmus.lasnaolijat'
-  Test id disabled  'katselmus.poikkeamat'
+  Test id disabled  katselmus.huomautukset.kuvaus
+  Test id input is  katselmus.huomautukset.kuvaus  This review is bu hao.
+  Test id disabled  katselmus.huomautukset.maaraAika
+  Test id disabled  katselmus.huomautukset.toteaja
+  Test id disabled  katselmus.huomautukset.toteamisHetki
+  Test id disabled  katselmus.lasnaolijat
+  Test id disabled  katselmus.poikkeamat
   Return from review
 
 The review is marked as faulty in the reviews table

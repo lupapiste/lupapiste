@@ -35,6 +35,8 @@
 
 (facts "about OAuth authorization endpoints"
 
+  (set-anti-csrf! true)
+
   (fact "Request without logging in redirects to login"
     (let [res (authorize-call {})]
       res => http302?

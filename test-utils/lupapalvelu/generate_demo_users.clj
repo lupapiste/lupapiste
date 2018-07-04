@@ -18,7 +18,7 @@
            (if (lupapalvelu.user/get-user-by-email full-email)
              (println "user exits " full-email)
              (user/create-new-user
-               {:role "authorityAdmin"
+               {:role "authority"
                 :orgAuthz {(keyword id) ["authorityAdmin"]}}
                {:email full-email
                 :username full-email
@@ -27,8 +27,7 @@
                 :lastName (str "Kayttaja " %)
                 :enabled true
                 :orgAuthz {(keyword id) ["authority"]}
-                :password "koulutus"}
-               :send-email false)))
+                :password "koulutus"})))
         (range 1 21)))))
 
 
@@ -388,13 +387,12 @@
         {:role "admin"}
         {:email email
          :username email
-         :role "authorityAdmin"
+         :role "authority"
          :firstName (str "Ymp\u00e4rist\u00f6toimi")
          :lastName (str "P\u00e4\u00e4k\u00e4ytt\u00e4j\u00e4 " kuntano)
          :enabled true
          :orgAuthz {(keyword org-id) ["authorityAdmin"]}
-         :password "koulutus"}
-        :send-email false)
+         :password "koulutus"})
       (generate-users-for-organization {:id org-id}))))
 
 (defn generate-applicants! []
@@ -409,8 +407,7 @@
                       :firstName (str "Koulutus " kuntano)
                       :lastName (str "Hakija " i)
                       :enabled false
-                      :password "koulutus"}
-                     :send-email false)]
+                      :password "koulutus"})]
           (mongo/update-by-id :users (:id user) {$set {:enabled true}}))
         (catch [:sade.core/type :sade.core/fail] {:keys [text desc] :as all}
           (println text (or desc "")))))))

@@ -2,9 +2,10 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.file-upload :refer :all]
             [clojure.java.io :as io]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment.muuntaja-client :as muuntaja]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [clj-uuid :as uuid]
+            [lupapalvelu.storage.file-storage :as storage]))
 
 (when (env/feature? :unzip-attachments)
   (facts "about uploading a zipped attachment collection with index file"
@@ -24,7 +25,7 @@
                                     :nationalId "C"}
                                    {:operationId op4
                                     :buildingId "D"}]}
-          session-id "abc"
+          user-id "abc"
           file-id "badger"
           length 54321
           content (io/file (io/resource "test-pdf.pdf"))
@@ -35,30 +36,30 @@
           contents "test contents"]
 
       (against-background
-        [(mongo/create-id) => file-id
-         (mongo/upload anything anything anything anything anything) => {:length length}]
+        [(uuid/v1) => file-id
+         (storage/upload anything anything anything anything anything) => {:length length}]
 
         (fact "non-zip is saved normally"
-          (save-files application [file1] session-id) => {:ok true
+          (save-files application [file1] user-id) => {:ok true
                                                           :files
                                                               [{:fileId file-id
                                                                 :filename "foobar.pdf"
                                                                 :size length
                                                                 :contentType "application/pdf"
-                                                                :metadata {:linked false, :sessionId "abc"}}]})
+                                                                :metadata {:linked false, :uploader-user-id user-id}}]})
         (against-background
           [(muuntaja/unzip-attachment-collection content) => {:attachments []
                                                               :error "invalid"}]
 
           (fact "muuntaja error is passed on to front end"
-            (save-files application [file2] session-id) => {:ok false
+            (save-files application [file2] user-id) => {:ok false
                                                             :error "invalid"}))
 
         (against-background
           [(muuntaja/unzip-attachment-collection content) => {:attachments []}]
 
           (fact "zero attachments without muuntaja error is still an error"
-            (save-files application [file2] session-id) => {:ok false
+            (save-files application [file2] user-id) => {:ok false
                                                             :error "error.unzipping-error"}))
 
         (against-background
@@ -69,18 +70,18 @@
            (muuntaja/download-file "/path/to/foobar.pdf") => (io/input-stream content)]
 
           (fact "files are extracted from a zip without index"
-            (save-files application [file2] session-id) => {:ok true
+            (save-files application [file2] user-id) => {:ok true
                                                             :files
                                                                 [{:filename "foobar1.pdf"
                                                                   :contentType "application/pdf"
                                                                   :fileId file-id
                                                                   :size length
-                                                                  :metadata {:linked false, :sessionId "abc"}}
+                                                                  :metadata {:linked false, :uploader-user-id user-id}}
                                                                  {:filename "foobar2.pdf"
                                                                   :contentType "application/pdf"
                                                                   :fileId file-id
                                                                   :size length
-                                                                  :metadata {:linked false, :sessionId "abc"}}]}))
+                                                                  :metadata {:linked false, :uploader-user-id user-id}}]}))
 
         (against-background
           [(muuntaja/unzip-attachment-collection content) => {:attachments [{:uri "/path/to/foobar.pdf"
@@ -113,7 +114,7 @@
            (muuntaja/download-file "/path/to/foobar.pdf") => (io/input-stream content)]
 
           (fact "attachment collection zip is parsed and stored as files"
-            (save-files application [file2] session-id) => {:ok true
+            (save-files application [file2] user-id) => {:ok true
                                                             :files
                                                                 [{:filename "foobar1.pdf"
                                                                   :contentType "application/pdf"
@@ -124,7 +125,7 @@
                                                                   :type {:metadata {:grouping :operation}
                                                                          :type-group :paapiirustus
                                                                          :type-id :pohjapiirustus}
-                                                                  :metadata {:linked false, :sessionId "abc"}
+                                                                  :metadata {:linked false, :uploader-user-id user-id}
                                                                   :group {:groupType :operation
                                                                           :operations [{:groupType :operation
                                                                                         :id op1}]}}
@@ -137,7 +138,7 @@
                                                                   :type {:metadata {:grouping :operation}
                                                                          :type-group :paapiirustus
                                                                          :type-id :pohjapiirustus}
-                                                                  :metadata {:linked false, :sessionId "abc"}
+                                                                  :metadata {:linked false, :uploader-user-id user-id}
                                                                   :group {:groupType :operation
                                                                           :operations [{:groupType :operation
                                                                                         :id op2}]}}
@@ -150,7 +151,7 @@
                                                                   :type {:metadata {:grouping :operation}
                                                                          :type-group :paapiirustus
                                                                          :type-id :julkisivupiirustus}
-                                                                  :metadata {:linked false, :sessionId "abc"}
+                                                                  :metadata {:linked false, :uploader-user-id user-id}
                                                                   :group {:groupType :operation
                                                                           :operations [{:groupType :operation
                                                                                         :id op3}
@@ -166,7 +167,7 @@
                                                                                     :multioperation true}
                                                                          :type-group :paapiirustus
                                                                          :type-id :asemapiirros}
-                                                                  :metadata {:linked false, :sessionId "abc"}
+                                                                  :metadata {:linked false, :uploader-user-id user-id}
                                                                   :group {:groupType :operation
                                                                           :operations (map #(hash-map :groupType :operation :id %) [op1 op2 op3 op4])}}
                                                                  {:filename "foobar5.pdf"
@@ -178,7 +179,7 @@
                                                                                     :for-operations #{:tyonjohtajan-nimeaminen-v2 :tyonjohtajan-nimeaminen}}
                                                                          :type-group :osapuolet
                                                                          :type-id :cv}
-                                                                  :metadata {:linked false, :sessionId "abc"}
+                                                                  :metadata {:linked false, :uploader-user-id user-id}
                                                                   :group {:groupType :parties}}]}))
 
         (against-background
@@ -200,7 +201,7 @@
            (muuntaja/download-file "/path/to/foobar.pdf") => (io/input-stream content)]
 
           (fact "attachment collection zip is parsed and stored as files - without application"
-            (save-files nil [file2] session-id) => {:ok true
+            (save-files nil [file2] user-id) => {:ok true
                                                     :files
                                                         [{:filename "foobar1.pdf"
                                                           :contentType "application/pdf"
@@ -211,7 +212,7 @@
                                                           :type {:metadata {:grouping :operation}
                                                                  :type-group :paapiirustus
                                                                  :type-id :pohjapiirustus}
-                                                          :metadata {:linked false, :sessionId "abc"}
+                                                          :metadata {:linked false, :uploader-user-id user-id}
                                                           :group {:groupType :operation
                                                                   :operations []}}
                                                          {:filename "foobar4.pdf"
@@ -224,7 +225,7 @@
                                                                             :multioperation true}
                                                                  :type-group :paapiirustus
                                                                  :type-id :asemapiirros}
-                                                          :metadata {:linked false, :sessionId "abc"}
+                                                          :metadata {:linked false, :uploader-user-id user-id}
                                                           :group {:groupType :operation
                                                                   :operations []}}
                                                          {:filename "foobar5.pdf"
@@ -236,7 +237,7 @@
                                                                             :for-operations #{:tyonjohtajan-nimeaminen-v2 :tyonjohtajan-nimeaminen}}
                                                                  :type-group :osapuolet
                                                                  :type-id :cv}
-                                                          :metadata {:linked false, :sessionId "abc"}
+                                                          :metadata {:linked false, :uploader-user-id user-id}
                                                           :group {:groupType :parties}}]}))))))
 
 (facts "Check if uploaded file already exists in application"

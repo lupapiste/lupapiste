@@ -25,7 +25,7 @@
    {:id "50ac77ecc2e6c2ea6e73f83e"
     :email "admin@sipoo.fi"
     :enabled true
-    :role "authorityAdmin"
+    :role "authority"
     :orgAuthz {:753-R-TESTI #{:authorityAdmin}
                :753-R #{:authorityAdmin}}
     :firstName "Simo"

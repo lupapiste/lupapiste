@@ -3,6 +3,7 @@
 Documentation   Kopiolaitos interaction
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        printout_resource.robot
 Variables      ../06_attachments/variables.py
 
 
@@ -15,9 +16,10 @@ Mikko creates an application
   Set Suite Variable  ${appname}  approve-app${secs}
   Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
 
-Mikko adds an attachment
+Mikko adds two attachments
   Open tab  attachments
   Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Muu  Asuinkerrostalon tai rivitalon rakentaminen
+  Upload attachment  ${PDF_TESTFILE_PATH}  Asemapiirros  Asemapiirros  Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko submits application
   Submit application
@@ -51,9 +53,9 @@ Sonja sets contents description for the attachment
 Sonja disables verdict attachment using multiselect view, one is selected
   Scroll and click test id  mark-verdict-attachments
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
-  Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
+  Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  2
   Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'selected')]  1
-  Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
+  Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'selected')]
   Scroll and click test id  multiselect-action-button
 
 There should be no verdict attachments
@@ -62,10 +64,12 @@ There should be no verdict attachments
 Sonja marks one attachment as verdict attachment using multiselect view
   Scroll and click test id  mark-verdict-attachments
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
-  Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
+  Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  2
   Element should be visible  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
-  Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
-  Wait until  Checkbox Should Be Selected  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]//input
+  # Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
+  Click element  jquery=tr.attachment-row:last
+  Wait until  Checkbox should be selected  jquery=tr.attachment-row.selected input
+  # Wait until  Checkbox Should Be Selected  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]//input
   Scroll and click test id  multiselect-action-button
   Wait for jQuery
 
@@ -76,9 +80,16 @@ Sonja gives verdict
   Open tab  verdict
   Fetch verdict
 
+Sonja adds RAM attachment to Mikko's attachment
+  Sonja adds RAM attachment  paapiirustus.asemapiirros
+
+Sonja marks the RAM attachment as a verdict attachment
+  Scroll and click test id  mark-verdict-attachments
+  Click element  jquery=tr.attachment-row:first
+  Scroll and click test id  multiselect-action-button
+
 Order verdict attachments button has appeared into Attachments tab
-  Open tab  attachments
-  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
+  Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
 
 The print order dialog can be opened by selecting from the dropdown
   Scroll and click test id  order-attachment-prints
@@ -95,8 +106,8 @@ Sonja opens the kopiolaitos order dialog on Verdict tab
   Scroll and click test id  test-order-attachment-prints
   Wait Until  Element should be visible  dialog-verdict-attachment-prints-order
 
-There is one attachment marked as verdict attachment
-  Wait Until  Xpath should match x times  //div[@id='dialog-verdict-attachment-prints-order']//tbody[@data-test-id='verdict-attachments-tbody']//tr  1
+There are two attachment marked as verdict attachments
+  Wait Until  Xpath should match x times  //div[@id='dialog-verdict-attachment-prints-order']//tbody[@data-test-id='verdict-attachments-tbody']//tr  2
   Element should be visible  verdict-attachment-prints-order-info
 
 Attachment data is visible
@@ -104,6 +115,12 @@ Attachment data is visible
   Element should contain  jquery=div#dialog-verdict-attachment-prints-order tr[data-test-id=order-prints-attachment-row-muut-muu] td[data-test-col=contents]  Muu muu muu liite
   Element should contain  jquery=div#dialog-verdict-attachment-prints-order tr[data-test-id=order-prints-attachment-row-muut-muu] td[data-test-col=filename]  robotframework-testfile-06_attachments.png
   Textfield value should be  jquery=div#dialog-verdict-attachment-prints-order tr[data-test-id=order-prints-attachment-row-muut-muu] td[data-test-col=amount] input  2
+
+RAM attachment is marked
+  Element should contain  jquery=tr[data-test-id=order-prints-attachment-row-paapiirustus-asemapiirros] td[data-test-col=type]  Asemapiirros (RAM)
+
+Let's not order RAM attachment
+  Input text with jQuery  tr[data-test-id=order-prints-attachment-row-paapiirustus-asemapiirros] td[data-test-col=amount] input  0
 
 Sonja checks the kopiolaitos order
   # Some input values come from organization data set in minimal fixture

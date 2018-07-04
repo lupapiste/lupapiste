@@ -159,19 +159,19 @@
 ;; ------------------------------------------
 
 (defquery application-verdict-templates
-  {:description      "List of id, name, default? maps for suitable
+  {:description "List of id, name, default? maps for suitable
   application verdict templates."
-   :feature          :pate
-   :user-roles       #{:authority}
-   :parameters       [id]
+   :feature :pate
+   :user-roles #{:authority}
+   :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [pate-enabled]
-   :states           states/post-submitted-states}
+   :pre-checks [pate-enabled]
+   :states states/post-submitted-states}
   [{:keys [application organization]}]
   (ok :templates (template/application-verdict-templates @organization
                                                          application)))
 (defquery pate-verdicts
-  {:description      "List of verdicts. Item properties:
+  {:description "List of verdicts. Item properties:
 
                        id:        Verdict id
                        published: (optional) timestamp
@@ -217,10 +217,10 @@
    :states           states/post-submitted-states}
   [command]
   (ok (assoc (verdict/open-verdict command)
-             :filled (verdict/verdict-filled? command))))
+        :filled (verdict/verdict-filled? command))))
 
 (defcommand edit-pate-verdict
-  {:description      "Updates verdict data. Returns changes and errors
+  {:description "Updates verdict data. Returns changes and errors
   lists (items are path-vector value pairs)"
    :feature          :pate
    :user-roles       #{:authority}
@@ -234,7 +234,7 @@
   (let [result (verdict/edit-verdict command)]
     (if (:modified result)
       (ok (assoc result
-                 :filled (verdict/verdict-filled? command true)))
+            :filled (verdict/verdict-filled? command true)))
       (template/error-response result))))
 
 (defraw preview-pate-verdict
@@ -444,9 +444,9 @@
   (let [today-long (tc/to-long (t/today-at-midnight))
         updates (create-bulletin application created verdict-id
                                  {:bulletinState :verdictGiven
-                                  :verdictGivenAt       today-long
+                                  :verdictGivenAt today-long
                                   :appealPeriodStartsAt today-long
-                                  :appealPeriodEndsAt   (tc/to-long (t/plus (t/today-at-midnight) (t/days 14)))  ;; TODO!!!
+                                  :appealPeriodEndsAt (tc/to-long (t/plus (t/today-at-midnight) (t/days 14))) ;; TODO!!!
                                   :verdictGivenText ""})]
     (bulletins/upsert-bulletin-by-id (str id "_" verdict-id) updates)
     (ok)))

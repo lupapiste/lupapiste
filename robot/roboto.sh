@@ -277,7 +277,7 @@ check_env() {
    # selenium version
    echo -n "Checking selenium version: "
    SELENIUM=$(pip list | grep "^selenium ")
-   echo "$SELENIUM" | grep -E "selenium \(3\.[0-9]+\.[0-9]+\)" || versionfail "Your selenium version '$SELENIUM' may cause tests to fail. Update ${BASH_SOURCE}:${LINENO} to match the current selenium version if it is fine, or change to 3.X.X."
+   echo "$SELENIUM" | grep -E "selenium\s+3\.1[3-9]+\.[0-9]+" || versionfail "Your selenium version '$SELENIUM' may cause tests to fail. Update ${BASH_SOURCE}:${LINENO} to match the current selenium version if it is fine, or change to 3.X.X."
 
    echo "Browser: $BROWSER"
    case "$BROWSER" in
@@ -289,7 +289,7 @@ check_env() {
          ;;
       "chrome" )
          CG=$(google-chrome --version)
-         echo "$CG" | grep -q "^Google Chrome \(6[4-6]\)\." || versionfail "Major version '$CG' of Chrome may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
+         echo "$CG" | grep -q "^Google Chrome \(6[6-8]\)\." || versionfail "Major version '$CG' of Chrome may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
          # Clean up old Chrome temp files if there
          rm -rf /tmp/.com.google.Chrome.*
          rm -rf /tmp/.org.chromium*

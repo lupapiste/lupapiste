@@ -13,10 +13,10 @@
             [lupapalvelu.user :as usr]))
 
 (defquery resolve-guest-authority-candidate
-  {:parameters [email]
+  {:parameters       [email]
    :input-validators [(partial action/non-blank-parameters [:email])]
-   :user-roles #{:authorityAdmin}
-   :description "Checks if the given email already maps to a user in
+   :permissions      [{:required [:organization/admin]}]
+   :description      "Checks if the given email already maps to a user in
    the system. If so, the response contains name information and
    whether the user already has access rights to every application for
    the organization. The latter is needed in order to avoid
@@ -25,27 +25,26 @@
   (ok :user (guest/resolve-guest-authority-candidate admin email)))
 
 (defcommand update-guest-authority-organization
-  {:parameters [email firstName lastName description]
+  {:parameters       [email firstName lastName description]
    :input-validators [(partial action/non-blank-parameters [:email :firstName :lastName])
                       action/email-validator]
-   :user-roles #{:authorityAdmin}
-   :description "Add or update organization's guest authority."}
+   :permissions      [{:required [:organization/admin]}]
+   :description      "Add or update organization's guest authority."}
   [{admin :user}]
   (guest/update-guest-authority-organization admin email firstName lastName description))
 
 (defquery guest-authorities-organization
-  {:user-roles #{:authorityAdmin}
+  {:permissions [{:required [:organization/admin]}]
    :description "List of guest authorities for the authority admin's
    organization."}
   [{admin :user}]
   (ok :guestAuthorities (guest/organization-guest-authorities (usr/authority-admins-organization-id admin))))
 
-(defcommand remove-guest-authority-organization {:description "Removes
-  guestAuthority from organisation and from every (applicable)
-  application within the organization."
-   :parameters [email]
+(defcommand remove-guest-authority-organization
+  {:description      "Removes guestAuthority from organisation and from every (applicable) application within the organization."
+   :parameters       [email]
    :input-validators [(partial action/non-blank-parameters [:email])]
-   :user-roles #{:authorityAdmin}}
+   :permissions      [{:required [:organization/admin]}]}
   [{admin :user}]
   (ok :applications (guest/remove-guest-authority-organization admin email)))
 
@@ -69,12 +68,12 @@
   (guest/invite-guest command))
 
 (defquery application-guests
-  {:description "List of application guests and guest authorities."
-   :user-roles #{:applicant :authority}
+  {:description      "List of application guests and guest authorities."
+   :user-roles       #{:applicant :authority}
    :user-authz-roles roles/all-authz-roles
-   :org-authz-roles roles/reader-org-authz-roles
-   :parameters [:id]
-   :states states/all-application-states}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :parameters       [:id]
+   :states           states/all-application-states}
   [command]
   (ok :guests (guest/application-guests command)))
 
@@ -92,22 +91,22 @@
   (guest/toggle-guest-subscription command))
 
 (defcommand delete-guest-application
-  {:description "Cancels the guest access from application."
-   :user-roles #{:applicant :authority}
+  {:description      "Cancels the guest access from application."
+   :user-roles       #{:applicant :authority}
    :user-authz-roles roles/writer-roles-with-foreman
-   :parameters [:id :username]
+   :parameters       [:id :username]
    :input-validators [(partial action/non-blank-parameters [:username])]
-   :pre-checks [guest/auth-modification-check
-                foreman/allow-foreman-only-in-foreman-app]
-   :states states/all-application-states}
+   :pre-checks       [guest/auth-modification-check
+                      foreman/allow-foreman-only-in-foreman-app]
+   :states           states/all-application-states}
   [command]
   (guest/delete-guest-application command))
 
 (defquery guest-authorities-application-organization
   {:description "Guest authorities that are defined for this
   application's organization."
-   :parameters [:id]
-   :user-roles #{:authority}
-   :states states/all-application-states}
+   :parameters  [:id]
+   :user-roles  #{:authority}
+   :states      states/all-application-states}
   [command]
   (ok :guestAuthorities (guest/guest-authorities-application-organization command)))

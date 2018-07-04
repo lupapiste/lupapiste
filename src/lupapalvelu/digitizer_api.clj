@@ -96,6 +96,6 @@
   (ok))
 
 (defquery digitizing-enabled
-  {:user-roles #{:authority :authorityAdmin}
+  {:user-roles #{:authority}
    :pre-checks [user-is-allowed-to-digitize]}
   (ok))

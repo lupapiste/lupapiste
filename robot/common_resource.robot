@@ -1280,9 +1280,11 @@ Invite count is
 Invite company to application
   [Arguments]  ${company}
   Open tab  parties
+  Sleep  0.5s
   Scroll and click test id  application-invite-company
   Wait test id visible  company-invite-bubble-dialog-ok
   Select From Autocomplete  div[data-test-id="company-invite-companies"]  ${company}
+  Sleep  0.5s
   Scroll and click test id  company-invite-bubble-dialog-ok
   Is authorized party  ${company}
 
@@ -1562,7 +1564,8 @@ Scroll by
 
 Scroll to test id
   [Arguments]  ${id}
-  Scroll to  [data-test-id=${id}]
+  Wait Until  Page Should Contain Element  xpath=//*[@data-test-id='${id}']
+  Execute Javascript  document.body.querySelector("[data-test-id='${id}']").scrollIntoView(false);
 
 Scroll to xpath
   [Arguments]  ${xpath}
@@ -1590,8 +1593,7 @@ Scroll and click input
 
 Scroll and click test id
   [Arguments]  ${id}
-  Element should be visible by test id  ${id}
-  Scroll to  [data-test-id="${id}"]
+  Scroll to test id  ${id}
   Click by test id  ${id}
 
 Scroll to and click xpath results
@@ -1623,17 +1625,17 @@ Textarea is empty
 Test id disabled
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until  Element should be disabled  jquery=[data-test-id=${id}]
+  Wait Until  Element should be disabled  xpath=//*[@data-test-id='${id}']
 
 Test id enabled
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until  Element should be enabled  jquery=[data-test-id=${id}]
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='${id}']
 
 Fill test id
   [Arguments]  ${id}  ${text}
   Wait test id visible  ${id}
-  Element Should Be Enabled  jquery=[data-test-id=${id}]
+  Element Should Be Enabled  xpath=//*[@data-test-id='${id}']
   Input text by test id  ${id}  ${text}
 
 Focus test id
@@ -1650,7 +1652,7 @@ Test id should contain
 
 Test id input is
   [Arguments]  ${id}  ${text}
-  Wait until  Value should be  jquery=[data-test-id=${id}]  ${text}
+  Wait until  Value should be  xpath=//*[@data-test-id='${id}']  ${text}
 
 Test id text is
   [Arguments]  ${id}  ${text}
@@ -1774,7 +1776,7 @@ Test id autocomplete disabled
 
 Press key test id
   [Arguments]  ${tid}  ${key}
-  Press key  jquery=[data-test-id=${tid}]  ${key}
+  Press key  jquery=[data-test-id=${tid}]:visible  ${key}
 
 # Frontend error log
 

@@ -116,7 +116,7 @@
             (get-in ely-statement-new [:person :name]) => (contains "Eija Esimerkki")
             (:status ely-statement-new) => "puollettu"
             (:text ely-statement-new) => "Hyv\u00e4 homma"
-            (util/to-xml-date (:given ely-statement-new)) => "2017-05-07")
+            (util/to-xml-date (:given ely-statement-new)) => (util/to-xml-date (.getTime #inst"2017-05-07"))) ; Depends on system TZ
           (fact "Old data is OK"
             (:saateText ely-statement-new) => "moro"
             (get-in ely-statement-new [:external :acknowledged]) => pos?)

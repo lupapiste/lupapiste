@@ -116,7 +116,7 @@
                   </td>
                   <td>
                     <span data-bind="if: $data.latestVersion">
-                      <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/neighbor-download-attachment?neighborId=' + $root.neighborId() + '&token=' + $root.token() + '&fileId=' + latestVersion.fileId}"></a><br/>
+                      <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/neighbor-download-attachment?neighborId=' + $root.neighborId() + '&token=' + $root.token() + '&fileId=' + latestVersion.fileId + '&applicationId=' $parent.id()}"></a><br/>
                       <i data-bind="ltext: latestVersion.contentType"></i>
                       <i data-bind="size: latestVersion.size"></i>
                     </span>

@@ -243,11 +243,10 @@
           :data-test-id (str "edit-link-" idx)}
          [:i.lupicon-pen.inspection-summary-edit]])]
      [:td
-      (for [attachment (rum/react (rum/cursor-in selected-summary [:targets idx :attachments]))
-            :let [latest (:latestVersion attachment)]]
+      (for [attachment (rum/react (rum/cursor-in selected-summary [:targets idx :attachments]))]
         [:div {:data-test-id (str "target-row-attachment")
                :key          (str "target-row-attachment-" (:id attachment))}
-         (attc/view-with-download-small-inline latest)
+         (attc/view-with-download-small-inline attachment)
          (when-not (or locked? targetFinished?)
            (attc/delete-attachment-link attachment remove-attachment-success))])
       (when (and (auth/ok? application-auth-model :upload-file-authenticated) target-id (not locked?) (not targetFinished?))

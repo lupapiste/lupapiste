@@ -10,6 +10,10 @@
 
 (def jms-test-db (str "test_krysp_http_jms" (now)))
 
+(defn get-integration-messages [app-id]
+  (->> (mongo/select :integration-messages {:application.id app-id})
+       (remove #(= "KuntaGML hakemus-path" (:messageType %))))) ; remove messages logged by /dev/krysp dummy endpoint
+
 (when (env/feature? :jms)
   (mongo/connect!)
   (mongo/with-db jms-test-db
@@ -28,18 +32,21 @@
           (fact "Veikko moves to backing system via HTTP"
             resp => ok?
             (:integrationAvailable resp) => true))
-        (Thread/sleep 50)
-
-        (let [msgs (->> (mongo/select :integration-messages {:application.id application-id})
-                        (remove #(= "KuntaGML hakemus-path" (:messageType %)))) ; remove messages logged by /dev/krysp dummy endpoint
-              sent-message (util/find-first (fn [msg] (= (:messageType msg) "KuntaGML application")) msgs)]
-          (facts "integration-messages"
-            (count msgs) => 3                               ; 2x state-change 1x KuntaGML
-            (fact "message is delivered via queue"
-              (:messageType sent-message) => "KuntaGML application"
-              (:direction sent-message) => "out"
-              (fact "is processed by consumer"
-                (:status sent-message) => "done")))))))))
+        (Thread/sleep 100)
+        (loop [retries 5
+               msgs (get-integration-messages application-id)]
+          (let [sent-message (util/find-first (fn [msg] (= (:messageType msg) "KuntaGML application")) msgs)]
+            (if-not (or (zero? retries) (= (:status sent-message) "done"))
+              (do
+                (Thread/sleep 1000)
+                (recur (dec retries) (get-integration-messages application-id)))
+              (facts "integration-messages"
+                (count msgs) => 3                               ; 2x state-change 1x KuntaGML
+                (fact "message is delivered via queue"
+                  (:messageType sent-message) => "KuntaGML application"
+                  (:direction sent-message) => "out"
+                  (fact "is processed by consumer"
+                    (:status sent-message) => "done")))))))))))
 
 
 (apply-remote-minimal)

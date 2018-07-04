@@ -1,25 +1,34 @@
 (ns lupapalvelu.application-options-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf]]
+  (:require [lupapalvelu.action :refer [defcommand defquery] :as action]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.permit :as permit]
             [monger.operators :refer :all]
-            [sade.core :refer :all]
-            [lupapalvelu.action :refer [defcommand update-application defquery] :as action]
-            [lupapalvelu.application :as a]
-            [lupapalvelu.permit :as permit]))
+            [sade.core :refer :all]))
+
+(defn- not-foreman-application
+  "Precheck that fails for foreman applications."
+  [command]
+  (when (some-> command :application foreman/foreman-app?)
+    (fail :error.foreman-application)))
 
 (defcommand set-municipality-hears-neighbors
-  {:parameters [:id enabled]
-   :user-roles #{:applicant :authority}
-   :states     #{:draft :open}
+  {:parameters       [:id enabled]
+   :user-roles       #{:applicant :authority}
+   :states           #{:draft :open}
    :input-validators [(partial action/boolean-parameters [:enabled])]
-   :pre-checks       [a/validate-authority-in-drafts]}
+   :pre-checks       [app/validate-authority-in-drafts
+                      (partial permit/valid-permit-types {:R [] :P :all})
+                      not-foreman-application]}
   [command]
-  (update-application command {$set {"options.municipalityHearsNeighbors" enabled}})
+  (action/update-application command {$set {"options.municipalityHearsNeighbors" enabled}})
   (ok))
 
 (defquery municipality-hears-neighbors-visible
   {:description "Pseudo query for Municipality hears neighbors
-  checkbox visibility. The option is available only for R and P permit
+  checkbox visibility. The option is availablce only for R and P permit
   types."
    :user-roles #{:applicant :authority}
-   :pre-checks [(partial permit/valid-permit-types {:R [] :P :all})]}
+   :pre-checks [(partial permit/valid-permit-types {:R [] :P :all})
+                not-foreman-application]}
   [_])

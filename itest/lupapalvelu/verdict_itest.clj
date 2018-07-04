@@ -176,13 +176,19 @@
             attachment => truthy)
 
           (fact "latest version file is a PDF"
-            (let [{:keys [headers body]} (raw sonja "download-attachment" :attachment-id (:fileId latestVersion))]
+            (let [{:keys [headers body]} (raw sonja
+                                              "download-attachment"
+                                              :file-id (:fileId latestVersion)
+                                              :id application-id)]
               (get headers "Content-Type") => "application/pdf"
               (.contains body "PDF") => true)
 
           (fact "original file exists and is a RTF"
             (:originalFileId latestVersion) => truthy
-            (let [{:keys [headers body]} (raw sonja "download-attachment" :attachment-id (:originalFileId latestVersion))]
+            (let [{:keys [headers body]} (raw sonja
+                                              "download-attachment"
+                                              :file-id (:originalFileId latestVersion)
+                                              :id application-id)]
               (get headers "Content-Type") => "application/rtf"
               (.contains body "\\rtf1\\ansi") => true))))))
 

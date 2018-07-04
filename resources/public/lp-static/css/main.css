@@ -13557,14 +13557,14 @@ ul.tabs {
   color: #df3215;
 }
 
-.bubble-dialog input[type=text], .bubble-dialog textarea {
+.bubble-dialog input[type=text], .bubble-dialog input[type=email], .bubble-dialog textarea {
   box-sizing: border-box;
   width: 100%;
   padding: 4px;
   display: block;
 }
 
-.bubble-dialog input[type=text]:focus, .bubble-dialog textarea:focus {
+.bubble-dialog input[type=text]:focus, .bubble-dialog input[type=email]:focus, .bubble-dialog textarea:focus {
   border-color: #fbc732;
 }
 

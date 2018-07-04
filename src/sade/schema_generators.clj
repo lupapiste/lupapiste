@@ -8,7 +8,8 @@
             [clj-time.format :as ctf]
             [clj-time.coerce :as ctc]
             [clojure.string :as s]
-            [clojure.test.check.generators :as gen]))
+            [clojure.test.check.generators :as gen]
+            [sade.shared-schemas :as sssc]))
 
 (defonce static-schema-generators (atom {}))
 (defonce dynamic-schema-generator-constructors (atom {}))
@@ -189,6 +190,10 @@
                          (gen/vector single-hex 24)))
 
 (register-generator ssc/ObjectIdStr object-id)
+
+(def uuid (gen/fmap str gen/uuid))
+
+(register-generator sssc/UUIDStr uuid)
 
 (def ipv4-address (gen/fmap (partial s/join ".")
                             (gen/vector (gen/elements (range 256)) 4)))

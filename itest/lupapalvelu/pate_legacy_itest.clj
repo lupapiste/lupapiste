@@ -99,7 +99,7 @@
                                                :type             {:type-id    "paatos"
                                                                   :type-group "paatoksenteko"}
                                                :applicationState "verdictGiven"})]))
-            (check-file file-id true)
+            (check-file app-id file-id true)
             (fact "Add attachment to review"
               (let [task-file-id (upload-file-and-bind
                                   sonja
@@ -108,7 +108,7 @@
                                                      :id   review-id}
                                           :type     {:type-group "katselmukset_ja_tarkastukset"
                                                      :type-id    "katselmuksen_tai_tarkastuksen_poytakirja"}})]
-                (check-file task-file-id true)
+                (check-file app-id task-file-id true)
                 (facts "Delete verdict"
                   (fact "Cannot call delete-pate-verdict"
                     (command sonja :delete-pate-verdict :id app-id
@@ -126,10 +126,10 @@
                                 history]} (query-application sonja app-id)]
                     (fact "No attachments and the file has been removed"
                       attachments => empty?
-                      (check-file file-id false))
+                      (check-file app-id file-id false))
                     (fact "No tasks and the file has been removed"
                       tasks => empty?
-                      (check-file task-file-id false))
+                      (check-file app-id task-file-id false))
                     (fact "State has been rewound"
                       state => "submitted")))))))))
 
@@ -149,7 +149,7 @@
             (fact "Attachment and file exist"
               (:attachments (query-application sonja app-id))
               => (just [(contains {:contents "Notes"})])
-              (check-file file-id true))))
+              (check-file app-id file-id true))))
         (fact "Add attachment to the second verdict"
           (let [file-id (upload-file-and-bind sonja app-id {:contents "Complaint"
                                                             :target   {:type "verdict"
@@ -160,7 +160,7 @@
               (:attachments (query-application sonja app-id))
               => (just [(contains {:contents "Notes"})
                         (contains {:contents "Complaint"})])
-              (check-file file-id true))))
+              (check-file app-id file-id true))))
         (fact "Fill and publish the first verdict"
           (fill-verdict sonja app-id vid1
                         :kuntalupatunnus "888-10-13"

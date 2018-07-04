@@ -37,7 +37,8 @@
             [sade.strings :as ss]
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
-            [ring.util.codec :as codec])
+            [ring.util.codec :as codec]
+            [lupapalvelu.storage.file-storage :as storage])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -890,3 +891,32 @@
             (print-info (:id app) att version "fileId missing but originalFileIdFound")
             (print-info (:id app) att version "fileId AND originalFileId missing"))
           (print-info (:id app) att version "fileId missing"))))))
+
+(defn move-files-to-ceph-in-applications [& application-ids]
+  (info "Moving files to Ceph in applications" application-ids)
+  (mongo/connect!)
+  (doseq [app-id application-ids]
+    (logging/with-logging-context {:applicationId app-id}
+      (info "Checking attachments for migration")
+      (try (storage/move-application-mongodb-files-to-s3 app-id)
+           (catch Throwable t
+             (error t "Exception occurred during the migration")))))
+  (info "Done"))
+
+(defn move-app-files-to-ceph-in-organizations [& organization-ids]
+  (if (seq organization-ids)
+    (do (info "Moving application files to Ceph in organizations" organization-ids)
+        (mongo/connect!)
+        (doseq [{:keys [id]} (mongo/select :applications
+                                           {:organization {$in organization-ids}
+                                            :attachments.latestVersion.fileId {$type "string"}
+                                            :attachments.latestVersion.storageSystem "mongodb"}
+                                           [:_id]
+                                           {:_id 1})]
+          (logging/with-logging-context {:applicationId id}
+            (info "Checking attachments for migration")
+            (try (storage/move-application-mongodb-files-to-s3 id)
+                 (catch Throwable t
+                   (error t "Exception occurred during the migration")))))
+        (info "Done"))
+    (error "Missing organization ids")))

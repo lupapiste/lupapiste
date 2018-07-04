@@ -25,7 +25,7 @@
           <td data-bind="text: date"></td>
           <td>
             <ul class="appeals-files"
-                data-bind="foreach: files">
+                data-bind="foreach: oldFiles">
               <li data-bind="attr: {'data-test-id': 'appeals-files-' + $index()}">
                 <a data-bind="download: $data"></a>
                   <span data-bind="ltext: contentType"></span>

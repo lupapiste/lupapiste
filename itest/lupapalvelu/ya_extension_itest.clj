@@ -106,7 +106,8 @@
                                                      :endDate "10.10.2016"
                                                      :state "open"}]})))
                  (fact "Reader can call query"
-                       (command sipoo-ya :update-user-organization
+                       (command sipoo-ya :upsert-organization-user
+                                :organizationId "753-YA"
                                 :email "luukas.lukija@sipoo.fi"
                                 :firstName "Luukas" :lastName "Lukija"
                                 :roles ["reader"]) => ok?

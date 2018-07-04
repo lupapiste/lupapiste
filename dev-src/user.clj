@@ -62,3 +62,8 @@
   (println "--spying:")
   (pprint/pprint v)
   v)
+
+(comment
+  (require 'midje.repl)
+  (midje.repl/load-facts :all)
+  )

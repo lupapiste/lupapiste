@@ -436,7 +436,7 @@
     (action/update-application command {$pull {:attachments {:id {$in (map :id review-attachments)}}}})
     (doseq [{{:keys [fileId originalFileId]} :latestVersion} review-attachments]
       (when-not (= fileId originalFileId)
-        (att/delete-attachment-file-and-preview! fileId)))
+        (att/delete-attachment-file-and-preview! application fileId)))
     (set-state command task-id :faulty_review_task
                {$set (merge {:tasks.$.faulty
                              {:timestamp created

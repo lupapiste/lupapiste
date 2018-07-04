@@ -58,7 +58,8 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
-            [lupapalvelu.ya-extension :as yax])
+            [lupapalvelu.ya-extension :as yax]
+            [lupapalvelu.storage.file-storage :as storage])
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
@@ -110,10 +111,27 @@
 (defn- in-role? [role request]
   (= role (keyword (:role (usr/current-user request)))))
 
+(defn- user-has-org-role?
+  "check that given user has top-level role `:authority` and given `org-role` in some
+   of her organizations."
+  [org-role user]
+  (and (->> user
+            :role
+            (= "authority"))
+       (->> user
+            :orgAuthz
+            (some (comp org-role val)))))
+
+(defn- has-org-role?
+  "check that current user has top-level role `:authority` and given `org-role` in some
+   of her organizations."
+  [org-role request]
+  (user-has-org-role? org-role (usr/current-user request)))
+
 (def applicant? (partial in-role? :applicant))
 (def authority? (partial in-role? :authority))
 (def oir? (partial in-role? :oirAuthority))
-(def authority-admin? (partial in-role? :authorityAdmin))
+(def authority-admin? (partial has-org-role? :authorityAdmin))
 (def admin? (partial in-role? :admin))
 (def financial-authority? (partial in-role? :financialAuthority))
 (defn- anyone [_] true)
@@ -275,7 +293,7 @@
   ([lang] (landing-page lang         (usr/current-user (request/ring-request))) )
   ([lang user]
    (let [lang (get user :language lang)]
-     (if-let [application-page (and (:id user) (usr/applicationpage-for (:role user)))]
+     (if-let [application-page (and (:id user) (usr/applicationpage-for user))]
        (redirect lang application-page)
        (redirect-to-frontpage lang)))))
 
@@ -654,7 +672,7 @@
             (action/update-application command {$set {:state state}, $push {:history (app-state/history-entry state (:created command) user)}}))
 
           (if redirect
-            (resp/redirect (str "/app/fi/" (str (usr/applicationpage-for (:role user))
+            (resp/redirect (str "/app/fi/" (str (usr/applicationpage-for user)
                                                 "#!/" (if infoRequest "inforequest" "application") "/" application-id)))
             (resp/status 200 application-id)))
         (resp/status 400 (str response)))))
@@ -692,8 +710,11 @@
       (resource-response (str "dev-pages/" file))
       (content-type-response {:uri file})))
 
-  (defjson "/dev/fileinfo/:id" {:keys [id]}
-    (dissoc (mongo/download id) :content))
+  (defjson "/dev/fileinfo/:application/:id" {:keys [application id]}
+    (when-let [data (storage/download-from-system application id (if (env/feature? :s3) :s3 :mongodb))]
+      (with-open [is ((:content data))]
+        ; Make sure input stream is closed even if it's not used.
+        (dissoc data :content))))
 
   (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]

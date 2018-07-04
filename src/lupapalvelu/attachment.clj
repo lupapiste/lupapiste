@@ -36,9 +36,13 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
-            [me.raynes.fs :as fs])
+            [me.raynes.fs :as fs]
+            [sade.env :as env]
+            [lupapalvelu.storage.file-storage :as storage]
+            [sade.shared-schemas :as sssc]
+            [lupapalvelu.vetuma :as vetuma])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File InputStream]))
+           [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream]))
 
 
 ;;
@@ -112,9 +116,10 @@
 (defschema Version
   "Attachment version"
   {:version                              VersionNumber
-   :fileId                               (sc/maybe ssc/ObjectIdStr)  ;; fileId in GridFS, nil if the file has been deleted when archived
-   :originalFileId                       (sc/maybe ssc/ObjectIdStr)  ;; fileId of the unrotated/unconverted file
+   :fileId                               (sc/maybe sssc/FileId)  ;; fileId in storage, nil if the file has been deleted when archived
+   :originalFileId                       (sc/maybe sssc/FileId)  ;; fileId of the unrotated/unconverted file
    (sc/optional-key :onkaloFileId)       AttachmentId                ;; id in Onkalo, if archived. Should equal attachment id.
+   :storageSystem                        sssc/StorageSystem
    :created                              ssc/Timestamp
    ;; Timestamp for the latest "non-versioning" operation (e.g.,
    ;; rotation, pdf/a conversion). Thus, modified can be present only
@@ -227,15 +232,6 @@
 ;;
 ;; Api
 ;;
-
-(defn link-files-to-application [app-id fileIds]
-  {:pre [(string? app-id)]}
-  (mongo/update-by-query :fs.files
-                         {:_id {$in fileIds}
-                          $or [{:metadata.linked false}
-                               {:metadata.linked {$exists false}}]}
-                         {$set {:metadata.application app-id
-                                :metadata.linked true}}))
 
 (defn- by-file-ids [file-ids {versions :versions :as attachment}]
   (some (comp (set file-ids) :fileId) versions))
@@ -438,9 +434,8 @@
                        #{:ok :requires_user_action})
            :cannot-delete))))
 
-(defn delete-attachment-file-and-preview! [file-id]
-  (mongo/delete-file-by-id file-id)
-  (mongo/delete-file-by-id (str file-id "-preview")))
+(defn delete-attachment-file-and-preview! [application file-id]
+  (storage/delete application file-id))
 
 (defn delete-archived-attachments-files-from-mongo! [application {:keys [metadata latestVersion versions id]}]
   {:pre [(= :arkistoitu (keyword (:tila metadata)))
@@ -448,8 +443,8 @@
   (->> versions
        (map-indexed
          (fn [idx {:keys [fileId originalFileId]}]
-           (delete-attachment-file-and-preview! fileId)
-           (delete-attachment-file-and-preview! originalFileId)
+           (delete-attachment-file-and-preview! application fileId)
+           (delete-attachment-file-and-preview! application originalFileId)
            (let [version-path (str "attachments.$.versions." idx)]
              (update-application
                (application->command application)
@@ -492,6 +487,7 @@
         {:version        version-number
          :fileId         fileId
          :originalFileId (or original-file-id fileId)
+         :storageSystem  (if (env/feature? :s3) :s3 :mongodb)
          :created        created
          :user           (usr/summary user)
          ;; File name will be presented in ASCII when the file is downloaded.
@@ -501,7 +497,7 @@
          :size           size
          :stamped        (boolean stamped)
          :archivable     (boolean archivable)}
-        :modified       modified
+        :modified modified
         :archivabilityError archivabilityError
         :missing-fonts missing-fonts
         :autoConversion autoConversion
@@ -551,12 +547,12 @@
        (when-not version-index
          {$push {:attachments.$.versions version-model}})))))
 
-(defn- remove-old-files! [{old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
+(defn- remove-old-files! [application {old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
   (some->> (filter (comp #{original-file-id} :originalFileId) old-versions)
            (first)
            ((juxt :fileId :originalFileId))
            (remove (set [file-id original-file-id]))
-           (run! delete-attachment-file-and-preview!)))
+           (run! (partial delete-attachment-file-and-preview! application))))
 
 (defn- attachment-comment-updates [application user attachment {:keys [comment? comment-text created]
                                                                 :or   {comment? true}}]
@@ -589,7 +585,7 @@
            update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
        (cond (pos? update-result)
-             (do (remove-old-files! attachment version-model)
+             (do (remove-old-files! application attachment version-model)
                  (assoc version-model :id attachment-id))
 
              (pos? retries-left)
@@ -659,7 +655,7 @@
       (info "1/4 deleting assignments regarding attachments" ids-str)
       (run! (partial assignment/remove-target-from-assignments (:id application)) attachment-ids)
       (info "2/4 deleting files of attachments" ids-str)
-      (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
+      (run! (partial delete-attachment-file-and-preview! application) (get-file-ids-for-attachments-ids application attachment-ids))
       (info "3/4 deleted files of attachments" ids-str)
       (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
       (info "4/4 deleted meta-data of attachments" ids-str)))
@@ -672,7 +668,7 @@
   (let [attachment (get-attachment-info application attachment-id)
         latest-version (latest-version-after-removing-file attachment file-id)]
     (infof "1/3 deleting files [%s] of attachment %s" (ss/join ", " (set [file-id original-file-id])) attachment-id)
-    (run! delete-attachment-file-and-preview! (set [file-id original-file-id]))
+    (run! (partial delete-attachment-file-and-preview! application) (set [file-id original-file-id]))
     (infof "2/3 deleted file %s of attachment %s" file-id attachment-id)
     (update-application
      (application->command application)
@@ -688,27 +684,26 @@
 
 (defn get-attachment-file-as!
   "Returns the attachment file if user has access to application and the attachment, otherwise nil."
-  [user file-id]
-  (when-let [attachment-file (mongo/download file-id)]
-    (when-let [application (and (:application attachment-file) (get-application-as (:application attachment-file) user :include-canceled-apps? true))]
-      (when (and (seq application) (access/can-access-attachment-file? user file-id application)) attachment-file))))
+  [user application file-id]
+  (when (and (seq application)
+             (access/can-access-attachment-file? user file-id application))
+    (storage/download application file-id)))
 
 (defn get-attachment-file!
   "Returns the attachment file without access checking, otherwise nil."
-  [file-id]
-  (when-let [attachment-file (mongo/download file-id)]
-    (when-let [application (and (:application attachment-file) (get-application-no-access-checking (:application attachment-file)))]
-      (when (seq application) attachment-file))))
+  [application file-id]
+  (when (seq application)
+    (storage/download application file-id)))
 
 (defn- get-attachment-version-file [application attachment {:keys [fileId onkaloFileId filename contentType]} user preview?]
   (when (or (not user) (access/can-access-attachment? user application attachment))
     (cond
       fileId
       (if preview?
-        (or (mongo/download (str fileId "-preview"))
+        (or (storage/download-preview (:id application) fileId attachment)
             ;; Generate preview if not previously done. It's async, so it can't be returned in this request.
             (preview/generate-preview-and-return-placeholder! (:id application) fileId filename contentType))
-        (mongo/download fileId))
+        (storage/download (:id application) fileId attachment))
 
       onkaloFileId
       (merge
@@ -760,8 +755,8 @@
    (output-attachment (attachment-fn file-id) download?)))
 
 (defn output-file
-  [file-id session-id]
-  (if-let [attachment-file (mongo/download-find {:_id file-id :metadata.sessionId session-id})]
+  [file-id user-or-session-id]
+  (if-let [attachment-file (storage/download-unlinked-file user-or-session-id file-id)]
     (update (attachment-200-response attachment-file (ss/encode-filename (:filename attachment-file)))
             :headers
             http/no-cache-headers)
@@ -775,17 +770,19 @@
   "Does archivability conversion, if required, for given file.
    If file was converted, uploads converted file to mongo.
    Returns map with conversion result and :file if conversion was made."
-  [application filedata]
+  [user-id session-id application filedata]
   (let [conversion-result  (conversion/archivability-conversion application filedata)
         converted-filedata (when (:autoConversion conversion-result)
                              ; upload and return new fileId for converted file
                              (file-upload/save-file (select-keys conversion-result [:content :filename])
-                                                    {:application (:id application) :linked false}))]
+                                                    {:linked false
+                                                     :uploader-user-id user-id
+                                                     :sessionId session-id}))]
     {:result conversion-result
      :file converted-filedata}))
 
 (defn- attach!
-  [{:keys [application user]} {attachment-id :attachment-id :as attachment-options} original-filedata conversion-data]
+  [{:keys [application user]} session-id {attachment-id :attachment-id :as attachment-options} original-filedata conversion-data]
   (let [options            (merge attachment-options
                                   original-filedata
                                   (:result conversion-data)
@@ -797,11 +794,25 @@
                                                    (assoc attachment-options
                                                      :requested-by-authority
                                                      (auth/application-authority? application user))))
-        linked-version     (set-attachment-version! application user attachment options)]
+        linked-version     (set-attachment-version! application user attachment options)
+        {:keys [fileId originalFileId]} linked-version]
+    (storage/link-files-to-application (or (:id user) session-id)
+                                       (:id application)
+                                       (cond-> []
+                                               (not (:original-file-already-linked? attachment-options)) (conj originalFileId)
+                                               (not= fileId originalFileId) (conj fileId)))
     (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
-    (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
     (cleanup-temp-file (:result conversion-data))
     linked-version))
+
+(defn- reusable-content [is-or-file]
+  (if (instance? File is-or-file)
+    ; File is reusable as is
+    is-or-file
+    (with-open [is is-or-file
+                out (ByteArrayOutputStream.)]
+      (io/copy is out)
+      (ByteArrayInputStream. (.toByteArray out)))))
 
 (defn upload-and-attach!
   "1) Uploads original file to GridFS
@@ -810,14 +821,21 @@
    4) Creates preview image in separate thread
    5) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to original file)
    Returns attached version."
-  [{:keys [application] :as command} attachment-options file-options]
-  (let [original-filedata   (file-upload/save-file file-options {:application (:id application) :linked false})
-        content            (if (instance? File (:content file-options))
-                             (:content file-options)
-                             ;; stream is consumed at this point, load from mongo
-                             ((-> original-filedata :fileId mongo/download :content)))
-        conversion-data    (conversion application (assoc original-filedata :content content))]
-    (attach! command attachment-options original-filedata conversion-data)))
+  [{:keys [application user session] :as command} attachment-options file-options]
+  (let [user-id           (:id user)
+        session-id        (when-not user-id
+                            (or (:id session)
+                                (vetuma/session-id)
+                                "system-process"))
+        content           (reusable-content (:content file-options))
+        original-filedata (file-upload/save-file (assoc file-options :content content)
+                                                 {:linked false
+                                                  :uploader-user-id user-id
+                                                  :sessionId session-id})
+        _                 (when (instance? ByteArrayInputStream content)
+                            (.reset content))
+        conversion-data   (conversion user-id session-id application (assoc original-filedata :content content))]
+    (attach! command session-id attachment-options original-filedata conversion-data)))
 
 (defn- append-stream [zip file-name in]
   (when in
@@ -922,7 +940,8 @@
    Updates archivability data in the latest version file even if conversion fails."
   [application attachment]
   {:pre [(map? application) (:id application) (:attachments application)]}
-  (let [{:keys [archivable contentType fileId]} (:latestVersion attachment)]
+  (let [{:keys [archivable contentType fileId]} (:latestVersion attachment)
+        session-id "pdfa-conversion"]
     (cond
       archivable
       (info "Attachment" (:id attachment) "is already archivable, ignoring")
@@ -931,21 +950,21 @@
       (warn "Attachment" (:id attachment) "mime type" (keyword contentType) "is not convertible to PDF/A")
 
       :else
-      (if-let [file-content (mongo/download fileId)]
+      (if-let [file-content (storage/download application fileId)]
         (let [{:keys [result file] :as conversion-data} (->> (update file-content :content apply [])
-                                                             (conversion application))]
+                                                             (conversion nil session-id application))]
           (if (and (:archivable result) (:fileId file))
             ; If the file is already valid PDF/A, there's no conversion and thus no fileId
             (do (update-latest-version-file! application attachment conversion-data (now))
+                (storage/link-files-to-application session-id (:id application) [(:fileId file)])
                 (preview/preview-image! (:id application) (:fileId file) (:filename file) (:contentType file))
-                (link-files-to-application (:id application) [(:fileId file)])
                 (cleanup-temp-file result)
                 result)
             (do (when-not (:archivable result)
                   (warn "Attachment" (:id attachment) "could not be converted to PDF/A."))
                 (update-latest-version-file! application attachment conversion-data (now))
                 result)))
-        (error "PDF/A conversion: No mongo file for fileId" fileId)))))
+        (error "PDF/A conversion: No file found with file id" fileId)))))
 
 (defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
   (boolean (and (states/post-verdict-states (keyword app-state))

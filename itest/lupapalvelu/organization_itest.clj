@@ -101,7 +101,11 @@
 
       (fact "naantali user sees other users in naantali & jarvenpaa (but not admin)"
         (map :username naantali-sees) =>
-        (contains ["rakennustarkastaja@naantali.fi" "lupasihteeri@naantali.fi" "rakennustarkastaja@jarvenpaa.fi" "lupasihteeri@jarvenpaa.fi" "olli" "digitoija@jarvenpaa.fi"] :in-any-order))
+        (contains ["rakennustarkastaja@naantali.fi"
+                   "lupasihteeri@naantali.fi"
+                   "rakennustarkastaja@jarvenpaa.fi"
+                   "lupasihteeri@jarvenpaa.fi"
+                   "olli"] :in-any-order))
 
       (fact "jarvenpaa just jarvenpaa users (incl. Mr. Naantali but not admin)"
         (map :username jarvenpaa-sees) =>
@@ -1232,11 +1236,11 @@
 
 (fact "Document request info"
   (fact "only authority admin can call"
-    (command sonja :set-document-request-info :enabled false :email "a@b.c" :instructions "Instructions")
+    (command sonja :set-document-request-info :enabled false :email "a@b.c" :instructions {:en "Instructions" :fi "Ohjeet" :sv "Anvisningar"})
     => (partial expected-failure? :error.unauthorized))
 
   (fact "email must be valid"
-    (command sipoo :set-document-request-info :enabled false :email "not-valid-email" :instructions "Instructions")
+    (command sipoo :set-document-request-info :enabled false :email "not-valid-email" :instructions {:en "Instructions" :fi "Ohjeet" :sv "Anvisningar"})
     => (partial expected-failure? :error.email))
 
   (fact "setting works"
@@ -1396,3 +1400,14 @@
              :org-id "564-YMP"
              :backend-systems {})
     => (partial expected-failure? :error.empty-map-parameters)))
+
+(facts "known-organizations? tests"
+  (facts
+    (local-org-api/known-organizations? []) => truthy
+    (local-org-api/known-organizations? nil) => truthy)
+  (fact
+    (local-org-api/known-organizations? ["297-R" "433-R" "069-R"])
+    => truthy)
+  (fact
+    (local-org-api/known-organizations? ["297-R" "433-R" "zap"])
+    => falsey))

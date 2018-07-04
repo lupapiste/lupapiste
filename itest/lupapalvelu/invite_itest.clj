@@ -61,6 +61,9 @@
           (get-in email [:body :plain]) => (contains (email-for-key teppo))
           (get-in email [:body :plain]) => (contains (email-for-key mikko)))))
 
+    (fact "Mikko can invite random user"
+      (invite mikko application-id nil nil "heppu@example.com" "" "Randomin kutsu") => ok?)
+
     (fact "Sonja must NOT be able to uninvite Teppo!"
       (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => unauthorized?
       (count (:invites (query teppo :invites))) => 1)

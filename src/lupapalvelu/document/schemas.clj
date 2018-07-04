@@ -364,7 +364,7 @@
                           {:name "INEXCHANGE"} ; InExchange Factorum AB
                           {:name "DNBAFIHX"} ; DNB Bank ASA
                           {:name "ITELFIHH"} ; S\u00e4\u00e4st\u00f6pankit
-                          {:name "003710948874"} ; OpusCapita Group Oy
+                          {:name "E204503"} ; OpusCapita Solutions Oy
                           {:name "00885790000000418"} ; HighJump AS
                           {:name "NDEAFIHH"} ; Nordea
                           {:name "OKOYFIHH"} ; OP-Pohjola-ryhm\u00e4
@@ -1356,19 +1356,31 @@
    {:info {:name "uusi-rakennus-ei-huoneistoa"
            :i18name "uusiRakennus"
            :approvable true
+           :post-verdict-editable true
            :accordion-fields buildingid-accordion-paths}
     :body (body tunnus
                 rakennuksen-omistajat
                 (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa)
                 rakennustunnus)}
 
-   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
+   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja"
+           :i18name "rakennuksen-muuttaminen"
+           :approvable true
+           :post-verdict-editable true
+           :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-muutos)}
 
-   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia" :i18name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
+   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
+           :i18name "rakennuksen-muuttaminen"
+           :approvable true
+           :post-verdict-editable true
+           :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja-muutos)}
 
-   {:info {:name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
+   {:info {:name "rakennuksen-muuttaminen"
+           :approvable true
+           :post-verdict-editable true
+           :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-muutos)}
 
    {:info {:name "rakennustietojen-korjaus" :approvable true :accordion-fields buildingid-accordion-paths}

@@ -23,7 +23,9 @@ Create project application
   Append To List  ${applicationIds}  ${newApplicationId}
 
 Go back to project application
-  Scroll and click test id  test-application-link-permit-lupapistetunnus
+  Sleep  0.5s
+  Wait until  Scroll and click test id  test-application-link-permit-lupapistetunnus
+  Sleep  0.5s
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='kerrostalo-rivitalo']
 
 Open foreman application
@@ -118,6 +120,7 @@ Foreman submit application
   Open foreman app from list  ${index}
   Sleep  1s
   Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
+  Sleep  1s
   Positive indicator should be visible
   Submit application
 

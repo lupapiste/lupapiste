@@ -18,25 +18,25 @@
             suffix id-suffix]
     (keyword (str number-part "-" suffix))))
 
-(def keyword-authz-generator
+(def keyword-org-authz-generator
   (let [default-roles (gen/elements roles/default-org-authz-roles)
-        all-roles (gen/elements roles/all-authz-roles)]
+        all-roles (gen/elements (disj roles/all-org-authz-roles :authorityAdmin))]
     (gen/frequency [[1 default-roles]
                     [1 all-roles]])))
 
 (def authz-generator
-  (gen/fmap name keyword-authz-generator))
+  (gen/fmap name keyword-org-authz-generator))
 
 (ssg/register-generator OrgId (org-id-generator))
-(ssg/register-generator Authz authz-generator)
+(ssg/register-generator OrgAuthzRoles authz-generator)
 
-(def distinct-authz-generator
-  (let [authz-gen (ssg/generator Authz)]
+(def distinct-org-authz-generator
+  (let [authz-gen (ssg/generator OrgAuthzRoles)]
     (gen/vector-distinct authz-gen
                          {:min-elements 0
-                          :max-elements (count roles/all-authz-roles)})))
+                          :max-elements (count roles/all-org-authz-roles)})))
 
-(ssg/register-generator [Authz] distinct-authz-generator)
+(ssg/register-generator [OrgAuthzRoles] distinct-org-authz-generator)
 
 
 (def authority-biased-user-role

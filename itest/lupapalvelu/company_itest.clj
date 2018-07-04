@@ -266,6 +266,7 @@
         (count apps) => 0))))
 
 (facts "Authed dummy into company"
+  (apply-remote-minimal)
   (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
         foo-email "foo@example.com"
         foo-pw "foofaafoo"]
@@ -279,7 +280,7 @@
              :role "writer") => ok?
 
     (fact "Dummy 'foo' is found, but not in the company"
-      (query kaino :company-search-user :email foo-email) => (result :found :firstName "" :lastName "" :role "dummy"))
+      (query kaino :company-search-user :email foo-email) => (result :found :firstName "" :lastName "foo@example.com" :role "dummy"))
     (fact "Dummy gets invite to company"
       (command kaino :company-invite-user :email foo-email :admin false :submit true :firstName "Foo" :lastName "Bar") => ok?
       (accept-invitation foo-email))
@@ -334,7 +335,7 @@
                             (assoc :body (json/encode {:searchText ""})
                                    :as :json)))
              :body :data :applications
-             count) => 4))))
+             count) => 2))))
 
 (def locked-err {:ok false :text "error.company-locked"})
 

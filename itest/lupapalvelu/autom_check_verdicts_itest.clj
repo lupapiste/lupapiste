@@ -58,7 +58,9 @@
             application-submitted (query-application local-query sonja application-id-submitted) => truthy
             application-sent (query-application local-query sonja application-id-sent) => truthy
             application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy]
-        (fact "Six emails (3x submitted, 2x approved, 1x verdict)" (count emails) => 6)
+        (fact "Six emails (3x submitted, 2x approved, 1x verdict)"
+          (Thread/sleep 2000)
+          (count emails) => 6)
         (get (last emails) :subject) => (contains "P\u00e4\u00e4t\u00f6s annettu")
         (:state application-submitted) => "submitted"
         (:state application-sent) => "sent"
@@ -66,7 +68,7 @@
 
       (fact "checking verdicts and sending emails to the authorities related to the applications"
         (fetch-verdicts {:jms? true :wait-ms 2000}) => nil?)
-      (loop [retries 5
+      (loop [retries 20
              state (:state (mongo/select-one :applications {:_id application-id-sent} [:state]))]
         (when-not (or (zero? retries) (util/not=as-kw state :sent))
           (Thread/sleep 1000)

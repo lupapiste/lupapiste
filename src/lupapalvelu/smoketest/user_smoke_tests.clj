@@ -3,14 +3,27 @@
             [schema.core :as sc]
             [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [sade.schemas :as ssc])
+  (:import [schema.utils ErrorContainer]))
 
 (def user-keys (map #(if (keyword? %) % (:k %)) (keys usr/User)))
 
+(def coerce-user (ssc/json-coercer usr/User))
+
 (mongocheck :users
-  #(when-let [res (sc/check usr/User (mongo/with-id %))]
-     (assoc (select-keys % [:username]) :errors res))
+  #(let [res (->> (mongo/with-id %)
+                  (coerce-user))]
+     (when (instance? ErrorContainer res)
+       (assoc (select-keys % [:username]) :errors res)))
   user-keys)
+
+(mongocheck :users
+  (fn [user]
+    (when (and (usr/applicant? user)
+               (contains? user :orgAuthz))
+      (format "User %s is applicant, but has orgAuthz: %s" (:username user) (:orgAuthz user))))
+  :role :orgAuthz)
 
 (mongocheck :users
             (fn [{pid :personId source :personIdSource :as user}]

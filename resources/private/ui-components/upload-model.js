@@ -37,7 +37,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   }
   self.files = params.files || ko.observableArray();
   self.fileInputId = _.uniqueId( "file-input-id-" );
-  self.waiting = ko.observable();
+  self.waiting = params.waiting || ko.observable();
   self.readOnly = params.readOnly;
   self.allowMultiple = params.allowMultiple;
 

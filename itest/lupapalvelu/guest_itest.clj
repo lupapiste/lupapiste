@@ -87,7 +87,7 @@
                                                   :text "Mail contents"})) => itest/ok?)
            (fact "Application guests: 1 entry"
                  (guest/application-guests (cmd "pena")) => [{:description nil
-                                                              :name ""
+                                                              :name "hii@hoo.net"
                                                               :username "hii@hoo.net"
                                                               :email "hii@hoo.net"
                                                               :role :guest

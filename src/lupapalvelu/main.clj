@@ -20,9 +20,11 @@
                "fix-prev-permit-applicants" 'lupapalvelu.prev-permit/fix-prev-permit-applicants
                "pdfa-convert-review-pdfs"   'lupapalvelu.batchrun/pdfa-convert-review-pdfs
                "pdf-to-pdfa-conversion"     'lupapalvelu.batchrun/pdf-to-pdfa-conversion
-               "cleanup-uploaded-files"     'lupapalvelu.file-upload/cleanup-uploaded-files
+               "cleanup-uploaded-files"     'lupapalvelu.storage.file-storage/delete-old-unlinked-files
                "unarchive"                  'lupapalvelu.batchrun/unarchive
-               "analyze-missing"            'lupapalvelu.batchrun/analyze-missing})
+               "analyze-missing"            'lupapalvelu.batchrun/analyze-missing
+               "move-files-to-ceph"         'lupapalvelu.batchrun/move-files-to-ceph-in-applications
+               "move-files-to-ceph-in-orgs" 'lupapalvelu.batchrun/move-app-files-to-ceph-in-organizations})
 
 (defn launch! [service args]
   (debugf "Loading namespace '%s'...\n" (namespace service))

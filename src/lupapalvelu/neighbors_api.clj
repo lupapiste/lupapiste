@@ -241,19 +241,18 @@
 
 ; http://localhost:8000/api/raw/neighbor/download-attachment?neighbor-id=51b1b6bfaa24d5fcab8a3239&token=G7s1enGjJrHcwHYOzpJ60wDw3JoIfqGhCW74ZLQhKUSiD7wZ&file-id=51b1b86daa24d5fcab8a32d7
 (defraw neighbor-download-attachment
-        {:parameters [neighborId token fileId]
-   :input-validators [(partial action/non-blank-parameters [:neighborId :token :fileId])]
+        {:parameters [neighborId token fileId applicationId]
+         :input-validators [(partial action/non-blank-parameters [:neighborId :token :fileId :applicationId])]
          :user-roles #{:anonymous}}
         [{created :created}]
-        (let [att-info (attachment/get-attachment-file! fileId)
-              application (domain/get-application-no-access-checking (:application att-info))
+        (let [application (domain/get-application-no-access-checking applicationId)
               neighbor (util/find-by-id neighborId (:neighbors application))
               attachment (attachment/get-attachment-info-by-file-id application fileId)
               att-type (-> attachment :type :type-group)]
           (if (and
                 (valid-token? token (:status neighbor) created)
                 (= att-type "paapiirustus"))
-            (attachment/output-attachment fileId true attachment/get-attachment-file!)
+            (attachment/output-attachment fileId true (partial attachment/get-attachment-file! application))
             {:status 401
              :headers {"Content-Type" "text/plain"}
              :body "401 Unauthorized"})))

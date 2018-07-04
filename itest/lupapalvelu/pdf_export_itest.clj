@@ -129,7 +129,7 @@
           pdf-content => (contains "Lohja")
           pdf-content => (contains (loc (:state application)))
           pdf-content => (contains "444-1-10-100")
-          pdf-content => (contains "01.01.2014")
+          pdf-content => (contains (util/to-local-date (.getTime #inst"2014-01-01"))) ; The "correct" date depends on system TZ
           pdf-content => (contains (:id application))
           pdf-content => (contains "Testihenkilo Erkki")
           pdf-content => (contains "Asuinkerrostalon tai rivitalon rakentaminen, Aidan rakentaminen")

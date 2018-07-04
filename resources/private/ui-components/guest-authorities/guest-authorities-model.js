@@ -4,7 +4,7 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
   self.guests = ko.observableArray();
 
   self.canEdit = function() {
-    return lupapisteApp.models.globalAuthModel.ok( "update-user-organization" );
+    return lupapisteApp.models.globalAuthModel.ok( "upsert-organization-user" );
   };
 
 

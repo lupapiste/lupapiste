@@ -1327,7 +1327,7 @@
                                 file-id]}        (add-verdict-attachment app-id
                                                                          verdict-id
                                                                          "Hello world!")]
-                    (check-file file-id true)
+                    (check-file app-id file-id true)
                     (fact "Modern verdict cannot be deleted with legacy command"
                       (command sonja :delete-legacy-verdict :id app-id
                                :verdict-id verdict-id) => fail?)
@@ -1336,4 +1336,4 @@
                                :verdict-id verdict-id) => ok?
                       (util/find-by-id attachment-id (:attachments (query-application sonja app-id)))
                       => nil?
-                      (check-file file-id false))))))))))))
+                      (check-file app-id file-id false))))))))))))

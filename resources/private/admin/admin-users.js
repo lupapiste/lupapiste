@@ -23,7 +23,10 @@
            }},
           {name: "resetPassword",
            button: "secondary",
-           showFor: function(user) { return user.enabled; },
+           showFor: function(user) {
+             return (user.role !== "dummy")
+                    && lupapisteApp.models.globalAuthModel.ok("admin-reset-password");
+           },
            operation: function(email, callback) {
              ajax
                .command("admin-reset-password", {email: email})
@@ -65,79 +68,18 @@
     }
   });
 
-
   //
   // For adding authotity admins
   //
-
   function AuthorityAdminUsers() {
     var self = this;
 
-    self.organizationCode = ko.observable();
-    self.username = ko.observable();
-    self.phase = ko.observable(0);
-    self.firstName = ko.observable();
-    self.lastName = ko.observable();
-    self.userDetailsOk = ko.computed(function() {
-        var firstNameOk = self.firstName();
-        var lastNameOk = self.lastName();
-        var organizationCodeOk = self.organizationCode();
-        var usernameOk = self.username();
-        return organizationCodeOk && usernameOk && firstNameOk && lastNameOk;});
+    self.showForm = ko.observable(false);
 
-    self.searching = ko.observable();
-    self.userAdded = ko.observable();
-
-    self.createdUserlinkFi = ko.observable();
-    self.createdUserlinkSv = ko.observable();
-    self.createdUserUsername = ko.observable();
-
-    self.clean = function() {
-      return self
-        .phase(1)
-        .organizationCode("")
-        .username("")
-        .firstName("")
-        .lastName("")
-        .searching(false)
-        .userAdded(false)
-        .createdUserlinkFi("")
-        .createdUserlinkSv("")
-        .createdUserUsername("");
-    };
-
-    self.dialog = function() {
-      if (!self._dialog) {
-        self._dialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
-        self._dialog.createMask();
-      }
-      return self._dialog;
-    };
-
-    self.addAdmin = function() {
-      self.clean().dialog().open("#add-authority-admin-user-to-organization-dialog");
-    };
-
-    self.next = function() {
-      self.searching(true).phase(2);
-      ajax
-        .command("create-user",
-                 {email: self.username(),
-                  role: "authorityAdmin",
-                  organization: self.organizationCode(),
-                  enabled: "true",
-                  firstName: self.firstName(),
-                  lastName: self.lastName()})
-        .pending(self.searching)
-        .success(function(r) {
-          self.createdUserUsername(r.user.username);
-          self.createdUserlinkFi(r.linkFi);
-          self.createdUserlinkSv(r.linkSv);
-          self.userAdded(true);
-          usersList.redraw();
-        })
-        .call();
-    };
+    // CLJS component will yell this to hub when it can be killed
+    hub.subscribe("admin::authAdminFinished", function() {
+      self.showForm(false);
+    });
   }
 
   var authorityAdminUsers = new AuthorityAdminUsers();
@@ -321,8 +263,7 @@
             role: "financialAuthority",
             email: self.email(),
             firstName: self.name(),
-            lastName: "",
-            enabled: "true"})
+            lastName: ""})
         .pending(self.searching)
         .success(function(r) {
           self.userAdded(true);

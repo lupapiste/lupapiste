@@ -160,9 +160,9 @@
 
     self.updateAttachments = function() {
       self.attachments(null);
-      if (!lupapisteApp.models.currentUser.isFinancialAuthority()) {
+      if (authorization.ok("user-attachments")) {
         ajax
-          .query("user-attachments", {})
+          .query("user-attachments")
           .pending(self.loadingAttachments)
           .success(function(data) {
             self.attachments(_.map(data.attachments, function(info, id) { info.id = id; return info; }));

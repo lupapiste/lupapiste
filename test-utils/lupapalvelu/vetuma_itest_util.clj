@@ -55,15 +55,15 @@
   {"TRID" trid
    "STATUS" "SUCCESSFUL"
    "SUBJECTDATA" "ETUNIMI=Jukka, SUKUNIMI=Palmu"
-   "EXTRADATA" "HETU=123456-7890"
-   "USERID" "123456-7890"
+   "EXTRADATA" "HETU=160935-0806"
+   "USERID" "160935-0806"
    "VTJDATA" "<VTJHenkiloVastaussanoma/>"})
 
 (defn vetuma-init
   "Initializes Vetuma session. Returns transaction ID (TRID)."
   [request-opts token-query]
   ; Request welcome page and query features to init session
-  (http-get (str (itu/server-address) "/app/wi/welcome") request-opts)
+  (http-get (str (itu/server-address) "/app/fi/welcome") request-opts)
   (http-get (str (itu/server-address) "/api/query/features") request-opts)
   (let [{:keys [status body]} (http-get vetuma-endpoint (merge request-opts token-query))
         form (xml/parse body)

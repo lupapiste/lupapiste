@@ -123,25 +123,25 @@
                           :input-id input-id))
          other-options))
 
-(rum/defc view-with-download < {:key-fn #(str "view-with-download-" (:fileId %))}
+(rum/defc view-with-download < {:key-fn #(str "view-with-download-" (:id %))}
   "Port of ko.bindingHandlers.viewWithDownload"
-  [latest-version]
+  [{:keys [id latestVersion]}]
   [:div.view-with-download
    [:a {:target "_blank"
-        :href (str "/api/raw/view-attachment?attachment-id=" (:fileId latest-version))}
-    (:filename latest-version)]
+        :href (str "/api/raw/latest-attachment-version?attachment-id=" id)}
+    (:filename latestVersion)]
     [:br]
     [:div.download
-     [:a {:href (str "/api/raw/download-attachment?attachment-id=" (:fileId latest-version))}
+     [:a {:href (str "/api/raw/latest-attachment-version?download=true&attachment-id=" id)}
       [:i.lupicon-download.btn-small]
       [:span (common/loc "download-file")]]]])
 
-(rum/defc view-with-download-small-inline < {:key-fn #(str "view-with-download-inline-" (:fileId %))}
-  [latest-version]
+(rum/defc view-with-download-small-inline < {:key-fn #(str "view-with-download-inline-" (:id %))}
+  [{:keys [id latestVersion]}]
   [:div.inline
    [:a {:target "_blank"
-        :href (str "/api/raw/view-attachment?attachment-id=" (:fileId latest-version))}
-    (:filename latest-version)]])
+        :href (str "/api/raw/latest-attachment-version?attachment-id=" id)}
+    (:filename latestVersion)]])
 
 (defn delete-with-confirmation [attachment]
   (hub/send  "show-dialog"

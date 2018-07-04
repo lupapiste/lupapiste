@@ -44,7 +44,7 @@
         options (select-keys context [:x-margin :y-margin :transparency :page])]
     (files/with-temp-file file
       (with-open [out (io/output-stream file)]
-        (stamper/stamp stamp fileId out options))
+        (stamper/stamp stamp application fileId out options))
       (debug "uploading stamped file: " (.getAbsolutePath file))
       (let [approval (get-attachment-approval-stamping application attachment-id)
             result  (att/upload-and-attach!

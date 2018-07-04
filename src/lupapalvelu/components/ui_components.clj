@@ -111,8 +111,6 @@
 (defn- schema-versions-by-permit-type []
   (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
 
-
-
 (defn- read-component-list-from-fs [path pattern]
   (let [files (fs/find-files path (re-pattern pattern))
         mapped-files (map #(-<>> % .getPath (s/replace <> env/file-separator "/")  (re-matches (re-pattern (str "^.*/" path "/(.*)"))) last) files)]

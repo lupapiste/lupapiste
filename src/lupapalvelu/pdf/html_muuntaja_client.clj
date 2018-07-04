@@ -1,12 +1,9 @@
 (ns lupapalvelu.pdf.html-muuntaja-client
   (:require [cheshire.core :as json]
-            [lupapalvelu.mongo :as mongo]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.http :as http]
-            [sade.strings :as ss]
-            [taoensso.timbre :as timbre])
-    (:import [java.io InputStream]))
+            [taoensso.timbre :as timbre]))
 
 (def html2pdf-path "/api/wkhtml2pdf")
 
@@ -36,16 +33,3 @@
     (catch Exception ex
       (timbre/error ex)
       (fail :unknown))))
-
-(defn upload-pdf-stream
-  "Uploads pdf stream into given file-id using filename provided that
-  the given response is ok."
-  [file-id filename {stream :pdf-file-stream :as resp}]
-  (if (ok? resp)
-    (with-open [s stream]
-      (ok :file-id file-id
-          :mongo-file (mongo/upload file-id
-                                    filename
-                                    "application/pdf"
-                                    s)))
-    resp))

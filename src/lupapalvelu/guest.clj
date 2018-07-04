@@ -41,9 +41,9 @@
 
 (defn update-guest-authority-organization
   "Namesake command implementation."
-  [admin email first-name last-name description]
+  [org-admin email first-name last-name description]
   (let [email (ss/canonize-email email)
-        org-id (usr/authority-admins-organization-id admin)
+        org-id (usr/authority-admins-organization-id org-admin)
         guests (->> org-id
                     organization-guest-authorities
                     (remove #(= email (:email %)))
@@ -52,11 +52,12 @@
                               :description description}]))]
     (org/update-organization org-id {$set {:guestAuthorities guests}})
     (when-not (usr/get-user-by-email email)
-      (uu/create-and-notify-user admin
-                                 {:firstName first-name
-                                  :lastName last-name
-                                  :email email
-                                  :role :authority}))))
+      (let [new-user-data {:firstName first-name
+                           :lastName  last-name
+                           :email     email
+                           :role      "authority"}
+            user (usr/create-new-user org-admin new-user-data)]
+        (uu/notify-new-authority user org-admin org-id)))))
 
 (defn remove-guest-authority-organization
   "Namesake command implementation."

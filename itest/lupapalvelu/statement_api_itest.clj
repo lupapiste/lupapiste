@@ -2,7 +2,7 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.factlet :refer [facts* fact*]]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.user-api :as user-api]))
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
@@ -11,7 +11,6 @@
 (def veikko-email (email-for-key veikko))
 (def mikko-email  (email-for-key mikko))
 (def pena-email  (email-for-key pena))
-(def olli-email (email-for-key olli))
 
 ;; Simulating manually added (applicant) statement giver. Those do not have the key :id.
 (def statement-giver-pena {:name "Pena Panaani"
@@ -50,9 +49,6 @@
                   (-> % :person :email)) %)
         (:statements (query-application apikey application-id))))
 
-(fact "authorityAdmin can't query get-statement-givers"
-    (query sipoo :get-statement-givers) => unauthorized?)
-
 (facts "Create statement giver"
   (apply-remote-minimal)
   (fact "One statement giver in Sipoo, Sonja (set in minimal fixture)"
@@ -79,7 +75,7 @@
         (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;"))))
 
   (facts "Add statement giver role for new user"
-    (command sipoo :create-user :email "foo@example.com" :lastName "foo@example.com" :role "authority") => ok?
+    (command admin :create-user :email "foo@example.com" :lastName "foo@example.com" :role "authority") => ok?
     (create-statement-giver sipoo "foo@example.com")
 
     (fact "Statement giver is added and sorted"
@@ -100,6 +96,9 @@
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         statement-giver-sonja (get-statement-giver-by-email sipoo sonja-email)
         statement-giver-ronja (get-statement-giver-by-email sipoo ronja-email)]
+
+    (fact "authorityAdmin can't query get-statement-givers"
+      (query sipoo :get-statement-givers :id application-id) => not-accessible?)
 
     (fact "request one statement giver"
       (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-ronja]) => ok?
@@ -198,17 +197,20 @@
           (command veikko :give-statement :id application-id :statementId (:id statement) :status "puollettu" :lang "fi") => (partial expected-failure? "error.statement-text-or-attachment-required"))
 
         (fact "Veikko can delete attachment"
-              (let [attachment-id (upload-attachment-for-statement veikko application-id nil true (:id statement))]
-                (command veikko :delete-attachment :id application-id
-                         :attachmentId attachment-id) => ok?))
+          (upload-attachment-for-statement veikko application-id nil true (:id statement))
+          (let [attachment (->> (:attachments (query-application veikko application-id))
+                                (util/find-first (fn [{:keys [target]}] (= (:id target) (:id statement)))))]
+            (command veikko :delete-attachment :id application-id
+                     :attachmentId (:id attachment)) => ok?))
         (fact* "Statement is given"
                (command veikko :give-statement :id application-id :statementId (:id statement) :status "puollettu" :text "I will approve" :lang "fi") => ok?)
 
         (fact "Applicant got email"
-              (let [emails (sent-emails)
+          (let [emails (sent-emails)
                 email  (last emails)]
-            (count emails) => 2
+            (count emails) => 1
             (:to email) => (contains mikko-email)
+            (:subject email) => (contains "sinulle on uusi viesti")
             email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")))
 
         (fact "One Attachment is generated"

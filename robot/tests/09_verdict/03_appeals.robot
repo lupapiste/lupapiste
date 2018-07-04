@@ -24,7 +24,7 @@ Mikko wants to build Skyscraper
 # ---------------------
 
 Sonja logs in
-  Sonja logs in
+  Sonja logs in  False
   Open application  ${appname}  753-416-25-30
 
 Sonja fetches verdict from municipality KRYSP service
@@ -44,6 +44,7 @@ Sonja adds appeal to the first verdict
   Appeals row check  0-0  0  appeal  Veijo  1.4.2016
 
 The appeal is visible on the Attachments tab
+  Sleep  1.0s
   Open tab  attachments
   Element should be visible  jquery=tr[data-test-type='muutoksenhaku.valitus']
   Open tab  verdict
@@ -83,7 +84,7 @@ Both files are shown in the Attachments tab
 
 Sonja removes the image file from appeal
   Click by test id  edit-appeal-0-0-0
-  Click by test id  remove-file-1
+  Click by test id  remove-appeal-file-1
   OK bubble 0-0-0
   Wait Until  Page should not contain  ${PNG_TESTFILE_NAME}
 
@@ -112,6 +113,7 @@ Sonja adds appeal and rectification
 Sonja adds appealVerdict thus locking appeals
   Add to verdict  0-0  appealVerdict  Phong  1.6.2016
   Scroll to test id  add-appeal-0-0
+  Sleep  1.0s
   No such test id  edit-appeal-0-0-0
   No such test id  edit-appeal-0-0-1
   Wait test id visible  show-appeal-0-0-0
@@ -163,7 +165,7 @@ Mikko logs in and sees only one appeal title
 # ---------------------
 
 Sonja logs in and adds more appeals
-  Sonja logs in
+  Sonja logs in  False
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
   jQuery should match X times  h2[data-test-id=verdict-appeal-title]  3
@@ -210,7 +212,7 @@ Mikko logs in. He can see the appeals but not edit them.
   [Teardown]  Logout
 
 Sonja logs in and deletes the first verdict.
-  Sonja logs in
+  Sonja logs in  False
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
   Click element  jquery=[data-test-id=delete-verdict-from-listing]:first
@@ -259,11 +261,13 @@ Add file
   [Arguments]  ${postfix}  ${path}=${TXT_TESTFILE_PATH}
   Execute JavaScript  $('div[data-test-id=appeal-files-${postfix}] input[type=file]').attr("class", "")
   Choose File  jquery=div[data-test-id=appeal-files-${postfix}] input[type=file]  ${path}
+  Sleep  1s
 
 OK bubble ${postfix}
+  Wait until  Test id enabled  appeal-${postfix}-bubble-dialog-ok
   Scroll and click test id  appeal-${postfix}-bubble-dialog-ok
   # DOM changes after OK, so let's wait a bit.
-  Sleep  2s
+  Sleep  4s
 
 Cancel bubble ${postfix}
   Scroll and click test id  appeal-${postfix}-bubble-dialog-cancel

@@ -20,6 +20,7 @@ LUPAPISTE.VerdictAppealBubbleModel = function( params ) {
   self.initFun = m.initFun;
   self.error = m.error;
   self.waiting = m.waiting;
+  self.filesWaiting = ko.observable(false);
   self.test = "test";
   self.dropZone = _.uniqueId( "appeal-drop-zone-");
   if( !_.isNull(params.test) || _.isUndefined( params.test) ) {
@@ -48,7 +49,13 @@ LUPAPISTE.VerdictAppealBubbleModel = function( params ) {
                                return _.trim( v );
                              });
     var warn = self.dateWarning() === "";
-    var files = _.size(self.model.files());
-    return required && warn && files;
+    var files = self.model.newFiles().length + self.model.oldFiles().length;
+    return required && warn && files && !self.filesWaiting();
   });
+
+  self.removeFile = function(file) {
+    self.model.oldFiles.remove(function (f) {
+      return f.fileId === file.fileId;
+    });
+  };
 };

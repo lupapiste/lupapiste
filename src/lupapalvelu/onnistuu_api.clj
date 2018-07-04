@@ -129,8 +129,12 @@
       (if (nil? (get-in process [:signer :currentUser]))
         (resp/redirect (str (env/value :host) "/app/" lang "/welcome#!/register-company-success"))
         (let [current-user (usr/current-user (request/ring-request))
-              response     (ssess/merge-to-session (request/ring-request) (resp/redirect (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for (:role current-user)) "#!/register-company-existing-user-success"))
-                                                   {:user (usr/session-summary (usr/get-user-by-id (:id current-user)))})]
+              response     (ssess/merge-to-session
+                             (request/ring-request)
+                             (resp/redirect (str (env/value :host) "/app/" lang "/"
+                                                 (usr/applicationpage-for current-user)
+                                                 "#!/register-company-existing-user-success"))
+                             {:user (usr/session-summary (usr/get-user-by-id (:id current-user)))})]
           response)))))
 
 ;
@@ -144,7 +148,7 @@
           current-user (usr/current-user (request/ring-request))]
       (if (nil? (get-in process [:signer :currentUser]))
         (resp/redirect (str (env/value :host) "/app/" lang "/welcome#!/register-company-fail"))
-        (resp/redirect (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for (:role current-user)) "#!/register-company-fail"))))))
+        (resp/redirect (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for current-user) "#!/register-company-fail"))))))
 
 (when (env/feature? :dummy-onnistuu)
 

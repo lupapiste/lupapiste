@@ -14,20 +14,13 @@
 ;; ==============================================================================
 ;;
 
-(testable-privates lupapalvelu.user-api validate-update-user! allowed-state?)
+(testable-privates lupapalvelu.user-api allowed-state?)
 
 (fact "filter-storage-key and default-filter-storage-key keys match"
   (set (keys filter-storage-key)) => (set (keys default-filter-storage-key)))
 
 (def admin-data {:role "admin" :email "admin"})
 
-(facts "validate-update-user!"
-  (facts "admin can change only others data"
-    (fact (validate-update-user! admin-data {:email "admin"}) => unauthorized?)
-    (fact (validate-update-user! admin-data {:email "foo"})   => truthy))
-  (fact "non-admin users can change only their own data"
-    (fact (validate-update-user! {:role ..anything.. :email "foo"} {:email "foo"}) => truthy)
-    (fact (validate-update-user! {:role ..anything.. :email "foo"} {:email "bar"}) => unauthorized?)))
 
 ;;
 ;; ==============================================================================
@@ -37,15 +30,36 @@
 
 (testable-privates lupapalvelu.user-api add-user-attachment-allowed?)
 
-(def applicant-user-data {:role "applicant" :id "777777777777777777000020" :username "pena" :email "pena@example.com" :firstName "Pena" :lastName "Panaani"
-                          :personId "010203-040A" :attachments [] :phone "0102030405" :city "Piippola" :street "Paapankuja 12" :zip "10203" :enabled true})
+(def applicant-user-data {:role "applicant"
+                          :id "777777777777777777000020"
+                          :username "pena"
+                          :email "pena@example.com"
+                          :firstName "Pena"
+                          :lastName "Panaani"
+                          :personId "010203-040A"
+                          :attachments []
+                          :phone "0102030405"
+                          :city "Piippola"
+                          :street "Paapankuja 12"
+                          :zip "10203"
+                          :enabled true})
 
-(def authority-user-data {:role "authority" :id "777777777777777777000023" :username "sonja" :email "sonja.sibbo@sipoo.fi" :firstName "Sonja" :lastName "Sibbo"
-                          :orgAuthz {:753-R #{:authority}, :753-YA #{:authority}, :998-R-TESTI-2 #{:authority}} :expires 1433313641389})
+(def authority-user-data {:role "authority"
+                          :id "777777777777777777000023"
+                          :username "sonja"
+                          :email "sonja.sibbo@sipoo.fi"
+                          :firstName "Sonja"
+                          :lastName "Sibbo"
+                          :orgAuthz {:753-R #{:authority}
+                                     :753-YA #{:authority}
+                                     :998-R-TESTI-2 #{:authority}}
+                          :enabled true})
 
 (facts "add-user-attachment-allowed?"
-  (fact "applicant" (add-user-attachment-allowed? applicant-user-data) => truthy)
-  (fact "authority" (add-user-attachment-allowed? authority-user-data) => falsey))
+  (fact "applicant"
+    (add-user-attachment-allowed? applicant-user-data) => truthy)
+  (fact "authority"
+    (add-user-attachment-allowed? authority-user-data) => falsey))
 
 (facts "allowed-state?"
   (facts "pre-sent states"

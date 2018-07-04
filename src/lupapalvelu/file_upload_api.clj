@@ -4,14 +4,15 @@
             [clojure.set :refer [rename-keys]]
             [sade.core :refer :all]
             [sade.env :as env]
-            [lupapalvelu.action :refer [defcommand defraw disallow-impersonation]]
+            [lupapalvelu.action :as action :refer [defcommand defraw disallow-impersonation]]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
-            [lupapalvelu.vetuma :as vetuma]))
+            [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.storage.file-storage :as storage]))
 
 (defn- file-mime-type-accepted [{{files :files} :data}]
   (when-not (every? mime/allowed-file? (map :filename files))
@@ -38,8 +39,8 @@
                       file-upload/file-size-legal]
    :pre-checks       [disallow-impersonation]
    :states           states/all-states}
-  [{:keys [application]}]
-  (let [{:keys [ok error] :as result} (file-upload/save-files application files (vetuma/session-id))]
+  [{:keys [application user]}]
+  (let [{:keys [ok error] :as result} (file-upload/save-files application files (:id user))]
     (when-not ok
       (errorf "upload failed, error: %s" error))
     (->> result
@@ -47,24 +48,14 @@
          (resp/json)
          (resp/status (if ok 200 400)))))
 
-(defn- file-upload-in-database
-  [{{attachment-id :attachmentId} :data}]
-  (let [file-found? (mongo/any? :fs.files {:_id attachment-id "metadata.sessionId" (vetuma/session-id)})]
-    (when-not file-found?
-      (fail :error.file-upload.not-found))))
-
-(defn- attachment-not-linked
-  [{{attachment-id :attachmentId} :data}]
-  (when-let [{{bulletin-id :bulletinId} :metadata} (mongo/select-one :fs.files {:_id attachment-id "metadata.sessionId" (vetuma/session-id)})]
-    (when-not (empty? bulletin-id)
-      (fail :error.file-upload.already-linked))))
-
 (defcommand remove-uploaded-file
   {:parameters [attachmentId]
-   :input-validators [file-upload-in-database attachment-not-linked]
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:anonymous}}
-  (if-let [{file-id :id} (mongo/select-one :fs.files {:_id attachmentId "metadata.sessionId" (vetuma/session-id)})]
-    (do
-      (mongo/delete-file-by-id file-id)
-      (ok :attachmentId attachmentId))
-    (fail :error.file-upload.removing-file-failed)))
+  [{:keys [user]}]
+  (let [uid (or (:id user) (vetuma/session-id))]
+    (if (storage/unlinked-files-exist? uid [attachmentId])
+      (do
+        (storage/delete-unlinked-file uid attachmentId)
+        (ok :attachmentId attachmentId))
+      (fail :error.file-upload.not-found))))

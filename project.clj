@@ -1,5 +1,3 @@
-(require 'cemerick.pomegranate.aether)
-
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.9.0"]
@@ -26,6 +24,12 @@
 
                  ; MongoDB driver
                  [com.novemberain/monger "3.1.0" :exclusions [[com.google.guava/guava]]]
+
+                 ; S3 Library
+                 [com.amazonaws/aws-java-sdk-s3 "1.11.313"]
+
+                 ; UUID Library
+                 [danlentz/clj-uuid "0.1.7"]
 
                  ; Logging
                  [com.taoensso/timbre "4.10.0" :exclusions [[io.aviso/pretty]]]
@@ -89,6 +93,7 @@
                  ; A Clojure(Script) library for declarative data description and validation
                  [prismatic/schema "1.1.9"]
                  [prismatic/schema-generators "0.1.2"]
+                 [prismatic/plumbing "0.5.5"]
 
                  ; MIME type resolution
                  [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
@@ -137,7 +142,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.60"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.9.18"]
+                 [lupapiste/commons "0.9.19"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -155,9 +160,17 @@
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  ; JS Pikaday for cljs datepicker (https://github.com/dbushell/Pikaday)
                  [cljs-pikaday "0.1.4"]]
-  :plugins [[lein-cljsbuild "1.1.5"]
+
+  :plugins [[lein-cljsbuild "1.1.7"]
             [lein-shell "0.5.0"]
-            [deraen/lein-sass4clj "0.3.1"]]
+            [deraen/lein-sass4clj "0.3.1"]
+            [lein-pdo "0.1.1"]
+            [lein-midje "3.2.1"]
+            [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
+            [lupapiste/lein-buildid "0.4.2"]
+            [lupapiste/lein-nitpicker "0.5.1"]
+            [lein-figwheel "0.5.15"]]
+
   :clean-targets ^{:protect false} ["resources/public/lp-static/js/rum-app.js"
                                     "resources/public/lp-static/js/rum-app.js.map"
                                     "resources/public/lp-static/js/out"
@@ -166,6 +179,7 @@
   :java-source-paths ["java-src"]
   :cljsbuild {:builds {:rum {:source-paths ^:replace ["src-cljs" "src-cljc"]}}}
   :profiles {:dev      {:dependencies   [[midje "1.9.1"]
+                                         [com.cemerick/pomegranate "1.0.0"]                                             ; midje.repl needs this
                                          [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                          [com.raspasov/clj-ssh "0.5.12"]
                                          [org.apache.activemq/artemis-jms-server "2.6.0"]
@@ -175,11 +189,6 @@
                                          [figwheel-sidecar "0.5.14"]
                                          ;; Better Chrome Dev Tools support
                                          [binaryage/devtools "0.9.4"]]
-                        :plugins        [[lein-midje "3.2.1"]
-                                         [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
-                                         [lupapiste/lein-buildid "0.4.2"]
-                                         [lupapiste/lein-nitpicker "0.5.1"]
-                                         [lein-figwheel "0.5.14"]]
                         :resource-paths ["dev-resources"]
                         :source-paths   ["dev-src" "test-utils"]
                         :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
@@ -194,7 +203,7 @@
                                                                    :on-jsload        lupapalvelu.ui.ui-components/reload-hook
                                                                    ;; If the figwheel does not connect,
                                                                    ;; turn the heads-up display off.
-                                                                   :heads-up-display false
+                                                                   :heads-up-display true
                                                                    }
                                                         :compiler {:output-dir     "resources/public/lp-static/js/out"
                                                                    :output-to      "resources/public/lp-static/js/rum-app.js"
@@ -225,7 +234,8 @@
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :figwheel {:server-port 3666
-             :css-dirs    ["resources/public/lp-static/css/main.css"]}
+             :css-dirs    ["resources/public/lp-static/css/main.css"]
+             :repl false}
   :sass {:target-path  "resources/public/lp-static/css/"
          :source-paths ["resources/private/common-html/sass/"]
          :output-style :compressed}
@@ -237,7 +247,14 @@
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," ["midje" ":filter" "-ajanvaraus"]]
-            "sass"        ["do" ["sass4clj" "once"] ["shell" "blessc" "--force" "resources/public/lp-static/css/main.css"]]}
+            "sass"        ["do"
+                           ["sass4clj" "once"]
+                           ["shell" "blessc" "--force" "resources/public/lp-static/css/main.css"]]
+            "front"       ["do"
+                           ["clean"]
+                           ["pdo"
+                            ["sass4clj" "auto"]
+                            ["figwheel"]]]}
   :aot [lupapalvelu.main clj-time.core]
   :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}

@@ -51,6 +51,10 @@ Foreman can not fill applicant information
   # No inputs that are missing a readoly attribute. In other words, all inputs are read only.
   Xpath Should Match X Times  //section[@data-doc-type='hakija-tj']//input[not(@readonly)]  0
 
+Municipality hears neighbors toggle is not visible
+  Open tab  requiredFieldSummary
+  No such test id  optionMunicipalityHearsNeighbors-label
+
 Foreman selects application type and submits the first foreman application
   Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
   Positive indicator should be visible

@@ -12,6 +12,11 @@
             [sade.shared-util :as util])
   (:import [goog.async Delay]))
 
+(defn atom-on-change
+  "Common 'on-change' event option: value atom is reset with element value."
+  [value*]
+  {:on-change #(reset! value* (.. % -target -value))})
+
 (rum/defc select [change-fn data-test-id value options & [classes]]
   [:select
    {:class (or classes "form-entry is-middle")
