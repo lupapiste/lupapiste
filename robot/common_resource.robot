@@ -1652,7 +1652,7 @@ Test id should contain
 
 Test id input is
   [Arguments]  ${id}  ${text}
-  Wait until  Value should be  jquery=[data-test-id=${id}]  ${text}
+  Wait until  Value should be  xpath=//*[@data-test-id='${id}']  ${text}
 
 Test id text is
   [Arguments]  ${id}  ${text}
