@@ -203,6 +203,7 @@ Removed role cannot be selected
 
 Sonja assigns handler
   Edit handler  0  Sibbo Sonja  Handy
+  Positive indicator should not be visible
   Click element  xpath=//section[@id='inforequest']//button[@data-test-id='edit-handlers-back']
   List handler is  0  Sibbo Sonja  Handy
   [Teardown]  Logout

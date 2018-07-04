@@ -1635,7 +1635,7 @@ Test id enabled
 Fill test id
   [Arguments]  ${id}  ${text}
   Wait test id visible  ${id}
-  Element Should Be Enabled  jquery=[data-test-id=${id}]
+  Element Should Be Enabled  xpath=//*[@data-test-id='${id}']
   Input text by test id  ${id}  ${text}
 
 Focus test id

@@ -84,13 +84,13 @@ Remove second dig row
   No such test id  'kaivettavaMaa.ainekset.1.aines-group.aines'
 
 Dig other shows text field
-  No such test id  'kaivettavaMaa.ainekset.0.aines-group.muu'
+  No such test id  kaivettavaMaa.ainekset.0.aines-group.muu
   Dig select  0  muu
-  Wait test id visible  'kaivettavaMaa.ainekset.0.aines-group.muu'
+  Wait test id visible  kaivettavaMaa.ainekset.0.aines-group.muu
 
 Other selection survives reload
   Dig reload
-  Wait test id visible  'kaivettavaMaa.ainekset.0.aines-group.muu'
+  Wait test id visible  kaivettavaMaa.ainekset.0.aines-group.muu
 
 Pena fills the first dig row
   Dig input  0  4  5  9
@@ -107,7 +107,7 @@ Pena fills the first dig row
 Dig errors
   Dig input  0  ${EMPTY}  4  4
   Dig footer sums  8.03  8.81  16.84
-  Fill test id  'kaivettavaMaa.ainekset.0.hyodynnetaan'  foo
+  Fill test id  kaivettavaMaa.ainekset.0.hyodynnetaan  foo
   Wait until  Element should be visible  jquery=tr[data-test-id=ainekset-row-0] i.calculation-error
   Wait test id visible  sum-kaivettavaMaa-ainekset-hyodynnetaan-error
   No such test id  sum-kaivettavaMaa-ainekset-poisajettavia-error
@@ -132,7 +132,8 @@ Dangerous unit
 
 Dangerous input
   [Arguments]  ${index}  ${amount}  ${unit}
-  Fill test id  'rakennusJaPurkujate.vaarallisetJatteet.${index}.maara'  ${amount}
+  ${selector}=  Set variable  rakennusJaPurkujate.vaarallisetJatteet.${index}.maara
+  Fill test id  ${selector}  ${amount}
   Dangerous unit  ${index}  ${unit}
 
 Dangerous add
@@ -142,8 +143,8 @@ Dangerous add
 
 Dig input
   [Arguments]  ${index}  ${use}  ${discard}  ${sum}
-  Fill test id  'kaivettavaMaa.ainekset.${index}.hyodynnetaan'  ${use}
-  Fill test id  'kaivettavaMaa.ainekset.${index}.poisajettavia'  ${discard}
+  Fill test id  kaivettavaMaa.ainekset.${index}.hyodynnetaan  ${use}
+  Fill test id  kaivettavaMaa.ainekset.${index}.poisajettavia  ${discard}
   Test id text is  kaivettavaMaa-ainekset-${index}-yhteensa  ${sum}
 
 Dig footer sums
