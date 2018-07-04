@@ -3,6 +3,7 @@
 Documentation   Applicant orders printouts of application attachments
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        printout_resource.robot
 Variables      ../06_attachments/variables.py
 
 
@@ -37,7 +38,10 @@ Sonja adds attachment to verdict
   Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
   Wait for jQuery
-  Logout
+
+Sonja creates RAM attachment to Mikkos's attachment
+  Sonja adds RAM attachment  paapiirustus.asemapiirros
+  [Teardown]  Logout
 
 Mikko goes to order form
   Mikko logs in
@@ -46,6 +50,9 @@ Mikko goes to order form
   Click enabled by test id  open-printing-order-form
   Element should be visible by test id  files-table
   Test id disabled  forward-button
+
+There is only one orderable item
+  jQuery should match X times  tr.not-in-printing-order  1
 
 Mikko selects a file to be printed out
   Scroll and click  tr[data-test-type='paapiirustus.asemapiirros']:first i.lupicon-circle-plus
