@@ -225,8 +225,7 @@
                                  (query/sort order-by)))))
 
 (defn snapshot
-  "Returns multiple entries by matching the monger query.
-   Cursor is snapshotted, which will always cause a full collection scan. Use only if necessary."
+  "Returns multiple entries by matching the monger query. Results are sorted by _id."
   ([collection]
    {:pre [collection]}
    (snapshot collection {}))
@@ -234,13 +233,13 @@
    {:pre [collection (map? query)]}
    (map with-id (with-collection (name collection)
                                  (query/find (remove-null-chars query))
-                                 (query/snapshot))))
+                                 (query/sort {:_id 1}))))
   ([collection query projection]
    {:pre [collection (map? query) (seq projection)]}
    (map with-id (with-collection (name collection)
                                  (query/find (remove-null-chars query))
                                  (query/fields (if (map? projection) (keys projection) projection))
-                                 (query/snapshot)))))
+                                 (query/sort {:_id 1})))))
 
 (defn select-one
   "Returns one entry by matching the monger query, nil if query did not match."
