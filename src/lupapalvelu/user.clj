@@ -431,7 +431,7 @@
     (case (count orgs)
       0 false
       1 true
-      (throw (ex-info "user is authorityAdmin in multiple organizations, somebody needs to implement this" {:user caller})))))
+      (throw (AssertionError. (format "Not supported atm: user %s is authorityAdmin in multiple organizations" (:username caller)))))))
 
 (defn- users-for-datatables-base-query [caller params]
   (let [caller-organizations (organization-ids caller)
