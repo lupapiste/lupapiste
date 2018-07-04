@@ -47,6 +47,7 @@
                  [cljstache "2.0.1"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [org.freemarker/freemarker "2.3.23"]
+
                  ; CSS
                  [garden "1.3.3"]
 
@@ -155,6 +156,8 @@
                  ;; Used in the markup support.
                  [instaparse "1.4.8"]
 
+                 ;; SAML 2.0 -support
+                 [kirasystems/saml20-clj "0.1.12"]
                  [org.clojure/clojurescript "1.9.946"]
                  [rum "0.10.8"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]

@@ -5,7 +5,8 @@
             [clj-time.format :as timeformat]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.walk :refer [postwalk prewalk]]
+            [clojure.pprint :as pp]
+            [clojure.walk :refer [postwalk prewalk keywordize-keys]]
             [me.raynes.fs :as fs]
             [sade.core :refer [fail!]]
             [sade.shared-util :as shared]
@@ -675,3 +676,9 @@
 
 (defn ^java.util.Date object-id-to-date [object-id]
   (-> object-id org.bson.types.ObjectId. bean :time java.util.Date.))
+
+(defn pspit
+  "Takes a Clojure data structure, such as a map, and pretty-spits it to a file.
+  Useful (?) for debugging / development purposes."
+  [data filename]
+  (-> data keywordize-keys (pp/pprint (io/writer filename))))
