@@ -909,7 +909,8 @@
         (mongo/connect!)
         (doseq [{:keys [id]} (mongo/select :applications
                                            {:organization {$in organization-ids}
-                                            :attachments.latestVersion.fileId {$type "string"}}
+                                            :attachments.latestVersion.fileId {$type "string"}
+                                            :attachments.latestVersion.storageSystem "mongodb"}
                                            [:_id]
                                            {:_id 1})]
           (logging/with-logging-context {:applicationId id}
