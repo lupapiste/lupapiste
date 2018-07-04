@@ -131,20 +131,18 @@
 ;; Database Api
 ;;
 
-(def isolated {"$isolated" 1})
-
 (defn update-n
   "Updates data into collection by query, returns a number of updated documents."
   [collection query data & {:as opts}]
   {:pre [(max-1-elem-match? query)]}
   (let [options (-> (merge {:write-concern default-write-concern} opts) seq flatten)]
-    (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) options))))
+    (.getN (mc/update (get-db) collection query (remove-null-chars data) options))))
 
 (defn update
   "Updates data into collection by query. Always returns nil."
   [collection query data & opts]
   {:pre [(max-1-elem-match? query)]}
-  (mc/update (get-db) collection (merge isolated (remove-null-chars query)) (remove-null-chars data) opts)
+  (mc/update (get-db) collection (remove-null-chars query) (remove-null-chars data) opts)
   nil)
 
 (defn update-by-id
@@ -158,7 +156,7 @@
   "Updates data into collection with 'multi' set to true. Returns the number of documents updated"
   [collection query data & opts]
   {:pre [(max-1-elem-match? query)]}
-  (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) (apply hash-map :multi true opts))))
+  (.getN (mc/update (get-db) collection query (remove-null-chars data) (apply hash-map :multi true opts))))
 
 (defn update-one-and-return
   "Updates first document in collection matching conditions. Returns updated document or nil."
