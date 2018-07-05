@@ -12,6 +12,7 @@
 
 (testable-privates lupapalvelu.pate.tasks
                    reviews->tasks legacy-reviews->tasks)
+(testable-privates lupapalvelu.document.rakennuslupa-canonical enrich-review-building get-review-katselmuksenrakennus)
 
 (defn filter-review-tasks [tasks]
   (filter #(= (get-in % [:schema-info :subtype]) :review)
@@ -25,12 +26,14 @@
 (def b1
   (let [valtakunnallinenNumero (ssg/generate ssc/Rakennustunnus)]
     {:localShortId   "012"
+     :propertyId     "1231234"
      :nationalId     valtakunnallinenNumero
      :buildingId     valtakunnallinenNumero
      :location-wgs84 nil
      :location       nil
      :index          (str 1)
-     :description    "Test buildings"}))
+     :description    "Test buildings"
+     :operationId    "op123"}))
 
 (facts "pate reviews->tasks data"
   (let [review (first (pate-tasks/pate-verdict->tasks test-pate-verdict 123 [b1]))]
@@ -40,6 +43,17 @@
         (get-in rakennus [:jarjestysnumero]) => "1"
         (get-in rakennus [:rakennusnro]) => "012"
         (get-in rakennus [:valtakunnallinenNumero]) => (:nationalId b1)))))
+
+(facts "pate review task to canonical"                      ; PATE-120
+  (let [review (first (pate-tasks/pate-verdict->tasks test-pate-verdict 123 [b1]))
+        rakennus (-> (get-in review [:data :rakennus]) vals first tools/unwrapped)
+        review-building-canoncial (-> (enrich-review-building {:buildings [b1]} rakennus)
+                                      get-review-katselmuksenrakennus)]
+    (fact "canonical building data is created"
+      (:KatselmuksenRakennus review-building-canoncial) => truthy)
+    (fact "operationId is there"
+      (get-in review-building-canoncial [:KatselmuksenRakennus :muuTunnustieto 0 :MuuTunnus :tunnus])
+      => (:operationId b1))))
 
 (fact "Reviews not included"
   (-> (assoc-in test-pate-verdict [:data :reviews-included] false)
