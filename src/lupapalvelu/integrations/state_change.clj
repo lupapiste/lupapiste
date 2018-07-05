@@ -143,14 +143,14 @@
 (sc/defschema EndpointData
   {:url                          sc/Str
    (sc/optional-key :headers)    {sc/Str sc/Str}
-   (sc/optional-key :basic-auth) [sc/Str sc/Str]})
+   (sc/optional-key :basic-auth) [sc/Str]})
 
 (sc/defn ^:always-validate get-state-change-endpoint-data :- (sc/maybe EndpointData) [organization]
-  (when-let [url (get-in organization [:state-change-endpoint :url])]
-    (let [endpoint-conf (:state-change-endpoint organization)
-          crypto-iv     (:crypto-iv endpoint-conf)
+  (when-let [url (get-in @organization [:state-change-endpoint :url])]
+    (let [endpoint-conf (:state-change-endpoint @organization)
+          crypto-iv     (:crypto-iv-s endpoint-conf)
           endpoint {:url     (ss/strip-trailing-slashes url)
-                    :headers (->> (get-in organization [:state-change-endpoint :header-parameters])
+                    :headers (->> (get-in @organization [:state-change-endpoint :header-parameters])
                                   (map (fn [header] {(str (:name header)) (str (org/decode-credentials (:value header) crypto-iv))}))
                                   (apply merge))}]
     (when (= (:auth-type endpoint-conf) "basic")
@@ -224,7 +224,7 @@
                    :data outgoing-data}
                   :action (:action command))]
         (messages/save msg)
-        (if-let [endpoint (get-state-change-endpoint-data @organization)]
+        (if-let [endpoint (get-state-change-endpoint-data organization)]
           (if (and jms? json-consumer-session)
             (send-via-jms outgoing-data endpoint {:user-id (:id user) :message-id message-id :application-id (:id app)})
             (send-via-http message-id outgoing-data endpoint))

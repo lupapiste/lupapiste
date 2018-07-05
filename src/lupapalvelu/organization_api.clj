@@ -242,8 +242,8 @@
   {:description "Update organization details."
    :parameters [permitType municipality
                 inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
-                opening pateEnabled]
-   :optional-parameters [bulletinsEnabled bulletinsUrl]
+                opening]
+   :optional-parameters [bulletinsEnabled bulletinsUrl pateEnabled]
    :input-validators [permit/permit-type-validator
                       (fn [{{:keys [permitType pateEnabled]} :data}]
                         (if (true? pateEnabled)
@@ -738,7 +738,7 @@
   {:parameters [url headers authType]
    :optional-parameters [basicCreds]
    :description "Set REST endpoint configurations for organization state change messages"
-   :user-roles #{:authorityAdmin}
+   :permissions      [{:required [:organization/admin]}]
    :input-validators [(partial action/string-parameters [:url])]}
   [{user :user}]
   (let [organization-id (usr/authority-admins-organization-id user)]

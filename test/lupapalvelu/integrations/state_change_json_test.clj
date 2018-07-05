@@ -187,7 +187,7 @@
         message-id (ssg/generate ssc/ObjectIdStr)]
     (against-background [(lupapalvelu.integrations.messages/create-id) => message-id
                          (lupapalvelu.integrations.messages/save anything) => nil
-                         (mjson/get-state-change-endpoint-data) => fake-endpoint
+                         (mjson/get-state-change-endpoint-data anything) => fake-endpoint
                          (mjson/state-change-data (:application command) "sent") => example-data
                          (mjson/send-via-jms example-data fake-endpoint anything) => "JMS SUCCESS"
                          (mjson/send-via-http message-id example-data fake-endpoint) => "HTTP SUCCESS"

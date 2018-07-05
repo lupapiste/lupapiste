@@ -1411,3 +1411,32 @@
   (fact
     (local-org-api/known-organizations? ["297-R" "433-R" "zap"])
     => falsey))
+
+(facts "State change messages can be set"
+  (let [organization  (first (:organizations (query admin :organizations)))
+        id (:id organization)]
+
+    (fact "Messages enabled"
+      (command admin "set-organization-boolean-attribute" :enabled true :organizationId id :attribute "state-change-msg-enabled") => ok?
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
+        (:state-change-msg-enabled updated-org) => true))
+
+    (fact "Messages disabled"
+      (command admin "set-organization-boolean-attribute" :enabled false :organizationId id :attribute "state-change-msg-enabled") => ok?
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
+        (:state-change-msg-enabled updated-org) => false))))
+
+(facts "Pate can be enabled on scope level"
+  (let [organization  (first (:organizations (query admin :organizations)))
+        id (:id organization)]
+
+    (fact "Enabled for R"
+      (command admin "set-organization-scope-pate-value" :permitType "R" :municipality "186" :value true) => ok?
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
+        (:pate-enabled (first (filter #(= (:permitType %) "R") (:scope updated-org)))) => true
+        (:pate-enabled (first (filter #(= (:permitType %) "KT") (:scope updated-org)))) => nil))
+
+    (fact "Disabled for R"
+      (command admin "set-organization-scope-pate-value" :permitType "R" :municipality "186" :value false) => ok?
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
+        (:pate-enabled (first (filter #(= (:permitType %) "R") (:scope updated-org)))) => false))))

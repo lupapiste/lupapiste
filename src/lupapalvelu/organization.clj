@@ -148,7 +148,7 @@
                                  :url sc/Str
                                  (sc/optional-key :notification-email) sc/Str
                                  (sc/optional-key :descriptions-from-backend-system) sc/Bool}
-   (sc/optional-key :pate-enabled) sc/Bool})
+   (sc/optional-key :pate-enabled) (sc/maybe sc/Bool)})
 
 (def permit-types (map keyword (keys (permit/permit-types))))
 
@@ -259,7 +259,12 @@
    (sc/optional-key :default-digitalization-location) {:x sc/Str :y sc/Str}
    (sc/optional-key :remove-handlers-from-reverted-draft) sc/Bool
    (sc/optional-key :state-change-endpoint) {:url sc/Str
-                                             :header-parameters [sc/Str]}})
+                                             (sc/optional-key :header-parameters) [{:name sc/Str
+                                                                                    :value sc/Str}]
+                                             (sc/optional-key :auth-type) sc/Str
+                                             (sc/optional-key :basic-auth-password) sc/Str
+                                             (sc/optional-key :basic-auth-username) sc/Str
+                                             (sc/optional-key :crypto-iv-s) sc/Str}})
 
 
 (sc/defschema SimpleOrg
