@@ -4,12 +4,29 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="text-field-template">
       <div class="col--vertical">
-        <label data-bind="text: label, attr: {'for': id}, css: {'required': required}, visible: label"></label>
+        <label data-bind="text: label,
+                          attr: {'for': id},
+                          css: {'required': required},
+                          visible: label"></label>
+        <!-- ko if: isImmediate -->
         <input class="input" type="text"
-               data-bind="textInput: value, attr: {placeholder: placeholder, id: id, name: id, 'data-test-id': id, maxlength: maxlength},
+               data-bind="textInput: value,
+                          attr: {placeholder: placeholder, id: id, name: id, maxlength: maxlength},
                           hasFocus: isSelected,
                           css: {required: required && !value()},
-                          disable: disable"/>
+                          disable: disable,
+                          testId: id"/>
+        <!-- /ko -->
+        <!-- ko ifnot: isImmediate -->
+        <input class="input" type="text"
+               data-bind="value: value,
+                          attr: {placeholder: placeholder, id: id, name: id, maxlength: maxlength},
+                          hasFocus: isSelected,
+                          css: {required: required && !value()},
+                          disable: disable,
+                          testId: id"/>
+        <!-- /ko -->
+
       </div>
     </script>
   </section>

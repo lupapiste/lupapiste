@@ -95,7 +95,7 @@ jQuery(document).ready(function() {
     {name: "indicator-icon"},
     {name: "accordion"},
     {name: "date-field", model: "input-field-model"},
-    {name: "text-field", model: "input-field-model"},
+    {name: "text-field"},
     {name: "textarea-field", model: "input-field-model"},
     {name: "checkbox-field", model: "input-field-model"},
     {name: "select-field"},
