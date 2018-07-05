@@ -1,22 +1,18 @@
-<!DOCTYPE html>
-<html>
-<body>
-  <section class="page container">
-    <script type="text/x-jquery-tmpl" id="fill-info-template">
-        <button data-bind="click: fillUserInfo, visible: authorization.ok('set-current-user-to-document')"
-                class="positive margins-s"
-                data-test-id="fill-info-button">
-          <i class="lupicon-user-pen"></i>
-          <span data-bind="ltext: 'fillInfoButton'"></span>
-        </button>
-        <span data-bind="if: showAttachmentsOption" class="form-entry form-entry-vcenter"
-              data-test-id="also-fill-attachments-checkbox">
-          <input type="checkbox" data-bind="checked: fillAttachments"
-                 id="fill-attachments-checkbox" class="form-input checkbox"/>
-          <label for="fill-attachments-checkbox" data-bind="ltext: 'application.attachmentsCopyOwn'"
-                 class="form-label form-label-checkbox"></label>
-        </span>
-    </script>
-  </section>
-</body>
-</html>
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="fill-info-template">
+  <div class="fill-info-toolbar">
+    <button data-bind="click: fillUserInfo,
+                       visible: authorization.ok('set-current-user-to-document')"
+            class="positive"
+            data-test-id="fill-info-button">
+      <i class="lupicon-user-pen"></i>
+      <span data-bind="ltext: 'fillInfoButton'"></span>
+    </button>
+    <!-- ko if: showAttachmentsOption -->
+    <toggle params="value: fillAttachments,
+                    ltext:'application.attachmentsCopyOwn',
+                    testId: 'also-fill-attachments',
+                    prefix: 'buttonbox'"></toggle>
+    <!-- /ko -->
+  </div>
+</script>

@@ -24,8 +24,12 @@ Sonja inits applications
   Sonja creates an application and invites foreman
   Logout
 
-Foreman uploads attachment
+No option for filling with attachments for foreman
   Foreman logs in
+  Foreman accepts invitation  0
+  No such toggle  also-fill-attachments
+
+Foreman uploads attachment
   Click Element  user-name
   Wait for Page to Load  Teppo  Nieminen
   Wait until  Click Label  architect
@@ -35,12 +39,12 @@ Foreman uploads attachment
   Click enabled by test id  userinfo-upload-ok
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
   Save User Data
+  Wait until  Scroll and click test id  back-button
 
 Foreman fills personal information
-  Foreman accepts invitation  0
-  Element should be visible by test id  also-fill-attachments-checkbox
-  Element should contain  xpath=//span[@data-test-id='also-fill-attachments-checkbox']/label  Kopioi omat liitteet hakemukselle
-  Checkbox should be selected  fill-attachments-checkbox
+  Toggle visible  also-fill-attachments
+  Test id text is  also-fill-attachments-label  Kopioi omat liitteet hakemukselle
+  Toggle selected  also-fill-attachments
   Foreman applies personal information to the foreman application
   Foreman personal information has been applied
   Foreman personal attachments have been copied
@@ -217,8 +221,21 @@ Re-send and give verdict
   Wait until  Application state should be  sent
   Submit empty verdict  foremanVerdictGiven
   Application state should be  foremanVerdictGiven
+  [Teardown]  Logout
+
+Foreman own attachments functionality is no longer available
+  Foreman logs in
+  Open foreman application  1
+  Open tab  parties
+  No such test id  fill-info-button
+  No such toggle  also-fill-attachments
+  Open tab  attachments
+  No such test id  copy-user-attachments
+  [Teardown]  Logout
 
 Foreman state has changed on base app
+  Sonja logs in
+  Open foreman application  1
   Go back to project application
   Open tab  tasks
   Wait Until  Required foreman state is  Vastaava työnjohtaja  ok

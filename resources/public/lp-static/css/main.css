@@ -6998,6 +6998,107 @@ input:disabled + .blockbox-label:hover.blockbox-label:before {
   background-color: #f6f6f6;
 }
 
+label.buttonbox-label {
+  width: 100%;
+  display: inline-block;
+  color: #333333;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
+  padding-top: 7px;
+}
+
+.buttonbox-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e603";
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: top;
+  color: #f39129;
+  cursor: pointer;
+}
+
+.buttonbox-label:hover.buttonbox-label:before,
+input:checked + .buttonbox-label:hover.buttonbox-label:before {
+  color: #fbc732;
+}
+
+input:focus + .buttonbox-label:before {
+  color: #fbc732 !important;
+}
+
+.attachment-batch-table input:focus + .buttonbox-label:before {
+  padding: 3px 3px 4px 3px;
+  border: 2px solid #fbc732;
+  border-radius: 16px;
+}
+
+.attachment-batch-table input:focus + label.buttonbox-label {
+  padding: 0 !important;
+}
+
+input:checked + .buttonbox-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e604";
+  color: #f39129;
+}
+
+input:disabled + .buttonbox-label:before,
+input:disabled + .buttonbox-label:hover.buttonbox-label:before {
+  cursor: initial;
+  color: #bbbbbb;
+}
+
+.no-label-text.buttonbox-label:before {
+  margin-right: 0;
+}
+
+.buttonbox-wrapper {
+  display: inline-block;
+  box-sizing: border-box;
+  border: 1px solid #dddddd;
+}
+
+.buttonbox-wrapper input[type=checkbox], .buttonbox-wrapper input[type=radio] {
+  display: block;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  position: absolute;
+  font-size: 0;
+}
+
+.buttonbox-wrapper.wrapper--disabled {
+  background-color: #f6f6f6;
+}
+
+.buttonbox-wrapper {
+  vertical-align: middle;
+}
+
 label.docgen-checkbox-label {
   width: 100%;
   display: inline-block;
@@ -8048,6 +8149,14 @@ div.labeled-input .cell {
   display: table-cell;
   padding-right: 24px;
   vertical-align: bottom;
+}
+
+.fill-info-toolbar {
+  margin: 6px 6px;
+}
+
+.fill-info-toolbar > button {
+  margin-right: 12px;
 }
 
 legend {

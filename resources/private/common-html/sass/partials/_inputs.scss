@@ -138,6 +138,11 @@
 // Checkboxes
 @include toggle-helper ( checkbox, "e604", "e603" ) {}
 @include toggle-helper ( blockbox, "e604", "e603", $wrapper-display: block ) {}
+@include toggle-helper ( buttonbox, "e604", "e603", $wrapper-display: inline-block ) {}
+.buttonbox-wrapper {
+  vertical-align: middle;
+}
+
 @include toggle-helper ( docgen-checkbox, "e604", "e603", $wrapper-display: block ) {}
 .docgen-checkbox-wrapper.form-input {
   height: auto;
@@ -484,4 +489,9 @@ div.labeled-input {
     padding-right: $marginL;
     vertical-align: bottom;
   }
+}
+
+.fill-info-toolbar {
+  margin: $marginS $marginS;
+  > button {margin-right: $btn-spacer;}
 }
