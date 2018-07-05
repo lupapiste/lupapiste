@@ -960,7 +960,11 @@
                      (get-operations))]
     (fact "actions" (seq actions) => truthy)))
 
-(testable-privates lupapalvelu.document.rakennuslupa-canonical get-huoneisto-data)
+(testable-privates lupapalvelu.document.rakennuslupa-canonical
+                   get-huoneisto-data
+                   get-huoneistot-schema
+                   schema-body-required-fields
+                   required-fields-have-value?)
 
 (facts "Huoneisto is correct"
   (let [huoneistot (get-huoneisto-data (-> uusi-rakennus
@@ -1023,6 +1027,14 @@
                                        "rakennuksen-muuttaminen")
         h2         (last huoneistot)]
     (fact "h2 muutostapa" (:muutostapa h2) => "muutos")))
+
+(facts "Huoneistot with created default data shouldn't create data into canonical"                       ; LPK-3844
+  (let [huoneistot (get-huoneisto-data (-> (doc-schemas/get-schema 1 "uusiRakennus")
+                                           (tools/create-document-data tools/default-values)
+                                           :huoneistot
+                                           tools/unwrapped)
+                                       "uusiRakennus")]
+    huoneistot => empty?))
 
 (testable-privates lupapalvelu.document.rakennuslupa-canonical get-rakennus)
 
@@ -2318,3 +2330,18 @@
   (get-huoneistot-pintaala (get-huoneisto-data (assoc-in huoneistot [:0 :huoneistoala] "") "uusiRakennus")) => 41.5
   (get-huoneistot-pintaala (get-huoneisto-data (assoc-in huoneistot [:0 :huoneistoala] :bar) "uusiRakennus")) => 41.5
   (get-huoneistot-pintaala (get-huoneisto-data (assoc-in huoneistot [:0 :huoneistoala] "10,0") "uusiRakennus")) => 51.5)
+
+(facts "huoneisto - required fields filled?"
+  (let [schema (get-huoneistot-schema "uusiRakennus")
+        fields (schema-body-required-fields schema)
+        default-doc-data (-> (doc-schemas/get-schema 1 "uusiRakennus")
+                             (tools/create-document-data tools/default-values)
+                             :huoneistot
+                             tools/unwrapped)]
+    fields => (just [:huoneistonumero :huoneluku :keittionTyyppi :huoneistoala])
+    (required-fields-have-value? schema {}) => false
+    (required-fields-have-value? schema {:huoneistonumero "1"}) => false
+    (fact "tools/default-values doesnt fill required data"  ; LPk-3844
+      (required-fields-have-value? schema default-doc-data) => false)
+    (fact "all test huoneistot are valid, as they have required fileld"
+      (vals huoneistot) => (has every? (partial required-fields-have-value? schema)))))
