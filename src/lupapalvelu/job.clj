@@ -8,7 +8,7 @@
            [java.util Date]))
 
 (defn check-status [data]
-  (if (every? #{:done :error} (map #(get-in % [:status]) (vals data)))
+  (if (every? #{:done :error} (map #(keyword (get-in % [:status])) (vals data)))
     :done
     :running))
 
@@ -53,11 +53,29 @@
     (mongo/update-by-id :jobs (:id old-job) {$set (dissoc new-job :id)})
     (:version new-job)))
 
+(defn update-by-id [job-id sub-task-id sub-task-status]
+  (or (let [new-job (mongo/update-one-and-return :jobs
+                                                 {:_id (ObjectId. job-id)}
+                                                 {$set {(str "value." sub-task-id) sub-task-status}
+                                                  $inc {:version 1}}
+                                                 :fields [:version :value :status])]
+        (-> (if (and (= :done (check-status (:value new-job)))
+                     (not= :done (:status new-job)))
+              (mongo/update-one-and-return :jobs
+                                           {:_id (ObjectId. job-id)}
+                                           {$set {:status :done}
+                                            $inc {:version 1}}
+                                           :fields [:version])
+              new-job)
+            :version))
+      (throw+ {:error :not-found :message (str "unknown job: id=" job-id)})))
+
 (def query-spacing 800)
 
 (defn- wait-for-job-update [^String id version timeout start-ts]
   (if-let [updated (->> (mongo/find-maps :jobs {:_id (ObjectId. id)
-                                                :version {$gt version}})
+                                                $or [{:version {$gt version}}
+                                                     {:status "done"}]})
                         (map mongo/with-id)
                         first)]
     (trim updated)
@@ -66,9 +84,6 @@
       (wait-for-job-update id version timeout start-ts))))
 
 (defn status [id version timeout]
-  (let [job (find-job id)]
-    (if (<= version (:version job))
-      {:result :update :job (trim job)}
-      (if-let [job (wait-for-job-update id version timeout (now))]
-        {:result :update :job job}
-        {:result :timeout}))))
+  (if-let [job (wait-for-job-update id version timeout (now))]
+    {:result :update :job job}
+    {:result :timeout}))
