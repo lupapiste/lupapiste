@@ -3,14 +3,18 @@
             [noir.core :refer [defpage]]
             [noir.response :as response]
             [noir.request :as request]
-            [sade.strings :as str]
             [lupapalvelu.ident.session :as ident-session]
             [lupapalvelu.ident.ident-util :as ident-util]
             [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer [$set]]
             [lupapalvelu.security :as security]
+            [monger.operators :refer [$set]]
+            [ring.util.response :refer :all]
+            [sade.env :as env]
             [sade.util :as util]
-            [sade.env :as env])
+            [sade.strings :as ss]
+            [saml20-clj.sp :as saml-sp]
+            [saml20-clj.routes :as saml-routes]
+            [saml20-clj.shared :as saml-shared])
   (:import (java.util Date)))
 
 ;; Headerit idp:stä
@@ -51,8 +55,7 @@
       (println sessionid)
       (println trid)
       (println "Ja pyyntö seuraa: ")
-      ; (clojure.pprint/pprint (clojure.walk/keywordize-keys req) (clojure.java.io/writer "esimerkkipyyntö.edn"))
-      (util/pspit req "esimerkkipyyntö2.edn")
+      ; (util/pspit req "esimerkkipyyntö.edn")
       (println req))
     ; (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :trid trid :paths paths :created-at (Date.)} :upsert true)
     (response/redirect (str "/from-ad/" trid))))
@@ -70,7 +73,7 @@
            :body "The SAML response from IdP does not validate!"})))
 
 (defpage "/api/saml/ad/error" {relay-state :RelayState status :statusCode status2 :statusCode2 message :statusMessage}
-  (if (str/contains? status2 "AuthnFailed")
+  (if (ss/contains? status2 "AuthnFailed")
     (warn "SAML endpoint rejected authentication")
     (error "SAML endpoint encountered an error:" status status2 message))
   (try
