@@ -93,7 +93,7 @@
             authority-in-org?                (fact "authority fails" (validate action) => fail?)
             :else                            (fact "else show" (validate action) => ok?)))))
 
-(fact "enable-accordions"
+(fact :qc "enable-accordions"
   (experimental/for-all
     [gen-data enable-accordions-gen]
     {:max-size 20 :num-tests 500}
