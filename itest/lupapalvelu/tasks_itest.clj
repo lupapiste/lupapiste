@@ -36,9 +36,9 @@
   (fact "created timestamp is set" (-> tasks first :created) => truthy)
 
   (fact "Assignee is set"
-    (-> tasks first :assignee :id) => pena-id
-    (-> tasks first :assignee :firstName) => "Pena"
-    (-> tasks first :assignee :lastName) => "Panaani")
+    (-> tasks first :assignee :id) => sonja-id
+    (-> tasks first :assignee :firstName) => "Sonja"
+    (-> tasks first :assignee :lastName) => "Sibbo")
 
     (fact "Applicant can see Tasks tab"
           (query pena :tasks-tab-visible :id application-id) => ok?)
