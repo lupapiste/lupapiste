@@ -77,7 +77,8 @@
                                                 $or [{:version {$gt version}}
                                                      {:status "done"}]})
                         (map mongo/with-id)
-                        first)]
+                        first
+                        stringify-keys)]
     (trim updated)
     (when (< (- (now) start-ts) timeout)
       (Thread/sleep query-spacing)
