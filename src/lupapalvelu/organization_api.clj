@@ -242,8 +242,8 @@
   {:description "Update organization details."
    :parameters [permitType municipality
                 inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
-                opening]
-   :optional-parameters [bulletinsEnabled bulletinsUrl pateEnabled]
+                opening pateEnabled]
+   :optional-parameters [bulletinsEnabled bulletinsUrl]
    :input-validators [permit/permit-type-validator
                       (fn [{{:keys [permitType pateEnabled]} :data}]
                         (if (true? pateEnabled)
