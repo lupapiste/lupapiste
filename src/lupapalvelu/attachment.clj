@@ -40,7 +40,8 @@
             [sade.env :as env]
             [lupapalvelu.storage.file-storage :as storage]
             [sade.shared-schemas :as sssc]
-            [lupapalvelu.vetuma :as vetuma])
+            [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.domain :as domain])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream]))
 
@@ -948,6 +949,13 @@
 
       (not (conversion/all-convertable-mime-types (keyword contentType)))
       (warn "Attachment" (:id attachment) "mime type" (keyword contentType) "is not convertible to PDF/A")
+
+      (and (env/feature? :s3) (= :mongodb (keyword (get-in attachment [:latestVersion :storageSystem]))))
+      ; Migrate all application files first to S3
+      (do (storage/move-application-mongodb-files-to-s3 (:id application))
+          (let [updated-app (domain/get-application-no-access-checking (:id application))
+                updated-att (first (filter #(= (:id attachment) (:id %)) (:attachments updated-app)))]
+            (convert-existing-to-pdfa! updated-app updated-att)))
 
       :else
       (if-let [file-content (storage/download application fileId)]
