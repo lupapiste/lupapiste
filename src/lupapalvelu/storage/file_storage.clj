@@ -10,7 +10,8 @@
             [pandect.core :as pandect]
             [taoensso.timbre :as timbre]
             [lupapalvelu.domain :as domain]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [lupapiste-commons.external-preview :as ext-preview])
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
            [java.time ZonedDateTime ZoneId]
            [java.util Date]))
@@ -275,7 +276,7 @@
   (assert (env/feature? :s3) "s3 feature must be enabled")
   (let [{:keys [attachments] :as application} (domain/get-application-no-access-checking id
                                                                                          [:attachments :organization])
-        preview-placeholder-sha1 (pandect/sha1 (io/file (io/resource "no-preview-available.jpg")))]
+        preview-placeholder-sha1 (pandect/sha1 (ext-preview/placeholder-image-is))]
     (doseq [{:keys [versions latestVersion] att-id :id} attachments
             [idx {:keys [fileId originalFileId storageSystem]}] (map-indexed vector versions)
             :when (and (= (keyword storageSystem) :mongodb)
