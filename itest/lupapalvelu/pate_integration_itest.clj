@@ -5,9 +5,9 @@
 
 (apply-remote-minimal)
 
-(command admin :set-organization-boolean-path
-         :organizationId "753-R"
-         :path "pate-enabled"
+(command admin :set-organization-scope-pate-value
+         :permitType "R"
+         :municipality "753"
          :value true)
 
 (defn check-count-and-last-state [id msg-count state]

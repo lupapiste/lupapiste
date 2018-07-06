@@ -98,7 +98,7 @@
                                       :julkisivumateriaali (:julkisivu rakenne))
         lammitystapa (:lammitystapa lammitys)
         huoneistot-data (get-huoneisto-data huoneistot (:name info))
-        huoneistot (if (org/pate-org? (:organization application))
+        huoneistot (if (org/pate-scope? application)
                      {:huoneisto huoneistot-data
                       :asuntojenPintaala (get-huoneistot-pintaala huoneistot-data)
                       :asuntojenLkm (get-huoneistot-lkm huoneistot-data)}

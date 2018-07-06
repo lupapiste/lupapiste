@@ -39,7 +39,8 @@
       :applicationEnabled false
       :openInforequestEnabled false
       :openInforequestEmail "someone@localhost"
-      :opening 123) => ok?
+      :opening 123
+      :pateEnabled false) => ok?
     (let [m (query pena :municipality-active :municipality "999")]
       (:applications m) => empty?
       (:infoRequests m) => empty?
@@ -54,7 +55,8 @@
              :applicationEnabled true
              :openInforequestEnabled false
              :openInforequestEmail "someone@localhost"
-             :opening 123) => ok?
+             :opening 123
+             :pateEnabled false) => ok?
     (let [resp (query pena :municipality-active :municipality "999")]
       (:applications resp) => (just "R")
       (:opening resp) => empty?))
@@ -67,7 +69,8 @@
              :applicationEnabled false
              :openInforequestEnabled true
              :openInforequestEmail "someone@localhost"
-             :opening 123) => ok?
+             :opening 123
+             :pateEnabled false) => ok?
     (let [resp (query pena :municipality-active :municipality "999")]
       (:applications resp) => empty?
       (:infoRequests resp) => (just "R")

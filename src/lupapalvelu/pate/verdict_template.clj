@@ -30,6 +30,7 @@
 
 (defn organization-categories [{scope :scope}]
   (->> scope
+       (filter #(true? (:pate-enabled %)))
        (map (comp schema-util/permit-type->categories :permitType))
        flatten
        set

@@ -947,7 +947,7 @@
 
 (facts "Toimenpiteet - operation canonical is implemented for all r-operation documents"
   (against-background
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (let [operations (map (partial hash-map :id) (range 100))
         actions (->> (vals op/r-operations)
                      (map (util/fn->> :schema (assoc {} :name)))
@@ -1028,7 +1028,7 @@
 
 (facts "When muu-lammonlahde is empty, lammonlahde is used"
   (against-background
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
                               :data {:lammitys {:lammitystapa {:value nil}
                                                :lammonlahde  {:value "turve"}
@@ -1038,7 +1038,7 @@
 
 (fact "LPK-427: When energiatehokkuusluku is set, energiatehokkuusluvunYksikko is included"
   (against-background
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
                               :data {:luokitus {:energiatehokkuusluku {:value "124"}
                                                 :energiatehokkuusluvunYksikko {:value "kWh/m2"}}}})
@@ -1047,7 +1047,7 @@
 
 (fact "LPK-427: When energiatehokkuusluku is not set, energiatehokkuusluvunYksikko is excluded"
   (against-background
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
                               :data {:luokitus {:energiatehokkuusluku {:value ""}
                                                 :energiatehokkuusluvunYksikko {:value "kWh/m2"}}}})
@@ -1056,7 +1056,7 @@
 
 (facts "When muu-lammonlahde is specified, it is used"
   (against-background
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
                               :data {:lammitys {:lammitystapa {:value nil}
                                                 :lammonlahde  {:value "other"}
@@ -1066,7 +1066,7 @@
 
 (facts "rakennuksenTiedot"
   (against-background
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (let [doc (tools/unwrapped (assoc-in uusi-rakennus [:data :varusteet :liitettyJatevesijarjestelmaanKytkin :value] true))
         {tiedot :rakennuksenTiedot} (get-rakennus application-rakennuslupa doc)]
 
@@ -1126,7 +1126,7 @@
 
 (facts "Canonical model is correct"
   (against-background
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (let [canonical (application-to-canonical application-rakennuslupa "sv")
         rakennusvalvonta (:Rakennusvalvonta canonical)
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta)
@@ -1353,7 +1353,7 @@
 
 (facts "Canonical model ilman ilmoitusta is correct"
   (against-background
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (let [canonical (application-to-canonical application-rakennuslupa-ilman-ilmoitusta "sv")
         rakennusvalvonta (:Rakennusvalvonta canonical)
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta)
@@ -1393,7 +1393,7 @@
 
 (facts "Canonical model has correct puolto"
   (against-background
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (let [application (assoc-in application-rakennuslupa [:statements 0 :status] "palautettu")
         canonical (application-to-canonical application "sv")
         rakennusvalvonta (:Rakennusvalvonta canonical)

@@ -8,5 +8,5 @@
   (mongo/clear!)
   (mongo/insert-batch :users minimal/users)
   (mongo/insert-batch :companies minimal/companies)
-  (mongo/insert-batch :organizations (map #(assoc % :pate-enabled true)
+  (mongo/insert-batch :organizations (map #(assoc % :scope (mapv (fn [sco] (assoc sco :pate-enabled true)) (:scope %)))
                                           minimal/organizations)))
