@@ -122,7 +122,8 @@
         :applicationEnabled false
         :openInforequestEnabled false
         :openInforequestEmail  "erajorma@example.com"
-        :opening nil) => ok?)
+        :opening nil
+        :pateEnabled false) => ok?)
 
     (fact "Admin converts inforequests to normal"
       (let [resp (command admin :convert-to-normal-inforequests :organizationId (:organization application))]
