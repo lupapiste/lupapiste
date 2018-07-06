@@ -519,8 +519,9 @@
 
 (defn pate-scope? [application]
   (let [organization (mongo/by-id :organizations (:organization application))]
-    (-> (resolve-organization-scope (:municipality application) (:permitType application) organization)
-        :pate-enabled)))
+    (if organization
+      (-> (resolve-organization-scope (:municipality application) (:permitType application) organization)
+          :pate-enabled))))
 
 (defn permit-types [{scope :scope :as organization}]
   (map (comp keyword :permitType) scope))
