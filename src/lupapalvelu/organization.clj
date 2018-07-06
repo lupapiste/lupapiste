@@ -272,11 +272,6 @@
 
 (def parse-organization (coerce/coercer! Organization coerce/json-coercion-matcher))
 
-(def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist :digitizer])
-(def authority-roles
-  "Reader role has access to every application within org."
-  (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))
-
 (defn- with-scope-defaults [org]
   (if (:scope org)
     (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))
@@ -544,8 +539,8 @@
 (defn allowed-roles-in-organization [organization]
   {:pre [(map? organization)]}
   (if-not (:permanent-archive-enabled organization)
-    (remove #(% (set permanent-archive-authority-roles)) authority-roles)
-    authority-roles))
+    (remove roles/permanent-archive-authority-roles roles/org-roles-without-admin)
+    roles/org-roles-without-admin))
 
 (defn filter-valid-user-roles-in-organization [organization roles]
   (let [organization  (if (map? organization) organization (get-organization organization))
