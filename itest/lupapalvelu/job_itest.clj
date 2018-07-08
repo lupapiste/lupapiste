@@ -39,4 +39,15 @@
                                               :status "done"
                                               :value {id1 {:status "done"} id2 {:status "done"}}
                                               :version 4}
-                                        :result :update})))
+                                        :result :update})
+
+    (fact "job gets completed when all tasks end in error"
+      (let [j2 (job/start initial-value)]
+        (job/update-by-id (:id j2) id1 {:status :error}) => 1
+        (job/update-by-id (:id j2) id2 {:status :error}) => 3
+
+        (job/status (:id j2) 3 10000) => {:job {:id (:id j2)
+                                                :status "done"
+                                                :value {id1 {:status "error"} id2 {:status "error"}}
+                                                :version 3}
+                                          :result :update}))))
