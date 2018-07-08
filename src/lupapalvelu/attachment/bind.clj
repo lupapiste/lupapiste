@@ -80,10 +80,10 @@
 (defn- bind-attachments! [{:keys [user] :as command} file-infos job-id]
   (reduce
     (fn [results {:keys [fileId type] :as filedata}]
-      (job/update job-id assoc fileId {:status :working :fileId fileId})
+      (job/update-by-id job-id fileId {:status :working :fileId fileId})
       (if-let [unlinked-file (storage/download-unlinked-file (:id user) fileId)]
         (let [result (bind-single-attachment! command unlinked-file filedata (map :attachment-id results))]
-          (job/update job-id assoc fileId {:status :done :fileId fileId})
+          (job/update-by-id job-id fileId {:status :done :fileId fileId})
           (conj results {:original-file-id fileId
                          :fileId (:fileId result)
                          :attachment-id (:id result)
@@ -91,7 +91,7 @@
                          :status :done}))
         (do
           (warnf "no file with file-id %s in storage" fileId)
-          (job/update job-id assoc fileId {:status :error :fileId fileId})
+          (job/update-by-id job-id fileId {:status :error :fileId fileId})
           (conj results {:fileId fileId :type type :status :error}))))
     []
     file-infos))
