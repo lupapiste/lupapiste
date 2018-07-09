@@ -135,7 +135,7 @@
 
 (fact "Sipoo categories"
   (:categories (query sipoo :verdict-template-categories))
-  => (contains ["r" "p" "tj"] :in-any-order))
+  => (contains ["r" "tj"] :in-any-order))
 
 
 (fact "Create new template"
