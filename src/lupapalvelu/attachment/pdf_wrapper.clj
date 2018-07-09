@@ -132,7 +132,6 @@
       (let [intended-width (float (* pdf-ppi (/ width width-ppi)))
             intended-length (float (* pdf-ppi (/ length length-ppi)))
             page (PDPage. (PDRectangle. intended-width intended-length))]
-        (println (type pd-image-x-object))
         (with-open [contents (PDPageContentStream. doc page)]
           (.addPage doc page)
           (.drawImage contents pd-image-x-object 0.0 0.0 intended-width intended-length))))
