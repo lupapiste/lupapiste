@@ -8951,7 +8951,7 @@ div.sticky {
 
 .reject-note {
   margin-left: 34px;
-  margin-top: -10px;
+  margin-top: -6px;
   font-size: 16px;
   color: #bbbbbb;
   padding-right: 1em;
@@ -8963,7 +8963,7 @@ div.sticky {
 
 .reject-note-editor {
   margin-left: 34px;
-  margin-top: -10px;
+  margin-top: -6px;
   font-size: 16px;
   color: inherit;
   display: block;
@@ -9020,14 +9020,14 @@ div.sticky {
 
 .accordion-reject-note {
   margin-left: 44px;
-  margin-top: -10px;
+  margin-top: -6px;
   font-size: 16px;
   color: #999999;
 }
 
 .accordion-reject-note-editor {
   margin-left: 45px;
-  margin-top: -10px;
+  margin-top: -6px;
   font-size: 16px;
   color: inherit;
   display: block;
@@ -9084,7 +9084,7 @@ div.sticky {
 
 .toolbar-reject-note {
   margin-left: 44px;
-  margin-top: -10px;
+  margin-top: -6px;
   font-size: 16px;
   color: #999999;
   color: #999999;
@@ -9094,7 +9094,7 @@ div.sticky {
 
 .toolbar-reject-note-editor {
   margin-left: 45px;
-  margin-top: -10px;
+  margin-top: -6px;
   font-size: 16px;
   color: inherit;
   display: block;
@@ -9152,7 +9152,7 @@ div.sticky {
 
 .attachment-reject-note-editor {
   margin-left: 34px;
-  margin-top: -10px;
+  margin-top: -6px;
   font-size: 16px;
   color: inherit;
   display: block;
@@ -9216,7 +9216,7 @@ div.sticky {
 
 .table-reject-note-editor {
   margin-left: 0;
-  margin-top: -10px;
+  margin-top: -6px;
   font-size: 16px;
   color: inherit;
   display: block;

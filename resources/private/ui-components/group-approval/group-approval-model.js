@@ -25,6 +25,7 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   self.hasContents = params.remove || self.isApprovable;
   var meta = self.docModel.getMeta( params.path );
   var myApproval = ko.observable( meta ? meta._approved : null );
+  var groupChanged = ko.observable( 0 );
 
   // Approval status resolution
   var masterApproval = ko.observable();
@@ -48,9 +49,11 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   ko.utils.extend(self, new LUPAPISTE.ApprovalModel(self));
 
   // Inherit isApproved && isRejected, override showStatus and details
-  self.showStatus = ko.pureComputed( _.partial( self.docModel.isApprovalCurrent,
-                                                self.model,
-                                                self.approval ));
+  self.showStatus = self.disposedComputed( function() {
+    return self.approval().timestamp > groupChanged()
+        && self.docModel.isApprovalCurrent( self.model, self.approval );
+  }
+);
 
   self.details = self.disposedPureComputed(_.partial(self.approvalInfo, myApproval));
 
@@ -81,5 +84,19 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   // Send the initial approval status to the master.
   self.docModel.approvalHubSend( self.docModel.safeApproval( self.model, myApproval),
                                  params.path );
+
+  // Group updates listener
+  self.addHubListener( "update-doc-success", function( e ) {
+    var groupPath = _.join( self.path, "." );
+    var docId = self.docModel.docId;
+    if( _.some( e.paths, function( path ) {
+      return _.startsWith( path,
+                         _.startsWith( path, docId )
+                                ? sprintf( "%s.%s", docId, groupPath)
+                                : groupPath );
+    })) {
+      groupChanged( moment().valueOf() );
+    }
+  });
 
 };

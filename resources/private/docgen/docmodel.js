@@ -1,3 +1,4 @@
+/*global  */
 var DocModel = function(schema, doc, application, authorizationModel, options) {
   "use strict";
 
@@ -1533,7 +1534,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   };
 
-  function afterSave(label, loader, indicator, callback, updateCommand, status, results) {
+  function afterSave(paths, label, loader, indicator, callback, updateCommand, status, results) {
     self.showValidationResults(results);
     if (label) {
       label.removeChild(loader);
@@ -1550,7 +1551,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     // Send updated event
     var eventType = updateCommand + "-success";
-    hub.send(eventType, {appId: self.appId, documentId: self.docId, status: status, results: results});
+    hub.send(eventType, {appId: self.appId, documentId: self.docId, status: status, results: results,
+                         paths: paths});
 
 
     if (callback) { callback(status, results); }
@@ -1575,7 +1577,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(event.target).addClass("source-value-changed");
     }
 
-    saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
+    saveForReal(path, value, _.partial(afterSave, [path], label, loader, indicator, callback));
   }
 
   function save(e, callback) {
@@ -1588,7 +1590,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function saveMany(target, updates, callback) {
     var indicator = docutils.createIndicator(target);
-    saveForReal(updates.paths, updates.values, _.partial(afterSave, null, null, indicator, callback));
+        saveForReal(updates.paths, updates.values, _.partial(afterSave, updates.paths, null, null, indicator, callback));
   }
 
   // Typical options are value, path, subSchema and sendLater.
