@@ -46,10 +46,13 @@
         </div>
 
         <div class="buttons">
-          <button class="btn-primary" data-bind="enable: archiveButtonEnabled, click: archiveSelected, testId: 'archive-selected'">
-            <span class="waiting" data-bind="css: { waiting: !_.isEmpty(archivingInProgressIds()) }">
+          <button class="btn-primary waiting" data-bind="enable: archiveButtonEnabled,
+                                                         click: archiveSelected,
+                                                         testId: 'archive-selected',
+                                                         css: { waiting: !_.isEmpty(archivingInProgressIds()) }">
+
+              <i class="lupicon-archives-in"></i>
               <i class="spin lupicon-refresh wait"></i>
-            </span>
             <span data-bind="ltext: 'arkistoidaan', visible: !_.isEmpty(archivingInProgressIds())"></span>
             <span data-bind="ltext: 'archivalSummary.archiveSelected', visible: _.isEmpty(archivingInProgressIds())"></span>
           </button>
@@ -127,11 +130,15 @@
         <h2 data-bind="ltext: 'archivalSummary.markArchived.heading'"></h2>
         <p data-bind="ltext: 'archivalSummary.markArchived.guide'"></p>
         <button class="btn-primary" data-bind="click: markPreVerdictPhaseArchived,
-                                               visible: markPreVerdictPhaseArchivedEnabled,
-                                               ltext: 'archivalSummary.markArchived.button'"></button>
+                                               visible: markPreVerdictPhaseArchivedEnabled">
+          <i class="lupicon-check"></i>
+          <span data-bind="ltext: 'archivalSummary.markArchived.button'"></span>
+        </button>
         <button class="btn-primary" data-bind="click: markFullyArchived,
-                                               visible: markFullyArchivedEnabled,
-                                               ltext: 'archivalSummary.markFullyArchived.button'"></button>
+                                               visible: markFullyArchivedEnabled">
+          <i class="lupicon-check"></i>
+          <span data-bind="ltext: 'archivalSummary.markFullyArchived.button'"></span>
+        </button>
       </div>
       <!-- /ko -->
 
