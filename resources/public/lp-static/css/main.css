@@ -15078,6 +15078,10 @@ div.automatic-assignments .assignment .editor {
   margin-top: 15px;
 }
 
+.convert-to-pdfa-button {
+  margin-bottom: 15px;
+}
+
 .applications-search-top {
   background-color: #eeeeee;
   border-bottom: 2px solid #dddddd;

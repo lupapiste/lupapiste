@@ -230,6 +230,16 @@
           </div>
           <!-- ko if: !_.isEmpty($data.latestVersion) -->
           <div class="left">
+            <div data-bind="if: convertableToPdfA" class="convert-to-pdfa-button">
+              <button class="btn-primary waiting" data-bind="click: _.partial($component.convertToPdfA, $data),
+                                                     disable: $component.conversionInProgress,
+                                                     css: { waiting: $component.conversionInProgress }">
+                <i class="lupicon-refresh"></i>
+                <i class="spin lupicon-refresh wait"></i>
+                <span data-bind="ltext: 'Konvertoi PDF/A-muotoon'"></span>
+              </button>
+            </div>
+
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'esikatselu'"></div>
               <div class="contents preview-image">
@@ -237,15 +247,6 @@
                   <img data-bind="attr: {src: '/api/raw/latest-attachment-version?preview=true&attachment-id=' + ko.unwrap(id)}">
                 </a>
               </div>
-            </div>
-            <div data-bind="if: convertableToPdfA">
-              <button class="btn-primary" data-bind="click: _.partial($component.convertToPdfA, $data),
-                                                     disable: $component.conversionInProgress">
-                <span class="waiting" data-bind="css: { waiting: $component.conversionInProgress }">
-                  <i class="spin lupicon-refresh wait"></i>
-                </span>
-                <span data-bind="ltext: 'Konvertoi PDF/A-muotoon'"></span>
-              </button>
             </div>
             <!-- ko if: showArchivalError -->
             <div class="additional-data-container archival-summary-conversion-log">
