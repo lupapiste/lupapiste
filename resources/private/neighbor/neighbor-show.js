@@ -79,10 +79,7 @@
       docgen.displayDocuments("neighborPartiesDocgen", a, sortedPartyDocs, options);
 
       self.attachmentsByGroup(getAttachmentsByGroup(a.attachments));
-      self.attachments(_.map(a.attachments || [], function(a) {
-        a.latestVersion = _.last(a.versions);
-        return a;
-      }));
+      self.attachments(a.attachments);
 
       self.primaryOperation(a.primaryOperation);
       self.secondaryOperations(a.secondaryOperations);
