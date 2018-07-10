@@ -1,6 +1,7 @@
-{:organization {:authority          #{:document/approve
-                                      :document/edit}}
- :document     {:writer             #{:document/edit
-                                      :document/edit-draft}
-                :foreman            #{:document/edit
-                                      :document/edit-draft}}}
+{:organization {:authority #{:document/approve
+                             :document/edit
+                             :document/edit-identifiers}}
+ :document     {:writer  #{:document/edit
+                           :document/edit-draft}
+                :foreman #{:document/edit
+                           :document/edit-draft}}}

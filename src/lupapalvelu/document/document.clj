@@ -149,6 +149,18 @@
     (when-not (or (not (created-after-verdict? document application)) (approval/approved? document))
       (fail :error.document-not-approved))))
 
+(defn is-identifier
+  "Precheck that fails if the identifier parameter does not refer to an
+  identifier schema."
+  [{:keys [document data]}]
+  (when document
+    (when-not (some->> document
+                       model/get-document-schema
+                       :body
+                       (util/find-by-key :name (:identifier data))
+                       :identifier)
+      (fail :error.not-identifier))))
+
 ;;
 ;; Document updates
 ;;

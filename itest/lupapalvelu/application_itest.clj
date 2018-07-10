@@ -754,16 +754,46 @@
                               :email "" :phone ""}
                              doc-id)))))
 
-(facts "Facts about update operation description"
-  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
-        application (query-application pena application-id)
-        op (:primaryOperation application)
-        test-desc "Testdesc"]
+(facts "Document tag and operation description"
+  (let [{app-id :id op :primaryOperation docs :documents
+         :as    application} (create-application pena :operation "pientalo"
+                                                 :propertyId sipoo-property-id)
+        test-desc            "Testdesc"
+        {doc-id :id :as doc}         (util/find-first #(= (get-in % [:schema-info :op :id]) (:id op))
+                                              docs)
+        desc-command         (fn [apikey description]
+                               (command apikey :update-op-description :id app-id
+                                        :op-id (:id op) :desc description
+                                        :collection "operations"))
+        tag-command          (fn [apikey tag]
+                               (command apikey :update-doc-identifier :id app-id
+                                        :doc doc-id :identifier "tunnus"
+                                        :value tag))]
     (fact "operation desc is empty" (-> op :description empty?) => truthy)
-    (command pena :update-op-description :id application-id :op-id (:id op) :desc test-desc :collection "operations")
-    (let [updated-app (query-application pena application-id)
-          updated-op (:primaryOperation updated-app)]
-      (fact "description is set" (:description updated-op) => test-desc))))
+    (fact "Pena can update description in draft state, Sonja cannot"
+      (desc-command pena test-desc) => ok?
+      (desc-command sonja "foobar" => fail?))
+    (fact "Pena can update document tag in draft state, Sonja cannot"
+      (tag-command pena "Tag") => ok?
+      (tag-command sonja "Foo" => fail?))
+    (fact "Check results"
+      (let [{op  :primaryOperation docs :documents
+             :as application} (query-application pena app-id)
+            doc (util/find-by-id doc-id docs)]
+        (fact "Description"
+          (:description op) => test-desc)
+        (fact "Tag"
+          (-> doc :data :tunnus :value) => "Tag")))
+    (fact "Submit application"
+      (command pena :submit-application :id app-id) => ok?)
+    (fact "Fetch verdict"
+      (command sonja :check-for-verdict :id app-id) => ok?)
+    (fact "Only authority can update description anymore"
+      (desc-command pena "gaah") => fail?
+      (desc-command sonja "foobar") => ok?)
+    (fact "... likewise tag"
+      (tag-command pena "cat") => fail?
+      (tag-command sonja "Foo") => ok?)))
 
 (facts "Changing application location"
   (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
