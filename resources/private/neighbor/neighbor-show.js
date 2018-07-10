@@ -114,6 +114,14 @@
       return !_.isEmpty(opName) ? "operations." + opName : "";
     });
 
+    self.fileDownloadLink = function(attachment) {
+      return "/api/raw/neighbor-download-attachment?neighborId="
+             + self.neighborId()
+             + "&token=" + self.token()
+             + "&fileId=" + attachment.latestVersion.fileId
+             + "&applicationId=" + self.applicationId();
+    };
+
     self.send = function() {
       ajax
         .command("neighbor-response", {
