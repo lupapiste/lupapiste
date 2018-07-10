@@ -1,6 +1,5 @@
 (ns lupapalvelu.neighbor-itest
   (:require [midje.sweet  :refer :all]
-            [clojure.string :as s]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
