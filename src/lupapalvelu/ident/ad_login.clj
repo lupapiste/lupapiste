@@ -30,17 +30,42 @@
    :ad-role      :role
    :ad-org-authz :orgAuthz})
 
+(defn- parse-certificate
+  "Strip the ---BEGIN CERTIFICATE--- and ---END CERTIFICATE--- headers and newlines
+  from certificate."
+  [certstring]
+  (->> (ss/split certstring #"\n") rest drop-last ss/join))
+
 ;; Nämä ehkä propertieseihin?
-(defn config []
-  {:app-name "http://app.example.com"
-   :base-uri ""
-   :idp-uri  "https://localhost:7000"
-   :idp-cert "moi"
-   ;:idp-cert "MIIDLDCCAhQCCQCs7L8tLvgUeDANBgkqhkiG9w0BAQsFADBYMQswCQYDVQQGEwJGSTEOMAwGA1UECAwFU2lwb28xDjAMBgNVBAcMBVNpcG9vMQ4wDAYDVQQKDAVTaXBvbzEZMBcGA1UEAwwQU2ltbyBTdXVydmlzaWlyaTAeFw0xODA2MjcwODE3MDRaFw0zODA2MjIwODE3MDRaMFgxCzAJBgNVBAYTAkZJMQ4wDAYDVQQIDAVTaXBvbzEOMAwGA1UEBwwFU2lwb28xDjAMBgNVBAoMBVNpcG9vMRkwFwYDVQQDDBBTaW1vIFN1dXJ2aXNpaXJpMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAplmJxb4a96fveEzqTOvuAWHXfVKkG9nyznJv5JsKtuI+uXbzQ0mdEr7TkRovFQBYTzPs4co+daLqgCA+tYv0p09obtaI8o8iXmGDVh7+q8Wg76yAocvpR5VnjoNwYHdYQnnCDcCaaPi2um0gvYmMGmhQ66kWtrmsEkTuJUEtNNM3W6sc7dl7LtrJ5TjMTtRVonxFyv0XamAJ2f6Y37cT17oas0g9ojCBNIHC0KTYBxXOTMn3x1PePKC4gEdDk0CsjJz+UHndwO2PqkYIrgh1COJYZckDEUU32y8Wc6e2k2YVJxn1GG0hNIbCMD4ogo+eI61johcw4ys+1fHk4NKvvwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBfV4071r36NE22CQ4q7GDfBwaUd9ofrf2N40sR4XzO3w9so13KZ2bhusM9/WI/L18bsPeUqZA1qsbEr2wRHdGA8Z1hCRSOZjWUNgvmNQYHX00yATlhzy8gvqCfgs55Dqj2Qo46ylacVLBVPH44p0WS0QPoYUKycZ7emIPVCQq8sEDpvt+B8tQHp3EF4VOrf3Nyb/BfRX0faJNX1wiHjq/neJzEsL7wAB4TgcKqcs/Hf0bHqGiWda57+BuAtiNU+7gIZfrlBBdT40199X5QZ8/OOiECw3NXgE6ZAdHquNOJvoHAIgDwIK2JIHqUfWjBsd4bG82OKIYCBwaJuRpwT4K8"
-   ;:keystore-file "keystore.jks"
-   ;:keystore-password "changeit"
-   ;:key-alias "stelios"
+(def config
+  {:app-name "Lupapiste"
+   :base-uri "http://localhost:8000"
+   :idp-uri  "https://localhost:7000" ;; The dockerized, locally running mock-saml instance (https://github.com/lupapiste/mock-saml)
+   :idp-cert (parse-certificate (slurp "./idp-public-cert.pem")) ;; This needs to live in Mongo
+   :keystore-file "./keystore"
+   :keystore-password (System/getenv "KEYSTORE_PASS") ;; The default password from the dev guide, needs to be set in environment variable
+   :key-alias "jetty"
    })
+
+(def decrypter
+  (saml-sp/make-saml-decrypter (:keystore-file config)
+                               (:keystore-password config)
+                               (:key-alias config)))
+
+(def sp-cert
+  "Service provider certificate, read from keystore file."
+  (saml-shared/get-certificate-b64 (:keystore-file config)
+                                   (:keystore-password config)
+                                   (:key-alias config)))
+
+(def mutables
+  (assoc
+    (saml-sp/generate-mutables)
+    :xml-signer (saml-sp/make-saml-signer (:keystore-file config)
+                                          (:keystore-password config)
+                                          (:key-alias config)
+                                          :algorithm :sha256)))
+
 
 (defpage "/api/saml/ad-login" []
   (let [sessionid (ident-util/session-id)
@@ -60,7 +85,7 @@
     ; (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :trid trid :paths paths :created-at (Date.)} :upsert true)
     (response/redirect (str "/from-ad/" trid))))
 
-(defpage "/from-ad/:trid" {:keys [trid] :as params}
+(defpage [:post "/from-ad/:trid"] {:keys [trid] :as params}
   (let [valid? params
         _ (println params)
         _ (println trid)

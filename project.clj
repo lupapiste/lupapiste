@@ -158,6 +158,7 @@
 
                  ;; SAML 2.0 -support
                  [kirasystems/saml20-clj "0.1.12"]
+
                  [org.clojure/clojurescript "1.9.946"]
                  [rum "0.10.8"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
