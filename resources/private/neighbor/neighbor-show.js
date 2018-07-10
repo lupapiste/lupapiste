@@ -143,8 +143,7 @@
     self.status = ko.observable();
   }
 
-  function getAttachmentsByGroup(source) {
-    var attachments = _.map(source, function(a) { a.latestVersion = _.last(a.versions || []); return a; });
+  function getAttachmentsByGroup(attachments) {
     var grouped = _.groupBy(attachments, function(attachment) { return attachment.type["type-group"]; });
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
