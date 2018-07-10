@@ -15,7 +15,6 @@
    Initial uploaded file is references as originalFileId in version."
   [{app :application created :created user :user} appeal-id appeal-type file]
   ; File has been uploaded unlinked, so link it first.
-  (storage/link-files-to-application (:id user) (:id app) [(:fileId file)])
   (let [type                 (att-type/attachment-type-for-appeal appeal-type)
         target               {:id appeal-id
                               :type appeal-type}
@@ -42,6 +41,7 @@
                                     archivability-result)
         version-model        (att/make-version attachment-data user version-data)]
     (preview/preview-image! (:id app) (:fileId version-data) (:filename version-data) (:contentType version-data))
+    (storage/link-files-to-application (:id user) (:id app) [(:fileId file)])
     (-> attachment-data
         (update :versions conj version-model)
         (assoc :latestVersion version-model))))
