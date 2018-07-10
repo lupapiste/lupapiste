@@ -7,19 +7,20 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment.preview :as preview]
             [clj-uuid :as uuid]
-            [lupapalvelu.storage.file-storage :as storage]))
+            [lupapalvelu.storage.file-storage :as storage]
+            [clojure.java.io :as io]))
 
 (testable-privates lupapalvelu.attachment.appeal create-appeal-attachment-data!)
 
 (facts "appeal attachment updates"
   (let [file-id  (str (uuid/v1))
-        file-obj {:content (constantly nil),
+        file-obj {:content     (fn [] (io/input-stream (io/resource "test-pdf.pdf")))
                   :contentType "application/pdf",
-                  :size 123,
-                  :filename "test-pdf.pdf",
-                  :metadata {:uploaded 12344567, :linked false},
+                  :size        123,
+                  :filename    "test-pdf.pdf",
+                  :metadata    {:uploaded 12344567, :linked false},
                   :application nil
-                  :fileId file-id}
+                  :fileId      file-id}
         app-id "LP-186-2018-90001"
         command {:application {:state :verdictGiven
                                :id app-id}
