@@ -156,8 +156,7 @@
 (defn download [bucket file-id]
   {:pre [(string? file-id)]}
   (try
-    (let [object (.getObject s3-client (bucket-name bucket) ^String file-id)
-          metadata (.getObjectMetadata object)
+    (let [metadata (.getObjectMetadata s3-client (bucket-name bucket) ^String file-id)
           user-metadata (->> (.getUserMetadata metadata)
                              (into {})
                              (map (fn [[k v]]
@@ -169,7 +168,9 @@
                                        "linked" (= v "true")
                                        (codec/url-decode v))]))
                              (into {}))]
-      {:content     (fn [] (.getObjectContent object))
+      {:content     (fn []
+                      (-> (.getObject s3-client (bucket-name bucket) ^String file-id)
+                          (.getObjectContent)))
        :contentType (.getContentType metadata)
        :size        (.getContentLength metadata)
        :filename    (:filename user-metadata)
