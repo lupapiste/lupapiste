@@ -24,9 +24,10 @@
                                                           :target target
                                                           :locked true
                                                           :read-only true})
-        archivability-result (conversion/archivability-conversion app {:content ((:content file))
-                                                                       :filename (:filename file)
-                                                                       :contentType (or (:contentType file) (:content-type file))})
+        archivability-result (with-open [content ((:content file))]
+                               (conversion/archivability-conversion app {:content content
+                                                                         :filename (:filename file)
+                                                                         :contentType (or (:contentType file) (:content-type file))}))
         converted-filedata   (when (:autoConversion archivability-result)
                                (file-upload/save-file (select-keys archivability-result [:content :filename])
                                                       :application (:id app)
