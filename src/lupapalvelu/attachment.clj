@@ -959,19 +959,20 @@
 
       :else
       (if-let [file-content (storage/download application fileId)]
-        (let [{:keys [result file] :as conversion-data} (->> (update file-content :content apply [])
-                                                             (conversion nil session-id application))]
-          (if (and (:archivable result) (:fileId file))
-            ; If the file is already valid PDF/A, there's no conversion and thus no fileId
-            (do (update-latest-version-file! application attachment conversion-data (now))
-                (storage/link-files-to-application session-id (:id application) [(:fileId file)])
-                (preview/preview-image! (:id application) (:fileId file) (:filename file) (:contentType file))
-                (cleanup-temp-file result)
-                result)
-            (do (when-not (:archivable result)
-                  (warn "Attachment" (:id attachment) "could not be converted to PDF/A."))
-                (update-latest-version-file! application attachment conversion-data (now))
-                result)))
+        (with-open [content ((:content file-content))]
+          (let [{:keys [result file] :as conversion-data} (->> (assoc file-content :content content)
+                                                               (conversion nil session-id application))]
+            (if (and (:archivable result) (:fileId file))
+              ; If the file is already valid PDF/A, there's no conversion and thus no fileId
+              (do (update-latest-version-file! application attachment conversion-data (now))
+                  (storage/link-files-to-application session-id (:id application) [(:fileId file)])
+                  (preview/preview-image! (:id application) (:fileId file) (:filename file) (:contentType file))
+                  (cleanup-temp-file result)
+                  result)
+              (do (when-not (:archivable result)
+                    (warn "Attachment" (:id attachment) "could not be converted to PDF/A."))
+                  (update-latest-version-file! application attachment conversion-data (now))
+                  result))))
         (error "PDF/A conversion: No file found with file id" fileId)))))
 
 (defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]

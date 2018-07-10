@@ -39,26 +39,28 @@
 (def archival-states #{:arkistoidaan :arkistoitu})
 
 (defn- upload-file [id is-or-file content-type metadata]
-  (let [host (env/value :arkisto :host)
-        app-id (env/value :arkisto :app-id)
-        app-key (env/value :arkisto :app-key)
-        encoded-id (codec/url-encode id)
-        url (str host "/documents/" encoded-id)
-        result (http/put url {:basic-auth [app-id app-key]
-                              :throw-exceptions false
-                              :quiet true
-                              :multipart  [{:name      "metadata"
-                                            :mime-type "application/json"
-                                            :encoding  "UTF-8"
-                                            :content   (json/generate-string metadata)}
-                                           {:name      "file"
-                                            :content   is-or-file
-                                            :mime-type content-type}]})]
-    (when (instance? InputStream is-or-file)
-      (try
-        (.close is-or-file)
-        (catch Exception _)))
-    result))
+  (try
+    (let [host (env/value :arkisto :host)
+          app-id (env/value :arkisto :app-id)
+          app-key (env/value :arkisto :app-key)
+          encoded-id (codec/url-encode id)
+          url (str host "/documents/" encoded-id)
+          result (http/put url {:basic-auth [app-id app-key]
+                                :throw-exceptions false
+                                :quiet true
+                                :multipart  [{:name      "metadata"
+                                              :mime-type "application/json"
+                                              :encoding  "UTF-8"
+                                              :content   (json/generate-string metadata)}
+                                             {:name      "file"
+                                              :content   is-or-file
+                                              :mime-type content-type}]})]
+      result)
+    (finally
+      (when (instance? InputStream is-or-file)
+        (try
+          (.close is-or-file)
+          (catch Exception _))))))
 
 (def archived-ts-keys-schema
   {:application                 (sc/maybe ssc/Timestamp)
