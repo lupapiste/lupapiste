@@ -2487,9 +2487,13 @@ button.primary:active, button.primary.active {
 }
 
 button.primary:disabled, button.primary.disabled, button.primary.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+button.primary:disabled i, button.primary.disabled i, button.primary.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.primary, .dataTables_paginate div.primary.paginate_button, .dataTables_paginate div.primary.disabled {
@@ -2514,9 +2518,13 @@ div.btn.primary:active, .dataTables_paginate div.primary.paginate_button:active,
 }
 
 div.btn.primary:disabled, .dataTables_paginate div.primary.paginate_button:disabled, .dataTables_paginate div.primary.disabled:disabled, div.btn.primary.disabled, .dataTables_paginate div.primary.disabled, div.btn.primary.waiting, .dataTables_paginate div.primary.waiting.paginate_button, .dataTables_paginate div.primary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.primary:disabled i, .dataTables_paginate div.primary.paginate_button:disabled i, .dataTables_paginate div.primary.disabled:disabled i, div.btn.primary.disabled i, .dataTables_paginate div.primary.disabled i, div.btn.primary.waiting i, .dataTables_paginate div.primary.waiting.paginate_button i, .dataTables_paginate div.primary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.primary, .dataTables_paginate a.primary.paginate_button, .dataTables_paginate a.primary.disabled {
@@ -2541,9 +2549,13 @@ a.btn.primary:active, .dataTables_paginate a.primary.paginate_button:active, .da
 }
 
 a.btn.primary:disabled, .dataTables_paginate a.primary.paginate_button:disabled, .dataTables_paginate a.primary.disabled:disabled, a.btn.primary.disabled, .dataTables_paginate a.primary.disabled, a.btn.primary.waiting, .dataTables_paginate a.primary.waiting.paginate_button, .dataTables_paginate a.primary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.primary:disabled i, .dataTables_paginate a.primary.paginate_button:disabled i, .dataTables_paginate a.primary.disabled:disabled i, a.btn.primary.disabled i, .dataTables_paginate a.primary.disabled i, a.btn.primary.waiting i, .dataTables_paginate a.primary.waiting.paginate_button i, .dataTables_paginate a.primary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.primary, .dataTables_paginate i.primary.paginate_button, .dataTables_paginate i.primary.disabled {
@@ -2568,9 +2580,13 @@ i.btn.primary:active, .dataTables_paginate i.primary.paginate_button:active, .da
 }
 
 i.btn.primary:disabled, .dataTables_paginate i.primary.paginate_button:disabled, .dataTables_paginate i.primary.disabled:disabled, i.btn.primary.disabled, .dataTables_paginate i.primary.disabled, i.btn.primary.waiting, .dataTables_paginate i.primary.waiting.paginate_button, .dataTables_paginate i.primary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.primary:disabled i, .dataTables_paginate i.primary.paginate_button:disabled i, .dataTables_paginate i.primary.disabled:disabled i, i.btn.primary.disabled i, .dataTables_paginate i.primary.disabled i, i.btn.primary.waiting i, .dataTables_paginate i.primary.waiting.paginate_button i, .dataTables_paginate i.primary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.primary, .dataTables_paginate span.primary.paginate_button, .dataTables_paginate span.primary.disabled {
@@ -2595,9 +2611,13 @@ span.btn.primary:active, .dataTables_paginate span.primary.paginate_button:activ
 }
 
 span.btn.primary:disabled, .dataTables_paginate span.primary.paginate_button:disabled, .dataTables_paginate span.primary.disabled:disabled, span.btn.primary.disabled, .dataTables_paginate span.primary.disabled, span.btn.primary.waiting, .dataTables_paginate span.primary.waiting.paginate_button, .dataTables_paginate span.primary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.primary:disabled i, .dataTables_paginate span.primary.paginate_button:disabled i, .dataTables_paginate span.primary.disabled:disabled i, span.btn.primary.disabled i, .dataTables_paginate span.primary.disabled i, span.btn.primary.waiting i, .dataTables_paginate span.primary.waiting.paginate_button i, .dataTables_paginate span.primary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.primary, .dataTables_paginate label.primary.paginate_button, .dataTables_paginate label.primary.disabled {
@@ -2622,9 +2642,13 @@ label.btn.primary:active, .dataTables_paginate label.primary.paginate_button:act
 }
 
 label.btn.primary:disabled, .dataTables_paginate label.primary.paginate_button:disabled, .dataTables_paginate label.primary.disabled:disabled, label.btn.primary.disabled, .dataTables_paginate label.primary.disabled, label.btn.primary.waiting, .dataTables_paginate label.primary.waiting.paginate_button, .dataTables_paginate label.primary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.primary:disabled i, .dataTables_paginate label.primary.paginate_button:disabled i, .dataTables_paginate label.primary.disabled:disabled i, label.btn.primary.disabled i, .dataTables_paginate label.primary.disabled i, label.btn.primary.waiting i, .dataTables_paginate label.primary.waiting.paginate_button i, .dataTables_paginate label.primary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.secondary, .dataTables_paginate button.paginate_button {
@@ -2649,9 +2673,13 @@ button.secondary:active, .dataTables_paginate button.paginate_button:active, but
 }
 
 button.secondary:disabled, .dataTables_paginate button.paginate_button:disabled, button.secondary.disabled, .dataTables_paginate button.disabled.paginate_button, button.secondary.waiting, .dataTables_paginate button.waiting.paginate_button {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+button.secondary:disabled i, .dataTables_paginate button.paginate_button:disabled i, button.secondary.disabled i, .dataTables_paginate button.disabled.paginate_button i, button.secondary.waiting i, .dataTables_paginate button.waiting.paginate_button i {
+  cursor: not-allowed;
 }
 
 div.btn.secondary, .dataTables_paginate div.paginate_button, .dataTables_paginate div.secondary.disabled {
@@ -2676,9 +2704,13 @@ div.btn.secondary:active, .dataTables_paginate div.paginate_button:active, .data
 }
 
 div.btn.secondary:disabled, .dataTables_paginate div.paginate_button:disabled, .dataTables_paginate div.secondary.disabled:disabled, div.btn.secondary.disabled, .dataTables_paginate div.disabled.paginate_button, .dataTables_paginate div.secondary.disabled, div.btn.secondary.waiting, .dataTables_paginate div.waiting.paginate_button, .dataTables_paginate div.secondary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.secondary:disabled i, .dataTables_paginate div.paginate_button:disabled i, .dataTables_paginate div.secondary.disabled:disabled i, div.btn.secondary.disabled i, .dataTables_paginate div.disabled.paginate_button i, .dataTables_paginate div.secondary.disabled i, div.btn.secondary.waiting i, .dataTables_paginate div.waiting.paginate_button i, .dataTables_paginate div.secondary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.secondary, .dataTables_paginate a.paginate_button, .dataTables_paginate a.secondary.disabled {
@@ -2703,9 +2735,13 @@ a.btn.secondary:active, .dataTables_paginate a.paginate_button:active, .dataTabl
 }
 
 a.btn.secondary:disabled, .dataTables_paginate a.paginate_button:disabled, .dataTables_paginate a.secondary.disabled:disabled, a.btn.secondary.disabled, .dataTables_paginate a.disabled.paginate_button, .dataTables_paginate a.secondary.disabled, a.btn.secondary.waiting, .dataTables_paginate a.waiting.paginate_button, .dataTables_paginate a.secondary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.secondary:disabled i, .dataTables_paginate a.paginate_button:disabled i, .dataTables_paginate a.secondary.disabled:disabled i, a.btn.secondary.disabled i, .dataTables_paginate a.disabled.paginate_button i, .dataTables_paginate a.secondary.disabled i, a.btn.secondary.waiting i, .dataTables_paginate a.waiting.paginate_button i, .dataTables_paginate a.secondary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.secondary, .dataTables_paginate i.paginate_button, .dataTables_paginate i.secondary.disabled {
@@ -2730,9 +2766,13 @@ i.btn.secondary:active, .dataTables_paginate i.paginate_button:active, .dataTabl
 }
 
 i.btn.secondary:disabled, .dataTables_paginate i.paginate_button:disabled, .dataTables_paginate i.secondary.disabled:disabled, i.btn.secondary.disabled, .dataTables_paginate i.disabled.paginate_button, .dataTables_paginate i.secondary.disabled, i.btn.secondary.waiting, .dataTables_paginate i.waiting.paginate_button, .dataTables_paginate i.secondary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.secondary:disabled i, .dataTables_paginate i.paginate_button:disabled i, .dataTables_paginate i.secondary.disabled:disabled i, i.btn.secondary.disabled i, .dataTables_paginate i.disabled.paginate_button i, .dataTables_paginate i.secondary.disabled i, i.btn.secondary.waiting i, .dataTables_paginate i.waiting.paginate_button i, .dataTables_paginate i.secondary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.secondary, .dataTables_paginate span.paginate_button, .dataTables_paginate span.secondary.disabled {
@@ -2757,9 +2797,13 @@ span.btn.secondary:active, .dataTables_paginate span.paginate_button:active, .da
 }
 
 span.btn.secondary:disabled, .dataTables_paginate span.paginate_button:disabled, .dataTables_paginate span.secondary.disabled:disabled, span.btn.secondary.disabled, .dataTables_paginate span.disabled.paginate_button, .dataTables_paginate span.secondary.disabled, span.btn.secondary.waiting, .dataTables_paginate span.waiting.paginate_button, .dataTables_paginate span.secondary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.secondary:disabled i, .dataTables_paginate span.paginate_button:disabled i, .dataTables_paginate span.secondary.disabled:disabled i, span.btn.secondary.disabled i, .dataTables_paginate span.disabled.paginate_button i, .dataTables_paginate span.secondary.disabled i, span.btn.secondary.waiting i, .dataTables_paginate span.waiting.paginate_button i, .dataTables_paginate span.secondary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.secondary, .dataTables_paginate label.paginate_button, .dataTables_paginate label.secondary.disabled {
@@ -2784,9 +2828,13 @@ label.btn.secondary:active, .dataTables_paginate label.paginate_button:active, .
 }
 
 label.btn.secondary:disabled, .dataTables_paginate label.paginate_button:disabled, .dataTables_paginate label.secondary.disabled:disabled, label.btn.secondary.disabled, .dataTables_paginate label.disabled.paginate_button, .dataTables_paginate label.secondary.disabled, label.btn.secondary.waiting, .dataTables_paginate label.waiting.paginate_button, .dataTables_paginate label.secondary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.secondary:disabled i, .dataTables_paginate label.paginate_button:disabled i, .dataTables_paginate label.secondary.disabled:disabled i, label.btn.secondary.disabled i, .dataTables_paginate label.disabled.paginate_button i, .dataTables_paginate label.secondary.disabled i, label.btn.secondary.waiting i, .dataTables_paginate label.waiting.paginate_button i, .dataTables_paginate label.secondary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.tertiary {
@@ -2811,9 +2859,13 @@ button.tertiary:active, button.tertiary.active {
 }
 
 button.tertiary:disabled, button.tertiary.disabled, button.tertiary.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+button.tertiary:disabled i, button.tertiary.disabled i, button.tertiary.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.tertiary, .dataTables_paginate div.tertiary.paginate_button, .dataTables_paginate div.tertiary.disabled {
@@ -2838,9 +2890,13 @@ div.btn.tertiary:active, .dataTables_paginate div.tertiary.paginate_button:activ
 }
 
 div.btn.tertiary:disabled, .dataTables_paginate div.tertiary.paginate_button:disabled, .dataTables_paginate div.tertiary.disabled:disabled, div.btn.tertiary.disabled, .dataTables_paginate div.tertiary.disabled, div.btn.tertiary.waiting, .dataTables_paginate div.tertiary.waiting.paginate_button, .dataTables_paginate div.tertiary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.tertiary:disabled i, .dataTables_paginate div.tertiary.paginate_button:disabled i, .dataTables_paginate div.tertiary.disabled:disabled i, div.btn.tertiary.disabled i, .dataTables_paginate div.tertiary.disabled i, div.btn.tertiary.waiting i, .dataTables_paginate div.tertiary.waiting.paginate_button i, .dataTables_paginate div.tertiary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.tertiary, .dataTables_paginate a.tertiary.paginate_button, .dataTables_paginate a.tertiary.disabled {
@@ -2865,9 +2921,13 @@ a.btn.tertiary:active, .dataTables_paginate a.tertiary.paginate_button:active, .
 }
 
 a.btn.tertiary:disabled, .dataTables_paginate a.tertiary.paginate_button:disabled, .dataTables_paginate a.tertiary.disabled:disabled, a.btn.tertiary.disabled, .dataTables_paginate a.tertiary.disabled, a.btn.tertiary.waiting, .dataTables_paginate a.tertiary.waiting.paginate_button, .dataTables_paginate a.tertiary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.tertiary:disabled i, .dataTables_paginate a.tertiary.paginate_button:disabled i, .dataTables_paginate a.tertiary.disabled:disabled i, a.btn.tertiary.disabled i, .dataTables_paginate a.tertiary.disabled i, a.btn.tertiary.waiting i, .dataTables_paginate a.tertiary.waiting.paginate_button i, .dataTables_paginate a.tertiary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.tertiary, .dataTables_paginate i.tertiary.paginate_button, .dataTables_paginate i.tertiary.disabled {
@@ -2892,9 +2952,13 @@ i.btn.tertiary:active, .dataTables_paginate i.tertiary.paginate_button:active, .
 }
 
 i.btn.tertiary:disabled, .dataTables_paginate i.tertiary.paginate_button:disabled, .dataTables_paginate i.tertiary.disabled:disabled, i.btn.tertiary.disabled, .dataTables_paginate i.tertiary.disabled, i.btn.tertiary.waiting, .dataTables_paginate i.tertiary.waiting.paginate_button, .dataTables_paginate i.tertiary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.tertiary:disabled i, .dataTables_paginate i.tertiary.paginate_button:disabled i, .dataTables_paginate i.tertiary.disabled:disabled i, i.btn.tertiary.disabled i, .dataTables_paginate i.tertiary.disabled i, i.btn.tertiary.waiting i, .dataTables_paginate i.tertiary.waiting.paginate_button i, .dataTables_paginate i.tertiary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.tertiary, .dataTables_paginate span.tertiary.paginate_button, .dataTables_paginate span.tertiary.disabled {
@@ -2919,9 +2983,13 @@ span.btn.tertiary:active, .dataTables_paginate span.tertiary.paginate_button:act
 }
 
 span.btn.tertiary:disabled, .dataTables_paginate span.tertiary.paginate_button:disabled, .dataTables_paginate span.tertiary.disabled:disabled, span.btn.tertiary.disabled, .dataTables_paginate span.tertiary.disabled, span.btn.tertiary.waiting, .dataTables_paginate span.tertiary.waiting.paginate_button, .dataTables_paginate span.tertiary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.tertiary:disabled i, .dataTables_paginate span.tertiary.paginate_button:disabled i, .dataTables_paginate span.tertiary.disabled:disabled i, span.btn.tertiary.disabled i, .dataTables_paginate span.tertiary.disabled i, span.btn.tertiary.waiting i, .dataTables_paginate span.tertiary.waiting.paginate_button i, .dataTables_paginate span.tertiary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.tertiary, .dataTables_paginate label.tertiary.paginate_button, .dataTables_paginate label.tertiary.disabled {
@@ -2946,9 +3014,13 @@ label.btn.tertiary:active, .dataTables_paginate label.tertiary.paginate_button:a
 }
 
 label.btn.tertiary:disabled, .dataTables_paginate label.tertiary.paginate_button:disabled, .dataTables_paginate label.tertiary.disabled:disabled, label.btn.tertiary.disabled, .dataTables_paginate label.tertiary.disabled, label.btn.tertiary.waiting, .dataTables_paginate label.tertiary.waiting.paginate_button, .dataTables_paginate label.tertiary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.tertiary:disabled i, .dataTables_paginate label.tertiary.paginate_button:disabled i, .dataTables_paginate label.tertiary.disabled:disabled i, label.btn.tertiary.disabled i, .dataTables_paginate label.tertiary.disabled i, label.btn.tertiary.waiting i, .dataTables_paginate label.tertiary.waiting.paginate_button i, .dataTables_paginate label.tertiary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.tertiary-ghost {
@@ -2973,9 +3045,13 @@ button.tertiary-ghost:active, button.tertiary-ghost.active {
 }
 
 button.tertiary-ghost:disabled, button.tertiary-ghost.disabled, button.tertiary-ghost.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+button.tertiary-ghost:disabled i, button.tertiary-ghost.disabled i, button.tertiary-ghost.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.tertiary-ghost, .dataTables_paginate div.tertiary-ghost.paginate_button, .dataTables_paginate div.tertiary-ghost.disabled {
@@ -3000,9 +3076,13 @@ div.btn.tertiary-ghost:active, .dataTables_paginate div.tertiary-ghost.paginate_
 }
 
 div.btn.tertiary-ghost:disabled, .dataTables_paginate div.tertiary-ghost.paginate_button:disabled, .dataTables_paginate div.tertiary-ghost.disabled:disabled, div.btn.tertiary-ghost.disabled, .dataTables_paginate div.tertiary-ghost.disabled, div.btn.tertiary-ghost.waiting, .dataTables_paginate div.tertiary-ghost.waiting.paginate_button, .dataTables_paginate div.tertiary-ghost.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.tertiary-ghost:disabled i, .dataTables_paginate div.tertiary-ghost.paginate_button:disabled i, .dataTables_paginate div.tertiary-ghost.disabled:disabled i, div.btn.tertiary-ghost.disabled i, .dataTables_paginate div.tertiary-ghost.disabled i, div.btn.tertiary-ghost.waiting i, .dataTables_paginate div.tertiary-ghost.waiting.paginate_button i, .dataTables_paginate div.tertiary-ghost.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.tertiary-ghost, .dataTables_paginate a.tertiary-ghost.paginate_button, .dataTables_paginate a.tertiary-ghost.disabled {
@@ -3027,9 +3107,13 @@ a.btn.tertiary-ghost:active, .dataTables_paginate a.tertiary-ghost.paginate_butt
 }
 
 a.btn.tertiary-ghost:disabled, .dataTables_paginate a.tertiary-ghost.paginate_button:disabled, .dataTables_paginate a.tertiary-ghost.disabled:disabled, a.btn.tertiary-ghost.disabled, .dataTables_paginate a.tertiary-ghost.disabled, a.btn.tertiary-ghost.waiting, .dataTables_paginate a.tertiary-ghost.waiting.paginate_button, .dataTables_paginate a.tertiary-ghost.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.tertiary-ghost:disabled i, .dataTables_paginate a.tertiary-ghost.paginate_button:disabled i, .dataTables_paginate a.tertiary-ghost.disabled:disabled i, a.btn.tertiary-ghost.disabled i, .dataTables_paginate a.tertiary-ghost.disabled i, a.btn.tertiary-ghost.waiting i, .dataTables_paginate a.tertiary-ghost.waiting.paginate_button i, .dataTables_paginate a.tertiary-ghost.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.tertiary-ghost, .dataTables_paginate i.tertiary-ghost.paginate_button, .dataTables_paginate i.tertiary-ghost.disabled {
@@ -3054,9 +3138,13 @@ i.btn.tertiary-ghost:active, .dataTables_paginate i.tertiary-ghost.paginate_butt
 }
 
 i.btn.tertiary-ghost:disabled, .dataTables_paginate i.tertiary-ghost.paginate_button:disabled, .dataTables_paginate i.tertiary-ghost.disabled:disabled, i.btn.tertiary-ghost.disabled, .dataTables_paginate i.tertiary-ghost.disabled, i.btn.tertiary-ghost.waiting, .dataTables_paginate i.tertiary-ghost.waiting.paginate_button, .dataTables_paginate i.tertiary-ghost.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.tertiary-ghost:disabled i, .dataTables_paginate i.tertiary-ghost.paginate_button:disabled i, .dataTables_paginate i.tertiary-ghost.disabled:disabled i, i.btn.tertiary-ghost.disabled i, .dataTables_paginate i.tertiary-ghost.disabled i, i.btn.tertiary-ghost.waiting i, .dataTables_paginate i.tertiary-ghost.waiting.paginate_button i, .dataTables_paginate i.tertiary-ghost.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.tertiary-ghost, .dataTables_paginate span.tertiary-ghost.paginate_button, .dataTables_paginate span.tertiary-ghost.disabled {
@@ -3081,9 +3169,13 @@ span.btn.tertiary-ghost:active, .dataTables_paginate span.tertiary-ghost.paginat
 }
 
 span.btn.tertiary-ghost:disabled, .dataTables_paginate span.tertiary-ghost.paginate_button:disabled, .dataTables_paginate span.tertiary-ghost.disabled:disabled, span.btn.tertiary-ghost.disabled, .dataTables_paginate span.tertiary-ghost.disabled, span.btn.tertiary-ghost.waiting, .dataTables_paginate span.tertiary-ghost.waiting.paginate_button, .dataTables_paginate span.tertiary-ghost.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.tertiary-ghost:disabled i, .dataTables_paginate span.tertiary-ghost.paginate_button:disabled i, .dataTables_paginate span.tertiary-ghost.disabled:disabled i, span.btn.tertiary-ghost.disabled i, .dataTables_paginate span.tertiary-ghost.disabled i, span.btn.tertiary-ghost.waiting i, .dataTables_paginate span.tertiary-ghost.waiting.paginate_button i, .dataTables_paginate span.tertiary-ghost.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.tertiary-ghost, .dataTables_paginate label.tertiary-ghost.paginate_button, .dataTables_paginate label.tertiary-ghost.disabled {
@@ -3108,9 +3200,13 @@ label.btn.tertiary-ghost:active, .dataTables_paginate label.tertiary-ghost.pagin
 }
 
 label.btn.tertiary-ghost:disabled, .dataTables_paginate label.tertiary-ghost.paginate_button:disabled, .dataTables_paginate label.tertiary-ghost.disabled:disabled, label.btn.tertiary-ghost.disabled, .dataTables_paginate label.tertiary-ghost.disabled, label.btn.tertiary-ghost.waiting, .dataTables_paginate label.tertiary-ghost.waiting.paginate_button, .dataTables_paginate label.tertiary-ghost.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.tertiary-ghost:disabled i, .dataTables_paginate label.tertiary-ghost.paginate_button:disabled i, .dataTables_paginate label.tertiary-ghost.disabled:disabled i, label.btn.tertiary-ghost.disabled i, .dataTables_paginate label.tertiary-ghost.disabled i, label.btn.tertiary-ghost.waiting i, .dataTables_paginate label.tertiary-ghost.waiting.paginate_button i, .dataTables_paginate label.tertiary-ghost.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.positive {
@@ -3135,9 +3231,13 @@ button.positive:active, button.positive.active {
 }
 
 button.positive:disabled, button.positive.disabled, button.positive.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+button.positive:disabled i, button.positive.disabled i, button.positive.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.positive, .dataTables_paginate div.positive.paginate_button, .dataTables_paginate div.positive.disabled {
@@ -3162,9 +3262,13 @@ div.btn.positive:active, .dataTables_paginate div.positive.paginate_button:activ
 }
 
 div.btn.positive:disabled, .dataTables_paginate div.positive.paginate_button:disabled, .dataTables_paginate div.positive.disabled:disabled, div.btn.positive.disabled, .dataTables_paginate div.positive.disabled, div.btn.positive.waiting, .dataTables_paginate div.positive.waiting.paginate_button, .dataTables_paginate div.positive.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.positive:disabled i, .dataTables_paginate div.positive.paginate_button:disabled i, .dataTables_paginate div.positive.disabled:disabled i, div.btn.positive.disabled i, .dataTables_paginate div.positive.disabled i, div.btn.positive.waiting i, .dataTables_paginate div.positive.waiting.paginate_button i, .dataTables_paginate div.positive.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.positive, .dataTables_paginate a.positive.paginate_button, .dataTables_paginate a.positive.disabled {
@@ -3189,9 +3293,13 @@ a.btn.positive:active, .dataTables_paginate a.positive.paginate_button:active, .
 }
 
 a.btn.positive:disabled, .dataTables_paginate a.positive.paginate_button:disabled, .dataTables_paginate a.positive.disabled:disabled, a.btn.positive.disabled, .dataTables_paginate a.positive.disabled, a.btn.positive.waiting, .dataTables_paginate a.positive.waiting.paginate_button, .dataTables_paginate a.positive.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.positive:disabled i, .dataTables_paginate a.positive.paginate_button:disabled i, .dataTables_paginate a.positive.disabled:disabled i, a.btn.positive.disabled i, .dataTables_paginate a.positive.disabled i, a.btn.positive.waiting i, .dataTables_paginate a.positive.waiting.paginate_button i, .dataTables_paginate a.positive.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.positive, .dataTables_paginate i.positive.paginate_button, .dataTables_paginate i.positive.disabled {
@@ -3216,9 +3324,13 @@ i.btn.positive:active, .dataTables_paginate i.positive.paginate_button:active, .
 }
 
 i.btn.positive:disabled, .dataTables_paginate i.positive.paginate_button:disabled, .dataTables_paginate i.positive.disabled:disabled, i.btn.positive.disabled, .dataTables_paginate i.positive.disabled, i.btn.positive.waiting, .dataTables_paginate i.positive.waiting.paginate_button, .dataTables_paginate i.positive.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.positive:disabled i, .dataTables_paginate i.positive.paginate_button:disabled i, .dataTables_paginate i.positive.disabled:disabled i, i.btn.positive.disabled i, .dataTables_paginate i.positive.disabled i, i.btn.positive.waiting i, .dataTables_paginate i.positive.waiting.paginate_button i, .dataTables_paginate i.positive.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.positive, .dataTables_paginate span.positive.paginate_button, .dataTables_paginate span.positive.disabled {
@@ -3243,9 +3355,13 @@ span.btn.positive:active, .dataTables_paginate span.positive.paginate_button:act
 }
 
 span.btn.positive:disabled, .dataTables_paginate span.positive.paginate_button:disabled, .dataTables_paginate span.positive.disabled:disabled, span.btn.positive.disabled, .dataTables_paginate span.positive.disabled, span.btn.positive.waiting, .dataTables_paginate span.positive.waiting.paginate_button, .dataTables_paginate span.positive.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.positive:disabled i, .dataTables_paginate span.positive.paginate_button:disabled i, .dataTables_paginate span.positive.disabled:disabled i, span.btn.positive.disabled i, .dataTables_paginate span.positive.disabled i, span.btn.positive.waiting i, .dataTables_paginate span.positive.waiting.paginate_button i, .dataTables_paginate span.positive.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.positive, .dataTables_paginate label.positive.paginate_button, .dataTables_paginate label.positive.disabled {
@@ -3270,9 +3386,13 @@ label.btn.positive:active, .dataTables_paginate label.positive.paginate_button:a
 }
 
 label.btn.positive:disabled, .dataTables_paginate label.positive.paginate_button:disabled, .dataTables_paginate label.positive.disabled:disabled, label.btn.positive.disabled, .dataTables_paginate label.positive.disabled, label.btn.positive.waiting, .dataTables_paginate label.positive.waiting.paginate_button, .dataTables_paginate label.positive.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.positive:disabled i, .dataTables_paginate label.positive.paginate_button:disabled i, .dataTables_paginate label.positive.disabled:disabled i, label.btn.positive.disabled i, .dataTables_paginate label.positive.disabled i, label.btn.positive.waiting i, .dataTables_paginate label.positive.waiting.paginate_button i, .dataTables_paginate label.positive.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.approve {
@@ -3297,9 +3417,13 @@ button.approve:active, button.approve.active {
 }
 
 button.approve:disabled, button.approve.disabled, button.approve.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+button.approve:disabled i, button.approve.disabled i, button.approve.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.approve, .dataTables_paginate div.approve.paginate_button, .dataTables_paginate div.approve.disabled {
@@ -3324,9 +3448,13 @@ div.btn.approve:active, .dataTables_paginate div.approve.paginate_button:active,
 }
 
 div.btn.approve:disabled, .dataTables_paginate div.approve.paginate_button:disabled, .dataTables_paginate div.approve.disabled:disabled, div.btn.approve.disabled, .dataTables_paginate div.approve.disabled, div.btn.approve.waiting, .dataTables_paginate div.approve.waiting.paginate_button, .dataTables_paginate div.approve.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.approve:disabled i, .dataTables_paginate div.approve.paginate_button:disabled i, .dataTables_paginate div.approve.disabled:disabled i, div.btn.approve.disabled i, .dataTables_paginate div.approve.disabled i, div.btn.approve.waiting i, .dataTables_paginate div.approve.waiting.paginate_button i, .dataTables_paginate div.approve.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.approve, .dataTables_paginate a.approve.paginate_button, .dataTables_paginate a.approve.disabled {
@@ -3351,9 +3479,13 @@ a.btn.approve:active, .dataTables_paginate a.approve.paginate_button:active, .da
 }
 
 a.btn.approve:disabled, .dataTables_paginate a.approve.paginate_button:disabled, .dataTables_paginate a.approve.disabled:disabled, a.btn.approve.disabled, .dataTables_paginate a.approve.disabled, a.btn.approve.waiting, .dataTables_paginate a.approve.waiting.paginate_button, .dataTables_paginate a.approve.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.approve:disabled i, .dataTables_paginate a.approve.paginate_button:disabled i, .dataTables_paginate a.approve.disabled:disabled i, a.btn.approve.disabled i, .dataTables_paginate a.approve.disabled i, a.btn.approve.waiting i, .dataTables_paginate a.approve.waiting.paginate_button i, .dataTables_paginate a.approve.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.approve, .dataTables_paginate i.approve.paginate_button, .dataTables_paginate i.approve.disabled {
@@ -3378,9 +3510,13 @@ i.btn.approve:active, .dataTables_paginate i.approve.paginate_button:active, .da
 }
 
 i.btn.approve:disabled, .dataTables_paginate i.approve.paginate_button:disabled, .dataTables_paginate i.approve.disabled:disabled, i.btn.approve.disabled, .dataTables_paginate i.approve.disabled, i.btn.approve.waiting, .dataTables_paginate i.approve.waiting.paginate_button, .dataTables_paginate i.approve.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.approve:disabled i, .dataTables_paginate i.approve.paginate_button:disabled i, .dataTables_paginate i.approve.disabled:disabled i, i.btn.approve.disabled i, .dataTables_paginate i.approve.disabled i, i.btn.approve.waiting i, .dataTables_paginate i.approve.waiting.paginate_button i, .dataTables_paginate i.approve.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.approve, .dataTables_paginate span.approve.paginate_button, .dataTables_paginate span.approve.disabled {
@@ -3405,9 +3541,13 @@ span.btn.approve:active, .dataTables_paginate span.approve.paginate_button:activ
 }
 
 span.btn.approve:disabled, .dataTables_paginate span.approve.paginate_button:disabled, .dataTables_paginate span.approve.disabled:disabled, span.btn.approve.disabled, .dataTables_paginate span.approve.disabled, span.btn.approve.waiting, .dataTables_paginate span.approve.waiting.paginate_button, .dataTables_paginate span.approve.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.approve:disabled i, .dataTables_paginate span.approve.paginate_button:disabled i, .dataTables_paginate span.approve.disabled:disabled i, span.btn.approve.disabled i, .dataTables_paginate span.approve.disabled i, span.btn.approve.waiting i, .dataTables_paginate span.approve.waiting.paginate_button i, .dataTables_paginate span.approve.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.approve, .dataTables_paginate label.approve.paginate_button, .dataTables_paginate label.approve.disabled {
@@ -3432,9 +3572,13 @@ label.btn.approve:active, .dataTables_paginate label.approve.paginate_button:act
 }
 
 label.btn.approve:disabled, .dataTables_paginate label.approve.paginate_button:disabled, .dataTables_paginate label.approve.disabled:disabled, label.btn.approve.disabled, .dataTables_paginate label.approve.disabled, label.btn.approve.waiting, .dataTables_paginate label.approve.waiting.paginate_button, .dataTables_paginate label.approve.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.approve:disabled i, .dataTables_paginate label.approve.paginate_button:disabled i, .dataTables_paginate label.approve.disabled:disabled i, label.btn.approve.disabled i, .dataTables_paginate label.approve.disabled i, label.btn.approve.waiting i, .dataTables_paginate label.approve.waiting.paginate_button i, .dataTables_paginate label.approve.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.btn-primary {
@@ -3459,9 +3603,13 @@ button.btn-primary:active, button.btn-primary.active {
 }
 
 button.btn-primary:disabled, button.btn-primary.disabled, button.btn-primary.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+button.btn-primary:disabled i, button.btn-primary.disabled i, button.btn-primary.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.btn-primary, .dataTables_paginate div.btn-primary.paginate_button, .dataTables_paginate div.btn-primary.disabled {
@@ -3486,9 +3634,13 @@ div.btn.btn-primary:active, .dataTables_paginate div.btn-primary.paginate_button
 }
 
 div.btn.btn-primary:disabled, .dataTables_paginate div.btn-primary.paginate_button:disabled, .dataTables_paginate div.btn-primary.disabled:disabled, div.btn.btn-primary.disabled, .dataTables_paginate div.btn-primary.disabled, div.btn.btn-primary.waiting, .dataTables_paginate div.btn-primary.waiting.paginate_button, .dataTables_paginate div.btn-primary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.btn-primary:disabled i, .dataTables_paginate div.btn-primary.paginate_button:disabled i, .dataTables_paginate div.btn-primary.disabled:disabled i, div.btn.btn-primary.disabled i, .dataTables_paginate div.btn-primary.disabled i, div.btn.btn-primary.waiting i, .dataTables_paginate div.btn-primary.waiting.paginate_button i, .dataTables_paginate div.btn-primary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.btn-primary, .dataTables_paginate a.btn-primary.paginate_button, .dataTables_paginate a.btn-primary.disabled {
@@ -3513,9 +3665,13 @@ a.btn.btn-primary:active, .dataTables_paginate a.btn-primary.paginate_button:act
 }
 
 a.btn.btn-primary:disabled, .dataTables_paginate a.btn-primary.paginate_button:disabled, .dataTables_paginate a.btn-primary.disabled:disabled, a.btn.btn-primary.disabled, .dataTables_paginate a.btn-primary.disabled, a.btn.btn-primary.waiting, .dataTables_paginate a.btn-primary.waiting.paginate_button, .dataTables_paginate a.btn-primary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.btn-primary:disabled i, .dataTables_paginate a.btn-primary.paginate_button:disabled i, .dataTables_paginate a.btn-primary.disabled:disabled i, a.btn.btn-primary.disabled i, .dataTables_paginate a.btn-primary.disabled i, a.btn.btn-primary.waiting i, .dataTables_paginate a.btn-primary.waiting.paginate_button i, .dataTables_paginate a.btn-primary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.btn-primary, .dataTables_paginate i.btn-primary.paginate_button, .dataTables_paginate i.btn-primary.disabled {
@@ -3540,9 +3696,13 @@ i.btn.btn-primary:active, .dataTables_paginate i.btn-primary.paginate_button:act
 }
 
 i.btn.btn-primary:disabled, .dataTables_paginate i.btn-primary.paginate_button:disabled, .dataTables_paginate i.btn-primary.disabled:disabled, i.btn.btn-primary.disabled, .dataTables_paginate i.btn-primary.disabled, i.btn.btn-primary.waiting, .dataTables_paginate i.btn-primary.waiting.paginate_button, .dataTables_paginate i.btn-primary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.btn-primary:disabled i, .dataTables_paginate i.btn-primary.paginate_button:disabled i, .dataTables_paginate i.btn-primary.disabled:disabled i, i.btn.btn-primary.disabled i, .dataTables_paginate i.btn-primary.disabled i, i.btn.btn-primary.waiting i, .dataTables_paginate i.btn-primary.waiting.paginate_button i, .dataTables_paginate i.btn-primary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.btn-primary, .dataTables_paginate span.btn-primary.paginate_button, .dataTables_paginate span.btn-primary.disabled {
@@ -3567,9 +3727,13 @@ span.btn.btn-primary:active, .dataTables_paginate span.btn-primary.paginate_butt
 }
 
 span.btn.btn-primary:disabled, .dataTables_paginate span.btn-primary.paginate_button:disabled, .dataTables_paginate span.btn-primary.disabled:disabled, span.btn.btn-primary.disabled, .dataTables_paginate span.btn-primary.disabled, span.btn.btn-primary.waiting, .dataTables_paginate span.btn-primary.waiting.paginate_button, .dataTables_paginate span.btn-primary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.btn-primary:disabled i, .dataTables_paginate span.btn-primary.paginate_button:disabled i, .dataTables_paginate span.btn-primary.disabled:disabled i, span.btn.btn-primary.disabled i, .dataTables_paginate span.btn-primary.disabled i, span.btn.btn-primary.waiting i, .dataTables_paginate span.btn-primary.waiting.paginate_button i, .dataTables_paginate span.btn-primary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.btn-primary, .dataTables_paginate label.btn-primary.paginate_button, .dataTables_paginate label.btn-primary.disabled {
@@ -3594,9 +3758,13 @@ label.btn.btn-primary:active, .dataTables_paginate label.btn-primary.paginate_bu
 }
 
 label.btn.btn-primary:disabled, .dataTables_paginate label.btn-primary.paginate_button:disabled, .dataTables_paginate label.btn-primary.disabled:disabled, label.btn.btn-primary.disabled, .dataTables_paginate label.btn-primary.disabled, label.btn.btn-primary.waiting, .dataTables_paginate label.btn-primary.waiting.paginate_button, .dataTables_paginate label.btn-primary.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.btn-primary:disabled i, .dataTables_paginate label.btn-primary.paginate_button:disabled i, .dataTables_paginate label.btn-primary.disabled:disabled i, label.btn.btn-primary.disabled i, .dataTables_paginate label.btn-primary.disabled i, label.btn.btn-primary.waiting i, .dataTables_paginate label.btn-primary.waiting.paginate_button i, .dataTables_paginate label.btn-primary.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.negative {
@@ -3621,9 +3789,13 @@ button.negative:active, button.negative.active {
 }
 
 button.negative:disabled, button.negative.disabled, button.negative.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+button.negative:disabled i, button.negative.disabled i, button.negative.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.negative, .dataTables_paginate div.negative.paginate_button, .dataTables_paginate div.negative.disabled {
@@ -3648,9 +3820,13 @@ div.btn.negative:active, .dataTables_paginate div.negative.paginate_button:activ
 }
 
 div.btn.negative:disabled, .dataTables_paginate div.negative.paginate_button:disabled, .dataTables_paginate div.negative.disabled:disabled, div.btn.negative.disabled, .dataTables_paginate div.negative.disabled, div.btn.negative.waiting, .dataTables_paginate div.negative.waiting.paginate_button, .dataTables_paginate div.negative.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.negative:disabled i, .dataTables_paginate div.negative.paginate_button:disabled i, .dataTables_paginate div.negative.disabled:disabled i, div.btn.negative.disabled i, .dataTables_paginate div.negative.disabled i, div.btn.negative.waiting i, .dataTables_paginate div.negative.waiting.paginate_button i, .dataTables_paginate div.negative.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.negative, .dataTables_paginate a.negative.paginate_button, .dataTables_paginate a.negative.disabled {
@@ -3675,9 +3851,13 @@ a.btn.negative:active, .dataTables_paginate a.negative.paginate_button:active, .
 }
 
 a.btn.negative:disabled, .dataTables_paginate a.negative.paginate_button:disabled, .dataTables_paginate a.negative.disabled:disabled, a.btn.negative.disabled, .dataTables_paginate a.negative.disabled, a.btn.negative.waiting, .dataTables_paginate a.negative.waiting.paginate_button, .dataTables_paginate a.negative.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.negative:disabled i, .dataTables_paginate a.negative.paginate_button:disabled i, .dataTables_paginate a.negative.disabled:disabled i, a.btn.negative.disabled i, .dataTables_paginate a.negative.disabled i, a.btn.negative.waiting i, .dataTables_paginate a.negative.waiting.paginate_button i, .dataTables_paginate a.negative.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.negative, .dataTables_paginate i.negative.paginate_button, .dataTables_paginate i.negative.disabled {
@@ -3702,9 +3882,13 @@ i.btn.negative:active, .dataTables_paginate i.negative.paginate_button:active, .
 }
 
 i.btn.negative:disabled, .dataTables_paginate i.negative.paginate_button:disabled, .dataTables_paginate i.negative.disabled:disabled, i.btn.negative.disabled, .dataTables_paginate i.negative.disabled, i.btn.negative.waiting, .dataTables_paginate i.negative.waiting.paginate_button, .dataTables_paginate i.negative.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.negative:disabled i, .dataTables_paginate i.negative.paginate_button:disabled i, .dataTables_paginate i.negative.disabled:disabled i, i.btn.negative.disabled i, .dataTables_paginate i.negative.disabled i, i.btn.negative.waiting i, .dataTables_paginate i.negative.waiting.paginate_button i, .dataTables_paginate i.negative.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.negative, .dataTables_paginate span.negative.paginate_button, .dataTables_paginate span.negative.disabled {
@@ -3729,9 +3913,13 @@ span.btn.negative:active, .dataTables_paginate span.negative.paginate_button:act
 }
 
 span.btn.negative:disabled, .dataTables_paginate span.negative.paginate_button:disabled, .dataTables_paginate span.negative.disabled:disabled, span.btn.negative.disabled, .dataTables_paginate span.negative.disabled, span.btn.negative.waiting, .dataTables_paginate span.negative.waiting.paginate_button, .dataTables_paginate span.negative.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.negative:disabled i, .dataTables_paginate span.negative.paginate_button:disabled i, .dataTables_paginate span.negative.disabled:disabled i, span.btn.negative.disabled i, .dataTables_paginate span.negative.disabled i, span.btn.negative.waiting i, .dataTables_paginate span.negative.waiting.paginate_button i, .dataTables_paginate span.negative.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.negative, .dataTables_paginate label.negative.paginate_button, .dataTables_paginate label.negative.disabled {
@@ -3756,9 +3944,13 @@ label.btn.negative:active, .dataTables_paginate label.negative.paginate_button:a
 }
 
 label.btn.negative:disabled, .dataTables_paginate label.negative.paginate_button:disabled, .dataTables_paginate label.negative.disabled:disabled, label.btn.negative.disabled, .dataTables_paginate label.negative.disabled, label.btn.negative.waiting, .dataTables_paginate label.negative.waiting.paginate_button, .dataTables_paginate label.negative.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.negative:disabled i, .dataTables_paginate label.negative.paginate_button:disabled i, .dataTables_paginate label.negative.disabled:disabled i, label.btn.negative.disabled i, .dataTables_paginate label.negative.disabled i, label.btn.negative.waiting i, .dataTables_paginate label.negative.waiting.paginate_button i, .dataTables_paginate label.negative.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.reject {
@@ -3783,9 +3975,13 @@ button.reject:active, button.reject.active {
 }
 
 button.reject:disabled, button.reject.disabled, button.reject.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+button.reject:disabled i, button.reject.disabled i, button.reject.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.reject, .dataTables_paginate div.reject.paginate_button, .dataTables_paginate div.reject.disabled {
@@ -3810,9 +4006,13 @@ div.btn.reject:active, .dataTables_paginate div.reject.paginate_button:active, .
 }
 
 div.btn.reject:disabled, .dataTables_paginate div.reject.paginate_button:disabled, .dataTables_paginate div.reject.disabled:disabled, div.btn.reject.disabled, .dataTables_paginate div.reject.disabled, div.btn.reject.waiting, .dataTables_paginate div.reject.waiting.paginate_button, .dataTables_paginate div.reject.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.reject:disabled i, .dataTables_paginate div.reject.paginate_button:disabled i, .dataTables_paginate div.reject.disabled:disabled i, div.btn.reject.disabled i, .dataTables_paginate div.reject.disabled i, div.btn.reject.waiting i, .dataTables_paginate div.reject.waiting.paginate_button i, .dataTables_paginate div.reject.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.reject, .dataTables_paginate a.reject.paginate_button, .dataTables_paginate a.reject.disabled {
@@ -3837,9 +4037,13 @@ a.btn.reject:active, .dataTables_paginate a.reject.paginate_button:active, .data
 }
 
 a.btn.reject:disabled, .dataTables_paginate a.reject.paginate_button:disabled, .dataTables_paginate a.reject.disabled:disabled, a.btn.reject.disabled, .dataTables_paginate a.reject.disabled, a.btn.reject.waiting, .dataTables_paginate a.reject.waiting.paginate_button, .dataTables_paginate a.reject.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.reject:disabled i, .dataTables_paginate a.reject.paginate_button:disabled i, .dataTables_paginate a.reject.disabled:disabled i, a.btn.reject.disabled i, .dataTables_paginate a.reject.disabled i, a.btn.reject.waiting i, .dataTables_paginate a.reject.waiting.paginate_button i, .dataTables_paginate a.reject.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.reject, .dataTables_paginate i.reject.paginate_button, .dataTables_paginate i.reject.disabled {
@@ -3864,9 +4068,13 @@ i.btn.reject:active, .dataTables_paginate i.reject.paginate_button:active, .data
 }
 
 i.btn.reject:disabled, .dataTables_paginate i.reject.paginate_button:disabled, .dataTables_paginate i.reject.disabled:disabled, i.btn.reject.disabled, .dataTables_paginate i.reject.disabled, i.btn.reject.waiting, .dataTables_paginate i.reject.waiting.paginate_button, .dataTables_paginate i.reject.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.reject:disabled i, .dataTables_paginate i.reject.paginate_button:disabled i, .dataTables_paginate i.reject.disabled:disabled i, i.btn.reject.disabled i, .dataTables_paginate i.reject.disabled i, i.btn.reject.waiting i, .dataTables_paginate i.reject.waiting.paginate_button i, .dataTables_paginate i.reject.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.reject, .dataTables_paginate span.reject.paginate_button, .dataTables_paginate span.reject.disabled {
@@ -3891,9 +4099,13 @@ span.btn.reject:active, .dataTables_paginate span.reject.paginate_button:active,
 }
 
 span.btn.reject:disabled, .dataTables_paginate span.reject.paginate_button:disabled, .dataTables_paginate span.reject.disabled:disabled, span.btn.reject.disabled, .dataTables_paginate span.reject.disabled, span.btn.reject.waiting, .dataTables_paginate span.reject.waiting.paginate_button, .dataTables_paginate span.reject.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.reject:disabled i, .dataTables_paginate span.reject.paginate_button:disabled i, .dataTables_paginate span.reject.disabled:disabled i, span.btn.reject.disabled i, .dataTables_paginate span.reject.disabled i, span.btn.reject.waiting i, .dataTables_paginate span.reject.waiting.paginate_button i, .dataTables_paginate span.reject.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.reject, .dataTables_paginate label.reject.paginate_button, .dataTables_paginate label.reject.disabled {
@@ -3918,9 +4130,13 @@ label.btn.reject:active, .dataTables_paginate label.reject.paginate_button:activ
 }
 
 label.btn.reject:disabled, .dataTables_paginate label.reject.paginate_button:disabled, .dataTables_paginate label.reject.disabled:disabled, label.btn.reject.disabled, .dataTables_paginate label.reject.disabled, label.btn.reject.waiting, .dataTables_paginate label.reject.waiting.paginate_button, .dataTables_paginate label.reject.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.reject:disabled i, .dataTables_paginate label.reject.paginate_button:disabled i, .dataTables_paginate label.reject.disabled:disabled i, label.btn.reject.disabled i, .dataTables_paginate label.reject.disabled i, label.btn.reject.waiting i, .dataTables_paginate label.reject.waiting.paginate_button i, .dataTables_paginate label.reject.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.authority {
@@ -3945,9 +4161,13 @@ button.authority:active, button.authority.active {
 }
 
 button.authority:disabled, button.authority.disabled, button.authority.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+button.authority:disabled i, button.authority.disabled i, button.authority.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.authority, .dataTables_paginate div.authority.paginate_button, .dataTables_paginate div.authority.disabled {
@@ -3972,9 +4192,13 @@ div.btn.authority:active, .dataTables_paginate div.authority.paginate_button:act
 }
 
 div.btn.authority:disabled, .dataTables_paginate div.authority.paginate_button:disabled, .dataTables_paginate div.authority.disabled:disabled, div.btn.authority.disabled, .dataTables_paginate div.authority.disabled, div.btn.authority.waiting, .dataTables_paginate div.authority.waiting.paginate_button, .dataTables_paginate div.authority.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.authority:disabled i, .dataTables_paginate div.authority.paginate_button:disabled i, .dataTables_paginate div.authority.disabled:disabled i, div.btn.authority.disabled i, .dataTables_paginate div.authority.disabled i, div.btn.authority.waiting i, .dataTables_paginate div.authority.waiting.paginate_button i, .dataTables_paginate div.authority.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.authority, .dataTables_paginate a.authority.paginate_button, .dataTables_paginate a.authority.disabled {
@@ -3999,9 +4223,13 @@ a.btn.authority:active, .dataTables_paginate a.authority.paginate_button:active,
 }
 
 a.btn.authority:disabled, .dataTables_paginate a.authority.paginate_button:disabled, .dataTables_paginate a.authority.disabled:disabled, a.btn.authority.disabled, .dataTables_paginate a.authority.disabled, a.btn.authority.waiting, .dataTables_paginate a.authority.waiting.paginate_button, .dataTables_paginate a.authority.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.authority:disabled i, .dataTables_paginate a.authority.paginate_button:disabled i, .dataTables_paginate a.authority.disabled:disabled i, a.btn.authority.disabled i, .dataTables_paginate a.authority.disabled i, a.btn.authority.waiting i, .dataTables_paginate a.authority.waiting.paginate_button i, .dataTables_paginate a.authority.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.authority, .dataTables_paginate i.authority.paginate_button, .dataTables_paginate i.authority.disabled {
@@ -4026,9 +4254,13 @@ i.btn.authority:active, .dataTables_paginate i.authority.paginate_button:active,
 }
 
 i.btn.authority:disabled, .dataTables_paginate i.authority.paginate_button:disabled, .dataTables_paginate i.authority.disabled:disabled, i.btn.authority.disabled, .dataTables_paginate i.authority.disabled, i.btn.authority.waiting, .dataTables_paginate i.authority.waiting.paginate_button, .dataTables_paginate i.authority.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.authority:disabled i, .dataTables_paginate i.authority.paginate_button:disabled i, .dataTables_paginate i.authority.disabled:disabled i, i.btn.authority.disabled i, .dataTables_paginate i.authority.disabled i, i.btn.authority.waiting i, .dataTables_paginate i.authority.waiting.paginate_button i, .dataTables_paginate i.authority.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.authority, .dataTables_paginate span.authority.paginate_button, .dataTables_paginate span.authority.disabled {
@@ -4053,9 +4285,13 @@ span.btn.authority:active, .dataTables_paginate span.authority.paginate_button:a
 }
 
 span.btn.authority:disabled, .dataTables_paginate span.authority.paginate_button:disabled, .dataTables_paginate span.authority.disabled:disabled, span.btn.authority.disabled, .dataTables_paginate span.authority.disabled, span.btn.authority.waiting, .dataTables_paginate span.authority.waiting.paginate_button, .dataTables_paginate span.authority.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.authority:disabled i, .dataTables_paginate span.authority.paginate_button:disabled i, .dataTables_paginate span.authority.disabled:disabled i, span.btn.authority.disabled i, .dataTables_paginate span.authority.disabled i, span.btn.authority.waiting i, .dataTables_paginate span.authority.waiting.paginate_button i, .dataTables_paginate span.authority.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.authority, .dataTables_paginate label.authority.paginate_button, .dataTables_paginate label.authority.disabled {
@@ -4080,9 +4316,13 @@ label.btn.authority:active, .dataTables_paginate label.authority.paginate_button
 }
 
 label.btn.authority:disabled, .dataTables_paginate label.authority.paginate_button:disabled, .dataTables_paginate label.authority.disabled:disabled, label.btn.authority.disabled, .dataTables_paginate label.authority.disabled, label.btn.authority.waiting, .dataTables_paginate label.authority.waiting.paginate_button, .dataTables_paginate label.authority.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.authority:disabled i, .dataTables_paginate label.authority.paginate_button:disabled i, .dataTables_paginate label.authority.disabled:disabled i, label.btn.authority.disabled i, .dataTables_paginate label.authority.disabled i, label.btn.authority.waiting i, .dataTables_paginate label.authority.waiting.paginate_button i, .dataTables_paginate label.authority.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.bulletin {
@@ -4107,9 +4347,13 @@ button.bulletin:active, button.bulletin.active {
 }
 
 button.bulletin:disabled, button.bulletin.disabled, button.bulletin.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+button.bulletin:disabled i, button.bulletin.disabled i, button.bulletin.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.bulletin, .dataTables_paginate div.bulletin.paginate_button, .dataTables_paginate div.bulletin.disabled {
@@ -4134,9 +4378,13 @@ div.btn.bulletin:active, .dataTables_paginate div.bulletin.paginate_button:activ
 }
 
 div.btn.bulletin:disabled, .dataTables_paginate div.bulletin.paginate_button:disabled, .dataTables_paginate div.bulletin.disabled:disabled, div.btn.bulletin.disabled, .dataTables_paginate div.bulletin.disabled, div.btn.bulletin.waiting, .dataTables_paginate div.bulletin.waiting.paginate_button, .dataTables_paginate div.bulletin.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.bulletin:disabled i, .dataTables_paginate div.bulletin.paginate_button:disabled i, .dataTables_paginate div.bulletin.disabled:disabled i, div.btn.bulletin.disabled i, .dataTables_paginate div.bulletin.disabled i, div.btn.bulletin.waiting i, .dataTables_paginate div.bulletin.waiting.paginate_button i, .dataTables_paginate div.bulletin.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.bulletin, .dataTables_paginate a.bulletin.paginate_button, .dataTables_paginate a.bulletin.disabled {
@@ -4161,9 +4409,13 @@ a.btn.bulletin:active, .dataTables_paginate a.bulletin.paginate_button:active, .
 }
 
 a.btn.bulletin:disabled, .dataTables_paginate a.bulletin.paginate_button:disabled, .dataTables_paginate a.bulletin.disabled:disabled, a.btn.bulletin.disabled, .dataTables_paginate a.bulletin.disabled, a.btn.bulletin.waiting, .dataTables_paginate a.bulletin.waiting.paginate_button, .dataTables_paginate a.bulletin.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.bulletin:disabled i, .dataTables_paginate a.bulletin.paginate_button:disabled i, .dataTables_paginate a.bulletin.disabled:disabled i, a.btn.bulletin.disabled i, .dataTables_paginate a.bulletin.disabled i, a.btn.bulletin.waiting i, .dataTables_paginate a.bulletin.waiting.paginate_button i, .dataTables_paginate a.bulletin.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.bulletin, .dataTables_paginate i.bulletin.paginate_button, .dataTables_paginate i.bulletin.disabled {
@@ -4188,9 +4440,13 @@ i.btn.bulletin:active, .dataTables_paginate i.bulletin.paginate_button:active, .
 }
 
 i.btn.bulletin:disabled, .dataTables_paginate i.bulletin.paginate_button:disabled, .dataTables_paginate i.bulletin.disabled:disabled, i.btn.bulletin.disabled, .dataTables_paginate i.bulletin.disabled, i.btn.bulletin.waiting, .dataTables_paginate i.bulletin.waiting.paginate_button, .dataTables_paginate i.bulletin.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.bulletin:disabled i, .dataTables_paginate i.bulletin.paginate_button:disabled i, .dataTables_paginate i.bulletin.disabled:disabled i, i.btn.bulletin.disabled i, .dataTables_paginate i.bulletin.disabled i, i.btn.bulletin.waiting i, .dataTables_paginate i.bulletin.waiting.paginate_button i, .dataTables_paginate i.bulletin.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.bulletin, .dataTables_paginate span.bulletin.paginate_button, .dataTables_paginate span.bulletin.disabled {
@@ -4215,9 +4471,13 @@ span.btn.bulletin:active, .dataTables_paginate span.bulletin.paginate_button:act
 }
 
 span.btn.bulletin:disabled, .dataTables_paginate span.bulletin.paginate_button:disabled, .dataTables_paginate span.bulletin.disabled:disabled, span.btn.bulletin.disabled, .dataTables_paginate span.bulletin.disabled, span.btn.bulletin.waiting, .dataTables_paginate span.bulletin.waiting.paginate_button, .dataTables_paginate span.bulletin.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.bulletin:disabled i, .dataTables_paginate span.bulletin.paginate_button:disabled i, .dataTables_paginate span.bulletin.disabled:disabled i, span.btn.bulletin.disabled i, .dataTables_paginate span.bulletin.disabled i, span.btn.bulletin.waiting i, .dataTables_paginate span.bulletin.waiting.paginate_button i, .dataTables_paginate span.bulletin.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.bulletin, .dataTables_paginate label.bulletin.paginate_button, .dataTables_paginate label.bulletin.disabled {
@@ -4242,9 +4502,13 @@ label.btn.bulletin:active, .dataTables_paginate label.bulletin.paginate_button:a
 }
 
 label.btn.bulletin:disabled, .dataTables_paginate label.bulletin.paginate_button:disabled, .dataTables_paginate label.bulletin.disabled:disabled, label.btn.bulletin.disabled, .dataTables_paginate label.bulletin.disabled, label.btn.bulletin.waiting, .dataTables_paginate label.bulletin.waiting.paginate_button, .dataTables_paginate label.bulletin.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.bulletin:disabled i, .dataTables_paginate label.bulletin.paginate_button:disabled i, .dataTables_paginate label.bulletin.disabled:disabled i, label.btn.bulletin.disabled i, .dataTables_paginate label.bulletin.disabled i, label.btn.bulletin.waiting i, .dataTables_paginate label.bulletin.waiting.paginate_button i, .dataTables_paginate label.bulletin.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.bulletin-inverse {
@@ -4269,9 +4533,13 @@ button.bulletin-inverse:active, button.bulletin-inverse.active {
 }
 
 button.bulletin-inverse:disabled, button.bulletin-inverse.disabled, button.bulletin-inverse.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+button.bulletin-inverse:disabled i, button.bulletin-inverse.disabled i, button.bulletin-inverse.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.bulletin-inverse, .dataTables_paginate div.bulletin-inverse.paginate_button, .dataTables_paginate div.bulletin-inverse.disabled {
@@ -4296,9 +4564,13 @@ div.btn.bulletin-inverse:active, .dataTables_paginate div.bulletin-inverse.pagin
 }
 
 div.btn.bulletin-inverse:disabled, .dataTables_paginate div.bulletin-inverse.paginate_button:disabled, .dataTables_paginate div.bulletin-inverse.disabled:disabled, div.btn.bulletin-inverse.disabled, .dataTables_paginate div.bulletin-inverse.disabled, div.btn.bulletin-inverse.waiting, .dataTables_paginate div.bulletin-inverse.waiting.paginate_button, .dataTables_paginate div.bulletin-inverse.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.bulletin-inverse:disabled i, .dataTables_paginate div.bulletin-inverse.paginate_button:disabled i, .dataTables_paginate div.bulletin-inverse.disabled:disabled i, div.btn.bulletin-inverse.disabled i, .dataTables_paginate div.bulletin-inverse.disabled i, div.btn.bulletin-inverse.waiting i, .dataTables_paginate div.bulletin-inverse.waiting.paginate_button i, .dataTables_paginate div.bulletin-inverse.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.bulletin-inverse, .dataTables_paginate a.bulletin-inverse.paginate_button, .dataTables_paginate a.bulletin-inverse.disabled {
@@ -4323,9 +4595,13 @@ a.btn.bulletin-inverse:active, .dataTables_paginate a.bulletin-inverse.paginate_
 }
 
 a.btn.bulletin-inverse:disabled, .dataTables_paginate a.bulletin-inverse.paginate_button:disabled, .dataTables_paginate a.bulletin-inverse.disabled:disabled, a.btn.bulletin-inverse.disabled, .dataTables_paginate a.bulletin-inverse.disabled, a.btn.bulletin-inverse.waiting, .dataTables_paginate a.bulletin-inverse.waiting.paginate_button, .dataTables_paginate a.bulletin-inverse.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.bulletin-inverse:disabled i, .dataTables_paginate a.bulletin-inverse.paginate_button:disabled i, .dataTables_paginate a.bulletin-inverse.disabled:disabled i, a.btn.bulletin-inverse.disabled i, .dataTables_paginate a.bulletin-inverse.disabled i, a.btn.bulletin-inverse.waiting i, .dataTables_paginate a.bulletin-inverse.waiting.paginate_button i, .dataTables_paginate a.bulletin-inverse.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.bulletin-inverse, .dataTables_paginate i.bulletin-inverse.paginate_button, .dataTables_paginate i.bulletin-inverse.disabled {
@@ -4350,9 +4626,13 @@ i.btn.bulletin-inverse:active, .dataTables_paginate i.bulletin-inverse.paginate_
 }
 
 i.btn.bulletin-inverse:disabled, .dataTables_paginate i.bulletin-inverse.paginate_button:disabled, .dataTables_paginate i.bulletin-inverse.disabled:disabled, i.btn.bulletin-inverse.disabled, .dataTables_paginate i.bulletin-inverse.disabled, i.btn.bulletin-inverse.waiting, .dataTables_paginate i.bulletin-inverse.waiting.paginate_button, .dataTables_paginate i.bulletin-inverse.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.bulletin-inverse:disabled i, .dataTables_paginate i.bulletin-inverse.paginate_button:disabled i, .dataTables_paginate i.bulletin-inverse.disabled:disabled i, i.btn.bulletin-inverse.disabled i, .dataTables_paginate i.bulletin-inverse.disabled i, i.btn.bulletin-inverse.waiting i, .dataTables_paginate i.bulletin-inverse.waiting.paginate_button i, .dataTables_paginate i.bulletin-inverse.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.bulletin-inverse, .dataTables_paginate span.bulletin-inverse.paginate_button, .dataTables_paginate span.bulletin-inverse.disabled {
@@ -4377,9 +4657,13 @@ span.btn.bulletin-inverse:active, .dataTables_paginate span.bulletin-inverse.pag
 }
 
 span.btn.bulletin-inverse:disabled, .dataTables_paginate span.bulletin-inverse.paginate_button:disabled, .dataTables_paginate span.bulletin-inverse.disabled:disabled, span.btn.bulletin-inverse.disabled, .dataTables_paginate span.bulletin-inverse.disabled, span.btn.bulletin-inverse.waiting, .dataTables_paginate span.bulletin-inverse.waiting.paginate_button, .dataTables_paginate span.bulletin-inverse.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.bulletin-inverse:disabled i, .dataTables_paginate span.bulletin-inverse.paginate_button:disabled i, .dataTables_paginate span.bulletin-inverse.disabled:disabled i, span.btn.bulletin-inverse.disabled i, .dataTables_paginate span.bulletin-inverse.disabled i, span.btn.bulletin-inverse.waiting i, .dataTables_paginate span.bulletin-inverse.waiting.paginate_button i, .dataTables_paginate span.bulletin-inverse.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.bulletin-inverse, .dataTables_paginate label.bulletin-inverse.paginate_button, .dataTables_paginate label.bulletin-inverse.disabled {
@@ -4404,9 +4688,13 @@ label.btn.bulletin-inverse:active, .dataTables_paginate label.bulletin-inverse.p
 }
 
 label.btn.bulletin-inverse:disabled, .dataTables_paginate label.bulletin-inverse.paginate_button:disabled, .dataTables_paginate label.bulletin-inverse.disabled:disabled, label.btn.bulletin-inverse.disabled, .dataTables_paginate label.bulletin-inverse.disabled, label.btn.bulletin-inverse.waiting, .dataTables_paginate label.bulletin-inverse.waiting.paginate_button, .dataTables_paginate label.bulletin-inverse.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.bulletin-inverse:disabled i, .dataTables_paginate label.bulletin-inverse.paginate_button:disabled i, .dataTables_paginate label.bulletin-inverse.disabled:disabled i, label.btn.bulletin-inverse.disabled i, .dataTables_paginate label.bulletin-inverse.disabled i, label.btn.bulletin-inverse.waiting i, .dataTables_paginate label.bulletin-inverse.waiting.paginate_button i, .dataTables_paginate label.bulletin-inverse.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.function {
@@ -4434,9 +4722,13 @@ button.function:active, button.function.active {
 }
 
 button.function:disabled, button.function.disabled, button.function.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+button.function:disabled i, button.function.disabled i, button.function.waiting i {
+  cursor: not-allowed;
 }
 
 button.function:link, button.function:visited {
@@ -4476,9 +4768,13 @@ div.btn.function:active, .dataTables_paginate div.function.paginate_button:activ
 }
 
 div.btn.function:disabled, .dataTables_paginate div.function.paginate_button:disabled, .dataTables_paginate div.function.disabled:disabled, div.btn.function.disabled, .dataTables_paginate div.function.disabled, div.btn.function.waiting, .dataTables_paginate div.function.waiting.paginate_button, .dataTables_paginate div.function.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+div.btn.function:disabled i, .dataTables_paginate div.function.paginate_button:disabled i, .dataTables_paginate div.function.disabled:disabled i, div.btn.function.disabled i, .dataTables_paginate div.function.disabled i, div.btn.function.waiting i, .dataTables_paginate div.function.waiting.paginate_button i, .dataTables_paginate div.function.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 div.btn.function:link, .dataTables_paginate div.function.paginate_button:link, .dataTables_paginate div.function.disabled:link, div.btn.function:visited, .dataTables_paginate div.function.paginate_button:visited, .dataTables_paginate div.function.disabled:visited {
@@ -4518,9 +4814,13 @@ a.btn.function:active, .dataTables_paginate a.function.paginate_button:active, .
 }
 
 a.btn.function:disabled, .dataTables_paginate a.function.paginate_button:disabled, .dataTables_paginate a.function.disabled:disabled, a.btn.function.disabled, .dataTables_paginate a.function.disabled, a.btn.function.waiting, .dataTables_paginate a.function.waiting.paginate_button, .dataTables_paginate a.function.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+a.btn.function:disabled i, .dataTables_paginate a.function.paginate_button:disabled i, .dataTables_paginate a.function.disabled:disabled i, a.btn.function.disabled i, .dataTables_paginate a.function.disabled i, a.btn.function.waiting i, .dataTables_paginate a.function.waiting.paginate_button i, .dataTables_paginate a.function.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.function:link, .dataTables_paginate a.function.paginate_button:link, .dataTables_paginate a.function.disabled:link, a.btn.function:visited, .dataTables_paginate a.function.paginate_button:visited, .dataTables_paginate a.function.disabled:visited {
@@ -4560,9 +4860,13 @@ i.btn.function:active, .dataTables_paginate i.function.paginate_button:active, .
 }
 
 i.btn.function:disabled, .dataTables_paginate i.function.paginate_button:disabled, .dataTables_paginate i.function.disabled:disabled, i.btn.function.disabled, .dataTables_paginate i.function.disabled, i.btn.function.waiting, .dataTables_paginate i.function.waiting.paginate_button, .dataTables_paginate i.function.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+i.btn.function:disabled i, .dataTables_paginate i.function.paginate_button:disabled i, .dataTables_paginate i.function.disabled:disabled i, i.btn.function.disabled i, .dataTables_paginate i.function.disabled i, i.btn.function.waiting i, .dataTables_paginate i.function.waiting.paginate_button i, .dataTables_paginate i.function.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.function:link, .dataTables_paginate i.function.paginate_button:link, .dataTables_paginate i.function.disabled:link, i.btn.function:visited, .dataTables_paginate i.function.paginate_button:visited, .dataTables_paginate i.function.disabled:visited {
@@ -4602,9 +4906,13 @@ span.btn.function:active, .dataTables_paginate span.function.paginate_button:act
 }
 
 span.btn.function:disabled, .dataTables_paginate span.function.paginate_button:disabled, .dataTables_paginate span.function.disabled:disabled, span.btn.function.disabled, .dataTables_paginate span.function.disabled, span.btn.function.waiting, .dataTables_paginate span.function.waiting.paginate_button, .dataTables_paginate span.function.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+span.btn.function:disabled i, .dataTables_paginate span.function.paginate_button:disabled i, .dataTables_paginate span.function.disabled:disabled i, span.btn.function.disabled i, .dataTables_paginate span.function.disabled i, span.btn.function.waiting i, .dataTables_paginate span.function.waiting.paginate_button i, .dataTables_paginate span.function.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.function:link, .dataTables_paginate span.function.paginate_button:link, .dataTables_paginate span.function.disabled:link, span.btn.function:visited, .dataTables_paginate span.function.paginate_button:visited, .dataTables_paginate span.function.disabled:visited {
@@ -4644,9 +4952,13 @@ label.btn.function:active, .dataTables_paginate label.function.paginate_button:a
 }
 
 label.btn.function:disabled, .dataTables_paginate label.function.paginate_button:disabled, .dataTables_paginate label.function.disabled:disabled, label.btn.function.disabled, .dataTables_paginate label.function.disabled, label.btn.function.waiting, .dataTables_paginate label.function.waiting.paginate_button, .dataTables_paginate label.function.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+label.btn.function:disabled i, .dataTables_paginate label.function.paginate_button:disabled i, .dataTables_paginate label.function.disabled:disabled i, label.btn.function.disabled i, .dataTables_paginate label.function.disabled i, label.btn.function.waiting i, .dataTables_paginate label.function.waiting.paginate_button i, .dataTables_paginate label.function.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.function:link, .dataTables_paginate label.function.paginate_button:link, .dataTables_paginate label.function.disabled:link, label.btn.function:visited, .dataTables_paginate label.function.paginate_button:visited, .dataTables_paginate label.function.disabled:visited {
@@ -4662,9 +4974,13 @@ label.btn.function:active, .dataTables_paginate label.function.paginate_button:a
 }
 
 .function.disabled, .function:disabled, .function.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+.function.disabled i, .function:disabled i, .function.waiting i {
+  cursor: not-allowed;
 }
 
 .function.disabled:hover, .function.disabled:active, .function.disabled:disabled, .function:disabled:hover, .function:disabled:active, .function:disabled:disabled, .function.waiting:hover, .function.waiting:active, .function.waiting:disabled {
@@ -4700,9 +5016,13 @@ button.function.authority:active, button.function.authority.active {
 }
 
 button.function.authority:disabled, button.function.authority.disabled, button.function.authority.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+button.function.authority:disabled i, button.function.authority.disabled i, button.function.authority.waiting i {
+  cursor: not-allowed;
 }
 
 button.function.authority:link, button.function.authority:visited {
@@ -4742,9 +5062,13 @@ div.btn.function.authority:active, .dataTables_paginate div.function.authority.p
 }
 
 div.btn.function.authority:disabled, .dataTables_paginate div.function.authority.paginate_button:disabled, .dataTables_paginate div.function.authority.disabled:disabled, div.btn.function.authority.disabled, .dataTables_paginate div.function.authority.disabled, div.btn.function.authority.waiting, .dataTables_paginate div.function.authority.waiting.paginate_button, .dataTables_paginate div.function.authority.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+div.btn.function.authority:disabled i, .dataTables_paginate div.function.authority.paginate_button:disabled i, .dataTables_paginate div.function.authority.disabled:disabled i, div.btn.function.authority.disabled i, .dataTables_paginate div.function.authority.disabled i, div.btn.function.authority.waiting i, .dataTables_paginate div.function.authority.waiting.paginate_button i, .dataTables_paginate div.function.authority.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 div.btn.function.authority:link, .dataTables_paginate div.function.authority.paginate_button:link, .dataTables_paginate div.function.authority.disabled:link, div.btn.function.authority:visited, .dataTables_paginate div.function.authority.paginate_button:visited, .dataTables_paginate div.function.authority.disabled:visited {
@@ -4784,9 +5108,13 @@ a.btn.function.authority:active, .dataTables_paginate a.function.authority.pagin
 }
 
 a.btn.function.authority:disabled, .dataTables_paginate a.function.authority.paginate_button:disabled, .dataTables_paginate a.function.authority.disabled:disabled, a.btn.function.authority.disabled, .dataTables_paginate a.function.authority.disabled, a.btn.function.authority.waiting, .dataTables_paginate a.function.authority.waiting.paginate_button, .dataTables_paginate a.function.authority.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+a.btn.function.authority:disabled i, .dataTables_paginate a.function.authority.paginate_button:disabled i, .dataTables_paginate a.function.authority.disabled:disabled i, a.btn.function.authority.disabled i, .dataTables_paginate a.function.authority.disabled i, a.btn.function.authority.waiting i, .dataTables_paginate a.function.authority.waiting.paginate_button i, .dataTables_paginate a.function.authority.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.function.authority:link, .dataTables_paginate a.function.authority.paginate_button:link, .dataTables_paginate a.function.authority.disabled:link, a.btn.function.authority:visited, .dataTables_paginate a.function.authority.paginate_button:visited, .dataTables_paginate a.function.authority.disabled:visited {
@@ -4826,9 +5154,13 @@ i.btn.function.authority:active, .dataTables_paginate i.function.authority.pagin
 }
 
 i.btn.function.authority:disabled, .dataTables_paginate i.function.authority.paginate_button:disabled, .dataTables_paginate i.function.authority.disabled:disabled, i.btn.function.authority.disabled, .dataTables_paginate i.function.authority.disabled, i.btn.function.authority.waiting, .dataTables_paginate i.function.authority.waiting.paginate_button, .dataTables_paginate i.function.authority.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+i.btn.function.authority:disabled i, .dataTables_paginate i.function.authority.paginate_button:disabled i, .dataTables_paginate i.function.authority.disabled:disabled i, i.btn.function.authority.disabled i, .dataTables_paginate i.function.authority.disabled i, i.btn.function.authority.waiting i, .dataTables_paginate i.function.authority.waiting.paginate_button i, .dataTables_paginate i.function.authority.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.function.authority:link, .dataTables_paginate i.function.authority.paginate_button:link, .dataTables_paginate i.function.authority.disabled:link, i.btn.function.authority:visited, .dataTables_paginate i.function.authority.paginate_button:visited, .dataTables_paginate i.function.authority.disabled:visited {
@@ -4868,9 +5200,13 @@ span.btn.function.authority:active, .dataTables_paginate span.function.authority
 }
 
 span.btn.function.authority:disabled, .dataTables_paginate span.function.authority.paginate_button:disabled, .dataTables_paginate span.function.authority.disabled:disabled, span.btn.function.authority.disabled, .dataTables_paginate span.function.authority.disabled, span.btn.function.authority.waiting, .dataTables_paginate span.function.authority.waiting.paginate_button, .dataTables_paginate span.function.authority.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+span.btn.function.authority:disabled i, .dataTables_paginate span.function.authority.paginate_button:disabled i, .dataTables_paginate span.function.authority.disabled:disabled i, span.btn.function.authority.disabled i, .dataTables_paginate span.function.authority.disabled i, span.btn.function.authority.waiting i, .dataTables_paginate span.function.authority.waiting.paginate_button i, .dataTables_paginate span.function.authority.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.function.authority:link, .dataTables_paginate span.function.authority.paginate_button:link, .dataTables_paginate span.function.authority.disabled:link, span.btn.function.authority:visited, .dataTables_paginate span.function.authority.paginate_button:visited, .dataTables_paginate span.function.authority.disabled:visited {
@@ -4910,9 +5246,13 @@ label.btn.function.authority:active, .dataTables_paginate label.function.authori
 }
 
 label.btn.function.authority:disabled, .dataTables_paginate label.function.authority.paginate_button:disabled, .dataTables_paginate label.function.authority.disabled:disabled, label.btn.function.authority.disabled, .dataTables_paginate label.function.authority.disabled, label.btn.function.authority.waiting, .dataTables_paginate label.function.authority.waiting.paginate_button, .dataTables_paginate label.function.authority.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+label.btn.function.authority:disabled i, .dataTables_paginate label.function.authority.paginate_button:disabled i, .dataTables_paginate label.function.authority.disabled:disabled i, label.btn.function.authority.disabled i, .dataTables_paginate label.function.authority.disabled i, label.btn.function.authority.waiting i, .dataTables_paginate label.function.authority.waiting.paginate_button i, .dataTables_paginate label.function.authority.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.function.authority:link, .dataTables_paginate label.function.authority.paginate_button:link, .dataTables_paginate label.function.authority.disabled:link, label.btn.function.authority:visited, .dataTables_paginate label.function.authority.paginate_button:visited, .dataTables_paginate label.function.authority.disabled:visited {
@@ -4952,9 +5292,13 @@ button.function.julkipano:active, button.function.julkipano.active {
 }
 
 button.function.julkipano:disabled, button.function.julkipano.disabled, button.function.julkipano.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+button.function.julkipano:disabled i, button.function.julkipano.disabled i, button.function.julkipano.waiting i {
+  cursor: not-allowed;
 }
 
 button.function.julkipano:link, button.function.julkipano:visited {
@@ -4994,9 +5338,13 @@ div.btn.function.julkipano:active, .dataTables_paginate div.function.julkipano.p
 }
 
 div.btn.function.julkipano:disabled, .dataTables_paginate div.function.julkipano.paginate_button:disabled, .dataTables_paginate div.function.julkipano.disabled:disabled, div.btn.function.julkipano.disabled, .dataTables_paginate div.function.julkipano.disabled, div.btn.function.julkipano.waiting, .dataTables_paginate div.function.julkipano.waiting.paginate_button, .dataTables_paginate div.function.julkipano.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+div.btn.function.julkipano:disabled i, .dataTables_paginate div.function.julkipano.paginate_button:disabled i, .dataTables_paginate div.function.julkipano.disabled:disabled i, div.btn.function.julkipano.disabled i, .dataTables_paginate div.function.julkipano.disabled i, div.btn.function.julkipano.waiting i, .dataTables_paginate div.function.julkipano.waiting.paginate_button i, .dataTables_paginate div.function.julkipano.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 div.btn.function.julkipano:link, .dataTables_paginate div.function.julkipano.paginate_button:link, .dataTables_paginate div.function.julkipano.disabled:link, div.btn.function.julkipano:visited, .dataTables_paginate div.function.julkipano.paginate_button:visited, .dataTables_paginate div.function.julkipano.disabled:visited {
@@ -5036,9 +5384,13 @@ a.btn.function.julkipano:active, .dataTables_paginate a.function.julkipano.pagin
 }
 
 a.btn.function.julkipano:disabled, .dataTables_paginate a.function.julkipano.paginate_button:disabled, .dataTables_paginate a.function.julkipano.disabled:disabled, a.btn.function.julkipano.disabled, .dataTables_paginate a.function.julkipano.disabled, a.btn.function.julkipano.waiting, .dataTables_paginate a.function.julkipano.waiting.paginate_button, .dataTables_paginate a.function.julkipano.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+a.btn.function.julkipano:disabled i, .dataTables_paginate a.function.julkipano.paginate_button:disabled i, .dataTables_paginate a.function.julkipano.disabled:disabled i, a.btn.function.julkipano.disabled i, .dataTables_paginate a.function.julkipano.disabled i, a.btn.function.julkipano.waiting i, .dataTables_paginate a.function.julkipano.waiting.paginate_button i, .dataTables_paginate a.function.julkipano.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.function.julkipano:link, .dataTables_paginate a.function.julkipano.paginate_button:link, .dataTables_paginate a.function.julkipano.disabled:link, a.btn.function.julkipano:visited, .dataTables_paginate a.function.julkipano.paginate_button:visited, .dataTables_paginate a.function.julkipano.disabled:visited {
@@ -5078,9 +5430,13 @@ i.btn.function.julkipano:active, .dataTables_paginate i.function.julkipano.pagin
 }
 
 i.btn.function.julkipano:disabled, .dataTables_paginate i.function.julkipano.paginate_button:disabled, .dataTables_paginate i.function.julkipano.disabled:disabled, i.btn.function.julkipano.disabled, .dataTables_paginate i.function.julkipano.disabled, i.btn.function.julkipano.waiting, .dataTables_paginate i.function.julkipano.waiting.paginate_button, .dataTables_paginate i.function.julkipano.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+i.btn.function.julkipano:disabled i, .dataTables_paginate i.function.julkipano.paginate_button:disabled i, .dataTables_paginate i.function.julkipano.disabled:disabled i, i.btn.function.julkipano.disabled i, .dataTables_paginate i.function.julkipano.disabled i, i.btn.function.julkipano.waiting i, .dataTables_paginate i.function.julkipano.waiting.paginate_button i, .dataTables_paginate i.function.julkipano.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.function.julkipano:link, .dataTables_paginate i.function.julkipano.paginate_button:link, .dataTables_paginate i.function.julkipano.disabled:link, i.btn.function.julkipano:visited, .dataTables_paginate i.function.julkipano.paginate_button:visited, .dataTables_paginate i.function.julkipano.disabled:visited {
@@ -5120,9 +5476,13 @@ span.btn.function.julkipano:active, .dataTables_paginate span.function.julkipano
 }
 
 span.btn.function.julkipano:disabled, .dataTables_paginate span.function.julkipano.paginate_button:disabled, .dataTables_paginate span.function.julkipano.disabled:disabled, span.btn.function.julkipano.disabled, .dataTables_paginate span.function.julkipano.disabled, span.btn.function.julkipano.waiting, .dataTables_paginate span.function.julkipano.waiting.paginate_button, .dataTables_paginate span.function.julkipano.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+span.btn.function.julkipano:disabled i, .dataTables_paginate span.function.julkipano.paginate_button:disabled i, .dataTables_paginate span.function.julkipano.disabled:disabled i, span.btn.function.julkipano.disabled i, .dataTables_paginate span.function.julkipano.disabled i, span.btn.function.julkipano.waiting i, .dataTables_paginate span.function.julkipano.waiting.paginate_button i, .dataTables_paginate span.function.julkipano.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.function.julkipano:link, .dataTables_paginate span.function.julkipano.paginate_button:link, .dataTables_paginate span.function.julkipano.disabled:link, span.btn.function.julkipano:visited, .dataTables_paginate span.function.julkipano.paginate_button:visited, .dataTables_paginate span.function.julkipano.disabled:visited {
@@ -5162,9 +5522,13 @@ label.btn.function.julkipano:active, .dataTables_paginate label.function.julkipa
 }
 
 label.btn.function.julkipano:disabled, .dataTables_paginate label.function.julkipano.paginate_button:disabled, .dataTables_paginate label.function.julkipano.disabled:disabled, label.btn.function.julkipano.disabled, .dataTables_paginate label.function.julkipano.disabled, label.btn.function.julkipano.waiting, .dataTables_paginate label.function.julkipano.waiting.paginate_button, .dataTables_paginate label.function.julkipano.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
+}
+
+label.btn.function.julkipano:disabled i, .dataTables_paginate label.function.julkipano.paginate_button:disabled i, .dataTables_paginate label.function.julkipano.disabled:disabled i, label.btn.function.julkipano.disabled i, .dataTables_paginate label.function.julkipano.disabled i, label.btn.function.julkipano.waiting i, .dataTables_paginate label.function.julkipano.waiting.paginate_button i, .dataTables_paginate label.function.julkipano.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.function.julkipano:link, .dataTables_paginate label.function.julkipano.paginate_button:link, .dataTables_paginate label.function.julkipano.disabled:link, label.btn.function.julkipano:visited, .dataTables_paginate label.function.julkipano.paginate_button:visited, .dataTables_paginate label.function.julkipano.disabled:visited {
@@ -5204,9 +5568,13 @@ button.ghost:active, button.ghost.active {
 }
 
 button.ghost:disabled, button.ghost.disabled, button.ghost.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: transparent !important;
+}
+
+button.ghost:disabled i, button.ghost.disabled i, button.ghost.waiting i {
+  cursor: not-allowed;
 }
 
 button.ghost:link, button.ghost:visited {
@@ -5246,9 +5614,13 @@ div.btn.ghost:active, .dataTables_paginate div.ghost.paginate_button:active, .da
 }
 
 div.btn.ghost:disabled, .dataTables_paginate div.ghost.paginate_button:disabled, .dataTables_paginate div.ghost.disabled:disabled, div.btn.ghost.disabled, .dataTables_paginate div.ghost.disabled, div.btn.ghost.waiting, .dataTables_paginate div.ghost.waiting.paginate_button, .dataTables_paginate div.ghost.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: transparent !important;
+}
+
+div.btn.ghost:disabled i, .dataTables_paginate div.ghost.paginate_button:disabled i, .dataTables_paginate div.ghost.disabled:disabled i, div.btn.ghost.disabled i, .dataTables_paginate div.ghost.disabled.paginate_button i, .dataTables_paginate div.ghost.disabled i, div.btn.ghost.waiting i, .dataTables_paginate div.ghost.waiting.paginate_button i, .dataTables_paginate div.ghost.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 div.btn.ghost:link, .dataTables_paginate div.ghost.paginate_button:link, .dataTables_paginate div.ghost.disabled:link, div.btn.ghost:visited, .dataTables_paginate div.ghost.paginate_button:visited, .dataTables_paginate div.ghost.disabled:visited {
@@ -5288,9 +5660,13 @@ a.btn.ghost:active, .dataTables_paginate a.ghost.paginate_button:active, .dataTa
 }
 
 a.btn.ghost:disabled, .dataTables_paginate a.ghost.paginate_button:disabled, .dataTables_paginate a.ghost.disabled:disabled, a.btn.ghost.disabled, .dataTables_paginate a.ghost.disabled, a.btn.ghost.waiting, .dataTables_paginate a.ghost.waiting.paginate_button, .dataTables_paginate a.ghost.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: transparent !important;
+}
+
+a.btn.ghost:disabled i, .dataTables_paginate a.ghost.paginate_button:disabled i, .dataTables_paginate a.ghost.disabled:disabled i, a.btn.ghost.disabled i, .dataTables_paginate a.ghost.disabled.paginate_button i, .dataTables_paginate a.ghost.disabled i, a.btn.ghost.waiting i, .dataTables_paginate a.ghost.waiting.paginate_button i, .dataTables_paginate a.ghost.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.ghost:link, .dataTables_paginate a.ghost.paginate_button:link, .dataTables_paginate a.ghost.disabled:link, a.btn.ghost:visited, .dataTables_paginate a.ghost.paginate_button:visited, .dataTables_paginate a.ghost.disabled:visited {
@@ -5330,9 +5706,13 @@ i.btn.ghost:active, .dataTables_paginate i.ghost.paginate_button:active, .dataTa
 }
 
 i.btn.ghost:disabled, .dataTables_paginate i.ghost.paginate_button:disabled, .dataTables_paginate i.ghost.disabled:disabled, i.btn.ghost.disabled, .dataTables_paginate i.ghost.disabled, i.btn.ghost.waiting, .dataTables_paginate i.ghost.waiting.paginate_button, .dataTables_paginate i.ghost.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: transparent !important;
+}
+
+i.btn.ghost:disabled i, .dataTables_paginate i.ghost.paginate_button:disabled i, .dataTables_paginate i.ghost.disabled:disabled i, i.btn.ghost.disabled i, .dataTables_paginate i.ghost.disabled.paginate_button i, .dataTables_paginate i.ghost.disabled i, i.btn.ghost.waiting i, .dataTables_paginate i.ghost.waiting.paginate_button i, .dataTables_paginate i.ghost.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.ghost:link, .dataTables_paginate i.ghost.paginate_button:link, .dataTables_paginate i.ghost.disabled:link, i.btn.ghost:visited, .dataTables_paginate i.ghost.paginate_button:visited, .dataTables_paginate i.ghost.disabled:visited {
@@ -5372,9 +5752,13 @@ span.btn.ghost:active, .dataTables_paginate span.ghost.paginate_button:active, .
 }
 
 span.btn.ghost:disabled, .dataTables_paginate span.ghost.paginate_button:disabled, .dataTables_paginate span.ghost.disabled:disabled, span.btn.ghost.disabled, .dataTables_paginate span.ghost.disabled, span.btn.ghost.waiting, .dataTables_paginate span.ghost.waiting.paginate_button, .dataTables_paginate span.ghost.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: transparent !important;
+}
+
+span.btn.ghost:disabled i, .dataTables_paginate span.ghost.paginate_button:disabled i, .dataTables_paginate span.ghost.disabled:disabled i, span.btn.ghost.disabled i, .dataTables_paginate span.ghost.disabled.paginate_button i, .dataTables_paginate span.ghost.disabled i, span.btn.ghost.waiting i, .dataTables_paginate span.ghost.waiting.paginate_button i, .dataTables_paginate span.ghost.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.ghost:link, .dataTables_paginate span.ghost.paginate_button:link, .dataTables_paginate span.ghost.disabled:link, span.btn.ghost:visited, .dataTables_paginate span.ghost.paginate_button:visited, .dataTables_paginate span.ghost.disabled:visited {
@@ -5414,9 +5798,13 @@ label.btn.ghost:active, .dataTables_paginate label.ghost.paginate_button:active,
 }
 
 label.btn.ghost:disabled, .dataTables_paginate label.ghost.paginate_button:disabled, .dataTables_paginate label.ghost.disabled:disabled, label.btn.ghost.disabled, .dataTables_paginate label.ghost.disabled, label.btn.ghost.waiting, .dataTables_paginate label.ghost.waiting.paginate_button, .dataTables_paginate label.ghost.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: transparent !important;
+}
+
+label.btn.ghost:disabled i, .dataTables_paginate label.ghost.paginate_button:disabled i, .dataTables_paginate label.ghost.disabled:disabled i, label.btn.ghost.disabled i, .dataTables_paginate label.ghost.disabled.paginate_button i, .dataTables_paginate label.ghost.disabled i, label.btn.ghost.waiting i, .dataTables_paginate label.ghost.waiting.paginate_button i, .dataTables_paginate label.ghost.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.ghost:link, .dataTables_paginate label.ghost.paginate_button:link, .dataTables_paginate label.ghost.disabled:link, label.btn.ghost:visited, .dataTables_paginate label.ghost.paginate_button:visited, .dataTables_paginate label.ghost.disabled:visited {
@@ -5434,10 +5822,15 @@ label.btn.ghost:active, .dataTables_paginate label.ghost.paginate_button:active,
 .ghost:disabled, ghost.disabled, .ghost.waiting,
 .btn.ghost.disabled,
 .dataTables_paginate .ghost.disabled, .btn.ghost.waiting, .dataTables_paginate .ghost.waiting.paginate_button, .dataTables_paginate .ghost.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
   border-color: #dddddd !important;
+}
+
+.ghost:disabled i, ghost.disabled i, .ghost.waiting i,
+.btn.ghost.disabled i, .dataTables_paginate .ghost.disabled.paginate_button i, .dataTables_paginate .ghost.disabled i, .btn.ghost.waiting i, .dataTables_paginate .ghost.waiting.paginate_button i, .dataTables_paginate .ghost.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 .ghost:disabled:hover, .ghost:disabled:active, .ghost:disabled:disabled, ghost.disabled:hover, ghost.disabled:active, ghost.disabled:disabled, .ghost.waiting:hover, .ghost.waiting:active, .ghost.waiting:disabled,
@@ -5479,9 +5872,13 @@ button.ghost.positive:active, button.ghost.positive.active {
 }
 
 button.ghost.positive:disabled, button.ghost.positive.disabled, button.ghost.positive.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: transparent !important;
+}
+
+button.ghost.positive:disabled i, button.ghost.positive.disabled i, button.ghost.positive.waiting i {
+  cursor: not-allowed;
 }
 
 button.ghost.positive:link, button.ghost.positive:visited {
@@ -5521,9 +5918,13 @@ div.btn.ghost.positive:active, .dataTables_paginate div.ghost.positive.paginate_
 }
 
 div.btn.ghost.positive:disabled, .dataTables_paginate div.ghost.positive.paginate_button:disabled, .dataTables_paginate div.ghost.positive.disabled:disabled, div.btn.ghost.positive.disabled, .dataTables_paginate div.ghost.positive.disabled, div.btn.ghost.positive.waiting, .dataTables_paginate div.ghost.positive.waiting.paginate_button, .dataTables_paginate div.ghost.positive.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: transparent !important;
+}
+
+div.btn.ghost.positive:disabled i, .dataTables_paginate div.ghost.positive.paginate_button:disabled i, .dataTables_paginate div.ghost.positive.disabled:disabled i, div.btn.ghost.positive.disabled i, .dataTables_paginate div.ghost.positive.disabled i, div.btn.ghost.positive.waiting i, .dataTables_paginate div.ghost.positive.waiting.paginate_button i, .dataTables_paginate div.ghost.positive.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 div.btn.ghost.positive:link, .dataTables_paginate div.ghost.positive.paginate_button:link, .dataTables_paginate div.ghost.positive.disabled:link, div.btn.ghost.positive:visited, .dataTables_paginate div.ghost.positive.paginate_button:visited, .dataTables_paginate div.ghost.positive.disabled:visited {
@@ -5563,9 +5964,13 @@ a.btn.ghost.positive:active, .dataTables_paginate a.ghost.positive.paginate_butt
 }
 
 a.btn.ghost.positive:disabled, .dataTables_paginate a.ghost.positive.paginate_button:disabled, .dataTables_paginate a.ghost.positive.disabled:disabled, a.btn.ghost.positive.disabled, .dataTables_paginate a.ghost.positive.disabled, a.btn.ghost.positive.waiting, .dataTables_paginate a.ghost.positive.waiting.paginate_button, .dataTables_paginate a.ghost.positive.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: transparent !important;
+}
+
+a.btn.ghost.positive:disabled i, .dataTables_paginate a.ghost.positive.paginate_button:disabled i, .dataTables_paginate a.ghost.positive.disabled:disabled i, a.btn.ghost.positive.disabled i, .dataTables_paginate a.ghost.positive.disabled i, a.btn.ghost.positive.waiting i, .dataTables_paginate a.ghost.positive.waiting.paginate_button i, .dataTables_paginate a.ghost.positive.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.ghost.positive:link, .dataTables_paginate a.ghost.positive.paginate_button:link, .dataTables_paginate a.ghost.positive.disabled:link, a.btn.ghost.positive:visited, .dataTables_paginate a.ghost.positive.paginate_button:visited, .dataTables_paginate a.ghost.positive.disabled:visited {
@@ -5605,9 +6010,13 @@ i.btn.ghost.positive:active, .dataTables_paginate i.ghost.positive.paginate_butt
 }
 
 i.btn.ghost.positive:disabled, .dataTables_paginate i.ghost.positive.paginate_button:disabled, .dataTables_paginate i.ghost.positive.disabled:disabled, i.btn.ghost.positive.disabled, .dataTables_paginate i.ghost.positive.disabled, i.btn.ghost.positive.waiting, .dataTables_paginate i.ghost.positive.waiting.paginate_button, .dataTables_paginate i.ghost.positive.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: transparent !important;
+}
+
+i.btn.ghost.positive:disabled i, .dataTables_paginate i.ghost.positive.paginate_button:disabled i, .dataTables_paginate i.ghost.positive.disabled:disabled i, i.btn.ghost.positive.disabled i, .dataTables_paginate i.ghost.positive.disabled i, i.btn.ghost.positive.waiting i, .dataTables_paginate i.ghost.positive.waiting.paginate_button i, .dataTables_paginate i.ghost.positive.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.ghost.positive:link, .dataTables_paginate i.ghost.positive.paginate_button:link, .dataTables_paginate i.ghost.positive.disabled:link, i.btn.ghost.positive:visited, .dataTables_paginate i.ghost.positive.paginate_button:visited, .dataTables_paginate i.ghost.positive.disabled:visited {
@@ -5647,9 +6056,13 @@ span.btn.ghost.positive:active, .dataTables_paginate span.ghost.positive.paginat
 }
 
 span.btn.ghost.positive:disabled, .dataTables_paginate span.ghost.positive.paginate_button:disabled, .dataTables_paginate span.ghost.positive.disabled:disabled, span.btn.ghost.positive.disabled, .dataTables_paginate span.ghost.positive.disabled, span.btn.ghost.positive.waiting, .dataTables_paginate span.ghost.positive.waiting.paginate_button, .dataTables_paginate span.ghost.positive.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: transparent !important;
+}
+
+span.btn.ghost.positive:disabled i, .dataTables_paginate span.ghost.positive.paginate_button:disabled i, .dataTables_paginate span.ghost.positive.disabled:disabled i, span.btn.ghost.positive.disabled i, .dataTables_paginate span.ghost.positive.disabled i, span.btn.ghost.positive.waiting i, .dataTables_paginate span.ghost.positive.waiting.paginate_button i, .dataTables_paginate span.ghost.positive.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.ghost.positive:link, .dataTables_paginate span.ghost.positive.paginate_button:link, .dataTables_paginate span.ghost.positive.disabled:link, span.btn.ghost.positive:visited, .dataTables_paginate span.ghost.positive.paginate_button:visited, .dataTables_paginate span.ghost.positive.disabled:visited {
@@ -5689,9 +6102,13 @@ label.btn.ghost.positive:active, .dataTables_paginate label.ghost.positive.pagin
 }
 
 label.btn.ghost.positive:disabled, .dataTables_paginate label.ghost.positive.paginate_button:disabled, .dataTables_paginate label.ghost.positive.disabled:disabled, label.btn.ghost.positive.disabled, .dataTables_paginate label.ghost.positive.disabled, label.btn.ghost.positive.waiting, .dataTables_paginate label.ghost.positive.waiting.paginate_button, .dataTables_paginate label.ghost.positive.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: transparent !important;
+}
+
+label.btn.ghost.positive:disabled i, .dataTables_paginate label.ghost.positive.paginate_button:disabled i, .dataTables_paginate label.ghost.positive.disabled:disabled i, label.btn.ghost.positive.disabled i, .dataTables_paginate label.ghost.positive.disabled i, label.btn.ghost.positive.waiting i, .dataTables_paginate label.ghost.positive.waiting.paginate_button i, .dataTables_paginate label.ghost.positive.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.ghost.positive:link, .dataTables_paginate label.ghost.positive.paginate_button:link, .dataTables_paginate label.ghost.positive.disabled:link, label.btn.ghost.positive:visited, .dataTables_paginate label.ghost.positive.paginate_button:visited, .dataTables_paginate label.ghost.positive.disabled:visited {
@@ -5734,9 +6151,13 @@ button.sidebar-button:active, button.sidebar-button.active {
 }
 
 button.sidebar-button:disabled, button.sidebar-button.disabled, button.sidebar-button.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #f39129 !important;
   background-color: #dddddd !important;
+}
+
+button.sidebar-button:disabled i, button.sidebar-button.disabled i, button.sidebar-button.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.sidebar-button, .dataTables_paginate div.sidebar-button.paginate_button, .dataTables_paginate div.sidebar-button.disabled {
@@ -5767,9 +6188,13 @@ div.btn.sidebar-button:active, .dataTables_paginate div.sidebar-button.paginate_
 }
 
 div.btn.sidebar-button:disabled, .dataTables_paginate div.sidebar-button.paginate_button:disabled, .dataTables_paginate div.sidebar-button.disabled:disabled, div.btn.sidebar-button.disabled, .dataTables_paginate div.sidebar-button.disabled, div.btn.sidebar-button.waiting, .dataTables_paginate div.sidebar-button.waiting.paginate_button, .dataTables_paginate div.sidebar-button.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #f39129 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.sidebar-button:disabled i, .dataTables_paginate div.sidebar-button.paginate_button:disabled i, .dataTables_paginate div.sidebar-button.disabled:disabled i, div.btn.sidebar-button.disabled i, .dataTables_paginate div.sidebar-button.disabled.paginate_button i, .dataTables_paginate div.sidebar-button.disabled i, div.btn.sidebar-button.waiting i, .dataTables_paginate div.sidebar-button.waiting.paginate_button i, .dataTables_paginate div.sidebar-button.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.sidebar-button, .dataTables_paginate a.sidebar-button.paginate_button, .dataTables_paginate a.sidebar-button.disabled {
@@ -5800,9 +6225,13 @@ a.btn.sidebar-button:active, .dataTables_paginate a.sidebar-button.paginate_butt
 }
 
 a.btn.sidebar-button:disabled, .dataTables_paginate a.sidebar-button.paginate_button:disabled, .dataTables_paginate a.sidebar-button.disabled:disabled, a.btn.sidebar-button.disabled, .dataTables_paginate a.sidebar-button.disabled, a.btn.sidebar-button.waiting, .dataTables_paginate a.sidebar-button.waiting.paginate_button, .dataTables_paginate a.sidebar-button.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #f39129 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.sidebar-button:disabled i, .dataTables_paginate a.sidebar-button.paginate_button:disabled i, .dataTables_paginate a.sidebar-button.disabled:disabled i, a.btn.sidebar-button.disabled i, .dataTables_paginate a.sidebar-button.disabled.paginate_button i, .dataTables_paginate a.sidebar-button.disabled i, a.btn.sidebar-button.waiting i, .dataTables_paginate a.sidebar-button.waiting.paginate_button i, .dataTables_paginate a.sidebar-button.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.sidebar-button, .dataTables_paginate i.sidebar-button.paginate_button, .dataTables_paginate i.sidebar-button.disabled {
@@ -5833,9 +6262,13 @@ i.btn.sidebar-button:active, .dataTables_paginate i.sidebar-button.paginate_butt
 }
 
 i.btn.sidebar-button:disabled, .dataTables_paginate i.sidebar-button.paginate_button:disabled, .dataTables_paginate i.sidebar-button.disabled:disabled, i.btn.sidebar-button.disabled, .dataTables_paginate i.sidebar-button.disabled, i.btn.sidebar-button.waiting, .dataTables_paginate i.sidebar-button.waiting.paginate_button, .dataTables_paginate i.sidebar-button.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #f39129 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.sidebar-button:disabled i, .dataTables_paginate i.sidebar-button.paginate_button:disabled i, .dataTables_paginate i.sidebar-button.disabled:disabled i, i.btn.sidebar-button.disabled i, .dataTables_paginate i.sidebar-button.disabled.paginate_button i, .dataTables_paginate i.sidebar-button.disabled i, i.btn.sidebar-button.waiting i, .dataTables_paginate i.sidebar-button.waiting.paginate_button i, .dataTables_paginate i.sidebar-button.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.sidebar-button, .dataTables_paginate span.sidebar-button.paginate_button, .dataTables_paginate span.sidebar-button.disabled {
@@ -5866,9 +6299,13 @@ span.btn.sidebar-button:active, .dataTables_paginate span.sidebar-button.paginat
 }
 
 span.btn.sidebar-button:disabled, .dataTables_paginate span.sidebar-button.paginate_button:disabled, .dataTables_paginate span.sidebar-button.disabled:disabled, span.btn.sidebar-button.disabled, .dataTables_paginate span.sidebar-button.disabled, span.btn.sidebar-button.waiting, .dataTables_paginate span.sidebar-button.waiting.paginate_button, .dataTables_paginate span.sidebar-button.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #f39129 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.sidebar-button:disabled i, .dataTables_paginate span.sidebar-button.paginate_button:disabled i, .dataTables_paginate span.sidebar-button.disabled:disabled i, span.btn.sidebar-button.disabled i, .dataTables_paginate span.sidebar-button.disabled.paginate_button i, .dataTables_paginate span.sidebar-button.disabled i, span.btn.sidebar-button.waiting i, .dataTables_paginate span.sidebar-button.waiting.paginate_button i, .dataTables_paginate span.sidebar-button.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.sidebar-button, .dataTables_paginate label.sidebar-button.paginate_button, .dataTables_paginate label.sidebar-button.disabled {
@@ -5899,9 +6336,13 @@ label.btn.sidebar-button:active, .dataTables_paginate label.sidebar-button.pagin
 }
 
 label.btn.sidebar-button:disabled, .dataTables_paginate label.sidebar-button.paginate_button:disabled, .dataTables_paginate label.sidebar-button.disabled:disabled, label.btn.sidebar-button.disabled, .dataTables_paginate label.sidebar-button.disabled, label.btn.sidebar-button.waiting, .dataTables_paginate label.sidebar-button.waiting.paginate_button, .dataTables_paginate label.sidebar-button.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #f39129 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.sidebar-button:disabled i, .dataTables_paginate label.sidebar-button.paginate_button:disabled i, .dataTables_paginate label.sidebar-button.disabled:disabled i, label.btn.sidebar-button.disabled i, .dataTables_paginate label.sidebar-button.disabled.paginate_button i, .dataTables_paginate label.sidebar-button.disabled i, label.btn.sidebar-button.waiting i, .dataTables_paginate label.sidebar-button.waiting.paginate_button i, .dataTables_paginate label.sidebar-button.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 button.sidebar-button-light {
@@ -5932,9 +6373,13 @@ button.sidebar-button-light:active, button.sidebar-button-light.active {
 }
 
 button.sidebar-button-light:disabled, button.sidebar-button-light.disabled, button.sidebar-button-light.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #f39129 !important;
   background-color: #dddddd !important;
+}
+
+button.sidebar-button-light:disabled i, button.sidebar-button-light.disabled i, button.sidebar-button-light.waiting i {
+  cursor: not-allowed;
 }
 
 div.btn.sidebar-button-light, .dataTables_paginate div.sidebar-button-light.paginate_button, .dataTables_paginate div.sidebar-button-light.disabled {
@@ -5965,9 +6410,13 @@ div.btn.sidebar-button-light:active, .dataTables_paginate div.sidebar-button-lig
 }
 
 div.btn.sidebar-button-light:disabled, .dataTables_paginate div.sidebar-button-light.paginate_button:disabled, .dataTables_paginate div.sidebar-button-light.disabled:disabled, div.btn.sidebar-button-light.disabled, .dataTables_paginate div.sidebar-button-light.disabled, div.btn.sidebar-button-light.waiting, .dataTables_paginate div.sidebar-button-light.waiting.paginate_button, .dataTables_paginate div.sidebar-button-light.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #f39129 !important;
   background-color: #dddddd !important;
+}
+
+div.btn.sidebar-button-light:disabled i, .dataTables_paginate div.sidebar-button-light.paginate_button:disabled i, .dataTables_paginate div.sidebar-button-light.disabled:disabled i, div.btn.sidebar-button-light.disabled i, .dataTables_paginate div.sidebar-button-light.disabled.paginate_button i, .dataTables_paginate div.sidebar-button-light.disabled i, div.btn.sidebar-button-light.waiting i, .dataTables_paginate div.sidebar-button-light.waiting.paginate_button i, .dataTables_paginate div.sidebar-button-light.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.sidebar-button-light, .dataTables_paginate a.sidebar-button-light.paginate_button, .dataTables_paginate a.sidebar-button-light.disabled {
@@ -5998,9 +6447,13 @@ a.btn.sidebar-button-light:active, .dataTables_paginate a.sidebar-button-light.p
 }
 
 a.btn.sidebar-button-light:disabled, .dataTables_paginate a.sidebar-button-light.paginate_button:disabled, .dataTables_paginate a.sidebar-button-light.disabled:disabled, a.btn.sidebar-button-light.disabled, .dataTables_paginate a.sidebar-button-light.disabled, a.btn.sidebar-button-light.waiting, .dataTables_paginate a.sidebar-button-light.waiting.paginate_button, .dataTables_paginate a.sidebar-button-light.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #f39129 !important;
   background-color: #dddddd !important;
+}
+
+a.btn.sidebar-button-light:disabled i, .dataTables_paginate a.sidebar-button-light.paginate_button:disabled i, .dataTables_paginate a.sidebar-button-light.disabled:disabled i, a.btn.sidebar-button-light.disabled i, .dataTables_paginate a.sidebar-button-light.disabled.paginate_button i, .dataTables_paginate a.sidebar-button-light.disabled i, a.btn.sidebar-button-light.waiting i, .dataTables_paginate a.sidebar-button-light.waiting.paginate_button i, .dataTables_paginate a.sidebar-button-light.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.sidebar-button-light, .dataTables_paginate i.sidebar-button-light.paginate_button, .dataTables_paginate i.sidebar-button-light.disabled {
@@ -6031,9 +6484,13 @@ i.btn.sidebar-button-light:active, .dataTables_paginate i.sidebar-button-light.p
 }
 
 i.btn.sidebar-button-light:disabled, .dataTables_paginate i.sidebar-button-light.paginate_button:disabled, .dataTables_paginate i.sidebar-button-light.disabled:disabled, i.btn.sidebar-button-light.disabled, .dataTables_paginate i.sidebar-button-light.disabled, i.btn.sidebar-button-light.waiting, .dataTables_paginate i.sidebar-button-light.waiting.paginate_button, .dataTables_paginate i.sidebar-button-light.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #f39129 !important;
   background-color: #dddddd !important;
+}
+
+i.btn.sidebar-button-light:disabled i, .dataTables_paginate i.sidebar-button-light.paginate_button:disabled i, .dataTables_paginate i.sidebar-button-light.disabled:disabled i, i.btn.sidebar-button-light.disabled i, .dataTables_paginate i.sidebar-button-light.disabled.paginate_button i, .dataTables_paginate i.sidebar-button-light.disabled i, i.btn.sidebar-button-light.waiting i, .dataTables_paginate i.sidebar-button-light.waiting.paginate_button i, .dataTables_paginate i.sidebar-button-light.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.sidebar-button-light, .dataTables_paginate span.sidebar-button-light.paginate_button, .dataTables_paginate span.sidebar-button-light.disabled {
@@ -6064,9 +6521,13 @@ span.btn.sidebar-button-light:active, .dataTables_paginate span.sidebar-button-l
 }
 
 span.btn.sidebar-button-light:disabled, .dataTables_paginate span.sidebar-button-light.paginate_button:disabled, .dataTables_paginate span.sidebar-button-light.disabled:disabled, span.btn.sidebar-button-light.disabled, .dataTables_paginate span.sidebar-button-light.disabled, span.btn.sidebar-button-light.waiting, .dataTables_paginate span.sidebar-button-light.waiting.paginate_button, .dataTables_paginate span.sidebar-button-light.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #f39129 !important;
   background-color: #dddddd !important;
+}
+
+span.btn.sidebar-button-light:disabled i, .dataTables_paginate span.sidebar-button-light.paginate_button:disabled i, .dataTables_paginate span.sidebar-button-light.disabled:disabled i, span.btn.sidebar-button-light.disabled i, .dataTables_paginate span.sidebar-button-light.disabled.paginate_button i, .dataTables_paginate span.sidebar-button-light.disabled i, span.btn.sidebar-button-light.waiting i, .dataTables_paginate span.sidebar-button-light.waiting.paginate_button i, .dataTables_paginate span.sidebar-button-light.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.sidebar-button-light, .dataTables_paginate label.sidebar-button-light.paginate_button, .dataTables_paginate label.sidebar-button-light.disabled {
@@ -6097,9 +6558,13 @@ label.btn.sidebar-button-light:active, .dataTables_paginate label.sidebar-button
 }
 
 label.btn.sidebar-button-light:disabled, .dataTables_paginate label.sidebar-button-light.paginate_button:disabled, .dataTables_paginate label.sidebar-button-light.disabled:disabled, label.btn.sidebar-button-light.disabled, .dataTables_paginate label.sidebar-button-light.disabled, label.btn.sidebar-button-light.waiting, .dataTables_paginate label.sidebar-button-light.waiting.paginate_button, .dataTables_paginate label.sidebar-button-light.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #f39129 !important;
   background-color: #dddddd !important;
+}
+
+label.btn.sidebar-button-light:disabled i, .dataTables_paginate label.sidebar-button-light.paginate_button:disabled i, .dataTables_paginate label.sidebar-button-light.disabled:disabled i, label.btn.sidebar-button-light.disabled i, .dataTables_paginate label.sidebar-button-light.disabled.paginate_button i, .dataTables_paginate label.sidebar-button-light.disabled i, label.btn.sidebar-button-light.waiting i, .dataTables_paginate label.sidebar-button-light.waiting.paginate_button i, .dataTables_paginate label.sidebar-button-light.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 .sidebar-button.sidebar-button--icon,
@@ -6111,10 +6576,15 @@ label.btn.sidebar-button-light:disabled, .dataTables_paginate label.sidebar-butt
 .outline:disabled, outline.disabled, .outline.waiting,
 .btn.outline.disabled,
 .dataTables_paginate .outline.disabled, .btn.outline.waiting, .dataTables_paginate .outline.waiting.paginate_button, .dataTables_paginate .outline.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
   border-color: #dddddd !important;
+}
+
+.outline:disabled i, outline.disabled i, .outline.waiting i,
+.btn.outline.disabled i, .dataTables_paginate .outline.disabled.paginate_button i, .dataTables_paginate .outline.disabled i, .btn.outline.waiting i, .dataTables_paginate .outline.waiting.paginate_button i, .dataTables_paginate .outline.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 .outline:disabled:hover, .outline:disabled:active, .outline:disabled:disabled, outline.disabled:hover, outline.disabled:active, outline.disabled:disabled, .outline.waiting:hover, .outline.waiting:active, .outline.waiting:disabled,
@@ -6156,9 +6626,13 @@ button.primary.outline:active, button.primary.outline.active {
 }
 
 button.primary.outline:disabled, button.primary.outline.disabled, button.primary.outline.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: white !important;
+}
+
+button.primary.outline:disabled i, button.primary.outline.disabled i, button.primary.outline.waiting i {
+  cursor: not-allowed;
 }
 
 button.primary.outline:link, button.primary.outline:visited {
@@ -6198,9 +6672,13 @@ div.btn.primary.outline:active, .dataTables_paginate div.primary.outline.paginat
 }
 
 div.btn.primary.outline:disabled, .dataTables_paginate div.primary.outline.paginate_button:disabled, .dataTables_paginate div.primary.outline.disabled:disabled, div.btn.primary.outline.disabled, .dataTables_paginate div.primary.outline.disabled, div.btn.primary.outline.waiting, .dataTables_paginate div.primary.outline.waiting.paginate_button, .dataTables_paginate div.primary.outline.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: white !important;
+}
+
+div.btn.primary.outline:disabled i, .dataTables_paginate div.primary.outline.paginate_button:disabled i, .dataTables_paginate div.primary.outline.disabled:disabled i, div.btn.primary.outline.disabled i, .dataTables_paginate div.primary.outline.disabled i, div.btn.primary.outline.waiting i, .dataTables_paginate div.primary.outline.waiting.paginate_button i, .dataTables_paginate div.primary.outline.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 div.btn.primary.outline:link, .dataTables_paginate div.primary.outline.paginate_button:link, .dataTables_paginate div.primary.outline.disabled:link, div.btn.primary.outline:visited, .dataTables_paginate div.primary.outline.paginate_button:visited, .dataTables_paginate div.primary.outline.disabled:visited {
@@ -6240,9 +6718,13 @@ a.btn.primary.outline:active, .dataTables_paginate a.primary.outline.paginate_bu
 }
 
 a.btn.primary.outline:disabled, .dataTables_paginate a.primary.outline.paginate_button:disabled, .dataTables_paginate a.primary.outline.disabled:disabled, a.btn.primary.outline.disabled, .dataTables_paginate a.primary.outline.disabled, a.btn.primary.outline.waiting, .dataTables_paginate a.primary.outline.waiting.paginate_button, .dataTables_paginate a.primary.outline.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: white !important;
+}
+
+a.btn.primary.outline:disabled i, .dataTables_paginate a.primary.outline.paginate_button:disabled i, .dataTables_paginate a.primary.outline.disabled:disabled i, a.btn.primary.outline.disabled i, .dataTables_paginate a.primary.outline.disabled i, a.btn.primary.outline.waiting i, .dataTables_paginate a.primary.outline.waiting.paginate_button i, .dataTables_paginate a.primary.outline.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 a.btn.primary.outline:link, .dataTables_paginate a.primary.outline.paginate_button:link, .dataTables_paginate a.primary.outline.disabled:link, a.btn.primary.outline:visited, .dataTables_paginate a.primary.outline.paginate_button:visited, .dataTables_paginate a.primary.outline.disabled:visited {
@@ -6282,9 +6764,13 @@ i.btn.primary.outline:active, .dataTables_paginate i.primary.outline.paginate_bu
 }
 
 i.btn.primary.outline:disabled, .dataTables_paginate i.primary.outline.paginate_button:disabled, .dataTables_paginate i.primary.outline.disabled:disabled, i.btn.primary.outline.disabled, .dataTables_paginate i.primary.outline.disabled, i.btn.primary.outline.waiting, .dataTables_paginate i.primary.outline.waiting.paginate_button, .dataTables_paginate i.primary.outline.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: white !important;
+}
+
+i.btn.primary.outline:disabled i, .dataTables_paginate i.primary.outline.paginate_button:disabled i, .dataTables_paginate i.primary.outline.disabled:disabled i, i.btn.primary.outline.disabled i, .dataTables_paginate i.primary.outline.disabled i, i.btn.primary.outline.waiting i, .dataTables_paginate i.primary.outline.waiting.paginate_button i, .dataTables_paginate i.primary.outline.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 i.btn.primary.outline:link, .dataTables_paginate i.primary.outline.paginate_button:link, .dataTables_paginate i.primary.outline.disabled:link, i.btn.primary.outline:visited, .dataTables_paginate i.primary.outline.paginate_button:visited, .dataTables_paginate i.primary.outline.disabled:visited {
@@ -6324,9 +6810,13 @@ span.btn.primary.outline:active, .dataTables_paginate span.primary.outline.pagin
 }
 
 span.btn.primary.outline:disabled, .dataTables_paginate span.primary.outline.paginate_button:disabled, .dataTables_paginate span.primary.outline.disabled:disabled, span.btn.primary.outline.disabled, .dataTables_paginate span.primary.outline.disabled, span.btn.primary.outline.waiting, .dataTables_paginate span.primary.outline.waiting.paginate_button, .dataTables_paginate span.primary.outline.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: white !important;
+}
+
+span.btn.primary.outline:disabled i, .dataTables_paginate span.primary.outline.paginate_button:disabled i, .dataTables_paginate span.primary.outline.disabled:disabled i, span.btn.primary.outline.disabled i, .dataTables_paginate span.primary.outline.disabled i, span.btn.primary.outline.waiting i, .dataTables_paginate span.primary.outline.waiting.paginate_button i, .dataTables_paginate span.primary.outline.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 span.btn.primary.outline:link, .dataTables_paginate span.primary.outline.paginate_button:link, .dataTables_paginate span.primary.outline.disabled:link, span.btn.primary.outline:visited, .dataTables_paginate span.primary.outline.paginate_button:visited, .dataTables_paginate span.primary.outline.disabled:visited {
@@ -6366,9 +6856,13 @@ label.btn.primary.outline:active, .dataTables_paginate label.primary.outline.pag
 }
 
 label.btn.primary.outline:disabled, .dataTables_paginate label.primary.outline.paginate_button:disabled, .dataTables_paginate label.primary.outline.disabled:disabled, label.btn.primary.outline.disabled, .dataTables_paginate label.primary.outline.disabled, label.btn.primary.outline.waiting, .dataTables_paginate label.primary.outline.waiting.paginate_button, .dataTables_paginate label.primary.outline.waiting.disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #bbbbbb !important;
   background-color: white !important;
+}
+
+label.btn.primary.outline:disabled i, .dataTables_paginate label.primary.outline.paginate_button:disabled i, .dataTables_paginate label.primary.outline.disabled:disabled i, label.btn.primary.outline.disabled i, .dataTables_paginate label.primary.outline.disabled i, label.btn.primary.outline.waiting i, .dataTables_paginate label.primary.outline.waiting.paginate_button i, .dataTables_paginate label.primary.outline.waiting.disabled i {
+  cursor: not-allowed;
 }
 
 label.btn.primary.outline:link, .dataTables_paginate label.primary.outline.paginate_button:link, .dataTables_paginate label.primary.outline.disabled:link, label.btn.primary.outline:visited, .dataTables_paginate label.primary.outline.paginate_button:visited, .dataTables_paginate label.primary.outline.disabled:visited {
@@ -6406,9 +6900,13 @@ a.link-btn:active, a.link-btn.active {
 }
 
 a.link-btn:disabled, a.link-btn.disabled, a.link-btn.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: none !important;
+}
+
+a.link-btn:disabled i, a.link-btn.disabled i, a.link-btn.waiting i {
+  cursor: not-allowed;
 }
 
 a.link-btn-inverse {
@@ -6434,9 +6932,13 @@ a.link-btn-inverse:active, a.link-btn-inverse.active {
 }
 
 a.link-btn-inverse:disabled, a.link-btn-inverse.disabled, a.link-btn-inverse.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: #dddddd !important;
+}
+
+a.link-btn-inverse:disabled i, a.link-btn-inverse.disabled i, a.link-btn-inverse.waiting i {
+  cursor: not-allowed;
 }
 
 .link-btn--link:hover span, .link-btn--link:active span {
@@ -6470,9 +6972,13 @@ a.link-btn-julkipano:active, a.link-btn-julkipano.active {
 }
 
 a.link-btn-julkipano:disabled, a.link-btn-julkipano.disabled, a.link-btn-julkipano.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: none !important;
+}
+
+a.link-btn-julkipano:disabled i, a.link-btn-julkipano.disabled i, a.link-btn-julkipano.waiting i {
+  cursor: not-allowed;
 }
 
 @-webkit-keyframes spin {
@@ -6563,9 +7069,13 @@ btn.no-border {
 }
 
 .dataTables_paginate .disabled {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: white !important;
   background-color: #dddddd !important;
+}
+
+.dataTables_paginate .disabled i {
+  cursor: not-allowed;
 }
 
 .stacked {
@@ -12196,6 +12706,7 @@ div.attachments-table-container table.attachments-table .amount-controls > [clas
   top: 4px;
   margin: 6px;
   color: #f39129;
+  cursor: pointer;
 }
 
 table.suti-admin-table {
@@ -29809,9 +30320,13 @@ div.pate-autocomplete .ac__menu ul.ac__items li.ac--grouped {
 }
 
 .pprint > a:disabled, .pprint > a.disabled, .pprint > a.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: none !important;
+}
+
+.pprint > a:disabled i, .pprint > a.disabled i, .pprint > a.waiting i {
+  cursor: not-allowed;
 }
 
 .dateinput.dateinput--safe {
@@ -38849,9 +39364,13 @@ div.summary-button-bar {
 }
 
 .bulletin-comment .bulletin-comment__name:disabled, .bulletin-comment .bulletin-comment__name.disabled, .bulletin-comment .bulletin-comment__name.waiting {
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: #999999 !important;
   background-color: none !important;
+}
+
+.bulletin-comment .bulletin-comment__name:disabled i, .bulletin-comment .bulletin-comment__name.disabled i, .bulletin-comment .bulletin-comment__name.waiting i {
+  cursor: not-allowed;
 }
 
 .bulletin-comment .bulletin-comment__name:after {

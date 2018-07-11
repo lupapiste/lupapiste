@@ -199,9 +199,12 @@ i.btn-small {
   // !importants are needed in order to make sure
   // that sibling classes are overriden.
   // For example, <div class="btn primary disabled">
-  cursor: default !important;
+  cursor: not-allowed !important;
   color: $color !important;
   background-color: $bg !important;
+  i {
+    cursor: not-allowed;
+  }
 }
 
 .disabled {
