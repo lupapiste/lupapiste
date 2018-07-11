@@ -619,10 +619,30 @@ Value should be
 # The following do not take data-test-id as argument
 #
 
+Get document id
+  [Arguments]  ${doc}  ${idx}=1
+    ${docId}=  Get Element Attribute  xpath=//section[@data-doc-type='${doc}'][${idx}]  data-doc-id
+   [Return]  ${docId}
+
 Get identifiers closed
-  [Arguments]  ${docId}
-  ${identifiersClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-id='${docId}']//div[@data-test-id='identifier-editors']
+  [Arguments]  ${doc}  ${idx}
+  ${docId} =  Get document id  ${doc}  ${idx}
+  ${identifiersClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=//section[@data-doc-id='${docId}']//div[@data-test-id='identifier-editors']
   [Return]  ${identifiersClosed}
+
+Open identifiers
+  [Arguments]  ${doc}  ${idx}=1
+  Wait until   Element should be visible  xpath=//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
+  ${docId}=  Get document id  ${doc}  ${idx}
+  ${identifiersClosed} =  Get identifiers closed  ${doc}  ${idx}
+  # for jQuery ${idx}-1 because xpath indeces start from 1!
+  Run keyword If  ${identifiersClosed}  Execute Javascript  $('[data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  Wait test id visible  ${docId}-identifier-input
+
+Close identifiers
+  [Arguments]  ${doc}  ${idx}
+  ${identifiersClosed} =  Get identifiers closed  ${doc}  ${idx}
+  Run keyword unless  ${identifiersClosed}  Execute Javascript  $('[data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
 
 Primary operation is
   [Arguments]  ${opId}
@@ -630,38 +650,48 @@ Primary operation is
 
 Edit operation description
   [Arguments]  ${doc}  ${text}  ${idx}=1
-  ${jQueryIdx}=  Evaluate  ${idx} - 1
-  Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
-  ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]  data-doc-id
-  ${identifiersClosed} =  Get identifiers closed  ${docId}
-  # for jQuery ${idx}-1 because xpath indeces start from 1!
-  Run keyword If  ${identifiersClosed}  Click element  div#application-info-tab [data-test-id=toggle-identifiers-${doc}]:eq(${jQueryIdx})
-  ${opDescriptionXpath}=  Set Variable  //div[@id='application-info-tab']//section[@data-doc-id='${docId}']//input[@data-test-id='op-description-editor-${doc}']
-  ${opDescriptionjQueryPath}=  Set Variable  div[id='application-info-tab'] section[data-doc-id='${docId}'] input[data-test-id='op-description-editor-${doc}']
-  Wait Until  Element Should Be Visible  ${opDescriptionXpath}
-  Input text with jQuery  ${opDescriptionjQueryPath}  ${text}
-  # Close the input
-  Scroll and click  div#application-info-tab [data-test-id=toggle-identifiers-${doc}]:eq(${jQueryIdx})
-  Wait until  Element should not be visible  ${opDescriptionXpath}
+  ${docId}=  Get document id  ${doc}  ${idx}
+  Open identifiers  ${doc}  ${idx}
+
+  ${path}=  Set Variable  section[data-doc-id='${docId}'] input[data-test-id='op-description-editor-${doc}']
+  Wait Until  Element Should Be Visible  jquery=${path}
+  Input text with jQuery  ${path}  ${text}
+  Close identifiers  ${doc}  ${idx}
 
 # This only works if there is only one applicable document.
 Operation description is
   [Arguments]  ${doc}  ${text}
-  Wait until  Element Should Contain  xpath=//div[@id='application-info-tab']//span[@data-test-id='${doc}-accordion-description-text']  ${text}
+  Wait until  Element Should Contain  xpath=//span[@data-test-id='${doc}-accordion-description-text']  ${text}
+
+Operation description disabled
+  [Arguments]  ${doc}  ${idx}=1
+  ${docId}=  Get document id  ${doc}  ${idx}
+  Open identifiers  ${doc}  ${idx}
+
+  ${path}=  Set Variable  section[data-doc-id='${docId}'] input[data-test-id='op-description-editor-${doc}']
+  Wait Until  Element Should Be Disabled  jquery=${path}
+  Close identifiers  ${doc}  ${idx}
 
 Input building identifier
   [Arguments]  ${doc}  ${text}  ${idx}=1
-  Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
-  ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]  data-doc-id
-  ${identifiersClosed} =  Get identifiers closed  ${docId}
-  # for jQuery ${idx}-1 because xpath indeces start from 1!
-  Run keyword If  ${identifiersClosed}  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
-  Wait Until  Element Should Be Visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
+  Open identifiers  ${doc}  ${idx}
+  ${docId}=  Get document id  ${doc}  ${idx}
   Input text by test id  ${docId}-identifier-input  ${text}
-  # Close the input
-  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
-  Wait Until  Element Should Not Be Visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
+  Close identifiers  ${doc}  ${idx}
 
+Building identifier is
+  [Arguments]  ${doc}  ${text}  ${idx}=1
+  Open identifiers  ${doc}  ${idx}
+  ${docId}=  Get document id  ${doc}  ${idx}
+  Test id input is  ${docId}-identifier-input  ${text}
+  Close identifiers  ${doc}  ${idx}
+
+Building identifier disabled
+  [Arguments]  ${doc}  ${idx}=1
+  Open identifiers  ${doc}  ${idx}
+  ${docId}=  Get document id  ${doc}  ${idx}
+  Test id disabled  ${docId}-identifier-input
+  Close identifiers  ${doc}  ${idx}
 
 Document status is disabled
   [Arguments]  ${docType}  ${xpathIdx}=1

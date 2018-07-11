@@ -765,11 +765,15 @@
                                (command apikey :update-op-description :id app-id
                                         :op-id (:id op) :desc description
                                         :collection "operations"))
-        tag-command          (fn [apikey tag]
+        tag-command          (fn [apikey tag & [identifier]]
                                (command apikey :update-doc-identifier :id app-id
-                                        :doc doc-id :identifier "tunnus"
+                                        :doc doc-id :identifier (or identifier "tunnus")
                                         :value tag))]
     (fact "operation desc is empty" (-> op :description empty?) => truthy)
+    (fact "Invalid identifiers"
+      (tag-command pena "hello" "valtakunnallinenNumero")
+      => (partial expected-failure? :error.not-identifier)
+      (tag-command pena "hello" "blaah") => fail?)
     (fact "Pena can update description in draft state, Sonja cannot"
       (desc-command pena test-desc) => ok?
       (desc-command sonja "foobar" => fail?))

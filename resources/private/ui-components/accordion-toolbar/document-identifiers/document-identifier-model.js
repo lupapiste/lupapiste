@@ -21,8 +21,7 @@ LUPAPISTE.DocumentIdentifierModel = function(params) {
     });
   }
 
-  self.enabled = _.wrap( "update-doc-identifier",
-                         lupapisteApp.models.applicationAuthModel.ok );
+  self.enabled = _.wrap( "update-doc-identifier", params.authModel.ok );
 
   self.requiredHighlight = ko.pureComputed(function() {
     return self.schema.required && !self.identifier();

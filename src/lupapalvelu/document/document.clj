@@ -153,11 +153,11 @@
   "Precheck that fails if the identifier parameter does not refer to an
   identifier schema."
   [{:keys [document data]}]
-  (when document
+  (when-let [identifier (:identifier data)]
     (when-not (some->> document
                        model/get-document-schema
                        :body
-                       (util/find-by-key :name (:identifier data))
+                       (util/find-by-key :name identifier)
                        :identifier)
       (fail :error.not-identifier))))
 
