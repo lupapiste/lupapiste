@@ -1,4 +1,3 @@
-/*global key */
 //
 // Provides services for accordion-toolbar component.
 //
