@@ -152,8 +152,8 @@
 
 (defn summary-data-for-operation
   [{orgId :organization} operation templateId]
-  (let [template (util/find-by-key :id templateId
-                                   (:templates (settings-for-organization orgId)))]
+  (let [template (util/find-by-id templateId
+                                  (:templates (settings-for-organization orgId)))]
     (assoc (select-keys template [:name])
            :id      (mongo/create-id)
            :op      (select-keys operation [:id :name :description])

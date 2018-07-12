@@ -3334,12 +3334,13 @@
       (provided (lupapalvelu.mongo/create-id) => "id"
                 (lupapalvelu.organization/get-organization "753-R")
                 => {:inspection-summaries-enabled true
-                    :inspection-summary
-                    {:templates            [{:name     "Inspector Template",
-                                             :modified 1530254158347,
-                                             :id       "5b35d34ecea1d0863491149c",
-                                             :items    ["First item" "Second item"]}]
-                     :operations-templates {:sisatila-muutos "5b35d34ecea1d0863491149c"}}}))
+                    :inspection-summary {:operations-templates
+                                         {:sisatila-muutos "5b35d34ecea1d0863491149c"}}}
+                (lupapalvelu.inspection-summary/settings-for-organization "753-R")
+                => {:templates [{:name     "Inspector Template",
+                                 :modified 1530254158347,
+                                 :id       "5b35d34ecea1d0863491149c",
+                                 :items    ["First item" "Second item"]}]}))
 
     (fact "finalize--attachments: no attachments"
       (finalize--attachments c-v-a)
@@ -3348,8 +3349,11 @@
                                         '({:amount     1
                                            :type-group "paatoksenteko"
                                            :type-id    "paatos"})}}
-                    :verdict (assoc-in verdict
-                                       [:data :attachments]
-                                       '({:amount     1
-                                          :type-group "paatoksenteko"
-                                          :type-id    "paatos"}))}) )))
+                    :verdict     (assoc-in verdict
+                                           [:data :attachments]
+                                           '({:amount     1
+                                              :type-group "paatoksenteko"
+                                              :type-id    "paatos"}))}) )
+    (fact "finalize--attachments: new and selected"
+      (finalize--attachments (-> c-v-a
+                                 (assoc-in [:application :attachments] ))))))
