@@ -982,8 +982,8 @@
                    (or (= verdict-id (:id target))
                        (contains? ids id))))
          (map (fn [{:keys [type id]}]
-                {:type-group (keyword (:type-group type))
-                 :type-id    (keyword (:type-id type))
+                {:type-group (:type-group type)
+                 :type-id    (:type-id type)
                  :id         id})))))
 
 (defn attachment-items

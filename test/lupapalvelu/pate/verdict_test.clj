@@ -24,7 +24,8 @@
                    general-handler application-deviations
                    archive-info application-operation
                    title-fn verdict-string
-                   verdict-section-string verdict-summary)
+                   verdict-section-string verdict-summary
+                   verdict-attachment-items)
 
 (testable-privates lupapalvelu.pate.verdict-template
                    template-inclusions)
@@ -2375,6 +2376,7 @@
                                               :location-wgs84 nil
                                               :nationalId     "199887766E"
                                               :operationId    "5b34a9d2cea1d0f410db2403"
+                                              :propertyId     "75341600550007"
                                               :usage          "021 rivitalot"})
                                 :tasks '({:assignee    {}
                                           :closed      nil
@@ -2396,7 +2398,7 @@
                                                         :rakennus           {:0 {:rakennus {:jarjestysnumero                    {:modified 12345
                                                                                                                                  :value    "1"}
                                                                                             :kiinttun                           {:modified 12345
-                                                                                                                                 :value    nil}
+                                                                                                                                 :value    "75341600550007"}
                                                                                             :kunnanSisainenPysyvaRakennusnumero {:modified 12345
                                                                                                                                  :value    nil}
                                                                                             :rakennusnro                        {:modified 12345
@@ -2441,7 +2443,7 @@
                                                         :rakennus           {:0 {:rakennus {:jarjestysnumero                    {:modified 12345
                                                                                                                                  :value    "1"}
                                                                                             :kiinttun                           {:modified 12345
-                                                                                                                                 :value    nil}
+                                                                                                                                 :value    "75341600550007"}
                                                                                             :kunnanSisainenPysyvaRakennusnumero {:modified 12345
                                                                                                                                  :value    nil}
                                                                                             :rakennusnro                        {:modified 12345
@@ -2576,7 +2578,7 @@
                                                                 :rakennus           {:0 {:rakennus {:jarjestysnumero                    {:modified 12345
                                                                                                                                          :value    "1"}
                                                                                                     :kiinttun                           {:modified 12345
-                                                                                                                                         :value    nil}
+                                                                                                                                         :value    "75341600550007"}
                                                                                                     :kunnanSisainenPysyvaRakennusnumero {:modified 12345
                                                                                                                                          :value    nil}
                                                                                                     :rakennusnro                        {:modified 12345
@@ -2622,7 +2624,7 @@
                                                                 :rakennus           {:0 {:rakennus {:jarjestysnumero                    {:modified 12345
                                                                                                                                          :value    "1"}
                                                                                                     :kiinttun                           {:modified 12345
-                                                                                                                                         :value    nil}
+                                                                                                                                         :value    "75341600550007"}
                                                                                                     :kunnanSisainenPysyvaRakennusnumero {:modified 12345
                                                                                                                                          :value    nil}
                                                                                                     :rakennusnro                        {:modified 12345
@@ -2747,6 +2749,7 @@
                                                :location-wgs84 nil
                                                :nationalId     "199887766E"
                                                :operationId    "5b34a9d2cea1d0f410db2403"
+                                               :propertyId     "75341600550007"
                                                :usage          "021 rivitalot"})}}}
         (provided (lupapalvelu.mongo/create-id) => "id"))
       (fact "finalize--building-and-tasks: tasks, no buildings"
@@ -3080,6 +3083,7 @@
                                               :location-wgs84 nil
                                               :nationalId     "199887766E"
                                               :operationId    "5b34a9d2cea1d0f410db2403"
+                                              :propertyId     "75341600550007"
                                               :usage          "021 rivitalot"})
                                 :tasks '({:assignee    {}
                                           :closed      nil
@@ -3270,6 +3274,7 @@
                                                :location-wgs84 nil
                                                :nationalId     "199887766E"
                                                :operationId    "5b34a9d2cea1d0f410db2403"
+                                               :propertyId     "75341600550007"
                                                :usage          "021 rivitalot"})}}}
         (provided (lupapalvelu.mongo/create-id) => "id"))
 
@@ -3288,6 +3293,7 @@
                                               :location       nil
                                               :location-wgs84 nil
                                               :nationalId     "199887766E"
+                                              :propertyId     "75341600550007"
                                               :operationId    "5b34a9d2cea1d0f410db2403"
                                               :usage          "021 rivitalot"}))
             :updates     {$set {:buildings '({:area           "281"
@@ -3298,6 +3304,7 @@
                                               :location       nil
                                               :location-wgs84 nil
                                               :nationalId     "199887766E"
+                                              :propertyId     "75341600550007"
                                               :operationId    "5b34a9d2cea1d0f410db2403"
                                               :usage          "021 rivitalot"})}}}))
 
@@ -3334,26 +3341,102 @@
       (provided (lupapalvelu.mongo/create-id) => "id"
                 (lupapalvelu.organization/get-organization "753-R")
                 => {:inspection-summaries-enabled true
-                    :inspection-summary {:operations-templates
-                                         {:sisatila-muutos "5b35d34ecea1d0863491149c"}}}
+                    :inspection-summary           {:operations-templates
+                                                   {:sisatila-muutos "5b35d34ecea1d0863491149c"}}}
                 (lupapalvelu.inspection-summary/settings-for-organization "753-R")
                 => {:templates [{:name     "Inspector Template",
                                  :modified 1530254158347,
                                  :id       "5b35d34ecea1d0863491149c",
                                  :items    ["First item" "Second item"]}]}))
 
-    (fact "finalize--attachments: no attachments"
-      (finalize--attachments c-v-a)
-      => (contains {:application (assoc application :attachments [])
-                    :updates     {$set {:pate-verdicts.$.data.attachments
-                                        '({:amount     1
-                                           :type-group "paatoksenteko"
-                                           :type-id    "paatos"})}}
-                    :verdict     (assoc-in verdict
-                                           [:data :attachments]
-                                           '({:amount     1
-                                              :type-group "paatoksenteko"
-                                              :type-id    "paatos"}))}) )
-    (fact "finalize--attachments: new and selected"
-      (finalize--attachments (-> c-v-a
-                                 (assoc-in [:application :attachments] ))))))
+    (let [att-paatosote {:id            "att1"
+                         :type          {:type-id    "paatosote"
+                                         :type-group "paatoksenteko"}
+                         :target        {:type "verdict"
+                                         :id   (:id verdict)}
+                         :latestVersion {:fileId "a"}}
+          att-ilmoitus  {:id            "att2"
+                         :type          {:type-id    "ilmoitus"
+                                         :type-group "paatoksenteko"}
+                         :latestVersion {:fileId "b"}}
+          att-empty     {:id   "att3"
+                         :type {:type-id    "ilmoitus"
+                                :type-group "paatoksenteko"}}
+          att-ilmoitus2 {:id            "att4"
+                         :type          {:type-id    "ilmoitus"
+                                         :type-group "paatoksenteko"}
+                         :target        {:type "verdict"
+                                         :id   (:id verdict)}
+                         :latestVersion {:fileId "c"}}
+          att-ilmoitus3 {:id            "att5"
+                         :type          {:type-id    "ilmoitus"
+                                         :type-group "paatoksenteko"}
+                         :latestVersion {:fileId "d"}}
+          att-paatos    {:id            "att6"
+                         :type          {:type-id    "paatos"
+                                         :type-group "paatoksenteko"}
+                         :latestVersion {:fileId "e"}}
+          att-paatos2   {:id            "att7"
+                         :type          {:type-id    "paatos"
+                                         :type-group "paatoksenteko"}
+                         :target        {:type "verdict"
+                                         :id   (:id verdict)}
+                         :latestVersion {:fileId "f"}}]
+      (fact "finalize--attachments: no attachments"
+        (finalize--attachments c-v-a)
+        => (contains {:application (assoc application :attachments [])
+                      :updates     {$set {:pate-verdicts.$.data.attachments
+                                          '({:amount     1
+                                             :type-group "paatoksenteko"
+                                             :type-id    "paatos"})}}
+                      :verdict     (assoc-in verdict
+                                             [:data :attachments]
+                                             '({:amount     1
+                                                :type-group "paatoksenteko"
+                                                :type-id    "paatos"}))}) )
+      (fact "verdict-attachment-items"
+        (verdict-attachment-items {:application {:attachments [att-paatosote att-ilmoitus att-empty]}}
+                                  {:id   (:id verdict)
+                                   :data {:atts ["att2" "att3"]}}
+                                  :atts)
+        => (just [{:id "att1" :type-group "paatoksenteko" :type-id "paatosote"}
+                  {:id "att2" :type-group "paatoksenteko" :type-id "ilmoitus"}]
+                 :in-any-order))
+      (fact "attachment-items"
+        (let [{:keys [update-fn]} (attachment-items
+                                   {:application {:attachments [att-paatosote att-ilmoitus att-empty
+                                                                att-ilmoitus2 att-ilmoitus3 att-paatos
+                                                                att-paatos2]
+                                                  :permitType  "R"}}
+                                   {:id   (:id verdict)
+                                    :data {:attachments ["att2" "att3" "gone" "att5" "att6"]}})]
+          (update-fn {:foo 8})
+          => (just {:foo         8
+                    :attachments (just [{:type-group "paatoksenteko" :type-id "paatosote" :amount 1}
+                                        {:type-group "paatoksenteko" :type-id "ilmoitus" :amount 3}
+                                        {:type-group "paatoksenteko" :type-id "paatos" :amount 3}]
+                                       :in-any-order)})))
+      (fact "finalize--attachments: new, selected and empty"
+        (finalize--attachments (-> c-v-a
+                                   (assoc-in [:command :application :attachments]
+                                             [att-paatosote att-ilmoitus att-empty
+                                              att-ilmoitus2 att-ilmoitus3 att-paatos
+                                              att-paatos2])
+                                   (assoc-in [:verdict :data :attachments]
+                                             ["att2" "att3"  "gone" "att5" "att6"])))
+        => (contains {:updates (just {$set (just {:pate-verdicts.$.data.attachments
+                                                  (just [{:amount     3
+                                                          :type-group "paatoksenteko"
+                                                          :type-id    "paatos"}
+                                                         {:amount     1
+                                                          :type-group "paatoksenteko"
+                                                          :type-id    "paatosote"}
+                                                         {:amount     3
+                                                          :type-group "paatoksenteko"
+                                                          :type-id    "ilmoitus"}]
+                                                        :in-any-order)})})})))
+
+    (fact "finalize--pdf"
+      (let [{:keys [updates]} (finalize--pdf c-v-a)]
+        (keys (get-in updates [$set :pate-verdicts.$.verdict-attachment.html]))
+        => (just [:header :body :footer] :in-any-order)))))

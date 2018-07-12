@@ -115,7 +115,7 @@
   {:version                              VersionNumber
    :fileId                               (sc/maybe sssc/FileId)  ;; fileId in storage, nil if the file has been deleted when archived
    :originalFileId                       (sc/maybe sssc/FileId)  ;; fileId of the unrotated/unconverted file
-   (sc/optional-key :onkaloFileId)       AttachmentId                ;; id in Onkalo, if archived. Should equal attachment id.
+   (sc/optional-key :onkaloFileId)       ssc/AttachmentId        ;; id in Onkalo, if archived. Should equal attachment id.
    :storageSystem                        sssc/StorageSystem
    :created                              ssc/Timestamp
    ;; Timestamp for the latest "non-versioning" operation (e.g.,
