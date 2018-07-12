@@ -89,6 +89,12 @@
       <div class="container">
 
         <!-- ko if: searchModel() && !noApplications() -->
+
+          <!-- ko if: gotResults() -->
+          <div data-bind="component: searchModel().paging"
+               class="applications-search-component"></div>
+          <!-- /ko -->
+
         <div data-bind="component: searchModel().searchResults"
              class="applications-search-component"></div>
 

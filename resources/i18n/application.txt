@@ -1136,7 +1136,7 @@
 "applications.report.post-verdict.file-name" "fi" "lupapiste-paatoksen-saaneet"
 "applications.report.post-verdict.file-name" "sv" "lupapiste-mottagare-av-beslut"
 "applications.results" "en" "My Projects {0} - {1} / {2}"
-"applications.results" "fi" "Omat hankkeet {0} - {1} / {2}"
+"applications.results" "fi" "Hankkeet {0} - {1} / {2}"
 "applications.results" "sv" "Egna projekt {0} - {1} / {2}"
 "applications.search.clear-filters" "en" "Clear filter"
 "applications.search.clear-filters" "fi" "Tyhjennä hakuehdot"

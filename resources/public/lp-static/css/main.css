@@ -8408,6 +8408,7 @@ input.dateinput:focus {
 input.dateinput:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
+  cursor: not-allowed;
 }
 
 input.dateinput.warning {
@@ -8501,6 +8502,7 @@ input.grid-style-input:focus {
 input.grid-style-input:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
+  cursor: not-allowed;
 }
 
 input.grid-style-input.warning {
@@ -8534,6 +8536,7 @@ input.grid-style-input--wide:focus {
 input.grid-style-input--wide:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
+  cursor: not-allowed;
 }
 
 input.grid-style-input--wide.warning {
@@ -10123,6 +10126,7 @@ div.alleYli-radioGroup {
 .form-grid input[type=text]:disabled, .form-grid input[type=password]:disabled, .form-grid input[type=number]:disabled, .form-grid select:disabled, .form-grid textarea:disabled, .form-grid span.form-string:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
+  cursor: not-allowed;
 }
 
 .form-grid input[type=text].warning, .form-grid input[type=password].warning, .form-grid input[type=number].warning, .form-grid select.warning, .form-grid textarea.warning, .form-grid span.form-string.warning {
@@ -11309,6 +11313,7 @@ select.dropdown:disabled, .dataTables_length select:disabled {
   border-color: #dddddd;
   background-image: url("/lp-static/img/lupicon-chevron-down-gray187.png");
   background-color: #f6f6f6;
+  cursor: not-allowed;
 }
 
 select.dropdown:focus, .dataTables_length select:focus {
@@ -11362,6 +11367,7 @@ select.dropdown--plain:disabled {
 .grid-style-input:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
+  cursor: not-allowed;
 }
 
 .grid-style-input.warning {
@@ -15642,6 +15648,11 @@ div.automatic-assignments .assignment .editor {
   clear: both;
 }
 
+.applications-search-component .button-group {
+  float: right;
+  margin-bottom: 20px;
+}
+
 .search-tabs ul {
   display: inline-block;
   list-style: none;
@@ -15683,16 +15694,35 @@ div.automatic-assignments .assignment .editor {
 
 .paging {
   color: #333333;
+  margin-bottom: 12px;
 }
 
 .paging label {
   color: #333333;
-  margin-bottom: 6px;
   display: inline-block;
+  vertical-align: middle;
 }
 
 .paging button {
-  margin-right: 20px;
+  margin-right: 10px;
+}
+
+.paging .results {
+  margin-bottom: 6px;
+}
+
+.paging a:not(:last-of-type) span.separator::after {
+  content: "|";
+}
+
+.paging span.limits {
+  font-size: 15px;
+  padding-right: 5px !important;
+  padding-left: 2px !important;
+}
+
+.paging .previous {
+  padding-right: 10px;
 }
 
 div.search {
