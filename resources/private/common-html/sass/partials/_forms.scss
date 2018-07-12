@@ -1542,6 +1542,7 @@ select.dropdown, .dataTables_length select {
       image: url( "/lp-static/img/lupicon-chevron-down-gray187.png");
       color: $gray246;
     }
+    cursor: not-allowed;
   }
   &:focus {
     background-image: url( "/lp-static/img/lupicon-chevron-down-orange-light.png");
