@@ -173,7 +173,8 @@
                           :application-organization-archive-enabled
                           :create-application
                           :document-states
-                          :authorized-to-apply-submit-restriction-to-other-auths}
+                          :authorized-to-apply-submit-restriction-to-other-auths
+                          :verdict-pdf}
         user {:id "user123"
               :role "authority"}
         application {:organization "999-R"

@@ -3393,7 +3393,10 @@
                                              [:data :attachments]
                                              '({:amount     1
                                                 :type-group "paatoksenteko"
-                                                :type-id    "paatos"}))}) )
+                                                :type-id    "paatos"}))})
+        (provided (lupapalvelu.attachment/attachment-array-updates
+                   "LP-753-2018-90008" anything :readOnly true :locked true :target {:type "verdict", :id "vid"})
+                  => nil))
       (fact "verdict-attachment-items"
         (verdict-attachment-items {:application {:attachments [att-paatosote att-ilmoitus att-empty]}}
                                   {:id   (:id verdict)
@@ -3434,9 +3437,13 @@
                                                          {:amount     3
                                                           :type-group "paatoksenteko"
                                                           :type-id    "ilmoitus"}]
-                                                        :in-any-order)})})})))
+                                                        :in-any-order)})})})
+        (provided (lupapalvelu.attachment/attachment-array-updates
+                   "LP-753-2018-90008" anything :readOnly true :locked true :target {:type "verdict", :id "vid"})
+                  => nil)))
 
     (fact "finalize--pdf"
-      (let [{:keys [updates]} (finalize--pdf c-v-a)]
-        (keys (get-in updates [$set :pate-verdicts.$.verdict-attachment.html]))
-        => (just [:header :body :footer] :in-any-order)))))
+      (keys (get-in (finalize--pdf c-v-a) [:updates $set :pate-verdicts.$.verdict-attachment.html]))
+      => (just [:header :body :footer] :in-any-order)
+      (provided (lupapalvelu.organization/get-organization-name "753-R" nil)
+                => "Sipoon rakennusvalvonta"))))
