@@ -7,6 +7,7 @@
             [clojure.set :as set]
             [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.verdict :as verdict]
@@ -29,11 +30,11 @@
 ;; and constraints are in sync with the legacy verdict API.
 
 (defn- pate-enabled
-  "Pre-checker that fails if Pate is not enabled in the application
-  organization."
-  [{:keys [organization]}]
+  "Pre-checker that fails if Pate is not enabled in the application organization scope."
+  [{:keys [organization application]}]
   (when (and organization
-             (not (:pate-enabled @organization)))
+             (not (-> (org/resolve-organization-scope (:municipality application) (:permitType application) @organization)
+                      :pate-enabled)))
     (fail :error.pate-disabled)))
 
 (defn- verdict-exists

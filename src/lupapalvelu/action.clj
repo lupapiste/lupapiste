@@ -284,31 +284,30 @@
    (update-application command {} changes))
   ([command mongo-query changes & {:keys [return-count?]}]
 
-   (when-let [new-state (get-in changes [$set :state])]
-     (assert
-       (or
-         ; Require history entry
-         (seq (get-in changes [$push :history]))
-         ; Inforequest state chenges don't require logging
-         (states/all-inforequest-states new-state)
-         ; delete-verdict commands sets state back, but no logging is required (LPK-917)
-         (seq (get-in changes [$pull :verdicts])))
-       "event must be pushed to history array when state is set")
-     (if (env/dev-mode?)
-       (when-not (map? (:user command))
-         (fatalf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))
-       (when-not (map? (:user command))
-         (warnf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))))
+    (when-let [new-state (get-in changes [$set :state])]
+      (assert
+        (or
+          ; Require history entry
+          (seq (get-in changes [$push :history]))
+          ; Inforequest state chenges don't require logging
+          (states/all-inforequest-states new-state)
+          ; delete-verdict commands sets state back, but no logging is required (LPK-917)
+          (seq (get-in changes [$pull :verdicts])))
+        "event must be pushed to history array when state is set")
+      (if (env/dev-mode?)
+        (when-not (map? (:user command))
+          (fatalf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))
+        (when-not (map? (:user command))
+          (warnf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))))
 
-   (with-application
-     command
-     (fn [{:keys [id organization]}]
-       (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
-         (when-let [new-state (get-in changes [$set :state])]
-           (when (and (env/feature? :pate-json) organization (org/pate-org? organization))
-             (util/future*
-               (state-change/trigger-state-change command new-state))))
-         (if return-count? n nil))))))
+    (with-application command
+      (fn [{:keys [id organization]}]
+        (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
+          (when-let [new-state (get-in changes [$set :state])]
+            (when (and (env/feature? :pate-json) organization (org/pate-scope? (:application command)))
+              (util/future*
+                (state-change/trigger-state-change command new-state))))
+          (if return-count? n nil))))))
 
 (defn application->command
   "Creates a command data structure that is suitable for update-application and with-application functions.

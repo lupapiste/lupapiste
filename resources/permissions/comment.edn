@@ -7,10 +7,6 @@
                 :authority #{:comment/read
                              :comment/set-target
                              :comment/mark-answered
-                             :comment/add}
-                :approver  #{:comment/read
-                             :comment/set-target
-                             :comment/mark-answered
                              :comment/add}}
  ; old comment-user-authz-roles
  :application  {:writer             #{:comment/add

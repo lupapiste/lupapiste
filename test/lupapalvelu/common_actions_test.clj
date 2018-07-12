@@ -1,6 +1,7 @@
 (ns lupapalvelu.common-actions-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [midje.experimental :as experimental]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :refer [safe-update-in]]
@@ -10,6 +11,7 @@
             [clojure.test.check.properties :as prop]
             [clojure.test :refer [is]]
             [sade.schema-generators :as ssg]
+            [sade.schema-utils :as ssu]
             [slingshot.slingshot :refer [try+]]
             [lupapalvelu.generators.application :as app-gen]
             [lupapalvelu.generators.organization]
@@ -21,15 +23,10 @@
             [lupapalvelu.itest-util :refer [unauthorized?]]
             [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
             [lupapalvelu.action :refer :all]
-            [lupapalvelu.actions-api :as ca]
     ;; ensure all actions are registered by requiring server ns
             [lupapalvelu.server]
-            [lupapalvelu.action :as action]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.roles :as roles]
-            [lupapalvelu.authorization :as auth]
-            [sade.schema-utils :as ssu]))
+            [lupapalvelu.user :as usr]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access? enrich-default-permissions enrich-action-contexts)
 
@@ -82,34 +79,25 @@
         action (build-action "enable-accordions" action-skeleton)
         org-id (:organization application)
         permit-type (:permitType application)
-        allowed-to-access? (action/user-is-allowed-to-access?
+        allowed-to-access? (user-is-allowed-to-access?
                              action application)
-        authority-in-org? (not-empty (get-in user [:orgAuthz (keyword org-id)]))
-        auths-in-application? (auth/user-authz? roles/all-authenticated-user-roles
-                                                application
-                                                user)]
+        insufficient-permissions? (-> (enrich-default-permissions action)
+                                      (access-denied-by-insufficient-permissions))
+        authority-in-org? (not-empty (get-in user [:orgAuthz (keyword org-id)]))]
     (with-mocked-orgs orgs
-      (cond (not allowed-to-access?)         (fail? (validate action))
+      (cond (or (not allowed-to-access?)
+                insufficient-permissions?)   (fact "not allowed" (validate action) => fail?)
             (and authority-in-org?
                  (or (= permit-type "YA")
-                     (= permit-type "ARK"))) (ok? (validate action))
-            authority-in-org?                (fail? (validate action))
-            :else                            (ok? (validate action))))))
+                     (= permit-type "ARK"))) (fact "YA / ARK always on" (validate action) => ok?)
+            authority-in-org?                (fact "authority fails" (validate action) => fail?)
+            :else                            (fact "else show" (validate action) => ok?)))))
 
-(def enable-accordions-prop
-  (prop/for-all [gen-data enable-accordions-gen]
+(fact :qc "enable-accordions"
+  (experimental/for-all
+    [gen-data enable-accordions-gen]
+    {:max-size 20 :num-tests 500}
     (enable-accordions-test gen-data)))
-
-(defn relevant-keys-accordions [quick-check-result]
-  (-> quick-check-result
-      (safe-update-in [:shrunk :smallest 0 :application]
-                             select-keys [:permitType :organization :id])
-      (dissoc :fail)))
-
-(fact "enable-accordions-spec"
-  (relevant-keys-accordions (tc/quick-check 500 enable-accordions-prop :max-size 20))
-  =>
-  passing-quick-check)
 
 (facts "Allowed actions for organization statementGiver"
   (let [allowed-actions #{:give-statement

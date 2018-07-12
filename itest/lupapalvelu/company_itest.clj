@@ -295,7 +295,7 @@
     (let [store (atom {})
           params {:cookie-store (->cookie-store store)}
           login-resp (login foo-email foo-pw params)
-          anticsrf (get-anti-csrf-from-store store)
+          anticsrf (get-anti-csrf store)
           params (-> params
                      (assoc :headers {"x-anti-forgery-token" anticsrf
                                       "accepts" "application/json;charset=utf-8"})

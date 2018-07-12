@@ -1,5 +1,6 @@
 (ns lupapalvelu.user-api
-  (:require [clojure.set :as set]
+  (:require [clj-uuid :as uuid]
+            [clojure.set :as set]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.attachment :as att]
@@ -8,6 +9,7 @@
             [lupapalvelu.change-email :as change-email]
             [lupapalvelu.company :as company]
             [lupapalvelu.ident.ident-util :as ident-util]
+            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.idf.idf-client :as idf]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mime :as mime]
@@ -19,6 +21,7 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
             [lupapalvelu.states :as states]
+            [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as usr]
@@ -37,9 +40,7 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [throw+ try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
-            [lupapalvelu.storage.file-storage :as storage]
-            [clj-uuid :as uuid]))
+            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]))
 
 ;;
 ;; ==============================================================================
@@ -362,7 +363,7 @@
    :input-validators [(partial action/non-blank-parameters [:organizationId :email :firstName :lastName])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       action/email-validator
-                      (partial allowed-roles org/authority-roles)]
+                      (partial allowed-roles roles/org-roles-without-admin)]
    :notified         true
    :permissions      [{:required [:organization/admin]}]
    :pre-checks       [(fn [{params :data user :user}]
@@ -395,7 +396,7 @@
   {:parameters       [email roles]
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
-                      (partial allowed-roles org/authority-roles)]
+                      (partial allowed-roles roles/org-roles-without-admin)]
    :permissions      [{:required [:organization/admin]}]}
   [{caller :user}]
   (let [organization-id (usr/authority-admins-organization-id caller)
@@ -784,6 +785,12 @@
   (when (empty? (:attachments (mongo/by-id :users (:id user) {:attachments true})))
     (fail :error.no-user-attachments)))
 
+(defn- foreman-app-in-pre-verdict-state [{:keys [application]}]
+  (when (and (foreman/foreman-app? application)
+             (not (contains? states/pre-verdict-states
+                             (-> application :state keyword))))
+    (fail :error.illegal-state)))
+
 (defcommand copy-user-attachments-to-application
   {:parameters       [id]
    :user-roles       #{:applicant}
@@ -792,7 +799,8 @@
    :pre-checks       [(fn [command]
                         (when-not (-> command :user :architect)
                           unauthorized))
-                      user-attachments-exists]}
+                      user-attachments-exists
+                      foreman-app-in-pre-verdict-state]}
   [{application :application user :user ts :created :as command}]
   (doseq [attachment (:attachments (mongo/by-id :users (:id user) {:attachments true}))]
     (let [application-id         id

@@ -18,7 +18,11 @@
             suffix id-suffix]
     (keyword (str number-part "-" suffix))))
 
-(def keyword-org-authz-generator (gen/elements roles/default-org-authz-roles))
+(def keyword-org-authz-generator
+  (let [default-roles (gen/elements roles/default-org-authz-roles)
+        all-roles (gen/elements (disj roles/all-org-authz-roles :authorityAdmin))]
+    (gen/frequency [[1 default-roles]
+                    [1 all-roles]])))
 
 (def authz-generator
   (gen/fmap name keyword-org-authz-generator))

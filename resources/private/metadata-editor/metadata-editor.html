@@ -24,7 +24,10 @@
           </div>
 
           <div data-bind="if: editable" class="editor-buttons">
-            <button class="btn-primary save" data-bind="click: save, ltext: 'save', enable: invalidFields().length === 0, testId:'save-metadata'"></button>
+            <button class="btn-primary save" data-bind="click: save, enable: invalidFields().length === 0, testId:'save-metadata'">
+              <i class="lupicon-save"></i>
+              <span data-bind="ltext: 'save'"></span>
+            </button>
           </div>
         </div>
       </div>

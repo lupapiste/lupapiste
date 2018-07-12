@@ -23,10 +23,17 @@
 (def comment-user-authz-roles (conj all-authz-writer-roles :foreman :financialAuthority))
 (def writer-roles-with-foreman (conj default-authz-writer-roles :foreman))
 
-(def default-org-authz-roles #{:authority :approver})
+(def default-org-authz-roles #{:authority})
 (def commenter-org-authz-roles (conj default-org-authz-roles :commenter))
 (def reader-org-authz-roles (conj commenter-org-authz-roles :reader))
-(def all-org-authz-roles (conj reader-org-authz-roles :authorityAdmin :tos-editor :tos-publisher :archivist :digitizer))
+(def permanent-archive-authority-roles #{:tos-editor :tos-publisher :archivist :digitizer})
+(def all-org-authz-roles (conj
+                           (union reader-org-authz-roles
+                                  commenter-org-authz-roles
+                                  default-org-authz-roles
+                                  permanent-archive-authority-roles)
+                           :approver :authorityAdmin))
+(def org-roles-without-admin (disj all-org-authz-roles :authorityAdmin))
 
 (def default-user-authz {:query default-authz-reader-roles
                          :export default-authz-reader-roles
@@ -48,5 +55,5 @@
   ; FIXME: LPK-3828 user can have multiple orgz
   (let [[org & more] (organization-ids-by-roles user #{:authorityAdmin})]
     (when (seq more)
-      (throw (ex-info "user is authorityAdmin in multiple organizations, somebody needs to implement this" {:user user})))
+      (throw (AssertionError. (format "Not supported atm: user %s is authorityAdmin in multiple organizations" (:username user)))))
     org))

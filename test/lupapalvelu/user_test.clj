@@ -132,11 +132,10 @@
                       organization-id             (name organization-id)
                       is-authority-in-org?        (user-is-authority-in-organization? user organization-id)]
                   (= is-authority-in-org?
-                     (or (contains? users-roles-in-organization :authority)
-                         (contains? users-roles-in-organization :approver))))))
+                     (contains? users-roles-in-organization :authority)))))
 
 (fact :qc user-is-authority-in-organization?-spec
-          (quick-check 100 user-is-authority-in-organization-prop :max-size 50)
+          (quick-check 150 user-is-authority-in-organization-prop :max-size 50)
           => passing-quick-check)
 
 (facts municipality-name->system-user-email

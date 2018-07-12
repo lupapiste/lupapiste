@@ -20,7 +20,9 @@
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]))
 
-(defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword)))
+(defn foreman-app? [application]
+  (= :tyonjohtajan-nimeaminen-v2
+     (some-> application :primaryOperation :name keyword)))
 
 (defcontext foreman-app-context [{{user-id :id} :user application :application}]
   ;; Some permissions are added in foreman applicatons by user application role

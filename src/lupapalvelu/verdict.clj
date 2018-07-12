@@ -164,12 +164,12 @@
 (defn- get-app-descriptions [{:keys [permitType] :as application} xml]
   (krysp-reader/read-permit-descriptions-from-xml permitType (cr/strip-xml-namespaces xml)))
 
-(defn- get-task-updates [application created verdicts app-xml]
+(defn- get-task-updates [application user created verdicts app-xml]
   (when (not-any? (comp #{"verdict"} :type :source) (:tasks application))
     {$set {:tasks (-> (assoc application
                              :verdicts verdicts
                              :buildings (building-reader/->buildings-summary app-xml))
-                      (tasks/verdicts->tasks created))}}))
+                      (tasks/verdicts->tasks user created))}}))
 
 (defn find-verdicts-from-xml
   "Returns a monger update map"
@@ -182,7 +182,7 @@
        (inspection-summary/process-verdict-given application)
        (util/deep-merge
          {$set {:verdicts verdicts-with-attachments, :modified created}}
-         (get-task-updates application created verdicts-with-attachments app-xml)
+         (get-task-updates application user created verdicts-with-attachments app-xml)
          (permit/read-verdict-extras-xml application app-xml)
          (when (and update-state? (not (states/post-verdict-states (keyword (:state application)))))
            (app-state/state-transition-update (sm/verdict-given-state application) created application user)))))))

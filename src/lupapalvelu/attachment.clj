@@ -40,7 +40,8 @@
             [sade.env :as env]
             [lupapalvelu.storage.file-storage :as storage]
             [sade.shared-schemas :as sssc]
-            [lupapalvelu.vetuma :as vetuma])
+            [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.domain :as domain])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream]))
 
@@ -949,21 +950,29 @@
       (not (conversion/all-convertable-mime-types (keyword contentType)))
       (warn "Attachment" (:id attachment) "mime type" (keyword contentType) "is not convertible to PDF/A")
 
+      (and (env/feature? :s3) (= :mongodb (keyword (get-in attachment [:latestVersion :storageSystem]))))
+      ; Migrate all application files first to S3
+      (do (storage/move-application-mongodb-files-to-s3 (:id application))
+          (let [updated-app (domain/get-application-no-access-checking (:id application))
+                updated-att (first (filter #(= (:id attachment) (:id %)) (:attachments updated-app)))]
+            (convert-existing-to-pdfa! updated-app updated-att)))
+
       :else
       (if-let [file-content (storage/download application fileId)]
-        (let [{:keys [result file] :as conversion-data} (->> (update file-content :content apply [])
-                                                             (conversion nil session-id application))]
-          (if (and (:archivable result) (:fileId file))
-            ; If the file is already valid PDF/A, there's no conversion and thus no fileId
-            (do (update-latest-version-file! application attachment conversion-data (now))
-                (storage/link-files-to-application session-id (:id application) [(:fileId file)])
-                (preview/preview-image! (:id application) (:fileId file) (:filename file) (:contentType file))
-                (cleanup-temp-file result)
-                result)
-            (do (when-not (:archivable result)
-                  (warn "Attachment" (:id attachment) "could not be converted to PDF/A."))
-                (update-latest-version-file! application attachment conversion-data (now))
-                result)))
+        (with-open [content ((:content file-content))]
+          (let [{:keys [result file] :as conversion-data} (->> (assoc file-content :content content)
+                                                               (conversion nil session-id application))]
+            (if (and (:archivable result) (:fileId file))
+              ; If the file is already valid PDF/A, there's no conversion and thus no fileId
+              (do (update-latest-version-file! application attachment conversion-data (now))
+                  (storage/link-files-to-application session-id (:id application) [(:fileId file)])
+                  (preview/preview-image! (:id application) (:fileId file) (:filename file) (:contentType file))
+                  (cleanup-temp-file result)
+                  result)
+              (do (when-not (:archivable result)
+                    (warn "Attachment" (:id attachment) "could not be converted to PDF/A."))
+                  (update-latest-version-file! application attachment conversion-data (now))
+                  result))))
         (error "PDF/A conversion: No file found with file id" fileId)))))
 
 (defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]

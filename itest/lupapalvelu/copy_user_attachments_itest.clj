@@ -100,7 +100,23 @@
               (count attachments) => 7
               (count cv-attachments) => 1)
             (fact "CV is needed now"
-              (:notNeeded (first cv-attachments)) => false)))))))
+              (:notNeeded (first cv-attachments)) => false)))))
+    (fact "Fetch verdict"
+      (command veikko :check-for-verdict :id application-id) => ok?)
+    (fact "Copying own attachments is still possible"
+      (command pena :copy-user-attachments-to-application :id application-id) => ok?)
+    (facts "Foreman application"
+      (let [for-id (create-foreman-application application-id pena mikko-id "Vastaava ty\u00f6njohtaja" "A")]
+        (fact "Copy own attachments"
+          (command pena :copy-user-attachments-to-application :id for-id) => ok?)
+        (fact "Set subtype and submit application"
+          (command pena :change-permit-sub-type :id for-id :permitSubtype "tyonjohtaja-hakemus") => ok?
+          (command pena :submit-application :id for-id) => ok?)
+        (fact "Fetch verdict"
+          (command veikko :check-for-verdict :id for-id) => ok?)
+        (fact "Copying own attachments no longer possible"
+          (command pena :copy-user-attachments-to-application :id for-id)
+          => (partial expected-failure? :error.illegal-state))))))
 
 (facts "YA application"
   (let [{application-id :id :as response} (create-app mikko :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")

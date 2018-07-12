@@ -713,9 +713,7 @@
 
   (defjson "/dev/fileinfo/:application/:id" {:keys [application id]}
     (when-let [data (storage/download-from-system application id (if (env/feature? :s3) :s3 :mongodb))]
-      (with-open [is ((:content data))]
-        ; Make sure input stream is closed even if it's not used.
-        (dissoc data :content))))
+      (dissoc data :content)))
 
   (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]

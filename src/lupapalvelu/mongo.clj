@@ -131,20 +131,18 @@
 ;; Database Api
 ;;
 
-(def isolated {"$isolated" 1})
-
 (defn update-n
   "Updates data into collection by query, returns a number of updated documents."
   [collection query data & {:as opts}]
   {:pre [(max-1-elem-match? query)]}
   (let [options (-> (merge {:write-concern default-write-concern} opts) seq flatten)]
-    (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) options))))
+    (.getN (mc/update (get-db) collection query (remove-null-chars data) options))))
 
 (defn update
   "Updates data into collection by query. Always returns nil."
   [collection query data & opts]
   {:pre [(max-1-elem-match? query)]}
-  (mc/update (get-db) collection (merge isolated (remove-null-chars query)) (remove-null-chars data) opts)
+  (mc/update (get-db) collection (remove-null-chars query) (remove-null-chars data) opts)
   nil)
 
 (defn update-by-id
@@ -158,7 +156,7 @@
   "Updates data into collection with 'multi' set to true. Returns the number of documents updated"
   [collection query data & opts]
   {:pre [(max-1-elem-match? query)]}
-  (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) (apply hash-map :multi true opts))))
+  (.getN (mc/update (get-db) collection query (remove-null-chars data) (apply hash-map :multi true opts))))
 
 (defn update-one-and-return
   "Updates first document in collection matching conditions. Returns updated document or nil."
@@ -225,8 +223,7 @@
                                  (query/sort order-by)))))
 
 (defn snapshot
-  "Returns multiple entries by matching the monger query.
-   Cursor is snapshotted, which will always cause a full collection scan. Use only if necessary."
+  "Returns multiple entries by matching the monger query. Results are sorted by _id."
   ([collection]
    {:pre [collection]}
    (snapshot collection {}))
@@ -234,13 +231,13 @@
    {:pre [collection (map? query)]}
    (map with-id (with-collection (name collection)
                                  (query/find (remove-null-chars query))
-                                 (query/snapshot))))
+                                 (query/sort {:_id 1}))))
   ([collection query projection]
    {:pre [collection (map? query) (seq projection)]}
    (map with-id (with-collection (name collection)
                                  (query/find (remove-null-chars query))
                                  (query/fields (if (map? projection) (keys projection) projection))
-                                 (query/snapshot)))))
+                                 (query/sort {:_id 1})))))
 
 (defn select-one
   "Returns one entry by matching the monger query, nil if query did not match."
@@ -500,6 +497,7 @@
   (ensure-index :integration-messages {:application.id 1})
   (ensure-index :integration-messages {:created -1})
   (ensure-index :archive-api-usage {:logged -1})
+  (ensure-index :jobs {:created 1} {:expireAfterSeconds (* 60 60)}) ; 1 h
   (infof "ensure-indexes took %d ms" (- (now) ts)))
 
 (defn clear! []

@@ -83,10 +83,6 @@ Test id readonly
   [Arguments]  ${id}
   Element should be visible  jquery=[data-test-id="${id}"][readonly=true]
 
-Test id editable
-  [Arguments]  ${id}
-  Element should be enabled  jquery=[data-test-id="${id}"]
-
 Review checkboxes enabled
   jQuery should match X times  table.review-buildings-table tbody input:disabled  0
   jQuery should match X times  input[data-test-id='katselmus.tiedoksianto']:disabled  0
@@ -102,28 +98,28 @@ Review frozen
   Review checkboxes disabled
   Element should not be visible  jquery=table.review-buildings-table tbody input:enabled
   Element should be disabled  jquery=[data-test-id="katselmus.tila"]
-  Test id disabled  'katselmus.pitoPvm'
+  Test id disabled  katselmus.pitoPvm
   Test id readonly  katselmus.pitaja
   Test id readonly  katselmus.lasnaolijat
   Test id readonly  katselmus.poikkeamat
-  Test id editable  katselmus.huomautukset.kuvaus
-  Test id editable  katselmus.huomautukset.maaraAika
-  Test id editable  katselmus.huomautukset.toteaja
-  Test id editable  katselmus.huomautukset.toteamisHetki
+  Test id enabled  katselmus.huomautukset.kuvaus
+  Test id enabled  katselmus.huomautukset.maaraAika
+  Test id enabled  katselmus.huomautukset.toteaja
+  Test id enabled  katselmus.huomautukset.toteamisHetki
   No such test id  add-targetted-attachment
 
 Review active
   Xpath should match X times  //table[contains(@class, 'review-buildings')]/tbody//tr  3
   Element should not be visible  jquery=table.review-buildings-table tbody select:disabled
-  Test id editable  katselmus.tila
-  Test id editable  katselmus.pitoPvm
-  Test id editable  katselmus.pitaja
-  Test id editable  katselmus.lasnaolijat
-  Test id editable  katselmus.poikkeamat
-  Test id editable  katselmus.huomautukset.kuvaus
-  Test id editable  katselmus.huomautukset.maaraAika
-  Test id editable  katselmus.huomautukset.toteaja
-  Test id editable  katselmus.huomautukset.toteamisHetki
+  Test id enabled  katselmus.tila
+  Test id enabled  katselmus.pitoPvm
+  Test id enabled  katselmus.pitaja
+  Test id enabled  katselmus.lasnaolijat
+  Test id enabled  katselmus.poikkeamat
+  Test id enabled  katselmus.huomautukset.kuvaus
+  Test id enabled  katselmus.huomautukset.maaraAika
+  Test id enabled  katselmus.huomautukset.toteaja
+  Test id enabled  katselmus.huomautukset.toteamisHetki
   Wait test id visible  upload-button-label
 
 Review disabled for applicant
@@ -133,14 +129,14 @@ Review disabled for applicant
   Review checkboxes disabled
   Element should not be visible  jquery=table.review-buildings-table tbody input:enabled
   Element should be disabled  jquery=[data-test-id="katselmus.tila"]
-  Test id disabled  'katselmus.pitoPvm'
-  Test id disabled  'katselmus.pitaja'
-  Test id disabled  'katselmus.lasnaolijat'
-  Test id disabled  'katselmus.poikkeamat'
-  Test id disabled  'katselmus.huomautukset.kuvaus'
-  Test id disabled  'katselmus.huomautukset.maaraAika'
-  Test id disabled  'katselmus.huomautukset.toteaja'
-  Test id disabled  'katselmus.huomautukset.toteamisHetki'
+  Test id disabled  katselmus.pitoPvm
+  Test id disabled  katselmus.pitaja
+  Test id disabled  katselmus.lasnaolijat
+  Test id disabled  katselmus.poikkeamat
+  Test id disabled  katselmus.huomautukset.kuvaus
+  Test id disabled  katselmus.huomautukset.maaraAika
+  Test id disabled  katselmus.huomautukset.toteaja
+  Test id disabled  katselmus.huomautukset.toteamisHetki
   Wait test id visible  upload-button-label
   No such test id  review-done
   No such test id  delete-task

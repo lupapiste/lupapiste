@@ -257,7 +257,7 @@
       :nop)
 
     (when (and (env/feature? :pate-json)
-               (org/pate-org? (:id @organization))
+               (org/pate-scope? application)
                (no-sent-reviews-yet? (:tasks application))
                (= :constructionStarted (sm/next-state application)))
       (update-application command (app-state/state-transition-update :constructionStarted created application user)))

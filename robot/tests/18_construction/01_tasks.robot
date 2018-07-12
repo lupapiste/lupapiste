@@ -83,6 +83,7 @@ Reject Valaistussuunnitelma
   Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
 
 Approve Valaistussuunnitelma
+  Sleep  0.5s
   Click enabled by test id  approve-task
   Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
   Return from review
@@ -101,7 +102,7 @@ Add attachment to Aloituskokous
 
 Aloituskokous form is still editable (LPK-494)
   Page Should Contain Element  xpath=//section[@id="task"]//input
-  Test id enabled  'katselmus.pitoPvm'
+  Test id enabled  katselmus.pitoPvm
   Edit R katselmus  osittainen  1.5.2016  Sonja Sibbo  Hello world!
 
 Return to listing
@@ -112,12 +113,12 @@ Return to listing
 
 Invalid date prevents review done
   Open review  0
-  Wait until  Test id editable  review-done
+  Wait until  Test id enabled  review-done
   Edit review date  1.2.34
   Wait until  Test id disabled  review-done
   Edit review date  1.5.2016
   Wait for jQuery
-  Wait until  Test id editable  review-done
+  Wait until  Test id enabled  review-done
 
 Partial review generates new review
   Finalize review

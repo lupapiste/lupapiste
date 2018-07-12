@@ -1,0 +1,97 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="state-change-msg-settings-template">
+  <div>
+    <h2 data-bind="ltext: 'auth-admin.state-change-msg-title'"></h2>
+
+    <table class="table admin-settings">
+      <thead>
+        <tr>
+          <th data-bind="ltext: 'auth-admin.state-change-url'"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <input data-bind="value: url" class="form-input url long" id="state-change-url" type="url"/>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th colspan="4" data-bind="ltext: 'auth-admin.auth-type.title'"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="4">
+            <select name="auth-type"
+                    class="form-input combobox"
+                    data-bind="options: authTypes,
+                               optionsText: function(auth) {return loc('auth-admin.auth-type.' + auth);},
+                               optionsValue: authTypes,
+                               optionsCaption: loc( 'choose' ),
+                               value: authType"></select>
+          </td>
+        </tr>
+        <!-- ko if: basicAuth() -->
+        <tr>
+          <td data-bind="ltext: 'auth-admin.server.username'"></td>
+          <td>
+            <input type="text" data-bind="value: basicUser" class="form-input">
+          </td>
+          <td data-bind="ltext: 'auth-admin.server.password'"></td>
+          <td>
+            <input data-bind="value: basicPassword,
+                             attr: {placeholder:passwordPlaceholder,
+                             'data-test-id': 'basic-password'}"
+                   type="password">
+          </td>
+        </tr>
+         <!-- /ko -->
+      </tbody>
+    </table>
+
+    <table class="table table-striped admin-settings">
+      <thead>
+        <tr>
+            <th colspan="3"  data-bind="ltext: 'auth-admin.header-param-title'"></th>
+        </tr>
+        <tr>
+          <th data-bind="ltext: 'auth-admin.header-param-name'"></th>
+          <th data-bind="ltext: 'auth-admin.header-param-value'" class="serversettings--wide"></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: headers">
+        <tr>
+          <td class="serversettings--wide value">
+            <input type="text" data-bind="value: $data.name">
+          </td>
+          <td class="serversettings--wide value">
+            <input type="text" data-bind="value: $data.value">
+          </td>
+          <td>
+            <icon-button params="icon: 'remove',
+                                 buttonClass: 'secondary',
+                                 click: _.partial( $parent.remove, $data),
+                                 ltext: 'remove'">
+            </icon-button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <icon-button params="icon: 'circle-plus',
+                     buttonClass: 'positive',
+                     click: add,
+                     ltext: 'auth-admin.add-header-param',
+                     testId: 'add-header-param'"></icon-button>
+
+    <button class="positive"
+            data-bind="click: save">
+      <span data-bind="ltext: 'save'"></span>
+    </button>
+
+  </div>
+</script>

@@ -33,7 +33,7 @@
                                                                                           :type          "lupapistetunnus"
                                                                                           :operation     "kerrostalo-rivitalo"
                                                                                           :permitSubtype ""}])
-    (org/pate-org? irrelevant) => false)
+    (org/pate-scope? irrelevant) => false)
   (let [result (permit/verdict-krysp-mapper app verdict "fi" "2.2.2" "BEGIN_OF_LINK/")
         attachments (:attachments result)
         xml_s (data-xml/indent-str (:xml result))

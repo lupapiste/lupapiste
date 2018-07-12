@@ -43,47 +43,48 @@
     (util/contains-value? config-by-group (keyword typeId))))
 
 (defn bind-single-attachment! [{:keys [application user created]} unlinked-file {:keys [fileId type attachmentId contents] :as filedata} exclude-ids]
-  (let [conversion-data       (att/conversion (:id user) nil application (assoc unlinked-file :content ((:content unlinked-file))))
-        is-authority          (usr/user-is-authority-in-organization? user (:organization application))
-        automatic-ok-enabled  (org/get-organization-auto-ok (:organization application))
-        placeholder-id        (or attachmentId
-                               (att/get-empty-attachment-placeholder-id (:attachments application) type (set exclude-ids)))
-        attachment            (or
-                                (att/get-attachment-info application placeholder-id)
-                                (att/create-attachment! application
-                                                      (assoc (select-keys filedata [:group :contents :target :source :disableResell :backendId])
-                                                              :requested-by-authority (boolean (auth/application-authority? application user))
-                                                        :created         created
-                                                        :attachment-type type)))
-        version-options (merge
-                          (select-keys unlinked-file [:fileId :filename :contentType :size])
-                          (select-keys filedata [:contents :drawingNumber :group :constructionTime :sign :target])
-                          (util/assoc-when {:created          created
-                                            :original-file-id fileId}
-                                           :comment-text contents
-                                           :state (when (and is-authority automatic-ok-enabled)
-                                                    :ok)
-                                           :constructionTime (boolean (and (not is-authority)
-                                                                           (:type filedata)
-                                                                           (file-is-to-be-marked-construction-time application
-                                                                                                                   filedata))))
-                          (:result conversion-data)
-                          (:file conversion-data))
-        linked-version (att/set-attachment-version! application user attachment version-options)
-        {:keys [fileId originalFileId]} linked-version]
-    (storage/link-files-to-application (:id user) (:id application) (cond-> [originalFileId]
-                                                                               (not= fileId originalFileId) (conj fileId)))
-    (preview/preview-image! (:id application) (:fileId version-options) (:filename version-options) (:contentType version-options))
-    (att/cleanup-temp-file (:result conversion-data))
-    (assoc linked-version :type (or (:type linked-version) (:type attachment)))))
+  (with-open [unlinked-content ((:content unlinked-file))]
+    (let [conversion-data       (att/conversion (:id user) nil application (assoc unlinked-file :content unlinked-content))
+          is-authority          (usr/user-is-authority-in-organization? user (:organization application))
+          automatic-ok-enabled  (org/get-organization-auto-ok (:organization application))
+          placeholder-id        (or attachmentId
+                                    (att/get-empty-attachment-placeholder-id (:attachments application) type (set exclude-ids)))
+          attachment            (or
+                                  (att/get-attachment-info application placeholder-id)
+                                  (att/create-attachment! application
+                                                          (assoc (select-keys filedata [:group :contents :target :source :disableResell :backendId])
+                                                            :requested-by-authority (boolean (auth/application-authority? application user))
+                                                            :created         created
+                                                            :attachment-type type)))
+          version-options (merge
+                            (select-keys unlinked-file [:fileId :filename :contentType :size])
+                            (select-keys filedata [:contents :drawingNumber :group :constructionTime :sign :target])
+                            (util/assoc-when {:created          created
+                                              :original-file-id fileId}
+                                             :comment-text contents
+                                             :state (when (and is-authority automatic-ok-enabled)
+                                                      :ok)
+                                             :constructionTime (boolean (and (not is-authority)
+                                                                             (:type filedata)
+                                                                             (file-is-to-be-marked-construction-time application
+                                                                                                                     filedata))))
+                            (:result conversion-data)
+                            (:file conversion-data))
+          linked-version (att/set-attachment-version! application user attachment version-options)
+          {:keys [fileId originalFileId]} linked-version]
+      (storage/link-files-to-application (:id user) (:id application) (cond-> [originalFileId]
+                                                                              (not= fileId originalFileId) (conj fileId)))
+      (preview/preview-image! (:id application) (:fileId version-options) (:filename version-options) (:contentType version-options))
+      (att/cleanup-temp-file (:result conversion-data))
+      (assoc linked-version :type (or (:type linked-version) (:type attachment))))))
 
 (defn- bind-attachments! [{:keys [user] :as command} file-infos job-id]
   (reduce
     (fn [results {:keys [fileId type] :as filedata}]
-      (job/update job-id assoc fileId {:status :working :fileId fileId})
+      (job/update-by-id job-id fileId {:status :working :fileId fileId})
       (if-let [unlinked-file (storage/download-unlinked-file (:id user) fileId)]
         (let [result (bind-single-attachment! command unlinked-file filedata (map :attachment-id results))]
-          (job/update job-id assoc fileId {:status :done :fileId fileId})
+          (job/update-by-id job-id fileId {:status :done :fileId fileId})
           (conj results {:original-file-id fileId
                          :fileId (:fileId result)
                          :attachment-id (:id result)
@@ -91,13 +92,10 @@
                          :status :done}))
         (do
           (warnf "no file with file-id %s in storage" fileId)
-          (job/update job-id assoc fileId {:status :error :fileId fileId})
+          (job/update-by-id job-id fileId {:status :error :fileId fileId})
           (conj results {:fileId fileId :type type :status :error}))))
     []
     file-infos))
-
-(defn- bind-job-status [data]
-  (if (every? #{:done :error} (map #(get-in % [:status]) (vals data))) :done :running))
 
 (defn- cancel-job [job-id {:keys [status text]}]
   (warnf "canceling bind job %s due '%s'" job-id text)
@@ -126,7 +124,7 @@
         job                (-> (zipmap (map :fileId coerced-file-infos)
                                        (map #(assoc % :status :pending)
                                             coerced-file-infos))
-                               (job/start bind-job-status))]
+                               (job/start))]
     (util/future*
      (if (ok? @preprocess-ref)
        (let [results (bind-attachments! command coerced-file-infos (:id job))]

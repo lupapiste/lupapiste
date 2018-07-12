@@ -8,7 +8,6 @@
                                       :organization/tags
                                       :organization/areas
                                       :organization/check-permanent-archive-enabled}
-                :approver           #{:organization/check-permanent-archive-enabled}
                 :tos-editor         #{:organization/check-permanent-archive-enabled}
                 :tos-publisher      #{:organization/check-permanent-archive-enabled}
                 :archivist          #{:organization/check-permanent-archive-enabled

@@ -830,7 +830,8 @@
                       building-update (get building-updates (:id op))
                       location (when-let [loc (:location building-update)] [(:x loc) (:y loc)])
                       location-wgs84 (when location (coord/convert "EPSG:3067" "WGS84" 5 location))]
-                  {:localShortId (or rakennusnro (when (validators/rakennusnumero? tunnus) tunnus))
+                  {:propertyId (or (:propertyId building-update) (:propertyId application))
+                   :localShortId (or rakennusnro (when (validators/rakennusnumero? tunnus) tunnus))
                    :nationalId (or valtakunnallinenNumero (:nationalBuildingId building-update))
                    :buildingId (or valtakunnallinenNumero (:nationalBuildingId building-update) rakennusnro)
                    :location-wgs84 location-wgs84

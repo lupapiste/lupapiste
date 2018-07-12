@@ -369,9 +369,6 @@
 (defn set-anti-csrf! [value]
   (fact (command pena :set-feature :feature "disable-anti-csrf" :value (not value)) => ok?))
 
-(defn get-anti-csrf-from-store [store]
-  (-> (get @store "anti-csrf-token") .getValue codec/url-decode))
-
 (defn feature? [& feature]
   (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name feature)))))
 
@@ -832,9 +829,12 @@
     (let [resp (query apikey (keyword command) :jobId id :version version)]
       (cond
         (job-done? resp)  resp
-        (< limit retries) (merge resp {:ok false :desc "Retry limit exeeded"})
+        (< limit retries) (merge resp {:ok false :desc "Retry limit exceeded"})
         :else (do (Thread/sleep 200)
-                  (recur (get-in resp [:job :version]) (inc retries)))))))
+                  (timbre/info "Re-polling job")
+                  (recur (or (get-in resp [:job :version])
+                             version)
+                         (inc retries)))))))
 
 (defn upload-file-and-bind
   "Uploads file and then bind using bind-attachments. To upload new file, specify metadata using filedata.

@@ -908,7 +908,9 @@
     (do (info "Moving application files to Ceph in organizations" organization-ids)
         (mongo/connect!)
         (doseq [{:keys [id]} (mongo/select :applications
-                                           {:organization {$in organization-ids}}
+                                           {:organization {$in organization-ids}
+                                            :attachments.latestVersion.fileId {$type "string"}
+                                            :attachments.latestVersion.storageSystem "mongodb"}
                                            [:_id]
                                            {:_id 1})]
           (logging/with-logging-context {:applicationId id}

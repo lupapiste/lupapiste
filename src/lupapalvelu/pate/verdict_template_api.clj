@@ -15,9 +15,9 @@
 ;; ----------------------------------
 
 (defn- pate-enabled
-  "Pre-checker that fails if Pate is not enabled in the organization."
+  "Pre-checker that fails if Pate is not enabled in some of the organizations scope."
   [cmd]
-  (when-not (:pate-enabled (template/command->organization cmd))
+  (when-not (some #{true} (map :pate-enabled (:scope (template/command->organization cmd))))
     (fail :error.pate-disabled)))
 
 (defn- valid-category [{{category :category} :data :as command}]

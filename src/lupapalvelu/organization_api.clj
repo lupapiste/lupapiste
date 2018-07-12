@@ -12,6 +12,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.schema-util :as pate-schema]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
@@ -91,6 +92,20 @@
     {}
     (map :permitType scope)))
 
+(defn decode-state-change-conf [organization]
+  (if-let [headers (get-in organization [:state-change-endpoint :header-parameters])]
+    (assoc-in
+      organization
+      [:state-change-endpoint :header-parameters]
+      (map
+        (fn [header]
+          (assoc
+            header
+            :value
+            (org/decode-credentials (:value header) (get-in organization [:state-change-endpoint :crypto-iv-s]))))
+        headers))
+    organization))
+
 
 ;;
 ;; Actions
@@ -105,12 +120,13 @@
         selected-operations-with-permit-type (selected-operations-with-permit-types organization)
         allowed-roles                        (org/allowed-roles-in-organization organization)]
     (ok :organization (-> organization
-                          (assoc :operationsAttachments ops-with-attachments
-                                 :selectedOperations selected-operations-with-permit-type
-                                 :allowedRoles allowed-roles)
-                          (dissoc :operations-attachments :selected-operations)
-                          (update-in [:map-layers :server] select-keys [:url :username])
-                          (update-in [:suti :server] select-keys [:url :username]))
+                        (assoc :operationsAttachments ops-with-attachments
+                               :selectedOperations selected-operations-with-permit-type
+                               :allowedRoles allowed-roles)
+                        (dissoc :operations-attachments :selected-operations)
+                        (update-in [:map-layers :server] select-keys [:url :username])
+                        (update-in [:suti :server] select-keys [:url :username])
+                        (decode-state-change-conf))
         :attachmentTypes (organization-attachments organization))))
 
 (defquery organization-attachment-types
@@ -223,24 +239,31 @@
     (ok :valid valid?)))
 
 (defcommand update-organization
-  {:description         "Update organization details."
-   :parameters          [permitType municipality
-                         inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
-                         opening]
+  {:description "Update organization details."
+   :parameters [permitType municipality
+                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
+                opening pateEnabled]
    :optional-parameters [bulletinsEnabled bulletinsUrl]
-   :input-validators    [permit/permit-type-validator]
-   :user-roles          #{:admin}}
+   :input-validators [permit/permit-type-validator
+                      (fn [{{:keys [permitType pateEnabled]} :data}]
+                        (if (true? pateEnabled)
+                          (when-not (true? (-> (pate-schema/permit-type->categories permitType)
+                                               first
+                                               pate-schema/pate-category?))
+                            (fail :error.pate-not-supported-for-scope))))]
+   :user-roles #{:admin}}
   [_]
   (mongo/update-by-query :organizations
-    {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
-    {$set (merge {:scope.$.inforequest-enabled     inforequestEnabled
-                  :scope.$.new-application-enabled applicationEnabled
-                  :scope.$.open-inforequest        openInforequestEnabled
-                  :scope.$.open-inforequest-email  openInforequestEmail
-                  :scope.$.opening                 (when (number? opening) opening)}
-                 (when-not (nil? bulletinsEnabled)
-                   {:scope.$.bulletins.enabled bulletinsEnabled
-                    :scope.$.bulletins.url     (or bulletinsUrl "")}))})
+      {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
+      {$set (merge {:scope.$.inforequest-enabled inforequestEnabled
+                    :scope.$.new-application-enabled applicationEnabled
+                    :scope.$.open-inforequest openInforequestEnabled
+                    :scope.$.open-inforequest-email openInforequestEmail
+                    :scope.$.opening (when (number? opening) opening)
+                    :scope.$.pate-enabled pateEnabled}
+                   (when-not (nil? bulletinsEnabled)
+                     {:scope.$.bulletins.enabled bulletinsEnabled
+                      :scope.$.bulletins.url     (or bulletinsUrl "")}))})
   (ok))
 
 (defn- duplicate-scope-validator [municipality & permit-types]
@@ -574,6 +597,22 @@
     (org/update-organization organizationId {$set {kw-path value}}))
   (ok))
 
+(defcommand set-organization-scope-pate-value
+  {:parameters       [permitType municipality value]
+   :description      "Set boolean value for pate-enabled in organization scope level."
+   :user-roles       #{:admin}
+   :input-validators [(partial non-blank-parameters [:permitType :municipality])
+                      (partial boolean-parameters [:value])
+                      (fn [{{:keys [permitType]} :data}]
+                        (when-not (true? (-> (pate-schema/permit-type->categories permitType)
+                                             first
+                                             pate-schema/pate-category?))
+                          (fail :error.pate-not-supported-for-scope)))]}
+  [_]
+  (mongo/update-by-query :organizations
+                         {:scope {$elemMatch {:permitType permitType :municipality municipality}}}  {$set {:scope.$.pate-enabled value}})
+  (ok))
+
 (defcommand set-organization-boolean-attribute
   {:parameters       [enabled organizationId attribute]
    :user-roles       #{:admin}
@@ -694,6 +733,16 @@
   (let [organization-id (usr/authority-admins-organization-id user)]
     (org/update-organization organization-id {$set {:reservations.default-location location}})
     (ok)))
+
+(defcommand set-organization-state-change-endpoint
+  {:parameters [url headers authType]
+   :optional-parameters [basicCreds]
+   :description "Set REST endpoint configurations for organization state change messages"
+   :permissions      [{:required [:organization/admin]}]
+   :input-validators [(partial action/string-parameters [:url])]}
+  [{user :user}]
+  (let [organization-id (usr/authority-admins-organization-id user)]
+    (org/set-state-change-endpoint organization-id (ss/trim url) headers authType basicCreds)))
 
 (defquery krysp-config
   {:permissions [{:required [:organization/admin]}]}

@@ -257,6 +257,7 @@
                    action-name (cond
                                  (:name api-response) (:name api-response)
                                  (= state "complementNeeded") (i18n/localize lang "caseFile.complementNeeded")
+                                 (= state "canceled") (i18n/localize lang "caseFile.canceled")
                                  :else (i18n/localize lang "caseFile.stateNotSet"))
                    ; History entries of legacy applications might not have all the timestamps
                    next-ts (or (:ts next) 0)]

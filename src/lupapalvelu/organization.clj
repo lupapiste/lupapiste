@@ -147,7 +147,8 @@
    (sc/optional-key :bulletins) {:enabled sc/Bool
                                  :url sc/Str
                                  (sc/optional-key :notification-email) sc/Str
-                                 (sc/optional-key :descriptions-from-backend-system) sc/Bool}})
+                                 (sc/optional-key :descriptions-from-backend-system) sc/Bool}
+   (sc/optional-key :pate-enabled) (sc/maybe sc/Bool)})
 
 (def permit-types (map keyword (keys (permit/permit-types))))
 
@@ -252,22 +253,24 @@
    (sc/optional-key :verdict-templates) PateSavedVerdictTemplates
    (sc/optional-key :phrases) [Phrase]
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
-   (sc/optional-key :pate-enabled)                 sc/Bool
+   (sc/optional-key :state-change-msg-enabled)      sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
    (sc/optional-key :local-bulletins-page-settings) LocalBulletinsPageSettings
    (sc/optional-key :default-digitalization-location) {:x sc/Str :y sc/Str}
-   (sc/optional-key :remove-handlers-from-reverted-draft) sc/Bool})
+   (sc/optional-key :remove-handlers-from-reverted-draft) sc/Bool
+   (sc/optional-key :state-change-endpoint) {:url sc/Str
+                                             (sc/optional-key :header-parameters) [{:name sc/Str
+                                                                                    :value sc/Str}]
+                                             (sc/optional-key :auth-type) sc/Str
+                                             (sc/optional-key :basic-auth-password) sc/Str
+                                             (sc/optional-key :basic-auth-username) sc/Str
+                                             (sc/optional-key :crypto-iv-s) sc/Str}})
 
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
 
 (def parse-organization (coerce/coercer! Organization coerce/json-coercion-matcher))
-
-(def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist :digitizer])
-(def authority-roles
-  "Reader role has access to every application within org."
-  (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))
 
 (defn- with-scope-defaults [org]
   (if (:scope org)
@@ -286,7 +289,7 @@
    :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
    :docstore-info :3d-map :default-digitalization-location
    :kopiolaitos-email :kopiolaitos-orderer-address :kopiolaitos-orderer-email :kopiolaitos-orderer-phone
-   :app-required-fields-filling-obligatory ])
+   :app-required-fields-filling-obligatory :state-change-msg-enabled])
 
 (defn get-organizations
   ([]
@@ -339,9 +342,6 @@
 (defn allowed-ip? [ip organization-id]
   (pos? (mongo/count :organizations {:_id organization-id, $and [{:allowedAutologinIPs {$exists true}} {:allowedAutologinIPs ip}]})))
 
-(defn pate-org? [org-id]
-  (pos? (mongo/count :organizations {:_id org-id :pate-enabled true})))
-
 (defn krysp-urls-not-set?
   "Takes organization as parameter.
   Returns true if organization has 0 non-blank krysp urls set."
@@ -360,6 +360,15 @@
           crypted-password (crypt/encrypt-aes-string password (env/value :backing-system :crypto-key) crypto-iv)
           crypto-iv-s      (-> crypto-iv crypt/base64-encode crypt/bytes->str)]
       {:username username :password crypted-password :crypto-iv crypto-iv-s})))
+
+(defn encode-headers [name value crypto-iv]
+  (when-not (ss/blank? name)
+    (let [crypted-value (crypt/encrypt-aes-string value (env/value :backing-system :crypto-key) crypto-iv)]
+      {:name name :value crypted-value})))
+
+(defn encode [value crypto-iv]
+  (when-not (ss/blank? value)
+    (crypt/encrypt-aes-string value (env/value :backing-system :crypto-key) crypto-iv)))
 
 (defn decode-credentials
   "Decode password that was originally generated (together with the init-vector)
@@ -447,6 +456,28 @@
           (update-organization id address-updates)))
       (update-organization id updates))))
 
+(defn set-state-change-endpoint [id url headers auth-type basic-creds]
+  (let [old-crypto-iv-s  (get-in (get-organization id) [:state-change-endpoint :crypto-iv-s])
+        old-crypto-iv    (if (some? old-crypto-iv-s) (-> old-crypto-iv-s crypt/str->bytes crypt/base64-decode))
+        crypto-iv        (or old-crypto-iv (crypt/make-iv-128))
+        crypted-headers  (map (fn [header] (encode-headers (:name header) (:value header) crypto-iv)) headers)
+        crypted-password (when (:password basic-creds) (encode (:password basic-creds) crypto-iv))
+        crypto-iv-s      (-> crypto-iv crypt/base64-encode crypt/bytes->str)
+        updates          (hash-map $set (merge {"state-change-endpoint.url" url
+                                                "state-change-endpoint.header-parameters" crypted-headers}
+                                               (when (not-empty crypto-iv-s)
+                                                 {"state-change-endpoint.crypto-iv-s" crypto-iv-s})
+                                               (when (not-empty auth-type)
+                                                 {"state-change-endpoint.auth-type" auth-type})
+                                               (when (not-empty (:username basic-creds))
+                                                 {"state-change-endpoint.basic-auth-username" (:username basic-creds)})
+                                               (when (not-empty crypted-password)
+                                                 {"state-change-endpoint.basic-auth-password" crypted-password})
+                                               (when (= auth-type "other")
+                                                 {"state-change-endpoint.basic-auth-username" ""
+                                                  "state-change-endpoint.basic-auth-password" "" })))]
+    (update-organization id updates)))
+
 (defn get-organization-name
   ([organization]
   (let [default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
@@ -481,6 +512,12 @@
     {:pre  [municipality organization (permit/valid-permit-type? permit-type)]}
    (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization)))))
 
+(defn pate-scope? [application]
+  (let [organization (mongo/by-id :organizations (:organization application))]
+    (if organization
+      (-> (resolve-organization-scope (:municipality application) (:permitType application) organization)
+          :pate-enabled))))
+
 (defn permit-types [{scope :scope :as organization}]
   (map (comp keyword :permitType) scope))
 
@@ -502,8 +539,8 @@
 (defn allowed-roles-in-organization [organization]
   {:pre [(map? organization)]}
   (if-not (:permanent-archive-enabled organization)
-    (remove #(% (set permanent-archive-authority-roles)) authority-roles)
-    authority-roles))
+    (remove roles/permanent-archive-authority-roles roles/org-roles-without-admin)
+    roles/org-roles-without-admin))
 
 (defn filter-valid-user-roles-in-organization [organization roles]
   (let [organization  (if (map? organization) organization (get-organization organization))

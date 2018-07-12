@@ -101,6 +101,7 @@
         (try
           (io/copy content tmp-file)
           (pdf-wrapper/wrap! image-format tmp-file pdf-file filename)
+          (.close content)
           {:archivable true
            :archivabilityError nil
            :autoConversion true

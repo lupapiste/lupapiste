@@ -95,6 +95,13 @@
             <input type="checkbox" data-bind="checked: digitizerToolsEnabled" class="form-input" id="digitizerToolsEnabled">
           </div>
 
+          <div data-bind="if: organization">
+            <div>
+              <label data-bind="ltext: 'admin.state-change.enabled.title' " for="state-change-msg-enabled"></label>
+              <input data-bind="checked: stateChangeMsgEnabled" id="state-change-msg-enabled" type="checkbox"/>
+            </div>
+          </div>
+
           <div class="calendars-setting" data-bind="if: util.getIn($data, ['organization', 'id']) && features.enabled('ajanvaraus')">
             <label data-bind="ltext: 'organization.calendars.enabled'" for="calendarsEnabled"></label>
             <input type="checkbox" data-bind="checked: calendarsEnabled" class="form-input" id="calendarsEnabled">
@@ -118,6 +125,7 @@
                   <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
                   <th data-bind="ltext: 'organization.application.enabled'"></th>
                   <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
+                  <th data-bind="text: 'Pate'"></th>
                   <th data-bind="ltext: 'organization.openinforequest.email'"></th>
                   <th>Palvelu avataan</th>
                   <th>Tallenna rivi</th>
@@ -133,6 +141,9 @@
                   </td>
                   <td data-bind="attr: {'data-test-id': 'open-inforequest-' + $data.municipality() + '-' + $data.permitType()}">
                     <input type="checkbox" data-bind="checked: $data['open-inforequest']" class="form-input" >
+                  </td>
+                  <td>
+                    <input type="checkbox" data-bind="checked: $data['pate-enabled']" class="form-input" >
                   </td>
                   <td data-bind="">
                     <input type="text" data-bind="value: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality() + '-' + $data.permitType()}" class="form-input" >
@@ -151,20 +162,6 @@
           <button data-bind="click: newScope" class="btn positive">Lis&auml;&auml; lupatyyppi</button>
 
           <button data-bind="visible: !openInfoRequests(), click: convertOpenInforequests" class="btn positive">Muuta avoimet neuvontapyynn&ouml;t tavallisiksi</button>
-
-
-          <div data-bind="if: organization">
-            <h2>Pate k&auml;yt&ouml;ss&auml;?</h2>
-            <div>
-              <div>
-                <label data-bind="text: loc('yes') + '/' + loc('no') " for="pate-enabled"></label>
-                <input data-bind="checked: organization()['pate-enabled']" id="pate-enabled" type="checkbox"/>
-              </div>
-              <button data-bind="ltext: 'save',
-                                 click: savePateEnabled" class="btn positive"
-                      data-test-id="save-pate-enabled"></button>
-            </div>
-          </div>
 
           <h2 data-bind="ltext: 'admin.organization.backend-system'"></h2>
           <table data-test-id="organization-backend-system-table">

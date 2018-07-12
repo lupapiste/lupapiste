@@ -492,15 +492,16 @@
   (app/add-operation command id operation))
 
 (defcommand update-op-description
-  {:parameters [id op-id desc]
-   :categories #{:documents} ; edited from document header
+  {:parameters       [id op-id desc]
+   :categories       #{:documents} ; edited from document header
    :input-validators [(partial action/non-blank-parameters [:id :op-id])
                       (partial action/string-parameters [:desc])]
-   :states     states/pre-sent-application-states
-   :permissions [{:context  {:application {:state #{:draft}}}
-                  :required [:application/edit-draft :application/edit-operation]}
-
-                 {:required [:application/edit-operation]}]}
+   :permissions      [{:context  {:application {:state #{:draft}}}
+                       :required [:application/edit-draft :application/edit-operation]}
+                      {:context  {:application {:state states/pre-sent-application-states}}
+                       :required [:application/edit-operation]}
+                      {:context  {:application {:state states/all-application-states-but-draft-or-terminal}}
+                       :required [:application/edit-operation :document/edit-identifiers]}]}
   [{:keys [application] :as command}]
   (if (= (get-in application [:primaryOperation :id]) op-id)
     (update-application command {$set {"primaryOperation.description" desc}})

@@ -229,6 +229,10 @@
 
       <section data-bind="component: {name: 'municipality-maps'}"></section>
       <suti-admin></suti-admin>
+      <div data-bind="if: organization.stateChangeMsgEnabled">
+        <section data-bind="component: {name: 'state-change-msg-settings',
+                                        params: organization.stateChanegeConf()}"></section>
+      </div>
       </div>
 
       <!-- DIALOGS -->

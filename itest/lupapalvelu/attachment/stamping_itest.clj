@@ -93,7 +93,7 @@
           (when-not (= "done" (:status job))
             (poll-job sonja :stamp-attachments-job (:id job) (:version job) 50) => ok?)
 
-          (fact "Latest version has chaned"
+          (fact "Latest version has changed"
             (let [attachment-after-restamp (get-attachment-by-id sonja application-id (:id attachment))]
               (:latestVersion attachment) =not=> (:latestVersion attachment-after-restamp)
               (get-in attachment [:latestVersion :stamped]) => true)))))))

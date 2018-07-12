@@ -166,6 +166,9 @@
       model/strip-turvakielto-data
       append-doc-schemas))
 
+(def neighbor-attachment-public-keys
+  [:latestVersion :type :modified])
+
 (defn ->public [{documents :documents :as application}]
   (-> application
       (select-keys [:state
@@ -188,7 +191,8 @@
                                :attachments
                                (filter (fn-> :type :type-group (= "paapiirustus")))
                                (filter (fn-> :versions empty? not))
-                               (filter metadata/public-attachment?)))
+                               (filter metadata/public-attachment?)
+                               (map #(select-keys % neighbor-attachment-public-keys))))
       (assoc :documents (map
                           strip-document
                           (remove (fn-> :schema-info schemas/get-schema :info :blacklist set :neighbor)

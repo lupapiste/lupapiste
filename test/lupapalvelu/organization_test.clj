@@ -237,3 +237,22 @@
   (fact "with both blank"
     (some-krysp-url? {:krysp {:A {:url ""} :B {:url ""}}}) => false
     (krysp-urls-not-set? {:krysp {:A {:url ""} :B {:url ""}}}) => true))
+
+(facts "pate-scope?"
+  (fact "pate enabled for scope"
+    (pate-scope? {:permitType "R" :organization "123-R" :municipality "123"}) => true
+    (provided
+      (mongo/by-id :organizations "123-R") => {:scope [{:municipality "123"
+                                                        :permitType "R"
+                                                        :pate-enabled true}]}))
+  (fact "pate not enabled for scope"
+    (pate-scope? {:permitType "P" :organization "123-R" :municipality "123"}) => false
+    (provided
+      (mongo/by-id :organizations "123-R") => {:scope [{:municipality "123"
+                                                        :permitType "P"
+                                                        :pate-enabled false}]}))
+  (fact "pate not set"
+    (pate-scope? {:permitType "P" :organization "123-R" :municipality "123"}) => falsey
+    (provided
+      (mongo/by-id :organizations "123-R") => {:scope [{:municipality "123"
+                                                        :permitType "P"}]})))

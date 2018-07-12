@@ -117,14 +117,14 @@
 (defn- stamp-attachment! [stamp file-info context job-id application-id]
   (try
     (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :stamped-original-file-id :job-id]))
-    (job/update job-id assoc (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
+    (job/update-by-id job-id (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
     (->> (update-stamp-to-attachment! stamp file-info context)
          (hash-map :status :done :fileId)
-         (job/update job-id assoc (:attachment-id file-info)))
+         (job/update-by-id job-id (:attachment-id file-info)))
     (debug "Stamping complete" (select-keys file-info [:attachment-id :contentType :fileId :filename :stamped-original-file-id]))
     (catch Throwable t
       (errorf t "failed to stamp attachment: application=%s, file=%s" application-id (:fileId file-info))
-      (job/update job-id assoc (:attachment-id file-info) {:status :error :fileId (:fileId file-info)}))))
+      (job/update-by-id job-id (:attachment-id file-info) {:status :error :fileId (:fileId file-info)}))))
 
 (defn- stamp-attachments!
   [file-infos {:keys [job-id application info-fields] :as context}]
@@ -141,13 +141,10 @@
             stamp-without-buildings)
           (stamp-attachment! file-info context job-id (:id application))))))
 
-(defn- stamp-job-status [data]
-  (if (every? #{:done :error} (map #(get-in % [:status]) (vals data))) :done :running))
-
 (defn make-stamp-job [attachment-infos context]
   (let [file-infos (map ->file-info attachment-infos)
         job (-> (zipmap (map :attachment-id file-infos) (map #(assoc % :status :pending) file-infos))
-                (job/start stamp-job-status))]
+                (job/start))]
     (future* (stamp-attachments! file-infos (assoc context :job-id (:id job))))
     (debug "Returning stamp job:" job)
     job))

@@ -2,11 +2,16 @@ LUPAPISTE.FillInfoModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel() );
   var attachmentsService = lupapisteApp.services.attachmentsService;
 
-  self.showAttachmentsOption = params.documentName === "tyonjohtaja-v2";
+  self.showAttachmentsOption = self.disposedComputed( function() {
+    return params.documentName === "tyonjohtaja-v2"
+        && attachmentsService.authModel.ok( "copy-user-attachments-to-application" );
+  });
+
   self.authorization = params.documentAuthModel;
-  self.fillAttachments = ko.observable(self.showAttachmentsOption);
+  self.fillAttachments = ko.observable(self.showAttachmentsOption());
 
   self.fillUserInfo = function () {
     ajax

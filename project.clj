@@ -135,7 +135,7 @@
                  [org.geotools/gt-epsg-wkt "18.1"]
 
                  ; Message Queue
-                 [org.apache.activemq/artemis-jms-client "2.6.0"]
+                 [org.apache.activemq/artemis-jms-client "2.6.2"]
                  [lupapiste/jms-client "0.2.1"]
                  [com.taoensso/nippy "2.14.0"]
 

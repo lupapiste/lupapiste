@@ -172,7 +172,7 @@
 (defn application-authority?
   "Returns true if the user is an authority in the organization that processes the application"
   [application user]
-  (boolean (has-organization-authz-roles? #{:authority :approver} (:organization application) user)))
+  (boolean (has-organization-authz-roles? #{:authority} (:organization application) user)))
 
 (defn application-authority-pre-check
   "Fails if user is NOT application authority"
