@@ -5,7 +5,7 @@
   the displayed data is initially calculated and only fixed after
   verdict (e.g., application id). Recently, this namespace is a
   collection of various components that are needed for the
-  implmentation of :placeholder schemas (see shared.cljc)."
+  implmentation of :placeholder schemas (see pate/shared_schemas.cljc)."
   (:require [clojure.string :as s]
             [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
@@ -61,6 +61,5 @@
             [:div.tabby__cell (if status
                                 (path/loc :statement status)
                                 (path/loc :application.statement.requested))]])
-          statements)
-     ]
+          statements)]
     [:span (path/loc :pate.no-statements)]))

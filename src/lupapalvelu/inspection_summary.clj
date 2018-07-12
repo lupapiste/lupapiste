@@ -150,15 +150,24 @@
 (defn- targets-from-template [template]
   (map new-target (:items template)))
 
-(defn new-summary-for-operation [{appId :id orgId :organization} {opId :id :as operation} templateId]
-  (let [template (util/find-by-key :id templateId (:templates (settings-for-organization orgId)))
-        new-id   (mongo/create-id)
-        summary  (assoc (select-keys template [:name])
-                   :id      new-id
-                   :op      (select-keys operation [:id :name :description])
-                   :targets (targets-from-template template))]
-    (mongo/update :applications {:_id appId} {$push {:inspection-summaries summary}})
-    new-id))
+(defn summary-data-for-operation
+  [{orgId :organization} operation templateId]
+  (let [template (util/find-by-id templateId
+                                  (:templates (settings-for-organization orgId)))]
+    (assoc (select-keys template [:name])
+           :id      (mongo/create-id)
+           :op      (select-keys operation [:id :name :description])
+           :targets (targets-from-template template))))
+
+(defn new-summary-for-operation
+  [{app-id :id :as application} operation templateId]
+  (let [{summary-id :id :as summary} (summary-data-for-operation application
+                                                                 operation
+                                                                 templateId)]
+    (mongo/update :applications
+                  {:_id app-id}
+                  {$push {:inspection-summaries summary}})
+    summary-id))
 
 (defn default-template-id-for-operation [organization {opName :name}]
   (get-in organization [:inspection-summary :operations-templates (keyword opName)]))
@@ -171,6 +180,19 @@
     (when (and (:inspection-summaries-enabled organization) (empty? inspection-summaries))
       (when-let [templateId (default-template-id-for-operation organization primaryOperation)]
         (new-summary-for-operation application primaryOperation templateId)))))
+
+(defn finalize--inspection-summary
+  "Similar to other Pate verdict finalize-- functions (see
+  pate/verdict.clj for details)"
+  [{:keys [application]}]
+  (let [{:keys [organization primaryOperation
+                inspection-summaries]} application
+        organization                   (org/get-organization organization)]
+    (when (and (:inspection-summaries-enabled organization) (empty? inspection-summaries))
+      (when-let [templateId (default-template-id-for-operation organization primaryOperation)]
+        (let [summary (summary-data-for-operation application primaryOperation templateId)]
+          {:application (update application :inspection-summaries conj summary)
+           :updates     {$push {:inspection-summaries summary}}})))))
 
 (defn get-summary-target [target-id summaries]
   (reduce (fn [_ {targets :targets :as summary}]

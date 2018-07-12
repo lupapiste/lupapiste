@@ -164,9 +164,7 @@
 
 (defmethod view-component :application-attachments
   [_ {:keys [schema info] :as options}]
-  ((if (path/value :published info)
-     pate-att/pate-frozen-application-attachments
-     pate-att/pate-application-attachments) options))
+  (pate-att/pate-attachments-view options))
 
 (defmethod view-component :text
   [_ {:keys [schema state path] :as options}]

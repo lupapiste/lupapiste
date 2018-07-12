@@ -456,3 +456,9 @@
           {:type-string (type-loc type-group type-id)
            :amount      amount}))
        attachments-table))
+
+(rum/defc pate-attachments-view < rum/reactive
+  [{:keys [info] :as options}]
+  ((if (path/react :published info)
+     pate-frozen-application-attachments
+     pate-application-attachments) options))

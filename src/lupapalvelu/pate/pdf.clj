@@ -8,7 +8,6 @@
             [lupapalvelu.application-meta-fields :as app-meta]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
@@ -21,6 +20,7 @@
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.pdf-html :as html]
             [lupapalvelu.pate.pdf-layouts :as layouts]
+            [lupapalvelu.pate.schemas :refer [resolve-verdict-attachment-type]]
             [lupapalvelu.pdf.html-template :as html-pdf]
             [lupapalvelu.pdf.html-template-common :as common]
             [rum.core :as rum]
@@ -374,38 +374,33 @@
   "Creates PDF for the verdict and uploads it as an attachment. Returns
   the attachment-id."
   [{:keys [application created] :as command} verdict]
-  (let [pdf       (html-pdf/html->pdf application
-                                      "pate-verdict"
-                                      (verdict-html application verdict))
-        contract? (util/=as-kw (:category verdict) :contract)]
-    (when-not (:ok pdf)
-      (fail! :pate.pdf-verdict-error))
-    (with-open [stream (:pdf-file-stream pdf)]
-      (:id (att/upload-and-attach! command
-                                   {:created         created
-                                    :attachment-type (-<>> (:permitType application)
-                                                          keyword
-                                                          att-type/get-all-attachment-types-for-permit-type
-                                                          (util/find-by-key :type-id :paatos)
-                                                          (select-keys <> [:type-group :type-id])
-                                                          (reduce-kv (fn [acc k v]
-                                                                       (assoc acc k (name v)))
-                                                                     {}))
-                                    :source          {:type "verdicts"
-                                                      :id   (:id verdict)}
-                                    :locked          true
-                                    :read-only       true
-                                    :contents        (i18n/localize (html/language verdict)
-                                                                    (if contract?
-                                                                      :pate.verdict-table.contract
-                                                                      :pate-verdict))}
-                                   {:filename (i18n/localize-and-fill (html/language verdict)
-                                                                      (if contract?
-                                                                        :pdf.contract.filename
-                                                                        :pdf.filename)
-                                                                      (:id application)
-                                                                      (util/to-local-datetime (:published verdict)))
-                                    :content  stream})))))
+  (when-let [html (get-in verdict [:verdict-attachment :html])]
+    (let [pdf       (html-pdf/html->pdf application
+                                        "pate-verdict"
+                                        html)
+         contract? (util/=as-kw (:category verdict) :contract)]
+     (when-not (:ok pdf)
+       (fail! :pate.pdf-verdict-error))
+     (with-open [stream (:pdf-file-stream pdf)]
+       (:id (att/upload-and-attach!
+             command
+             {:created         created
+              :attachment-type (resolve-verdict-attachment-type application)
+              :source          {:type "verdicts"
+                                :id   (:id verdict)}
+              :locked          true
+              :read-only       true
+              :contents        (i18n/localize (html/language verdict)
+                                              (if contract?
+                                                :pate.verdict-table.contract
+                                                :pate-verdict))}
+             {:filename (i18n/localize-and-fill (html/language verdict)
+                                                (if contract?
+                                                  :pdf.contract.filename
+                                                  :pdf.filename)
+                                                (:id application)
+                                                (util/to-local-datetime (:published verdict)))
+              :content  stream}))))))
 
 (defn create-verdict-attachment-version
   "Creates a verdict attachments as a new version to previously created
