@@ -18,6 +18,8 @@
 
 (apply-remote-minimal)
 
+(def org-id "753-R")
+
 (defn mangle-keys [m fun]
   (reduce-kv (fn [acc k v]
                (assoc acc (fun k) v))
@@ -28,7 +30,7 @@
   (mangle-keys m (util/fn->> name (str (name prefix)) keyword)))
 
 (defn toggle-sipoo-pate [flag]
-  (toggle-pate "753-R" flag))
+  (toggle-pate org-id flag))
 
 (defn check-kuntagml [{:keys [organization permitType id]} verdict-date]
   (let [organization (organization-from-minimal-by-id organization)
@@ -64,26 +66,31 @@
 (facts "Pate enabled"
   (fact "Disable Pate in Sipoo"
     (toggle-sipoo-pate false)
-    (query sipoo :pate-enabled) => (err :error.pate-disabled))
+    (query sipoo :pate-enabled :org-id org-id)
+    => (err :error.pate-disabled))
   (fact "Enable Pate in Sipoo"
     (toggle-sipoo-pate true)
-    (query sipoo :pate-enabled) => ok?))
+    (query sipoo :pate-enabled :org-id org-id) => ok?))
 
 (facts "Settings"
   (fact "Bad category"
     (query sipoo :verdict-template-settings
+           :org-id org-id
            :category "foo") => (err :error.invalid-category))
   (fact "No settings"
     (query sipoo :verdict-template-settings
+           :org-id org-id
            :category "r")=> (just {:ok true}))
   (fact "Save to bad path"
     (command sipoo :save-verdict-template-settings-value
+             :org-id org-id
              :category "r"
              :path [:one :two]
              :value ["a" "b" "c"])
     => (err :error.invalid-value-path))
   (fact "Save bad value"
     (command sipoo :save-verdict-template-settings-value
+             :org-id org-id
              :category "r"
              :path [:verdict-code]
              :value [:bad-code])
@@ -91,6 +98,7 @@
   (fact "Save settings draft"
     (let [{modified :modified}
           (command sipoo :save-verdict-template-settings-value
+                   :org-id org-id
                    :category "r"
                    :path [:verdict-code]
                    :value [:ehdollinen :ei-puollettu
@@ -98,6 +106,7 @@
       modified => pos?
       (fact "Query settings"
         (query sipoo :verdict-template-settings
+               :org-id org-id
                :category "r")
         => (contains {:settings {:draft    {:verdict-code ["ehdollinen" "ei-puollettu"
                                                            "evatty" "hyvaksytty"]}
@@ -107,6 +116,7 @@
     (letfn [(set-date-delta [k delta]
               (fact {:midje/description (format "Set %s delta to %s" k delta)}
                 (command sipoo :save-verdict-template-settings-value
+                         :org-id org-id
                          :category :r
                          :path [k]
                          :value (str delta)) => ok?))]
@@ -119,42 +129,46 @@
       ))
   (fact "Date delta validation"
     (command sipoo :save-verdict-template-settings-value
+             :org-id org-id
              :category :r
              :path [:muutoksenhaku]
              :value "-8")=> invalid-value?)
   (fact "Board"
     (command sipoo :save-verdict-template-settings-value
+             :org-id org-id
              :category :r
              :path [:lautakunta-muutoksenhaku]
              :value "10")=> ok?
     (command sipoo :save-verdict-template-settings-value
+             :org-id org-id
              :category :r
              :path [:boardname]
              :value "Board of peers")=> ok?)
   (fact "The settings are now filled"
-    (query sipoo :verdict-template-settings :category "r")
+    (query sipoo :verdict-template-settings :org-id org-id :category "r")
     => (contains {:filled true})))
 
 (fact "Sipoo categories"
-  (:categories (query sipoo :verdict-template-categories))
+  (:categories (query sipoo :verdict-template-categories :org-id org-id))
   => (contains ["r" "tj"] :in-any-order))
 
 
 (fact "Create new template"
-  (let [{:keys [id name draft modified category]} (init-verdict-template sipoo :r)]
+  (let [{:keys [id name draft
+                modified category]} (init-verdict-template sipoo org-id :r)]
     id => string?
     name => "P\u00e4\u00e4t\u00f6spohja"
     draft => nil
     modified => pos?
     category => "r"
     (fact "Fetch draft"
-      (query sipoo :verdict-template :template-id id)
+      (query sipoo :verdict-template :org-id org-id :template-id id)
       => (contains {:id       id
                     :name     name
                     :draft    nil
                     :modified modified}))
     (fact "Template list"
-      (query sipoo :verdict-templates)
+      (query sipoo :verdict-templates :org-id org-id)
       => (contains {:verdict-templates [{:id        id
                                          :name      name
                                          :modified  modified
@@ -164,62 +178,69 @@
     (fact "Change the name"
       (let [{later :modified}
             (command sipoo :set-verdict-template-name
+                     :org-id org-id
                      :template-id id
                      :name "Uusi nimi")]
         (- later modified) => pos?
         (fact "Save draft data value"
           (let [{even-later :modified}
                 (command sipoo :save-verdict-template-draft-value
+                         :org-id org-id
                          :template-id id
                          :path [:giver]
                          :value :viranhaltija)]
             (- even-later later) => pos?
             (fact "Fetch draft again"
-              (query sipoo :verdict-template :template-id id)
+              (query sipoo :verdict-template :org-id org-id :template-id id)
               => (contains {:id       id
                             :name     "Uusi nimi"
                             :draft    {:giver "viranhaltija"}
                             :modified even-later}))
             (fact "Enable every delta"
               (command sipoo :save-verdict-template-draft-value
+                       :org-id org-id
                        :template-id id
                        :path [:verdict-dates]
                        :value [:julkipano :anto :muutoksenhaku :lainvoimainen
                                :aloitettava :voimassa]) => ok?)
             (fact "Bad foreman value"
               (command sipoo :save-verdict-template-draft-value
+                       :org-id org-id
                        :template-id id
                        :path [:vv-tj]
                        :value ["hiihoo"])
               => invalid-value?)
             (fact "Dynamic repeating conditions"
               (fact "Add conditions"
-                (let [condition-id1   (add-template-condition sipoo id "Strict condition")
-                      condition-id2   (add-template-condition sipoo id "Other condition")
-                      empty-condition (add-template-condition sipoo id nil)]
+                (let [condition-id1   (add-template-condition sipoo org-id id "Strict condition")
+                      condition-id2   (add-template-condition sipoo org-id id "Other condition")
+                      empty-condition (add-template-condition sipoo org-id id nil)]
                   (check-template-conditions sipoo
+                                             org-id
                                              id
                                              condition-id1 "Strict condition"
                                              condition-id2 "Other condition"
                                              empty-condition nil)
                   (fact "Remove condition"
-                    (remove-template-condition sipoo id condition-id2)
-                    (check-template-conditions sipoo id
+                    (remove-template-condition sipoo org-id id condition-id2)
+                    (check-template-conditions sipoo org-id id
                                              condition-id1 "Strict condition"
                                              empty-condition nil)))))
             (fact "Set foremen removed"
               (command sipoo :save-verdict-template-draft-value
+                       :org-id org-id
                        :template-id id
                        :path [:removed-sections :foremen]
                        :value true) => ok?)
             (facts "Set plans removed"
               (let [{last-edit :modified}
                     (command sipoo :save-verdict-template-draft-value
+                             :org-id org-id
                              :template-id id
                              :path [:removed-sections :plans]
                              :value true) => ok?]
                 (fact "Fetch draft to see the compound items are OK"
-                  (query sipoo :verdict-template :template-id id)
+                  (query sipoo :verdict-template :org-id org-id :template-id id)
                   => (contains {:id       id
                                 :name     "Uusi nimi"
                                 :draft    (contains {:giver            "viranhaltija"
@@ -231,36 +252,41 @@
                                 :modified last-edit
                                 :filled   true})))
               (facts "Publish template"
-                (publish-verdict-template sipoo id) => ok?
+                (publish-verdict-template sipoo org-id id) => ok?
                 (facts "Required fields"
                   (fact "The template cannot be published if any settings required field is empty"
                     (command sipoo :save-verdict-template-settings-value
+                             :org-id org-id
                              :category "r" :path [:boardname] :value "")
                     => (contains {:filled false})
-                    (publish-verdict-template sipoo id) => (err :pate.required-fields)
+                    (publish-verdict-template sipoo org-id id) => (err :pate.required-fields)
                     (command sipoo :save-verdict-template-settings-value
+                             :org-id org-id
                              :category "r" :path [:boardname] :value "Board of peers")
                     => (contains {:filled true})
-                    (publish-verdict-template sipoo id) => ok?)
+                    (publish-verdict-template sipoo org-id id) => ok?)
                   (fact "The template cannot be published if any required field is empty"
                     (command sipoo :save-verdict-template-draft-value
+                             :org-id org-id
                              :template-id id :path [:giver] :value "")
                     => (contains {:filled false})
-                    (publish-verdict-template sipoo id) => (err :pate.required-fields)))
+                    (publish-verdict-template sipoo org-id id) => (err :pate.required-fields)))
                 (let [{filled    :filled
                        last-edit :modified}  (command sipoo :save-verdict-template-draft-value
+                                                      :org-id org-id
                                                       :template-id id
                                                       :path [:giver]
                                                       :value :viranhaltija)
-                      {published :published} (publish-verdict-template sipoo id)]
+                      {published :published} (publish-verdict-template sipoo org-id id)]
                   filled => true
                   (- published last-edit) => pos?
                   (fact "Delete template"
                     (command sipoo :toggle-delete-verdict-template
+                             :org-id org-id
                              :template-id id
                              :delete true) => ok?)
                   (fact "Template list again. Publishing and deletion do not affect modified timestamp."
-                    (-> (query sipoo :verdict-templates) :verdict-templates first)
+                    (-> (query sipoo :verdict-templates :org-id org-id) :verdict-templates first)
                     => (contains {:id        id
                                   :name      "Uusi nimi"
                                   :modified  last-edit
@@ -269,20 +295,23 @@
                                   :published published}))
                   (fact "Name change not allowed for deleted template"
                     (command sipoo :set-verdict-template-name
+                             :org-id org-id
                              :template-id id
                              :name "Foo")
                     => (err :error.verdict-template-deleted))
                   (fact "Draft data update not allowed for deleted template"
                     (command sipoo :save-verdict-template-draft-value
+                             :org-id org-id
                              :template-id id
                              :path [:hii]
                              :value "Foo")
                     => (err :error.verdict-template-deleted))
                   (fact "Publish not allowed for deleted template"
-                    (publish-verdict-template sipoo id)
+                    (publish-verdict-template sipoo org-id id)
                     => (err :error.verdict-template-deleted))
                   (fact "Fetch draft not allowed for deleted template"
                     (query sipoo :verdict-template
+                           :org-id org-id
                            :template-id id)
                     => (err :error.verdict-template-deleted))
                   (fact "Copying is allowed also for deleted templates"
@@ -290,6 +319,7 @@
                                   copy-deleted copy-draft copy-name
                                   copy-category]}
                           (prefix-keys (command sipoo :copy-verdict-template
+                                                :org-id org-id
                                                 :template-id id)
                                        :copy-)]
                       copy-id =not=> id
@@ -308,25 +338,29 @@
                         => (just [{:condition "Strict condition"} {}] :in-any-order))
                       (fact "Editing copy draft does not affect original"
                         (command sipoo :save-verdict-template-draft-value
+                                 :org-id org-id
                                  :template-id copy-id
                                  :path [:paatosteksti]
                                  :value  "This is the verdict.") => ok?
                         (fact "Copy has new data"
                           (-> (query sipoo :verdict-template
+                                     :org-id org-id
                                      :template-id copy-id)
                               :draft :paatosteksti)
                           => "This is the verdict.")
                         (fact "Restore the deleted template"
                           (command sipoo :toggle-delete-verdict-template
+                                   :org-id org-id
                                    :template-id id
                                    :delete false) => ok?)
                         (fact "The original (restored) template does not have new data"
                           (-> (query sipoo :verdict-template
+                                     :org-id org-id
                                      :template-id id)
                               :draft :paatosteksti)
                           => nil)
                         (fact "Template list has both templates"
-                          (->> (query sipoo :verdict-templates)
+                          (->> (query sipoo :verdict-templates :org-id org-id)
                                :verdict-templates
                                (map #(select-keys % [:id :name])))
                           =>  [{:id id :name "Uusi nimi"}
@@ -334,56 +368,67 @@
 
 (fact "Delete nonexisting template"
   (command sipoo :toggle-delete-verdict-template
+           :org-id org-id
            :template-id "bad-id" :delete true)
   => (err :error.verdict-template-not-found))
 
 (fact "Copy nonexisting template"
   (command sipoo :copy-verdict-template
+           :org-id org-id
            :template-id "bad-id")
   => (err :error.verdict-template-not-found))
 
 (facts "Data path and value validation"
-  (let [{id :id} (init-verdict-template sipoo :r)]
+  (let [{id :id} (init-verdict-template sipoo org-id :r)]
     (command sipoo :save-verdict-template-draft-value
+             :org-id org-id
              :template-id id
              :path [:verdict-dates]
              :value ["bad"])=> invalid-value?
     (command sipoo :save-verdict-template-draft-value
+             :org-id org-id
              :template-id id
              :path [:bad :path]
              :value false)=> (err :error.invalid-value-path)
     (command sipoo :save-verdict-template-draft-value
+             :org-id org-id
              :template-id id
              :path [:verdict-code]
              :value :bad) => invalid-value?
     (command sipoo :save-verdict-template-draft-value
+             :org-id org-id
              :template-id id
              :path [:verdict-code]
              :value :hyvaksytty) => ok?))
 
 (facts "Operation default verdict template"
   (fact "No defaults yet"
-    (:templates (query sipoo :default-operation-verdict-templates))
+    (:templates (query sipoo :default-operation-verdict-templates
+                       :org-id org-id))
     => {})
-  (let [{old-id :id}      (->> (query sipoo :verdict-templates)
+  (let [{old-id :id}      (->> (query sipoo :verdict-templates
+                                      :org-id org-id)
                                :verdict-templates
                                (util/find-first :published))
-        {template-id :id} (init-verdict-template sipoo :r)]
+        {template-id :id} (init-verdict-template sipoo org-id :r)]
     (fact "Fill required fields"
       (command sipoo :save-verdict-template-draft-value
+               :org-id org-id
                :template-id template-id
                :path [:giver]
                :value :viranhaltija)
       => (contains {:filled true}))
     (fact "Verdict template not published"
       (command sipoo :set-default-operation-verdict-template
+               :org-id org-id
                :operation "pientalo" :template-id template-id)
       => (err :error.verdict-template-not-published))
     (fact "Publish the verdict template"
-      (publish-verdict-template sipoo template-id)
+      (publish-verdict-template sipoo org-id template-id)
       => ok?)
     (fact "Selectable verdict templates"
-      (:items (query sipoo :selectable-verdict-templates))
+      (:items (query sipoo :selectable-verdict-templates
+                     :org-id org-id))
       => {:R  [{:id old-id :name "Uusi nimi"}
                 {:id template-id :name "P\u00e4\u00e4t\u00f6spohja"}]
           :P  []
@@ -391,55 +436,70 @@
           :tyonjohtajan-nimeaminen-v2 []})
     (fact "Delete verdict template"
       (command sipoo :toggle-delete-verdict-template
+               :org-id org-id
                :template-id template-id :delete true)
       => ok?)
     (fact "Verdict template not editable"
       (command sipoo :set-default-operation-verdict-template
+               :org-id org-id
                :operation "pientalo" :template-id template-id)
       => (err :error.verdict-template-deleted))
     (fact "Delete verdict template"
       (command sipoo :toggle-delete-verdict-template
+               :org-id org-id
                :template-id template-id :delete false)
       => ok?)
     (fact "Bad operation"
       (command sipoo :set-default-operation-verdict-template
+               :org-id org-id
                :operation "bad-operation" :template-id template-id)
       => (err :error.unknown-operation))
     (fact "Bad operation category"
       (command sipoo :set-default-operation-verdict-template
+               :org-id org-id
                :operation "rasitetoimitus" :template-id template-id)
       => (err :error.invalid-category))
     (fact "Set template for operation"
       (command sipoo :set-default-operation-verdict-template
+               :org-id org-id
                :operation "pientalo" :template-id template-id)
       => ok?)
     (fact "Defaults are no longer empty"
-      (:templates (query sipoo :default-operation-verdict-templates))
+      (:templates (query sipoo :default-operation-verdict-templates
+                         :org-id org-id))
       => {:pientalo template-id})
     (fact "Set template for another operation"
       (command sipoo :set-default-operation-verdict-template
+               :org-id org-id
                :operation "muu-laajentaminen" :template-id template-id)
       => ok?)
     (fact "Defaults has two items"
-      (:templates (query sipoo :default-operation-verdict-templates))
+      (:templates (query sipoo :default-operation-verdict-templates
+                         :org-id org-id))
       => {:pientalo template-id :muu-laajentaminen template-id})
     (fact "Empty template-id clears default"
       (command sipoo :set-default-operation-verdict-template
+               :org-id org-id
                :operation "muu-laajentaminen" :template-id "")
       => ok?
-      (:templates (query sipoo :default-operation-verdict-templates))
+      (:templates (query sipoo :default-operation-verdict-templates
+                         :org-id org-id))
       => {:pientalo template-id})
     (fact "Deleted template can no longer be default"
       (command sipoo :toggle-delete-verdict-template
+               :org-id org-id
                :template-id template-id :delete true)
       => ok?
-      (:templates (query sipoo :default-operation-verdict-templates))
+      (:templates (query sipoo :default-operation-verdict-templates
+                         :org-id org-id))
       => {})
     (fact "Undoing deletion makes template default again"
       (command sipoo :toggle-delete-verdict-template
+               :org-id org-id
                :template-id template-id :delete false)
       => ok?
-      (:templates (query sipoo :default-operation-verdict-templates))
+      (:templates (query sipoo :default-operation-verdict-templates
+                         :org-id org-id))
       => {:pientalo template-id})
 
     (facts "Application verdict templates"
@@ -447,11 +507,13 @@
                                                         :operation :pientalo
                                                         :propertyId sipoo-property-id)]
         (fact "Create and delete verdict template"
-          (let [{tmp-id :id} (init-verdict-template sipoo :r)]
+          (let [{tmp-id :id} (init-verdict-template sipoo org-id :r)]
             (command sipoo :toggle-delete-verdict-template
+                     :org-id org-id
                      :template-id tmp-id :delete true) => ok?))
         (fact "Rename assumed default"
           (command sipoo :set-verdict-template-name
+                   :org-id org-id
                    :template-id template-id
                    :name "Oletus"))
         (:templates (query sonja :application-verdict-templates :id app-id))
@@ -542,15 +604,15 @@
       (-> buildings second :location-wgs84) => (coord/convert "EPSG:3067" "WGS84" 5 [406216.0 6686856.0]))))
 
 (defn add-review [& kvs]
-  (add-repeating-setting sipoo :r :reviews :add-review kvs))
+  (add-repeating-setting sipoo org-id :r :reviews :add-review kvs))
 
 (defn add-plan [& kvs]
-  (add-repeating-setting sipoo :r :plans :add-plan kvs))
+  (add-repeating-setting sipoo org-id :r :plans :add-plan kvs))
 
 (facts "Settings dependencies (reviews and plans)"
   (let [{template-id :id
          draft       :draft
-         modified    :modified} (init-verdict-template sipoo :r)]
+         modified    :modified} (init-verdict-template sipoo org-id :r)]
     (fact "Initially no reviews nor plans in template"
       draft => nil)
     (fact "Add review"
@@ -558,24 +620,29 @@
                                   :type "pohjakatselmus")]
         review-id => truthy
         (fact "Regularly opened template does not include review"
-          (query sipoo :verdict-template :template-id template-id)
+          (query sipoo :verdict-template
+                 :org-id org-id
+                 :template-id template-id)
           => (contains {:id       template-id
                         :modified modified
                         :draft    nil}))
         (fact "Update and open"
           (command sipoo :update-and-open-verdict-template
+                   :org-id org-id
                    :template-id template-id)
           => (contains {:draft {:reviews {(keyword review-id) {:text-fi "Katselmus"
                                                                :text-sv "Syn"
                                                                :text-en "Review"}}}}))
         (fact "Include review in verdict"
           (command sipoo :save-verdict-template-draft-value
+                   :org-id org-id
                    :template-id template-id
                    :path [:reviews review-id :included]
                    :value true)
           => ok?)
         (fact "Review text is read-only"
           (some-> (command sipoo :save-verdict-template-draft-value
+                           :org-id org-id
                            :template-id template-id
                            :path [:reviews review-id :text-fi]
                            :value "foo")
@@ -586,11 +653,13 @@
           => :error.read-only)
         (fact "Change review's name"
           (command sipoo :save-verdict-template-settings-value
+                   :org-id org-id
                    :category :r
                    :path [:reviews review-id :fi]
                    :value "sumlestaK") => ok?)
         (fact "Name updated in the template after update and open"
           (command sipoo :update-and-open-verdict-template
+                   :org-id org-id
                    :template-id template-id)
           => (contains {:draft {:reviews {(keyword review-id) {:text-fi "sumlestaK"
                                                                :text-sv "Syn"
@@ -598,6 +667,7 @@
                                                                :included true}}}}))
         (fact "Remove review"
           (command sipoo :save-verdict-template-settings-value
+                   :org-id org-id
                   :category :r
                   :path [:reviews review-id :remove-review]
                   :value nil) => ok?)
@@ -605,17 +675,20 @@
           (let [plan-id (add-plan :fi "Suunnitelma" :sv "Plan" :en "Plan")]
             (fact "Update and open: no review, but a plan"
               (command sipoo :update-and-open-verdict-template
+                       :org-id org-id
                        :template-id template-id)
               => (contains {:draft (just {:plans {(keyword plan-id) {:text-fi "Suunnitelma"
                                                                      :text-sv "Plan"
                                                                      :text-en "Plan"}}})}))
             (fact "Remove plan"
               (command sipoo :save-verdict-template-settings-value
+                       :org-id org-id
                        :category :r
                        :path [:plans plan-id :remove-plan]
                        :value nil) => ok?
               (:draft (command sipoo :update-and-open-verdict-template
-                        :template-id template-id))
+                               :org-id org-id
+                               :template-id template-id))
               => nil)))))))
 
 (def space-saving-definitions
@@ -628,12 +701,12 @@
         plan3                (add-plan :fi "S3" :sv "P3" :en "P3")
         plan4                (add-plan :fi "S4" :sv "P4" :en "P4")
         {template-id :id
-         draft       :draft} (init-verdict-template sipoo :r)
-        good-condition       (add-template-condition sipoo template-id "Good condition")
-        empty-condition      (add-template-condition sipoo template-id nil)
-        blank-condition      (add-template-condition sipoo template-id "    ")
-        other-condition      (add-template-condition sipoo template-id "Other condition")
-        remove-condition     (add-template-condition sipoo template-id "Remove condition")
+         draft       :draft} (init-verdict-template sipoo org-id :r)
+        good-condition       (add-template-condition sipoo org-id template-id "Good condition")
+        empty-condition      (add-template-condition sipoo org-id template-id nil)
+        blank-condition      (add-template-condition sipoo org-id template-id "    ")
+        other-condition      (add-template-condition sipoo org-id template-id "Other condition")
+        remove-condition     (add-template-condition sipoo org-id template-id "Remove condition")
         {app-id :id}         (create-and-open-application pena
                                                           :propertyId sipoo-property-id
                                                           :operation  :sisatila-muutos
@@ -651,13 +724,14 @@
                 remove-condition review1 review2 review3 review4
                 template-id]} space-saving-definitions]
     (fact "Remove condition"
-      (remove-template-condition sipoo template-id remove-condition))
+      (remove-template-condition sipoo org-id template-id remove-condition))
     (fact "Full template without attachments"
       (command sipoo :set-verdict-template-name
+               :org-id org-id
                :template-id template-id
                :name "Full template") => ok?)
 
-    (set-template-draft-values sipoo template-id
+    (set-template-draft-values sipoo org-id template-id
                                :language "fi"
                                :verdict-dates ["julkipano" "anto"
                                                "muutoksenhaku" "lainvoimainen"
@@ -689,11 +763,13 @@
                                [:removed-sections :attachments] true)
     (fact "Delete review 1"
       (command sipoo :save-verdict-template-settings-value
+               :org-id org-id
                :category :r
                :path [:reviews review1 :remove-review]
                :value nil)=> ok?)
     (fact "Delete plan 1"
       (command sipoo :save-verdict-template-settings-value
+               :org-id org-id
                :category :r
                :path [:plans plan1 :remove-plan]
                :value nil) => ok?)))
@@ -740,7 +816,7 @@
             (command sonja :new-pate-verdict-draft :id app-id :template-id template-id)
             => fail?)
           (fact "Publish Full template"
-            (publish-verdict-template sipoo template-id)
+            (publish-verdict-template sipoo org-id template-id)
             => ok?)
           (fact "Pena cannot create verdict"
             (command pena :new-pate-verdict-draft :id app-id :template-id template-id)
@@ -1127,6 +1203,7 @@
                     (letfn [(edit-template [path value]
                               (fact {:midje/description (format "Template draft %s -> %s" path value)}
                                 (command sipoo :save-verdict-template-draft-value
+                                         :org-id org-id
                                          :template-id template-id
                                          :path (map name (flatten [path]))
                                          :value value) => ok?))]
@@ -1153,7 +1230,7 @@
                       (fact "Board verdict template"
                         (edit-template :giver :lautakunta) => true)
                       (fact "Publish template"
-                        (publish-verdict-template sipoo template-id) => ok?)))
+                        (publish-verdict-template sipoo org-id template-id) => ok?)))
                   (fact "Sonja sets Ronja as the handler for the application"
                     (let [{handlers :handlers} (query-application sonja app-id)]
                       (command sonja :remove-application-handler :id app-id

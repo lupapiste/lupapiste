@@ -5,46 +5,53 @@
 
 (apply-remote-minimal)
 
+(def org-id "753-R")
+
 (defn err [error]
   (partial expected-failure? error))
 
 (fact "No phrases yet"
-  (query sipoo :organization-phrases) => {:ok true :phrases []})
+  (query sipoo :organization-phrases :org-id org-id)
+  => {:ok true :phrases []})
 
 (fact "Add new phrase"
   (command sipoo :upsert-phrase
+           :org-id org-id
            :category :paatosteksti
            :tag "Tag"
            :phrase "Hello") => ok?)
 
 (facts "One phrase listed"
-  (let [phrases (:phrases (query sipoo :organization-phrases))]
+  (let [phrases (:phrases (query sipoo :organization-phrases :org-id org-id))]
     phrases => (just [(contains {:tag "Tag"
                                  :category "paatosteksti"
                                  :phrase "Hello"})])
     (fact "Update phrase"
       (let [phrase-id (-> phrases first :id)]
         (command sipoo :upsert-phrase
+                 :org-id org-id
                  :phrase-id phrase-id
                  :category "kaava"
                  :tag "Gat"
                  :phrase "World")=> ok?
         (fact "Phrase updated"
-          (:phrases (query sipoo :organization-phrases))
+          (:phrases (query sipoo :organization-phrases :org-id org-id))
           => [{:id       phrase-id
                :tag      "Gat"
                :category "kaava"
                :phrase   "World"}])
         (fact "Add one more phrase"
           (command sipoo :upsert-phrase
+                   :org-id org-id
                    :category "yleinen"
                    :tag "Bah"
                    :phrase "Humbug") => ok?)
         (fact "Delete the first phrase"
           (command sipoo :delete-phrase
+                   :org-id org-id
                    :phrase-id phrase-id) => ok?)
         (fact "Check the phrases"
-          (:phrases (query sipoo :organization-phrases))
+          (:phrases (query sipoo :organization-phrases :org-id org-id))
           => (just [(contains {:category "yleinen"
                                :tag "Bah"
                                :phrase "Humbug"})]))))))
@@ -71,6 +78,7 @@
 
 (fact "Bad category"
   (command sipoo :upsert-phrase
+           :org-id org-id
            :category "bad"
            :tag "Gat"
            :phrase "World")
@@ -78,8 +86,13 @@
 
 (fact "Bad phrase id"
   (command sipoo :upsert-phrase
+           :org-id org-id
            :phrase-id "bad"
            :category "muutoksenhaku"
            :tag "Gat"
            :phrase "World")
   => (err :error.phrase-not-found))
+
+(fact "Bad org-id"
+  (query sipoo :organization-phrases :org-id "bad")
+  => (err :error.invalid-organization))

@@ -62,12 +62,12 @@
   and draft."
    :feature          :pate
    :permissions      [{:required [:organization/admin]}]
-   :parameters       [:org-id category]
+   :parameters       [org-id category]
    :input-validators [(partial action/non-blank-parameters [:org-id :category])]
    :pre-checks       [pate-enabled
                       valid-category]}
   [{:keys [created lang] :as command}]
-  (ok (assoc (template/new-verdict-template (template/command->organization command)
+  (ok (assoc (template/new-verdict-template org-id
                                             created
                                             lang
                                             category)
@@ -297,18 +297,20 @@
   (ok :templates (template/operation-verdict-templates (template/command->organization command))))
 
 (defcommand set-default-operation-verdict-template
-  {:description      "Set default verdict template for a selected operation
-  in the organization."
-   :feature          :pate
-   :permissions      [{:required [:organization/admin]}]
-   :parameters       [:org-id operation template-id]
-   :input-validators [(partial action/non-blank-parameters [:org-id :template-id :operation])]
-   :pre-checks       [pate-enabled
-                      (template/verdict-template-check :published :editable :blank)
-                      organization-operation
-                      operation-vs-template-category]}
+  {:description         "Set default verdict template for a selected operation
+  in the organization. If template-id is not given, the default is
+  cleared."
+   :feature             :pate
+   :permissions         [{:required [:organization/admin]}]
+   :parameters          [org-id operation]
+   :optional-parameters [template-id]
+   :input-validators    [(partial action/non-blank-parameters [:org-id :operation])]
+   :pre-checks          [pate-enabled
+                         (template/verdict-template-check :published :editable :blank)
+                         organization-operation
+                         operation-vs-template-category]}
   [command]
-  (template/set-operation-verdict-template (template/command->organization command)
+  (template/set-operation-verdict-template org-id
                                            operation
                                            template-id))
 
