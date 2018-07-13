@@ -450,7 +450,8 @@
      before
      (common/add-test-id (if disabled?
                            link
-                           [:a {:on-click click} link]))
+                           [:a {:on-click click} link])
+                         test-id)
      after]))
 
 (rum/defc icon-button < rum/reactive

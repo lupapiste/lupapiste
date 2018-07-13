@@ -31,14 +31,16 @@
 
 (defn add-repeating-setting
   "Returns the id of the new item."
-  [apikey category rep-dict add-dict & kvs]
+  [apikey org-id category rep-dict add-dict & kvs]
   (let [id (get-in (command apikey :save-verdict-template-settings-value
+                            :org-id org-id
                             :category category
                             :path [add-dict]
                             :value nil)
                    [:changes 0 0 1])]
     (doseq [[k v] (apply hash-map (flatten kvs))]
       (command apikey :save-verdict-template-settings-value
+               :org-id org-id
                :category category
                :path [rep-dict id k]
                :value v))
@@ -50,24 +52,27 @@
     (raw sonja :download-attachment :file-id file-id :id app-id)
     => (contains {:status (if exists? 200 404)})))
 
-(defn init-verdict-template [apikey category]
+(defn init-verdict-template [apikey org-id category]
   (command apikey :new-verdict-template
+           :org-id org-id
            :category (name category)))
 
-(defn set-template-draft-value [apikey template-id path value]
+(defn set-template-draft-value [apikey org-id template-id path value]
   (fact {:midje/description (format "Draft value: %s %s"
                                     path value)}
-        (command apikey :save-verdict-template-draft-value
-                 :template-id template-id
-                 :path (map keyword (flatten [path]))
-                 :value value) => ok?))
+    (command apikey :save-verdict-template-draft-value
+             :org-id org-id
+             :template-id template-id
+             :path (map keyword (flatten [path]))
+             :value value) => ok?))
 
-(defn set-template-draft-values [apikey template-id & args]
+(defn set-template-draft-values [apikey org-id template-id & args]
   (doseq [[path value] (->arg-map args)]
-    (set-template-draft-value apikey template-id path value)))
+    (set-template-draft-value apikey org-id template-id path value)))
 
-(defn publish-verdict-template [apikey template-id]
+(defn publish-verdict-template [apikey org-id template-id]
   (command apikey :publish-verdict-template
+           :org-id org-id
            :template-id template-id))
 
 (defn fill-sisatila-muutos-application [apikey app-id]
@@ -205,27 +210,32 @@
                   {}
                   (apply hash-map kv))))
 
-(defn add-template-condition [apikey template-id condition]
+(defn add-template-condition [apikey org-id template-id condition]
   (add-condition #(command apikey :save-verdict-template-draft-value
+                           :org-id org-id
                            :template-id template-id
                            :path [:add-condition]
                            :value true)
                  #(command apikey :save-verdict-template-draft-value
-                   :template-id template-id
-                   :path [:conditions %1 :condition]
-                   :value %2)
+                           :org-id org-id
+                           :template-id template-id
+                           :path [:conditions %1 :condition]
+                           :value %2)
                  condition))
 
-(defn remove-template-condition [apikey template-id condition-id]
+(defn remove-template-condition [apikey org-id template-id condition-id]
   (remove-condition #(command apikey :save-verdict-template-draft-value
+                              :org-id org-id
                               :template-id template-id
                               :path [:conditions condition-id :remove-condition]
                               :value true)
                     condition-id))
 
 
-(defn check-template-conditions [apikey template-id & kv]
-  (check-conditions #(-> (query apikey :verdict-template :template-id template-id)
+(defn check-template-conditions [apikey org-id template-id & kv]
+  (check-conditions #(-> (query apikey :verdict-template
+                                :template-id template-id
+                                :org-id org-id)
                          :draft :conditions)
                     kv))
 

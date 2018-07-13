@@ -4,6 +4,6 @@
        data-bind="feature: 'pate',
                   if: organization.organizationId() && authorization.ok('pate-enabled'),
                   css: lupapisteApp.services.naviSidebarService.containerCss">
-    <cljs-pate_verdict-templates></cljs-pate_verdict-templates>
+    <cljs-pate_verdict-templates params="orgId: organization.organizationId()"></cljs-pate_verdict-templates>
   </div>
 </section>

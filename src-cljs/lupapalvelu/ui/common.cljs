@@ -211,8 +211,8 @@
 (defn add-test-id
   "Adds data-test-id attribute. The target can be either the attribute
   map or the encompassing component. Extras parts are concatened with
-  -. If the test-id is nil (or false),  the target is returned
-  unchanged regardless of extras."
+  - If the test-id is nil (or false), the target is returned unchanged
+  regardless of extras."
   [[x & xs :as target] test-id & extras]
   (let [test-id (when test-id
                   (->> (cons test-id extras)

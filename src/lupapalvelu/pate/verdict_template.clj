@@ -22,10 +22,10 @@
 
 (defn command->organization
   "User-organizations is not available for input-validators."
-  [{:keys [user user-organizations organization]}]
+  [{:keys [user-organizations organization data]}]
   (if organization
     @organization
-    (util/find-by-id (usr/authority-admins-organization-id user)
+    (util/find-by-id (:org-id data)
                      user-organizations)))
 
 (defn organization-categories [{scope :scope}]
