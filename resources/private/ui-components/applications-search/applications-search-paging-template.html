@@ -5,7 +5,7 @@
     <script type="text/x-jquery-tmpl" id="applications-search-paging-template">
       <div class="paging"
            data-bind="ifnot: dataProvider.pending">
-        <label class="results" data-bind="text: loc($data.resultsTextKey, start(), end(), count())"></label>
+        <p class="results" data-bind="text: loc($data.resultsTextKey, start(), end(), count())"></p>
         <div>
           <button class="primary previous"
                   data-test-id="paging-previous"
@@ -29,7 +29,7 @@
               <span class="separator"></span>
             </a>
           <!-- /ko -->
-            <label data-bind="ltext: 'applications.lengthMenu'"></label>
+            <p data-bind="ltext: 'applications.lengthMenu'"></p>
           </div>
         </div>
       </div>
