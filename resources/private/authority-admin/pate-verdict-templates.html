@@ -2,7 +2,7 @@
   <navi-sidebar></navi-sidebar>
   <div class="container container--authority-admin feature--no-border"
        data-bind="feature: 'pate',
-                  if: organization.organizationId() && authorization.ok('pate-enabled'),
+                  if: organization.organizationId() && organization.pateEnabled(),
                   css: lupapisteApp.services.naviSidebarService.containerCss">
     <cljs-pate_verdict-templates params="orgId: organization.organizationId()"></cljs-pate_verdict-templates>
   </div>

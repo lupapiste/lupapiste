@@ -47,15 +47,14 @@
 ;; ----------------------------------
 
 (defquery pate-enabled
-  {:description "Pseudo-query that fails if Pate is not enabled in
-  the organization"
-   :feature     :pate
-   :permissions [{:required [:organization/admin]}]
-   :parameters [:org-id]
+  {:description      "Query that fails if Pate is not enabled in the
+  organization. Thus, the result does not matter."
+   :feature          :pate
+   :permissions      [{:required [:organization/admin]}]
+   :parameters       [:org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]
-   :pre-checks  [pate-enabled]}
+   :pre-checks       [pate-enabled]}
   [_])
-
 
 (defcommand new-verdict-template
   {:description      "Creates new empty template. Returns template id, name
