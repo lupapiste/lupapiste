@@ -2,6 +2,7 @@
   (:require [lupapalvelu.document.rakennuslupa-canonical :as rakval-canon]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.xml.disk-writer :as writer]
             [ring.util.codec :as codec]
             [sade.core :refer :all]
@@ -197,4 +198,8 @@
    :linkkiliitteeseen (format "%s/api/raw/verdict-pdf?%s"
                               (env/value :host)
                               (codec/form-encode {:id         (:id application)
-                                                  :verdict-id (:id verdict)}))})
+                                                  :verdict-id (:id verdict)}))
+   :muokkausHetki     (util/to-xml-datetime (:published verdict))
+   :tyyppi            (:type-id (schemas/resolve-verdict-attachment-type application))
+   :versionumero      "0.1" ;; Generated verdict PDF is always the first version
+   })
