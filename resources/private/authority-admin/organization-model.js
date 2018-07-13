@@ -332,12 +332,14 @@ LUPAPISTE.OrganizationModel = function () {
   };
 
   function refreshVerdictTemplates() {
-    ajax.query( "selectable-verdict-templates")
+    ajax.query( "selectable-verdict-templates",
+                {"org-id": self.organizationId()})
     .success( function( res ) {
       self.selectableVerdictTemplates( _.get( res, "items", {} ));
     })
     .call();
-    ajax.query( "default-operation-verdict-templates")
+    ajax.query( "default-operation-verdict-templates",
+                {"org-id": self.organizationId()})
     .success( function( res ) {
       self.defaultOperationVerdictTemplates( _.get( res, "templates", {} )  );
     })

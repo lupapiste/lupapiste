@@ -12,6 +12,7 @@
 (def current-template        (state-cursor :current-template))
 (def current-view            (state-cursor :current-view))
 (def current-category        (state-cursor :current-category))
+(def org-id                  (state-cursor :org-id))
 (def template-list           (state-cursor :template-list))
 (def categories              (state-cursor :categories))
 (def references              (state-cursor :references))

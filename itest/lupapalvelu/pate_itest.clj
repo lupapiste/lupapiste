@@ -73,6 +73,10 @@
     (query sipoo :pate-enabled :org-id org-id) => ok?))
 
 (facts "Settings"
+  (fact "Bad org-di"
+    (query sipoo :verdict-template-settings
+           :org-id "bad"
+           :category "r") => (err :error.invalid-organization))
   (fact "Bad category"
     (query sipoo :verdict-template-settings
            :org-id org-id

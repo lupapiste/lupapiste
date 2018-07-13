@@ -31,7 +31,8 @@ LUPAPISTE.DefaultVerdictTemplateModel = function( params ) {
     },
     write: function( v ) {
       ajax.command( "set-default-operation-verdict-template",
-                  {operation: operation.id,
+                  {"org-id": organization.organizationId(),
+                   operation: operation.id,
                   "template-id": v || "" })
       .success( function( res ) {
         util.showSavedIndicator( res );
