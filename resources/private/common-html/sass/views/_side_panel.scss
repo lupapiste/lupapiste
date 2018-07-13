@@ -19,17 +19,10 @@
 
 #side-panel {
   z-index: 2001;
-  color: #fff;
+  color: $gray255;
   position: fixed;
   right: -500px;
   top: 60px;
-
-  .comment-controls {
-    margin-left: 0;
-    .mark-answered {
-      margin-left: 0;
-    }
-  }
   .buttons {
     float: left;
     margin-top: $marginM;
@@ -57,7 +50,7 @@
   .content-wrapper {
     float: left;
     height: 100%;
-    background-color: $gray69;
+    background-color: $gray85;
     padding: $marginS;
     width: 500px;
   }
@@ -138,14 +131,6 @@
     clear: both;
   }
 
-  h1 {
-    color: #fff;
-  }
-
-  .comment {
-    color: $grey-text;
-  }
-
   #notice-template {
     height: 100%;
   }
@@ -191,7 +176,7 @@
           display: table-cell;
           margin-bottom: $grid-margin;
           label {
-            color: #fff;
+            color: $gray255;
           }
         }
       }
@@ -244,7 +229,7 @@
     }
   }
   label {
-    color: #fff;
+    color: $gray255;
   }
 }
 
@@ -268,11 +253,6 @@
     right: -400px;
   }
 
-  .comment-controls {
-    .comment-request {
-      margin-left: 0;
-    }
-  }
   #side-panel .message-buttons {
     @include stacked;
     button {
