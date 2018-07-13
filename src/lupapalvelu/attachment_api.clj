@@ -117,6 +117,14 @@
                    attachments))
     (fail :error.attachment-is-locked)))
 
+(defn- no-attachment-is-read-only [{{attachments :attachments} :application {:keys [files]} :data}]
+  (when (and (seq files)
+             (some (fn [{:keys [id readOnly]}]
+                     (and (contains? (set files) id)
+                          readOnly))
+                   attachments))
+    (fail :error.attachment-is-read-only)))
+
 ;;
 ;; Attachments
 ;;
@@ -641,7 +649,8 @@
                       (partial action/parameters-matching-schema [:stamp] JSONStampSchema)
                       (partial action/supported-lang :lang)]
    :pre-checks       [any-attachment-has-version
-                      no-attachment-is-archived]
+                      no-attachment-is-archived
+                      no-attachment-is-read-only]
    :user-roles       #{:authority}
    :states           states/post-submitted-states
    :description      "Stamps all attachments of given application"}

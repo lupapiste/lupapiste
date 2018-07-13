@@ -263,7 +263,12 @@ Sonja logs in and approves application
 Sonja cannot invite any more statement givers
   Open tab  statement
   No such test id  add-statement
-  Logout
+
+Statement attachments cannot be stamped
+  Open tab  attachments
+  Click by test id  stamp-attachments
+  Test id text is  stamp-status-text  Ei leimauskelpoisia liitteitä
+  [Teardown]  Logout
 
 Luukas logs in but cannot edit statement
   Luukas logs in
