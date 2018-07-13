@@ -1435,7 +1435,7 @@
               (let [url                        (xml/get-text xml [:paatostieto :poytakirja
                                                                   :liite :linkkiliitteeseen])
                     {:keys [uri query-string]} (http-client/parse-url url)]
-                url => (has-prefix (env/value :host))
+                url => (has-prefix (target-server-or-localhost-address))
                 uri => "/api/raw/verdict-pdf"
                 (http-client/form-decode query-string)
                 => {"verdict-id" verdict-id
