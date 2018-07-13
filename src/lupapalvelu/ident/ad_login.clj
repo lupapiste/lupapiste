@@ -46,11 +46,11 @@
    :idp-cert (parse-certificate (slurp "./idp-public-cert.pem")) ;; This needs to live in Mongo's organizations collection
    :keystore-file "./keystore"
    :keystore-password (System/getenv "KEYSTORE_PASS") ;; The default password from the dev guide, needs to be set in environment variable
-   :key-alias "jetty"
+   :key-alias "jetty" ;; The normal Lupis certificate
    })
 
 (defn xml-tree->edn
-  "Takes an xml tree returned by the clojure.data.xml parser, recursively parses it into as readable and flat Clojure map
+  "Takes an xml tree returned by the clojure.data.xml parser, recursively parses it into as readable and flat a Clojure map
   as is feasible."
   [element]
   (cond
@@ -65,62 +65,56 @@
     (map? element) {(:tag element) (xml-tree->edn (:content element))}
     :else nil))
 
-(defn parse-saml-resp [xml-string]
-  (let [xmltree (-> xml-string xml/parse-str)]
-    xmltree))
-
-(def decrypter
-  (saml-sp/make-saml-decrypter (:keystore-file config)
-                               (:keystore-password config)
-                               (:key-alias config)))
-
-(def sp-cert
-  "Service provider certificate, read from keystore file."
-  (saml-shared/get-certificate-b64 (:keystore-file config)
-                                   (:keystore-password config)
-                                   (:key-alias config)))
-
-(def mutables
-  (assoc
-    (saml-sp/generate-mutables)
-    :xml-signer (saml-sp/make-saml-signer (:keystore-file config)
-                                          (:keystore-password config)
-                                          (:key-alias config)
-                                          :algorithm :sha256)))
+(defn parse-saml-resp
+  "Takes an SAML message in string format, returns it parsed into a Clojure map."
+  [xml-string]
+  (-> xml-string xml/parse-str xml-tree->edn))
 
 (def resp (atom {}))
 
 (defpage [:post "/api/saml/ad-login"] {params :params session :session}
-  (let [sessionid (ident-util/session-id)
-        trid      (security/random-password)
-        paths     {:success "/from-ad/:trid"
-                   :error "/api/saml/ad/error"
-                   :cancel "/"}
-        req (request/ring-request)
+  (let [req (request/ring-request)
+        decrypter (saml-sp/make-saml-decrypter (:keystore-file config)
+                                               (:keystore-password config)
+                                               (:key-alias config))
+        sp-cert (saml-shared/get-certificate-b64 (:keystore-file config)
+                                                 (:keystore-password config)
+                                                 (:key-alias config))
+        mutables (assoc (saml-sp/generate-mutables)
+                        :xml-signer (saml-sp/make-saml-signer (:keystore-file config)
+                                                              (:keystore-password config)
+                                                              (:key-alias config)
+                                                              :algorithm :sha256))
+        acs-uri (str (:base-uri config) "/saml")
+        saml-req-factory! (saml-sp/create-request-factory mutables
+                                                          (:idp-uri config)
+                                                          saml-routes/saml-format
+                                                          (:app-name config)
+                                                          (:acs-uri config))
+        prune-fn! (partial saml-sp/prune-timed-out-ids! (:saml-id-timeouts mutables))
+        state {:mutables mutables
+               :saml-req-factory! saml-req-factory!
+               :timeout-pruner-fn! prune-fn!
+               :certificate-x509 sp-cert}
         xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse]))
-        _ (swap! resp assoc :xml-resp xml-response)
-        _ (swap! resp assoc :req req)
         relay-state (get-in req [:params :RelayState])
         [valid-relay-state? continue-url] (saml-routes/valid-hmac-relay-state? (:secret-key-spec mutables) relay-state)
-        ;; saml-resp (saml-sp/xml-string->saml-resp xml-response) ;; Why in the world does this not work here when it works with the SAME INPUT in saml-test?!
-        ;; Should return openSaml Java object but throws NullPointerException.
-        idp-cert (:idp-cert config)
-        ; valid-signature? (if idp-cert
-        ;                    (saml-sp/validate-saml-response-signature saml-resp idp-cert)
-        ;                    false)
+        saml-resp (saml-sp/xml-string->saml-resp xml-response)
+        valid-signature? (if (:idp-cert config)
+                           (saml-sp/validate-saml-response-signature saml-resp (:idp-cert config))
+                           false)
+        valid? (and valid-relay-state? valid-signature?)
+        saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter))
+        _ (println req)
+        _ (println state)
+        _ (println xml-response)
+        _ (println valid-relay-state?)
+        _ (println relay-state)
+        _ (println saml-resp)
+        _ (println saml-info)
+        _ (println valid-signature?)
         ]
-    (do
-      (println "Joo-o")
-      (println "Ja pyyntö seuraa: ")
-      (println req)
-      (println xml-response)
-      (println relay-state)
-      (println valid-relay-state?)
-      (println continue-url)
-      ; (println saml-resp)
-      ; (println valid-signature?)
-    ; (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :trid trid :paths paths :created-at (Date.)} :upsert true)
-    (response/redirect (str "/from-ad/anders.autologin")))))
+    {:jee "jee"})) ;; Add logic here after SAML validation and parsing succeeds.
 
 (defpage [:post "/from-ad/:trid"] {:keys [trid] :as params}
   (let [valid? params
