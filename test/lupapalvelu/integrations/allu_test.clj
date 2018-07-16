@@ -153,18 +153,18 @@
                   :body         (json/encode (application->allu-placement-contract app))})))
 
 (facts "handle-placement-contract-response"
-  (fact "HTTP 200" (handle-placement-contract-response {:status 200, :body "1"}) => "1")
-  (fact "HTTP 201" (handle-placement-contract-response {:status 201, :body "1"}) => "1")
+  (fact "HTTP 200" (handle-placement-contract-response {:status 200, :body "1"}) => [:ok "1"])
+  (fact "HTTP 201" (handle-placement-contract-response {:status 201, :body "1"}) => [:ok "1"])
 
   (fact "HTTP 400"
     (catch-all (handle-placement-contract-response {:status 400, :body "Your data was bad."}))
-    => (contains {:ok false, :text "error.allu.malformed-application", :body "Your data was bad."}))
+    => [:err :error.allu.malformed-application {:body "Your data was bad."}])
   (fact "HTTP 401"
     (catch-all (handle-placement-contract-response {:status 401, :body "You are unauthorized."}))
-    => (contains {:ok false, :text "error.allu.http", :status 401}))
+    => [:err :error.allu.http {:status 401, :body "You are unauthorized."}])
   (fact "HTTP 403"
     (catch-all (handle-placement-contract-response {:status 403, :body "It is forbidden."}))
-    => (contains {:ok false, :text "error.allu.http", :status 403}))
+    => [:err :error.allu.http {:status 403, :body "It is forbidden."}])
   (fact "HTTP 404"
     (catch-all (handle-placement-contract-response {:status 404, :body "Not found."}))
-    => (contains {:ok false, :text "error.allu.http", :status 404})))
+    => [:err :error.allu.http {:status 404, :body "Not found."}]))

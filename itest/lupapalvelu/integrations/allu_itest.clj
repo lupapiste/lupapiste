@@ -2,9 +2,10 @@
   "Integration tests for ALLU integration. Using local (i.e. not over HTTP) testing style."
   (:require [mount.core :as mount]
             [schema.core :as sc]
+            [clj-http.client :as http]
             [cheshire.core :as json]
             [monger.operators :refer [$set]]
-            [sade.core :refer [ok?]]
+            [sade.core :refer [ok? fail]]
             [sade.schema-generators :as ssg]
             [sade.env :as env]
             [lupapalvelu.document.data-schema :as dds]
@@ -14,7 +15,7 @@
             [lupapalvelu.itest-util :as itu :refer [pena]]
 
             [lupapalvelu.integrations.allu :as allu
-             :refer [ALLUPlacementContracts create-contract! ->LocalMockALLU PlacementContract]]))
+             :refer [ALLUPlacementContracts create-contract! allu-fail! ->LocalMockALLU PlacementContract]]))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -45,11 +46,16 @@
       (:content-type request) => :json
       (-> request :body (json/decode true)) => #(nil? (sc/check PlacementContract %)))
 
-    (create-contract! inner endpoint request)))
+    (create-contract! inner endpoint request))
 
-(deftype ConstALLU [response]
+  (allu-fail! [_ text info-map] (allu-fail! inner text info-map)))
+
+(deftype ConstALLU [response fail-map]
   ALLUPlacementContracts
-  (create-contract! [_ _ _] response))
+  (create-contract! [_ _ _] response)
+  (allu-fail! [_ text info-map]
+    (fact "response was not ok" response => http/client-error?)
+    (fact "error has the expected contents" (fail text info-map) => fail-map)))
 
 ;;;; Actual Tests
 ;;;; ===================================================================================================================
@@ -86,16 +92,16 @@
         @sent-allu-requests => 0))
 
     (fact "error responses from ALLU produce `fail!`ures"
-      (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 400, :body "Your data was bad."})})
-
+      (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 400, :body "Your data was bad."}
+                                                           {:ok   false, :text "error.allu.malformed-application"
+                                                            :body "Your data was bad."})})
       (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
-        (itu/local-command pena :submit-application :id id) => {:ok   false, :text "error.allu.malformed-application"
-                                                                :body "Your data was bad."})
+        (itu/local-command pena :submit-application :id id))
 
-      (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 401, :body "You are unauthorized."})})
-
+      (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 401, :body "You are unauthorized."}
+                                                           {:ok     false, :text "error.allu.http"
+                                                            :status 401, :body "You are unauthorized."})})
       (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-        (itu/local-command pena :submit-application :id id) => {:ok     false, :text "error.allu.http"
-                                                                :status 401, :body "You are unauthorized."}))
+        (itu/local-command pena :submit-application :id id)))
 
     (mount/start #'allu/allu-instance)))

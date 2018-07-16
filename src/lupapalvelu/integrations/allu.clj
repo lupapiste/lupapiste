@@ -285,23 +285,29 @@
 ;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
 (defn- handle-placement-contract-response [{:keys [status body]}]
   (case status
-    (200 201) body
-    400 (fail! :error.allu.malformed-application :body body)
-    (fail! :error.allu.http :status status :body body)))
+    (200 201) [:ok body]
+    400 [:err :error.allu.malformed-application {:body body}]
+    [:err :error.allu.http {:status status :body body}]))
 
 (defprotocol ALLUPlacementContracts
-  (create-contract! [self endpoint request]))
+  (create-contract! [self endpoint request])
+
+  (allu-fail! [self text info-map]))
 
 (deftype RemoteALLU []
   ALLUPlacementContracts
-  (create-contract! [_ endpoint request] (http/post endpoint request)))
+  (create-contract! [_ endpoint request] (http/post endpoint request))
+
+  (allu-fail! [_ text info-map] (fail! text info-map)))     ; TODO: Is there a better way to handle post-fn errors?
 
 (deftype LocalMockALLU [current-id]
   ALLUPlacementContracts
   (create-contract! [_ _ {placement-contract :body}]
     (if-let [validation-error (sc/check PlacementContract (json/decode placement-contract true))]
       {:status 400, :body validation-error}
-      {:status 200, :body (str (swap! current-id inc))})))
+      {:status 200, :body (str (swap! current-id inc))}))
+
+  (allu-fail! [_ text info-map] (fail! text info-map)))     ; TODO: Is there a better way to handle post-fn errors?
 
 (defstate allu-instance
   :start (if (env/dev-mode?)
@@ -316,6 +322,9 @@
   * :error.allu.http :status _ :body _ - An HTTP error. Probably due to a bug or connection issues."
   [app]
   (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)
-        allu-id (handle-placement-contract-response (create-contract! allu-instance endpoint request))]
-    (info (:id app) "was created succesfully in ALLU as" allu-id)
-    allu-id))
+        [tag & fields] (handle-placement-contract-response (create-contract! allu-instance endpoint request))]
+    (case tag
+      :ok (let [[allu-id] fields]
+            (info (:id app) "was created succesfully in ALLU as" allu-id)
+            allu-id)
+      :err (apply allu-fail! allu-instance fields))))

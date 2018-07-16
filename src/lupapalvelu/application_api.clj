@@ -340,21 +340,21 @@
    :on-success       [(notify :application-state-change)
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)
-                      (notify :organization-housing-office)]
+                      (notify :organization-housing-office)
+                      (fn [{:keys [application]} _]
+                        (when (and (env/feature? :allu) (allu/allu-application? application))
+                          ;; TODO: Save the returned contract id to db.
+                          ;; TODO: Use message queue to delay and retry interaction with ALLU.
+                          ;; TODO: Save messages for inter-system debugging etc.
+                          ;; TODO: Send errors to authority instead of applicant?
+                          (allu/create-placement-contract! application)))]
    :pre-checks       [(partial sm/validate-state-transition :submitted)]}
   [{:keys [application] :as command}]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (do
-        (app/submit command)
-        (when (and (env/feature? :allu) (allu/allu-application? application))
-          ;; TODO: put into :on-success instead (?)
-          ;; TODO: Save the returned contract id
-          ;; TODO: Send errors to authority instead of applicant?
-          ;; TODO: Resending in case ALLU is having problems?
-          (allu/create-placement-contract! application))
-        (ok)))))
+      (do (app/submit command)
+          (ok)))))
 
 (defcommand refresh-ktj
   {:parameters [:id]
