@@ -221,10 +221,6 @@
   (sc/constrained DecimalString (every-pred #(if min (<= min (util/->double %)) true) #(if max (>= max (util/->double %)) true))
                   (format "Min max valued decimal string with values [%d-%d]" min max)))
 
-(defdynamicschema NonEmptyVec [elem]
-  (sc/constrained [elem] (min-length-constraint 1)
-                  (str "Non empty " (sc/explain [elem]))))
-
 ;;
 ;; Other definitions
 ;;
