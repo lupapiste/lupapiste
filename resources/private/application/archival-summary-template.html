@@ -106,19 +106,19 @@
       </div>
       <!-- /ko -->
 
-      <div data-bind="if: util.getIn(archivingDates, ['initial'])" class="spacerL">
+      <div data-bind="if: archivingDates.initial" class="spacerL">
         <h2 data-bind="ltext: 'archivalSummary.archivalDates'"></h2>
         <div>
           <span data-bind="ltext: 'archivalSummary.archivalDates.initial'"></span>
-          <span data-bind="dateString: archivingDates().initial"></span>
+          <span data-bind="dateString: archivingDates.initial"></span>
         </div>
-        <div data-bind="if: archivingDates().application">
+        <div data-bind="if: archivingDates.application">
           <span data-bind="ltext: 'archivalSummary.archivalDates.application'"></span>
-          <span data-bind="dateString: archivingDates().application"></span>
+          <span data-bind="dateString: archivingDates.application"></span>
         </div>
-        <div data-bind="if: archivingDates().completed">
+        <div data-bind="if: archivingDates.completed">
           <span data-bind="ltext: 'archivalSummary.archivalDates.completed'"></span>
-          <span data-bind="dateString: archivingDates().completed"></span>
+          <span data-bind="dateString: archivingDates.completed"></span>
         </div>
       </div>
 
