@@ -481,7 +481,9 @@
       attachmentsService.convertToPdfA(attachmentId);
     };
 
-    self.archivingDates = ko.observable(params.application.archived);
+
+    self.archivingDates = ko.mapping.fromJS(_.defaults(params.application.archived,
+      {"initial": null}, {"application": null}, {"completed": null}));
 
     self.blockMarkArchived = ko.observable(false);
 
