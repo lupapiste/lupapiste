@@ -23,8 +23,7 @@
                                usr/get-user-by-email
                                usr/with-org-auth)
         admin-org-id       (usr/authority-admins-organization-id admin)
-        reader-roles       (set (remove #{:guestAuthority} org/authority-roles))
-        candidate-org-ids  (usr/organization-ids-by-roles candidate reader-roles)
+        candidate-org-ids (usr/organization-ids-by-roles candidate roles/org-roles-without-admin)
         already-has-access (->> candidate-org-ids
                                 (filter #(= admin-org-id %))
                                 not-empty

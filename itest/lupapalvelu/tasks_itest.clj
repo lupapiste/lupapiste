@@ -36,9 +36,9 @@
   (fact "created timestamp is set" (-> tasks first :created) => truthy)
 
   (fact "Assignee is set"
-    (-> tasks first :assignee :id) => pena-id
-    (-> tasks first :assignee :firstName) => "Pena"
-    (-> tasks first :assignee :lastName) => "Panaani")
+    (-> tasks first :assignee :id) => sonja-id
+    (-> tasks first :assignee :firstName) => "Sonja"
+    (-> tasks first :assignee :lastName) => "Sibbo")
 
     (fact "Applicant can see Tasks tab"
           (query pena :tasks-tab-visible :id application-id) => ok?)
@@ -311,9 +311,9 @@
               => (contains {:fileId (-> ak :faulty :files first :originalFileId)}))))))))
 
 (facts "Reviews with PATE"
-  (command admin :set-organization-boolean-path
-           :organizationId "753-R"
-           :path "pate-enabled"
+  (command admin :set-organization-scope-pate-value
+           :permitType "R"
+           :municipality "753"
            :value true)
   (let [sipoo-application        (create-and-submit-application pena :propertyId sipoo-property-id)
         jarvenpaa-application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)

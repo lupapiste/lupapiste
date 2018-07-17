@@ -5,28 +5,32 @@
     <script type="text/x-jquery-tmpl" id="applications-search-paging-template">
       <div class="paging"
            data-bind="ifnot: dataProvider.pending">
-        <label data-bind="text: loc($data.resultsTextKey, start(), end(), count())"></label>
+        <p class="results" data-bind="text: loc($data.resultsTextKey, start(), end(), count())"></p>
         <div>
-          <button class="btn secondary"
+          <button class="primary previous"
                   data-test-id="paging-previous"
                   data-bind="click: prev, enable: enablePrevButton">
             <i class="lupicon-chevron-left"></i>
             <span data-bind="ltext: 'previous'"></span>
           </button>
-          <button class="btn secondary"
+          <button class="primary"
                   data-test-id="paging-next"
                   data-bind="click: next, enable: enableNextButton">
             <span data-bind="ltext: 'next'"></span>
             <i class="lupicon-chevron-right"></i>
           </button>
+          <div class="button-group">
           <!-- ko foreach: limits -->
-          <button class="btn secondary"
-                  data-bind="text: $data,
-                             css: {active: $component.limit() === $data},
-                             attr: {'data-test-id': 'limit-' + $data},
-                             click: $component.setLimit"></button>
+            <a class="link-btn link-btn--link"
+                    data-bind="css: {active: $component.limit() === $data},
+                               attr: {'data-test-id': 'limit-' + $data},
+                               click: $component.setLimit">
+              <span class="limits" data-bind="text: $data"></span>
+              <span class="separator"></span>
+            </a>
           <!-- /ko -->
-          <label data-bind="ltext: 'applications.lengthMenu'"></label>
+            <p data-bind="ltext: 'applications.lengthMenu'"></p>
+          </div>
         </div>
       </div>
     </script>

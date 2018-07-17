@@ -7,10 +7,12 @@
             [clojure.set :as set]
             [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.verdict :as verdict]
             [lupapalvelu.pate.verdict-template :as template]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
@@ -29,11 +31,11 @@
 ;; and constraints are in sync with the legacy verdict API.
 
 (defn- pate-enabled
-  "Pre-checker that fails if Pate is not enabled in the application
-  organization."
-  [{:keys [organization]}]
+  "Pre-checker that fails if Pate is not enabled in the application organization scope."
+  [{:keys [organization application]}]
   (when (and organization
-             (not (:pate-enabled @organization)))
+             (not (-> (org/resolve-organization-scope (:municipality application) (:permitType application) @organization)
+                      :pate-enabled)))
     (fail :error.pate-disabled)))
 
 (defn- verdict-exists
@@ -44,12 +46,15 @@
     :legacy? fails if the verdict is a 'modern' Pate verdict
     :modern? fails if the verdict is a legacy verdict
     :contract? fails if the verdict is not a contract
-    :verdict? fails for contracts"
+    :verdict? fails for contracts
+    :html? fails if the html version of the verdict attachment is not
+           available."
   [& conditions]
   (let [{:keys [editable? published?
                 legacy? modern?
-                contract? verdict?]} (zipmap conditions
-                                             (repeat true))]
+                contract? verdict?
+                html?]} (zipmap conditions
+                                (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
@@ -80,7 +85,10 @@
 
                           (and verdict? (util/=as-kw (:category verdict)
                                                      :contract))
-                          :error.verdict.contract)
+                          :error.verdict.contract
+
+                          (and html? (not (some-> verdict :verdict-attachment :html)))
+                          :error.verdict.no-html)
                         identity fail))))))
 
 (defn- replacement-check
@@ -287,6 +295,32 @@
   [command]
   (verdict/sign-contract command)
   (ok))
+
+(defcommand generate-pate-pdf
+  {:description      "Regenerates (or at least tries to) verdict pdf if the
+  creation during publishing has failed."
+   :feature          :pate
+   :categories       #{:pate-verdicts}
+   :parameters       [:id :verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [(verdict-exists :published? :html?)]
+   :states           states/post-verdict-states
+   :user-roles       #{:authority}}
+  [command]
+  (ok :attachment-id (verdict/verdict-html->pdf command
+                                                (verdict/command->verdict command))))
+
+(defraw verdict-pdf
+  {:description      "Endpoint for downloading the verdict attachment."
+   :feature          :pate
+   :parameters       [:id :verdict-id]
+   :categories       #{:pate-verdicts}
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
+   :user-authz-roles roles/all-authz-roles
+   :pre-checks       [(verdict-exists :published?)]}
+  [command]
+  (verdict/download-verdict command))
 
 ;; ------------------------------------------
 ;; Modern actions

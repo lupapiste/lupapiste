@@ -15,10 +15,14 @@
 ;; ----------------------------------
 
 (defn- pate-enabled
-  "Pre-checker that fails if Pate is not enabled in the organization."
-  [cmd]
-  (when-not (:pate-enabled (template/command->organization cmd))
-    (fail :error.pate-disabled)))
+  "Pre-checker that fails if Pate is not enabled in any organization
+  scope."
+  [command]
+  (when (some-> command :data :org-id)
+    (if-let [organization (template/command->organization command)]
+      (when-not (util/find-by-key :pate-enabled true (:scope organization))
+        (fail :error.pate-disabled))
+      (fail :error.invalid-organization))))
 
 (defn- valid-category [{{category :category} :data :as command}]
   (when category
@@ -43,25 +47,26 @@
 ;; ----------------------------------
 
 (defquery pate-enabled
-  {:description "Pseudo-query that fails if Pate is not enabled in
-  the organization"
-   :feature     :pate
-   :permissions [{:required [:organization/admin]}]
-   :pre-checks  [pate-enabled]}
+  {:description      "Query that fails if Pate is not enabled in the
+  organization. Thus, the result does not matter."
+   :feature          :pate
+   :permissions      [{:required [:organization/admin]}]
+   :parameters       [:org-id]
+   :input-validators [(partial action/non-blank-parameters [:org-id])]
+   :pre-checks       [pate-enabled]}
   [_])
-
 
 (defcommand new-verdict-template
   {:description      "Creates new empty template. Returns template id, name
   and draft."
    :feature          :pate
    :permissions      [{:required [:organization/admin]}]
-   :parameters       [category]
-   :input-validators [(partial action/non-blank-parameters [:category])]
+   :parameters       [org-id category]
+   :input-validators [(partial action/non-blank-parameters [:org-id :category])]
    :pre-checks       [pate-enabled
                       valid-category]}
-  [{:keys [created user lang]}]
-  (ok (assoc (template/new-verdict-template (usr/authority-admins-organization-id user)
+  [{:keys [created lang] :as command}]
+  (ok (assoc (template/new-verdict-template org-id
                                             created
                                             lang
                                             category)
@@ -70,8 +75,8 @@
 (defcommand set-verdict-template-name
   {:description      "Name cannot be empty."
    :feature          :pate
-   :parameters       [template-id name]
-   :input-validators [(partial action/non-blank-parameters [:name])]
+   :parameters       [:org-id template-id name]
+   :input-validators [(partial action/non-blank-parameters [:org-id :template-id :name])]
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]
    :permissions      [{:required [:organization/admin]}]}
@@ -87,10 +92,10 @@
   drafts. Returns modified timestamp."
    :feature          :pate
    :permissions      [{:required [:organization/admin]}]
-   :parameters       [template-id path value]
+   :parameters       [:org-id template-id path value]
    ;; Value is validated upon saving according to the schema.
    :input-validators [(partial action/vector-parameters [:path])
-                      (partial action/non-blank-parameters [:template-id])]
+                      (partial action/non-blank-parameters [:template-id :org-id])]
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [{:keys [created] :as command}]
@@ -114,8 +119,8 @@
   template draft. The snapshot includes also the current settings."
    :feature          :pate
    :permissions      [{:required [:organization/admin]}]
-   :parameters       [template-id]
-   :input-validators [(partial action/non-blank-parameters [:template-id])]
+   :parameters       [:org-id template-id]
+   :input-validators [(partial action/non-blank-parameters [:org-id :template-id])]
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable :named :filled)]}
   [{:keys [created user user-organizations] :as command}]
@@ -125,11 +130,13 @@
   (ok :published created))
 
 (defquery verdict-templates
-  {:description "Id, name, modified, published and deleted maps for
+  {:description      "Id, name, modified, published and deleted maps for
   every verdict template."
-   :feature     :pate
-   :permissions [{:required [:organization/admin]}]
-   :pre-checks  [pate-enabled]}
+   :feature          :pate
+   :permissions      [{:required [:organization/admin]}]
+   :parameters       [:org-id]
+   :input-validators [(partial action/non-blank-parameters [:org-id])]
+   :pre-checks       [pate-enabled]}
   [command]
   (ok :verdict-templates (->> (template/command->organization command)
                               :verdict-templates
@@ -137,11 +144,13 @@
                               (map template/verdict-template-summary))))
 
 (defquery verdict-template-categories
-  {:description "Categories for the user's organization. Does not
+  {:description      "Categories for the user's organization. Does not
    include legacy-only categories."
-   :feature     :pate
-   :permissions [{:required [:organization/admin]}]
-   :pre-checks  [pate-enabled]}
+   :feature          :pate
+   :permissions      [{:required [:organization/admin]}]
+   :parameters       [:org-id]
+   :input-validators [(partial action/non-blank-parameters [:org-id])]
+   :pre-checks       [pate-enabled]}
   [command]
   (ok :categories (template/organization-categories (template/command->organization command))))
 
@@ -150,8 +159,8 @@
   template must be editable."
    :feature          :pate
    :permissions      [{:required [:organization/admin]}]
-   :parameters       [template-id]
-   :input-validators [(partial action/non-blank-parameters [:template-id])]
+   :parameters       [:org-id template-id]
+   :input-validators [(partial action/non-blank-parameters [:org-id :template-id])]
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [command]
@@ -163,8 +172,8 @@
   settings dependencies."
    :feature          :pate
    :permissions      [{:required [:organization/admin]}]
-   :parameters       [template-id]
-   :input-validators [(partial action/non-blank-parameters [:template-id])]
+   :parameters       [org-id template-id]
+   :input-validators [(partial action/non-blank-parameters [:org-id :template-id])]
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable)]}
   [command]
@@ -174,8 +183,8 @@
   {:description      "Toggle template's deletion status"
    :feature          :pate
    :permissions      [{:required [:organization/admin]}]
-   :parameters       [template-id delete]
-   :input-validators [(partial action/non-blank-parameters [:template-id])
+   :parameters       [:org-id template-id delete]
+   :input-validators [(partial action/non-blank-parameters [:org-id :template-id])
                       (partial action/boolean-parameters [:delete])]
    :pre-checks       [pate-enabled
                       (template/verdict-template-check)]}
@@ -190,8 +199,8 @@
   original is copied."
    :feature          :pate
    :permissions      [{:required [:organization/admin]}]
-   :parameters       [template-id]
-   :input-validators [(partial action/non-blank-parameters [:template-id])]
+   :parameters       [:org-id template-id]
+   :input-validators [(partial action/non-blank-parameters [:org-id :template-id])]
    :pre-checks       [pate-enabled
                       (template/verdict-template-check)]}
   [{:keys [created lang] :as command}]
@@ -211,8 +220,8 @@
   {:description      "Settings matching the category or empty response."
    :feature          :pate
    :permissions      [{:required [:organization/admin]}]
-   :parameters       [category]
-   :input-validators [(partial action/non-blank-parameters [:category])]
+   :parameters       [:org-id category]
+   :input-validators [(partial action/non-blank-parameters [:org-id :category])]
    :pre-checks       [pate-enabled
                       valid-category]}
   [command]
@@ -226,9 +235,9 @@
   settings. Returns modified timestamp. Creates settings if needed."
    :feature          :pate
    :permissions      [{:required [:organization/admin]}]
-   :parameters       [category path value]
+   :parameters       [:org-id category path value]
    ;; Value is validated against schema on saving.
-   :input-validators [(partial action/non-blank-parameters [:category])
+   :input-validators [(partial action/non-blank-parameters [:org-id :category])
                       (partial action/vector-parameters [:path])]
    :pre-checks       [pate-enabled
                       valid-category]}
@@ -276,37 +285,43 @@
         (fail :error.invalid-category)))))
 
 (defquery default-operation-verdict-templates
-  {:description "Map where keys are operations and values template
+  {:description      "Map where keys are operations and values template
   ids. Deleted templates are filtered out."
-   :feature     :pate
-   :permissions [{:required [:organization/admin]}]
-   :pre-checks  [pate-enabled]}
+   :feature          :pate
+   :permissions      [{:required [:organization/admin]}]
+   :parameters       [:org-id]
+   :input-validators [(partial action/non-blank-parameters [:org-id])]
+   :pre-checks       [pate-enabled]}
   [command]
   (ok :templates (template/operation-verdict-templates (template/command->organization command))))
 
 (defcommand set-default-operation-verdict-template
-  {:description      "Set default verdict template for a selected operation
-  in the organization."
-   :feature          :pate
-   :permissions      [{:required [:organization/admin]}]
-   :parameters       [operation template-id]
-   :input-validators [(partial action/non-blank-parameters [:operation])]
-   :pre-checks       [pate-enabled
-                      (template/verdict-template-check :published :editable :blank)
-                      organization-operation
-                      operation-vs-template-category]}
-  [{user :user}]
-  (template/set-operation-verdict-template (usr/authority-admins-organization-id user)
+  {:description         "Set default verdict template for a selected operation
+  in the organization. If template-id is not given, the default is
+  cleared."
+   :feature             :pate
+   :permissions         [{:required [:organization/admin]}]
+   :parameters          [org-id operation]
+   :optional-parameters [template-id]
+   :input-validators    [(partial action/non-blank-parameters [:org-id :operation])]
+   :pre-checks          [pate-enabled
+                         (template/verdict-template-check :published :editable :blank)
+                         organization-operation
+                         operation-vs-template-category]}
+  [command]
+  (template/set-operation-verdict-template org-id
                                            operation
                                            template-id))
 
 (defquery selectable-verdict-templates
-  {:description "Returns a map of where keys are permit types or
+  {:description      "Returns a map of where keys are permit types or
   operation names and templates (id, name pairs) are values. Permit
   types that are missing are not supported by Pate verdict template
   mechanism."
-   :feature    :pate
-   :permissions [{:required [:organization/admin]}]
-   :pre-checks [pate-enabled]}
+   :feature          :pate
+   :permissions      [{:required [:organization/admin]}]
+   :parameters       [:org-id]
+   :input-validators [(partial action/non-blank-parameters [:org-id])]
+   :pre-checks       [pate-enabled]}
   [command]
   (ok :items (template/selectable-verdict-templates (template/command->organization command))))

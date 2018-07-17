@@ -4,7 +4,6 @@ LUPAPISTE.DocumentIdentifierModel = function(params) {
   self.params = params;
 
   self.documentId = params.docId;
-  self.authModel = params.authModel;
   self.options = params.options; // DocModel options (disabled setting)
   self.indicator = ko.observable();
 
@@ -22,9 +21,7 @@ LUPAPISTE.DocumentIdentifierModel = function(params) {
     });
   }
 
-  self.enabled = ko.pureComputed(function() {
-    return self.options.disabled === false || self.authModel.ok("update-doc");
-  });
+  self.enabled = _.wrap( "update-doc-identifier", params.authModel.ok );
 
   self.requiredHighlight = ko.pureComputed(function() {
     return self.schema.required && !self.identifier();
@@ -38,5 +35,4 @@ LUPAPISTE.DocumentIdentifierModel = function(params) {
     if (subscription) { subscription.dispose(); }
     hub.send("accordionService::saveIdentifier", {docId: self.documentId, key: self.identifierObject.key, value: self.identifier()});
   };
-
 };

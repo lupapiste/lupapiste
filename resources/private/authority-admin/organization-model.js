@@ -67,6 +67,10 @@ LUPAPISTE.OrganizationModel = function () {
   self.assignmentTriggers = ko.observableArray();
   self.multipleOperationsSupported = ko.observable(false);
   self.removeHandlersFromRevertedDraft = ko.observable( false );
+  self.stateChangeMsgEnabled = ko.observable(false);
+  self.stateChangeMsgUrl = ko.observable("");
+  self.stateChangeMsgHeaders = ko.observableArray([]);
+  self.stateChanegeConf = ko.observable();
 
   self.sectionOperations = ko.observableArray();
 
@@ -318,9 +322,8 @@ LUPAPISTE.OrganizationModel = function () {
 
 
   // Pate verdict templates
-  self.pateEnabled = function() {
-    return authorizationModel.ok("pate-enabled");
-  };
+  self.pateEnabled = ko.observable( false );
+
   self.selectableVerdictTemplates = ko.observable( {} );
   self.defaultOperationVerdictTemplates = ko.observable( {} );
   self.pateSupported = function( permitTypeOrOperation ) {
@@ -328,17 +331,25 @@ LUPAPISTE.OrganizationModel = function () {
   };
 
   function refreshVerdictTemplates() {
-    ajax.query( "selectable-verdict-templates")
+    ajax.query( "selectable-verdict-templates",
+                {"org-id": self.organizationId()})
     .success( function( res ) {
       self.selectableVerdictTemplates( _.get( res, "items", {} ));
     })
     .call();
-    ajax.query( "default-operation-verdict-templates")
+    ajax.query( "default-operation-verdict-templates",
+                {"org-id": self.organizationId()})
     .success( function( res ) {
       self.defaultOperationVerdictTemplates( _.get( res, "templates", {} )  );
     })
     .call();
   }
+
+  self.pateEnabled.subscribe( function( enabled ) {
+    if( enabled ) {
+      refreshVerdictTemplates();
+    }
+  });
 
   // Sent from pate/service.cljs
   hub.subscribe( "pate::verdict-templates-changed", refreshVerdictTemplates );
@@ -353,6 +364,12 @@ LUPAPISTE.OrganizationModel = function () {
         self.allOperations = data.operations;
       })
       .call();
+
+      ajax.query( "pate-enabled", {"org-id": self.organizationId()})
+      .success( _.wrap( true, self.pateEnabled))
+      .error( _.noop )
+      .call();
+
 
     // Required fields in app obligatory to submit app
     //
@@ -406,6 +423,16 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.defaultDigitalizationLocationX(util.getIn(organization, ["default-digitalization-location", "x"], []));
     self.defaultDigitalizationLocationY(util.getIn(organization, ["default-digitalization-location", "y"], []));
+
+    self.stateChangeMsgEnabled(organization["state-change-msg-enabled"] || false);
+
+    self.stateChanegeConf( {
+      url: util.getIn(organization, ["state-change-endpoint", "url"], []),
+      headers: util.getIn(organization, ["state-change-endpoint", "header-parameters"], []),
+      authType: util.getIn(organization, ["state-change-endpoint", "auth-type"], []),
+      username: util.getIn(organization, ["state-change-endpoint", "basic-auth-username"], []),
+      password: util.getIn(organization, ["state-change-endpoint", "basic-auth-password"], [])
+    });
 
     _.forOwn(operationsAttachmentsPerPermitType, function(value, permitType) {
       var operationsAttachments = _(value)
@@ -479,9 +506,6 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.assignmentTriggers( _.get( organization, "assignment-triggers", []));
 
-    if( self.pateEnabled() ) {
-      refreshVerdictTemplates();
-    }
     self.initialized = true;
   };
 

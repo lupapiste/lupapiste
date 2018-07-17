@@ -39,6 +39,10 @@
 
 .applications-search-component {
   clear: both;
+  .button-group {
+    float: right;
+    margin-bottom: $grid-margin;
+  }
 }
 
 .search-tabs {
@@ -80,13 +84,30 @@
 
 .paging {
   color: $gray51;
-  label {
-    color: $gray51;
-    margin-bottom: $marginS;
+  margin-bottom: $marginM;
+  p {
     display: inline-block;
+    vertical-align: middle;
+    margin-bottom: 0;
   }
   button {
-    margin-right: $grid-margin;
+    margin-right: $grid-margin/2;
+  }
+  .results {
+  margin-bottom: $marginS;
+  }
+  a:not(:last-of-type) {
+    span.separator::after {
+      content: "|";
+    }
+  }
+  span.limits {
+    font-size: $font-size-body;
+    padding-right: 5px !important;
+    padding-left: 2px !important;
+  }
+  .previous {
+    padding-right: 10px;
   }
 }
 
@@ -183,7 +204,6 @@ div.search {
       padding-left: 2px;
       display: table-cell;
       vertical-align: middle;
-      color: $grey-text;
     }
   }
   .application-search-results__urgency {

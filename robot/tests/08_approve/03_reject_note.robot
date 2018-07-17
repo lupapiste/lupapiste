@@ -70,6 +70,26 @@ Sonja rejects kaytto with note
   Reject note is  rakennuksen-muuttaminen-kaytto  Bad usage
   Reject with note but cancel  kaytto  rakennuksen-muuttaminen-kaytto  foobar
 
+Editing group neutralizes group's approval status
+  Group rejected  kaytto
+  Select from test id  'kaytto.rakentajaTyyppi'  liiketaloudellinen
+  Wait until  Group neutral  kaytto
+  Wait until  Reject note is  rakennuksen-muuttaminen-kaytto  Bad usage
+
+The operation is also neutralized
+  Accordion negated  rakennuksen-muuttaminen
+
+Sonja approves Omistaja (repeating document)
+  Click approve  rakennuksenOmistajat
+
+Again, editing neutralizes group
+  Group approved  rakennuksenOmistajat
+  Input text with jQuery  input[data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  Pepper
+  Wait until  Group neutral   rakennuksenOmistajat
+
+Reject the primary operation (and its groups) again
+  Reject with note and lose focus  rakennuksen-muuttaminen  rakennuksen-muuttaminen  Bad operation
+
 Sonja rejects attachment
   Open tab  attachments
   Tab indicator is  2

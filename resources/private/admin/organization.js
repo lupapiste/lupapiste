@@ -41,6 +41,7 @@
     self.docterminalEnabled = ko.observable(false);
     self.docstorePrice = ko.observable("");
     self.docstoreDescs = ko.observableArray();
+    self.stateChangeMsgEnabled = ko.observable(false);
 
     self.validDocstorePrice = ko.pureComputed(function () {
       var price = util.parseFloat(self.docstorePrice());
@@ -84,14 +85,6 @@
     self.threeDMapEnabled.subscribe( function( value ) {
       organizationCommand( "set-3d-map-enabled", {flag: Boolean( value )}, self.threeDMapServerParams.waiting);
     });
-
-    function saveBooleanValue(updatePath, boolValue) {
-      organizationCommand("set-organization-boolean-path", {path: updatePath, value: boolValue});
-    }
-
-    self.savePateEnabled = function() {
-      saveBooleanValue("pate-enabled", self.organization()["pate-enabled"]());
-    };
 
     function updateSsoKeys() {
       _.forEach(self.ssoKeys(), function(ssoKey) {
@@ -155,6 +148,7 @@
           self.threeDMapEnabled( _.get(result, "data.3d-map.enabled"));
           self.threeDMapServerParams.server(_.get( result, "data.3d-map.server"));
           self.backendSystems(_.map(util.getIn(result, ["data", "krysp"]), function(v,k) { return {permitType: k, backendSystem: v["backend-system"]}; }));
+          self.stateChangeMsgEnabled(result.data["state-change-msg-enabled"]);
 
           var archiveTs= result.data["earliest-allowed-archiving-date"];
           if (archiveTs && archiveTs > 0) {
@@ -210,7 +204,8 @@
                   applicationEnabled: scope["new-application-enabled"],
                   openInforequestEnabled: scope["open-inforequest"],
                   openInforequestEmail: scope["open-inforequest-email"],
-                  opening: openingMills};
+                  opening: openingMills,
+                  pateEnabled: scope["pate-enabled"]};
 
       ajax.command("update-organization", data)
         .success(util.showSavedIndicator)
@@ -295,6 +290,10 @@
 
     self.digitizerToolsEnabled.subscribe(function(value) {
       setBooleanAttribute("digitizer-tools-enabled", value);
+    });
+
+    self.stateChangeMsgEnabled.subscribe(function(value) {
+      setBooleanAttribute("state-change-msg-enabled", value);
     });
 
     self.calendarsEnabled.subscribe(function(value) {

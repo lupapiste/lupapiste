@@ -355,10 +355,9 @@
             (filter #(-> %  ss/blank? not) (:muutMaaraykset lupamaaraykset))))))
     (:paatokset verdict)))
 
-(defn verdicts->tasks [application timestamp]
-  (let [owner (first (auth/get-auths-by-role application :writer))
-        meta {:created timestamp
-              :assignee (user/get-user-by-id (:id owner))}]
+(defn verdicts->tasks [application user timestamp]
+  (let [meta {:created timestamp
+              :assignee user}]
     (flatten (map #(verdict->tasks % meta application) (:verdicts application)))))
 
 (defn task-schemas [{:keys [schema-version permitType]}]

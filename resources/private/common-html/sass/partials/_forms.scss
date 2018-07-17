@@ -38,7 +38,7 @@ legend {
   }
   // newbies
   &.source-value-changed {
-    border: 2px solid $lp-green;
+    border: 2px solid $green-dark;
   }
   &.err {
     color: red;
@@ -102,7 +102,6 @@ input[readonly], textarea[readonly] {
   top: 20px;
   right: 8px;
   padding: $marginS;
-  color: $grey-text;
   background-color: white;
   border: 1px solid $lp-light-grey;
   box-shadow: 1px 1px 2px $lp-dark-grey;
@@ -286,7 +285,7 @@ input.form-input.inline {
     outline: 3px solid $lp-orange;
   }
   &.source-value-changed {
-    outline: 2px solid $lp-green;
+    outline: 2px solid $green-dark;
   }
 }
 
@@ -480,7 +479,7 @@ input.form-input.inline {
       }
       .form-input.checkbox {
         margin-top: 0;
-      }      
+      }
     }
   }
   .form-entry {
@@ -840,7 +839,7 @@ div.sticky {
 @include input-and-button( reject-edits ) {}
 
 @mixin reject( $margin-left: 34px,
-               $margin-top: -10px,
+               $margin-top: -6px,
                $color: inherit) {
   margin: {
     left: $margin-left;
@@ -1542,6 +1541,7 @@ select.dropdown, .dataTables_length select {
       image: url( "/lp-static/img/lupicon-chevron-down-gray187.png");
       color: $gray246;
     }
+    cursor: not-allowed;
   }
   &:focus {
     background-image: url( "/lp-static/img/lupicon-chevron-down-orange-light.png");

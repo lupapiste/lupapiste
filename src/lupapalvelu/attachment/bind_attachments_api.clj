@@ -114,7 +114,8 @@
 (defquery bind-attachments-job
   {:parameters [jobId version]
    :user-roles          #{:applicant :authority :oirAuthority}
-   :input-validators    [(partial action/numeric-parameters [:jobId :version])]
+   :input-validators    [(partial action/non-blank-parameters [:jobId])
+                         (partial action/numeric-parameters [:version])]
    :states              (states/all-states-but :canceled)}
   [{{job-id :jobId version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (ok (job/status job-id (util/->long version) (util/->long timeout))))

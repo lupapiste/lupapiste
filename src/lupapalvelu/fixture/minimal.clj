@@ -856,7 +856,9 @@
                                 :bulletins {:enabled true
                                             :url "http://localhost:8000/dev/julkipano"
                                             :notification-email "sonja.sibbo@sipoo.fi"
-                                            :descriptions-from-backend-system false}}
+                                            :descriptions-from-backend-system false}
+                                ; NB! Setting pate-enabled to true WILL BREAK (robot) tests
+                                :pate-enabled false}
                                {:municipality "753" :permitType "P" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YM" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YI" :inforequest-enabled true :new-application-enabled true}
@@ -988,8 +990,6 @@
                        :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true
-                       ; NB! Setting pate-enabled to true WILL BREAK (robot) tests
-                       :pate-enabled false
                        :docstore-info (assoc org/default-docstore-info
                                              :docStoreInUse true
                                              :docTerminalInUse true
@@ -1079,7 +1079,8 @@
                        :scope [{:municipality "837"
                                 :permitType "R"
                                 :inforequest-enabled true
-                                :new-application-enabled true}]
+                                :new-application-enabled true
+                                :pate-enabled true}]
                        :links [(link {:fi "Tampere" :sv "Tammerfors"}
                                      "http://tampere.fi")
                                (link {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
@@ -1113,7 +1114,6 @@
                                                 :auto-katos [[:paapiirustus :asemapiirros]
                                                              [:ennakkoluvat_ja_lausunnot :naapurin_kuuleminen]
                                                              [:rakennuspaikan_hallinta :todistus_hallintaoikeudesta]]}
-                       :pate-enabled true
                        :krysp {:R {:url local-krysp :version "2.2.2"
                                    :http (merge
                                            {:auth-type "basic"

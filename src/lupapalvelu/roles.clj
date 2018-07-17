@@ -26,7 +26,14 @@
 (def default-org-authz-roles #{:authority})
 (def commenter-org-authz-roles (conj default-org-authz-roles :commenter))
 (def reader-org-authz-roles (conj commenter-org-authz-roles :reader))
-(def all-org-authz-roles (conj reader-org-authz-roles :approver :authorityAdmin :tos-editor :tos-publisher :archivist :digitizer))
+(def permanent-archive-authority-roles #{:tos-editor :tos-publisher :archivist :digitizer})
+(def all-org-authz-roles (conj
+                           (union reader-org-authz-roles
+                                  commenter-org-authz-roles
+                                  default-org-authz-roles
+                                  permanent-archive-authority-roles)
+                           :approver :authorityAdmin))
+(def org-roles-without-admin (disj all-org-authz-roles :authorityAdmin))
 
 (def default-user-authz {:query default-authz-reader-roles
                          :export default-authz-reader-roles

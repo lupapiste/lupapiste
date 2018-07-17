@@ -7,6 +7,16 @@
             [sade.util :as util]
             [taoensso.timbre :as timbre]))
 
+(def stamp {:id            "123456789012345678901234"
+            :name       "Oletusleima"
+            :position   {:x 10 :y 200}
+            :background 0
+            :page       :first
+            :qrCode     true
+            :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
+                         [{:type :backend-id :value "17-0753-R"}]
+                         [{:type :organization :value "Sipoon rakennusvalvonta"}]]})
+
 (facts "Stamping"
   (apply-remote-minimal)
   (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
@@ -15,15 +25,6 @@
         _ (upload-attachment pena application-id attachment true :filename "dev-resources/test-pdf.pdf")
         application (query-application pena application-id)
         comments (:comments application)
-        stamp {:id         "123456789012345678901234"
-               :name       "Oletusleima"
-               :position   {:x 10 :y 200}
-               :background 0
-               :page       :first
-               :qrCode     true
-               :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
-                            [{:type :backend-id :value "17-0753-R"}]
-                            [{:type :organization :value "Sipoon rakennusvalvonta"}]]}
         {job :job :as resp} (command
                               sonja
                               :stamp-attachments
@@ -341,3 +342,20 @@
       (let [updated-stamps (:stamps (query sipoo :stamp-templates))]
         (count updated-stamps) => (dec (count stamps))
         (util/find-by-id stamp-id updated-stamps) => nil))))
+
+(fact "Readonly attachments cannot be stamped"
+  (let [{app-id :id}           (create-and-submit-application pena
+                                                              :operation "pientalo"
+                                                              :propertyId sipoo-property-id)
+        {att-id     :id
+         read-only? :readOnly} (-> (generate-statement app-id sonja)
+                                   :attachments
+                                   last)]
+    (fact "Statement attachment is readonly"
+      read-only? => true)
+    (command sonja :stamp-attachments :id app-id
+             :stamp stamp
+             :lang "fi"
+             :files [att-id]
+             :timestamp "")
+    => (partial expected-failure? :error.attachment-is-read-only)))

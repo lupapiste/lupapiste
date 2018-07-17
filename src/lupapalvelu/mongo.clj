@@ -497,6 +497,7 @@
   (ensure-index :integration-messages {:application.id 1})
   (ensure-index :integration-messages {:created -1})
   (ensure-index :archive-api-usage {:logged -1})
+  (ensure-index :jobs {:created 1} {:expireAfterSeconds (* 60 60)}) ; 1 h
   (infof "ensure-indexes took %d ms" (- (now) ts)))
 
 (defn clear! []

@@ -20,6 +20,7 @@
   &:disabled {
     border-color: $input-disabled-border-color;
     background-color: $input-disabled-background-color;
+    cursor: not-allowed;
   }
   &.warning {
     border-color: $negative;

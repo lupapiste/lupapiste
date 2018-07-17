@@ -7,7 +7,8 @@
 
 (defn fetch-template-list []
   (common/query "verdict-templates"
-                #(reset! state/template-list (:verdict-templates %))))
+                #(reset! state/template-list (:verdict-templates %))
+                :org-id @state/org-id))
 
 (defn- list-update-response [callback]
   (fn [response]
@@ -58,70 +59,82 @@
   (common/query "verdict-template-categories"
                 #(do
                    (reset! state/categories (:categories %))
-                   (callback @state/categories))))
+                   (callback @state/categories))
+                :org-id @state/org-id))
 
 (defn publish-template [template-id callback]
   (common/command {:command "publish-verdict-template"
                    :success (list-update-response callback)}
-                  :template-id template-id))
+                  :template-id template-id
+                  :org-id @state/org-id))
 
 (defn save-draft-value [template-id path value callback]
   (common/command {:command "save-verdict-template-draft-value"
                    :success callback}
                   :template-id template-id
                   :path path
-                  :value value))
+                  :value value
+                  :org-id @state/org-id))
 
 (defn fetch-template [template-id callback]
   (common/query :verdict-template
                 callback
-                :template-id template-id))
+                :template-id template-id
+                :org-id @state/org-id))
 
 (defn fetch-updated-template [template-id callback]
   (common/command {:command  :update-and-open-verdict-template
                    :success callback}
-                  :template-id template-id))
+                  :template-id template-id
+                  :org-id @state/org-id))
 
 (defn new-template [category callback]
   (common/command {:command "new-verdict-template"
                    :success (list-update-response callback)}
                   :category category
-                  :lang (common/get-current-language)))
+                  :lang (common/get-current-language)
+                  :org-id @state/org-id))
 
 (defn set-template-name [template-id name callback]
   (common/command {:command "set-verdict-template-name"
                    :success (list-update-response callback)}
                   :template-id template-id
-                  :name name))
+                  :name name
+                  :org-id @state/org-id))
 
 (defn toggle-delete-template [template-id delete callback]
   (common/command {:command "toggle-delete-verdict-template"
                    :success (list-update-response callback)}
                   :template-id template-id
-                  :delete delete))
+                  :delete delete
+                  :org-id @state/org-id))
 
 (defn copy-template [template-id callback]
   (common/command {:command "copy-verdict-template"
                    :success (list-update-response callback)}
-                  :template-id template-id))
+                  :template-id template-id
+                  :org-id @state/org-id))
 
 (defn settings [category callback]
   (common/query "verdict-template-settings"
                 callback
-                :category category))
+                :category category
+                :org-id @state/org-id))
 
 (defn save-settings-value [category path value callback]
   (common/command {:command "save-verdict-template-settings-value"
                    :success callback}
                   :category category
                   :path path
-                  :value value))
+                  :value value
+                  :org-id @state/org-id))
 
 ;; Phrases
 
 (defn fetch-organization-phrases []
   (common/query "organization-phrases"
-                #(reset! state/phrases (get % :phrases []))))
+                #(reset! state/phrases (get % :phrases []))
+                :org-id @state/org-id))
 
 (defn fetch-application-phrases [app-id]
   (common/query "application-phrases"
@@ -134,14 +147,15 @@
          (fn []
            (fetch-organization-phrases)
            (callback))
-         (flatten (into [] phrase-map))))
+         (flatten (into [:org-id @state/org-id] phrase-map))))
 
 (defn delete-phrase [phrase-id callback]
   (common/command {:command "delete-phrase"
                    :success (fn []
                               (fetch-organization-phrases)
                               (callback))}
-                  :phrase-id phrase-id))
+                  :phrase-id phrase-id
+                  :org-id @state/org-id))
 
 ;; Application verdict templates
 
@@ -224,6 +238,22 @@
                   :id app-id
                   :verdict-id verdict-id
                   :password password))
+
+(declare refresh-attachments)
+
+(defn generate-pdf
+  [app-id verdict-id waiting?*]
+  (let [refresh-auths #(state/refresh-verdict-auths app-id
+                                                    {:verdict-id verdict-id})]
+    (common/command {:command :generate-pate-pdf
+                    :waiting? waiting?*
+                    :success (fn [{:keys [attachment-id]}]
+                               (when attachment-id
+                                 (refresh-auths)
+                                 (refresh-attachments)))
+                     :error (fn [_] (refresh-auths))}
+                   :id app-id
+                   :verdict-id verdict-id)))
 
 ;; Attachments
 

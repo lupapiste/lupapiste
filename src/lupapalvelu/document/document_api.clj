@@ -155,6 +155,23 @@
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
+(defcommand update-doc-identifier
+  {:description      "Update document identifier (e.g., tunnus). Separate
+  command since the allowed states are user role specific."
+   :parameters       [:id doc identifier value]
+   :categories       #{:documents}
+   :input-validators [(partial action/non-blank-parameters [:id :doc :identifier])]
+   :contexts         [document-context]
+   :permissions      [{:context  {:application {:state #{:draft}}}
+                       :required [:application/read :document/edit-draft]}
+                      {:context  {:application {:state states/update-doc-states}}
+                       :required [:application/read :document/edit]}
+                      {:context  {:application {:state states/all-application-states-but-draft-or-terminal}}
+                       :required [:application/read :document/edit-identifiers]}]
+   :pre-checks       [is-identifier]}
+  [command]
+  (doc-persistence/update! command doc [[identifier (ss/trim value)]] "documents"))
+
 (defcommand update-task
   {:parameters       [id doc updates]
    :categories       #{:tasks}

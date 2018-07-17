@@ -13,7 +13,8 @@ jQuery(document).ready(function() {
                     {name: "handler-roles"},
                     {name: "triggers"},
                     {name: "navi-sidebar"},
-                    {name: "default-verdict-template"}];
+                    {name: "default-verdict-template"},
+                    {name: "state-change-msg-settings"}];
 
   ko.registerLupapisteComponents(components);
 });

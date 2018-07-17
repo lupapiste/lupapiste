@@ -21,7 +21,8 @@
             [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.states :as states])
+            [lupapalvelu.states :as states]
+            [lupapalvelu.organization :as org])
   (:import (com.mongodb WriteConcern)))
 
 (def displayName {:displayName (zipmap i18n/supported-langs (repeat sc/Str))})
@@ -140,17 +141,23 @@
            (#{:draft} (keyword new-state)))))
 
 (sc/defschema EndpointData
-  {:url sc/Str
-   :headers {(sc/enum "X-Username" "X-Password" "X-Vault") (sc/maybe sc/Str)}})
+  {:url                          sc/Str
+   (sc/optional-key :headers)    {sc/Str sc/Str}
+   (sc/optional-key :basic-auth) [sc/Str]})
 
-(sc/defn ^:always-validate get-state-change-endpoint-data :- (sc/maybe EndpointData) []
-  (when-let [url (env/value :matti :rest :url)]
-    {:url     (ss/strip-trailing-slashes (str url "/" (env/value :matti :rest :path :state-change)))
-     :headers (util/assoc-when-pred
-                {} ss/not-blank?
-                "X-Username" (env/value :matti :rest :username)
-                "X-Password" (env/value :matti :rest :password)
-                "X-Vault"    (env/value :matti :rest :vault))}))
+(sc/defn ^:always-validate get-state-change-endpoint-data :- (sc/maybe EndpointData) [organization]
+  (when-let [url (get-in @organization [:state-change-endpoint :url])]
+    (let [endpoint-conf (:state-change-endpoint @organization)
+          crypto-iv     (:crypto-iv-s endpoint-conf)
+          endpoint {:url     (ss/strip-trailing-slashes url)
+                    :headers (->> (get-in @organization [:state-change-endpoint :header-parameters])
+                                  (map (fn [header] {(str (:name header)) (str (org/decode-credentials (:value header) crypto-iv))}))
+                                  (apply merge))}]
+    (when (= (:auth-type endpoint-conf) "basic")
+      (assoc endpoint :basic-auth (org/get-credentials {:username  (:basic-auth-username endpoint-conf)
+                                                        :password  (:basic-auth-password endpoint-conf)
+                                                        :crypto-iv crypto-iv})))
+    endpoint)))
 
 (defn send-via-http [message-id data {:keys [url headers]}]
   (http/post url
@@ -200,7 +207,7 @@
           matti-json-queue))
 )
 
-(defn trigger-state-change [{user :user :as command} new-state]
+(defn trigger-state-change [{user :user organization :organization :as command} new-state]
   (when (valid-states new-state (get-in command [:application :state]))
     (when-let [outgoing-data (state-change-data (:application command) new-state)]
       (let [message-id (messages/create-id)
@@ -217,7 +224,7 @@
                    :data outgoing-data}
                   :action (:action command))]
         (messages/save msg)
-        (if-let [endpoint (get-state-change-endpoint-data)]
+        (if-let [endpoint (get-state-change-endpoint-data organization)]
           (if (and jms? json-consumer-session)
             (send-via-jms outgoing-data endpoint {:user-id (:id user) :message-id message-id :application-id (:id app)})
             (send-via-http message-id outgoing-data endpoint))

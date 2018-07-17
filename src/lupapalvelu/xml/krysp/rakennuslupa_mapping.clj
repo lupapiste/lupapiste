@@ -540,7 +540,7 @@
 (defmethod permit/application-krysp-mapper :R
   [application lang krysp-version begin-of-link]
   (let [canonical-without-attachments  (canonical/application-to-canonical application lang)
-        canonical-without-attachments (if-not (org/pate-org? (:organization application))
+        canonical-without-attachments (if-not (org/pate-scope? application)
                                         (util/dissoc-in canonical-without-attachments
                                                         [:Rakennusvalvonta :rakennusvalvontaAsiatieto
                                                          :RakennusvalvontaAsia :luvanTunnisteTiedot

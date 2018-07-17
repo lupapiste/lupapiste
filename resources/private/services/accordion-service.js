@@ -202,12 +202,16 @@ LUPAPISTE.AccordionService = function() {
 
   hub.subscribe("accordionService::saveIdentifier", function(event) {
     var docId = event.docId;
-    var value = event.value;
-    var path = [event.key];
-    var indicator = event.indicator;
+    var value = _.trim( event.value );
+    var indicatorFn = _.wrap({type: "saved"}, event.indicator || _.noop);
     var doc = _.find(self.identifierFields(), {docId: docId});
     if (doc.value() !== value) {
-      lupapisteApp.services.documentDataService.updateDoc(docId, [[path, value]], indicator);
+      ajax.command( "update-doc-identifier", {id: self.appModel.id(),
+                                              doc: docId,
+                                              value: value,
+                                              identifier: event.key})
+      .success( indicatorFn )
+      .call();
       doc.value(value);
     }
   });

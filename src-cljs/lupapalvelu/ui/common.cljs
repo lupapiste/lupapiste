@@ -40,16 +40,27 @@
                       (string? a)  :string
                       (keyword? a) :string)))
 
+;; Options [optional]:
+;; command: string or keyword
+;; [show-saved-indicator?]: boolean
+;; [success]: function
+;; [error]: function
+;; [waiting?]: atom that is set true for the duration of the ajax
+;; call.
 (defmethod command :map
-  [{:keys [command  show-saved-indicator? success error]} & kvs]
-  (letfn [(with-error-handler-if-given [call]
-            (if error
+  [{:keys [command  show-saved-indicator? success error waiting?]} & kvs]
+  (letfn [(waiting [flag] (when waiting? (reset! waiting? flag)))
+          (with-error-handler-if-given [call]
+            (if (or error waiting?)
               (.error call (fn [js-result]
+                             (waiting false)
                              (when error
                                (error (js->clj js-result :keywordize-keys true)))))
               call))]
+    (waiting true)
     (-> (js/ajax.command (clj->js command) (-> (apply hash-map kvs) clj->js))
         (.success (fn [js-result]
+                    (waiting false)
                     (when show-saved-indicator?
                       (js/util.showSavedIndicator js-result))
                     (when success
@@ -200,8 +211,8 @@
 (defn add-test-id
   "Adds data-test-id attribute. The target can be either the attribute
   map or the encompassing component. Extras parts are concatened with
-  -. If the test-id is nil (or false),  the target is returned
-  unchanged regardless of extras."
+  - If the test-id is nil (or false), the target is returned unchanged
+  regardless of extras."
   [[x & xs :as target] test-id & extras]
   (let [test-id (when test-id
                   (->> (cons test-id extras)

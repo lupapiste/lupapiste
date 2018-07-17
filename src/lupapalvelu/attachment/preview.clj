@@ -8,7 +8,8 @@
             [lupapiste-commons.threads :as threads]
             [sade.env :as env]
             [lupapalvelu.logging :as logging]
-            [lupapalvelu.storage.file-storage :as storage])
+            [lupapalvelu.storage.file-storage :as storage]
+            [clojure.java.io :as io])
   (:import [java.io InputStream]))
 
 (defonce preview-generation-pool (threads/threadpool 2 "preview-generation-worker"))
@@ -60,5 +61,5 @@
   [application-id file-id filename content-type]
   (preview-image! application-id file-id filename content-type)
   {:contentType "image/jpeg"
-   :filename    "no-preview-available.jpg"
-   :content     ext-preview/placeholder-image-is})
+   :filename    "preview-being-generated.jpg"
+   :content     #(io/input-stream (io/resource "preview-being-generated.jpg"))})

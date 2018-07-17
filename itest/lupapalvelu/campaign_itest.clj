@@ -18,7 +18,7 @@
                      :cookie-store (->cookie-store cookie-store)}
                     rest)
              [:headers "x-anti-forgery-token"]
-             (constantly (get-anti-csrf-from-store cookie-store))))
+             (constantly (get-anti-csrf cookie-store))))
 
 (defn response [raw-response]
   (let [{:keys [status body]} (decode-response raw-response)]

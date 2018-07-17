@@ -369,9 +369,6 @@
 (defn set-anti-csrf! [value]
   (fact (command pena :set-feature :feature "disable-anti-csrf" :value (not value)) => ok?))
 
-(defn get-anti-csrf-from-store [store]
-  (-> (get @store "anti-csrf-token") .getValue codec/url-decode))
-
 (defn feature? [& feature]
   (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name feature)))))
 
@@ -874,7 +871,7 @@
 (defn get-statement-by-user-id [application user-id]
   (some #(when (= user-id (get-in % [:person :userId])) %) (:statements application)))
 
-;; This has a side effect which generates a attachement to appliction
+;; This has a side effect which generates an attachment to appliction
 (defn generate-statement [application-id apikey]
   (let [resp (query sipoo :get-organizations-statement-givers) => ok?
         statement-giver (->> resp :data (some #(when (= (email-for-key apikey) (:email %)) %))) => truthy

@@ -362,7 +362,7 @@
    :input-validators [(partial action/non-blank-parameters [:organizationId :email :firstName :lastName])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       action/email-validator
-                      (partial allowed-roles org/authority-roles)]
+                      (partial allowed-roles roles/org-roles-without-admin)]
    :notified         true
    :permissions      [{:required [:organization/admin]}]
    :pre-checks       [(fn [{params :data user :user}]
@@ -395,7 +395,7 @@
   {:parameters       [email roles]
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
-                      (partial allowed-roles org/authority-roles)]
+                      (partial allowed-roles roles/org-roles-without-admin)]
    :permissions      [{:required [:organization/admin]}]}
   [{caller :user}]
   (let [organization-id (usr/authority-admins-organization-id caller)

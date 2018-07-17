@@ -903,20 +903,26 @@
              (error t "Exception occurred during the migration")))))
   (info "Done"))
 
+(defonce ceph-migration-threadpool (threads/threadpool 3 "ceph-migration-worker"))
+
 (defn move-app-files-to-ceph-in-organizations [& organization-ids]
   (if (seq organization-ids)
     (do (info "Moving application files to Ceph in organizations" organization-ids)
         (mongo/connect!)
-        (doseq [{:keys [id]} (mongo/select :applications
-                                           {:organization {$in organization-ids}
-                                            :attachments.latestVersion.fileId {$type "string"}
-                                            :attachments.latestVersion.storageSystem "mongodb"}
-                                           [:_id]
-                                           {:_id 1})]
-          (logging/with-logging-context {:applicationId id}
-            (info "Checking attachments for migration")
-            (try (storage/move-application-mongodb-files-to-s3 id)
-                 (catch Throwable t
-                   (error t "Exception occurred during the migration")))))
+        (let [threads (->> (mongo/select :applications
+                                         {:organization                            {$in organization-ids}
+                                          :attachments.latestVersion.fileId        {$type "string"}
+                                          :attachments.latestVersion.storageSystem "mongodb"}
+                                         [:_id]
+                                         {:_id 1})
+                           (mapv (fn [{:keys [id]}]
+                                   (threads/submit ceph-migration-threadpool
+                                                   (logging/with-logging-context {:applicationId id}
+                                                     (info "Checking attachments for migration")
+                                                     (try (storage/move-application-mongodb-files-to-s3 id)
+                                                          (catch Throwable t
+                                                            (error t "Exception occurred during the migration"))))))))]
+          (info "All migration threads submitted. Number of applications:" (count threads))
+          (threads/wait-for-threads threads))
         (info "Done"))
     (error "Missing organization ids")))

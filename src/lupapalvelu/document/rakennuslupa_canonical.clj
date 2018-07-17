@@ -98,7 +98,7 @@
                                       :julkisivumateriaali (:julkisivu rakenne))
         lammitystapa (:lammitystapa lammitys)
         huoneistot-data (get-huoneisto-data huoneistot (:name info))
-        huoneistot (if (org/pate-org? (:organization application))
+        huoneistot (if (org/pate-scope? application)
                      {:huoneisto huoneistot-data
                       :asuntojenPintaala (get-huoneistot-pintaala huoneistot-data)
                       :asuntojenLkm (get-huoneistot-lkm huoneistot-data)}
@@ -431,9 +431,9 @@
   (when rakennus
     (let [property-id (or (not-empty kiinttun) (:propertyId app))
           app-building (util/find-first (every-pred (comp #{property-id} :propertyId)
-                                                    (some-fn (comp #{rakennusnro} :localShortId)
-                                                             (comp #{national-id} :nationalId)
-                                                             (comp #{national-id} :buildingId)))
+                                                    (some-fn (comp #{national-id} :nationalId)
+                                                             (comp #{national-id} :buildingId)
+                                                             (comp #{rakennusnro} :localShortId)))
                                         app-buildings)]
       (update building :rakennus util/assoc-when
               :kiinttun property-id
@@ -494,7 +494,6 @@
                        (map (partial enrich-review-building application))
                        (remove bad-review-building?))
         application (tools/unwrapped application)
-        documents-by-type (documents-by-type-without-blanks application)
         katselmustyyppi (katselmusnimi-to-type katselmuksen-laji :katselmus)]
     {:Rakennusvalvonta
      {:toimituksenTiedot (toimituksen-tiedot application lang)
