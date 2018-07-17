@@ -48,11 +48,14 @@
 
     (create-contract! inner endpoint request))
 
+  (lock-contract! [_ endpoint request] (assert false "unimplemented"))
+
   (allu-fail! [_ text info-map] (allu-fail! inner text info-map)))
 
 (deftype ConstALLU [response fail-map]
   ALLUPlacementContracts
   (create-contract! [_ _ _] response)
+  (lock-contract! [_ _ _] (assert false "unimplemented"))
   (allu-fail! [_ text info-map]
     (fact "response was not ok" response => http/client-error?)
     (fact "error has the expected contents" (fail text info-map) => fail-map)))
@@ -67,18 +70,31 @@
     (mongo/with-db itu/test-db-name
       (lupapalvelu.fixture.core/apply-fixture "minimal")
 
+<<<<<<< HEAD
       (let [sent-allu-requests (atom 0)]
         (mount/start-with {#'allu/allu-instance (->CheckingALLU (->LocalMockALLU sent-allu-requests))})
+=======
+    (let [initial-allu-state {:id-counter 0, :applications {}}
+          allu-state (atom initial-allu-state)]
+      (mount/start-with {#'allu/allu-instance (->CheckingALLU (->LocalMockALLU allu-state))})
+>>>>>>> LPK-3779 Initial implementation of locking placement contracts in ALLU.
 
         (fact "enabled and sending correctly to ALLU for Helsinki YA sijoituslupa and sijoitussopimus."
           (doseq [permitSubtype ["sijoituslupa" "sijoitussopimus"]]
             (let [{:keys [id]} (create-and-fill-placement-app pena permitSubtype) => ok?]
               (itu/local-command pena :submit-application :id id) => ok?))
 
+<<<<<<< HEAD
           @sent-allu-requests => 2)
 
         (fact "disabled for everything else."
           (reset! sent-allu-requests 0)
+=======
+        (:id-counter @allu-state) => 2)
+
+      (fact "disabled for everything else."
+        (reset! allu-state initial-allu-state)
+>>>>>>> LPK-3779 Initial implementation of locking placement contracts in ALLU.
 
           (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate allu/SijoituslupaOperation)) => ok?]
             (itu/local-command pena :submit-application :id id) => ok?)
@@ -90,7 +106,11 @@
                                                    :propertyId "09143200010023") => ok?]
             (itu/local-command pena :submit-application :id id) => ok?)
 
+<<<<<<< HEAD
           @sent-allu-requests => 0))
+=======
+        (:id-counter @allu-state) => 0))
+>>>>>>> LPK-3779 Initial implementation of locking placement contracts in ALLU.
 
       (fact "error responses from ALLU produce `fail!`ures"
         (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 400, :body "Your data was bad."}

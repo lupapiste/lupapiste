@@ -1,6 +1,6 @@
 (ns lupapalvelu.integrations.allu-test
   "Unit tests for lupapalvelu.integrations.allu. No side-effects except validation exceptions."
-  (:require [schema.core :as sc :refer [defschema]]
+  (:require [schema.core :as sc :refer [defschema Bool]]
             [cheshire.core :as json]
             [sade.core :refer [def-]]
             [sade.schemas :refer [NonBlankStr Kiinteistotunnus ApplicationId]]
@@ -21,7 +21,8 @@
             [lupapalvelu.integrations.allu :as allu :refer [PlacementContract]]))
 
 (testable-privates lupapalvelu.integrations.allu
-                   application->allu-placement-contract placement-creation-request handle-placement-contract-response)
+                   application->allu-placement-contract placement-creation-request placement-locking-request
+                   handle-placement-contract-response)
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -129,7 +130,8 @@
   (fact "Valid applications produce valid inputs for ALLU."
     (quick-check 10
                  (for-all [application (sg/generator ValidPlacementApplication)]
-                   (nil? (sc/check PlacementContract (application->allu-placement-contract application)))))
+                   (nil? (sc/check PlacementContract
+                                   (application->allu-placement-contract (sg/generate Bool) application)))))
     => passing-quick-check)
 
   (fact "Invalid applications get rejected."
@@ -137,7 +139,7 @@
                  (for-all [application (sg/generator TypedPlacementApplication)
                            :when (invalid-placement-application? application)]
                    (try
-                     (application->allu-placement-contract application)
+                     (application->allu-placement-contract (sg/generate Bool) application)
                      false
                      (catch Exception _ true))))
     => passing-quick-check))
@@ -150,7 +152,18 @@
     (fact "request"
       request => {:headers      {:authorization "Bearer foo.bar.baz"}
                   :content-type :json
-                  :body         (json/encode (application->allu-placement-contract app))})))
+                  :body         (json/encode (application->allu-placement-contract  false app))})))
+
+(facts "placement-locking-request"
+  (let [allu-id 23
+        app (-> (sg/generate ValidPlacementApplication) (assoc-in [:foreignKeys :allu :id] allu-id))
+        [endpoint request] (placement-locking-request "https://example.com/api/v1" "foo.bar.baz" app)]
+    (fact "endpoint"
+      endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
+    (fact "request"
+      request => {:headers {:authorization "Bearer foo.bar.baz"}
+                  :content-type :json
+                  :body (json/encode (application->allu-placement-contract true app))})))
 
 (facts "handle-placement-contract-response"
   (fact "HTTP 200" (handle-placement-contract-response {:status 200, :body "1"}) => [:ok "1"])
