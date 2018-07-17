@@ -313,7 +313,6 @@
 
 (deftype LocalMockALLU [state]
   ALLUPlacementContracts
-  ;; FIXME: Getting NullPointerExceptions:
   (create-contract! [_ _ {placement-contract :body}]
     (if-let [validation-error (sc/check PlacementContract (json/decode placement-contract true))]
       {:status 400, :body validation-error}
@@ -335,7 +334,7 @@
 
 (defstate allu-instance
   :start (if (env/dev-mode?)
-           (->LocalMockALLU (atom 0))
+           (->LocalMockALLU (atom {:id-counter 0, :applications {}} "0"))
            (->RemoteALLU)))
 
 (defn create-placement-contract!
