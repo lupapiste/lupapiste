@@ -238,7 +238,7 @@
 
 (def- format-date-time (partial tf/unparse (tf/formatters :date-time-no-ms)))
 
-(defn- convert-value-flattened-app [lock? {:keys [id propertyId documents] :as app}]
+(defn- convert-value-flattened-app [pending-on-client {:keys [id propertyId documents] :as app}]
   (let [applicant-doc (first (filter #(= (doc-name %) "hakija-ya") documents))
         work-description (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa") documents))
         payee-doc (first (filter #(= (doc-name %) "yleiset-alueet-maksaja") documents))
@@ -252,21 +252,22 @@
              :identificationNumber         id
              :invoicingCustomer            (convert-payee payee-doc)
              :name                         (str id " " kind)
-             :pendingOnClient              lock?
+             :pendingOnClient              pending-on-client
              :postalAddress                (application-postal-address app)
              :propertyIdentificationNumber propertyId
              :startTime                    (format-date-time start)
              :workDescription              (-> work-description :data :kayttotarkoitus)}]
     (assoc-when res :customerReference (not-empty (-> payee-doc :data :laskuviite)))))
 
-(sc/defn ^{:private true, :always-validate true} application->allu-placement-contract :- PlacementContract [lock? app]
-  (->> app flatten-values (convert-value-flattened-app lock?)))
+(sc/defn ^{:private true, :always-validate true} application->allu-placement-contract :- PlacementContract
+  [pending-on-client app]
+  (->> app flatten-values (convert-value-flattened-app pending-on-client)))
 
 (defn- placement-creation-request [allu-url allu-jwt app]
   [(str allu-url "/placementcontracts")
    {:headers      {:authorization (str "Bearer " allu-jwt)}
     :content-type :json
-    :body         (json/encode (application->allu-placement-contract false app))}])
+    :body         (json/encode (application->allu-placement-contract true app))}])
 
 (defn- placement-locking-request [allu-url allu-jwt app]
   (let [allu-id (-> app :foreignKeys :allu :id)]
@@ -274,7 +275,7 @@
     [(str allu-url "/placementcontracts/" allu-id)
      {:headers      {:authorization (str "Bearer " allu-jwt)}
       :content-type :json
-      :body         (json/encode (application->allu-placement-contract true app))}]))
+      :body         (json/encode (application->allu-placement-contract false app))}]))
 
 ;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
 (defn- handle-placement-contract-response [{:keys [status body]}]
@@ -312,6 +313,7 @@
 
 (deftype LocalMockALLU [state]
   ALLUPlacementContracts
+  ;; FIXME: Getting NullPointerExceptions:
   (create-contract! [_ _ {placement-contract :body}]
     (if-let [validation-error (sc/check PlacementContract (json/decode placement-contract true))]
       {:status 400, :body validation-error}

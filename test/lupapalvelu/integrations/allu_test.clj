@@ -152,7 +152,7 @@
     (fact "request"
       request => {:headers      {:authorization "Bearer foo.bar.baz"}
                   :content-type :json
-                  :body         (json/encode (application->allu-placement-contract  false app))})))
+                  :body         (json/encode (application->allu-placement-contract true app))})))
 
 (facts "placement-locking-request"
   (let [allu-id 23
@@ -163,7 +163,7 @@
     (fact "request"
       request => {:headers {:authorization "Bearer foo.bar.baz"}
                   :content-type :json
-                  :body (json/encode (application->allu-placement-contract true app))})))
+                  :body (json/encode (application->allu-placement-contract false app))})))
 
 (facts "handle-placement-contract-response"
   (fact "HTTP 200" (handle-placement-contract-response {:status 200, :body "1"}) => [:ok "1"])
