@@ -11,6 +11,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.applicationId = self.application.id;
   self.applicationTitle = self.application.title;
   self.allowedAttachmentTypes = self.application.allowedAttachmentTypes;
+  self.processing = self.attachment().processing;
 
   var authModel = self.attachment().authModel; // No need to be computed since does not change for attachment
 
@@ -296,15 +297,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     return authModel.ok("convert-to-pdfa");
   });
 
-  self.conversionInProgress = ko.observable(false);
-
-  addUpdateListener("convert-to-pdfa", {}, function() {
-    querySelf();
-    self.conversionInProgress(false);
-  });
-
   self.convertToPdfA = function() {
-    self.conversionInProgress(true);
     service.convertToPdfA(self.id);
   };
 
@@ -320,6 +313,8 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.addHubListener("side-panel-open", _.partial(self.disablePreview, true));
   self.addHubListener("side-panel-close", _.partial(self.disablePreview, false));
 
-  // Initial refresh just in case
-  querySelf();
+  // Initial refresh just in case, but not if we're still processing
+  if (!self.processing()) {
+    querySelf();
+  }
 };

@@ -465,22 +465,11 @@
         .call();
     };
 
-    self.conversionInProgress = ko.observable(false);
-
     self.convertToPdfA = function(attachment) {
-      self.conversionInProgress(true);
       var attachmentId = ko.unwrap(attachment.id);
       attachment.showAdditionalControls(true);
-      self.addEventListener(attachmentsService.serviceName,
-        {eventType: "update", attachmentId: attachmentId, commandName: "convert-to-pdfa"},
-        function() {
-          attachmentsService.queryOne(attachmentId, {triggerCommand: "convert-to-pdfa"});
-          self.conversionInProgress(false);
-        }
-      );
       attachmentsService.convertToPdfA(attachmentId);
     };
-
 
     self.archivingDates = ko.mapping.fromJS(_.defaults(params.application.archived,
       {"initial": null}, {"application": null}, {"completed": null}));

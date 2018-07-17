@@ -453,6 +453,7 @@ LUPAPISTE.AttachmentsService = function() {
     var commandParams = _.assign({"id": self.applicationId(),
                                   "attachmentId": attachmentId},
                                  params);
+    var attachment = ko.unwrap(self.getAttachment(attachmentId));
     ajax.command(commandName, commandParams)
       .success(function(response) {
         var attachment = ko.unwrap(self.getAttachment(attachmentId));
@@ -465,6 +466,7 @@ LUPAPISTE.AttachmentsService = function() {
         error("Unable to update attachment: " , _.assign({commandName: commandName, commandParams: commandParams}, response));
         notify.ajaxError(response);
       })
+      .processing(attachment.processing)
       .call();
   };
 
@@ -495,7 +497,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   hub.subscribe( "attachmentsService::update", function( event ) {
-    if( event.commandName === "reject-attachment-note" ) {
+    if( event.commandName === "reject-attachment-note" || event.commandName === "convert-to-pdfa" ) {
       self.queryOne( event.attachmentId );
     }
   });

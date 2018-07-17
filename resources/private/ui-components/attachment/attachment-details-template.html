@@ -296,8 +296,8 @@
                   <!-- ko if: $component.convertableToPdfA -->
                   <div class="spacerM">
                     <button class="btn-primary" data-bind="click: $component.convertToPdfA,
-                                                           disable: $component.conversionInProgress">
-                      <span class="waiting" data-bind="css: { waiting: $component.conversionInProgress }">
+                                                           disable: $component.processing">
+                      <span class="waiting" data-bind="css: { waiting: $component.processing }">
                         <i class="spin lupicon-refresh wait"></i>
                       </span>
                       <span data-bind="ltext: 'Konvertoi PDF/A-muotoon'"></span>
