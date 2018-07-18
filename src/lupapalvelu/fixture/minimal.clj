@@ -531,7 +531,8 @@
     :enabled true
     :language "fi"
     :role "authority"
-    :orgAuthz {:091-R #{:authority :approver :archivist :tos-editor :tos-publisher}}
+    :orgAuthz {:091-R #{:authority :approver :archivist :tos-editor :tos-publisher}
+               :091-YA  #{:authority :approver}}
     :firstName "Hannu"
     :lastName "Helsinki"
     :username "rakennustarkastaja@hel.fi"

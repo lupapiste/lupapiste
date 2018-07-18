@@ -893,4 +893,4 @@
 ;;
 
 (defn set-integration-key [app-id system-name key-data]
-  (mongo/update-by-id :applications app-id {$set {(str "integrationKeys." system-name) key-data}}))
+  (mongo/update-by-id :applications app-id {$set {(str "integrationKeys." (name system-name)) key-data}}))
