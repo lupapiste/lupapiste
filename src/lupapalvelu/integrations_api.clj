@@ -82,7 +82,7 @@
         ;; TODO: Send attachments and comments
         ;; TODO: Non-placement-contract ALLU applications
         (allu/lock-placement-contract! application)
-        (do-rest-fn nil))
+        (do-rest-fn true nil))
 
       (org/krysp-integration? @organization (permit/permit-type application))
       (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
@@ -92,10 +92,10 @@
             attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids
                                                                                         created)
                                     {})]
-        (do-rest-fn attachments-updates))
+        (do-rest-fn true attachments-updates))
 
       ;; Integration details not defined for the organization -> let the approve command pass
-      :else (do-rest-fn nil))))
+      :else (do-rest-fn false nil))))
 
 (defn- ensure-general-handler-is-set [handlers user organization]
   (let [general-id (org/general-handler-id-for-organization organization)]
@@ -139,7 +139,7 @@
         mongo-query {:state {$in ["submitted" "complementNeeded"]}}
         indicator-updates (app/mark-indicators-seen-updates command)
         transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
-        do-update (fn [attachments-updates]
+        do-update (fn [integration-available attachments-updates]
                     (update-application (assoc command :application application)
                       mongo-query
                       (util/deep-merge
@@ -150,7 +150,7 @@
                                 attachments-updates
                                 indicator-updates)}
                         (app-state/state-transition-update next-state created application user)))
-                    (ok :integrationAvailable (not (nil? attachments-updates))))]
+                    (ok :integrationAvailable integration-available))]
 
     (do-approve (assoc command :application application) id current-state lang do-update)))
 
