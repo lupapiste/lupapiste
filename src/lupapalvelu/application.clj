@@ -887,3 +887,10 @@
     (or (= primary-operation "raktyo-aloit-loppuunsaat")
         (= primary-operation "jatkoaika")
         (= primary-operation "ya-jatkoaika"))))
+
+;;
+;; Integration keys
+;;
+
+(defn set-integration-key [app-id system-name key-data]
+  (mongo/update-by-id :applications app-id {$set {(str "integrationKeys." system-name) key-data}}))

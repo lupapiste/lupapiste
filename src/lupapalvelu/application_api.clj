@@ -343,12 +343,12 @@
                       (notify :organization-housing-office)
                       (fn [{:keys [application]} _]
                         (when (and (env/feature? :allu) (allu/allu-application? application))
-                          ;; TODO: Save the returned contract id to db.
                           ;; TODO: Use message queue to delay and retry interaction with ALLU.
                           ;; TODO: Save messages for inter-system debugging etc.
                           ;; TODO: Send errors to authority instead of applicant?
                           ;; TODO: Non-placement-contract ALLU applications
-                          (allu/create-placement-contract! application)))]
+                          (let [allu-id (allu/create-placement-contract! application)]
+                            (app/set-integration-key id :ALLU allu-id))))]
    :pre-checks       [(partial sm/validate-state-transition :submitted)]}
   [{:keys [application] :as command}]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]

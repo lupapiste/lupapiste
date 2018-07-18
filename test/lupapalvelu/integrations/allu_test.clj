@@ -156,7 +156,7 @@
 
 (facts "placement-locking-request"
   (let [allu-id 23
-        app (assoc-in (sg/generate ValidPlacementApplication) [:foreignKeys :allu :id] allu-id)
+        app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)
         [endpoint request] (placement-locking-request "https://example.com/api/v1" "foo.bar.baz" app)]
     (fact "endpoint"
       endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))

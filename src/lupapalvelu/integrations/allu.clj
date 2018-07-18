@@ -270,7 +270,7 @@
     :body         (json/encode (application->allu-placement-contract true app))}])
 
 (defn- placement-locking-request [allu-url allu-jwt app]
-  (let [allu-id (-> app :foreignKeys :allu :id)]
+  (let [allu-id (-> app :integrationKeys :ALLU :id)]
     (assert allu-id (str (:id app) " does not contain an ALLU id"))
     [(str allu-url "/placementcontracts/" allu-id)
      {:headers      {:authorization (str "Bearer " allu-jwt)}
