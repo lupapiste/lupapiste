@@ -347,6 +347,7 @@
                           ;; TODO: Use message queue to delay and retry interaction with ALLU.
                           ;; TODO: Save messages for inter-system debugging etc.
                           ;; TODO: Send errors to authority instead of applicant?
+                          ;; TODO: Non-placement-contract ALLU applications
                           (allu/create-placement-contract! application)))]
    :pre-checks       [(partial sm/validate-state-transition :submitted)]}
   [{:keys [application] :as command}]
