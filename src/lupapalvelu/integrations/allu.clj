@@ -328,7 +328,7 @@
         {:status 400, :body validation-error}
         (if (contains? (:applications @state) allu-id)
           {:status 200, :body allu-id}
-          [:status 404, :body (str "Not Found: " allu-id)]))))
+          {:status 404, :body (str "Not Found: " allu-id)}))))
 
   (allu-fail! [_ text info-map] (fail! text info-map)))     ; TODO: Is there a better way to handle post-fn errors?
 
