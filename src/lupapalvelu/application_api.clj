@@ -341,7 +341,7 @@
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)
                       (notify :organization-housing-office)
-                      (fn [{:keys [application]} _]
+                      (fn [{{:keys [id] :as application} :application} _]
                         (when (and (env/feature? :allu) (allu/allu-application? application))
                           ;; TODO: Use message queue to delay and retry interaction with ALLU.
                           ;; TODO: Save messages for inter-system debugging etc.
