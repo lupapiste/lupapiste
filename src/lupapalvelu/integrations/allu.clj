@@ -334,7 +334,7 @@
 
 (defstate allu-instance
   :start (if (env/dev-mode?)
-           (->LocalMockALLU (atom {:id-counter 0, :applications {}} "0"))
+           (->LocalMockALLU (atom {:id-counter 0, :applications {}}))
            (->RemoteALLU)))
 
 (defn create-placement-contract!
