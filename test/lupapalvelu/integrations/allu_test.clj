@@ -1,5 +1,5 @@
 (ns lupapalvelu.integrations.allu-test
-  "Unit tests for lupapalvelu.integrations.allu. No side-effects except validation exceptions."
+  "Unit tests for lupapalvelu.integrations.allu. No side-effects."
   (:require [schema.core :as sc :refer [defschema Bool]]
             [cheshire.core :as json]
             [sade.core :refer [def-]]
@@ -156,28 +156,28 @@
 
 (facts "placement-locking-request"
   (let [allu-id 23
-        app (-> (sg/generate ValidPlacementApplication) (assoc-in [:foreignKeys :allu :id] allu-id))
+        app (assoc-in (sg/generate ValidPlacementApplication) [:foreignKeys :allu :id] allu-id)
         [endpoint request] (placement-locking-request "https://example.com/api/v1" "foo.bar.baz" app)]
     (fact "endpoint"
       endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
     (fact "request"
-      request => {:headers {:authorization "Bearer foo.bar.baz"}
+      request => {:headers      {:authorization "Bearer foo.bar.baz"}
                   :content-type :json
-                  :body (json/encode (application->allu-placement-contract false app))})))
+                  :body         (json/encode (application->allu-placement-contract false app))})))
 
 (facts "handle-placement-contract-response"
   (fact "HTTP 200" (handle-placement-contract-response {:status 200, :body "1"}) => [:ok "1"])
   (fact "HTTP 201" (handle-placement-contract-response {:status 201, :body "1"}) => [:ok "1"])
 
   (fact "HTTP 400"
-    (catch-all (handle-placement-contract-response {:status 400, :body "Your data was bad."}))
+    (handle-placement-contract-response {:status 400, :body "Your data was bad."})
     => [:err :error.allu.malformed-application {:body "Your data was bad."}])
   (fact "HTTP 401"
-    (catch-all (handle-placement-contract-response {:status 401, :body "You are unauthorized."}))
+    (handle-placement-contract-response {:status 401, :body "You are unauthorized."})
     => [:err :error.allu.http {:status 401, :body "You are unauthorized."}])
   (fact "HTTP 403"
-    (catch-all (handle-placement-contract-response {:status 403, :body "It is forbidden."}))
+    (handle-placement-contract-response {:status 403, :body "It is forbidden."})
     => [:err :error.allu.http {:status 403, :body "It is forbidden."}])
   (fact "HTTP 404"
-    (catch-all (handle-placement-contract-response {:status 404, :body "Not found."}))
+    (handle-placement-contract-response {:status 404, :body "Not found."})
     => [:err :error.allu.http {:status 404, :body "Not found."}]))
