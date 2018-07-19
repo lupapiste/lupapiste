@@ -61,8 +61,7 @@
   (data-leaf elem-schema (cond (= :upper case) ssc/UpperCaseLetter (= :lower case) ssc/LowerCaseLetter :else ssc/Letter)))
 
 (defmethod coerce-subtype :tel [elem-schema]
-  ;; `(data-leaf elem-schema ssc/Tel)` would break lupapalvelu.xml.krysp.kiinteistotoimitus-test
-  (data-leaf elem-schema sc/Str))
+  (data-leaf elem-schema ssc/Tel))
 
 (defmethod coerce-subtype :email [elem-schema]
   (data-leaf elem-schema ssc/Email))

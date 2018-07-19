@@ -212,7 +212,7 @@
 
 (register-generator ssc/ApplicationId application-id)
 
-(register-generator ssc/Tel (string-from-regex #"\+?[\d\s-]+"))
+(register-generator ssc/Tel (string-from-regex #"\+?[\d -]+"))
 
 (def http-protocol (gen/elements ["http://" "https://"]))
 (def http-url
