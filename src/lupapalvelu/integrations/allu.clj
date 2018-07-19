@@ -270,12 +270,6 @@
     [(str allu-url "/applications/" allu-id "/cancelled")
      {:headers {:authorization (str "Bearer " allu-jwt)}}]))
 
-;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
-(defn- handle-cancel-response [response]
-  (match response
-    {:status (:or 200 201)} [:ok]
-    _ [:err :error.allu.http (select-keys response [:status :body])]))
-
 (defn- placement-creation-request [allu-url allu-jwt app]
   [(str allu-url "/placementcontracts")
    {:headers      {:authorization (str "Bearer " allu-jwt)}
@@ -291,6 +285,12 @@
       :body         (json/encode (application->allu-placement-contract pending-on-client app))}]))
 
 (def- placement-locking-request (partial placement-update-request false))
+
+;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
+(defn- handle-cancel-response [response]
+  (match response
+    {:status (:or 200 201), :body body} [:ok body]
+    _ [:err :error.allu.http (select-keys response [:status :body])]))
 
 ;;;; Should you use this?
 ;;;; ===================================================================================================================
