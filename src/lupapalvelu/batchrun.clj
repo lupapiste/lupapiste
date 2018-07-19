@@ -39,7 +39,8 @@
             [sade.validators :as v]
             [ring.util.codec :as codec]
             [lupapalvelu.storage.file-storage :as storage])
-  (:import [org.xml.sax SAXParseException]))
+  (:import [org.xml.sax SAXParseException]
+           [java.util.concurrent ExecutorService TimeUnit]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -903,12 +904,20 @@
              (error t "Exception occurred during the migration")))))
   (info "Done"))
 
-(defonce ceph-migration-threadpool (threads/threadpool 3 "ceph-migration-worker"))
+(defonce ^ExecutorService ceph-migration-threadpool (threads/threadpool 8 "ceph-migration-worker"))
 
 (defn move-app-files-to-ceph-in-organizations [& organization-ids]
   (if (seq organization-ids)
     (do (info "Moving application files to Ceph in organizations" organization-ids)
         (mongo/connect!)
+        (.addShutdownHook (Runtime/getRuntime)
+                          (Thread.
+                            ^Runnable
+                            (fn []
+                              (println "Interrupt received, shutting down.")
+                              (.shutdownNow ceph-migration-threadpool)
+                              (.awaitTermination ceph-migration-threadpool 60 TimeUnit/SECONDS)
+                              (println "Threads finished"))))
         (let [threads (->> (mongo/select :applications
                                          {:organization                            {$in organization-ids}
                                           :attachments.latestVersion.fileId        {$type "string"}
