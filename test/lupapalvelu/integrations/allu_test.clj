@@ -150,14 +150,6 @@
     (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/cancelled"))
     (fact "request" request => {:headers {:authorization "Bearer foo.bar.baz"}})))
 
-(facts "handle-cancel-response"
-  (fact "HTTP success"
-    (handle-cancel-response {:status 200}) => [:ok]
-    (handle-cancel-response {:status 201}) => [:ok])
-
-  (fact "HTTP error"
-    (handle-cancel-response {:status 400}) => [:err :error.allu.http {:status 400}]))
-
 (facts "placement-creation-request"
   (let [app (sg/generate ValidPlacementApplication)
         [endpoint request] (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
