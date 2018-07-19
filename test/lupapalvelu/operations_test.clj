@@ -2,9 +2,12 @@
   (:require [lupapalvelu.operations :refer :all]
             [lupapalvelu.test-util :refer :all]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapiste-commons.operations :as commons-operations]
             [clojure.set :as set]))
+
+(testable-privates lupapalvelu.operations r-operations p-operations)
 
 (facts "check that every operation refers to existing schema"
   (doseq [[op {:keys [schema required]}] operations
@@ -117,7 +120,7 @@
 
 (facts "operation definitions in lupapalvelu.operations should match lupapiste-commons.operations"
   (fact "R-operations match"
-    (let [lp-ops (set (keys r-operations))
+    (let [lp-ops (set (keys @r-operations))
           commons-ops (set commons-operations/r-operations)]
       (set/difference lp-ops commons-ops) => #{}))
 
@@ -127,7 +130,7 @@
       (= lp-ops commons-ops) => true))
 
   (fact "P-operations match"
-    (let [lp-ops (set (keys p-operations))
+    (let [lp-ops (set (keys @p-operations))
           commons-ops (set commons-operations/p-operations)]
       (= lp-ops commons-ops) => true)))
 

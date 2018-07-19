@@ -10,7 +10,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.reports.excel :as excel]
             [lupapalvelu.user :as usr])
-  (:import (java.io OutputStream)))
+  (:import (java.io OutputStream)
+           (java.util Locale)))
 
 (defn- ->excel-time [timestamp-string]
   (-> timestamp-string
@@ -23,7 +24,8 @@
       util/to-local-date))
 
 (defn cents->euros [cents]
-  (Double/parseDouble (format "%.2f" (/ (bigdec cents) 100))))
+  ;; Locale/ROOT forces the decimal separator to be "." regardless of locale settings in the environment:
+  (Double/parseDouble (String/format Locale/ROOT "%.2f" (to-array [(/ (bigdec cents) 100)]))))
 
 (def- transaction-id :transaction_id)
 (def- created-timestamp (comp ->excel-time :created_at))

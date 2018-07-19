@@ -10,7 +10,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.factlet :as fl]
-            [lupapalvelu.operations :as op]
+            [lupapalvelu.operations]
             [lupapalvelu.organization :as org]
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
@@ -21,6 +21,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [schema.core :as sc]))
+
+(testable-privates lupapalvelu.operations r-operations)
 
 (facts "Date format"
   (fact (util/to-xml-date (.getMillis (date-time 2012 1 14))) => "2012-01-14")
@@ -949,12 +951,12 @@
   (against-background
     (org/pate-scope? irrelevant) => false)
   (let [operations (map (partial hash-map :id) (range 100))
-        actions (->> (vals op/r-operations)
+        actions (->> (vals @r-operations)
                      (map (util/fn->> :schema (assoc {} :name)))
                      (map doc-schemas/get-schema)
                      (map doc-data-schema/coerce-doc)
                      (map ssg/generate)
-                     (map #(assoc-in %3 [:schema-info :op] {:id %1 :name (name %2)}) (range) (keys op/r-operations))
+                     (map #(assoc-in %3 [:schema-info :op] {:id %1 :name (name %2)}) (range) (keys @r-operations))
                      (assoc application-rakennuslupa :primaryOperation (first operations) :secondaryOperations (rest operations) :documents)
                      (tools/unwrapped)
                      (get-operations))]
