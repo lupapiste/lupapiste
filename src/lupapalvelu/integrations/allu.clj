@@ -1,5 +1,6 @@
 (ns lupapalvelu.integrations.allu
-  (:require [clojure.walk :refer [postwalk]]
+  (:require [clojure.core.match :refer [match]]
+            [clojure.walk :refer [postwalk]]
             [mount.core :refer [defstate]]
             [schema.core :as sc :refer [defschema optional-key enum]]
             [cheshire.core :as json]
@@ -202,18 +203,18 @@
                       :ovt (if (seq ovtTunnus) ovtTunnus verkkolaskuTunnus))
       customer)))
 
-(defn- doc->customer [payee? {{tag :_selected :as data} :data}]
-  (case tag
-    "henkilo" (person->customer (:henkilo data))
-    "yritys" (company->customer payee? (:yritys data))))
+(defn- doc->customer [payee? doc]
+  (match (:data doc)
+    {:_selected "henkilo", :henkilo person} (person->customer person)
+    {:_selected "yritys", :yritys company} (company->customer payee? company)))
 
 (defn- person->contact [{:keys [henkilotiedot], {:keys [puhelin email]} :yhteystiedot}]
   {:name (fullname henkilotiedot), :phone puhelin, :email email})
 
-(defn- customer-contact [{{tag :_selected :as data} :data}]
-  (case tag
-    "henkilo" (:henkilo data)
-    "yritys" (-> data :yritys :yhteyshenkilo)))
+(defn- customer-contact [customer-doc]
+  (match (:data customer-doc)
+    {:_selected "henkilo", :henkilo person} person
+    {:_selected "yritys", :yritys {:yhteyshenkilo contact}} contact))
 
 (defn- convert-applicant [applicant-doc]
   {:customer (doc->customer false applicant-doc)
@@ -278,11 +279,11 @@
       :body         (json/encode (application->allu-placement-contract false app))}]))
 
 ;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
-(defn- handle-placement-contract-response [{:keys [status body]}]
-  (case status
-    (200 201) [:ok body]
-    400 [:err :error.allu.malformed-application {:body body}]
-    [:err :error.allu.http {:status status :body body}]))
+(defn- handle-placement-contract-response [response]
+  (match response
+    {:status (:or 200 201), :body body} [:ok body]
+    {:status 400, :body body} [:err :error.allu.malformed-application {:body body}]
+    _ [:err :error.allu.http (select-keys response [:status :body])]))
 
 ;;;; Should you use this?
 ;;;; ===================================================================================================================
@@ -340,20 +341,16 @@
 (defn create-placement-contract!
   "Create placement contract in ALLU. Returns ALLU id for the contract."
   [app]
-  (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)
-        [tag & fields] (handle-placement-contract-response (create-contract! allu-instance endpoint request))]
-    (case tag
-      :ok (let [[allu-id] fields]
-            (info (:id app) "was created succesfully in ALLU as" allu-id)
-            allu-id)
-      :err (apply allu-fail! allu-instance fields))))
+  (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)]
+    (match (handle-placement-contract-response (create-contract! allu-instance endpoint request))
+      [:ok allu-id] (do (info (:id app) "was created succesfully in ALLU as" allu-id)
+                        allu-id)
+      [:err error-code error-data] (allu-fail! allu-instance error-code error-data))))
 
 (defn lock-placement-contract!
   "Lock placement contract in ALLU for verdict evaluation."
   [app]
-  (let [[endpoint request] (placement-locking-request (env/value :allu :url) (env/value :allu :jwt) app)
-        [tag & fields] (handle-placement-contract-response (lock-contract! allu-instance endpoint request))]
-    (case tag
-      :ok (let [[allu-id] fields]
-            (info (:id app) "was locked succesfully in ALLU as" allu-id))
-      :err (apply allu-fail! allu-instance fields))))
+  (let [[endpoint request] (placement-locking-request (env/value :allu :url) (env/value :allu :jwt) app)]
+    (match (handle-placement-contract-response (lock-contract! allu-instance endpoint request))
+      [:ok allu-id] (info (:id app) "was locked succesfully in ALLU as" allu-id)
+      [:err error-code error-data] (allu-fail! allu-instance error-code error-data))))
