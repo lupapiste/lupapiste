@@ -280,7 +280,8 @@
     (doseq [{:keys [versions latestVersion] att-id :id} attachments
             [idx {:keys [fileId originalFileId storageSystem]}] (map-indexed vector versions)
             :when (and (= (keyword storageSystem) :mongodb)
-                       (some? fileId))]
+                       (some? fileId)
+                       (not (.isInterrupted (Thread/currentThread))))]
       (timbre/info "Migrating attachment" att-id "version" idx)
       (doseq [file-id (if (= fileId originalFileId)
                         [fileId (str fileId "-preview")]
