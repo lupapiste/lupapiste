@@ -29,8 +29,8 @@
 
 (defn now ^Long [] (System/currentTimeMillis))
 
-(defmacro def- [item value]
-  `(def ^{:private true} ~item ~value))
+(defmacro def- [item & args]
+  `(def ~(with-meta item (assoc (meta item) :private true)) ~@args))
 
 (defn error-and-fail! [error-msg fail-key]
   (error error-msg)

@@ -11,6 +11,9 @@
                  [org.clojure/core.memoize "0.5.9"]
                  [org.clojure/core.async "0.4.474"]
 
+                 ; State management
+                 [mount "0.1.12"]
+
                  ; Web frameworks
                  [ring "1.6.2" :exclusions [commons-fileupload org.clojure/tools.reader]]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
@@ -77,6 +80,9 @@
 
                  ; Joda time wrapper
                  [clj-time "0.14.2"]
+
+                 ; Country code manipulation
+                 [iso-country-codes "1.0"]
 
                  ; String case manipulation
                  [camel-snake-kebab "0.4.0"]
@@ -180,6 +186,7 @@
   :cljsbuild {:builds {:rum {:source-paths ^:replace ["src-cljs" "src-cljc"]}}}
   :profiles {:dev      {:dependencies   [[midje "1.9.1"]
                                          [com.cemerick/pomegranate "1.0.0"]                                             ; midje.repl needs this
+                                         [com.gfredericks/test.chuck "0.2.9"]
                                          [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                          [com.raspasov/clj-ssh "0.5.12"]
                                          [org.apache.activemq/artemis-jms-server "2.6.0"]
