@@ -324,29 +324,32 @@
 
 (deftype LocalMockALLU [state]
   ALLUPlacementContracts
-  ;; TODO: Write cancellation into .-state
   (cancel-allu-application! [_ endpoint _]
     (let [allu-id (second (re-find #".*/(\d+)/cancelled" endpoint))]
       (if (contains? (:applications @state) allu-id)
-        {:status 200, :body ""}
+        (do (swap! state update :applications dissoc allu-id)
+            {:status 200, :body ""})
         {:status 404, :body (str "Not Found: " allu-id)})))
 
-  (create-contract! [_ _ {placement-contract :body}]
-    (if-let [validation-error (sc/check PlacementContract (json/decode placement-contract true))]
-      {:status 400, :body validation-error}
-      (let [{:keys [id-counter]} (swap! state (fn [{:keys [id-counter] :as state}]
-                                                (-> state
-                                                    (update :id-counter inc)
-                                                    (update :applications assoc (str id-counter) placement-contract))))]
-        {:status 200, :body (str (dec id-counter))})))
+  (create-contract! [_ _ request]
+    (let [placement-contract (json/decode (:body request) true)]
+      (if-let [validation-error (sc/check PlacementContract placement-contract)]
+        {:status 400, :body validation-error}
+        (let [local-mock-allu-state-push (fn [{:keys [id-counter] :as state}]
+                                           (-> state
+                                               (update :id-counter inc)
+                                               (update :applications assoc (str id-counter) placement-contract)))
+              {:keys [id-counter]} (swap! state local-mock-allu-state-push)]
+          {:status 200, :body (str (dec id-counter))}))))
 
-  ;; TODO: Overwrite contract in .-state
-  (lock-contract! [_ endpoint {placement-contract :body}]
-    (let [allu-id (second (re-find #".*/(\d+)" endpoint))]
-      (if-let [validation-error (sc/check PlacementContract (json/decode placement-contract true))]
+  (lock-contract! [_ endpoint request]
+    (let [placement-contract (json/decode (:body request) true)
+          allu-id (second (re-find #".*/(\d+)" endpoint))]
+      (if-let [validation-error (sc/check PlacementContract placement-contract)]
         {:status 400, :body validation-error}
         (if (contains? (:applications @state) allu-id)
-          {:status 200, :body allu-id}
+          (do (swap! state assoc-in [:applications allu-id] placement-contract)
+              {:status 200, :body allu-id})
           {:status 404, :body (str "Not Found: " allu-id)}))))
 
   (allu-fail! [_ text info-map] (fail! text info-map)))     ; TODO: Is there a better way to handle post-fn errors?
