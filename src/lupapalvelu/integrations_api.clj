@@ -77,7 +77,7 @@
   (if-let [validation-failure (app/validate-link-permits application)]
     validation-failure
     (cond
-      (and (env/feature? :allu) (allu/allu-application? application))
+      (allu/allu-application? application)
       (do
         ;; TODO: Send attachments and comments
         ;; TODO: Non-placement-contract ALLU applications

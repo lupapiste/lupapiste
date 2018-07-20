@@ -292,7 +292,8 @@
 (def- allu-permit-subtypes #{"sijoituslupa" "sijoitussopimus"})
 
 (defn allu-application? [{:keys [permitSubtype organization]}]
-  (and (contains? allu-organizations organization)
+  (and (env/feature? :allu)
+       (contains? allu-organizations organization)
        (contains? allu-permit-subtypes permitSubtype)))
 
 ;;;; ALLU Proxy
