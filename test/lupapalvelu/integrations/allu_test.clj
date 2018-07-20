@@ -20,8 +20,8 @@
 
             [lupapalvelu.integrations.allu :as allu :refer [PlacementContract]]))
 
-(testable-privates lupapalvelu.integrations.allu
-                   application->allu-placement-contract placement-creation-request placement-locking-request)
+(testable-privates lupapalvelu.integrations.allu application->allu-placement-contract
+                   application-cancel-request placement-creation-request placement-locking-request)
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -143,23 +143,36 @@
                      (catch Exception _ true))))
     => passing-quick-check))
 
+(facts "application-cancel-request"
+  (let [allu-id 23
+        app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)
+        [endpoint request] (application-cancel-request "https://example.com/api/v1" "foo.bar.baz" app)]
+    (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/cancelled"))
+    (fact "request" request => {:headers {:authorization "Bearer foo.bar.baz"}})))
+
+(facts "handle-cancel-response"
+  (fact "HTTP success"
+    (handle-cancel-response {:status 200}) => [:ok]
+    (handle-cancel-response {:status 201}) => [:ok])
+
+  (fact "HTTP error"
+    (handle-cancel-response {:status 400}) => [:err :error.allu.http {:status 400}]))
+
 (facts "placement-creation-request"
   (let [app (sg/generate ValidPlacementApplication)
         [endpoint request] (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
-    (fact "endpoint"
-      endpoint => "https://example.com/api/v1/placementcontracts")
-    (fact "request"
-      request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                  :content-type :json
-                  :body         (json/encode (application->allu-placement-contract true app))})))
+    (fact "endpoint" endpoint => "https://example.com/api/v1/placementcontracts")
+    (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
+                                :content-type :json
+                                :body         (json/encode (application->allu-placement-contract true app))})))
 
 (facts "placement-locking-request"
   (let [allu-id 23
         app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)
         [endpoint request] (placement-locking-request "https://example.com/api/v1" "foo.bar.baz" app)]
-    (fact "endpoint"
-      endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
-    (fact "request"
-      request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                  :content-type :json
-                  :body         (json/encode (application->allu-placement-contract false app))})))
+    (fact "endpoint" endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
+    (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
+                                :content-type :json
+                                :body         (json/encode (application->allu-placement-contract false app))})))
+
+

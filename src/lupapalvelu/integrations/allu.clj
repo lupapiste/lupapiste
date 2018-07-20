@@ -270,6 +270,12 @@
     [(str allu-url "/applications/" allu-id "/cancelled")
      {:headers {:authorization (str "Bearer " allu-jwt)}}]))
 
+;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
+(defn- handle-cancel-response [response]
+  (match response
+    {:status (:or 200 201)} [:ok]
+    _ [:err :error.allu.http (select-keys response [:status :body])]))
+
 (defn- placement-creation-request [allu-url allu-jwt app]
   [(str allu-url "/placementcontracts")
    {:headers      {:authorization (str "Bearer " allu-jwt)}
