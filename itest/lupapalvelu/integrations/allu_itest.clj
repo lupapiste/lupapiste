@@ -60,48 +60,49 @@
 ;;;; Actual Tests
 ;;;; ===================================================================================================================
 
-(mongo/connect!)
+(env/with-feature-value :allu true
+  (mongo/connect!)
 
-(facts "Usage of ALLU integration in submit-application command"
-  (mongo/with-db itu/test-db-name
-    (lupapalvelu.fixture.core/apply-fixture "minimal")
+  (facts "Usage of ALLU integration in submit-application command"
+    (mongo/with-db itu/test-db-name
+      (lupapalvelu.fixture.core/apply-fixture "minimal")
 
-    (let [sent-allu-requests (atom 0)]
-      (mount/start-with {#'allu/allu-instance (->CheckingALLU (->LocalMockALLU sent-allu-requests))})
+      (let [sent-allu-requests (atom 0)]
+        (mount/start-with {#'allu/allu-instance (->CheckingALLU (->LocalMockALLU sent-allu-requests))})
 
-      (fact "enabled and sending correctly to ALLU for Helsinki YA sijoituslupa and sijoitussopimus."
-        (doseq [permitSubtype ["sijoituslupa" "sijoitussopimus"]]
-          (let [{:keys [id]} (create-and-fill-placement-app pena permitSubtype) => ok?]
-            (itu/local-command pena :submit-application :id id) => ok?))
+        (fact "enabled and sending correctly to ALLU for Helsinki YA sijoituslupa and sijoitussopimus."
+          (doseq [permitSubtype ["sijoituslupa" "sijoitussopimus"]]
+            (let [{:keys [id]} (create-and-fill-placement-app pena permitSubtype) => ok?]
+              (itu/local-command pena :submit-application :id id) => ok?))
 
-        @sent-allu-requests => 2)
+          @sent-allu-requests => 2)
 
-      (fact "disabled for everything else."
-        (reset! sent-allu-requests 0)
+        (fact "disabled for everything else."
+          (reset! sent-allu-requests 0)
 
-        (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate allu/SijoituslupaOperation)) => ok?]
-          (itu/local-command pena :submit-application :id id) => ok?)
+          (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate allu/SijoituslupaOperation)) => ok?]
+            (itu/local-command pena :submit-application :id id) => ok?)
 
-        (let [{:keys [id]} (itu/create-local-app pena
-                                                 :operation "pientalo"
-                                                 :x "385770.46" :y "6672188.964"
-                                                 :address "Kaivokatu 1"
-                                                 :propertyId "09143200010023") => ok?]
-          (itu/local-command pena :submit-application :id id) => ok?)
+          (let [{:keys [id]} (itu/create-local-app pena
+                                                   :operation "pientalo"
+                                                   :x "385770.46" :y "6672188.964"
+                                                   :address "Kaivokatu 1"
+                                                   :propertyId "09143200010023") => ok?]
+            (itu/local-command pena :submit-application :id id) => ok?)
 
-        @sent-allu-requests => 0))
+          @sent-allu-requests => 0))
 
-    (fact "error responses from ALLU produce `fail!`ures"
-      (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 400, :body "Your data was bad."}
-                                                           {:ok   false, :text "error.allu.malformed-application"
-                                                            :body "Your data was bad."})})
-      (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
-        (itu/local-command pena :submit-application :id id))
+      (fact "error responses from ALLU produce `fail!`ures"
+        (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 400, :body "Your data was bad."}
+                                                             {:ok   false, :text "error.allu.malformed-application"
+                                                              :body "Your data was bad."})})
+        (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
+          (itu/local-command pena :submit-application :id id))
 
-      (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 401, :body "You are unauthorized."}
-                                                           {:ok     false, :text "error.allu.http"
-                                                            :status 401, :body "You are unauthorized."})})
-      (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-        (itu/local-command pena :submit-application :id id)))
+        (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 401, :body "You are unauthorized."}
+                                                             {:ok     false, :text "error.allu.http"
+                                                              :status 401, :body "You are unauthorized."})})
+        (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
+          (itu/local-command pena :submit-application :id id)))
 
-    (mount/start #'allu/allu-instance)))
+      (mount/start #'allu/allu-instance))))
