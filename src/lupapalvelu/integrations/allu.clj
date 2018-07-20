@@ -366,12 +366,13 @@
 ;;;; ===================================================================================================================
 
 (defn cancel-application!
-  "Cancel application in ALLU."
+  "Cancel application in ALLU (if it had been sent there)."
   [app]
-  (let [[endpoint request] (application-cancel-request (env/value :allu :url) (env/value :allu :jwt) app)]
-    (match (cancel-allu-application! allu-instance endpoint request)
-      {:status (:or 200 201)} (info (:id app) "was canceled in ALLU")
-      response (allu-http-fail! response))))
+  (when-let [allu-id (-> app :integrationKeys :ALLU :id)]
+    (let [[endpoint request] (application-cancel-request (env/value :allu :url) (env/value :allu :jwt) app)]
+      (match (cancel-allu-application! allu-instance endpoint request)
+        {:status (:or 200 201)} (info (:id app) "was canceled in ALLU as" allu-id)
+        response (allu-http-fail! response)))))
 
 (defn create-placement-contract!
   "Create placement contract in ALLU. Returns ALLU id for the contract."
