@@ -153,4 +153,4 @@
           (itu/local-command pena :submit-application :id id)
           @failure-counter => 1)))
 
-    (mount/start #'allu/allu-instance)))
+    (mount/start #'allu/allu-instance))))
