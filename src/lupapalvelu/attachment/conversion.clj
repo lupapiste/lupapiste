@@ -21,6 +21,8 @@
   #{:application/vnd.openxmlformats-officedocument.presentationml.presentation
     :application/vnd.openxmlformats-officedocument.wordprocessingml.document
     :application/vnd.oasis.opendocument.text
+    :application/vnd.oasis.opendocument.graphics
+    :application/vnd.oasis.opendocument.presentation
     :application/vnd.ms-powerpoint
     :application/rtf
     :application/msword
