@@ -160,3 +160,4 @@
         request => {:headers      {:authorization "Bearer foo.bar.baz"}
                     :content-type :json
                     :body         (json/encode (application->allu-placement-contract pending-on-client app))}))))
+
