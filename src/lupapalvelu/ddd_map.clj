@@ -1,11 +1,13 @@
 (ns lupapalvelu.ddd-map
   "External 3D map support. Preferred namespace alias ddd."
   (:require [taoensso.timbre :refer [errorf]]
-   [sade.core :refer :all]
+            [sade.core :refer :all]
             [sade.strings :as ss]
+            [sade.http :as http]
+            [monger.operators :refer :all]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
-            [sade.http :as http]))
+            [lupapalvelu.action :as action]))
 
 (defn three-d-map-enabled
   "Pre-checker for making sure that the organization has the 3D map enabled."
@@ -28,14 +30,21 @@
     (catch Exception e
       (errorf "3D map url %s failed: %s" url (.getMessage e)))))
 
+(defn- mark-3d-map-activated [{:keys [created] :as command}]
+  (action/update-application
+    command
+    {:3dMapActivated nil}
+    {$set {:3dMapActivated created}}))
+
 (defn redirect-to-3d-map
   "Makes POST request to the 3D map server and returns the Location header value."
-  [{email :email} {app-id :id} organization]
-  (let [{:keys [url username password crypto-iv]} (-> organization
+  [{:keys [application user organization] :as command}]
+  (let [email (:email user)
+        {:keys [url username password crypto-iv]} (-> @organization
                                                       :3d-map
                                                       :server)
         response (post-3d-map-server url
-                                     app-id
+                                     (:id application)
                                      (or (usr/get-apikey email)
                                          (usr/create-apikey email))
                                      (when (ss/not-blank? crypto-iv)
@@ -45,4 +54,5 @@
         location (-> response :headers :location)]
     (if (ss/blank? location)
       (fail :error.3d-map-not-found)
-      (ok :location location))))
+      (do (mark-3d-map-activated command)
+          (ok :location location)))))
