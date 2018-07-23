@@ -66,7 +66,9 @@
     :else nil))
 
 (defn parse-saml-resp
-  "Takes an SAML message in string format, returns it parsed into a Clojure map."
+  "Takes an SAML message in string format, returns it parsed into a Clojure map.
+  Isn't really all that necessary, since the saml-info var (inside a let binding
+  in ad-login route) contains the same info..."
   [xml-string]
   (-> xml-string xml/parse-str xml-tree->edn))
 
@@ -104,16 +106,8 @@
                            (saml-sp/validate-saml-response-signature saml-resp (:idp-cert config))
                            false)
         valid? (and valid-relay-state? valid-signature?)
-        saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter))
-        _ (println req)
-        _ (println state)
-        _ (println xml-response)
-        _ (println valid-relay-state?)
-        _ (println relay-state)
-        _ (println saml-resp)
-        _ (println saml-info)
-        _ (println valid-signature?)
-        ]
+        ; saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter)) ;; The relaystate doesn't validate yet...
+        saml-info (saml-sp/saml-resp->assertions saml-resp decrypter)]
     {:jee "jee"})) ;; Add logic here after SAML validation and parsing succeeds.
 
 (defpage [:post "/from-ad/:trid"] {:keys [trid] :as params}
