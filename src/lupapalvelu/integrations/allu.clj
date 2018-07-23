@@ -282,13 +282,15 @@
     :content-type :json
     :body         (json/encode (application->allu-placement-contract true app))}])
 
-(defn- placement-locking-request [allu-url allu-jwt app]
+(defn- placement-update-request [pending-on-client allu-url allu-jwt app]
   (let [allu-id (-> app :integrationKeys :ALLU :id)]
     (assert allu-id (str (:id app) " does not contain an ALLU id"))
     [(str allu-url "/placementcontracts/" allu-id)
      {:headers      {:authorization (str "Bearer " allu-jwt)}
       :content-type :json
-      :body         (json/encode (application->allu-placement-contract false app))}]))
+      :body         (json/encode (application->allu-placement-contract pending-on-client app))}]))
+
+(def- placement-locking-request (partial placement-update-request false))
 
 ;;;; Should you use this?
 ;;;; ===================================================================================================================
@@ -309,6 +311,7 @@
   (cancel-allu-application! [self endpoint request])
 
   (create-contract! [self endpoint request])
+  (update-contract! [self endpoint request])
   (lock-contract! [self endpoint request])
 
   (allu-fail! [self text info-map]))
@@ -318,9 +321,21 @@
   (cancel-allu-application! [_ endpoint request] (http/put endpoint request))
 
   (create-contract! [_ endpoint request] (http/post endpoint request))
+  (update-contract! [_ endpoint request] (http/put endpoint request))
   (lock-contract! [_ endpoint request] (http/put endpoint request))
 
   (allu-fail! [_ text info-map] (fail! text info-map)))     ; TODO: Is there a better way to handle post-fn errors?
+
+(defn- local-mock-update-contract [state endpoint request]
+  (let [placement-contract (json/decode (:body request) true)
+        allu-id (second (re-find #".*/(\d+)" endpoint))]
+    (if-let [validation-error (sc/check PlacementContract placement-contract)]
+      (assoc state :latest-response {:status 400, :body validation-error})
+      (if (contains? (:applications state) allu-id)
+        (-> state
+            (assoc-in [:applications allu-id] placement-contract)
+            (assoc :latest-response {:status 200, :body allu-id}))
+        (assoc state :latest-response {:status 404, :body (str "Not Found: " allu-id)})))))
 
 (deftype LocalMockALLU [state]
   ALLUPlacementContracts
@@ -342,15 +357,8 @@
               {:keys [id-counter]} (swap! state local-mock-allu-state-push)]
           {:status 200, :body (str (dec id-counter))}))))
 
-  (lock-contract! [_ endpoint request]
-    (let [placement-contract (json/decode (:body request) true)
-          allu-id (second (re-find #".*/(\d+)" endpoint))]
-      (if-let [validation-error (sc/check PlacementContract placement-contract)]
-        {:status 400, :body validation-error}
-        (if (contains? (:applications @state) allu-id)
-          (do (swap! state assoc-in [:applications allu-id] placement-contract)
-              {:status 200, :body allu-id})
-          {:status 404, :body (str "Not Found: " allu-id)}))))
+  (update-contract! [_ endpoint request] (:latest-response (swap! state local-mock-update-contract endpoint request)))
+  (lock-contract! [_ endpoint request] (:latest-response (swap! state local-mock-update-contract endpoint request)))
 
   (allu-fail! [_ text info-map] (fail! text info-map)))     ; TODO: Is there a better way to handle post-fn errors?
 
@@ -364,6 +372,8 @@
 
 ;;;; Public API
 ;;;; ===================================================================================================================
+
+;;; TODO: DRY these up:
 
 (defn cancel-application!
   "Cancel application in ALLU (if it had been sent there)."
@@ -382,6 +392,15 @@
       {:status (:or 200 201), :body allu-id} (do (info (:id app) "was created succesfully in ALLU as" allu-id)
                                                  allu-id)
       response (allu-http-fail! response))))
+
+(defn update-placement-contract!
+  "Update application in ALLU (if it had been sent there)."
+  [app]
+  (when-let [allu-id (-> app :integrationKeys :ALLU :id)]
+    (let [[endpoint request] (placement-update-request true (env/value :allu :url) (env/value :allu :jwt) app)]
+      (match (update-contract! allu-instance endpoint request)
+        {:status (:or 200 201), :body allu-id} (info (:id app) "was updated succesfully in ALLU as" allu-id)
+        response (allu-http-fail! response)))))
 
 (defn lock-placement-contract!
   "Lock placement contract in ALLU for verdict evaluation."

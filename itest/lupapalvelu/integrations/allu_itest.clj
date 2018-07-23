@@ -15,8 +15,8 @@
             [lupapalvelu.itest-util :as itu :refer [pena raktark-helsinki]]
 
             [lupapalvelu.integrations.allu :as allu
-             :refer [ALLUPlacementContracts cancel-allu-application! create-contract! lock-contract! allu-fail!
-                     ->LocalMockALLU PlacementContract]]))
+             :refer [ALLUPlacementContracts ->LocalMockALLU PlacementContract
+                     update-contract! cancel-allu-application! create-contract! lock-contract! allu-fail!]]))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -59,6 +59,12 @@
 
     (create-contract! inner endpoint request))
 
+  (update-contract! [_ endpoint request]
+    (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
+    (check-request false request)
+
+    (update-contract! inner endpoint request))
+
   (lock-contract! [_ endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
     (check-request false request)
@@ -67,10 +73,12 @@
 
   (allu-fail! [_ text info-map] (allu-fail! inner text info-map)))
 
+;; FIXME: DRY it up
 (deftype ConstALLU [cancel-response creation-response locking-response fail-map failure-counter]
   ALLUPlacementContracts
   (cancel-allu-application! [_ _ _] cancel-response)
   (create-contract! [_ _ _] creation-response)
+  (update-contract! [_ _ _] locking-response)
   (lock-contract! [_ _ _] locking-response)
   (allu-fail! [_ text info-map]
     (fact "response is 4**" creation-response => http/client-error?)
