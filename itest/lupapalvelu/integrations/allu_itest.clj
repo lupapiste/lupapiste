@@ -80,6 +80,7 @@
 
   (allu-fail! [_ text info-map] (allu-fail! inner text info-map)))
 
+;; FIXME: DRY it up
 (deftype ConstALLU [cancel-response creation-response locking-response fail-map failure-counter]
   ALLUPlacementContracts
   (cancel-allu-application! [_ _ _] cancel-response)
