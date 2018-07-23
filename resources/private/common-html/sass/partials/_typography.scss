@@ -16,11 +16,11 @@ body {
   font-size: $font-size-body;
   line-height: $baseline;
   margin-bottom: $baseline;
-  color: $grey-text;
+  color: $primary-text;
 }
 
 p {
-  color: #616161;
+  color: $primary-text;
   margin-bottom: $baseline;
   line-height: $baseline;
 }
@@ -31,7 +31,6 @@ h1, .h1 {
   font-size: $baseline;
   margin-bottom: $marginM;
   text-transform: uppercase;
-  color: $grey-text;
 
 }
 
@@ -51,12 +50,8 @@ i {
   margin-bottom: $marginM;
 }
 
-.error-text {
-  color: $error-text;
-}
-
 .success-message {
-  color: $lp-green;
+  color: $green-dark;
 }
 
 blockquote {

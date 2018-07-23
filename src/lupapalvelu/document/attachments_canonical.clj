@@ -1,12 +1,15 @@
 (ns lupapalvelu.document.attachments-canonical
-  (:require [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.xml.disk-writer :as writer]
+  (:require [lupapalvelu.document.rakennuslupa-canonical :as rakval-canon]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.pate.schemas :as schemas]
+            [lupapalvelu.xml.disk-writer :as writer]
+            [ring.util.codec :as codec]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.strings :as ss]
-            [sade.util :as util]
-            [lupapalvelu.document.rakennuslupa-canonical :as rakval-canon]
-            [sade.strings :as str]))
+            [sade.strings :as str]
+            [sade.util :as util]))
 
 (defn- create-metatieto [k v]
   (when v
@@ -187,3 +190,16 @@
           file-id (:fileId attachment)
           file-name (:filename attachment)]
       (get-Liite attachment-title link attachment type-id file-id file-name (:version attachment)))))
+
+(defn pate-verdict-attachment-link
+  [application verdict]
+  {:kuvaus            (i18n/localize (get-in verdict [:data :language] :fi)
+                                     :pate-verdict)
+   :linkkiliitteeseen (format "%s/api/raw/verdict-pdf?%s"
+                              (env/value :host)
+                              (codec/form-encode {:id         (:id application)
+                                                  :verdict-id (:id verdict)}))
+   :muokkausHetki     (util/to-xml-datetime (:published verdict))
+   :tyyppi            (:type-id (schemas/resolve-verdict-attachment-type application))
+   :versionumero      "0.1" ;; Generated verdict PDF is always the first version
+   })

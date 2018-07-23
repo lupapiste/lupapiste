@@ -25,9 +25,8 @@
     (phrase-id-exists command)))
 
 (defn upsert-phrase [{:keys [data user]}]
-  (let [m         (select-keys data [:category :tag :phrase])
-        phrase-id (:phrase-id data)
-        org-id    (usr/authority-admins-organization-id user)]
+  (let [m                          (select-keys data [:category :tag :phrase])
+        {:keys [phrase-id org-id]} data]
     (if phrase-id
       (mongo/update :organizations
                     {:_id     org-id

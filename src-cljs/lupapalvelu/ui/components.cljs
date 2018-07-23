@@ -435,15 +435,23 @@
    text Text where link is in brackets: 'Press [me] for details'
    text-loc Localization key for text.
    click Function to be called when the link is clicked
-   [test-id] Test-id for the link element."
+   [test-id] Test-id for the link element
+
+   [disabled?] See `common/resolve-disabled`
+   [enabled?]  See `common/resolve-disabled`"
   [{:keys [click test-id] :as options}]
   (let [regex          #"\[(.*)\]"
         text           (common/resolve-text options)
         link           (last (re-find regex text))
         ;; Split results include the link
-        [before after] (remove #(= link %) (s/split text regex))]
-    [:span before
-     [:a (common/add-test-id {:on-click click} test-id) link]
+        [before after] (remove #(= link %) (s/split text regex))
+        disabled?      (common/resolve-disabled options)]
+    [:span {:class (common/css-flags :disabled disabled?)}
+     before
+     (common/add-test-id (if disabled?
+                           link
+                           [:a {:on-click click} link])
+                         test-id)
      after]))
 
 (rum/defc icon-button < rum/reactive

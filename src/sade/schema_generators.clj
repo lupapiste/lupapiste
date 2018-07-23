@@ -9,7 +9,8 @@
             [clj-time.coerce :as ctc]
             [clojure.string :as s]
             [clojure.test.check.generators :as gen]
-            [sade.shared-schemas :as sssc]))
+            [sade.shared-schemas :as sssc]
+            [com.gfredericks.test.chuck.generators :refer [string-from-regex]]))
 
 (defonce static-schema-generators (atom {}))
 (defonce dynamic-schema-generator-constructors (atom {}))
@@ -130,7 +131,7 @@
 
 (register-generator ssc/Rakennusnumero rakennusnumero)
 
-(def kiinteistotunnus (gen/fmap (partial apply str) (gen/vector single-number-int 9)))
+(def kiinteistotunnus (gen/fmap (partial apply str) (gen/vector single-number-int 14)))
 
 (register-generator ssc/Kiinteistotunnus kiinteistotunnus)
 
@@ -210,6 +211,8 @@
                               (gen/vector single-number-int 12)))
 
 (register-generator ssc/ApplicationId application-id)
+
+(register-generator ssc/Tel (string-from-regex #"\+?[\d -]+"))
 
 (def http-protocol (gen/elements ["http://" "https://"]))
 (def http-url

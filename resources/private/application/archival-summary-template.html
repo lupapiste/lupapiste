@@ -109,19 +109,19 @@
       </div>
       <!-- /ko -->
 
-      <div data-bind="if: util.getIn(archivingDates, ['initial'])" class="spacerL">
+      <div data-bind="if: archivingDates.initial" class="spacerL">
         <h2 data-bind="ltext: 'archivalSummary.archivalDates'"></h2>
         <div>
           <span data-bind="ltext: 'archivalSummary.archivalDates.initial'"></span>
-          <span data-bind="dateString: archivingDates().initial"></span>
+          <span data-bind="dateString: archivingDates.initial"></span>
         </div>
-        <div data-bind="if: archivingDates().application">
+        <div data-bind="if: archivingDates.application">
           <span data-bind="ltext: 'archivalSummary.archivalDates.application'"></span>
-          <span data-bind="dateString: archivingDates().application"></span>
+          <span data-bind="dateString: archivingDates.application"></span>
         </div>
-        <div data-bind="if: archivingDates().completed">
+        <div data-bind="if: archivingDates.completed">
           <span data-bind="ltext: 'archivalSummary.archivalDates.completed'"></span>
-          <span data-bind="dateString: archivingDates().completed"></span>
+          <span data-bind="dateString: archivingDates.completed"></span>
         </div>
       </div>
 
@@ -239,8 +239,8 @@
           <div class="left">
             <div data-bind="if: convertableToPdfA" class="convert-to-pdfa-button">
               <button class="btn-primary waiting" data-bind="click: _.partial($component.convertToPdfA, $data),
-                                                     disable: $component.conversionInProgress,
-                                                     css: { waiting: $component.conversionInProgress }">
+                                                     disable: $data.processing,
+                                                     css: { waiting: $data.processing }">
                 <i class="lupicon-refresh"></i>
                 <i class="spin lupicon-refresh wait"></i>
                 <span data-bind="ltext: 'Konvertoi PDF/A-muotoon'"></span>

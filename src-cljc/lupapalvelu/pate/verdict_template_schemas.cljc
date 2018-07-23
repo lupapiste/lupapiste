@@ -97,9 +97,8 @@
               (let [codename     (name code)
                     included-key (keyword (str codename "-included"))]
                 {:toggle-key code
-
                  :included     {:toggle {:i18nkey  (keyword (str "pate-r.foremen."
-                                                               codename))
+                                                                 codename))
                                          :label?  false}}
                  :included-key included-key
                  :toggle     {:toggle {:i18nkey :pate.available-in-verdict

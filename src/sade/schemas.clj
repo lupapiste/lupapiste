@@ -3,6 +3,7 @@
             [sade.validators :as validators]
             [sade.strings :as ss]
             [clj-time.format :as ctf]
+            [iso-country-codes.countries :as countries]
             [schema.core :refer [defschema] :as sc]
             [schema.coerce :as coerce]
             [sade.shared-schemas :as sssc]
@@ -170,6 +171,10 @@
 (defschema ApplicationId
   (sc/pred validators/application-id? "Application ID"))
 
+(defschema ISO-3166-alpha-2
+  "Two letter country code (e.g. 'FI')"
+  (apply sc/enum (map :alpha-2 countries/countries)))
+
 ;; Schemas for blank or valid values
 
 (sc/defschema OptionalHttpUrl
@@ -215,3 +220,10 @@
 (defdynamicschema min-max-valued-decimal-string [min max]
   (sc/constrained DecimalString (every-pred #(if min (<= min (util/->double %)) true) #(if max (>= max (util/->double %)) true))
                   (format "Min max valued decimal string with values [%d-%d]" min max)))
+
+;;
+;; Other definitions
+;;
+
+(defschema AttachmentId
+  (min-length-string 24))

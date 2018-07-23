@@ -7,9 +7,13 @@
                  [org.clojure/tools.nrepl "0.2.13"]
                  [org.clojure/tools.reader "1.1.3.1"]
                  [org.clojure/tools.trace "0.7.9"]
-                 [org.clojure/test.check "0.9.0"]
                  [org.clojure/core.memoize "0.5.9"]
                  [org.clojure/core.async "0.4.474"]
+                 [org.clojure/test.check "0.9.0"]
+                 [com.gfredericks/test.chuck "0.2.9"]
+
+                 ; State management
+                 [mount "0.1.12"]
 
                  ; Web frameworks
                  [ring "1.6.2" :exclusions [commons-fileupload org.clojure/tools.reader]]
@@ -78,6 +82,9 @@
 
                  ; Joda time wrapper
                  [clj-time "0.14.2"]
+
+                 ; Country code manipulation
+                 [iso-country-codes "1.0"]
 
                  ; String case manipulation
                  [camel-snake-kebab "0.4.0"]

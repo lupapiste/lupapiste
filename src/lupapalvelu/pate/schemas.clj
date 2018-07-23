@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.schemas
   (:require [clojure.set :as set]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :refer [body] :as tools]
             [lupapalvelu.i18n :as i18n]
@@ -12,7 +13,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [schema-tools.core :as st]
-            [schema.core :refer [defschema] :as sc]))
+            [schema.core :refer [defschema] :as sc]
+            [swiss.arrows :refer :all]))
 
 (defschema PateCategory
   {:id       ssc/ObjectIdStr
@@ -109,14 +111,23 @@
 (defschema PateBaseVerdict
   (merge PateCategory
          {;; Verdict is draft until it is published
-          (sc/optional-key :published) ssc/Timestamp
-          :modified                    ssc/Timestamp
-          :data                        sc/Any
-          (sc/optional-key :archive)   {:verdict-date                    ssc/Timestamp
-                                        (sc/optional-key :lainvoimainen) ssc/Timestamp
-                                        :verdict-giver                   sc/Str}
+          (sc/optional-key :published)          ssc/Timestamp
+          :modified                             ssc/Timestamp
+          :data                                 sc/Any
+          (sc/optional-key :archive)            {:verdict-date                    ssc/Timestamp
+                                                 (sc/optional-key :lainvoimainen) ssc/Timestamp
+                                                 :verdict-giver                   sc/Str}
           ;; Either the drafter or publisher
-          (sc/optional-key :user)      UserRef}))
+          (sc/optional-key :user)               UserRef
+          ;; Pointer to the verdict attachment. Either an attachment
+          ;; id or html source. The source is stored in order to be
+          ;; able to regenerate PDF, when needed (after muuntaja
+          ;; failure, for example). After the PDF has been
+          ;; successfully generated, the html is replaced with
+          ;; attachment id.
+          (sc/optional-key :verdict-attachment) (sc/conditional
+                                                 :html {:html sc/Any}
+                                                 :else ssc/AttachmentId)}))
 
 (defschema PateModernVerdict
   (merge PateBaseVerdict
@@ -457,3 +468,15 @@
                     (section-dicts section)))
           {}
           sections))
+
+(defn resolve-verdict-attachment-type
+  ([{:keys [permitType]} type-id]
+   (-<>> (keyword permitType)
+         att-type/get-all-attachment-types-for-permit-type
+         (util/find-by-key :type-id type-id)
+         (select-keys <> [:type-group :type-id])
+         (reduce-kv (fn [acc k v]
+                      (assoc acc k (name v)))
+                    {})))
+  ([application]
+   (resolve-verdict-attachment-type application :paatos)))

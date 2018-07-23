@@ -11,7 +11,8 @@
             [schema.core :as sc]
             [sade.schema-generators :as ssg]))
 
-(testable-privates lupapalvelu.attachment.type attachment-types-by-operation)
+(testable-privates lupapalvelu.attachment.type
+                   attachment-types-by-operation foreman-application-types type-grouping default-grouping)
 
 (facts "Test parse-attachment-type"
   (fact (parse-attachment-type "foo.bar")  => {:type-group :foo, :type-id :bar})
@@ -59,15 +60,15 @@
     (count (attachment-types-by-operation "tyonjohtajan-nimeaminen-v2")) => 7))
 
 (fact "All attachment types in default-grouping are valid"
-  (->> (mapcat val default-grouping)
+  (->> (mapcat val @default-grouping)
        (remove (partial contains? (mapcat val attachment-types-by-permit-type)))) => empty?)
 
 (fact "All attachment types in foreman-application-types are valid"
-  (->> foreman-application-types
+  (->> @foreman-application-types
        (remove (partial contains? (mapcat val attachment-types-by-permit-type)))) => empty?)
 
 (fact "All attachment types in group-tag-mapping are valid"
-  (->> (keys type-grouping)
+  (->> (keys @type-grouping)
        (remove (partial contains? (mapcat val attachment-types-by-permit-type)))) => empty?)
 
 (facts "predefined content mapping keys are valid"

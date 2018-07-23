@@ -214,6 +214,10 @@ span.formatted {
   }
 }
 
+span.disabled {
+  color: $gray85;
+}
+
 span.markup {
   display: inline-block;
   p {
@@ -755,31 +759,32 @@ span.verdict-published {
   font-weight: bold;
 }
 
-div.pate-note {
+@mixin patenote( $vmargin, $padding) {
   border-left: 4px solid $orange-dark;
-  margin-top: $marginS;
-  margin-bottom: $marginS;
-  padding-left: $marginS;
-  padding-right: $marginS;
-  padding-top: $marginS;
-  padding-bottom: $marginS;
-  background-color: $gray246;
+  margin-top: $vmargin;
+  margin-bottom: $vmargin;
+  padding: $padding;
   display: inline-block;
 }
 
+div.pate-note {
+  @include patenote( $marginS, $marginS);
+  background-color: $gray246;
+}
+
 div.pate-required-fields-note {
-  border-left: 4px solid $orange-dark;
-  margin-top: 0;
-  margin-bottom: 0;
-  padding-top: 0;
-  padding-bottom: 0;
+  @include patenote( 0, 0);
   padding-left: $marginS;
-  //background-color: $gray246;
-  display: inline-block;
   margin-right: $marginS;
   &:after {
     @include required-after;
   }
+}
+
+div.pate-published-note {
+  @include patenote( 0, 0);
+  padding-left: $marginS;
+  margin-right: 4em;
 }
 
 div.pate-unordered-list {

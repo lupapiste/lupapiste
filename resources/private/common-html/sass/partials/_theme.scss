@@ -1,31 +1,4 @@
-/* colors*/
-
-$lp-green: rgb(4,199,20);
-$lp-orange: rgb(243,145,41);
-$lp-dark-grey: rgb(79,79,79);
-$lp-light-grey: rgb(246,246,246);
-$color-text: #333;
-$color-dark-bg: rgb(136,138,140);
-$grey-text: rgb(89,89,89);
-$error-text: red;
-$lp-light-green: rgb(185,254,190);
-
-$lupapisteBlue: #01BEF5;
-$borderColor: #01BEF5;
-$lupapisteLightblue: #C1E8F7;
-
-@mixin blue-background {
-  background: #30B2E5; /* Old browsers */
-  @include background( linear-gradient(top,  #49c0f0 0%, #2cafe3 100%));
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#49c0f0', endColorstr='#2cafe3',GradientType=0 ); /* IE6-9 */
-}
-
-@mixin red-background {
-  background: #febbbb; /* Old browsers */
-  @include background( linear-gradient(top, #febbbb 0%, #fe9090 45%, #ff5c5c 100%));
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#febbbb', endColorstr='#ff5c5c',GradientType=0 ); /* IE6-9 */
-}
-
+// Use these color variables below
 // Colors as specified in the visual guide
 
 $orange-darkest:  rgb(239, 118, 38);
@@ -85,13 +58,11 @@ $turqo-active:   $turqo-light;
 
 // Grays from the darkest to the lightest (white);
 @function make-gray( $n ) {
-    @return rgb( $n, $n, $n );
+	@return rgb( $n, $n, $n );
 }
 
 $gray17:  make-gray( 17 );
 $gray51:  make-gray( 51 );
-$gray69:  make-gray( 69 );
-$gray79:  make-gray( 79 );
 $gray85:  make-gray( 85 );
 $gray119: make-gray( 119 );
 $gray153: make-gray( 153 );
@@ -141,15 +112,17 @@ $light-gray-hover:  $gray153;
 $light-gray-active: $gray187;
 
 
-
 // Somewhat semantic colors.
 // These are used in "normal" circumstances.
 
 $primary:   $orange-dark;
 $positive:  $green-dark;
 $negative:  $red-dark;
+$primary-text: $gray51;
 
 // Legacy gray color variables
-$lp-dark-grey: $gray79;
+$lp-dark-grey: $gray85;
 $lp-light-grey: $gray246;
-$grey-text: $gray51;
+$lp-orange: $orange-dark;
+$color-text: $gray51;
+

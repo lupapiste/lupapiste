@@ -6,6 +6,8 @@
 
 (apply-remote-minimal)
 
+(def org-id "753-YA")
+
 (fact "Create and submit YA application"
    (let [{app-id  :id
           subtype :permitSubtype} (create-and-submit-application pena
@@ -174,7 +176,7 @@
                       :in-any-order)))))))
 
 (facts "Modern contracts"
-  (toggle-pate "753-YA" true)
+  (toggle-pate org-id true)
 
   (facts "Create new YA application"
     (let [{app-id :id} (create-and-submit-application teppo
@@ -194,27 +196,30 @@
         (command sonja :new-legacy-verdict-draft :id app-id)
         => fail?)
       (fact "Contract settings consist only of reviews"
-        (let [review-id (add-repeating-setting sipoo-ya :contract :reviews :add-review
+        (let [review-id (add-repeating-setting sipoo-ya org-id :contract :reviews :add-review
                                                :fi "Foo suomeksi"
                                                :sv "Foo p\u00e5 svenska"
                                                :en "Foo in English"
                                                :type "aloituskatselmus")]
-          (query sipoo-ya :verdict-template-settings :category "contract")
+          (query sipoo-ya :verdict-template-settings
+                 :org-id org-id
+                 :category "contract")
           => (contains {:filled true})
           (fact "Create contract template"
-            (let [{template-id :id} (init-verdict-template sipoo-ya :contract)]
+            (let [{template-id :id} (init-verdict-template sipoo-ya org-id :contract)]
               (fact "Fill template"
                 (set-template-draft-values sipoo-ya
+                                           org-id
                                            template-id
                                            :language "fi"
                                            :contract-text "This is a test contract."
                                            [:reviews review-id :included] true
                                            [:reviews review-id :selected] true))
               (fact "Add condition"
-                (add-template-condition sipoo-ya template-id
+                (add-template-condition sipoo-ya org-id template-id
                                         "Some random condition."))
               (fact "Publish template"
-                (publish-verdict-template sipoo-ya template-id) => ok?)
+                (publish-verdict-template sipoo-ya org-id template-id) => ok?)
               (fact "New contract"
                 (let [{:keys [verdict-id]} (command sonja :new-pate-verdict-draft :id app-id
                                                     :template-id template-id)

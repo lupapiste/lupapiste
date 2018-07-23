@@ -11,9 +11,12 @@
             [midje.util :refer [testable-privates]]
             [net.cgrand.enlive-html :as enlive]
             [sade.common-reader :as cr]
+            [sade.env :as env]
             [sade.xml :as xml]))
 
-(def verdict verdict-with-attachment)
+(def verdict (assoc verdict-with-attachment
+                    :published 1531465278654 ;; 13.7.2018
+                    ))
 
 (def app (assoc application-rakennuslupa :attachments [{:id "11"
                                                         :type {:type-id "paatosote" :type-group "paatoksenteko"}
@@ -146,13 +149,15 @@
         (xml/get-text lp-xml [:paatostieto :poytakirja :liite :kuvaus]) => "P\u00e4\u00e4t\u00f6s")
 
       (fact "linkkiliitteeseen"
-        (xml/get-text lp-xml [:paatostieto :poytakirja :liite :linkkiliitteeseen]) => "BEGIN_OF_LINK/LP-753-2018-90012 P\u00e4\u00e4t\u00f6s 21.03.2018 12:29.pdf")
+        (let [link (format "%s/api/raw/verdict-pdf?id=%s&verdict-id=%s"
+                           (sade.env/value :host) (:id app) (:id verdict))]
+          (xml/get-text lp-xml [:paatostieto :poytakirja :liite :linkkiliitteeseen]) => link))
 
       (fact "versio"
         (xml/get-text lp-xml [:paatostieto :poytakirja :liite :versionumero]) => "0.1")
 
       (fact "muokkaushetki"
-        (xml/get-text lp-xml [:paatostieto :poytakirja :liite :muokkausHetki]) => "2018-03-21T10:29:38")
+        (xml/get-text lp-xml [:paatostieto :poytakirja :liite :muokkausHetki]) => "2018-07-13T07:01:18")
 
       (fact "tyyppi"
         (xml/get-text lp-xml [:paatostieto :poytakirja :liite :tyyppi]) => "paatos"))))

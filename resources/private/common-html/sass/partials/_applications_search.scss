@@ -85,10 +85,10 @@
 .paging {
   color: $gray51;
   margin-bottom: $marginM;
-  label {
-    color: $gray51;
+  p {
     display: inline-block;
     vertical-align: middle;
+    margin-bottom: 0;
   }
   button {
     margin-right: $grid-margin/2;
@@ -204,7 +204,6 @@ div.search {
       padding-left: 2px;
       display: table-cell;
       vertical-align: middle;
-      color: $grey-text;
     }
   }
   .application-search-results__urgency {
