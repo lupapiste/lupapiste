@@ -6,7 +6,7 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
 
 - [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 - [Leiningen](https://github.com/technomancy/leiningen) 2.5+
-- [MongoDB](https://www.mongodb.org/downloads) (testattu 2.6 - 3.4 versioilla)
+- [MongoDB](https://www.mongodb.org/downloads) 3.6.x
     - Mac: `brew install mongodb` (`brew tap homebrew/services` + `brew services start mongodb`)
     - Tarkista, että mongon kantakansiolla ja lokikansiolla on asetettu permissionit
     - Macillä saattaa tulla avoimien tiedostojen raja vastaan: [How to persist ulimit settings in osx](http://unix.stackexchange.com/questions/108174/how-to-persist-ulimit-settings-in-osx-mavericks)
@@ -151,11 +151,11 @@ Vaihtoehtoisesti voit ajaa Mongoa Dockerissa. Jos käytössäsi on Docker 17.03 
 
 Luo seuraavaksi mongo-kontti joka käyttää äsken luotua volume containeria
 
-    $ docker run --name lupapiste-mongo -v lupis-mongo-volume:/data/db -p 27018:27017 -d mongo:3.2
+    $ docker run --name lupapiste-mongo -v lupis-mongo-volume:/data/db -p 27018:27017 -d mongo:3.6
 
 Jos et luonut volume containeria niin jätä `-v lupis-mongo-volume:/data/db` pois parametreista, eli luo container seuraavasti:
 
-    $ docker run --name lupapiste-mongo -p 27018:27017 -d mongo:3.2
+    $ docker run --name lupapiste-mongo -p 27018:27017 -d mongo:3.6
 
 edellisellä komennolla ajettuna kontin mongon portti 27017 ohjataan oman koneen porttiin 27018. Jos portti 27017 on vapaana, voit hyvin ohjata myös siihen tai vaihtoehtoisesti johonkin toiseen porttiin. Käytetty oman koneen portti pitää päivittää `user.properties`-tiedostoon.
 
