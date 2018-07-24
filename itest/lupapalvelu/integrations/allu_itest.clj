@@ -112,12 +112,17 @@
             (-> (:applications @allu-state) first val :pendingOnClient) => true
 
             (itu/local-command pena :update-doc :id id :doc descr-id :updates [["kayttotarkoitus" "tuijottelu"]]) => ok?
+            (-> (:applications @allu-state) first val :workDescription) => "tuijottelu"
+
             (itu/local-command pena :set-user-to-document :id id :documentId applicant-id
                                :userId pena-id :path "henkilo") => ok?
+            (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Pena Panaani"
             (itu/local-command pena :set-current-user-to-document :id id :documentId applicant-id :path "henkilo")
             => ok?
+            (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Pena Panaani"
             (itu/local-command pena :set-company-to-document :id id :documentId applicant-id
                                :companyId "esimerkki" :path "henkilo") => ok?
+            (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Esimerkki Oy"
 
             (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
             (count (:applications @allu-state)) => 1
