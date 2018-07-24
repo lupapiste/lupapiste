@@ -21,7 +21,7 @@
             [lupapalvelu.integrations.allu :as allu :refer [PlacementContract]]))
 
 (testable-privates lupapalvelu.integrations.allu application->allu-placement-contract
-                   application-cancel-request placement-creation-request placement-locking-request)
+                   application-cancel-request placement-creation-request placement-update-request)
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -148,11 +148,15 @@
                                 :content-type :json
                                 :body         (json/encode (application->allu-placement-contract true app))})))
 
-(facts "placement-locking-request"
+(facts "placement-update-request"
   (let [allu-id 23
-        app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)
-        [endpoint request] (placement-locking-request "https://example.com/api/v1" "foo.bar.baz" app)]
-    (fact "endpoint" endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
-    (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                                :content-type :json
-                                :body         (json/encode (application->allu-placement-contract false app))})))
+
+        app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)]
+    (doseq [pending-on-client [true false]
+            :let [[endpoint request]
+                  (placement-update-request pending-on-client "https://example.com/api/v1" "foo.bar.baz" app)]]
+      (fact "endpoint" endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
+      (fact "request"
+        request => {:headers      {:authorization "Bearer foo.bar.baz"}
+                    :content-type :json
+                    :body         (json/encode (application->allu-placement-contract pending-on-client app))}))))
