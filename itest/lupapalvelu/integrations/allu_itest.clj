@@ -9,10 +9,12 @@
             [sade.schema-generators :as ssg]
             [sade.env :as env]
             [lupapalvelu.document.data-schema :as dds]
+            [lupapalvelu.document.tools :refer [doc-name]]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
 
             [midje.sweet :refer [facts fact =>]]
-            [lupapalvelu.itest-util :as itu :refer [pena raktark-helsinki]]
+            [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
 
             [lupapalvelu.integrations.allu :as allu
              :refer [ALLUPlacementContracts ->LocalMockALLU PlacementContract
@@ -61,7 +63,7 @@
 
   (update-contract! [_ endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
-    (check-request false request)
+    (check-request true request)
 
     (update-contract! inner endpoint request))
 
@@ -100,10 +102,22 @@
         (mount/start-with {#'allu/allu-instance (->CheckingALLU (->LocalMockALLU allu-state))})
 
         (fact "enabled and sending correctly to ALLU for Helsinki YA sijoituslupa and sijoitussopimus."
-          (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
+          (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?
+                {:keys [documents]} (domain/get-application-no-access-checking id)
+                {descr-id :id} (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa")
+                                              documents))
+                {applicant-id :id} (first (filter #(= (doc-name %) "hakija-ya") documents))]
             (itu/local-command pena :submit-application :id id) => ok?
             (count (:applications @allu-state)) => 1
             (-> (:applications @allu-state) first val :pendingOnClient) => true
+
+            (itu/local-command pena :update-doc :id id :doc descr-id :updates [["kayttotarkoitus" "tuijottelu"]]) => ok?
+            (itu/local-command pena :set-user-to-document :id id :documentId applicant-id
+                               :userId pena-id :path "henkilo") => ok?
+            (itu/local-command pena :set-current-user-to-document :id id :documentId applicant-id :path "henkilo")
+            => ok?
+            (itu/local-command pena :set-company-to-document :id id :documentId applicant-id
+                               :companyId "esimerkki" :path "henkilo") => ok?
 
             (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
             (count (:applications @allu-state)) => 1
