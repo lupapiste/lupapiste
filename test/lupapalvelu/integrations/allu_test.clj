@@ -150,7 +150,6 @@
 
 (facts "placement-update-request"
   (let [allu-id 23
-
         app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)]
     (doseq [pending-on-client [true false]
             :let [[endpoint request]
@@ -160,4 +159,3 @@
         request => {:headers      {:authorization "Bearer foo.bar.baz"}
                     :content-type :json
                     :body         (json/encode (application->allu-placement-contract pending-on-client app))}))))
-
