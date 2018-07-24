@@ -3,7 +3,7 @@
 Documentation  Admin edits organization
 Suite Teardown  Apply minimal fixture now
 Resource       ../../common_resource.robot
-
+Resource       ./keywords.robot
 
 *** Test Cases ***
 
@@ -12,10 +12,7 @@ Solita admin goes to organizations page
   Go to page  organizations
   Wait test id visible  organization-search-term
   Test id text is  organization-result-count  ${EMPTY}
-
-Admin shows all organizations
-  Scroll and click test id  organization-show-all
-  Test id text is  organization-result-count  19 organisaatiota.
+  Admin shows all organizations
 
 Admin searchs just 753-R
   Fill test id  organization-search-term  753-R
