@@ -17,6 +17,7 @@
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
 
 ;;;; Schemas
@@ -401,6 +402,10 @@
       (match (update-contract! allu-instance endpoint request)
         {:status (:or 200 201), :body allu-id} (info (:id app) "was updated succesfully in ALLU as" allu-id)
         response (allu-http-fail! response)))))
+
+(defn updater [{{:keys [id] :as application} :application} _]
+  (when (allu-application? application)
+    (update-placement-contract! (domain/get-application-no-access-checking id))))
 
 (defn lock-placement-contract!
   "Lock placement contract in ALLU for verdict evaluation."
