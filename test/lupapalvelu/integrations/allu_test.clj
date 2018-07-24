@@ -131,16 +131,6 @@
                  (for-all [application (sg/generator ValidPlacementApplication)]
                    (nil? (sc/check PlacementContract
                                    (application->allu-placement-contract (sg/generate Bool) application)))))
-    => passing-quick-check)
-
-  (fact "Invalid applications get rejected."
-    (quick-check 10
-                 (for-all [application (sg/generator TypedPlacementApplication)
-                           :when (invalid-placement-application? application)]
-                   (try
-                     (application->allu-placement-contract (sg/generate Bool) application)
-                     false
-                     (catch Exception _ true))))
     => passing-quick-check))
 
 (facts "application-cancel-request"

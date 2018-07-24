@@ -99,66 +99,67 @@
             allu-state (atom initial-allu-state)]
         (mount/start-with {#'allu/allu-instance (->CheckingALLU (->LocalMockALLU allu-state))})
 
-      (fact "enabled and sending correctly to ALLU for Helsinki YA sijoituslupa and sijoitussopimus."
-        (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
-          (itu/local-command pena :submit-application :id id) => ok?
-          (count (:applications @allu-state)) => 1
-          (-> (:applications @allu-state) first val :pendingOnClient) => true
+        (fact "enabled and sending correctly to ALLU for Helsinki YA sijoituslupa and sijoitussopimus."
+          (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
+            (itu/local-command pena :submit-application :id id) => ok?
+            (count (:applications @allu-state)) => 1
+            (-> (:applications @allu-state) first val :pendingOnClient) => true
 
-          (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
-          (count (:applications @allu-state)) => 1
-          (-> (:applications @allu-state) first val :pendingOnClient) => false)
+            (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
+            (count (:applications @allu-state)) => 1
+            (-> (:applications @allu-state) first val :pendingOnClient) => false)
 
-        (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-          (itu/local-command pena :submit-application :id id) => ok?
+          (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
+            (itu/local-command pena :submit-application :id id) => ok?
 
-          (itu/local-command pena :cancel-application :id id :text "Alkoi nolottaa." :lang "fi") => ok?
-          (:id-counter @allu-state) => 2
-          (count (:applications @allu-state)) => 1)
+            (itu/local-command pena :cancel-application :id id :text "Alkoi nolottaa." :lang "fi") => ok?
+            (:id-counter @allu-state) => 2
+            (count (:applications @allu-state)) => 1)
 
-        (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-          (itu/local-command pena :submit-application :id id) => ok?
+          (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
+            (itu/local-command pena :submit-application :id id) => ok?
 
-          (itu/local-command raktark-helsinki :return-to-draft
-                             :id id :text "Tällaisenaan nolo ehdotus." :lang "fi") => ok?
-          (:id-counter @allu-state) => 3
-          (count (:applications @allu-state)) => 1))
+            (itu/local-command raktark-helsinki :return-to-draft
+                               :id id :text "Tällaisenaan nolo ehdotus." :lang "fi") => ok?
+            (:id-counter @allu-state) => 3
+            (count (:applications @allu-state)) => 1))
 
-      (fact "disabled for everything else."
-        (reset! allu-state initial-allu-state)
+        (fact "disabled for everything else."
+          (reset! allu-state initial-allu-state)
 
-        (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate allu/SijoituslupaOperation)) => ok?]
-          (itu/local-command pena :submit-application :id id) => ok?)
+          (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate allu/SijoituslupaOperation)) => ok?]
+            (itu/local-command pena :submit-application :id id) => ok?)
 
-        (let [{:keys [id]} (itu/create-local-app pena
-                                                 :operation "pientalo"
-                                                 :x "385770.46" :y "6672188.964"
-                                                 :address "Kaivokatu 1"
-                                                 :propertyId "09143200010023") => ok?]
-          (itu/local-command pena :submit-application :id id) => ok?
-          (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?)
+          (let [{:keys [id]} (itu/create-local-app pena
+                                                   :operation "pientalo"
+                                                   :x "385770.46" :y "6672188.964"
+                                                   :address "Kaivokatu 1"
+                                                   :propertyId "09143200010023") => ok?]
+            (itu/local-command pena :submit-application :id id) => ok?
+            (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?)
 
-        (:id-counter @allu-state) => 0))
+          (:id-counter @allu-state) => 0))
 
-    (fact "error responses from ALLU produce `fail!`ures"
-      (let [failure-counter (atom 0)]
-        (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 200}
-                                                             {:status 400, :body "Your data was bad."} nil
-                                                             {:ok   false, :text "error.allu.http"
-                                                              :status 400, :body "Your data was bad."}
-                                                             failure-counter)})
-        (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
-          (itu/local-command pena :submit-application :id id)
-          @failure-counter => 1))
+      (fact "error responses from ALLU produce `fail!`ures"
+        (let [failure-counter (atom 0)]
+          (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 200}
+                                                               {:status 400, :body "Your data was bad."} nil
+                                                               {:ok   false, :text "error.allu.malformed-application"
+                                                                :body "Your data was bad."}
+                                                               failure-counter)})
+          (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
+            (itu/local-command pena :submit-application :id id)
+            @failure-counter => 1))
 
-      (let [failure-counter (atom 0)]
-        (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 200}
-                                                             {:status 401, :body "You are unauthorized."} nil
-                                                             {:ok     false, :text "error.allu.http"
-                                                              :status 401, :body "You are unauthorized."}
-                                                             failure-counter)})
-        (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-          (itu/local-command pena :submit-application :id id)
-          @failure-counter => 1)))
+        (let [failure-counter (atom 0)]
+          (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 200}
+                                                               {:status 401, :body "You are unauthorized."} nil
+                                                               {:ok     false, :text "error.allu.http"
+                                                                :status 401, :body "You are unauthorized."}
+                                                               failure-counter)})
+          (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
+            (itu/local-command pena :submit-application :id id)
+            @failure-counter => 1)))
 
-    (mount/start #'allu/allu-instance))))
+      ;; FIXME: Does not actually restore an instance of the correct type:
+      (mount/start #'allu/allu-instance))))

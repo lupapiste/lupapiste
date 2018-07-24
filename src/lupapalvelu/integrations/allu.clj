@@ -261,8 +261,7 @@
              :workDescription              (-> work-description :data :kayttotarkoitus)}]
     (assoc-when res :customerReference (not-empty (-> payee-doc :data :laskuviite)))))
 
-(sc/defn ^{:private true, :always-validate true} application->allu-placement-contract :- PlacementContract
-  [pending-on-client app]
+(sc/defn ^{:private true} application->allu-placement-contract :- PlacementContract [pending-on-client app]
   (->> app flatten-values (convert-value-flattened-app pending-on-client)))
 
 (defn- application-cancel-request [allu-url allu-jwt app]
@@ -394,6 +393,7 @@
                                                  allu-id)
       response (allu-http-fail! response))))
 
+;; TODO: Will error if user changes the application to contain invalid data, is that what we want?
 (defn update-placement-contract!
   "Update application in ALLU (if it had been sent there)."
   [app]
