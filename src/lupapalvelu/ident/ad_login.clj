@@ -42,7 +42,7 @@
 (def config
   {:app-name "Lupapiste"
    :base-uri "http://localhost:8000"
-   :idp-uri  "https://localhost:7000" ;; The dockerized, locally running mock-saml instance (https://github.com/lupapiste/mock-saml)
+   :idp-uri  "http://localhost:7000" ;; The dockerized, locally running mock-saml instance (https://github.com/lupapiste/mock-saml)
    :idp-cert (parse-certificate (slurp "./idp-public-cert.pem")) ;; This needs to live in Mongo's organizations collection
    :keystore-file "./keystore"
    :keystore-password (System/getenv "KEYSTORE_PASS") ;; The default password from the dev guide, needs to be set in environment variable
@@ -72,7 +72,27 @@
   [xml-string]
   (-> xml-string xml/parse-str xml-tree->edn))
 
-(def resp (atom {}))
+
+(def mutables
+  (assoc (saml-sp/generate-mutables)
+         :xml-signer (saml-sp/make-saml-signer (:keystore-file config)
+                                               (:keystore-password config)
+                                               (:key-alias config)
+                                               :algorithm :sha256)))
+
+(def saml-req-factory!
+  (saml-sp/create-request-factory mutables
+                                  (:idp-uri config)
+                                  saml-routes/saml-format
+                                  (:app-name config)
+                                  (:acs-uri config)))
+
+(defpage [:get "/api/saml/ad-login"] []
+  (let [saml-request (saml-req-factory!)
+        hmac-relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec mutables) "target")]
+    (saml-sp/get-idp-redirect (:idp-uri config)
+                              saml-request
+                              hmac-relay-state)))
 
 (defpage [:post "/api/saml/ad-login"] {params :params session :session}
   (let [req (request/ring-request)
@@ -82,17 +102,7 @@
         sp-cert (saml-shared/get-certificate-b64 (:keystore-file config)
                                                  (:keystore-password config)
                                                  (:key-alias config))
-        mutables (assoc (saml-sp/generate-mutables)
-                        :xml-signer (saml-sp/make-saml-signer (:keystore-file config)
-                                                              (:keystore-password config)
-                                                              (:key-alias config)
-                                                              :algorithm :sha256))
         acs-uri (str (:base-uri config) "/saml")
-        saml-req-factory! (saml-sp/create-request-factory mutables
-                                                          (:idp-uri config)
-                                                          saml-routes/saml-format
-                                                          (:app-name config)
-                                                          (:acs-uri config))
         prune-fn! (partial saml-sp/prune-timed-out-ids! (:saml-id-timeouts mutables))
         state {:mutables mutables
                :saml-req-factory! saml-req-factory!
@@ -106,21 +116,20 @@
                            (saml-sp/validate-saml-response-signature saml-resp (:idp-cert config))
                            false)
         valid? (and valid-relay-state? valid-signature?)
-        ; saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter)) ;; The relaystate doesn't validate yet...
-        saml-info (saml-sp/saml-resp->assertions saml-resp decrypter)]
+        saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter)) ;; The relaystate doesn't validate yet...
+        _ (println saml-info)
+        saml-info (saml-sp/saml-resp->assertions saml-resp decrypter)
+        _ (println (str "Saml validation successful? - " valid?))]
     {:jee "jee"})) ;; Add logic here after SAML validation and parsing succeeds.
 
 (defpage [:post "/from-ad/:trid"] {:keys [trid] :as params}
-  (let [valid? params
-        _ (println params)
-        _ (println trid)
-        _ (println "Jeps, eli nyt ollaan from-ad -polussa")]
-        (if valid?
-          {:status  303 ;; See other
-           :headers {"Location" "http://localhost:8000/app/fi/authority"}
-           :body ""}
-          {:status 500
-           :body "The SAML response from IdP does not validate!"})))
+  (let [valid? params]
+    (if valid?
+      {:status 303 ;; See other
+       :headers {"Location" "http://localhost:8000/app/fi/authority"}
+       :body ""}
+      {:status 500
+       :body "The SAML response from IdP does not validate!"})))
 
 (defpage "/api/saml/ad/error" {relay-state :RelayState status :statusCode status2 :statusCode2 message :statusMessage}
   (if (ss/contains? status2 "AuthnFailed")

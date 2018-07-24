@@ -28,7 +28,7 @@
                     <div class="blockbox-wrapper">
                       <input type="checkbox" id="rememberme" data-bind="checked: rememberMe">
                       <label id="rememberme-label" for="rememberme" class="checkbox-label" data-bind="ltext: 'userinfo.rememberme'"></label>
-                    </div>                  
+                    </div>
                   </div>
               </div>
               <div class="row">
@@ -61,6 +61,12 @@
 
             <button id="register-button" class="function"
                     data-bind="ltext: 'welcome.register', enable: lupapisteApp.models.globalAuthModel.ok('register-user')"></button>
+          </section>
+          <section class="welcome-register-section">
+            <h3>SAML-kirjautuminen</h3>
+            <p>Tunnistaudu ulkoisen SAML-palvelun avulla</p>
+
+            <button id="saml-button" class="function" onclick="location.href='/api/saml/ad-login'">Tunnistaudu</button>
           </section>
         </div>
       </div>
