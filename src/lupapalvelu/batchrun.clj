@@ -557,8 +557,7 @@
                                          {:_id {$in application-ids}}))
                   (merge app-state/timestamp-key
                          (pcond-> projection
-                                  sequential? (zipmap (repeat true))))
-                  {:_id 1})))
+                                  sequential? (zipmap (repeat true)))))))
 
 (defn mark-reviews-faulty-for-application [application {:keys [new-faulty-tasks]}]
   (when (not (empty? new-faulty-tasks))
