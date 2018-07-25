@@ -4,6 +4,7 @@
             [slingshot.slingshot :refer [try+]]
             [monger.operators :refer [$set $push $pull $ne]]
             [schema.core :as sc]
+            [sade.coordinate :as coord]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -234,6 +235,16 @@
    (filter-params-of-command params command
                              (partial sc/check schema)
                              error-msg)))
+
+(defn coordinate-parameters
+  "Validates that the given parameters have coordinate values that reside approximately in Finland"
+  [x y command]
+  (or (filter-params-of-command [x] command
+                                (complement coord/valid-x?)
+                                :error.illegal-coordinates)
+      (filter-params-of-command [y] command
+                                (complement coord/valid-y?)
+                                :error.illegal-coordinates)))
 
 (defn valid-db-key
   "Input-validator to check that given parameter is valid db key"

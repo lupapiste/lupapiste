@@ -1719,10 +1719,10 @@
                                      :source nil,
                                      :sourceValue "199887766E",
                                      :modified 1530179094764},
-                        :muutostyolaji {:value "rakennukse pääasiallinen käyttötarkoitusmuutos",
+                        :muutostyolaji {:value "rakennukse p\u00E4\u00E4asiallinen k\u00E4ytt\u00F6tarkoitusmuutos",
                                         :modified 1530179094764,
                                         :source nil,
-                                        :sourceValue "rakennukse pääasiallinen käyttötarkoitusmuutos"},
+                                        :sourceValue "rakennukse p\u00E4\u00E4asiallinen k\u00E4ytt\u00F6tarkoitusmuutos"},
                         :rakennuksenOmistajat {:0 {:_selected {:value "yritys",
                                                                :source "krysp",
                                                                :sourceValue "yritys",
@@ -2009,10 +2009,10 @@
                                                   :modified 1530179094764,
                                                   :source "krysp",
                                                   :sourceValue "vesikeskus"},
-                                   :lammonlahde {:value "kevyt polttoöljy",
+                                   :lammonlahde {:value "kevyt poltto\u00F6ljy",
                                                  :source "krysp",
                                                  :modified 1530179094764,
-                                                 :sourceValue "kevyt polttoöljy"},
+                                                 :sourceValue "kevyt poltto\u00F6ljy"},
                                    :muu-lammonlahde {:value "",
                                                      :modified 1530179094764,
                                                      :source "krysp",
@@ -2512,7 +2512,7 @@
                                                         :version 1}
                                           :source      {:id "vid" :type "verdict"}
                                           :state       :requires_user_action
-                                          :taskname    "Erityisalojen työnjohtaja"}
+                                          :taskname    "Erityisalojen ty\u00F6njohtaja"}
                                          {:assignee    {}
                                           :closed      nil
                                           :created     12345
@@ -2527,7 +2527,7 @@
                                                         :version 1}
                                           :source      {:id "vid" :type "verdict"}
                                           :state       :requires_user_action
-                                          :taskname    "Ilmanvaihtotyönjohtaja"}
+                                          :taskname    "Ilmanvaihtoty\u00F6njohtaja"}
                                          {:assignee    {}
                                           :closed      nil
                                           :created     12345
@@ -2542,7 +2542,7 @@
                                                         :version 1}
                                           :source      {:id "vid" :type "verdict"}
                                           :state       :requires_user_action
-                                          :taskname    "Vastaava työnjohtaja"}
+                                          :taskname    "Vastaava ty\u00F6njohtaja"}
                                          {:assignee    {}
                                           :closed      nil
                                           :created     12345
@@ -2557,7 +2557,7 @@
                                                         :version 1}
                                           :source      {:id "vid" :type "verdict"}
                                           :state       :requires_user_action
-                                          :taskname    "Vesi- ja viemärityönjohtaja"}))
+                                          :taskname    "Vesi- ja viem\u00E4rity\u00F6njohtaja"}))
             :updates     {$push {:tasks {$each '({:assignee    {}
                                                   :closed      nil
                                                   :created     12345
@@ -2694,7 +2694,7 @@
                                                                 :version 1}
                                                   :source      {:id "vid" :type "verdict"}
                                                   :state       :requires_user_action
-                                                  :taskname    "Erityisalojen työnjohtaja"}
+                                                  :taskname    "Erityisalojen ty\u00F6njohtaja"}
                                                  {:assignee    {}
                                                   :closed      nil
                                                   :created     12345
@@ -2709,7 +2709,7 @@
                                                                 :version 1}
                                                   :source      {:id "vid" :type "verdict"}
                                                   :state       :requires_user_action
-                                                  :taskname    "Ilmanvaihtotyönjohtaja"}
+                                                  :taskname    "Ilmanvaihtoty\u00F6njohtaja"}
                                                  {:assignee    {}
                                                   :closed      nil
                                                   :created     12345
@@ -2724,7 +2724,7 @@
                                                                 :version 1}
                                                   :source      {:id "vid" :type "verdict"}
                                                   :state       :requires_user_action
-                                                  :taskname    "Vastaava työnjohtaja"}
+                                                  :taskname    "Vastaava ty\u00F6njohtaja"}
                                                  {:assignee    {}
                                                   :closed      nil
                                                   :created     12345
@@ -2739,7 +2739,7 @@
                                                                 :version 1}
                                                   :source      {:id "vid" :type "verdict"}
                                                   :state       :requires_user_action
-                                                  :taskname    "Vesi- ja viemärityönjohtaja"})}}
+                                                  :taskname    "Vesi- ja viem\u00E4rity\u00F6njohtaja"})}}
                           $set  {:buildings '({:area           "281"
                                                :buildingId     "199887766E"
                                                :description    ""
@@ -2866,7 +2866,7 @@
                                                           :version 1}
                                             :source      {:id "vid" :type "verdict"}
                                             :state       :requires_user_action
-                                            :taskname    "Erityisalojen työnjohtaja"}
+                                            :taskname    "Erityisalojen ty\u00F6njohtaja"}
                                            {:assignee    {}
                                             :closed      nil
                                             :created     12345
@@ -2881,7 +2881,7 @@
                                                           :version 1}
                                             :source      {:id "vid" :type "verdict"}
                                             :state       :requires_user_action
-                                            :taskname    "Ilmanvaihtotyönjohtaja"}
+                                            :taskname    "Ilmanvaihtoty\u00F6njohtaja"}
                                            {:assignee    {}
                                             :closed      nil
                                             :created     12345
@@ -2896,7 +2896,7 @@
                                                           :version 1}
                                             :source      {:id "vid" :type "verdict"}
                                             :state       :requires_user_action
-                                            :taskname    "Vastaava työnjohtaja"}
+                                            :taskname    "Vastaava ty\u00F6njohtaja"}
                                            {:assignee    {}
                                             :closed      nil
                                             :created     12345
@@ -2911,7 +2911,7 @@
                                                           :version 1}
                                             :source      {:id "vid" :type "verdict"}
                                             :state       :requires_user_action
-                                            :taskname    "Vesi- ja viemärityönjohtaja"}))
+                                            :taskname    "Vesi- ja viem\u00E4rity\u00F6njohtaja"}))
               :updates     {$push {:tasks {$each '({:assignee    {}
                                                     :closed      nil
                                                     :created     12345
@@ -3022,7 +3022,7 @@
                                                                   :version 1}
                                                     :source      {:id "vid" :type "verdict"}
                                                     :state       :requires_user_action
-                                                    :taskname    "Erityisalojen työnjohtaja"}
+                                                    :taskname    "Erityisalojen ty\u00F6njohtaja"}
                                                    {:assignee    {}
                                                     :closed      nil
                                                     :created     12345
@@ -3037,7 +3037,7 @@
                                                                   :version 1}
                                                     :source      {:id "vid" :type "verdict"}
                                                     :state       :requires_user_action
-                                                    :taskname    "Ilmanvaihtotyönjohtaja"}
+                                                    :taskname    "Ilmanvaihtoty\u00F6njohtaja"}
                                                    {:assignee    {}
                                                     :closed      nil
                                                     :created     12345
@@ -3052,7 +3052,7 @@
                                                                   :version 1}
                                                     :source      {:id "vid" :type "verdict"}
                                                     :state       :requires_user_action
-                                                    :taskname    "Vastaava työnjohtaja"}
+                                                    :taskname    "Vastaava ty\u00F6njohtaja"}
                                                    {:assignee    {}
                                                     :closed      nil
                                                     :created     12345
@@ -3067,7 +3067,7 @@
                                                                   :version 1}
                                                     :source      {:id "vid" :type "verdict"}
                                                     :state       :requires_user_action
-                                                    :taskname    "Vesi- ja viemärityönjohtaja"})}}
+                                                    :taskname    "Vesi- ja viem\u00E4rity\u00F6njohtaja"})}}
                             $set  {:buildings []}}}
           (provided (lupapalvelu.mongo/create-id) => "id")))
       (fact "finalize--building-and-tasks: reviews not included, plans, foremen, buildings"
@@ -3129,7 +3129,7 @@
                                                         :version 1}
                                           :source      {:id "vid" :type "verdict"}
                                           :state       :requires_user_action
-                                          :taskname    "Erityisalojen työnjohtaja"}
+                                          :taskname    "Erityisalojen ty\u00F6njohtaja"}
                                          {:assignee    {}
                                           :closed      nil
                                           :created     12345
@@ -3144,7 +3144,7 @@
                                                         :version 1}
                                           :source      {:id "vid" :type "verdict"}
                                           :state       :requires_user_action
-                                          :taskname    "Ilmanvaihtotyönjohtaja"}
+                                          :taskname    "Ilmanvaihtoty\u00F6njohtaja"}
                                          {:assignee    {}
                                           :closed      nil
                                           :created     12345
@@ -3159,7 +3159,7 @@
                                                         :version 1}
                                           :source      {:id "vid" :type "verdict"}
                                           :state       :requires_user_action
-                                          :taskname    "Vastaava työnjohtaja"}
+                                          :taskname    "Vastaava ty\u00F6njohtaja"}
                                          {:assignee    {}
                                           :closed      nil
                                           :created     12345
@@ -3174,7 +3174,7 @@
                                                         :version 1}
                                           :source      {:id "vid" :type "verdict"}
                                           :state       :requires_user_action
-                                          :taskname    "Vesi- ja viemärityönjohtaja"}))
+                                          :taskname    "Vesi- ja viem\u00E4rity\u00F6njohtaja"}))
             :updates     {$push {:tasks {$each '({:assignee    {}
                                                   :closed      nil
                                                   :created     12345
@@ -3219,7 +3219,7 @@
                                                                 :version 1}
                                                   :source      {:id "vid" :type "verdict"}
                                                   :state       :requires_user_action
-                                                  :taskname    "Erityisalojen työnjohtaja"}
+                                                  :taskname    "Erityisalojen ty\u00F6njohtaja"}
                                                  {:assignee    {}
                                                   :closed      nil
                                                   :created     12345
@@ -3234,7 +3234,7 @@
                                                                 :version 1}
                                                   :source      {:id "vid" :type "verdict"}
                                                   :state       :requires_user_action
-                                                  :taskname    "Ilmanvaihtotyönjohtaja"}
+                                                  :taskname    "Ilmanvaihtoty\u00F6njohtaja"}
                                                  {:assignee    {}
                                                   :closed      nil
                                                   :created     12345
@@ -3249,7 +3249,7 @@
                                                                 :version 1}
                                                   :source      {:id "vid" :type "verdict"}
                                                   :state       :requires_user_action
-                                                  :taskname    "Vastaava työnjohtaja"}
+                                                  :taskname    "Vastaava ty\u00F6njohtaja"}
                                                  {:assignee    {}
                                                   :closed      nil
                                                   :created     12345
@@ -3264,7 +3264,7 @@
                                                                 :version 1}
                                                   :source      {:id "vid" :type "verdict"}
                                                   :state       :requires_user_action
-                                                  :taskname    "Vesi- ja viemärityönjohtaja"})}}
+                                                  :taskname    "Vesi- ja viem\u00E4rity\u00F6njohtaja"})}}
                           $set  {:buildings '({:area           "281"
                                                :buildingId     "199887766E"
                                                :description    ""

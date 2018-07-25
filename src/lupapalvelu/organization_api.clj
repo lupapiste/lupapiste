@@ -3,7 +3,7 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters parameters-matching-schema] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters parameters-matching-schema coordinate-parameters] :as action]
             [lupapalvelu.attachment.stamps :as stamps]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.i18n :as i18n]
@@ -645,9 +645,7 @@
 (defcommand set-default-digitalization-location
   {:parameters       [x y]
    :permissions      [{:required [:organization/admin]}]
-   :input-validators [(fn [{{x :x y :y} :data}]
-                        (when-not (or (ss/decimal-number? x) (ss/decimal-number? y))
-                          (fail :error.illegal-number)))]}
+   :input-validators [(partial coordinate-parameters :x :y)]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:default-digitalization-location.x x
                                                                               :default-digitalization-location.y y}})

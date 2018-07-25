@@ -632,6 +632,13 @@
   (supported-localization-parameters [:name] {:data {:name (dissoc (i18n/supported-langs-map str) :fi)}}) => (localization-error [:name])
   (supported-localization-parameters [:name] {:data {:name (dissoc (assoc (i18n/supported-langs-map str) :esperanto "") :fi)}}) => (localization-error [:name]))
 
+(fact "coordinate-parameters"
+  (coordinate-parameters :x :y {:data {:x "10001" :y "7779999.0"}}) => nil
+  (coordinate-parameters :x-coord :y-coord {:data {:x-coord "10000" :y "7779999.0"}})  => {:ok false :parameters [:x-coord] :text "error.illegal-coordinates"}
+  (coordinate-parameters :x-coord :y-coord {:data {:x-coord "10001" :y "7789999.0"}})  => {:ok false :parameters [:y-coord] :text "error.illegal-coordinates"}
+  (coordinate-parameters :x :y {:data {}})  => {:ok false :parameters [:x] :text "error.illegal-coordinates"}
+  (coordinate-parameters :x :y {:data {:x "10001" :y "NaN"}})  => {:ok false :parameters [:y] :text "error.illegal-coordinates"})
+
 (facts "feature requirements"
   (against-background
     (get-actions) => {:test-command1 {:feature :abba :user-roles #{:anonymous} :permissions [{:required []}]}})
