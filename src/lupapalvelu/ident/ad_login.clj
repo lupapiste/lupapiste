@@ -1,7 +1,6 @@
 (ns lupapalvelu.ident.ad-login
   (:require [clojure.data.xml :as xml]
             [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
-            [sade.xml :as sxml]
             [noir.core :refer [defpage]]
             [noir.response :as response]
             [noir.request :as request]
@@ -9,17 +8,21 @@
             [lupapalvelu.ident.ident-util :as ident-util]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
+            [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
             [ring.util.response :refer :all]
+            [sade.core :refer [def-]]
             [sade.env :as env]
             [sade.util :as util]
+            [sade.session :as ssess]
             [sade.strings :as ss]
+            [sade.xml :as sxml]
             [saml20-clj.sp :as saml-sp]
             [saml20-clj.routes :as saml-routes]
             [saml20-clj.shared :as saml-shared])
   (:import (java.util Date)))
 
-;; Headerit idp:stä
+;; Headerit idp:sta
 (def ad-header-translations
   {:ad-cn        :fullName
    :ad-firstname :firstName
@@ -38,7 +41,7 @@
   [certstring]
   (->> (ss/split certstring #"\n") rest drop-last ss/join))
 
-;; Nämä ehkä propertieseihin?
+;; Nää ehkä propertieseihin?
 (def config
   {:app-name "Lupapiste"
    :base-uri "http://localhost:8000"
@@ -73,14 +76,14 @@
   (-> xml-string xml/parse-str xml-tree->edn))
 
 
-(def mutables
+(def- mutables
   (assoc (saml-sp/generate-mutables)
          :xml-signer (saml-sp/make-saml-signer (:keystore-file config)
                                                (:keystore-password config)
                                                (:key-alias config)
                                                :algorithm :sha256)))
 
-(def saml-req-factory!
+(def- saml-req-factory!
   (saml-sp/create-request-factory mutables
                                   (:idp-uri config)
                                   saml-routes/saml-format
@@ -89,7 +92,10 @@
 
 (defpage [:get "/api/saml/ad-login"] []
   (let [saml-request (saml-req-factory!)
-        hmac-relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec mutables) "target")]
+        hmac-relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec mutables) "target")
+        req (request/ring-request)
+        sessionid (get-in req [:session :id])
+        trid (security/random-password)]
     (saml-sp/get-idp-redirect (:idp-uri config)
                               saml-request
                               hmac-relay-state)))
@@ -116,11 +122,20 @@
                            (saml-sp/validate-saml-response-signature saml-resp (:idp-cert config))
                            false)
         valid? (and valid-relay-state? valid-signature?)
-        saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter)) ;; The relaystate doesn't validate yet...
-        _ (println saml-info)
-        saml-info (saml-sp/saml-resp->assertions saml-resp decrypter)
-        _ (println (str "Saml validation successful? - " valid?))]
-    {:jee "jee"})) ;; Add logic here after SAML validation and parsing succeeds.
+        saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter))
+        email (first (get (:attrs (first (:assertions saml-info))) "email")) ; Fix this monstrosity ASAP!
+        _ (info saml-info)
+        ]
+    (if valid?
+      #_(response/status 200 (response/content-type "text/plain" (str saml-info)))
+      (let [response (ssess/merge-to-session
+                       req
+                       (response/redirect "http://localhost:8000") ; Fix!
+                       {:user (usr/session-summary (usr/get-user-by-email email))})]
+        response)
+      (do
+        (error "SAML validation failed")
+        (response/status 403 (response/content-type "text/plain" "Validation of SAML response failed"))))))
 
 (defpage [:post "/from-ad/:trid"] {:keys [trid] :as params}
   (let [valid? params]
