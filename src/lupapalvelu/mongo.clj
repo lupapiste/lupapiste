@@ -448,8 +448,8 @@
   (ensure-index :applications {:municipality 1})
   (ensure-index :applications {:submitted 1})
   (ensure-index :applications {:modified -1})
-  (ensure-index :applications {:organization 1})
-  (ensure-index :applications {:auth.id 1})
+  (ensure-index :applications {:organization 1 :modified -1})
+  (ensure-index :applications {:auth.id 1 :modified -1})
   (ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
   (ensure-index :applications {:address 1})
   (ensure-index :applications {:tags 1})
@@ -464,6 +464,8 @@
   (ensure-index :applications {:applicant 1})                                 ;; For application search
   (ensure-index :applications {:state 1})                                     ;; For application search
   (ensure-index :applications {:authority.lastName 1 :authority.firstName 1}) ;; For application search
+  (ensure-index :applications {:handlers.userId 1} {:sparse true})            ;; For application search
+  (ensure-index :applications {:documents.data.henkilotiedot.hetu.value 1} {:sparse true}) ;; For application search
   (ensure-index :applications {:location-wgs84 "2dsphere"})
   (ensure-index :applications {:drawings.geometry-wgs84 "2dsphere"})
   (ensure-index :activation {:email 1})
