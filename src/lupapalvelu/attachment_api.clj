@@ -446,7 +446,7 @@
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:file-id :id])]
    :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
-   :states           states/all-application-states
+   :states           states/all-application-or-archiving-project-states
    :user-authz-roles roles/all-authz-roles}
   [{{:keys [file-id]} :data user :user application :application}]
   (att/output-attachment file-id true (partial att/get-attachment-file-as! user application)))
