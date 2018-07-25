@@ -23,71 +23,10 @@
 (testable-privates lupapalvelu.integrations.allu application->allu-placement-contract
                    application-cancel-request placement-creation-request placement-update-request)
 
+;;; TODO: Instead of testing internals, just use mocks.
+
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
-
-(defschema TypedAddress
-  {:katu                 {:value sc/Str}
-   :postinumero          {:value sc/Str}
-   :postitoimipaikannimi {:value sc/Str}
-   :maa                  {:value sc/Str}})
-
-(defschema TypedContactInfo
-  {:puhelin {:value sc/Str}
-   :email   {:value sc/Str}})
-
-(defschema TypedPersonDoc
-  {:henkilotiedot {:etunimi  {:value sc/Str}
-                   :sukunimi {:value sc/Str}
-                   :hetu     {:value sc/Str}}
-   :osoite        TypedAddress
-   :yhteystiedot  TypedContactInfo})
-
-(defschema TypedCompanyDoc
-  {:yritysnimi           {:value sc/Str}
-   :liikeJaYhteisoTunnus {:value sc/Str}
-   :osoite               TypedAddress
-   :yhteyshenkilo        {:henkilotiedot {:etunimi  {:value sc/Str}
-                                          :sukunimi {:value sc/Str}}
-                          :yhteystiedot  TypedContactInfo}})
-
-(defschema TypedCustomerDoc
-  {:schema-info {:subtype (sc/enum :hakija :maksaja)}
-   :data        {:_selected {:value (sc/enum "henkilo" "yritys")}
-                 :henkilo   TypedPersonDoc
-                 :yritys    TypedCompanyDoc}})
-
-(defschema TypedApplicantDoc
-  (assoc-in TypedCustomerDoc [:schema-info :subtype] (sc/eq :hakija)))
-
-(defschema TypedPaymentInfo
-  {:verkkolaskuTunnus {:value sc/Str}
-   :ovtTunnus         {:value sc/Str}
-   :valittajaTunnus   {:value sc/Str}})
-
-(defschema TypedPayeeDoc
-  (-> TypedCustomerDoc
-      (assoc-in [:schema-info :subtype] (sc/eq :maksaja))
-      (assoc-in [:data :laskuviite] {:value sc/Str})
-      (assoc-in [:data :yritys :verkkolaskutustieto] TypedPaymentInfo)))
-
-(defschema TypedDescriptionDoc
-  {:schema-info {:subtype (sc/eq :hankkeen-kuvaus)}
-   :data        {:kayttotarkoitus {:value sc/Str}}})
-
-(defschema TypedPlacementApplication
-  {:id               sc/Str
-   :permitSubtype    sc/Str
-   :organization     sc/Str
-   :propertyId       sc/Str
-   :municipality     sc/Str
-   :address          sc/Str
-   :primaryOperation {:name (apply sc/enum (keys ya-operation-type-to-schema-name-key))}
-   :documents        [(sc/one TypedApplicantDoc "applicant")
-                      (sc/one TypedDescriptionDoc "description")
-                      (sc/one TypedPayeeDoc "payee")]
-   :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
-   :drawings         [{:geometry-wgs84 geo/GeoJSON-2008}]})
 
 (defschema ValidPlacementApplication
   {:id               ApplicationId

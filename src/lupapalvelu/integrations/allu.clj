@@ -270,6 +270,12 @@
     [(str allu-url "/applications/" allu-id "/cancelled")
      {:headers {:authorization (str "Bearer " allu-jwt)}}]))
 
+(defn- attachment-send [allu-url allu-jwt allu-id attachment]
+  [(str allu-url "/applications/" allu-id "/attachments")
+   {:headers {:authorization (str "Bearer " allu-jwt)}
+    :multipart [{:name "metadata", :content nil}            ; FIXME
+                {:name "file", :content ""}]}])             ; FIXME
+
 ;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
 (defn- handle-cancel-response [response]
   (match response
@@ -309,6 +315,7 @@
 
 (defprotocol ALLUPlacementContracts
   (cancel-allu-application! [self endpoint request])
+  (send-allu-attachment! [self endpoint request])
 
   (create-contract! [self endpoint request])
   (update-contract! [self endpoint request])
@@ -319,6 +326,7 @@
 (deftype RemoteALLU []
   ALLUPlacementContracts
   (cancel-allu-application! [_ endpoint request] (http/put endpoint request))
+  (send-allu-attachment! [_ endpoint request] (http/post endpoint request))
 
   (create-contract! [_ endpoint request] (http/post endpoint request))
   (update-contract! [_ endpoint request] (http/put endpoint request))
@@ -345,6 +353,8 @@
         (do (swap! state update :applications dissoc allu-id)
             {:status 200, :body ""})
         {:status 404, :body (str "Not Found: " allu-id)})))
+
+  (send-allu-attachment! [_ _ _] (assert false "unimplemented"))
 
   (create-contract! [_ _ request]
     (let [placement-contract (json/decode (:body request) true)]
@@ -418,3 +428,17 @@
     (match (lock-contract! allu-instance endpoint request)
       {:status (:or 200 201), :body allu-id} (info (:id app) "was locked succesfully in ALLU as" allu-id)
       response (allu-http-fail! response))))
+
+(defn- send-attachment! [app allu-id attachment]
+  (let [[endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) allu-id attachment)]
+    (match (send-allu-attachment! allu-instance endpoint request)
+      {:status (:or 200 201)} (info "attachment" (:id attachment) "of" (:id app) "was sent to ALLU")
+      response (allu-fail! allu-instance :error.allu.http (select-keys response [:status :body])))))
+
+(defn send-attachments!
+  "Send attachments of application to ALLU."
+  [{:keys [attachments] :as app}]
+  (let [allu-id (get-in app [:integrationKeys :ALLU :id])]
+    (assert allu-id (str (:id app) " does not contain an ALLU id"))
+    (doseq [attachment attachments]
+      (send-attachment! app allu-id attachment))))

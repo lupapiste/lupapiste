@@ -19,7 +19,8 @@
 
             [lupapalvelu.integrations.allu :as allu
              :refer [ALLUPlacementContracts ->LocalMockALLU PlacementContract
-                     update-contract! cancel-allu-application! create-contract! lock-contract! allu-fail!]]))
+                     cancel-allu-application! send-allu-attachment!
+                     update-contract! create-contract! lock-contract! allu-fail!]]))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -59,6 +60,13 @@
 
     (cancel-allu-application! inner endpoint request))
 
+  (send-allu-attachment! [_ endpoint request]
+    (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/cancelled")))
+    (fact "request is well-formed"
+      (assert false "unimplemented"))
+
+    (send-allu-attachment! inner endpoint request))
+
   (create-contract! [_ endpoint request]
     (fact "endpoint is correct" endpoint => (str (env/value :allu :url) "/placementcontracts"))
     (check-request true true request)
@@ -81,9 +89,10 @@
   (allu-fail! [_ text info-map] (allu-fail! inner text info-map)))
 
 ;; FIXME: DRY it up
-(deftype ConstALLU [cancel-response creation-response locking-response fail-map failure-counter]
+(deftype ConstALLU [cancel-response attach-response creation-response locking-response fail-map failure-counter]
   ALLUPlacementContracts
   (cancel-allu-application! [_ _ _] cancel-response)
+  (send-allu-attachment![_ _ _] attach-response)
   (create-contract! [_ _ _] creation-response)
   (update-contract! [_ _ _] locking-response)
   (lock-contract! [_ _ _] locking-response)
@@ -174,7 +183,7 @@
 
       (fact "error responses from ALLU produce `fail!`ures"
         (let [failure-counter (atom 0)]
-          (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 200}
+          (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 200} {:status 200}
                                                                {:status 400, :body "Your data was bad."} nil
                                                                {:ok   false, :text "error.allu.http"
                                                                 :status 400, :body "Your data was bad."}
@@ -184,7 +193,7 @@
             @failure-counter => 1))
 
         (let [failure-counter (atom 0)]
-          (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 200}
+          (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 200} {:status 200}
                                                                {:status 401, :body "You are unauthorized."} nil
                                                                {:ok     false, :text "error.allu.http"
                                                                 :status 401, :body "You are unauthorized."}
