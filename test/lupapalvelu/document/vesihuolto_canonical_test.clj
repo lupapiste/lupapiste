@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.vesihuolto-canonical-test
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.document.vesihuolto-canonical :as yic]
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.vesihuolto-canonical :as vc]))

@@ -3,7 +3,6 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.roles :refer :all]
             [lupapalvelu.permissions :as permissions]
-            [lupapalvelu.application-schema :as aps]
             [lupapalvelu.document.tools :as doc-tools]
             [schema.core :refer [defschema] :as sc]
             [sade.core :refer :all]

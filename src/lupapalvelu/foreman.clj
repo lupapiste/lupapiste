@@ -1,5 +1,5 @@
 (ns lupapalvelu.foreman
-  (:require [taoensso.timbre :as timbre :refer [error]]
+  (:require [taoensso.timbre :refer [error]]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]

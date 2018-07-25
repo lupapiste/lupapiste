@@ -4,8 +4,6 @@
             [lupapalvelu.operations :as op]
             [lupapiste-commons.attachment-types :as attachment-types]
             [sade.core :refer :all]
-            [sade.env :as env]
-            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.strings :as str]
             [sade.util :refer [fn-> fn->>] :as util]

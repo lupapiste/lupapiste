@@ -1,6 +1,5 @@
 (ns lupapalvelu.reminders-itest
-  (:require [clojure.java.io :as io]
-            [monger.operators :refer :all]
+  (:require [monger.operators :refer :all]
             [midje.sweet :refer :all]
             [sade.dummy-email-server :as dummy-email-server]
             [sade.core :refer [def- now]]

@@ -1,5 +1,5 @@
 (ns lupapalvelu.autologin
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn warnf error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info warn warnf error errorf fatal]]
             [slingshot.slingshot :refer [throw+ try+]]
             [clojure.core.memoize :as memo]
             [pandect.core :as pandect]

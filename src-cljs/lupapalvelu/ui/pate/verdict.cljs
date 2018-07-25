@@ -1,15 +1,12 @@
 (ns lupapalvelu.ui.pate.verdict
   "View of an individual Pate verdict."
-  (:require [clojure.set :as set]
-            [lupapalvelu.pate.legacy-schemas :as legacy]
+  (:require [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.path :as path]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.pate.components :as pate-components]
-            [lupapalvelu.ui.pate.layout :as layout]
-            [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]

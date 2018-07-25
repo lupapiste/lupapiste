@@ -1,13 +1,11 @@
 (ns lupapalvelu.attachment-itest
-  (:require [clojure.set :as set]
-            [lupapalvelu.attachment :refer :all]
+  (:require [lupapalvelu.attachment :refer :all]
             [lupapalvelu.attachment.util :refer [attachment-state]]
             [lupapalvelu.factlet :refer [facts*]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.pdf.pdfa-conversion :as pdfa]
             [midje.sweet :refer :all]
-            [sade.env :as env]
             [sade.util :as util]))
 
 (apply-remote-minimal)

@@ -8,7 +8,6 @@
             [lupapalvelu.organization :refer :all]
             [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
             [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
-            [lupapalvelu.pdf.libreoffice-template :as template]
             [lupapalvelu.pdf.libreoffice-template-base-test :refer :all]))
 
 (def applicant-index #'lupapalvelu.pdf.libreoffice-template/applicant-index)

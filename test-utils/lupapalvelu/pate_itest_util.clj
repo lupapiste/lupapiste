@@ -1,6 +1,5 @@
 (ns lupapalvelu.pate-itest-util
   (:require [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [monger.operators :refer :all]
             [sade.strings :as ss]

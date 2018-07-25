@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.krysp.krysp-itest
-    (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+    (:require [taoensso.timbre :refer (trace debug info warn error fatal)]
       [clojure.string :as s]
       [clojure.java.io :as io]
       [clojure.data.xml :refer :all]

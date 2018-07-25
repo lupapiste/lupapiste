@@ -11,7 +11,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :as sc]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+            [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.organization :as organization])

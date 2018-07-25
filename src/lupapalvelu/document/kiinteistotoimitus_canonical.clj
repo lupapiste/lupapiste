@@ -1,8 +1,7 @@
 (ns lupapalvelu.document.kiinteistotoimitus-canonical
   (:require [clojure.walk :as walk]
             [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
-            [lupapalvelu.document.tools :as tools ]
-            [lupapalvelu.permit :as permit]
+            [lupapalvelu.document.tools :as tools]
             [sade.strings :as str]
             [sade.util :as util]))
 

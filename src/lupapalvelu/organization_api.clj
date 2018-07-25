@@ -33,7 +33,7 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]))
+            [taoensso.timbre :refer [trace debug debugf info warn error errorf fatal]]))
 ;;
 ;; local api
 ;;

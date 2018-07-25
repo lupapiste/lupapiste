@@ -2,7 +2,6 @@
   (:require [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.util :as util]))

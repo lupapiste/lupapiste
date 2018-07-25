@@ -1,5 +1,5 @@
 (ns lupapalvelu.token
-  (:require [taoensso.timbre :as timbre :refer [errorf]]
+  (:require [taoensso.timbre :refer [errorf]]
             [monger.operators :refer :all]
             [noir.request :as request]
             [lupapalvelu.mongo :as mongo]

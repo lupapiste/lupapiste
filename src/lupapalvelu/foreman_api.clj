@@ -5,8 +5,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [lupapalvelu.company :as company]

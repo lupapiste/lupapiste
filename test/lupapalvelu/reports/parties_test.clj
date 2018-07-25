@@ -4,7 +4,6 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schemas]
             [sade.schema-generators :as ssg]
-            [sade.strings :as ss]
             [sade.util :as util]
             [sade.util :as util]))
 

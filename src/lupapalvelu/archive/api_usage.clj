@@ -8,7 +8,6 @@
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.schemas :as ssc]
-            [sade.util :as util]
             [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org])

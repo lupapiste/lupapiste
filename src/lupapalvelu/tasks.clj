@@ -1,20 +1,18 @@
 (ns lupapalvelu.tasks
   (:require [clojure.set :refer [rename-keys]]
             [lupapalvelu.action :as action :refer [application->command update-application]]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [monger.operators :refer :all]
             [sade.core :refer [def- fail]]
             [sade.strings :as ss]
             [sade.util :as util]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]))
+            [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]))
 
 (def task-schemas-version 1)
 

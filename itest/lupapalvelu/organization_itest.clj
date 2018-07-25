@@ -1,10 +1,8 @@
 (ns lupapalvelu.organization-itest
   (:require [midje.sweet :refer :all]
-            [clojure.java.io :as io]
             [clojure.set :refer [difference]]
             [lupapalvelu.organization :as local-org-api]
             [lupapalvelu.waste-ads :as waste-ads]
-            [lupapalvelu.operations :as operations]
             [lupapalvelu.proxy-services :as proxy]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.factlet :refer [fact* facts*]]

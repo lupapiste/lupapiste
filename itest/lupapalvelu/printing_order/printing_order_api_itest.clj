@@ -1,8 +1,6 @@
 (ns lupapalvelu.printing-order.printing-order-api-itest
   (:require [lupapalvelu.itest-util :refer :all]
-            [midje.sweet :refer :all]
-            [lupapalvelu.printing-order.mylly-client :as mylly]
-            [lupapalvelu.mongo :as mongo]))
+            [midje.sweet :refer :all]))
 
 (apply-remote-minimal)
 

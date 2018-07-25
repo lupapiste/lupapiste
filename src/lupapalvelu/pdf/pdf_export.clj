@@ -5,7 +5,6 @@
             [clj-time.local :as tl]
             [clj-time.format :as tf]
             [lupapalvelu.i18n :refer [loc] :as i18n]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [sade.core :refer :all]
             [sade.files :as files]

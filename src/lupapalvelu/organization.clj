@@ -35,7 +35,7 @@
             [sade.util :as util]
             [sade.xml :as sxml]
             [schema.core :as sc]
-            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
+            [taoensso.timbre :refer [trace debug debugf info infof warn error errorf fatal]]
             [schema.coerce :as coerce]))
 
 (def scope-skeleton

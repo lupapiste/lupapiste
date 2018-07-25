@@ -1,6 +1,6 @@
 (ns lupapalvelu.proxy-services
   (:require [clojure.data.zip.xml :refer :all]
-            [taoensso.timbre :as timbre :refer [debug debugf info warn error errorf]]
+            [taoensso.timbre :refer [debug debugf info warn error errorf]]
             [monger.operators :refer [$exists]]
             [noir.response :as resp]
             [sade.core :refer :all]

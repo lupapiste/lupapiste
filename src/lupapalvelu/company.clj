@@ -1,5 +1,5 @@
 (ns lupapalvelu.company
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
             [clojure.data :refer [diff]]
             [clojure.set :as set]
             [monger.operators :refer :all]

@@ -1,6 +1,6 @@
 (ns lupapalvelu.application-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof
-                                                warnf warn error errorf]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof
+                                     warnf warn error errorf]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [slingshot.slingshot :refer [try+]]

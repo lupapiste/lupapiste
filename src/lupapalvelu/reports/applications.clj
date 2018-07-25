@@ -1,6 +1,5 @@
 (ns lupapalvelu.reports.applications
-  (:require [dk.ative.docjure.spreadsheet :as spreadsheet]
-            [monger.operators :refer :all]
+  (:require [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [now]]

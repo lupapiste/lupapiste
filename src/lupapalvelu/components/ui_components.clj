@@ -1,5 +1,5 @@
 (ns lupapalvelu.components.ui-components
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error fatal]]
             [swiss.arrows :refer [-<>>]]
             [clojure.java.io :as io]
             [clojure.string :as s]
@@ -7,7 +7,6 @@
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
-            [lupapalvelu.action :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-scales, attachment-sizes]]
             [lupapalvelu.attachment.type :as att-type]

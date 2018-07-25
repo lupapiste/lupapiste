@@ -11,8 +11,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.document.schemas :as schemas]
             [monger.operators :refer :all]
-            [sade.core :refer :all]
-            [sade.util :as util]))
+            [sade.core :refer :all]))
 
 ;;
 ;; Attachments

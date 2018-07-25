@@ -1,5 +1,5 @@
 (ns lupapalvelu.wfs
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error errorf]]
+  (:require [taoensso.timbre :refer [trace debug info infof warn warnf error errorf]]
             [ring.util.codec :as codec]
             [net.cgrand.enlive-html :as enlive]
             [clojure.string :as s]

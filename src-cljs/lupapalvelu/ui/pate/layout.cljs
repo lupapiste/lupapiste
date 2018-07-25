@@ -29,18 +29,14 @@
 
   references (atom): Data for external reference resolution (see
   reference-list components)"
-  (:require [clojure.set :as set]
-            [clojure.string :as s]
+  (:require [clojure.string :as s]
             [lupapalvelu.pate.path :as path]
             [lupapalvelu.pate.shared-schemas :as schemas]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.attachments :as pate-att]
             [lupapalvelu.ui.pate.components :as pate-components]
-            [lupapalvelu.ui.pate.phrases :as phrases]
             [lupapalvelu.ui.pate.placeholder :as placeholder]
-            [lupapalvelu.ui.pate.service :as service]
-            [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 

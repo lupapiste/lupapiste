@@ -2,7 +2,6 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.test-util :refer [walk-dissoc-keys]]
-            [lupapalvelu.application :as app]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.operations :as operations]
             [sade.env :as env]

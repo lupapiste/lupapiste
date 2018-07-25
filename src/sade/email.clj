@@ -1,5 +1,5 @@
 (ns sade.email
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn warnf error fatal]]
             [clojure.set :as set]
             [postal.core :as postal]
             [sade.env :as env]

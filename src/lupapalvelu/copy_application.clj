@@ -1,6 +1,5 @@
 (ns lupapalvelu.copy-application
-  (:require [clojure.set :as set]
-            [taoensso.timbre :refer [error]]
+  (:require [taoensso.timbre :refer [error]]
             [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as company]

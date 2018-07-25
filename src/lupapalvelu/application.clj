@@ -1,5 +1,5 @@
 (ns lupapalvelu.application
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warnf error fatal]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clojure.set :refer [difference]]

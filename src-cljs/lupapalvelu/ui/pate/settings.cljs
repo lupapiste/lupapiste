@@ -1,16 +1,13 @@
 (ns lupapalvelu.ui.pate.settings
-  (:require [clojure.string :as s]
-            [lupapalvelu.pate.path :as path]
+  (:require [lupapalvelu.pate.path :as path]
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.components :as pate-components]
-            [lupapalvelu.ui.pate.layout :as layout]
             [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
-            [rum.core :as rum]
-            [sade.shared-util :as util]))
+            [rum.core :as rum]))
 
 (defn settings-updater [{:keys [path state info] :as options}]
   (service/save-settings-value (path/value [:category] info)

@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.validator
-  (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info warn warnf error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace tracef debug debugf info warn warnf error errorf fatal]]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]

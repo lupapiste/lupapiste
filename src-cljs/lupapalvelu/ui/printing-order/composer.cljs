@@ -1,9 +1,6 @@
 (ns lupapalvelu.ui.printing-order.composer
   (:require [rum.core :as rum]
-            [lupapalvelu.ui.attachment.components :as attc]
-            [lupapalvelu.ui.components :as comp]
             [lupapalvelu.ui.util :as util]
-            [lupapalvelu.ui.rum-util :as rum-util]
             [lupapalvelu.ui.common :refer [loc loc-html] :as common]
             [lupapalvelu.ui.printing-order.components :as poc]
             [lupapalvelu.ui.printing-order.files :as files]

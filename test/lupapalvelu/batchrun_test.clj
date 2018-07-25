@@ -3,12 +3,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [taoensso.timbre :refer [debug]]
-            [lupapalvelu.krysp-test-util :as krysp-test-util]
-            [lupapalvelu.batchrun :as batchrun]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [sade.util :as util]))
+            [lupapalvelu.batchrun :as batchrun]))
 
 (testable-privates lupapalvelu.batchrun fetch-reviews-for-organization fetch-reviews-for-organization-permit-type
                    organization-has-krysp-url-function get-valid-applications)

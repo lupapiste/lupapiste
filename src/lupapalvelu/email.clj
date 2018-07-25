@@ -4,7 +4,7 @@
             [cljstache.core :as clostache]
             [endophile.core :as endophile]
             [net.cgrand.enlive-html :as enlive]
-            [taoensso.timbre :as timbre :refer [warn]]
+            [taoensso.timbre :refer [warn]]
             [sade.core :refer :all]
             [sade.email :as email]
             [sade.env :as env]

@@ -1,10 +1,9 @@
 (ns sade.http
-  (:require [taoensso.timbre :as timbre :refer [warn error]]
+  (:require [taoensso.timbre :refer [warn error]]
             [clj-http.client :as http]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.env :as env]
-            [sade.util :as util]
             [cheshire.core :as json]
             [clojure.walk :as walk])
   (:refer-clojure :exclude [get])

@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.krysp.ymparistolupa-canonical-to-krysp-xml-test
-  (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
+  (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all]
             [lupapalvelu.document.ymparistolupa-canonical :refer [ymparistolupa-canonical]]
             [lupapalvelu.document.ymparistolupa-canonical-test :refer [application application-yritysmaksaja]]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa-element-to-xml ymparistolupa_to_krysp_212 ymparistolupa_to_krysp_221]]

@@ -7,7 +7,6 @@
             [sade.util :refer [fn->] :as util]
             [sade.core :refer :all]
             [lupapalvelu.attachment.metadata :as metadata]
-            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]

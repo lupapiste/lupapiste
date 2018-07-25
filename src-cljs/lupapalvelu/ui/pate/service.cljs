@@ -2,7 +2,6 @@
   (:require [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.pate.state :as state]
-            [lupapalvelu.ui.authorization :as auth]
             [sade.shared-util :as util]))
 
 (defn fetch-template-list []

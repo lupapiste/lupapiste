@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.asianhallinta-canonical
-  (:require [clojure.string :as s]
-            [sade.core :refer :all]
+  (:require [sade.core :refer :all]
             [sade.util :as util]
             [sade.property :as p]
             [lupapalvelu.document.attachments-canonical :as acanon]
@@ -8,7 +7,6 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.xml.disk-writer :as writer]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.i18n :as i18n]))
 
 

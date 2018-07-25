@@ -1,6 +1,5 @@
 (ns lupapalvelu.inspection-summary-itest
   (:require [midje.sweet :refer :all]
-            [clojure.java.io :as io]
             [clojure.set :refer [difference]]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer :all]

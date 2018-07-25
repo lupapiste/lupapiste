@@ -1,7 +1,6 @@
 (ns lupapalvelu.verdict
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+  (:require [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.data :refer [diff]]
-            [clojure.java.io :as io]
             [monger.operators :refer :all]
             [net.cgrand.enlive-html :as enlive]
             [swiss.arrows :refer :all]

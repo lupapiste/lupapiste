@@ -4,7 +4,6 @@
             [sade.strings :as ss]
             [sade.env :as env]
             [midje.sweet :refer :all]
-            [schema.core :as sc]
             [lupapalvelu.document.schemas :as schema])
   (:import [org.apache.commons.io.output NullWriter]))
 

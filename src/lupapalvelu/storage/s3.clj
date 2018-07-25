@@ -7,7 +7,6 @@
             [sade.strings :as str]
             [sade.util :as util]
             [sade.strings :as ss]
-            [sade.crypt :as c]
             [ring.util.codec :as codec]
             [lupapalvelu.mongo :as mongo])
   (:import [java.io InputStream ByteArrayOutputStream File FileInputStream ByteArrayInputStream]

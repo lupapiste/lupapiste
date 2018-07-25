@@ -1,10 +1,9 @@
 (ns lupapalvelu.server
   (:require [clojure.java.io :as io]
             [mount.core :as mount]
-            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
+            [taoensso.timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [noir.core :refer [defpage]]
             [noir.server :as server]
-            [noir.response :as response]
             [ring.middleware.session.cookie :as session]
             [sade.core :refer [now]]
             [sade.env :as env]

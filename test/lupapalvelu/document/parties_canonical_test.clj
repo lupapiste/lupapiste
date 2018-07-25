@@ -5,8 +5,7 @@
             [lupapalvelu.document.tools :as doc-tools]
             [lupapalvelu.document.parties-canonical :refer :all]
             [sade.schema-generators :as ssg]
-            [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.strings :as ss]))
 
 (testable-privates lupapalvelu.document.parties-canonical party-doc-to-canonical)
 

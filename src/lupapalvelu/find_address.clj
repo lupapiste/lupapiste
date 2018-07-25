@@ -1,5 +1,5 @@
 (ns lupapalvelu.find-address
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error]]
+  (:require [taoensso.timbre :refer [trace debug info warn error]]
             [clojure.data.zip.xml :refer [xml-> text]]
             [monger.operators :refer :all]
             [monger.query :as q]

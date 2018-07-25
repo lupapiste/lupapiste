@@ -7,7 +7,7 @@
             [sade.xml :as xml]
             [sade.strings :as ss]
             [sade.common-reader :as cr]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [asiakirjat-toimitettu-checker
                                                                       application-rakennuslupa

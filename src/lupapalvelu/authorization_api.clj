@@ -5,7 +5,6 @@
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! unauthorized]]
-            [sade.env :as env]
             [sade.util :as util :refer [=as-kw]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application notify] :as action]
             [lupapalvelu.application :as application]

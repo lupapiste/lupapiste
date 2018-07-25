@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
-  (:require [taoensso.timbre :as timbre :refer [debug]]
+  (:require [taoensso.timbre :refer [debug]]
             [sade.core :refer :all]
             [sade.util :as util]
             [lupapalvelu.document.attachments-canonical :as attachments-canon]

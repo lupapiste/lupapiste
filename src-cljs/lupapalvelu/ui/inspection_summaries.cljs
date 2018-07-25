@@ -7,7 +7,6 @@
             [lupapalvelu.ui.common :refer [query command] :as common]
             [lupapalvelu.ui.components :as uc]
             [lupapalvelu.ui.components.datepicker :as date]
-            [lupapalvelu.ui.util :as jsutil]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.rum-util :as rum-util]
             [cljs-time.coerce :as tc]

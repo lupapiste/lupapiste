@@ -1,10 +1,8 @@
 (ns lupapalvelu.pdf.pdf-export-test
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
-            [lupapalvelu.pate.schemas :as pate-schemas]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.test-util :as test-util]
             [midje.sweet :refer :all]
@@ -12,8 +10,8 @@
             [pdfboxing.text :as pdfbox]
             [sade.files :as files]
             [sade.util :as util]
-            [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof
-                                                warn warnf error errorf fatal fatalf]])
+            [taoensso.timbre :refer [trace tracef debug debugf info infof
+                                     warn warnf error errorf fatal fatalf]])
   (:import (java.io File FileOutputStream)))
 
 (testable-privates lupapalvelu.pdf.pdf-export get-value-by-path get-subschemas hide-by-hide-when show-by-show-when removable-groups)

@@ -1,9 +1,8 @@
 (ns lupapalvelu.application-search-api
   (:require [monger.operators :refer :all]
-            [monger.query :as query]
             [sade.core :refer :all]
             [sade.util :as util]
-            [lupapalvelu.action :refer [defquery] :as action]
+            [lupapalvelu.action :refer [defquery]]
             [lupapalvelu.application-search :as search]
             [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.domain :as domain]

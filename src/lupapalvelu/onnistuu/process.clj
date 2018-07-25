@@ -1,6 +1,5 @@
 (ns lupapalvelu.onnistuu.process
-  (:require [taoensso.timbre :as timbre :refer [debug infof warnf errorf]]
-            [clojure.java.io :as io]
+  (:require [taoensso.timbre :refer [debug infof warnf errorf]]
             [clojure.walk :as walk]
             [pandect.core :as pandect]
             [monger.operators :refer :all]
@@ -8,7 +7,6 @@
             [cheshire.core :as json]
             [cheshire.generate :as cheshire]
             [slingshot.slingshot :refer [throw+]]
-            [noir.response :as resp]
             [sade.env :as env]
             [sade.schemas :refer [max-length-string]]
             [sade.core :refer [ok]]

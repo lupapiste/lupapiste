@@ -2,10 +2,7 @@
   (:require [lupapalvelu.factlet :refer [facts*]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.info-links :as info-links]
-            [sade.util :as util]
-            [midje.sweet :refer :all]
-            [sade.env :as env]))
+            [midje.sweet :refer :all]))
 
 (defn- localized [text-map]
   (i18n/with-default-localization text-map (:fi text-map)))

@@ -1,6 +1,5 @@
 (ns lupapalvelu.pdf.libreoffice-template-statement
-  (:require [taoensso.timbre :as log]
-            [sade.util :as util]
+  (:require [sade.util :as util]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pdf.libreoffice-template :refer [xml-escape child-attachments] :as template]
             [clojure.string :as s]

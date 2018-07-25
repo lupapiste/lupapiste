@@ -1,6 +1,5 @@
 (ns lupapalvelu.ui.pate.sections
-  (:require [clojure.string :as s]
-            [lupapalvelu.pate.path :as path]
+  (:require [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.layout :as layout]

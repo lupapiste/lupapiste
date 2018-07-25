@@ -3,15 +3,11 @@
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
             [lupapalvelu.action :refer [execute] :as action]
-            [lupapalvelu.attachment-api :as api]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.itest-util :as itest]
             [lupapalvelu.tiedonohjaus-api :refer :all]
-            [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.archive.archiving :as archiving]
             [lupapalvelu.archive.archiving-util :as archiving-util]
             [lupapalvelu.assignment :as assignment]))
 

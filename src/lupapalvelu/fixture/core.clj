@@ -1,5 +1,5 @@
 (ns lupapalvelu.fixture.core
-  (:require [taoensso.timbre :as timbre :refer [debug info warnf error]]
+  (:require [taoensso.timbre :refer [debug info warnf error]]
             [lupapalvelu.mongo :as mongo]))
 
 (defonce fixtures (atom {}))

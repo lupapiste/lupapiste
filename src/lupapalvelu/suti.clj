@@ -1,14 +1,11 @@
 (ns lupapalvelu.suti
   (:require [monger.operators :refer :all]
-            [cheshire.core :as json]
             [swiss.arrows :refer :all]
             [taoensso.timbre :refer [debugf]]
             [sade.core :refer :all]
             [sade.http :as http]
             [sade.strings :as ss]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.operations :as op]
-            [lupapalvelu.user :as usr]
             [lupapalvelu.states :as states]))
 
 

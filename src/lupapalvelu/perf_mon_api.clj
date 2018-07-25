@@ -1,5 +1,5 @@
 (ns lupapalvelu.perf-mon-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error fatal]]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [sade.core :refer :all]

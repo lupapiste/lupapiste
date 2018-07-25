@@ -1,5 +1,4 @@
-(ns lupapalvelu.ui.hub
-  (:require [clojure.string :as string]))
+(ns lupapalvelu.ui.hub)
 
 (defn send
   ([event]

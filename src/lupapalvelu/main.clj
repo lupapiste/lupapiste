@@ -1,6 +1,6 @@
 (ns lupapalvelu.main
   (:require [lupapalvelu.logging]
-            [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]])
+            [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]])
   (:gen-class))
 
 (def services {"server"                     'lupapalvelu.server/-main

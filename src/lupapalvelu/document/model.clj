@@ -1,9 +1,8 @@
 (ns lupapalvelu.document.model
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf]]
+  (:require [taoensso.timbre :refer [trace debug info warn error errorf]]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.set :refer [union difference]]
             [clj-time.format :as timeformat]
-            [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -12,7 +11,6 @@
             [lupapalvelu.document.vrk :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]
             [lupapalvelu.mongo :as mongo])

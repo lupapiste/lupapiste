@@ -42,7 +42,6 @@
             [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
             [lupapalvelu.application :as application]
             [lupapalvelu.document.waste-schemas :as waste-schemas]
-            [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org])
   (:import [org.joda.time DateTime]))
 

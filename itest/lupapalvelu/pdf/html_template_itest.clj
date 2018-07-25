@@ -6,15 +6,13 @@
             [sade.core :refer [now]]
             [sade.files :as files]
             [sade.schemas :as ssc]
-            [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.test-util :refer [replace-in-schema]]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.inspection-summary :refer [InspectionSummary]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pdf.html-template :refer :all]
-            [lupapalvelu.storage.file-storage :as storage])
+            [lupapalvelu.pdf.html-template :refer :all])
   (:import [java.io InputStream]))
 
 (def local-db-name (str "test_pdf_html_template_" (now)))

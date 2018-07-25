@@ -1,5 +1,5 @@
 (ns lupapalvelu.application-bulletins-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn warnf error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
@@ -21,8 +21,6 @@
             [clj-time.coerce :as tc]
             [clj-time.core :as t]
             [lupapalvelu.states :as states]
-            [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.application :as app]
             [lupapalvelu.application-bulletin-utils :as bulletin-utils]
             [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.application-bulletin-utils :as bulletin-utils]))

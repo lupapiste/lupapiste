@@ -1,6 +1,6 @@
 ; Source: https://github.com/jeffmad/clj-icalendar/blob/master/src/clj_icalendar/core.clj
 (ns lupapalvelu.icalendar
-  (:require [taoensso.timbre :as timbre :refer [info error]])
+  (:require [taoensso.timbre :refer [info error]])
   (:import (java.util Date)
            (net.fortuna.ical4j.model Calendar DateTime)
            (net.fortuna.ical4j.model.property Method ProdId Version CalScale Attendee Uid Organizer Url Location Description Sequence)

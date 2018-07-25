@@ -7,7 +7,6 @@
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
-            [sade.strings :as ss]
             [sade.util :as util]
             [sade.schemas :as ssc]
             [schema.core :as sc]

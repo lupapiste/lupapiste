@@ -1,6 +1,5 @@
 (ns lupapalvelu.archive.archiving-api
-  (:require [cheshire.core :as json]
-            [sade.core :refer [ok unauthorized fail]]
+  (:require [sade.core :refer [ok unauthorized fail]]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters]]
             [lupapalvelu.archive.archiving :as archiving]
             [lupapalvelu.application :as app]

@@ -8,7 +8,6 @@
             [sade.util :as util]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
-            [sade.validators :as v]
             [lupapalvelu.action :as action]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]

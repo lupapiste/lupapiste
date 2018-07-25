@@ -1,6 +1,5 @@
 (ns lupapalvelu.child-to-attachment
-  (:require [clojure.java.io :as io]
-            [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
+  (:require [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [sade.core :refer [def- now]]
             [sade.files :as files]
             [sade.strings :as ss]

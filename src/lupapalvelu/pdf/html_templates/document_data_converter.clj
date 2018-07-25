@@ -2,7 +2,6 @@
   (:require [sade.util :refer [fn->>] :as util]
             [sade.strings :as ss]
             [clojure.walk :refer [prewalk]]
-            [net.cgrand.enlive-html :as enlive]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.schemas :as schemas]))
 

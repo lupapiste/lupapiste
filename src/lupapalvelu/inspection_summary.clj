@@ -15,7 +15,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [schema.core :as sc :refer [defschema]]
-            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
+            [taoensso.timbre :refer [trace debug debugf info infof warn error errorf fatal]]
             [clj-uuid :as uuid]
             [lupapalvelu.storage.file-storage :as storage]))
 

@@ -20,7 +20,7 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
-            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [taoensso.timbre :refer [trace debug info warn error fatal]]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.foreman :as foreman]))
 

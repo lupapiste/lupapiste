@@ -7,7 +7,6 @@
             [clojure.data.xml :as xml]
             [lupapalvelu.document.asianhallinta-canonical :as ah]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
-            [lupapalvelu.integrations.statement-canonical :as c]
             [lupapalvelu.statement :as stmnt]
             [lupapalvelu.xml.asianhallinta.asianhallinta-mapping :as ah-mapping]
             [lupapalvelu.xml.emit :refer [element-to-xml]]

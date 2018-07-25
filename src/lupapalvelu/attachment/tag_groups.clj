@@ -1,7 +1,6 @@
 (ns lupapalvelu.attachment.tag-groups
   (:require [clojure.set :refer [intersection union]]
-            [sade.util :refer [fn->] :as util]
-            [sade.strings :as ss]
+            [sade.util :refer [fn->]]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.util :as att-util]))

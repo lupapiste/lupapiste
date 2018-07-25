@@ -1,5 +1,5 @@
 (ns lupapalvelu.pdf.pdf-export-api
-  (:require [taoensso.timbre :as timbre :refer [info]]
+  (:require [taoensso.timbre :refer [info]]
             [ring.util.response :as response]
             [sade.files :as files]
             [lupapalvelu.action :as action :refer [defraw]]

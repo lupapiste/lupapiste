@@ -1,6 +1,5 @@
 (ns lupapalvelu.migration.ymp-organization-test
     (:require [lupapalvelu.migration.migrations :refer :all]
-              [lupapalvelu.organization :as org]
               [sade.schema-generators :as ssg]
               [schema.core :refer [defschema] :as sc]
               [midje.sweet :refer :all]))

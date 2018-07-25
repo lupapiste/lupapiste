@@ -3,7 +3,7 @@
             [clojure.zip :as zip]
             [clojure.edn :as edn]
             [sade.strings :as ss]
-            [sade.util :refer [fn->>] :as util]))
+            [sade.util :refer [fn->>]]))
 
 (defn by-id
   "Return item from application collection by id.

@@ -1,10 +1,8 @@
 (ns lupapalvelu.pdf.libreoffice-template-history
-  (:require [taoensso.timbre :as log]
-            [lupapalvelu.tiedonohjaus :as toj]
+  (:require [lupapalvelu.tiedonohjaus :as toj]
             [sade.util :as util]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pdf.libreoffice-template :as template]
-            [clojure.string :as s]
             [clojure.java.io :as io]))
 
 (defn- build-history-row [{:keys [type text version category contents ts user]} lang]

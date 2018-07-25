@@ -1,5 +1,5 @@
 (ns lupapalvelu.action
-  (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
+  (:require [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [clojure.set :as set]
             [slingshot.slingshot :refer [try+]]
             [monger.operators :refer [$set $push $pull $ne]]

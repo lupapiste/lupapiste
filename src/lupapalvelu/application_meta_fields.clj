@@ -1,5 +1,5 @@
 (ns lupapalvelu.application-meta-fields
-  (:require [taoensso.timbre :as timbre :refer [tracef debug debugf info warn error]]
+  (:require [taoensso.timbre :refer [tracef debug debugf info warn error]]
             [monger.operators :refer :all]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.model :as model]
@@ -11,7 +11,6 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.attachment.util :as att-util]
             [sade.core :refer :all]
-            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]))
 

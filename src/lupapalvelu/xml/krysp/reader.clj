@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.reader
   "Read the Krysp from municipality Web Feature Service"
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error warnf]]
+  (:require [taoensso.timbre :refer [trace debug info warn error warnf]]
             [clojure.set :refer [rename-keys]]
             [net.cgrand.enlive-html :as enlive]
             [sade.env :as env]
@@ -13,7 +13,6 @@
             [lupapalvelu.drawing :as drawing]
             [lupapalvelu.document.schemas]
             [lupapalvelu.conversion.util :as conv-util]
-            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
             [lupapalvelu.wfs :as wfs]

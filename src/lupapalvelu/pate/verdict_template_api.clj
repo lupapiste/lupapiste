@@ -3,9 +3,6 @@
   (:require [clojure.set :as set]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.pate.verdict-template :as template]
-            [lupapalvelu.pate.schemas :as schemas]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))

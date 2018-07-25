@@ -1,6 +1,6 @@
 (ns lupapalvelu.idf.idf-api
   "Identity federation server: create users from partner applications to Lupapiste"
-  (:require [taoensso.timbre :as timbre :refer [debug info warn error]]
+  (:require [taoensso.timbre :refer [debug info warn error]]
             [ring.util.response :as resp]
             [sade.env :as env]
             [sade.util :as util]

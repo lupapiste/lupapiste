@@ -1,8 +1,6 @@
 (ns lupapalvelu.verdict-api
-  (:require [clojure.set :as set]
-            [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
+  (:require [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.appeal-common :as appeal-common]
-            [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.child-to-attachment :as child-to-attachment]

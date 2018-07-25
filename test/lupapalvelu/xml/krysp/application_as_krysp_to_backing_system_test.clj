@@ -3,7 +3,6 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.permit :as permit]
             [sade.core :refer [now]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]

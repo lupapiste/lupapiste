@@ -14,7 +14,7 @@
             [sade.core :refer [unauthorized fail?]]
             [sade.strings :as ss]
             [sade.util :as util]
-            [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]))
+            [taoensso.timbre :refer [trace debug info warn warnf error fatal]]))
 
 ;;
 ;; application mongo querys

@@ -1,6 +1,5 @@
 (ns lupapalvelu.ui.auth-admin.edit-authority.edit-view
-  (:require [lupapalvelu.ui.authorization :as auth]
-            [lupapalvelu.ui.common :refer [loc query command]]
+  (:require [lupapalvelu.ui.common :refer [loc query command]]
             [lupapalvelu.ui.auth-admin.edit-authority.edit-info :as info]
             [lupapalvelu.ui.auth-admin.edit-authority.edit-roles :as roles]
             [lupapalvelu.ui.auth-admin.edit-authority.state :as state]

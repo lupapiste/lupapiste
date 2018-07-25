@@ -1,5 +1,5 @@
 (ns lupapalvelu.printing-order.printing-order-api
-  (:require [taoensso.timbre :as timbre :refer [error]]
+  (:require [taoensso.timbre :refer [error]]
             [lupapalvelu.action :refer [defquery defcommand]]
             [sade.core :refer :all]
             [lupapalvelu.attachment :as att]
@@ -9,11 +9,8 @@
             [sade.util :as util]
             [schema.core :as sc]
             [lupapalvelu.attachment.type :as att-type]
-            [lupapalvelu.attachment.tags :as att-tags]
-            [lupapalvelu.printing-order.mylly-client :as mylly]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.roles :as roles]
-            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.permit :as permit]))
 
 (def omitted-attachment-type-groups

@@ -6,7 +6,6 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.vetuma-itest-util :as vetuma]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.fixture.company-application :as comp-app]
             [lupapalvelu.dummy-ident-itest-util :refer :all]
             [lupapalvelu.ident.dummy :as dummy]
             [lupapalvelu.factlet :refer :all]

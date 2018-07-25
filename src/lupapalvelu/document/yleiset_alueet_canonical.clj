@@ -1,11 +1,9 @@
 (ns lupapalvelu.document.yleiset-alueet-canonical
   (:require [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.domain :as domain]
             [sade.util :as util]
             [sade.strings :as ss]
-            [sade.core :refer :all]
-            [clojure.walk :as walk]))
+            [sade.core :refer :all]))
 
 (defn- get-handler [{handlers :handlers :as application}]
   (if-let [general-handler (util/find-first :general handlers)]

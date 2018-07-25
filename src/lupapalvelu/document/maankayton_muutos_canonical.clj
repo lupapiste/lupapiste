@@ -1,8 +1,6 @@
 (ns lupapalvelu.document.maankayton-muutos-canonical
   (:require [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
-            [lupapalvelu.document.tools :as tools ]
-            [lupapalvelu.permit :as permit]
-            [sade.util :as util]))
+            [lupapalvelu.document.tools :as tools]))
 
 (defn- toimituksen-tila [app]
   (let [state (-> app :state keyword)

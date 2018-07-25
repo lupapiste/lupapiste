@@ -1,6 +1,5 @@
 (ns lupapalvelu.tasks-itest
   (:require [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]

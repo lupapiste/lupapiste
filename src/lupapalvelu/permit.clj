@@ -1,5 +1,5 @@
 (ns lupapalvelu.permit
-  (:require [taoensso.timbre :as timbre :refer [error errorf warn]]
+  (:require [taoensso.timbre :refer [error errorf warn]]
             [schema.core :as sc]
             [sade.core :refer [fail]]
             [sade.strings :as ss]

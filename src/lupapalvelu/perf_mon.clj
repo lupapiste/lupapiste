@@ -1,5 +1,5 @@
 (ns lupapalvelu.perf-mon
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error fatal]]
             [noir.core :refer [defpage]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]

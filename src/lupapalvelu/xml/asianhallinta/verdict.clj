@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.asianhallinta.verdict
-  (:require [sade.core :refer [ok fail fail! error-and-fail!] :as core]
+  (:require [sade.core :refer [ok fail fail! error-and-fail!]]
             [sade.common-reader :as cr]
             [sade.util :as util]
             [sade.xml :as xml]

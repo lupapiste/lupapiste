@@ -5,8 +5,7 @@
             [lupapalvelu.pate-itest-util :refer :all]
             [sade.core :refer [now]]
             [sade.shared-util :as shared-util]
-            [sade.util :as util]
-            [clojure.set :as set]))
+            [sade.util :as util]))
 
 (apply-remote-fixture "pate-verdict")
 

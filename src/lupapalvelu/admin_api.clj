@@ -1,5 +1,5 @@
 (ns lupapalvelu.admin-api
-  (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf]]
+  (:require [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf]]
             [sade.core :refer [now ok]]
             [sade.strings :as ss]
             [sade.util :as util]

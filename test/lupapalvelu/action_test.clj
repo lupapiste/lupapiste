@@ -1,6 +1,5 @@
 (ns lupapalvelu.action-test
-  (:require [taoensso.timbre :as timbre]
-            [midje.sweet :refer :all]
+  (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
             [schema.core :as sc]

@@ -1,6 +1,5 @@
 (ns lupapalvelu.child-to-attachment-test
-  (:require [clojure.java.io :as io]
-            [sade.files :as files]
+  (:require [sade.files :as files]
             [lupapalvelu.child-to-attachment :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]

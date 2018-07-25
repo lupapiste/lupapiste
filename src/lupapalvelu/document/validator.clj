@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.validator
   (:require [schema.core :as sc]
-            [sade.util :as util]
             [lupapalvelu.document.tools :as tools]))
 
 (defonce validators (atom {}))

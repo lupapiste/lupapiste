@@ -2,7 +2,6 @@
   (:require [rum.core :as rum]
             [lupapalvelu.ui.bulletins.state :as state]
             [lupapalvelu.ui.common :as common]
-            [lupapalvelu.ui.hub :as hub]
             [sade.shared-util :as util]))
 
 (defonce args (atom {}))

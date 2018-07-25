@@ -2,9 +2,6 @@
   (:require [lupapalvelu.application :as application]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.schema-validation :as schema-validation]
-            [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.mongo :as mongo]
             [sade.core :refer :all]
             [sade.strings :as ss]))
 

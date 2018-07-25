@@ -1,7 +1,6 @@
 (ns lupapalvelu.assignment-itest
   (:require [midje.sweet :refer :all]
             [schema.core :as sc]
-            [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.assignment :refer [Assignment]]

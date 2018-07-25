@@ -3,10 +3,9 @@
             [clojure.walk :as walk]
             [lupapalvelu.campaign :as camp]
             [sade.core :refer :all]
-            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [taoensso.timbre :as timbre :refer [debug debugf info warn error]])
+            [taoensso.timbre :refer [debug debugf info warn error]])
   (:import [fr.opensagres.xdocreport.converter Options ConverterTypeTo ConverterTypeVia]
            [fr.opensagres.xdocreport.document IXDocReport]
            [fr.opensagres.xdocreport.document.registry XDocReportRegistry]

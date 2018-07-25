@@ -1,6 +1,6 @@
 (ns lupapalvelu.calendars-api
   (:require [sade.core :refer :all]
-            [taoensso.timbre :as timbre :refer [info error]]
+            [taoensso.timbre :refer [info error]]
             [lupapalvelu.action :refer [defquery defcommand notify] :as action]
             [sade.env :as env]
             [sade.util :as util]

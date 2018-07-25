@@ -1,10 +1,8 @@
 (ns lupapalvelu.pdf.libreoffice-template-verdict
-  (:require [taoensso.timbre :as timbre]
-            [sade.util :as util]
+  (:require [sade.util :as util]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pdf.libreoffice-template :refer [get-organization-name applicant-index] :as template]
             [clojure.string :as s]
-            [lupapalvelu.domain :as domain]
             [clojure.java.io :as io]))
 
 (defn- get-lupamaaraykset [application verdict-id paatos-idx]

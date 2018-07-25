@@ -1,6 +1,5 @@
 (ns lupapalvelu.pate.verdict-schemas
   (:require [clojure.set :as set]
-            [clojure.string :as s]
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as schemas]

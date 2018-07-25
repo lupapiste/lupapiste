@@ -1,11 +1,8 @@
 (ns lupapalvelu.pate.schemas
   (:require [clojure.set :as set]
             [lupapalvelu.attachment.type :as att-type]
-            [lupapalvelu.document.schemas :as doc-schemas]
-            [lupapalvelu.document.tools :refer [body] :as tools]
-            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.document.tools :refer [body]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]

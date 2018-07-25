@@ -3,7 +3,6 @@
             [midje.util :refer [testable-privates]]
             [clojure.string :refer [join]]
             [sade.core :refer [unauthorized]]
-            [sade.env :as env]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
