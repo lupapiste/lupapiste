@@ -962,7 +962,7 @@
                                :attachments.$.latestVersion.fileId (:originalFileId latestVersion)
                                (str "attachments.$.versions." last-idx ".archivable") false
                                (str "attachments.$.versions." last-idx ".fileId") (:originalFileId latestVersion)}})
-          (let [updated-app (mongo/by-id :applications id [:attachments])
+          (let [updated-app (mongo/by-id :applications id)
                 attachment (attachment/get-attachment-info updated-app (:id att))]
             (attachment/convert-existing-to-pdfa! updated-app attachment)))
         (info "Attachment" (:id att) "processed"))))
