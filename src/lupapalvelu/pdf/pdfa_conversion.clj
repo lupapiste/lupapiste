@@ -3,16 +3,16 @@
             [clojure.java.io :as io]
             [clojure.core.memoize :as memo]
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
-            [com.netflix.hystrix.core :as hystrix]
             [sade.strings :as ss]
             [sade.env :as env]
             [sade.files :as files]
             [lupapalvelu.statistics :as statistics]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.pdf.pdf-swat :as swat])
+            [lupapalvelu.pdf.pdf-swat :as swat]
+            [lupapiste-commons.threads :as threads])
   (:import [java.io File IOException FileNotFoundException InputStream]
            [com.lowagie.text.pdf PdfReader]
-           [com.netflix.hystrix HystrixCommandProperties HystrixCommand$Setter HystrixThreadPoolProperties]))
+           [java.util.concurrent ExecutorService]))
 
 (defn- executable-exists? [executable]
   (try
@@ -202,22 +202,14 @@
           (io/copy pdf-file output-file))
         {:pdfa? (or (:assume-pdfa-compatibility opts) false)})))
 
-(hystrix/defcommand convert-to-pdf-a
-  "Takes a PDF File and returns a File that is PDF/A
-  opts is a map possible containing the following keys:
-  {:application      \"Application data for logging purposes\"
-   :filename         \"Original filename for logging purposes\"}"
-  {:hystrix/group-key   "Attachment"
-   :hystrix/command-key "Convert to PDF/A with PDF Tools utility"
-   :hystrix/thread-pool-key :pdf-tools-thread-pool
-   :hystrix/init-fn     (fn [_ ^HystrixCommand$Setter setter]
-                          (doto setter
-                            (.andCommandPropertiesDefaults
-                              (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 5 60 1000)))
-                            (.andThreadPoolPropertiesDefaults
-                              (.withMaxQueueSize (HystrixThreadPoolProperties/Setter) Integer/MAX_VALUE))))}
-  [pdf-file output-file & [opts]]
-  (analyze-and-convert-to-pdf-a pdf-file output-file opts))
+(def ^ExecutorService conversion-pool (threads/threadpool 6 "pdf2pdf-conversion-worker"))
+
+(defn convert-to-pdf-a [pdf-file output-file & [opts]]
+  {:post [(boolean? (:pdfa? %))]}
+  (-> (.submit conversion-pool
+               ^Callable (fn []
+                           (analyze-and-convert-to-pdf-a pdf-file output-file opts)))
+      (.get)))
 
 (defn file-is-valid-pdfa? [pdf-file]
   {:pre [(or (instance? InputStream pdf-file) (instance? File pdf-file))]}
