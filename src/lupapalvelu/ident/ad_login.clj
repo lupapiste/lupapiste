@@ -1,26 +1,19 @@
 (ns lupapalvelu.ident.ad-login
-  (:require [clojure.data.xml :as xml]
-            [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
             [noir.core :refer [defpage]]
             [noir.response :as response]
             [noir.request :as request]
-            [lupapalvelu.ident.session :as ident-session]
-            [lupapalvelu.ident.ident-util :as ident-util]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
             [ring.util.response :refer :all]
             [sade.core :refer [def-]]
-            [sade.env :as env]
-            [sade.util :as util]
             [sade.session :as ssess]
             [sade.strings :as ss]
             [sade.xml :as sxml]
             [saml20-clj.sp :as saml-sp]
             [saml20-clj.routes :as saml-routes]
-            [saml20-clj.shared :as saml-shared])
-  (:import (java.util Date)))
+            [saml20-clj.shared :as saml-shared]))
 
 ;; Headerit idp:sta
 (def ad-header-translations
@@ -73,7 +66,7 @@
   Isn't really all that necessary, since the saml-info var (inside a let binding
   in ad-login route) contains the same info..."
   [xml-string]
-  (-> xml-string xml/parse-str xml-tree->edn))
+  (-> xml-string sxml/parse xml-tree->edn))
 
 (defn parse-saml-info
   "The saml-info map returned by saml20-clj comes in a wacky format, so its best to
@@ -133,7 +126,7 @@
         valid? (and valid-relay-state? valid-signature?)
         saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter))
         parsed-saml-info (parse-saml-info saml-info)
-        email (get-in parsed-saml-info [:assertions :attrs :email])
+        {:keys [email firstName lastName]} (get-in parsed-saml-info [:assertions :attrs])
         _ (info parsed-saml-info)
         _ (clojure.pprint/pprint parsed-saml-info)
         ]
@@ -142,38 +135,17 @@
       (let [user (or (usr/get-user-by-email email)
                      (usr/create-new-user nil {:email email
                                                :username email
+                                               :firstName firstName
+                                               :lastName lastName
                                                :role "authority"
                                                :company {:id "esimerkki"
                                                          :role "admin"
-                                                         :submit true}
-                                               }))
+                                                         :submit true}}))
             response (ssess/merge-to-session
                        req
-                       (response/redirect "http://localhost:8000") ; Fix!
+                       (response/redirect "http://localhost:8000/app/fi/authority") ; Fix!
                        {:user user})]
         response)
       (do
         (error "SAML validation failed")
         (response/status 403 (response/content-type "text/plain" "Validation of SAML response failed"))))))
-
-(defpage [:post "/from-ad/:trid"] {:keys [trid] :as params}
-  (let [valid? params]
-    (if valid?
-      {:status 303 ;; See other
-       :headers {"Location" "http://localhost:8000/app/fi/authority"}
-       :body ""}
-      {:status 500
-       :body "The SAML response from IdP does not validate!"})))
-
-(defpage "/api/saml/ad/error" {relay-state :RelayState status :statusCode status2 :statusCode2 message :statusMessage}
-  (if (ss/contains? status2 "AuthnFailed")
-    (warn "SAML endpoint rejected authentication")
-    (error "SAML endpoint encountered an error:" status status2 message))
-  (try
-    (if-let [trid (re-find #".*/([0-9A-Za-z]+)$" relay-state)]
-      (let [url (or (some-> (ident-session/get-by-trid (last trid)) (get-in [:paths :cancel])) "/")]
-        (response/redirect url))
-      (response/redirect "/"))
-    (catch Exception e
-      (error "SAML error endpoint encountered an error:" e)
-      (response/redirect "/"))))
