@@ -84,7 +84,7 @@
                       applications+=v.applications;
                     });
                     return {size:size, count:count, applications:applications}"
-        result-fmt (fn [acc {id :id {:keys [size count] :as value} :value}]
+        result-fmt (fn [acc {id :id {:keys [size] :as value} :value}]
                      (let [size-mb (/ size (* 1024 1024))
                            avg (if (pos? (:count value)) (/ (:size value) (:count value)) 0)
                            avg-kb (/ avg 1024)]

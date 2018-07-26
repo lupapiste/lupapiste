@@ -207,6 +207,7 @@
   (let [canonical          (party-doc-to-canonical (doc-tools/unwrapped application) "fi" (doc-tools/unwrapped (docs 2)))
         asia               (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia])
         krysp-element-keys (keys asia)
+        ;; TODO: Use or remove:
         valid-names        (->> (:documents application)
                                 (filter (fn [{info :schema-info}]
                                           (= (:subtype info) :suunnittelija)))
@@ -232,6 +233,7 @@
   (let [canonical          (party-doc-to-canonical (doc-tools/unwrapped application) "fi" (doc-tools/unwrapped (docs 1)))
         asia               (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia])
         krysp-element-keys (keys asia)
+        ;; TODO: Use or remove:
         valid-names        (->> (:documents application)
                                 (filter (fn [{info :schema-info}]
                                           (= (:subtype info) :suunnittelija)))

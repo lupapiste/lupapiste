@@ -86,7 +86,7 @@
 ;; Throttling:
 ;;
 
-(defn wrap-db-throttle [f f-name]
+(defn wrap-db-throttle [f _]
   (fn [& args]
     (Thread/sleep @db-throttle)
     (apply f args)))

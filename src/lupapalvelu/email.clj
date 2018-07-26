@@ -75,9 +75,9 @@
                                       (if-not (= linktext href)
                                         (str linktext \: separator href \space)
                                         (str separator href \space))))
-(defmethod ->str :img     [element] "")
-(defmethod ->str :br      [element] "")
-(defmethod ->str :hr      [element] hr-as-text)
+(defmethod ->str :img     [_] "")
+(defmethod ->str :br      [_] "")
+(defmethod ->str :hr      [_] hr-as-text)
 (defmethod ->str :blockquote [element] (-> element :content ->str* (ss/replace #"\n{2,}" "\n  ") (ss/replace #"^\n" "  ")))
 (defmethod ->str :table      [element] (str \newline (->str* (filter map? (:content element))) \newline))
 (defmethod ->str :tr         [element] (let [contents (filter #(map? %) (:content element))]
@@ -110,7 +110,6 @@
       close-braces        "\\}+"
       whitespace          "\\s*"
       captured-key        "((?:[^#.}\\s]+\\.?)*)"
-      key                 "(?:(?:[^#.}\\s]+\\.?)*)"
       anything            "(?:.|\n|\r)*"
       variable            (str "(?:" open-braces whitespace captured-key whitespace close-braces ")")
       open-section        (str open-section-braces whitespace captured-key whitespace close-braces)

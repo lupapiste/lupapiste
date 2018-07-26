@@ -473,7 +473,7 @@
   [_]
   [0 0 0])
 (defmethod ->version-array clojure.lang.PersistentArrayMap
-  [{major :major minor :minor micro :micro :as v :or {major 0 minor 0 micro 0}}]
+  [{major :major minor :minor micro :micro :or {major 0 minor 0 micro 0}}]
   (mapv ->int [major minor micro]))
 (defmethod ->version-array clojure.lang.PersistentVector
   [v]
@@ -587,7 +587,7 @@
             (fs/mkdirs (fs/parent f))
             (io/copy (.getInputStream zip entry) f))))
 
-       (catch IllegalArgumentException e
+       (catch IllegalArgumentException _
          (if-not (= encoding fallback-encoding)
            (do
              (warnf "Malformed zipfile contents in (%s) with encoding: %s. Fallbacking to CP858 encoding" source encoding)

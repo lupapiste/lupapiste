@@ -10,7 +10,7 @@
 
 (defmulti handle-token (fn [token-data params] (:token-type token-data)))
 
-(defmethod handle-token :default [token-data params]
+(defmethod handle-token :default [token-data _]
   (errorf "consumed token: token-type %s does not have handler: id=%s" (:token-type token-data) (:_id token-data)))
 
 (def make-token-id (partial security/random-password 48))

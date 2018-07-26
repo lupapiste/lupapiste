@@ -23,7 +23,7 @@
   (when (some-> command :data :phrase-id)
     (phrase-id-exists command)))
 
-(defn upsert-phrase [{:keys [data user]}]
+(defn upsert-phrase [{:keys [data]}]
   (let [m                          (select-keys data [:category :tag :phrase])
         {:keys [phrase-id org-id]} data]
     (if phrase-id

@@ -41,6 +41,6 @@
   (rum/mount (report)
              (.getElementById js/document (:dom-id @args))))
 
-(defn ^:export start [domId componentParams]
+(defn ^:export start [domId _]
   (swap! args assoc :dom-id (name domId))
   (mount-component))

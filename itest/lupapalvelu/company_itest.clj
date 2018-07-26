@@ -97,7 +97,7 @@
 
       (fact "Invitation is cancelled"
             (let [email (last-email)
-                  [uri token] (re-find #"http.+/app/fi/welcome#!/invite-company-user/ok/([A-Za-z0-9-]+)" (:plain (:body email)))]
+                  [_ token] (re-find #"http.+/app/fi/welcome#!/invite-company-user/ok/([A-Za-z0-9-]+)" (:plain (:body email)))]
               (command kaino :company-cancel-invite :tokenId token) => ok?
               (let [company (query kaino :company :company "solita" :users true)]
                 (count (:invitations company)) => 0
@@ -487,10 +487,9 @@
   (let [store (atom {})
         params (vetuma/default-vetuma-params (->cookie-store store))
         trid (dummy-ident-init params vetuma/default-token-query)
-        ident-finish (dummy-ident-finish params {:personId dummy/dummy-person-id} trid)
+        _ (dummy-ident-finish params {:personId dummy/dummy-person-id} trid)
         vetuma-data (decode-body (http-get (str (server-address) "/api/vetuma/user") params))
         stamp (:stamp vetuma-data)
-        person-id (:userid vetuma-data)
         params (update params :headers assoc "x-anti-forgery-token" (-> (get @store "anti-csrf-token") .getValue codec/url-decode))
         old-details (first (:users (query admin :users :email "foo@example.com")))
         reg-resp (vetuma/register params {:email "foo@example.com"

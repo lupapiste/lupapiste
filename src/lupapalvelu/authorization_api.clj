@@ -35,7 +35,7 @@
 
 (defn- select-user-auths
   "Select auths for user by user-id and company-id."
-  [{user-id :id :as user} {auth :auth :as application}]
+  [{user-id :id :as user} application]
   (let [company-auths  (auth/get-company-auths application user)
         personal-auths (auth/get-auths application user-id)]
     (assoc application :auth (remove nil? (concat company-auths personal-auths)))))
@@ -154,7 +154,7 @@
           (doc-persistence/do-set-user-to-document application document-id (:id user) (get-in auth [:invite :path]) created user false)))
       (ok))))
 
-(defn do-remove-auth [{{auth :auth :as application} :application :as command} username]
+(defn do-remove-auth [{:keys [application] :as command} username]
   (let [username (ss/canonize-email username)
         last-invite-permission? (->> (auth/get-auths-by-permissions application [:application/invite])
                                      (every? (comp #{username} :username)))
@@ -189,7 +189,7 @@
 (defn no-company-users-in-auths-when-company-denies-invitations
   "Precheck for company auth removal for companies that have set :invitationDenied
   flag on. To remove company, all company users have to be removed first."
-  [{{auth-id :id type :type} :auth-entry {auth :auth :as application} :application}]
+  [{{auth-id :id type :type} :auth-entry {:keys [auth]} :application}]
   (when (and (util/=as-kw :company type)
              (:invitationDenied (company/find-company-by-id auth-id)))
 

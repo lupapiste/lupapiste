@@ -27,7 +27,7 @@
 (def can-generate? (partial can? :generate-pate-pdf))
 
 (defn updater
-  ([{:keys [state path] :as options} value]
+  ([{:keys [path] :as options} value]
    (service/edit-verdict @state/application-id
                          (path/value [:info :id] state/current-verdict)
                          path
@@ -55,7 +55,7 @@
                                                    :target {:type :verdict
                                                             :id   (:id verdict)}
                                                    kvs))
-                     :upload.include?     (fn [_ {target :target :as att}]
+                     :upload.include?     (fn [_ {:keys [target]}]
                                             (= (:id target) (:id verdict)))}}))
   (reset! state/references references)
   (common/reset-if-needed! state/verdict-wait? false))
@@ -80,7 +80,7 @@
   (verdict-section-header options))
 
 (rum/defc toggle-all < rum/reactive
-  [{:keys [schema _meta] :as options}]
+  [{:keys [schema _meta]}]
   (when (can-edit?)
     (let [all-sections  (map :id (:sections schema))
           meta-map (rum/react _meta)
@@ -109,17 +109,13 @@
                                                 verdict-id
                                                 waiting?*)})]))
 
-(rum/defc verdict-toolbar < rum/reactive
-  [{:keys [schema state info _meta] :as options}]
-  (let [{:keys [published legacy? id category]
-         :as   info} @info
+(rum/defc verdict-toolbar < rum/reactive [{:keys [info _meta] :as options}]
+  (let [{:keys [published id category] :as info} @info
         contract? (util/=as-kw category :contract)
         yes-fn     (fn []
                      (reset! state/verdict-wait? true)
                      (reset! (rum/cursor-in _meta [:enabled?]) false)
-                     (service/publish-and-reopen-verdict  @state/application-id
-                                                          info
-                                                          reset-verdict))]
+                     (service/publish-and-reopen-verdict @state/application-id info reset-verdict))]
     [:div.pate-grid-2
      (when-not published
        [:div.row

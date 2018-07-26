@@ -17,7 +17,7 @@
 (rum/defc edit-authority-view < rum/reactive
   {:init         init
    :will-unmount (fn [& _] (reset! state/component-state {}))}
-  [authority-id]
+  [_]
   (let [user (rum/react state/authority)]
     [:div
      [:h1 (str (loc "auth-admin.edit-authority.title") ", " (:firstName user) " " (:lastName user))]

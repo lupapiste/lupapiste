@@ -156,10 +156,6 @@
 
         foreman-app (command sonja :create-foreman-application :id application-id :taskId "" :foremanRole "ei tiedossa" :foremanEmail "")
 
-        id-matches? (fn [response]
-                      (and
-                        (one-result? response)
-                        (= (get-in response [:data :applications 0 :id]) application-id)))
         application2 (create-and-submit-application sonja
                        :address "Hakukuja 10"
                        :propertyId (p/to-property-id property-id)

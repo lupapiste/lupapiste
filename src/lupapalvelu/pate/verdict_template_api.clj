@@ -62,12 +62,8 @@
    :input-validators [(partial action/non-blank-parameters [:org-id :category])]
    :pre-checks       [pate-enabled
                       valid-category]}
-  [{:keys [created lang] :as command}]
-  (ok (assoc (template/new-verdict-template org-id
-                                            created
-                                            lang
-                                            category)
-        :filled false)))
+  [{:keys [created lang]}]
+  (ok (assoc (template/new-verdict-template org-id created lang category) :filled false)))
 
 (defcommand set-verdict-template-name
   {:description      "Name cannot be empty."
@@ -78,10 +74,7 @@
                       (template/verdict-template-check :editable)]
    :permissions      [{:required [:organization/admin]}]}
   [{created :created :as command}]
-  (template/set-name (template/command->organization command)
-                     template-id
-                     created
-                     name)
+  (template/set-name (template/command->organization command) template-id created name)
   (ok :modified created))
 
 (defcommand save-verdict-template-draft-value
@@ -120,10 +113,8 @@
    :input-validators [(partial action/non-blank-parameters [:org-id :template-id])]
    :pre-checks       [pate-enabled
                       (template/verdict-template-check :editable :named :filled)]}
-  [{:keys [created user user-organizations] :as command}]
-  (template/publish-verdict-template (template/command->organization command)
-                                     template-id
-                                     created)
+  [{:keys [created] :as command}]
+  (template/publish-verdict-template (template/command->organization command) template-id created)
   (ok :published created))
 
 (defquery verdict-templates
@@ -305,10 +296,8 @@
                          (template/verdict-template-check :published :editable :blank)
                          organization-operation
                          operation-vs-template-category]}
-  [command]
-  (template/set-operation-verdict-template org-id
-                                           operation
-                                           template-id))
+  [_]
+  (template/set-operation-verdict-template org-id operation template-id))
 
 (defquery selectable-verdict-templates
   {:description      "Returns a map of where keys are permit types or

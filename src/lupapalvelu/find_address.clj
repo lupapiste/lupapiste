@@ -58,7 +58,7 @@
 ;;;   :location   Map with :x and :y
 ;;;
 
-(defn search-property-id [lang property-id]
+(defn search-property-id [_ property-id]
   (map (fn [f] {:location (select-keys f [:x :y])
                 :property-id (:kiinttunnus f)
                 :kind :property-id})

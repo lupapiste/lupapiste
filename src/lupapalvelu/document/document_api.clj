@@ -257,7 +257,7 @@
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       user-can-be-set-validator
                       doc-disabled-validator]}
-  [{:keys [created application user] :as command}]
+  [{:keys [created application user]}]
   (doc-persistence/do-set-user-to-document application documentId userId path created user))
 
 (defcommand set-current-user-to-document
@@ -268,7 +268,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       doc-disabled-validator]}
-  [{:keys [created application user] :as command}]
+  [{:keys [created application user]}]
   (doc-persistence/do-set-user-to-document application documentId (:id user) path created user))
 
 (defcommand set-company-to-document
@@ -283,7 +283,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       doc-disabled-validator]}
-  [{:keys [user created application document] :as command}]
+  [{:keys [user created application document]}]
   (doc-persistence/do-set-company-to-document application
                                               document
                                               companyId

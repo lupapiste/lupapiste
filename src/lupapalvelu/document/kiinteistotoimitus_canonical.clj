@@ -23,14 +23,14 @@
 (defmulti kiinteistonmuodostus-details (fn [name _] name))
 
 (defmethod kiinteistonmuodostus-details :default
-  [_ doc])
+  [_ _])
 
 (defmethod kiinteistonmuodostus-details "lohkominen-tonttijako"
-  [_ doc]
+  [_ _]
   {:lohkomisenTyyppi "Tonttijaon mukainen tontti"})
 
 (defmethod kiinteistonmuodostus-details "lohkominen-ohjeellinen"
-  [_ doc]
+  [_ _]
   {:lohkomisenTyyppi "Ohjeellisen tonttijaon mukainen rakennuspaikka"})
 
 (defmulti operation-details (fn [doc]

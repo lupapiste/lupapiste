@@ -180,7 +180,7 @@
          [:body body (when script?
                        page-number-script)]])))
 
-(defn- verdict-schema [{:keys [category schema-version legacy?] :as opts}]
+(defn- verdict-schema [{:keys [category schema-version legacy?]}]
   (if legacy?
     (legacy/legacy-verdict-schema category)
     (verdict-schemas/verdict-schema category schema-version)))
@@ -239,9 +239,7 @@
        (concat extra)
        (remove nil?)))
 
-(defn resolve-cell [{lang :lang :as data}
-                    source-value
-                    {:keys [text width unit loc-prefix styles] :as cell}]
+(defn resolve-cell [{:keys [lang]} source-value {:keys [text width unit loc-prefix styles] :as cell}]
   (let [path (some-> cell :path pathify)
         class (resolve-class cell-styles
                              styles

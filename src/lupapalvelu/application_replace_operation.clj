@@ -177,7 +177,7 @@
         old-op          (get-operation-by-key updated-app :id op-id)
         old-op-doc      (domain/get-document-by-operation updated-app old-op)
         updated-command (assoc command :application updated-app)
-        new-ops         (when primary-op? (app/change-primary-operation updated-command app-id (:id new-op)))
+        new-ops         (when primary-op? (app/change-primary-operation updated-command (:id new-op)))
         updated-app     (merge (:application updated-command) new-ops)
         updated-command (assoc updated-command :application updated-app)]
     (move-attachments-from-old-op-to-new updated-command new-op old-op)

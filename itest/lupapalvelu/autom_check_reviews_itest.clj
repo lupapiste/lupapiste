@@ -94,8 +94,8 @@
 
         (fact "failure in fetching multiple applications causes fallback into fetching consecutively"
 
-          (let [review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
-                poll-result   (batchrun/poll-verdicts-for-reviews)
+          (let [_ (count-reviews sonja application-id-verdict-given-1) => 3
+                _ (batchrun/poll-verdicts-for-reviews)
                 last-review-1 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-1)))
                 last-review-2 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-2)))
                 app-1         (query-application local-query sonja application-id-verdict-given-1)
@@ -125,8 +125,8 @@
 
         (fact "checking for reviews in correct states"
 
-          (let [review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
-                poll-result (batchrun/poll-verdicts-for-reviews)
+          (let [_ (count-reviews sonja application-id-verdict-given-1) => 3
+                _ (batchrun/poll-verdicts-for-reviews)
                 last-review (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-1)))
                 app         (query-application local-query sonja application-id-verdict-given-1)]
 
@@ -180,8 +180,8 @@
         (give-local-verdict sonja application-id-verdict-given-2 :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
 
         ;; Trying to fetch with multiple ids throws xml parser exception -> causes fallback into consecutive fetching
-        (let [review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
-              poll-result   (batchrun/poll-verdicts-for-reviews)
+        (let [_ (count-reviews sonja application-id-verdict-given-1) => 3
+              _   (batchrun/poll-verdicts-for-reviews)
               last-review-1 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-1)))
               last-review-2 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-2)))
               app-1         (query-application local-query sonja application-id-verdict-given-1)
@@ -272,7 +272,7 @@
 
         (fact "checking review updates states"
 
-          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+          (let [_ (batchrun/poll-verdicts-for-reviews)
                 application-submitted     (query-application local-query sonja application-id-submitted)     => truthy
                 application-canceled      (query-application local-query sonja application-id-canceled)      => truthy
                 application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy
@@ -299,7 +299,7 @@
                                              [{:lp-tunnus application-id-construction}  {:pvm "2016-06-06Z" :tila "osittainen loppukatselmus, yksi tai useampia luvan rakennuksista on k\u00e4ytt\u00f6\u00f6notettu"}]])))
 
         (fact "checking review updates states again"
-          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+          (let [_ (batchrun/poll-verdicts-for-reviews)
                 application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy
                 application-construction  (query-application local-query sonja application-id-construction)  => truthy]
 
@@ -360,7 +360,7 @@
 
         (fact "first batchrun"
 
-          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+          (let [_ (batchrun/poll-verdicts-for-reviews)
                 application (query-application local-query sonja application-id) => truthy]
             (fact "application reviews contain the one that will be changed"
               (->> application :tasks (util/find-first #(= (-> % :data :katselmus :pitoPvm :value)
@@ -375,7 +375,7 @@
 
         (fact "second batchrun, no overwrite"
 
-          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+          (let [_ (batchrun/poll-verdicts-for-reviews)
                 application (query-application local-query sonja application-id) => truthy]
 
             (fact "application state is updated from verdictGive to constructionStarted"
@@ -403,7 +403,7 @@
                     (sxml/parse-string "utf-8"))))
 
         (fact "second batchrun, overwrite with the same data"
-          (let [poll-result (batchrun/poll-verdicts-for-reviews :overwrite-background-reviews? true)
+          (let [_ (batchrun/poll-verdicts-for-reviews :overwrite-background-reviews? true)
                 application (query-application local-query sonja application-id) => truthy]
 
             ;; :overwrite-background-reviews? is true, but the review
@@ -427,7 +427,7 @@
                 old-task (->> application-before-rewrite :tasks
                               (util/find-first #(= (-> % :data :katselmus :pitoPvm :value)
                                                    "29.09.2014")))
-                poll-result (batchrun/poll-verdicts-for-reviews :overwrite-background-reviews? true)
+                _ (batchrun/poll-verdicts-for-reviews :overwrite-background-reviews? true)
                 application (query-application local-query sonja application-id) => truthy
                 overwritten-task (->> application :tasks
                                       (util/find-first #(= (:id %)

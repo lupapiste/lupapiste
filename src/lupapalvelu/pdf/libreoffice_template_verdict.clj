@@ -59,7 +59,7 @@
           (map (fn [row] [(str (get-in row [:data :maarays :value]) " (" (:taskname row) ")")]) (filter-tasks application verdict-id "task-lupamaarays")))))
 
 ;;(sc/optional-key :vaaditutKatselmukset)           [Katselmus]
-(defn- verdict-vaaditutKatselmukset [application verdict-id paatos-idx lang]
+(defn- verdict-vaaditutKatselmukset [application verdict-id paatos-idx]
   (if-let [krysp-other-requirements (:vaaditutKatselmukset (get-lupamaaraykset application verdict-id paatos-idx))]
     (map (fn [val] [(str (:katselmuksenLaji val)) (str (:tarkastuksenTaiKatselmuksenNimi val))])
          krysp-other-requirements)
@@ -145,7 +145,7 @@
                                  ;;                                 "PLANSTABLE" (verdict-vaaditutErityissuunnitelmat application id paatos-idx)
 
                                  "REVIEWHEADER" (i18n/localize lang "verdict.vaaditutKatselmukset")
-                                 "REVIEWSTABLE" (verdict-vaaditutKatselmukset application id paatos-idx lang)
+                                 "REVIEWSTABLE" (verdict-vaaditutKatselmukset application id paatos-idx)
 
                                  "OTHERHEADER" (i18n/localize lang "verdict.muutMaaraykset")
                                  "OTHERTABLE" (verdict-muutMaaraykset application id paatos-idx)

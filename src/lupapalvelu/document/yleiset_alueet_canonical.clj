@@ -5,7 +5,7 @@
             [sade.strings :as ss]
             [sade.core :refer :all]))
 
-(defn- get-handler [{handlers :handlers :as application}]
+(defn- get-handler [{:keys [handlers]}]
   (if-let [general-handler (util/find-first :general handlers)]
     {:henkilotieto {:Henkilo {:nimi {:etunimi (:firstName general-handler) :sukunimi (:lastName general-handler)}}}}
     empty-tag))
@@ -317,7 +317,7 @@
 
 (defn- get-ya-katselmus [katselmus]
   (let [data (tools/unwrapped (:data katselmus))
-        {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
+        {:keys [katselmuksenLaji vaadittuLupaehtona]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat]} (:katselmus data)
         huomautukset (-> data :katselmus :huomautukset)
         task-name (:taskname katselmus)]
@@ -343,7 +343,7 @@
                                                             :toteaja (:toteaja huomautukset))
                                                           (select-keys huomautukset [:maaraAika :toteamisHetki])))}})))))
 
-(defn katselmus-canonical [application katselmus lang user]
+(defn katselmus-canonical [application katselmus lang]
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
         operation-name-key (-> application :primaryOperation :name keyword)

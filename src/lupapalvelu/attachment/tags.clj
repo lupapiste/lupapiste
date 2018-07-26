@@ -38,23 +38,23 @@
     []
     (mapcat (partial groups-for-attachment-group-type application) attachment-groups)))
 
-(defn- tag-by-applicationState [{ram :ramLink app-state :applicationState :as attachment}]
+(defn- tag-by-applicationState [{ram :ramLink app-state :applicationState}]
   (cond
     ram :ram
     (states/post-verdict-states (keyword app-state)) :postVerdict
     :else :preVerdict))
 
-(defn- tag-by-notNeeded [{not-needed :notNeeded :as attachment}]
+(defn- tag-by-notNeeded [{not-needed :notNeeded}]
   (if not-needed
     :notNeeded
     :needed))
 
-(defn- tag-by-forPrinting [{verdict-attachment :forPrinting :as attachment}]
+(defn- tag-by-forPrinting [{verdict-attachment :forPrinting}]
   (if verdict-attachment
     :verdictAttachment
     :nonVerdictAttachment))
 
-(defn- tag-by-file-status [{{:keys [fileId onkaloFileId]} :latestVersion :as attachment}]
+(defn- tag-by-file-status [{{:keys [fileId onkaloFileId]} :latestVersion}]
   (when (or fileId onkaloFileId)
     :hasFile))
 
@@ -80,7 +80,7 @@
   (when ((set application-group-types) (tag-by-group-type attachment))
     application-group-type-tag))
 
-(defn- tag-by-operation [{op :op :as attachment}]
+(defn- tag-by-operation [{:keys [op]}]
   (when (= (count op) 1)
     (->> (get-in op [0 :id])
          op-id->tag)))

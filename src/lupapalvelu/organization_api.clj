@@ -56,7 +56,7 @@
   [{scope :scope}]
   (let [permit-types (->> scope (map :permitType) distinct (map keyword))]
     (->> (select-keys operations/operation-names-by-permit-type permit-types)
-         (map (fn [[permit-type operations]] (->> (map att-type/get-attachment-types-for-operation operations)
+         (map (fn [[_ operations]] (->> (map att-type/get-attachment-types-for-operation operations)
                                                   (map att-type/->grouped-array)
                                                   (zipmap operations))))
          (zipmap permit-types))))
@@ -172,7 +172,7 @@
 (defquery user-organization-bulletin-settings
   {:permissions [{:required [:organization/admin]}]
    :pre-checks  [check-bulletins-enabled]}
-  [{user :user user-orgs :user-organizations}]
+  [{user-orgs :user-organizations}]
   (let [user-org (first user-orgs)
         scopes   (->> user-org :scope
                       (filter (comp :enabled :bulletins))
@@ -195,7 +195,7 @@
    :input-validators    [permit/permit-type-validator
                          bulletin-scope-settings-validator]
    :pre-checks          [check-bulletins-enabled]}
-  [{user :user data :data}]
+  [{:keys [data]}]
   (let [updates (merge (when (util/not-empty-or-nil? notificationEmail)
                          {:scope.$.bulletins.notification-email notificationEmail})
                        (when (contains? data :descriptionsFromBackendSystem)
@@ -582,7 +582,7 @@
    :input-validators [(partial non-blank-parameters [:organizationId])
                       (partial boolean-parameters [:enabled])]
    :feature          :ajanvaraus}
-  [{user :user}]
+  [_]
   (org/update-organization organizationId {$set {:calendars-enabled enabled}})
   (ok))
 
@@ -592,7 +592,7 @@
    :user-roles       #{:admin}
    :input-validators [(partial non-blank-parameters [:organizationId :path])
                       (partial boolean-parameters [:value])]}
-  [{user :user}]
+  [_]
   (when-let [kw-path (-> path (ss/split #"\.") (util/kw-path))]
     (org/update-organization organizationId {$set {kw-path value}}))
   (ok))
@@ -799,7 +799,7 @@
    :pre-checks          [(fn [{:keys [data]}]
                            (when-not (pos? (mongo/count :organizations {:_id (:organization data)}))
                              (fail :error.unknown-organization)))]}
-  [{data :data user :user}]
+  [{:keys [data]}]
   (let [url     (-> data :url ss/trim)
         updates (->> (when username
                        (org/encode-credentials username password))
@@ -824,7 +824,7 @@
 (defcommand set-kopiolaitos-info
   {:parameters       [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
    :permissions      [{:required [:organization/admin]}]
-   :input-validators [(fn [{{email-str :kopiolaitosEmail} :data :as command}]
+   :input-validators [(fn [{{email-str :kopiolaitosEmail} :data}]
                         (let [emails (util/separate-emails email-str)]
                           ;; action/email-validator returns nil if email was valid
                           (when (some #(email-validator :email {:data {:email %}}) emails)
@@ -968,7 +968,7 @@
 (defquery get-organization-areas
   {:user-authz-roles #{:statementGiver}
    :user-roles       #{:authority}}
-  [{{:keys [orgAuthz] :as user} :user}]
+  [{{:keys [orgAuthz]} :user}]
   (if (seq orgAuthz)
     (let [organization-areas (mongo/select
                                :organizations
@@ -981,7 +981,7 @@
 
 (defraw organization-area
   {:permissions [{:required [:organization/admin]}]}
-  [{user :user {[{:keys [tempfile filename size]}] :files created :created} :data :as action}]
+  [{user :user {[{:keys [tempfile filename size]}] :files created :created} :data}]
   (let [org-id       (usr/authority-admins-organization-id user)
         filename     (mime/sanitize-filename filename)
         content-type (mime/mime-type filename)

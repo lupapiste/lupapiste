@@ -140,7 +140,7 @@
 
 (defn remove-sensitive-keys [m]
   (util/postwalk-map
-    (partial filter (fn [[k v]] (if (or (string? k) (keyword? k)) (not (re-matches #"(?i).*(passw(or)?d.*|key)$" (name k))) true)))
+    (partial filter (fn [[k _]] (if (or (string? k) (keyword? k)) (not (re-matches #"(?i).*(passw(or)?d.*|key)$" (name k))) true)))
     m))
 
 (status/defstatus :build (assoc env/buildinfo :server-mode env/mode))
@@ -527,7 +527,6 @@
 (defn verbose-csrf-block [req]
    (let [ip (http/client-ip req)
          nothing "(not there)"
-         referer (get-in req [:headers "referer"])
          cookie-csrf (get-in req [:cookies "anti-csrf-token" :value])
          ring-session-full (or (get-in req [:cookies "ring-session" :value]) nothing)
          ring-session (clojure.string/replace ring-session-full #"^(...).*(...)$" "$1...$2")

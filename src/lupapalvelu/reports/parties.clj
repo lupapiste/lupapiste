@@ -154,7 +154,7 @@
     (when-not (ss/blank? value)
       (loc "koulutus" value))))
 
-(defn- get-suunnittelija-rooli-loc [doc-data lang]
+(defn- get-suunnittelija-rooli-loc [doc-data]
   (let [kuntaRoolikoodi-schema (-> schemas/kuntaroolikoodi
                                    first
                                    :body)
@@ -171,7 +171,7 @@
        :sukunimi              (get-in data [:henkilotiedot :sukunimi])
        :rooli                 (case (get-in doc [:schema-info :name])
                                 "paasuunnittelija" (loc "osapuoli.suunnittelija.kuntaRoolikoodi.p\u00e4\u00e4suunnittelija")
-                                "suunnittelija" (get-suunnittelija-rooli-loc data lang))
+                                "suunnittelija" (get-suunnittelija-rooli-loc data))
        :suunnittelu-vaativuus (select-with-ei-tiedossa-loc
                                 [:suunnittelutehtavanVaativuusluokka]
                                 "osapuoli.suunnittelutehtavanVaativuusluokka"

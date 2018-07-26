@@ -43,7 +43,7 @@
    :user-roles #{:applicant}
    :pre-checks [pricing-available?
                 (partial permit/valid-permit-types {:R [] :P :all})]}
-  [{application :application :as command}]
+  [command]
   (ok :attachments (->> (att/sorted-attachments command)
                     (map att/enrich-attachment)
                     (remove #(and
@@ -82,7 +82,7 @@
    :user-roles       #{:applicant}
    :user-authz-roles roles/default-authz-reader-roles
    :pre-checks       [pricing-available?]}
-  [{application :application user :user created-ts :created :as command}]
+  [{:keys [application] :as command}]
   (let [prepared-order (processor/prepare-order application order contacts)
         total-size (reduce + (map :size (:files prepared-order)))]
     (when (> total-size max-total-file-size)

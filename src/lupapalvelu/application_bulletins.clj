@@ -300,7 +300,7 @@
 (defn process-check-for-verdicts-result
   "For (non-YMP) organizations with bulletins enabled, update bulletins to match with verdicts retrieved from backing system"
   [{{old-verdicts :verdicts applicationId :id :keys [organization permitType municipality] :as application} :application
-    created :created :as command} new-verdicts app-descriptions]
+    created :created} new-verdicts app-descriptions]
   (let [{:keys [enabled descriptions-from-backend-system]} (org/bulletin-settings-for-scope (org/get-organization organization) permitType municipality)]
     (when (and enabled
                (not (permit/ymp-permit-type? (:permitType application)))

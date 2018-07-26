@@ -188,7 +188,7 @@
           (count (filter (comp :new-entry :handler) handler-history)) => 2)))))
 
 (facts remove-application-handler
-  (let [{app-id :id :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
+  (let [{app-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
         resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
 
     (fact "Handler is added"
@@ -241,29 +241,28 @@
 (facts* "Application has opened when submitted from draft"
   (let [{id :id :as app1} (create-application pena) => truthy
         _ (comment-application pena id true)
-        resp (command pena :submit-application :id id) => ok?
+        _ (command pena :submit-application :id id) => ok?
         app2 (query-application pena id) => truthy]
     (:opened app1) => nil
     (:opened app2) => number?))
 
 (facts* "authority cannot submit application for applicant before it has been opened"
-  (let [{id :id :as app} (create-application pena)
+  (let [{:keys [id]} (create-application pena)
         resp (command sonja :submit-application :id id)]
     (:state (query-application sonja id)) => "draft"
     resp => fail?))
 
 (facts* "Authority can submit application for applicant after it has been opened"
-  (let [{id :id :as app} (create-application pena)
+  (let [{:keys [id]} (create-application pena)
         _ (comment-application pena id true)
         resp (command sonja :submit-application :id id)]
     (:state (query-application sonja id)) => "submitted"
     resp => ok?))
 
 (facts "enable-accordions pseudo-query"
-  (let [{id :id :as app} (create-and-open-application
-                           pena
-                           :propertyId tampere-property-id
-                           :operation "ya-sijoituslupa-ilmajohtojen-sijoittaminen")]
+  (let [{:keys [id]} (create-and-open-application pena
+                                                  :propertyId tampere-property-id
+                                                  :operation "ya-sijoituslupa-ilmajohtojen-sijoittaminen")]
     (fact "accordions are enabled for applicant"
       (query pena :enable-accordions :id id) => ok?)
     (fact "accordions are enabled for authorities in the applications organization"
@@ -271,9 +270,7 @@
     (fact "accordions are not enabled for other authorities"
       (query veikko :enable-accordions :id id) =not=> ok?))
 
-  (let [{id :id :as app} (create-and-open-application
-                           pena
-                           :propertyId tampere-property-id)]
+  (let [{:keys [id]} (create-and-open-application pena :propertyId tampere-property-id)]
     (fact "accordions are not enabled for authorities on non-YA applications"
       (query jussi :enable-accordions :id id) =not=> ok?
       (query veikko :enable-accordions :id id) =not=> ok?)
@@ -726,7 +723,7 @@
                                 {:firstName "" :lastName ""
                                  :email "" :phone ""}))))
   (fact "Company auth, company user"
-    (let [{app-id :id :as app} (create-and-open-application pena :propertyId sipoo-property-id)
+    (let [{app-id :id} (create-and-open-application pena :propertyId sipoo-property-id)
           doc-id (->> (command erkki :create-doc
                            :id app-id
                            :collection "documents"
@@ -754,11 +751,10 @@
                              doc-id)))))
 
 (facts "Document tag and operation description"
-  (let [{app-id :id op :primaryOperation docs :documents
-         :as    application} (create-application pena :operation "pientalo"
-                                                 :propertyId sipoo-property-id)
+  (let [{app-id :id op :primaryOperation docs :documents} (create-application pena :operation "pientalo"
+                                                                              :propertyId sipoo-property-id)
         test-desc            "Testdesc"
-        {doc-id :id :as doc}         (util/find-first #(= (get-in % [:schema-info :op :id]) (:id op))
+        {doc-id :id}         (util/find-first #(= (get-in % [:schema-info :op :id]) (:id op))
                                               docs)
         desc-command         (fn [apikey description]
                                (command apikey :update-op-description :id app-id
@@ -780,8 +776,7 @@
       (tag-command pena "Tag") => ok?
       (tag-command sonja "Foo" => fail?))
     (fact "Check results"
-      (let [{op  :primaryOperation docs :documents
-             :as application} (query-application pena app-id)
+      (let [{op :primaryOperation docs :documents} (query-application pena app-id)
             doc (util/find-by-id doc-id docs)]
         (fact "Description"
           (:description op) => test-desc)

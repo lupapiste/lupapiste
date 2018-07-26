@@ -15,7 +15,7 @@
             [sade.shared-util :as util]))
 
 (defn updater
-  ([{:keys [state info path] :as options} value]
+  ([{:keys [info path] :as options} value]
    (service/save-draft-value (path/value [:id] info)
                              path
                              value
@@ -120,8 +120,7 @@
                             :test-id  :back})
    component])
 
-(defn verdict-template
-  [{:keys [schema state info] :as options}]
+(defn verdict-template [{:keys [info] :as options}]
   [:div.verdict-template
    [:div.pate-grid-2
     [:div.row.row--tight

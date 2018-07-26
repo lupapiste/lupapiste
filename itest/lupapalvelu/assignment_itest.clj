@@ -56,9 +56,9 @@
           doc-id1 (-> (query-application sonja id1) :documents first :id)
           id2 (create-app-id ronja :propertyId sipoo-property-id)
           doc-id2 (-> (query-application sonja id2) :documents first :id)
-          {assignment-id1-1 :id} (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Hakemus 1")
-          {assignment-id1-2 :id} (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Hakemus 1")
-          {assignment-id2-1 :id} (create-assignment sonja ronja-id id2 [{:group "group" :id doc-id2}] "Hakemus 1")]
+          _ (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Hakemus 1")
+          _ (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Hakemus 1")
+          _ (create-assignment sonja ronja-id id2 [{:group "group" :id doc-id2}] "Hakemus 1")]
       (-> (query sonja :assignments-for-application :id id1) :assignments count) => 2
       (-> (query ronja :assignments-for-application :id id1) :assignments count) => 2
       (-> (query sonja :assignments-for-application :id id2) :assignments count) => 1
@@ -257,8 +257,8 @@
       id2 => truthy)
 
     (facts "text search finds approximate matches in description"
-      (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Kuvaava teksti")
-            {assignment-id2 :id} (create-assignment ronja sonja-id id2 [{:group "group" :id doc-id2}] "Kuvaava teksti")]
+      (let [_ (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Kuvaava teksti")
+            _ (create-assignment ronja sonja-id id2 [{:group "group" :id doc-id2}] "Kuvaava teksti")]
         (fact "uva eks - all"
           (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
                :data :assignments (map :description)) => (contains "Kuvaava teksti"))
@@ -383,18 +383,17 @@
       resp3        =>     ok?
       handler-resp =>     ok?)
     (fact "automatic assignment is created from a trigger"
-      (let [{job :job :as job-resp} (command
-                                     pena
-                                     :bind-attachments
-                                     :id application-id
-                                     :filedatas [{:fileId file-id-1 :type (:type (first attachments))
-                                                  :group {:groupType "operation"
-                                                          :operations [operation]
-                                                          :title "Osapuolet"}
-                                                  :contents "eka"}
-                                                 {:fileId file-id-2 :type (:type (second attachments))
-                                                  :group {:groupType nil}
-                                                  :contents "toka"}]) => ok?
+      (let [{:keys [job]} (command pena
+                                   :bind-attachments
+                                   :id application-id
+                                   :filedatas [{:fileId file-id-1 :type (:type (first attachments))
+                                                :group {:groupType "operation"
+                                                        :operations [operation]
+                                                        :title "Osapuolet"}
+                                                :contents "eka"}
+                                               {:fileId file-id-2 :type (:type (second attachments))
+                                                :group {:groupType nil}
+                                                :contents "toka"}]) => ok?
             _ (poll-attachment-job pena job)
             trigger-assignments (query-trigger-assignments sonja (:id trigger))]
         (count trigger-assignments) => 1
@@ -415,13 +414,12 @@
       (let [trigger-assignment (first (query-trigger-assignments sonja "dead1111111111111112beef"))]
         (:recipient trigger-assignment) => nil))
     (fact "new attachment is added as targets to existing trigger assignments"
-      (let [{job :job :as job-resp} (command
-                                     pena
-                                     :bind-attachments
-                                     :id application-id
-                                     :filedatas [{:fileId file-id-3 :type (:type (get attachments 2))
-                                                  :group {:groupType "parties"}
-                                                  :contents "hakija"}]) => ok?
+      (let [{:keys [job]} (command pena
+                                   :bind-attachments
+                                   :id application-id
+                                   :filedatas [{:fileId file-id-3 :type (:type (get attachments 2))
+                                                :group {:groupType "parties"}
+                                                :contents "hakija"}]) => ok?
             _ (poll-attachment-job pena job)
             trigger-assignments (query-trigger-assignments sonja (:id trigger))]
         (count trigger-assignments) => 1
@@ -433,12 +431,11 @@
                                          :data :assignments (filter #(= (:trigger %) (:id trigger))))
             old-trigger-assignment-id (-> old-trigger-assignments first :id)
             complete-resp (complete-assignment sonja old-trigger-assignment-id)
-            {job :job :as job-resp} (command
-                                     pena
-                                     :bind-attachments
-                                     :id application-id
-                                     :filedatas [{:fileId file-id-4 :type (:type (get attachments 3))
-                                                  :contents "suunnitelma"}])
+            {:keys [job]} (command pena
+                                   :bind-attachments
+                                   :id application-id
+                                   :filedatas [{:fileId file-id-4 :type (:type (get attachments 3))
+                                                :contents "suunnitelma"}])
             _ (poll-attachment-job pena job)
             trigger-assignments (query-trigger-assignments sonja (:id trigger))
             non-completed-trigger-assignments (filter #(not ((set (map :type (:states %))) "completed"))

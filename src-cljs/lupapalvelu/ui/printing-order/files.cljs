@@ -81,7 +81,7 @@
 
 (rum/defcs files-accordion-group < rum/reactive
   (rum/local true ::group-open)
-  [{group-open ::group-open} {:keys [level path children]}]
+  [_ {:keys [path children]}]
   (let [attachments          (rum/react (rum/cursor-in state/component-state [:attachments]))
         attachments-in-group (filter (partial attachment-in-group? path) attachments)]
    (when (seq attachments-in-group)

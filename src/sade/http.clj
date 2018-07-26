@@ -23,7 +23,7 @@
                       :else (throw (IllegalArgumentException. "uneven number of options")))]
     (merge (env/value :http-client) options-map)))
 
-(defn- log [message {quiet :quiet :as options}]
+(defn- log [message options]
   (when-not (:quiet options)
     (error "error.integration -" message)))
 
@@ -51,7 +51,7 @@
     (false? throw-exceptions) {:status 502, :body (str "I/O exception - " (.getMessage e))}
     :else                     (throw e)))
 
-(defn- logged-call [f uri {:keys [throw-fail! throw-exceptions] :as options}]
+(defn- logged-call [f uri {:keys [throw-fail!] :as options}]
   (let [http-client-opts (update options :throw-exceptions (fn [t?] (if throw-fail! false t?)))
         connection-error (or (:connection-error options) :error.integration.connection)
         http-error       (or (:http-error options) :error.integration.http)]

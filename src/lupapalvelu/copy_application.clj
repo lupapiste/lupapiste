@@ -124,7 +124,7 @@
 
 (defn- empty-document-copy
   "Returns an empty copy of the given document"
-  [document {:keys [created primaryOperation schema-version] :as application} & [manual-schema-datas]]
+  [document {:keys [created primaryOperation schema-version]} & [manual-schema-datas]]
   (let [schema (schemas/get-schema schema-version (-> document :schema-info :name))]
     (app/make-document (:name primaryOperation) created manual-schema-datas schema)))
 
@@ -202,7 +202,7 @@
 
 (defn- handle-copy-action
   "Handle the copy action specified by the document schema"
-  [document application organization manual-schema-datas]
+  [document application manual-schema-datas]
   (let [schema-info (-> document :schema-info
                         (schemas/get-schema) :info)
         copy-action (:copy-action schema-info)]
@@ -239,7 +239,7 @@
   "Preprocess document taken from another application so that it is valid for the target application"
   [document application organization manual-schema-datas]
   (-> document
-      (handle-copy-action   application organization manual-schema-datas)
+      (handle-copy-action application manual-schema-datas)
       (handle-special-cases application organization manual-schema-datas)
       (assoc :id      (mongo/create-id)
              :created (:created application))
@@ -322,7 +322,7 @@
                :schema-version :secondaryOperations]})
 
 (defn- new-application-overrides
-  [{:keys [address auth infoRequest location municipality primaryOperation schema-version state title tosFunction] :as application}
+  [{:keys [address infoRequest location municipality primaryOperation schema-version state title tosFunction] :as application}
    user organization created manual-schema-datas]
   {:pre [(not-empty primaryOperation) (not-empty location) municipality]}
   (let [org-id (:id organization)
@@ -393,7 +393,7 @@
 
 (defn check-application-copyable-to-organization
   "Fails if the application cannot be copied to the specific organization"
-  [{{:keys [source-application-id x y address propertyId]} :data :keys [user]}]
+  [{{:keys [source-application-id propertyId]} :data :keys [user]}]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
     (let [operation-name (primary-op-name source-application)
           municipality   (prop/municipality-by-property-id propertyId)
@@ -490,7 +490,7 @@
                                                :application app})))
 
 
-(defn send-invite-notifications! [{:keys [auth] :as application} {:keys [user] :as command}]
+(defn send-invite-notifications! [{:keys [auth] :as application} command]
   (let [[users companies] ((juxt remove filter) (comp #{"company"} :type)
                                                 (remove (comp #{:statementGiver} keyword :role)
                                                         auth))]

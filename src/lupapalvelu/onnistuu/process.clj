@@ -159,11 +159,11 @@
 ;
 
 (notifications/defemail :onnistuu-success
-  {:model-fn  (fn [command conf recipient] command)
+  {:model-fn  (fn [command _ _] command)
    :recipients-fn (constantly [{:email (env/value :onnistuu :success :email)}])})
 
 (notifications/defemail :onnistuu-success-campaign
-  {:model-fn  (fn [command conf recipient] command)
+  {:model-fn  (fn [command _ _] command)
    :recipients-fn (constantly [{:email (env/value :onnistuu :success :email)}])})
 
 (defn success! [process-id data iv ts]
@@ -179,7 +179,7 @@
                         (json/decode)
                         walk/keywordize-keys)
         {:keys [signatures stamp document]} resp
-        {:keys [type identifier name timestamp uuid]} (first signatures)
+        {:keys [type identifier name]} (first signatures)
         resp-assert! (fn [result expected message]
                       (when-not (= result expected)
                         (errorf "sign:success:%s: %s: expected '%s', got '%s'" process-id message result expected)

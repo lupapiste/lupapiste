@@ -11,9 +11,7 @@
 
 (facts "Application info links"
 
-  (let [{application-id :id :as app}
-        (create-and-open-application pena :propertyId sipoo-property-id)]
-
+  (let [{application-id :id} (create-and-open-application pena :propertyId sipoo-property-id)]
    application-id => truthy
 
    (fact "Invite statement giver"

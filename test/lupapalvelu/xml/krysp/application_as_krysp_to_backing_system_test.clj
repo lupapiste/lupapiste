@@ -53,8 +53,7 @@
 
 (facts "Designer documents that have not been approved are removed"
   (let [documents (mapv #(model/new-document (schemas/get-schema 1 %) 123) ["paasuunnittelija" "suunnittelija" "hakija-r"])
-        approved-docs (mapv #(assoc-in % [:meta :_approved] {:value "approved" :timestamp 124}) documents)
-        application {:documents documents}]
+        approved-docs (mapv #(assoc-in % [:meta :_approved] {:value "approved" :timestamp 124}) documents)]
 
     (fact "Approved have not been removed"
       (let [filtered (:documents (remove-non-approved-designers {:documents approved-docs}))]

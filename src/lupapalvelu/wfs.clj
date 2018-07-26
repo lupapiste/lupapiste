@@ -219,10 +219,10 @@
      :location {:x x :y y}}))
 
 (defn feature-to-simple-address-string [feature]
-  (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)]
+  (let [{street :street number :number {fi :fi} :name} (feature-to-address feature)]
     (str street " " number ", " fi)))
 
-(defn feature-to-address-string [[street number city]]
+(defn feature-to-address-string [[_ _ city]]
   (if (s/blank? city)
     (fn [feature]
       (let [{street :street {fi :fi} :name} (feature-to-address feature)]

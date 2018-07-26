@@ -124,7 +124,6 @@
              krysp-version (get-in organization [:krysp permit-type :version])
              permit-type-dir (permit/get-sftp-directory permit-type)
              output-dir (str "target/" sftp-user permit-type-dir "/")
-             local-file (str output-dir (:id application) ".xml")
              sftp-server (subs (env/value :fileserver-address) 7)
              target-file-name (str "target/Downloaded-" (:id application) "-" (now) ".xml")
              filename-starts-with (:id application)
@@ -183,7 +182,6 @@
                                             :YA #(nth % 2)
                                             last)
                         liite-edn (-> liitetieto take-liite-fn (xml/select1 [:Liite]) xml/xml->edn :Liite (util/ensure-sequential :metatietotieto))
-                        kuvaus (:kuvaus liite-edn)
                         liite-id (->> liite-edn
                                       :metatietotieto
                                       (map #(or (:metatieto %) (:Metatieto %)))
@@ -539,9 +537,7 @@
                                        xml/xml->edn
                                        :Liite
                                        :linkkiliitteeseen))
-                                 liitetieto)
-               host (env/value :host)]
-
+                                 liitetieto)]
            (fact "Correctly named xml file is created" (.exists xml-file) => true)
 
            (fact "XML file is valid"

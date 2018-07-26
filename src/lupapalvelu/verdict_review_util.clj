@@ -22,20 +22,15 @@
   "Function name is anachronistic. Currently also review attachment
   types are supported."
   ([application] (verdict-attachment-type application "paatosote"))
-  ([{permit-type :permitType :as application} type-id]
+  ([{permit-type :permitType} type-id]
    (let [resolved (reduce-kv (fn [acc k v]
                                (assoc acc k (name v)))
                              {}
                              (att-type/resolve-type permit-type type-id))]
      (cond
-       (seq resolved)
-       resolved
-
-       (util/includes-as-kw? [:R :P :ARK] permit-type)
-       {:type-group "paatoksenteko" :type-id type-id}
-
-       :else
-       {:type-group "muut" :type-id type-id}))))
+       (seq resolved) resolved
+       (util/includes-as-kw? [:R :P :ARK] permit-type) {:type-group "paatoksenteko" :type-id type-id}
+       :else {:type-group "muut" :type-id type-id}))))
 
 (defmulti attachment-type-from-krysp-type
   (fn [{target-type :type} _] (keyword target-type)))

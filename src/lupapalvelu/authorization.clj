@@ -95,7 +95,7 @@
    (filter #(and (= "writer" (:role %))
                  (= "company" (:type %)))
            auth))
-  ([{auth :auth} {{company-id :id company-role :role} :company :as user}]
+  ([{auth :auth} {{company-id :id company-role :role} :company}]
    (filter #(and (= company-id (:id %))
                  (contains? #{(keyword company-role) nil} (keyword (:company-role %))))
            auth)))
@@ -125,7 +125,7 @@
 
 (defmulti approve-invite-auth
   {:arglists '([auth-elem user accepted-ts])}
-  (fn [{auth-type :type :as auth} & _] (keyword auth-type)))
+  (fn [{auth-type :type} & _] (keyword auth-type)))
 
 (defmethod approve-invite-auth :default [{invite :invite :as auth} user accepted-ts]
   (when invite

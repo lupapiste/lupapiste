@@ -194,7 +194,7 @@
   [user]
   (dissoc user :private))
 
-(defn create-handler [handler-id role-id {user-id :id first-name :firstName last-name :lastName :as user}]
+(defn create-handler [handler-id role-id {user-id :id first-name :firstName last-name :lastName}]
   {:id        (or handler-id (mongo/create-id))
    :roleId    role-id
    :userId    user-id
@@ -291,7 +291,7 @@
 
 (defn organization-ids
   "Returns user's organizations as a set of strings"
-  [{org-authz :orgAuthz :as user}]
+  [{org-authz :orgAuthz}]
   (->> org-authz keys (map name) set))
 
 (defn get-organizations

@@ -286,7 +286,7 @@
             [:LupaTunnus :VRKLupatunnus]
             (app/vrk-lupatunnus application)))
 
-(defn get-avainsanaTieto [{tags :tags :as application}]
+(defn get-avainsanaTieto [{:keys [tags]}]
   (->> (map :label tags)
        (remove nil?)
        (map (partial hash-map :Avainsana))))
@@ -365,7 +365,7 @@
   {:sahkopostiosoite (-> yhteystiedot :email)
    :puhelin (-> yhteystiedot :puhelin)})
 
-(defn- get-simple-yritys [{:keys [yritysnimi liikeJaYhteisoTunnus] :as yritys}]
+(defn- get-simple-yritys [{:keys [yritysnimi liikeJaYhteisoTunnus]}]
   {:nimi yritysnimi, :liikeJaYhteisotunnus liikeJaYhteisoTunnus})
 
 (defn get-verkkolaskutus [unwrapped-party-doc]
@@ -507,7 +507,7 @@
       (str joined "," (-> selections :muuMika))
       joined)))
 
-(defn- get-sijaistustieto [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm] :as sijaistus} sijaistettavaRooli]
+(defn- get-sijaistustieto [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm]} sijaistettavaRooli]
   (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
     {:Sijaistus (util/assoc-when-pred {} util/not-empty-or-nil?
                   :sijaistettavaHlo (ss/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
@@ -515,7 +515,7 @@
                   :alkamisPvm (when-not (ss/blank? alkamisPvm) (util/to-xml-date-from-string alkamisPvm))
                   :paattymisPvm (when-not (ss/blank? paattymisPvm) (util/to-xml-date-from-string paattymisPvm)))}))
 
-(defn- get-sijaistettava-hlo-214 [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi] :as sijaistus}]
+(defn- get-sijaistettava-hlo-214 [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi]}]
   (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
     (ss/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))))
 
@@ -550,7 +550,7 @@
     (select-keys  tasks (get role-tasks role))))
 
 
-(defn get-tyonjohtaja-data [application lang tyonjohtaja party-type & [subtype]]
+(defn get-tyonjohtaja-data [_ lang tyonjohtaja party-type & [subtype]]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type subtype) :suunnittelijaRoolikoodi :FISEpatevyyskortti :FISEkelpoisuus)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         ;; The mappings in backing system providers' end make us pass "muu" when "muu koulutus" is selected.
@@ -615,14 +615,14 @@
     (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data application lang))
     (get-parties-by-type documents-by-type :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data application lang))))
 
-(defn address->osoitetieto [{katu :street postinumero :zip postitoimipaikannimi :city :as address}]
+(defn address->osoitetieto [{katu :street postinumero :zip postitoimipaikannimi :city}]
   (when-not (util/empty-or-nil? katu)
     (util/assoc-when-pred {} util/not-empty-or-nil?
                      :osoitenimi {:teksti katu}
                      :postinumero postinumero
                      :postitoimipaikannimi postitoimipaikannimi)))
 
-(defn get-neighbor [{status :status property-id :propertyId :as neighbor}]
+(defn get-neighbor [{status :status property-id :propertyId}]
   (let [{state :state vetuma :vetuma message :message} (last status)
         neighbor (util/assoc-when-pred {} util/not-empty-or-nil?
                                   :henkilo (str (:firstName vetuma) " " (:lastName vetuma))
@@ -639,7 +639,7 @@
   (->> (map get-neighbor neighbors)
        (remove nil?)))
 
-(defn osapuolet [{neighbors :neighbors :as application} documents-by-type lang]
+(defn osapuolet [application documents-by-type lang]
   {:pre [(map? documents-by-type) (string? lang)]}
   {:Osapuolet
    {:osapuolitieto (get-parties application documents-by-type)
@@ -735,7 +735,7 @@
 (defn get-yhteystiedot [unwrapped-party-doc]
   (if (= (-> unwrapped-party-doc :data :_selected) "yritys")
     (let [yritys (-> unwrapped-party-doc :data :yritys)
-          {:keys [yhteyshenkilo osoite]} yritys
+          {:keys [yhteyshenkilo]} yritys
           {:keys [etunimi sukunimi]} (:henkilotiedot yhteyshenkilo)
           {:keys [puhelin email]} (:yhteystiedot yhteyshenkilo)
           yhteyshenkilon-nimi (ss/trim (str etunimi " " sukunimi))
@@ -883,7 +883,7 @@
 (defmethod osapuolitieto "yritys"
   [data]
   (let [company (:yritys data)
-        {contact :yhteystiedot personal :henkilotiedot kytkimet :kytkimet} (:yhteyshenkilo company)
+        {contact :yhteystiedot personal :henkilotiedot} (:yhteyshenkilo company)
         billing (get-verkkolaskutus {:data data})
         billing-information (when billing
                               {:verkkolaskutustieto billing})]

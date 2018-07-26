@@ -29,7 +29,7 @@
    :permissions      [{:required [:application/archive]}]
    :states           (conj states/post-verdict-states :underReview)
    :pre-checks       [application-within-time-limit]}
-  [{:keys [application user organization] :as command}]
+  [{:keys [organization] :as command}]
   (if-let [{:keys [error]} (-> (update command :application app/enrich-application-handlers @organization)
                                (archiving/send-to-archive (set attachmentIds) (set documentIds)))]
     (fail error)

@@ -82,7 +82,7 @@
                                                                         open-verdict)}))
 
 
-(defn- confirm-and-delete-verdict [app-id {:keys [legacy? id published] :as verdict}]
+(defn- confirm-and-delete-verdict [app-id {:keys [legacy? published] :as verdict}]
   (hub/send  "show-dialog"
              {:ltitle          "areyousure"
               :size            "medium"

@@ -157,7 +157,7 @@
   (when (= (keyword (:state application)) :sent)
     (permit/valid-permit-types {:YI :all :YL :all :YM :all :VVVL :all :MAL :all} command)))
 
-(defmethod att/upload-to-target-allowed :statement [{{:keys [state]} :application :as command}]
+(defmethod att/upload-to-target-allowed :statement [command]
   (or (statement-in-sent-state-allowed command)
       (statement-not-given command)
       (statement-owner command)))
@@ -170,7 +170,7 @@
         (-> (att/get-attachment-info application attachment-id) (get-in [:target :id]) (util/find-by-id statements) :state #{:given})
         (fail :error.statement-already-given)))
 
-(defmethod att/delete-allowed-by-target :statement [{{attachment-id :attachmentId} :data :keys [state statements] :as application}]
+(defmethod att/delete-allowed-by-target :statement [{{attachment-id :attachmentId} :data :keys [statements] :as application}]
   (when (-> (att/get-attachment-info application attachment-id) (get-in [:target :id]) (util/find-by-id statements) :state #{:given})
     (fail :error.statement-already-given)))
 

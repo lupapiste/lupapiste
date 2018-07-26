@@ -63,7 +63,7 @@
    :org-authz-roles  roles/all-org-authz-roles
    :input-validators [(partial action/non-blank-parameters [:lang])]
    :states           states/all-states}
-  [{:keys [user application lang]}]
+  [{:keys [application lang]}]
   (if application
     (files/with-temp-file libre-file
       (-> (libre/generate-casefile-pdfa application lang libre-file)

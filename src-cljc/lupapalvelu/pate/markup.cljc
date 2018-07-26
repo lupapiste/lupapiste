@@ -165,13 +165,13 @@
            others)
     (add-to-data scopes add)))
 
-(defn- close-scope [[closing & others  :as scopes] & [trim?]]
+(defn- close-scope [[closing & others :as scopes]]
   (if-let [tag (:tag closing)]
     (add-to-scope others (consv tag {} (:data closing)))
     scopes))
 
 (defn- close-all-scopes [scopes]
-  (loop [[x & xs :as scs] scopes]
+  (loop [[x :as scs] scopes]
     (if (:tag x)
       (recur (close-scope scs))
       scs)))
@@ -207,9 +207,8 @@
 
 (defn- text-tags [markup]
   (loop [[x & xs]                    (split-markup markup)
-         [scope & others :as scopes] []]
-    (let [{scope-tag  :tag
-           scope-data :data} scope
+         [scope :as scopes] []]
+    (let [{scope-tag :tag} scope
           format-tag         (get text-formats x)]
       (cond
         (or (nil? x)
@@ -240,7 +239,7 @@
 
 (defn- list-tag [scopes markup]
   (let [{:keys [list-depth list-type list-tag]} (resolve-list markup)]
-    (loop [[scope & others :as scopes] scopes]
+    (loop [[scope :as scopes] scopes]
       (let [depth (:depth scope)]
         (cond
           (or (not depth)
@@ -273,7 +272,7 @@
 
 (defn- block-tags [markup]
   (loop [[x & xs]                    markup
-         [scope & others :as scopes] []]
+         scopes []]
     (case (first x)
       nil (close-all-scopes scopes)
 

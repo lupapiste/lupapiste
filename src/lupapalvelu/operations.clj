@@ -500,12 +500,12 @@
                 :asianhallinta             true}
    })
 
-(defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
+(defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype}]
   (if (= :tyonjohtaja-ilmoitus (keyword subtype))
     states/tj-ilmoitus-state-graph
     states/tj-hakemus-state-graph))
 
-(defn- state-machine-resolver [{subtype :permitSubtype :as application}]
+(defn- state-machine-resolver [{subtype :permitSubtype}]
   (if (= :muutoslupa (keyword subtype))
     states/r-muutoslupa-state-graph
     states/full-application-state-graph))

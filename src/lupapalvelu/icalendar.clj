@@ -51,10 +51,7 @@
     (.add props method)
     (.add props CalScale/GREGORIAN) c))
 
-(defn- create-event [^Date start ^Date end ^String title & {:keys [^String description ^String url ^String location
-                                                                   ^String organizer-email ^String organizer-name
-                                                                   ^PersistentArrayMap attendee ^String unique-id
-                                                                   ^Number sequence] :as all}]
+(defn- create-event [^Date start ^Date end ^String title & all]
   (let [st (doto  (DateTime. start) (.setUtc true))
         et (doto  (DateTime. end) (.setUtc true))
         vevent (VEvent. st et title)]
@@ -69,13 +66,12 @@
   "output the calendar to a string, using a folding writer,
    which will limit the line lengths as per ical spec."
   [^net.fortuna.ical4j.model.Calendar cal]
-  (let [co (CalendarOutputter.)
-        sw (StringWriter.)
-        output (.output co cal sw)
-        _ (.close sw)]
+  (let [sw (StringWriter.)]
+    (.output (CalendarOutputter.) cal sw)
+    (.close sw)
     (.replaceAll (.toString sw) "\r" "")))
 
-(defn create-calendar-event [{:keys [method startTime endTime location comment attendee unique-id sequence title] :as data}]
+(defn create-calendar-event [{:keys [method startTime endTime location comment attendee unique-id sequence title]}]
   (let [cal  (create-cal method "Lupapiste" "Lupapiste Calendar" "V0.1" "EN")
         event (create-event  (Date. startTime)
                              (Date. endTime)

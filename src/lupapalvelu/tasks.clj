@@ -228,7 +228,7 @@
         info   (model/document-info doc schema)]
     (model/validate-fields nil info nil (:data doc) [])))
 
-(defn new-task [schema-name task-name data {:keys [created assignee state] :as meta :or {state :requires_user_action}} source]
+(defn new-task [schema-name task-name data {:keys [created assignee state] :or {state :requires_user_action}} source]
   {:pre [schema-name source (or (map? data) (nil? data))]}
   (util/deep-merge
     (model/new-document (schemas/get-schema task-schemas-version schema-name) created)
@@ -252,7 +252,7 @@
 
 
 (defn merge-rakennustieto [rakennustieto-from-xml rakennus-from-buildings]
-  (let [match-rt (fn [[rak-index rak-map]]
+  (let [match-rt (fn [[_ rak-map]]
                    (let [rak-rak-map (:rakennus rak-map)
                          match-by (fn [k one-rt]
                                     (and (not-empty (k rak-rak-map))

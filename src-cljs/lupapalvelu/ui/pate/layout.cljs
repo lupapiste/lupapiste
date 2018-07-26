@@ -121,63 +121,51 @@
 ;; View layout components
 ;; -------------------------------
 
-(defmulti view-component (fn [cell-type _]
-                           cell-type))
+(defmulti view-component (fn [cell-type _] cell-type))
 
-(defmethod view-component :default
-  [& _])
+(defmethod view-component :default [& _])
 
-(defmethod view-component :reference-list
-  [_ {:keys [state path schema ] :as options}]
+(defmethod view-component :reference-list [_ {:keys [state path schema ] :as options}]
   (let [values (set (flatten [(path/value path state)]))]
     [:span (->> (pate-components/resolve-reference-list options)
                 (filter #(contains? values (:value %)))
                 (map :text)
                 (s/join (get schema :separator ", ")))]))
 
-(defmethod view-component :phrase-text
-  [_ {:keys [state path schema] :as options}]
+(defmethod view-component :phrase-text [_ {:keys [state path]}]
   (components/markup-span (path/value path state)))
 
-(defmethod view-component :reference
-  [_ {:keys [state schema references] :as options}]
+(defmethod view-component :reference [_ {:keys [state schema references]}]
   (let [[x & xs :as path] (-> schema :path util/split-kw-path)]
     (components/markup-span (if (util/=as-kw x :*ref)
                                 (path/react xs references)
                                 (path/react path state)))))
 
-(defmethod view-component :placeholder
-  [_ {:keys [state path schema] :as options}]
+(defmethod view-component :placeholder [_ options]
   (placeholder/placeholder options))
 
-(defmethod view-component :attachments
-  [_ {:keys [state path schema] :as options}]
+(defmethod view-component :attachments [_ options]
   (pate-att/pate-attachments options))
 
-(defmethod view-component :link
-  [_ {:keys [schema] :as options}]
+(defmethod view-component :link [_ options]
   (pate-components/pate-link options))
 
-(defmethod view-component :application-attachments
-  [_ {:keys [schema info] :as options}]
+(defmethod view-component :application-attachments [_ options]
   (pate-att/pate-attachments-view options))
 
-(defmethod view-component :text
-  [_ {:keys [schema state path] :as options}]
+(defmethod view-component :text [_ {:keys [schema state path]]
   (let [value (path/value path state)]
     (when-not (s/blank? value)
       (pate-components/sandwich (assoc schema
                                        :class :sandwich__view)
                                 [:span value]))))
 
-(defmethod view-component :date
-  [_ {:keys [schema state path] :as options}]
+(defmethod view-component :date [_ {:keys [schema state path]}]
   (pate-components/sandwich (assoc schema
                                    :class :sandwich__view)
                             [:span (js/util.finnishDate (path/value path state))]))
 
-(defmethod view-component :select
-  [_ {:keys [schema state path] :as options}]
+(defmethod view-component :select [_ {:keys [state path] :as options}]
   (let [value (path/value path state)]
     [:span (when-not (s/blank? value)
              (pate-components/pate-select-item-text options value))]))
@@ -223,7 +211,7 @@
 (defn- repeating-keys
   "The repeating keys (keys within the state that correspond to a
   repeating schema). Sorted by :sort-by if given within schema."
-  [{:keys [dictionary path state] :as options} repeating]
+  [{:keys [dictionary path state]} repeating]
   (let [r-map  (path/react repeating state)
         sorter (get-in dictionary (path/extend path repeating :sort-by))
         sort-key (if-let [prefix (:prefix sorter)]

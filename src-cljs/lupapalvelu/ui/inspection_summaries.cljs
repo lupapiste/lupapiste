@@ -217,7 +217,6 @@
   [idx row-target]
   (let [editing? (:editing? row-target)
         editingInspectionDate? (:editingInspectionDate? row-target)
-        application-id (:applicationId @component-state)
         summary-id (:id @selected-summary)
         target-id (:id row-target)
         application-auth-model (:auth-model @args)
@@ -363,7 +362,7 @@
 (rum/defc inspection-summaries < rum/reactive
                                  {:init init
                                   :will-unmount (fn [& _] (reset! component-state empty-component-state))}
-  [ko-app application-auth-model]
+  [_ application-auth-model]
   (let [{summary-id :id :as summary}   (rum/react selected-summary)
         auth-model                     (rum/react (rum-util/derived-atom [component-state] (partial auth/get-auth-model :inspection-summaries summary-id)))
         bubble-visible                 (rum/cursor-in component-state [:view :bubble-visible])

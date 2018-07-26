@@ -74,7 +74,7 @@
                            (for [[k v] (partition 2 fields)]
                              [k `(->> ~'data ~@v)]))
                         (try
-                          (when-let [resp# (do ~@body)]
+                          (when (do ~@body)
                             (map (fn [path#] {:path   path#
                                               :result [~level (name ~code)]}) ~paths))
                           (catch Exception e#

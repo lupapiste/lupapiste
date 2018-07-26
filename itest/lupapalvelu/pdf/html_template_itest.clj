@@ -83,8 +83,7 @@
                                              :patevyys-tyonjohtaja {:koulutusvalinta {:value "rakennusmestari"},
                                                                     :koulutus {:value ""},
                                                                     :valmistumisvuosi {:value "1966"}, :kokemusvuodet {:value "50"}, :valvottavienKohteidenMaara {:value "13"}},
-                                             :henkilotiedot {:etunimi {:value "Ilkka"}, :sukunimi {:value "Ilmastoija"}, :hetu {:value "010266-010B"}}, :patevyysvaatimusluokka {:value "A"}}}]}]
-          file-id (mongo/create-id)]
+                                             :henkilotiedot {:etunimi {:value "Ilkka"}, :sukunimi {:value "Ilmastoija"}, :hetu {:value "010266-010B"}}, :patevyysvaatimusluokka {:value "A"}}}]}]]
 
       (fact "inpection summary test data matches schema"
         (sc/check [(replace-in-schema InspectionSummary ssc/ObjectIdStr sc/Str)] (:inspection-sumamries app)) => nil)

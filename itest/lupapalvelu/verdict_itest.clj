@@ -25,7 +25,9 @@
 
     (let [new-verdict-resp (command sonja :new-verdict-draft :id application-id) => ok?
           verdict-id (:verdictId new-verdict-resp) => truthy
-          resp        (command sonja :save-verdict-draft :id application-id :verdictId verdict-id :backendId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124 :text "" :agreement false :section "") => ok?
+          _           (command sonja :save-verdict-draft :id application-id :verdictId verdict-id :backendId "aaa"
+                               :status 42 :name "Paatoksen antaja" :given 123 :official 124 :text "" :agreement false
+                               :section "") => ok?
           application (query-application sonja application-id)
           verdict     (first (:verdicts application))
           paatos      (first (:paatokset verdict))
@@ -70,7 +72,8 @@
           (fact "Ronja got mail"
             email => map?
             (:to email) => (contains (email-for "ronja"))
-            (let [[href a-id v-id] (re-find #"(?sm)http.+/app/fi/authority#!/verdict/([A-Za-z0-9-]+)/([0-9a-z]+)" (get-in email [:body :plain]))]
+            (let [[_ a-id v-id] (re-find #"(?sm)http.+/app/fi/authority#!/verdict/([A-Za-z0-9-]+)/([0-9a-z]+)"
+                                         (get-in email [:body :plain]))]
               a-id => application-id
               v-id => verdict-id))))
 
@@ -334,8 +337,7 @@
                                                       :urlHash verdict-id}))))
          (facts "Third verdict"
                 (fact "One decision (paatos)" (count (get-in app [:verdicts 2 :paatokset])) => 1)
-                (let [verdict-id (-> app :verdicts (nth 2) :id)
-                      d (get-in app [:verdicts 2 :paatokset 0])
+                (let [d (get-in app [:verdicts 2 :paatokset 0])
                       pk (-> d :poytakirjat first)]
                   (fact "Date is 8.12.2015" (-> d :paivamaarat :paatosdokumentinPvm) => (coerce/to-long "2015-12-08"))
                   (fact "Poytakirja details"

@@ -289,7 +289,7 @@
                    => ok?)
 
                  (fact "Comment for the deleted attachment is marked removed"
-                   (let [{:keys [comments attachments]} (query-application pena application-id)]
+                   (let [{:keys [comments]} (query-application pena application-id)]
                      (util/find-first (fn [{target :target}]
                                         (and (= (:type target) "attachment")
                                              (= (:id target) att-id)))
@@ -297,7 +297,7 @@
                      => (contains {:removed true})))))))))
 
 (facts* "Signing signs corrrect attachments"
-  (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
+  (let [{application-id :id} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
         _ (comment-application pena application-id true) => ok? ; visible to Veikko
         application (query-application pena application-id)
         old-attachment (-> application :attachments last)
@@ -337,7 +337,7 @@
           (count (:signatures old)) => 1)))))
 
 (facts* "Post-verdict attachments"
-  (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
+  (let [{application-id :id} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
         application (query-application pena application-id)
         _ (upload-attachment-to-all-placeholders pena application)
         _ (command pena :submit-application :id application-id)
@@ -356,7 +356,7 @@
     (count (:attachments (query-application pena application-id))) => 7))
 
 (facts "Attachments query"
-  (let [{application-id :id :as create-resp} (create-and-submit-application pena :propertyId sipoo-property-id)
+  (let [{application-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
         {verdict-id :verdictId :as verdict-resp} (command sonja :new-verdict-draft :id application-id)]
     (facts "initialization"
       (fact "verdict" verdict-resp => ok?)
@@ -381,7 +381,7 @@
        query-resp => (partial expected-failure? "error.application-not-accessible")))))
 
 (facts "Single attachment query"
-  (let [{application-id :id :as create-resp} (create-and-submit-application pena :propertyId sipoo-property-id)
+  (let [{application-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
         {verdict-id :verdictId :as verdict-resp} (command sonja :new-verdict-draft :id application-id)]
     (facts "initialization"
       (fact "verdict" verdict-resp => ok?)
@@ -397,7 +397,7 @@
             attachment => map?))
 
         (facts "Applicant does not see the verdict attachment"
-          (let [{attachment :attachment :as query-resp} (query pena :attachment :id application-id :attachmentId attachment-id)]
+          (let [query-resp (query pena :attachment :id application-id :attachmentId attachment-id)]
             query-resp => (partial expected-failure? "error.attachment-not-found")))
 
         (fact "Unauthorized"
@@ -405,7 +405,7 @@
             query-resp => (partial expected-failure? "error.application-not-accessible")))))))
 
 (facts "Attachment-groups query"
-  (let [{application-id :id :as create-resp} (create-and-submit-application pena :propertyId sipoo-property-id)
+  (let [{application-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
         {groups :groups :as query-resp} (query sonja :attachment-groups :id application-id)]
 
     query-resp => ok?
@@ -647,10 +647,7 @@
                         :id application-id
                         :attachmentTypes [type]
                         :group nil) => ok?
-          attachment {:id (first (:attachmentIds resp))
-                      :type type}
-          attachment-id (:id attachment)]
-
+          attachment {:id (first (:attachmentIds resp)), :type type}]
       (upload-attachment pena application-id attachment true :filename "dev-resources/invalid-pdfa.pdf")
 
       (let [attachment (first (:attachments (query-application raktark-jarvenpaa application-id)))]
@@ -672,7 +669,7 @@
           (get-in attachment [:latestVersion :version :minor]) => 0)))))
 
 (facts* "Attachments visibility"
-  (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
+  (let [{application-id :id} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
         {attachments :attachments :as application} (query-application pena application-id)
         _ (command pena :set-attachment-visibility
                    :id application-id
@@ -682,7 +679,6 @@
         {:keys [attachments] :as application} (query-application pena application-id)
         user-has-auth? (fn [username {auth :auth}]
                          (= username (:username (first auth))))
-        att1 (first attachments)
         att2 (second attachments)
         aid1 (get-in attachments [0 :id])
         aid2 (get-in attachments [1 :id])

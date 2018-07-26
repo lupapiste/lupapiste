@@ -67,7 +67,7 @@
         (resp/json (or (find-address/search normalized-term lang) [])))
       (resp/status 400 "Missing query parameters")))
 
-(defn point-by-property-id-proxy [{{property-id :property-id} :params :as request}]
+(defn point-by-property-id-proxy [{{property-id :property-id} :params}]
   (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id))
     (let [features (plocation/property-location-info property-id)]
       (if features

@@ -63,19 +63,19 @@
   {:dictionary (assoc (->> dates
                            (map (fn [kw]
                                   [kw (schema-util/required
-                                       {:date {:disabled? :automatic-verdict-dates
-                                               :i18nkey   (util/kw-path :pate-verdict kw)}})]))
+                                        {:date {:disabled? :automatic-verdict-dates
+                                                :i18nkey   (util/kw-path :pate-verdict kw)}})]))
                            (into {}))
-                      :language                (schema-util/required (assoc helper/language-select
-                                                                            :template-dict :language))
-                      :verdict-date            (schema-util/required {:date {}})
-                      :automatic-verdict-dates {:toggle {}}
-                      :handler               (schema-util/required {:text {:loc-prefix
-                                                                           (case category
-                                                                             :p :pate.prepper
-                                                                             :pate-verdict.handler)}})
-                      :handler-title         {:text {:loc-prefix :pate-verdict.handler.title}}
-                      :application-id        app-id-placeholder)
+                 :language (schema-util/required (assoc helper/language-select
+                                                   :template-dict :language))
+                 :verdict-date (schema-util/required {:date {}})
+                 :automatic-verdict-dates {:toggle {}}
+                 :handler (schema-util/required {:text {:loc-prefix
+                                                        (case category
+                                                          :p :pate.prepper
+                                                          :pate-verdict.handler)}})
+                 :handler-title {:text {:loc-prefix :pate-verdict.handler.title}}
+                 :application-id app-id-placeholder)
    :section    {:id   :pate-dates
                 :grid {:columns 7
                        :rows    [[{:col   7
@@ -105,13 +105,12 @@
                                    :col   2
                                    :show? :_meta.editing?
                                    :dict  :automatic-verdict-dates}]
-                                 {:id         "deltas"
-                                  :css        [:pate-date]
-                                  :row        (map (fn [kw]
-                                                     (let [id (name kw)]
-                                                       {:disabled? :automatic-verdict-dates
-                                                        :dict      kw}))
-                                                   dates)}]}}})
+                                 {:id  "deltas"
+                                  :css [:pate-date]
+                                  :row (map (fn [kw]
+                                              {:disabled? :automatic-verdict-dates
+                                               :dict      kw})
+                                            dates)}]}}})
 
 (def versub-operation
   {:dictionary {:operation {:text {:loc-prefix :pate.operation}}

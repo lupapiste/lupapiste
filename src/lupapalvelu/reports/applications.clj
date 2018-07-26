@@ -371,8 +371,7 @@
                                          (apply +))}))))
 
 (defn ^OutputStream digitized-attachments [user start-ts end-ts lang]
-  (let [org-ids       (mapv :id (usr/get-organizations user))
-        applications  (digitized-applications-between user start-ts end-ts)
+  (let [applications  (digitized-applications-between user start-ts end-ts)
         row-data      (map #(digi-report-data %) applications)
         sum-data      (digi-report-sum row-data)
         sum-sheet     (i18n/localize lang "digitizer.excel.sum.sheet.name")
@@ -385,5 +384,5 @@
                           :header      (rest (digitizer-report-headers lang))
                           :row-fn      (juxt :date :attachments)
                           :data        sum-data}])
-        sum-row       (excel/add-sum-row! sum-sheet wb [(i18n/localize lang "digitizer.excel.sum") (apply + (map :attachments sum-data))])]
+        _       (excel/add-sum-row! sum-sheet wb [(i18n/localize lang "digitizer.excel.sum") (apply + (map :attachments sum-data))])]
     (excel/xlsx-stream wb)))

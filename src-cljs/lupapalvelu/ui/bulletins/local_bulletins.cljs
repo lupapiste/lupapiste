@@ -6,8 +6,7 @@
 
 (defonce args (atom {}))
 
-(defn init
-  [init-state props]
+(defn init [init-state _]
   (reset! state/current-organization (:organization @args))
   (reset! state/local-bulletins-query {:page 1 :left -1 :pending? false})
   (common/query :local-bulletins-page-settings

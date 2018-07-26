@@ -10,13 +10,13 @@
   (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "kayttotark-muutos")
         app (query-application pena application-id)
         rakmuu-doc (domain/get-document-by-name app "rakennuksen-muuttaminen")
-        resp2 (command pena :update-doc :id application-id :doc (:id rakmuu-doc) :collection "documents" :updates [["muutostyolaji" "muut muutosty\u00f6t"]])
+        _ (command pena :update-doc :id application-id :doc (:id rakmuu-doc) :collection "documents" :updates [["muutostyolaji" "muut muutosty\u00f6t"]])
         updated-app (query-application pena application-id)
         building-info (query pena :get-building-info-from-wfs :id application-id) => ok?
         doc-before (domain/get-document-by-name updated-app "rakennuksen-muuttaminen")
         building-id (:buildingId (first (:data building-info)))
 
-        resp3 (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id :path "buildingId" :overwrite true) => ok?
+        _ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id :path "buildingId" :overwrite true) => ok?
         merged-app (query-application pena application-id)
         doc-after (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
 
@@ -62,11 +62,11 @@
 
        (fact "two of the huoneistot have actual source data, others are empty"
          (count (filter
-                  (fn [[i data]]
+                  (fn [[_ data]]
                     (some #(:source %) (vals data)))
                   huoneistot)) => 2
          (count (filter
-                  (fn [[i data]]
+                  (fn [[_ data]]
                     (every? #(nil? (:source %)) (vals data)))
                   huoneistot)) => 19)
 
@@ -127,7 +127,7 @@
         doc (domain/get-document-by-name app "purkaminen")
         building-info (query pena :get-building-info-from-wfs :id application-id) => ok?
         building-id (:buildingId (first (:data building-info)))
-        resp (command pena :merge-details-from-krysp :id application-id :documentId (:id doc) :collection "documents" :buildingId building-id :path "buildingId" :overwrite true) => ok?
+        _ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc) :collection "documents" :buildingId building-id :path "buildingId" :overwrite true) => ok?
         merged-app (query-application pena application-id)
         doc-after (domain/get-document-by-name merged-app "purkaminen")]
     (get-in doc-after [:data :mitat :kokonaisala :source]) => "krysp"
@@ -137,8 +137,8 @@
   (let [application-id (create-app-id pena :propertyId no-backend-property-id :operation "purkaminen")
         app (query-application pena application-id)
         doc (domain/get-document-by-name app "purkaminen")
-        building-info (query pena :get-building-info-from-wfs :id application-id) => ok?
-        resp (command pena :merge-details-from-krysp :id application-id :documentId (:id doc) :collection "documents" :buildingId "other" :path "buildingId" :overwrite true) => ok?
+        _ (query pena :get-building-info-from-wfs :id application-id) => ok?
+        _ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc) :collection "documents" :buildingId "other" :path "buildingId" :overwrite true) => ok?
         merged-app (query-application pena application-id)
         doc-after (domain/get-document-by-name merged-app "purkaminen")]
     (get-in doc-after [:data :buildingId :value]) => "other"))

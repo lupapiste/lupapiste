@@ -160,7 +160,7 @@
        (filter seq)))
 
 
-(defn- get-app-descriptions [{:keys [permitType] :as application} xml]
+(defn- get-app-descriptions [{:keys [permitType]} xml]
   (krysp-reader/read-permit-descriptions-from-xml permitType (cr/strip-xml-namespaces xml)))
 
 (defn- get-task-updates [application user created verdicts app-xml]
@@ -236,8 +236,7 @@
   differently. These 'special' verdicts contain reference permit id in
   MuuTunnus. xml should be without namespaces"
   [application xml]
-  (let [app-id (:id application)
-        op-name (-> application :primaryOperation :name)
+  (let [op-name (-> application :primaryOperation :name)
         link-permit-id (-> application :linkPermitData first :id)]
     (and (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
          (not-empty (enlive/select xml [:luvanTunnisteTiedot :MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))])))))
@@ -377,7 +376,7 @@
    tasks: tasks of the application
    verdict-id: Id of the target verdict
    task: task to be analyzed."
-  [tasks verdict-id {{source-type :type source-id :id} :source :as task}]
+  [tasks verdict-id {{source-type :type source-id :id} :source}]
   (case (keyword source-type)
     :verdict (= verdict-id source-id)
     :task (verdict-task? tasks verdict-id (some #(when (= (:id %) source-id) %) tasks))
@@ -386,7 +385,7 @@
 (defn deletable-verdict-task-ids
   "Task ids that a) can be deleted and b) belong to the
   verdict with the given id."
-  [{:keys [tasks attachments]} verdict-id]
+  [{:keys [tasks]} verdict-id]
   (->> tasks
        (filter #(and (not= (-> % :state keyword) :sent)
                      (verdict-task? tasks verdict-id %)))
@@ -524,7 +523,7 @@
     (assoc app-paatos
            :poytakirjat
            (doall
-            (for [{:keys [action pk] :as update-info} update-actions]
+            (for [{:keys [action pk]} update-actions]
               (case action
                 :keep   pk
                 :update (get-poytakirja! application

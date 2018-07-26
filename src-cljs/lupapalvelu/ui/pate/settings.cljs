@@ -56,8 +56,7 @@
 ;; Settings sections
 ;; -------------------------
 
-(defmethod sections/section-header :settings
-  [{:keys [path schema state] :as options} _]
+(defmethod sections/section-header :settings [{:keys [schema] :as options} _]
   [:div.pate-grid-6.section-header
    [:div.row.row--tight
     [:div.col-4

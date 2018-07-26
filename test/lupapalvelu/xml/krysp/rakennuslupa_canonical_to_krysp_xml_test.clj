@@ -75,9 +75,9 @@
       (let [lp-xml_212 (cr/strip-xml-namespaces (xml/parse xml_212_s))
             lp-xml_213 (cr/strip-xml-namespaces (xml/parse xml_213_s))
             lp-xml_216 (cr/strip-xml-namespaces (xml/parse xml_216_s))
-            lp-xml_218 (cr/strip-xml-namespaces (xml/parse xml_218_s))
+            _ (cr/strip-xml-namespaces (xml/parse xml_218_s))
             lp-xml_220 (cr/strip-xml-namespaces (xml/parse xml_220_s))
-            lp-xml_222 (cr/strip-xml-namespaces (xml/parse xml_222_s))
+            _ (cr/strip-xml-namespaces (xml/parse xml_222_s))
             tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
             tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
             tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])]

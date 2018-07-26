@@ -12,15 +12,13 @@
             [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]))
 
-(defmulti placeholder (fn [options & _]
-                        (-> options :schema :type)))
+(defmulti placeholder (fn [options & _] (-> options :schema :type)))
 
 ;; Neighbors value is a list of property-id, timestamp maps.  Before
 ;; publishing the verdict, the neighbors are taken from the
 ;; applicationModel. On publishing the neighbor states are frozen into
 ;; mongo.
-(defmethod placeholder :neighbors
-  [{:keys [state path] :as options}]
+(defmethod placeholder :neighbors [{:keys [state path]}]
   [:div.tabby.neighbor-states
    (map (fn [{:keys [property-id done]}]
           [:div.tabby__row.neighbor
@@ -33,12 +31,9 @@
               (common/loc :neighbors.open))]])
         (path/value path state))])
 
-(defmethod placeholder :application-id
-  [_]
-  [:span.formatted (rum/react state/application-id)])
+(defmethod placeholder :application-id [_] [:span.formatted (rum/react state/application-id)])
 
-(defmethod placeholder :building
-  [{:keys [state path]}]
+(defmethod placeholder :building [{:keys [state path]}]
   (let [{:keys [operation building-id tag description]} (path/value (butlast path) state)]
     [:span.formatted (->> [(path/loc :operations operation)
                            (s/join ": " (remove s/blank? [tag description]))
@@ -46,8 +41,7 @@
                           (remove s/blank?)
                           (s/join " \u2013 "))]))
 
-(defmethod placeholder :statements
-  [{:keys [state path]}]
+(defmethod placeholder :statements [{:keys [state path]}]
   (if-let [statements (seq (path/value path state))]
     [:div.tabby.statements
      (map (fn [{:keys [given text status]}]

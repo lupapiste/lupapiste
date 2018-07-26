@@ -141,7 +141,7 @@
 (defn- state-base-filter [required-state attachment]
   (util/=as-kw required-state (att-util/attachment-state attachment)))
 
-(defn count-attachments-requiring-action [user {:keys [infoRequest attachments _attachment_indicator_reset] :as application}]
+(defn count-attachments-requiring-action [user {:keys [infoRequest attachments _attachment_indicator_reset]}]
   (if-not infoRequest
     (let [requires-user-action (partial state-base-filter :requires_user_action)
           requires-authority-action (partial state-base-filter :requires_authority_action)

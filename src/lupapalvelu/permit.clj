@@ -360,7 +360,7 @@
 (defn archiving-project? [{:keys [permitType]}]
   (= permitType (name ARK)))
 
-(defn is-archiving-project [{{:keys [permitType] :as application} :application}]
+(defn is-archiving-project [{:keys [application]}]
   (when-not (archiving-project? application)
     (fail :error.unsupported-permit-type)))
 

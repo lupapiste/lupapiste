@@ -518,7 +518,7 @@
       (-> (resolve-organization-scope (:municipality application) (:permitType application) organization)
           :pate-enabled))))
 
-(defn permit-types [{scope :scope :as organization}]
+(defn permit-types [{:keys [scope]}]
   (map (comp keyword :permitType) scope))
 
 (defn with-organization [id function]
@@ -820,7 +820,7 @@
                        {$pull {:links (mongofy {:name name
                                                 :url  url})}}))
 
-(defn general-handler-id-for-organization [{roles :handler-roles :as organization}]
+(defn general-handler-id-for-organization [{roles :handler-roles}]
   (:id (util/find-first :general roles)))
 
 (defn create-handler-role
@@ -860,7 +860,7 @@
                            {:trigger trigger-id}
                            {$set {:description description}})))
 
-(defn update-assignment-trigger [{org-id :id} {:keys [targets handlerRole description] :as trigger} triggerId]
+(defn update-assignment-trigger [{org-id :id} {:keys [targets handlerRole description]} triggerId]
   (let [query (assoc {:assignment-triggers {$elemMatch {:id triggerId}}} :_id org-id)
         changes {$set (merge {:assignment-triggers.$.targets targets
                               :assignment-triggers.$.description description}

@@ -207,7 +207,7 @@
         (validate-notice-submittable application link-permit)
         (validate-foreman-submittable application link-permit)))))
 
-(defn new-foreman-application [{:keys [created user application organization] :as command}]
+(defn new-foreman-application [{:keys [created application] :as command}]
   (-> (app/do-create-application
        (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
                              :x (-> application :location first)
@@ -219,7 +219,7 @@
                              :messages []}))
       (assoc :opened (if (util/pos? (:opened application)) created nil))))
 
-(defn- cleanup-hakija-doc [{info :schema-info :as doc}]
+(defn- cleanup-hakija-doc [doc]
   (let [schema-name (op/get-operation-metadata :tyonjohtajan-nimeaminen-v2 :applicant-doc-schema)]
     (-> doc
       (assoc :id (mongo/create-id))
@@ -296,7 +296,7 @@
                "yritys"  (yritys-invite % auth)))
        (remove nil?)))
 
-(defn- create-company-auth [inviter company-id timestamp]
+(defn- create-company-auth [inviter company-id]
   (when-let [company (company/find-company-by-id company-id)]
     ;; company-auth can be nil if company is locked
     (when-let [company-auth (company/company->auth company :writer)]
@@ -305,7 +305,7 @@
 
 (defn- invite->auth [inv app-id inviter timestamp]
   (if (:company-id inv)
-    (create-company-auth inviter (:company-id inv) timestamp)
+    (create-company-auth inviter (:company-id inv))
     (let [invited (usr/get-or-create-user-by-email (:email inv) inviter)]
       (auth/create-invite-auth inviter invited app-id (:role inv) timestamp))))
 
@@ -329,7 +329,7 @@
                       {$push {:auth (auth/create-invite-auth user foreman-user (:id linked-app) "foreman" created)}
                        $set  {:modified created}}))
 
-(defn send-invite-notifications! [foreman-app foreman-user linked-app {user :user created :created :as command}]
+(defn send-invite-notifications! [foreman-app foreman-user linked-app command]
   (try
     (when (and foreman-user (not (auth/has-auth? linked-app (:id foreman-user))))
       (invite-to-linked-app! linked-app foreman-user command))
@@ -341,7 +341,7 @@
   (when-let [task (util/find-by-id task-id (:tasks application))]
     (doc-persistence/persist-model-updates application "tasks" task [[[:asiointitunnus] foreman-app-id]] created)))
 
-(defn get-linked-foreman-applications [{id :id :as application}]
+(defn get-linked-foreman-applications [{:keys [id]}]
   (let [foreman-application-ids (->> (mongo/select :app-links {:link {$in [id]}})
                                      (filter (comp #{"linkpermit"} :type (keyword id)))
                                      (filter (comp #{"tyonjohtajan-nimeaminen-v2"} :apptype #((->> % :link first keyword) %)))

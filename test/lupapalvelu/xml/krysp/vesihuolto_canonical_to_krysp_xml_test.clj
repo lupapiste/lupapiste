@@ -24,7 +24,7 @@
     (let [xml_213_s (-> (common-map-enums canonical "2.1.3")
                         (element-to-xml vesihuolto-to-krysp_213)
                         (indent-str))
-          lp-xml_213    (cr/strip-xml-namespaces (xml/parse xml_213_s))]
+          _    (cr/strip-xml-namespaces (xml/parse xml_213_s))]
 
       (validator/validate xml_213_s (:permitType vapautus-vesijohdosta-ja-viemarista-hakemus) "2.1.3")))
 

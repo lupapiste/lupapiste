@@ -134,8 +134,7 @@
   (let [attachments-selected (->> @state/component-state
                                   :attachments
                                   (filter (fn [{id :id}]
-                                            (pos? (get order id)))))
-        order-number (-> @state/component-state :order-number)]
+                                            (pos? (get order id)))))]
     [:div
      (when (= (-> @state/component-state :phase) 4)
        [:div.order-section
@@ -202,7 +201,7 @@
 (rum/defc order-composer < rum/reactive
                            {:init         init
                             :will-unmount state/will-unmount}
-  [ko-app]
+  [_]
   (let [phase (rum/react (rum/cursor-in state/component-state [:phase]))]
     [:div
      [:h1 {:data-test-id "order-composer-title"}

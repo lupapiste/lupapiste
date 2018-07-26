@@ -157,7 +157,7 @@
                                       (and (sent? document) readonly-after-sent)
                                       (some validate-all-subschemas body)))]
     (doseq [path remove-paths]
-      (let [{:keys [readonly readonly-after-sent] :as subschema} (model/find-by-name (:body doc-schema) path)]
+      (let [subschema (model/find-by-name (:body doc-schema) path)]
         (when (validate-all-subschemas subschema)
           (fail! :error-trying-to-remove-readonly-field))))))
 
@@ -253,7 +253,7 @@
      (when (model/has-errors? post-results) (fail! :document-would-be-in-error-after-update :results post-results))
      document)))
 
-(defn- can-add-schema? [{info :info :as schema} application]
+(defn- can-add-schema? [{:keys [info]} application]
   (let [schema-name         (:name info)
         applicant-schema    (operations/get-applicant-doc-schema-name application)
 

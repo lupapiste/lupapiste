@@ -49,7 +49,7 @@
    :notified    true
    :pre-checks  [application-has-verdict-given-state]
    :on-success  (notify :application-state-change)}
-  [{app :application :as command}]
+  [command]
   (let [result (verdict/do-check-for-verdict command)]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)
@@ -198,7 +198,7 @@
    :states     states/post-verdict-states
    :user-roles #{:applicant :authority}
    :user-authz-roles roles/writer-roles-with-foreman}
-  [{:keys [application created user created] :as command}]
+  [{:keys [application user created] :as command}]
   (if (usr/get-user-with-password (:username user) password)
     (when-let [verdict (find-verdict application verdictId)]
       (let [result (update-application command

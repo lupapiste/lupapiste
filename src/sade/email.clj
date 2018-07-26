@@ -52,7 +52,7 @@
 
 (defn send-mail
   "Send raw email message. Consider using send-email-message instead."
-  [to subject & {:keys [plain html calendar attachments] :as args}]
+  [to subject & {:keys [plain html calendar attachments]}]
   (assert (or plain html calendar) "must provide some content")
   (let [plain-body (when plain {:content plain :type "text/plain; charset=utf-8"})
         html-body  (when html {:content html :type "text/html; charset=utf-8"})

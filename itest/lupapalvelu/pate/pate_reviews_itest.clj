@@ -36,7 +36,6 @@
         plan-ids                 (->> references :plans (map :id))
         review-ids               (->> references :reviews (map :id))
         find-review-id           #(:id (util/find-by-key :fi % (:reviews references)))
-        find-plan-id             #(:id (util/find-by-key :fi % (:plans references)))
         {:keys [primaryOperation
                 buildings]}      (query-application pena app-id)]
     (fact "Buildings empty"                                 ; they could be populated, but not implemented yet

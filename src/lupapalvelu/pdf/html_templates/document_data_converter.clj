@@ -44,13 +44,13 @@
 
 (defn doc->html
   "Convert document into hiccup html"
-  ([{schema-info :schema-info data :data :as doc} lang]
+  ([{:keys [schema-info data]} lang]
    (doc->html (schemas/get-schema schema-info) data lang))
   ([{{name :name i18name :i18name} :info :as schema} data lang]
    (i18n/with-lang lang
      [:div.document (convert-element data [] [(or i18name name)] (assoc schema :type :group))])))
 
-(defn- parse-i18nkey [{:keys [i18nkey] :as schema}]
+(defn- parse-i18nkey [{:keys [i18nkey]}]
   (some->> (ss/split i18nkey #"\.") (mapv keyword)))
 
 (defn- get-in-schema-with-i18n-path [{{name :name i18name :i18name} :info :as doc-schema} path]
@@ -63,7 +63,7 @@
 
 (defn get-value-in
   "Get localized value for element inside document data."
-  ([{schema-info :schema-info data :data :as doc} lang path]
+  ([{:keys [schema-info data]} lang path]
    (get-value-in (schemas/get-schema schema-info) data lang path))
   ([schema data lang path]
    (let [elem-schema (get-in-schema-with-i18n-path schema path)]
@@ -90,9 +90,9 @@
        keyword))
 
 (defn- leaf-element
-  ([doc-data path i18n-path {elem-name :name :as elem-schema} attrs]
+  ([doc-data path i18n-path elem-schema attrs]
    (leaf-element (element-value doc-data path i18n-path elem-schema) i18n-path elem-schema attrs))
-  ([value i18n-path {elem-name :name elem-type :type label :label :as elem-schema} attrs]
+  ([value i18n-path {elem-name :name elem-type :type label :label} attrs]
    [(kw :span# elem-name :.leaf- elem-type)
     attrs
     (when-not (false? label) [:div.element-title [:b (get-title i18n-path)]])
@@ -106,7 +106,7 @@
   (when ((:values show-when) (get-value-by-path doc-data path (:path show-when)))
     (convert-element doc-data path i18n-path (dissoc elem-schema :show-when))))
 
-(defmethod convert-element ::i18nkey [doc-data path i18n-path elem-schema]
+(defmethod convert-element ::i18nkey [doc-data path _ elem-schema]
   (let [i18n-path (parse-i18nkey elem-schema)]
     (convert-element doc-data path i18n-path (dissoc elem-schema :i18nkey))))
 
@@ -119,16 +119,16 @@
   (let [[tag & body] (convert-element doc-data path i18n-path (dissoc elem-schema :layout))]
     (apply vector (kw tag :.layout- layout) body)))
 
-(defmethod convert-element ::select-one-of [doc-data path i18n-path {elem-body :body :as elem-schema}]
+(defmethod convert-element ::select-one-of [doc-data path i18n-path {elem-body :body}]
   (let [selected (keyword (get-in doc-data (conj path (keyword schemas/select-one-of-key) :value)))
         selected-schema (util/find-first (comp #{selected} keyword :name) elem-body)]
     ;; TODO: Might need group header
     (convert-element doc-data (conj path selected) (conj i18n-path selected) selected-schema)))
 
-(defmethod convert-element ::hidden [doc-data path i18n-path {elem-body :body :as elem-schema}]
+(defmethod convert-element ::hidden [_ _ _ _]
   nil)
 
-(defmethod element-value :default [doc-data path i18n-path schema]
+(defmethod element-value :default [doc-data path _ _]
   (get-in doc-data (conj path :value)))
 
 (defmethod convert-element :string [doc-data path i18n-path schema]
@@ -140,7 +140,7 @@
 (defmethod convert-element :select [doc-data path i18n-path schema]
   (leaf-element doc-data path i18n-path schema {}))
 
-(defmethod element-value :checkbox [doc-data path i18n-path schema]
+(defmethod element-value :checkbox [doc-data path _ _]
   (when (get-in doc-data (conj path :value)) (i18n/loc "yes")))
 
 (defmethod convert-element :fundingSelector [doc-data path i18n-path schema]
@@ -161,7 +161,7 @@
   (some->> (get-i18n-path-for-selection doc-data path i18n-path schema)
            (apply i18n/loc)))
 
-(defmethod convert-element :group [doc-data path i18n-path {elem-name :name elem-body :body :as elem-schema}]
+(defmethod convert-element :group [doc-data path i18n-path {elem-name :name elem-body :body}]
   (apply vector (kw :div# elem-name ".group")
          [:h3.group-title (get-title (conj i18n-path "_group_label"))]
          (->> (map (fn [{subschema-name :name :as subschema}]
@@ -169,10 +169,10 @@
                    elem-body)
               (remove nil?))))
 
-(defn- table-header-row [doc-data path i18n-path {elem-body :body :as elem-schema}]
+(defn- table-header-row [_ _ _ {elem-body :body}]
   (apply vector :tr (map (fn->> :name (vector :th)) elem-body))) ; TODO: localize
 
-(defn- table-data-row [doc-data path i18n-path {elem-body :body :as elem-schema}]
+(defn- table-data-row [doc-data path _ {elem-body :body}]
   (apply vector :tr (map (fn->> :name keyword (conj path) (get-in doc-data) :value (vector :td)) elem-body))) ; TODO: use convert-element
 
 (defmethod convert-element :table [doc-data path i18n-path {elem-name :name :as elem-schema}]

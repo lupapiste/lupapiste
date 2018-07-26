@@ -60,5 +60,5 @@
    :pre-checks       [org-id-valid
                       phrases/phrase-id-exists]
    :feature          :pate}
-  [{user :user}]
+  [_]
   (phrases/delete-phrase org-id phrase-id))

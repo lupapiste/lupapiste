@@ -14,7 +14,7 @@
 
 (def ^:private root-element {:UusiAsia nil})
 
-(defn- get-asian-tyyppi-string [application]
+(defn- get-asian-tyyppi-string [_]
   ; KasiteltavaHakemus, TODO tulossa Tiedoksianto (ilmoitukset)
   "KasiteltavaHakemus")
 

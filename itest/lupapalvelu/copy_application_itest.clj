@@ -44,7 +44,7 @@
           _                     (command pena :invite-with-role :id app-id :email (email-for-key teppo)
                                          :role "writer" :text "huanying" :documentName "" :documentId "" :path "") => ok?
           hakija-doc-id         (:id (domain/get-applicant-document (:documents app)))
-          resp                  (command pena :update-doc :id app-id :doc hakija-doc-id  :collection "documents"
+          _                     (command pena :update-doc :id app-id :doc hakija-doc-id  :collection "documents"
                                          :updates [["henkilo.henkilotiedot.etunimi" (:firstName mikko-user)]
                                                    ["henkilo.henkilotiedot.sukunimi" (:lastName mikko-user)]
                                                    ["henkilo.userId" (:id mikko-user)]]) => ok?]

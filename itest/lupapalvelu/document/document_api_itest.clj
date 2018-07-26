@@ -23,10 +23,10 @@
   (let [application-id   (create-app-id pena)
         application0     (query-application pena application-id) => truthy
         hakija-doc-id    (:id (domain/get-applicant-document (:documents application0)))
-        resp             (command pena :update-doc :id application-id :doc hakija-doc-id  :collection "documents" :updates [["henkilo.henkilotiedot.etunimi" "foo"]["henkilo.henkilotiedot.sukunimi" "bar"]]) => ok?
+        _                (command pena :update-doc :id application-id :doc hakija-doc-id  :collection "documents" :updates [["henkilo.henkilotiedot.etunimi" "foo"]["henkilo.henkilotiedot.sukunimi" "bar"]]) => ok?
         modified1        (:modified (query-application pena application-id))
         rakennus-doc-id  (:id (domain/get-document-by-name application0 "rakennuspaikka")) => truthy
-        resp             (command pena :update-doc :id application-id :doc rakennus-doc-id  :collection "documents" :updates [["kiinteisto.maaraalaTunnus" "maaraalaTunnus"]]) => ok?
+        _                (command pena :update-doc :id application-id :doc rakennus-doc-id  :collection "documents" :updates [["kiinteisto.maaraalaTunnus" "maaraalaTunnus"]]) => ok?
         application2     (query-application pena application-id)
         modified2        (:modified application2)
         hakija-doc       (domain/get-document-by-id application2 hakija-doc-id)

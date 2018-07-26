@@ -75,8 +75,7 @@
            :template-id template-id))
 
 (defn fill-sisatila-muutos-application [apikey app-id]
-  (let [{docs :documents
-         :as  app} (query-application apikey app-id)
+  (let [{docs :documents} (query-application apikey app-id)
         doc-map    (reduce (fn [acc {:keys [id schema-info]}]
                              (assoc acc (:name schema-info) id))
                            {}

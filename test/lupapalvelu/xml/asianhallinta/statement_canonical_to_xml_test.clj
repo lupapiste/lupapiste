@@ -73,7 +73,6 @@
             mapping        (ah-mapping/get-uusi-asia-mapping (ss/suffix schema-version "-"))
             xml            (element-to-xml canonical mapping)
             xml-s          (xml/indent-str xml) => truthy
-            permit-type    (:permitType application)
             xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
         (fact "xml ok"
           xml => truthy)

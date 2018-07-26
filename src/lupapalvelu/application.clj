@@ -181,7 +181,7 @@
               (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
           schema-names))
 
-(defn enrich-application-handlers [application {roles :handler-roles :as organization}]
+(defn enrich-application-handlers [application {roles :handler-roles}]
   (update application :handlers (partial map #(merge (util/find-by-id (:roleId %) roles) %))))
 
 ; Seen updates
@@ -508,7 +508,7 @@
                   (make-attachments created primaryOperation organization state tosFunction)
                   [])})
 
-(defn application-documents-map [{:keys [infoRequest created primaryOperation auth] :as application} user organization manual-schema-datas]
+(defn application-documents-map [{:keys [infoRequest created primaryOperation] :as application} user organization manual-schema-datas]
   {:pre [(pos? created) (map? primaryOperation)]}
   {:documents (if-not infoRequest
                 (make-documents user created organization primaryOperation application manual-schema-datas)
@@ -641,7 +641,7 @@
     ;; Cannot update existing array and push new items into it same time with one update
     (when (not-empty attachment-updates) (action/update-application command attachment-updates))))
 
-(defn change-primary-operation [{:keys [application] :as command} id secondaryOperationId]
+(defn change-primary-operation [{:keys [application] :as command} secondaryOperationId]
   (let [old-primary-op                       (:primaryOperation application)
         old-secondary-ops                    (:secondaryOperations application)
         new-primary-op                       (util/find-first #(= secondaryOperationId (:id %)) old-secondary-ops)
@@ -707,7 +707,7 @@
                                               meta-fields/enrich-with-link-permit-data
                                               (dissoc :id)
                                               (assoc :_id (:id application))))
-    (catch com.mongodb.DuplicateKeyException e
+    (catch com.mongodb.DuplicateKeyException _
       ; This is ok. Only the first submit is saved.
       )))
 
@@ -742,8 +742,7 @@
                 ((change-application-state-targets application) (keyword new-state)))
     (fail :error.illegal-state)))
 
-(defn application-org-authz-users
-  [{org-id :organization :as application} org-authz]
+(defn application-org-authz-users [{org-id :organization} org-authz]
   (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
@@ -758,7 +757,7 @@
 (defn- remove-app-links [id]
   (mongo/remove-many :app-links {:link {$in [id]}}))
 
-(defn cancel-inforequest [{:keys [created user data application] :as command}]
+(defn cancel-inforequest [{:keys [created user application] :as command}]
   {:pre [(seq (:application command))]}
   (action/update-application command (app-state/state-transition-update :canceled created application user))
   (remove-app-links (:id application))

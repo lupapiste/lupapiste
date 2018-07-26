@@ -583,7 +583,7 @@
                                                                     model))})
 
 (defmethod auth/approve-invite-auth :company
-  [{invite :invite :as auth} {{company-id :id} :company :as user} accepted-ts]
+  [{invite :invite :as auth} {{company-id :id} :company} accepted-ts]
   (when invite
     (some-> (find-company! {:id company-id})
             company->auth

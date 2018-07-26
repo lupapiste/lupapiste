@@ -196,6 +196,6 @@
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])]
    :user-authz-roles #{:writer :foreman}
    :user-roles       #{:applicant :authority}}
-  [{application :application user :user}]
+  [{:keys [application]}]
   (inspection-summary/edit-target application summaryId targetId {:set {:inspection-date date}})
   (ok))

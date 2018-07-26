@@ -23,15 +23,11 @@
 
 (def error-reporter
   (reify ErrorReporter
-    (^void warning [this ^String message, ^String sourceName,
-                    ^int line, ^String lineSource, ^int lineOffset]
-      (warn message))
-    (^void error [this ^String message, ^String sourceName,
-                    ^int line, ^String lineSource, ^int lineOffset]
-      (error message))
-    (^EvaluatorException runtimeError [this ^String message, ^String sourceName,
-                    ^int line, ^String lineSource, ^int lineOffset]
-      (error message) (EvaluatorException. message))))
+    (warning [_ message _ _ _ _] (warn message))
+    (error [_ message _ _ _ _] (error message))
+    (runtimeError [_ message _ _ _ _]
+      (error message)
+      (EvaluatorException. message))))
 
 (defn- minified [kind ^java.io.Reader in ^java.io.Writer out]
   (cond
