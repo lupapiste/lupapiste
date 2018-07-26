@@ -41,10 +41,6 @@
                  ; upgraded pretty to match Midje version, should work with Timbre
                  [io.aviso/pretty "0.1.34"]
 
-                 ;;Hystrix
-                 [com.netflix.hystrix/hystrix-clj "1.5.6"]
-                 [com.netflix.hystrix/hystrix-metrics-event-stream "1.5.6"]
-
                  ; markup processing
                  [enlive "1.1.6"]
                  [endophile "0.1.2" :exclusions [hiccup]]

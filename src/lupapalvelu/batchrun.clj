@@ -934,3 +934,36 @@
           (threads/wait-for-threads threads))
         (info "Done"))
     (error "Missing organization ids")))
+
+(defn fix-bad-archival-conversions-in-091-R []
+  (mongo/connect!)
+  (info "Reconverting attachments to PDF/A in 091-R archiving projects")
+  (doseq [{:keys [id]} (mongo/select :applications
+                                     {:organization "091-R"
+                                      :permitType "ARK"
+                                      ; 2018-07-12 09:00 Z
+                                      :created {$gt 1531386000000}
+                                      :state {$in ["open" "underReview"]}}
+                                     [:_id]
+                                     {:_id 1})]
+    (logging/with-logging-context {:applicationId id}
+      (doseq [{:keys [latestVersion versions metadata] :as att} (:attachments (mongo/by-id :applications id [:attachments]))
+              :when (and (not= :arkistoitu (keyword (:tila metadata)))
+                         (or (and (:archivable latestVersion)
+                                  (not= (:fileId latestVersion) (:originalFileId latestVersion)))
+                             (and (not (:archivable latestVersion))
+                                  (= (:archivabilityError latestVersion) "invalid-pdfa"))))]
+        (info "Reconverting attachment" (:id att))
+        (let [last-idx (dec (count versions))]
+          (mongo/update :applications
+                        {:_id id
+                         :attachments.id (:id att)}
+                        {$set {:attachments.$.latestVersion.archivable false
+                               :attachments.$.latestVersion.fileId (:originalFileId latestVersion)
+                               (str "attachments.$.versions." last-idx ".archivable") false
+                               (str "attachments.$.versions." last-idx ".fileId") (:originalFileId latestVersion)}})
+          (let [updated-app (mongo/by-id :applications id [:attachments])
+                attachment (attachment/get-attachment-info updated-app (:id att))]
+            (attachment/convert-existing-to-pdfa! updated-app attachment)))
+        (info "Attachment" (:id att) "processed"))))
+  (info "Done."))
