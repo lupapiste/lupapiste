@@ -680,7 +680,7 @@
 (defn create-new-user
   "Insert new user to database, returns new user data without private information. If user
    exists and has role \"dummy\", overwrites users information. If users exists with any other
-   role, throws exception. Caller should have gone through with-org-authz."
+   role, throws exception. Caller should have gone through 'lupapalvelu.user/with-org-authz'."
   [caller user-data]
   (let [user-data (->> user-data
                        (create-new-user-entity)

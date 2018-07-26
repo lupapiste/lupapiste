@@ -1,6 +1,5 @@
 (ns lupapalvelu.ident.ad-login
   (:require [clojure.data.xml :as xml]
-            [clojure.walk :as walk]
             [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
             [noir.core :refer [defpage]]
             [noir.response :as response]
@@ -135,15 +134,23 @@
         saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter))
         parsed-saml-info (parse-saml-info saml-info)
         email (get-in parsed-saml-info [:assertions :attrs :email])
-        ; _ (reset! jou saml-info) ; DEBUG, remove this
         _ (info parsed-saml-info)
+        _ (clojure.pprint/pprint parsed-saml-info)
         ]
     (if valid?
-      #_(response/status 200 (response/content-type "text/plain" (str saml-info)))
-      (let [response (ssess/merge-to-session
+      ; (response/status 200 (response/content-type "text/plain" (str saml-info)))
+      (let [user (or (usr/get-user-by-email email)
+                     (usr/create-new-user nil {:email email
+                                               :username email
+                                               :role "authority"
+                                               :company {:id "esimerkki"
+                                                         :role "admin"
+                                                         :submit true}
+                                               }))
+            response (ssess/merge-to-session
                        req
                        (response/redirect "http://localhost:8000") ; Fix!
-                       {:user (usr/session-summary (usr/get-user-by-email email))})]
+                       {:user user})]
         response)
       (do
         (error "SAML validation failed")
