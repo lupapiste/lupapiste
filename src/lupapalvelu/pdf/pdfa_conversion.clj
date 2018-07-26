@@ -9,7 +9,8 @@
             [lupapalvelu.statistics :as statistics]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.pdf.pdf-swat :as swat]
-            [lupapiste-commons.threads :as threads])
+            [lupapiste-commons.threads :as threads]
+            [lupapalvelu.logging :as logging])
   (:import [java.io File IOException FileNotFoundException InputStream]
            [com.lowagie.text.pdf PdfReader]
            [java.util.concurrent ExecutorService]))
@@ -208,7 +209,8 @@
   {:post [(boolean? (:pdfa? %))]}
   (-> (.submit conversion-pool
                ^Callable (fn []
-                           (analyze-and-convert-to-pdf-a pdf-file output-file opts)))
+                           (logging/with-logging-context {:applicationId (-> opts :application :id)}
+                             (analyze-and-convert-to-pdf-a pdf-file output-file opts))))
       (.get)))
 
 (defn file-is-valid-pdfa? [pdf-file]
