@@ -1,5 +1,6 @@
 (ns lupapalvelu.ident.ad-login
   (:require [clojure.data.xml :as xml]
+            [clojure.walk :as walk]
             [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
             [noir.core :refer [defpage]]
             [noir.response :as response]
@@ -75,6 +76,15 @@
   [xml-string]
   (-> xml-string xml/parse-str xml-tree->edn))
 
+(defn parse-saml-info
+  "The saml-info map returned by saml20-clj comes in a wacky format, so its best to
+  parse it into a more manageable form (without string keys or single-element lists etc)."
+  [element]
+  (cond
+    (and (seq? element) (= (count element) 1)) (parse-saml-info (first element))
+    (seq? element) (mapv parse-saml-info element)
+    (map? element) (into {} (for [[k v] element] [(keyword k) (parse-saml-info v)]))
+    :else element))
 
 (def- mutables
   (assoc (saml-sp/generate-mutables)
@@ -123,8 +133,10 @@
                            false)
         valid? (and valid-relay-state? valid-signature?)
         saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter))
-        email (first (get (:attrs (first (:assertions saml-info))) "email")) ; Fix this monstrosity ASAP!
-        _ (info saml-info)
+        parsed-saml-info (parse-saml-info saml-info)
+        email (get-in parsed-saml-info [:assertions :attrs :email])
+        ; _ (reset! jou saml-info) ; DEBUG, remove this
+        _ (info parsed-saml-info)
         ]
     (if valid?
       #_(response/status 200 (response/content-type "text/plain" (str saml-info)))
