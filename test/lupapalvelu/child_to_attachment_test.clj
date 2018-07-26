@@ -7,8 +7,7 @@
             [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]])
-  (:import (java.io File)))
+            [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]))
 
 (testable-privates lupapalvelu.child-to-attachment build-attachment-options)
 

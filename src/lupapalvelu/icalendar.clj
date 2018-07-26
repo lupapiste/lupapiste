@@ -4,7 +4,7 @@
   (:import (java.util Date)
            (net.fortuna.ical4j.model Calendar DateTime)
            (net.fortuna.ical4j.model.property Method ProdId Version CalScale Attendee Uid Organizer Url Location Description Sequence)
-           (net.fortuna.ical4j.model.parameter Cn Role Rsvp PartStat)
+           (net.fortuna.ical4j.model.parameter Cn Role Rsvp)
            (net.fortuna.ical4j.model.component VEvent)
            (net.fortuna.ical4j.data CalendarOutputter)
            (java.io StringWriter)

@@ -8,7 +8,7 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [lupapalvelu.components.core :as c])
-  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
+  (:import [java.io ByteArrayOutputStream]
            [org.apache.commons.io IOUtils]
            [com.googlecode.htmlcompressor.compressor HtmlCompressor]
            [com.yahoo.platform.yui.compressor JavaScriptCompressor CssCompressor]

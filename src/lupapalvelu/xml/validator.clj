@@ -5,7 +5,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [clojure.java.io :as io])
-  (:import [java.io InputStream Reader StringReader]
+  (:import [java.io StringReader]
            [javax.xml.transform.stream StreamSource]
            [javax.xml.validation SchemaFactory]
            [org.w3c.dom.ls LSResourceResolver LSInput]))

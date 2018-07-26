@@ -10,7 +10,7 @@
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre-client]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
-  (:import (java.io File FileOutputStream)))
+  (:import (java.io FileOutputStream)))
 
 (defn- get-child [application child-type id]
   (first (filter #(or (nil? id) (= id (:id %))) (child-type application))))

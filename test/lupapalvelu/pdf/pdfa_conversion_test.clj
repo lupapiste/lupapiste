@@ -5,7 +5,7 @@
     [midje.util :refer [testable-privates]]
     [sade.files :as files]
     [lupapalvelu.pdf.pdfa-conversion :refer :all])
-  (:import [java.io FileInputStream File]))
+  (:import [java.io FileInputStream]))
 
 (testable-privates lupapalvelu.pdf.pdfa-conversion pdf2pdf-key)
 

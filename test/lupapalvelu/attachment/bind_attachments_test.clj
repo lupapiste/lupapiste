@@ -1,4 +1,4 @@
-(ns lupapalvelu.bind_attachments-test
+(ns lupapalvelu.bind-attachments-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer [expected-failure?]]

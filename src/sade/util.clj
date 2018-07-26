@@ -13,8 +13,7 @@
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [debugf warnf]])
   (:import [java.util.jar JarFile]
-           [org.joda.time LocalDateTime]
-           [java.io ByteArrayOutputStream]))
+           [org.joda.time LocalDateTime]))
 
 (defmacro defalias [alias from]
   `(do (def ~alias ~from)

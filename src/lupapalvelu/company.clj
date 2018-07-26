@@ -21,8 +21,7 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
-            [lupapalvelu.user :as usr])
-  (:import [java.util Date]))
+            [lupapalvelu.user :as usr]))
 
 ;;
 ;; Company schema:

@@ -12,7 +12,7 @@
             [sade.util :as util]
             [taoensso.timbre :refer [trace tracef debug debugf info infof
                                      warn warnf error errorf fatal fatalf]])
-  (:import (java.io File FileOutputStream)))
+  (:import (java.io FileOutputStream)))
 
 (testable-privates lupapalvelu.pdf.pdf-export get-value-by-path get-subschemas hide-by-hide-when show-by-show-when removable-groups)
 

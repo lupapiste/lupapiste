@@ -41,9 +41,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.application :as app])
-  (:import [java.net URL]
-           [java.nio.charset StandardCharsets]))
+            [lupapalvelu.application :as app]))
 
 (def Timestamp sc/Num) ;; Some timestamps are casted as double during mongo export
 

@@ -16,9 +16,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr])
-  (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
-           (org.apache.poi.xssf.usermodel XSSFWorkbook)
-           (org.apache.poi.ss.usermodel CellType)))
+  (:import (java.io OutputStream)))
 
 (defn handler-roles-org [org-id]
   (mongo/select-one :organizations {:_id org-id} [:handler-roles]))

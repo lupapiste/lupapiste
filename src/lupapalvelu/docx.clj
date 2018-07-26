@@ -11,7 +11,7 @@
            [fr.opensagres.xdocreport.document.registry XDocReportRegistry]
            [fr.opensagres.xdocreport.template IContext]
            [fr.opensagres.xdocreport.template TemplateEngineKind]
-           [java.io OutputStream InputStream ByteArrayOutputStream ByteArrayInputStream]))
+           [java.io InputStream ByteArrayOutputStream ByteArrayInputStream]))
 
 (set! *warn-on-reflection* true)
 

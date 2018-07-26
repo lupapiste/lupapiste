@@ -14,7 +14,7 @@
             [sade.env :as env]
             [sade.crypt :as c]
             [lupapalvelu.storage.file-storage :as storage])
-  (:import [org.joda.time DateTime DateTimeZone]))
+  (:import [org.joda.time DateTimeZone]))
 
 (warn "Starting Onnistuu.fi dummy server...")
 

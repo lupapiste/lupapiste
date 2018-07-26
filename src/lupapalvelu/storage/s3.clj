@@ -11,7 +11,7 @@
             [lupapalvelu.mongo :as mongo])
   (:import [java.io InputStream ByteArrayOutputStream File FileInputStream ByteArrayInputStream]
            [com.amazonaws.services.s3.model PutObjectRequest CreateBucketRequest CannedAccessControlList
-                                            ObjectMetadata AmazonS3Exception Bucket S3ObjectSummary S3VersionSummary]
+                                            ObjectMetadata AmazonS3Exception S3ObjectSummary]
            [com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration]
            [com.amazonaws.auth AWSStaticCredentialsProvider BasicAWSCredentials]
            [com.amazonaws.services.s3 AmazonS3ClientBuilder AmazonS3]
