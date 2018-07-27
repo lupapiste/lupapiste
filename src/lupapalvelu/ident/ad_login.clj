@@ -8,8 +8,10 @@
             [monger.operators :refer [$set]]
             [ring.util.response :refer :all]
             [sade.core :refer [def-]]
+            [sade.env :as env]
             [sade.session :as ssess]
             [sade.strings :as ss]
+            [sade.util :as util]
             [sade.xml :as sxml]
             [schema.core :as sc]
             [saml20-clj.sp :as saml-sp]
@@ -35,16 +37,16 @@
   [certstring]
   (->> (ss/split certstring #"\n") rest drop-last ss/join))
 
-;; Nää ehkä propertieseihin?
 (def config
-  {:app-name "Lupapiste"
-   :base-uri "http://localhost:8000"
-   :idp-uri  "http://localhost:7000" ;; The dockerized, locally running mock-saml instance (https://github.com/lupapiste/mock-saml)
-   :idp-cert (parse-certificate (slurp "./idp-public-cert.pem")) ;; This needs to live in Mongo's organizations collection
-   :keystore-file "./keystore"
-   :keystore-password (System/getenv "KEYSTORE_PASS") ;; The default password from the dev guide, needs to be set in environment variable
-   :key-alias "jetty" ;; The normal Lupis certificate
-   })
+  (let [c (env/get-config)]
+    {:app-name "Lupapiste"
+     :base-uri (:host c)
+     :idp-uri  "http://localhost:7000" ;; The dockerized, locally running mock-saml instance (https://github.com/lupapiste/mock-saml)
+     :idp-cert (parse-certificate (slurp "./idp-public-cert.pem")) ;; This needs to live in Mongo's organizations collection
+     :keystore-file (get-in c [:ssl :keystore])
+     :keystore-password (get-in c [:ssl :key-password])
+     :key-alias "jetty" ;; The normal Lupis certificate
+     }))
 
 (defn xml-tree->edn
   "Takes an xml tree returned by the clojure.data.xml parser, recursively parses it into as readable and flat a Clojure map
@@ -65,7 +67,8 @@
 (defn parse-saml-resp
   "Takes an SAML message in string format, returns it parsed into a Clojure map.
   Isn't really all that necessary, since the saml-info var (inside a let binding
-  in ad-login route) contains the same info..."
+  in ad-login route) contains the same info... Perhaps useful in cases where the SAML
+  message doesn't validate."
   [xml-string]
   (-> xml-string sxml/parse xml-tree->edn))
 
@@ -98,12 +101,12 @@
         hmac-relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec mutables) "target")
         req (request/ring-request)
         sessionid (get-in req [:session :id])
-        trid (security/random-password)]
+        trid (security/random-password)] ;; Is trid actually necessary here?
     (saml-sp/get-idp-redirect (:idp-uri config)
                               saml-request
                               hmac-relay-state)))
 
-(defpage [:post "/api/saml/ad-login"] {params :params session :session}
+(defpage [:post "/api/saml/ad-login"] []
   (let [req (request/ring-request)
         decrypter (saml-sp/make-saml-decrypter (:keystore-file config)
                                                (:keystore-password config)
@@ -132,7 +135,6 @@
         _ (clojure.pprint/pprint parsed-saml-info)
         ]
     (if valid?
-      ; (response/status 200 (response/content-type "text/plain" (str saml-info)))
       (let [user (or (usr/get-user-by-email email)
                      (usr/create-new-user {:role "admin"}
                                           {:firstName firstName
@@ -141,11 +143,11 @@
                                            :email email
                                            :username email
                                            :enabled true
-                                           :orgAuthz {:753-R ["authorityAdmin"]}}
+                                           :orgAuthz {:753-R #{"authority"}}}
                                           ))
             response (ssess/merge-to-session
                        req
-                       (response/redirect "http://localhost:8000/app/fi/authority") ; Fix!
+                       (response/redirect (format "%s/app/fi/authority" (:host (env/get-config))))
                        {:user user})]
         response)
       (do
