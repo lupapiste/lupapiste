@@ -41,7 +41,7 @@
             (sc/optional-key :areas)         [sc/Str]
             (sc/optional-key :event)         [sc/Str]}})
 
-(def Id (ssc/min-length-string 1))                                                                                      ; Variation of user ids in different environments is too diverse for a simple customized schema.
+(def Id (ssc/min-length-string 1)) ; Variation of user ids in different environments is too diverse for a simple customized schema.
 
 (def all-roles
   "set of role strings that can be used in User's :role field"
@@ -595,14 +595,14 @@
                (error (ex-info "stack trace" {}) "new user does not match NewUser schema" schema-errors)
                true))}
 
-   {:desc  "user-data has orgAuths in expected form"        ; keys as keyword, roles as string
+   {:desc  "user-data has orgAuthz in expected form"        ; keys as keyword, roles as string
     :error :error.missing-parameters
     :fail? (fnk [[:user-data {orgAuthz nil}]]
              (when orgAuthz
                (not (and (every? keyword? (keys orgAuthz))
                          (every? string?  (apply concat (vals orgAuthz)))))))}
 
-   {:desc  "caller has been run trough 'with-org-auth'"
+   {:desc  "caller has been run through 'with-org-auth'"
     :error :error.missing-parameters
     :fail? (fnk [[:caller {orgAuthz nil}]]
              (when (seq orgAuthz)

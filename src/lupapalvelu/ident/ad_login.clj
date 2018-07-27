@@ -11,6 +11,7 @@
             [sade.session :as ssess]
             [sade.strings :as ss]
             [sade.xml :as sxml]
+            [schema.core :as sc]
             [saml20-clj.sp :as saml-sp]
             [saml20-clj.routes :as saml-routes]
             [saml20-clj.shared :as saml-shared]))
@@ -133,14 +134,15 @@
     (if valid?
       ; (response/status 200 (response/content-type "text/plain" (str saml-info)))
       (let [user (or (usr/get-user-by-email email)
-                     (usr/create-new-user nil {:email email
-                                               :username email
-                                               :firstName firstName
-                                               :lastName lastName
-                                               :role "authority"
-                                               :company {:id "esimerkki"
-                                                         :role "admin"
-                                                         :submit true}}))
+                     (usr/create-new-user {:role "admin"}
+                                          {:firstName firstName
+                                           :lastName lastName
+                                           :role "authority"
+                                           :email email
+                                           :username email
+                                           :enabled true
+                                           :orgAuthz {:753-R ["authorityAdmin"]}}
+                                          ))
             response (ssess/merge-to-session
                        req
                        (response/redirect "http://localhost:8000/app/fi/authority") ; Fix!
