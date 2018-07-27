@@ -61,7 +61,7 @@
     (cancel-allu-application! inner endpoint request))
 
   (send-allu-attachment! [_ endpoint request]
-    (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/cancelled")))
+    (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/attachments")))
     (fact "request is well-formed"
       (assert false "unimplemented"))
 

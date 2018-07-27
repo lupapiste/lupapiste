@@ -79,9 +79,10 @@
     (cond
       (allu/allu-application? application)
       (do
-        ;; TODO: Send attachments and comments
         ;; TODO: Non-placement-contract ALLU applications
         (allu/lock-placement-contract! application)
+        ;; TODO: Send comments
+        (allu/send-attachments! application)
         (do-rest-fn true nil))
 
       (org/krysp-integration? @organization (permit/permit-type application))

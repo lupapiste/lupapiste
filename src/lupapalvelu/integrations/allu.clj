@@ -396,7 +396,7 @@
   [app]
   (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)]
     (match (create-contract! allu-instance endpoint request)
-      {:status (:or 200 201), :body allu-id} (do (info (:id app) "was created succesfully in ALLU as" allu-id)
+      {:status (:or 200 201), :body allu-id} (do (info (:id app) "was created in ALLU as" allu-id)
                                                  allu-id)
       response (allu-http-fail! response))))
 
@@ -407,7 +407,7 @@
   (when-let [allu-id (-> app :integrationKeys :ALLU :id)]
     (let [[endpoint request] (placement-update-request true (env/value :allu :url) (env/value :allu :jwt) app)]
       (match (update-contract! allu-instance endpoint request)
-        {:status (:or 200 201), :body allu-id} (info (:id app) "was updated succesfully in ALLU as" allu-id)
+        {:status (:or 200 201), :body allu-id} (info (:id app) "was updated in ALLU as" allu-id)
         response (allu-http-fail! response)))))
 
 (defn updater [{{:keys [id] :as application} :application} _]
@@ -419,7 +419,7 @@
   [app]
   (let [[endpoint request] (placement-locking-request (env/value :allu :url) (env/value :allu :jwt) app)]
     (match (lock-contract! allu-instance endpoint request)
-      {:status (:or 200 201), :body allu-id} (info (:id app) "was locked succesfully in ALLU as" allu-id)
+      {:status (:or 200 201), :body allu-id} (info (:id app) "was locked in ALLU as" allu-id)
       response (allu-http-fail! response))))
 
 (defn- send-attachment! [app {attachment-id :id}]
