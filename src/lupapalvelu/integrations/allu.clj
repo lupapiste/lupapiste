@@ -14,6 +14,7 @@
             [sade.http :as http]
             [sade.schemas :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
                                   ApplicationId ISO-3166-alpha-2 date-string]]
+            [lupapalvelu.attachment :refer [get-attachment-latest-version-file]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common]
@@ -270,11 +271,15 @@
     [(str allu-url "/applications/" allu-id "/cancelled")
      {:headers {:authorization (str "Bearer " allu-jwt)}}]))
 
-(defn- attachment-send [allu-url allu-jwt allu-id attachment]
-  [(str allu-url "/applications/" allu-id "/attachments")
-   {:headers {:authorization (str "Bearer " allu-jwt)}
-    :multipart [{:name "metadata", :content nil}            ; FIXME
-                {:name "file", :content ""}]}])             ; FIXME
+(defn- attachment-send [allu-url allu-jwt app {attachment-id :id}]
+  (let [allu-id (-> app :integrationKeys :ALLU :id)]
+    (assert allu-id (str (:id app) " does not contain an ALLU id"))
+    [(str allu-url "/applications/" allu-id "/attachments")
+     {:headers   {:authorization (str "Bearer " allu-jwt)}
+      :multipart [{:name "metadata", :content nil}          ; FIXME
+                  {:name    "file"
+                   ;; TODO: Purify this:
+                   :content ((:content (get-attachment-latest-version-file nil attachment-id false app)))}]}]))
 
 ;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
 (defn- handle-cancel-response [response]
@@ -429,8 +434,8 @@
       {:status (:or 200 201), :body allu-id} (info (:id app) "was locked succesfully in ALLU as" allu-id)
       response (allu-http-fail! response))))
 
-(defn- send-attachment! [app allu-id attachment]
-  (let [[endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) allu-id attachment)]
+(defn- send-attachment! [app attachment]
+  (let [[endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) app attachment)]
     (match (send-allu-attachment! allu-instance endpoint request)
       {:status (:or 200 201)} (info "attachment" (:id attachment) "of" (:id app) "was sent to ALLU")
       response (allu-fail! allu-instance :error.allu.http (select-keys response [:status :body])))))
@@ -438,7 +443,5 @@
 (defn send-attachments!
   "Send attachments of application to ALLU."
   [{:keys [attachments] :as app}]
-  (let [allu-id (get-in app [:integrationKeys :ALLU :id])]
-    (assert allu-id (str (:id app) " does not contain an ALLU id"))
-    (doseq [attachment attachments]
-      (send-attachment! app allu-id attachment))))
+  (doseq [attachment attachments]
+    (send-attachment! app attachment)))
