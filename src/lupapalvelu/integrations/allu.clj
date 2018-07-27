@@ -422,10 +422,6 @@
   (when (allu-application? application)
     (update-placement-contract! (domain/get-application-no-access-checking id))))
 
-(defn updater [{{:keys [id] :as application} :application} _]
-  (when (allu-application? application)
-    (update-placement-contract! (domain/get-application-no-access-checking id))))
-
 (defn lock-placement-contract!
   "Lock placement contract in ALLU for verdict evaluation."
   [app]
