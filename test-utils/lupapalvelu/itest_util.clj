@@ -123,7 +123,7 @@
 (def get-files-from-sftp-server? dev-env?)
 
 (defn decode-response [resp]
-  (http/decode-response resp))
+  (update-in resp [:body] #(json/decode % true)))
 
 (defn decode-body [resp]
   (:body (decode-response resp)))

@@ -38,7 +38,8 @@
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
             [ring.util.codec :as codec]
-            [lupapalvelu.storage.file-storage :as storage])
+            [lupapalvelu.storage.file-storage :as storage]
+            [cheshire.core :as json])
   (:import [org.xml.sax SAXParseException]
            [java.util.concurrent ExecutorService TimeUnit]))
 
@@ -49,8 +50,8 @@
 
 (defn system-not-in-lockdown? []
   (-> (http/get "http://127.0.0.1:8000/system/status")
-      http/decode-response
-      :body :data :not-in-lockdown :data))
+      :body (json/decode true)
+      :data :not-in-lockdown :data))
 
 ;; Email definition for the "open info request reminder"
 
