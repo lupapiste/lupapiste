@@ -310,26 +310,28 @@
 ;;;; ALLU Proxy
 ;;;; ===================================================================================================================
 
-(defprotocol ALLUPlacementContracts
-  (cancel-allu-application! [self endpoint request])
-  (send-allu-attachment! [self endpoint request])
+(defprotocol ALLUApplications
+  (cancel-allu-application! [self endpoint request]))
 
+(defprotocol ALLUAttachments
+  (send-allu-attachment! [self endpoint request]))
+
+(defprotocol ALLUPlacementContracts
   (create-contract! [self endpoint request])
   (update-contract! [self endpoint request])
-  (lock-contract! [self endpoint request])
-
-  (allu-fail! [self text info-map]))
+  (lock-contract! [self endpoint request]))
 
 (deftype RemoteALLU []
-  ALLUPlacementContracts
+  ALLUApplications
   (cancel-allu-application! [_ endpoint request] (http/put endpoint request))
+
+  ALLUAttachments
   (send-allu-attachment! [_ endpoint request] (http/post endpoint request))
 
+  ALLUPlacementContracts
   (create-contract! [_ endpoint request] (http/post endpoint request))
   (update-contract! [_ endpoint request] (http/put endpoint request))
-  (lock-contract! [_ endpoint request] (http/put endpoint request))
-
-  (allu-fail! [_ text info-map] (fail! text info-map)))     ; TODO: Is there a better way to handle post-fn errors?
+  (lock-contract! [_ endpoint request] (http/put endpoint request)))
 
 (defn- local-mock-update-contract [state endpoint request]
   (let [placement-contract (json/decode (:body request) true)
@@ -343,7 +345,7 @@
         (assoc state :latest-response {:status 404, :body (str "Not Found: " allu-id)})))))
 
 (deftype LocalMockALLU [state]
-  ALLUPlacementContracts
+  ALLUApplications
   (cancel-allu-application! [_ endpoint _]
     (let [allu-id (second (re-find #".*/(\d+)/cancelled" endpoint))]
       (if (contains? (:applications @state) allu-id)
@@ -351,8 +353,10 @@
             {:status 200, :body ""})
         {:status 404, :body (str "Not Found: " allu-id)})))
 
+  ALLUAttachments
   (send-allu-attachment! [_ _ _] (assert false "unimplemented"))
 
+  ALLUPlacementContracts
   (create-contract! [_ _ request]
     (let [placement-contract (json/decode (:body request) true)]
       (if-let [validation-error (sc/check PlacementContract placement-contract)]
@@ -365,9 +369,9 @@
           {:status 200, :body (str (dec id-counter))}))))
 
   (update-contract! [_ endpoint request] (:latest-response (swap! state local-mock-update-contract endpoint request)))
-  (lock-contract! [_ endpoint request] (:latest-response (swap! state local-mock-update-contract endpoint request)))
+  (lock-contract! [_ endpoint request] (:latest-response (swap! state local-mock-update-contract endpoint request))))
 
-  (allu-fail! [_ text info-map] (fail! text info-map)))     ; TODO: Is there a better way to handle post-fn errors?
+(def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
 
 (defstate allu-instance
   :start (if (env/dev-mode?)
@@ -375,7 +379,7 @@
            (->RemoteALLU)))
 
 (defn- allu-http-fail! [response]
-  (allu-fail! allu-instance :error.allu.http (select-keys response [:status :body])))
+  (allu-fail! :error.allu.http (select-keys response [:status :body])))
 
 ;;;; Public API
 ;;;; ===================================================================================================================
@@ -428,7 +432,7 @@
         [endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) app file-contents)]
     (match (send-allu-attachment! allu-instance endpoint request)
       {:status (:or 200 201)} (info "attachment" attachment-id "of" (:id app) "was sent to ALLU")
-      response (allu-fail! allu-instance :error.allu.http (select-keys response [:status :body])))))
+      response (allu-http-fail! response))))
 
 (defn send-attachments!
   "Send attachments of application to ALLU."
