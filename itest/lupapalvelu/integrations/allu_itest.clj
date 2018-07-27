@@ -112,8 +112,8 @@
       (fact "error responses from ALLU produce `fail!`ures"
         (let [failure-counter (atom 0)]
           (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 400, :body "Your data was bad."} nil
-                                                               {:ok   false, :text "error.allu.malformed-application"
-                                                                :body "Your data was bad."}
+                                                               {:ok   false, :text "error.allu.http"
+                                                                :status 400, :body "Your data was bad."}
                                                                failure-counter)})
           (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
             (itu/local-command pena :submit-application :id id)

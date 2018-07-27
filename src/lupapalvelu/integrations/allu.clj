@@ -278,13 +278,6 @@
       :content-type :json
       :body         (json/encode (application->allu-placement-contract false app))}]))
 
-;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
-(defn- handle-placement-contract-response [response]
-  (match response
-    {:status (:or 200 201), :body body} [:ok body]
-    {:status 400, :body body} [:err :error.allu.malformed-application {:body body}]
-    _ [:err :error.allu.http (select-keys response [:status :body])]))
-
 ;;;; Should you use this?
 ;;;; ===================================================================================================================
 
@@ -296,7 +289,7 @@
   (and (contains? allu-organizations organization)
        (contains? allu-permit-subtypes permitSubtype)))
 
-;;;; Effectful operations
+;;;; ALLU Proxy
 ;;;; ===================================================================================================================
 
 (defprotocol ALLUPlacementContracts
@@ -338,19 +331,22 @@
            (->LocalMockALLU (atom {:id-counter 0, :applications {}}))
            (->RemoteALLU)))
 
+;;;; Public API
+;;;; ===================================================================================================================
+
 (defn create-placement-contract!
   "Create placement contract in ALLU. Returns ALLU id for the contract."
   [app]
   (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)]
-    (match (handle-placement-contract-response (create-contract! allu-instance endpoint request))
-      [:ok allu-id] (do (info (:id app) "was created succesfully in ALLU as" allu-id)
-                        allu-id)
-      [:err error-code error-data] (allu-fail! allu-instance error-code error-data))))
+    (match (create-contract! allu-instance endpoint request)
+      {:status (:or 200 201), :body allu-id} (do (info (:id app) "was created succesfully in ALLU as" allu-id)
+                                                 allu-id)
+      response (allu-fail! allu-instance :error.allu.http (select-keys response [:status :body])))))
 
 (defn lock-placement-contract!
   "Lock placement contract in ALLU for verdict evaluation."
   [app]
   (let [[endpoint request] (placement-locking-request (env/value :allu :url) (env/value :allu :jwt) app)]
-    (match (handle-placement-contract-response (lock-contract! allu-instance endpoint request))
-      [:ok allu-id] (info (:id app) "was locked succesfully in ALLU as" allu-id)
-      [:err error-code error-data] (allu-fail! allu-instance error-code error-data))))
+    (match (lock-contract! allu-instance endpoint request)
+      {:status (:or 200 201), :body allu-id} (info (:id app) "was locked succesfully in ALLU as" allu-id)
+      response (allu-fail! allu-instance :error.allu.http (select-keys response [:status :body])))))

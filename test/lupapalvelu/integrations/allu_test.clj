@@ -21,8 +21,7 @@
             [lupapalvelu.integrations.allu :as allu :refer [PlacementContract]]))
 
 (testable-privates lupapalvelu.integrations.allu
-                   application->allu-placement-contract placement-creation-request placement-locking-request
-                   handle-placement-contract-response)
+                   application->allu-placement-contract placement-creation-request placement-locking-request)
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -164,20 +163,3 @@
       request => {:headers      {:authorization "Bearer foo.bar.baz"}
                   :content-type :json
                   :body         (json/encode (application->allu-placement-contract false app))})))
-
-(facts "handle-placement-contract-response"
-  (fact "HTTP 200" (handle-placement-contract-response {:status 200, :body "1"}) => [:ok "1"])
-  (fact "HTTP 201" (handle-placement-contract-response {:status 201, :body "1"}) => [:ok "1"])
-
-  (fact "HTTP 400"
-    (handle-placement-contract-response {:status 400, :body "Your data was bad."})
-    => [:err :error.allu.malformed-application {:body "Your data was bad."}])
-  (fact "HTTP 401"
-    (handle-placement-contract-response {:status 401, :body "You are unauthorized."})
-    => [:err :error.allu.http {:status 401, :body "You are unauthorized."}])
-  (fact "HTTP 403"
-    (handle-placement-contract-response {:status 403, :body "It is forbidden."})
-    => [:err :error.allu.http {:status 403, :body "It is forbidden."}])
-  (fact "HTTP 404"
-    (handle-placement-contract-response {:status 404, :body "Not found."})
-    => [:err :error.allu.http {:status 404, :body "Not found."}]))
