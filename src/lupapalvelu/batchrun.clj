@@ -1019,3 +1019,9 @@
     (info "All migration threads submitted. Number of bulletins:" (count threads))
     (threads/wait-for-threads threads))
   (info "Done"))
+
+(defn clean-orphaned-files-from-mongo []
+  (info "Removing orphaned files from MongoDB GridFS")
+  (mongo/connect!)
+  (storage/clean-unlinked-files-from-mongo)
+  (info "Done"))

@@ -377,3 +377,29 @@
                            :versions.id version-id}
                           {$set {(str "versions.$.attachments." idx ".latestVersion.storageSystem") :s3}}))
         (timbre/error "File" fileId "not found in S3 in bulletin attachment" att-id)))))
+
+(defn clean-unlinked-files-from-mongo []
+  ; Remove old orphaned uploads
+  (mongo/delete-file {$and [{$or [{:metadata.linked false}
+                                  {:metadata.linked {$exists false}}]}
+                            {:metadata.application {$exists false}}
+                            {:metadata.uploaded {$lt (ts-two-hours-ago)}}]})
+  (doseq [{:keys [metadata id]} (mongo/select :fs.files {})
+          :when (nil? (:commentId metadata))]
+    (cond
+      (ss/contains? id "-preview") (mongo/delete-file-by-id id)
+
+      (:application metadata)
+      (if-let [attachment (->> (mongo/by-id :applications (:application metadata) [:attachments])
+                               :attachments
+                               (filter (fn [{:keys [versions]}]
+                                         (some (fn [{:keys [fileId originalFileId]}]
+                                                 (or (= id fileId)
+                                                     (= id originalFileId)))
+                                               versions)))
+                               first)]
+        (timbre/error "File id" id "from app" (:application metadata) "/ attachment" (:id attachment) "still in Mongo")
+        (do (timbre/info metadata "Removing orphaned file" id "not actually found on app" (:application metadata))
+            (mongo/delete-file-by-id id)))
+
+      :else (timbre/warn metadata "Don't know what to do with file id" id))))
