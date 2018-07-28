@@ -25,7 +25,9 @@
                "analyze-missing"            'lupapalvelu.batchrun/analyze-missing
                "move-files-to-ceph"         'lupapalvelu.batchrun/move-files-to-ceph-in-applications
                "move-files-to-ceph-in-orgs" 'lupapalvelu.batchrun/move-app-files-to-ceph-in-organizations
-               "fix-helsinki-pdfa"          'lupapalvelu.batchrun/fix-bad-archival-conversions-in-091-R})
+               "fix-helsinki-pdfa"          'lupapalvelu.batchrun/fix-bad-archival-conversions-in-091-R
+               "move-user-files-to-ceph"    'lupapalvelu.batchrun/move-user-files-to-ceph
+               "fix-bulletin-files-s3"      'lupapalvelu.batchrun/fix-bulletin-files-storage-system})
 
 (defn launch! [service args]
   (debugf "Loading namespace '%s'...\n" (namespace service))

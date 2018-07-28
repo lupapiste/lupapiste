@@ -11,7 +11,8 @@
             [taoensso.timbre :as timbre]
             [lupapalvelu.domain :as domain]
             [clojure.string :as str]
-            [lupapiste-commons.external-preview :as ext-preview])
+            [lupapiste-commons.external-preview :as ext-preview]
+            [lupapalvelu.user :as usr])
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
            [java.time ZonedDateTime ZoneId]
            [java.util Date]))
@@ -321,3 +322,58 @@
       (mongo/delete-file-by-id (str fileId "-preview"))
       (when (not= (:fileId latestVersion) (:fileId (last versions)))
         (timbre/error "Latest version fileId does not match the fileId of last element in versions in attachment" att-id)))))
+
+(defn move-user-mongodb-files-to-s3 [user-id]
+  {:pre [(string? user-id)]}
+  (assert (env/feature? :s3) "s3 feature must be enabled")
+  (let [{:keys [attachments]} (usr/get-user-by-id user-id
+                                                  [:attachments])]
+    (doseq [{:keys [attachment-id storageSystem]} attachments
+            :when (and (= (keyword storageSystem) :mongodb)
+                       (some? attachment-id)
+                       (not (.isInterrupted (Thread/currentThread))))]
+      (timbre/info "Migrating user" user-id "file" attachment-id)
+      (let [{:keys [content contentType filename metadata]} (mongo/download attachment-id)
+            bos (ByteArrayOutputStream.)]
+        (if content
+          (do (with-open [is (content)]
+                (io/copy is bos))
+              (let [mongo-data (.toByteArray bos)
+                    mongo-data-sha1 (pandect/sha1 mongo-data)
+                    new-id (s3-id user-id attachment-id)]
+                (timbre/info "Uploading file" attachment-id "to s3")
+                (s3/put-file-or-input-stream user-bucket
+                                             new-id
+                                             filename
+                                             contentType
+                                             (ByteArrayInputStream. mongo-data)
+                                             metadata)
+                (with-open [s3-data ((:content (s3/download user-bucket new-id)))]
+                  (when (not= mongo-data-sha1 (pandect/sha1 s3-data))
+                    (throw (Exception. (str "Data in MongoDB and S3 do not match for " new-id))))))
+              (timbre/info "Changing user" user-id "file" attachment-id "storageSystem to s3")
+              (mongo/update :users
+                            {:_id user-id
+                             :attachments.attachment-id attachment-id}
+                            {$set {:attachments.$.storageSystem :s3}})
+              (mongo/delete-file-by-id attachment-id))
+          (timbre/error "File" attachment-id "not found in GridFS but linked on user" user-id))))))
+
+(defn fix-bulletin-storage-system [bulletin-id]
+  {:pre [(string? bulletin-id)]}
+  (assert (env/feature? :s3) "s3 feature must be enabled")
+  (doseq [version (:versions (mongo/by-id :application-bulletins bulletin-id [:versions]))
+          :let [version-id (:id version)]
+          [idx {{:keys [storageSystem fileId]} :latestVersion att-id :id}] (map-indexed vector (:attachments version))
+          :when (and (= (keyword storageSystem) :mongodb)
+                     (some? fileId)
+                     (not (.isInterrupted (Thread/currentThread))))]
+    (timbre/info "Fixing bulletin" bulletin-id "attachment" att-id "file" fileId)
+    (let [new-id (s3-id bulletin-id fileId)]
+      (if (s3/object-exists? application-bucket new-id)
+        (do (timbre/info "Updating bulletin" bulletin-id "version" version-id "attachment" idx "storage system to S3")
+            (mongo/update :application-bulletins
+                          {:_id bulletin-id
+                           :versions.id version-id}
+                          {$set {(str "versions.$.attachments." idx ".latestVersion.storageSystem") :s3}}))
+        (timbre/error "File" fileId "not found in S3 in bulletin attachment" att-id)))))

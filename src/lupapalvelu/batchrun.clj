@@ -967,3 +967,55 @@
             (attachment/convert-existing-to-pdfa! updated-app attachment)))
         (info "Attachment" (:id att) "processed"))))
   (info "Done."))
+
+(defn move-user-files-to-ceph []
+  (info "Moving user files to Ceph")
+  (mongo/connect!)
+  (.addShutdownHook (Runtime/getRuntime)
+                    (Thread.
+                      ^Runnable
+                      (fn []
+                        (println "Interrupt received, shutting down.")
+                        (.shutdownNow ceph-migration-threadpool)
+                        (.awaitTermination ceph-migration-threadpool 60 TimeUnit/SECONDS)
+                        (println "Threads finished"))))
+  (let [threads (->> (mongo/select :users
+                                   {:attachments.storageSystem "mongodb"}
+                                   [:_id]
+                                   {:_id 1})
+                     (mapv (fn [{:keys [id]}]
+                             (threads/submit ceph-migration-threadpool
+                               (logging/with-logging-context {:userId id}
+                                 (info "Checking attachments for migration")
+                                 (try (storage/move-user-mongodb-files-to-s3 id)
+                                      (catch Throwable t
+                                        (error t "Exception occurred during the migration"))))))))]
+    (info "All migration threads submitted. Number of users:" (count threads))
+    (threads/wait-for-threads threads))
+  (info "Done"))
+
+(defn fix-bulletin-files-storage-system []
+  (info "Moving bulletin files to Ceph")
+  (mongo/connect!)
+  (.addShutdownHook (Runtime/getRuntime)
+                    (Thread.
+                      ^Runnable
+                      (fn []
+                        (println "Interrupt received, shutting down.")
+                        (.shutdownNow ceph-migration-threadpool)
+                        (.awaitTermination ceph-migration-threadpool 60 TimeUnit/SECONDS)
+                        (println "Threads finished"))))
+  (let [threads (->> (mongo/select :application-bulletins
+                                   {:versions.attachments.latestVersion.storageSystem "mongodb"}
+                                   [:_id]
+                                   {:_id 1})
+                     (mapv (fn [{:keys [id]}]
+                             (threads/submit ceph-migration-threadpool
+                               (logging/with-logging-context {:applicationId id}
+                                 (info "Checking attachments for migration")
+                                 (try (storage/fix-bulletin-storage-system id)
+                                      (catch Throwable t
+                                        (error t "Exception occurred during the migration"))))))))]
+    (info "All migration threads submitted. Number of bulletins:" (count threads))
+    (threads/wait-for-threads threads))
+  (info "Done"))
