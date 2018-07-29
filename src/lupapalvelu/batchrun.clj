@@ -919,8 +919,8 @@
                               (println "Threads finished"))))
         (let [threads (->> (mongo/select :applications
                                          {:organization {$in organization-ids}
-                                          :attachments  {$elemMatch {:latestVersion.fileId        {$type "string"}
-                                                                     :latestVersion.storageSystem "mongodb"}}}
+                                          :attachments  {$elemMatch {:versions.fileId        {$type "string"}
+                                                                     :versions.storageSystem "mongodb"}}}
                                          [:_id]
                                          {:_id 1})
                            (mapv (fn [{:keys [id]}]
