@@ -918,9 +918,9 @@
                               (.awaitTermination ceph-migration-threadpool 60 TimeUnit/SECONDS)
                               (println "Threads finished"))))
         (let [threads (->> (mongo/select :applications
-                                         {:organization                            {$in organization-ids}
-                                          :attachments.latestVersion.fileId        {$type "string"}
-                                          :attachments.latestVersion.storageSystem "mongodb"}
+                                         {:organization {$in organization-ids}
+                                          :attachments  {$elemMatch {:latestVersion.fileId        {$type "string"}
+                                                                     :latestVersion.storageSystem "mongodb"}}}
                                          [:_id]
                                          {:_id 1})
                            (mapv (fn [{:keys [id]}]

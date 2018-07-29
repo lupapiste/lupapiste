@@ -398,7 +398,34 @@
                                                      (= id originalFileId)))
                                                versions)))
                                first)]
-        (timbre/error "File id" id "from app" (:application metadata) "/ attachment" (:id attachment) "still in Mongo")
+        (let [version (->> (:versions attachment)
+                           (filter (fn [{:keys [fileId originalFileId]}]
+                                     (or (= id fileId)
+                                         (= id originalFileId))))
+                           first)]
+          (if (= (keyword (:storageSystem version)) :s3)
+            (let [{:keys [content contentType filename metadata]} (mongo/download id)
+                  bos (ByteArrayOutputStream.)
+                  new-id (s3-id (:application metadata) id)]
+              (if content
+                (do (with-open [is (content)]
+                      (io/copy is bos))
+                    (let [mongo-data (.toByteArray bos)
+                          mongo-data-sha1 (pandect/sha1 mongo-data)]
+                      (timbre/info "Uploading file" id "to s3")
+                      (s3/put-file-or-input-stream application-bucket
+                                                   new-id
+                                                   filename
+                                                   contentType
+                                                   (ByteArrayInputStream. mongo-data)
+                                                   metadata)
+                      (with-open [s3-data ((:content (s3/download application-bucket new-id)))]
+                        (when (not= mongo-data-sha1 (pandect/sha1 s3-data))
+                          (throw (Exception. (str "Data in MongoDB and S3 do not match for " new-id)))))
+                      (mongo/delete-file-by-id id)))
+                (timbre/error "File" id "chunks not found in GridFS")))
+            (timbre/error "File id" id "from app" (:application metadata) "/ attachment" (:id attachment) "still in Mongo")))
+
         (do (timbre/info metadata "Removing orphaned file" id "not actually found on app" (:application metadata))
             (mongo/delete-file-by-id id)))
 
