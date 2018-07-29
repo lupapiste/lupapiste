@@ -278,12 +278,12 @@
   (let [{:keys [attachments] :as application} (domain/get-application-no-access-checking id
                                                                                          [:attachments :organization])
         preview-placeholder-sha1 (pandect/sha1 (ext-preview/placeholder-image-is))]
-    (doseq [{:keys [versions latestVersion] att-id :id} attachments
-            [idx {:keys [fileId originalFileId storageSystem]}] (map-indexed vector versions)
+    (doseq [[att-idx {:keys [versions latestVersion] att-id :id}] (map-indexed vector attachments)
+            [version-idx {:keys [fileId originalFileId storageSystem]}] (map-indexed vector versions)
             :when (and (= (keyword storageSystem) :mongodb)
                        (some? fileId)
                        (not (.isInterrupted (Thread/currentThread))))]
-      (timbre/info "Migrating attachment" att-id "version" idx)
+      (timbre/info "Migrating attachment" att-id "version" version-idx)
       (doseq [file-id (if (= fileId originalFileId)
                         [fileId (str fileId "-preview")]
                         [fileId originalFileId (str fileId "-preview")])]
@@ -308,18 +308,18 @@
                         (throw (Exception. (str "Data in MongoDB and S3 do not match for " (s3-id id file-id)))))))))
             (when-not (str/ends-with? file-id "preview")
               (timbre/error "File" file-id "not found in GridFS but linked on" id "attachment" att-id)))))
-      (timbre/info "Changing attachment" att-id "version" idx "storageSystem to s3")
-      (action/update-application
-        (action/application->command application)
-        {:attachments.id att-id}
-        {$set (cond-> {(str "attachments.$.versions." idx ".storageSystem") :s3}
-                      (= fileId (:fileId latestVersion))
-                      (assoc "attachments.$.latestVersion.storageSystem" :s3))})
-      (mongo/delete-file-by-id fileId)
-      (when-not (= fileId originalFileId)
-        (timbre/info "Deleting attachment" att-id "version" idx "original file" originalFileId "from GridFS")
-        (mongo/delete-file-by-id originalFileId))
-      (mongo/delete-file-by-id (str fileId "-preview"))
+      (when (s3/object-exists? application-bucket (s3-id id fileId))
+        (timbre/info "Changing attachment" att-id "/ index" att-idx "version" version-idx "storageSystem to s3")
+        (action/update-application
+          (action/application->command application)
+          {$set (cond-> {(str "attachments." att-idx ".versions." version-idx ".storageSystem") :s3}
+                        (= fileId (:fileId latestVersion))
+                        (assoc (str "attachments." att-idx ".latestVersion.storageSystem") :s3))})
+        (mongo/delete-file-by-id fileId)
+        (when-not (= fileId originalFileId)
+          (timbre/info "Deleting attachment" att-id "version" version-idx "original file" originalFileId "from GridFS")
+          (mongo/delete-file-by-id originalFileId))
+        (mongo/delete-file-by-id (str fileId "-preview")))
       (when (not= (:fileId latestVersion) (:fileId (last versions)))
         (timbre/error "Latest version fileId does not match the fileId of last element in versions in attachment" att-id)))))
 
