@@ -118,7 +118,7 @@
               (:state app-2) => "constructionStarted")) => truthy
 
           ;; Trying to fetch with multiple ids throws xml parser exception -> causes fallback into consecutive fetching
-          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1 application-id-verdict-given-2] :application-id anything) =throws=> (SAXParseException. "msg" "id" "sid" 0 0))
+          (provided (krysp-reader/rakval-application-xml anything anything (contains [application-id-verdict-given-1 application-id-verdict-given-2] :in-any-order) :application-id anything) =throws=> (SAXParseException. "msg" "id" "sid" 0 0))
           ;; Fallback - no xml found for application 1 by application id or backend-id
           (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1] :application-id anything) => nil)
           (provided (krysp-reader/rakval-application-xml anything anything ["2013-01"] :kuntalupatunnus anything) => nil)
@@ -145,7 +145,7 @@
               (:state app) => "constructionStarted")) => truthy
 
           ;; Application xml found for application 1 when fetching multiple applications
-          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1 application-id-verdict-given-2] :application-id anything)
+          (provided (krysp-reader/rakval-application-xml anything anything (contains [application-id-verdict-given-1 application-id-verdict-given-2] :in-any-order) :application-id anything)
                     => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
                            (ss/replace #"LP-186-2014-90009" application-id-verdict-given-1)
                            (sxml/parse-string "utf-8")))
@@ -201,7 +201,7 @@
           (fact "application 2 state is updated"
             (:state app-2) => "constructionStarted")) => truthy
 
-            (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1 application-id-verdict-given-2] :application-id anything) =throws=> (slingshot-exception {:sade.core/type :sade.core/fail, :status 404}))
+            (provided (krysp-reader/rakval-application-xml anything anything (contains [application-id-verdict-given-1 application-id-verdict-given-2] :in-any-order) :application-id anything) =throws=> (slingshot-exception {:sade.core/type :sade.core/fail, :status 404}))
             ;; Fallback - no xml found for application 1 by application id or backend-id
             (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1] :application-id anything) => nil)
             (provided (krysp-reader/rakval-application-xml anything anything ["2013-01"] :kuntalupatunnus anything) => nil)
@@ -299,7 +299,7 @@
               (:state application-suunnittelija) => "verdictGiven")) => truthy
 
           ;; Review query is made only for applications in eligible state -> xml found for verdict given application
-          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given application-id-construction] :application-id anything)
+          (provided (krysp-reader/rakval-application-xml anything anything (contains [application-id-verdict-given application-id-construction] :in-any-order) :application-id anything)
                     => (build-multi-app-xml [[{:lp-tunnus application-id-verdict-given} {:pvm "2016-06-05Z" :tila "rakennusty\u00f6t aloitettu"}]
                                              [{:lp-tunnus application-id-construction}  {:pvm "2016-06-06Z" :tila "osittainen loppukatselmus, yksi tai useampia luvan rakennuksista on k\u00e4ytt\u00f6\u00f6notettu"}]])))
 
@@ -314,7 +314,7 @@
               (:state application-construction)  => "inUse")) => truthy
 
           ;; Review query is made only for applications in eligible state -> xml found for verdict given application
-          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given application-id-construction] :application-id anything)
+          (provided (krysp-reader/rakval-application-xml anything anything (contains [application-id-verdict-given application-id-construction] :in-any-order) :application-id anything)
                     => (build-multi-app-xml [[{:lp-tunnus application-id-construction}  {:pvm "2016-06-07Z" :tila "rakennusty\u00f6t aloitettu"}]]))
           ;; No result for verdict given appwhen retried with kuntalupatunnus
           (provided (krysp-reader/rakval-application-xml anything anything ["verdict-vg"] :kuntalupatunnus anything) => nil))))))
