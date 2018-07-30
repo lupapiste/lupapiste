@@ -23,6 +23,7 @@
             [lupapalvelu.review :as review]
             [lupapalvelu.states :as states]
             [lupapalvelu.storage.file-migration :refer [move-application-mongodb-files-to-s3]]
+            [lupapalvelu.storage.gridfs :as gfs]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
@@ -883,11 +884,11 @@
             {version :latestVersion :as att} (->> (:attachments app)
                                                   (filter  :latestVersion)
                                                   (remove #(get-in % [:latestVersion :onkaloFileId])))
-            :let [file (mongo/download (:fileId version))
+            :let [file (gfs/download (:fileId version))
                   different-original? (not= (:fileId version) (:originalFileId version))]]
       (when-not file
         (if different-original?
-          (if (mongo/download (:originalFileId version))
+          (if (gfs/download (:originalFileId version))
             (print-info (:id app) att version "fileId missing but originalFileIdFound")
             (print-info (:id app) att version "fileId AND originalFileId missing"))
           (print-info (:id app) att version "fileId missing"))))))

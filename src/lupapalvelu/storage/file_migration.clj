@@ -8,8 +8,8 @@
             [lupapiste-commons.external-preview :as ext-preview]
             [lupapalvelu.action :as action]
             [lupapalvelu.domain :refer [get-application-no-access-checking]]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.storage.file-storage :refer [s3-id application-bucket]]
+            [lupapalvelu.storage.gridfs :as gfs]
             [lupapalvelu.storage.s3 :as s3])
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
@@ -27,7 +27,7 @@
       (doseq [file-id (if (= fileId originalFileId)
                         [fileId (str fileId "-preview")]
                         [fileId originalFileId (str fileId "-preview")])]
-        (let [{:keys [content contentType filename metadata]} (mongo/download file-id)
+        (let [{:keys [content contentType filename metadata]} (gfs/download file-id)
               bos (ByteArrayOutputStream.)]
           (if content
             (do (with-open [is (content)]
@@ -55,10 +55,10 @@
         {$set (cond-> {(str "attachments.$.versions." idx ".storageSystem") :s3}
                       (= fileId (:fileId latestVersion))
                       (assoc "attachments.$.latestVersion.storageSystem" :s3))})
-      (mongo/delete-file-by-id fileId)
+      (gfs/delete-file-by-id fileId)
       (when-not (= fileId originalFileId)
         (info "Deleting attachment" att-id "version" idx "original file" originalFileId "from GridFS")
-        (mongo/delete-file-by-id originalFileId))
-      (mongo/delete-file-by-id (str fileId "-preview"))
+        (gfs/delete-file-by-id originalFileId))
+      (gfs/delete-file-by-id (str fileId "-preview"))
       (when (not= (:fileId latestVersion) (:fileId (last versions)))
         (error "Latest version fileId does not match the fileId of last element in versions in attachment" att-id)))))

@@ -4,6 +4,7 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.stamps :as stamps]
             [lupapalvelu.attachment.util :as att-util]
+            [lupapalvelu.storage.gridfs :as gfs]
             [lupapalvelu.stamper :as stamper]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.job :as job]
@@ -188,12 +189,12 @@
                     stamp-without-buildings)
             options (select-keys context [:x-margin :y-margin :transparency :page])]
         (info "Fixing attachment id" (:id attachment))
-        (when (and (nil? (mongo/download fileId))
-                   (mongo/download originalFileId))
+        (when (and (nil? (gfs/download fileId))
+                   (gfs/download originalFileId))
           (let [conversion (conversion/archivability-conversion application
                                                                 {:filename    filename
                                                                  :contentType contentType
-                                                                 :content     ((:content (mongo/download originalFileId)))})]
+                                                                 :content     ((:content (gfs/download originalFileId)))})]
             (when (:autoConversion conversion)
               (do
                 (file-upload/save-file (merge (select-keys conversion [:content :filename]) {:fileId fileId})
@@ -201,7 +202,7 @@
                 (infof "fileId %s from previous version converted, uploaded and linked successfully" fileId)))))
         (files/with-temp-file file
           (try
-            (if (mongo/download (:fileId latestVersion))
+            (if (gfs/download (:fileId latestVersion))
               (do
                 (with-open [out (io/output-stream file)]
                   (stamper/stamp stamp (:fileId latestVersion) out options))
@@ -211,14 +212,14 @@
                                                                       :content     file})]
                   (if (:autoConversion converted)
                     (do (info "Uploading stamped replacement version for file id" (:fileId latestVersion))
-                        (mongo/delete-file-by-id (:fileId latestVersion))
-                        (mongo/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))
+                        (gfs/delete-file-by-id (:fileId latestVersion))
+                        (gfs/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))
                     (error "Could not convert file id" (:fileId latestVersion) "to PDF/A"))))
               (do
                 (with-open [out (io/output-stream file)]
                   (stamper/stamp stamp fileId out options))
                 (info "Uploading stamped replacement version for original file id" (:originalFileId latestVersion))
-                (mongo/upload (:originalFileId latestVersion) filename contentType file {:linked true :application (:id application)})
+                (gfs/upload (:originalFileId latestVersion) filename contentType file {:linked true :application (:id application)})
                 (when-not (= (:fileId latestVersion) (:originalFileId latestVersion))
                   (let [converted (conversion/archivability-conversion
                                     application
@@ -227,7 +228,7 @@
                                      :content     file})]
                     (if (:autoConversion converted)
                       (do (info "Uploading stamped replacement version for file id" (:fileId latestVersion))
-                          (mongo/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))
+                          (gfs/upload (:fileId latestVersion) filename contentType (:content converted) {:linked true :application (:id application)}))
                       (error "Could not convert file id" (:fileId latestVersion) "to PDF/A"))))))
             (catch Throwable t
               (error t "Could not fix attachment" attachment))))))))
