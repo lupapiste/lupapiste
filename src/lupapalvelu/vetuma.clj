@@ -47,9 +47,7 @@
    :extradata "VTJTT=VTJ-VETUMA-Perus"
    :key       (env/value :vetuma :key)})
 
-;; log error for all missing env keys.
-(doseq [[k v] (config)]
-  (when (nil? v) (errorf "missing key '%s' value from property file" (name k))))
+(util/log-missing-keys! (config))
 
 ;;
 ;; Helpers

@@ -48,6 +48,8 @@
      :key-alias "jetty" ;; The normal Lupis certificate
      }))
 
+(util/log-missing-keys! config)
+
 (defn xml-tree->edn
   "Takes an xml tree returned by the clojure.data.xml parser, recursively parses it into as readable and flat a Clojure map
   as is feasible."
@@ -148,7 +150,7 @@
             response (ssess/merge-to-session
                        req
                        (response/redirect (format "%s/app/fi/authority" (:host (env/get-config))))
-                       {:user user})]
+                       {:user (usr/session-summary user)})]
         response)
       (do
         (error "SAML validation failed")
