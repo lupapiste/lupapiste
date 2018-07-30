@@ -64,7 +64,7 @@
     (ah-mapping/uusi-asia-from-application application lang ah-version submitted-application begin-of-link output-dir)))
 
 (defn save-as-asianhallinta-asian-taydennys
-  "Saves attachments to asianhallinta"
+  "Saves attachments to asianhallinta. Returns a sequence of attachment file IDs that were saved."
   [application attachments lang]
   (let [permit-type   (permit-type application)
         scope         (organization/resolve-organization-scope (:municipality application) permit-type)

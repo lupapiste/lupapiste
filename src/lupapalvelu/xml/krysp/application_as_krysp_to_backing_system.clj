@@ -188,8 +188,8 @@
           (fail! :error.unknown))))))
 
 (defn save-unsent-attachments-as-krysp
-  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
-  [{:keys [application organization user]} lang]
+  "Sends attachments to municipality backend. Returns a sequence of attachment file IDs that were sent."
+  [user organization application lang]
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version @organization permit-type)
         begin-of-link (get-begin-of-link permit-type @organization)

@@ -167,11 +167,7 @@
   "Attachment is unsent, if a) it has a file, b) the file has not been
   sent, c) attachment type is neither statement nor verdict."
   [{{attachments :attachments} :application}]
-  (when-not (some (fn [{:keys [sent versions target]}]
-                    (and (not-empty versions)
-                         (not (#{:statement :verdict} (-> target :type keyword)))
-                         (or (not sent) (> (-> versions last :created) sent))))
-                  attachments)
+  (when-not (some attachment/unsent? attachments)
     (fail :error.no-unsent-attachments)))
 
 (defcommand move-attachments-to-backing-system
@@ -185,25 +181,18 @@
                 mapping-to-krysp/http-not-allowed]
    :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
-  [{:keys [created application user organization] :as command}]
-
+  [{:keys [user organization application created] :as command}]
   (let [all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
-        attachments-wo-sent-timestamp (filter
-                                        #(and
-                                          (-> % :versions count pos?)
-                                          (or
-                                            (not (:sent %))
-                                            (> (-> % :versions last :created) (:sent %)))
-                                          (not (#{"verdict" "statement"} (-> % :target :type)))
-                                          (some #{(:id %)} attachmentIds))
-                                        all-attachments)
-        command (assoc-in command [:application :attachments] attachments-wo-sent-timestamp)]
-    (if (pos? (count attachments-wo-sent-timestamp))
-      (let [sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp command lang)
+        attachments-wo-sent-timestamp (filter (every-pred attachment/unsent? ; unsent...
+                                                          (comp (set attachmentIds) :id)) ; ...and requested
+                                              all-attachments)]
+    (if (seq attachments-wo-sent-timestamp)
+      (let [application (assoc application :attachments attachments-wo-sent-timestamp)
+            sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp user organization application lang)
             data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
-            attachments-data {:data-key :attachments
-                              :data (map :id attachments-wo-sent-timestamp)}
-            transfer      (get-transfer-item :exported-to-backing-system command attachments-data)]
+            attachments-transfer-data {:data-key :attachments
+                                       :data (map :id attachments-wo-sent-timestamp)}
+            transfer (get-transfer-item :exported-to-backing-system command attachments-transfer-data)]
         (update-application command {$push {:transfers transfer}
                                      $set data-argument})
         (ok))
@@ -365,27 +354,20 @@
                 (application-already-exported :exported-to-asianhallinta)
                 has-unsent-attachments]
    :states     (conj states/post-verdict-states :sent)
-   :description "Sends such selected attachments to backing system that are not yet sent."}
-  [{:keys [created application user] :as command}]
-
+   :description "Sends such selected attachments to asianhallinta that are not yet sent."}
+  [{:keys [application created] :as command}]
   (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
-        attachments-wo-sent-timestamp (filter
-                                        #(and
-                                          (-> % :versions count pos?)
-                                          (or
-                                            (not (:sent %))
-                                            (> (-> % :versions last :created) (:sent %)))
-                                          (not (#{"verdict" "statement"} (-> % :target :type)))
-                                          (some #{(:id %)} attachmentIds))
-                                        all-attachments)
-        attachments-transfer-data {:data-key :attachments
-                                   :data (map :id attachments-wo-sent-timestamp)}
-        transfer (get-transfer-item :exported-to-asianhallinta command attachments-transfer-data)]
-    (if (pos? (count attachments-wo-sent-timestamp))
+        attachments-wo-sent-timestamp (filter (every-pred attachment/unsent? ; unsent...
+                                                          (comp (set attachmentIds) :id)) ; ...and requested
+                                              all-attachments)]
+    (if (seq attachments-wo-sent-timestamp)
       (let [application (meta-fields/enrich-with-link-permit-data application)
             application (update-kuntalupatunnus application)
             sent-file-ids (ah/save-as-asianhallinta-asian-taydennys application attachments-wo-sent-timestamp lang)
-            data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
+            data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
+            attachments-transfer-data {:data-key :attachments
+                                       :data (map :id attachments-wo-sent-timestamp)}
+            transfer (get-transfer-item :exported-to-asianhallinta command attachments-transfer-data)]
         (update-application command {$push {:transfers transfer}
                                      $set data-argument})
         (ok))

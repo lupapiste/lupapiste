@@ -265,6 +265,12 @@
   (filter #(and (= (get-in % [:target :type]) type)
                 (= (get-in % [:target :id])   id))  attachments))
 
+(defn unsent? [{:keys [versions sent] :as attachment}]
+  (and (seq versions)                        ; Has been uploaded
+       (or (not sent)                        ; Never sent to backing system
+           (> (-> versions last :created) sent)) ; Backing system does not have newest version
+       (not (#{"verdict" "statement"} (-> attachment :target :type))))) ; Not generated inside the system
+
 (defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :sent timestamp))
 
