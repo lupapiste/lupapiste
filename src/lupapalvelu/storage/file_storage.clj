@@ -195,6 +195,13 @@
     (s3/object-exists? application-bucket (s3-id application-id file-id))
     (map? (mongo/file-metadata {:id file-id}))))
 
+(defn user-attachment-exists?
+  ([user-id file-id] (user-attachment-exists? user-id file-id (find-user-attachment-storage-system user-id file-id)))
+  ([user-id file-id storage-system]
+    (if (and (env/feature? :s3) (= (keyword storage-system) :s3))
+      (s3/object-exists? user-bucket (s3-id user-id file-id))
+      (map? (mongo/file-metadata {:id file-id})))))
+
 ;; DELETE
 
 (defn delete [application file-id]
