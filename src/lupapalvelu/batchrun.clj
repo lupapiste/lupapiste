@@ -22,6 +22,7 @@
             [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.review :as review]
             [lupapalvelu.states :as states]
+            [lupapalvelu.storage.file-migration :refer [move-application-mongodb-files-to-s3]]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
@@ -37,8 +38,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
-            [ring.util.codec :as codec]
-            [lupapalvelu.storage.file-storage :as storage])
+            [ring.util.codec :as codec])
   (:import [org.xml.sax SAXParseException]
            [java.util.concurrent ExecutorService TimeUnit]))
 
@@ -898,7 +898,7 @@
   (doseq [app-id application-ids]
     (logging/with-logging-context {:applicationId app-id}
       (info "Checking attachments for migration")
-      (try (storage/move-application-mongodb-files-to-s3 app-id)
+      (try (move-application-mongodb-files-to-s3 app-id)
            (catch Throwable t
              (error t "Exception occurred during the migration")))))
   (info "Done"))
@@ -927,7 +927,7 @@
                                    (threads/submit ceph-migration-threadpool
                                                    (logging/with-logging-context {:applicationId id}
                                                      (info "Checking attachments for migration")
-                                                     (try (storage/move-application-mongodb-files-to-s3 id)
+                                                     (try (move-application-mongodb-files-to-s3 id)
                                                           (catch Throwable t
                                                             (error t "Exception occurred during the migration"))))))))]
           (info "All migration threads submitted. Number of applications:" (count threads))

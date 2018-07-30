@@ -28,6 +28,8 @@
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.states :as states]
+            [lupapalvelu.storage.file-storage :as storage]
+            [lupapalvelu.storage.file-migration :refer [move-application-mongodb-files-to-s3]]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
@@ -38,7 +40,6 @@
             [lupapalvelu.user :as usr]
             [me.raynes.fs :as fs]
             [sade.env :as env]
-            [lupapalvelu.storage.file-storage :as storage]
             [sade.shared-schemas :as sssc]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.domain :as domain])
@@ -948,7 +949,7 @@
 
       (and (env/feature? :s3) (= :mongodb (keyword (get-in attachment [:latestVersion :storageSystem]))))
       ; Migrate all application files first to S3
-      (do (storage/move-application-mongodb-files-to-s3 (:id application))
+      (do (move-application-mongodb-files-to-s3 (:id application))
           (let [updated-app (domain/get-application-no-access-checking (:id application))
                 updated-att (first (filter #(= (:id attachment) (:id %)) (:attachments updated-app)))]
             (convert-existing-to-pdfa! updated-app updated-att)))
