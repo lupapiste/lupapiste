@@ -102,6 +102,10 @@
                                  :size        file-length})
                 (verify-content dl)))
 
+            (fact "user files' existence can be checked"
+              (fs/user-attachment-exists? user-id id) => true
+              (fs/user-attachment-exists? user-id (str (uuid/v1))) => false)
+
             (fact "user file can be deleted"
               (fs/delete-user-attachment user-id id storage-system) => nil
               (fs/download-user-attachment user-id id storage-system) => nil)))
