@@ -264,7 +264,9 @@
                                              (sc/optional-key :auth-type) sc/Str
                                              (sc/optional-key :basic-auth-password) sc/Str
                                              (sc/optional-key :basic-auth-username) sc/Str
-                                             (sc/optional-key :crypto-iv-s) sc/Str}})
+                                             (sc/optional-key :crypto-iv-s) sc/Str}
+   (sc/optional-key :ad-login) {:enabled sc/Bool
+                               :trusted-domains [sc/Str]}})
 
 
 (sc/defschema SimpleOrg
@@ -569,6 +571,20 @@
 
 (defn organizations-with-calendars-enabled []
   (map :id (mongo/select :organizations {:calendars-enabled true} {:id 1})))
+
+(defn organizations-with-ad-login-enabled []
+  (map :id (mongo/select :organizations {:ad-login.enabled true} {:id 1})))
+
+(defn valid-email? [email]
+  (boolean (re-matches #".+\@.+\..+" email)))
+
+(defn organization-by-domain
+  "Takes a username (= email), checks to which organization its domain belongs to and return the organization id.
+  Returns nil if it's not found in any organizations."
+  [username]
+  {:pre [(valid-email? username)]}
+  (let [domain (last (ss/split username #"@"))]
+    (map :id (mongo/select :organizations {:ad-login.trusted-domains domain} {:id 1}))))
 
 ;;
 ;; Backend server addresses
