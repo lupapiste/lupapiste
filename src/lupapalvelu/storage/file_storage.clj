@@ -11,7 +11,8 @@
             [taoensso.timbre :as timbre]
             [lupapalvelu.domain :as domain]
             [clojure.string :as str]
-            [lupapiste-commons.external-preview :as ext-preview])
+            [lupapiste-commons.external-preview :as ext-preview]
+            [lupapalvelu.user :as usr])
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
            [java.time ZonedDateTime ZoneId]
            [java.util Date]))
@@ -277,12 +278,12 @@
   (let [{:keys [attachments] :as application} (domain/get-application-no-access-checking id
                                                                                          [:attachments :organization])
         preview-placeholder-sha1 (pandect/sha1 (ext-preview/placeholder-image-is))]
-    (doseq [{:keys [versions latestVersion] att-id :id} attachments
-            [idx {:keys [fileId originalFileId storageSystem]}] (map-indexed vector versions)
+    (doseq [[att-idx {:keys [versions latestVersion] att-id :id}] (map-indexed vector attachments)
+            [version-idx {:keys [fileId originalFileId storageSystem]}] (map-indexed vector versions)
             :when (and (= (keyword storageSystem) :mongodb)
                        (some? fileId)
                        (not (.isInterrupted (Thread/currentThread))))]
-      (timbre/info "Migrating attachment" att-id "version" idx)
+      (timbre/info "Migrating attachment" att-id "version" version-idx)
       (doseq [file-id (if (= fileId originalFileId)
                         [fileId (str fileId "-preview")]
                         [fileId originalFileId (str fileId "-preview")])]
@@ -307,17 +308,125 @@
                         (throw (Exception. (str "Data in MongoDB and S3 do not match for " (s3-id id file-id)))))))))
             (when-not (str/ends-with? file-id "preview")
               (timbre/error "File" file-id "not found in GridFS but linked on" id "attachment" att-id)))))
-      (timbre/info "Changing attachment" att-id "version" idx "storageSystem to s3")
-      (action/update-application
-        (action/application->command application)
-        {:attachments.id att-id}
-        {$set (cond-> {(str "attachments.$.versions." idx ".storageSystem") :s3}
-                      (= fileId (:fileId latestVersion))
-                      (assoc "attachments.$.latestVersion.storageSystem" :s3))})
-      (mongo/delete-file-by-id fileId)
-      (when-not (= fileId originalFileId)
-        (timbre/info "Deleting attachment" att-id "version" idx "original file" originalFileId "from GridFS")
-        (mongo/delete-file-by-id originalFileId))
-      (mongo/delete-file-by-id (str fileId "-preview"))
+      (when (s3/object-exists? application-bucket (s3-id id fileId))
+        (timbre/info "Changing attachment" att-id "/ index" att-idx "version" version-idx "storageSystem to s3")
+        (action/update-application
+          (action/application->command application)
+          {$set (cond-> {(str "attachments." att-idx ".versions." version-idx ".storageSystem") :s3}
+                        (= fileId (:fileId latestVersion))
+                        (assoc (str "attachments." att-idx ".latestVersion.storageSystem") :s3))})
+        (mongo/delete-file-by-id fileId)
+        (when-not (= fileId originalFileId)
+          (timbre/info "Deleting attachment" att-id "version" version-idx "original file" originalFileId "from GridFS")
+          (mongo/delete-file-by-id originalFileId))
+        (mongo/delete-file-by-id (str fileId "-preview")))
       (when (not= (:fileId latestVersion) (:fileId (last versions)))
         (timbre/error "Latest version fileId does not match the fileId of last element in versions in attachment" att-id)))))
+
+(defn move-user-mongodb-files-to-s3 [user-id]
+  {:pre [(string? user-id)]}
+  (assert (env/feature? :s3) "s3 feature must be enabled")
+  (let [{:keys [attachments]} (usr/get-user-by-id user-id
+                                                  [:attachments])]
+    (doseq [{:keys [attachment-id storageSystem]} attachments
+            :when (and (= (keyword storageSystem) :mongodb)
+                       (some? attachment-id)
+                       (not (.isInterrupted (Thread/currentThread))))]
+      (timbre/info "Migrating user" user-id "file" attachment-id)
+      (let [{:keys [content contentType filename metadata]} (mongo/download attachment-id)
+            bos (ByteArrayOutputStream.)]
+        (if content
+          (do (with-open [is (content)]
+                (io/copy is bos))
+              (let [mongo-data (.toByteArray bos)
+                    mongo-data-sha1 (pandect/sha1 mongo-data)
+                    new-id (s3-id user-id attachment-id)]
+                (timbre/info "Uploading file" attachment-id "to s3")
+                (s3/put-file-or-input-stream user-bucket
+                                             new-id
+                                             filename
+                                             contentType
+                                             (ByteArrayInputStream. mongo-data)
+                                             metadata)
+                (with-open [s3-data ((:content (s3/download user-bucket new-id)))]
+                  (when (not= mongo-data-sha1 (pandect/sha1 s3-data))
+                    (throw (Exception. (str "Data in MongoDB and S3 do not match for " new-id))))))
+              (timbre/info "Changing user" user-id "file" attachment-id "storageSystem to s3")
+              (mongo/update :users
+                            {:_id user-id
+                             :attachments.attachment-id attachment-id}
+                            {$set {:attachments.$.storageSystem :s3}})
+              (mongo/delete-file-by-id attachment-id))
+          (timbre/error "File" attachment-id "not found in GridFS but linked on user" user-id))))))
+
+(defn fix-bulletin-storage-system [bulletin-id]
+  {:pre [(string? bulletin-id)]}
+  (assert (env/feature? :s3) "s3 feature must be enabled")
+  (doseq [version (:versions (mongo/by-id :application-bulletins bulletin-id [:versions]))
+          :let [version-id (:id version)]
+          [idx {{:keys [storageSystem fileId]} :latestVersion att-id :id}] (map-indexed vector (:attachments version))
+          :when (and (= (keyword storageSystem) :mongodb)
+                     (some? fileId)
+                     (not (.isInterrupted (Thread/currentThread))))]
+    (timbre/info "Fixing bulletin" bulletin-id "attachment" att-id "file" fileId)
+    (let [new-id (s3-id bulletin-id fileId)]
+      (if (s3/object-exists? application-bucket new-id)
+        (do (timbre/info "Updating bulletin" bulletin-id "version" version-id "attachment" idx "storage system to S3")
+            (mongo/update :application-bulletins
+                          {:_id bulletin-id
+                           :versions.id version-id}
+                          {$set {(str "versions.$.attachments." idx ".latestVersion.storageSystem") :s3}}))
+        (timbre/error "File" fileId "not found in S3 in bulletin attachment" att-id)))))
+
+(defn clean-unlinked-files-from-mongo []
+  ; Remove old orphaned uploads
+  (mongo/delete-file {$and [{$or [{:metadata.linked false}
+                                  {:metadata.linked {$exists false}}]}
+                            {:metadata.application {$exists false}}
+                            {:metadata.uploaded {$lt (ts-two-hours-ago)}}]})
+  (doseq [{:keys [metadata id]} (mongo/select :fs.files {})
+          :when (nil? (:commentId metadata))]
+    (cond
+      (ss/contains? id "-preview") (mongo/delete-file-by-id id)
+
+      (:application metadata)
+      (if-let [attachment (->> (mongo/by-id :applications (:application metadata) [:attachments])
+                               :attachments
+                               (filter (fn [{:keys [versions]}]
+                                         (some (fn [{:keys [fileId originalFileId]}]
+                                                 (or (= id fileId)
+                                                     (= id originalFileId)))
+                                               versions)))
+                               first)]
+        (let [version (->> (:versions attachment)
+                           (filter (fn [{:keys [fileId originalFileId]}]
+                                     (or (= id fileId)
+                                         (= id originalFileId))))
+                           first)]
+          (if (= (keyword (:storageSystem version)) :s3)
+            (let [{:keys [content contentType filename metadata]} (mongo/download id)
+                  bos (ByteArrayOutputStream.)
+                  new-id (s3-id (:application metadata) id)]
+              (if content
+                (do (with-open [is (content)]
+                      (io/copy is bos))
+                    (let [mongo-data (.toByteArray bos)
+                          mongo-data-sha1 (pandect/sha1 mongo-data)]
+                      (timbre/info "Uploading file" id "to s3")
+                      (s3/put-file-or-input-stream application-bucket
+                                                   new-id
+                                                   filename
+                                                   contentType
+                                                   (ByteArrayInputStream. mongo-data)
+                                                   metadata)
+                      (with-open [s3-data ((:content (s3/download application-bucket new-id)))]
+                        (when (not= mongo-data-sha1 (pandect/sha1 s3-data))
+                          (throw (Exception. (str "Data in MongoDB and S3 do not match for " new-id)))))
+                      (mongo/delete-file-by-id id)))
+                (timbre/error "File" id "chunks not found in GridFS")))
+            (timbre/error "File id" id "from app" (:application metadata) "/ attachment" (:id attachment) "still in Mongo")))
+
+        (do (timbre/info metadata "Removing orphaned file" id "not actually found on app" (:application metadata))
+            (mongo/delete-file-by-id id)))
+
+      :else (timbre/warn metadata "Don't know what to do with file id" id))))
