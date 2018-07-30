@@ -28,7 +28,9 @@
                       {$or [{:auth.id user-id}
                             {:auth {$elemMatch {:id company-id :company-role company-role}}}
                             {:auth {$elemMatch {:id company-id :company-role {$exists false}}}}]})
-      :authority    {$or [{:organization {$in organizations}} {:auth.id (:id user)}]}
+      :authority    (if (empty? organizations)
+                      {:auth.id user-id}
+                      {$or [{:organization {$in organizations}} {:auth.id (:id user)}]})
       :rest-api     {:organization {$in organizations}}
       :oirAuthority {:organization {$in organizations}}
       :trusted-etl {}
