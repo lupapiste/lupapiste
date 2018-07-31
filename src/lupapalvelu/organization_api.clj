@@ -389,7 +389,7 @@
 
 (defcommand update-adlogin-settings
   {:parameters       [org-id enabled trusted-domains idp-uri idp-cert]
-   :input-validators [(partial non-blank-parameters [:org-id])]
+   :input-validators [(partial non-blank-parameters [:org-id :idp-uri :idp-cert])]
    :user-roles       #{:admin}}
   [_]
   (org/set-adlogin-settings org-id enabled trusted-domains idp-uri idp-cert)
