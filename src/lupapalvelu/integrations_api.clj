@@ -82,7 +82,7 @@
         ;; TODO: Non-placement-contract ALLU applications
         (allu/lock-placement-contract! application)
         ;; TODO: Send comments
-        (allu/send-attachments! application)
+        (allu/send-attachments! application (filter attachment/unsent? (:attachments application)))
         (do-rest-fn true nil))
 
       (org/krysp-integration? @organization (permit/permit-type application))

@@ -14,7 +14,7 @@
             [sade.http :as http]
             [sade.schemas :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
                                   ApplicationId ISO-3166-alpha-2 date-string]]
-            [lupapalvelu.attachment :refer [get-attachment-latest-version-file]]
+            [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common]
@@ -151,6 +151,7 @@
 ;;;; Constants
 ;;;; ===================================================================================================================
 
+;; TODO: Should this be injected from commands instead?
 (def- lang
   "The language to use when localizing output to ALLU"
   "fi")
@@ -271,13 +272,18 @@
     [(str allu-url "/applications/" allu-id "/cancelled")
      {:headers {:authorization (str "Bearer " allu-jwt)}}]))
 
-(defn- attachment-send [allu-url allu-jwt app file-contents]
+(defn- attachment-send [allu-url allu-jwt app
+                        {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment} file-contents]
+  {:pre [file-contents]}
   (let [allu-id (-> app :integrationKeys :ALLU :id)]
     (assert allu-id (str (:id app) " does not contain an ALLU id"))
     [(str allu-url "/applications/" allu-id "/attachments")
      {:headers   {:authorization (str "Bearer " allu-jwt)}
-      :multipart [{:name "metadata", :content ""}           ; FIXME
-                  {:name "file", :content (or file-contents "")}]}]))
+      :multipart [{:name    "metadata"
+                   :content (json/encode {:name        (:contents attachment)
+                                          :description (localize lang :attachmentType type-group type-id)
+                                          :mimeType    (:contentType latestVersion)})}
+                  {:name "file", :content file-contents}]}]))
 
 (defn- placement-creation-request [allu-url allu-jwt app]
   [(str allu-url "/placementcontracts")
@@ -426,16 +432,16 @@
       {:status (:or 200 201), :body allu-id} (info (:id app) "was locked in ALLU as" allu-id)
       response (allu-http-fail! response))))
 
-(defn- send-attachment! [app {attachment-id :id}]
-  (let [file-contents (when-let [file-map (get-attachment-latest-version-file nil attachment-id false app)]
+(defn- send-attachment! [app {attachment-id :id :keys [latestVersion] :as attachment}]
+  (let [file-contents (when-let [file-map (get-attachment-file! app (:fileId latestVersion))]
                         ((:content file-map)))
-        [endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) app file-contents)]
+        [endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) app attachment file-contents)]
     (match (send-allu-attachment! allu-instance endpoint request)
       {:status (:or 200 201)} (info "attachment" attachment-id "of" (:id app) "was sent to ALLU")
       response (allu-http-fail! response))))
 
 (defn send-attachments!
-  "Send attachments of application to ALLU."
-  [{:keys [attachments] :as app}]
+  "Send the specified `attachments` of `application` to ALLU."
+  [application attachments]
   (doseq [attachment attachments]
-    (send-attachment! app attachment)))
+    (send-attachment! application attachment)))
