@@ -28,6 +28,7 @@
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.states :as states]
+            [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
@@ -38,7 +39,6 @@
             [lupapalvelu.user :as usr]
             [me.raynes.fs :as fs]
             [sade.env :as env]
-            [lupapalvelu.storage.file-storage :as storage]
             [sade.shared-schemas :as sssc]
             [lupapalvelu.vetuma :as vetuma])
   (:import [java.util.zip ZipOutputStream ZipEntry]
