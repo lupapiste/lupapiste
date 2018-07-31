@@ -269,7 +269,7 @@
         .error(function(d) {
           if (d.needMorePrevPermitInfo) {
             if (self.needMorePrevPermitInfo()) {
-              notify.error(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
+              notify.error(loc("error.dialog.title"), loc("error.no-previous-permit-found-from-backend"));
             } else {
               self.needMorePrevPermitInfo(true);
             }

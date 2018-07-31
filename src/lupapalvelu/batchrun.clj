@@ -23,7 +23,6 @@
             [lupapalvelu.review :as review]
             [lupapalvelu.states :as states]
             [lupapalvelu.storage.file-migration :refer [move-application-mongodb-files-to-s3]]
-            [lupapalvelu.storage.gridfs :as gfs]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
@@ -40,8 +39,7 @@
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
             [ring.util.codec :as codec])
-  (:import [org.xml.sax SAXParseException]
-           [java.util.concurrent ExecutorService TimeUnit]))
+  (:import [org.xml.sax SAXParseException]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -865,76 +863,6 @@
               (info "Attachments successfully unarchived for application" (:id application))
               (error "Some attachments were not successfully unarchived for application" (:id application)))))))
     (println "Organization must be provided.")))
-
-(defn print-info [id att version message]
-  (let [type (get-in att [:type :type-id])
-        content (:contentType version)]
-    (println id "-" (:id att) "-" (:fileId version) ", msg:" message "," content"," type)))
-
-(defn analyze-missing [& args]
-  (mongo/connect!)
-  (info "Starting analyze-missing job")
-  (let [ts 1522540800000]
-    (doseq [app (mongo/select :applications
-                              {$or [{:modified {$gte ts}}
-                                    {:verdicts.timestamp {$gte ts}}
-                                    {:tasks.created {$gte ts}}]}
-                              [:attachments]
-                              {:_id 1})
-            {version :latestVersion :as att} (->> (:attachments app)
-                                                  (filter  :latestVersion)
-                                                  (remove #(get-in % [:latestVersion :onkaloFileId])))
-            :let [file (gfs/download (:fileId version))
-                  different-original? (not= (:fileId version) (:originalFileId version))]]
-      (when-not file
-        (if different-original?
-          (if (gfs/download (:originalFileId version))
-            (print-info (:id app) att version "fileId missing but originalFileIdFound")
-            (print-info (:id app) att version "fileId AND originalFileId missing"))
-          (print-info (:id app) att version "fileId missing"))))))
-
-(defn move-files-to-ceph-in-applications [& application-ids]
-  (info "Moving files to Ceph in applications" application-ids)
-  (mongo/connect!)
-  (doseq [app-id application-ids]
-    (logging/with-logging-context {:applicationId app-id}
-      (info "Checking attachments for migration")
-      (try (move-application-mongodb-files-to-s3 app-id)
-           (catch Throwable t
-             (error t "Exception occurred during the migration")))))
-  (info "Done"))
-
-(defonce ^ExecutorService ceph-migration-threadpool (threads/threadpool 8 "ceph-migration-worker"))
-
-(defn move-app-files-to-ceph-in-organizations [& organization-ids]
-  (if (seq organization-ids)
-    (do (info "Moving application files to Ceph in organizations" organization-ids)
-        (mongo/connect!)
-        (.addShutdownHook (Runtime/getRuntime)
-                          (Thread.
-                            ^Runnable
-                            (fn []
-                              (println "Interrupt received, shutting down.")
-                              (.shutdownNow ceph-migration-threadpool)
-                              (.awaitTermination ceph-migration-threadpool 60 TimeUnit/SECONDS)
-                              (println "Threads finished"))))
-        (let [threads (->> (mongo/select :applications
-                                         {:organization                            {$in organization-ids}
-                                          :attachments.latestVersion.fileId        {$type "string"}
-                                          :attachments.latestVersion.storageSystem "mongodb"}
-                                         [:_id]
-                                         {:_id 1})
-                           (mapv (fn [{:keys [id]}]
-                                   (threads/submit ceph-migration-threadpool
-                                                   (logging/with-logging-context {:applicationId id}
-                                                     (info "Checking attachments for migration")
-                                                     (try (move-application-mongodb-files-to-s3 id)
-                                                          (catch Throwable t
-                                                            (error t "Exception occurred during the migration"))))))))]
-          (info "All migration threads submitted. Number of applications:" (count threads))
-          (threads/wait-for-threads threads))
-        (info "Done"))
-    (error "Missing organization ids")))
 
 (defn fix-bad-archival-conversions-in-091-R []
   (mongo/connect!)

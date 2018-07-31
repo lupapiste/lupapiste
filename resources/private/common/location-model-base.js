@@ -127,7 +127,9 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   //
 
   self.onError = function(e) {
-    if (e.status > 400) {
+    if (e.status === 404) {
+      hub.send("indicator", {style: "negative", message: "integration.addressNotFound"});
+    } else if (e.status > 400) {
       hub.send("indicator", {style: "negative", message: "integration.getAddressNotWorking", html: true});
     }
   };
