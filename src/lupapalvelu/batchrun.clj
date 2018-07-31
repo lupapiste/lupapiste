@@ -863,33 +863,6 @@
               (error "Some attachments were not successfully unarchived for application" (:id application)))))))
     (println "Organization must be provided.")))
 
-(defn print-info [id att version message]
-  (let [type (get-in att [:type :type-id])
-        content (:contentType version)]
-    (println id "-" (:id att) "-" (:fileId version) ", msg:" message "," content"," type)))
-
-(defn analyze-missing [& args]
-  (mongo/connect!)
-  (info "Starting analyze-missing job")
-  (let [ts 1522540800000]
-    (doseq [app (mongo/select :applications
-                              {$or [{:modified {$gte ts}}
-                                    {:verdicts.timestamp {$gte ts}}
-                                    {:tasks.created {$gte ts}}]}
-                              [:attachments]
-                              {:_id 1})
-            {version :latestVersion :as att} (->> (:attachments app)
-                                                  (filter  :latestVersion)
-                                                  (remove #(get-in % [:latestVersion :onkaloFileId])))
-            :let [file (mongo/download (:fileId version))
-                  different-original? (not= (:fileId version) (:originalFileId version))]]
-      (when-not file
-        (if different-original?
-          (if (mongo/download (:originalFileId version))
-            (print-info (:id app) att version "fileId missing but originalFileIdFound")
-            (print-info (:id app) att version "fileId AND originalFileId missing"))
-          (print-info (:id app) att version "fileId missing"))))))
-
 (defn fix-bad-archival-conversions-in-091-R []
   (mongo/connect!)
   (info "Reconverting attachments to PDF/A in 091-R archiving projects")
