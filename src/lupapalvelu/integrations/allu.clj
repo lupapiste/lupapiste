@@ -432,16 +432,19 @@
       {:status (:or 200 201), :body allu-id} (info (:id app) "was locked in ALLU as" allu-id)
       response (allu-http-fail! response))))
 
-(defn- send-attachment! [app {attachment-id :id :keys [latestVersion] :as attachment}]
-  (let [file-contents (when-let [file-map (get-attachment-file! app (:fileId latestVersion))]
+(defn- send-attachment!
+  "Send `attachment` of `application to ALLU. Return the fileId of the file that was sent."
+  [app {attachment-id :id {:keys [fileId]} :latestVersion :as attachment}]
+  (let [file-contents (when-let [file-map (get-attachment-file! app fileId)]
                         ((:content file-map)))
         [endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) app attachment file-contents)]
     (match (send-allu-attachment! allu-instance endpoint request)
-      {:status (:or 200 201)} (info "attachment" attachment-id "of" (:id app) "was sent to ALLU")
+      {:status (:or 200 201)} (do (info "attachment" attachment-id "of" (:id app) "was sent to ALLU")
+                                  fileId)
       response (allu-http-fail! response))))
 
 (defn send-attachments!
-  "Send the specified `attachments` of `application` to ALLU."
+  "Send the specified `attachments` of `application` to ALLU. Returns a seq of attachment file IDs that were sent."
   [application attachments]
-  (doseq [attachment attachments]
-    (send-attachment! application attachment)))
+  (doall (for [attachment attachments]
+           (send-attachment! application attachment))))

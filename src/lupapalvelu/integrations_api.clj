@@ -189,7 +189,9 @@
                                               all-attachments)]
     (if (seq attachments-wo-sent-timestamp)
       (let [application (assoc application :attachments attachments-wo-sent-timestamp)
-            sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp user organization application lang)
+            sent-file-ids (if (allu/allu-application? application)
+                            (allu/send-attachments! application attachments-wo-sent-timestamp)
+                            (mapping-to-krysp/save-unsent-attachments-as-krysp user organization application lang))
             data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
             attachments-transfer-data {:data-key :attachments
                                        :data (map :id attachments-wo-sent-timestamp)}
