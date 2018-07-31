@@ -21,6 +21,11 @@
     self.allowedAutologinIps = ko.observableArray();
     self.ssoKeys = ko.observableArray();
 
+    self.adLoginEnabled = ko.observable(false);
+    self.adLoginDomains = ko.observable("");
+    self.adLoginIdPUri = ko.observable("");
+    self.adLoginIdPCert = ko.observable("");
+
     self.threeDMapEnabled = ko.observable();
 
     self.threeDMapServerParams = {
@@ -150,6 +155,13 @@
           self.backendSystems(_.map(util.getIn(result, ["data", "krysp"]), function(v,k) { return {permitType: k, backendSystem: v["backend-system"]}; }));
           self.stateChangeMsgEnabled(result.data["state-change-msg-enabled"]);
 
+          if (result.data.hasOwnProperty("ad-login")) {
+            self.adLoginEnabled(result.data["ad-login"]["enabled"]);
+            self.adLoginDomains(result.data["ad-login"]["trusted-domains"].join(", "));
+            self.adLoginIdPUri(result.data["ad-login"]["idp-uri"]);
+            self.adLoginIdPCert(result.data["ad-login"]["idp-cert"]);
+          };
+
           var archiveTs= result.data["earliest-allowed-archiving-date"];
           if (archiveTs && archiveTs > 0) {
             self.earliestArchivingDate(new Date(result.data["earliest-allowed-archiving-date"]));
@@ -246,6 +258,25 @@
                                                    permitTypes:  self.permitTypes(),
                                                    municipalities: self.municipalities()}});
       }
+    };
+
+    self.saveAdLoginSettings = function() {
+      const adLogin = {
+        enabled: self.adLoginEnabled(),
+        trustedDomains: self.adLoginDomains().split(",").map(uri => uri.trim()),
+        idpUri: self.adLoginIdPUri(),
+        idpCert: self.adLoginIdPCert()
+      };
+      console.log(adLogin)
+      ajax
+        .command("update-adlogin-settings", {"org-id": self.organization().id(),
+                                             "enabled": self.adLoginEnabled(),
+          "trusted-domains": self.adLoginDomains().split(",").map(uri => uri.trim()),
+          "idp-uri": self.adLoginIdPUri(),
+          "idp-cert": self.adLoginIdPCert()
+        })
+        .success(util.showSavedIndicator)
+        .call();
     };
 
     self.saveAutologinIps = function() {

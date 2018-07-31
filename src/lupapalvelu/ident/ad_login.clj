@@ -3,6 +3,7 @@
             [noir.core :refer [defpage]]
             [noir.response :as response]
             [noir.request :as request]
+            [lupapalvelu.organization :refer [ad-login-data-by-domain]]
             [lupapalvelu.security :as security]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
@@ -37,12 +38,29 @@
   [certstring]
   (->> (ss/split certstring #"\n") rest drop-last ss/join))
 
+(defn make-ad-config [username]
+  (let [c (env/get-config)
+        ad-data (first (ad-login-data-by-domain username))
+        {:keys [enabled idp-cert idp-uri]} (:ad-login ad-data)]
+    (when ad-data
+      {:app-name "Lupapiste"
+       :base-uri (:host c)
+       :idp-uri idp-uri ;"http://localhost:7000" ;; The dockerized, locally running mock-saml instance (https://github.com/lupapiste/mock-saml)
+       :idp-cert (parse-certificate idp-cert) ;; This needs to live in Mongo's organizations collection
+       :keystore-file (get-in c [:ssl :keystore])
+       :keystore-password (get-in c [:ssl :key-password])
+       :key-alias "jetty" ;; The normal Lupis certificate
+       })))
+
+; (def config (make-ad-config "einari@pori.fi"))
+
 (def config
   (let [c (env/get-config)]
     {:app-name "Lupapiste"
      :base-uri (:host c)
-     :idp-uri  "http://localhost:7000" ;; The dockerized, locally running mock-saml instance (https://github.com/lupapiste/mock-saml)
+     :idp-uri "http://localhost:7000" ;; The dockerized, locally running mock-saml instance (https://github.com/lupapiste/mock-saml)
      :idp-cert (parse-certificate (slurp "./idp-public-cert.pem")) ;; This needs to live in Mongo's organizations collection
+     ; :idp-cert "nam nam" ;; This needs to live in Mongo's organizations collection
      :keystore-file (get-in c [:ssl :keystore])
      :keystore-password (get-in c [:ssl :key-password])
      :key-alias "jetty" ;; The normal Lupis certificate
@@ -50,7 +68,7 @@
 
 (util/log-missing-keys! config)
 
-(defn xml-tree->edn
+(defn- xml-tree->edn
   "Takes an xml tree returned by the clojure.data.xml parser, recursively parses it into as readable and flat a Clojure map
   as is feasible."
   [element]
@@ -108,6 +126,8 @@
                               saml-request
                               hmac-relay-state)))
 
+(def tila (atom {}))
+
 (defpage [:post "/api/saml/ad-login"] []
   (let [req (request/ring-request)
         decrypter (saml-sp/make-saml-decrypter (:keystore-file config)
@@ -133,8 +153,25 @@
         saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter))
         parsed-saml-info (parse-saml-info saml-info)
         {:keys [email firstName lastName]} (get-in parsed-saml-info [:assertions :attrs])
+        _ (reset! tila {:req req
+                        :sp-cert sp-cert
+                        :acs-uri acs-uri
+                        :state state
+                        :xml-response xml-response
+                        :relay-state relay-state
+                        :saml-resp saml-resp
+                        :valid-signature? valid-signature?
+                        :valid? valid?
+                        :saml-info saml-info
+                        :parsed-saml-info parsed-saml-info})
         _ (info parsed-saml-info)
         _ (clojure.pprint/pprint parsed-saml-info)
+        _ (info (str "SAML response validation " (if valid? "was successful" "failed")))
+        ; _ (println "TÄSSÄ TÄSSÄ")
+        ; _ (println (saml-sp/validate-saml-response-signature saml-resp "MOIKKA"))
+        ; _ (str "response: " saml-resp)
+        _ (str "ALLEKIRJOITUS: " (.getSignature saml-resp))
+        _ (println (str "sp-cert: " sp-cert))
         ]
     (if valid?
       (let [user (or (usr/get-user-by-email email)

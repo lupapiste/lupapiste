@@ -266,8 +266,9 @@
                                              (sc/optional-key :basic-auth-username) sc/Str
                                              (sc/optional-key :crypto-iv-s) sc/Str}
    (sc/optional-key :ad-login) {:enabled sc/Bool
-                               :trusted-domains [sc/Str]}})
-
+                                :idp-cert sc/Str
+                                :idp-uri sc/Str
+                                :trusted-domains [sc/Str]}})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
@@ -291,7 +292,7 @@
    :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
    :docstore-info :3d-map :default-digitalization-location
    :kopiolaitos-email :kopiolaitos-orderer-address :kopiolaitos-orderer-email :kopiolaitos-orderer-phone
-   :app-required-fields-filling-obligatory :state-change-msg-enabled])
+   :app-required-fields-filling-obligatory :state-change-msg-enabled :ad-login])
 
 (defn get-organizations
   ([]
@@ -578,13 +579,13 @@
 (defn valid-email? [email]
   (boolean (re-matches #".+\@.+\..+" email)))
 
-(defn organization-by-domain
+(defn ad-login-data-by-domain
   "Takes a username (= email), checks to which organization its domain belongs to and return the organization id.
   Returns nil if it's not found in any organizations."
   [username]
   {:pre [(valid-email? username)]}
   (let [domain (last (ss/split username #"@"))]
-    (map :id (mongo/select :organizations {:ad-login.trusted-domains domain} {:id 1}))))
+    (mongo/select :organizations {:ad-login.trusted-domains domain} {:id 1 :ad-login 1})))
 
 ;;
 ;; Backend server addresses
@@ -1024,3 +1025,10 @@
                 get-docstore-info-for-organization!
                 :docTerminalInUse)
     (fail :error.docterminal-not-enabled)))
+
+(defn set-adlogin-settings [org-id enabled trusted-domains idp-uri idp-cert]
+  (update-organization org-id
+                       {$set {:ad-login.enabled enabled
+                              :ad-login.trusted-domains trusted-domains
+                              :ad-login.idp-uri idp-uri
+                              :ad-login.idp-cert idp-cert}}))

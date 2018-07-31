@@ -159,6 +159,7 @@
           </div>
         </div>
 
+
           <button data-bind="click: newScope" class="btn positive">Lis&auml;&auml; lupatyyppi</button>
 
           <button data-bind="visible: !openInfoRequests(), click: convertOpenInforequests" class="btn positive">Muuta avoimet neuvontapyynn&ouml;t tavallisiksi</button>
@@ -206,6 +207,39 @@
               </tbody>
             </table>
           </div>
+
+        <div>
+          <h2>AD-kirjautumisen asetukset</h2>
+          <table data-test-id="ad-table">
+            <thead>
+              <tr>
+                <th>AD-kirjautuminen käytössä</th>
+                <th>Luotetut domainit</th>
+                <th>IdP-palvelun osoite</th>
+                <th>IdP-palvelun sertifikaatti</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <input data-bind="checked: adLoginEnabled" id="adlogin-enabled" type="checkbox"/>
+                </td>
+                <td>
+                  <input type="text" data-bind="value: adLoginDomains" class="form-input">
+                </td>
+                <td>
+                  <input type="text" data-bind="value: adLoginIdPUri" class="form-input">
+                </td>
+                <td>
+                  <input type="textarea" data-bind="value: adLoginIdPCert" class="form-input">
+                </td>
+              </tr>
+              <button data-bind="click: saveAdLoginSettings" class="btn positive">Tallenna</button>
+            </tbody>
+          </table>
+
+        </div>
+
         </div>
       </div>
     </section>
