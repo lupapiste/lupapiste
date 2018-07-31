@@ -282,8 +282,11 @@
       :multipart [{:name    "metadata"
                    :content (json/encode {:name        (:contents attachment)
                                           :description (localize lang :attachmentType type-group type-id)
-                                          :mimeType    (:contentType latestVersion)})}
-                  {:name "file", :content file-contents}]}]))
+                                          :mimeType    (:contentType latestVersion)})
+                   :mime-type "application/json"}
+                  {:name "file"
+                   :content file-contents
+                   :mime-type (:contentType latestVersion)}]}]))
 
 (defn- placement-creation-request [allu-url allu-jwt app]
   [(str allu-url "/placementcontracts")
