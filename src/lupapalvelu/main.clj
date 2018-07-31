@@ -22,13 +22,7 @@
                "pdf-to-pdfa-conversion"     'lupapalvelu.batchrun/pdf-to-pdfa-conversion
                "cleanup-uploaded-files"     'lupapalvelu.storage.file-storage/delete-old-unlinked-files
                "unarchive"                  'lupapalvelu.batchrun/unarchive
-               "analyze-missing"            'lupapalvelu.batchrun/analyze-missing
-               "move-files-to-ceph"         'lupapalvelu.batchrun/move-files-to-ceph-in-applications
-               "move-files-to-ceph-in-orgs" 'lupapalvelu.batchrun/move-app-files-to-ceph-in-organizations
-               "fix-helsinki-pdfa"          'lupapalvelu.batchrun/fix-bad-archival-conversions-in-091-R
-               "move-user-files-to-ceph"    'lupapalvelu.batchrun/move-user-files-to-ceph
-               "fix-bulletin-files-s3"      'lupapalvelu.batchrun/fix-bulletin-files-storage-system
-               "clean-orphaned-mongo-files" 'lupapalvelu.batchrun/clean-orphaned-files-from-mongo})
+               "fix-helsinki-pdfa"          'lupapalvelu.batchrun/fix-bad-archival-conversions-in-091-R})
 
 (defn launch! [service args]
   (debugf "Loading namespace '%s'...\n" (namespace service))

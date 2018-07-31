@@ -22,7 +22,6 @@
             [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.review :as review]
             [lupapalvelu.states :as states]
-            [lupapalvelu.storage.file-migration :refer [move-application-mongodb-files-to-s3]]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
