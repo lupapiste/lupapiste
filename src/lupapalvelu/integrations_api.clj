@@ -171,16 +171,17 @@
     (fail :error.no-unsent-attachments)))
 
 (defcommand move-attachments-to-backing-system
-  {:parameters [id lang attachmentIds]
+  {:parameters       [id lang attachmentIds]
    :input-validators [(partial action/non-blank-parameters [:id :lang])
                       (partial action/vector-parameter-of :attachmentIds string?)]
-   :user-roles #{:authority}
-   :pre-checks [(permit/validate-permit-type-is permit/R)
-                (application-already-exported :exported-to-backing-system)
-                has-unsent-attachments
-                mapping-to-krysp/http-not-allowed]
-   :states     (conj states/post-verdict-states :sent)
-   :description "Sends such selected attachments to backing system that are not yet sent."}
+   :user-roles       #{:authority}
+   :pre-checks       [(some-fn (every-pred (permit/validate-permit-type-is permit/R)
+                                           mapping-to-krysp/http-not-allowed) ; has SFTP KRYSP support for this...
+                               (comp allu/allu-application? :application)) ; ...or uses ALLU instead
+                      (application-already-exported :exported-to-backing-system)
+                      has-unsent-attachments]
+   :states           (conj states/post-verdict-states :sent)
+   :description      "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [user organization application created] :as command}]
   (let [all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
         attachments-wo-sent-timestamp (filter (every-pred attachment/unsent? ; unsent...
