@@ -8,6 +8,11 @@ LUPAPISTE.BulletinVerdictsTabModel = function(params) {
     return util.getIn(params, ["bulletin", "officialAt"]);
   });
 
+  self.bulletinId = ko.pureComputed(function() {
+    return util.getIn(params, ["bulletin", "application-id"]);
+  });
+
+
   var verdicts = _.map(_.cloneDeep(params.verdicts() || []), function(verdict) {
     var paatokset = _.map(verdict.paatokset || [], function(paatos) {
       var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
