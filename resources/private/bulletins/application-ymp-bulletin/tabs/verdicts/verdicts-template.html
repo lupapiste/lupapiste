@@ -76,7 +76,7 @@
                                   </div>
                               </div>
                           </div>
-                          
+
                           <div>
                             <!-- ko if: $data.lupamaaraykset -->
                               <h4 data-bind="ltext: 'verdict.lupamaaraukset'"></h4>
@@ -186,7 +186,7 @@
                                               <td data-bind="dateString: $data.paatospvm"></td>
                                               <td data-bind="foreach: $data.attachments">
                                                   <span data-bind="with: $data.latestVersion">
-                                                      <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-bulletin-attachment?attachment-id=' + fileId}"></a><br/>
+                                                      <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-bulletin-attachment?attachment-id=' + fileId + '&bulletin-id=' + $component.bulletinId() }"></a><br/>
                                                       <i data-bind="ltext: contentType"></i>
                                                       <i data-bind="size: size"></i><br/>
                                                   </span>
