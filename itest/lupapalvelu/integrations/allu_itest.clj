@@ -12,10 +12,11 @@
             [lupapalvelu.mongo :as mongo]
 
             [midje.sweet :refer [facts fact =>]]
-            [lupapalvelu.itest-util :as itu :refer [pena]]
+            [lupapalvelu.itest-util :as itu :refer [pena raktark-helsinki]]
 
             [lupapalvelu.integrations.allu :as allu
-             :refer [ALLUPlacementContracts create-contract! allu-fail! ->LocalMockALLU PlacementContract]]))
+             :refer [ALLUPlacementContracts create-contract! lock-contract! allu-fail!
+                     ->LocalMockALLU PlacementContract]]))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -35,27 +36,40 @@
                                :permitSubtype permitSubtype}})
     response))
 
+(defn- check-request [pending-on-client request]
+  (fact "request is well-formed"
+    (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
+    (:content-type request) => :json
+    (let [contract (-> request :body (json/decode true))]
+      contract => #(nil? (sc/check PlacementContract %))
+      (:pendingOnClient contract) => pending-on-client)))
+
 (deftype CheckingALLU [inner]
   ALLUPlacementContracts
   (create-contract! [_ endpoint request]
     (fact "endpoint is correct"
       endpoint => (str (env/value :allu :url) "/placementcontracts"))
-
-    (fact "request is well-formed"
-      (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
-      (:content-type request) => :json
-      (-> request :body (json/decode true)) => #(nil? (sc/check PlacementContract %)))
+    (check-request true request)
 
     (create-contract! inner endpoint request))
 
+  (lock-contract! [_ endpoint request]
+    (fact "endpoint is correct"
+      endpoint => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
+    (check-request false request)
+
+    (lock-contract! inner endpoint request))
+
   (allu-fail! [_ text info-map] (allu-fail! inner text info-map)))
 
-(deftype ConstALLU [response fail-map]
+(deftype ConstALLU [creation-response locking-response fail-map failure-counter]
   ALLUPlacementContracts
-  (create-contract! [_ _ _] response)
+  (create-contract! [_ _ _] creation-response)
+  (lock-contract! [_ _ _] locking-response)
   (allu-fail! [_ text info-map]
-    (fact "response was not ok" response => http/client-error?)
-    (fact "error has the expected contents" (fail text info-map) => fail-map)))
+    (fact "response is 4**" creation-response => http/client-error?)
+    (fact "error has the expected contents" (fail text info-map) => fail-map)
+    (swap! failure-counter inc)))
 
 ;;;; Actual Tests
 ;;;; ===================================================================================================================
@@ -63,22 +77,24 @@
 (env/with-feature-value :allu true
   (mongo/connect!)
 
-  (facts "Usage of ALLU integration in submit-application command"
-    (mongo/with-db itu/test-db-name
-      (lupapalvelu.fixture.core/apply-fixture "minimal")
+(facts "Usage of ALLU integration in commands"
+  (mongo/with-db itu/test-db-name
+    (lupapalvelu.fixture.core/apply-fixture "minimal")
 
-      (let [sent-allu-requests (atom 0)]
-        (mount/start-with {#'allu/allu-instance (->CheckingALLU (->LocalMockALLU sent-allu-requests))})
+      (let [initial-allu-state {:id-counter 0, :applications {}}
+            allu-state (atom initial-allu-state)]
+        (mount/start-with {#'allu/allu-instance (->CheckingALLU (->LocalMockALLU allu-state))})
 
         (fact "enabled and sending correctly to ALLU for Helsinki YA sijoituslupa and sijoitussopimus."
           (doseq [permitSubtype ["sijoituslupa" "sijoitussopimus"]]
             (let [{:keys [id]} (create-and-fill-placement-app pena permitSubtype) => ok?]
-              (itu/local-command pena :submit-application :id id) => ok?))
+              (itu/local-command pena :submit-application :id id) => ok?
+              (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?))
 
-          @sent-allu-requests => 2)
+          (:id-counter @allu-state) => 2)
 
         (fact "disabled for everything else."
-          (reset! sent-allu-requests 0)
+          (reset! allu-state initial-allu-state)
 
           (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate allu/SijoituslupaOperation)) => ok?]
             (itu/local-command pena :submit-application :id id) => ok?)
@@ -88,21 +104,28 @@
                                                    :x "385770.46" :y "6672188.964"
                                                    :address "Kaivokatu 1"
                                                    :propertyId "09143200010023") => ok?]
-            (itu/local-command pena :submit-application :id id) => ok?)
+            (itu/local-command pena :submit-application :id id) => ok?
+            (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?)
 
-          @sent-allu-requests => 0))
+          (:id-counter @allu-state) => 0))
 
       (fact "error responses from ALLU produce `fail!`ures"
-        (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 400, :body "Your data was bad."}
-                                                             {:ok   false, :text "error.allu.malformed-application"
-                                                              :body "Your data was bad."})})
-        (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
-          (itu/local-command pena :submit-application :id id))
+        (let [failure-counter (atom 0)]
+          (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 400, :body "Your data was bad."} nil
+                                                               {:ok   false, :text "error.allu.http"
+                                                                :status 400, :body "Your data was bad."}
+                                                               failure-counter)})
+          (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
+            (itu/local-command pena :submit-application :id id)
+            @failure-counter => 1))
 
-        (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 401, :body "You are unauthorized."}
-                                                             {:ok     false, :text "error.allu.http"
-                                                              :status 401, :body "You are unauthorized."})})
-        (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-          (itu/local-command pena :submit-application :id id)))
+        (let [failure-counter (atom 0)]
+          (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 401, :body "You are unauthorized."} nil
+                                                               {:ok     false, :text "error.allu.http"
+                                                                :status 401, :body "You are unauthorized."}
+                                                               failure-counter)})
+          (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
+            (itu/local-command pena :submit-application :id id)
+            @failure-counter => 1)))
 
       (mount/start #'allu/allu-instance))))

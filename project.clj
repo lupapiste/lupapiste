@@ -9,8 +9,10 @@
                  [org.clojure/tools.trace "0.7.9"]
                  [org.clojure/core.memoize "0.5.9"]
                  [org.clojure/core.async "0.4.474"]
+                 [org.clojure/core.match "0.2.2"]
                  [org.clojure/test.check "0.9.0"]
                  [com.gfredericks/test.chuck "0.2.9"]
+                 [prismatic/plumbing "0.5.5"]
 
                  ; State management
                  [mount "0.1.12"]
@@ -96,7 +98,6 @@
                  ; A Clojure(Script) library for declarative data description and validation
                  [prismatic/schema "1.1.9"]
                  [prismatic/schema-generators "0.1.2"]
-                 [prismatic/plumbing "0.5.5"]
 
                  ; MIME type resolution
                  [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
