@@ -5,6 +5,7 @@
             [noir.request :as request]
             [lupapalvelu.organization :refer [ad-login-data-by-domain]]
             [lupapalvelu.security :as security]
+            [lupapalvelu.user-api :as user-api]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
             [ring.util.response :refer :all]
@@ -152,7 +153,7 @@
         valid? (and valid-relay-state? valid-signature?)
         saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter))
         parsed-saml-info (parse-saml-info saml-info)
-        {:keys [email firstName lastName]} (get-in parsed-saml-info [:assertions :attrs])
+        {:keys [email firstName lastName organization groups]} (get-in parsed-saml-info [:assertions :attrs])
         _ (reset! tila {:req req
                         :sp-cert sp-cert
                         :acs-uri acs-uri
@@ -174,16 +175,19 @@
         _ (println (str "sp-cert: " sp-cert))
         ]
     (if valid?
-      (let [user (or (usr/get-user-by-email email)
-                     (usr/create-new-user {:role "admin"}
-                                          {:firstName firstName
-                                           :lastName lastName
-                                           :role "authority"
-                                           :email email
-                                           :username email
-                                           :enabled true
-                                           :orgAuthz {:753-R #{"authority"}}}
-                                          ))
+      (let [orgAuthz (if (string? groups) #{groups} (set groups))
+            user-data {:firstName firstName
+                       :lastName  lastName
+                       :role      "authority"
+                       :email     email
+                       :username  email
+                       :enabled   true
+                       :orgAuthz  {(keyword organization) orgAuthz}}        ;; validointi ja virheiden hallinta?
+            user (if-let [user-from-db (usr/get-user-by-email email)]
+                   (let [updated-user-data (util/deep-merge user-from-db user-data)]
+                     (user-api/update-authority user-from-db email updated-user-data)
+                     updated-user-data)
+                   (usr/create-new-user {:role "admin"} user-data))
             response (ssess/merge-to-session
                        req
                        (response/redirect (format "%s/app/fi/authority" (:host (env/get-config))))
