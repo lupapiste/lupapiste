@@ -283,7 +283,8 @@
                    :content (json/encode {:name        (:contents attachment)
                                           :description (localize lang :attachmentType type-group type-id)
                                           :mimeType    (:contentType latestVersion)})
-                   :mime-type "application/json"}
+                   :mime-type "application/json"
+                   :encoding "UTF-8"}
                   {:name "file"
                    :content file-contents
                    :mime-type (:contentType latestVersion)}]}]))
