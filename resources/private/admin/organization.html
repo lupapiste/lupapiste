@@ -200,8 +200,8 @@
               <tbody data-bind="foreach: $data.ssoKeys">
                 <tr>
                   <td><input type="checkbox" data-bind="checked: $data.selected, attr: {'data-test-id': 'org-sso-selected-' + $data.id}" class="form-input"></td>
-                  <td><span data-bind="text: $data.ip, attr: {'data-test-id': 'org-sso-ip-' + $data.id}" class="form-input"></td>
-                  <td><span data-bind="text: $data.comment, attr: {'data-test-id': 'org-sso-comment-' + $data.id}" class="form-input"></td>
+                  <td><span data-bind="text: $data.ip, attr: {'data-test-id': 'org-sso-ip-' + $data.id}" class="form-input"></span></td>
+                  <td><span data-bind="text: $data.comment, attr: {'data-test-id': 'org-sso-comment-' + $data.id}" class="form-input"></span></td>
                 </tr>
                 <button data-bind="click: saveAutologinIps" class="btn positive">Tallenna</button>
               </tbody>
@@ -209,14 +209,14 @@
           </div>
 
         <div>
-          <h2>AD-kirjautumisen asetukset</h2>
+          <h2 data-bind="ltext: 'organization.adlogin.header'"></h2>
           <table data-test-id="ad-table">
             <thead>
               <tr>
-                <th>AD-kirjautuminen käytössä</th>
-                <th>Luotetut domainit</th>
-                <th>IdP-palvelun osoite</th>
-                <th>IdP-palvelun sertifikaatti</th>
+                <th data-bind="ltext: 'organization.adlogin.enabled'"></th>
+                <th data-bind="ltext: 'organization.adlogin.trustedDomains'"></th>
+                <th data-bind="ltext: 'organization.adlogin.idpUri'"></th>
+                <th data-bind="ltext: 'organization.adlogin.idpCert'"></th>
               </tr>
             </thead>
             <tbody>
@@ -237,7 +237,6 @@
               <button data-bind="click: saveAdLoginSettings" class="btn positive">Tallenna</button>
             </tbody>
           </table>
-
         </div>
 
         </div>
