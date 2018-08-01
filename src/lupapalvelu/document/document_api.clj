@@ -14,7 +14,7 @@
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.integrations.allu :as allu]
+            [lupapalvelu.backing-system.allu :as allu]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 

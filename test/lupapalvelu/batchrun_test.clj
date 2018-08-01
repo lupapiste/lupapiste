@@ -7,7 +7,7 @@
             [lupapalvelu.batchrun :as batchrun]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [sade.util :as util]))
 
 (testable-privates lupapalvelu.batchrun fetch-reviews-for-organization fetch-reviews-for-organization-permit-type
@@ -40,7 +40,7 @@
     (fetch-reviews-for-organization-permit-type {:id "test-user"} {:id "org-id"} :R [{:id "LP-ORG-2000-00001"}])
     => [[{:id "LP-ORG-2000-00001"} "xml1"]]
 
-    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+    (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                {:id "org-id"} :R :application-id ["LP-ORG-2000-00001"])
               => {"LP-ORG-2000-00001" "xml1"}))
 
@@ -50,7 +50,7 @@
     => [[{:id "LP-ORG-2000-00001"} "xml1"]
         [{:id "LP-ORG-2000-00002"} "xml2"]]
 
-    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+    (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                {:id "org-id"} :R :application-id ["LP-ORG-2000-00001" "LP-ORG-2000-00002"])
               => {"LP-ORG-2000-00001" "xml1"
                   "LP-ORG-2000-00002" "xml2"}))
@@ -65,12 +65,12 @@
           [{:id "LP-ORG-2000-00002"} "xml2"]
           [{:id "LP-ORG-2000-00003"} "xml3"]]
 
-      (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+      (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                  organization :R :application-id ["LP-ORG-2000-00001" "LP-ORG-2000-00002"])
                 => {"LP-ORG-2000-00001" "xml1"
                     "LP-ORG-2000-00002" "xml2"})
 
-      (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+      (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                  organization :R :application-id ["LP-ORG-2000-00003"])
                 => {"LP-ORG-2000-00003" "xml3"})))
 
@@ -86,22 +86,22 @@
           [{:id "LP-ORG-2000-00004" :kuntalupatunnus "bck-id-04" :verdicts [{} {:kuntalupatunnus "bck-id-04"}]} "xml4"]]
 
       ;; First chunk with app-id
-      (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+      (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                  organization :R :application-id ["LP-ORG-2000-00001" "LP-ORG-2000-00002"])
                 => {"LP-ORG-2000-00001" "xml1"})
 
       ;; Second chunk with app-id
-      (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+      (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                  organization :R :application-id ["LP-ORG-2000-00003" "LP-ORG-2000-00004"])
                 => {})
 
       ;; First chunk with back-end-id
-      (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+      (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                  organization :R :kuntalupatunnus ["bck-id-02" "bck-id-03"])
                 => {"bck-id-02" "xml2"})
 
       ;; Second chunk with back-end-id
-      (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+      (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                  organization :R :kuntalupatunnus ["bck-id-04"])
                 => {"bck-id-04" "xml4"}))))
 
@@ -255,7 +255,7 @@
                                                       :faulty-tasks {}})
               => ..test-result.. :times 1)))
 
-(defmethod lupapalvelu.xml.krysp.common-reader/get-tunnus-xml-path :TEST [& _]
+(defmethod lupapalvelu.backing-system.krysp.common-reader/get-tunnus-xml-path :TEST [& _]
   [:tunnus])
 
 (def result (atom []))

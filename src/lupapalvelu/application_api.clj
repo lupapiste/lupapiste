@@ -29,7 +29,7 @@
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.integrations.allu :as allu]
+            [lupapalvelu.backing-system.allu :as allu]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -44,7 +44,7 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.suti :as suti]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
+            [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as krysp-output]
             [lupapalvelu.ya :as ya])
   (:import (java.net SocketTimeoutException)))
 

@@ -15,9 +15,9 @@
             [lupapalvelu.review :as review]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;

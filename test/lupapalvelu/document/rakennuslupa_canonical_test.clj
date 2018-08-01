@@ -13,7 +13,7 @@
             [lupapalvelu.operations]
             [lupapalvelu.organization :as org]
             [lupapalvelu.xml.emit :refer :all]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
+            [lupapalvelu.backing-system.krysp.rakennuslupa-mapping :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.core :refer :all]

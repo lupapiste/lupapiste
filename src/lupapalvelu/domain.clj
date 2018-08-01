@@ -9,7 +9,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.xml.krysp.verdict :as verdict]
+            [lupapalvelu.backing-system.krysp.verdict :as verdict]
             [monger.operators :refer :all]
             [sade.core :refer [unauthorized fail?]]
             [sade.strings :as ss]

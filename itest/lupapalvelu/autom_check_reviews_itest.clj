@@ -27,8 +27,8 @@
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.batchrun :as batchrun]
             [lupapalvelu.pdftk :as pdftk]
-            [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as app-from-krysp]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [lupapalvelu.user :as usr]
             [lupapalvelu.review :as review]
             [lupapalvelu.storage.file-storage :as storage])

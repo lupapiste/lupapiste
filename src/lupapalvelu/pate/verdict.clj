@@ -30,7 +30,7 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.verdict :as old-verdict]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp]
+            [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as krysp]
             [monger.operators :refer :all]
             [ring.util.codec :as codec]
             [rum.core :as rum]
@@ -817,7 +817,7 @@
 (defn ->buildings-array
   "Construction of the application-buildings array. This should be
   equivalent to ->buildings-summary function in
-  lupapalvelu.xml.krysp.building-reader the namespace, but instead of
+  lupapalvelu.backing_system.krysp.building-reader the namespace, but instead of
   the message from backing system, here all the input data is
   originating from PATE verdict."
   [application]

@@ -28,9 +28,9 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as user]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.xml.asianhallinta.core :as ah]
+            [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.asianhallinta.core :as ah]
             [lupapalvelu.ya-extension :as yax]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -39,7 +39,7 @@
             [sade.util :as util]
             [sade.validators :as validators]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.integrations.allu :as allu]))
+            [lupapalvelu.backing-system.allu :as allu]))
 
 (defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)

@@ -11,7 +11,7 @@
             [sade.validators :refer [matches?]]
             [clojure.string :as str]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]))
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]))
 
 ;; Schema definitions
 
