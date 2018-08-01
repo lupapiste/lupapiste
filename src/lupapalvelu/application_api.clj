@@ -232,8 +232,8 @@
                        :required [:application/cancel]}]
    :notified         true
    :on-success       [(notify :application-state-change)
-                      (fn [{:keys [application]} _]
-                        (when (allu/allu-application? application)
+                      (fn [{:keys [application organization]} _]
+                        (when (allu/allu-application? @organization (permit/permit-type application))
                           (allu/cancel-application! application)))]
    :states           states/all-application-or-archiving-project-states
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
@@ -343,8 +343,8 @@
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)
                       (notify :organization-housing-office)
-                      (fn [{{:keys [id] :as application} :application} _]
-                        (when (allu/allu-application? application)
+                      (fn [{{:keys [id] :as application} :application :keys [organization]} _]
+                        (when (allu/allu-application? @organization (permit/permit-type application))
                           ;; TODO: Use message queue to delay and retry interaction with ALLU.
                           ;; TODO: Save messages for inter-system debugging etc.
                           ;; TODO: Send errors to authority instead of applicant?
@@ -655,8 +655,8 @@
    :states           #{:submitted}
    :pre-checks       [(partial sm/validate-state-transition :draft)]
    :on-success       [(notify :application-return-to-draft)
-                      (fn [{:keys [application]} _]
-                        (when (allu/allu-application? application)
+                      (fn [{:keys [application organization]} _]
+                        (when (allu/allu-application? @organization (permit/permit-type application))
                           (allu/cancel-application! application)))]}
   [{{:keys [role] :as user}         :user
     {:keys [state] :as application} :application

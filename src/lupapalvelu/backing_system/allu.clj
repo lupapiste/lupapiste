@@ -14,12 +14,13 @@
             [sade.http :as http]
             [sade.schemas :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
                                   ApplicationId ISO-3166-alpha-2 date-string]]
-            [lupapalvelu.attachment :refer [get-attachment-file!]]
+            [lupapalvelu.attachment :as attachment :refer [get-attachment-file!]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
+            [lupapalvelu.integrations.geojson-2008-schemas :as geo]
+            [lupapalvelu.permit :as permit]))
 
 ;;;; Schemas
 ;;;; ===================================================================================================================
@@ -308,14 +309,8 @@
 ;;;; Should you use this?
 ;;;; ===================================================================================================================
 
-(def- allu-organizations #{"091-YA"})
-
-(def- allu-permit-subtypes #{"sijoituslupa" "sijoitussopimus"})
-
-(defn allu-application? [{:keys [permitSubtype organization]}]
-  (and (env/feature? :allu)
-       (contains? allu-organizations organization)
-       (contains? allu-permit-subtypes permitSubtype)))
+(defn allu-application? [organization permit-type]
+  (and (env/feature? :allu) (= (:id organization) "091-YA") (= permit-type "YA")))
 
 ;;;; ALLU Proxy
 ;;;; ===================================================================================================================
@@ -424,11 +419,11 @@
         {:status (:or 200 201), :body allu-id} (info (:id app) "was updated in ALLU as" allu-id)
         response (allu-http-fail! response)))))
 
-(defn updater [{{:keys [id] :as application} :application} _]
-  (when (allu-application? application)
+(defn updater [{{:keys [id] :as application} :application :keys [organization]} _]
+  (when (allu-application? @organization (permit/permit-type application))
     (update-placement-contract! (domain/get-application-no-access-checking id))))
 
-(defn lock-placement-contract!
+(defn- lock-placement-contract!
   "Lock placement contract in ALLU for verdict evaluation."
   [app]
   (let [[endpoint request] (placement-locking-request (env/value :allu :url) (env/value :allu :jwt) app)]
@@ -452,3 +447,11 @@
   [application attachments]
   (doall (for [attachment attachments]
            (send-attachment! application attachment))))
+
+(defn approve-application!
+  "Approve application in ALLU. Returns a seq of attachment file IDs that were sent."
+  [application]
+  ;; TODO: Non-placement-contract ALLU applications
+  (lock-placement-contract! application)
+  ;; TODO: Send comments
+  (send-attachments! application (filter attachment/unsent? (:attachments application))))

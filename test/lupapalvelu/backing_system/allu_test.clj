@@ -9,11 +9,11 @@
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]
+            [lupapalvelu.organization :refer [PermitType]]
 
             [midje.sweet :refer [facts fact => contains]]
             [midje.util :refer [testable-privates]]
             [clojure.test.check :refer [quick-check]]
-            [clojure.test.check.generators :as gen]
             [com.gfredericks.test.chuck.properties :refer [for-all]]
             [com.gfredericks.test.chuck.generators :refer [string-from-regex]]
             [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
@@ -50,18 +50,15 @@
 ;;;; ==================================================================================================================
 
 (facts "allu-application?"
-  (fact "Use ALLU integration for Helsinki YA sijoituslupa and sijoitussopimus."
-    (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoituslupa"}) => true
-    (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoitussopimus"}) => true)
+  (fact "Use ALLU integration for Helsinki YA."
+    (allu/allu-application? {:id "091-YA"} "YA") => true)
 
   (fact "Do not use ALLU integration for anything else."
     (quick-check 10
-                 (for-all [organization organizations
-                           permitSubtype gen/string-alphanumeric
-                           :when (not (and (= organization "091-YA")
-                                           (or (= permitSubtype "sijoituslupa")
-                                               (= permitSubtype "sijoitussopimus"))))]
-                   (not (allu/allu-application? {:organization organization, :permitSubtype permitSubtype}))))
+                 (for-all [org-id organizations
+                           permit-type (sg/generator PermitType)
+                           :when (not (and (= org-id "091-YA") (= permit-type "YA")))]
+                   (not (allu/allu-application? {:id org-id} permit-type))))
     => passing-quick-check))
 
 (facts "application->allu-placement-contract"

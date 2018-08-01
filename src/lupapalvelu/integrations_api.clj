@@ -95,20 +95,13 @@
   "If a backing system is defined for the application, send approval message there.
   Returns [backing-system-in-use sent-file-ids] where sent-file-ids is nil if backing system is not in use."
   [command {:keys [id] :as application} organization current-state lang]
-  (let [use-allu (allu/allu-application? application)
+  (let [use-allu (allu/allu-application? @organization (permit/permit-type application))
         use-krysp (org/krysp-integration? @organization (permit/permit-type application))
         integration-available (or use-allu use-krysp)
         sent-file-ids (if integration-available
                         (let [submitted-application (mongo/by-id :submitted-applications id)]
                           (cond
-                            use-allu
-                            ;; TODO: This should be just a a call to allu/approve! or something like that:
-                            (do
-                              ;; TODO: Non-placement-contract ALLU applications
-                              (allu/lock-placement-contract! application)
-                              ;; TODO: Send comments
-                              (allu/send-attachments! application
-                                                      (filter attachment/unsent? (:attachments application))))
+                            use-allu (allu/approve-application! submitted-application)
 
                             use-krysp
                             (mapping-to-krysp/save-application-as-krysp command lang submitted-application
@@ -192,7 +185,7 @@
                                               all-attachments)]
     (if (seq attachments-wo-sent-timestamp)
       (let [application (assoc application :attachments attachments-wo-sent-timestamp)
-            sent-file-ids (if (allu/allu-application? application)
+            sent-file-ids (if (allu/allu-application? @organization (permit/permit-type application))
                             (allu/send-attachments! application attachments-wo-sent-timestamp)
                             (mapping-to-krysp/save-unsent-attachments-as-krysp user organization application lang))
             data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
