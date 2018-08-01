@@ -94,7 +94,7 @@
 (defn- backing-system-approve-application!
   "If a backing system is defined for the application, send approval message there.
   Returns [backing-system-in-use sent-file-ids] where sent-file-ids is nil if backing system is not in use."
-  [command application organization current-state lang]
+  [command {:keys [id] :as application} organization current-state lang]
   (let [use-allu (allu/allu-application? application)
         use-krysp (org/krysp-integration? @organization (permit/permit-type application))
         integration-available (or use-allu use-krysp)
@@ -102,7 +102,7 @@
                         (let [submitted-application (mongo/by-id :submitted-applications id)]
                           (cond
                             use-allu
-                            ;; TODO: This should be justa a call to allu/approve! or something like that:
+                            ;; TODO: This should be just a a call to allu/approve! or something like that:
                             (do
                               ;; TODO: Non-placement-contract ALLU applications
                               (allu/lock-placement-contract! application)
