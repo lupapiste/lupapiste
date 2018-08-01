@@ -73,31 +73,6 @@
       transfer
       (assoc transfer (:data-key data-map) (:data data-map)))))
 
-(defn- do-approve [{:keys [application organization created] :as command} id current-state lang do-rest-fn]
-  (if-let [validation-failure (app/validate-link-permits application)]
-    validation-failure
-    (cond
-      (allu/allu-application? application)
-      (do
-        ;; TODO: Non-placement-contract ALLU applications
-        (allu/lock-placement-contract! application)
-        ;; TODO: Send comments
-        (allu/send-attachments! application (filter attachment/unsent? (:attachments application)))
-        (do-rest-fn true nil))
-
-      (org/krysp-integration? @organization (permit/permit-type application))
-      (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
-            sent-file-ids (let [submitted-application (mongo/by-id :submitted-applications id)]
-                            (mapping-to-krysp/save-application-as-krysp command lang submitted-application
-                                                                        :current-state current-state))
-            attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids
-                                                                                        created)
-                                    {})]
-        (do-rest-fn true attachments-updates))
-
-      ;; Integration details not defined for the organization -> let the approve command pass
-      :else (do-rest-fn false nil))))
-
 (defn- ensure-general-handler-is-set [handlers user organization]
   (let [general-id (org/general-handler-id-for-organization organization)]
     (if (or (nil? general-id) (util/find-by-key :roleId general-id handlers))
@@ -116,6 +91,33 @@
                  (ss/blank? bulletinOpDescription))
         (fail :error.invalid-value)))))
 
+(defn- backing-system-approve-application!
+  "If a backing system is defined for the application, send approval message there.
+  Returns [backing-system-in-use sent-file-ids] where sent-file-ids is nil if backing system is not in use."
+  [command application organization current-state lang]
+  (let [use-allu (allu/allu-application? application)
+        use-krysp (org/krysp-integration? @organization (permit/permit-type application))
+        integration-available (or use-allu use-krysp)
+        sent-file-ids (if integration-available
+                        (let [submitted-application (mongo/by-id :submitted-applications id)]
+                          (cond
+                            use-allu
+                            ;; TODO: This should be justa a call to allu/approve! or something like that:
+                            (do
+                              ;; TODO: Non-placement-contract ALLU applications
+                              (allu/lock-placement-contract! application)
+                              ;; TODO: Send comments
+                              (allu/send-attachments! application
+                                                      (filter attachment/unsent? (:attachments application))))
+
+                            use-krysp
+                            (mapping-to-krysp/save-application-as-krysp command lang submitted-application
+                                                                        :current-state current-state)
+
+                            :else (assert false "should have been unreachable")))
+                        nil)]
+    [integration-available sent-file-ids]))
+
 (defcommand approve-application
   {:parameters       [id lang]
    :pre-checks       [temporary-approve-prechecks
@@ -127,33 +129,34 @@
    :states           #{:submitted :complementNeeded}
    :org-authz-roles  #{:approver}}
   [{:keys [application created user organization] :as command}]
-  (let [current-state  (:state application)
-        next-state   (if (yax/ya-extension-app? application)
-                       (sm/verdict-given-state application)
-                       (sm/next-state application))
-        _           (assert (sm/valid-state? application next-state))
+  (let [current-state (:state application)
+        next-state (if (yax/ya-extension-app? application)
+                     (sm/verdict-given-state application)
+                     (sm/next-state application))
+        _ (assert (sm/valid-state? application next-state))
 
-        handlers    (ensure-general-handler-is-set (:handlers application) user @organization)
+        handlers (ensure-general-handler-is-set (:handlers application) user @organization)
         application (-> application
                         (assoc :handlers handlers)
-                        (app/post-process-app-for-krysp @organization))
-        mongo-query {:state {$in ["submitted" "complementNeeded"]}}
-        indicator-updates (app/mark-indicators-seen-updates command)
-        transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
-        do-update (fn [integration-available attachments-updates]
-                    (update-application (assoc command :application application)
-                      mongo-query
-                      (util/deep-merge
-                        {$push {:transfers transfer}}
-                        {$set (util/deep-merge
-                                (when handlers
-                                  {:handlers handlers})
-                                attachments-updates
-                                indicator-updates)}
-                        (app-state/state-transition-update next-state created application user)))
-                    (ok :integrationAvailable integration-available))]
-
-    (do-approve (assoc command :application application) id current-state lang do-update)))
+                        (app/post-process-app-for-krysp @organization))]
+    (or (app/validate-link-permits application)             ; If validation failure is non-nil, just return it.
+        (let [[integration-available sent-file-ids] (backing-system-approve-application! command application
+                                                                                         organization current-state lang)
+              all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
+              attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids
+                                                                                          created)
+                                      {})
+              transfer (get-transfer-item :exported-to-backing-system {:created created :user user})]
+          (update-application (assoc command :application application)
+                              {:state {$in ["submitted" "complementNeeded"]}}
+                              (util/deep-merge
+                                {$push {:transfers transfer}
+                                 $set (util/deep-merge
+                                        (when handlers {:handlers handlers})
+                                        attachments-updates
+                                        (app/mark-indicators-seen-updates command))}
+                                (app-state/state-transition-update next-state created application user)))
+          (ok :integrationAvailable integration-available)))))
 
 (defn- application-already-exported [type]
   (fn [{application :application}]
