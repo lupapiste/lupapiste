@@ -122,6 +122,7 @@
         hmac-relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec mutables) "target")
         req (request/ring-request)
         sessionid (get-in req [:session :id])
+        _ (println "moi")
         trid (security/random-password)] ;; Is trid actually necessary here?
     (saml-sp/get-idp-redirect (:idp-uri config)
                               saml-request
@@ -153,7 +154,9 @@
         valid? (and valid-relay-state? valid-signature?)
         saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter))
         parsed-saml-info (parse-saml-info saml-info)
-        {:keys [email firstName lastName organization groups]} (get-in parsed-saml-info [:assertions :attrs])
+        {:keys [email firstName lastName groups]} (get-in parsed-saml-info [:assertions :attrs])
+        ;; This retrieves the orgid by user email (these need to be set in the database of course for this to work...)
+        organization (-> email ad-login-data-by-domain first :id)
         _ (reset! tila {:req req
                         :sp-cert sp-cert
                         :acs-uri acs-uri
@@ -168,11 +171,6 @@
         _ (info parsed-saml-info)
         _ (clojure.pprint/pprint parsed-saml-info)
         _ (info (str "SAML response validation " (if valid? "was successful" "failed")))
-        ; _ (println "TÄSSÄ TÄSSÄ")
-        ; _ (println (saml-sp/validate-saml-response-signature saml-resp "MOIKKA"))
-        ; _ (str "response: " saml-resp)
-        _ (str "ALLEKIRJOITUS: " (.getSignature saml-resp))
-        _ (println (str "sp-cert: " sp-cert))
         ]
     (if valid?
       (let [orgAuthz (if (string? groups) #{groups} (set groups))
@@ -184,7 +182,9 @@
                        :enabled   true
                        :orgAuthz  {(keyword organization) orgAuthz}}        ;; validointi ja virheiden hallinta?
             user (if-let [user-from-db (usr/get-user-by-email email)]
-                   (let [updated-user-data (util/deep-merge user-from-db user-data)]
+                   user-from-db
+                   ;; The following form is temporarily commented out since the deep merge breaks orgAuthz field as it is now
+                   #_(let [updated-user-data (util/deep-merge user-from-db user-data)]
                      (user-api/update-authority user-from-db email updated-user-data)
                      updated-user-data)
                    (usr/create-new-user {:role "admin"} user-data))

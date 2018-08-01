@@ -6,6 +6,7 @@
             [lupapalvelu.i18n :as i18n]
             [sade.core :refer :all]
             [sade.env :as env]
+            [sade.strings :as ss]
             [clj-time.coerce :as tc]
             [clj-time.core :as t]))
 
@@ -1364,6 +1365,48 @@
                        :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported false}
+
+                      ;; Pori R, has ad-login settings and only-use-inspection-from-backend set to true
+                      {:id "609-R"
+                       :name (names {:fi "Pori - Rakennusvalvonta"
+                                     :sv "Björneborg - Byggnadstilsyn"})
+                       :scope [{:open-inforequest-email nil
+                                :open-inforequest false
+                                :new-application-enabled true
+                                :inforequest-enabled true
+                                :municipality "609"
+                                :permitType "R"}
+                               {:open-inforequest-email nil
+                                :open-inforequest false
+                                :new-application-enabled true
+                                :inforequest-enabled true
+                                :municipality "609"
+                                :permitType "P"}]
+                       :link [(link {:fi "Rakennusvalvonta"
+                                     :sv "Byggnadstilsyn"
+                                     :en "Rakennusvalvonta"}
+                                     "https://www.pori.fi/asuminen-ja-ymparisto/rakentaminen/rakennusvalvonta")]
+                       :handler-roles [{:id "abba1111111111111111b297"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
+                       :operations-attachments {:poikkeamis [[:paapiirustus :asemapiirros]]}
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
+                       :automatic-ok-for-attachments-enabled true
+                       :multiple-operations-supported false
+                       :only-use-inspection-from-backend true
+                       :ad-login {:enabled true
+                                  :idp-cert (ss/join "\n" ["-----BEGIN CERTIFICATE-----"
+                                                           "MIIDkDCCAngCCQCC3cD/vgiFszANBgkqhkiG9w0BAQsFADCBiTELMAkGA1UEBhMC"
+                                                           "spfqkmX4uluF3bYhnVTfxm9P0+Rwsd3rJ1DyffQ/taW+/d9ow64pDy6bkOxyOkyt"
+                                                           "MCWpOg=="
+                                                           "-----END CERTIFICATE-----"])
+                                  :idp-uri "http://localhost:7000"
+                                  :trusted-domains ["pori.fi"]}}
 
                       ;; Helsinki R
                       {:id "091-R"
