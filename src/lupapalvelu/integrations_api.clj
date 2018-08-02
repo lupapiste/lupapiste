@@ -11,6 +11,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.autologin :as autologin]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.backing-system.core :as bs]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
@@ -91,26 +92,6 @@
                  (ss/blank? bulletinOpDescription))
         (fail :error.invalid-value)))))
 
-(defn- backing-system-approve-application!
-  "If a backing system is defined for the application, send approval message there.
-  Returns [backing-system-in-use sent-file-ids] where sent-file-ids is nil if backing system is not in use."
-  [command {:keys [id] :as application} organization current-state lang]
-  (let [use-allu (allu/allu-application? @organization (permit/permit-type application))
-        use-krysp (org/krysp-integration? @organization (permit/permit-type application))
-        integration-available (or use-allu use-krysp)
-        sent-file-ids (if integration-available
-                        (let [submitted-application (mongo/by-id :submitted-applications id)]
-                          (cond
-                            use-allu (allu/approve-application! submitted-application)
-
-                            use-krysp
-                            (mapping-to-krysp/save-application-as-krysp command lang submitted-application
-                                                                        :current-state current-state)
-
-                            :else (assert false "should have been unreachable")))
-                        nil)]
-    [integration-available sent-file-ids]))
-
 (defcommand approve-application
   {:parameters       [id lang]
    :pre-checks       [temporary-approve-prechecks
@@ -133,8 +114,8 @@
                         (assoc :handlers handlers)
                         (app/post-process-app-for-krysp @organization))]
     (or (app/validate-link-permits application)             ; If validation failure is non-nil, just return it.
-        (let [[integration-available sent-file-ids] (backing-system-approve-application! command application
-                                                                                         organization current-state lang)
+        (let [[integration-available sent-file-ids] (bs/approve-application! command application organization
+                                                                             current-state lang)
               all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
               attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids
                                                                                           created)
