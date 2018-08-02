@@ -12,6 +12,10 @@
             [lupapalvelu.autologin :as autologin]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.backing-system.core :as bs]
+            [lupapalvelu.backing-system.allu :as allu]
+            [lupapalvelu.backing-system.asianhallinta.core :as ah]
+            [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
@@ -29,9 +33,6 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as user]
-            [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
-            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
-            [lupapalvelu.backing-system.asianhallinta.core :as ah]
             [lupapalvelu.ya-extension :as yax]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -39,8 +40,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as validators]
-            [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.backing-system.allu :as allu]))
+            [lupapalvelu.foreman :as foreman]))
 
 (defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
@@ -154,7 +154,8 @@
    :user-roles       #{:authority}
    :pre-checks       [(some-fn (every-pred (permit/validate-permit-type-is permit/R)
                                            mapping-to-krysp/http-not-allowed) ; has SFTP KRYSP support for this...
-                               (comp allu/allu-application? :application)) ; ...or uses ALLU instead
+                               (fn [{:keys [application organization]}] ; ...or uses ALLU instead
+                                 (allu/allu-application? @organization (permit/permit-type application))))
                       (application-already-exported :exported-to-backing-system)
                       has-unsent-attachments]
    :states           (conj states/post-verdict-states :sent)
@@ -165,10 +166,8 @@
                                                           (comp (set attachmentIds) :id)) ; ...and requested
                                               all-attachments)]
     (if (seq attachments-wo-sent-timestamp)
-      (let [application (assoc application :attachments attachments-wo-sent-timestamp)
-            sent-file-ids (if (allu/allu-application? @organization (permit/permit-type application))
-                            (allu/send-attachments! application attachments-wo-sent-timestamp)
-                            (mapping-to-krysp/save-unsent-attachments-as-krysp user organization application lang))
+      (let [sent-file-ids (bs/send-attachments! (bs/get-backing-system @organization (permit/permit-type application))
+                                                user @organization application attachments-wo-sent-timestamp lang)
             data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
             attachments-transfer-data {:data-key :attachments
                                        :data (map :id attachments-wo-sent-timestamp)}

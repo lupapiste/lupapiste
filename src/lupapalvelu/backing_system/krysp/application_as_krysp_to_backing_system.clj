@@ -189,17 +189,18 @@
 
 (defn save-unsent-attachments-as-krysp
   "Sends attachments to municipality backend. Returns a sequence of attachment file IDs that were sent."
-  [user organization application lang]
-  (let [permit-type   (permit/permit-type application)
-        krysp-version (resolve-krysp-version @organization permit-type)
-        begin-of-link (get-begin-of-link permit-type @organization)
+  [user organization application attachments lang]
+  (let [application (assoc application :attachments attachments) ; HACK: Callees expect to get `attachments` like this.
+        permit-type   (permit/permit-type application)
+        krysp-version (resolve-krysp-version organization permit-type)
+        begin-of-link (get-begin-of-link permit-type organization)
         filtered-app  (remove-unsupported-attachments application)
 
-        output-fn     (if-some [http-conf (http-conf @organization permit-type)]
+        output-fn     (if-some [http-conf (http-conf organization permit-type)]
                         (fn [xml attachments]
                           (krysp-http/send-xml application user :attachments xml http-conf)
                           (->> attachments (map :fileId) (remove nil?)))
-                        #(writer/write-to-disk %1 application %2 (resolve-output-directory @organization permit-type)))
+                        #(writer/write-to-disk %1 application %2 (resolve-output-directory organization permit-type)))
         mapping-result (rl-mapping/save-unsent-attachments-as-krysp filtered-app lang krysp-version begin-of-link)]
     (if-some [{:keys [xml attachments]} mapping-result]
       (-> (data-xml/emit-str xml)
