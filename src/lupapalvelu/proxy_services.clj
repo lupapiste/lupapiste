@@ -87,9 +87,9 @@
                                   :propertyId property-id
                                   :name {:fi (i18n/localize :fi "municipality" backup-municipality)
                                          :sv (i18n/localize :sv "municipality" backup-municipality)}}))]
-      (if (seq found-points)
-        (resp/json result-data)
-        (resp/status 503 "Service temporarily unavailable")))
+      (cond (seq found-points) (resp/json result-data)
+            (nil? found-points) (resp/status 503 "Service temporarily unavailable")
+            :else (resp/status 404 "Not found")))
     (resp/status 400 "Bad Request")))
 
 (defn property-id-by-point-proxy [{{x :x y :y} :params}]

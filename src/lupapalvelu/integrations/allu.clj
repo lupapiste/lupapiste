@@ -1,5 +1,6 @@
 (ns lupapalvelu.integrations.allu
-  (:require [clojure.walk :refer [postwalk]]
+  (:require [clojure.core.match :refer [match]]
+            [clojure.walk :refer [postwalk]]
             [mount.core :refer [defstate]]
             [schema.core :as sc :refer [defschema optional-key enum]]
             [cheshire.core :as json]
@@ -202,18 +203,18 @@
                       :ovt (if (seq ovtTunnus) ovtTunnus verkkolaskuTunnus))
       customer)))
 
-(defn- doc->customer [payee? {{tag :_selected :as data} :data}]
-  (case tag
-    "henkilo" (person->customer (:henkilo data))
-    "yritys" (company->customer payee? (:yritys data))))
+(defn- doc->customer [payee? doc]
+  (match (:data doc)
+    {:_selected "henkilo", :henkilo person} (person->customer person)
+    {:_selected "yritys", :yritys company} (company->customer payee? company)))
 
 (defn- person->contact [{:keys [henkilotiedot], {:keys [puhelin email]} :yhteystiedot}]
   {:name (fullname henkilotiedot), :phone puhelin, :email email})
 
-(defn- customer-contact [{{tag :_selected :as data} :data}]
-  (case tag
-    "henkilo" (:henkilo data)
-    "yritys" (-> data :yritys :yhteyshenkilo)))
+(defn- customer-contact [customer-doc]
+  (match (:data customer-doc)
+    {:_selected "henkilo", :henkilo person} person
+    {:_selected "yritys", :yritys {:yhteyshenkilo contact}} contact))
 
 (defn- convert-applicant [applicant-doc]
   {:customer (doc->customer false applicant-doc)
@@ -238,7 +239,7 @@
 
 (def- format-date-time (partial tf/unparse (tf/formatters :date-time-no-ms)))
 
-(defn- convert-value-flattened-app [{:keys [id propertyId documents] :as app}]
+(defn- convert-value-flattened-app [pending-on-client {:keys [id propertyId documents] :as app}]
   (let [applicant-doc (first (filter #(= (doc-name %) "hakija-ya") documents))
         work-description (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa") documents))
         payee-doc (first (filter #(= (doc-name %) "yleiset-alueet-maksaja") documents))
@@ -252,21 +253,30 @@
              :identificationNumber         id
              :invoicingCustomer            (convert-payee payee-doc)
              :name                         (str id " " kind)
-             :pendingOnClient              true
+             :pendingOnClient              pending-on-client
              :postalAddress                (application-postal-address app)
              :propertyIdentificationNumber propertyId
              :startTime                    (format-date-time start)
              :workDescription              (-> work-description :data :kayttotarkoitus)}]
     (assoc-when res :customerReference (not-empty (-> payee-doc :data :laskuviite)))))
 
-(sc/defn ^{:private true, :always-validate true} application->allu-placement-contract :- PlacementContract [app]
-  (-> app flatten-values convert-value-flattened-app))
+(sc/defn ^{:private true, :always-validate true} application->allu-placement-contract :- PlacementContract
+  [pending-on-client app]
+  (->> app flatten-values (convert-value-flattened-app pending-on-client)))
 
 (defn- placement-creation-request [allu-url allu-jwt app]
   [(str allu-url "/placementcontracts")
    {:headers      {:authorization (str "Bearer " allu-jwt)}
     :content-type :json
-    :body         (json/encode (application->allu-placement-contract app))}])
+    :body         (json/encode (application->allu-placement-contract true app))}])
+
+(defn- placement-locking-request [allu-url allu-jwt app]
+  (let [allu-id (-> app :integrationKeys :ALLU :id)]
+    (assert allu-id (str (:id app) " does not contain an ALLU id"))
+    [(str allu-url "/placementcontracts/" allu-id)
+     {:headers      {:authorization (str "Bearer " allu-jwt)}
+      :content-type :json
+      :body         (json/encode (application->allu-placement-contract false app))}]))
 
 ;;;; Should you use this?
 ;;;; ===================================================================================================================
@@ -279,52 +289,64 @@
   (and (contains? allu-organizations organization)
        (contains? allu-permit-subtypes permitSubtype)))
 
-;;;; Effectful operations
+;;;; ALLU Proxy
 ;;;; ===================================================================================================================
-
-;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
-(defn- handle-placement-contract-response [{:keys [status body]}]
-  (case status
-    (200 201) [:ok body]
-    400 [:err :error.allu.malformed-application {:body body}]
-    [:err :error.allu.http {:status status :body body}]))
 
 (defprotocol ALLUPlacementContracts
   (create-contract! [self endpoint request])
+  (lock-contract! [self endpoint request])
 
   (allu-fail! [self text info-map]))
 
 (deftype RemoteALLU []
   ALLUPlacementContracts
   (create-contract! [_ endpoint request] (http/post endpoint request))
+  (lock-contract! [_ endpoint request] (http/put endpoint request))
 
   (allu-fail! [_ text info-map] (fail! text info-map)))     ; TODO: Is there a better way to handle post-fn errors?
 
-(deftype LocalMockALLU [current-id]
+(deftype LocalMockALLU [state]
   ALLUPlacementContracts
   (create-contract! [_ _ {placement-contract :body}]
     (if-let [validation-error (sc/check PlacementContract (json/decode placement-contract true))]
       {:status 400, :body validation-error}
-      {:status 200, :body (str (swap! current-id inc))}))
+      (let [{:keys [id-counter]} (swap! state (fn [{:keys [id-counter] :as state}]
+                                                (-> state
+                                                    (update :id-counter inc)
+                                                    (update :applications assoc (str id-counter) placement-contract))))]
+        {:status 200, :body (str (dec id-counter))})))
+
+  (lock-contract! [_ endpoint {placement-contract :body}]
+    (let [allu-id (second (re-find #".*/(\d+)" endpoint))]
+      (if-let [validation-error (sc/check PlacementContract (json/decode placement-contract true))]
+        {:status 400, :body validation-error}
+        (if (contains? (:applications @state) allu-id)
+          {:status 200, :body allu-id}
+          {:status 404, :body (str "Not Found: " allu-id)}))))
 
   (allu-fail! [_ text info-map] (fail! text info-map)))     ; TODO: Is there a better way to handle post-fn errors?
 
 (defstate allu-instance
   :start (if (env/dev-mode?)
-           (->LocalMockALLU (atom 0))
+           (->LocalMockALLU (atom {:id-counter 0, :applications {}}))
            (->RemoteALLU)))
 
-(defn create-placement-contract!
-  "Create placement contract in ALLU. Returns ALLU id for the contract.
+;;;; Public API
+;;;; ===================================================================================================================
 
-  Can `sade.core/fail!` with
-  * :error.allu.malformed-application - Application is malformed according to ALLU.
-  * :error.allu.http :status _ :body _ - An HTTP error. Probably due to a bug or connection issues."
+(defn create-placement-contract!
+  "Create placement contract in ALLU. Returns ALLU id for the contract."
   [app]
-  (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)
-        [tag & fields] (handle-placement-contract-response (create-contract! allu-instance endpoint request))]
-    (case tag
-      :ok (let [[allu-id] fields]
-            (info (:id app) "was created succesfully in ALLU as" allu-id)
-            allu-id)
-      :err (apply allu-fail! allu-instance fields))))
+  (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) app)]
+    (match (create-contract! allu-instance endpoint request)
+      {:status (:or 200 201), :body allu-id} (do (info (:id app) "was created succesfully in ALLU as" allu-id)
+                                                 allu-id)
+      response (allu-fail! allu-instance :error.allu.http (select-keys response [:status :body])))))
+
+(defn lock-placement-contract!
+  "Lock placement contract in ALLU for verdict evaluation."
+  [app]
+  (let [[endpoint request] (placement-locking-request (env/value :allu :url) (env/value :allu :jwt) app)]
+    (match (lock-contract! allu-instance endpoint request)
+      {:status (:or 200 201), :body allu-id} (info (:id app) "was locked succesfully in ALLU as" allu-id)
+      response (allu-fail! allu-instance :error.allu.http (select-keys response [:status :body])))))

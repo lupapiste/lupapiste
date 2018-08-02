@@ -37,10 +37,8 @@
             [sade.strings :as ss]
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
-            [ring.util.codec :as codec]
-            [lupapalvelu.storage.file-storage :as storage])
-  (:import [org.xml.sax SAXParseException]
-           [java.util.concurrent ExecutorService TimeUnit]))
+            [ring.util.codec :as codec])
+  (:import [org.xml.sax SAXParseException]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -865,72 +863,35 @@
               (error "Some attachments were not successfully unarchived for application" (:id application)))))))
     (println "Organization must be provided.")))
 
-(defn print-info [id att version message]
-  (let [type (get-in att [:type :type-id])
-        content (:contentType version)]
-    (println id "-" (:id att) "-" (:fileId version) ", msg:" message "," content"," type)))
-
-(defn analyze-missing [& args]
+(defn fix-bad-archival-conversions-in-091-R []
   (mongo/connect!)
-  (info "Starting analyze-missing job")
-  (let [ts 1522540800000]
-    (doseq [app (mongo/select :applications
-                              {$or [{:modified {$gte ts}}
-                                    {:verdicts.timestamp {$gte ts}}
-                                    {:tasks.created {$gte ts}}]}
-                              [:attachments]
-                              {:_id 1})
-            {version :latestVersion :as att} (->> (:attachments app)
-                                                  (filter  :latestVersion)
-                                                  (remove #(get-in % [:latestVersion :onkaloFileId])))
-            :let [file (mongo/download (:fileId version))
-                  different-original? (not= (:fileId version) (:originalFileId version))]]
-      (when-not file
-        (if different-original?
-          (if (mongo/download (:originalFileId version))
-            (print-info (:id app) att version "fileId missing but originalFileIdFound")
-            (print-info (:id app) att version "fileId AND originalFileId missing"))
-          (print-info (:id app) att version "fileId missing"))))))
-
-(defn move-files-to-ceph-in-applications [& application-ids]
-  (info "Moving files to Ceph in applications" application-ids)
-  (mongo/connect!)
-  (doseq [app-id application-ids]
-    (logging/with-logging-context {:applicationId app-id}
-      (info "Checking attachments for migration")
-      (try (storage/move-application-mongodb-files-to-s3 app-id)
-           (catch Throwable t
-             (error t "Exception occurred during the migration")))))
-  (info "Done"))
-
-(defonce ^ExecutorService ceph-migration-threadpool (threads/threadpool 8 "ceph-migration-worker"))
-
-(defn move-app-files-to-ceph-in-organizations [& organization-ids]
-  (if (seq organization-ids)
-    (do (info "Moving application files to Ceph in organizations" organization-ids)
-        (mongo/connect!)
-        (.addShutdownHook (Runtime/getRuntime)
-                          (Thread.
-                            ^Runnable
-                            (fn []
-                              (println "Interrupt received, shutting down.")
-                              (.shutdownNow ceph-migration-threadpool)
-                              (.awaitTermination ceph-migration-threadpool 60 TimeUnit/SECONDS)
-                              (println "Threads finished"))))
-        (let [threads (->> (mongo/select :applications
-                                         {:organization                            {$in organization-ids}
-                                          :attachments.latestVersion.fileId        {$type "string"}
-                                          :attachments.latestVersion.storageSystem "mongodb"}
-                                         [:_id]
-                                         {:_id 1})
-                           (mapv (fn [{:keys [id]}]
-                                   (threads/submit ceph-migration-threadpool
-                                                   (logging/with-logging-context {:applicationId id}
-                                                     (info "Checking attachments for migration")
-                                                     (try (storage/move-application-mongodb-files-to-s3 id)
-                                                          (catch Throwable t
-                                                            (error t "Exception occurred during the migration"))))))))]
-          (info "All migration threads submitted. Number of applications:" (count threads))
-          (threads/wait-for-threads threads))
-        (info "Done"))
-    (error "Missing organization ids")))
+  (info "Reconverting attachments to PDF/A in 091-R archiving projects")
+  (doseq [{:keys [id]} (mongo/select :applications
+                                     {:organization "091-R"
+                                      :permitType "ARK"
+                                      ; 2018-07-12 09:00 Z
+                                      :created {$gt 1531386000000}
+                                      :state {$in ["open" "underReview"]}}
+                                     [:_id]
+                                     {:_id 1})]
+    (logging/with-logging-context {:applicationId id}
+      (doseq [{:keys [latestVersion versions metadata] :as att} (:attachments (mongo/by-id :applications id [:attachments]))
+              :when (and (not= :arkistoitu (keyword (:tila metadata)))
+                         (or (and (:archivable latestVersion)
+                                  (not= (:fileId latestVersion) (:originalFileId latestVersion)))
+                             (and (not (:archivable latestVersion))
+                                  (= (:archivabilityError latestVersion) "invalid-pdfa"))))]
+        (info "Reconverting attachment" (:id att))
+        (let [last-idx (dec (count versions))]
+          (mongo/update :applications
+                        {:_id id
+                         :attachments.id (:id att)}
+                        {$set {:attachments.$.latestVersion.archivable false
+                               :attachments.$.latestVersion.fileId (:originalFileId latestVersion)
+                               (str "attachments.$.versions." last-idx ".archivable") false
+                               (str "attachments.$.versions." last-idx ".fileId") (:originalFileId latestVersion)}})
+          (let [updated-app (mongo/by-id :applications id)
+                attachment (attachment/get-attachment-info updated-app (:id att))]
+            (attachment/convert-existing-to-pdfa! updated-app attachment)))
+        (info "Attachment" (:id att) "processed"))))
+  (info "Done."))

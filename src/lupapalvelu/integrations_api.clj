@@ -38,7 +38,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as validators]
-            [lupapalvelu.foreman :as foreman]))
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.integrations.allu :as allu]))
 
 (defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
@@ -73,16 +74,28 @@
       (assoc transfer (:data-key data-map) (:data data-map)))))
 
 (defn- do-approve [{:keys [application organization created] :as command} id current-state lang do-rest-fn]
-  (if (org/krysp-integration? @organization (permit/permit-type application))
-    (or
-      (app/validate-link-permits application)
+  (if-let [validation-failure (app/validate-link-permits application)]
+    validation-failure
+    (cond
+      (and (env/feature? :allu) (allu/allu-application? application))
+      (do
+        ;; TODO: Send attachments and comments
+        ;; TODO: Non-placement-contract ALLU applications
+        (allu/lock-placement-contract! application)
+        (do-rest-fn true nil))
+
+      (org/krysp-integration? @organization (permit/permit-type application))
       (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
-            sent-file-ids   (let [submitted-application (mongo/by-id :submitted-applications id)]
-                              (mapping-to-krysp/save-application-as-krysp command lang submitted-application :current-state current-state))
-            attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created) {})]
-        (do-rest-fn attachments-updates)))
-    ;; Integration details not defined for the organization -> let the approve command pass
-    (do-rest-fn nil)))
+            sent-file-ids (let [submitted-application (mongo/by-id :submitted-applications id)]
+                            (mapping-to-krysp/save-application-as-krysp command lang submitted-application
+                                                                        :current-state current-state))
+            attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids
+                                                                                        created)
+                                    {})]
+        (do-rest-fn true attachments-updates))
+
+      ;; Integration details not defined for the organization -> let the approve command pass
+      :else (do-rest-fn false nil))))
 
 (defn- ensure-general-handler-is-set [handlers user organization]
   (let [general-id (org/general-handler-id-for-organization organization)]
@@ -126,7 +139,7 @@
         mongo-query {:state {$in ["submitted" "complementNeeded"]}}
         indicator-updates (app/mark-indicators-seen-updates command)
         transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
-        do-update (fn [attachments-updates]
+        do-update (fn [integration-available attachments-updates]
                     (update-application (assoc command :application application)
                       mongo-query
                       (util/deep-merge
@@ -137,7 +150,7 @@
                                 attachments-updates
                                 indicator-updates)}
                         (app-state/state-transition-update next-state created application user)))
-                    (ok :integrationAvailable (not (nil? attachments-updates))))]
+                    (ok :integrationAvailable integration-available))]
 
     (do-approve (assoc command :application application) id current-state lang do-update)))
 

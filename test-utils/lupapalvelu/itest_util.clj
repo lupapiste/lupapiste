@@ -871,7 +871,7 @@
 (defn get-statement-by-user-id [application user-id]
   (some #(when (= user-id (get-in % [:person :userId])) %) (:statements application)))
 
-;; This has a side effect which generates an attachment to appliction
+;; This has a side effect which generates a attachement to appliction
 (defn generate-statement [application-id apikey]
   (let [resp (query sipoo :get-organizations-statement-givers) => ok?
         statement-giver (->> resp :data (some #(when (= (email-for-key apikey) (:email %)) %))) => truthy
