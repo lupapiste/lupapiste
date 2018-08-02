@@ -61,37 +61,12 @@
      :base-uri (:host c)
      :idp-uri "http://localhost:7000" ;; The dockerized, locally running mock-saml instance (https://github.com/lupapiste/mock-saml)
      :idp-cert (parse-certificate (slurp "./idp-public-cert.pem")) ;; This needs to live in Mongo's organizations collection
-     ; :idp-cert "nam nam" ;; This needs to live in Mongo's organizations collection
      :keystore-file (get-in c [:ssl :keystore])
      :keystore-password (get-in c [:ssl :key-password])
      :key-alias "jetty" ;; The normal Lupis certificate
      }))
 
 (util/log-missing-keys! config)
-
-(defn- xml-tree->edn
-  "Takes an xml tree returned by the clojure.data.xml parser, recursively parses it into as readable and flat a Clojure map
-  as is feasible."
-  [element]
-  (cond
-    (nil? element) nil
-    (string? element) element
-    (and (= 1 (count element)) (string? (first element))) (first element)
-    (and (map? element) (= :AttributeValue (:tag element))) (xml-tree->edn (first (:content element)))
-    (and (map? element) (empty? element)) {}
-    (and (= 1 (count element)) (sequential? element)) (xml-tree->edn (first element))
-    (sequential? element) (mapv xml-tree->edn element)
-    (and (map? element) (= :Attribute (:tag element))) {(keyword (:Name (:attrs element))) (xml-tree->edn (:content element))}
-    (map? element) {(:tag element) (xml-tree->edn (:content element))}
-    :else nil))
-
-(defn parse-saml-resp
-  "Takes an SAML message in string format, returns it parsed into a Clojure map.
-  Isn't really all that necessary, since the saml-info var (inside a let binding
-  in ad-login route) contains the same info... Perhaps useful in cases where the SAML
-  message doesn't validate."
-  [xml-string]
-  (-> xml-string sxml/parse xml-tree->edn))
 
 (defn parse-saml-info
   "The saml-info map returned by saml20-clj comes in a wacky format, so its best to
@@ -117,12 +92,11 @@
                                   (:app-name config)
                                   (:acs-uri config)))
 
-(defpage [:get "/api/saml/ad-login"] []
+(defpage [:get "/api/saml/ad-login/:orgid"] {orgid :orgid}
   (let [saml-request (saml-req-factory!)
         hmac-relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec mutables) "target")
         req (request/ring-request)
         sessionid (get-in req [:session :id])
-        _ (println "moi")
         trid (security/random-password)] ;; Is trid actually necessary here?
     (saml-sp/get-idp-redirect (:idp-uri config)
                               saml-request
