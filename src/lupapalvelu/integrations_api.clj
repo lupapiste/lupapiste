@@ -114,8 +114,9 @@
                         (assoc :handlers handlers)
                         (app/post-process-app-for-krysp @organization))]
     (or (app/validate-link-permits application)             ; If validation failure is non-nil, just return it.
-        (let [[integration-available sent-file-ids] (bs/approve-application! command application organization
-                                                                             current-state lang)
+        (let [[integration-available sent-file-ids]
+              (bs/approve-application! (bs/get-backing-system @organization (permit/permit-type application))
+                                       command application current-state lang)
               all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
               attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids
                                                                                           created)

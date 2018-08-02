@@ -1,26 +1,33 @@
 (ns lupapalvelu.backing-system.core
-  (:require [lupapalvelu.backing-system.allu :as allu]
+  (:require [schema.core :as sc]
+            [lupapalvelu.backing-system.allu :as allu]
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as org]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.organization :as org :refer [Organization PermitType]]))
 
-(defn approve-application!
-  "If a backing system is defined for the application, send approval message there.
-  Returns [backing-system-in-use sent-file-ids] where sent-file-ids is nil if backing system is not in use."
-  [command {:keys [id] :as application} organization current-state lang]
-  (let [use-allu (allu/allu-application? @organization (permit/permit-type application))
-        use-krysp (org/krysp-integration? @organization (permit/permit-type application))
-        integration-available (or use-allu use-krysp)
-        sent-file-ids (if integration-available
-                        (let [submitted-application (mongo/by-id :submitted-applications id)]
-                          (cond
-                            use-allu (allu/approve-application! submitted-application)
+(defprotocol BackingSystem
+  (approve-application! [self command application current-state lang]
+    "Send approval message to backing system.
+    Returns [backing-system-in-use sent-file-ids] where sent-file-ids is nil if backing system is not in use."))
 
-                            use-krysp
-                            (mapping-to-krysp/save-application-as-krysp command lang submitted-application
-                                                                        :current-state current-state)
+(deftype NoopBackingSystem []
+  BackingSystem
+  (approve-application! [_ _ _ _ _] [false nil]))
 
-                            :else (assert false "should have been unreachable")))
-                        nil)]
-    [integration-available sent-file-ids]))
+(deftype ALLUBackingSystem []
+  BackingSystem
+  (approve-application! [_ _ {:keys [id]} _ _]
+    [true (allu/approve-application! (mongo/by-id :submitted-applications id))]))
+
+(deftype KRYSPBackingSystem []
+  BackingSystem
+  (approve-application! [_ command {:keys [id]} current-state lang]
+    (let [submitted-application (mongo/by-id :submitted-applications id)]
+      [true (mapping-to-krysp/save-application-as-krysp command lang submitted-application
+                                                        :current-state current-state)])))
+
+(sc/defn get-backing-system :- (sc/protocol BackingSystem) [organization :- Organization, permit-type :- PermitType]
+  (cond
+    (allu/allu-application? organization permit-type) (->ALLUBackingSystem)
+    (org/krysp-integration? organization permit-type) (->KRYSPBackingSystem)
+    :else (->NoopBackingSystem)))
