@@ -342,22 +342,23 @@
    :on-success       [(notify :application-state-change)
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)
-                      (notify :organization-housing-office)
-                      (fn [{{:keys [id] :as application} :application :keys [organization]} _]
-                        (when (allu/allu-application? @organization (permit/permit-type application))
+                      (notify :organization-housing-office)]
+   :pre-checks       [(partial sm/validate-state-transition :submitted)]}
+  [{:keys [application organization] :as command}]
+  (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
+    (if-some [errors (seq (submit-validation-errors command))]
+      (fail :error.cannot-submit-application :errors errors)
+      (let [application (if (allu/allu-application? @organization (permit/permit-type application))
                           ;; TODO: Use message queue to delay and retry interaction with ALLU.
                           ;; TODO: Save messages for inter-system debugging etc.
                           ;; TODO: Send errors to authority instead of applicant?
                           ;; TODO: Non-placement-contract ALLU applications
                           (let [allu-id (allu/create-placement-contract! application)]
-                            (app/set-integration-key id :ALLU {:id allu-id}))))]
-   :pre-checks       [(partial sm/validate-state-transition :submitted)]}
-  [{:keys [application] :as command}]
-  (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
-    (if-some [errors (seq (submit-validation-errors command))]
-      (fail :error.cannot-submit-application :errors errors)
-      (do (app/submit command)
-          (ok)))))
+                            (app/set-integration-key id :ALLU {:id allu-id})
+                            (assoc-in application [:integrationKeys :ALLU :id] allu-id)) ; HACK
+                          application)]
+        (app/submit (assoc command :application application))
+        (ok)))))
 
 (defcommand refresh-ktj
   {:parameters [:id]
