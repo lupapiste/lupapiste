@@ -3,7 +3,7 @@
             [noir.core :refer [defpage]]
             [noir.response :as response]
             [noir.request :as request]
-            [lupapalvelu.organization :refer [ad-login-data-by-domain]]
+            [lupapalvelu.organization :refer [ad-login-data-by-domain get-organization]]
             [lupapalvelu.security :as security]
             [lupapalvelu.user-api :as user-api]
             [lupapalvelu.user :as usr]
@@ -34,10 +34,10 @@
    :ad-org-authz :orgAuthz})
 
 (defn- parse-certificate
-  "Strip the ---BEGIN CERTIFICATE--- and ---END CERTIFICATE--- headers and newlines
+  "Strip the -----BEGIN CERTIFICATE----- and -----END CERTIFICATE----- headers and newlines
   from certificate."
   [certstring]
-  (->> (ss/split certstring #"\n") rest drop-last ss/join))
+  (ss/replace certstring #"[\n ]|(BEGIN|END) CERTIFICATE|-{5}" ""))
 
 (defn make-ad-config [username]
   (let [c (env/get-config)
@@ -53,21 +53,6 @@
        :key-alias "jetty" ;; The normal Lupis certificate
        })))
 
-; (def config (make-ad-config "einari@pori.fi"))
-
-(def config
-  (let [c (env/get-config)]
-    {:app-name "Lupapiste"
-     :base-uri (:host c)
-     :idp-uri "http://localhost:7000" ;; The dockerized, locally running mock-saml instance (https://github.com/lupapiste/mock-saml)
-     :idp-cert (parse-certificate (slurp "./idp-public-cert.pem")) ;; This needs to live in Mongo's organizations collection
-     :keystore-file (get-in c [:ssl :keystore])
-     :keystore-password (get-in c [:ssl :key-password])
-     :key-alias "jetty" ;; The normal Lupis certificate
-     }))
-
-(util/log-missing-keys! config)
-
 (defn parse-saml-info
   "The saml-info map returned by saml20-clj comes in a wacky format, so its best to
   parse it into a more manageable form (without string keys or single-element lists etc)."
@@ -78,70 +63,64 @@
     (map? element) (into {} (for [[k v] element] [(keyword k) (parse-saml-info v)]))
     :else element))
 
-(def- mutables
-  (assoc (saml-sp/generate-mutables)
-         :xml-signer (saml-sp/make-saml-signer (:keystore-file config)
-                                               (:keystore-password config)
-                                               (:key-alias config)
-                                               :algorithm :sha256)))
+(def ad-config
+  (let [c (env/get-config)
+        {:keys [keystore key-password]} (:ssl c)
+        key-alias "jetty"]
+    (atom
+      {:app-name "Lupapiste"
+       :base-uri (:host c)
+       :keystore-file keystore
+       :keystore-password key-password
+       :key-alias key-alias
+       :mutables (assoc (saml-sp/generate-mutables)
+                        :xml-signer (saml-sp/make-saml-signer keystore
+                                                              key-password
+                                                              key-alias
+                                                              :algorithm :sha256))
+       :sp-cert (saml-shared/get-certificate-b64 keystore key-password key-alias)
+       :decrypter (saml-sp/make-saml-decrypter keystore key-password key-alias)
+       :organizational-settings {}})))
 
-(def- saml-req-factory!
-  (saml-sp/create-request-factory mutables
-                                  (:idp-uri config)
-                                  saml-routes/saml-format
-                                  (:app-name config)
-                                  (:acs-uri config)))
+(defn add-organization-data-to-config! [orgid]
+  (if-let [ad-login (:ad-login (get-organization orgid))]
+    (let [{:keys [enabled idp-cert idp-uri trusted-domains]} ad-login
+          acs-uri (str (:host (env/get-config)) "/api/saml/ad-login/" orgid)]
+      (swap! ad-config assoc-in [:organizational-settings (keyword orgid)] {:enabled enabled
+                                                                            :idp-cert (parse-certificate idp-cert)
+                                                                            :idp-uri idp-uri
+                                                                            :trusted-domains trusted-domains
+                                                                            :saml-req-factory! (saml-sp/create-request-factory
+                                                                                                 (:mutables @ad-config)
+                                                                                                 idp-uri
+                                                                                                 saml-routes/saml-format
+                                                                                                 "Lupapiste"
+                                                                                                 acs-uri)}))))
 
 (defpage [:get "/api/saml/ad-login/:orgid"] {orgid :orgid}
-  (let [saml-request (saml-req-factory!)
-        hmac-relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec mutables) "target")
-        req (request/ring-request)
-        sessionid (get-in req [:session :id])
-        trid (security/random-password)] ;; Is trid actually necessary here?
-    (saml-sp/get-idp-redirect (:idp-uri config)
+  (let [org-data (get-in (add-organization-data-to-config! orgid) [:organizational-settings (keyword orgid)])
+        saml-request ((:saml-req-factory! org-data))
+        hmac-relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec (:mutables @ad-config)) "target")
+        req (request/ring-request)]
+    (saml-sp/get-idp-redirect (:idp-uri org-data)
                               saml-request
                               hmac-relay-state)))
 
-(def tila (atom {}))
-
-(defpage [:post "/api/saml/ad-login"] []
+(defpage [:post "/api/saml/ad-login/:orgid"] {orgid :orgid}
   (let [req (request/ring-request)
-        decrypter (saml-sp/make-saml-decrypter (:keystore-file config)
-                                               (:keystore-password config)
-                                               (:key-alias config))
-        sp-cert (saml-shared/get-certificate-b64 (:keystore-file config)
-                                                 (:keystore-password config)
-                                                 (:key-alias config))
-        acs-uri (str (:base-uri config) "/saml")
-        prune-fn! (partial saml-sp/prune-timed-out-ids! (:saml-id-timeouts mutables))
-        state {:mutables mutables
-               :saml-req-factory! saml-req-factory!
-               :timeout-pruner-fn! prune-fn!
-               :certificate-x509 sp-cert}
         xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse]))
         relay-state (get-in req [:params :RelayState])
-        [valid-relay-state? continue-url] (saml-routes/valid-hmac-relay-state? (:secret-key-spec mutables) relay-state)
+        [valid-relay-state? continue-url] (saml-routes/valid-hmac-relay-state? (:secret-key-spec (:mutables @ad-config)) relay-state)
         saml-resp (saml-sp/xml-string->saml-resp xml-response)
-        valid-signature? (if (:idp-cert config)
-                           (saml-sp/validate-saml-response-signature saml-resp (:idp-cert config))
+        idp-cert (get-in @ad-config [:organizational-settings (keyword orgid) :idp-cert])
+        valid-signature? (if idp-cert
+                           (saml-sp/validate-saml-response-signature saml-resp idp-cert)
                            false)
         valid? (and valid-relay-state? valid-signature?)
-        saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp decrypter))
+        saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp (:decrypter @ad-config)))
         parsed-saml-info (parse-saml-info saml-info)
         {:keys [email firstName lastName groups]} (get-in parsed-saml-info [:assertions :attrs])
         ;; This retrieves the orgid by user email (these need to be set in the database of course for this to work...)
-        organization (-> email ad-login-data-by-domain first :id)
-        _ (reset! tila {:req req
-                        :sp-cert sp-cert
-                        :acs-uri acs-uri
-                        :state state
-                        :xml-response xml-response
-                        :relay-state relay-state
-                        :saml-resp saml-resp
-                        :valid-signature? valid-signature?
-                        :valid? valid?
-                        :saml-info saml-info
-                        :parsed-saml-info parsed-saml-info})
         _ (info parsed-saml-info)
         _ (clojure.pprint/pprint parsed-saml-info)
         _ (info (str "SAML response validation " (if valid? "was successful" "failed")))
@@ -154,7 +133,7 @@
                        :email     email
                        :username  email
                        :enabled   true
-                       :orgAuthz  {(keyword organization) orgAuthz}}        ;; validointi ja virheiden hallinta?
+                       :orgAuthz  {(keyword orgid) orgAuthz}}        ;; validointi ja virheiden hallinta?
             user (if-let [user-from-db (usr/get-user-by-email email)]
                    user-from-db
                    ;; The following form is temporarily commented out since the deep merge breaks orgAuthz field as it is now

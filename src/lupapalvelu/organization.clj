@@ -323,7 +323,7 @@
   (-> (mongo/by-id :organizations org-id [:allowedAutologinIPs])
       :allowedAutologinIPs))
 
-(defn autogin-ip-mongo-changes [ips]
+(defn autologin-ip-mongo-changes [ips]
   (when (nil? (sc/check [ssc/IpAddress] ips))
     {$set {:allowedAutologinIPs ips}}))
 

@@ -383,7 +383,7 @@
                       (comp org/valid-ip-addresses :ips :data)]
    :user-roles       #{:admin}}
   [_]
-  (->> (org/autogin-ip-mongo-changes ips)
+  (->> (org/autologin-ip-mongo-changes ips)
        (org/update-organization org-id))
   (ok))
 
