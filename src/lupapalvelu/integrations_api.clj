@@ -103,8 +103,7 @@
    :states           #{:submitted :complementNeeded}
    :org-authz-roles  #{:approver}}
   [{:keys [application created user organization] :as command}]
-  (let [current-state (:state application)
-        next-state (if (yax/ya-extension-app? application)
+  (let [next-state (if (yax/ya-extension-app? application)
                      (sm/verdict-given-state application)
                      (sm/next-state application))
         _ (assert (sm/valid-state? application next-state))
@@ -114,10 +113,11 @@
                         (assoc :handlers handlers)
                         (app/post-process-app-for-krysp @organization))]
     (or (app/validate-link-permits application)             ; If validation failure is non-nil, just return it.
-        (let [[integration-available sent-file-ids]
+        (let [submitted-application (mongo/by-id :submitted-applications id)
+              [integration-available sent-file-ids]
               (bs/approve-application! (bs/get-backing-system @organization (permit/permit-type application))
-                                       command application current-state lang)
-              all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
+                                       command submitted-application lang)
+              all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
               attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids
                                                                                           created)
                                       {})
@@ -126,10 +126,9 @@
                               {:state {$in ["submitted" "complementNeeded"]}}
                               (util/deep-merge
                                 {$push {:transfers transfer}
-                                 $set (util/deep-merge
-                                        (when handlers {:handlers handlers})
-                                        attachments-updates
-                                        (app/mark-indicators-seen-updates command))}
+                                 $set (util/deep-merge (when handlers {:handlers handlers})
+                                                       attachments-updates
+                                                       (app/mark-indicators-seen-updates command))}
                                 (app-state/state-transition-update next-state created application user)))
           (ok :integrationAvailable integration-available)))))
 
