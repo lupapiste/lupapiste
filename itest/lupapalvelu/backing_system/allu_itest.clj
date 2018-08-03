@@ -102,8 +102,6 @@
 ;;;; Actual Tests
 ;;;; ===================================================================================================================
 
-;;; TODO: move-attachments-to-backing-system
-
 (env/with-feature-value :allu true
   (mongo/connect!)
 
@@ -152,22 +150,37 @@
               (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Esimerkki Oy"
 
               (let [filename "dev-resources/test-attachment.txt"
+                    file-contents (slurp filename)
                     description "Test file"
-                    _ (itu/upload-attachment pena id attachment true :filename filename :text description)
+                    description* "The best file"
+                    _ (itu/upload-attachment pena id attachment true :filename filename :text description) => ok?
                     _ (itu/local-command pena :set-attachment-meta :id id :attachmentId (:id attachment)
-                                         :meta {:contents description})
+                                         :meta {:contents description}) => ok?
                     {[attachment] :attachments} (domain/get-application-no-access-checking id)]
                 (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
 
                 (count (:applications @allu-state)) => 1
                 (-> (:applications @allu-state) first val :pendingOnClient) => false
                 (-> (:applications @allu-state) first val :attachments)
-                => [{:metadata {:name        (:contents attachment)
+                => [{:metadata {:name        description
                                 :description (localize "fi" :attachmentType
                                                        (-> attachment :type :type-group)
                                                        (-> attachment :type :type-id))
                                 :mimeType    (-> attachment :latestVersion :contentType)}
-                     :file     (slurp filename)}]))
+                     :file     file-contents}]
+
+                (itu/local-command pena :set-attachment-meta :id id :attachmentId (:id attachment)
+                                   :meta {:contents description*}) => ok?
+                (itu/local-command raktark-helsinki :move-attachments-to-backing-system :id id :lang "fi"
+                                   :attachmentIds [(:id attachment)]) => ok?
+
+                (-> (:applications @allu-state) first val :attachments)
+                => [{:metadata {:name        description*
+                                :description (localize "fi" :attachmentType
+                                                       (-> attachment :type :type-group)
+                                                       (-> attachment :type :type-id))
+                                :mimeType    (-> attachment :latestVersion :contentType)}
+                     :file     file-contents}]))
 
             (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
               (itu/local-command pena :submit-application :id id) => ok?
