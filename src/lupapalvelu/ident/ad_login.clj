@@ -39,20 +39,6 @@
   [certstring]
   (ss/replace certstring #"[\n ]|(BEGIN|END) CERTIFICATE|-{5}" ""))
 
-(defn make-ad-config [username]
-  (let [c (env/get-config)
-        ad-data (first (ad-login-data-by-domain username))
-        {:keys [enabled idp-cert idp-uri]} (:ad-login ad-data)]
-    (when ad-data
-      {:app-name "Lupapiste"
-       :base-uri (:host c)
-       :idp-uri idp-uri ;"http://localhost:7000" ;; The dockerized, locally running mock-saml instance (https://github.com/lupapiste/mock-saml)
-       :idp-cert (parse-certificate idp-cert) ;; This needs to live in Mongo's organizations collection
-       :keystore-file (get-in c [:ssl :keystore])
-       :keystore-password (get-in c [:ssl :key-password])
-       :key-alias "jetty" ;; The normal Lupis certificate
-       })))
-
 (defn parse-saml-info
   "The saml-info map returned by saml20-clj comes in a wacky format, so its best to
   parse it into a more manageable form (without string keys or single-element lists etc)."
@@ -120,8 +106,6 @@
         saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp (:decrypter @ad-config)))
         parsed-saml-info (parse-saml-info saml-info)
         {:keys [email firstName lastName groups]} (get-in parsed-saml-info [:assertions :attrs])
-        ;; This retrieves the orgid by user email (these need to be set in the database of course for this to work...)
-        _ (info parsed-saml-info)
         _ (clojure.pprint/pprint parsed-saml-info)
         _ (info (str "SAML response validation " (if valid? "was successful" "failed")))
         ]
