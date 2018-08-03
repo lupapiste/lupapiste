@@ -172,4 +172,8 @@ LUPAPISTE.ConversationModel = function(params) {
   self.commentRole = function( data ) {
     return "applicationRole." + _.get(data, "user.application-role", "unknown");
   };
+
+  self.downloadConversationPDF = function() {
+    location.assign( "/api/raw/download-conversation-pdf?id=" + self.applicationId());
+  };
 };

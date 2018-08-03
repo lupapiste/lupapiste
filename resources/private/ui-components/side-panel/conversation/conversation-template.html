@@ -43,6 +43,14 @@
               <i class="wait spin lupicon-refresh"></i>
               <span data-bind="ltext: 'application.conversationSend'"></span>
             </button>
+            <button class="positive"
+                    data-bind="disable: !comments,
+                               click: downloadConversationPDF,
+                               css: {waiting: pending}">
+              <i class="lupicon-download"></i>
+              <i class="wait spin lupicon-refresh"></i>
+              <span data-bind="ltext: 'application.conversationDownload'"></span>
+            </button>
           </div>
 
           <!-- ko if: authorization.ok('can-mark-answered') -->
