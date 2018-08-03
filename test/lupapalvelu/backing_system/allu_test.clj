@@ -6,8 +6,10 @@
             [sade.schemas :refer [NonBlankStr Kiinteistotunnus ApplicationId]]
             [sade.schema-generators :as sg]
             [sade.municipality :refer [municipality-codes]]
+            [lupapalvelu.attachment :refer [Attachment]]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
+            [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]
             [lupapalvelu.organization :refer [PermitType]]
 
@@ -21,7 +23,7 @@
             [lupapalvelu.backing-system.allu :as allu :refer [PlacementContract]]))
 
 (testable-privates lupapalvelu.backing-system.allu application->allu-placement-contract
-                   application-cancel-request placement-creation-request placement-update-request)
+                   application-cancel-request placement-creation-request placement-update-request attachment-send)
 
 ;;; TODO: Instead of testing internals, just use mocks.
 
@@ -70,7 +72,7 @@
     => passing-quick-check))
 
 (facts "application-cancel-request"
-  (let [allu-id 23
+  (let [allu-id "23"
         app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)
         [endpoint request] (application-cancel-request "https://example.com/api/v1" "foo.bar.baz" app)]
     (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/cancelled"))
@@ -84,8 +86,28 @@
                                 :content-type :json
                                 :body         (json/encode (application->allu-placement-contract true app))})))
 
+(facts "attachment-send"
+  (let [allu-id "23"
+        application (-> (sg/generate ValidPlacementApplication) (assoc-in [:integrationKeys :ALLU :id] allu-id))
+        {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment} (sg/generate Attachment)
+        contents "You will be assimilated."
+        [endpoint request] (attachment-send "https://example.com/api/v1" "foo.bar.baz" application attachment
+                                            contents)]
+    (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/attachments"))
+    (fact "request"
+      (:headers request) => {:authorization "Bearer foo.bar.baz"}
+      (-> request (get-in [:multipart 0]) (select-keys [:name :mime-type :encoding]))
+      => {:name "metadata", :mime-type "application/json", :encoding "UTF-8"}
+      (-> request (get-in [:multipart 0 :content]) (json/decode true))
+      => {:name        (:contents attachment)
+          :description (localize "" :attachmentType type-group type-id)
+          :mimeType    (:contentType latestVersion)}
+      (get-in request [:multipart 1]) => {:name      "file"
+                                          :mime-type (:contentType latestVersion)
+                                          :content   contents})))
+
 (facts "placement-update-request"
-  (let [allu-id 23
+  (let [allu-id "23"
         app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)]
     (doseq [pending-on-client [true false]
             :let [[endpoint request]
