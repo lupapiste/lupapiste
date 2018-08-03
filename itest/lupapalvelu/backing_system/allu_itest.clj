@@ -11,6 +11,7 @@
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
 
@@ -101,6 +102,8 @@
 ;;;; Actual Tests
 ;;;; ===================================================================================================================
 
+;;; TODO: move-attachments-to-backing-system
+
 (env/with-feature-value :allu true
   (mongo/connect!)
 
@@ -119,7 +122,7 @@
                                (swap! failure-counter inc))]
           (fact "enabled and sending correctly to ALLU for Helsinki YA sijoituslupa and sijoitussopimus."
             (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?
-                  {:keys [documents]} (domain/get-application-no-access-checking id)
+                  {[attachment] :attachments :keys [documents]} (domain/get-application-no-access-checking id)
                   {descr-id :id} (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa")
                                                 documents))
                   {applicant-id :id} (first (filter #(= (doc-name %) "hakija-ya") documents))]
@@ -148,9 +151,23 @@
                                              ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]]))
               (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Esimerkki Oy"
 
-              (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
-              (count (:applications @allu-state)) => 1
-              (-> (:applications @allu-state) first val :pendingOnClient) => false)
+              (let [filename "dev-resources/test-attachment.txt"
+                    description "Test file"
+                    _ (itu/upload-attachment pena id attachment true :filename filename :text description)
+                    _ (itu/local-command pena :set-attachment-meta :id id :attachmentId (:id attachment)
+                                         :meta {:contents description})
+                    {[attachment] :attachments} (domain/get-application-no-access-checking id)]
+                (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
+
+                (count (:applications @allu-state)) => 1
+                (-> (:applications @allu-state) first val :pendingOnClient) => false
+                (-> (:applications @allu-state) first val :attachments)
+                => [{:metadata {:name        (:contents attachment)
+                                :description (localize "fi" :attachmentType
+                                                       (-> attachment :type :type-group)
+                                                       (-> attachment :type :type-id))
+                                :mimeType    (-> attachment :latestVersion :contentType)}
+                     :file     (slurp filename)}]))
 
             (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
               (itu/local-command pena :submit-application :id id) => ok?

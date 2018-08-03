@@ -100,7 +100,7 @@
       => {:name "metadata", :mime-type "application/json", :encoding "UTF-8"}
       (-> request (get-in [:multipart 0 :content]) (json/decode true))
       => {:name        (:contents attachment)
-          :description (localize "" :attachmentType type-group type-id)
+          :description (localize "fi" :attachmentType type-group type-id)
           :mimeType    (:contentType latestVersion)}
       (get-in request [:multipart 1]) => {:name      "file"
                                           :mime-type (:contentType latestVersion)
