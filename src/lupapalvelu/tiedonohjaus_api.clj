@@ -77,6 +77,7 @@
   {:parameters       [:id functionCode]
    :input-validators [(partial non-blank-parameters [:id :functionCode])]
    :user-roles       #{:authority}
+   :org-authz-roles  #{:authority :archivist}
    :states           (conj states/pre-verdict-but-draft :underReview)}
   [command]
   (update-tos-metadata functionCode command))
@@ -168,6 +169,7 @@
    :input-validators [(partial non-blank-parameters [:id :attachmentId])
                       (partial action/map-parameters [:metadata])]
    :user-roles       #{:authority}
+   :org-authz-roles  #{:authority :archivist}
    :states           states/all-but-draft
    :pre-checks       [(partial target-is-not-archived :attachment)]}
   [command]
@@ -178,6 +180,7 @@
    :input-validators [(partial non-blank-parameters [:id])
                       (partial action/map-parameters [:metadata])]
    :user-roles       #{:authority}
+   :org-authz-roles  #{:authority :archivist}
    :states           states/all-but-draft
    :pre-checks       [(partial target-is-not-archived :application)]}
   [{:keys [application created user] :as command}]
@@ -193,6 +196,7 @@
    :input-validators [(partial non-blank-parameters [:id])
                       (partial action/map-parameters [:metadata])]
    :user-roles       #{:authority}
+   :org-authz-roles  #{:authority :archivist}
    :states           states/all-but-draft
    :pre-checks       [(partial target-is-not-archived :process)]}
   [{:keys [application created user] :as command}]
@@ -222,14 +226,17 @@
   {:parameters       [:id lang]
    :input-validators [(partial action/non-blank-parameters [:lang])]
    :user-roles       #{:authority}
+   :org-authz-roles  #{:authority :archivist}
    :states           states/all-application-states
    :pre-checks       [(permit/validate-permit-type-is-not permit/ARK)]}
   [{:keys [application]}]
   (ok :process (t/generate-case-file-data application lang)))
 
 (defquery tos-operations-enabled
-  {:user-roles #{:authority}
-   :categories #{:attachments}
+  {:parameters       [id]
+   :user-roles       #{:authority}
+   :org-authz-roles  #{:authority :archivist}
+   :categories       #{:attachments}
    :states     states/all-application-or-archiving-project-states}
   (ok))
 

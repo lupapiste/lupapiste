@@ -80,6 +80,10 @@ Verdict attachment should be visible on the bulletin page
   Open bulletin tab  verdicts
   Bulletin verdict detail list should have rows  1
 
+Verdict is shown correctly after reload
+  Reload page
+  Wait test id visible  given-verdict-id-0
+
 *** Keywords ***
 
 Move bulletin to verdict given with appeal period starting today
