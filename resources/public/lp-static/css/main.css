@@ -34389,6 +34389,15 @@ span.icon_clear:before {
   vertical-align: top;
 }
 
+.application_summary .application_summary_info a.property-id-edit {
+  display: inline-block;
+  float: right;
+}
+
+.application_summary .application_summary_info a.property-id-edit::after {
+  content: "\2026";
+}
+
 .application_summary .application_summary_info ul li {
   display: block;
 }
