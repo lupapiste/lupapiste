@@ -13848,6 +13848,10 @@ ul.tabs {
   padding-bottom: 0;
 }
 
+.change-location-help {
+  margin-bottom: .5em;
+}
+
 .with-map {
   /* .map-container { */
   /*   //padding: 0; */
@@ -34383,6 +34387,15 @@ span.icon_clear:before {
 
 .application_summary .application_summary_info select, .application_summary .application_summary_info .property-id {
   vertical-align: top;
+}
+
+.application_summary .application_summary_info a.property-id-edit {
+  display: inline-block;
+  float: right;
+}
+
+.application_summary .application_summary_info a.property-id-edit::after {
+  content: "\2026";
 }
 
 .application_summary .application_summary_info ul li {

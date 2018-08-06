@@ -11,6 +11,7 @@ Init...
   Set Suite Variable  ${appname}  create-app${secs}
   Set Suite Variable  ${newName}  ${appname}-edit
   Set Suite Variable  ${propertyId}  753-423-2-41
+  Set Suite Variable  ${newPropertyId}  753-423-3-52
   Set Suite Variable  ${paasuunnittelijaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='paasuunnittelija']
   Set Suite Variable  ${hakijanasiamiesXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakijan-asiamies']
   Set Suite Variable  ${asiamiesXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakijan-asiamies']
@@ -180,13 +181,11 @@ Mikko toggles applicant to company, company's name is updated to accordion
   Scroll and click  ${hakijajQueryPath} input[data-docgen-path='_selected'][value='henkilo']
   Wait until  Element should contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikko Intonen
 
-Mikko changes application address
-  Page should not contain  ${newName}
-  Element should be visible  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
-  Scroll and click test id  change-location-link
-  Input text by test id  application-new-address  ${newName}
-  Click enabled by test id  change-location-save
-  Wait Until  Page should contain  ${newName}
+Mikko changes application address via property id edit
+  Change address  change-property-id  Propsintie 8
+
+Mikko changes application address via address edit
+  Change address  change-location-link  ${newName}
 
 Mikko decides to submit application
   Open application  ${newName}  ${propertyId}
@@ -231,3 +230,12 @@ Huoneisto row items disabled except muutostapa
   [Arguments]  ${index}
   jQuery should match X times  tr[data-test-id='huoneistot-row-${index}'] :disabled  12
   Element Should Be Enabled   //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//select[@data-test-id="huoneistot.${index}.muutostapa"]
+
+Change address
+  [Arguments]  ${testId}  ${address}
+  Page should not contain  ${address}
+  Wait test id visible  ${testId}
+  Scroll and click test id  ${testId}
+  Input text by test id  application-new-address  ${address}
+  Click enabled by test id  change-location-save
+  Wait Until  Page should contain  ${address}

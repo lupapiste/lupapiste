@@ -23,6 +23,15 @@
       default
       (:muutostapa huoneisto))))
 
+(defn- schema-body-required-fields [schema]
+  (->> (:body schema)
+       (filter :required)
+       (map (comp keyword :name))))
+
+(defn- required-fields-have-value? [schema huoneisto]
+  (let [required-fields (schema-body-required-fields schema)]
+    (every? #(some? (get huoneisto %)) required-fields)))
+
 (defn- get-huoneistot-schema [schema-name]
   (->> {:name schema-name}
        schemas/get-schema
@@ -36,8 +45,9 @@
           :let      [huoneistonumero (-> huoneisto :huoneistonumero)
                      huoneistoPorras (-> huoneisto :porras)
                      jakokirjain (-> huoneisto :jakokirjain)
-                     muutostapa (muutostapa huoneisto schema)]
-          :when     (and muutostapa (seq huoneisto))]
+                     muutostapa (muutostapa huoneisto schema)
+                     required-filled? (required-fields-have-value? schema huoneisto)]
+          :when     (and muutostapa (seq huoneisto) required-filled?)]
       (merge {:muutostapa       muutostapa
               :huoneluku        (-> huoneisto :huoneluku)
               :keittionTyyppi   (-> huoneisto :keittionTyyppi)
