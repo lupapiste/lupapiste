@@ -153,7 +153,7 @@
 (defmethod view-component :application-attachments [_ options]
   (pate-att/pate-attachments-view options))
 
-(defmethod view-component :text [_ {:keys [schema state path]]
+(defmethod view-component :text [_ {:keys [schema state path]}]
   (let [value (path/value path state)]
     (when-not (s/blank? value)
       (pate-components/sandwich (assoc schema
