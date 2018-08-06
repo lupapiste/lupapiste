@@ -695,6 +695,29 @@
                                          :apptype (get-in link-application [:primaryOperation :name])}}
                         :upsert true)))
 
+(defn get-lp-id-by-kuntalupatunnus [kuntalupatunnus]
+  (:id (mongo/select-one :applications {:verdicts.kuntalupatunnus kuntalupatunnus})))
+
+(defn update-app-links!
+  "To be run after Vantaa-conversion for each imported kuntalupatunnus. Takes a kuntalupatunnus
+  and updates (i.e. removes and re-links) its references in app-links collection so that the links point to real Lupapiste applications.
+  E.g. '14-0633-13-TJO|LP-092-2018-90011' -> 'LP-092-2018-90012|LP-92-2018-90011' etc."
+  [kuntalupatunnus]
+  (let [links-to-app (mongo/select :app-links {:_id (re-pattern kuntalupatunnus)}) ;; Fetch all app-links to this id
+        update-info (for [link links-to-app]
+                      (let [app-id (->> link :link (filter #(not= kuntalupatunnus %)) first)]
+                        {:application (mongo/select-one :applications {:_id app-id}) ;; The applications to which the link points
+                         :link-permit-id (get-lp-id-by-kuntalupatunnus kuntalupatunnus) ;; The new Lupapiste id for kuntalupatunnus
+                         :app-link-id (:id link)}))] ;; The id for the link document (format: "14-0633-13-TJO|LP-092-2018-90011")
+    (doseq [item update-info]
+      (let [{:keys [app-link-id application link-permit-id]} update-info]
+        (if (not-any? nil? (vals item))
+          (do
+            (info (format "Updating app-link: %s -> %s" app-link-id (str link-permit-id "|" (:id application))))
+            (mongo/remove app-link-id)
+            (do-add-link-permit application link-permit-id)))
+        (error (format "Could not update app-link for permit %s / %s" kuntalupatunnus link-permit-id))))))
+
 ;; Submit
 (defn submit [{:keys [application created user] :as command} ]
   (let [transitions (remove nil?
