@@ -69,7 +69,7 @@
    :pre-checks       []
    :input-validators [(partial action/non-blank-parameters [:application-id :document-id])]
    :feature          :premises-upload}
-  [{{:keys [application-id document-id lang]} :data user :user :as command}]
+  [{{:keys [application-id document-id lang]} :data user :user}]
   (let [filename (str (i18n/localize lang "huoneistot.excel-file-name")
                       "-"
                       (local/format-local-time (local/local-now) :basic-date)

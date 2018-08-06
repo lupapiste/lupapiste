@@ -1,5 +1,5 @@
 (ns lupapalvelu.pdf.pdf-export-api
-  (:require [taoensso.timbre :as timbre :refer [info]]
+  (:require [taoensso.timbre :refer [info]]
             [ring.util.response :as response]
             [sade.files :as files]
             [lupapalvelu.action :as action :refer [defraw]]
@@ -63,7 +63,7 @@
    :org-authz-roles  roles/all-org-authz-roles
    :input-validators [(partial action/non-blank-parameters [:lang])]
    :states           states/all-states}
-  [{:keys [user application lang]}]
+  [{:keys [application lang]}]
   (if application
     (files/with-temp-file libre-file
       (-> (libre/generate-casefile-pdfa application lang libre-file)

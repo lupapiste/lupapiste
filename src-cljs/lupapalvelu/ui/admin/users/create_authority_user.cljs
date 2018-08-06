@@ -82,7 +82,7 @@
 (defn mount-component []
   (rum/mount (create-auth-admin) (.getElementById js/document (:dom-id @args))))
 
-(defn ^:export start [domId & component-args]
+(defn ^:export start [domId & _]
   (swap! args
          assoc
          :dom-id (name domId))

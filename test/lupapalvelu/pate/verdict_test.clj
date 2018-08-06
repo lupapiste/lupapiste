@@ -1,21 +1,16 @@
 (ns lupapalvelu.pate.verdict-test
-  (:require [clj-time.coerce :as time-coerce]
-            [lupapalvelu.inspection-summary :as inspection-summary]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pate.date :as date]
+  (:require[lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict :refer :all]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
-            [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
             [sade.shared-schemas :refer [object-id-pattern]]
-            [sade.strings :as ss]
             [sade.util :as util]
             [schema.core :as sc]))
 

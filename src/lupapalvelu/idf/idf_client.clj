@@ -1,6 +1,6 @@
 (ns lupapalvelu.idf.idf-client
   "Identity federation client: create users to partner applications"
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+  (:require [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.set :refer [rename-keys]]
             [clojure.string :refer [split-lines]]
             [sade.http :as http]

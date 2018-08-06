@@ -1,6 +1,6 @@
 (ns lupapalvelu.application-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof
-                                                warnf warn error errorf]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof
+                                     warnf warn error errorf]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [slingshot.slingshot :refer [try+]]
@@ -79,7 +79,7 @@
 (defquery application
   {:parameters       [:id]
    :permissions      [{:required [:application/read]}]}
-  [{:keys [application user] :as command}]
+  [{:keys [application] :as command}]
   (if application
     (ok :application (app/post-process-app command)
         :permitSubtypes (app/resolve-valid-subtypes application))
@@ -135,14 +135,14 @@
                        :required [:application/edit-draft]}
 
                       {:required [:application/read]}]}
-  [{:keys [data user created] :as command}]
+  [{:keys [user created] :as command}]
   (update-application command {$set (app/mark-collection-seen-update user created type)}))
 
 (defcommand mark-everything-seen
   {:parameters [:id]
    :permissions [{:required [:application/read :application/mark-everything-seen]}]
    :states     (states/all-states-but [:draft :archived])}
-  [{:keys [application user created] :as command}]
+  [command]
   (update-application command {$set (app/mark-indicators-seen-updates command)}))
 
 ;;
@@ -191,7 +191,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :handlerId])]
    :permissions [{:required [:application/edit-handlers]}]
    :states     (states/all-states-but :draft :canceled)}
-  [{created :created {handlers :handlers} :application user :user :as command}]
+  [{created :created user :user :as command}]
   (let [result   (update-application command
                                      {$set  {:modified created}
                                       $pull {:handlers {:id handlerId}}
@@ -536,8 +536,8 @@
 
                  {:required [:application/edit-operation]}]
    :pre-checks [secondary-operation-exists?]}
-  [{:keys [application] :as command}]
-  (app/change-primary-operation command id secondaryOperationId)
+  [command]
+  (app/change-primary-operation command secondaryOperationId)
   (ok))
 
 (defn- replace-operation-allowed-pre-check [{application :application}]
@@ -585,7 +585,7 @@
                        :required [:application/edit-permit-subtype-in-ya]}]
    :pre-checks       [app/validate-has-subtypes
                       app/pre-check-permit-subtype]}
-  [{:keys [application created] :as command}]
+  [{:keys [created] :as command}]
   (update-application command {$set {:permitSubtype permitSubtype, :modified created}})
   (ok))
 
@@ -614,7 +614,7 @@
                                  :modified   created}
                            $unset {:propertyIdSource true}})
       (try (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
-           (catch Exception e (warn "KTJ data was not updated after location changed")))
+           (catch Exception _ (warn "KTJ data was not updated after location changed")))
       (when (and (permit/archiving-project? application) (true? refreshBuildings))
         (app/fetch-buildings command propertyId refreshBuildings)))
     (fail :error.property-in-other-muinicipality)))
@@ -631,7 +631,7 @@
    :permissions      [{:required [:application/change-state]}]
    :notified         true
    :on-success       (notify :application-state-change)}
-  [{:keys [user application] :as command}]
+  [{:keys [user] :as command}]
   (let [organization       (deref (:organization command))
         application        (:application command)
         archiving-project? (= (keyword (:permitType application)) :ARK)
@@ -674,7 +674,7 @@
                       (partial action/positive-number-parameters [:startDate])]
    :permissions      [{:required [:application/edit-warranty-dates]}]
    :states           states/post-verdict-states}
-   [{:keys [application] :as command}]
+   [command]
   (update-application command {$set {:warrantyStart startDate}})
   (ok))
 
@@ -685,7 +685,7 @@
                       (partial action/positive-number-parameters [:endDate])]
    :permissions      [{:required [:application/edit-warranty-dates]}]
    :states           states/post-verdict-states}
-  [{:keys [application] :as command}]
+  [command]
   (update-application command {$set {:warrantyEnd endDate}})
   (ok))
 
@@ -718,7 +718,7 @@
    :contexts    [foreman/foreman-app-context]
    :permissions [{:required [:application/edit]}]
    :states     (states/all-application-states-but (conj states/terminal-states :sent))}
-  [{{:keys [propertyId] :as application} :application user :user :as command}]
+  [{{:keys [propertyId] :as application} :application user :user}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
         ;; exclude from results the current application itself, and the applications that have a link-permit relation to it
         ignore-ids (-> application
@@ -788,7 +788,7 @@
 
                       {:required [:application/remove-link-permit]}]
    :states     (states/all-application-states-but (conj states/terminal-states :sent))}
-  [{application :application}]
+  [_]
   (if (mongo/remove :app-links (app/make-mongo-id-for-link-permit id linkPermitId))
     (ok)
     (fail :error.unknown)))
@@ -799,7 +799,7 @@
    :contexts            [foreman/foreman-app-context]
    :permissions         [{:required [:application/edit]}]
    :input-validators    [(partial action/string-parameters [:path])]}
-  [command]
+  [_]
   (ok :operations (op/operations-in (ss/split (not-empty path) #"\."))))
 
 ;;
@@ -904,7 +904,7 @@
    :permissions [{:required [:application/create-continuation-period-permit]}]
    :states     #{:verdictGiven :constructionStarted}
    :pre-checks [validate-not-jatkolupa-app]}
-  [{:keys [created user application] :as command}]
+  [{:keys [application] :as command}]
 
   (let [permit-type      (:permitType application)
         continuation-app (app/do-create-application
@@ -949,7 +949,7 @@
                                :modified               created}
                         $push {:attachments {$each (app/make-attachments created op @org state tos-fn)}}}))
   (try (app/autofill-rakennuspaikka app created)
-       (catch Exception e (warn "KTJ data was not updated to inforequest when converted to application"))))
+       (catch Exception _ (warn "KTJ data was not updated to inforequest when converted to application"))))
 
 (defcommand remove-buildings
   {:parameters  [id]
@@ -1011,7 +1011,7 @@
   {:parameters       [id]
    :permissions      [{:required [:application/read]}]
    :states           states/all-states}
-  [{:keys [application lang organization]}]
+  [{:keys [application lang]}]
   (ok :handlers (map (fn [{role-name :name :as handler}]
                        (-> handler
                            (assoc :roleName ((keyword lang) role-name))

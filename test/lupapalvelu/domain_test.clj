@@ -1,8 +1,7 @@
 (ns lupapalvelu.domain-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.domain :refer :all]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.domain :refer :all]))
 
 (testable-privates lupapalvelu.domain only-authority-sees-drafts normalize-neighbors)
 

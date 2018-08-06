@@ -1,10 +1,8 @@
 (ns lupapalvelu.organization-itest
   (:require [midje.sweet :refer :all]
-            [clojure.java.io :as io]
             [clojure.set :refer [difference]]
             [lupapalvelu.organization :as local-org-api]
             [lupapalvelu.waste-ads :as waste-ads]
-            [lupapalvelu.operations :as operations]
             [lupapalvelu.proxy-services :as proxy]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.factlet :refer [fact* facts*]]
@@ -242,12 +240,12 @@
                        :id application-id
                        :attachmenttypes [{:type-group :paapiirustus :type-id :muu_paapiirustus}]
                        :group nil)
-            {job :job :as job-resp} (command pena :bind-attachments
-                                             :id application-id
-                                             :filedatas [{:fileId file-id-1
-                                                          :type {:type-group "paapiirustus"
-                                                                 :type-id "muu_paapiirustus"}
-                                                          :contents "eka"}]) => ok?]
+            {:keys [job]} (command pena :bind-attachments
+                                   :id application-id
+                                   :filedatas [{:fileId file-id-1
+                                                :type {:type-group "paapiirustus"
+                                                       :type-id "muu_paapiirustus"}
+                                                :contents "eka"}]) => ok?]
         (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => ok?
         (Thread/sleep 1000)
         (fact "trigger assignment is created"
@@ -359,7 +357,7 @@
       (:operations resp) => [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["pientalo" "pientalo"]]] ["Rakennelman rakentaminen" [["Aita" "aita"]]]]]]))
 
   (fact* "The query 'organization-by-user' correctly returns the selected operations of the organization"
-    (let [resp (query pena "organization-by-user") => unauthorized?
+    (let [_ (query pena "organization-by-user") => unauthorized?
           resp (query sipoo "organization-by-user") => ok?]
       (get-in resp [:organization :selectedOperations]) => {:R ["aita" "pientalo"]}))
 
@@ -625,7 +623,7 @@
                                                                   "username"
                                                                   "plaintext")
                     (let [org (local-org-api/get-organization "753-YA")
-                          {:keys [username password crypto-iv]} (-> org :map-layers :server)]
+                          {:keys [password crypto-iv]} (-> org :map-layers :server)]
                       (fact "Password is encrypted"
                             (not= password "plaintext") => true)
                       (fact "Password decryption"

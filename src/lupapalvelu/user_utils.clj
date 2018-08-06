@@ -9,7 +9,7 @@
             [lupapalvelu.user :as usr]
             [sade.core :refer [ok fail!]]
             [sade.strings :as ss]
-            [taoensso.timbre :as timbre :refer [infof]]))
+            [taoensso.timbre :refer [infof]]))
 
 ;; Emails
 

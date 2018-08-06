@@ -60,28 +60,28 @@
   (let [canonical (mac/maa-aines-canonical application "fi") => truthy
         MaaAinesluvat (:MaaAinesluvat canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot MaaAinesluvat) => truthy
-        aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title application)
+        _ (:aineistonnimi toimituksenTiedot) => (:title application)
 
         maa-aineslupa-asiatieto (:maaAineslupaAsiatieto MaaAinesluvat) => truthy
         maa-aineslupa (:MaaAineslupaAsia maa-aineslupa-asiatieto)
-        kasittelytietotieto (:kasittelytietotieto maa-aineslupa) => truthy
+        _ (:kasittelytietotieto maa-aineslupa) => truthy
 
         luvanTunnistetiedot (:luvanTunnistetiedot maa-aineslupa) => truthy
         LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
         MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
-        tunnus (:tunnus MuuTunnus) => (:id application)
-        sovellus (:sovellus MuuTunnus) => "Lupapiste"
+        _ (:tunnus MuuTunnus) => (:id application)
+        _ (:sovellus MuuTunnus) => "Lupapiste"
 
         lausuntotieto (:lausuntotieto maa-aineslupa) => truthy
         Lausunto (:Lausunto (first lausuntotieto)) => truthy
-        viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
-        pyyntoPvm (:pyyntoPvm Lausunto) => "2013-09-17"
+        _ (:viranomainen Lausunto) => "Paloviranomainen"
+        _ (:pyyntoPvm Lausunto) => "2013-09-17"
         lausuntotieto (:lausuntotieto Lausunto) => truthy
         annettu-lausunto (:Lausunto lausuntotieto) => truthy
-        lausunnon-antanut-viranomainen (:viranomainen annettu-lausunto) => "Paloviranomainen"
-        varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
-        lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
+        _ (:viranomainen annettu-lausunto) => "Paloviranomainen"
+        _ (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
+        _ (:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
         hakemus (-> maa-aineslupa :hakemustieto :Hakemus) => seq]
 

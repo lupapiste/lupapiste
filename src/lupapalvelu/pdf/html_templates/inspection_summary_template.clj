@@ -31,7 +31,7 @@
       [:td#finished-date]
       [:td#finished-by]]]]])
 
-(defn- target-attachments [{attachments :attachments :as application} {target-id :id}]
+(defn- target-attachments [{:keys [attachments]} {target-id :id}]
   (->> (filter (comp #{target-id} :id :target) attachments)
        (map (comp :filename :latestVersion))))
 

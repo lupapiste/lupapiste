@@ -5,7 +5,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
-            [lupapalvelu.action :refer [defexport] :as action]
+            [lupapalvelu.action :refer [defexport]]
             [lupapalvelu.application :as application]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.exports :as exports :refer [application-to-salesforce exported-application validate-application-export-data]]

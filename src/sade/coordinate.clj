@@ -1,5 +1,5 @@
 (ns sade.coordinate
-  (:require [taoensso.timbre :as timbre :refer [debug info warn error]]
+  (:require [taoensso.timbre :refer [debug info warn error]]
             [clojure.string :as s]
             [clojure.core.memoize :as memo]
             [sade.util :as util]

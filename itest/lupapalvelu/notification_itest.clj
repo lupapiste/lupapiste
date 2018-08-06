@@ -1,6 +1,5 @@
 (ns lupapalvelu.notification-itest
   (:require [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.user :as usr]
             [midje.sweet :refer :all]
             [sade.core :refer [now]]))
 

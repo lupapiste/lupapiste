@@ -210,27 +210,27 @@
   (let [canonical (poikkeus-application-to-canonical poikkari-hakemus "fi" ) => truthy
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
-        aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title poikkari-hakemus)
-        aineistotoimittaja (:aineistotoimittaja toimituksenTiedot) => (env/value :aineistotoimittaja)
-        tila (:tila toimituksenTiedot) => "keskener\u00e4inen"
-        kuntakoodi (:kuntakoodi toimituksenTiedot) => (:municipality poikkari-hakemus)
+        _ (:aineistonnimi toimituksenTiedot) => (:title poikkari-hakemus)
+        _ (:aineistotoimittaja toimituksenTiedot) => (env/value :aineistotoimittaja)
+        _ (:tila toimituksenTiedot) => "keskener\u00e4inen"
+        _ (:kuntakoodi toimituksenTiedot) => (:municipality poikkari-hakemus)
 
-        suunnittelutarveasiatieto (:suunnittelutarveasiatieto Popast) => nil
+        _ (:suunnittelutarveasiatieto Popast) => nil
         poikkeamisasiatieto (:poikkeamisasiatieto Popast) => truthy
         Poikkeamisasia (:Poikkeamisasia poikkeamisasiatieto)
         ;abstarctPoikkeamistype
         kasittelynTilatieto (:kasittelynTilatieto Poikkeamisasia) => truthy
         Tilamuutos (-> kasittelynTilatieto first :Tilamuutos) => map?
-        pvm (:pvm Tilamuutos) => "2013-09-17"
+        _ (:pvm Tilamuutos) => "2013-09-17"
 
-        kuntakoodi (:kuntakoodi Poikkeamisasia) => (:municipality poikkari-hakemus)
+        _ (:kuntakoodi Poikkeamisasia) => (:municipality poikkari-hakemus)
 
         luvanTunnistetiedot (:luvanTunnistetiedot Poikkeamisasia) => truthy
         LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
         MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
-        tunnus (:tunnus MuuTunnus) => "LP-753-2013-00001"
-        sovellus (:sovellus MuuTunnus) => "Lupapiste"
+        _ (:tunnus MuuTunnus) => "LP-753-2013-00001"
+        _ (:sovellus MuuTunnus) => "Lupapiste"
 
         osapuolettieto (:osapuolettieto Poikkeamisasia) => truthy
         Osapuolet (:Osapuolet osapuolettieto) => truthy
@@ -268,7 +268,7 @@
         _ (:postitoimipaikannimi osoite) => "Piippola"
         _ (:puhelin henkilo) => "0102030405"
         _ (:sahkopostiosoite henkilo) => "pena@example.com"
-        yritys (:yritys Osapuoli) => nil
+        _ (:yritys Osapuoli) => nil
 
 
         rakennuspaikkatieto (:rakennuspaikkatieto Poikkeamisasia) => truthy
@@ -278,43 +278,43 @@
         RakennuspaikanKiinteisto (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto) => truthy
         kiinteistotieto (:kiinteistotieto RakennuspaikanKiinteisto) => truthy
         Kiinteisto (:Kiinteisto kiinteistotieto) => truthy
-        tilannimi (:tilannimi Kiinteisto) => "Omatila"
-        kiinteistotunnus (:kiinteistotunnus Kiinteisto) => "75342700020063"
-        maaraalaTunnus (:maaraAlaTunnus Kiinteisto) => "M0008"
-        rantaKytkin (:rantaKytkin Kiinteisto) => true
-        kokotilaKytkin (:kokotilaKytkin RakennuspaikanKiinteisto) => false
-        hallintaperuste (:hallintaperuste RakennuspaikanKiinteisto) => "oma"
+        _ (:tilannimi Kiinteisto) => "Omatila"
+        _ (:kiinteistotunnus Kiinteisto) => "75342700020063"
+        _ (:maaraAlaTunnus Kiinteisto) => "M0008"
+        _ (:rantaKytkin Kiinteisto) => true
+        _ (:kokotilaKytkin RakennuspaikanKiinteisto) => false
+        _ (:hallintaperuste RakennuspaikanKiinteisto) => "oma"
 
         toimenpidetieto (:toimenpidetieto Poikkeamisasia) => truthy
 
         lausuntotieto (:lausuntotieto Poikkeamisasia) => truthy
         Lausunto (:Lausunto (first lausuntotieto)) => truthy
-        viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
-        pyyntoPvm (:pyyntoPvm Lausunto) => "2013-09-17"
+        _ (:viranomainen Lausunto) => "Paloviranomainen"
+        _ (:pyyntoPvm Lausunto) => "2013-09-17"
         lausuntotieto (:lausuntotieto Lausunto) => truthy
         annettu-lausunto (:Lausunto lausuntotieto) => truthy
-        lausunnon-antanut-viranomainen (:viranomainen annettu-lausunto) => "Paloviranomainen"
-        varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
-        lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
+        _ (:viranomainen annettu-lausunto) => "Paloviranomainen"
+        _ (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
+        _ (:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
         puoltotieto (:puoltotieto annettu-lausunto) => truthy
         Puolto (:Puolto puoltotieto) => truthy
-        puolto (:puolto Puolto) => "puollettu"
-        lausuntoId (:id Lausunto) => "52385377da063788effc1e93"
+        _ (:puolto Puolto) => "puollettu"
+        _ (:id Lausunto) => "52385377da063788effc1e93"
 
         lisatietotieto (:lisatietotieto Poikkeamisasia) => truthy
         Lisatieto (:Lisatieto lisatietotieto) => truthy
-        asioimiskieli (:asioimiskieli Lisatieto) => "suomi"
-        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => nil?
+        _ (:asioimiskieli Lisatieto) => "suomi"
+        _  (:suoramarkkinointikieltoKytkin Lisatieto) => nil?
 
         ;end of abstarctPoikkeamistype
-        kayttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi poikkeamisasia"
+        _ (:kayttotapaus Poikkeamisasia) => "Uusi poikkeamisasia"
         avainsanatieto (:avainsanaTieto Poikkeamisasia)
 
         asianTiedot (:asianTiedot Poikkeamisasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot) => truthy
-        vahainenPoikkeaminen (:vahainenPoikkeaminen Asiantiedot) => "Alueelle ei voimassa olevaa kaava."
-        kuvaus (:poikkeamisasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]
+        _ (:vahainenPoikkeaminen Asiantiedot) => "Alueelle ei voimassa olevaa kaava."
+        _ (:poikkeamisasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]
 
     (fact "toimenpide-count" (count toimenpidetieto) => 2)
 
@@ -403,27 +403,27 @@
         canonical (poikkeus-application-to-canonical application "fi" ) => truthy
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
-        aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title suunnitelutarveratkaisu)
-        aineistotoimittaja (:aineistotoimittaja toimituksenTiedot) => (env/value :aineistotoimittaja)
-        tila (:tila toimituksenTiedot) => "keskener\u00e4inen"
-        kuntakoodi (:kuntakoodi toimituksenTiedot) => (:municipality suunnitelutarveratkaisu)
+        _ (:aineistonnimi toimituksenTiedot) => (:title suunnitelutarveratkaisu)
+        _ (:aineistotoimittaja toimituksenTiedot) => (env/value :aineistotoimittaja)
+        _ (:tila toimituksenTiedot) => "keskener\u00e4inen"
+        _ (:kuntakoodi toimituksenTiedot) => (:municipality suunnitelutarveratkaisu)
 
         suunnittelutarveasiatieto (:suunnittelutarveasiatieto Popast) => truthy
-        poikkeamisasiatieto (:poikkeamisasiatieto Popast) => nil
+        _ (:poikkeamisasiatieto Popast) => nil
         Suunnittelutarveasia (:Suunnittelutarveasia suunnittelutarveasiatieto)
         ;abstarctPoikkeamistype
         kasittelynTilatieto (:kasittelynTilatieto Suunnittelutarveasia) => truthy
         Tilamuutos (-> kasittelynTilatieto first :Tilamuutos) => map?
-        pvm (:pvm Tilamuutos) => "2013-09-17"
+        _ (:pvm Tilamuutos) => "2013-09-17"
 
-        kuntakoodi (:kuntakoodi Suunnittelutarveasia) => (:municipality poikkari-hakemus)
+        _ (:kuntakoodi Suunnittelutarveasia) => (:municipality poikkari-hakemus)
 
         luvanTunnistetiedot (:luvanTunnistetiedot Suunnittelutarveasia) => truthy
         LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
         MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
-        tunnus (:tunnus MuuTunnus) => "LP-753-2013-00001"
-        sovellus (:sovellus MuuTunnus) => "Lupapiste"
+        _ (:tunnus MuuTunnus) => "LP-753-2013-00001"
+        _ (:sovellus MuuTunnus) => "Lupapiste"
 
         osapuolettieto (:osapuolettieto Suunnittelutarveasia) => truthy
         Osapuolet (:Osapuolet osapuolettieto) => truthy
@@ -460,7 +460,7 @@
         _ (:postitoimipaikannimi osoite) => "Piippola"
         _ (:puhelin henkilo) => "0102030405"
         _ (:sahkopostiosoite henkilo) => "pena@example.com"
-        yritys (:yritys Osapuoli) => nil
+        _ (:yritys Osapuoli) => nil
 
 
         rakennuspaikkatieto (:rakennuspaikkatieto Suunnittelutarveasia) => truthy
@@ -470,42 +470,42 @@
         RakennuspaikanKiinteisto (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto) => truthy
         kiinteistotieto (:kiinteistotieto RakennuspaikanKiinteisto) => truthy
         Kiinteisto (:Kiinteisto kiinteistotieto) => truthy
-        tilannimi (:tilannimi Kiinteisto) => "Omatila"
-        kiinteistotunnus (:kiinteistotunnus Kiinteisto) => "75342700020063"
-        maaraalaTunnus (:maaraAlaTunnus Kiinteisto) => "M0008"
-        rantaKytkin (:rantaKytkin Kiinteisto) => true
-        kokotilaKytkin (:kokotilaKytkin RakennuspaikanKiinteisto) => false
-        hallintaperuste (:hallintaperuste RakennuspaikanKiinteisto) => "oma"
+        _ (:tilannimi Kiinteisto) => "Omatila"
+        _ (:kiinteistotunnus Kiinteisto) => "75342700020063"
+        _ (:maaraAlaTunnus Kiinteisto) => "M0008"
+        _ (:rantaKytkin Kiinteisto) => true
+        _ (:kokotilaKytkin RakennuspaikanKiinteisto) => false
+        _ (:hallintaperuste RakennuspaikanKiinteisto) => "oma"
 
         toimenpidetieto (:toimenpidetieto Suunnittelutarveasia) => truthy
 
         lausuntotieto (:lausuntotieto Suunnittelutarveasia) => truthy
         Lausunto (:Lausunto (first lausuntotieto)) => truthy
-        viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
-        pyyntoPvm (:pyyntoPvm Lausunto) => "2013-09-17"
+        _ (:viranomainen Lausunto) => "Paloviranomainen"
+        _ (:pyyntoPvm Lausunto) => "2013-09-17"
         lausuntotieto (:lausuntotieto Lausunto) => truthy
         annettu-lausunto (:Lausunto lausuntotieto) => truthy
-        lausunnon-antanut-viranomainen (:viranomainen annettu-lausunto) => "Paloviranomainen"
-        varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
-        lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
+        _ (:viranomainen annettu-lausunto) => "Paloviranomainen"
+        _ (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
+        _(:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
         puoltotieto (:puoltotieto annettu-lausunto) => truthy
         Puolto (:Puolto puoltotieto) => truthy
-        puolto (:puolto Puolto) => "puollettu"
-        lausuntoId (:id Lausunto) => "52385377da063788effc1e93"
+        _ (:puolto Puolto) => "puollettu"
+        _ (:id Lausunto) => "52385377da063788effc1e93"
 
         lisatietotieto (:lisatietotieto Suunnittelutarveasia) => truthy
         Lisatieto (:Lisatieto lisatietotieto) => truthy
-        asioimiskieli (:asioimiskieli Lisatieto) => "suomi"
-        suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => nil?
+        _ (:asioimiskieli Lisatieto) => "suomi"
+        _ (:suoramarkkinointikieltoKytkin Lisatieto) => nil?
 
         ;end of abstarctPoikkeamistype
-        kayttotapaus (:kayttotapaus Suunnittelutarveasia) => "Uusi suunnittelutarveasia"
+        _ (:kayttotapaus Suunnittelutarveasia) => "Uusi suunnittelutarveasia"
 
         asianTiedot (:asianTiedot Suunnittelutarveasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot) => truthy
-        vahainenPoikkeaminen (:vahainenPoikkeaminen Asiantiedot) => "Alueelle ei voimassa olevaa kaava."
-        kuvaus (:suunnittelutarveasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]
+        _ (:vahainenPoikkeaminen Asiantiedot) => "Alueelle ei voimassa olevaa kaava."
+        _ (:suunnittelutarveasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]
 
     (fact "toimenpide-count" (count toimenpidetieto) => 2)
 

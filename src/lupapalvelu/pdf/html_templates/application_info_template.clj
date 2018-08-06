@@ -29,7 +29,7 @@
     [:tr
      [:td {:colspan "2"} [:div [:b#operations-title]] [:div#operations-value]]]]])
 
-(defn- get-handlers [{handlers :handlers :as application} lang]
+(defn- get-handlers [{:keys [handlers]} lang]
   (map #(format "%s %s (%s)" (:firstName %) (:lastName %) (get-in % [:name (keyword lang)])) handlers))
 
 (defn get-operation-info [{documents :documents} lang {op-name :name op-id :id op-desc :description}]

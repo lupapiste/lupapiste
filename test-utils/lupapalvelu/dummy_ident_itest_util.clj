@@ -9,7 +9,7 @@
   ; Request welcome page and query features to init session
   (http-get (str (server-address) "/app/fi/welcome") request-opts)
   (http-get (str (server-address) "/api/query/features") request-opts)
-  (let [{:keys [status body] :as resp} (http-get (str (server-address) "/dev/saml/init-login")
+  (let [{:keys [status] :as resp} (http-get (str (server-address) "/dev/saml/init-login")
                                                  (merge request-opts token-query))
         trid (-> resp (decode-response) :body :trid)]
 

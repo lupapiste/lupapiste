@@ -1,9 +1,7 @@
 (ns lupapalvelu.notice-api
   (:require [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as app]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail!]]))

@@ -129,7 +129,7 @@
    :states      valid-states
    :pre-checks  [(task-state-assertion (tasks/all-states-but :sent))
                  validate-task-is-not-review]}
-  [{:keys [application] :as command}]
+  [command]
   (tasks/set-state command taskId :requires_user_action))
 
 
@@ -137,7 +137,7 @@
   (when (ss/blank? (get-in (util/find-by-id task-id tasks) [:data :katselmuksenLaji :value]))
     (fail! :error.missing-parameters)))
 
-(defn- validate-required-review-fields! [{{task-id :taskId :as data} :data} {tasks :tasks :as application}]
+(defn- validate-required-review-fields! [{{task-id :taskId} :data} {tasks :tasks :as application}]
   (when (= (permit/permit-type application) permit/R)
     (let [review (get-in (util/find-by-id task-id tasks) [:data :katselmus])]
       (when (some #(ss/blank? (get-in review [% :value])) [:pitoPvm :pitaja :tila])
@@ -289,7 +289,7 @@
                  (task-source-type-assertion #{:verdict :authority :task})]
    :user-roles  #{:authority}
    :states      valid-states}
-  [{application :application user :user organization :organization created :created :as command}]
+  [{:keys [application organization] :as command}]
   (let [command        (assoc command :application (app/post-process-app-for-krysp application @organization))
         sent-file-ids  (mapping-to-krysp/save-review-as-krysp command (util/find-by-id taskId (:tasks application)) lang)
         sent-to-krysp? (not (nil? sent-file-ids))]

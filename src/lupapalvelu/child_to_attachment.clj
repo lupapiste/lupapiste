@@ -1,6 +1,5 @@
 (ns lupapalvelu.child-to-attachment
-  (:require [clojure.java.io :as io]
-            [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
+  (:require [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [sade.core :refer [def- now]]
             [sade.files :as files]
             [sade.strings :as ss]
@@ -11,7 +10,7 @@
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre-client]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
-  (:import (java.io File FileOutputStream)))
+  (:import (java.io FileOutputStream)))
 
 (defn- get-child [application child-type id]
   (first (filter #(or (nil? id) (= id (:id %))) (child-type application))))

@@ -1,6 +1,6 @@
 (ns lupapalvelu.calendars-api
   (:require [sade.core :refer :all]
-            [taoensso.timbre :as timbre :refer [info error]]
+            [taoensso.timbre :refer [info error]]
             [lupapalvelu.action :refer [defquery defcommand notify] :as action]
             [sade.env :as env]
             [sade.util :as util]
@@ -349,7 +349,7 @@
     (ok :authorities (cal/find-application-authz-with-calendar appl)
         :reservationTypes (reservation-types organization)
         :defaultLocation (get-in (o/get-organization organization) [:reservations :default-location] ""))
-    (catch Exception e (ok :authorities []
+    (catch Exception _ (ok :authorities []
                            :reservationTypes []
                            :defaultLocation ""))))
 
@@ -366,7 +366,7 @@
    :on-success       [(notify :suggest-appointment-authority)
                       (notify :suggest-appointment-from-applicant)
                       (notify :suggest-appointment-to-applicant)]}
-  [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
+  [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created}]
   ; Applicant: clientId must be the same as user id
   ; Authority: authorityId must be the same as user id
   ; Organization of application must be the same as the organization in reservation slot
@@ -407,7 +407,7 @@
    :input-validators [(partial action/number-parameters [:reservationId])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant})]
    :on-success       (notify :accept-appointment)}
-  [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
+  [{:keys [user application] timestamp :created}]
   (let [reservation (util/find-by-id reservationId (:reservations application))]
     (info "Accepting reservation" reservationId)
     (cal/accept-reservation application reservation user timestamp)
@@ -420,7 +420,7 @@
    :input-validators [(partial action/number-parameters [:reservationId])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]
    :on-success       (notify :decline-appointment)}
-  [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
+  [{:keys [user application] timestamp :created}]
   (let [reservation (util/find-by-id reservationId (:reservations application))]
     (info "Declining reservation" reservationId)
     (cal/decline-reservation application reservation user timestamp)
@@ -459,7 +459,7 @@
    :input-validators [(partial action/number-parameters [:reservationId])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority})]
    :on-success       (notify :decline-appointment)}
-  [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
+  [{:keys [user application] timestamp :created}]
   (let [reservation (util/find-by-id reservationId (:reservations application))]
     (info "Canceling reservation" reservationId)
     (cal/cancel-reservation application reservation user timestamp)
@@ -471,7 +471,7 @@
    :parameters       [reservationId :id]
    :input-validators [(partial action/number-parameters [:reservationId])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant})]}
-  [{{userId :id :as user} :user application :application}]
+  [{{userId :id} :user application :application}]
   (cal/mark-reservation-update-seen application reservationId userId)
   (ok))
 

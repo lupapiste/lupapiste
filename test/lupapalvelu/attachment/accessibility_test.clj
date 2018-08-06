@@ -4,7 +4,7 @@
             [midje.util :refer [testable-privates]]))
 
 (defn make-auths [users]
-  (map (fn [{:keys [id company] :as user}]
+  (map (fn [{:keys [id company]}]
          (merge {:id id :role "writer" :type "writer"}
                 (when company
                   {:type "company" })))

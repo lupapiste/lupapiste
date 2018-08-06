@@ -3,7 +3,6 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer [expected-failure? unauthorized?]]
             [lupapalvelu.foreman :as f]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.data-schema :as dds]
             [sade.core :refer [now]]
             [sade.schema-generators :as ssg]))

@@ -5,7 +5,6 @@
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.organization :as org]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.property-location :as prop-loc]
             [sade.core :refer [now]]
             [sade.env :as env]

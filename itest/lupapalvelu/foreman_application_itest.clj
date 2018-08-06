@@ -406,12 +406,9 @@
 (facts* "Auths and invites"
   (let [apikey pena
         {application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
-        {:keys [hakija1 hakija-no-auth hakija-contact-person hakija-company]} (add-invites apikey application-id)
+        _ (add-invites apikey application-id)
         _ (command apikey :submit-application :id application-id)
         _ (give-verdict sonja application-id :verdictId "321-2016")
-
-        application            (query-application apikey application-id)
-
         has-auth? (fn [email auth]
                         (or (some (partial = email) (map :username auth)) false))]
     (sent-emails) ; clear email box
@@ -638,7 +635,7 @@
        (fact "foreman can NOT upload a new version to applicants attachment on foreman application"
          (upload-attachment foreman foreman-app-id {:id attachment-by-applicant} false) => attachment-by-applicant)
 
-       (let [{actions-by-id :actionsById :as resp} (query foreman :allowed-actions-for-category :category "attachments" :id foreman-app-id)
+       (let [{actions-by-id :actionsById} (query foreman :allowed-actions-for-category :category "attachments" :id foreman-app-id)
              actions-for-foreman-att (get actions-by-id (keyword attachment-by-foreman))
              actions-for-applicant-att (get actions-by-id (keyword attachment-by-applicant))
              actions [:upload-attachment :delete-attachment :delete-attachment-version :rotate-pdf

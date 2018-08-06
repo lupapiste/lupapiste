@@ -80,8 +80,7 @@
 
 (rum/defcs type-selector < rum/reactive
   (rum/local nil ::types)
-  [{types* ::types} {:keys [schema files* fields* binding?*]
-                     :as   options} filedata]
+  [{types* ::types} {:keys [schema fields* binding?*]} filedata]
   (attachment-types types*)
   (let [att-types (some->> (rum/react types*)
                            (filter (fn [{:keys [type-group]}]
@@ -93,8 +92,7 @@
                                    :text  (type-loc type-group type-id)
                                    :value (kw-type type)})))]
     (when (seq att-types)
-      (let [filename    (keyword (:filename filedata))
-            value       (or (:type (field-info fields* filedata))
+      (let [value       (or (:type (field-info fields* filedata))
                             (:value (util/find-by-key :value
                                                       (:default schema)
                                                       att-types)))
@@ -172,7 +170,7 @@
                          ((keyword filename) @fields*)
                          :file-id file-id)))
         @files*)
-   (fn [{:keys [done pending result] :as job}]
+   (fn [{:keys [done pending] :as job}]
      (letfn [(finalize []
                (service/refresh-attachments)
                (reset! binding?* false))]
@@ -190,7 +188,7 @@
                                  :message :attachment.bind-failed})))))))
 
 (rum/defc batch-buttons < rum/reactive
-  [{:keys [schema files* fields* binding?*] :as options}]
+  [{:keys [files* fields* binding?*] :as options}]
   (let [binding? (rum/react binding?*)]
     [:tfoot.batch--buttons
      [:tr
@@ -216,7 +214,7 @@
 (rum/defc attachments-batch < rum/reactive
   "Metadata editor for file upload. The name is a hat-tip to the
   AttachmentBatchModel."
-  [{:keys [schema files* fields* binding?*] :as options}]
+  [{:keys [files* binding?*] :as options}]
   (when (-> files* rum/react seq)
     (let [binding? (rum/react binding?*)]
       [:div
@@ -228,7 +226,7 @@
           [:th [:span.batch-required (path/loc :application.attachmentContents)]]
           [:th.td-center (path/loc :remove)]]]
         [:tbody
-         (for [{:keys [filename state] :as filedata} @files*]
+         (for [{:keys [state] :as filedata} @files*]
            [:tr
             [:td.batch--file (batch-file-link filedata)]
             (case state
@@ -297,7 +295,7 @@
 
 (rum/defc pate-attachments < rum/reactive
   "Displays and supports adding new attachments."
-  [{:keys [schema path state] :as options}]
+  [{:keys [schema] :as options}]
   (let [files*    (atom [])
         fields*   (atom {})
         binding?* (atom false)]
@@ -410,7 +408,7 @@
       [:span (common/loc :pate.no-attachments)])))
 
 (rum/defc pate-select-application-attachments < rum/reactive
-  [{:keys [schema path state info] :as options} & [wrap-label?]]
+  [{:keys [path state info] :as options} & [wrap-label?]]
   (pate-components/label-wrap-if-needed
    options
    {:component (select-application-attachments

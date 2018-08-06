@@ -32,8 +32,7 @@
         lp-xml-212 (cr/strip-xml-namespaces (xml/parse xml-212s))
         lp-xml-213 (cr/strip-xml-namespaces (xml/parse xml-213s))
         lp-xml-220 (cr/strip-xml-namespaces (xml/parse xml-220s))
-        lp-xml-221 (cr/strip-xml-namespaces (xml/parse xml-221s))]
-
+        _          (cr/strip-xml-namespaces (xml/parse xml-221s))]
     (fact ":tag is set (2.1.2)"
       (xml-test-common/has-tag
         (get-yleiset-alueet-krysp-mapping lupa-name-key "2.1.2")) => true)
@@ -150,13 +149,13 @@
 
 (fact "YA katselmus"
   (let [application kaivulupa-application-with-review
-        canonical (katselmus-canonical application  katselmus "fi" {})
+        canonical (katselmus-canonical application katselmus "fi")
         operation-name-key (-> application :primaryOperation :name keyword)
         lupa-name-key (ya-operation-type-to-schema-name-key operation-name-key)
 
         xml-212 (yleisetalueet-element-to-xml canonical lupa-name-key "2.1.2")
         xml-212s (indent-str xml-212)
-        lp-xml-212 (cr/strip-xml-namespaces (xml/parse xml-212s))
+        _ (cr/strip-xml-namespaces (xml/parse xml-212s))
 
         xml-221 (yleisetalueet-element-to-xml canonical lupa-name-key "2.2.1")
         xml-221s (indent-str xml-221)

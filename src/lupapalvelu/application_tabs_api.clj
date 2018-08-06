@@ -2,7 +2,7 @@
   "Pseudo queries to handle application's tabs' visibility in UI"
   (:require [sade.core :refer :all]
             [sade.util :refer [fn->]]
-            [lupapalvelu.action :as action :refer [defquery]]
+            [lupapalvelu.action :refer [defquery]]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.foreman :as foreman]

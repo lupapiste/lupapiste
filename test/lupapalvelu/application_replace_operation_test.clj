@@ -46,6 +46,7 @@
                            :versions []
                            :id "7"
                            :op []}
+             ;; TODO: Use or remove this:
              attachment-8  {:type {:type-group "paapiirustus" :type-id "leikkauspiirros"}
                             :versions []
                             :id "8"

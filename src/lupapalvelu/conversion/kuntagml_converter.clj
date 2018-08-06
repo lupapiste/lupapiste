@@ -6,7 +6,6 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.conversion.util :as conversion-util]
-            [lupapalvelu.document.model :as model]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
@@ -143,7 +142,7 @@
   1) The local MongoDB has to contain the location info for the municipality in question (here Vantaa)
   2) this function needs to be called from prev-permit-api/create-application-from-previous-permit instead of
   prev-permit/fetch-prev-application!"
-  [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
+  [{{:keys [kuntalupatunnus authorizeApplicants]} :data :as command}]
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
         destructured-permit-id (conversion-util/destructure-permit-id kuntalupatunnus)
         operation             "aiemmalla-luvalla-hakeminen"

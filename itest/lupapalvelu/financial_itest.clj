@@ -2,8 +2,7 @@
   (:require [midje.sweet  :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.domain :as domain]))
 
 (apply-remote-minimal)
 

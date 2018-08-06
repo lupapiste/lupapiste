@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
-  (:require [taoensso.timbre :as timbre :refer [debug]]
+  (:require [taoensso.timbre :refer [debug]]
             [sade.core :refer :all]
             [sade.util :as util]
             [lupapalvelu.document.attachments-canonical :as attachments-canon]
@@ -404,7 +404,7 @@
     "2.2.2" rakennuslupa_to_krysp_222
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
-(defn- katselmus-pk? [{:keys [type-group type-id] :as attachment-type}]
+(defn- katselmus-pk? [{:keys [type-group type-id]}]
   (and (= type-group "katselmukset_ja_tarkastukset")
     (#{"katselmuksen_tai_tarkastuksen_poytakirja" "aloituskokouksen_poytakirja"} type-id)))
 

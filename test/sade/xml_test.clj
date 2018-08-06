@@ -1,8 +1,7 @@
 (ns sade.xml-test
   (:require [sade.xml :refer :all]
             [midje.sweet :refer :all]
-            [clojure.string :as s]
-            [clojure.xml :as xml]))
+            [clojure.string :as s]))
 
 
 ;; See https://www.owasp.org/index.php/XML_External_Entity_%28XXE%29_Processing

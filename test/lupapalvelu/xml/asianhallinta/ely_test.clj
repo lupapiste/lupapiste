@@ -3,7 +3,6 @@
             [clojure.java.io :as io]
             [sade.xml :as xml]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.integrations.ely :as ely]
             [net.cgrand.enlive-html :as enlive]))
 
 

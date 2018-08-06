@@ -1,5 +1,5 @@
 (ns lupapalvelu.find-address
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error]]
+  (:require [taoensso.timbre :refer [trace debug info warn error]]
             [clojure.data.zip.xml :refer [xml-> text]]
             [monger.operators :refer :all]
             [monger.query :as q]
@@ -58,7 +58,7 @@
 ;;;   :location   Map with :x and :y
 ;;;
 
-(defn search-property-id [lang property-id]
+(defn search-property-id [_ property-id]
   (map (fn [f] {:location (select-keys f [:x :y])
                 :property-id (:kiinttunnus f)
                 :kind :property-id})
