@@ -231,7 +231,10 @@
                       {:context  {:application {:state states/all-but-draft}}
                        :required [:application/cancel]}]
    :notified         true
-   :on-success       (notify :application-state-change)
+   :on-success       [(notify :application-state-change)
+                      (fn [{:keys [application]} _]
+                        (when (allu/allu-application? application)
+                          (allu/cancel-application! application)))]
    :states           states/all-application-or-archiving-project-states
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
@@ -342,7 +345,7 @@
                       (notify :organization-on-submit)
                       (notify :organization-housing-office)
                       (fn [{{:keys [id] :as application} :application} _]
-                        (when (and (env/feature? :allu) (allu/allu-application? application))
+                        (when (allu/allu-application? application)
                           ;; TODO: Use message queue to delay and retry interaction with ALLU.
                           ;; TODO: Save messages for inter-system debugging etc.
                           ;; TODO: Send errors to authority instead of applicant?
@@ -652,7 +655,10 @@
    :permissions      [{:required [:application/change-state]}]
    :states           #{:submitted}
    :pre-checks       [(partial sm/validate-state-transition :draft)]
-   :on-success       (notify :application-return-to-draft)}
+   :on-success       [(notify :application-return-to-draft)
+                      (fn [{:keys [application]} _]
+                        (when (allu/allu-application? application)
+                          (allu/cancel-application! application)))]}
   [{{:keys [role] :as user}         :user
     {:keys [state] :as application} :application
     created                         :created
