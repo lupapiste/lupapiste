@@ -1,5 +1,5 @@
 (ns lupapalvelu.conversion.kuntagml-converter
-  (:require [taoensso.timbre :refer [info infof warn]]
+  (:require [taoensso.timbre :refer [info infof warn error]]
             [sade.core :refer :all]
             [sade.util :as util]
             [lupapalvelu.action :as action]
@@ -130,7 +130,10 @@
       (let [app-links (krysp-reader/->viitelupatunnukset xml)]
         (infof (format "Linking %d app-links to application %s" (count app-links) (:id created-application)))
         (doseq [link app-links]
-          (app/do-add-link-permit created-application link)))
+          (try
+            (app/do-add-link-permit created-application link)
+            (catch Exception e
+              (error "Adding app-link %s -> %s failed: %s" (:id created-application) link (.getMessage e))))))
 
       (let [fetched-application (mongo/by-id :applications (:id created-application))]
         (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
