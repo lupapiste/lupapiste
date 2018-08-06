@@ -710,10 +710,10 @@
                         {:application (mongo/select-one :applications {:_id app-id}) ;; The applications to which the link points
                          :link-permit-id (get-lp-id-by-kuntalupatunnus kuntalupatunnus) ;; The new Lupapiste id for kuntalupatunnus
                          :app-link-id (:id link)}))] ;; The id for the link document (format: "14-0633-13-TJO|LP-092-2018-90011")
-    (doseq [item update-info]
+    (doseq [item update-info
+            :when (ss/not-blank? (:link-permit-id item))]
       (let [{:keys [app-link-id application link-permit-id]} update-info]
-        (if (and (not-any? nil? (vals item))
-                 (ss/not-blank? link-permit-id))
+        (if (and (not-any? nil? (vals item)))
           (do
             (info (format "Updating app-link: %s -> %s" app-link-id (str link-permit-id "|" (:id application))))
             (mongo/remove app-link-id)
