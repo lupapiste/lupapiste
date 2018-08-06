@@ -26,7 +26,8 @@
                                (.setSignerOverride "S3SignerType")
                                (.setCacheResponseMetadata false)
                                (.setMaxConnections 100)
-                               (.setConnectionTimeout 5000))]
+                               (.setConnectionTimeout 5000)
+                               (.setConnectionTTL (or (env/value :s3 :connection-ttl) 300000)))] ; 5 minutes
     (-> (doto (AmazonS3ClientBuilder/standard)
           (.withCredentials (AWSStaticCredentialsProvider. credentials))
           (.withClientConfiguration client-configuration)
