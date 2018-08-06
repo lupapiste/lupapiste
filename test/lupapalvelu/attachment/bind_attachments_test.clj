@@ -16,6 +16,7 @@
           command  {:data {:filedatas filedatas} :application ..application..}]
       (validate-attachment-groups command)) => nil
     (provided (op/get-primary-operation-metadata ..application.. :attachment-op-selector) => nil)
+    (provided (op/operation-id-exists? ..application.. ..op-id..) => true)
     (provided (sc/check [att/Operation] [{:id ..op-id.. :name ..op-name..}]) => nil))
 
   (fact "multiple files"
@@ -26,6 +27,7 @@
           command  {:data {:filedatas filedatas} :application ..application..}]
       (validate-attachment-groups command)) => nil
     (provided (op/get-primary-operation-metadata ..application.. :attachment-op-selector) => nil)
+    (provided (op/operation-id-exists? ..application.. ..op-id..) => true)
     (provided (sc/check [att/Operation] [{:id ..op-id.. :name ..op-name..}]) => nil))
 
   (fact "attachment op selection not allowed"
