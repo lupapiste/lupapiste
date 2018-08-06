@@ -359,7 +359,13 @@
         {:status 404, :body (str "Not Found: " allu-id)})))
 
   ALLUAttachments
-  (send-allu-attachment! [_ _ _] (assert false "unimplemented"))
+  (send-allu-attachment! [_ endpoint request]
+    (let [allu-id (second (re-find #".*/applications/(\d+)/attachments" endpoint))]
+      (if (contains? (:applications @state) allu-id)
+        (let [attachment {:metadata (-> (get-in request [:multipart 0 :content]) (json/decode true))}]
+          (swap! state update-in [:applications allu-id :attachments] (fnil conj []) attachment)
+          {:status 200, :body ""})
+        {:status 404, :body (str "Not Found: " allu-id)})))
 
   ALLUPlacementContracts
   (create-contract! [_ _ request]

@@ -1,11 +1,12 @@
 (ns lupapalvelu.backing_system.allu-itest
   "Integration tests for ALLU integration. Using local (i.e. not over HTTP) testing style."
-  (:require [mount.core :as mount]
+  (:require [clojure.java.io :as io]
+            [mount.core :as mount]
             [schema.core :as sc]
             [clj-http.client :as http]
             [cheshire.core :as json]
             [monger.operators :refer [$set]]
-            [sade.core :refer [ok? fail]]
+            [sade.core :refer [ok?]]
             [sade.schema-generators :as ssg]
             [sade.env :as env]
             [lupapalvelu.document.data-schema :as dds]
@@ -65,7 +66,13 @@
   (send-allu-attachment! [_ endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/attachments")))
     (fact "request is well-formed"
-      (assert false "unimplemented"))
+      (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
+      (-> request :multipart count) => 2
+      (-> request (get-in [:multipart 0]) keys set) => #{:name :mime-type :encoding :content}
+      (-> request (get-in [:multipart 0]) (select-keys [:name :mime-type :encoding]))
+      => {:name "metadata", :mime-type "application/json", :encoding "UTF-8"}
+      (-> request (get-in [:multipart 1]) keys set) => #{:name :mime-type :content}
+      (-> request (get-in [:multipart 1]) :name) => "file")
 
     (send-allu-attachment! inner endpoint request))
 
@@ -139,6 +146,7 @@
               (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Pena Panaani"
 
               (itu/local-command pena :update-doc :id id :doc applicant-id :updates [["_selected" "yritys"]])
+              ;; Leads to ALLU failure because contact person info is not set:
               (itu/local-command pena :set-company-to-document :id id :documentId applicant-id
                                  :companyId "esimerkki" :path "yritys") => ok?
               (let [user (usr/get-user-by-id pena-id)]
@@ -150,10 +158,12 @@
               (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Esimerkki Oy"
 
               (let [filename "dev-resources/test-attachment.txt"
-                    file-contents (slurp filename)
+                    file (io/file filename)
                     description "Test file"
                     description* "The best file"
-                    _ (itu/upload-attachment pena id attachment true :filename filename :text description) => ok?
+                    _ (itu/local-command pena :upload-attachment :id id :attachmentId (:id attachment)
+                                         :attachmentType {:type-group "muut", :type-id "muu"} :group {}
+                                         :filename filename :tempfile file :size (.length file)) => ok?
                     _ (itu/local-command pena :set-attachment-meta :id id :attachmentId (:id attachment)
                                          :meta {:contents description}) => ok?
                     {[attachment] :attachments} (domain/get-application-no-access-checking id)]
@@ -166,21 +176,23 @@
                                 :description (localize "fi" :attachmentType
                                                        (-> attachment :type :type-group)
                                                        (-> attachment :type :type-id))
-                                :mimeType    (-> attachment :latestVersion :contentType)}
-                     :file     file-contents}]
+                                :mimeType    (-> attachment :latestVersion :contentType)}}]
 
-                (itu/local-command pena :set-attachment-meta :id id :attachmentId (:id attachment)
+                ;; Upload another attachment for :move-attachments-to-backing-system to send:
+                (itu/local-command raktark-helsinki :upload-attachment :id id :attachmentId (:id attachment)
+                                   :attachmentType {:type-group "muut", :type-id "muu"} :group {}
+                                   :filename filename :tempfile file :size (.length file)) => ok?
+                (itu/local-command raktark-helsinki :set-attachment-meta :id id :attachmentId (:id attachment)
                                    :meta {:contents description*}) => ok?
                 (itu/local-command raktark-helsinki :move-attachments-to-backing-system :id id :lang "fi"
                                    :attachmentIds [(:id attachment)]) => ok?
 
-                (-> (:applications @allu-state) first val :attachments)
-                => [{:metadata {:name        description*
-                                :description (localize "fi" :attachmentType
-                                                       (-> attachment :type :type-group)
-                                                       (-> attachment :type :type-id))
-                                :mimeType    (-> attachment :latestVersion :contentType)}
-                     :file     file-contents}]))
+                (-> (:applications @allu-state) first val :attachments (get 1))
+                => {:metadata {:name        description*
+                               :description (localize "fi" :attachmentType
+                                                      (-> attachment :type :type-group)
+                                                      (-> attachment :type :type-id))
+                               :mimeType    (-> attachment :latestVersion :contentType)}}))
 
             (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
               (itu/local-command pena :submit-application :id id) => ok?
@@ -218,7 +230,7 @@
                                                                  {:status 400, :body "Your data was bad."} nil)})
             (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
               (itu/local-command pena :submit-application :id id)
-              @failure-counter => 1)
+              @failure-counter => 2)
 
             (reset! failure-counter 0)
 
