@@ -1092,6 +1092,40 @@
                                                     {:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "Lupapiste"}}]
                                    :rakennuksenSelite "A: kerrostalo-rivitalo-kuvaus"})))
 
+(facts "rakennuksenTiedot : varusteet"
+  (against-background
+    (org/pate-scope? irrelevant) => true)
+  (let [doc (tools/unwrapped  {:schema-info {:name "uusiRakennus"}
+                               :data {:varusteet {:viemariKytkin true
+                                                  :hissiKytkin true
+                                                  :sahkoKytkin true}}})
+        {tiedot :rakennuksenTiedot} (get-rakennus application-rakennuslupa (tools/unwrapped  {:schema-info {:name "uusiRakennus"}}))
+        {tiedot2 :rakennuksenTiedot} (get-rakennus application-rakennuslupa doc)]
+
+    (fact "when all varusteet flags are false varusteet map should be empty"
+      (:varusteet tiedot) => {})
+
+    (fact "Only selected varusteet should be in varusteet map"
+      (:varusteet tiedot2) => {:viemariKytkin true
+                               :hissiKytkin true
+                               :sahkoKytkin true})))
+
+(facts "rakennuksenTiedot : verkostoliittymat"
+  (against-background
+    (org/pate-scope? irrelevant) => true)
+  (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
+                              :data {:verkostoliittymat {:sahkoKytkin true
+                                                         :viemariKytkin true}}})
+        {tiedot :rakennuksenTiedot} (get-rakennus application-rakennuslupa (tools/unwrapped {:schema-info {:name "uusiRakennus"}}))
+        {tiedot2 :rakennuksenTiedot} (get-rakennus application-rakennuslupa doc)]
+
+    (fact "When theres no verkostoliittymat map should be empty"
+      (:verkostoliittymat tiedot) => {})
+
+    (fact "Only selected liittymat should be in verkostoliittymat map"
+      (:verkostoliittymat tiedot2) => {:sahkoKytkin true
+                                       :viemariKytkin true})))
+
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
   (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]
 
