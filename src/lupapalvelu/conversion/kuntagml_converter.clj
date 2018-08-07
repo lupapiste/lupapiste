@@ -102,19 +102,20 @@
         ;; Siirretään lausunnot luonnos-tilasta "lausunto annettu"-tilaan
         given-statements (for [st statements
                                :when (map? st)]
-                           (statement/give-statement st
-                                                     (:saateText st)
-                                                     (get-in st [:metadata :puoltotieto])
-                                                     (mongo/create-id)
-                                                     (mongo/create-id)
-                                                     false))
+                           (try
+                             (statement/give-statement st
+                                                       (:saateText st)
+                                                       (get-in st [:metadata :puoltotieto])
+                                                       (mongo/create-id)
+                                                       (mongo/create-id)
+                                                       false)
+                             (catch Exception e
+                               (error "Moving statement to statement given -state failed: %s" (.getMessage e)))))
 
         created-application (-> created-application
                                 (update-in [:documents] concat other-building-docs new-parties structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
-                                (assoc :statements (if-not (empty? given-statements)
-                                                     given-statements
-                                                     []))
+                                (assoc :statements given-statements)
                                 (assoc :opened (:created command)))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
