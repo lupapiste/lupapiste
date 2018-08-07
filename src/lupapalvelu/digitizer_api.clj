@@ -24,7 +24,10 @@
     (when-not (and archive-enabled? correct-role?)
       unauthorized)))
 
-(defn default-digitalization-location-set-if-used [{user-orgs :user-organizations {:keys [organizationId createWithDefaultLocation]} :data}]
+(defn default-digitalization-location-set-if-used
+  "Verifies that default digitalization location can only be used if
+  it is set for the organization and is valid."
+  [{user-orgs :user-organizations {:keys [organizationId createWithDefaultLocation]} :data}]
   (when createWithDefaultLocation
     (if-let [{:keys [x y]} (->> user-orgs (util/find-by-id organizationId) :default-digitalization-location)]
       (coord/validate-coordinates [x y])
