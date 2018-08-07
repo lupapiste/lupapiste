@@ -24,7 +24,7 @@
       unauthorized)))
 
 (defcommand create-archiving-project
-            {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus createAnyway createWithoutBuildings createWithDefaultLocation]
+            {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus createWithoutPreviousPermit createWithoutBuildings createWithDefaultLocation]
              :user-roles       #{:authority}
              :input-validators [(partial action/non-blank-parameters [:lang :organizationId]) ;; no :address included
                                 ;; the propertyId parameter can be nil
@@ -32,7 +32,7 @@
                                   (when (not (ss/blank? propertyId))
                                     (action/property-id-parameters [:propertyId] command)))]
              :pre-checks       [user-is-allowed-to-digitize]}
-            [{:keys [user] :as command}]
+  [{:keys [user] :as command}]
   (if-let [app-with-verdict (domain/get-application-as
                               {:organization organizationId
                                :verdicts     {$elemMatch {:kuntalupatunnus kuntalupatunnus}}

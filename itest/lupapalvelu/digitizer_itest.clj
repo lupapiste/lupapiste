@@ -14,7 +14,7 @@
                 :propertyId propertyId
                 :organizationId "186-R"
                 :kuntalupatunnus kuntalupatunnus
-                :createAnyway true
+                :createWithoutPreviousPermit true
                 :createWithoutBuildings true
                 :createWithDefaultLocation false
                 :refreshBuildings refreshBuildings)))
@@ -36,7 +36,7 @@
                                       :propertyId ""
                                       :organizationId "186-R"
                                       :kuntalupatunnus "186-00X"
-                                      :createAnyway true
+                                      :createWithoutPreviousPermit true
                                       :createWithoutBuildings true
                                       :createWithDefaultLocation true)
           app-id (:id response)
