@@ -164,6 +164,13 @@ $preamble-min-height: 280px; // at least the size of the map container
     select , .property-id {
       vertical-align: top;
     }
+    a.property-id-edit {
+      display: inline-block;
+      float: right;
+      &::after {
+        content:  "\2026";
+      }
+    }
     ul {
       li {
         display: block;

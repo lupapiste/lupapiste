@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.krysp.ymparistolupa-canonical-to-krysp-xml-test
-  (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
+  (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all]
             [lupapalvelu.document.ymparistolupa-canonical :refer [ymparistolupa-canonical]]
             [lupapalvelu.document.ymparistolupa-canonical-test :refer [application application-yritysmaksaja]]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa-element-to-xml ymparistolupa_to_krysp_212 ymparistolupa_to_krysp_221]]
@@ -23,7 +23,6 @@
         xml_221_s     (indent-str xml_221)
         lp-xml_212    (cr/strip-xml-namespaces (xml/parse xml_212_s))
         lp-xml_221    (cr/strip-xml-namespaces (xml/parse xml_221_s))]
-
     (validator/validate xml_212_s (:permitType application) "2.1.2") ; throws exception
     (validator/validate xml_221_s (:permitType application) "2.2.1") ; throws exception
 
@@ -49,12 +48,10 @@
        (xml/get-text (first luvat) [:kuvaus]) => "lupapistetunnus"
        (xml/get-text (second luvat) [:tunnistetieto]) => "kuntalupa-123"))
 
-
     (fact "sijainti"
       (let [tiedot-sijainnista (xml/select1 lp-xml_212 [:toiminnanSijaintitieto :ToiminnanSijainti])
             sijainti (xml/select1 tiedot-sijainnista [:sijaintitieto :Sijainti])
             osoite (xml/select1 sijainti :osoite)]
-
         (xml/get-text tiedot-sijainnista :yksilointitieto) => (:id application)
         (xml/get-text osoite [:osoitenimi :teksti]) => "Londb\u00f6lentie 97"
         (xml/get-text sijainti [:piste :Point :pos]) =>  "428195.77099609 6686701.3931274"))
@@ -64,12 +61,8 @@
         (fact "etunimi" (xml/get-text maksaja [:etunimi]) => "Pappa")
         (fact "sukunimi" (xml/get-text maksaja [:sukunimi]) => "Betalare")
         (fact "laskuviite" (xml/get-text maksaja [:laskuviite]) => "1686343528523")
-
         (fact "maa"
-          (xml/get-text maksaja [:osoitetieto :Osoite :valtioKansainvalinen]) => "FIN")
-        )
-
-      )))
+          (xml/get-text maksaja [:osoitetieto :Osoite :valtioKansainvalinen]) => "FIN")))))
 
 (facts "Ymparistolupa with yritysmaksaja"
   (let [canonical (ymparistolupa-canonical application-yritysmaksaja "fi")
@@ -78,7 +71,7 @@
         xml_212_s     (indent-str xml_212)
         xml_221_s     (indent-str xml_221)
         lp-xml_212    (cr/strip-xml-namespaces (xml/parse xml_212_s))
-        lp-xml_221    (cr/strip-xml-namespaces (xml/parse xml_221_s))]
+        _    (cr/strip-xml-namespaces (xml/parse xml_221_s))]
 
     ; TODO - other fields could/should be tested as well
 
@@ -87,7 +80,5 @@
             test-values {:ovtTunnus         "003712345671"
                          :verkkolaskuTunnus "verkkolaskuTunnus"
                          :valittajaTunnus   "BAWCFI22"}]
-
         (doseq [[k v] test-values]
-          (xml/get-text Verkkolaskutus [k]) => v)))
-    ))
+          (xml/get-text Verkkolaskutus [k]) => v)))))

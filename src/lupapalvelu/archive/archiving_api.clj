@@ -1,6 +1,5 @@
 (ns lupapalvelu.archive.archiving-api
-  (:require [cheshire.core :as json]
-            [sade.core :refer [ok unauthorized fail]]
+  (:require [sade.core :refer [ok unauthorized fail]]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters]]
             [lupapalvelu.archive.archiving :as archiving]
             [lupapalvelu.application :as app]
@@ -30,7 +29,7 @@
    :permissions      [{:required [:application/archive]}]
    :states           (conj states/post-verdict-states :underReview)
    :pre-checks       [application-within-time-limit]}
-  [{:keys [application user organization] :as command}]
+  [{:keys [organization] :as command}]
   (if-let [{:keys [error]} (-> (update command :application app/enrich-application-handlers @organization)
                                (archiving/send-to-archive (set attachmentIds) (set documentIds)))]
     (fail error)

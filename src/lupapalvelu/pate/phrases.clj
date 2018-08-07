@@ -2,7 +2,6 @@
   (:require [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.util :as util]))
@@ -24,7 +23,7 @@
   (when (some-> command :data :phrase-id)
     (phrase-id-exists command)))
 
-(defn upsert-phrase [{:keys [data user]}]
+(defn upsert-phrase [{:keys [data]}]
   (let [m                          (select-keys data [:category :tag :phrase])
         {:keys [phrase-id org-id]} data]
     (if phrase-id

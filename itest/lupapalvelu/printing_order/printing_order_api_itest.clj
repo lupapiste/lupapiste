@@ -1,8 +1,6 @@
 (ns lupapalvelu.printing-order.printing-order-api-itest
   (:require [lupapalvelu.itest-util :refer :all]
-            [midje.sweet :refer :all]
-            [lupapalvelu.printing-order.mylly-client :as mylly]
-            [lupapalvelu.mongo :as mongo]))
+            [midje.sweet :refer :all]))
 
 (apply-remote-minimal)
 
@@ -47,8 +45,8 @@
              (:orders (query pena :my-printing-orders)) => (has some (contains {:application application-id :acknowledged? true})))))
 
       (facts "foreman tries to order building plan printouts"
-        (let [{foreman-app-id :id} (command pena :create-foreman-application :id application-id
-                                      :taskId "" :foremanRole "ei tiedossa" :foremanEmail "mikko@example.com")]
+        (let [_ (command pena :create-foreman-application :id application-id
+                         :taskId "" :foremanRole "ei tiedossa" :foremanEmail "mikko@example.com")]
           (fact "mikko has access to the printing order functionality"
             (query mikko :attachments-for-printing-order :id application-id) => ok?)
           (fact "foreman places an order"

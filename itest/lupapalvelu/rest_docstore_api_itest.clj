@@ -1,8 +1,6 @@
 (ns lupapalvelu.rest-docstore-api-itest
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.organization :as org]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.rest.docstore-api :as api]))
 

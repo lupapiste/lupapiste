@@ -8,7 +8,6 @@
             [lupapalvelu.organization :refer :all]
             [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
             [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
-            [lupapalvelu.pdf.libreoffice-template :as template]
             [lupapalvelu.pdf.libreoffice-template-base-test :refer :all]))
 
 (def applicant-index #'lupapalvelu.pdf.libreoffice-template/applicant-index)
@@ -46,9 +45,9 @@
 (facts "Verdict vaaditutKatselmukset "
        (def verdict-vaaditutKatselmukset #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-vaaditutKatselmukset)
        (fact {:midje/description (str "verdict-reviews krysp")}
-             (verdict-vaaditutKatselmukset application1 "a1" 0 :fi) => '[[" muu katselmus " "* KVV-tarkastus"] [" muu katselmus " " * S\u00e4hk\u00f6tarkastus "] [" muu katselmus " " * Rakennetarkastus "] [" loppukatselmus " ""] [" muu katselmus " " Aloitusilmoitus "]])
+             (verdict-vaaditutKatselmukset application1 "a1" 0) => '[[" muu katselmus " "* KVV-tarkastus"] [" muu katselmus " " * S\u00e4hk\u00f6tarkastus "] [" muu katselmus " " * Rakennetarkastus "] [" loppukatselmus " ""] [" muu katselmus " " Aloitusilmoitus "]])
        (fact {:midje/description (str "verdict-reviews non-krysp")}
-             (verdict-vaaditutKatselmukset application2 "a1" 0 :fi) => '[["YA paikan tarkastaminen"] ["rakennuksen paikan tarkastaminen"]]))
+             (verdict-vaaditutKatselmukset application2 "a1" 0) => '[["YA paikan tarkastaminen"] ["rakennuksen paikan tarkastaminen"]]))
 
 (facts "Verdict signatures "
        (def verdict-signatures #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-signatures)

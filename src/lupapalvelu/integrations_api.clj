@@ -77,7 +77,7 @@
   (if-let [validation-failure (app/validate-link-permits application)]
     validation-failure
     (cond
-      (and (env/feature? :allu) (allu/allu-application? application))
+      (allu/allu-application? application)
       (do
         ;; TODO: Send attachments and comments
         ;; TODO: Non-placement-contract ALLU applications
@@ -184,8 +184,7 @@
                 mapping-to-krysp/http-not-allowed]
    :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
-  [{:keys [created application user organization] :as command}]
-
+  [{:keys [created] :as command}]
   (let [all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
         attachments-wo-sent-timestamp (filter
                                         #(and
@@ -217,7 +216,7 @@
                 (application-already-exported :exported-to-backing-system)
                 mapping-to-krysp/http-not-allowed]
    :states     states/post-verdict-states}
-  [{:keys [application organization] :as command}]
+  [command]
   (let [sent-document-ids (or (mapping-to-krysp/save-parties-as-krysp command lang) [])
         transfer-item     (get-transfer-item :parties-to-backing-system command {:data-key :party-documents
                                                                                  :data sent-document-ids})]
@@ -247,7 +246,7 @@
    :user-roles #{:applicant :authority}
    :states     krysp-enrichment-states
    :pre-checks [app/validate-authority-in-drafts]}
-  [{created :created {:keys [organization propertyId] :as application} :application :as command}]
+  [{created :created {:keys [propertyId] :as application} :application :as command}]
   (let [{url :url credentials :credentials} (org/get-building-wfs application)
         clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
     (if (or clear-ids? url)
@@ -299,7 +298,7 @@
    :user-authz-roles roles/all-authz-roles
    :states     states/all-application-states
    :pre-checks [app/validate-authority-in-drafts]}
-  [{{:keys [organization municipality propertyId] :as application} :application}]
+  [{{:keys [propertyId] :as application} :application}]
   (if-let [{url :url credentials :credentials} (org/get-building-wfs application)]
     (ok :data (building-reader/building-info-list url credentials propertyId))
     (ok)))
@@ -365,7 +364,7 @@
                 has-unsent-attachments]
    :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
-  [{:keys [created application user] :as command}]
+  [{:keys [created application] :as command}]
 
   (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
         attachments-wo-sent-timestamp (filter
@@ -487,7 +486,7 @@
                           (fail :error.invalid-key)))
                       validate-integration-message-filename]
    :states #{:sent :complementNeeded}}
-  [{application :application org :organization :as command}]
+  [{application :application org :organization}]
   (let [f (resolve-integration-message-file application @org transferType fileType filename)]
     (assert (ss/starts-with (.getName f) (:id application))) ; Can't be too paranoid...
     (if (.exists f)

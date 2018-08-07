@@ -2,7 +2,6 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [net.cgrand.enlive-html :as enlive]
-            [lupapalvelu.pdf.html-template-common :as common]
             [lupapalvelu.pdf.html-templates.application-info-template :refer :all]))
 
 (testable-privates lupapalvelu.pdf.html-templates.application-info-template get-handlers get-operations get-foremen)

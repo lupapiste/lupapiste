@@ -19,7 +19,7 @@
                        [[:kiinteisto :rekisterointipvm] (or
                                                           (try
                                                             (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                            (catch Exception e (:rekisterointipvm ktj-tiedot)))
+                                                            (catch Exception _ (:rekisterointipvm ktj-tiedot)))
                                                           "")]]
           schema (schemas/get-schema (:schema-info document))
           updates (filter (partial doc-persistence/update-key-in-schema? (:body schema)) doc-updates)]

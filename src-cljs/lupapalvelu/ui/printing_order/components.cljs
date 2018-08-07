@@ -1,6 +1,5 @@
 (ns lupapalvelu.ui.printing-order.components
   (:require [rum.core :as rum]
-            [lupapalvelu.ui.util :as util]
             [lupapalvelu.ui.common :refer [loc] :as common]
             [lupapalvelu.ui.printing-order.state :as state]))
 

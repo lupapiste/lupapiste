@@ -9,5 +9,5 @@
    :feature :conversion-debug
    :user-roles   #{:authority}
    :permissions [{:required []}]}
-  [{:keys [user] :as command}]
+  [command]
   (converter/debug command))

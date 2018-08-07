@@ -1,10 +1,8 @@
 (ns lupapalvelu.actions-api
   (:require [clojure.set :refer [difference]]
-            [sade.env :as env]
             [sade.core :refer :all]
             [sade.util :refer [fn-> fn->>]]
-            [lupapalvelu.action :refer [defquery] :as action]
-            [lupapalvelu.roles :as roles]))
+            [lupapalvelu.action :refer [defquery] :as action]))
 
 ;;
 ;; Default actions

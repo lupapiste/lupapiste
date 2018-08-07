@@ -15,6 +15,12 @@
         <i class="lupicon-circle-attention negative"></i>
         <span data-bind="ltext: 'application.property-id.entered-manually'"></span>
       </span>
+      <!-- ko if: $root.authorization.ok( "change-location") -->
+      <a class="property-id-edit"
+         data-bind="testId: 'change-property-id',
+                    ltext: 'edit',
+                    click: _.wrap($root.application, $root.changeLocationModel.changeLocation)"></a>
+      <!-- /ko -->
     </span>
   </div>
 

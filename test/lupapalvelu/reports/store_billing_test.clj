@@ -102,7 +102,7 @@
 
 (facts "Billing entries sheet"
   (fact "No entries"
-    (billing-entries-sheet "091-R" 0 1528874580463 [] :fi)
+    (billing-entries-sheet 0 1528874580463 [] :fi)
     => {:sheet-name (str (util/to-local-date 0)
                          " - "
                          (util/to-local-date 1528874580463))
@@ -113,7 +113,7 @@
                ["Yhteens\u00E4" 0 0.0]]})
 
   (facts "One entry"
-    (let [sheet (billing-entries-sheet "091-R" 0 10000000000 (take 1 docstore-response) :fi)]
+    (let [sheet (billing-entries-sheet 0 10000000000 (take 1 docstore-response) :fi)]
       (fact "has right number of rows"
         (count (:data sheet)) => 4) ; 1 data row + 3 rows of summary
 
@@ -125,7 +125,7 @@
         (-> sheet :data first last) => (-> docstore-response first :price_in_cents_without_vat cents->euros))))
 
   (facts "Multiple entries"
-    (let [sheet (billing-entries-sheet "091-R" 0 10000000000 docstore-response :fi)]
+    (let [sheet (billing-entries-sheet 0 10000000000 docstore-response :fi)]
       (fact "has right number of rows"
         (count (:data sheet)) => (+ (count docstore-response) 3)) ; 1 data row + 3 rows of summary
 

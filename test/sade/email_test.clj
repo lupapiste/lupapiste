@@ -1,7 +1,6 @@
 (ns sade.email-test
   (:require [sade.email :refer :all]
-            [midje.sweet :refer :all]
-            [postal.core :as postal]))
+            [midje.sweet :refer :all]))
 
 (facts "send-mail"
   ; Need some body:

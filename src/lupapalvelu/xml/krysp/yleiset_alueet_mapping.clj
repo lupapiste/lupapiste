@@ -333,7 +333,7 @@
 
          all-canonical-attachments (seq (filter identity canonical-attachments))
 
-         canonical-without-attachments (ya-canonical/katselmus-canonical application review lang user)
+         canonical-without-attachments (ya-canonical/katselmus-canonical application review lang)
          canonical (-> canonical-without-attachments
                        (#(if (seq canonical-attachments)
                            (assoc-in % [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto] canonical-attachments)

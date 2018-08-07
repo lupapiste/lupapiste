@@ -1,10 +1,7 @@
 (ns lupapalvelu.ya-digging-permit-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.application :as app]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.operations :as operations]
-            [sade.env :as env]))
+            [lupapalvelu.domain :as domain]))
 
 (apply-remote-minimal)
 

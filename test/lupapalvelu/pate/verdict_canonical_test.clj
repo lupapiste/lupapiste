@@ -290,7 +290,7 @@
 
 (facts paivamaarat-type-canonical
   (fact "all dates defined"
-    (paivamaarat-type-canonical "fi" verdict)
+    (paivamaarat-type-canonical verdict)
     => {:aloitettavaPvm "2022-11-23"
         :lainvoimainenPvm "2017-11-27"
         :voimassaHetkiPvm "2023-11-23"
@@ -300,7 +300,7 @@
         :julkipanoPvm "2017-11-24"})
 
   (fact "undefined fields defaults to nil"
-    (paivamaarat-type-canonical "fi" (update verdict :data dissoc :aloitettava :lainvoimainen :voimassa))
+    (paivamaarat-type-canonical (update verdict :data dissoc :aloitettava :lainvoimainen :voimassa))
     => {:aloitettavaPvm nil
         :lainvoimainenPvm nil
         :voimassaHetkiPvm nil
@@ -347,7 +347,7 @@
 
   (facts paivamaarat-type-canonical
     (fact "all dates defined"
-      (paivamaarat-type-canonical "fi" p-verdict)
+      (paivamaarat-type-canonical p-verdict)
       => {:aloitettavaPvm nil
           :lainvoimainenPvm nil
           :voimassaHetkiPvm "2020-02-25"
@@ -356,7 +356,7 @@
           :viimeinenValitusPvm nil
           :julkipanoPvm "2018-02-22"})
     (fact "undefined fields defaults to nil"
-      (paivamaarat-type-canonical "fi" (update p-verdict :data dissoc :lainvoimainen :voimassa))
+      (paivamaarat-type-canonical (update p-verdict :data dissoc :lainvoimainen :voimassa))
       => {:aloitettavaPvm nil
           :lainvoimainenPvm nil
           :voimassaHetkiPvm nil

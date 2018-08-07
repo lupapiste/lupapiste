@@ -16,7 +16,7 @@
         (try
           ; Return right away, let cache be popupulated by chance
           (mongo/insert-batch :propertyCache (map mongo/with-mongo-meta location-infos) WriteConcern/UNACKNOWLEDGED)
-          (catch com.mongodb.DuplicateKeyException ignored)))
+          (catch com.mongodb.DuplicateKeyException _)))
       location-infos)))
 
 (defn property-location-info

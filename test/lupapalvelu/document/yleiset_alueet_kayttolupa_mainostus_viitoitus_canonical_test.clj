@@ -99,7 +99,7 @@
 
         Sijainti-osoite (-> Mainostuslupa :sijaintitieto first :Sijainti :osoite) => truthy
         Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
-        Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
+        _ (-> Sijainti-osoite :alkuHetki) => truthy
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
         Sijainti-piste (-> Mainostuslupa :sijaintitieto first :Sijainti :piste :Point :pos) => truthy
 
@@ -120,8 +120,8 @@
                              (tools/unwrapped
                                (assoc-in (:data maksaja) [:_selected :value] "henkilo")) "maksaja")
         maksaja-yksityinen-Henkilo (-> maksaja-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
-        maksaja-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
-        maksaja-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy
+        _ (:nimi maksaja-yksityinen-Henkilo) => truthy
+        _ (:osoite maksaja-yksityinen-Henkilo) => truthy
 
         ;; Tapahtuman alkupvm ja loppupvm
         alkuPvm (-> Mainostuslupa :alkuPvm) => truthy
@@ -132,8 +132,8 @@
         mainostustapahtuma-loppu-pvm (-> Toimintajakso :loppuHetki) => truthy
 
         ;; :lupaAsianKuvaus and :sijoituslupaviitetieto do not appear
-        lupaAsianKuvaus (:lupaAsianKuvaus Mainostuslupa) => falsey
-        Sijoituslupaviite (:sijoituslupaviitetieto Mainostuslupa) => falsey
+        _ (:lupaAsianKuvaus Mainostuslupa) => falsey
+        _ (:sijoituslupaviitetieto Mainostuslupa) => falsey
 
         osapuolet-vec (-> Mainostuslupa :osapuolitieto) => truthy
 
@@ -167,7 +167,7 @@
 
         lisatieto-vec (-> Mainostuslupa :lupakohtainenLisatietotieto) => truthy
 
-        pinta-ala (:pintaala Mainostuslupa) => falsey
+        _ (:pintaala Mainostuslupa) => falsey
 
         match-fn #(= "Tapahtuman nimi" (-> % :LupakohtainenLisatieto :selitysteksti))
         tapahtuman-nimi-Lisatieto (:LupakohtainenLisatieto (first (filter match-fn lisatieto-vec))) => truthy
@@ -187,16 +187,16 @@
         canonical-2 (application-to-canonical viitoitus-application "fi")
         Viitoituslupa (-> canonical-2 :YleisetAlueet :yleinenAlueAsiatieto :Kayttolupa) => truthy
 
-        lupaAsianKuvaus-2 (:lupaAsianKuvaus Viitoituslupa) => falsey
-        Sijoituslupaviite-2 (:sijoituslupaviitetieto Viitoituslupa) => falsey
-        toimintajaksotieto-2 (:toimintajaksotieto canonical-2) => falsey
+        _ (:lupaAsianKuvaus Viitoituslupa) => falsey
+        _ (:sijoituslupaviitetieto Viitoituslupa) => falsey
+        _ (:toimintajaksotieto canonical-2) => falsey
 
         alkuPvm-2 (-> Viitoituslupa :alkuPvm) => truthy
         loppuPvm-2 (-> Viitoituslupa :loppuPvm) => truthy
 
         lisatieto-vec-2 (-> Viitoituslupa :lupakohtainenLisatietotieto) => truthy
         match-fn-2 #(= "Haetaan kausilupaa" (-> % :LupakohtainenLisatieto :selitysteksti))
-        haetaan-kausilupaa-Lisatieto-2 (:LupakohtainenLisatieto (first (filter match-fn-2 lisatieto-vec-2))) => falsey]
+        _ (:LupakohtainenLisatieto (first (filter match-fn-2 lisatieto-vec-2))) => falsey]
 
     (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
 

@@ -217,9 +217,7 @@
 
         (facts "Toimenpiteet"
           (let [operations (sxml/select1 xml-parsed [:UusiAsia :Toimenpiteet])
-                op         (sxml/get-text xml-parsed [:UusiAsia :Toimenpiteet])
-                ttunnus    (-> op :content first)
-                tteksti    (-> op :content second)]
+                op         (sxml/get-text xml-parsed [:UusiAsia :Toimenpiteet])]
             (count (:content operations)) => 1
             (fact "Toimenpide has ToimenpideTunnus and ToimenpideTeksti"
               (sxml/get-text op [:Toimenpide :ToimenpideTunnus]) => (:name (:primaryOperation application))
@@ -243,7 +241,6 @@
         schema-version "ah-1.1"
         mapping        (ua-mapping/get-uusi-asia-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
-        permit-type    (:permitType application)
         docs           (common/documents-by-type-without-blanks (tools/unwrapped application)) => truthy
         xml-parsed     (reader/strip-xml-namespaces (sxml/parse (xml/indent-str xml))) => truthy]
 

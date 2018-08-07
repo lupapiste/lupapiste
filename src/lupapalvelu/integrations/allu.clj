@@ -1,4 +1,6 @@
 (ns lupapalvelu.integrations.allu
+  "JSON REST API integration with ALLU as backing system. Used for Helsinki YA instead of SFTP/HTTP KRYSP XML
+  integration."
   (:require [clojure.core.match :refer [match]]
             [clojure.walk :refer [postwalk]]
             [mount.core :refer [defstate]]
@@ -264,6 +266,18 @@
   [pending-on-client app]
   (->> app flatten-values (convert-value-flattened-app pending-on-client)))
 
+(defn- application-cancel-request [allu-url allu-jwt app]
+  (let [allu-id (-> app :integrationKeys :ALLU :id)]
+    (assert allu-id (str (:id app) " does not contain an ALLU id"))
+    [(str allu-url "/applications/" allu-id "/cancelled")
+     {:headers {:authorization (str "Bearer " allu-jwt)}}]))
+
+;; TODO: Propagate error descriptions from ALLU etc. when they provide documentation for those.
+(defn- handle-cancel-response [response]
+  (match response
+    {:status (:or 200 201)} [:ok]
+    _ [:err :error.allu.http (select-keys response [:status :body])]))
+
 (defn- placement-creation-request [allu-url allu-jwt app]
   [(str allu-url "/placementcontracts")
    {:headers      {:authorization (str "Bearer " allu-jwt)}
@@ -286,13 +300,16 @@
 (def- allu-permit-subtypes #{"sijoituslupa" "sijoitussopimus"})
 
 (defn allu-application? [{:keys [permitSubtype organization]}]
-  (and (contains? allu-organizations organization)
+  (and (env/feature? :allu)
+       (contains? allu-organizations organization)
        (contains? allu-permit-subtypes permitSubtype)))
 
 ;;;; ALLU Proxy
 ;;;; ===================================================================================================================
 
 (defprotocol ALLUPlacementContracts
+  (cancel-allu-application! [self endpoint request])
+
   (create-contract! [self endpoint request])
   (lock-contract! [self endpoint request])
 
@@ -300,6 +317,8 @@
 
 (deftype RemoteALLU []
   ALLUPlacementContracts
+  (cancel-allu-application! [_ endpoint request] (http/put endpoint request))
+
   (create-contract! [_ endpoint request] (http/post endpoint request))
   (lock-contract! [_ endpoint request] (http/put endpoint request))
 
@@ -307,21 +326,32 @@
 
 (deftype LocalMockALLU [state]
   ALLUPlacementContracts
-  (create-contract! [_ _ {placement-contract :body}]
-    (if-let [validation-error (sc/check PlacementContract (json/decode placement-contract true))]
-      {:status 400, :body validation-error}
-      (let [{:keys [id-counter]} (swap! state (fn [{:keys [id-counter] :as state}]
-                                                (-> state
-                                                    (update :id-counter inc)
-                                                    (update :applications assoc (str id-counter) placement-contract))))]
-        {:status 200, :body (str (dec id-counter))})))
+  (cancel-allu-application! [_ endpoint _]
+    (let [allu-id (second (re-find #".*/(\d+)/cancelled" endpoint))]
+      (if (contains? (:applications @state) allu-id)
+        (do (swap! state update :applications dissoc allu-id)
+            {:status 200, :body ""})
+        {:status 404, :body (str "Not Found: " allu-id)})))
 
-  (lock-contract! [_ endpoint {placement-contract :body}]
-    (let [allu-id (second (re-find #".*/(\d+)" endpoint))]
-      (if-let [validation-error (sc/check PlacementContract (json/decode placement-contract true))]
+  (create-contract! [_ _ request]
+    (let [placement-contract (json/decode (:body request) true)]
+      (if-let [validation-error (sc/check PlacementContract placement-contract)]
+        {:status 400, :body validation-error}
+        (let [local-mock-allu-state-push (fn [{:keys [id-counter] :as state}]
+                                           (-> state
+                                               (update :id-counter inc)
+                                               (update :applications assoc (str id-counter) placement-contract)))
+              {:keys [id-counter]} (swap! state local-mock-allu-state-push)]
+          {:status 200, :body (str (dec id-counter))}))))
+
+  (lock-contract! [_ endpoint request]
+    (let [placement-contract (json/decode (:body request) true)
+          allu-id (second (re-find #".*/(\d+)" endpoint))]
+      (if-let [validation-error (sc/check PlacementContract placement-contract)]
         {:status 400, :body validation-error}
         (if (contains? (:applications @state) allu-id)
-          {:status 200, :body allu-id}
+          (do (swap! state assoc-in [:applications allu-id] placement-contract)
+              {:status 200, :body allu-id})
           {:status 404, :body (str "Not Found: " allu-id)}))))
 
   (allu-fail! [_ text info-map] (fail! text info-map)))     ; TODO: Is there a better way to handle post-fn errors?
@@ -331,8 +361,20 @@
            (->LocalMockALLU (atom {:id-counter 0, :applications {}}))
            (->RemoteALLU)))
 
+(defn- allu-http-fail! [response]
+  (allu-fail! allu-instance :error.allu.http (select-keys response [:status :body])))
+
 ;;;; Public API
 ;;;; ===================================================================================================================
+
+(defn cancel-application!
+  "Cancel application in ALLU (if it had been sent there)."
+  [app]
+  (when-let [allu-id (-> app :integrationKeys :ALLU :id)]
+    (let [[endpoint request] (application-cancel-request (env/value :allu :url) (env/value :allu :jwt) app)]
+      (match (cancel-allu-application! allu-instance endpoint request)
+        {:status (:or 200 201)} (info (:id app) "was canceled in ALLU as" allu-id)
+        response (allu-http-fail! response)))))
 
 (defn create-placement-contract!
   "Create placement contract in ALLU. Returns ALLU id for the contract."
@@ -341,7 +383,7 @@
     (match (create-contract! allu-instance endpoint request)
       {:status (:or 200 201), :body allu-id} (do (info (:id app) "was created succesfully in ALLU as" allu-id)
                                                  allu-id)
-      response (allu-fail! allu-instance :error.allu.http (select-keys response [:status :body])))))
+      response (allu-http-fail! response))))
 
 (defn lock-placement-contract!
   "Lock placement contract in ALLU for verdict evaluation."
@@ -349,4 +391,4 @@
   (let [[endpoint request] (placement-locking-request (env/value :allu :url) (env/value :allu :jwt) app)]
     (match (lock-contract! allu-instance endpoint request)
       {:status (:or 200 201), :body allu-id} (info (:id app) "was locked succesfully in ALLU as" allu-id)
-      response (allu-fail! allu-instance :error.allu.http (select-keys response [:status :body])))))
+      response (allu-http-fail! response))))

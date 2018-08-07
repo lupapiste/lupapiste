@@ -1,6 +1,6 @@
 (ns lupapalvelu.idf.idf-api
   "Identity federation server: create users from partner applications to Lupapiste"
-  (:require [taoensso.timbre :as timbre :refer [debug info warn error]]
+  (:require [taoensso.timbre :refer [debug info warn error]]
             [ring.util.response :as resp]
             [sade.env :as env]
             [sade.util :as util]
@@ -48,7 +48,7 @@
           clock-drift (util/abs (- (now) ts))]
       (when (> clock-drift timestamp-tolerance-ms)
         (bad-request "Invalid timestamp: too old")))
-    (catch NumberFormatException e
+    (catch NumberFormatException _
       (bad-request "Invalid timestamp: NaN"))))
 
 (defn- invalid-email [email]
@@ -59,7 +59,7 @@
   (when-not (or (ss/blank? b) (= "true" b) (= "false" b))
     (bad-request "Invalid boolean parameter")))
 
-(defn- invalid-parameters [first-name last-name email phone street zip city marketing architect]
+(defn- invalid-parameters [email marketing architect]
   (or
     (invalid-email (ss/canonize-email email))
     (invalid-boolean marketing)
@@ -93,7 +93,7 @@
       (incorrect-parter app)
       (incorrect-mac first-name last-name email phone street zip city marketing architect app id ts mac)
       (request-expired ts)
-      (invalid-parameters first-name last-name email phone street zip city marketing architect)
+      (invalid-parameters email marketing architect)
       (try
         (let [first-name (strip-nonletters first-name)
               last-name  (strip-nonletters last-name)

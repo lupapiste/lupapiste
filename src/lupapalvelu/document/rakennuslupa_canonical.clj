@@ -95,7 +95,7 @@
       (assoc defaults :rakennusnro manuaalinen_rakennusnro)
       defaults)))
 
-(defn- get-rakennus [application {id :id created :created info :schema-info toimenpide :data :as doc}]
+(defn- get-rakennus [application {created :created info :schema-info toimenpide :data}]
   (let [{:keys [kaytto mitat rakenne lammitys luokitus huoneistot]} toimenpide
         kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (:muuRakennusaine rakenne)
                                                   :rakennusaine (:kantavaRakennusaine rakenne))
@@ -251,30 +251,23 @@
                             (assoc % :jarjestysnumero n)
                             %) toimenpide))
 
-(defmulti operation-canonical
-  {:arglists '([application document])}
-  (fn [application document] (-> document :schema-info :name keyword)))
+(defmulti operation-canonical {:arglists '([application document])}
+  (fn [_ document] (-> document :schema-info :name keyword)))
 
-(defmethod operation-canonical :hankkeen-kuvaus-minimum [& _]
-  nil)
+(defmethod operation-canonical :hankkeen-kuvaus-minimum [& _] nil)
 
 (defmethod operation-canonical :hankkeen-kuvaus [& _] ;; For prev permit applications
   nil)
 
-(defmethod operation-canonical :jatkoaika-hankkeen-kuvaus [& _]
-  nil)
+(defmethod operation-canonical :jatkoaika-hankkeen-kuvaus [& _] nil)
 
-(defmethod operation-canonical :maisematyo [& _]
-  nil)
+(defmethod operation-canonical :maisematyo [& _] nil)
 
-(defmethod operation-canonical :aloitusoikeus [& _]
-  nil)
+(defmethod operation-canonical :aloitusoikeus [& _] nil)
 
-(defmethod operation-canonical :aiemman-luvan-toimenpide [& _]
-  nil)
+(defmethod operation-canonical :aiemman-luvan-toimenpide [& _] nil)
 
-(defmethod operation-canonical :tyonjohtaja-v2 [& _]
-  nil)
+(defmethod operation-canonical :tyonjohtaja-v2 [& _] nil)
 
 (defmethod operation-canonical :uusiRakennus [application document]
   (get-uusi-toimenpide document application))
@@ -457,7 +450,7 @@
        (remove (comp ss/blank? :tunnus))
        (map (partial hash-map :MuuTunnus))))
 
-(defn- get-review-rakennustunnus [[{rakennus :rakennus :as building} & _]]
+(defn- get-review-rakennustunnus [[{:keys [rakennus]} & _]]
   (util/assoc-when-pred
       (select-keys rakennus [:jarjestysnumero :kiinttun]) util/not-empty-or-nil?
       :rakennusnro (:rakennusnro rakennus)
@@ -478,14 +471,14 @@
                             {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
          :rakennuksenSelite (:description rakennus)))})
 
-(defn- get-review-huomautus [{kuvaus :kuvaus toteaja :toteaja maara-aika :maaraAika toteamis-hetki :toteamisHetki :as huomautukset}]
+(defn- get-review-huomautus [{kuvaus :kuvaus toteaja :toteaja maara-aika :maaraAika toteamis-hetki :toteamisHetki}]
   (when kuvaus
     {:huomautus (util/assoc-when-pred
-                    {:kuvaus "-"} util/not-empty-or-nil?
-                    :kuvaus kuvaus
-                    :toteaja toteaja
-                    :maaraAika (util/to-xml-date-from-string maara-aika)
-                    :toteamisHetki (util/to-xml-date-from-string toteamis-hetki))}))
+                  {:kuvaus "-"} util/not-empty-or-nil?
+                  :kuvaus kuvaus
+                  :toteaja toteaja
+                  :maaraAika (util/to-xml-date-from-string maara-aika)
+                  :toteamisHetki (util/to-xml-date-from-string toteamis-hetki))}))
 
 (defn katselmus-canonical [application lang task user]
   (let [{{{pito-pvm     :pitoPvm
@@ -537,8 +530,7 @@
         :kayttotapaus (katselmus-kayttotapaus katselmuksen-laji :katselmus)}}}}))
 
 (defn unsent-attachments-to-canonical [application lang]
-  (let [application (tools/unwrapped application)
-        documents-by-type (documents-by-type-without-blanks application)]
+  (let [application (tools/unwrapped application)]
     {:Rakennusvalvonta
      {:toimituksenTiedot (toimituksen-tiedot application lang)
       :rakennusvalvontaAsiatieto

@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.disk-writer
-  (:require [taoensso.timbre :as timbre :refer [info error]]
+  (:require [taoensso.timbre :refer [info error]]
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [sade.core :refer :all]

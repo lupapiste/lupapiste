@@ -2,12 +2,11 @@
   (:require [lupapalvelu.action :as action]
             [lupapalvelu.archive.archiving-util :as archiving-util]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
             [noir.response :as resp]
             [sade.core :refer :all]
             [sade.util :as util]
-            [taoensso.timbre :as timbre :refer [debug info warn error]]))
+            [taoensso.timbre :refer [debug info warn error]]))
 
 (defn- update-archival-status-change [application attachment-id tila read-only modified deletion-explanation]
   (let [mongo-base-updates {:attachments.$.metadata.tila tila

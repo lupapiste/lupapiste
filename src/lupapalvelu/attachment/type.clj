@@ -4,8 +4,6 @@
             [lupapalvelu.operations :as op]
             [lupapiste-commons.attachment-types :as attachment-types]
             [sade.core :refer :all]
-            [sade.env :as env]
-            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.strings :as str]
             [sade.util :refer [fn-> fn->>] :as util]
@@ -143,7 +141,7 @@
 (def get-attachment-types-for-operation (memoize attachment-types-by-operation))
 
 (defn get-attachment-types-for-application
-  [{:keys [permitType primaryOperation secondaryOperations] :as application}]
+  [{:keys [primaryOperation secondaryOperations] :as application}]
   {:pre [application]}
   (->> (cons primaryOperation secondaryOperations)
        (map :name)
@@ -174,7 +172,7 @@
                           (-> application :permitType keyword attachment-types-by-permit-type))]
     (contains? allowed-types attachment-type)))
 
-(defn tag-by-type [{type :type :as attachment}]
+(defn tag-by-type [{:keys [type]}]
   (get type-grouping
        (-> (select-keys type [:type-group :type-id])
            (util/convert-values keyword))))

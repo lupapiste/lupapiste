@@ -123,6 +123,7 @@
         {:keys [attachments]} (query-application mikko application-id)
         cv-type {:type-group "osapuolet"
                  :type-id "cv"}
+        ;; TODO: Use or remove:
         tutkintotodistus-type {:type-group "osapuolet"
                                :type-id "tutkintotodistus"}]
     response => ok?

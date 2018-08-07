@@ -1,7 +1,6 @@
 (ns lupapalvelu.control-api
-  (:require [taoensso.timbre :as timbre :refer [info]]
+  (:require [taoensso.timbre :refer [info]]
             [noir.core :refer [defpage]]
-            [noir.server :as server]
             [noir.request]
             [noir.response :as response]
             [sade.env :as env]

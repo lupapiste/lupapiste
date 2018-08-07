@@ -1,8 +1,7 @@
 (ns lupapalvelu.restrictions-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.restrictions :refer :all]
-            [sade.util :as util]))
+            [lupapalvelu.restrictions :refer :all]))
 
 (testable-privates lupapalvelu.restrictions restrict apply-auth-restriction check-auth-restriction-entry)
 

@@ -21,7 +21,7 @@
     (map util/->int)
     (ss/join "-")))
 
-(defn- take-municipality [[match s _1 _2 _4]]
+(defn- take-municipality [[_ s]]
   (let [municipality (ss/zero-pad 3 s)]
     (get muni/municipality-mapping municipality municipality)))
 
@@ -30,5 +30,4 @@
     (condp re-find (ss/trim property-id)
       property-id-pattern    :>> take-municipality
       db-property-id-pattern :>> take-municipality
-      nil))
-  )
+      nil)))

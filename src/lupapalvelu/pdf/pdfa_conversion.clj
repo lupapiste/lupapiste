@@ -20,7 +20,7 @@
     (do
       (shell/sh executable)
       true)
-    (catch IOException e
+    (catch IOException _
       false)))
 
 (defn- find-pdf2pdf-executable []

@@ -1,8 +1,6 @@
 (ns lupapalvelu.ident.session
   (:require [lupapalvelu.mongo :as mongo]
-            [sade.env :as env]
-            [monger.operators :refer :all]
-            [noir.response :as response]))
+            [monger.operators :refer :all]))
 
 ;;
 ;; public local api

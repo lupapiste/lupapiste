@@ -2,7 +2,7 @@
   (:require [ring.util.codec :as codec]
             [sade.schemas :as ssc]
             [sade.validators :as sv]
-            [sade.util :refer [fn-> fn->>] :as util]
+            [sade.util :refer [fn-> fn->>]]
             [schema.core :as sc]
             [schema-generators.generators :as sg]
             [clj-time.format :as ctf]

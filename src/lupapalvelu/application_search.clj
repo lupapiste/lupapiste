@@ -1,11 +1,9 @@
 (ns lupapalvelu.application-search
   (:require [clojure.set :refer [rename-keys]]
-            [clojure.string :as s]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.find-address :as find-address]
-            [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
@@ -21,7 +19,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as v]
-            [taoensso.timbre :as timbre :refer [debug info warn error errorf]]))
+            [taoensso.timbre :refer [debug info warn error errorf]]))
 
 ;;
 ;; Query construction

@@ -1,10 +1,9 @@
 (ns lupapalvelu.i18n
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error errorf fatal]]
             [clj-time.format :as timef]
             [clj-time.core :as time]
             [clojure.java.io :as io]
             [clojure.string :as s]
-            [cheshire.core :as json]
             [ontodev.excel :as xls]
             [sade.core :refer :all]
             [sade.env :as env]

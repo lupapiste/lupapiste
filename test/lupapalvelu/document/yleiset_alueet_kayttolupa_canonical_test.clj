@@ -106,14 +106,14 @@
                              (tools/unwrapped
                                (assoc-in (:data maksaja) [:_selected :value] "henkilo")) "maksaja")
         maksaja-yksityinen-Henkilo (-> maksaja-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
-        maksaja-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
-        maksaja-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy
+        _ (:nimi maksaja-yksityinen-Henkilo) => truthy
+        _ (:osoite maksaja-yksityinen-Henkilo) => truthy
 
         alkuPvm (-> Kayttolupa :alkuPvm) => truthy
         loppuPvm (-> Kayttolupa :loppuPvm) => truthy
 
         lupaAsianKuvaus (:lupaAsianKuvaus Kayttolupa) => truthy
-        Sijoituslupaviite (-> Kayttolupa :sijoituslupaviitetieto :Sijoituslupaviite) => falsey
+        _ (-> Kayttolupa :sijoituslupaviitetieto :Sijoituslupaviite) => falsey
 
 ;        ;; hakijan yritystieto-osa
 ;        rooliKoodi-Hakija "hakija"

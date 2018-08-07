@@ -1,18 +1,9 @@
 (ns lupapalvelu.info-links
   (:require [clojure.set :refer [union]]
             [monger.operators :refer :all]
-            [sade.env :as env]
-            [sade.util :as util]
             [sade.core :refer [ok fail fail! now]]
-            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
-            [lupapalvelu.application :as app]
-            [lupapalvelu.authorization :as auth]
-            [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.open-inforequest :as open-inforequest]
-            [lupapalvelu.states :as states]
+            [lupapalvelu.action :refer [defquery defcommand update-application notify]]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as org]))
 

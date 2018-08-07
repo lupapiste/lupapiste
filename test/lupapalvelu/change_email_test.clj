@@ -2,7 +2,6 @@
   (:require [midje.sweet :refer :all]
             [midje.util]
             [lupapalvelu.change-email :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]

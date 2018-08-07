@@ -1,7 +1,7 @@
 (ns lupapalvelu.smoketest.assignment-smoke-tests
   (:require [clojure.set :refer [rename-keys]]
             [schema.core :as sc]
-            [taoensso.timbre :as timbre :refer [errorf]]
+            [taoensso.timbre :refer [errorf]]
             [lupapiste.mongocheck.core :refer [mongocheck]]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.mongo :as mongo]
