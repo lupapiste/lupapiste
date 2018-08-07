@@ -19,6 +19,8 @@
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]))
 
+(def tila (atom {})) ;; For debugging, remove!
+
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
   ;; Data to be deduced from xml:
@@ -97,9 +99,14 @@
 
         structures (->> xml krysp-reader/->rakennelmatiedot (map conversion-util/rakennelmatieto->kaupunkikuvatoimenpide))
 
+        statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
+
+        _ (reset! tila statements)
+
         created-application (-> created-application
                                 (update-in [:documents] concat other-building-docs new-parties structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
+                                (assoc :statements statements)
                                 (assoc :opened (:created command)))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
@@ -147,7 +154,7 @@
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
         destructured-permit-id (conversion-util/destructure-permit-id kuntalupatunnus)
         operation             "aiemmalla-luvalla-hakeminen"
-        path                  "./src/lupapalvelu/conversion/test-data/"
+        path                  "../../Desktop/test-data/"
         filename              (str path kuntalupatunnus ".xml")
         permit-type           "R"
         xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
