@@ -1,8 +1,6 @@
 (ns lupapalvelu.digitizer-itest
   (:require [lupapalvelu.domain :as domain]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture.core :as fixture]
             [midje.sweet :refer :all]))
 
 (apply-remote-minimal)

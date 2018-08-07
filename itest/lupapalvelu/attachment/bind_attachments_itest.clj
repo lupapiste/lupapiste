@@ -1,10 +1,8 @@
 (ns lupapalvelu.attachment.bind-attachments-itest
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.attachment :as att]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
-            [sade.util :as util]
-            [sade.schemas :as ssc]))
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 

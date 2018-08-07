@@ -1,19 +1,19 @@
 (ns lupapalvelu.perf-test)
 
-(defn a [x]
+(defn a []
   (Thread/sleep 100)
   "a")
 
-(defn b [x]
+(defn b []
   ; (throw (Exception. "Ups!"))
   (Thread/sleep 200)
   "b")
 
 (defn c []
-  (a "1")
-  (a "2")
-  (b "3"))
+  (a)
+  (a)
+  (b))
 
 (defn d []
   (c)
-  (a "1"))
+  (a))

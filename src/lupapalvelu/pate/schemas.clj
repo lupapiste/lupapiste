@@ -1,11 +1,8 @@
 (ns lupapalvelu.pate.schemas
   (:require [clojure.set :as set]
             [lupapalvelu.attachment.type :as att-type]
-            [lupapalvelu.document.schemas :as doc-schemas]
-            [lupapalvelu.document.tools :refer [body] :as tools]
-            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.document.tools :refer [body]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
@@ -163,9 +160,7 @@
 
 (defmulti validate-resolution :type)
 
-(defmethod validate-resolution :default
-  [options]
-  :error.invalid-value-path)
+(defmethod validate-resolution :default [_] :error.invalid-value-path)
 
 (defn schema-error [{:keys [schema path value schema-overrides type]}]
   (if-let [schema (st/get-in (get schema-overrides type schema) path)]
@@ -177,8 +172,7 @@
   (when (not= (count path) (or size 0))
     :error.invalid-value-path))
 
-(defmethod validate-resolution :date-delta
-  [{:keys [path schema value] :as options}]
+(defmethod validate-resolution :date-delta [{:keys [path value] :as options}]
   (or (path-error path)
       (schema-error (assoc options
                            :value (parse-int value)
@@ -195,21 +189,18 @@
       (not (set/subset? v-set d-set))    :error.invalid-value
       (not= (count items) (count v-set)) :error.duplicate-items)))
 
-(defmethod validate-resolution :date
-  [{:keys [path value] :as options}]
+(defmethod validate-resolution :date [{:keys [path value] :as options}]
   (or (path-error path)
       (schema-error (assoc options
                            :value (parse-int value)
                            :path [:value]))))
 
-(defmethod validate-resolution :select
-  [{:keys [path value data] :as options}]
+(defmethod validate-resolution :select [{:keys [path value data]}]
   (or (path-error path)
       (when-not (ss/blank? (str value))
         (check-items [value] (:items data)))))
 
-(defmethod validate-resolution :multi-select
-  [{:keys [path schema data value] :as options}]
+(defmethod validate-resolution :multi-select [{:keys [path data value] :as options}]
   ;; Items should not be part of the original path.
   (or (path-error path)
       (schema-error (assoc options
@@ -221,8 +212,7 @@
     (util/split-kw-path path)
     path))
 
-(defmethod validate-resolution :reference-list
-  [{:keys [path schema data value references] :as options}]
+(defmethod validate-resolution :reference-list [{:keys [path data value references]}]
   (let [canon-value (->> [value] flatten (remove nil?))
         data-type   (:type data)]
     (or
@@ -245,42 +235,34 @@
                                         map? (map (fn [[k v]]
                                                     (assoc v :MAP-KEY k))))))))))
 
-(defmethod validate-resolution :phrase-text
-  [{:keys [path schema value data] :as options}]
+(defmethod validate-resolution :phrase-text [{:keys [path] :as options}]
   (or (path-error path)
       (schema-error (assoc options :path [:text]))))
 
-(defmethod validate-resolution :keymap
-  [{:keys [path schema value data] :as options}]
+(defmethod validate-resolution :keymap [{:keys [path data]}]
   (or (path-error path 1)
       (when-not (util/includes-as-kw? (keys data) (first path))
         :error.invalid-value-path)))
 
-(defmethod validate-resolution :button
-  [{:keys [path]}]
+(defmethod validate-resolution :button [{:keys [path]}]
   (path-error path))
 
-(defmethod validate-resolution :application-attachments
-  [{:keys [path  value]}]
+(defmethod validate-resolution :application-attachments [{:keys [path  value]}]
   (or (path-error path)
       (when (sc/check [sc/Str] value)
         :error.invalid-value)))
 
-(defn- simple-value-resolution
-  [{:keys [path value] :as options}]
+(defn- simple-value-resolution [{:keys [path] :as options}]
   (or (path-error path)
       (schema-error (assoc options :path [:value]))))
 
-(defmethod validate-resolution :toggle
-  [options]
+(defmethod validate-resolution :toggle [options]
   (simple-value-resolution options))
 
-(defmethod validate-resolution :text
-  [options]
+(defmethod validate-resolution :text [options]
   (simple-value-resolution options))
 
-(defn- resolve-dict-value
-  [data]
+(defn- resolve-dict-value [data]
   (let [{:keys [reference-list date-delta multi-select
                 phrase-text keymap button application-attachments
                 toggle text date select]} data
@@ -342,7 +324,7 @@
   button always presents either adding or removing item from a
   repeating structure. This function is called from
   validate-and-process-value (see below)."
-  [{:keys [path old-data dict-schema dict-path dictionary err]}]
+  [{:keys [path old-data dict-schema dictionary err]}]
   (let [add    (-> dict-schema :button :add)
         remove (-> dict-schema :button :remove)]
     (or
@@ -432,7 +414,7 @@
   [schema data]
   (->> schema
        :dictionary
-       (filter (fn [[k v]]
+       (filter (fn [[_ v]]
                  (or (:required? v)
                      (:repeating v))))
        (every? (fn [[k v]]

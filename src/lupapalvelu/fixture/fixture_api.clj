@@ -1,5 +1,5 @@
 (ns lupapalvelu.fixture.fixture-api
-  (:require [taoensso.timbre :as timbre :refer [debug info warnf error]]
+  (:require [taoensso.timbre :refer [debug info warnf error]]
             [sade.env :refer [in-dev]]
             [sade.core :refer [ok fail]]
             [lupapalvelu.action :refer [defquery] :as action]

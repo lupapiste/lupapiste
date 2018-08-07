@@ -1,22 +1,20 @@
 (ns lupapalvelu.onnistuu.dummy-onnistuu-server
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error errorf fatal]]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [noir.request :as request]
             [cheshire.core :as json]
             [hiccup.core :refer [html]]
             [hiccup.page :refer [html5]]
-            [hiccup.form :as form]
             [clj-http.client :as http]
             [clj-time.core :as t]
             [clj-time.format :as tf]
-            [clj-time.local :as tl]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.crypt :as c]
             [lupapalvelu.storage.file-storage :as storage])
-  (:import [org.joda.time DateTime DateTimeZone]))
+  (:import [org.joda.time DateTimeZone]))
 
 (warn "Starting Onnistuu.fi dummy server...")
 

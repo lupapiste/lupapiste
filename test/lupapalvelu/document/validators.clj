@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.validators
-  (:require [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.model :as model]
+  (:require [lupapalvelu.document.model :as model]
             [lupapalvelu.document.tools :refer :all]
             [midje.sweet :refer :all]))
 

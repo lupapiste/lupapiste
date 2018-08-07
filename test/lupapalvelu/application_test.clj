@@ -16,7 +16,6 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.ya :as ya]
             [sade.util :as util]
             [sade.env :as env]))
 

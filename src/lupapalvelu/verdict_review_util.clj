@@ -11,7 +11,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :as sc]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+            [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.organization :as organization])
@@ -22,20 +22,15 @@
   "Function name is anachronistic. Currently also review attachment
   types are supported."
   ([application] (verdict-attachment-type application "paatosote"))
-  ([{permit-type :permitType :as application} type-id]
+  ([{permit-type :permitType} type-id]
    (let [resolved (reduce-kv (fn [acc k v]
                                (assoc acc k (name v)))
                              {}
                              (att-type/resolve-type permit-type type-id))]
      (cond
-       (seq resolved)
-       resolved
-
-       (util/includes-as-kw? [:R :P :ARK] permit-type)
-       {:type-group "paatoksenteko" :type-id type-id}
-
-       :else
-       {:type-group "muut" :type-id type-id}))))
+       (seq resolved) resolved
+       (util/includes-as-kw? [:R :P :ARK] permit-type) {:type-group "paatoksenteko" :type-id type-id}
+       :else {:type-group "muut" :type-id type-id}))))
 
 (defmulti attachment-type-from-krysp-type
   (fn [{target-type :type} _] (keyword target-type)))

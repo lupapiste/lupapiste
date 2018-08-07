@@ -3,7 +3,7 @@
             [clojure.zip :as zip]
             [clojure.edn :as edn]
             [sade.strings :as ss]
-            [sade.util :refer [fn->>] :as util]))
+            [sade.util :refer [fn->>]]))
 
 (defn by-id
   "Return item from application collection by id.
@@ -49,7 +49,7 @@
   []
   "Ranta\"tie\" 66:*")
 
-(defn dummy-values [user-id {:keys [type subtype case name body dummy-test max-len] :as element}]
+(defn dummy-values [user-id {:keys [type subtype case body dummy-test max-len] :as element}]
   (condp = (keyword dummy-test)
     :postal-code "12345"
     (condp = (keyword type)

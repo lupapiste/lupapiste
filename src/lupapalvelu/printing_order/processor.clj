@@ -60,7 +60,7 @@
                                       (with-open [content-is ((:content (att/get-attachment-file-as! user application fileId)))]
                                         (assoc file :content (mylly/encode-file-from-stream content-is)))) files)))
 
-(defn save-integration-message [user created-ts cmd-name {:keys [id organization state]} {:keys [internalOrderId delivery] :as prepared-order}]
+(defn save-integration-message [user created-ts cmd-name {:keys [id organization state]} {:keys [internalOrderId delivery]}]
   (messages/save {:id internalOrderId
                   :direction "out"
                   :messageType "printing-order"

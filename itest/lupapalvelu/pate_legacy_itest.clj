@@ -122,8 +122,7 @@
                     (query sonja :pate-verdict :id app-id
                            :verdict-id verdict-id)
                     => fail?)
-                  (let [{:keys [attachments tasks state
-                                history]} (query-application sonja app-id)]
+                  (let [{:keys [attachments tasks state]} (query-application sonja app-id)]
                     (fact "No attachments and the file has been removed"
                       attachments => empty?
                       (check-file app-id file-id false))

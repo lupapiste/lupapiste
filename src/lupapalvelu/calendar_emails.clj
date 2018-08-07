@@ -5,7 +5,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.icalendar :as ical]
             [sade.util :as util]
-            [sade.env :as env]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
             [lupapalvelu.i18n :as i18n])

@@ -2,6 +2,7 @@
   (:require [lupapalvelu.user :as user]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
+            [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.itest-util :refer [apply-remote-minimal pena upload-user-attachment]]
             [sade.core :refer [now]]
@@ -103,7 +104,7 @@
         obfuscated-username "poistunut_777777777777777777000020@example.com"
         attachments (:attachments (user/get-user-by-id id {:attachments 1}))]
     (doseq [{:keys [attachment-id]} attachments]
-      (mongo/file-metadata {:id attachment-id}) => boolean)
+      (storage/user-attachment-exists? id attachment-id) => true)
 
     (user/erase-user id) => nil
     (user/get-user-by-id id) => {:id id
@@ -115,4 +116,4 @@
                                  :enabled false
                                  :state "erased"}
     (doseq [{:keys [attachment-id]} attachments]
-      (mongo/file-metadata {:id attachment-id}) => nil?)))
+      (storage/user-attachment-exists? id attachment-id) => false)))

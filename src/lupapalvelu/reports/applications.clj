@@ -1,6 +1,5 @@
 (ns lupapalvelu.reports.applications
-  (:require [dk.ative.docjure.spreadsheet :as spreadsheet]
-            [monger.operators :refer :all]
+  (:require [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [now]]
@@ -17,9 +16,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr])
-  (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
-           (org.apache.poi.xssf.usermodel XSSFWorkbook)
-           (org.apache.poi.ss.usermodel CellType)))
+  (:import (java.io OutputStream)))
 
 (defn handler-roles-org [org-id]
   (mongo/select-one :organizations {:_id org-id} [:handler-roles]))
@@ -372,8 +369,7 @@
                                          (apply +))}))))
 
 (defn ^OutputStream digitized-attachments [user start-ts end-ts lang]
-  (let [org-ids       (mapv :id (usr/get-organizations user))
-        applications  (digitized-applications-between user start-ts end-ts)
+  (let [applications  (digitized-applications-between user start-ts end-ts)
         row-data      (map #(digi-report-data %) applications)
         sum-data      (digi-report-sum row-data)
         sum-sheet     (i18n/localize lang "digitizer.excel.sum.sheet.name")
@@ -386,5 +382,5 @@
                           :header      (rest (digitizer-report-headers lang))
                           :row-fn      (juxt :date :attachments)
                           :data        sum-data}])
-        sum-row       (excel/add-sum-row! sum-sheet wb [(i18n/localize lang "digitizer.excel.sum") (apply + (map :attachments sum-data))])]
+        _       (excel/add-sum-row! sum-sheet wb [(i18n/localize lang "digitizer.excel.sum") (apply + (map :attachments sum-data))])]
     (excel/xlsx-stream wb)))

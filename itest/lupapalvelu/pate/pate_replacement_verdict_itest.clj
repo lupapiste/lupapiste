@@ -61,7 +61,7 @@
           (fact "Pseudo query succeeds"
             (query sonja :replace-pate-verdict :id app-id
                    :verdict-id verdict-id) => ok?)
-          (let [{vid1 :verdict-id :as res} (command sonja :new-pate-verdict-draft :id app-id
+          (let [{vid1 :verdict-id} (command sonja :new-pate-verdict-draft :id app-id
                                             :template-id template-id
                                             :replacement-id verdict-id) => ok?]
             (fact "Only one replacement draft at the time"

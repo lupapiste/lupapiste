@@ -121,13 +121,13 @@
 (defmethod coerce-type :maaraalaTunnus [elem-schema]
   (data-leaf elem-schema ssc/Maaraalatunnus))
 
-(defmethod coerce-type :foremanHistory [elem-schema]
+(defmethod coerce-type :foremanHistory [_]
   {:value (sc/eq nil)})
 
-(defmethod coerce-type :fillMyInfoButton [elem-schema]
+(defmethod coerce-type :fillMyInfoButton [_]
   {:value (sc/eq nil)})
 
-(defmethod coerce-type :calculation [elem-schema]
+(defmethod coerce-type :calculation [_]
   {:value (sc/eq nil)})
 
 (defmethod coerce-type :personSelector [elem-schema]

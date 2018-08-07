@@ -14,7 +14,6 @@
             [clj-time.format :as fmt]
             [clj-time.local :as local]
             [net.cgrand.enlive-html :as enlive]
-            [sade.util :as util]
             [clojure.java.io :as io]
             [sade.strings :as str]))
 

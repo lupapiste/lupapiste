@@ -6,7 +6,7 @@
                                                            drawings-as-krysp]]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical-operations]]
             [schema.core :as sc]
-            [taoensso.timbre :as timbre :refer [warnf]]
+            [taoensso.timbre :refer [warnf]]
             [lupapalvelu.action :as action]
             [lupapalvelu.building :as building]
             [lupapalvelu.rest.schemas :refer [HakemusTiedot]]))

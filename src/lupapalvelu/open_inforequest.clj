@@ -1,5 +1,5 @@
 (ns lupapalvelu.open-inforequest
-  (:require [taoensso.timbre :as timbre :refer [infof info error]]
+  (:require [taoensso.timbre :refer [infof info error]]
             [monger.operators :refer :all]
             [sade.env :as env]
             [sade.core :refer [now fail fail!]]

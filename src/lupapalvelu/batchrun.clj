@@ -37,10 +37,8 @@
             [sade.strings :as ss]
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
-            [ring.util.codec :as codec]
-            [lupapalvelu.storage.file-storage :as storage])
-  (:import [org.xml.sax SAXParseException]
-           [java.util.concurrent ExecutorService TimeUnit]))
+            [ring.util.codec :as codec])
+  (:import [org.xml.sax SAXParseException]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -288,7 +286,7 @@
           {$set {:reminder-sent (now)}})))))
 
 
-(defn send-reminder-emails [& args]
+(defn send-reminder-emails [& _]
   (when (env/feature? :reminders)
     (mongo/connect!)
     (statement-request-reminder)
@@ -439,7 +437,7 @@
           (errorf "Failed to rename %s to %s" zip-path target))))
     (logging/log-event :info {:run-by "Asianhallinta reader" :event "Reader process finished"})))
 
-(defn check-for-asianhallinta-messages [& args]
+(defn check-for-asianhallinta-messages [& _]
   (when-not (system-not-in-lockdown?)
     (logging/log-event :info {:run-by "Asianhallinta reader" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
@@ -481,7 +479,7 @@
                                                                               :event "Failed to read reviews"
                                                                               :validation-errors validation-errors}))
           result)))
-    (catch Throwable t
+    (catch Throwable _
       (errorf "error.integration - Could not read reviews for %s" (:id application)))))
 
 (defn fetch-reviews-for-organization-permit-type-consecutively [organization permit-type applications]
@@ -505,7 +503,7 @@
        (apply concat)
        (remove nil?)))
 
-(defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
+(defn- fetch-reviews-for-organization-permit-type [organization permit-type applications]
   (try+
 
    (logging/log-event :info {:run-by "Automatic review checking"
@@ -516,7 +514,7 @@
 
    (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
 
-   (catch SAXParseException e
+   (catch SAXParseException _
      (logging/log-event :error {:run-by "Automatic review checking"
                                 :organization-id (:id organization)
                                 :event (format "Could not understand response when getting reviews in chunks from %s backend" (:id organization))})
@@ -584,7 +582,7 @@
                        (group-by :permitType applications)
                        (->> (map #(organization-applications-for-review-fetching (:id organization) % projection) permit-types)
                             (zipmap permit-types)))]
-    (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
+    (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type organization) grouped-apps)
          (map (fn [[{app-id :id permit-type :permitType} app-xml]]
                 (let [app    (first (organization-applications-for-review-fetching (:id organization) permit-type projection app-id))
                       result (read-reviews-for-application eraajo-user created app app-xml overwrite-background-reviews?)
@@ -603,7 +601,7 @@
          (log-review-results-for-organization (:id organization)))))
 
 (defn poll-verdicts-for-reviews
-  [& {:keys [application-ids organization-ids overwrite-background-reviews?] :as options}]
+  [& {:keys [application-ids organization-ids] :as options}]
   (let [applications  (when (seq application-ids)
                         (mongo/select :applications {:_id {$in application-ids}}))
         permit-types  (or (->> applications
@@ -628,7 +626,7 @@
                             organizations)]
     (threads/wait-for-threads threads)))
 
-(defn check-for-reviews [& args]
+(defn check-for-reviews [& _]
   (when-not (system-not-in-lockdown?)
     (logging/log-event :info {:run-by "Automatic review checking" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
@@ -685,7 +683,7 @@
       (println "No application id given.")
       1)))
 
-(defn pdfa-convert-review-pdfs [& args]
+(defn pdfa-convert-review-pdfs [& _]
   (mongo/connect!)
   (debug "# of applications with background generated tasks:"
            (mongo/count :applications {:tasks.source.type "background"}))
@@ -864,76 +862,6 @@
               (info "Attachments successfully unarchived for application" (:id application))
               (error "Some attachments were not successfully unarchived for application" (:id application)))))))
     (println "Organization must be provided.")))
-
-(defn print-info [id att version message]
-  (let [type (get-in att [:type :type-id])
-        content (:contentType version)]
-    (println id "-" (:id att) "-" (:fileId version) ", msg:" message "," content"," type)))
-
-(defn analyze-missing [& args]
-  (mongo/connect!)
-  (info "Starting analyze-missing job")
-  (let [ts 1522540800000]
-    (doseq [app (mongo/select :applications
-                              {$or [{:modified {$gte ts}}
-                                    {:verdicts.timestamp {$gte ts}}
-                                    {:tasks.created {$gte ts}}]}
-                              [:attachments]
-                              {:_id 1})
-            {version :latestVersion :as att} (->> (:attachments app)
-                                                  (filter  :latestVersion)
-                                                  (remove #(get-in % [:latestVersion :onkaloFileId])))
-            :let [file (mongo/download (:fileId version))
-                  different-original? (not= (:fileId version) (:originalFileId version))]]
-      (when-not file
-        (if different-original?
-          (if (mongo/download (:originalFileId version))
-            (print-info (:id app) att version "fileId missing but originalFileIdFound")
-            (print-info (:id app) att version "fileId AND originalFileId missing"))
-          (print-info (:id app) att version "fileId missing"))))))
-
-(defn move-files-to-ceph-in-applications [& application-ids]
-  (info "Moving files to Ceph in applications" application-ids)
-  (mongo/connect!)
-  (doseq [app-id application-ids]
-    (logging/with-logging-context {:applicationId app-id}
-      (info "Checking attachments for migration")
-      (try (storage/move-application-mongodb-files-to-s3 app-id)
-           (catch Throwable t
-             (error t "Exception occurred during the migration")))))
-  (info "Done"))
-
-(defonce ^ExecutorService ceph-migration-threadpool (threads/threadpool 8 "ceph-migration-worker"))
-
-(defn move-app-files-to-ceph-in-organizations [& organization-ids]
-  (if (seq organization-ids)
-    (do (info "Moving application files to Ceph in organizations" organization-ids)
-        (mongo/connect!)
-        (.addShutdownHook (Runtime/getRuntime)
-                          (Thread.
-                            ^Runnable
-                            (fn []
-                              (println "Interrupt received, shutting down.")
-                              (.shutdownNow ceph-migration-threadpool)
-                              (.awaitTermination ceph-migration-threadpool 60 TimeUnit/SECONDS)
-                              (println "Threads finished"))))
-        (let [threads (->> (mongo/select :applications
-                                         {:organization                            {$in organization-ids}
-                                          :attachments.latestVersion.fileId        {$type "string"}
-                                          :attachments.latestVersion.storageSystem "mongodb"}
-                                         [:_id]
-                                         {:_id 1})
-                           (mapv (fn [{:keys [id]}]
-                                   (threads/submit ceph-migration-threadpool
-                                                   (logging/with-logging-context {:applicationId id}
-                                                     (info "Checking attachments for migration")
-                                                     (try (storage/move-application-mongodb-files-to-s3 id)
-                                                          (catch Throwable t
-                                                            (error t "Exception occurred during the migration"))))))))]
-          (info "All migration threads submitted. Number of applications:" (count threads))
-          (threads/wait-for-threads threads))
-        (info "Done"))
-    (error "Missing organization ids")))
 
 (defn fix-bad-archival-conversions-in-091-R []
   (mongo/connect!)

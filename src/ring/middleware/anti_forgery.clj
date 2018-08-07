@@ -17,7 +17,7 @@
 
 (def token-key :__anti-forgery-token)
 
-(defn- session-token [request token-gen-fn log-fn]
+(defn- session-token [request token-gen-fn]
   (or (get-in request [:session token-key])
       (token-gen-fn)))
 
@@ -27,7 +27,7 @@
     (update-in response [:session] merge {k v})
     (assoc-in response [:session] (merge (:session request) {k v}))))
 
-(defn- assoc-session-token [response request token log-fn]
+(defn- assoc-session-token [response request token]
   (let [old-token (get-in request [:session token-key])]
     (if (= old-token token)
       response
@@ -49,9 +49,9 @@
       (zero? (reduce bit-or (map bit-xor a b)))
       false)))
 
-(defn- valid-request? [request token-gen-fn log-fn]
+(defn- valid-request? [request token-gen-fn]
   (let [request-token (request-token request)
-        stored-token (session-token request token-gen-fn log-fn)]
+        stored-token (session-token request token-gen-fn)]
     (and request-token
          stored-token
          (secure-eql? request-token stored-token))))
@@ -66,8 +66,7 @@
 
 (defn- default-token-generation-fn [] (random/base64 60))
 
-(defn- default-error-callback
-  [request]
+(defn- default-error-callback [_]
   (access-denied "<h1>Invalid anti-forgery token</h1>"))
 
 (defn wrap-anti-forgery
@@ -85,15 +84,15 @@
       default-token-generation-fn
       default-error-callback
       println))
-  ([handler excluded-routes token-gen-fn attack-callback log-fn]
+  ([handler excluded-routes token-gen-fn attack-callback _]
      (fn [request]
        (if (contains? excluded-routes (:uri request))
          (handler request)
-         (binding [*anti-forgery-token* (session-token request token-gen-fn log-fn)]
-           (if (and (post-request? request) (not (valid-request? request token-gen-fn log-fn)))
+         (binding [*anti-forgery-token* (session-token request token-gen-fn)]
+           (if (and (post-request? request) (not (valid-request? request token-gen-fn)))
              (attack-callback request)
              (if-let [response (handler request)]
-               (assoc-session-token response request *anti-forgery-token* log-fn))))))))
+               (assoc-session-token response request *anti-forgery-token*))))))))
 
 ;; Modified middleware for Lupapiste
 

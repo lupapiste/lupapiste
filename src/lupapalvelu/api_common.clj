@@ -1,7 +1,7 @@
 (ns lupapalvelu.api-common
   (:require [clojure.walk :refer [keywordize-keys]]
             [sade.http :as http]
-            [lupapalvelu.i18n :refer [*lang*] :as i18n]
+            [lupapalvelu.i18n :refer [*lang*]]
             [lupapalvelu.action :as action]
             [lupapalvelu.user :as usr]
             [lupapalvelu.logging :refer [with-logging-context]]

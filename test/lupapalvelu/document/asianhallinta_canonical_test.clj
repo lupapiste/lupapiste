@@ -7,7 +7,6 @@
             [sade.util :as util]
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.document.asianhallinta-canonical :as ah]
-            [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.xml.asianhallinta.asianhallinta-mapping :as ahm]
             [lupapalvelu.i18n :as i18n]

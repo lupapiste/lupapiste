@@ -1,5 +1,5 @@
 (ns lupapalvelu.perf-mon
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error fatal]]
             [noir.core :refer [defpage]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
@@ -86,7 +86,7 @@
 ;; Throttling:
 ;;
 
-(defn wrap-db-throttle [f f-name]
+(defn wrap-db-throttle [f _]
   (fn [& args]
     (Thread/sleep @db-throttle)
     (apply f args)))

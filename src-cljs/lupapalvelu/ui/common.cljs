@@ -111,7 +111,7 @@
   (css-flags :foo true :bar false) => '(\"foo\")"
   [& flags]
   (->> (apply hash-map flags)
-       (filter (fn [[k v]] v))
+       (filter val)
        keys
        css))
 
@@ -199,7 +199,7 @@
 
   If both disabled? and enabled? are given, the button is disabled if
   either condition results in disabled state."
-  [{:keys [enabled? disabled?] :as options}]
+  [{:keys [enabled? disabled?]}]
   (or (rum/react (atomize disabled?))
       (some-> enabled? atomize rum/react false?)))
 

@@ -2,7 +2,6 @@
   (:require [monger.operators :refer :all]
             [sade.util :as util]
             [schema.core :as sc]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime]
             [clojure.set :refer [rename-keys]]
             [lupapalvelu.attachment.muuntaja-client :as muuntaja]

@@ -1,6 +1,6 @@
 (ns lupapalvelu.proxy-services
   (:require [clojure.data.zip.xml :refer :all]
-            [taoensso.timbre :as timbre :refer [debug debugf info warn error errorf]]
+            [taoensso.timbre :refer [debug debugf info warn error errorf]]
             [monger.operators :refer [$exists]]
             [noir.response :as resp]
             [sade.core :refer :all]
@@ -67,7 +67,7 @@
         (resp/json (or (find-address/search normalized-term lang) [])))
       (resp/status 400 "Missing query parameters")))
 
-(defn point-by-property-id-proxy [{{property-id :property-id} :params :as request}]
+(defn point-by-property-id-proxy [{{property-id :property-id} :params}]
   (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id))
     (let [features (plocation/property-location-info property-id)]
       (if features
@@ -87,9 +87,9 @@
                                   :propertyId property-id
                                   :name {:fi (i18n/localize :fi "municipality" backup-municipality)
                                          :sv (i18n/localize :sv "municipality" backup-municipality)}}))]
-      (if (seq found-points)
-        (resp/json result-data)
-        (resp/status 503 "Service temporarily unavailable")))
+      (cond (seq found-points) (resp/json result-data)
+            (nil? found-points) (resp/status 503 "Service temporarily unavailable")
+            :else (resp/status 404 "Not found")))
     (resp/status 400 "Bad Request")))
 
 (defn property-id-by-point-proxy [{{x :x y :y} :params}]

@@ -1,6 +1,5 @@
 (ns lupapalvelu.fixture.ajanvaraus
-  (:require [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture.core :refer :all]
+  (:require [lupapalvelu.fixture.core :refer :all]
             [sade.core :refer :all]
             [lupapalvelu.calendars-api]))
 

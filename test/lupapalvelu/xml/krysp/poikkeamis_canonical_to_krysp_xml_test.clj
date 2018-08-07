@@ -93,7 +93,7 @@
 
       (facts "Check xml"
         (let [lp-xml     (cr/strip-xml-namespaces (xml/parse xml_s))
-              ilmoittaja (xml/select (cr/strip-xml-namespaces (xml/parse xml_s)))]
+              _ (xml/select (cr/strip-xml-namespaces (xml/parse xml_s)))]
           (fact "pintaAla"
             (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil)
           (fact "kerrosala"
@@ -119,7 +119,7 @@
 
       (facts "Check xml"
         (let [lp-xml     (cr/strip-xml-namespaces (xml/parse xml_s))
-              ilmoittaja (xml/select (cr/strip-xml-namespaces (xml/parse xml_s)))]
+              _ (xml/select (cr/strip-xml-namespaces (xml/parse xml_s)))]
           (fact "pintaAla"
             (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil)
           (fact "kerrosala"
@@ -205,7 +205,7 @@
 
       (facts "Check xml"
         (let [lp-xml     (cr/strip-xml-namespaces (xml/parse xml_s))
-              ilmoittaja (xml/select (cr/strip-xml-namespaces (xml/parse xml_s)))]
+              _ (xml/select (cr/strip-xml-namespaces (xml/parse xml_s)))]
           (fact "pintaAla"
             (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil)
           (fact "kerrosala"
@@ -231,7 +231,7 @@
 
       (facts "Check xml"
         (let [lp-xml     (cr/strip-xml-namespaces (xml/parse xml_s))
-              ilmoittaja (xml/select (cr/strip-xml-namespaces (xml/parse xml_s)))]
+              _ (xml/select (cr/strip-xml-namespaces (xml/parse xml_s)))]
           (fact "pintaAla"
             (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil)
           (fact "kerrosala"

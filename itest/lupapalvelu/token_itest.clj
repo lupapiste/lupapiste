@@ -1,7 +1,6 @@
 (ns lupapalvelu.token-itest
   (:require [midje.sweet :refer :all]
             [sade.core :refer [now]]
-            [lupapalvelu.user :as user]
             [lupapalvelu.token :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]))

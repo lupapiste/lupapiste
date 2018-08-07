@@ -107,7 +107,7 @@
   (let [hetu "121212-1212"
         filename "LP-123.xml"
         content (str "<?xml version=\"1.0\" encoding=\"UTF-8\"?><yht:Osapuoli><yht:henkilo><yht:henkilotunnus>" hetu "</yht:henkilotunnus></yht:henkilo></yht:Osapuoli>")
-        {:keys [status headers body] :as resp} (iapi/transferred-file-response filename content)
+        {:keys [status headers body]} (iapi/transferred-file-response filename content)
         content-type (get headers "Content-Type")]
 
     (fact "status OK" status => 200)

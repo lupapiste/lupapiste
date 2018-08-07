@@ -1,5 +1,5 @@
 (ns lupapalvelu.link-permit
-  (:require [taoensso.timbre :as timbre :refer [infof info error errorf warn]]
+  (:require [taoensso.timbre :refer [infof info error errorf warn]]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.operations :as op]
             [lupapalvelu.states :as states]

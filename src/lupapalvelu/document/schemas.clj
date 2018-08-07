@@ -125,7 +125,7 @@
        (merge (when (map? op) {:removable-by :all})) ; Operation documents are removable by default
        (update document :schema-info merge)))
 
-(defn select-one-of-schema? [{schema-name :name :as schema}]
+(defn select-one-of-schema? [{schema-name :name}]
   (= select-one-of-key (name schema-name)))
 
 ;;

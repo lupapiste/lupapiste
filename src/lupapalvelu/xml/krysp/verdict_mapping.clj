@@ -14,10 +14,9 @@
 
 (defmethod permit/verdict-krysp-mapper :R [application verdict lang krysp-version begin-of-link]
   (let [attachments-canonical (att-canonical/get-attachments-as-canonical application begin-of-link (comp #{(:id verdict)} :id :target))
-        verdict-canonical (canonical/verdict-canonical application lang verdict)
+        verdict-canonical (canonical/verdict-canonical lang verdict)
         verdict-link (att-canonical/pate-verdict-attachment-link application verdict)
         kayttotapaus (or (:usage verdict) kayttotapaus)]
-
     {:attachments (mapping-common/attachment-details-from-canonical attachments-canonical)
      :xml (-> (meta-fields/enrich-with-link-permit-data application)
               (r-canonical/application-to-canonical lang)
@@ -34,9 +33,8 @@
 (defmethod permit/verdict-krysp-mapper :P [application verdict lang krysp-version begin-of-link]
   (let [attachments-canonical (att-canonical/get-attachments-as-canonical application begin-of-link (comp #{(:id verdict)} :id :target))
         verdict-link          (att-canonical/pate-verdict-attachment-link application verdict)
-        raw-verdict           (canonical/verdict-canonical application lang verdict)
+        raw-verdict           (canonical/verdict-canonical lang verdict)
         verdict               (assoc raw-verdict :Paatos (dissoc (:Paatos raw-verdict) :lupamaaraykset))]
-
     {:attachment attachments-canonical
      :xml        (-> (p-canoncial/poikkeus-application-to-canonical application lang)
                      (assoc-in [:Popast :poikkeamisasiatieto :Poikkeamisasia :paatostieto] verdict)

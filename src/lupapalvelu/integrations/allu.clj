@@ -1,4 +1,6 @@
 (ns lupapalvelu.integrations.allu
+  "JSON REST API integration with ALLU as backing system. Used for Helsinki YA instead of SFTP/HTTP KRYSP XML
+  integration."
   (:require [clojure.core.match :refer [match]]
             [clojure.walk :refer [postwalk]]
             [mount.core :refer [defstate]]

@@ -3,14 +3,12 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.action :as action :refer [defquery defcommand]]
             [sade.core :refer [ok fail fail! now unauthorized]]
-            [sade.strings :as ss]
             [lupapalvelu.states :as states]
             [lupapalvelu.application :as app]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.permit :as permit]
-            [sade.util :as util]
-            [sade.env :as env]))
+            [sade.util :as util]))
 
 (defn- build-inspection-summary-query-params [{application-id :id} {summary-id :id}]
   {:id        application-id
@@ -198,6 +196,6 @@
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])]
    :user-authz-roles #{:writer :foreman}
    :user-roles       #{:applicant :authority}}
-  [{application :application user :user}]
+  [{:keys [application]}]
   (inspection-summary/edit-target application summaryId targetId {:set {:inspection-date date}})
   (ok))

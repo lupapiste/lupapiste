@@ -3,12 +3,9 @@
     [monger.operators :refer :all]
     [sade.core :refer :all]
     [lupapalvelu.user :as usr]
-    [lupapalvelu.token :as token]
-    [lupapalvelu.ttl :as ttl]
     [lupapalvelu.authorization-api :as auth]
     [lupapalvelu.action :as action]
     [lupapalvelu.notifications :as notifications]
-    [sade.env :as env]
     [sade.util :as util]))
 
 (defn get-financial-user []

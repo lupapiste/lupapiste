@@ -1,6 +1,5 @@
 (ns lupapalvelu.attachment.integrations-test
-  (:require [schema.core :as sc]
-            [midje.sweet :refer :all]
+  (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer [expected-failure?]]
             [lupapalvelu.integrations-api]))

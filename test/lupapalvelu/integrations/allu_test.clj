@@ -3,6 +3,7 @@
   (:require [schema.core :as sc :refer [defschema Bool]]
             [cheshire.core :as json]
             [sade.core :refer [def-]]
+            [sade.env :as env]
             [sade.schemas :refer [NonBlankStr Kiinteistotunnus ApplicationId]]
             [sade.schema-generators :as sg]
             [sade.municipality :refer [municipality-codes]]
@@ -110,53 +111,53 @@
 ;;;; Actual Tests
 ;;;; ==================================================================================================================
 
-(facts "allu-application?"
-  (fact "Use ALLU integration for Helsinki YA sijoituslupa and sijoitussopimus."
-    (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoituslupa"}) => true
-    (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoitussopimus"}) => true)
+(env/with-feature-value :allu true
+  (facts "allu-application?"
+    (fact "Use ALLU integration for Helsinki YA sijoituslupa and sijoitussopimus."
+      (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoituslupa"}) => true
+      (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoitussopimus"}) => true)
 
-  (fact "Do not use ALLU integration for anything else."
-    (quick-check 10
-                 (for-all [organization organizations
-                           permitSubtype gen/string-alphanumeric
-                           :when (not (and (= organization "091-YA")
-                                           (or (= permitSubtype "sijoituslupa")
-                                               (= permitSubtype "sijoitussopimus"))))]
-                   (not (allu/allu-application? {:organization organization, :permitSubtype permitSubtype}))))
-    => passing-quick-check))
+    (fact "Do not use ALLU integration for anything else."
+      (quick-check 10
+                   (for-all [organization organizations
+                             permitSubtype gen/string-alphanumeric
+                             :when (not (and (= organization "091-YA")
+                                             (or (= permitSubtype "sijoituslupa")
+                                                 (= permitSubtype "sijoitussopimus"))))]
+                     (not (allu/allu-application? {:organization organization, :permitSubtype permitSubtype}))))
+      => passing-quick-check))
 
-(facts "application->allu-placement-contract"
-  (fact "Valid applications produce valid inputs for ALLU."
-    (quick-check 10
-                 (for-all [application (sg/generator ValidPlacementApplication)]
-                   (nil? (sc/check PlacementContract
-                                   (application->allu-placement-contract (sg/generate Bool) application)))))
-    => passing-quick-check))
+  (facts "application->allu-placement-contract"
+    (fact "Valid applications produce valid inputs for ALLU."
+      (quick-check 10
+                   (for-all [application (sg/generator ValidPlacementApplication)]
+                     (nil? (sc/check PlacementContract
+                                     (application->allu-placement-contract (sg/generate Bool) application)))))
+      => passing-quick-check))
 
-(facts "application-cancel-request"
-  (let [allu-id 23
-        app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)
-        [endpoint request] (application-cancel-request "https://example.com/api/v1" "foo.bar.baz" app)]
-    (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/cancelled"))
-    (fact "request" request => {:headers {:authorization "Bearer foo.bar.baz"}})))
+  (facts "application-cancel-request"
+    (let [allu-id 23
+          app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)
+          [endpoint request] (application-cancel-request "https://example.com/api/v1" "foo.bar.baz" app)]
+      (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/cancelled"))
+      (fact "request" request => {:headers {:authorization "Bearer foo.bar.baz"}})))
 
-(facts "placement-creation-request"
-  (let [app (sg/generate ValidPlacementApplication)
-        [endpoint request] (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
-    (fact "endpoint" endpoint => "https://example.com/api/v1/placementcontracts")
-    (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                                :content-type :json
-                                :body         (json/encode (application->allu-placement-contract true app))})))
+  (facts "placement-creation-request"
+    (let [app (sg/generate ValidPlacementApplication)
+          [endpoint request] (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
+      (fact "endpoint" endpoint => "https://example.com/api/v1/placementcontracts")
+      (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
+                                  :content-type :json
+                                  :body         (json/encode (application->allu-placement-contract true app))})))
 
-(facts "placement-update-request"
-  (let [allu-id 23
-
-        app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)]
-    (doseq [pending-on-client [true false]
-            :let [[endpoint request]
-                  (placement-update-request pending-on-client "https://example.com/api/v1" "foo.bar.baz" app)]]
-      (fact "endpoint" endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
-      (fact "request"
-        request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                    :content-type :json
-                    :body         (json/encode (application->allu-placement-contract pending-on-client app))}))))
+  (facts "placement-update-request"
+    (let [allu-id 23
+          app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)]
+      (doseq [pending-on-client [true false]
+              :let [[endpoint request]
+                    (placement-update-request pending-on-client "https://example.com/api/v1" "foo.bar.baz" app)]]
+        (fact "endpoint" endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
+        (fact "request"
+          request => {:headers      {:authorization "Bearer foo.bar.baz"}
+                      :content-type :json
+                      :body         (json/encode (application->allu-placement-contract pending-on-client app))})))))

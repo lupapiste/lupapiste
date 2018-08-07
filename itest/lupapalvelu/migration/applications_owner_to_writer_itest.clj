@@ -5,7 +5,7 @@
             [sade.core :refer :all]
             [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]
-            [sade.util :refer [fn-> fn->>] :as util]
+            [sade.util :refer [fn-> fn->>]]
             [lupapalvelu.migration.migrations :as mig]
             [lupapalvelu.mongo :as mongo]))
 

@@ -1,12 +1,11 @@
 (ns lupapalvelu.kopiolaitos
-  (:require [taoensso.timbre :as timbre :refer [warnf info error errorf]]
+  (:require [taoensso.timbre :refer [warnf info error errorf]]
             [monger.operators :refer :all]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! def-]]
             [sade.util :as util]
-            [sade.validators :as v]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.action :as action]
             [lupapalvelu.email :as email]
