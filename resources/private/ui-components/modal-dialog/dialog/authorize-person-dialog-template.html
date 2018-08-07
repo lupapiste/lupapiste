@@ -8,7 +8,8 @@
       <input class="grid-style-input"
              data-bind="textInput: email,
                         disable: emailDisabled,
-                        attr: {'id': emailId}">
+                        attr: {'id': emailId},
+                        testId: 'invite-email'">
       <label data-bind="ltext: 'application.inviteMessage',
                         attr: {'for': textId}"></label>
       <textarea class="grid-style-input"
@@ -16,23 +17,28 @@
                 data-bind="textInput: text,
                            attr: {id: textId,
                            placeholder: loc( 'comment.placeholder') },
-                           disable: allDisabled"></textarea>
+                           disable: allDisabled,
+                           testId: 'invite-text'"></textarea>
       <!-- ko if: error -->
       <div class="context-error"
            data-bind="ltext: error"></div>
       <!-- /ko -->
       <!-- ko if: showRemove -->
       <p data-bind="ltext: 'document.party.person-select.remove-existing-role-before-invite'"></p>
-      <button class="negative"
-              data-bind="click: remove,
-                         ltext: 'document.party.person-select.remove-auth',
-                         disable: allDisabled"></button>
+      <icon-button params="buttonClass: 'negative',
+                           ltext: 'document.party.person-select.remove-auth',
+                           icon: 'circle-remove',
+                           click: remove,
+                           waiting: allDisabled,
+                           testId: 'remove-auth'"></icon-button>
       <!-- /ko -->
       <!-- ko ifnot: showRemove -->
-      <button class="positive"
-              data-bind="click: invite,
-                         ltext: 'application.inviteSend',
-                         disable: inviteDisabled"></button>
+      <icon-button params="click: invite,
+                           ltext: 'application.inviteSend',
+                           disable: inviteDisabled,
+                           waiting: allDisabled,
+                           icon: 'circle-plus',
+                           testId: 'application-invite-submit'"></icon-button>
       <!-- /ko -->
     </form>
   </div>

@@ -1,3 +1,12 @@
+// Component for docgen invitations. Used by DocgenPersonSelectModel.
+// Parameters [optional]:
+
+// [email]: If email is given it cannot be changed. Also, the
+// remove-auth functionality is supported only if the email has been
+// given.
+// documentName: Document schema name
+// path: Party path within the document
+// documentId: Document id.
 LUPAPISTE.AuthorizePersonDialogModel = function( params ) {
   "use strict";
   var self = this;
@@ -9,7 +18,9 @@ LUPAPISTE.AuthorizePersonDialogModel = function( params ) {
   var processing = ko.observable();
   var pending = ko.observable();
 
-  self.description = params.description;
+  self.description = fixedEmail
+    ? "document.party.person-select.designer.areyousure"
+    : "invite.desc";
   self.emailId = _.uniqueId( "email-");
   self.email = ko.observable( params.email );
   self.textId = _.uniqueId( "text-");
@@ -35,14 +46,18 @@ LUPAPISTE.AuthorizePersonDialogModel = function( params ) {
       || _.isBlank( self.text() );
   });
 
+  function resize() {
+    _.delay( hub.send, 100, "resize-dialog" );
+  }
+
   function errorHandler( res ) {
     self.error( res.text );
     self.showRemove( fixedEmail && _.includes(["reader", "guest"],
                                               res["existing-role"]));
-    hub.send( "resize-dialog");
+    resize();
   }
 
-  self.invite = function() {
+ self.invite = function() {
     ajax.command( "invite-with-role",
                   {id: applicationId,
                    documentName: params.documentName,
@@ -68,9 +83,10 @@ LUPAPISTE.AuthorizePersonDialogModel = function( params ) {
       .pending( pending )
       .success( function() {
         repository.load( applicationId );
+        hub.send( "refresh-guests");
         self.error( null );
         self.showRemove( false );
-        hub.send( "resize-dialog");
+        resize();
       })
       .error( errorHandler )
       .call();

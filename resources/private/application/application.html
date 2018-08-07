@@ -1055,65 +1055,6 @@
                     <!-- /ko -->
                 </div>
 
-                <div id="dialog-valtuutus" class="window autosized">
-                    <div class="dialog-header">
-                        <p data-bind="ltext: 'application.addInvite'">Lis&auml;&auml; valtuutus</p>
-                        <p class="dialog-close close lupicon-remove"></p>
-                    </div>
-                    <div class="dialog-content">
-                        <p data-bind="ltext: 'invite.desc'" class="dialog-desc"> </p>
-                        <form data-bind="with: $root.invite">
-                            <!-- label data-bind="ltext: 'userinfo.role'" class="form-label" for="invite-document"></label -->
-                            <input class="form-input text long" id="invite-document-name" disabled="disabled" type="hidden" data-bind="value: documentName" />
-                            <input class="form-input text long" id="invite-document-id" disabled="disabled" type="hidden" data-bind="value: documentId" />
-                            <input class="form-input text long" id="invite-document-path" disabled="disabled" type="hidden" data-bind="value: path" />
-                            <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
-                            <input class="form-input text long" id="invite-email" type="text" data-bind="textInput: email" />
-                            <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
-                            <textarea id="invite-text" rows=10 class="form-input textarea really-long high" data-bind="textInput: text"></textarea>
-                            <div data-bind="visible: error" >
-                                <div data-bind="text: error" class="context-error"></div>
-                            </div>
-                            <button class="btn btn-primary btn-dialog" data-test-id="application-invite-submit" data-bind="click: submit, disable: disabled">
-                                <span data-bind="ltext: 'application.inviteSend'"></span>
-                                <em data-bind="visible: pending" class="button-loader"></em>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <div id="dialog-valtuutus-yrityskayttaja-suunnittelijaksi" class="window autosized">
-                  <div class="dialog-header">
-                    <p data-bind="ltext: 'application.addInvite'">Lis&auml;&auml; valtuutus</p>
-                    <p class="dialog-close close lupicon-remove"></p>
-                  </div>
-                  <div class="dialog-content">
-                    <p data-bind="ltext: 'document.party.person-select.designer.areyousure'" class="dialog-desc"></p>
-                    <p>&nbsp;</p>
-                    <form data-bind="with: $root.invite">
-                        <input class="form-input text long" id="invite-document-name" disabled="disabled" type="hidden" data-bind="value: documentName" />
-                        <input class="form-input text long" id="invite-document-id" disabled="disabled" type="hidden" data-bind="value: documentId" />
-                        <input class="form-input text long" id="invite-document-path" disabled="disabled" type="hidden" data-bind="value: path" />
-                        <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
-                        <input class="form-input text long" id="invite-email" type="text" disabled="disabled" data-bind="textInput: email" />
-                        <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
-                        <textarea id="invite-text" rows=10 class="form-input textarea really-long high" data-bind="textInput: text"></textarea>
-                        <div data-bind="visible: error" >
-                        <div data-bind="text: error" class="context-error"></div>
-                      </div>
-                      <p data-bind="ltext: 'document.party.person-select.remove-existing-role-before-invite', visible: hasReaderRole"></p>
-                      <button class="btn btn-primary btn-dialog negative" data-test-id="application-invite-submit" data-bind="click: removeExistingAuth, visible: hasReaderRole">
-                        <span data-bind="ltext: 'document.party.person-select.remove-auth'"></span>
-                        <em data-bind="visible: pending" class="button-loader"></em>
-                      </button>
-                      <button class="btn btn-primary btn-dialog" data-test-id="application-invite-submit" data-bind="click: submit, disable: disabled, visible: !hasReaderRole()">
-                        <span data-bind="ltext: 'application.inviteSend'"></span>
-                        <em data-bind="visible: pending" class="button-loader"></em>
-                      </button>
-                    </form>
-                  </div>
-                </div>
-
                 <div id="dialog-add-attachment-templates" class="window autosized selectm-dialog">
                     <div class="dialog-header">
                         <p data-bind="ltext: 'application.newAttachmentTemplates'"></p>
