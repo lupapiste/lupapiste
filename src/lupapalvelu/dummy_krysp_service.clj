@@ -1,5 +1,5 @@
 (ns lupapalvelu.dummy-krysp-service
-  (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal spy]]
+  (:require [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal spy]]
             [schema.core :as sc]
             [net.cgrand.enlive-html :as enlive]
             [sade.env :as env]
@@ -15,7 +15,6 @@
             [lupapalvelu.integrations.messages :as imessages]
             [ring.util.request :as ring-request]
             [sade.http :as http]
-            [clj-time.core :as t]
             [sade.util :as util]
             [hiccup.core :as core]))
 

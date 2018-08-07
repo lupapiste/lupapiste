@@ -792,7 +792,7 @@
                           unauthorized))
                       user-attachments-exists
                       foreman-app-in-pre-verdict-state]}
-  [{application :application user :user ts :created :as command}]
+  [{user :user ts :created :as command}]
   (doseq [attachment (:attachments (mongo/by-id :users (:id user) {:attachments true}))]
     (let [application-id         id
           user-id                (:id user)

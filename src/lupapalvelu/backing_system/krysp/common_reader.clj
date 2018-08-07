@@ -56,23 +56,23 @@
 (defmulti get-tunnus-xml-path
   "Get path for reading xml without ns."
   {:arglists '([permit-type search-type])}
-  (fn [permit-type & args]
+  (fn [permit-type & _]
     (keyword permit-type)))
 
 (defmethod get-tunnus-xml-path :default
-  [permit-type search-type]
+  [_ search-type]
   (case search-type
     :application-id  [:LupaTunnus :muuTunnustieto :MuuTunnus :tunnus]
     :kuntalupatunnus [:LupaTunnus :kuntalupatunnus]))
 
 (defmethod get-tunnus-xml-path :KT
-  [permit-type search-type]
+  [_ _]
   [:hakemustunnustieto :Hakemustunnus :tunnus])
 
 (defmulti get-tunnus-path
   "Get url path for fetching xmls from krysp."
   {:arglists '([permit-type search-type])}
-  (fn [permit-type & args]
+  (fn [permit-type & _]
     (keyword permit-type)))
 
 (defmethod get-tunnus-path :default
@@ -83,7 +83,7 @@
          (str prefix))))
 
 (defmethod get-tunnus-path :KT
-  [permit-type search-type]
+  [_ _]
   "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus")
 
 (defn property-equals

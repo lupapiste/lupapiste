@@ -5,8 +5,7 @@
             [lupapalvelu.document.tools :as doc-tools]
             [lupapalvelu.document.parties-canonical :refer :all]
             [sade.schema-generators :as ssg]
-            [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.strings :as ss]))
 
 (testable-privates lupapalvelu.document.parties-canonical party-doc-to-canonical)
 
@@ -208,6 +207,7 @@
   (let [canonical          (party-doc-to-canonical (doc-tools/unwrapped application) "fi" (doc-tools/unwrapped (docs 2)))
         asia               (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia])
         krysp-element-keys (keys asia)
+        ;; TODO: Use or remove:
         valid-names        (->> (:documents application)
                                 (filter (fn [{info :schema-info}]
                                           (= (:subtype info) :suunnittelija)))
@@ -233,6 +233,7 @@
   (let [canonical          (party-doc-to-canonical (doc-tools/unwrapped application) "fi" (doc-tools/unwrapped (docs 1)))
         asia               (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia])
         krysp-element-keys (keys asia)
+        ;; TODO: Use or remove:
         valid-names        (->> (:documents application)
                                 (filter (fn [{info :schema-info}]
                                           (= (:subtype info) :suunnittelija)))

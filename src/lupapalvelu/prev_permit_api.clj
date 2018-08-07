@@ -7,8 +7,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [defcommand defraw]]
             [lupapalvelu.prev-permit :as prev-permit]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.conversion.util :as util]))
+            [lupapalvelu.user :as usr]))
 
 (defraw get-lp-id-from-previous-permit
   {:parameters [kuntalupatunnus authorizeApplicants]

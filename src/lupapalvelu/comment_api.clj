@@ -38,7 +38,7 @@
             :comment-text text})))
 
 (notifications/defemail :new-comment
-  {:pred-fn (fn [{user :user {roles :roles target :target} :data app :application}]
+  {:pred-fn (fn [{user :user {target :target} :data app :application}]
               (and
                 (not= (:type target) "verdict") ; target might be comment target or attachment target
                 (or (usr/authority? user)
@@ -84,7 +84,7 @@
   {:parameters [id]
    :permissions [{:required [:comment/read]}]
    :states states/all-states}
-  [{{app-id :id :as application} :application}]
+  [{:keys [application]}]
   (ok :comments (comment/enrich-comments application)))
 
 (defcommand add-comment

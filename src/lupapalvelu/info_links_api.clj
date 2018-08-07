@@ -1,15 +1,10 @@
 (ns lupapalvelu.info-links-api
   (:require [clojure.set :refer [union]]
             [monger.operators :refer :all]
-            [sade.env :as env]
-            [sade.util :as util]
             [sade.core :refer [ok fail fail!]]
-            [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.info-links :as info-links]
-            [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.i18n :as i18n]))

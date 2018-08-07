@@ -1,4 +1,4 @@
-(ns lupapalvelu.foreman-test
+(ns lupapalvelu.open-inforequest-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.open-inforequest :refer :all]))

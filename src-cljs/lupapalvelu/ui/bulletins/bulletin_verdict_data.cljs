@@ -111,7 +111,7 @@
                 [:td (:paatoksentekija pk)]
                 [:td (common/format-timestamp (:paatospvm pk))]])]]]])])]))
 
-(rum/defc init-identification-link [bulletin]
+(rum/defc init-identification-link [_]
   (let [pathname (aget js/window.location "pathname")
         search (aget js/window.location "search")
         hash (aget js/window.location "hash")

@@ -2,7 +2,6 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
-            [sade.env :as env]
             [lupapalvelu.tiedonohjaus :refer :all]
             [lupapalvelu.action :as action]
             [lupapalvelu.domain :as domain]

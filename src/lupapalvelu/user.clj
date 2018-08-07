@@ -10,6 +10,7 @@
             [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
+            [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.user-enums :as user-enums]
             [monger.operators :refer :all]
             [monger.query :as query]
@@ -193,7 +194,7 @@
   [user]
   (dissoc user :private))
 
-(defn create-handler [handler-id role-id {user-id :id first-name :firstName last-name :lastName :as user}]
+(defn create-handler [handler-id role-id {user-id :id first-name :firstName last-name :lastName}]
   {:id        (or handler-id (mongo/create-id))
    :roleId    role-id
    :userId    user-id
@@ -290,7 +291,7 @@
 
 (defn organization-ids
   "Returns user's organizations as a set of strings"
-  [{org-authz :orgAuthz :as user}]
+  [{org-authz :orgAuthz}]
   (->> org-authz keys (map name) set))
 
 (defn get-organizations
@@ -919,7 +920,7 @@
   [user-id]
   ;; Remove attachment files:
   (doseq [{:keys [attachment-id]} (:attachments (get-user-by-id user-id {:attachments 1}))]
-    (mongo/delete-file {:id attachment-id, :metadata.user-id user-id}))
+    (storage/delete-user-attachment user-id attachment-id))
 
   ;; Erase user record:
   (mongo/update-by-id :users user-id

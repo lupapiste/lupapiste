@@ -132,7 +132,7 @@
                    (sxml/parse-string "utf-8"))
             (sade.http/get anything :as :stream :throw-exceptions false :conn-timeout 10000)
             => (sample-response))
-          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+          (let [_ (batchrun/poll-verdicts-for-reviews)
                 assignments (get-assignments)]
 
             (fact "attachments trigger assignments"
@@ -150,7 +150,7 @@
             (sade.http/get anything :as :stream :throw-exceptions false :conn-timeout 10000)
             => (sample-response))
           (let [old-assignments (get-assignments)
-                poll-result (batchrun/poll-verdicts-for-reviews)
+                _ (batchrun/poll-verdicts-for-reviews)
                 assignments (get-assignments)]
 
             (fact "no new assignments"

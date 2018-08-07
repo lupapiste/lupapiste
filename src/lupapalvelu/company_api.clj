@@ -7,7 +7,6 @@
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
-            [sade.strings :as ss]
             [sade.util :as util]
             [sade.schemas :as ssc]
             [schema.core :as sc]
@@ -218,7 +217,7 @@
    :user-roles #{:applicant}
    :pre-checks [(some-pre-check com/validate-is-admin
                                 (com/validate-has-company-role :admin))]}
-  [{:keys [created user application] :as command}]
+  [{:keys [created user]}]
   (let [token (mongo/by-id :token tokenId)
         token-company-id (get-in token [:data :company :id])
         user-company-id (get-in user [:company :id])]
@@ -235,7 +234,7 @@
                                  :label                sc/Str}])]
    :user-roles #{:applicant}
    :pre-checks [(com/validate-has-company-role :any)]}
-  [{{:keys [company] :as user} :user :as command}]
+  [{{:keys [company] :as user} :user}]
   (com/update-company! (:id company) {:tags (map mongo/ensure-id tags)} user)
   (ok))
 

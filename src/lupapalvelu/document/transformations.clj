@@ -30,7 +30,7 @@
           (rakennusjate-removed-rows suunnitelma-doc selvitys-doc :vaarallisetAineet)))
 
 (defn create-rakennusjateselvitys-from-rakennusjatesuunnitelma
-  [{{schema-version :schema-version docs :documents :as application} :application created :created :as command}]
+  [{{schema-version :schema-version docs :documents :as application} :application created :created}]
   (when-let [suunnitelma-doc (domain/get-document-by-name application waste-schemas/basic-construction-waste-plan-name)]
     (let [updates (rakennusjateselvitys-updates suunnitelma-doc)
           schema  (schemas/get-schema schema-version waste-schemas/basic-construction-waste-report-name)]

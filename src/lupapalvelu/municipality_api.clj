@@ -8,7 +8,7 @@
 (defquery municipality-borders
   {:user-roles #{:anonymous}
    :description "Get municipality borders in GeoJSON format."}
-  [command]
+  [_]
   (ok :data {}))
 
 (defn municipality-name [lang id]

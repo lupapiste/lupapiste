@@ -1,11 +1,11 @@
 (ns lupapalvelu.document.document
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error]]
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<>>]]
             [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.action :refer [update-application] :as action]
+            [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]

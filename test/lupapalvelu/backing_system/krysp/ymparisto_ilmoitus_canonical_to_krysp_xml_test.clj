@@ -1,5 +1,5 @@
 (ns lupapalvelu.backing-system.krysp.ymparisto-ilmoitus-canonical-to-krysp-xml-test
-  (:require [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
+  (:require [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :refer :all]
             [lupapalvelu.document.ymparisto-ilmoitukset-canonical :refer [meluilmoitus-canonical]]
             [lupapalvelu.document.ymparisto-ilmoitukset-canonical-test :refer [meluilmoitus-yritys-application ]]
             [lupapalvelu.backing-system.krysp.ymparisto-ilmoitukset-mapping :refer [ymparistoilmoitus-element-to-xml ilmoitus_to_krysp_212 ilmoitus_to_krysp_221]]

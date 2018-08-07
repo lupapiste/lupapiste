@@ -3,6 +3,7 @@
   (:require [schema.core :as sc :refer [defschema Bool]]
             [cheshire.core :as json]
             [sade.core :refer [def-]]
+            [sade.env :as env]
             [sade.schemas :refer [NonBlankStr Kiinteistotunnus ApplicationId]]
             [sade.schema-generators :as sg]
             [sade.municipality :refer [municipality-codes]]
@@ -51,69 +52,70 @@
 ;;;; Actual Tests
 ;;;; ==================================================================================================================
 
-(facts "allu-application?"
-  (fact "Use ALLU integration for Helsinki YA."
-    (allu/allu-application? {:id "091-YA"} "YA") => true)
+(env/with-feature-value :allu true
+  (facts "allu-application?"
+    (fact "Use ALLU integration for Helsinki YA."
+      (allu/allu-application? {:id "091-YA"} "YA") => true)
 
-  (fact "Do not use ALLU integration for anything else."
-    (quick-check 10
-                 (for-all [org-id organizations
-                           permit-type (sg/generator PermitType)
-                           :when (not (and (= org-id "091-YA") (= permit-type "YA")))]
-                   (not (allu/allu-application? {:id org-id} permit-type))))
-    => passing-quick-check))
+    (fact "Do not use ALLU integration for anything else."
+      (quick-check 10
+                   (for-all [org-id organizations
+                             permit-type (sg/generator PermitType)
+                             :when (not (and (= org-id "091-YA") (= permit-type "YA")))]
+                     (not (allu/allu-application? {:id org-id} permit-type))))
+      => passing-quick-check))
 
-(facts "application->allu-placement-contract"
-  (fact "Valid applications produce valid inputs for ALLU."
-    (quick-check 10
-                 (for-all [application (sg/generator ValidPlacementApplication)]
-                   (nil? (sc/check PlacementContract
-                                   (application->allu-placement-contract (sg/generate Bool) application)))))
-    => passing-quick-check))
+  (facts "application->allu-placement-contract"
+    (fact "Valid applications produce valid inputs for ALLU."
+      (quick-check 10
+                   (for-all [application (sg/generator ValidPlacementApplication)]
+                     (nil? (sc/check PlacementContract
+                                     (application->allu-placement-contract (sg/generate Bool) application)))))
+      => passing-quick-check))
 
-(facts "application-cancel-request"
-  (let [allu-id "23"
-        app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)
-        [endpoint request] (application-cancel-request "https://example.com/api/v1" "foo.bar.baz" app)]
-    (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/cancelled"))
-    (fact "request" request => {:headers {:authorization "Bearer foo.bar.baz"}})))
+  (facts "application-cancel-request"
+    (let [allu-id "23"
+          app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)
+          [endpoint request] (application-cancel-request "https://example.com/api/v1" "foo.bar.baz" app)]
+      (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/cancelled"))
+      (fact "request" request => {:headers {:authorization "Bearer foo.bar.baz"}})))
 
-(facts "placement-creation-request"
-  (let [app (sg/generate ValidPlacementApplication)
-        [endpoint request] (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
-    (fact "endpoint" endpoint => "https://example.com/api/v1/placementcontracts")
-    (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                                :content-type :json
-                                :body         (json/encode (application->allu-placement-contract true app))})))
+  (facts "placement-creation-request"
+    (let [app (sg/generate ValidPlacementApplication)
+          [endpoint request] (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
+      (fact "endpoint" endpoint => "https://example.com/api/v1/placementcontracts")
+      (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
+                                  :content-type :json
+                                  :body         (json/encode (application->allu-placement-contract true app))})))
 
-(facts "attachment-send"
-  (let [allu-id "23"
-        application (-> (sg/generate ValidPlacementApplication) (assoc-in [:integrationKeys :ALLU :id] allu-id))
-        {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment} (sg/generate Attachment)
-        contents "You will be assimilated."
-        [endpoint request] (attachment-send "https://example.com/api/v1" "foo.bar.baz" application attachment
-                                            contents)]
-    (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/attachments"))
-    (fact "request"
-      (:headers request) => {:authorization "Bearer foo.bar.baz"}
-      (-> request (get-in [:multipart 0]) (select-keys [:name :mime-type :encoding]))
-      => {:name "metadata", :mime-type "application/json", :encoding "UTF-8"}
-      (-> request (get-in [:multipart 0 :content]) (json/decode true))
-      => {:name        (:contents attachment)
-          :description (localize "fi" :attachmentType type-group type-id)
-          :mimeType    (:contentType latestVersion)}
-      (get-in request [:multipart 1]) => {:name      "file"
-                                          :mime-type (:contentType latestVersion)
-                                          :content   contents})))
-
-(facts "placement-update-request"
-  (let [allu-id "23"
-        app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)]
-    (doseq [pending-on-client [true false]
-            :let [[endpoint request]
-                  (placement-update-request pending-on-client "https://example.com/api/v1" "foo.bar.baz" app)]]
-      (fact "endpoint" endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
+  (facts "attachment-send"
+    (let [allu-id "23"
+          application (-> (sg/generate ValidPlacementApplication) (assoc-in [:integrationKeys :ALLU :id] allu-id))
+          {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment} (sg/generate Attachment)
+          contents "You will be assimilated."
+          [endpoint request] (attachment-send "https://example.com/api/v1" "foo.bar.baz" application attachment
+                                              contents)]
+      (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/attachments"))
       (fact "request"
-        request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                    :content-type :json
-                    :body         (json/encode (application->allu-placement-contract pending-on-client app))}))))
+        (:headers request) => {:authorization "Bearer foo.bar.baz"}
+        (-> request (get-in [:multipart 0]) (select-keys [:name :mime-type :encoding]))
+        => {:name "metadata", :mime-type "application/json", :encoding "UTF-8"}
+        (-> request (get-in [:multipart 0 :content]) (json/decode true))
+        => {:name        (:contents attachment)
+            :description (localize "fi" :attachmentType type-group type-id)
+            :mimeType    (:contentType latestVersion)}
+        (get-in request [:multipart 1]) => {:name      "file"
+                                            :mime-type (:contentType latestVersion)
+                                            :content   contents})))
+
+  (facts "placement-update-request"
+    (let [allu-id "23"
+          app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)]
+      (doseq [pending-on-client [true false]
+              :let [[endpoint request]
+                    (placement-update-request pending-on-client "https://example.com/api/v1" "foo.bar.baz" app)]]
+        (fact "endpoint" endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
+        (fact "request"
+          request => {:headers      {:authorization "Bearer foo.bar.baz"}
+                      :content-type :json
+                      :body         (json/encode (application->allu-placement-contract pending-on-client app))})))))

@@ -1,6 +1,5 @@
 (ns lupapalvelu.tasks-itest
   (:require [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
@@ -86,9 +85,7 @@
 
   (let [task-id (->> tasks (remove (fn->> :schema-info :subtype keyword (= :review))) first :id)
         review-id (->> tasks (filter (fn->> :schema-info :subtype keyword (= :review))) first :id)
-        task (util/find-by-id task-id (:tasks application))
-        review (util/find-by-id review-id (:tasks application))]
-
+        task (util/find-by-id task-id (:tasks application))]
     (fact "Pena can't approve"
       (command pena :approve-task :id application-id :taskId task-id) => unauthorized?)
 
@@ -212,11 +209,11 @@
                :updates [["katselmus.tila" "lopullinen"]
                          ["katselmus.pitoPvm" "11.09.2017"]
                          ["katselmus.pitaja" "Auburn Authority"]]))
-    (let [att-file-id (upload-file-and-bind sonja application-id {:contents "Asiantuntijatarkastuksen lausunto"
-                                                                  :group    {}
-                                                                  :target   {:type "task" :id loppukatselmus-id}
-                                                                  :type     {:type-group "katselmukset_ja_tarkastukset"
-                                                                             :type-id    "tarkastusasiakirja"}})]
+    (let [_ (upload-file-and-bind sonja application-id {:contents "Asiantuntijatarkastuksen lausunto"
+                                                        :group    {}
+                                                        :target   {:type "task" :id loppukatselmus-id}
+                                                        :type     {:type-group "katselmukset_ja_tarkastukset"
+                                                                   :type-id    "tarkastusasiakirja"}})]
       (fact "Mark review as done"
         (command sonja :review-done :id application-id :lang "fi" :taskId loppukatselmus-id)
         => ok?)

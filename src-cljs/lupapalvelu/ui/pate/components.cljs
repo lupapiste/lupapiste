@@ -1,14 +1,11 @@
 (ns lupapalvelu.ui.pate.components
   "More or less Pate-specific user interface components. See
   layout.cljs for documentation on the component conventions."
-  (:require [clojure.set :as set]
-            [clojure.string :as s]
+  (:require [clojure.string :as s]
             [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.phrases :as phrases]
-            [lupapalvelu.ui.pate.service :as service]
-            [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
@@ -19,15 +16,14 @@
                                  value)
     (path/meta-updated options)))
 
-(defn- state-change-callback
-  [{:keys [state path] :as options}]
+(defn- state-change-callback [options]
   (partial change-state options))
 
 (defn show-label? [{label? :label?} wrap-label?]
   (and wrap-label? (not (false? label?))))
 
 (defn label-wrap
-  [{:keys [schema path] :as options} {:keys [component empty-label?]}]
+  [{:keys [path] :as options} {:keys [component empty-label?]}]
   [:div.col--vertical
    (if empty-label?
      (common/empty-label)
@@ -37,9 +33,7 @@
       (path/loc options)])
    component])
 
-(defn label-wrap-if-needed
-  [{:keys [schema] :as options} {:keys [component wrap-label? empty-label?]
-                                 :as extra}]
+(defn label-wrap-if-needed [{:keys [schema] :as options} {:keys [component wrap-label?] :as extra}]
   (if (show-label? schema wrap-label?)
     (label-wrap options extra)
     component))
@@ -94,7 +88,7 @@
 
 (defn- resolve-reference-list
   "List of :value, :text maps"
-  [{:keys [path schema references] :as options}]
+  [{:keys [schema references] :as options}]
   (let [{:keys [item-key item-loc-prefix term]}        schema
         {:keys [extra-path match-key] term-path :path} term
         extra-path                                     (path/pathify extra-path)
@@ -126,8 +120,7 @@
                            js/util.localeComparator
                            identity)))))
 
-(rum/defc select-reference-list < rum/reactive
-  [{:keys [schema references path state] :as options} & [wrap-label?]]
+(rum/defc select-reference-list < rum/reactive [{:keys [path state] :as options} & [wrap-label?]]
   (label-wrap-if-needed
    options
    {:component   (components/dropdown
@@ -141,7 +134,7 @@
     :wrap-label? wrap-label?}))
 
 (rum/defc multi-select-reference-list < rum/reactive
-  [{:keys [schema] :as options} & [wrap-label?]]
+  [options & [wrap-label?]]
   (pate-multi-select (assoc-in options [:schema :items] (resolve-reference-list options))
                      wrap-label?))
 

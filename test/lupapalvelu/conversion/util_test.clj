@@ -2,8 +2,7 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.conversion.util :as util]
             [lupapalvelu.backing-system.krysp.application-from-krysp :refer [get-local-application-xml-by-filename]]
-            [lupapalvelu.backing-system.krysp.reader :as reader]
-            [sade.strings :as ss]))
+            [lupapalvelu.backing-system.krysp.reader :as reader]))
 
 (fact "Conversion of permit ids from 'database-format' works as expected"
   (facts "ids in 'database-format' are converted into 'ui-format'"

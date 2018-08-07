@@ -5,8 +5,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [lupapalvelu.company :as company]
@@ -53,7 +51,7 @@
                  {:required [:application/edit]}]
    :states     states/all-states
    :pre-checks [foreman-app-check]}
-  [{:keys [application user created] :as command}]
+  [{:keys [application created] :as command}]
   (let [foreman-applications (seq (foreman/get-foreman-project-applications application foremanHetu))
         other-applications (map #(foreman/other-project-document % created) foreman-applications)
         tyonjohtaja-doc (domain/get-document-by-name application "tyonjohtaja-v2")
@@ -76,7 +74,7 @@
                  {:required [:application/edit]}]
    :states states/all-states
    :pre-checks [foreman/ensure-foreman-not-linked]}
-  [{:keys [created application] :as command}]
+  [{:keys [created application]}]
   (let [task (util/find-by-id taskId (:tasks application))]
     (if task
       (let [updates [[[:asiointitunnus] foremanAppId]]]
@@ -92,7 +90,7 @@
    :input-validators [(partial action/non-blank-parameters [:all])]
    :permissions      [{:required [:application/show-foreman-history]}]
    :pre-checks       [foreman-app-check]}
-  [{application :application user :user :as command}]
+  [{:keys [application]}]
   (if application
     (let [history-data (foreman/get-foreman-history-data application)]
       (if (= all "true")
@@ -106,7 +104,7 @@
   {:states           states/all-states
    :permissions      [{:required [:application/read]}]
    :parameters       [id]}
-  [{application :application user :user :as command}]
+  [{:keys [application]}]
   (->> (foreman/get-linked-foreman-applications application)
        (sort-by :id)
        (ok :applications)))

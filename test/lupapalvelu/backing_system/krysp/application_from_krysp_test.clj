@@ -165,7 +165,7 @@
   (fact "no endpoint defined"
     (try+
      (get-application-xml-by-application-id {:id "LP-123-2016-00001" :organization "123-R" :permitType "R"})
-     (catch [:sade.core/type :sade.core/fail :text "error.no-legacy-available"] e
+     (catch [:sade.core/type :sade.core/fail :text "error.no-legacy-available"] _
        true))  => truthy     ; truthy for getting midje understand provided
 
     (provided (organization/get-krysp-wfs {:organization "123-R" :permitType "R"}) => nil)))

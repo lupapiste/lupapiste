@@ -1,10 +1,7 @@
 (ns lupapalvelu.pate.pdf
   "PDF generation via HTML for Pate verdicts. Utilises a simple
   schema-based mechanism for the layout definiton and generation."
-  (:require [clojure.java.io :as io]
-            [garden.core :as garden]
-            [garden.selectors :as sel]
-            [lupapalvelu.application :as app]
+  (:require [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as app-meta]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.document.schemas :as schemas]
@@ -12,18 +9,12 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.logging :as logging]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
-            [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.pdf-html :as html]
             [lupapalvelu.pate.pdf-layouts :as layouts]
             [lupapalvelu.pate.schemas :refer [resolve-verdict-attachment-type]]
             [lupapalvelu.pdf.html-template :as html-pdf]
-            [lupapalvelu.pdf.html-template-common :as common]
-            [rum.core :as rum]
             [sade.core :refer :all]
             [sade.property :as property]
             [sade.strings :as ss]
@@ -128,7 +119,7 @@
                                                    (:koulutus skills))]
                                   (join-non-blanks ", "))}))))
          (remove nil?)
-         (sort (fn [a b]
+         (sort (fn [a _]
                  (if (= (:role a) head-loc) -1 1))))))
 
 (defn primary-operation-data [application]
@@ -307,7 +298,7 @@
   "Adds all kinds of different properties to the options. It is then up
   to category-specific verdict-body methods and corresponding
   pdf-layouts whether every property is displayed in the pdf or not."
-  [{:keys [lang application verdict] :as options}]
+  [{:keys [lang application] :as options}]
   (let [buildings (verdict-buildings options)]
     (assoc options
            :application-id (:id application)
@@ -431,7 +422,7 @@
 (defn create-verdict-preview
   "Creates draft version of the verdict
   PDF. Returns :pdf-file-stream, :filename map or :error map."
-  [{:keys [application created] :as command} verdict]
+  [{:keys [application created]} verdict]
   (let [pdf (html-pdf/html->pdf application
                                 "pate-verdict-draft"
                                 (verdict-html application verdict))]

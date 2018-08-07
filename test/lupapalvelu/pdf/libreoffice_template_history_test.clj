@@ -5,7 +5,7 @@
             [midje.util :refer [testable-privates]]
             [sade.files :as files]
             [lupapalvelu.test-util :as test-util]
-            [lupapalvelu.i18n :refer [loc localize] :as i18n]
+            [lupapalvelu.i18n :refer [loc localize]]
             [lupapalvelu.pdf.libreoffice-template :refer :all]
             [lupapalvelu.pdf.libreoffice-template-history :as history]
             [lupapalvelu.tiedonohjaus :refer :all]

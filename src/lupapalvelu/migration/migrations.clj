@@ -42,7 +42,6 @@
             [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
             [lupapalvelu.application :as application]
             [lupapalvelu.document.waste-schemas :as waste-schemas]
-            [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org])
   (:import [org.joda.time DateTime]))
 
@@ -76,7 +75,7 @@
                                          ]
                                      updated)))
         unmatched-operations (filter
-                               (fn [{id :id :as op}]
+                               (fn [{:keys [id]}]
                                  (nil? (some
                                          (fn [d]
                                            (when
@@ -106,7 +105,7 @@
                      r
                      d)) documents)
         new-operations (filter
-                         (fn [{id :id :as op}]
+                         (fn [{:keys [id]}]
                            (some
                              (fn [d]
                                (when
@@ -644,17 +643,16 @@
    bulletins, obtained by the given query. Returns the number
    of bulletins updated."
   {:pre [(keyword? k) (fn? f) (map? query)]}
-  (let [version-key (keyword (str "versions." (name k)))]
-    (reduce + 0
-      (for [bulletin (mongo/select :application-bulletins query {:versions 1})]
-        (mongo/update-n :application-bulletins
-          {:_id (:id bulletin)}
-          {$set
-            {:versions
-              (map
-                (fn [versio]
-                  (assoc versio k (map f (get versio k))))
-                (:versions bulletin))}})))))
+  (reduce + 0
+          (for [bulletin (mongo/select :application-bulletins query {:versions 1})]
+            (mongo/update-n :application-bulletins
+                            {:_id (:id bulletin)}
+                            {$set
+                             {:versions
+                              (map
+                                (fn [versio]
+                                  (assoc versio k (map f (get versio k))))
+                                (:versions bulletin))}}))))
 
 (defn- populate-buildingids-to-doc [doc]
   (let [rakennusnro (get-in doc [:data :rakennusnro])
@@ -691,7 +689,7 @@
          (:id app-link)
          {$set {(str linkpermit-id ".apptype") apptype}}))))
 
-(defn- merge-versions [old-versions {:keys [user version] :as new-version}]
+(defn- merge-versions [old-versions {:keys [user] :as new-version}]
   (let [next-ver (att/next-attachment-version (:version (last old-versions)) user)]
     (concat old-versions [(assoc new-version :version next-ver)])))
 
@@ -1478,13 +1476,13 @@
 (defmigration cleanup-numeric-history-state
   {:apply-when (pos? (mongo/count :applications {"history.state" {$type 18}}))}
   (reduce + 0
-    (for [collection [:applications :submitted-applications]]
+    (for [_ [:applications :submitted-applications]]
       (mongo/update-n :applications {"history.state" {$type 18}} {$pull {:history {:state {$type 18}}}} :multi true))))
 
 (defmigration cleanup-construction-started-history-state
   {:apply-when (pos? (mongo/count :applications {"history.state" "constructionStarted"}))}
   (reduce + 0
-    (for [collection [:applications :submitted-applications]]
+    (for [_ [:applications :submitted-applications]]
       (mongo/update-n :applications {"history.state" "constructionStarted"} {$pull {:history {:state "constructionStarted"}}} :multi true))))
 
 (defn populate-application-history [{:keys [opened submitted sent canceled started complementNeeded closed startedBy closedBy history verdicts] :as application}]
@@ -1510,7 +1508,7 @@
       (let [applications (mongo/select collection {:state {$ne "draft"}, :infoRequest false} [:opened :sent :submitted :canceled :complementNeeded :started :closed :startedBy :closedBy :history :verdicts :permitType :primaryOperation :state])]
         (count (map #(mongo/update-by-id collection (:id %) (populate-application-history %)) applications))))))
 
-(defn user-summary [{email :email id :id first-name :firstName last-name :lastName :as user}]
+(defn user-summary [{id :id first-name :firstName :as user}]
   (user/summary
    (if (and (= id "-") (= first-name "Lupapiste"))
      (assoc user :username "eraajo@lupapiste.fi")
@@ -1645,7 +1643,7 @@
 (defn update-verdict-id-in-attachment-target [query]
   (reduce + 0
     (for [collection [:applications :submitted-applications]
-          {attachments :attachments verdicts :verdicts app-id :id :as a} (mongo/select collection query {:verdicts 1 :attachments 1})]
+          {:keys [attachments verdicts] app-id :id} (mongo/select collection query {:verdicts 1 :attachments 1})]
       (mongo/update-n collection
                       {:_id app-id}
                       {$set {:attachments (map (partial set-verdict-id-for-nil-valued-verdict-targets (:id (first verdicts))) attachments)}}))))
@@ -1704,9 +1702,7 @@
   {$pull {:auth {:role role :id id}}})
 
 (defn remove-owners-double-auth-updates [auths]
-  (let [{owner-id :id :as owner-auth} (some
-                                        #(when (= (:role %) "owner") %)
-                                        auths)]
+  (let [{owner-id :id} (some #(when (= (:role %) "owner") %) auths)]
     (when-let [removable-auths (seq
                                  (filter
                                    #(and
@@ -1880,7 +1876,7 @@
 (def r-or-p-operation? (->> (filter (comp #{"R" "P"} :permit-type val) op/operations) keys set))
 (def ya-operation? (->> op/ya-operations keys set))
 
-(defn update-operations-attachment-type [mapping [type-group type-id]]
+(defn update-operations-attachment-type [[type-group type-id]]
   (let [{new-group :type-group new-id :type-id} (-> {:type-group (keyword type-group) :type-id (keyword type-id)}
                                                     attachment-type-mapping/attachment-mapping)]
     (if (and new-group new-id)
@@ -1889,7 +1885,7 @@
 
 (defn update-operations-attachments-types [mapping operation-pred [operation attachment-types]]
   (if (operation-pred (keyword operation))
-    [operation (->> attachment-types (map (partial update-operations-attachment-type mapping)) distinct)]
+    [operation (->> attachment-types (map (partial update-operations-attachment-type)) distinct)]
     [operation attachment-types]))
 
 (defmigration organization-operation-attachments-type-update
@@ -2558,7 +2554,7 @@
 (defn- valid-date-string [date]
   (try
     (instance? DateTime (clj-time.format/parse ddMMyyyy-formatter date))
-    (catch Exception e
+    (catch Exception _
       false)))
 
 (defn- add-start-timestamp [document]
@@ -2756,7 +2752,7 @@
                                                                                            :en "Handler"}
                                                                                  :general true}]}}))))
 
-(defn- set-handler-for-application [role-id {id :id authority :authority :as application}]
+(defn- set-handler-for-application [role-id {:keys [id authority]}]
   (when (:id authority)
     (let [handler (user/create-handler nil role-id authority)]
       (mongo/update-by-id :applications           id {$set {:handlers [handler]}})
@@ -2788,7 +2784,7 @@
             (let [target (:target assignment)]
               (mongo/update-n :assignments {:_id (:id assignment)} {$set {:targets [target]}
                                                                     $unset {:target ""}})))))
-(defn- add-empty-handler-array [collection {handlers :handlers id :id :as application}]
+(defn- add-empty-handler-array [collection {:keys [id handlers]}]
   (when-not handlers
     (mongo/update-by-id collection id {$set {:handlers []}})))
 
@@ -2978,7 +2974,7 @@
                                   {:trigger    {$ne "user-created"}
                                    :description ""}))}
   (let [assignments (mongo/select :assignments {:trigger {$ne "user-created"}, :description ""})]
-    (doseq [{:keys [id application trigger] :as assignment} assignments]
+    (doseq [{:keys [id application trigger]} assignments]
       (let [organization (mongo/select-one :organizations {:_id (:organization application)})]
         (mongo/update-by-id :assignments
                             id
@@ -3733,7 +3729,7 @@
                           :notification.message #"liiketoimintajohtaja"}
                          {$set {:notification.message "Lupapisteen henkil\u00f6rekisterin pit\u00e4j\u00e4 vaihtui 1.5.2017 Solita Oy:st\u00e4 Evolta Oy:ksi. Muutos ei vaikuta k\u00e4ytt\u00f6ehtoihin. Lis\u00e4tietoja asiasta antaa Niina Syrj\u00e4rinne, puh. 0400 613 756."}}))
 
-(defn application-owner-as-creator [{auth :auth :as application}]
+(defn application-owner-as-creator [{:keys [auth]}]
   (-> (util/find-first (comp #{"owner"} :role) auth)
       (usr/summary)
       (dissoc :role :type)))

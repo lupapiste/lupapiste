@@ -2,7 +2,6 @@
   (:require [lupapalvelu.action :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.itest-util :refer [expected-failure? ->xml]]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]

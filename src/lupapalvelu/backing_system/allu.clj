@@ -1,4 +1,6 @@
 (ns lupapalvelu.backing-system.allu
+  "JSON REST API integration with ALLU as backing system. Used for Helsinki YA instead of SFTP/HTTP KRYSP XML
+  integration."
   (:require [clojure.core.match :refer [match]]
             [clojure.walk :refer [postwalk]]
             [mount.core :refer [defstate]]
@@ -18,9 +20,7 @@
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.integrations.geojson-2008-schemas :as geo]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
 
 ;;;; Schemas
 ;;;; ===================================================================================================================

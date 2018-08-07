@@ -1,6 +1,6 @@
 (ns lupapalvelu.backing-system.krysp.reader
   "Read the Krysp from municipality Web Feature Service"
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error warnf]]
+  (:require [taoensso.timbre :refer [trace debug info warn error warnf]]
             [clojure.set :refer [rename-keys]]
             [net.cgrand.enlive-html :as enlive]
             [sade.env :as env]
@@ -13,7 +13,6 @@
             [lupapalvelu.drawing :as drawing]
             [lupapalvelu.document.schemas]
             [lupapalvelu.conversion.util :as conv-util]
-            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
             [lupapalvelu.wfs :as wfs]
@@ -303,17 +302,17 @@
 (defn ->tj-suunnittelija-verdicts [xml-without-ns {{:keys [yhteystiedot sijaistus]} :data} osapuoli-type kuntaRoolikoodi]
   (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
         osapuoli-key (last osapuoli-path)]
-    (map (fn [osapuolet-xml-without-ns]
+    (map (fn [_]
            (let [osapuolet (get-tj-suunnittelija-osapuolet xml-without-ns osapuoli-path osapuoli-key kuntaRoolikoodi-key kuntaRoolikoodi yhteystiedot)
                  osapuoli (party-with-paatos-data osapuolet sijaistus)]
-           (when (and osapuoli (> (now) (:paatosPvm osapuoli)))
-             {:poytakirjat
-              [{:status (get tj-suunnittelija-verdict-statuses-to-loc-keys-mapping (:paatostyyppi osapuoli))
-                :paatospvm (:paatosPvm osapuoli)
-                :liite (:liite osapuoli)
-                }]
-              })))
-  (select xml-without-ns [:osapuolettieto :Osapuolet]))))
+             (when (and osapuoli (> (now) (:paatosPvm osapuoli)))
+               {:poytakirjat
+                [{:status (get tj-suunnittelija-verdict-statuses-to-loc-keys-mapping (:paatostyyppi osapuoli))
+                  :paatospvm (:paatosPvm osapuoli)
+                  :liite (:liite osapuoli)
+                  }]
+                })))
+         (select xml-without-ns [:osapuolettieto :Osapuolet]))))
 
 (def krysp-state-sorting
   "Chronological ordering of application states from KuntaGML. Used when comparing states timestamped to same dates."
@@ -382,7 +381,7 @@
 (def backend-preverdict-state
   #{"" "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"})
 
-(defn- simple-verdicts-validator [xml organization & verdict-date-path]
+(defn- simple-verdicts-validator [xml & verdict-date-path]
   (let [verdict-date-path (or verdict-date-path [:paatostieto :Paatos :paatosdokumentinPvm])
         xml-without-ns (cr/strip-xml-namespaces xml)
         app-state      (application-state xml-without-ns)
@@ -413,8 +412,8 @@
                                               liitetiedot)))})))
         (select xml-without-ns [:paatostieto :Paatos])))))
 
-(defn- outlier-verdicts-validator [xml organization]
-  (simple-verdicts-validator xml organization :paatostieto :Paatos :pvmtieto :Pvm :pvm))
+(defn- outlier-verdicts-validator [xml]
+  (simple-verdicts-validator xml :paatostieto :Paatos :pvmtieto :Pvm :pvm))
 
 (defn ->outlier-verdicts
   "For some reason kiinteistotoimitus (at least) defines its own
@@ -449,15 +448,16 @@
 (defmethod permit/read-verdict-xml :KT   [_ xml-without-ns & _]    (->outlier-verdicts xml-without-ns))
 (defmethod permit/read-verdict-xml :ARK  [_ xml-without-ns & args] (apply ->standard-verdicts xml-without-ns args))
 
-(defmethod permit/read-tj-suunnittelija-verdict-xml :R [_ xml-without-ns & args] (apply ->tj-suunnittelija-verdicts xml-without-ns args))
+(defmethod permit/read-tj-suunnittelija-verdict-xml :R [_ xml-without-ns & args]
+  (apply ->tj-suunnittelija-verdicts xml-without-ns args))
 
 (defmethod permit/validate-verdict-xml :R    [_ xml organization] (standard-verdicts-validator xml organization))
 (defmethod permit/validate-verdict-xml :P    [_ xml organization] (standard-verdicts-validator xml organization))
-(defmethod permit/validate-verdict-xml :YA   [_ xml organization] (simple-verdicts-validator xml organization))
-(defmethod permit/validate-verdict-xml :YL   [_ xml organization] (simple-verdicts-validator xml organization))
-(defmethod permit/validate-verdict-xml :MAL  [_ xml organization] (simple-verdicts-validator xml organization))
-(defmethod permit/validate-verdict-xml :VVVL [_ xml organization] (simple-verdicts-validator xml organization))
-(defmethod permit/validate-verdict-xml :KT   [_ xml organization] (outlier-verdicts-validator xml organization))
+(defmethod permit/validate-verdict-xml :YA   [_ xml _] (simple-verdicts-validator xml))
+(defmethod permit/validate-verdict-xml :YL   [_ xml _] (simple-verdicts-validator xml))
+(defmethod permit/validate-verdict-xml :MAL  [_ xml _] (simple-verdicts-validator xml))
+(defmethod permit/validate-verdict-xml :VVVL [_ xml _] (simple-verdicts-validator xml))
+(defmethod permit/validate-verdict-xml :KT   [_ xml _] (outlier-verdicts-validator xml))
 
 (defn- ->lp-tunnus [asia]
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
@@ -486,7 +486,7 @@
 (defmulti ->verdicts
   "Reads the verdicts."
   {:arglists '([xml permit-type reader & reader-args])}
-  (fn [xml permit-type & _] (keyword permit-type)))
+  (fn [_ permit-type & _] (keyword permit-type)))
 
 (defmethod ->verdicts :default
   [xml permit-type reader & reader-args]

@@ -6,6 +6,7 @@
             [hiccup.core :as core]
             [sade.env :as env]
             [monger.operators :refer [$set]]
+            [lupapalvelu.ident.session :as ident-session]
             [lupapalvelu.mongo :as mongo]
             [sade.util :as util]
             [noir.request :as request]
@@ -76,6 +77,6 @@
          (response/redirect (get-in data [:paths :success]))))))
 
   (defpage [:get "/dev/saml-logout"] {:keys [return]}
-    (if-let [session (lupapalvelu.ident.session/get-session (session-id))]
-      (lupapalvelu.ident.session/delete-user session))
+    (if-let [session (ident-session/get-session (session-id))]
+      (ident-session/delete-user session))
     (response/redirect return)))

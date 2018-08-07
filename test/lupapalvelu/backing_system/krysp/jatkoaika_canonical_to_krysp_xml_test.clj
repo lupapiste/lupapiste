@@ -8,7 +8,7 @@
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
             [lupapalvelu.xml.validator :refer :all :as validator]
             [lupapalvelu.backing-system.krysp.canonical-to-krysp-xml-test-common :refer :all :as xml-test-common]
-            [lupapalvelu.backing-system.krysp.mapping-common :refer :all :as mapping-common]
+            [lupapalvelu.backing-system.krysp.mapping-common :refer :all]
             [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
             [midje.sweet :refer :all]
             [clojure.data.xml :refer :all]

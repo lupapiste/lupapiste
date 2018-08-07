@@ -54,7 +54,7 @@
       (count (:applications resp)) => 0)))
 
 (fact "When using kayttotarkoitus operation, price and kayttotarkoitus is included in operation"
-  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo")
+  (let [_ (create-app-id pena :operation "kerrostalo-rivitalo")
         http-resp (http-get (str (server-address) "/data-api/json/export-applications")
                     {:basic-auth ["solita-etl" "solita-etl"]
                      :follow-redirects false

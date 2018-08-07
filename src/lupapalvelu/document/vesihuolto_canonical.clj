@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.vesihuolto-canonical
-  (:require [lupapalvelu.document.vesihuolto-schemas :as vh-schemas]
-            [lupapalvelu.document.canonical-common :refer :all]
+  (:require [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.i18n :as i18n]

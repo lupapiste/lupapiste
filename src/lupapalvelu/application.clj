@@ -1,5 +1,5 @@
 (ns lupapalvelu.application
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warnf error fatal]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clojure.set :refer [difference]]
@@ -181,7 +181,7 @@
               (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
           schema-names))
 
-(defn enrich-application-handlers [application {roles :handler-roles :as organization}]
+(defn enrich-application-handlers [application {roles :handler-roles}]
   (update application :handlers (partial map #(merge (util/find-by-id (:roleId %) roles) %))))
 
 ; Seen updates
@@ -508,7 +508,7 @@
                   (make-attachments created primaryOperation organization state tosFunction)
                   [])})
 
-(defn application-documents-map [{:keys [infoRequest created primaryOperation auth] :as application} user organization manual-schema-datas]
+(defn application-documents-map [{:keys [infoRequest created primaryOperation] :as application} user organization manual-schema-datas]
   {:pre [(pos? created) (map? primaryOperation)]}
   {:documents (if-not infoRequest
                 (make-documents user created organization primaryOperation application manual-schema-datas)
@@ -641,7 +641,7 @@
     ;; Cannot update existing array and push new items into it same time with one update
     (when (not-empty attachment-updates) (action/update-application command attachment-updates))))
 
-(defn change-primary-operation [{:keys [application] :as command} id secondaryOperationId]
+(defn change-primary-operation [{:keys [application] :as command} secondaryOperationId]
   (let [old-primary-op                       (:primaryOperation application)
         old-secondary-ops                    (:secondaryOperations application)
         new-primary-op                       (util/find-first #(= secondaryOperationId (:id %)) old-secondary-ops)
@@ -695,6 +695,31 @@
                                          :apptype (get-in link-application [:primaryOperation :name])}}
                         :upsert true)))
 
+(defn get-lp-id-by-kuntalupatunnus [kuntalupatunnus]
+  (:id (mongo/select-one :applications {:verdicts.kuntalupatunnus kuntalupatunnus} {:_id 1})))
+
+(defn update-app-links!
+  "To be run after Vantaa-conversion for each imported kuntalupatunnus. Takes a kuntalupatunnus
+  and updates (i.e. removes and re-links) its references in app-links collection so that the links point to real Lupapiste applications.
+  E.g. '14-0633-13-TJO|LP-092-2018-90011' -> 'LP-092-2018-90012|LP-92-2018-90011' etc.
+  Note! The kuntalupatunnus given as a parameter needs to be in the so-called database format."
+  [kuntalupatunnus]
+  (let [links-to-app (mongo/select :app-links {:_id (re-pattern kuntalupatunnus)}) ;; Fetch all app-links to this id
+        update-info (for [link links-to-app]
+                      (let [app-id (->> link :link (filter #(not= kuntalupatunnus %)) first)]
+                        {:application (mongo/select-one :applications {:_id app-id}) ;; The applications to which the link points
+                         :link-permit-id (get-lp-id-by-kuntalupatunnus kuntalupatunnus) ;; The new Lupapiste id for kuntalupatunnus
+                         :app-link-id (:id link)}))] ;; The id for the link document (format: "14-0633-13-TJO|LP-092-2018-90011")
+    (doseq [item update-info
+            :when (ss/not-blank? (:link-permit-id item))]
+      (let [{:keys [app-link-id application link-permit-id]} update-info]
+        (if (and (not-any? nil? (vals item)))
+          (do
+            (info (format "Updating app-link: %s -> %s" app-link-id (str link-permit-id "|" (:id application))))
+            (mongo/remove app-link-id)
+            (do-add-link-permit application link-permit-id)))
+        (error (format "Could not update app-link for permit %s / %s" kuntalupatunnus link-permit-id))))))
+
 ;; Submit
 (defn submit [{:keys [application created user] :as command} ]
   (let [transitions (remove nil?
@@ -707,7 +732,7 @@
                                               meta-fields/enrich-with-link-permit-data
                                               (dissoc :id)
                                               (assoc :_id (:id application))))
-    (catch com.mongodb.DuplicateKeyException e
+    (catch com.mongodb.DuplicateKeyException _
       ; This is ok. Only the first submit is saved.
       )))
 
@@ -742,8 +767,7 @@
                 ((change-application-state-targets application) (keyword new-state)))
     (fail :error.illegal-state)))
 
-(defn application-org-authz-users
-  [{org-id :organization :as application} org-authz]
+(defn application-org-authz-users [{org-id :organization} org-authz]
   (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
@@ -758,7 +782,7 @@
 (defn- remove-app-links [id]
   (mongo/remove-many :app-links {:link {$in [id]}}))
 
-(defn cancel-inforequest [{:keys [created user data application] :as command}]
+(defn cancel-inforequest [{:keys [created user application] :as command}]
   {:pre [(seq (:application command))]}
   (action/update-application command (app-state/state-transition-update :canceled created application user))
   (remove-app-links (:id application))

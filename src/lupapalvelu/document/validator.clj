@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.validator
   (:require [schema.core :as sc]
-            [sade.util :as util]
             [lupapalvelu.document.tools :as tools]))
 
 (defonce validators (atom {}))
@@ -75,7 +74,7 @@
                            (for [[k v] (partition 2 fields)]
                              [k `(->> ~'data ~@v)]))
                         (try
-                          (when-let [resp# (do ~@body)]
+                          (when (do ~@body)
                             (map (fn [path#] {:path   path#
                                               :result [~level (name ~code)]}) ~paths))
                           (catch Exception e#

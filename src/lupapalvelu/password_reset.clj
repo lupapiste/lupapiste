@@ -1,5 +1,5 @@
 (ns lupapalvelu.password-reset
-  (:require [taoensso.timbre :as timbre :refer [debug info infof warn warnf error]]
+  (:require [taoensso.timbre :refer [debug info infof warn warnf error]]
             [sade.env :as env]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.token :as token]

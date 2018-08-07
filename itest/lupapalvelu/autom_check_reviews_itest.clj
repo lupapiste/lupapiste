@@ -1,16 +1,13 @@
 (ns lupapalvelu.autom-check-reviews-itest
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [clojure.java.io :as io]
             [slingshot.support]
             [sade.core :refer [now fail]]
             [sade.files :as files]
-            [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.xml :as sxml]
             [sade.coordinate :as coordinate]
-            [sade.dummy-email-server :as dummy-email-server]
             [lupapalvelu.krysp-test-util :refer [build-multi-app-xml]]
             [lupapalvelu.action :as action]
             [lupapalvelu.domain :as domain]
@@ -21,13 +18,11 @@
             [lupapalvelu.tasks :refer [task-is-review?]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.integrations-api]
-            [lupapalvelu.verdict :as verdict]
             [lupapalvelu.verdict-api]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.batchrun :as batchrun]
             [lupapalvelu.pdftk :as pdftk]
-            [lupapalvelu.backing-system.krysp.application-from-krysp :as app-from-krysp]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [lupapalvelu.user :as usr]
             [lupapalvelu.review :as review]
@@ -99,8 +94,8 @@
 
         (fact "failure in fetching multiple applications causes fallback into fetching consecutively"
 
-          (let [review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
-                poll-result   (batchrun/poll-verdicts-for-reviews)
+          (let [_ (count-reviews sonja application-id-verdict-given-1) => 3
+                _ (batchrun/poll-verdicts-for-reviews)
                 last-review-1 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-1)))
                 last-review-2 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-2)))
                 app-1         (query-application local-query sonja application-id-verdict-given-1)
@@ -118,7 +113,7 @@
               (:state app-2) => "constructionStarted")) => truthy
 
           ;; Trying to fetch with multiple ids throws xml parser exception -> causes fallback into consecutive fetching
-          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1 application-id-verdict-given-2] :application-id anything) =throws=> (SAXParseException. "msg" "id" "sid" 0 0))
+          (provided (krysp-reader/rakval-application-xml anything anything (contains [application-id-verdict-given-1 application-id-verdict-given-2] :in-any-order) :application-id anything) =throws=> (SAXParseException. "msg" "id" "sid" 0 0))
           ;; Fallback - no xml found for application 1 by application id or backend-id
           (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1] :application-id anything) => nil)
           (provided (krysp-reader/rakval-application-xml anything anything ["2013-01"] :kuntalupatunnus anything) => nil)
@@ -130,8 +125,8 @@
 
         (fact "checking for reviews in correct states"
 
-          (let [review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
-                poll-result (batchrun/poll-verdicts-for-reviews)
+          (let [_ (count-reviews sonja application-id-verdict-given-1) => 3
+                _ (batchrun/poll-verdicts-for-reviews)
                 last-review (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-1)))
                 app         (query-application local-query sonja application-id-verdict-given-1)]
 
@@ -145,7 +140,7 @@
               (:state app) => "constructionStarted")) => truthy
 
           ;; Application xml found for application 1 when fetching multiple applications
-          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1 application-id-verdict-given-2] :application-id anything)
+          (provided (krysp-reader/rakval-application-xml anything anything (contains [application-id-verdict-given-1 application-id-verdict-given-2] :in-any-order) :application-id anything)
                     => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
                            (ss/replace #"LP-186-2014-90009" application-id-verdict-given-1)
                            (sxml/parse-string "utf-8")))
@@ -185,8 +180,8 @@
         (give-local-verdict sonja application-id-verdict-given-2 :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
 
         ;; Trying to fetch with multiple ids throws xml parser exception -> causes fallback into consecutive fetching
-        (let [review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
-              poll-result   (batchrun/poll-verdicts-for-reviews)
+        (let [_ (count-reviews sonja application-id-verdict-given-1) => 3
+              _   (batchrun/poll-verdicts-for-reviews)
               last-review-1 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-1)))
               last-review-2 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-2)))
               app-1         (query-application local-query sonja application-id-verdict-given-1)
@@ -201,7 +196,7 @@
           (fact "application 2 state is updated"
             (:state app-2) => "constructionStarted")) => truthy
 
-            (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1 application-id-verdict-given-2] :application-id anything) =throws=> (slingshot-exception {:sade.core/type :sade.core/fail, :status 404}))
+            (provided (krysp-reader/rakval-application-xml anything anything (contains [application-id-verdict-given-1 application-id-verdict-given-2] :in-any-order) :application-id anything) =throws=> (slingshot-exception {:sade.core/type :sade.core/fail, :status 404}))
             ;; Fallback - no xml found for application 1 by application id or backend-id
             (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1] :application-id anything) => nil)
             (provided (krysp-reader/rakval-application-xml anything anything ["2013-01"] :kuntalupatunnus anything) => nil)
@@ -277,7 +272,7 @@
 
         (fact "checking review updates states"
 
-          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+          (let [_ (batchrun/poll-verdicts-for-reviews)
                 application-submitted     (query-application local-query sonja application-id-submitted)     => truthy
                 application-canceled      (query-application local-query sonja application-id-canceled)      => truthy
                 application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy
@@ -299,12 +294,12 @@
               (:state application-suunnittelija) => "verdictGiven")) => truthy
 
           ;; Review query is made only for applications in eligible state -> xml found for verdict given application
-          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given application-id-construction] :application-id anything)
+          (provided (krysp-reader/rakval-application-xml anything anything (contains [application-id-verdict-given application-id-construction] :in-any-order) :application-id anything)
                     => (build-multi-app-xml [[{:lp-tunnus application-id-verdict-given} {:pvm "2016-06-05Z" :tila "rakennusty\u00f6t aloitettu"}]
                                              [{:lp-tunnus application-id-construction}  {:pvm "2016-06-06Z" :tila "osittainen loppukatselmus, yksi tai useampia luvan rakennuksista on k\u00e4ytt\u00f6\u00f6notettu"}]])))
 
         (fact "checking review updates states again"
-          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+          (let [_ (batchrun/poll-verdicts-for-reviews)
                 application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy
                 application-construction  (query-application local-query sonja application-id-construction)  => truthy]
 
@@ -314,7 +309,7 @@
               (:state application-construction)  => "inUse")) => truthy
 
           ;; Review query is made only for applications in eligible state -> xml found for verdict given application
-          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given application-id-construction] :application-id anything)
+          (provided (krysp-reader/rakval-application-xml anything anything (contains [application-id-verdict-given application-id-construction] :in-any-order) :application-id anything)
                     => (build-multi-app-xml [[{:lp-tunnus application-id-construction}  {:pvm "2016-06-07Z" :tila "rakennusty\u00f6t aloitettu"}]]))
           ;; No result for verdict given appwhen retried with kuntalupatunnus
           (provided (krysp-reader/rakval-application-xml anything anything ["verdict-vg"] :kuntalupatunnus anything) => nil))))))
@@ -365,7 +360,7 @@
 
         (fact "first batchrun"
 
-          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+          (let [_ (batchrun/poll-verdicts-for-reviews)
                 application (query-application local-query sonja application-id) => truthy]
             (fact "application reviews contain the one that will be changed"
               (->> application :tasks (util/find-first #(= (-> % :data :katselmus :pitoPvm :value)
@@ -380,7 +375,7 @@
 
         (fact "second batchrun, no overwrite"
 
-          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+          (let [_ (batchrun/poll-verdicts-for-reviews)
                 application (query-application local-query sonja application-id) => truthy]
 
             (fact "application state is updated from verdictGive to constructionStarted"
@@ -408,7 +403,7 @@
                     (sxml/parse-string "utf-8"))))
 
         (fact "second batchrun, overwrite with the same data"
-          (let [poll-result (batchrun/poll-verdicts-for-reviews :overwrite-background-reviews? true)
+          (let [_ (batchrun/poll-verdicts-for-reviews :overwrite-background-reviews? true)
                 application (query-application local-query sonja application-id) => truthy]
 
             ;; :overwrite-background-reviews? is true, but the review
@@ -432,7 +427,7 @@
                 old-task (->> application-before-rewrite :tasks
                               (util/find-first #(= (-> % :data :katselmus :pitoPvm :value)
                                                    "29.09.2014")))
-                poll-result (batchrun/poll-verdicts-for-reviews :overwrite-background-reviews? true)
+                _ (batchrun/poll-verdicts-for-reviews :overwrite-background-reviews? true)
                 application (query-application local-query sonja application-id) => truthy
                 overwritten-task (->> application :tasks
                                       (util/find-first #(= (:id %)

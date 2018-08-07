@@ -1,6 +1,5 @@
 (ns lupapalvelu.ui.pate.sections
-  (:require [clojure.string :as s]
-            [lupapalvelu.pate.path :as path]
+  (:require [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.pate.layout :as layout]
@@ -14,11 +13,7 @@
 (rum/defc remove-section-checkbox < rum/reactive
   [{:keys [state schema] :as options}]
   (let [path       [:removed-sections (:id schema)]
-        state*     (path/state path state)
-        handler-fn (fn [flag]
-                     (reset! state* flag)
-                     (path/meta-updated (assoc options
-                                               :path path)))]
+        state*     (path/state path state)]
     (components/toggle state*
                        {:text-loc  (if (contract? options)
                                      :pate.contract.template.include
@@ -39,7 +34,7 @@
 
 (rum/defc default-section < rum/reactive
   {:key-fn #(common/unique-id "section")}
-  [{:keys [schema] :as options} section-type]
+  [options section-type]
   (when (path/visible? options)
     [:div.pate-section
      {:class (path/css options)}

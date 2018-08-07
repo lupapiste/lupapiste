@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.vesihuolto-canonical-test
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.document.vesihuolto-canonical :as yic]
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.vesihuolto-canonical :as vc]))
@@ -126,85 +125,85 @@
 (fl/facts* "Vesijohto ja viemari"
   (let [canonical (vc/vapautus-canonical vapautus-vesijohdosta-ja-viemarista-hakemus "fi") => truthy
         Vesihuoltolaki (:Vesihuoltolaki canonical) => truthy
-        toimituksenTiedot (:toimituksenTiedot Vesihuoltolaki) => truthy
+        _ (:toimituksenTiedot Vesihuoltolaki) => truthy
         vapautukset (:vapautukset Vesihuoltolaki) => truthy
         Vapautus (:Vapautus vapautukset) => truthy
         kasittelytietotieto (:kasittelytietotieto Vapautus) => truthy
         Kasittelytieto (:KasittelyTieto kasittelytietotieto) => truthy
-        muutosHetki (:muutosHetki Kasittelytieto) => "2014-03-21T06:40:05"
-        hakemuksenTila (:hakemuksenTila Kasittelytieto) => "1 Vireill\u00e4"
-        kasittelija (:kasittelija Kasittelytieto) => {:henkilo {:nimi {:etunimi "Pekka", :sukunimi "Borga"}}}
+        _ (:muutosHetki Kasittelytieto) => "2014-03-21T06:40:05"
+        _ (:hakemuksenTila Kasittelytieto) => "1 Vireill\u00e4"
+        _ (:kasittelija Kasittelytieto) => {:henkilo {:nimi {:etunimi "Pekka", :sukunimi "Borga"}}}
 
         luvanTunnistetiedot (:luvanTunnistetiedot Vapautus) => truthy
         LupaTunnus (:LupaTunnus luvanTunnistetiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
         MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
-        tunnus (:tunnus MuuTunnus) => (:id vapautus-vesijohdosta-ja-viemarista-hakemus)
-        sovellus (:sovellus MuuTunnus) => "Lupapiste"
+        _ (:tunnus MuuTunnus) => (:id vapautus-vesijohdosta-ja-viemarista-hakemus)
+        _ (:sovellus MuuTunnus) => "Lupapiste"
 
         lausuntotieto (:lausuntotieto Vapautus) => truthy
         Lausunto (:Lausunto (first lausuntotieto)) => truthy
-        viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
-        pyyntoPvm (:pyyntoPvm Lausunto) => "2013-09-17"
+        _ (:viranomainen Lausunto) => "Paloviranomainen"
+        _ (:pyyntoPvm Lausunto) => "2013-09-17"
         lausuntotieto (:lausuntotieto Lausunto) => truthy
         annettu-lausunto (:Lausunto lausuntotieto) => truthy
-        lausunnon-antanut-viranomainen (:viranomainen annettu-lausunto) => "Paloviranomainen"
-        varsinainen-lausunto (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
-        lausuntoPvm (:lausuntoPvm annettu-lausunto) => "2013-09-17"
+        _ (:viranomainen annettu-lausunto) => "Paloviranomainen"
+        _ (:lausunto annettu-lausunto) => "Lausunto liitteen\u00e4."
+        _ (:lausuntoPvm annettu-lausunto) => "2013-09-17"
 
-        vapautusperuste (:vapautusperuste Vapautus) => "" ;xml pit\u00e4\u00e4 saada tyhja vapautusperuste elementti
+        _ (:vapautusperuste Vapautus) => "" ;xml pit\u00e4\u00e4 saada tyhja vapautusperuste elementti
         vapautushakemustieto (:vapautushakemustieto Vapautus) => truthy
         Vapautushakemus (:Vapautushakemus vapautushakemustieto) => truthy
-        haetaan (:haetaan Vapautushakemus) => nil
+        _ (:haetaan Vapautushakemus) => nil
         ;; Only one applicant (hakija) is included
-        applicants (:hakija Vapautushakemus) => (just [(contains {:etunimi "Pekka"
-                                                                  :sukunimi "Borga"
-                                                                  :henkilotunnus "210281-9988"})])
+        _ (:hakija Vapautushakemus) => (just [(contains {:etunimi "Pekka"
+                                                         :sukunimi "Borga"
+                                                         :henkilotunnus "210281-9988"})])
         kohde (:kohde Vapautushakemus) => truthy
 
-        kiinteistorekisteritunnus (:kiinteistorekisteritunnus kohde) => "75342300020226"
+        _ (:kiinteistorekisteritunnus kohde) => "75342300020226"
         kiinteistonRakennusTieto (:kiinteistonRakennusTieto kohde) => truthy
-        krt_count (count kiinteistonRakennusTieto) => 3
+        _ (count kiinteistonRakennusTieto) => 3
         kr1 (nth kiinteistonRakennusTieto 0) => truthy
         KiinteistonRakennus (:KiinteistonRakennus kr1) => truthy
         kayttotarkoitustieto (:kayttotarkoitustieto KiinteistonRakennus) => truthy
-        kayttotarkoitus (:kayttotarkoitus kayttotarkoitustieto) => "asuinrakennus"
+        _ (:kayttotarkoitus kayttotarkoitustieto) => "asuinrakennus"
         kohteenVarustelutaso (:kohteenVarustelutaso KiinteistonRakennus) => truthy
-        kohteenVarustelutaso_count (count kohteenVarustelutaso) => 6
+        _ (count kohteenVarustelutaso) => 6
         vss (set kohteenVarustelutaso)
-        has_Astianpesukone (vss "Astianpesukone") => truthy
-        has_Lamminvesivaraaja (vss "L\u00e4mminvesivaraaja") => truthy
-        has_Pyykinpesukone (vss "Pyykinpesukone") => truthy
-        has_Suihku (vss "Suihku") => truthy
-        hasTiskiallas (vss "Tiskiallas") => truthy
-        has_WC (vss "WC(vesik\u00e4ym\u00e4l\u00e4)") => truthy
-        haetaanVapautustaKytkin (:haetaanVapautustaKytkin KiinteistonRakennus) => true?
+        _ (vss "Astianpesukone") => truthy
+        _ (vss "L\u00e4mminvesivaraaja") => truthy
+        _ (vss "Pyykinpesukone") => truthy
+        _ (vss "Suihku") => truthy
+        _ (vss "Tiskiallas") => truthy
+        _ (vss "WC(vesik\u00e4ym\u00e4l\u00e4)") => truthy
+        _ (:haetaanVapautustaKytkin KiinteistonRakennus) => true?
 
         kr2 (nth kiinteistonRakennusTieto 1) => truthy
         KiinteistonRakennus (:KiinteistonRakennus kr2) => truthy
         kayttotarkoitustieto (:kayttotarkoitustieto KiinteistonRakennus) => truthy
-        kayttotarkoitus (:kayttotarkoitus kayttotarkoitustieto) => "ei tiedossa"
-        kohteenVarustelutaso (:kohteenVarustelutaso KiinteistonRakennus) => nil
-        haetaanVapautustaKytkin (:haetaanVapautustaKytkin KiinteistonRakennus) => false?
+        _ (:kayttotarkoitus kayttotarkoitustieto) => "ei tiedossa"
+        _ (:kohteenVarustelutaso KiinteistonRakennus) => nil
+        _ (:haetaanVapautustaKytkin KiinteistonRakennus) => false?
 
         kr3 (nth kiinteistonRakennusTieto 2) => truthy
         KiinteistonRakennus (:KiinteistonRakennus kr3) => truthy
         kayttotarkoitustieto (:kayttotarkoitustieto KiinteistonRakennus) => truthy
-        kayttotarkoitus (:kayttotarkoitus kayttotarkoitustieto) => "saunarakennus"
+        _ (:kayttotarkoitus kayttotarkoitustieto) => "saunarakennus"
         kohteenVarustelutaso (:kohteenVarustelutaso KiinteistonRakennus) => truthy
-        kohteenVarustelutaso_count (count kohteenVarustelutaso) => 1
+        _ (count kohteenVarustelutaso) => 1
         vss (set kohteenVarustelutaso)
-        has_Kuivakaymala (vss "Kuivak\u00e4ym\u00e4l\u00e4") => truthy
-        has_Suihku (vss "Suihku") => nil
-        haetaanVapautustaKytkin (:haetaanVapautustaKytkin KiinteistonRakennus) => false
+        _ (vss "Kuivak\u00e4ym\u00e4l\u00e4") => truthy
+        _ (vss "Suihku") => nil
+        _ (:haetaanVapautustaKytkin KiinteistonRakennus) => false
         sijaintitieto (:sijaintitieto Vapautushakemus) => truthy
         s1 (first sijaintitieto) => truthy
-        Sijainti (:Sijainti s1) => truthy
-        asianKuvaus (:asianKuvaus Vapautus) => "Vapautus vesijohtoon ja j\u00e4tevesiviem\u00e4riin liittymisest\u00e4 (VHL 11 \u00a7) / Uudehko talo, jonka rakentamisen yhteydess\u00e4 tehty porakaivo ja pienpuhdistamo, josta j\u00e4tevedet johdetaan pois pohjaveden valuma-alueeta."
+        _ (:Sijainti s1) => truthy
+        _ (:asianKuvaus Vapautus) => "Vapautus vesijohtoon ja j\u00e4tevesiviem\u00e4riin liittymisest\u00e4 (VHL 11 \u00a7) / Uudehko talo, jonka rakentamisen yhteydess\u00e4 tehty porakaivo ja pienpuhdistamo, josta j\u00e4tevedet johdetaan pois pohjaveden valuma-alueeta."
 
         talousvedet (:talousvedet kohde) => truthy
         hankinta (:hankinta talousvedet) => truthy
-        hankinta (:hankinta hankinta) => "kiinteist\u00f6n porakaivosta"
+        _ (:hankinta hankinta) => "kiinteist\u00f6n porakaivosta"
 
-        jatevedet (:jatevedet kohde) => "Labkon biokem 6 panospudistamo, josta k\u00e4siteltu j\u00e4tevesi johdetaan pois pohjaveden valuma-alueelta."
+        _ (:jatevedet kohde) => "Labkon biokem 6 panospudistamo, josta k\u00e4siteltu j\u00e4tevesi johdetaan pois pohjaveden valuma-alueelta."
         ]))

@@ -1,5 +1,5 @@
 (ns lupapalvelu.company
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
             [clojure.data :refer [diff]]
             [clojure.set :as set]
             [monger.operators :refer :all]
@@ -21,8 +21,7 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
-            [lupapalvelu.user :as usr])
-  (:import [java.util Date]))
+            [lupapalvelu.user :as usr]))
 
 ;;
 ;; Company schema:
@@ -583,7 +582,7 @@
                                                                     model))})
 
 (defmethod auth/approve-invite-auth :company
-  [{invite :invite :as auth} {{company-id :id} :company :as user} accepted-ts]
+  [{invite :invite :as auth} {{company-id :id} :company} accepted-ts]
   (when invite
     (some-> (find-company! {:id company-id})
             company->auth

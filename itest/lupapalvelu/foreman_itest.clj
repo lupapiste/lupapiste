@@ -3,8 +3,7 @@
             [midje.util :refer [testable-privates]]
             [sade.core :refer [now]]
             [lupapalvelu.fixture.core :as fixture]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.foreman :as f]))
+            [lupapalvelu.mongo :as mongo]))
 
 (def db-name (str "test_foreman-itest_" (now)))
 

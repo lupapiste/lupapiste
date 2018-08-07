@@ -190,7 +190,7 @@
 (defdynamicschema date-string [format]
   (let [formatter (ctf/formatter format)]
     (sc/constrained sc/Str #(try (ctf/parse formatter %)
-                                 (catch IllegalFieldValueException e false))
+                                 (catch IllegalFieldValueException _ false))
                     (str "Date string " format))))
 
 (defdynamicschema fixed-length-string [len]

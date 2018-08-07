@@ -1,5 +1,5 @@
 (ns lupapalvelu.web
-  (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
+  (:require [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.java.io :as io]
             [clojure.string :as s]
@@ -7,7 +7,6 @@
             [clj-time.local :as local]
             [cheshire.core :as json]
             [me.raynes.fs :as fs]
-            [ring.util.request :as ring-request]
             [ring.util.response :refer [resource-response]]
             [ring.util.io :as ring-io]
             [ring.middleware.content-type :refer [content-type-response]]
@@ -15,7 +14,6 @@
             [noir.core :refer [defpage]]
             [noir.request :as request]
             [noir.response :as resp]
-            [noir.session :as session]
             [noir.cookies :as cookies]
             [net.cgrand.enlive-html :as enlive]
             [monger.operators :refer [$set $push $elemMatch]]
@@ -48,7 +46,6 @@
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ident.suomifi]
             [lupapalvelu.idf.idf-api :as idf-api]
-            [lupapalvelu.integrations.messages :as imessages]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.persistence :as doc-persistence]
@@ -143,7 +140,7 @@
 
 (defn remove-sensitive-keys [m]
   (util/postwalk-map
-    (partial filter (fn [[k v]] (if (or (string? k) (keyword? k)) (not (re-matches #"(?i).*(passw(or)?d.*|key)$" (name k))) true)))
+    (partial filter (fn [[k _]] (if (or (string? k) (keyword? k)) (not (re-matches #"(?i).*(passw(or)?d.*|key)$" (name k))) true)))
     m))
 
 (status/defstatus :build (assoc env/buildinfo :server-mode env/mode))
@@ -530,7 +527,6 @@
 (defn verbose-csrf-block [req]
    (let [ip (http/client-ip req)
          nothing "(not there)"
-         referer (get-in req [:headers "referer"])
          cookie-csrf (get-in req [:cookies "anti-csrf-token" :value])
          ring-session-full (or (get-in req [:cookies "ring-session" :value]) nothing)
          ring-session (clojure.string/replace ring-session-full #"^(...).*(...)$" "$1...$2")

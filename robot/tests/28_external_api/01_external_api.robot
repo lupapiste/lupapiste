@@ -99,6 +99,7 @@ Fill review info
   Input text with jQuery  textarea[data-test-id="katselmus.huomautukset.kuvaus"]  ei
 
 Transfering task emits LupapisteApi.integrationSent function call
+  Sleep  2s
   Scroll and click test id  review-done
   Sleep  2s
   Confirm yes no dialog

@@ -1,11 +1,11 @@
 (ns lupapalvelu.xml.validator
-  (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info warn warnf error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace tracef debug debugf info warn warnf error errorf fatal]]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [clojure.java.io :as io])
-  (:import [java.io InputStream Reader StringReader]
+  (:import [java.io StringReader]
            [javax.xml.transform.stream StreamSource]
            [javax.xml.validation SchemaFactory]
            [org.w3c.dom.ls LSResourceResolver LSInput]))
@@ -13,19 +13,19 @@
 (def- schema-factory (SchemaFactory/newInstance "http://www.w3.org/2001/XMLSchema"))
 (.setResourceResolver schema-factory
   (reify LSResourceResolver
-    (^LSInput resolveResource [this ^String type, ^String namespaceURI, ^String publicId, ^String systemId, ^String baseURI]
+    (resolveResource [_ _ _ publicId systemId baseURI]
       (let [filename (ss/suffix baseURI "/")
             path (ss/replace (ss/suffix baseURI "classpath:") filename systemId)]
         (tracef "Loading XML schema resource 'classpath:%s' which was referenced by %s" path filename)
         (reify LSInput
-          (^String getBaseURI [this] baseURI)
-          (^InputStream getByteStream [this])
-          (^boolean getCertifiedText [this] false)
-          (^Reader getCharacterStream [this] (-> path io/resource io/input-stream io/reader))
-          (^String getEncoding [this])
-          (^String getPublicId [this] publicId)
-          (^String getStringData [this])
-          (^String getSystemId [this] systemId))))))
+          (getBaseURI [_] baseURI)
+          (getByteStream [_])
+          (getCertifiedText [_] false)
+          (getCharacterStream [_] (-> path io/resource io/input-stream io/reader))
+          (getEncoding [_])
+          (getPublicId [_] publicId)
+          (getStringData [_])
+          (getSystemId [_] systemId))))))
 
 (defn- stream-source [filename]
   (let [ss (StreamSource. (clojure.lang.RT/resourceAsStream nil filename))]

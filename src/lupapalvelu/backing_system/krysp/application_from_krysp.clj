@@ -50,10 +50,10 @@
                (not raw?) (not-empty-content permit-type)))
     (fail! :error.no-legacy-available)))
 
-(defn get-application-xml-by-application-id [{:keys [id organization permitType] :as application} & [raw?]]
+(defn get-application-xml-by-application-id [{:keys [id organization permitType]} & [raw?]]
   (fetch-application-xmls organization permitType [id] :application-id raw?))
 
-(defn get-application-xml-by-backend-id [{:keys [id organization permitType] :as application} backend-id & [raw?]]
+(defn get-application-xml-by-backend-id [{:keys [organization permitType]} backend-id & [raw?]]
   (when backend-id
     (fetch-application-xmls organization permitType [backend-id] :kuntalupatunnus raw?)))
 
@@ -69,17 +69,17 @@
 (defmulti get-application-xmls
   "Get application xmls from krysp"
   {:arglists '([organization permit-type search-type ids])}
-  (fn [org-id permit-type search-type & args]
+  (fn [_ _ search-type & _]
     (keyword search-type)))
 
 (defmethod get-application-xmls :application-id
-  [organization permit-type search-type application-ids]
+  [organization permit-type _ application-ids]
   (let [res (->> (fetch-application-xmls organization permit-type application-ids :application-id false)
                  (group-content-by get-lp-tunnus permit-type))]
     res))
 
 (defmethod get-application-xmls :kuntalupatunnus
-  [organization permit-type search-type backend-ids]
+  [organization permit-type _ backend-ids]
   (->> (fetch-application-xmls organization permit-type backend-ids :kuntalupatunnus false)
        (group-content-by get-kuntalupatunnus permit-type)))
 

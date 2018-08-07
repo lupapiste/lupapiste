@@ -2,9 +2,6 @@
   (:require [lupapalvelu.application :as application]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.schema-validation :as schema-validation]
-            [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.mongo :as mongo]
             [sade.core :refer :all]
             [sade.strings :as ss]))
 
@@ -30,9 +27,6 @@
                 '(:vuosi :no :tyyppi :kauposa))
               (ss/split id #"[- ]")))))
 
-; (defn xml->tj-documents [xml]
-;   (map prev-permit/tyonjohtaja->tj-document (get-tyonjohtajat xml)))
-
 (defn normalize-permit-id
   "Viitelupien tunnukset on Factassa tallennettu 'tietokantaformaatissa', josta ne on tunnuksella
   hakemista varten muunnettava yleiseen formaattiin.
@@ -41,8 +35,7 @@
   (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) (destructure-permit-id id))))
 
 (defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
-  (let [doc (application/make-document "muu-rakentaminen" (now) {} (schemas/get-schema 1 "kaupunkikuvatoimenpide"))
-        data (model/map2updates [] {:kayttotarkoitus nil
+  (let [data (model/map2updates [] {:kayttotarkoitus nil
                                     :kokonaisala ""
                                     :kuvaus (get-in raktieto [:Rakennelma :kuvaus :kuvaus])
                                     :tunnus (get-in raktieto [:Rakennelma :tunnus :rakennusnro])

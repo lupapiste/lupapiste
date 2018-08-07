@@ -58,7 +58,7 @@
     (mapv fill-row (:rows stamp))))
 
 (defn- fill-stamp [stamp context]
-  (update stamp :rows (fn [rows] (fill-rows stamp context))))
+  (assoc stamp :rows (fill-rows stamp context)))
 
 (defn stamps [organization application user]
   (let [organization-stamp-templates (:stamps organization)

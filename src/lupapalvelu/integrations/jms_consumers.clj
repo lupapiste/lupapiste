@@ -2,7 +2,6 @@
   (:require [lupapalvelu.archive.api-usage]
             [lupapalvelu.batchrun.fetch-verdict-consumer :as fetch-verdict-consumer]
             [sade.env :as env]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :refer [get-organizations]]))
 
 (defn init! []

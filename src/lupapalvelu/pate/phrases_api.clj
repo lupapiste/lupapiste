@@ -6,7 +6,6 @@
             [lupapalvelu.pate.phrases :as phrases]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr]
             [sade.core :refer :all]))
 
 (defn- org-id-valid
@@ -61,5 +60,5 @@
    :pre-checks       [org-id-valid
                       phrases/phrase-id-exists]
    :feature          :pate}
-  [{user :user}]
+  [_]
   (phrases/delete-phrase org-id phrase-id))
