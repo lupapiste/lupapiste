@@ -170,7 +170,8 @@
                                               all-attachments)]
     (if (seq attachments-wo-sent-timestamp)
       (let [sent-file-ids (bs/send-attachments! (bs/get-backing-system @organization (permit/permit-type application))
-                                                user @organization application attachments-wo-sent-timestamp lang)
+                                                command user @organization application attachments-wo-sent-timestamp
+                                                lang)
             data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
             attachments-transfer-data {:data-key :attachments
                                        :data (map :id attachments-wo-sent-timestamp)}

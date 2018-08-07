@@ -232,9 +232,9 @@
                        :required [:application/cancel]}]
    :notified         true
    :on-success       [(notify :application-state-change)
-                      (fn [{:keys [application organization]} _]
+                      (fn [{:keys [application organization] :as command} _]
                         (bs/cancel-application! (bs/get-backing-system @organization (permit/permit-type application))
-                                                application))]
+                                                command))]
    :states           states/all-application-or-archiving-project-states
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
@@ -351,7 +351,7 @@
       (let [application (if-let [[bs-name integration-key]
                                  (bs/submit-application! (bs/get-backing-system @organization
                                                                                 (permit/permit-type application))
-                                                         application)]
+                                                         command)]
                           (do (app/set-integration-key id bs-name integration-key)
                               (assoc-in application [:integrationKeys bs-name] integration-key)) ; HACK
                           application)]
@@ -654,9 +654,9 @@
    :states           #{:submitted}
    :pre-checks       [(partial sm/validate-state-transition :draft)]
    :on-success       [(notify :application-return-to-draft)
-                      (fn [{:keys [application organization]} _]
+                      (fn [{:keys [application organization] :as command} _]
                         (bs/return-to-draft! (bs/get-backing-system @organization (permit/permit-type application))
-                                             application))]}
+                                             command))]}
   [{{:keys [role] :as user}         :user
     {:keys [state] :as application} :application
     created                         :created

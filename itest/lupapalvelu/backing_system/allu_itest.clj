@@ -21,7 +21,7 @@
 
             [lupapalvelu.backing-system.allu :as allu
              :refer [ALLUApplications cancel-allu-application! ALLUAttachments send-allu-attachment!
-                     ALLUPlacementContracts ->LocalMockALLU PlacementContract
+                     ALLUPlacementContracts ->LocalMockALLU ->MessageSavingALLU PlacementContract
                      update-contract! create-contract! lock-contract! allu-fail!]]))
 
 ;;;; Refutation Utilities
@@ -55,15 +55,15 @@
 
 (deftype CheckingALLU [inner]
   ALLUApplications
-  (cancel-allu-application! [_ endpoint request]
+  (cancel-allu-application! [_ command endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/cancelled")))
     (fact "request is well-formed"
       (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt)))
 
-    (cancel-allu-application! inner endpoint request))
+    (cancel-allu-application! inner command endpoint request))
 
   ALLUAttachments
-  (send-allu-attachment! [_ endpoint request]
+  (send-allu-attachment! [_ command endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/attachments")))
     (fact "request is well-formed"
       (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
@@ -74,37 +74,37 @@
       (-> request (get-in [:multipart 1]) keys set) => #{:name :mime-type :content}
       (-> request (get-in [:multipart 1]) :name) => "file")
 
-    (send-allu-attachment! inner endpoint request))
+    (send-allu-attachment! inner command endpoint request))
 
   ALLUPlacementContracts
-  (create-contract! [_ endpoint request]
+  (create-contract! [_ command endpoint request]
     (fact "endpoint is correct" endpoint => (str (env/value :allu :url) "/placementcontracts"))
     (check-request true true request)
 
-    (create-contract! inner endpoint request))
+    (create-contract! inner command endpoint request))
 
-  (update-contract! [_ endpoint request]
+  (update-contract! [_ command endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
     (check-request false                                    ; Is allowed to be invalid so no schema check
                    true request)
 
-    (update-contract! inner endpoint request))
+    (update-contract! inner command endpoint request))
 
-  (lock-contract! [_ endpoint request]
+  (lock-contract! [_ command endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
     (check-request true false request)
 
-    (lock-contract! inner endpoint request)))
+    (lock-contract! inner command endpoint request)))
 
 (deftype ConstALLU [cancel-response attach-response creation-response update-response]
   ALLUApplications
-  (cancel-allu-application! [_ _ _] cancel-response)
+  (cancel-allu-application! [_ _ _ _] cancel-response)
   ALLUAttachments
-  (send-allu-attachment! [_ _ _] attach-response)
+  (send-allu-attachment! [_ _ _ _] attach-response)
   ALLUPlacementContracts
-  (create-contract! [_ _ _] creation-response)
-  (update-contract! [_ _ _] update-response)
-  (lock-contract! [_ _ _] update-response))
+  (create-contract! [_ _ _ _] creation-response)
+  (update-contract! [_ _ _ _] update-response)
+  (lock-contract! [_ _ _ _] update-response))
 
 ;;;; Actual Tests
 ;;;; ===================================================================================================================
@@ -119,7 +119,7 @@
       (let [initial-allu-state {:id-counter 0, :applications {}}
             allu-state (atom initial-allu-state)
             failure-counter (atom 0)]
-        (mount/start-with {#'allu/allu-instance (->CheckingALLU (->LocalMockALLU allu-state))})
+        (mount/start-with {#'allu/allu-instance (->CheckingALLU (->MessageSavingALLU (->LocalMockALLU allu-state)))})
 
         (binding [allu-fail! (fn [text info-map]
                                (fact "error text" text => :error.allu.http)
@@ -226,16 +226,18 @@
             (:id-counter @allu-state) => 0)
 
           (fact "error responses from ALLU produce `fail!`ures"
-            (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 200} {:status 200}
-                                                                 {:status 400, :body "Your data was bad."} nil)})
+            (mount/start-with {#'allu/allu-instance (->MessageSavingALLU
+                                                      (->ConstALLU {:status 200} {:status 200}
+                                                                   {:status 400, :body "Your data was bad."} nil))})
             (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
               (itu/local-command pena :submit-application :id id)
               @failure-counter => 2)
 
             (reset! failure-counter 0)
 
-            (mount/start-with {#'allu/allu-instance (->ConstALLU {:status 200} {:status 200}
-                                                                 {:status 401, :body "You are unauthorized."} nil)})
+            (mount/start-with {#'allu/allu-instance (->MessageSavingALLU
+                                                      (->ConstALLU {:status 200} {:status 200}
+                                                                   {:status 401, :body "You are unauthorized."} nil))})
             (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
               (itu/local-command pena :submit-application :id id)
               @failure-counter => 1))))
