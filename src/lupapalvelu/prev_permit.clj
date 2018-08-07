@@ -152,9 +152,9 @@
                 :name (:viranomainen lausuntotieto)}]
   (statement/create-statement (now)
                               (:lausunto lausuntotieto)
-                              (now)
-                              ; (get-in lausuntotieto [:Lausunto :lausuntoPvm]) ;; dueDate, fix this!
-                              person)))
+                              (now) ;; Due date
+                              person
+                              {:puoltotieto (get-in lausuntotieto [:puoltotieto :Puolto :puolto])})))
 
 (defn invite-applicants [{:keys [lang created application] :as command} applicants authorize-applicants]
   ;; FIXME: refactor document updates out from here

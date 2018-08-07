@@ -102,7 +102,7 @@
         given-statements (for [st statements]
                            (statement/give-statement st
                                                      (:saateText st)
-                                                     "puollettu"
+                                                     (get-in st [:metadata :puoltotieto])
                                                      (mongo/create-id)
                                                      (mongo/create-id)
                                                      false))
