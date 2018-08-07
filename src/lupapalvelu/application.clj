@@ -340,6 +340,16 @@
 (defn- enrich-tos-function-name [{tos-function :tosFunction org-id :organization :as application}]
   (assoc application :tosFunctionName (:name (tos/tos-function-with-name tos-function org-id))))
 
+(defn- remove-draft-foreman-links [user {apps-linking-to-us :appsLinkingToUs :as application}]
+  (let [is-application-authority (auth/application-authority? application user)
+        is-application-writer (some #{(:username user)} (map :username (auth/get-auths-by-role application :writer)))]
+    (if (and is-application-authority (not is-application-writer))
+      (-> (update application :appsLinkingToUs #(remove (fn [link-model]
+                                                          (and (util/=as-kw (:operation link-model) :tyonjohtajan-nimeaminen-v2)
+                                                               (= (:state link-model) "draft"))) %))
+          (update :appsLinkingToUs not-empty))
+      application)))
+
 (defn post-process-app [{:keys [user] :as command}]
   (->> (with-auth-models command)
        with-allowed-attachment-types
@@ -347,6 +357,7 @@
        enrich-primary-operation-with-metadata
        att/post-process-attachments
        meta-fields/enrich-with-link-permit-data
+       (remove-draft-foreman-links user)
        (meta-fields/with-meta-fields user)
        action/without-system-keys
        (process-documents-and-tasks user)
