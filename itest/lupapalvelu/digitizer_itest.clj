@@ -21,12 +21,30 @@
 
 (facts "Create digitizer project with default location"
 
+    (fact "Digitizer can NOT create project without location if no default location has been set"
+      (command digitoija :create-archiving-project
+               :lang "fi"
+               :x ""
+               :y ""
+               :address ""
+               :propertyId ""
+               :organizationId "186-R"
+               :kuntalupatunnus "186-00X"
+               :createWithoutPreviousPermit true
+               :createWithoutBuildings true
+               :createWithDefaultLocation true)
+      => (partial expected-failure? :error.no-default-digitalization-location))
+
     (fact "Admin can set default location for organization"
       (command jarvenpaa :set-default-digitalization-location :x "404262.00" :y "6694511.00") => ok?
 
       (let [organization (first (:organizations (query admin :organizations)))]
         (get-in organization [:default-digitalization-location :x]) => "404262.00"
         (get-in organization [:default-digitalization-location :y]) => "6694511.00"))
+
+    (fact "The default location must be approximately in Finland"
+      (command jarvenpaa :set-default-digitalization-location :x "0.00" :y "0.00")
+      => (partial expected-failure? :error.illegal-coordinates))
 
     (let [response (command digitoija :create-archiving-project
                                       :lang "fi"
@@ -42,7 +60,7 @@
           app-id (:id response)
           application (query-application digitoija app-id)]
 
-      (fact "Digitizer can create project without location"
+      (fact "If default location has been set, digitizer can create project without location"
         response => ok?
         (:address application) => "Sijainti puuttuu"
         (:x (:location application)) => 404262.00
