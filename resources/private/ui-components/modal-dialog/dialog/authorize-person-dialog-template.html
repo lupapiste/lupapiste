@@ -1,0 +1,39 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="authorize-person-dialog-template">
+  <div class="content authorize-person-content">
+    <form>
+      <p data-bind="ltext: description"></p>
+      <label data-bind="ltext: 'userinfo.email',
+                        attr: {'for': emailId}"></label>
+      <input class="grid-style-input"
+             data-bind="textInput: email,
+                        disable: emailDisabled,
+                        attr: {'id': emailId}">
+      <label data-bind="ltext: 'application.inviteMessage',
+                        attr: {'for': textId}"></label>
+      <textarea class="grid-style-input"
+                rows="10"
+                data-bind="textInput: text,
+                           attr: {id: textId,
+                           placeholder: loc( 'comment.placeholder') },
+                           disable: allDisabled"></textarea>
+      <!-- ko if: error -->
+      <div class="context-error"
+           data-bind="ltext: error"></div>
+      <!-- /ko -->
+      <!-- ko if: showRemove -->
+      <p data-bind="ltext: 'document.party.person-select.remove-existing-role-before-invite'"></p>
+      <button class="negative"
+              data-bind="click: remove,
+                         ltext: 'document.party.person-select.remove-auth',
+                         disable: allDisabled"></button>
+      <!-- /ko -->
+      <!-- ko ifnot: showRemove -->
+      <button class="positive"
+              data-bind="click: invite,
+                         ltext: 'application.inviteSend',
+                         disable: inviteDisabled"></button>
+      <!-- /ko -->
+    </form>
+  </div>
+</script>

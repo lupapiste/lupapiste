@@ -13656,6 +13656,11 @@ ul.tabs {
   position: static;
 }
 
+#modal-dialog .dialog.autosized > .component {
+  overflow: initial;
+  margin: 12px 12px;
+}
+
 #modal-dialog .dialog .header {
   padding-top: 2px;
   padding-bottom: 4px;
@@ -13921,6 +13926,22 @@ ul.tabs {
   color: #df3215;
   margin-top: 6px;
   margin-bottom: 6px;
+}
+
+.authorize-person-content {
+  max-width: 40em;
+}
+
+.authorize-person-content label, .authorize-person-content input, .authorize-person-content textarea, .authorize-person-content button {
+  display: block;
+}
+
+.authorize-person-content label, .authorize-person-content button {
+  margin-top: 1em;
+}
+
+.authorize-person-content input, .authorize-person-content textarea {
+  width: 100%;
 }
 
 /*
