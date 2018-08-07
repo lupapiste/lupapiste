@@ -1105,10 +1105,17 @@
     (fact "when all varusteet flags are false varusteet map should be empty"
       (:varusteet tiedot) => {})
 
-    (fact "Only selected varusteet should be in varusteet map"
-      (:varusteet tiedot2) => {:viemariKytkin true
+    (fact "If one varuste is selected then all should be in map"
+      (:varusteet tiedot2) => {:sahkoKytkin true
+                               :kaasuKytkin false
+                               :viemariKytkin true
+                               :vesijohtoKytkin false
+                               :lamminvesiKytkin false
+                               :aurinkopaneeliKytkin false
                                :hissiKytkin true
-                               :sahkoKytkin true})))
+                               :koneellinenilmastointiKytkin false
+                               :saunoja nil
+                               :vaestonsuoja nil})))
 
 (facts "rakennuksenTiedot : verkostoliittymat"
   (against-background
@@ -1122,9 +1129,12 @@
     (fact "When theres no verkostoliittymat map should be empty"
       (:verkostoliittymat tiedot) => {})
 
-    (fact "Only selected liittymat should be in verkostoliittymat map"
+    (fact "If one liittyma is selected then all should be in map"
       (:verkostoliittymat tiedot2) => {:sahkoKytkin true
-                                       :viemariKytkin true})))
+                                       :viemariKytkin true
+                                       :maakaasuKytkin false
+                                       :kaapeliKytkin false
+                                       :vesijohtoKytkin false})))
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
   (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]
