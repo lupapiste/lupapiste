@@ -99,7 +99,9 @@
 
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
 
-        given-statements (for [st statements]
+        ;; Siirretään lausunnot luonnos-tilasta "lausunto annettu"-tilaan
+        given-statements (for [st statements
+                               :when (map? st)]
                            (statement/give-statement st
                                                      (:saateText st)
                                                      (get-in st [:metadata :puoltotieto])
@@ -110,7 +112,9 @@
         created-application (-> created-application
                                 (update-in [:documents] concat other-building-docs new-parties structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
-                                (assoc :statements given-statements)
+                                (assoc :statements (if-not (empty? given-statements)
+                                                     given-statements
+                                                     []))
                                 (assoc :opened (:created command)))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
