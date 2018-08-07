@@ -148,11 +148,12 @@
   [lausuntotieto]
   (let [person {:userId "0"
                 :text "Viranomainen"
-                :email "nothing@batchrun.com"
-                :name (get-in lausuntotieto [:Lausunto :viranomainen])}]
+                :email "eratuonti@lupapiste.fi"
+                :name (:viranomainen lausuntotieto)}]
   (statement/create-statement (now)
-                              (get-in lausuntotieto [:Lausunto :lausunto])
-                              (get-in lausuntotieto [:Lausunto :lausuntoPvm]) ;; dueDate, fix this!
+                              (:lausunto lausuntotieto)
+                              (now)
+                              ; (get-in lausuntotieto [:Lausunto :lausuntoPvm]) ;; dueDate, fix this!
                               person)))
 
 (defn invite-applicants [{:keys [lang created application] :as command} applicants authorize-applicants]

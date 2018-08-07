@@ -12,13 +12,12 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.review :as review]
+            [lupapalvelu.statement :as statement]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]))
-
-(def tila (atom {})) ;; For debugging, remove!
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
@@ -100,12 +99,18 @@
 
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
 
-        _ (reset! tila statements)
+        given-statements (for [st statements]
+                           (statement/give-statement st
+                                                     (:saateText st)
+                                                     "puollettu"
+                                                     (mongo/create-id)
+                                                     (mongo/create-id)
+                                                     false))
 
         created-application (-> created-application
                                 (update-in [:documents] concat other-building-docs new-parties structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
-                                (assoc :statements statements)
+                                (assoc :statements given-statements)
                                 (assoc :opened (:created command)))
 
         ;; attaches the new application, and its id to path [:data :id], into the command

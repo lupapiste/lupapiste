@@ -675,7 +675,7 @@
       (map cr/all-of x))))
 
 (defn ->lausuntotiedot [xml]
-  (->> (select xml [:rakennusvalvontaAsiatieto :lausuntotieto])
+  (->> (select xml [:rakennusvalvontaAsiatieto :lausuntotieto :Lausunto :lausuntotieto :Lausunto])
        (map cr/all-of)))
 
 ;;
