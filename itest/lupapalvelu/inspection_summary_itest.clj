@@ -1,6 +1,5 @@
 (ns lupapalvelu.inspection-summary-itest
   (:require [midje.sweet :refer :all]
-            [clojure.java.io :as io]
             [clojure.set :refer [difference]]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer :all]
@@ -40,7 +39,7 @@
 
 (facts "Inspection summaries in applications"
   (fact "Create test data"
-    (let [app-sipoo     (create-and-submit-application pena :propertyId sipoo-property-id :address "Peltomaankatu 9")
+    (let [_    (create-and-submit-application pena :propertyId sipoo-property-id :address "Peltomaankatu 9")
           {id1 :id :as app-jarvenpaa}
                         (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Jarvikatu 29")
           _ (command jarvenpaa :create-inspection-summary-template :name "foo" :templateText "bar\nbar2\n\n bar3")
@@ -53,8 +52,7 @@
       (fact "Default template created upon verdict given"
         (give-verdict raktark-jarvenpaa (:id app-jarvenpaa) :verdictId "3323") => ok?
         (let [{summaries :summaries} (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa))
-              {summaryId1 :id summaryName :name targets :targets
-               :as default-summary} (first summaries)
+              {summaryId1 :id summaryName :name targets :targets} (first summaries)
               test-target (second targets)
               test-target-attachment-pred (fn [{{:keys [id type]} :target}] (and (= type "inspection-summary-item")
                                                                                  (= id (:id test-target))))]
@@ -123,11 +121,10 @@
                        :targetName "bar1") => (partial expected-failure? :error.edit-inspection-summary-target.not-found)))))))
 
   (facts "Marking inspection target DONE"
-    (let [{id1 :id :as app-jarvenpaa} (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Jarvikatu 29")
+    (let [{id1 :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Jarvikatu 29")
           verdict (give-verdict raktark-jarvenpaa id1 :verdictId "1111")
           {summaries :summaries} (query pena :inspection-summaries-for-application :id id1)
-          {summaryId1 :id summaryName :name targets :targets
-           :as default-summary} (first summaries)
+          {summaryId1 :id targets :targets} (first summaries)
           test-target (second targets)
           test-target-attachment-pred (fn [{{:keys [id type]} :target}] (and (= type "inspection-summary-item")
                                                                              (= id (:id test-target))))]
@@ -205,8 +202,8 @@
         {template-id :id} (command sipoo :create-inspection-summary-template :name "foo" :templateText "bar\nbar2\nbar3") => ok?
         _                 (command sipoo :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId template-id) => ok?
         _                 (give-verdict sonja (:id app) :verdictId "3323") => ok?
-        {summaries :summaries :as result} (query sonja :inspection-summaries-for-application :id (:id app))
-        {attachments :attachments :as result} (query sonja :attachments :id (:id app))
+        {summaries :summaries} (query sonja :inspection-summaries-for-application :id (:id app))
+        {attachments :attachments} (query sonja :attachments :id (:id app))
         {summary-id :id}  (first summaries)
         {target-id :id}   (command sonja :add-target-to-inspection-summary :id (:id app) :summaryId summary-id :targetName "some name")]
 
@@ -247,11 +244,7 @@
         (fact "Attachment has a version"
           latest-version => not-empty)
 
-        (let [{:keys [headers body]} (raw sonja
-                                          "download-attachment"
-                                          :file-id (:fileId latest-version)
-                                          :id (:id app))]
-
+        (let [{:keys [headers]} (raw sonja "download-attachment" :file-id (:fileId latest-version) :id (:id app))]
           (fact "content type"
             (get headers "Content-Type") => "application/pdf"))))
 

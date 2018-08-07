@@ -14,7 +14,7 @@
                               :propertyId sipoo-property-id
                               :address "Paatoskuja 12")
         application-id      (:id application)
-        [doc-id1 doc-id2 & doc-ids] (map :id (:documents application))]
+        [doc-id1 doc-id2] (map :id (:documents application))]
 
     (fact "Request statement from Pena"
       (command sonja :request-for-statement :id application-id

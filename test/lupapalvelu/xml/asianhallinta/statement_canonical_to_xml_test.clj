@@ -7,7 +7,6 @@
             [clojure.data.xml :as xml]
             [lupapalvelu.document.asianhallinta-canonical :as ah]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
-            [lupapalvelu.integrations.statement-canonical :as c]
             [lupapalvelu.statement :as stmnt]
             [lupapalvelu.xml.asianhallinta.asianhallinta-mapping :as ah-mapping]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
@@ -74,7 +73,6 @@
             mapping        (ah-mapping/get-uusi-asia-mapping (ss/suffix schema-version "-"))
             xml            (element-to-xml canonical mapping)
             xml-s          (xml/indent-str xml) => truthy
-            permit-type    (:permitType application)
             xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
         (fact "xml ok"
           xml => truthy)

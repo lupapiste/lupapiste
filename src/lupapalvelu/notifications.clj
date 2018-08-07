@@ -14,7 +14,7 @@
             [sade.util :refer [future* to-local-date fn->]]
             [sade.util :as util]
             [schema.core :as sc]
-            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]))
+            [taoensso.timbre :refer [trace debug info warn error fatal]]))
 
 ;;
 ;; Helpers

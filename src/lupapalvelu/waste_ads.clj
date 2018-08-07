@@ -43,7 +43,7 @@
     (sequential? m) (apply max (map max-modified (cons 0 m)))
     :default        0))
 
-(defn- get-materials-info [municipality {data :data :as doc}]
+(defn- get-materials-info [municipality {:keys [data]}]
   (let [{contact :contact materials :availableMaterials} (-> (select-keys data [:contact :availableMaterials])
                                                              tools/unwrapped)]
     {:contact      contact

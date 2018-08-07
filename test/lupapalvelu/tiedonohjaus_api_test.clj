@@ -6,7 +6,6 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [execute update-application]]
             [lupapalvelu.tiedonohjaus :as t]
-            [lupapalvelu.organization :as organization]
             [lupapalvelu.archive.archiving-util :as archiving-util]
             [sade.util :as util]))
 

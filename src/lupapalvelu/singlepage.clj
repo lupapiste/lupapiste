@@ -1,15 +1,14 @@
 (ns lupapalvelu.singlepage
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
+  (:require [taoensso.timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [clojure.java.io :as io]
             [lupapalvelu.components.ui-components :refer [ui-components] :as uic]
-            [lupapalvelu.i18n :as i18n]
             [net.cgrand.enlive-html :as enlive]
             [clj-time.coerce :as tc]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
             [lupapalvelu.components.core :as c])
-  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
+  (:import [java.io ByteArrayOutputStream]
            [org.apache.commons.io IOUtils]
            [com.googlecode.htmlcompressor.compressor HtmlCompressor]
            [com.yahoo.platform.yui.compressor JavaScriptCompressor CssCompressor]
@@ -24,15 +23,11 @@
 
 (def error-reporter
   (reify ErrorReporter
-    (^void warning [this ^String message, ^String sourceName,
-                    ^int line, ^String lineSource, ^int lineOffset]
-      (warn message))
-    (^void error [this ^String message, ^String sourceName,
-                    ^int line, ^String lineSource, ^int lineOffset]
-      (error message))
-    (^EvaluatorException runtimeError [this ^String message, ^String sourceName,
-                    ^int line, ^String lineSource, ^int lineOffset]
-      (error message) (EvaluatorException. message))))
+    (warning [_ message _ _ _ _] (warn message))
+    (error [_ message _ _ _ _] (error message))
+    (runtimeError [_ message _ _ _ _]
+      (error message)
+      (EvaluatorException. message))))
 
 (defn- minified [kind ^java.io.Reader in ^java.io.Writer out]
   (cond

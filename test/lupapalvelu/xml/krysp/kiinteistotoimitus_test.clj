@@ -61,7 +61,7 @@
     (fact "valid 1.0.5" (validator/validate xml_105_str (:permitType app) "1.0.5") => nil) ; throws exception if invalid
 
     (fact "1.0.2 some checks"                               ; TODO more comprehensive tests
-      (xml/get-text parsed-105 [:ToimituksenTiedot :aineistonnimi]) => (:title app))
+      (xml/get-text parsed-102 [:ToimituksenTiedot :aineistonnimi]) => (:title app))
     (fact "1.0.5 added kayttotapaus"
       (xml/get-text parsed-105 [:kayttotapaus]) => "Lupapiste kiinteist\u00f6toimitus")))
 

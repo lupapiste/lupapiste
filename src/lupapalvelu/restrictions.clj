@@ -56,7 +56,7 @@
           :restriction restriction
           :user (:user auth-restriction-entry))))
 
-(defn- enrich-with-auth-info [{application :application :as command} entry]
+(defn- enrich-with-auth-info [{:keys [application]} entry]
   (let [{auth-type :type :as auth} (util/find-by-id (get-in entry [:user :id]) (:auth application))]
     (cond-> entry
       (:user entry)    (assoc-in [:user :type] (if (= :company (keyword auth-type)) :company :person))

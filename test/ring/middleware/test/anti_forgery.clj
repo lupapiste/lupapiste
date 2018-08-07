@@ -52,7 +52,7 @@
                       [:session :__anti-forgery-token])))))
 
 (deftest token-binding-test
-  (letfn [(handler [request]
+  (letfn [(handler [_]
             {:status 200
              :headers {}
              :body *anti-forgery-token*})]
@@ -61,12 +61,12 @@
              (:body response))))))
 
 (deftest nil-response-test
-  (letfn [(handler [request] nil)]
+  (letfn [(handler [_] nil)]
     (let [response ((wrap-anti-forgery handler) (request :get "/"))]
       (is (nil? response)))))
 
 (deftest no-lf-in-token-test
-  (letfn [(handler [request]
+  (letfn [(handler [_]
             {:status 200
              :headers {}
              :body *anti-forgery-token*})]

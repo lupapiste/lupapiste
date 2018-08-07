@@ -15,7 +15,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [schema.core :as sc :refer [defschema]]
-            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
+            [taoensso.timbre :refer [trace debug debugf info infof warn error errorf fatal]]
             [clj-uuid :as uuid]
             [lupapalvelu.storage.file-storage :as storage]))
 
@@ -195,7 +195,7 @@
            :updates     {$push {:inspection-summaries summary}}})))))
 
 (defn get-summary-target [target-id summaries]
-  (reduce (fn [_ {targets :targets :as summary}]
+  (reduce (fn [_ {:keys [targets]}]
             (when-let [target (util/find-by-id target-id targets)]
               (reduced target)))
           nil
@@ -283,7 +283,7 @@
   (->> (delete-summary-attachment-updates summary-id)
        (mongo/update-by-id :applications (:id application))))
 
-(defn toggle-summary-locking [{{app-id :id summaries :inspection-summaries :as application} :application :keys [lang user] :as command} summary-id locked?]
+(defn toggle-summary-locking [{{app-id :id :as application} :application :keys [lang user] :as command} summary-id locked?]
   (mongo/update-by-query :applications
                          {:_id app-id :inspection-summaries {$elemMatch {:id summary-id}}}
                          {$set {:inspection-summaries.$.locked locked?}})

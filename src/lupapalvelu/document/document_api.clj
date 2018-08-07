@@ -1,8 +1,7 @@
 (ns lupapalvelu.document.document-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn error]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
-            [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.application :as application]
@@ -258,7 +257,7 @@
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       user-can-be-set-validator
                       doc-disabled-validator]}
-  [{:keys [created application user] :as command}]
+  [{:keys [created application user]}]
   (doc-persistence/do-set-user-to-document application documentId userId path created user))
 
 (defcommand set-current-user-to-document
@@ -269,7 +268,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       doc-disabled-validator]}
-  [{:keys [created application user] :as command}]
+  [{:keys [created application user]}]
   (doc-persistence/do-set-user-to-document application documentId (:id user) path created user))
 
 (defcommand set-company-to-document
@@ -284,7 +283,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       doc-disabled-validator]}
-  [{:keys [user created application document] :as command}]
+  [{:keys [user created application document]}]
   (doc-persistence/do-set-company-to-document application
                                               document
                                               companyId

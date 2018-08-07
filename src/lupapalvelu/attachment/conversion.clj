@@ -6,7 +6,6 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre-conversion]
-            [lupapalvelu.tiff-validation :as tiff-validation]
             [lupapalvelu.attachment.pdf-wrapper :as pdf-wrapper]
             [taoensso.timbre :as timbre]
             [sade.env :as env])

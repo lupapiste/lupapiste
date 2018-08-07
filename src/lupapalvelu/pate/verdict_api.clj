@@ -9,18 +9,14 @@
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.schema-util :as schema-util]
-            [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.verdict :as verdict]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.roles :as roles]
-            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
-            [sade.strings :as ss]
-            [sade.util :as util]
-            [schema.core :as sc]))
+            [sade.util :as util]))
 
 
 ;; ------------------------------------------

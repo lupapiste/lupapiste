@@ -79,7 +79,7 @@
 
         Sijainti-osoite (-> Sijoituslupa :sijaintitieto first :Sijainti :osoite) => truthy
         Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
-        Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
+        _ (-> Sijainti-osoite :alkuHetki) => truthy
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
         Sijainti-piste (-> Sijoituslupa :sijaintitieto first :Sijainti :piste :Point :pos) => truthy
 
@@ -146,7 +146,7 @@
         hakija-yksityinen-nimi (:nimi hakija-yksityinen-Henkilo) => truthy
         hakija-yksityinen-osoite (:osoite hakija-yksityinen-Henkilo) => truthy
 
-        pinta-ala (:pintaala Sijoituslupa) => falsey]
+        _ (:pintaala Sijoituslupa) => falsey]
 
     (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
     (fact "lupatunnus"

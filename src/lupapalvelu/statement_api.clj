@@ -20,7 +20,7 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
-            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [taoensso.timbre :refer [trace debug info warn error fatal]]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.foreman :as foreman]))
 
@@ -57,7 +57,7 @@
                                                   (fail! :error.is-financial-authority)))))]
    :notified            true
    :permissions         [{:required [:organization/admin]}]}
-  [{data :data user :user}]
+  [{:keys [user]}]
   (let [organization       (organization/get-organization (usr/authority-admins-organization-id user))
         email              (ss/canonize-email email)
         statement-giver-id (mongo/create-id)]
@@ -105,7 +105,7 @@
    :user-roles       #{:authority}
    :user-authz-roles roles/default-authz-writer-roles
    :states           states/all-application-states}
-  [{application :application organization :organization}]
+  [{:keys [organization]}]
   (statement/fetch-organization-statement-givers @organization))
 
 (defn- request-statement-model [{{:keys [saateText dueDate]} :data app :application caller :user :as command} _ recipient]
@@ -135,7 +135,7 @@
                       statement/validate-selected-persons]
    :notified         true
    :description      "Adds statement-requests to the application and ensures permission to all new users."}
-  [{{:keys [dueDate saateText]} :data user :user {:keys [organization] :as application} :application now :created :as command}]
+  [{{:keys [dueDate saateText]} :data user :user {:keys [organization]} :application now :created :as command}]
   (let [persons     (map #(update % :email ss/canonize-email) selectedPersons)
         new-emails  (->> (map :email persons) (remove usr/get-user-by-email) (set))
         users       (map (comp #(usr/get-or-create-user-by-email % user) :email) persons)
@@ -168,7 +168,7 @@
    :input-validators    [ely/subtype-input-validator]
    :feature             :ely-uspa
    :description         "Sends request for statement to ELY-keskus via integration"}
-  [{:keys [application created user organization] :as command}]
+  [{:keys [created user organization] :as command}]
   (let [org                   @organization
         submitted-application (mongo/by-id :submitted-applications id)
         metadata              (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))

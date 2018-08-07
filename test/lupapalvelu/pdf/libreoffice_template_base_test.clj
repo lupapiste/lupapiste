@@ -4,7 +4,6 @@
     [taoensso.timbre :refer [trace debug debugf]]
     [midje.sweet :refer :all]
     [midje.util :refer [testable-privates]]
-    [lupapalvelu.domain :as domain]
     [lupapalvelu.pdf.libreoffice-template :refer :all]
     [lupapalvelu.mongo :as mongo]))
 

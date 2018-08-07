@@ -14,7 +14,7 @@
     (let [resp (decode-response
                  (api-call {:query-params {:kuntalupatunnus "14-0241-R 3"}
                             :basic-auth   ["jarvenpaa-backend" "jarvenpaa"]}))
-          {:keys [id text] :as body} (:body resp)]
+          {:keys [id text]} (:body resp)]
       resp => http200?
       text => "created-new-application"
       (fact "applicants are authorized"

@@ -53,9 +53,7 @@
   given options. Creates path onto top-level. Extends existing
   path, [dict] otherwise."
   [{{dict :dict} :schema dictionary :dictionary path :path :as options}]
-  (let [{dict-schema :schema
-         dict-path   :path :as res} (schema-util/dict-resolve (concat path [dict])
-                                                              dictionary)]
+  (let [{dict-schema :schema, dict-path :path} (schema-util/dict-resolve (concat path [dict]) dictionary)]
     (assoc (schema-options options dict-schema )
            :path (extend path dict dict-path))))
 
@@ -97,7 +95,7 @@
 ;; Component-aware localization: i18nkey, loc-prefix and dict override
 ;; the loc-path.
 (defmethod loc :map
-  [{:keys [i18nkey loc-path schema] :as arg} & extra]
+  [{:keys [i18nkey loc-path schema]} & extra]
   (loc (concat [(or i18nkey
                     (:i18nkey schema)
                     (:loc-prefix schema)
@@ -212,7 +210,7 @@
   :?+.hii.hoo -> [:? :foo :bar :hii :hoo]
   :-.hii.hoo  -> [:foo :hii :hoo]
   :-?.hii.hoo -> [? :foo :hii :hoo]"
-  [{path :path :as options} kw-path]
+  [{:keys [path]} kw-path]
   (let [path                   (pathify path)
         [x & xs :as unchanged] (pathify kw-path)
         result (->> (condp #(%2 %1) x

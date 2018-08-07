@@ -1,6 +1,5 @@
 (ns lupapalvelu.ui.auth-admin.stamp.state
-  (:require [lupapalvelu.ui.rum-util :as rum-util]
-            [lupapalvelu.ui.auth-admin.stamp.util :as stamp-util]
+  (:require [lupapalvelu.ui.auth-admin.stamp.util :as stamp-util]
             [lupapalvelu.ui.common :refer [query]]))
 
 (def empty-stamp {:name       ""

@@ -25,7 +25,7 @@
           writed-keys (atom #{})]
       (loop []
         (when-let [l (.readLine orig)]
-          (let [[k lang & t] (s/split l #"\s")]
+          (let [[k lang] (s/split l #"\s")]
             (when (not (@writed-keys [k lang]))
               (swap! writed-keys conj [k lang])
               (.write out (str l \newline))

@@ -74,7 +74,7 @@
         :length height
         :pd-image-x-object pd-image-x-object}])))
 
-(defn- read-png-image [^ImageReader reader ^File png-file ^PDDocument doc]
+(defn- read-png-image [^ImageReader reader ^PDDocument doc]
   (let [image (.read reader 0)
         pd-image-x-object (LosslessFactory/createFromImage doc image)
         width (.getWidth pd-image-x-object)
@@ -97,7 +97,7 @@
       (case image-format
         :jpeg (read-jpeg-image reader file doc)
         :tiff (doall (read-tiff-images reader doc))
-        :png (read-png-image reader file doc)))))
+        :png (read-png-image reader doc)))))
 
 (defn- set-metadata-to-pdf! [^PDDocument doc pdf-title]
   (with-open [xmp-os (ByteArrayOutputStream.)

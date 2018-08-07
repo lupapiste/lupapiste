@@ -1,6 +1,4 @@
-(ns lupapalvelu.xml.asianhallinta.mapping-common
-  (:require [lupapalvelu.document.asianhallinta-canonical :as ahc]
-            [sade.util :as util]))
+(ns lupapalvelu.xml.asianhallinta.mapping-common)
 
 (def yhteystiedot-type
   [{:tag :Jakeluosoite}

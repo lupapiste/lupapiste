@@ -28,7 +28,7 @@
 (defn- send-key-for-partner [partner-name] (get-in (config partner-name) [:send :key]))
 
 (defn calculate-mac
-  ([{:keys [etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen id] :as query-params} partner-name ts send-or-receive]
+  ([{:keys [etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen id]} partner-name ts send-or-receive]
     {:pre [(known-partner? partner-name)]}
     (calculate-mac etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen partner-name id ts send-or-receive))
   ([etunimi sukunimi email puhelin katuosoite postinumero postitoimipaikka suoramarkkinointilupa ammattilainen partner-name id ts send-or-receive]

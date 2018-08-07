@@ -1,5 +1,5 @@
 (ns lupapalvelu.attachment
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [clojure.java.io :as io]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
@@ -229,7 +229,7 @@
 ;; Api
 ;;
 
-(defn- by-file-ids [file-ids {versions :versions :as attachment}]
+(defn- by-file-ids [file-ids {:keys [versions]}]
   (some (comp (set file-ids) :fileId) versions))
 
 (defn get-attachments-infos
@@ -249,7 +249,7 @@
   (first (filter (partial by-file-ids #{file-id}) attachments)))
 
 (defn get-attachments-by-operation
-  [{:keys [attachments] :as application} op-id]
+  [{:keys [attachments]} op-id]
   (filter (fn-> att-util/get-operation-ids set (contains? op-id)) attachments))
 
 (defn get-attachments-by-type
@@ -258,7 +258,7 @@
   (filter #(= (:type %) type) attachments))
 
 (defn get-attachments-by-target-type-and-id
-  [{:keys [attachments]} {:keys [type id] :as target}]
+  [{:keys [attachments]} {:keys [type id]}]
   {:pre [(string? type)
          (string? id)]}
   (filter #(and (= (get-in % [:target :type]) type)
@@ -543,7 +543,7 @@
        (when-not version-index
          {$push {:attachments.$.versions version-model}})))))
 
-(defn- remove-old-files! [application {old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
+(defn- remove-old-files! [application {old-versions :versions} {file-id :fileId original-file-id :originalFileId}]
   (some->> (filter (comp #{original-file-id} :originalFileId) old-versions)
            (first)
            ((juxt :fileId :originalFileId))
@@ -963,11 +963,11 @@
                   result))))
         (error "PDF/A conversion: No file found with file id" fileId)))))
 
-(defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
+(defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState}]
   (boolean (and (states/post-verdict-states (keyword app-state))
                 ((conj states/all-application-states :info) (keyword orig-app-state)))))
 
-(defn validate-attachment-manually-set-construction-time [{{:keys [attachmentId]} :data application :application :as command}]
+(defn validate-attachment-manually-set-construction-time [{{:keys [attachmentId]} :data application :application}]
   (when-not (manually-set-construction-time (get-attachment-info application attachmentId))
     (fail :error.attachment-not-manually-set-construction-time)))
 
@@ -982,7 +982,7 @@
 
 (defn- attachment-assignment-info
   "Return attachment info as assignment target"
-  [{{:keys [type-group type-id]} :type contents :contents id :id :as doc}]
+  [{{:keys [type-group type-id]} :type contents :contents id :id}]
   (util/assoc-when-pred {:id id :type-key (ss/join "." ["attachmentType" type-group type-id])} ss/not-blank?
                         :description contents))
 

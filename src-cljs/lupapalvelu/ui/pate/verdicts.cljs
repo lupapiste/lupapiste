@@ -1,14 +1,10 @@
 (ns lupapalvelu.ui.pate.verdicts
   (:require [clojure.set :as set]
-            [clojure.string :as ss]
             [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
-            [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.layout :as layout]
-            [lupapalvelu.ui.pate.phrases :as phrases]
-            [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
@@ -86,7 +82,7 @@
                                                                         open-verdict)}))
 
 
-(defn- confirm-and-delete-verdict [app-id {:keys [legacy? id published] :as verdict}]
+(defn- confirm-and-delete-verdict [app-id {:keys [legacy? published] :as verdict}]
   (hub/send  "show-dialog"
              {:ltitle          "areyousure"
               :size            "medium"

@@ -3,8 +3,7 @@
   admin UI."
   (:require [lupapalvelu.action :refer [defraw defquery defcommand] :as action]
             [lupapalvelu.admin-reports :as reps]
-            [sade.core :refer :all]
-            [sade.util :as util]))
+            [sade.core :refer :all]))
 
 (defraw user-report
   {:description      "User report. Yes|no|both parameterization for company

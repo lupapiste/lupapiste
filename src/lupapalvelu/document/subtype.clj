@@ -1,5 +1,5 @@
 (ns lupapalvelu.document.subtype
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error fatal]]
             [sade.util :refer [->int ->double] :as util]
             [sade.validators :refer [valid-email?] :as v]
             [clojure.string :refer [blank?]]))

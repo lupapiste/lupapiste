@@ -546,11 +546,11 @@
     messages))
 
 (defn contains-application-link? [application-id role {body :body}]
-  (let [[href r a-id] (re-find #"(?sm)http.+/app/fi/(applicant|authority)#!/application/([A-Za-z0-9-]+)" (:plain body))]
+  (let [[_ r a-id] (re-find #"(?sm)http.+/app/fi/(applicant|authority)#!/application/([A-Za-z0-9-]+)" (:plain body))]
     (and (= role r) (= application-id a-id))))
 
 (defn contains-application-link-with-tab? [application-id tab role {body :body}]
-  (let [[href r a-id a-tab] (re-find #"(?sm)http.+/app/fi/(applicant|authority)#!/application/([A-Za-z0-9-]+)/([a-z]+)" (:plain body))]
+  (let [[_ r a-id a-tab] (re-find #"(?sm)http.+/app/fi/(applicant|authority)#!/application/([A-Za-z0-9-]+)/([a-z]+)" (:plain body))]
     (and (= role r) (= application-id a-id) (= tab a-tab))))
 
 
@@ -726,7 +726,6 @@
   {:pre [target-id target-type]}
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
-        application (query-application apikey application-id)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http-post uri
                       {:oauth-token apikey
@@ -790,7 +789,7 @@
       (when-not aloitusoikeus?
         (sign-attachment apikey id (:id first-attachment) password)))))
 
-(defn generate-construction-time-attachment [{id :id :as application} authority-apikey password]
+(defn generate-construction-time-attachment [{id :id} authority-apikey password]
   (let [attachment-type {:type-group "muut" :type-id "muu"}
         resp (command authority-apikey :create-attachments :id id :attachmentTypes [attachment-type] :group nil)
         attachment-id (-> resp :attachmentIds first)]
@@ -875,21 +874,21 @@
 (defn generate-statement [application-id apikey]
   (let [resp (query sipoo :get-organizations-statement-givers) => ok?
         statement-giver (->> resp :data (some #(when (= (email-for-key apikey) (:email %)) %))) => truthy
-        create-statement-result (command apikey :request-for-statement
-                                  :functionCode nil
-                                  :id application-id
-                                  :selectedPersons [statement-giver]
-                                  :saateText "saate"
-                                  :dueDate 1450994400000) => ok?
+        _ (command apikey :request-for-statement
+                   :functionCode nil
+                   :id application-id
+                   :selectedPersons [statement-giver]
+                   :saateText "saate"
+                   :dueDate 1450994400000) => ok?
         updated-application (query-application apikey application-id)
         statement-id (:id (get-statement-by-user-id updated-application (id-for-key apikey)))
-        upload-statement-attachment-result (upload-attachment-for-statement apikey application-id "" true statement-id)
-        give-statement-result (command apikey :give-statement
-                                :id application-id
-                                :statementId statement-id
-                                :status "puollettu"
-                                :lang "fi"
-                                :text "Annanpa luvan urakalle.")]
+        _ (upload-attachment-for-statement apikey application-id "" true statement-id)
+        _ (command apikey :give-statement
+                   :id application-id
+                   :statementId statement-id
+                   :status "puollettu"
+                   :lang "fi"
+                   :text "Annanpa luvan urakalle.")]
     (query-application apikey application-id)))
 
 (defn generate-documents [application apikey & [local?]]
@@ -899,7 +898,7 @@
           updates (map (fn [[p v]] [(butlast p) v]) updates)
           updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)
           user-role (:role (find-user-from-minimal-by-apikey apikey))
-          updates (filterv (fn [[path value]]
+          updates (filterv (fn [[path _]]
                              (try
                                (let [splitted-path (ss/split path #"\.")]
                                  (doc-persistence/validate-against-whitelist! document [splitted-path] user-role application)
@@ -919,20 +918,18 @@
 ;; Vetuma
 ;;
 
-(defn vetuma! [{:keys [userid firstname lastname] :as data}]
-  (->
-    (http-get
-      (str (server-address) "/dev/api/vetuma")
-      {:query-params (select-keys data [:userid :firstname :lastname])})
-    decode-response
-    :body))
+(defn vetuma! [data]
+  (-> (http-get (str (server-address) "/dev/api/vetuma")
+                {:query-params (select-keys data [:userid :firstname :lastname])})
+      decode-response
+      :body))
 
 (defn vetuma-stamp! [] ; Used by neighbor_itest
   (-> {:userid "123"
        :firstname "Pekka"
        :lastname "Banaani"}
-    vetuma!
-    :stamp))
+      vetuma!
+      :stamp))
 
 ;; File actions
 

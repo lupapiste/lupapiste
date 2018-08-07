@@ -1,5 +1,5 @@
 (ns lupapalvelu.pdftk
-  (:require [taoensso.timbre :as timbre :refer [debug info warn error]]
+  (:require [taoensso.timbre :refer [debug info warn error]]
             [clojure.java.shell :as shell]))
 
 (defn- handle-result [result]

@@ -459,7 +459,7 @@
                                               (map (partial ->target assignment-group)
                                                    targets)))
            ; Try again in case the assignment was inserted between the previous update and insert call attempts
-           (catch Exception e
+           (catch Exception _
              (try (mongo/update-n :assignments query update)
                   (catch Exception e
                     (error "could not upsert assignment targets for trigger " (:id trigger)
@@ -468,7 +468,6 @@
 (defn run-assignment-triggers [response-fn]
   (fn [& response]
     (let [{:keys [user organization application targets assignment-group timestamp]} (apply response-fn response)
-          org-id   (:id organization)
           triggers (:assignment-triggers organization)]
       (when-not (= (:permitType application) permit/ARK)
         (doseq [{:keys [trigger targets]} (group-by-triggers triggers targets)]

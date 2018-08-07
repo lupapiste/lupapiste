@@ -1,7 +1,6 @@
 (ns lupapalvelu.pdf.html-template
   (:require [sade.core :refer [now ok ok?]]
             [lupapalvelu.logging :as logging]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.pdf.html-template-common :as common]
             [lupapalvelu.pdf.html-muuntaja-client :as muuntaja]

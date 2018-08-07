@@ -95,12 +95,12 @@
 
         Sijainti-osoite (-> Jatkoaika :sijaintitieto first :Sijainti :osoite) => truthy
         Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
-        Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
+        _ (-> Sijainti-osoite :alkuHetki) => truthy
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
         Sijainti-piste (-> Jatkoaika :sijaintitieto first :Sijainti :piste :Point :pos) => truthy
 
         osapuolet-vec (-> Jatkoaika :osapuolitieto) => truthy
-        vastuuhenkilot-vec (-> Jatkoaika :vastuuhenkilotieto) => truthy
+        _ (-> Jatkoaika :vastuuhenkilotieto) => truthy
 
         maksaja (-> Jatkoaika :maksajatieto :Maksaja) => truthy
 
@@ -130,9 +130,9 @@
         hakija-henkilo-nimi (:nimi hakija-Henkilo) => truthy
         hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy
 
-        lupakohtainenLisatietotieto (-> Jatkoaika :lupakohtainenLisatietotieto) => falsey
+        _ (-> Jatkoaika :lupakohtainenLisatietotieto) => falsey
 
-        pinta-ala (:pintaala Jatkoaika) => falsey]
+        _ (:pintaala Jatkoaika) => falsey]
 
 
     (fact "contains nil" (util/contains-value? canonical nil?) => falsey)

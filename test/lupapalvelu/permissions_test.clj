@@ -1,8 +1,7 @@
 (ns lupapalvelu.permissions-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.permissions :refer :all]
-            [sade.util :as util]))
+            [lupapalvelu.permissions :refer :all]))
 
 (testable-privates lupapalvelu.permissions defpermissions)
 

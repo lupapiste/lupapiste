@@ -3,8 +3,6 @@
             [sade.core :refer :all]
             [sade.util :as util]
             [clj-time.core :as t]
-            [clj-time.coerce :as tc]
-            [clojure.set :as set]
             [lupapalvelu.action :as action :refer [defraw]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as usr]

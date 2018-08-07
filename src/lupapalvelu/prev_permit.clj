@@ -155,7 +155,7 @@
                               (get-in lausuntotieto [:Lausunto :lausuntoPvm]) ;; dueDate, fix this!
                               person)))
 
-(defn invite-applicants [{:keys [lang user created application] :as command} applicants authorize-applicants]
+(defn invite-applicants [{:keys [lang created application] :as command} applicants authorize-applicants]
   ;; FIXME: refactor document updates out from here
   (let [applicants-with-no-info (remove get-applicant-type applicants)
         applicants (filter get-applicant-type applicants)]

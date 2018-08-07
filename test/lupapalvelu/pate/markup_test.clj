@@ -1,5 +1,5 @@
 (ns lupapalvelu.pate.markup-test
-  (:require [lupapalvelu.pate.markup :refer [markup->tags]:as markup]
+  (:require [lupapalvelu.pate.markup :refer [markup->tags]]
             [midje.sweet :refer :all]))
 
 (facts "text tags"

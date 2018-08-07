@@ -2,13 +2,11 @@
   (:require [rum.core :as rum]
             [lupapalvelu.ui.bulletins.state :as state]
             [lupapalvelu.ui.common :as common]
-            [lupapalvelu.ui.hub :as hub]
             [sade.shared-util :as util]))
 
 (defonce args (atom {}))
 
-(defn init
-  [init-state props]
+(defn init [init-state _]
   (reset! state/current-organization (:organization @args))
   (reset! state/local-bulletins-query {:page 1 :left -1 :pending? false})
   (common/query :local-bulletins-page-settings

@@ -1,7 +1,6 @@
 (ns lupapalvelu.attachment.tag-groups
   (:require [clojure.set :refer [intersection union]]
-            [sade.util :refer [fn->] :as util]
-            [sade.strings :as ss]
+            [sade.util :refer [fn->]]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.util :as att-util]))
@@ -31,7 +30,7 @@
 (defn- filter-tag-groups
   "remove the tag groups whose tag is not found in the attachments"
   [attachments-tag-sets hierarchy]
-  (letfn [(filter-recursively [[parent & children :as group]]
+  (letfn [(filter-recursively [[parent & children]]
             (when-let [attachments-tag-sets-in-group (attachments-tag-sets-with-tag parent attachments-tag-sets)]
               (->> (filter-tag-groups attachments-tag-sets-in-group children)
                    (cons parent))))]
@@ -67,7 +66,7 @@
   eg. [[:default] [:parties] [:building-site] [opid1 [:paapiirustus] [:iv_suunnitelma] [:default]] [opid2 [:kvv_suunnitelma] [:default]]]"
   ([application]
    (attachment-tag-groups application attachment-tag-group-hierarchy))
-  ([{attachments :attachments :as application} hierarchy]
+  ([{attachments :attachments} hierarchy]
    (let [enriched-attachments (map add-tags attachments)]
      (->> hierarchy
           (add-operation-tag-groups enriched-attachments)

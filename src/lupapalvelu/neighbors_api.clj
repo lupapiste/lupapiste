@@ -153,7 +153,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :neighborId])]
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
-  [{:keys [application user created lang] :as command}]
+  [{:keys [user created] :as command}]
   (let [new-state {:state :mark-done :user user :created created}]
     (update-application command {:neighbors {$elemMatch {:id neighborId}}} {$push {:neighbors.$.status new-state}})))
 
@@ -204,7 +204,7 @@
   {:parameters [applicationId neighborId token]
    :input-validators [(partial action/non-blank-parameters [:applicationId :neighborId :token])]
    :user-roles #{:anonymous}}
-  [{user :user created :created :as command}]
+  [{:keys [created]}]
   (let [application (domain/get-application-no-access-checking applicationId)
         neighbor (util/find-by-id neighborId (:neighbors application))]
     (if (valid-token? token (:status neighbor) created)
@@ -218,7 +218,7 @@
                         (when-not (#{"ok" "comments"} (get-in command [:data :response]))
                           (fail :error.invalid-response)))]
    :user-roles #{:anonymous}}
-  [{:keys [user created lang] :as command}]
+  [{:keys [user created lang]}]
   (if-let [vetuma-user (rename-keys (vetuma/get-user stamp) {:firstname :firstName :lastname :lastName})]
     (let [application (domain/get-application-no-access-checking applicationId)
           neighbor (util/find-by-id neighborId (:neighbors application))
