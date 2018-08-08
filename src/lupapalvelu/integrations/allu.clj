@@ -5,7 +5,6 @@
             [clojure.walk :refer [postwalk]]
             [mount.core :refer [defstate]]
             [schema.core :as sc :refer [defschema optional-key enum]]
-            [cheshire.core :as json]
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
@@ -282,7 +281,7 @@
   [(str allu-url "/placementcontracts")
    {:headers      {:authorization (str "Bearer " allu-jwt)}
     :content-type :json
-    :body         (json/encode (application->allu-placement-contract true app))}])
+    :form-params  (application->allu-placement-contract true app)}])
 
 (defn- placement-update-request [pending-on-client allu-url allu-jwt app]
   (let [allu-id (-> app :integrationKeys :ALLU :id)]
@@ -290,7 +289,7 @@
     [(str allu-url "/placementcontracts/" allu-id)
      {:headers      {:authorization (str "Bearer " allu-jwt)}
       :content-type :json
-      :body         (json/encode (application->allu-placement-contract pending-on-client app))}]))
+      :form-params  (application->allu-placement-contract pending-on-client app)}]))
 
 (def- placement-locking-request (partial placement-update-request false))
 
@@ -329,7 +328,7 @@
   (allu-fail! [_ text info-map] (fail! text info-map)))     ; TODO: Is there a better way to handle post-fn errors?
 
 (defn- local-mock-update-contract [state endpoint request]
-  (let [placement-contract (json/decode (:body request) true)
+  (let [placement-contract (:form-params request)
         allu-id (second (re-find #".*/(\d+)" endpoint))]
     (if-let [validation-error (sc/check PlacementContract placement-contract)]
       (assoc state :latest-response {:status 400, :body validation-error})
@@ -349,7 +348,7 @@
         {:status 404, :body (str "Not Found: " allu-id)})))
 
   (create-contract! [_ _ request]
-    (let [placement-contract (json/decode (:body request) true)]
+    (let [placement-contract (:form-params request)]
       (if-let [validation-error (sc/check PlacementContract placement-contract)]
         {:status 400, :body validation-error}
         (let [local-mock-allu-state-push (fn [{:keys [id-counter] :as state}]
