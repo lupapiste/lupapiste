@@ -44,25 +44,13 @@
     (mongo/update-by-id :applications id {$set {:permitSubtype permitSubtype, :documents documents}})
     response))
 
-(defn- check-request [schema-check? pending-on-client request]
+(defn- check-request [schema-check? request]
   (fact "request is well-formed"
     (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
     (:content-type request) => :json
     (let [contract (:form-params request)]
       (when schema-check?
-        contract => #(nil? (sc/check PlacementContract %)))
-      (:pendingOnClient contract) => pending-on-client)))
-
-(defn- local-mock-update-contract [state endpoint request]
-  (let [placement-contract (:form-params request)
-        allu-id (second (re-find #".*/(\d+)" endpoint))]
-    (if-let [validation-error (sc/check PlacementContract placement-contract)]
-      (assoc state :latest-response {:status 400, :body validation-error})
-      (if (contains? (:applications state) allu-id)
-        (-> state
-            (assoc-in [:applications allu-id] placement-contract)
-            (assoc :latest-response {:status 200, :body allu-id}))
-        (assoc state :latest-response {:status 404, :body (str "Not Found: " allu-id)})))))
+        contract => #(nil? (sc/check PlacementContract %))))))
 
 (deftype AtomMockALLU [state]
   ALLUApplications
@@ -94,8 +82,15 @@
               {:keys [id-counter]} (swap! state local-mock-allu-state-push)]
           {:status 200, :body (str (dec id-counter))}))))
 
-  (update-contract! [_ _ endpoint request] (:latest-response (swap! state local-mock-update-contract endpoint request)))
-  (lock-contract! [_ _ endpoint request] (:latest-response (swap! state local-mock-update-contract endpoint request))))
+  (update-contract! [_ _ endpoint request]
+    (let [allu-id (second (re-find #".*/(\d+)" endpoint))
+          placement-contract (:form-params request)]
+      (if-let [validation-error (sc/check PlacementContract placement-contract)]
+        {:status 400, :body validation-error}
+        (if (contains? (:applications state) allu-id)
+          (do (swap! state assoc-in [:applications allu-id] placement-contract)
+              {:status 200, :body allu-id})
+          {:status 404, :body (str "Not Found: " allu-id)})))))
 
 (deftype CheckingALLU [inner]
   ALLUApplications
@@ -123,22 +118,15 @@
   ALLUPlacementContracts
   (create-contract! [_ command endpoint request]
     (fact "endpoint is correct" endpoint => (str (env/value :allu :url) "/placementcontracts"))
-    (check-request true true request)
+    (check-request true request)
 
     (create-contract! inner command endpoint request))
 
   (update-contract! [_ command endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
-    (check-request false                                    ; Is allowed to be invalid so no schema check
-                   true request)
+    (check-request false request)
 
-    (update-contract! inner command endpoint request))
-
-  (lock-contract! [_ command endpoint request]
-    (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
-    (check-request true false request)
-
-    (lock-contract! inner command endpoint request)))
+    (update-contract! inner command endpoint request)))
 
 (deftype ConstALLU [cancel-response attach-response creation-response update-response]
   ALLUApplications
@@ -147,8 +135,7 @@
   (send-allu-attachment! [_ _ _ _] attach-response)
   ALLUPlacementContracts
   (create-contract! [_ _ _ _] creation-response)
-  (update-contract! [_ _ _ _] update-response)
-  (lock-contract! [_ _ _ _] update-response))
+  (update-contract! [_ _ _ _] update-response))
 
 ;;;; Actual Tests
 ;;;; ===================================================================================================================

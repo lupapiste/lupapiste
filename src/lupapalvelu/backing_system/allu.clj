@@ -349,8 +349,7 @@
 
 (defprotocol ALLUPlacementContracts
   (create-contract! [self command endpoint request])
-  (update-contract! [self command endpoint request])
-  (lock-contract! [self command endpoint request]))
+  (update-contract! [self command endpoint request]))
 
 (deftype RemoteALLU []
   ALLUApplications
@@ -363,21 +362,12 @@
 
   ALLUPlacementContracts
   (create-contract! [_ _ endpoint request] (http/post endpoint request))
-  (update-contract! [_ _ endpoint request] (http/put endpoint request))
-  (lock-contract! [_ _ endpoint request] (http/put endpoint request)))
+  (update-contract! [_ _ endpoint request] (http/put endpoint request)))
 
 (defn- creation-message-sent? [allu-id]
   (mongo/any? :integration-messages {:messageType "ALLU placementcontracts/create"
                                      :status "done"
                                      :application.id (str "LP-" allu-id)}))
-
-(defn- local-mock-update-contract [endpoint {placement-contract :form-params}]
-  (let [allu-id (second (re-find #".*/([\d\-]+)" endpoint))]
-    (if-let [validation-error (sc/check PlacementContract placement-contract)]
-      {:status 400, :body validation-error}
-      (if (creation-message-sent? allu-id)
-        {:status 200, :body allu-id}
-        {:status 404, :body (str "Not Found: " allu-id)}))))
 
 ;; This approximates the ALLU state with the `imessages` data:
 (deftype IntegrationMessagesMockALLU []
@@ -401,8 +391,13 @@
       {:status 400, :body validation-error}
       {:status 200, :body (subs identificationNumber 3)}))
 
-  (update-contract! [_ _ endpoint request] (local-mock-update-contract endpoint request))
-  (lock-contract! [_ _ endpoint request] (local-mock-update-contract endpoint request)))
+  (update-contract! [_ _ endpoint {placement-contract :form-params}]
+    (let [allu-id (second (re-find #".*/([\d\-]+)" endpoint))]
+      (if-let [validation-error (sc/check PlacementContract placement-contract)]
+        {:status 400, :body validation-error}
+        (if (creation-message-sent? allu-id)
+          {:status 200, :body allu-id}
+          {:status 404, :body (str "Not Found: " allu-id)})))))
 
 (defn- integration-message [{:keys [application user action]} endpoint request message-subtype payload-key]
   {:id           (mongo/create-id)
@@ -445,10 +440,7 @@
                               #(create-contract! inner command endpoint request)))
   (update-contract! [_ command endpoint request]
     (with-integration-message command endpoint request "placementcontracts/update" :form-params
-                              #(update-contract! inner command endpoint request)))
-  (lock-contract! [_ command endpoint request]
-    (with-integration-message command endpoint request "placementcontracts/lock" :form-params
-                              #(lock-contract! inner command endpoint request))))
+                              #(update-contract! inner command endpoint request))))
 
 (def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
 
@@ -527,6 +519,6 @@
   "Lock placement contract in ALLU for verdict evaluation."
   [{:keys [application] :as command}]
   (let [[endpoint request] (placement-update-request false (env/value :allu :url) (env/value :allu :jwt) application)]
-    (match (lock-contract! allu-instance command endpoint request)
+    (match (update-contract! allu-instance command endpoint request)
       {:status (:or 200 201), :body allu-id} (info (:id application) "was locked in ALLU as" allu-id)
       response (allu-http-fail! response))))
