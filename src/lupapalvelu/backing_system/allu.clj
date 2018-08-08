@@ -2,6 +2,7 @@
   "JSON REST API integration with ALLU as backing system. Used for Helsinki YA instead of SFTP/HTTP KRYSP XML
   integration."
   (:require [clojure.core.match :refer [match]]
+            [clojure.string :as s]
             [clojure.walk :refer [postwalk]]
             [monger.operators :refer [$set]]
             [mount.core :refer [defstate]]
@@ -23,7 +24,8 @@
             [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]
             [lupapalvelu.integrations.messages :as imessages]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo])
+  (:import [java.io InputStream]))
 
 ;;;; Schemas
 ;;;; ===================================================================================================================
@@ -151,6 +153,26 @@
    (optional-key :propertyIdentificationNumber) Kiinteistotunnus
    :startTime                                   (date-string :date-time-no-ms)
    (optional-key :workDescription)              NonBlankStr})
+
+;;; TODO: Use these (?):
+
+(defschema ALLUAuthHeaders
+  {:authorization (sc/pred #(s/starts-with? % "Bearer ") 'JWTBearer)}) ; TODO: Also match JWT
+
+(defschema ALLUPlacementContractRequest
+  {:headers      ALLUAuthHeaders
+   :content-type (sc/eq :json)
+   :form-params  PlacementContract})
+
+(defschema AttachmentRequest
+  {:headers   ALLUAuthHeaders
+   :multipart [{:name      (sc/eq "metadata")
+                :mime-type (sc/eq "application/json")
+                :encoding  (sc/eq "UTF-8")
+                :content   sc/Str}                          ; TODO: Improve this (without using json/decode!)
+               {:name      (sc/eq "file")
+                :mime-type sc/Str
+                :content   InputStream}]})
 
 ;;;; Constants
 ;;;; ===================================================================================================================
