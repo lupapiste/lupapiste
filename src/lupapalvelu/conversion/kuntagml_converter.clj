@@ -99,7 +99,7 @@
 
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
 
-        ;; Siirretään lausunnot luonnos-tilasta "lausunto annettu"-tilaan
+        ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
         given-statements (for [st statements
                                :when (map? st)]
                            (try
