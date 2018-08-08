@@ -673,6 +673,10 @@
       (select x [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja])
       (map cr/all-of x))))
 
+(defn ->lausuntotiedot [xml]
+  (->> (select xml [:rakennusvalvontaAsiatieto :lausuntotieto :Lausunto :lausuntotieto :Lausunto])
+       (map cr/all-of)))
+
 ;;
 ;; Information parsed from verdict xml message for application creation
 ;;

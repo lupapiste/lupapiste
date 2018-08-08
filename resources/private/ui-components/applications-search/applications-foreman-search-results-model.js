@@ -21,6 +21,8 @@ LUPAPISTE.ApplicationsForemanSearchResultsModel = function(params) {
     util.createSortableColumn("seventh", "applications.submitted",  {sortField: "submitted",
                                                                      currentSort: self.dataProvider.sort}),
     util.createSortableColumn("eight", "applications.status",       {sortField: "state",
+                                                                     currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("ninth", "application.handlers",      {sortField: "handler",
                                                                      currentSort: self.dataProvider.sort})
   ];
 };

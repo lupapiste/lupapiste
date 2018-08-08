@@ -4,7 +4,6 @@
             [mount.core :as mount]
             [schema.core :as sc]
             [clj-http.client :as http]
-            [cheshire.core :as json]
             [monger.operators :refer [$set]]
             [sade.core :refer [ok?]]
             [sade.schema-generators :as ssg]

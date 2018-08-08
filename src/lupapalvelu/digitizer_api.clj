@@ -5,6 +5,7 @@
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.roles :as roles]
+            [sade.coordinate :as coord]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -23,16 +24,26 @@
     (when-not (and archive-enabled? correct-role?)
       unauthorized)))
 
+(defn default-digitalization-location-set-if-used
+  "Verifies that default digitalization location can only be used if
+  it is set for the organization and is valid."
+  [{user-orgs :user-organizations {:keys [organizationId createWithDefaultLocation]} :data}]
+  (when createWithDefaultLocation
+    (if-let [{:keys [x y]} (->> user-orgs (util/find-by-id organizationId) :default-digitalization-location)]
+      (coord/validate-coordinates [x y])
+      (fail :error.no-default-digitalization-location))))
+
 (defcommand create-archiving-project
-            {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus createAnyway createWithoutBuildings createWithDefaultLocation]
+            {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus createWithoutPreviousPermit createWithoutBuildings createWithDefaultLocation]
              :user-roles       #{:authority}
              :input-validators [(partial action/non-blank-parameters [:lang :organizationId]) ;; no :address included
                                 ;; the propertyId parameter can be nil
                                 (fn [{{propertyId :propertyId} :data :as command}]
                                   (when (not (ss/blank? propertyId))
                                     (action/property-id-parameters [:propertyId] command)))]
-             :pre-checks       [user-is-allowed-to-digitize]}
-            [{:keys [user] :as command}]
+             :pre-checks       [user-is-allowed-to-digitize
+                                default-digitalization-location-set-if-used]}
+  [{:keys [user] :as command}]
   (if-let [app-with-verdict (domain/get-application-as
                               {:organization organizationId
                                :verdicts     {$elemMatch {:kuntalupatunnus kuntalupatunnus}}

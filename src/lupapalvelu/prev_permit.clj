@@ -17,6 +17,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
             [lupapalvelu.review :as review]
+            [lupapalvelu.statement :as statement]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
@@ -140,6 +141,20 @@
 
 (defn tyonjohtaja->tj-document [party]
   (party->party-doc party "tyonjohtaja-v2"))
+
+(defn lausuntotieto->statement
+  "Takes a lausuntotieto-element produced by `lupapalvelu.xml.krysp.reader/->lausuntotiedot`, returns
+  a document that conforms to the Statement schema in the `lupapalvelu.statement` namespace."
+  [lausuntotieto]
+  (let [person {:userId "0"
+                :text "Viranomainen"
+                :email "eratuonti@lupapiste.fi"
+                :name (:viranomainen lausuntotieto)}]
+  (statement/create-statement (now)
+                              (:lausunto lausuntotieto)
+                              (now) ;; Due date
+                              person
+                              {:puoltotieto (get-in lausuntotieto [:puoltotieto :Puolto :puolto])})))
 
 (defn invite-applicants [{:keys [lang created application] :as command} applicants authorize-applicants]
   ;; FIXME: refactor document updates out from here
