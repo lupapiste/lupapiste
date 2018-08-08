@@ -12,6 +12,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.review :as review]
+            [lupapalvelu.statement :as statement]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
@@ -96,9 +97,25 @@
 
         structures (->> xml krysp-reader/->rakennelmatiedot (map conversion-util/rakennelmatieto->kaupunkikuvatoimenpide))
 
+        statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
+
+        ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
+        given-statements (for [st statements
+                               :when (map? st)]
+                           (try
+                             (statement/give-statement st
+                                                       (:saateText st)
+                                                       (get-in st [:metadata :puoltotieto])
+                                                       (mongo/create-id)
+                                                       (mongo/create-id)
+                                                       false)
+                             (catch Exception e
+                               (error "Moving statement to statement given -state failed: %s" (.getMessage e)))))
+
         created-application (-> created-application
                                 (update-in [:documents] concat other-building-docs new-parties structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
+                                (assoc :statements given-statements)
                                 (assoc :opened (:created command)))
 
         ;; attaches the new application, and its id to path [:data :id], into the command

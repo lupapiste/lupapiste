@@ -209,7 +209,7 @@
 
 (def- common-maanmittaus-schemas ["maksaja" "kiinteisto"])
 
-(def- common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka"])
+(def- common-poikkeamis-schemas ["hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "poikkeusasian-rakennuspaikka"])
 
 (def- common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
 

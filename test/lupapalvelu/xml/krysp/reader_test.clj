@@ -483,8 +483,6 @@
   (fact "without extraparam returns correct"
     (wfs-krysp-url "http://localhost?output=KRYSP" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?output=KRYSP&request=GetFeature&maxFeatures=1000&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E"))
 
-
-
 (facts "Testing information parsed from a verdict xml message for application creation"
   (against-background (sade.env/feature? :disable-ktj-on-create) => true)
   (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml"))
@@ -772,3 +770,7 @@
 (facts "It can be deduced if the verdict is about a foreman or not"
   (is-foreman-application? verdict-a) => false
   (is-foreman-application? verdict-tjo) => true)
+
+(facts "Statements can be read from a Krysp document"
+  (-> verdict-a ->lausuntotiedot first :viranomainen) => "Huvikummun Voima"
+  (-> verdict-tjo ->lausuntotiedot first :viranomainen) => nil)

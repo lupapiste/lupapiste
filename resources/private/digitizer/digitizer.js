@@ -255,7 +255,7 @@
       params.lang = loc.getCurrentLanguage();
       params.organizationId = self.selectedPrevPermitOrganization();
       params.kuntalupatunnus = trimBackendId();
-      params.createAnyway = createWithoutPrevPermit;
+      params.createWithoutPreviousPermit = createWithoutPrevPermit;
       params.createWithoutBuildings = createWithoutBuildings;
       params.createWithDefaultLocation = createWithDefaultLocation;
 
