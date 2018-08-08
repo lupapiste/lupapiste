@@ -112,7 +112,7 @@
       :whitelist {:roles [:authority] :otherwise :disabled}
       :auth {:enabled [:is-end-review]}}
      {:name "huomautukset" :type :group
-      :body [{:name "kuvaus" :type :text :max-len 80000 :css []
+      :body [{:name "kuvaus" :type :text :max-len 8000 :css []
               :whitelist {:roles [:authority] :otherwise :disabled}
               :auth {:disabled [:is-faulty-review]}}
              {:name "maaraAika" :type :date
