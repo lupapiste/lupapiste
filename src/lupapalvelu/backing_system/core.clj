@@ -43,7 +43,7 @@
     ;; TODO: Non-placement-contract ALLU applications
     (allu/lock-placement-contract! command)
     ;; TODO: Send comments
-    (allu/send-attachments! command (filter attachment/unsent? (-> command :application :attachments))))
+    [true (allu/send-attachments! command (filter attachment/unsent? (-> command :application :attachments)))])
   (send-attachments! [_ command _ _ _ attachments _] (allu/send-attachments! command attachments)))
 
 (deftype KRYSPBackingSystem []
