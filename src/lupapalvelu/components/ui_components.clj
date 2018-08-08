@@ -328,7 +328,7 @@
 
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
                             :signing :invites :verdict-attachment-prints :calendar-view :printing-order]
-                  :js ["map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
+                  :js ["map-model.js" "change-location.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "add-party.js" "archival-summary.js" "case-file.js"
                        "create-digging-permit.js"

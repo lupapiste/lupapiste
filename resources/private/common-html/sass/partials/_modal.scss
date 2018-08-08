@@ -49,6 +49,10 @@
         position: static;
       }
     }
+    &.autosized > .component {
+      overflow: initial;
+      margin: $marginM $marginM;
+    }
     .header {
       padding-top: 2px;
       padding-bottom: 4px;
@@ -328,5 +332,18 @@
   margin: {
     top: $marginS;
     bottom: $marginS
+  }
+}
+
+.authorize-person-content {
+  max-width: 40em;
+  label, input, textarea, button {
+    display: block
+  }
+  label, button {
+    margin-top: 1em;
+  }
+  input, textarea {
+    width: 100%;
   }
 }
