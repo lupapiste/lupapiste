@@ -1,7 +1,6 @@
 (ns lupapalvelu.backing-system.allu-test
   "Unit tests for lupapalvelu.backing-system.allu. No side-effects."
   (:require [schema.core :as sc :refer [defschema Bool]]
-            [cheshire.core :as json]
             [sade.core :refer [def-]]
             [sade.env :as env]
             [sade.schemas :refer [NonBlankStr Kiinteistotunnus ApplicationId]]
@@ -86,7 +85,7 @@
       (fact "endpoint" endpoint => "https://example.com/api/v1/placementcontracts")
       (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
                                   :content-type :json
-                                  :body         (json/encode (application->allu-placement-contract true app))})))
+                                  :form-params  (application->allu-placement-contract true app)})))
 
   (facts "attachment-send"
     (let [allu-id "23"
@@ -97,16 +96,16 @@
                                               contents)]
       (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/attachments"))
       (fact "request"
-        (:headers request) => {:authorization "Bearer foo.bar.baz"}
-        (-> request (get-in [:multipart 0]) (select-keys [:name :mime-type :encoding]))
-        => {:name "metadata", :mime-type "application/json", :encoding "UTF-8"}
-        (-> request (get-in [:multipart 0 :content]) (json/decode true))
-        => {:name        (:contents attachment)
-            :description (localize "fi" :attachmentType type-group type-id)
-            :mimeType    (:contentType latestVersion)}
-        (get-in request [:multipart 1]) => {:name      "file"
-                                            :mime-type (:contentType latestVersion)
-                                            :content   contents})))
+        request => {:headers   {:authorization "Bearer foo.bar.baz"}
+                    :multipart [{:name      "metadata"
+                                 :mime-type "application/json"
+                                 :encoding  "UTF-8"
+                                 :content   {:name        (:contents attachment)
+                                             :description (localize "fi" :attachmentType type-group type-id)
+                                             :mimeType    (:contentType latestVersion)}}
+                                {:name      "file"
+                                 :mime-type (:contentType latestVersion)
+                                 :content   contents}]})))
 
   (facts "placement-update-request"
     (let [allu-id "23"
@@ -118,4 +117,4 @@
         (fact "request"
           request => {:headers      {:authorization "Bearer foo.bar.baz"}
                       :content-type :json
-                      :body         (json/encode (application->allu-placement-contract pending-on-client app))})))))
+                      :form-params  (application->allu-placement-contract pending-on-client app)})))))

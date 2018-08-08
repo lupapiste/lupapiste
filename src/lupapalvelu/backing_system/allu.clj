@@ -17,8 +17,7 @@
             [sade.http :as http]
             [sade.schemas :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
                                   ApplicationId ISO-3166-alpha-2 date-string]]
-            [sade.util :as util]
-            [lupapalvelu.attachment :as attachment :refer [get-attachment-file!]]
+            [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common]
@@ -271,6 +270,9 @@
 (sc/defn ^{:private true} application->allu-placement-contract :- PlacementContract [pending-on-client app]
   (->> app flatten-values (convert-value-flattened-app pending-on-client)))
 
+;;;; Request construction
+;;;; ===================================================================================================================
+
 (defn- application-cancel-request [allu-url allu-jwt app]
   (let [allu-id (-> app :integrationKeys :ALLU :id)]
     (assert allu-id (str (:id app) " does not contain an ALLU id"))
@@ -285,9 +287,9 @@
     [(str allu-url "/applications/" allu-id "/attachments")
      {:headers   {:authorization (str "Bearer " allu-jwt)}
       :multipart [{:name      "metadata"
-                   :content   (json/encode {:name        (:contents attachment)
-                                            :description (localize lang :attachmentType type-group type-id)
-                                            :mimeType    (:contentType latestVersion)})
+                   :content   {:name        (:contents attachment)
+                               :description (localize lang :attachmentType type-group type-id)
+                               :mimeType    (:contentType latestVersion)}
                    :mime-type "application/json"
                    :encoding  "UTF-8"}
                   {:name      "file"
@@ -298,7 +300,7 @@
   [(str allu-url "/placementcontracts")
    {:headers      {:authorization (str "Bearer " allu-jwt)}
     :content-type :json
-    :body         (json/encode (application->allu-placement-contract true app))}])
+    :form-params  (application->allu-placement-contract true app)}])
 
 (defn- placement-update-request [pending-on-client allu-url allu-jwt app]
   (let [allu-id (-> app :integrationKeys :ALLU :id)]
@@ -306,9 +308,7 @@
     [(str allu-url "/placementcontracts/" allu-id)
      {:headers      {:authorization (str "Bearer " allu-jwt)}
       :content-type :json
-      :body         (json/encode (application->allu-placement-contract pending-on-client app))}]))
-
-(def- placement-locking-request (partial placement-update-request false))
+      :form-params  (application->allu-placement-contract pending-on-client app)}]))
 
 ;;;; Should you use this?
 ;;;; ===================================================================================================================
@@ -335,7 +335,9 @@
   (cancel-allu-application! [_ _ endpoint request] (http/put endpoint request))
 
   ALLUAttachments
-  (send-allu-attachment! [_ _ endpoint request] (http/post endpoint request))
+  (send-allu-attachment! [_ _ endpoint request]
+    (->> (update-in request [:multipart 0 :content] json/encode)
+         (http/post endpoint request)))
 
   ALLUPlacementContracts
   (create-contract! [_ _ endpoint request] (http/post endpoint request))
@@ -343,7 +345,7 @@
   (lock-contract! [_ _ endpoint request] (http/put endpoint request)))
 
 (defn- local-mock-update-contract [state endpoint request]
-  (let [placement-contract (json/decode (:body request) true)
+  (let [placement-contract (:form-params request)
         allu-id (second (re-find #".*/(\d+)" endpoint))]
     (if-let [validation-error (sc/check PlacementContract placement-contract)]
       (assoc state :latest-response {:status 400, :body validation-error})
@@ -373,7 +375,7 @@
 
   ALLUPlacementContracts
   (create-contract! [_ _ _ request]
-    (let [placement-contract (json/decode (:body request) true)]
+    (let [placement-contract (:form-params request)]
       (if-let [validation-error (sc/check PlacementContract placement-contract)]
         {:status 400, :body validation-error}
         (let [local-mock-allu-state-push (fn [{:keys [id-counter] :as state}]
@@ -399,7 +401,9 @@
    :initator     (select-keys user [:id :username])
    :action       action
    :data         {:endpoint endpoint
-                  :request  (util/strip-nils (select-keys request [payload-key]))}})
+                  :request  (if (= payload-key :multipart)  ; HACK
+                              {:multipart [(get-in request [:multipart 0])]}
+                              (select-keys request [payload-key]))}})
 
 (defn- with-integration-message [command endpoint request message-subtype payload-key body]
   (let [{msg-id :id :as msg} (integration-message command endpoint request message-subtype payload-key)
@@ -411,7 +415,7 @@
 (deftype MessageSavingALLU [inner]
   ALLUApplications
   (cancel-allu-application! [_ command endpoint request]
-    (with-integration-message command endpoint request "applications/cancelled" :body
+    (with-integration-message command endpoint request "applications/cancelled" :form-params
                               #(cancel-allu-application! inner command endpoint request)))
 
   ALLUAttachments
@@ -421,13 +425,13 @@
 
   ALLUPlacementContracts
   (create-contract! [_ command endpoint request]
-    (with-integration-message command endpoint request "placementcontracts/create" :body
+    (with-integration-message command endpoint request "placementcontracts/create" :form-params
                               #(create-contract! inner command endpoint request)))
   (update-contract! [_ command endpoint request]
-    (with-integration-message command endpoint request "placementcontracts/update" :body
+    (with-integration-message command endpoint request "placementcontracts/update" :form-params
                               #(update-contract! inner command endpoint request)))
   (lock-contract! [_ command endpoint request]
-    (with-integration-message command endpoint request "placementcontracts/lock" :body
+    (with-integration-message command endpoint request "placementcontracts/lock" :form-params
                               #(lock-contract! inner command endpoint request))))
 
 (def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
@@ -509,7 +513,7 @@
 (defn lock-placement-contract!
   "Lock placement contract in ALLU for verdict evaluation."
   [{:keys [application] :as command}]
-  (let [[endpoint request] (placement-locking-request (env/value :allu :url) (env/value :allu :jwt) application)]
+  (let [[endpoint request] (placement-update-request false (env/value :allu :url) (env/value :allu :jwt) application)]
     (match (lock-contract! allu-instance command endpoint request)
       {:status (:or 200 201), :body allu-id} (info (:id application) "was locked in ALLU as" allu-id)
       response (allu-http-fail! response))))

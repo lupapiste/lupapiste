@@ -48,7 +48,7 @@
   (fact "request is well-formed"
     (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
     (:content-type request) => :json
-    (let [contract (-> request :body (json/decode true))]
+    (let [contract (:form-params request)]
       (when schema-check?
         contract => #(nil? (sc/check PlacementContract %)))
       (:pendingOnClient contract) => pending-on-client)))
