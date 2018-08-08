@@ -366,49 +366,43 @@
   (update-contract! [_ _ endpoint request] (http/put endpoint request))
   (lock-contract! [_ _ endpoint request] (http/put endpoint request)))
 
-(defn- local-mock-update-contract [state endpoint request]
-  (let [placement-contract (:form-params request)
-        allu-id (second (re-find #".*/(\d+)" endpoint))]
-    (if-let [validation-error (sc/check PlacementContract placement-contract)]
-      (assoc state :latest-response {:status 400, :body validation-error})
-      (if (contains? (:applications state) allu-id)
-        (-> state
-            (assoc-in [:applications allu-id] placement-contract)
-            (assoc :latest-response {:status 200, :body allu-id}))
-        (assoc state :latest-response {:status 404, :body (str "Not Found: " allu-id)})))))
+(defn- creation-message-sent? [allu-id]
+  (mongo/any? :integration-messages {:messageType "ALLU placementcontracts/create"
+                                     :status "done"
+                                     :application.id (str "LP-" allu-id)}))
 
-(deftype LocalMockALLU [state]
+(defn- local-mock-update-contract [endpoint {placement-contract :form-params}]
+  (let [allu-id (second (re-find #".*/([\d\-]+)" endpoint))]
+    (if-let [validation-error (sc/check PlacementContract placement-contract)]
+      {:status 400, :body validation-error}
+      (if (creation-message-sent? allu-id)
+        {:status 200, :body allu-id}
+        {:status 404, :body (str "Not Found: " allu-id)}))))
+
+;; This approximates the ALLU state with the `imessages` data:
+(deftype IntegrationMessagesMockALLU []
   ALLUApplications
   (cancel-allu-application! [_ _ endpoint _]
-    (let [allu-id (second (re-find #".*/(\d+)/cancelled" endpoint))]
-      (if (contains? (:applications @state) allu-id)
-        (do (swap! state update :applications dissoc allu-id)
-            {:status 200, :body ""})
+    (let [allu-id (second (re-find #".*/([\d\-]+)/cancelled" endpoint))]
+      (if (creation-message-sent? allu-id)
+        {:status 200, :body ""}
         {:status 404, :body (str "Not Found: " allu-id)})))
 
   ALLUAttachments
-  (send-allu-attachment! [_ _ endpoint request]
-    (let [allu-id (second (re-find #".*/applications/(\d+)/attachments" endpoint))]
-      (if (contains? (:applications @state) allu-id)
-        (let [attachment {:metadata (-> (get-in request [:multipart 0 :content]) (json/decode true))}]
-          (swap! state update-in [:applications allu-id :attachments] (fnil conj []) attachment)
-          {:status 200, :body ""})
+  (send-allu-attachment! [_ _ endpoint _]
+    (let [allu-id (second (re-find #".*/applications/([\d\-]+)/attachments" endpoint))]
+      (if (creation-message-sent? allu-id)
+        {:status 200, :body ""}
         {:status 404, :body (str "Not Found: " allu-id)})))
 
   ALLUPlacementContracts
-  (create-contract! [_ _ _ request]
-    (let [placement-contract (:form-params request)]
-      (if-let [validation-error (sc/check PlacementContract placement-contract)]
-        {:status 400, :body validation-error}
-        (let [local-mock-allu-state-push (fn [{:keys [id-counter] :as state}]
-                                           (-> state
-                                               (update :id-counter inc)
-                                               (update :applications assoc (str id-counter) placement-contract)))
-              {:keys [id-counter]} (swap! state local-mock-allu-state-push)]
-          {:status 200, :body (str (dec id-counter))}))))
+  (create-contract! [_ _ _ {{:keys [identificationNumber] :as placement-contract} :form-params}]
+    (if-let [validation-error (sc/check PlacementContract placement-contract)]
+      {:status 400, :body validation-error}
+      {:status 200, :body (subs identificationNumber 3)}))
 
-  (update-contract! [_ _ endpoint request] (:latest-response (swap! state local-mock-update-contract endpoint request)))
-  (lock-contract! [_ _ endpoint request] (:latest-response (swap! state local-mock-update-contract endpoint request))))
+  (update-contract! [_ _ endpoint request] (local-mock-update-contract endpoint request))
+  (lock-contract! [_ _ endpoint request] (local-mock-update-contract endpoint request)))
 
 (defn- integration-message [{:keys [application user action]} endpoint request message-subtype payload-key]
   {:id           (mongo/create-id)
@@ -459,10 +453,7 @@
 (def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
 
 (defstate allu-instance
-  :start (->MessageSavingALLU
-           (if (env/dev-mode?)
-             (->LocalMockALLU (atom {:id-counter 0, :applications {}}))
-             (->RemoteALLU))))
+  :start (->MessageSavingALLU (if (env/dev-mode?) (->IntegrationMessagesMockALLU) (->RemoteALLU))))
 
 (defn- allu-http-fail! [response]
   (allu-fail! :error.allu.http (select-keys response [:status :body])))

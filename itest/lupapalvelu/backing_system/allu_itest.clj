@@ -1,10 +1,11 @@
 (ns lupapalvelu.backing_system.allu-itest
   "Integration tests for ALLU integration. Using local (i.e. not over HTTP) testing style."
   (:require [clojure.java.io :as io]
-            [mount.core :as mount]
-            [schema.core :as sc]
+            [cheshire.core :as json]
             [clj-http.client :as http]
             [monger.operators :refer [$set]]
+            [mount.core :as mount]
+            [schema.core :as sc]
             [sade.core :refer [ok?]]
             [sade.schema-generators :as ssg]
             [sade.env :as env]
@@ -20,7 +21,7 @@
 
             [lupapalvelu.backing-system.allu :as allu
              :refer [ALLUApplications cancel-allu-application! ALLUAttachments send-allu-attachment!
-                     ALLUPlacementContracts ->LocalMockALLU ->MessageSavingALLU PlacementContract
+                     ALLUPlacementContracts ->MessageSavingALLU PlacementContract
                      update-contract! create-contract! lock-contract! allu-fail!]]))
 
 ;;;; Refutation Utilities
@@ -51,6 +52,50 @@
       (when schema-check?
         contract => #(nil? (sc/check PlacementContract %)))
       (:pendingOnClient contract) => pending-on-client)))
+
+(defn- local-mock-update-contract [state endpoint request]
+  (let [placement-contract (:form-params request)
+        allu-id (second (re-find #".*/(\d+)" endpoint))]
+    (if-let [validation-error (sc/check PlacementContract placement-contract)]
+      (assoc state :latest-response {:status 400, :body validation-error})
+      (if (contains? (:applications state) allu-id)
+        (-> state
+            (assoc-in [:applications allu-id] placement-contract)
+            (assoc :latest-response {:status 200, :body allu-id}))
+        (assoc state :latest-response {:status 404, :body (str "Not Found: " allu-id)})))))
+
+(deftype AtomMockALLU [state]
+  ALLUApplications
+  (cancel-allu-application! [_ _ endpoint _]
+    (let [allu-id (second (re-find #".*/(\d+)/cancelled" endpoint))]
+      (if (contains? (:applications @state) allu-id)
+        (do (swap! state update :applications dissoc allu-id)
+            {:status 200, :body ""})
+        {:status 404, :body (str "Not Found: " allu-id)})))
+
+  ALLUAttachments
+  (send-allu-attachment! [_ _ endpoint request]
+    (let [allu-id (second (re-find #".*/applications/(\d+)/attachments" endpoint))]
+      (if (contains? (:applications @state) allu-id)
+        (let [attachment {:metadata (-> (get-in request [:multipart 0 :content]) (json/decode true))}]
+          (swap! state update-in [:applications allu-id :attachments] (fnil conj []) attachment)
+          {:status 200, :body ""})
+        {:status 404, :body (str "Not Found: " allu-id)})))
+
+  ALLUPlacementContracts
+  (create-contract! [_ _ _ request]
+    (let [placement-contract (:form-params request)]
+      (if-let [validation-error (sc/check PlacementContract placement-contract)]
+        {:status 400, :body validation-error}
+        (let [local-mock-allu-state-push (fn [{:keys [id-counter] :as state}]
+                                           (-> state
+                                               (update :id-counter inc)
+                                               (update :applications assoc (str id-counter) placement-contract)))
+              {:keys [id-counter]} (swap! state local-mock-allu-state-push)]
+          {:status 200, :body (str (dec id-counter))}))))
+
+  (update-contract! [_ _ endpoint request] (:latest-response (swap! state local-mock-update-contract endpoint request)))
+  (lock-contract! [_ _ endpoint request] (:latest-response (swap! state local-mock-update-contract endpoint request))))
 
 (deftype CheckingALLU [inner]
   ALLUApplications
@@ -118,7 +163,7 @@
       (let [initial-allu-state {:id-counter 0, :applications {}}
             allu-state (atom initial-allu-state)
             failure-counter (atom 0)]
-        (mount/start-with {#'allu/allu-instance (->CheckingALLU (->MessageSavingALLU (->LocalMockALLU allu-state)))})
+        (mount/start-with {#'allu/allu-instance (->CheckingALLU (->MessageSavingALLU (->AtomMockALLU allu-state)))})
 
         (binding [allu-fail! (fn [text info-map]
                                (fact "error text" text => :error.allu.http)
