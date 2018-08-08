@@ -115,27 +115,35 @@
                      {:huoneisto huoneistot-data})
         vaestonsuoja-value (ss/trim (get-in toimenpide [:varusteet :vaestonsuoja]))
         vaestonsuoja (when (ss/numeric? vaestonsuoja-value) (util/->int vaestonsuoja-value))
+        verkostoliittymat (if (some true? (vals (:verkostoliittymat toimenpide)))
+                            {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin))
+                             :maakaasuKytkin (true? (-> toimenpide :verkostoliittymat :maakaasuKytkin))
+                             :viemariKytkin (true? (-> toimenpide :verkostoliittymat :viemariKytkin))
+                             :vesijohtoKytkin (true? (-> toimenpide :verkostoliittymat :vesijohtoKytkin))
+                             :kaapeliKytkin (true? (-> toimenpide :verkostoliittymat :kaapeliKytkin))}
+                            {})
+        varusteet (if (or (some true? (vals (:varusteet toimenpide)))
+                          (util/not-empty-or-nil? vaestonsuoja)
+                          (util/not-empty-or-nil? (-> toimenpide :varusteet :saunoja positive-integer)))
+                    {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin))
+                     :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin))
+                     :viemariKytkin (true? (-> toimenpide :varusteet :viemariKytkin))
+                     :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin))
+                     :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin))
+                     :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin))
+                     :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
+                     :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
+                     :saunoja (-> toimenpide :varusteet :saunoja positive-integer)
+                     :vaestonsuoja vaestonsuoja}
+                    {})
         rakennuksen-tiedot-basic-info {:kayttotarkoitus (:kayttotarkoitus kaytto)
                                        :rakentamistapa (:rakentamistapa rakenne)
-                                       :verkostoliittymat {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin))
-                                                           :maakaasuKytkin (true? (-> toimenpide :verkostoliittymat :maakaasuKytkin))
-                                                           :viemariKytkin (true? (-> toimenpide :verkostoliittymat :viemariKytkin))
-                                                           :vesijohtoKytkin (true? (-> toimenpide :verkostoliittymat :vesijohtoKytkin))
-                                                           :kaapeliKytkin (true? (-> toimenpide :verkostoliittymat :kaapeliKytkin))}
+                                       :verkostoliittymat verkostoliittymat
                                        :lammitystapa (cond
                                                        (= lammitystapa "suorasahk\u00f6") "suora s\u00e4hk\u00f6"
                                                        (= lammitystapa "eiLammitysta") "ei l\u00e4mmityst\u00e4"
                                                        :default lammitystapa)
-                                       :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin))
-                                                   :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin))
-                                                   :viemariKytkin (true? (-> toimenpide :varusteet :viemariKytkin))
-                                                   :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin))
-                                                   :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin))
-                                                   :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin))
-                                                   :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
-                                                   :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
-                                                   :saunoja (-> toimenpide :varusteet :saunoja positive-integer)
-                                                   :vaestonsuoja vaestonsuoja}
+                                       :varusteet varusteet
                                        :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))
                                        :rakennustunnus (get-rakennustunnus toimenpide application info)}
         rakennuksen-tiedot (merge

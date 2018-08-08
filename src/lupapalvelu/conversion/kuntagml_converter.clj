@@ -1,5 +1,5 @@
 (ns lupapalvelu.conversion.kuntagml-converter
-  (:require [taoensso.timbre :refer [info infof warn]]
+  (:require [taoensso.timbre :refer [info infof warn error]]
             [sade.core :refer :all]
             [sade.util :as util]
             [lupapalvelu.action :as action]
@@ -125,6 +125,15 @@
           (info "Saved review updates")
           (infof "Reviews were not saved: %s" (:desc update-result))))
 
+      ;; Add link permits (viitelupien linkitys)
+      (let [app-links (krysp-reader/->viitelupatunnukset xml)]
+        (infof (format "Linking %d app-links to application %s" (count app-links) (:id created-application)))
+        (doseq [link app-links]
+          (try
+            (app/do-add-link-permit created-application link)
+            (catch Exception e
+              (error "Adding app-link %s -> %s failed: %s" (:id created-application) link (.getMessage e))))))
+
       (let [fetched-application (mongo/by-id :applications (:id created-application))]
         (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
         fetched-application))))
@@ -146,7 +155,7 @@
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
         destructured-permit-id (conversion-util/destructure-permit-id kuntalupatunnus)
         operation             "aiemmalla-luvalla-hakeminen"
-        path                  "./src/lupapalvelu/conversion/test-data/"
+        path                  "../../Desktop/test-data/"
         filename              (str path kuntalupatunnus ".xml")
         permit-type           "R"
         xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
