@@ -112,7 +112,7 @@
       :whitelist {:roles [:authority] :otherwise :disabled}
       :auth {:enabled [:is-end-review]}}
      {:name "huomautukset" :type :group
-      :body [{:name "kuvaus" :type :text :max-len 20000 :css []
+      :body [{:name "kuvaus" :type :text :max-len 80000 :css []
               :whitelist {:roles [:authority] :otherwise :disabled}
               :auth {:disabled [:is-faulty-review]}}
              {:name "maaraAika" :type :date
@@ -124,12 +124,12 @@
              {:name "toteamisHetki" :type :date
               :whitelist {:roles [:authority] :otherwise :disabled}
               :auth {:disabled [:is-faulty-review]}}]}
-     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width
+     {:name "lasnaolijat" :type :text :max-len 8000 :layout :full-width
       :css [] :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}
       :auth {:disabled [:is-faulty-review]}}
-     {:name "poikkeamat" :type :text :max-len 4000 :layout
-      :full-width :css [] :readonly-after-sent true
+     {:name "poikkeamat" :type :text :max-len 8000 :layout :full-width
+      :css [] :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}
       :auth {:disabled [:is-faulty-review]}}]}
    {:name "muuTunnus" :type :text :readonly true :hidden true}
