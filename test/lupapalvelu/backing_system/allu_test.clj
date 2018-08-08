@@ -1,7 +1,7 @@
 (ns lupapalvelu.backing-system.allu-test
   "Unit tests for lupapalvelu.backing-system.allu. No side-effects."
-  (:require [schema.core :as sc :refer [defschema Bool]]
-            [cheshire.core :as json]
+  (:require [cheshire.core :as json]
+            [schema.core :as sc :refer [defschema Bool]]
             [sade.core :refer [def-]]
             [sade.env :as env]
             [sade.schemas :refer [NonBlankStr Kiinteistotunnus ApplicationId]]
@@ -86,7 +86,7 @@
       (fact "endpoint" endpoint => "https://example.com/api/v1/placementcontracts")
       (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
                                   :content-type :json
-                                  :body         (json/encode (application->allu-placement-contract true app))})))
+                                  :form-params  (application->allu-placement-contract true app)})))
 
   (facts "attachment-send"
     (let [allu-id "23"
@@ -118,4 +118,4 @@
         (fact "request"
           request => {:headers      {:authorization "Bearer foo.bar.baz"}
                       :content-type :json
-                      :body         (json/encode (application->allu-placement-contract pending-on-client app))})))))
+                      :form-params  (application->allu-placement-contract pending-on-client app)})))))

@@ -3,9 +3,9 @@
   integration."
   (:require [clojure.core.match :refer [match]]
             [clojure.walk :refer [postwalk]]
+            [cheshire.core :as json]
             [mount.core :refer [defstate]]
             [schema.core :as sc :refer [defschema optional-key enum]]
-            [cheshire.core :as json]
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
@@ -294,7 +294,7 @@
   [(str allu-url "/placementcontracts")
    {:headers      {:authorization (str "Bearer " allu-jwt)}
     :content-type :json
-    :body         (json/encode (application->allu-placement-contract true app))}])
+    :form-params  (application->allu-placement-contract true app)}])
 
 (defn- placement-update-request [pending-on-client allu-url allu-jwt app]
   (let [allu-id (-> app :integrationKeys :ALLU :id)]
@@ -302,7 +302,7 @@
     [(str allu-url "/placementcontracts/" allu-id)
      {:headers      {:authorization (str "Bearer " allu-jwt)}
       :content-type :json
-      :body         (json/encode (application->allu-placement-contract pending-on-client app))}]))
+      :form-params  (application->allu-placement-contract pending-on-client app)}]))
 
 (def- placement-locking-request (partial placement-update-request false))
 
@@ -339,7 +339,7 @@
   (lock-contract! [_ endpoint request] (http/put endpoint request)))
 
 (defn- local-mock-update-contract [state endpoint request]
-  (let [placement-contract (json/decode (:body request) true)
+  (let [placement-contract (:form-params request)
         allu-id (second (re-find #".*/(\d+)" endpoint))]
     (if-let [validation-error (sc/check PlacementContract placement-contract)]
       (assoc state :latest-response {:status 400, :body validation-error})
@@ -369,7 +369,7 @@
 
   ALLUPlacementContracts
   (create-contract! [_ _ request]
-    (let [placement-contract (json/decode (:body request) true)]
+    (let [placement-contract (:form-params request)]
       (if-let [validation-error (sc/check PlacementContract placement-contract)]
         {:status 400, :body validation-error}
         (let [local-mock-allu-state-push (fn [{:keys [id-counter] :as state}]

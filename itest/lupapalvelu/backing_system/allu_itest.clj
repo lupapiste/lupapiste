@@ -4,7 +4,6 @@
             [mount.core :as mount]
             [schema.core :as sc]
             [clj-http.client :as http]
-            [cheshire.core :as json]
             [monger.operators :refer [$set]]
             [sade.core :refer [ok?]]
             [sade.schema-generators :as ssg]
@@ -48,7 +47,7 @@
   (fact "request is well-formed"
     (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
     (:content-type request) => :json
-    (let [contract (-> request :body (json/decode true))]
+    (let [contract (:form-params request)]
       (when schema-check?
         contract => #(nil? (sc/check PlacementContract %)))
       (:pendingOnClient contract) => pending-on-client)))
