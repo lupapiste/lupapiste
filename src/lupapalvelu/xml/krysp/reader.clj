@@ -16,6 +16,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
             [lupapalvelu.wfs :as wfs]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [lupapalvelu.xml.krysp.common-reader :as common]
             [lupapalvelu.find-address :as find-address]
@@ -672,6 +673,10 @@
       (first x)
       (select x [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja])
       (map cr/all-of x))))
+
+(defn ->lausuntotiedot [xml]
+  (->> (select xml [:rakennusvalvontaAsiatieto :lausuntotieto :Lausunto :lausuntotieto :Lausunto])
+       (map cr/all-of)))
 
 ;;
 ;; Information parsed from verdict xml message for application creation
