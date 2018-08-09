@@ -232,9 +232,7 @@
                        :required [:application/cancel]}]
    :notified         true
    :on-success       [(notify :application-state-change)
-                      (fn [{:keys [application organization] :as command} _]
-                        (bs/cancel-application! (bs/get-backing-system @organization (permit/permit-type application))
-                                                command))]
+                      (fn [command _] (bs/cancel-application! command))]
    :states           states/all-application-or-archiving-project-states
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
@@ -344,14 +342,11 @@
                       (notify :organization-on-submit)
                       (notify :organization-housing-office)]
    :pre-checks       [(partial sm/validate-state-transition :submitted)]}
-  [{:keys [application organization] :as command}]
+  [{:keys [application] :as command}]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (let [application (if-let [[bs-name integration-key]
-                                 (bs/submit-application! (bs/get-backing-system @organization
-                                                                                (permit/permit-type application))
-                                                         command)]
+      (let [application (if-let [[bs-name integration-key] (bs/submit-application! command)]
                           (do (app/set-integration-key id bs-name integration-key)
                               (assoc-in application [:integrationKeys bs-name] integration-key)) ; HACK
                           application)]
@@ -654,9 +649,7 @@
    :states           #{:submitted}
    :pre-checks       [(partial sm/validate-state-transition :draft)]
    :on-success       [(notify :application-return-to-draft)
-                      (fn [{:keys [application organization] :as command} _]
-                        (bs/return-to-draft! (bs/get-backing-system @organization (permit/permit-type application))
-                                             command))]}
+                      (fn [command _] (bs/return-to-draft! command))]}
   [{{:keys [role] :as user}         :user
     {:keys [state] :as application} :application
     created                         :created
