@@ -332,6 +332,33 @@
       :content-type :json
       :form-params  (application->allu-placement-contract pending-on-client app)}]))
 
+(defn- base-integration-message [{:keys [application user action]} endpoint message-subtype direction status]
+  {:id           (mongo/create-id)
+   :direction    direction
+   :messageType  message-subtype
+   :transferType "http"
+   :partner      "allu"
+   :format       "json"
+   :created      (now)
+   :status       status
+   :application  (select-keys application [:id :organization :state])
+   :initator     (select-keys user [:id :username])
+   :action       action
+   :data         {:endpoint endpoint}})
+
+;; TODO: :attachment-files and :attachmentsCount for attachemnt messages
+(sc/defn ^{:private true, :always-validate true} request-integration-message :- IntegrationMessage
+  [command endpoint request message-subtype payload-key]
+  (assoc-in (base-integration-message command endpoint message-subtype "out" "processing") [:data :request]
+            (if (= payload-key :multipart)                  ; HACK
+              {:multipart [(get-in request [:multipart 0])]}
+              (select-keys request [payload-key]))))
+
+(sc/defn ^{:private true, :always-validate true} response-integration-message :- IntegrationMessage
+  [command endpoint response message-subtype]
+  (assoc-in (base-integration-message command endpoint message-subtype "in" "done") [:data :response]
+            (select-keys response [:status :body])))
+
 ;;;; Should you use this?
 ;;;; ===================================================================================================================
 
@@ -400,32 +427,6 @@
         (if (creation-response-ok? allu-id)
           {:status 200, :body allu-id}
           {:status 404, :body (str "Not Found: " allu-id)})))))
-
-(defn- base-integration-message [{:keys [application user action]} endpoint message-subtype direction status]
-  {:id           (mongo/create-id)
-   :direction    direction
-   :messageType  message-subtype
-   :transferType "http"
-   :partner      "allu"
-   :format       "json"
-   :created      (now)
-   :status       status
-   :application  (select-keys application [:id :organization :state])
-   :initator     (select-keys user [:id :username])
-   :action       action
-   :data         {:endpoint endpoint}})
-
-(sc/defn ^{:private true, :always-validate true} request-integration-message :- IntegrationMessage
-  [command endpoint request message-subtype payload-key]
-  (assoc-in (base-integration-message command endpoint message-subtype "out" "processing") [:data :request]
-            (if (= payload-key :multipart)                  ; HACK
-              {:multipart [(get-in request [:multipart 0])]}
-              (select-keys request [payload-key]))))
-
-(sc/defn ^{:private true, :always-validate true} response-integration-message :- IntegrationMessage
-  [command endpoint response message-subtype]
-  (assoc-in (base-integration-message command endpoint message-subtype "in" "done") [:data :response]
-            (select-keys response [:status :body])))
 
 (defn- with-integration-messages [command endpoint request message-subtype payload-key body]
   (let [{msg-id :id :as msg} (request-integration-message command endpoint request message-subtype payload-key)
