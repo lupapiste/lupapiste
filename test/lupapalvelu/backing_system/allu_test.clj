@@ -87,7 +87,6 @@
             [endpoint request] (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
         (fact "endpoint" endpoint => "https://example.com/api/v1/placementcontracts")
         (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                                    :content-type :json
                                     :form-params  (application->allu-placement-contract true app)})))
 
     (facts "attachment-send"
@@ -99,16 +98,11 @@
                                                 contents)]
         (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/attachments"))
         (fact "request"
-          request => {:headers   {:authorization "Bearer foo.bar.baz"}
-                      :multipart [{:name      "metadata"
-                                   :mime-type "application/json"
-                                   :encoding  "UTF-8"
-                                   :content   {:name        (:contents attachment)
+          request => {:headers     {:authorization "Bearer foo.bar.baz"}
+                      :form-params {:metadata {:name        (:contents attachment)
                                                :description (localize "fi" :attachmentType type-group type-id)
-                                               :mimeType    (:contentType latestVersion)}}
-                                  {:name      "file"
-                                   :mime-type (:contentType latestVersion)
-                                   :content   contents}]})))
+                                               :mimeType    (:contentType latestVersion)}
+                                    :file     contents}})))
 
     (facts "placement-update-request"
       (let [allu-id "23"
@@ -119,7 +113,6 @@
           (fact "endpoint" endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
           (fact "request"
             request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                        :content-type :json
                         :form-params  (application->allu-placement-contract pending-on-client app)}))))
 
     (facts "integration message generation"
@@ -130,8 +123,7 @@
           (request-integration-message {:user        user
                                         :application app
                                         :action      "submit-application"}
-                                       endpoint request
-                                       "placementcontracts.create" :form-params)
+                                       endpoint request "placementcontracts.create")
           => (contains {:direction    "out"
                         :messageType  "placementcontracts.create"
                         :transferType "http"
@@ -151,8 +143,7 @@
             (response-integration-message {:user        user
                                            :application app
                                            :action      "submit-application"}
-                                          endpoint response
-                                          "placementcontracts.create")
+                                          endpoint response "placementcontracts.create")
             => (contains {:direction    "in"
                           :messageType  "placementcontracts.create"
                           :transferType "http"

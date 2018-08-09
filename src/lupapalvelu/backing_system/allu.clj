@@ -2,7 +2,6 @@
   "JSON REST API integration with ALLU as backing system. Used for Helsinki YA instead of SFTP/HTTP KRYSP XML
   integration."
   (:require [clojure.core.match :refer [match]]
-            [clojure.string :as s]
             [clojure.walk :refer [postwalk]]
             [monger.operators :refer [$set $in]]
             [cheshire.core :as json]
@@ -12,7 +11,7 @@
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
             [taoensso.timbre :refer [info]]
-            [sade.util :refer [assoc-when]]
+            [sade.util :refer [dissoc-in assoc-when]]
             [sade.core :refer [def- fail! now]]
             [sade.env :as env]
             [sade.http :as http]
@@ -24,8 +23,7 @@
             [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]
             [lupapalvelu.integrations.messages :as imessages :refer [IntegrationMessage]]
-            [lupapalvelu.mongo :as mongo])
-  (:import [java.io InputStream]))
+            [lupapalvelu.mongo :as mongo]))
 
 ;;;; Schemas
 ;;;; ===================================================================================================================
@@ -153,26 +151,6 @@
    (optional-key :propertyIdentificationNumber) Kiinteistotunnus
    :startTime                                   (date-string :date-time-no-ms)
    (optional-key :workDescription)              NonBlankStr})
-
-;;; TODO: Use these (?):
-
-(defschema ALLUAuthHeaders
-  {:authorization (sc/pred #(s/starts-with? % "Bearer ") 'JWTBearer)}) ; TODO: Also match JWT
-
-(defschema ALLUPlacementContractRequest
-  {:headers      ALLUAuthHeaders
-   :content-type (sc/eq :json)
-   :form-params  PlacementContract})
-
-(defschema AttachmentRequest
-  {:headers   ALLUAuthHeaders
-   :multipart [{:name      (sc/eq "metadata")
-                :mime-type (sc/eq "application/json")
-                :encoding  (sc/eq "UTF-8")
-                :content   sc/Str}                          ; TODO: Improve this (without using json/decode!)
-               {:name      (sc/eq "file")
-                :mime-type sc/Str
-                :content   InputStream}]})
 
 ;;;; Constants
 ;;;; ===================================================================================================================
@@ -304,30 +282,23 @@
   (let [allu-id (-> app :integrationKeys :ALLU :id)]
     (assert allu-id (str (:id app) " does not contain an ALLU id"))
     [(str allu-url "/applications/" allu-id "/attachments")
-     {:headers   {:authorization (str "Bearer " allu-jwt)}
-      :multipart [{:name      "metadata"
-                   :content   {:name        (:contents attachment)
+     {:headers     {:authorization (str "Bearer " allu-jwt)}
+      :form-params {:metadata {:name        (:contents attachment)
                                :description (localize lang :attachmentType type-group type-id)
                                :mimeType    (:contentType latestVersion)}
-                   :mime-type "application/json"
-                   :encoding  "UTF-8"}
-                  {:name      "file"
-                   :content   file-contents
-                   :mime-type (:contentType latestVersion)}]}]))
+                    :file     file-contents}}]))
 
 (defn- placement-creation-request [allu-url allu-jwt app]
   [(str allu-url "/placementcontracts")
-   {:headers      {:authorization (str "Bearer " allu-jwt)}
-    :content-type :json
-    :form-params  (application->allu-placement-contract true app)}])
+   {:headers     {:authorization (str "Bearer " allu-jwt)}
+    :form-params (application->allu-placement-contract true app)}])
 
 (defn- placement-update-request [pending-on-client allu-url allu-jwt app]
   (let [allu-id (-> app :integrationKeys :ALLU :id)]
     (assert allu-id (str (:id app) " does not contain an ALLU id"))
     [(str allu-url "/placementcontracts/" allu-id)
-     {:headers      {:authorization (str "Bearer " allu-jwt)}
-      :content-type :json
-      :form-params  (application->allu-placement-contract pending-on-client app)}]))
+     {:headers     {:authorization (str "Bearer " allu-jwt)}
+      :form-params (application->allu-placement-contract pending-on-client app)}]))
 
 ;;;; integration-messages
 ;;;; ===================================================================================================================
@@ -348,11 +319,9 @@
 
 ;; TODO: :attachment-files and :attachmentsCount for attachment messages
 (sc/defn ^{:private true, :always-validate true} request-integration-message :- IntegrationMessage
-  [command endpoint request message-subtype payload-key]
+  [command endpoint request message-subtype]
   (assoc-in (base-integration-message command endpoint message-subtype "out" "processing") [:data :request]
-            (if (= payload-key :multipart)                  ; HACK
-              {:multipart [(get-in request [:multipart 0])]}
-              (select-keys request [payload-key]))))
+            (select-keys request [:form-params])))
 
 (sc/defn ^{:private true, :always-validate true} response-integration-message :- IntegrationMessage
   [command endpoint response message-subtype]
@@ -380,13 +349,21 @@
   (-cancel-application! [_ _ endpoint request] (http/put endpoint request))
 
   ALLUPlacementContracts
-  (-create-placement-contract! [_ _ endpoint request] (http/post endpoint request))
-  (-update-placement-contract! [_ _ endpoint request] (http/put endpoint request))
+  (-create-placement-contract! [_ _ endpoint request] (http/post endpoint (assoc request :content-type :json)))
+  (-update-placement-contract! [_ _ endpoint request] (http/put endpoint (assoc request :content-type :json)))
 
   ALLUAttachments
   (-send-attachment! [_ _ endpoint request]
-    (->> (update-in request [:multipart 0 :content] json/encode) ; HACK
-         (http/post endpoint request))))
+    ;; Remember when I said :form-params? I LIED:
+    (http/post endpoint (-> request
+                            (dissoc :body)
+                            (assoc :multipart [{:name      "metadata"
+                                                :content   (json/encode (-> request :form-params :metadata))
+                                                :mime-type "application/json"
+                                                :encoding  "UTF-8"}
+                                               {:name      "file"
+                                                :content   (-> request :form-params :file)
+                                                :mime-type (-> request :form-params :metadata :mimeType)}])))))
 
 ;;;; Mock for interactive development
 ;;;; ===================================================================================================================
@@ -431,8 +408,8 @@
 ;;;; Integration message <del>Decorator</del> middleware
 ;;;; ===================================================================================================================
 
-(defn- with-integration-messages [command endpoint request message-subtype payload-key body]
-  (let [{msg-id :id :as msg} (request-integration-message command endpoint request message-subtype payload-key)
+(defn- with-integration-messages [command endpoint request message-subtype body]
+  (let [{msg-id :id :as msg} (request-integration-message command endpoint request message-subtype)
         _ (imessages/save msg)
         response (body)]
     (imessages/update-message msg-id {$set {:status "done", :acknowledged (now)}})
@@ -442,20 +419,21 @@
 (deftype MessageSavingALLU [inner]
   ALLUApplications
   (-cancel-application! [_ command endpoint request]
-    (with-integration-messages command endpoint request "applications.cancelled" :form-params
+    (with-integration-messages command endpoint request "applications.cancelled"
                                #(-cancel-application! inner command endpoint request)))
 
   ALLUPlacementContracts
   (-create-placement-contract! [_ command endpoint request]
-    (with-integration-messages command endpoint request "placementcontracts.create" :form-params
+    (with-integration-messages command endpoint request "placementcontracts.create"
                                #(-create-placement-contract! inner command endpoint request)))
   (-update-placement-contract! [_ command endpoint request]
-    (with-integration-messages command endpoint request "placementcontracts.update" :form-params
+    (with-integration-messages command endpoint request "placementcontracts.update"
                                #(-update-placement-contract! inner command endpoint request)))
 
   ALLUAttachments
   (-send-attachment! [_ command endpoint request]
-    (with-integration-messages command endpoint request "attachments.create" :multipart
+    ;; TODO: Instead of just throwing :file away, store the fileId:
+    (with-integration-messages command endpoint (dissoc-in request [:form-params :file]) "attachments.create"
                                #(-send-attachment! inner command endpoint request))))
 
 ;;;; State and error handling

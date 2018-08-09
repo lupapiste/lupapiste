@@ -22,7 +22,8 @@
             [lupapalvelu.backing-system.allu :as allu
              :refer [ALLUApplications -cancel-application! ALLUAttachments -send-attachment!
                      ALLUPlacementContracts ->MessageSavingALLU PlacementContract
-                     -update-placement-contract! -create-placement-contract! allu-fail!]]))
+                     -update-placement-contract! -create-placement-contract! allu-fail!]])
+  (:import [java.io InputStream]))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -47,7 +48,6 @@
 (defn- check-request [schema-check? request]
   (fact "request is well-formed"
     (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
-    (:content-type request) => :json
     (let [contract (:form-params request)]
       (when schema-check?
         contract => #(nil? (sc/check PlacementContract %))))))
@@ -87,7 +87,7 @@
   (-send-attachment! [_ _ endpoint request]
     (let [allu-id (second (re-find #".*/applications/(\d+)/attachments" endpoint))]
       (if (contains? (:applications @state) allu-id)
-        (let [attachment {:metadata (-> (get-in request [:multipart 0 :content]) (json/decode true))}]
+        (let [attachment (select-keys (:form-params request) [:metadata])]
           (swap! state update-in [:applications allu-id :attachments] (fnil conj []) attachment)
           {:status 200, :body ""})
         {:status 404, :body (str "Not Found: " allu-id)}))))
@@ -119,12 +119,8 @@
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/attachments")))
     (fact "request is well-formed"
       (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
-      (-> request :multipart count) => 2
-      (-> request (get-in [:multipart 0]) keys set) => #{:name :mime-type :encoding :content}
-      (-> request (get-in [:multipart 0]) (select-keys [:name :mime-type :encoding]))
-      => {:name "metadata", :mime-type "application/json", :encoding "UTF-8"}
-      (-> request (get-in [:multipart 1]) keys set) => #{:name :mime-type :content}
-      (-> request (get-in [:multipart 1]) :name) => "file")
+      (-> request :form-params :metadata keys set) => #{:name :description :mimeType}
+      (-> request :form-params :file) => #(instance? InputStream %))
 
     (-send-attachment! inner command endpoint request)))
 
