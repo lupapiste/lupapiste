@@ -20,9 +20,9 @@
             [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
 
             [lupapalvelu.backing-system.allu :as allu
-             :refer [ALLUApplications cancel-allu-application! ALLUAttachments send-allu-attachment!
+             :refer [ALLUApplications -cancel-application! ALLUAttachments -send-attachment!
                      ALLUPlacementContracts ->MessageSavingALLU PlacementContract
-                     update-contract! create-contract! allu-fail!]]))
+                     -update-placement-contract! -create-placement-contract! allu-fail!]]))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -54,24 +54,15 @@
 
 (deftype AtomMockALLU [state]
   ALLUApplications
-  (cancel-allu-application! [_ _ endpoint _]
+  (-cancel-application! [_ _ endpoint _]
     (let [allu-id (second (re-find #".*/(\d+)/cancelled" endpoint))]
       (if (contains? (:applications @state) allu-id)
         (do (swap! state update :applications dissoc allu-id)
             {:status 200, :body ""})
         {:status 404, :body (str "Not Found: " allu-id)})))
 
-  ALLUAttachments
-  (send-allu-attachment! [_ _ endpoint request]
-    (let [allu-id (second (re-find #".*/applications/(\d+)/attachments" endpoint))]
-      (if (contains? (:applications @state) allu-id)
-        (let [attachment {:metadata (-> (get-in request [:multipart 0 :content]) (json/decode true))}]
-          (swap! state update-in [:applications allu-id :attachments] (fnil conj []) attachment)
-          {:status 200, :body ""})
-        {:status 404, :body (str "Not Found: " allu-id)})))
-
   ALLUPlacementContracts
-  (create-contract! [_ _ _ request]
+  (-create-placement-contract! [_ _ _ request]
     (let [placement-contract (:form-params request)]
       (if-let [validation-error (sc/check PlacementContract placement-contract)]
         {:status 400, :body validation-error}
@@ -82,7 +73,7 @@
               {:keys [id-counter]} (swap! state local-mock-allu-state-push)]
           {:status 200, :body (str (dec id-counter))}))))
 
-  (update-contract! [_ _ endpoint request]
+  (-update-placement-contract! [_ _ endpoint request]
     (let [allu-id (second (re-find #".*/(\d+)" endpoint))
           placement-contract (:form-params request)]
       (if-let [validation-error (sc/check PlacementContract placement-contract)]
@@ -90,19 +81,41 @@
         (if (contains? (:applications state) allu-id)
           (do (swap! state assoc-in [:applications allu-id] placement-contract)
               {:status 200, :body allu-id})
-          {:status 404, :body (str "Not Found: " allu-id)})))))
+          {:status 404, :body (str "Not Found: " allu-id)}))))
+
+  ALLUAttachments
+  (-send-attachment! [_ _ endpoint request]
+    (let [allu-id (second (re-find #".*/applications/(\d+)/attachments" endpoint))]
+      (if (contains? (:applications @state) allu-id)
+        (let [attachment {:metadata (-> (get-in request [:multipart 0 :content]) (json/decode true))}]
+          (swap! state update-in [:applications allu-id :attachments] (fnil conj []) attachment)
+          {:status 200, :body ""})
+        {:status 404, :body (str "Not Found: " allu-id)}))))
 
 (deftype CheckingALLU [inner]
   ALLUApplications
-  (cancel-allu-application! [_ command endpoint request]
+  (-cancel-application! [_ command endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/cancelled")))
     (fact "request is well-formed"
       (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt)))
 
-    (cancel-allu-application! inner command endpoint request))
+    (-cancel-application! inner command endpoint request))
+
+  ALLUPlacementContracts
+  (-create-placement-contract! [_ command endpoint request]
+    (fact "endpoint is correct" endpoint => (str (env/value :allu :url) "/placementcontracts"))
+    (check-request true request)
+
+    (-create-placement-contract! inner command endpoint request))
+
+  (-update-placement-contract! [_ command endpoint request]
+    (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
+    (check-request false request)
+
+    (-update-placement-contract! inner command endpoint request))
 
   ALLUAttachments
-  (send-allu-attachment! [_ command endpoint request]
+  (-send-attachment! [_ command endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/attachments")))
     (fact "request is well-formed"
       (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
@@ -113,29 +126,16 @@
       (-> request (get-in [:multipart 1]) keys set) => #{:name :mime-type :content}
       (-> request (get-in [:multipart 1]) :name) => "file")
 
-    (send-allu-attachment! inner command endpoint request))
-
-  ALLUPlacementContracts
-  (create-contract! [_ command endpoint request]
-    (fact "endpoint is correct" endpoint => (str (env/value :allu :url) "/placementcontracts"))
-    (check-request true request)
-
-    (create-contract! inner command endpoint request))
-
-  (update-contract! [_ command endpoint request]
-    (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
-    (check-request false request)
-
-    (update-contract! inner command endpoint request)))
+    (-send-attachment! inner command endpoint request)))
 
 (deftype ConstALLU [cancel-response attach-response creation-response update-response]
   ALLUApplications
-  (cancel-allu-application! [_ _ _ _] cancel-response)
-  ALLUAttachments
-  (send-allu-attachment! [_ _ _ _] attach-response)
+  (-cancel-application! [_ _ _ _] cancel-response)
   ALLUPlacementContracts
-  (create-contract! [_ _ _ _] creation-response)
-  (update-contract! [_ _ _ _] update-response))
+  (-create-placement-contract! [_ _ _ _] creation-response)
+  (-update-placement-contract! [_ _ _ _] update-response)
+  ALLUAttachments
+  (-send-attachment! [_ _ _ _] attach-response))
 
 ;;;; Actual Tests
 ;;;; ===================================================================================================================

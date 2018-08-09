@@ -363,30 +363,30 @@
 ;;;; ===================================================================================================================
 
 (defprotocol ALLUApplications
-  (cancel-allu-application! [self command endpoint request]))
-
-(defprotocol ALLUAttachments
-  (send-allu-attachment! [self command endpoint request]))
+  (-cancel-application! [self command endpoint request]))
 
 (defprotocol ALLUPlacementContracts
-  (create-contract! [self command endpoint request])
-  (update-contract! [self command endpoint request]))
+  (-create-placement-contract! [self command endpoint request])
+  (-update-placement-contract! [self command endpoint request]))
+
+(defprotocol ALLUAttachments
+  (-send-attachment! [self command endpoint request]))
 
 ;;;; HTTP request sender for production
 ;;;; ===================================================================================================================
 
 (deftype RemoteALLU []
   ALLUApplications
-  (cancel-allu-application! [_ _ endpoint request] (http/put endpoint request))
-
-  ALLUAttachments
-  (send-allu-attachment! [_ _ endpoint request]
-    (->> (update-in request [:multipart 0 :content] json/encode)
-         (http/post endpoint request)))
+  (-cancel-application! [_ _ endpoint request] (http/put endpoint request))
 
   ALLUPlacementContracts
-  (create-contract! [_ _ endpoint request] (http/post endpoint request))
-  (update-contract! [_ _ endpoint request] (http/put endpoint request)))
+  (-create-placement-contract! [_ _ endpoint request] (http/post endpoint request))
+  (-update-placement-contract! [_ _ endpoint request] (http/put endpoint request))
+
+  ALLUAttachments
+  (-send-attachment! [_ _ endpoint request]
+    (->> (update-in request [:multipart 0 :content] json/encode)
+         (http/post endpoint request))))
 
 ;;;; Mock for interactive development
 ;;;; ===================================================================================================================
@@ -401,32 +401,32 @@
 ;; This approximates the ALLU state with the `imessages` data:
 (deftype IntegrationMessagesMockALLU []
   ALLUApplications
-  (cancel-allu-application! [_ _ endpoint _]
+  (-cancel-application! [_ _ endpoint _]
     (let [allu-id (second (re-find #".*/([\d\-]+)/cancelled" endpoint))]
       (if (creation-response-ok? allu-id)
         {:status 200, :body ""}
         {:status 404, :body (str "Not Found: " allu-id)})))
 
-  ALLUAttachments
-  (send-allu-attachment! [_ _ endpoint _]
-    (let [allu-id (second (re-find #".*/applications/([\d\-]+)/attachments" endpoint))]
-      (if (creation-response-ok? allu-id)
-        {:status 200, :body ""}
-        {:status 404, :body (str "Not Found: " allu-id)})))
-
   ALLUPlacementContracts
-  (create-contract! [_ _ _ {{:keys [identificationNumber] :as placement-contract} :form-params}]
+  (-create-placement-contract! [_ _ _ {{:keys [identificationNumber] :as placement-contract} :form-params}]
     (if-let [validation-error (sc/check PlacementContract placement-contract)]
       {:status 400, :body validation-error}
       {:status 200, :body (subs identificationNumber 3)}))
 
-  (update-contract! [_ _ endpoint {placement-contract :form-params}]
+  (-update-placement-contract! [_ _ endpoint {placement-contract :form-params}]
     (let [allu-id (second (re-find #".*/([\d\-]+)" endpoint))]
       (if-let [validation-error (sc/check PlacementContract placement-contract)]
         {:status 400, :body validation-error}
         (if (creation-response-ok? allu-id)
           {:status 200, :body allu-id}
-          {:status 404, :body (str "Not Found: " allu-id)})))))
+          {:status 404, :body (str "Not Found: " allu-id)}))))
+
+  ALLUAttachments
+  (-send-attachment! [_ _ endpoint _]
+    (let [allu-id (second (re-find #".*/applications/([\d\-]+)/attachments" endpoint))]
+      (if (creation-response-ok? allu-id)
+        {:status 200, :body ""}
+        {:status 404, :body (str "Not Found: " allu-id)}))))
 
 ;;;; Integration message <del>Decorator</del> middleware
 ;;;; ===================================================================================================================
@@ -441,22 +441,22 @@
 
 (deftype MessageSavingALLU [inner]
   ALLUApplications
-  (cancel-allu-application! [_ command endpoint request]
+  (-cancel-application! [_ command endpoint request]
     (with-integration-messages command endpoint request "applications.cancelled" :form-params
-                               #(cancel-allu-application! inner command endpoint request)))
-
-  ALLUAttachments
-  (send-allu-attachment! [_ command endpoint request]
-    (with-integration-messages command endpoint request "attachments.create" :multipart
-                               #(send-allu-attachment! inner command endpoint request)))
+                               #(-cancel-application! inner command endpoint request)))
 
   ALLUPlacementContracts
-  (create-contract! [_ command endpoint request]
+  (-create-placement-contract! [_ command endpoint request]
     (with-integration-messages command endpoint request "placementcontracts.create" :form-params
-                               #(create-contract! inner command endpoint request)))
-  (update-contract! [_ command endpoint request]
+                               #(-create-placement-contract! inner command endpoint request)))
+  (-update-placement-contract! [_ command endpoint request]
     (with-integration-messages command endpoint request "placementcontracts.update" :form-params
-                               #(update-contract! inner command endpoint request))))
+                               #(-update-placement-contract! inner command endpoint request)))
+
+  ALLUAttachments
+  (-send-attachment! [_ command endpoint request]
+    (with-integration-messages command endpoint request "attachments.create" :multipart
+                               #(-send-attachment! inner command endpoint request))))
 
 ;;;; State and error handling
 ;;;; ===================================================================================================================
@@ -469,16 +469,56 @@
 (defn- allu-http-fail! [response]
   (allu-fail! :error.allu.http (select-keys response [:status :body])))
 
-;;;; Private API
+;;;; Mix up pure and impure into an API
 ;;;; ===================================================================================================================
+
+(defn allu-application? [organization permit-type]
+  (and (env/feature? :allu) (= (:id organization) "091-YA") (= permit-type "YA")))
+
+;;; TODO: DRY these up:
+
+(declare create-placement-contract!)
+
+(defn submit-application!
+  "Submit application to ALLU. Returns the value that should be saved to application.integrationKeys.ALLU."
+  [{{:keys [permitSubtype]} :application :as command}]
+  {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
+  ;; TODO: Use message queue to delay and retry interaction with ALLU.
+  ;; TODO: Send errors to authority instead of applicant?
+  ;; TODO: Non-placement-contract ALLU applications
+  {:id (create-placement-contract! command)})
+
+(declare update-placement-contract!)
+
+;; TODO: Non-placement-contract ALLU applications
+(def update-application!
+  "Update application in ALLU (if it had been sent there)."
+  update-placement-contract!)
+
+(defn cancel-application!
+  "Cancel application in ALLU (if it had been sent there)."
+  [{:keys [application] :as command}]
+  (when-let [allu-id (-> application :integrationKeys :ALLU :id)]
+    (let [[endpoint request] (application-cancel-request (env/value :allu :url) (env/value :allu :jwt) application)]
+      (match (-cancel-application! allu-instance command endpoint request)
+        {:status (:or 200 201)} (info (:id application) "was canceled in ALLU as" allu-id)
+        response (allu-http-fail! response)))))
 
 (defn- create-placement-contract!
   "Create placement contract in ALLU. Returns ALLU id for the contract."
   [{:keys [application] :as command}]
   (let [[endpoint request] (placement-creation-request (env/value :allu :url) (env/value :allu :jwt) application)]
-    (match (create-contract! allu-instance command endpoint request)
+    (match (-create-placement-contract! allu-instance command endpoint request)
       {:status (:or 200 201), :body allu-id} (do (info (:id application) "was created in ALLU as" allu-id)
                                                  allu-id)
+      response (allu-http-fail! response))))
+
+(defn lock-placement-contract!
+  "Lock placement contract in ALLU for verdict evaluation."
+  [{:keys [application] :as command}]
+  (let [[endpoint request] (placement-update-request false (env/value :allu :url) (env/value :allu :jwt) application)]
+    (match (-update-placement-contract! allu-instance command endpoint request)
+      {:status (:or 200 201), :body allu-id} (info (:id application) "was locked in ALLU as" allu-id)
       response (allu-http-fail! response))))
 
 ;; TODO: Will error if user changes the application to contain invalid data, is that what we want?
@@ -487,7 +527,7 @@
   [{:keys [application] :as command}]
   (when-let [allu-id (-> application :integrationKeys :ALLU :id)]
     (let [[endpoint request] (placement-update-request true (env/value :allu :url) (env/value :allu :jwt) application)]
-      (match (update-contract! allu-instance command endpoint request)
+      (match (-update-placement-contract! allu-instance command endpoint request)
         {:status (:or 200 201), :body allu-id} (info (:id application) "was updated in ALLU as" allu-id)
         response (allu-http-fail! response)))))
 
@@ -496,28 +536,12 @@
   [{:keys [application] :as command} {attachment-id :id {:keys [fileId]} :latestVersion :as attachment}]
   (let [file-contents (when-let [file-map (get-attachment-file! application fileId)]
                         ((:content file-map)))
-        [endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) application attachment file-contents)]
-    (match (send-allu-attachment! allu-instance command endpoint request)
+        [endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) application attachment
+                                            file-contents)]
+    (match (-send-attachment! allu-instance command endpoint request)
       {:status (:or 200 201)} (do (info "attachment" attachment-id "of" (:id application) "was sent to ALLU")
                                   fileId)
       response (allu-http-fail! response))))
-
-;;;; Public API
-;;;; ===================================================================================================================
-
-(defn allu-application? [organization permit-type]
-  (and (env/feature? :allu) (= (:id organization) "091-YA") (= permit-type "YA")))
-
-;;; TODO: DRY these up:
-
-(defn cancel-application!
-  "Cancel application in ALLU (if it had been sent there)."
-  [{:keys [application] :as command}]
-  (when-let [allu-id (-> application :integrationKeys :ALLU :id)]
-    (let [[endpoint request] (application-cancel-request (env/value :allu :url) (env/value :allu :jwt) application)]
-      (match (cancel-allu-application! allu-instance command endpoint request)
-        {:status (:or 200 201)} (info (:id application) "was canceled in ALLU as" allu-id)
-        response (allu-http-fail! response)))))
 
 (defn send-attachments!
   "Send the specified `attachments` of `(:application command)` to ALLU
@@ -525,25 +549,3 @@
   [command attachments]
   (doall (for [attachment attachments]
            (send-attachment! command attachment))))
-
-(defn submit-application!
-  "Submit application to ALLU. Returns the value that should be saved to application.integrationKeys.ALLU."
-  [command]
-  ;; TODO: Use message queue to delay and retry interaction with ALLU.
-  ;; TODO: Save messages for inter-system debugging etc.
-  ;; TODO: Send errors to authority instead of applicant?
-  ;; TODO: Non-placement-contract ALLU applications
-  {:id (create-placement-contract! command)})
-
-;; TODO: Non-placement-contract ALLU applications
-(def update-application!
-  "Update application in ALLU (if it had been sent there)."
-  update-placement-contract!)
-
-(defn lock-placement-contract!
-  "Lock placement contract in ALLU for verdict evaluation."
-  [{:keys [application] :as command}]
-  (let [[endpoint request] (placement-update-request false (env/value :allu :url) (env/value :allu :jwt) application)]
-    (match (update-contract! allu-instance command endpoint request)
-      {:status (:or 200 201), :body allu-id} (info (:id application) "was locked in ALLU as" allu-id)
-      response (allu-http-fail! response))))
