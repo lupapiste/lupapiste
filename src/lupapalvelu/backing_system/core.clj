@@ -17,7 +17,7 @@
 (defprotocol BackingSystem
   (-submit-application! [self command]
     "Send application submit message to backing system. Returns [backing-system-name integration-key-data] or nil.")
-  (-update-application! [self command-with-updated-application]
+  (-update-application! [self command updated-application]
     "Update application in backing system if supported. Returns true if supported, false if not.")
   (-cancel-application! [self command] "Cancel application in backing system. Returns nil.")
   (-return-to-draft! [self command] "Return application to draft in backing system. Returns nil.")
@@ -30,7 +30,7 @@
 (deftype NoopBackingSystem []
   BackingSystem
   (-submit-application! [_ _] nil)
-  (-update-application! [_ _] false)
+  (-update-application! [_ _ _] false)
   (-return-to-draft! [_ _] nil)
   (-cancel-application! [_ _] nil)
   (-approve-application! [_ _ _ _] [false nil])
@@ -39,8 +39,8 @@
 (deftype ALLUBackingSystem []
   BackingSystem
   (-submit-application! [_ command] [:ALLU (allu/submit-application! command)])
-  (-update-application! [_ command-with-updated-application]
-    (allu/update-application! command-with-updated-application)
+  (-update-application! [_  command updated-application]
+    (allu/update-application! (assoc command :application updated-application))
     true)
   (-return-to-draft! [_ command] (allu/cancel-application! command))
   (-cancel-application! [_ command] (allu/cancel-application! command))
@@ -54,7 +54,7 @@
 (deftype KRYSPBackingSystem []
   BackingSystem
   (-submit-application! [_ _] nil)
-  (-update-application! [_ _] false)
+  (-update-application! [_ _ _] false)
   (-return-to-draft! [_ _] nil)
   (-cancel-application! [_ _] nil)
   (-approve-application! [_ {{:keys [state]} :application :as command} submitted-application lang]
@@ -78,8 +78,7 @@
 (def submit-application! (partial with-implicit-backing-system -submit-application!))
 
 (defn- update-application! [{{:keys [id]} :application :as command}]
-  (with-implicit-backing-system -update-application!
-                                (assoc command :application (domain/get-application-no-access-checking id))))
+  (with-implicit-backing-system -update-application! command (domain/get-application-no-access-checking id)))
 
 (defn update-callback [command _]
   (update-application! command)

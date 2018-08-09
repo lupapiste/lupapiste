@@ -385,7 +385,7 @@
 
   ALLUAttachments
   (-send-attachment! [_ _ endpoint request]
-    (->> (update-in request [:multipart 0 :content] json/encode)
+    (->> (update-in request [:multipart 0 :content] json/encode) ; HACK
          (http/post endpoint request))))
 
 ;;;; Mock for interactive development
