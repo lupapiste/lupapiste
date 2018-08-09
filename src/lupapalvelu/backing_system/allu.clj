@@ -184,13 +184,10 @@
 
 (def- WGS84-URN "EPSG:4326")
 
-;;;; Cleaning up :value indirections
+;;;; Application conversion
 ;;;; ===================================================================================================================
 
 (def- flatten-values (partial postwalk (some-fn :value identity)))
-
-;;;; Application conversion
-;;;; ===================================================================================================================
 
 (defn- application-kind [app]
   (let [operation (-> app :primaryOperation :name keyword)
@@ -292,7 +289,7 @@
 (sc/defn ^{:private true} application->allu-placement-contract :- PlacementContract [pending-on-client app]
   (->> app flatten-values (convert-value-flattened-app pending-on-client)))
 
-;;;; Request construction
+;;;; Requests
 ;;;; ===================================================================================================================
 
 (defn- application-cancel-request [allu-url allu-jwt app]
@@ -332,6 +329,9 @@
       :content-type :json
       :form-params  (application->allu-placement-contract pending-on-client app)}]))
 
+;;;; integration-messages
+;;;; ===================================================================================================================
+
 (defn- base-integration-message [{:keys [application user action]} endpoint message-subtype direction status]
   {:id           (mongo/create-id)
    :direction    direction
@@ -346,7 +346,7 @@
    :action       action
    :data         {:endpoint endpoint}})
 
-;; TODO: :attachment-files and :attachmentsCount for attachemnt messages
+;; TODO: :attachment-files and :attachmentsCount for attachment messages
 (sc/defn ^{:private true, :always-validate true} request-integration-message :- IntegrationMessage
   [command endpoint request message-subtype payload-key]
   (assoc-in (base-integration-message command endpoint message-subtype "out" "processing") [:data :request]
@@ -359,13 +359,7 @@
   (assoc-in (base-integration-message command endpoint message-subtype "in" "done") [:data :response]
             (select-keys response [:status :body])))
 
-;;;; Should you use this?
-;;;; ===================================================================================================================
-
-(defn allu-application? [organization permit-type]
-  (and (env/feature? :allu) (= (:id organization) "091-YA") (= permit-type "YA")))
-
-;;;; ALLU Proxy
+;;;; ALLU proxy protocols
 ;;;; ===================================================================================================================
 
 (defprotocol ALLUApplications
@@ -377,6 +371,9 @@
 (defprotocol ALLUPlacementContracts
   (create-contract! [self command endpoint request])
   (update-contract! [self command endpoint request]))
+
+;;;; HTTP request sender for production
+;;;; ===================================================================================================================
 
 (deftype RemoteALLU []
   ALLUApplications
@@ -390,6 +387,9 @@
   ALLUPlacementContracts
   (create-contract! [_ _ endpoint request] (http/post endpoint request))
   (update-contract! [_ _ endpoint request] (http/put endpoint request)))
+
+;;;; Mock for interactive development
+;;;; ===================================================================================================================
 
 (defn- creation-response-ok? [allu-id]
   (mongo/any? :integration-messages {:direction            "in" ; i.e. the response
@@ -428,6 +428,9 @@
           {:status 200, :body allu-id}
           {:status 404, :body (str "Not Found: " allu-id)})))))
 
+;;;; Integration message <del>Decorator</del> middleware
+;;;; ===================================================================================================================
+
 (defn- with-integration-messages [command endpoint request message-subtype payload-key body]
   (let [{msg-id :id :as msg} (request-integration-message command endpoint request message-subtype payload-key)
         _ (imessages/save msg)
@@ -455,13 +458,19 @@
     (with-integration-messages command endpoint request "placementcontracts.update" :form-params
                                #(update-contract! inner command endpoint request))))
 
-(def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
+;;;; State and error handling
+;;;; ===================================================================================================================
 
 (defstate allu-instance
   :start (->MessageSavingALLU (if (env/dev-mode?) (->IntegrationMessagesMockALLU) (->RemoteALLU))))
 
+(def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
+
 (defn- allu-http-fail! [response]
   (allu-fail! :error.allu.http (select-keys response [:status :body])))
+
+;;;; Private API
+;;;; ===================================================================================================================
 
 (defn- create-placement-contract!
   "Create placement contract in ALLU. Returns ALLU id for the contract."
@@ -495,6 +504,9 @@
 
 ;;;; Public API
 ;;;; ===================================================================================================================
+
+(defn allu-application? [organization permit-type]
+  (and (env/feature? :allu) (= (:id organization) "091-YA") (= permit-type "YA")))
 
 ;;; TODO: DRY these up:
 
