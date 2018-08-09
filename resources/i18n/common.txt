@@ -1607,7 +1607,7 @@
 "kiinteisto.kiinteisto.vesipintaala" "en" "Water area"
 "kiinteisto.kiinteisto.vesipintaala" "fi" "Vesipinta-ala"
 "kiinteisto.kiinteisto.vesipintaala" "sv" "Vattenareal"
-"kiinteisto.maaraala" "en" "This parcel"
+"kiinteisto.maaraala" "en" "This is parcel"
 "kiinteisto.maaraala" "fi" "Kyseessä määräala"
 "kiinteisto.maaraala" "sv" "Outbruten del"
 "kiinteisto.maaraala.label" "en" "Parcel"
