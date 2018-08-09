@@ -1,31 +1,15 @@
 (ns lupapalvelu.comment-html
-  (:require [clj-time.format :as format]
-            [clojure.java.io :as io]
-            [garden.core :as garden]
+  (:require [garden.core :as garden]
             [garden.selectors :as sel]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pate.date :as date]
-            [lupapalvelu.pdf.html-template-common :as common]
             [rum.core :as rum]
             [sade.core :refer :all]
             [sade.property :as property]
-            [sade.util :as util]
-            [schema.core :refer [defschema] :as sc]
-            [swiss.arrows :refer :all])
-  (:import (javax.imageio ImageIO)
-           (java.text SimpleDateFormat)
-           (org.apache.commons.codec.binary Base64)
-           (org.apache.commons.io IOUtils)))
+            [sade.util :as util])
+  (:import (java.text SimpleDateFormat)))
 
-(def page-number-script
-  [:script
-   {:dangerouslySetInnerHTML
-    {:__html
-     (-> common/wkhtmltopdf-page-numbering-script-path
-         io/resource
-         slurp)}}])
-
-(defn html [body & [script?]]
+(defn html [body]
   (str "<!DOCTYPE html>"
        (rum/render-static-markup
          [:html
@@ -58,7 +42,7 @@
                                [:.commenter-date {:font-weight :bold
                                                   :line-height "1.6"}]
                                [:.page-break {:page-break-before :always}]])}}]]
-          [:body body (when script? page-number-script)]])))
+          [:body body]])))
 
 (defn info-box [lang key value]
   (let [info-box-div [:div [:div.header-info (i18n/localize lang key)]]]
