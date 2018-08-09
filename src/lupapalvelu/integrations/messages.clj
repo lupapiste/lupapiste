@@ -59,5 +59,5 @@
   ([message-id updates write-concern]
     (mongo/update-by-id :integration-messages message-id updates :write-concern write-concern)))
 
-(sc/defn set-message-status [message-id status :- IntegrationMessageStatus]
+(sc/defn ^:always-validate set-message-status [message-id status :- IntegrationMessageStatus]
   (update-message message-id {$set {:status status}} WriteConcern/UNACKNOWLEDGED))

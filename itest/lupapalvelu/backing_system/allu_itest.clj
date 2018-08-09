@@ -22,7 +22,7 @@
             [lupapalvelu.backing-system.allu :as allu
              :refer [ALLUApplications cancel-allu-application! ALLUAttachments send-allu-attachment!
                      ALLUPlacementContracts ->MessageSavingALLU PlacementContract
-                     update-contract! create-contract! lock-contract! allu-fail!]]))
+                     update-contract! create-contract! allu-fail!]]))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================

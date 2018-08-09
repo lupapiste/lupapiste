@@ -4,7 +4,7 @@
   (:require [clojure.core.match :refer [match]]
             [clojure.string :as s]
             [clojure.walk :refer [postwalk]]
-            [monger.operators :refer [$set]]
+            [monger.operators :refer [$set $in]]
             [cheshire.core :as json]
             [mount.core :refer [defstate]]
             [schema.core :as sc :refer [defschema optional-key enum]]
@@ -23,7 +23,7 @@
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]
-            [lupapalvelu.integrations.messages :as imessages]
+            [lupapalvelu.integrations.messages :as imessages :refer [IntegrationMessage]]
             [lupapalvelu.mongo :as mongo])
   (:import [java.io InputStream]))
 
@@ -364,24 +364,26 @@
   (create-contract! [_ _ endpoint request] (http/post endpoint request))
   (update-contract! [_ _ endpoint request] (http/put endpoint request)))
 
-(defn- creation-message-sent? [allu-id]
-  (mongo/any? :integration-messages {:messageType "ALLU placementcontracts/create"
-                                     :status "done"
-                                     :application.id (str "LP-" allu-id)}))
+(defn- creation-response-ok? [allu-id]
+  (mongo/any? :integration-messages {:direction            "in" ; i.e. the response
+                                     :messageType          "placementcontracts.create"
+                                     :status               "done"
+                                     :application.id       (str "LP-" allu-id)
+                                     :data.response.status {$in [200 201]}}))
 
 ;; This approximates the ALLU state with the `imessages` data:
 (deftype IntegrationMessagesMockALLU []
   ALLUApplications
   (cancel-allu-application! [_ _ endpoint _]
     (let [allu-id (second (re-find #".*/([\d\-]+)/cancelled" endpoint))]
-      (if (creation-message-sent? allu-id)
+      (if (creation-response-ok? allu-id)
         {:status 200, :body ""}
         {:status 404, :body (str "Not Found: " allu-id)})))
 
   ALLUAttachments
   (send-allu-attachment! [_ _ endpoint _]
     (let [allu-id (second (re-find #".*/applications/([\d\-]+)/attachments" endpoint))]
-      (if (creation-message-sent? allu-id)
+      (if (creation-response-ok? allu-id)
         {:status 200, :body ""}
         {:status 404, :body (str "Not Found: " allu-id)})))
 
@@ -395,52 +397,62 @@
     (let [allu-id (second (re-find #".*/([\d\-]+)" endpoint))]
       (if-let [validation-error (sc/check PlacementContract placement-contract)]
         {:status 400, :body validation-error}
-        (if (creation-message-sent? allu-id)
+        (if (creation-response-ok? allu-id)
           {:status 200, :body allu-id}
           {:status 404, :body (str "Not Found: " allu-id)})))))
 
-(defn- integration-message [{:keys [application user action]} endpoint request message-subtype payload-key]
+(defn- base-integration-message [{:keys [application user action]} endpoint message-subtype direction status]
   {:id           (mongo/create-id)
-   :direction    "out"
-   :messageType  (str "ALLU " message-subtype)
+   :direction    direction
+   :messageType  message-subtype
    :transferType "http"
    :partner      "allu"
    :format       "json"
    :created      (now)
-   :status       "processing"
+   :status       status
    :application  (select-keys application [:id :organization :state])
    :initator     (select-keys user [:id :username])
    :action       action
-   :data         {:endpoint endpoint
-                  :request  (if (= payload-key :multipart)  ; HACK
-                              {:multipart [(get-in request [:multipart 0])]}
-                              (select-keys request [payload-key]))}})
+   :data         {:endpoint endpoint}})
 
-(defn- with-integration-message [command endpoint request message-subtype payload-key body]
-  (let [{msg-id :id :as msg} (integration-message command endpoint request message-subtype payload-key)
+(sc/defn ^{:private true, :always-validate true} request-integration-message :- IntegrationMessage
+  [command endpoint request message-subtype payload-key]
+  (assoc-in (base-integration-message command endpoint message-subtype "out" "processing") [:data :request]
+            (if (= payload-key :multipart)                  ; HACK
+              {:multipart [(get-in request [:multipart 0])]}
+              (select-keys request [payload-key]))))
+
+(sc/defn ^{:private true, :always-validate true} response-integration-message :- IntegrationMessage
+  [command endpoint response message-subtype]
+  (assoc-in (base-integration-message command endpoint message-subtype "in" "done") [:data :response]
+            (select-keys response [:status :body])))
+
+(defn- with-integration-messages [command endpoint request message-subtype payload-key body]
+  (let [{msg-id :id :as msg} (request-integration-message command endpoint request message-subtype payload-key)
         _ (imessages/save msg)
-        res (body)]
+        response (body)]
     (imessages/update-message msg-id {$set {:status "done", :acknowledged (now)}})
-    res))
+    (imessages/save (response-integration-message command endpoint response message-subtype))
+    response))
 
 (deftype MessageSavingALLU [inner]
   ALLUApplications
   (cancel-allu-application! [_ command endpoint request]
-    (with-integration-message command endpoint request "applications/cancelled" :form-params
-                              #(cancel-allu-application! inner command endpoint request)))
+    (with-integration-messages command endpoint request "applications.cancelled" :form-params
+                               #(cancel-allu-application! inner command endpoint request)))
 
   ALLUAttachments
   (send-allu-attachment! [_ command endpoint request]
-    (with-integration-message command endpoint request "attachments/create" :multipart
-                              #(send-allu-attachment! inner command endpoint request)))
+    (with-integration-messages command endpoint request "attachments.create" :multipart
+                               #(send-allu-attachment! inner command endpoint request)))
 
   ALLUPlacementContracts
   (create-contract! [_ command endpoint request]
-    (with-integration-message command endpoint request "placementcontracts/create" :form-params
-                              #(create-contract! inner command endpoint request)))
+    (with-integration-messages command endpoint request "placementcontracts.create" :form-params
+                               #(create-contract! inner command endpoint request)))
   (update-contract! [_ command endpoint request]
-    (with-integration-message command endpoint request "placementcontracts/update" :form-params
-                              #(update-contract! inner command endpoint request))))
+    (with-integration-messages command endpoint request "placementcontracts.update" :form-params
+                               #(update-contract! inner command endpoint request))))
 
 (def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
 
