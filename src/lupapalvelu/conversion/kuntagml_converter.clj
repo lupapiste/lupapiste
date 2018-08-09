@@ -116,7 +116,8 @@
                                 (update-in [:documents] concat other-building-docs new-parties structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :statements given-statements)
-                                (assoc :opened (:created command)))
+                                (assoc :opened (:created command))
+                                (assoc :facta-imported true))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]

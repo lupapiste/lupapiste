@@ -44,6 +44,7 @@
   (let [query (merge
                 (domain/application-query-for user)
                 {:primaryOperation.id {$exists true}}
+                {:facta-imported {$ne true}}
                 (when (or (ss/numeric? after) (ss/numeric? before))
                   {:modified (util/assoc-when {}
                                               $gte (when after (Long/parseLong after 10))
