@@ -307,15 +307,14 @@
                       (map (fn [e] {:email e, :role "authority"}) emails)))})
 
 (defn submit-validation-errors [{:keys [application] :as command}]
-  (remove nil? (conj []
-                     (foreman/validate-application application)
-                     (app/validate-link-permits application)
-                     (app/validate-fully-formed application)
-                     (ya/validate-digging-permit application)
-                     (when-not (company/cannot-submit command)
-                       (fail :company.user.cannot.submit))
-                     (suti/suti-submit-validation command)
-                     (restrictions/check-auth-restriction command :application/submit))))
+  (remove nil? [(foreman/validate-application application)
+                (app/validate-link-permits application)
+                (app/validate-fully-formed application)
+                (ya/validate-digging-permit application)
+                (when-not (company/cannot-submit command)
+                  (fail :company.user.cannot.submit))
+                (suti/suti-submit-validation command)
+                (restrictions/check-auth-restriction command :application/submit)]))
 
 (defquery application-submittable
   {:description "Query for frontend, to display possible errors regarding application submit"
