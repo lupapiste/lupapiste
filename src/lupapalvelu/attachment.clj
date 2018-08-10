@@ -1016,6 +1016,30 @@
                                             attachment)
     (enrich-attachment attachment)))
 
+;;
+;; Comments as attachment
+;;
+
+(defn- comments-empty? [application]
+  (->> application
+       :comments
+       (remove #(-> % :target :type (keyword) (= :attachment)))
+       (empty?)))
+
+(defn save-comments-as-attachment [{lang :lang application :application created :created :as command}]
+  (when-not (comments-empty? application)
+    (let [comments-pdf (comment/get-comments-as-pdf lang application)
+          content (:pdf-file-stream comments-pdf)
+          existing-keskustelu (util/find-by-key :type {:type-id "keskustelu" :type-group "muut"} (:attachments application))
+          file-options {:filename (format "%s-%s.pdf" (:id application) (i18n/localize lang :conversation.title))
+                        :content  content
+                        :size     (.available content)}
+          attachment-options {:attachment-type {:type-id    :keskustelu
+                                                :type-group :muut}
+                              :attachment-id   (when existing-keskustelu (:id existing-keskustelu))
+                              :created         created
+                              :required        false}]
+      (upload-and-attach! command attachment-options file-options))))
 
 ;;
 ;; Pre-checks
