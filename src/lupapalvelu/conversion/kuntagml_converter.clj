@@ -78,11 +78,12 @@
                        :propertyId      (:propertyId location-info)
                        :address         (:address location-info)
                        :municipality    municipality}
-        created-application (app/make-application make-app-info
+        created-application (app/make-application make-app-info ; Application state is set to verdictGiven at creation
                                                   []            ; messages
                                                   (:user command)
                                                   (:created command)
                                                   manual-schema-datas)
+
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))))
@@ -98,6 +99,8 @@
         structures (->> xml krysp-reader/->rakennelmatiedot (map conversion-util/rakennelmatieto->kaupunkikuvatoimenpide))
 
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
+
+        state-changes (-> xml krysp-reader/get-sorted-tilamuutos-entries)
 
         ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
         given-statements (for [st statements
@@ -129,14 +132,14 @@
              (get-in command [:data :kuntalupatunnus])
              authorize-applicants)
       ;; Get verdicts for the application
-      (when-let [updates (verdict/find-verdicts-from-xml command xml)]
+      (when-let [updates (verdict/find-verdicts-from-xml command xml false)]
         (action/update-application command updates))
 
       (prev-permit/invite-applicants command hakijat authorize-applicants)
       (infof "Processed applicants, processable applicants count was: %s" (count (filter prev-permit/get-applicant-type hakijat)))
 
       (let [updated-application (mongo/by-id :applications (:id created-application))
-            {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml)
+            {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml false false)
             review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-updates")
             update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id)]
         (if (:ok update-result)
