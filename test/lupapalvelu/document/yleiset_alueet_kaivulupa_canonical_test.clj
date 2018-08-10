@@ -110,7 +110,7 @@
         Kasittelytieto (-> Tyolupa :kasittelytietotieto :Kasittelytieto) => truthy
         Kasittelytieto-kasittelija-nimi (-> Kasittelytieto :kasittelija :henkilotieto :Henkilo :nimi) => truthy
 
-        luvanTunnisteTiedot (:luvanTunnisteTiedot Tyolupa) => truthy
+        _ (:luvanTunnisteTiedot Tyolupa) => truthy
 
         Tyolupa-kayttotarkoitus (:kayttotarkoitus Tyolupa) => truthy
         Tyolupa-Johtoselvitysviite (-> Tyolupa :johtoselvitysviitetieto :Johtoselvitysviite) => truthy
@@ -179,9 +179,8 @@
 ;        hakija-Vastuuhenkilo-osoite (-> hakija-Vastuuhenkilo :osoitetieto :osoite) => truthy
 ;
 ;        ;; Testataan muunnosfunktiota yksityisella hakijalla ("henkilo"-tyyppinen hakija)
-        hakija-yksityinen (get-yritys-and-henkilo
-                            (tools/unwrapped
-                              (assoc-in (:data maksaja) [:_selected :value] "henkilo")) "hakija")
+        _ (get-yritys-and-henkilo
+            (tools/unwrapped (assoc-in (:data maksaja) [:_selected :value] "henkilo")) "hakija")
 ;        hakija-yksityinen-Henkilo (-> maksaja-yksityinen :Osapuoli :henkilotieto :Henkilo) => truthy
 ;        hakija-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
 ;        hakija-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy
@@ -395,7 +394,7 @@
 (ctc/validate-all-documents kaivulupa-application-with-review :tasks)
 
 (facts "Katselmus canonical"
-  (let [canonical (katselmus-canonical kaivulupa-application-with-review katselmus "fi" {})
+  (let [canonical (katselmus-canonical kaivulupa-application-with-review katselmus "fi")
         review    (get-in canonical [:YleisetAlueet :yleinenAlueAsiatieto :Tyolupa :katselmustieto :Katselmus])
         {:keys [pitoPvm pitaja
                 katselmuksenLaji

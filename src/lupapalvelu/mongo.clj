@@ -1,9 +1,8 @@
 (ns lupapalvelu.mongo
   (:refer-clojure :exclude [count remove update distinct any?])
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn error errorf]]
             [clojure.walk :as walk]
             [clojure.string :as s]
-            [clojure.java.io :as io]
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
@@ -18,10 +17,9 @@
             [monger.query :as query]
             [monger.credentials :as mcred]
             [sade.status :refer [defstatus]])
-  (:import [javax.net.ssl SSLSocketFactory]
-           [org.bson.types ObjectId]
-           [com.mongodb DB WriteConcern MapReduceCommand$OutputType MapReduceOutput]
-           [com.mongodb.gridfs GridFS GridFSDBFile GridFSInputFile]))
+  (:import [org.bson.types ObjectId]
+           [com.mongodb DB DBObject WriteConcern MapReduceCommand$OutputType MapReduceOutput]
+           [com.mongodb.gridfs GridFS]))
 
 
 (def operators (set (map name (keys (ns-publics 'monger.operators)))))
@@ -168,11 +166,11 @@
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
   ([collection data] (insert collection data default-write-concern))
-  ([collection data concern] (mc/insert (get-db) collection (with-_id (remove-null-chars data))) nil))
+  ([collection data _] (mc/insert (get-db) collection (with-_id (remove-null-chars data))) nil))
 
 (defn insert-batch
   ([collection data] (insert-batch collection data default-write-concern))
-  ([collection data concern] (mc/insert-batch (get-db) collection (map (comp with-_id remove-null-chars) data))))
+  ([collection data _] (mc/insert-batch (get-db) collection (map (comp with-_id remove-null-chars) data))))
 
 (defn by-id
   ([collection id]
@@ -294,70 +292,6 @@
   [collection query]
   (.wasAcknowledged (mc/remove (get-db) collection (remove-null-chars query))))
 
-;;
-;; Grid FS
-;;
-(defn ^{:perfmon-exclude true} set-file-id [^GridFSInputFile input ^String id]
-  (.setId input (remove-null-chars id))
-  input)
-
-(defn upload [file-id filename content-type content & metadata]
-  {:pre [(string? file-id) (string? filename) (string? content-type)
-         (or (instance? java.io.File content) (instance? java.io.InputStream content))
-         (or (nil? metadata) (sequential? metadata))
-         (or (even? (clojure.core/count metadata)) (map? (first metadata)))]}
-  (let [meta (remove-null-chars (if (map? (first metadata))
-                                  (first metadata)
-                                  (apply hash-map metadata)))]
-    (with-open [input-stream (io/input-stream content)]
-      (gfs/store-file (gfs/make-input-file (get-gfs) input-stream)
-        (set-file-id file-id)
-        (gfs/filename filename)
-        (gfs/content-type content-type)
-        (gfs/metadata (assoc meta :uploaded (now)))))))
-
-(defn- ^{:perfmon-exclude true} gridfs-file-as-map [^GridFSDBFile attachment]
-  (let [metadata (from-db-object (.getMetaData attachment) :true)]
-    {:content (fn [] (.getInputStream attachment))
-     :contentType (.getContentType attachment)
-     :size (.getLength attachment)
-     :filename (.getFilename attachment)
-     :fileId (.getId attachment)
-     :metadata metadata
-     :application (:application metadata)}))
-
-(defn file-metadata
-  "Returns only GridFS file metadata as map. Use download-find to get content."
-  [query]
-  (gfs/find-one-as-map (get-gfs) (with-_id (remove-null-chars query))))
-
-(defn update-file-by-query
-  [query updates]
-  {:pre [(max-1-elem-match? query) (map? query) (map? updates)]}
-  (update-by-query :fs.files query updates))
-
-(defn download-find-many [query]
-  (map gridfs-file-as-map (gfs/find (get-gfs) (with-_id (remove-null-chars query)))))
-
-(defn download-find [query]
-  (when-let [attachment (gfs/find-one (get-gfs) (with-_id (remove-null-chars query)))]
-    (gridfs-file-as-map attachment)))
-
-(defn ^{:perfmon-exclude true} download
-  "Downloads file from Mongo GridFS"
-  [file-id]
-  (download-find {:_id file-id}))
-
-(defn delete-file [query]
-  {:pre [(seq query)]}
-  (let [query (with-_id (remove-null-chars query))]
-    (info "removing file" query)
-    (gfs/remove (get-gfs) query)))
-
-(defn ^{:perfmon-exclude true} delete-file-by-id [file-id]
-  {:pre [(string? file-id)]}
-  (delete-file {:id file-id}))
-
 (defn count
   "returns count of objects in collection"
   ([collection]
@@ -390,17 +324,15 @@
     (let [conf (env/value :mongodb)
           db   (:dbname conf)
           user (-> conf :credentials :username)
-          pw   (-> conf :credentials :password)
-          ssl  (:ssl conf)]
-      (connect! server-list db user pw ssl)))
+          pw   (-> conf :credentials :password)]
+      (connect! server-list db user pw)))
   ([^String host ^Long port]
     (let [conf (env/value :mongodb)
           dbname   (:dbname conf)
           user (-> conf :credentials :username)
-          pw   (-> conf :credentials :password)
-          ssl  (:ssl conf)]
-      (connect! [(m/server-address host port)] dbname user pw ssl)))
-  ([servers dbname username password ssl]
+          pw   (-> conf :credentials :password)]
+      (connect! [(m/server-address host port)] dbname user pw)))
+  ([servers dbname username password]
     (let [servers (if (string? servers)
                     (let [[host port] (clojure.string/split servers #":")]
                       [(m/server-address host (Long/parseLong port))])
@@ -448,8 +380,8 @@
   (ensure-index :applications {:municipality 1})
   (ensure-index :applications {:submitted 1})
   (ensure-index :applications {:modified -1})
-  (ensure-index :applications {:organization 1})
-  (ensure-index :applications {:auth.id 1})
+  (ensure-index :applications {:organization 1 :modified -1})
+  (ensure-index :applications {:auth.id 1 :modified -1})
   (ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
   (ensure-index :applications {:address 1})
   (ensure-index :applications {:tags 1})
@@ -464,6 +396,8 @@
   (ensure-index :applications {:applicant 1})                                 ;; For application search
   (ensure-index :applications {:state 1})                                     ;; For application search
   (ensure-index :applications {:authority.lastName 1 :authority.firstName 1}) ;; For application search
+  (ensure-index :applications {:handlers.userId 1} {:sparse true})            ;; For application search
+  (ensure-index :applications {:documents.data.henkilotiedot.hetu.value 1} {:sparse true}) ;; For application search
   (ensure-index :applications {:location-wgs84 "2dsphere"})
   (ensure-index :applications {:drawings.geometry-wgs84 "2dsphere"})
   (ensure-index :activation {:email 1})
@@ -490,7 +424,7 @@
   (ensure-index :buildingCache {:propertyId 1} {:unique true})
   (ensure-index :ssoKeys {:ip 1} {:unique true})
   (ensure-index :assignments {:application.id 1, :recipient.id 1, :states.type 1})
-  (ensure-index :assignments {:application.organization 1})
+  (ensure-index :assignments {:application.organization 1, :recipient.id 1 :modified -1})
   (ensure-index :assignments {:status 1})
   (ensure-index :application-bulletins {:versions.bulletinState 1})
   (ensure-index :application-bulletins {:versions.municipality 1})

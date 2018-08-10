@@ -11,7 +11,6 @@
             [midje.util :refer [testable-privates]]
             [net.cgrand.enlive-html :as enlive]
             [sade.common-reader :as cr]
-            [sade.env :as env]
             [sade.xml :as xml]))
 
 (def verdict (assoc verdict-with-attachment

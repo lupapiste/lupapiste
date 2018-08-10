@@ -1,14 +1,12 @@
 (ns lupapalvelu.attachment.accessibility
   (:require [lupapalvelu.attachment.metadata :as metadata]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.user :as user]
             [sade.core :refer :all]
-            [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]))
 
 
-(defn visibility-check [user {app-auth :auth org :organization} {:keys [metadata auth] :as attachment}]
+(defn visibility-check [user {app-auth :auth org :organization} {:keys [auth] :as attachment}]
   (case (keyword (metadata/get-visibility attachment))
     :asiakas-ja-viranomainen (or
                                (or (auth/has-auth? {:auth auth} (:id user)) ; attachment auth
@@ -19,7 +17,7 @@
     :julkinen true
     nil true))
 
-(defn publicity-check [user {app-auth :auth org :organization} {:keys [metadata auth] :as attachment}]
+(defn publicity-check [user {org :organization} {:keys [auth] :as attachment}]
   (case (keyword (metadata/get-publicity-class attachment)) ; TODO check cases
     :osittain-salassapidettava (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (auth/org-authz org user))
     :salainen (or (auth/has-auth-role? {:auth auth} (:id user) :uploader) (auth/org-authz org user))
@@ -28,7 +26,7 @@
 
 (defn can-access-attachment?
   "Checks user's access right to attachment from application auth and attachment auth"
-  [user {app-auth :auth :as application} {:keys [latestVersion metadata auth] :as attachment}]
+  [user {:as application} {:keys [latestVersion auth] :as attachment}]
   {:pre [(map? attachment)]}
   (assert (if latestVersion (seq auth) true))
   (boolean

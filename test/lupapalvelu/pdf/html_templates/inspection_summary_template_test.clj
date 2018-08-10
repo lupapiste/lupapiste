@@ -6,7 +6,6 @@
             [sade.schemas :as ssc]
             [lupapalvelu.test-util :refer [replace-in-schema MidjeMetaconstant]]
             [lupapalvelu.inspection-summary :refer [InspectionSummary]]
-            [lupapalvelu.pdf.html-template-common :as common]
             [lupapalvelu.pdf.html-templates.inspection-summary-template :refer :all]))
 
 (testable-privates lupapalvelu.pdf.html-templates.inspection-summary-template target-attachments)

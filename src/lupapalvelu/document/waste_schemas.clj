@@ -9,7 +9,7 @@
 
 (def construction-waste-report-schemas #{basic-construction-waste-report-name extended-construction-waste-report-name})
 
-(defn construction-waste-plan-for-organization [{:keys [extended-construction-waste-report-enabled] :as org}]
+(defn construction-waste-plan-for-organization [{:keys [extended-construction-waste-report-enabled]}]
   (if extended-construction-waste-report-enabled
     extended-construction-waste-report-name
     basic-construction-waste-plan-name))

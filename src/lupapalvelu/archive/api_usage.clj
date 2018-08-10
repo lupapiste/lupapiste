@@ -8,12 +8,9 @@
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.schemas :as ssc]
-            [sade.util :as util]
             [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as org])
-  (:import (javax.jms Session)))
-
+            [lupapalvelu.organization :as org]))
 
 (sc/defschema ArchiveApiUsageLogEntry
   "Schema for API usage log entries, produced by Onkalo"

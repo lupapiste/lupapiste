@@ -49,6 +49,10 @@
         position: static;
       }
     }
+    &.autosized > .component {
+      overflow: initial;
+      margin: $marginM $marginM;
+    }
     .header {
       padding-top: 2px;
       padding-bottom: 4px;
@@ -234,6 +238,10 @@
   padding-bottom:0;
 }
 
+.change-location-help {
+  margin-bottom: .5em;
+}
+
 // This seems to be used only in change-location.html
 .with-map {
   //min-width: 680px !important;
@@ -324,5 +332,18 @@
   margin: {
     top: $marginS;
     bottom: $marginS
+  }
+}
+
+.authorize-person-content {
+  max-width: 40em;
+  label, input, textarea, button {
+    display: block
+  }
+  label, button {
+    margin-top: 1em;
+  }
+  input, textarea {
+    width: 100%;
   }
 }

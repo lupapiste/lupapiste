@@ -6,8 +6,7 @@
             [sade.env :as env]
             [sade.validators :as v]
             [net.cgrand.enlive-html :as enlive]
-            [clojure.string :as str])
-  (:import [java.net URLEncoder]))
+            [clojure.string :as str]))
 
 (defn- path [& p] (interpose :> (concat [enlive/root] p)))
 

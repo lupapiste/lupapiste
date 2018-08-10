@@ -1,5 +1,5 @@
 (ns lupapalvelu.application-meta-fields
-  (:require [taoensso.timbre :as timbre :refer [tracef debug debugf info warn error]]
+  (:require [taoensso.timbre :refer [tracef debug debugf info warn error]]
             [monger.operators :refer :all]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.model :as model]
@@ -11,7 +11,6 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.attachment.util :as att-util]
             [sade.core :refer :all]
-            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]))
 
@@ -142,7 +141,7 @@
 (defn- state-base-filter [required-state attachment]
   (util/=as-kw required-state (att-util/attachment-state attachment)))
 
-(defn count-attachments-requiring-action [user {:keys [infoRequest attachments _attachment_indicator_reset] :as application}]
+(defn count-attachments-requiring-action [user {:keys [infoRequest attachments _attachment_indicator_reset]}]
   (if-not infoRequest
     (let [requires-user-action (partial state-base-filter :requires_user_action)
           requires-authority-action (partial state-base-filter :requires_authority_action)

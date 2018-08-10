@@ -1,9 +1,8 @@
 (ns lupapalvelu.document.model
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf]]
+  (:require [taoensso.timbre :refer [trace debug info warn error errorf]]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.set :refer [union difference]]
             [clj-time.format :as timeformat]
-            [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -12,7 +11,6 @@
             [lupapalvelu.document.vrk :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]
             [lupapalvelu.mongo :as mongo])
@@ -85,7 +83,7 @@
   (try
     (or (ss/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
-    (catch Exception e [:warn "illegal-value:date"])))
+    (catch Exception _ [:warn "illegal-value:date"])))
 
 (defmethod validate-field :msDate [_ _ v]
   (if (not (nil? v))
@@ -111,7 +109,7 @@
     (when-not (or (ss/blank? v) (accepted-values v))
       [:warn "illegal-value:select"])))
 
-(defmethod validate-field :buildingSelector [_ elem v]
+(defmethod validate-field :buildingSelector [_ _ v]
   (cond
     (ss/blank? v) nil
     (= other-value v) nil
@@ -119,22 +117,22 @@
     (v/rakennustunnus? v) nil
     :else [:warn "illegal-rakennusnumero"]))
 
-(defmethod validate-field :newBuildingSelector [_ elem v]
+(defmethod validate-field :newBuildingSelector [_ _ v]
   (when (not= v "ei tiedossa")
     (subtype/subtype-validation {:subtype :number} v)))
 
-(defmethod validate-field :personSelector [application elem v]
+(defmethod validate-field :personSelector [application _ v]
   (let [approved-auths (remove :invite (:auth application))]
     (when-not (or (ss/blank? v)
                   (auth/has-auth? {:auth approved-auths} v)
                   (auth/has-auth-via-company? {:auth approved-auths} v))
       [:err "application-does-not-have-given-auth"])))
 
-(defmethod validate-field :companySelector [application elem v]
+(defmethod validate-field :companySelector [_ _ v]
   (when-not (or (string? v) (nil? v))
     [:err "unknown-type"]))
 
-(defmethod validate-field :linkPermitSelector [application elem v]
+(defmethod validate-field :linkPermitSelector [_ _ v]
   ;; This validation is for custom value in linkPermitSelector field, which should not be restricted into any format.
   (when-not (or (string? v) (nil? v))
     [:err "unknown-type"]))
@@ -463,14 +461,14 @@
 ;;
 
 (defn modifications-since-approvals
-  ([{:keys [schema-info data meta] :as document}]
+  ([{:keys [schema-info data meta]}]
     (let [schema (and schema-info (schemas/get-schema (:version schema-info) (:name schema-info)))
           timestamp (max (get-in meta [:_approved :timestamp] 0) (get-in meta [:_indicator_reset :timestamp] 0))]
       (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) timestamp)))
   ([schema-body path data meta approvable-parent timestamp]
     (letfn [(max-timestamp [p] (max timestamp (get-in meta (concat p [:_approved :timestamp]) 0)))
             (count-mods
-              [{:keys [name approvable repeating body type] :as element}]
+              [{:keys [name approvable repeating body type]}]
               (let [current-path (conj path (keyword name))
                     current-approvable (or approvable-parent approvable)]
                 (if (or (= :group type) (= :table type))

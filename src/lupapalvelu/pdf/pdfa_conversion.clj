@@ -3,22 +3,24 @@
             [clojure.java.io :as io]
             [clojure.core.memoize :as memo]
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
-            [com.netflix.hystrix.core :as hystrix]
             [sade.strings :as ss]
             [sade.env :as env]
             [sade.files :as files]
             [lupapalvelu.statistics :as statistics]
-            [lupapalvelu.organization :as organization])
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.pdf.pdf-swat :as swat]
+            [lupapiste-commons.threads :as threads]
+            [lupapalvelu.logging :as logging])
   (:import [java.io File IOException FileNotFoundException InputStream]
            [com.lowagie.text.pdf PdfReader]
-           [com.netflix.hystrix HystrixCommandProperties HystrixCommand$Setter HystrixThreadPoolProperties]))
+           [java.util.concurrent ExecutorService]))
 
 (defn- executable-exists? [executable]
   (try
     (do
       (shell/sh executable)
       true)
-    (catch IOException e
+    (catch IOException _
       false)))
 
 (defn- find-pdf2pdf-executable []
@@ -85,6 +87,12 @@
 (defn- pdf-was-already-compliant? [lines]
   (ss/contains? (apply str lines) "will be copied only since it is already conformant"))
 
+(defn- outlines-entry-error?
+  "PDF spec specifies that Outlines entry in the PDF dictionary must be an indirect object reference.
+   At least some ROWE scanner produces PDFs where this is invalid."
+  [log-lines]
+  (some #(ss/contains? % "value of the key Outlines must be an indirect object") log-lines))
+
 (defn- compliance-level [input-file output-file {:keys [application filename]}]
   (apply shell/sh (pdftools-analyze-command input-file output-file))
   (let [log (apply str (parse-log-file output-file))
@@ -111,24 +119,33 @@
                   :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
                   :output-file output-file
                   :autoConversion (not (pdf-was-already-compliant? log-lines))}
-      (#{5 6 139} exit) (if-let [fonts (-> log-lines
-                                           parse-errors-from-log-lines
-                                           parse-missing-fonts-from-log-lines)]
-                          {:pdfa? false
-                           :missing-fonts fonts}
-                          (if-not forced-cl
+      (#{5 6 139} exit) (let [errors (parse-errors-from-log-lines log-lines)
+                              fonts (parse-missing-fonts-from-log-lines errors)]
+                          (cond
+                            fonts {:pdfa? false
+                                   :missing-fonts fonts}
+
+                            (outlines-entry-error? errors) (do (warn "Removing invalid Outlines entry from PDF dictionary")
+                                                               (swat/rewrite-outline-as-empty-in-place! input-file)
+                                                               (-> (run-pdf-to-pdf-a-conversion input-file
+                                                                                                output-file
+                                                                                                opts)
+                                                                   (assoc :already-valid-pdfa? false
+                                                                          :autoConversion true)))
+
                             ; Retry with another compliance level
-                            (run-pdf-to-pdf-a-conversion input-file
-                                                         output-file
-                                                         opts
-                                                         (if (= "pdfa-1b" cl)
-                                                           "pdfa-2b"
-                                                           "pdfa-1b"))
-                            {:pdfa? false
-                             :conversionLog (cons (if (= exit 5)
-                                                    "PDF/A conversion failed because it can't be done losslessly"
-                                                    "PDF/A conversion failed because of an error in the PDF structure")
-                                                  (replace-file-names-in-log  log-lines input-file output-file))}))
+                            (not forced-cl) (run-pdf-to-pdf-a-conversion input-file
+                                                                         output-file
+                                                                         opts
+                                                                         (if (= "pdfa-1b" cl)
+                                                                           "pdfa-2b"
+                                                                           "pdfa-1b"))
+
+                            :else {:pdfa? false
+                                   :conversionLog (cons (if (= exit 5)
+                                                          "PDF/A conversion failed because it can't be done losslessly"
+                                                          "PDF/A conversion failed because of an error in the PDF structure")
+                                                        (replace-file-names-in-log  log-lines input-file output-file))}))
       (= exit 10) (do
                     (error "pdf2pdf - not a valid license")
                     {:pdfa? false
@@ -186,22 +203,15 @@
           (io/copy pdf-file output-file))
         {:pdfa? (or (:assume-pdfa-compatibility opts) false)})))
 
-(hystrix/defcommand convert-to-pdf-a
-  "Takes a PDF File and returns a File that is PDF/A
-  opts is a map possible containing the following keys:
-  {:application      \"Application data for logging purposes\"
-   :filename         \"Original filename for logging purposes\"}"
-  {:hystrix/group-key   "Attachment"
-   :hystrix/command-key "Convert to PDF/A with PDF Tools utility"
-   :hystrix/thread-pool-key :pdf-tools-thread-pool
-   :hystrix/init-fn     (fn [_ ^HystrixCommand$Setter setter]
-                          (doto setter
-                            (.andCommandPropertiesDefaults
-                              (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 5 60 1000)))
-                            (.andThreadPoolPropertiesDefaults
-                              (.withMaxQueueSize (HystrixThreadPoolProperties/Setter) Integer/MAX_VALUE))))}
-  [pdf-file output-file & [opts]]
-  (analyze-and-convert-to-pdf-a pdf-file output-file opts))
+(def ^ExecutorService conversion-pool (threads/threadpool 6 "pdf2pdf-conversion-worker"))
+
+(defn convert-to-pdf-a [pdf-file output-file & [opts]]
+  {:post [(boolean? (:pdfa? %))]}
+  (-> (.submit conversion-pool
+               ^Callable (fn []
+                           (logging/with-logging-context {:applicationId (-> opts :application :id)}
+                             (analyze-and-convert-to-pdf-a pdf-file output-file opts))))
+      (.get)))
 
 (defn file-is-valid-pdfa? [pdf-file]
   {:pre [(or (instance? InputStream pdf-file) (instance? File pdf-file))]}

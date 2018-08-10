@@ -7,7 +7,7 @@
             [sade.xml :as xml]
             [sade.strings :as ss]
             [sade.common-reader :as cr]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [asiakirjat-toimitettu-checker
                                                                       application-rakennuslupa
@@ -75,9 +75,9 @@
       (let [lp-xml_212 (cr/strip-xml-namespaces (xml/parse xml_212_s))
             lp-xml_213 (cr/strip-xml-namespaces (xml/parse xml_213_s))
             lp-xml_216 (cr/strip-xml-namespaces (xml/parse xml_216_s))
-            lp-xml_218 (cr/strip-xml-namespaces (xml/parse xml_218_s))
+            _ (cr/strip-xml-namespaces (xml/parse xml_218_s))
             lp-xml_220 (cr/strip-xml-namespaces (xml/parse xml_220_s))
-            lp-xml_222 (cr/strip-xml-namespaces (xml/parse xml_222_s))
+            _ (cr/strip-xml-namespaces (xml/parse xml_222_s))
             tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
             tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
             tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])]

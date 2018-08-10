@@ -40,7 +40,7 @@
                       (fn [new]
                         (.setDate instance new true))))))
      :will-unmount
-     (fn [this]
+     (fn [_]
        (.destroy @instance-atom)
        (remove-watch instance-atom :update-instance)
        (reset! instance-atom nil))}))
@@ -88,8 +88,7 @@
      :will-unmount dispose}))
 
 
-(rum/defcs datepicker < (datepicker-mixin)
-  [state datepicker-args commit-fn test-id]
+(rum/defcs datepicker < (datepicker-mixin) [_ datepicker-args commit-fn test-id]
   [:input.inspection-date-input {:type    "text"
                                  :on-blur #(commit-fn @(:date-atom datepicker-args))
                                  :data-test-id test-id}])

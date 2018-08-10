@@ -3,8 +3,7 @@
             [lupapalvelu.printing-order.mylly-client :as mylly]
             [lupapalvelu.mongo :as mongo]
             [clojure.data.codec.base64 :as base64]
-            [clojure.java.io :as io]
-            [sade.env :as env])
+            [clojure.java.io :as io])
   (:import (java.io ByteArrayOutputStream)))
 
 (def login-result-xml

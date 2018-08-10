@@ -215,7 +215,6 @@
 
       (fact "upsert is validated"
         (let [appeals             (appeals-for-verdict pena app-id vid)
-              test-appeal-verdict (second appeals)
               appeal              (first appeals)]
           (fact "Can't update appeal with appeal-verdict endpoint"
             (command sonja :upsert-appeal-verdict :id app-id

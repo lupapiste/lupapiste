@@ -5,8 +5,7 @@
             [lupapalvelu.pate-itest-util :refer :all]
             [sade.core :refer [now]]
             [sade.shared-util :as shared-util]
-            [sade.util :as util]
-            [clojure.set :as set]))
+            [sade.util :as util]))
 
 (apply-remote-fixture "pate-verdict")
 
@@ -37,7 +36,6 @@
         plan-ids                 (->> references :plans (map :id))
         review-ids               (->> references :reviews (map :id))
         find-review-id           #(:id (util/find-by-key :fi % (:reviews references)))
-        find-plan-id             #(:id (util/find-by-key :fi % (:plans references)))
         {:keys [primaryOperation
                 buildings]}      (query-application pena app-id)]
     (fact "Buildings empty"                                 ; they could be populated, but not implemented yet

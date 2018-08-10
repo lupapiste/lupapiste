@@ -6,15 +6,13 @@
             [sade.core :refer [now]]
             [sade.files :as files]
             [sade.schemas :as ssc]
-            [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.test-util :refer [replace-in-schema]]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.inspection-summary :refer [InspectionSummary]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pdf.html-template :refer :all]
-            [lupapalvelu.storage.file-storage :as storage])
+            [lupapalvelu.pdf.html-template :refer :all])
   (:import [java.io InputStream]))
 
 (def local-db-name (str "test_pdf_html_template_" (now)))
@@ -85,8 +83,7 @@
                                              :patevyys-tyonjohtaja {:koulutusvalinta {:value "rakennusmestari"},
                                                                     :koulutus {:value ""},
                                                                     :valmistumisvuosi {:value "1966"}, :kokemusvuodet {:value "50"}, :valvottavienKohteidenMaara {:value "13"}},
-                                             :henkilotiedot {:etunimi {:value "Ilkka"}, :sukunimi {:value "Ilmastoija"}, :hetu {:value "010266-010B"}}, :patevyysvaatimusluokka {:value "A"}}}]}]
-          file-id (mongo/create-id)]
+                                             :henkilotiedot {:etunimi {:value "Ilkka"}, :sukunimi {:value "Ilmastoija"}, :hetu {:value "010266-010B"}}, :patevyysvaatimusluokka {:value "A"}}}]}]]
 
       (fact "inpection summary test data matches schema"
         (sc/check [(replace-in-schema InspectionSummary ssc/ObjectIdStr sc/Str)] (:inspection-sumamries app)) => nil)

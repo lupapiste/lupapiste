@@ -1,6 +1,5 @@
 (ns lupapalvelu.onnistuu-itest
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.onnistuu.process :as p]
             [sade.crypt :as crypt]
             [sade.util :as util]
             [sade.env :as env]

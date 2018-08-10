@@ -191,4 +191,5 @@ LUPAPISTE.ApplicationGuestsModel = function() {
   }
 
   self.addHubListener( "contextService::enter", fetchAll );
+  self.addHubListener( "refresh-guests", fetchAll );
 };

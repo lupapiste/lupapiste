@@ -14,7 +14,7 @@
             [sade.core :refer [unauthorized fail?]]
             [sade.strings :as ss]
             [sade.util :as util]
-            [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]))
+            [taoensso.timbre :refer [trace debug info warn warnf error fatal]]))
 
 ;;
 ;; application mongo querys
@@ -28,7 +28,9 @@
                       {$or [{:auth.id user-id}
                             {:auth {$elemMatch {:id company-id :company-role company-role}}}
                             {:auth {$elemMatch {:id company-id :company-role {$exists false}}}}]})
-      :authority    {$or [{:organization {$in organizations}} {:auth.id (:id user)}]}
+      :authority    (if (empty? organizations)
+                      {:auth.id user-id}
+                      {$or [{:organization {$in organizations}} {:auth.id (:id user)}]})
       :rest-api     {:organization {$in organizations}}
       :oirAuthority {:organization {$in organizations}}
       :trusted-etl {}
@@ -93,7 +95,7 @@
 
 (defn- pick-user-company-notes
   "Filters company notes for user without changing original :company-notes structure (notes returned in a seq)."
-  [{{company-id :id} :company :as user} company-notes]
+  [{{company-id :id} :company} company-notes]
   (filter (comp #{company-id} :companyId) company-notes))
 
 (defn- relates-to-draft-verdict? [{verdicts :verdicts} {target :target source :source}]
@@ -108,7 +110,7 @@
            (= (-> statement :person :email ss/canonize-email)
               (-> user :email ss/canonize-email)))))
 
-(defn- statement-attachment-hidden-for-user? [{statements :statements} user {target :target :as attachment}]
+(defn- statement-attachment-hidden-for-user? [{statements :statements} user {target :target}]
   (and (= (:type target) "statement")
        (not (->> (util/find-by-id (:id target) statements) (authorized-to-statement? user)))))
 
@@ -152,7 +154,7 @@
   is removed but the comment text is blank. Called after the
   attachments have been filtered. In other words, the non-removed
   missing attachments are considered hidden."
-  [{:keys [attachments] :as application}]
+  [application]
   (let [attachment-ids (attachment-ids application)]
     (update application :comments (fn [comments]
                                     (remove (fn [{:keys [target removed text]}]
@@ -190,10 +192,10 @@
 (defn enrich-application-handlers
   ([{org-id :organization :as application}]
    (enrich-application-handlers application {:handler-roles (lazy-seq (:handler-roles (mongo/select-one :organizations {:_id org-id} [:handler-roles])))}))
-  ([application {roles :handler-roles :as organization}]
+  ([application {roles :handler-roles}]
    (update application :handlers (partial map #(merge (util/find-by-id (:roleId %) roles) %)))))
 
-(defn enrich-application-tags [{app-tags :tags :as application} {org-tags :tags :as organization}]
+(defn enrich-application-tags [{app-tags :tags :as application} {org-tags :tags}]
   (->> (map (util/key-by :id org-tags) app-tags)
        (remove nil?)
        (assoc application :tags)))
@@ -247,7 +249,7 @@
 
 (defn validate-access
   "Command pre-check for validating user roles in application auth array."
-  [allowed-roles {:keys [application user] :as command}]
+  [allowed-roles {:keys [application user]}]
   (when-not (or (auth/has-some-auth-role? application (:id user) allowed-roles)
                 (auth/has-some-auth-role? application (get-in user [:company :id]) allowed-roles))
     unauthorized))
@@ -303,7 +305,7 @@
         documents (docs-from application-or-documents)]
     (first (filter #(= op-id (get-in % [:schema-info :op :id])) documents))))
 
-(defn get-subtype [{schema-info :schema-info :as doc}]
+(defn get-subtype [{:keys [schema-info]}]
   (when (:subtype schema-info)
     (name (:subtype schema-info))))
 

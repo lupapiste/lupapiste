@@ -1,11 +1,10 @@
 (ns lupapalvelu.review
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+  (:require [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.util :as util]
             [lupapalvelu.tasks :as tasks]
-            [plumbing.core :as pc]
-            [lupapalvelu.action :refer [update-application application->command] :as action]
+            [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.building :as building]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.review-reader :as review-reader]
@@ -14,7 +13,6 @@
             [sade.strings :as ss]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.verdict-review-util :as verdict-review-util]
-            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.organization :as organization]))
 
 (defn- empty-review-task? [t]

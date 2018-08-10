@@ -44,7 +44,6 @@
   };
 
 
-  var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
   var verdictAttachmentPrintsOrderModel = new LUPAPISTE.VerdictAttachmentPrintsOrderModel();
@@ -277,9 +276,6 @@
 
       addFieldSubscription(applicationModel.bulletinOpDescription, saveBulletinOpDescription);
 
-      // Invite
-      inviteModel.setApplicationId(app.id);
-
       // Verdict details
       verdictModel.refresh(app);
 
@@ -418,10 +414,6 @@
       hub.send("application-model-updated", {applicationId: app.id});
     });
   }
-
-  hub.subscribe({eventType: "dialog-close", id: "dialog-valtuutus"}, function() {
-    inviteModel.reset();
-  });
 
   // tabs
   var selectedTabName = ko.observable();
@@ -671,7 +663,6 @@
       changeLocationModel: changeLocationModel,
       constructionStateChangeModel: constructionStateChangeModel,
       createTask: createTaskController,
-      invite: inviteModel,
       foreman: foremanModel,
       map: mapModel,
       neighbor: neighborActions,

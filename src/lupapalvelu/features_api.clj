@@ -1,8 +1,7 @@
 (ns lupapalvelu.features-api
   (:require [sade.env :as env]
             [sade.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand] :as action]
-            [lupapalvelu.document.tools :as tools]))
+            [lupapalvelu.action :refer [defquery defcommand] :as action]))
 
 (defquery "features"
    {:description "returns list of features"

@@ -1,5 +1,5 @@
 (ns lupapalvelu.stamper
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info warn error fatal]]
             [clojure.string :as s]
             [clojure.java.io :as io]
             [slingshot.slingshot :refer [throw+]]

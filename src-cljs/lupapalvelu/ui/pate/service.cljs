@@ -2,7 +2,6 @@
   (:require [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.pate.state :as state]
-            [lupapalvelu.ui.authorization :as auth]
             [sade.shared-util :as util]))
 
 (defn fetch-template-list []
@@ -22,7 +21,7 @@
   is a 'top-level' atom that contains the info property (including
   modified and filled?)."
   [container* {:keys [state path]}]
-  (fn [{:keys [modified changes errors removals filled] :as response}]
+  (fn [{:keys [modified changes errors removals filled]}]
     (swap! state (fn [state]
                    (let [state (as-> state $
                                  (reduce (fn [acc [k v]]
@@ -305,16 +304,15 @@
   other words, when the :pending list is empty. Nil (no job) argument
   denotes error (e.g., timeout)."
   [app-id filedatas status-fn]
-  (let [result* (atom {})]
-    (bind-attachments app-id
-                      (map (fn [{:keys [file-id type] :as filedata}]
-                             (let [[type-group type-id] (util/split-kw-path type)]
-                               (merge (dissoc filedata :file-id :type)
-                                      {:fileId   file-id
-                                       :type {:type-group type-group
-                                              :type-id type-id}})))
-                           filedatas)
-                      (partial batch-job status-fn))))
+  (bind-attachments app-id
+                    (map (fn [{:keys [file-id type] :as filedata}]
+                           (let [[type-group type-id] (util/split-kw-path type)]
+                             (merge (dissoc filedata :file-id :type)
+                                    {:fileId file-id
+                                     :type   {:type-group type-group
+                                              :type-id    type-id}})))
+                         filedatas)
+                    (partial batch-job status-fn)))
 
 ;; Co-operation with the AttachmentsService
 

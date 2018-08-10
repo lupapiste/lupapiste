@@ -1,7 +1,6 @@
 (ns lupapalvelu.ui.company.reports
   (:require [rum.core :as rum]
             [cljs-time.coerce :as tc]
-            [cljs-time.core :as c]
             [cljs-time.format :as tf]
             [lupapalvelu.ui.common :refer [loc] :as common]
             [lupapalvelu.ui.components :as components]
@@ -42,6 +41,6 @@
   (rum/mount (report)
              (.getElementById js/document (:dom-id @args))))
 
-(defn ^:export start [domId componentParams]
+(defn ^:export start [domId _]
   (swap! args assoc :dom-id (name domId))
   (mount-component))

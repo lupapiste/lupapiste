@@ -17,8 +17,7 @@
             [clojure.set :refer [difference]]
             [sade.strings :as ss]
             [sade.schemas :as ssc]
-            [schema.core :as sc]
-            [sade.shared-util :as util])
+            [schema.core :as sc])
   (:import [schema.utils.ErrorContainer]))
 
 (defn- validate-doc [ignored-errors application {:keys [id schema-info data] :as doc}]

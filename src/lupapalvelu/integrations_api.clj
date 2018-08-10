@@ -38,7 +38,8 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as validators]
-            [lupapalvelu.foreman :as foreman]))
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.integrations.allu :as allu]))
 
 (defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
@@ -73,16 +74,28 @@
       (assoc transfer (:data-key data-map) (:data data-map)))))
 
 (defn- do-approve [{:keys [application organization created] :as command} id current-state lang do-rest-fn]
-  (if (org/krysp-integration? @organization (permit/permit-type application))
-    (or
-      (app/validate-link-permits application)
+  (if-let [validation-failure (app/validate-link-permits application)]
+    validation-failure
+    (cond
+      (allu/allu-application? application)
+      (do
+        ;; TODO: Send attachments and comments
+        ;; TODO: Non-placement-contract ALLU applications
+        (allu/lock-placement-contract! application)
+        (do-rest-fn true nil))
+
+      (org/krysp-integration? @organization (permit/permit-type application))
       (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
-            sent-file-ids   (let [submitted-application (mongo/by-id :submitted-applications id)]
-                              (mapping-to-krysp/save-application-as-krysp command lang submitted-application :current-state current-state))
-            attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created) {})]
-        (do-rest-fn attachments-updates)))
-    ;; Integration details not defined for the organization -> let the approve command pass
-    (do-rest-fn nil)))
+            sent-file-ids (let [submitted-application (mongo/by-id :submitted-applications id)]
+                            (mapping-to-krysp/save-application-as-krysp command lang submitted-application
+                                                                        :current-state current-state))
+            attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids
+                                                                                        created)
+                                    {})]
+        (do-rest-fn true attachments-updates))
+
+      ;; Integration details not defined for the organization -> let the approve command pass
+      :else (do-rest-fn false nil))))
 
 (defn- ensure-general-handler-is-set [handlers user organization]
   (let [general-id (org/general-handler-id-for-organization organization)]
@@ -126,7 +139,7 @@
         mongo-query {:state {$in ["submitted" "complementNeeded"]}}
         indicator-updates (app/mark-indicators-seen-updates command)
         transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
-        do-update (fn [attachments-updates]
+        do-update (fn [integration-available attachments-updates]
                     (update-application (assoc command :application application)
                       mongo-query
                       (util/deep-merge
@@ -137,7 +150,7 @@
                                 attachments-updates
                                 indicator-updates)}
                         (app-state/state-transition-update next-state created application user)))
-                    (ok :integrationAvailable (not (nil? attachments-updates))))]
+                    (ok :integrationAvailable integration-available))]
 
     (do-approve (assoc command :application application) id current-state lang do-update)))
 
@@ -171,8 +184,7 @@
                 mapping-to-krysp/http-not-allowed]
    :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
-  [{:keys [created application user organization] :as command}]
-
+  [{:keys [created] :as command}]
   (let [all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
         attachments-wo-sent-timestamp (filter
                                         #(and
@@ -204,7 +216,7 @@
                 (application-already-exported :exported-to-backing-system)
                 mapping-to-krysp/http-not-allowed]
    :states     states/post-verdict-states}
-  [{:keys [application organization] :as command}]
+  [command]
   (let [sent-document-ids (or (mapping-to-krysp/save-parties-as-krysp command lang) [])
         transfer-item     (get-transfer-item :parties-to-backing-system command {:data-key :party-documents
                                                                                  :data sent-document-ids})]
@@ -234,7 +246,7 @@
    :user-roles #{:applicant :authority}
    :states     krysp-enrichment-states
    :pre-checks [app/validate-authority-in-drafts]}
-  [{created :created {:keys [organization propertyId] :as application} :application :as command}]
+  [{created :created {:keys [propertyId] :as application} :application :as command}]
   (let [{url :url credentials :credentials} (org/get-building-wfs application)
         clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
     (if (or clear-ids? url)
@@ -286,7 +298,7 @@
    :user-authz-roles roles/all-authz-roles
    :states     states/all-application-states
    :pre-checks [app/validate-authority-in-drafts]}
-  [{{:keys [organization municipality propertyId] :as application} :application}]
+  [{{:keys [propertyId] :as application} :application}]
   (if-let [{url :url credentials :credentials} (org/get-building-wfs application)]
     (ok :data (building-reader/building-info-list url credentials propertyId))
     (ok)))
@@ -352,7 +364,7 @@
                 has-unsent-attachments]
    :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
-  [{:keys [created application user] :as command}]
+  [{:keys [created application] :as command}]
 
   (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
         attachments-wo-sent-timestamp (filter
@@ -474,7 +486,7 @@
                           (fail :error.invalid-key)))
                       validate-integration-message-filename]
    :states #{:sent :complementNeeded}}
-  [{application :application org :organization :as command}]
+  [{application :application org :organization}]
   (let [f (resolve-integration-message-file application @org transferType fileType filename)]
     (assert (ss/starts-with (.getName f) (:id application))) ; Can't be too paranoid...
     (if (.exists f)

@@ -1,8 +1,5 @@
 (ns lupapalvelu.autom-check-verdict-attachments-itest
-  (:require [clj-time.coerce :as c]
-            [clj-time.core :as t]
-            [midje.sweet :refer :all]
-            [lupapalvelu.fixture.core :as fixture]
+  (:require [midje.sweet :refer :all]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]

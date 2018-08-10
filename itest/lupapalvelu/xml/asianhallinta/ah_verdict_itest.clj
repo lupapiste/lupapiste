@@ -5,7 +5,6 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.application :as app]
             [lupapalvelu.batchrun :as batch]
-            [lupapalvelu.xml.asianhallinta.verdict :as ahk]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
@@ -15,7 +14,7 @@
             [lupapalvelu.verdict-api]                       ; for notification definition
             [me.raynes.fs :as fs]
             [lupapalvelu.mongo :as mongo]
-            [sade.core :refer [now] :as core]
+            [sade.core :refer [now]]
             [sade.common-reader :as cr]
             [sade.files :as files]
             [sade.env :as env]

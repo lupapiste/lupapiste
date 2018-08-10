@@ -5,12 +5,7 @@ var stamping = (function() {
     stampingMode: ko.observable(false),
     authorization: lupapisteApp.models.applicationAuthModel,
     appModel: lupapisteApp.models.application,
-    attachments: ko.pureComputed( function() {
-      return _.reject( lupapisteApp.services.attachmentsService.attachments(),
-                       function( a ) {
-                         return util.getIn( a, ["readOnly"]);
-                       });
-    }),
+    attachments: lupapisteApp.services.attachmentsService.attachments,
     pending: ko.observable(false),
     stamps: ko.observableArray([]),
     selectedStampId: ko.observable(null),

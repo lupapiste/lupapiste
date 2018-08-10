@@ -5,7 +5,6 @@
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.organization :as org]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.property-location :as prop-loc]
             [sade.core :refer [now]]
             [sade.env :as env]
@@ -210,18 +209,18 @@
     (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
           body (json/decode (:body response) true)]
       (count body) => 2
-      (first body) => {:id "603"
-                       :kaavalaji "RK"
-                       :kaavanro "12021"
-                       :kasitt_pvm "6/1/1984 12:00:00 AM"
-                       :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
+      (first body) => {:id "601"
+                       :kaavalaji "rkm"
+                       :kaavanro "12010"
+                       :kasitt_pvm "4/22/1975 12:00:00 AM"
+                       :linkki "http://194.111.49.141/asemakaavapdf/12010.pdf"
                        :type "bentley"}
 
-      (second body) => {:id "607"
-                        :kaavalaji "RK"
-                        :kaavanro "12001"
-                        :kasitt_pvm "5/31/1967 12:00:00 AM"
-                        :linkki "http://194.111.49.141/asemakaavapdf/12001.pdf"
+      (second body) => {:id "605"
+                        :kaavalaji "RKM"
+                        :kaavanro "12013"
+                        :kasitt_pvm "7/20/1978 12:00:00 AM"
+                        :linkki "http://194.111.49.141/asemakaavapdf/12013.pdf"
                         :type "bentley"})))
 
 (facts "general-plan-urls-by-point-proxy"

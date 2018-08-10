@@ -10,7 +10,7 @@
 (testable-privates lupapalvelu.operations r-operations p-operations)
 
 (facts "check that every operation refers to existing schema"
-  (doseq [[op {:keys [schema required]}] operations
+  (doseq [[_ {:keys [schema required]}] operations
           schema (cons schema required)]
     (schemas/get-schema (schemas/get-latest-schema-version) schema) => truthy))
 

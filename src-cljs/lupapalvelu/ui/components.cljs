@@ -168,7 +168,7 @@
   autocomplete and combobox. Returns map with :items-fn :text-edit
   and :menu-items."
   [local-state
-   {:keys [items callback disabled? combobox?]}
+   {:keys [items callback combobox?]}
    text-edit-options]
   (let [{selected* ::selected
          term*     ::term
@@ -267,8 +267,7 @@
      [callback] change callback that is called when after list selection or blur.
      [disabled?] Is component disabled? (false)
      [required?] Is component required? (false)"
-  [{current* ::current
-    open?*   ::open?
+  [{open?*   ::open?
     term*    ::term
     latest*  ::latest
     :as      local-state} _ {:keys [callback required? disabled?] :as options}]
@@ -313,11 +312,8 @@
      [test-id] data-test-id attribute for the top-level div."
   [{selected* ::selected
     term*     ::term
-    current*  ::current
     open?*    ::open?
-    :as       local-state} _ {:keys [items clear? callback disabled?
-                                     required? test-id]
-                                    :as options}]
+    :as       local-state} _ {:keys [clear? callback disabled? required? test-id] :as options}]
   (let [{:keys [text-edit
                 menu-items
                 items-fn]} (complete-parts local-state
@@ -420,7 +416,7 @@
 (rum/defcs date-edit < rum/reactive
   (initial-value-mixin ::date)
   (datepicker/date-state-mixin ::date {:format "D.M.YYYY"})
-  [{date* ::date :as local-state} _ {:keys [callback] :as options}]
+  [{date* ::date} _ {:keys [callback] :as options}]
   [:input.dateinput.dateinput--safe
    (merge {:type      "text"
            :value     @date*

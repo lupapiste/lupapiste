@@ -31,12 +31,8 @@
           :xml tj-xml
           :app tj-app}}))
 
-(def explainers {:reviews (constantly nil)
-                 :tj (constantly nil)})
-
 (defn get-result-for-key [results k]
-  (let [{:keys [count-xml count-app] :as data} (get results k)
-        explain-fn (get explainers k)]
+  (let [{:keys [count-xml count-app]} (get results k)]
     (when (> count-app count-xml)
       {:msg (format "count does not match, XML: %d , app: %d" count-xml count-app )
        :type k})))

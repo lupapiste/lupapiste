@@ -5,7 +5,7 @@
             [sade.util :as util]
             [sade.strings :as ss]))
 
-(defn- convert-kesto-row [[ind row]]
+(defn- convert-kesto-row [[_ row]]
   (apply merge
          {:alkuPvm (util/to-xml-date-from-string (:alku row))
           :loppuPvm (util/to-xml-date-from-string (:loppu row))}

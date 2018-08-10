@@ -9,8 +9,10 @@
                  [org.clojure/tools.trace "0.7.9"]
                  [org.clojure/core.memoize "0.5.9"]
                  [org.clojure/core.async "0.4.474"]
+                 [org.clojure/core.match "0.2.2"]
                  [org.clojure/test.check "0.9.0"]
                  [com.gfredericks/test.chuck "0.2.9"]
+                 [prismatic/plumbing "0.5.5"]
 
                  ; State management
                  [mount "0.1.12"]
@@ -40,10 +42,6 @@
                  [org.slf4j/slf4j-log4j12 "1.7.22"]
                  ; upgraded pretty to match Midje version, should work with Timbre
                  [io.aviso/pretty "0.1.34"]
-
-                 ;;Hystrix
-                 [com.netflix.hystrix/hystrix-clj "1.5.6"]
-                 [com.netflix.hystrix/hystrix-metrics-event-stream "1.5.6"]
 
                  ; markup processing
                  [enlive "1.1.6"]
@@ -100,7 +98,6 @@
                  ; A Clojure(Script) library for declarative data description and validation
                  [prismatic/schema "1.1.9"]
                  [prismatic/schema-generators "0.1.2"]
-                 [prismatic/plumbing "0.5.5"]
 
                  ; MIME type resolution
                  [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
@@ -149,7 +146,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.60"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.9.19"]
+                 [lupapiste/commons "0.9.22"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -176,7 +173,7 @@
             [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
             [lupapiste/lein-buildid "0.4.2"]
             [lupapiste/lein-nitpicker "0.5.1"]
-            [lein-figwheel "0.5.15"]]
+            [lein-figwheel "0.5.16"]]
 
   :clean-targets ^{:protect false} ["resources/public/lp-static/js/rum-app.js"
                                     "resources/public/lp-static/js/rum-app.js.map"
@@ -192,8 +189,8 @@
                                          [org.apache.activemq/artemis-jms-server "2.6.0"]
                                          [rhizome "0.2.7"]
                                          [pdfboxing "0.1.13"]
-                                         [com.cemerick/piggieback "0.2.2"]
-                                         [figwheel-sidecar "0.5.14"]
+                                         [cider/piggieback "0.3.6"]
+                                         [figwheel-sidecar "0.5.16"]
                                          ;; Better Chrome Dev Tools support
                                          [binaryage/devtools "0.9.4"]]
                         :resource-paths ["dev-resources"]
@@ -204,7 +201,7 @@
                                          :test-paths            []}
                         :sass           {:output-style :expanded
                                          :source-map   true}
-                        :repl-options   {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
+                        :repl-options   {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]
                                          :timeout          200000}
                         :cljsbuild      {:builds {:rum {:figwheel {:websocket-host  :js-client-host
                                                                    :on-jsload        lupapalvelu.ui.ui-components/reload-hook

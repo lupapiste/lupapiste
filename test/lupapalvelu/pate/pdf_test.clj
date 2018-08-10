@@ -1,7 +1,6 @@
 (ns lupapalvelu.pate.pdf-test
   "PDF testing concentrates mainly on the source value resolution."
-  (:require [lupapalvelu.application :as app]
-            [lupapalvelu.pate.pdf :as pdf]
+  (:require [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.pdf-html :as html]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [midje.sweet :refer :all]))

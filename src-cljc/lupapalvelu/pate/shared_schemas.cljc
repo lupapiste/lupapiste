@@ -1,8 +1,6 @@
 (ns lupapalvelu.pate.shared-schemas
   "Schema definitions for Pate schemas."
-  (:require [clojure.string :as s]
-            [clojure.set :as set]
-            [sade.shared-util :as util]
+  (:require [sade.shared-util :as util]
             [schema.core :refer [defschema] :as sc]))
 
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit

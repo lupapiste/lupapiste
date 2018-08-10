@@ -1,8 +1,8 @@
 (ns lupapalvelu.integrations.allu-test
-  "Unit tests for lupapalvelu.integrations.allu. No side-effects except validation exceptions."
-  (:require [schema.core :as sc :refer [defschema]]
-            [cheshire.core :as json]
+  "Unit tests for lupapalvelu.integrations.allu. No side-effects."
+  (:require [schema.core :as sc :refer [defschema Bool]]
             [sade.core :refer [def-]]
+            [sade.env :as env]
             [sade.schemas :refer [NonBlankStr Kiinteistotunnus ApplicationId]]
             [sade.schema-generators :as sg]
             [sade.municipality :refer [municipality-codes]]
@@ -20,74 +20,11 @@
 
             [lupapalvelu.integrations.allu :as allu :refer [PlacementContract]]))
 
-(testable-privates lupapalvelu.integrations.allu
-                   application->allu-placement-contract placement-creation-request handle-placement-contract-response)
+(testable-privates lupapalvelu.integrations.allu application->allu-placement-contract
+                   application-cancel-request placement-creation-request placement-update-request)
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
-
-(defschema TypedAddress
-  {:katu                 {:value sc/Str}
-   :postinumero          {:value sc/Str}
-   :postitoimipaikannimi {:value sc/Str}
-   :maa                  {:value sc/Str}})
-
-(defschema TypedContactInfo
-  {:puhelin {:value sc/Str}
-   :email   {:value sc/Str}})
-
-(defschema TypedPersonDoc
-  {:henkilotiedot {:etunimi  {:value sc/Str}
-                   :sukunimi {:value sc/Str}
-                   :hetu     {:value sc/Str}}
-   :osoite        TypedAddress
-   :yhteystiedot  TypedContactInfo})
-
-(defschema TypedCompanyDoc
-  {:yritysnimi           {:value sc/Str}
-   :liikeJaYhteisoTunnus {:value sc/Str}
-   :osoite               TypedAddress
-   :yhteyshenkilo        {:henkilotiedot {:etunimi  {:value sc/Str}
-                                          :sukunimi {:value sc/Str}}
-                          :yhteystiedot  TypedContactInfo}})
-
-(defschema TypedCustomerDoc
-  {:schema-info {:subtype (sc/enum :hakija :maksaja)}
-   :data        {:_selected {:value (sc/enum "henkilo" "yritys")}
-                 :henkilo   TypedPersonDoc
-                 :yritys    TypedCompanyDoc}})
-
-(defschema TypedApplicantDoc
-  (assoc-in TypedCustomerDoc [:schema-info :subtype] (sc/eq :hakija)))
-
-(defschema TypedPaymentInfo
-  {:verkkolaskuTunnus {:value sc/Str}
-   :ovtTunnus         {:value sc/Str}
-   :valittajaTunnus   {:value sc/Str}})
-
-(defschema TypedPayeeDoc
-  (-> TypedCustomerDoc
-      (assoc-in [:schema-info :subtype] (sc/eq :maksaja))
-      (assoc-in [:data :laskuviite] {:value sc/Str})
-      (assoc-in [:data :yritys :verkkolaskutustieto] TypedPaymentInfo)))
-
-(defschema TypedDescriptionDoc
-  {:schema-info {:subtype (sc/eq :hankkeen-kuvaus)}
-   :data        {:kayttotarkoitus {:value sc/Str}}})
-
-(defschema TypedPlacementApplication
-  {:id               sc/Str
-   :permitSubtype    sc/Str
-   :organization     sc/Str
-   :propertyId       sc/Str
-   :municipality     sc/Str
-   :address          sc/Str
-   :primaryOperation {:name (apply sc/enum (keys ya-operation-type-to-schema-name-key))}
-   :documents        [(sc/one TypedApplicantDoc "applicant")
-                      (sc/one TypedDescriptionDoc "description")
-                      (sc/one TypedPayeeDoc "payee")]
-   :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
-   :drawings         [{:geometry-wgs84 geo/GeoJSON-2008}]})
 
 (defschema ValidPlacementApplication
   {:id               ApplicationId
@@ -110,61 +47,53 @@
 ;;;; Actual Tests
 ;;;; ==================================================================================================================
 
-(facts "allu-application?"
-  (fact "Use ALLU integration for Helsinki YA sijoituslupa and sijoitussopimus."
-    (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoituslupa"}) => true
-    (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoitussopimus"}) => true)
+(env/with-feature-value :allu true
+  (facts "allu-application?"
+    (fact "Use ALLU integration for Helsinki YA sijoituslupa and sijoitussopimus."
+      (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoituslupa"}) => true
+      (allu/allu-application? {:organization "091-YA", :permitSubtype "sijoitussopimus"}) => true)
 
-  (fact "Do not use ALLU integration for anything else."
-    (quick-check 10
-                 (for-all [organization organizations
-                           permitSubtype gen/string-alphanumeric
-                           :when (not (and (= organization "091-YA")
-                                           (or (= permitSubtype "sijoituslupa")
-                                               (= permitSubtype "sijoitussopimus"))))]
-                   (not (allu/allu-application? {:organization organization, :permitSubtype permitSubtype}))))
-    => passing-quick-check))
+    (fact "Do not use ALLU integration for anything else."
+      (quick-check 10
+                   (for-all [organization organizations
+                             permitSubtype gen/string-alphanumeric
+                             :when (not (and (= organization "091-YA")
+                                             (or (= permitSubtype "sijoituslupa")
+                                                 (= permitSubtype "sijoitussopimus"))))]
+                     (not (allu/allu-application? {:organization organization, :permitSubtype permitSubtype}))))
+      => passing-quick-check))
 
-(facts "application->allu-placement-contract"
-  (fact "Valid applications produce valid inputs for ALLU."
-    (quick-check 10
-                 (for-all [application (sg/generator ValidPlacementApplication)]
-                   (nil? (sc/check PlacementContract (application->allu-placement-contract application)))))
-    => passing-quick-check)
+  (facts "application->allu-placement-contract"
+    (fact "Valid applications produce valid inputs for ALLU."
+      (quick-check 10
+                   (for-all [application (sg/generator ValidPlacementApplication)]
+                     (nil? (sc/check PlacementContract
+                                     (application->allu-placement-contract (sg/generate Bool) application)))))
+      => passing-quick-check))
 
-  (fact "Invalid applications get rejected."
-    (quick-check 10
-                 (for-all [application (sg/generator TypedPlacementApplication)
-                           :when (invalid-placement-application? application)]
-                   (try
-                     (application->allu-placement-contract application)
-                     false
-                     (catch Exception _ true))))
-    => passing-quick-check))
+  (facts "application-cancel-request"
+    (let [allu-id 23
+          app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)
+          [endpoint request] (application-cancel-request "https://example.com/api/v1" "foo.bar.baz" app)]
+      (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/cancelled"))
+      (fact "request" request => {:headers {:authorization "Bearer foo.bar.baz"}})))
 
-(facts "placement-creation-request"
-  (let [app (sg/generate ValidPlacementApplication)
-        [endpoint request] (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
-    (fact "endpoint"
-      endpoint => "https://example.com/api/v1/placementcontracts")
-    (fact "request"
-      request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                  :content-type :json
-                  :body         (json/encode (application->allu-placement-contract app))})))
+  (facts "placement-creation-request"
+    (let [app (sg/generate ValidPlacementApplication)
+          [endpoint request] (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
+      (fact "endpoint" endpoint => "https://example.com/api/v1/placementcontracts")
+      (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
+                                  :content-type :json
+                                  :form-params  (application->allu-placement-contract true app)})))
 
-(facts "handle-placement-contract-response"
-  (fact "HTTP 200" (handle-placement-contract-response {:status 200, :body "1"}) => [:ok "1"])
-  (fact "HTTP 201" (handle-placement-contract-response {:status 201, :body "1"}) => [:ok "1"])
-
-  (fact "HTTP 400"
-    (catch-all (handle-placement-contract-response {:status 400, :body "Your data was bad."}))
-    => [:err :error.allu.malformed-application {:body "Your data was bad."}])
-  (fact "HTTP 401"
-    (catch-all (handle-placement-contract-response {:status 401, :body "You are unauthorized."}))
-    => [:err :error.allu.http {:status 401, :body "You are unauthorized."}])
-  (fact "HTTP 403"
-    (catch-all (handle-placement-contract-response {:status 403, :body "It is forbidden."}))
-    => [:err :error.allu.http {:status 403, :body "It is forbidden."}])
-  (fact "HTTP 404"
-    (catch-all (handle-placement-contract-response {:status 404, :body "Not found."}))
-    => [:err :error.allu.http {:status 404, :body "Not found."}]))
+  (facts "placement-update-request"
+    (let [allu-id 23
+          app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)]
+      (doseq [pending-on-client [true false]
+              :let [[endpoint request]
+                    (placement-update-request pending-on-client "https://example.com/api/v1" "foo.bar.baz" app)]]
+        (fact "endpoint" endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
+        (fact "request"
+          request => {:headers      {:authorization "Bearer foo.bar.baz"}
+                      :content-type :json
+                      :form-params  (application->allu-placement-contract pending-on-client app)})))))

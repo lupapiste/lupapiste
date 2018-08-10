@@ -43,6 +43,11 @@
               <i class="wait spin lupicon-refresh"></i>
               <span data-bind="ltext: 'application.conversationSend'"></span>
             </button>
+            <a data-bind="attr: {href: '/api/raw/download-conversation-pdf?id=' + applicationId()}"
+               class="btn positive">
+                <i class="lupicon-download"></i>
+                <span data-bind="ltext: 'application.conversationDownload'"></span>
+            </a>
           </div>
 
           <!-- ko if: authorization.ok('can-mark-answered') -->

@@ -1,5 +1,5 @@
 (ns sade.common-reader
-  (:require [taoensso.timbre :as timbre :refer [debug debugf warn error]]
+  (:require [taoensso.timbre :refer [debug debugf warn error]]
             [clojure.string :as s]
             [clj-time.coerce :as coerce]
             [clj-time.format :as timeformat]

@@ -4,7 +4,7 @@
             [sade.util :as util]
             [sade.core :refer [ok fail fail!]]
             [sade.strings :as ss]
-            [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
+            [lupapalvelu.action :refer [defquery defcommand update-application notify defraw] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.authorization :as auth]
@@ -14,7 +14,8 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.permissions :as permissions]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.i18n :as i18n]))
 
 ;;
 ;; Emails
@@ -38,7 +39,7 @@
             :comment-text text})))
 
 (notifications/defemail :new-comment
-  {:pred-fn (fn [{user :user {roles :roles target :target} :data app :application}]
+  {:pred-fn (fn [{user :user {target :target} :data app :application}]
               (and
                 (not= (:type target) "verdict") ; target might be comment target or attachment target
                 (or (usr/authority? user)
@@ -70,10 +71,10 @@
 (def commenting-states (union states/all-inforequest-states (states/all-application-or-archiving-project-states-but states/terminal-states)))
 
 (defcommand can-target-comment-to-authority
-   {:description "Dummy command for UI logic"
-    :parameters [id]
-    :permissions [{:required [:comment/set-target]}]
-    :states      (disj commenting-states :draft)})
+  {:description "Dummy command for UI logic"
+   :parameters [id]
+   :permissions [{:required [:comment/set-target]}]
+   :states      (disj commenting-states :draft)})
 
 (defcommand can-mark-answered
   {:description "Dummy command for UI logic"
@@ -84,14 +85,14 @@
   {:parameters [id]
    :permissions [{:required [:comment/read]}]
    :states states/all-states}
-  [{{app-id :id :as application} :application}]
+  [{:keys [application]}]
   (ok :comments (comment/enrich-comments application)))
 
 (defcommand add-comment
   {:parameters [id text target roles]
    :optional-parameters [to mark-answered openApplication]
    :contexts [foreman/foreman-app-context]
-   :permissions [{:context {:application {:state #{:draft}}}
+   :permissions [{:context  {:application {:state #{:draft}}}
                   :required [:application/edit-draft :comment/add]}
                  {:required [:comment/add]}]
    :states     commenting-states
@@ -117,3 +118,21 @@
         (comment/comment-mongo-update (:state application) text target (application/user-role user application) mark-answered user to-user created ensured-visibility)
         (when (and openApplication (= (:state application) "draft"))
           (app-state/state-transition-update :open created application user))))))
+
+(defraw download-conversation-pdf
+  {:parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :permissions      [{:context  {:application {:state #{:draft}}}
+                       :required [:application/edit-draft :comment/add]}
+                      {:required [:comment/add]}]
+   :user-roles       #{:applicant :authority}}
+  [{:keys [user application] :as command}]
+  (let [lang    (:language user)
+        pdf     (comment/get-comments-as-pdf lang application)
+        filename (format "%s-%s.pdf" (:id application) (i18n/localize lang :conversation.title))]
+    (if (:ok pdf)
+      {:status  200
+       :headers {"Content-Type"        "application/pdf"
+                 "Content-Disposition" (format "attachment;filename=\"%s\"" filename)}
+       :body    (:pdf-file-stream pdf)}
+      {:error :conversation.pdf.error})))

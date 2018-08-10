@@ -17,7 +17,7 @@
 
 (notifications/defemail :change-email
   {:recipients-fn notifications/from-user
-   :model-fn (fn [{data :data} conf recipient]
+   :model-fn (fn [{data :data} _ recipient]
                (let [{:keys [id expires]} (:token data)]
                  (merge
                    (select-keys data [:old-email :new-email])
@@ -25,7 +25,7 @@
                     :expires (util/to-local-datetime expires)
                     :link    #(change-email-link % id)})))})
 
-(defn simple-email-model [{data :data} conf recipient]
+(defn simple-email-model [{data :data} _ _]
   (let [{:keys [id expires]} (:token data)]
     (merge
       (select-keys data [:old-email :new-email])
@@ -50,7 +50,7 @@
                            (remove #(= (:id %) (:id user)))
                            (cons user))
                       [user]))
-   :model-fn (fn [{:keys [user data]} conf recipient]
+   :model-fn (fn [{:keys [user data]} _ _]
                {:old-email (:email user)
                 :new-email (:new-email data)})})
 

@@ -1,7 +1,7 @@
 (ns lupapalvelu.attachment.util
   (:require [sade.util :as util]))
 
-(defn get-operation-ids [{op :op :as attachment}]
+(defn get-operation-ids [{op :op}]
   (mapv :id op))
 
 (defn get-original-file-id

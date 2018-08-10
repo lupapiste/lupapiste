@@ -553,7 +553,7 @@
         params       {:cookie-store (->cookie-store store)
                       :follow-redirects false
                       :throw-exceptions false}
-        login        (http-post
+        _            (http-post
                        (str (server-address) "/api/login")
                        (assoc params :form-params {:username "admin" :password "admin"})) => http200?
         csrf-token   (get-anti-csrf store) => truthy
@@ -611,7 +611,7 @@
 
     (fact "every available action is a query or raw, i.e. not a command
           (or any other mutating action type we might have in the future)"
-      (let [action-names (keys (filter (fn [[name ok]] (ok? ok)) (actions)))]
+      (let [action-names (keys (filter (fn [[_ ok]] (ok? ok)) (actions)))]
         ; Make sure we have required all the actions
         (require 'lupapalvelu.server)
         (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))
@@ -627,7 +627,7 @@
         params {:cookie-store     (->cookie-store store)
                 :follow-redirects false
                 :throw-exceptions false}
-        login (http-post
+        _     (http-post
                 (str (server-address) "/api/login")
                 (assoc params :form-params {:username "admin" :password "admin"})) => http200?
         csrf-token (get-anti-csrf store) => truthy
@@ -661,7 +661,7 @@
 
     (fact "every available action is a query or raw, i.e. not a command
           (or any other mutating action type we might have in the future)"
-      (let [action-names (keys (filter (fn [[name ok]] (ok? ok)) (actions)))]
+      (let [action-names (keys (filter (fn [[_ ok]] (ok? ok)) (actions)))]
         ; Make sure we have required all the actions
         (require 'lupapalvelu.server)
         (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))))

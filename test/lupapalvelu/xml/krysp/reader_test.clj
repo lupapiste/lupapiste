@@ -88,15 +88,15 @@
   (against-background
     (sade.core/now) => 100)
   (fact "Empty state"
-    (simple-verdicts-validator (simple-verdicts-skeleton "" "") {}) => {:ok false, :text "info.application-backend-preverdict-state"})
+    (simple-verdicts-validator (simple-verdicts-skeleton "" "")) => {:ok false, :text "info.application-backend-preverdict-state"})
   (fact "Still in application state"
-    (simple-verdicts-validator (simple-verdicts-skeleton "hakemus" "1970-01-02") {}) => {:ok false, :text "info.application-backend-preverdict-state"})
+    (simple-verdicts-validator (simple-verdicts-skeleton "hakemus" "1970-01-02")) => {:ok false, :text "info.application-backend-preverdict-state"})
   (fact "Nil date"
-    (simple-verdicts-validator (simple-verdicts-skeleton nil nil) {}) => {:ok false, :text "info.paatos-date-missing"})
+    (simple-verdicts-validator (simple-verdicts-skeleton nil nil)) => {:ok false, :text "info.paatos-date-missing"})
   (fact "Future date"
-    (simple-verdicts-validator (simple-verdicts-skeleton "OK" "1970-01-02") {}) => {:ok false, :text "info.paatos-future-date"} )
+    (simple-verdicts-validator (simple-verdicts-skeleton "OK" "1970-01-02")) => {:ok false, :text "info.paatos-future-date"} )
   (fact "Past date"
-    (simple-verdicts-validator (simple-verdicts-skeleton "OK" "1970-01-01") {}) => nil))
+    (simple-verdicts-validator (simple-verdicts-skeleton "OK" "1970-01-01")) => nil))
 
 (facts "KRYSP verdict"
   (let [xml (xml/parse (slurp "resources/krysp/dev/verdict.xml"))
@@ -338,8 +338,6 @@
 
     (let [verdict        (-> cases first :paatokset first)
           lupamaaraykset (:lupamaaraykset verdict)
-          paivamaarat    (:paivamaarat verdict)
-          poytakirjat    (:poytakirjat verdict)
           katselmukset   (:vaaditutKatselmukset lupamaaraykset)
           maaraykset     (:maaraykset lupamaaraykset)]
 
@@ -400,7 +398,7 @@
     (fact "xml has 1 cases" (count cases) => 1)
     (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
 
-    (fact "validator finds verdicts" (simple-verdicts-validator xml {}) => nil)
+    (fact "validator finds verdicts" (simple-verdicts-validator xml) => nil)
 
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "523")
 
@@ -438,7 +436,7 @@
       (fact "xml has 1 cases" (count cases) => 1)
       (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
 
-      (fact "validator finds verdicts" (simple-verdicts-validator xml {}) => nil)
+      (fact "validator finds verdicts" (simple-verdicts-validator xml) => nil)
 
       (fact "kuntalupatunnus"
         (:kuntalupatunnus (last cases)) => #(.startsWith % "638-2014-"))
@@ -485,13 +483,11 @@
   (fact "without extraparam returns correct"
     (wfs-krysp-url "http://localhost?output=KRYSP" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?output=KRYSP&request=GetFeature&maxFeatures=1000&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E"))
 
-
-
 (facts "Testing information parsed from a verdict xml message for application creation"
   (against-background (sade.env/feature? :disable-ktj-on-create) => true)
   (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml"))
         info (get-app-info-from-message xml "14-0241-R 3")
-        {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus hakijat]} info]
+        {:keys [kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka hakijat]} info]
     (fact "got info" info => truthy)
     (fact "info contains the needed keys" (every? (partial contains info)
                                             [:id :kuntalupatunnus :municipality :rakennusvalvontaasianKuvaus :vahainenPoikkeaminen :rakennuspaikka :ensimmainen-rakennus :hakijat]))
@@ -676,7 +672,7 @@
 
 
 (facts* "Tests for TJ/suunnittelijan verdicts parsing"
-  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.1.8-foremen.xml"))
+  (let [_ (xml/parse (slurp "dev-resources/krysp/verdict-r-2.1.8-foremen.xml"))
         osapuoli {:alkamisPvm "2015-07-07"
                   :paattymisPvm "2015-07-10"
                   :sijaistettavaHlo "Pena Panaani"
@@ -774,3 +770,7 @@
 (facts "It can be deduced if the verdict is about a foreman or not"
   (is-foreman-application? verdict-a) => false
   (is-foreman-application? verdict-tjo) => true)
+
+(facts "Statements can be read from a Krysp document"
+  (-> verdict-a ->lausuntotiedot first :viranomainen) => "Huvikummun Voima"
+  (-> verdict-tjo ->lausuntotiedot first :viranomainen) => nil)

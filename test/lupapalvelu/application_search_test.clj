@@ -6,7 +6,6 @@
             [lupapalvelu.application-search :refer :all]
             [lupapalvelu.application-utils :refer [make-area-query]]
             [lupapalvelu.operations :refer [operation-names]]
-            [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.states :as states]))

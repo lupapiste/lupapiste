@@ -1,19 +1,14 @@
 (ns lupapalvelu.pate.verdict-template
   (:require [clojure.set :as set]
-            [lupapalvelu.action :as action]
-            [lupapalvelu.application :as app]
-            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as ops]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.settings-schemas :as settings-schemas]
             [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
-            [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -195,13 +190,11 @@
                             timestamp)
                   update)))
 
-(defn verdict-template-update-and-open [{:keys [lang data created] :as command}]
+(defn verdict-template-update-and-open [{:keys [data created] :as command}]
   (let [{:keys [template-id]}   data
         organization            (command->organization command)
         {draft :draft :as data} (verdict-template-response-data organization template-id)
-        {new-draft :draft
-         :as       updated}     (verdict-template-settings-dependencies (:id organization)
-                                                                        data)
+        {new-draft :draft :as updated} (verdict-template-settings-dependencies (:id organization) data)
         updates                 (reduce (fn [acc dict]
                                           (let [new-dict-value (dict new-draft)]
                                             (if (not= (dict draft) new-dict-value)
@@ -283,16 +276,14 @@
 (defn save-draft-value
   "Error code on failure (see schemas for details)."
   [organization template-id timestamp path value]
-  (let [{:keys [category draft]
-         :as   template}  (verdict-template organization template-id)
-        {:keys [path value op]
-         :as   processed} (schemas/validate-and-process-value
-                           (template-schemas/verdict-template-schema category)
-                           path
-                           value
-                           draft
-                           {:settings (:draft (settings organization
-                                                        category))})]
+  (let [{:keys [category draft]} (verdict-template organization template-id)
+        {:keys [path value op] :as  processed} (schemas/validate-and-process-value
+                                                 (template-schemas/verdict-template-schema category)
+                                                 path
+                                                 value
+                                                 draft
+                                                 {:settings (:draft (settings organization
+                                                                              category))})]
     (when op ;; Value could be nil
       (let [mongo-path (util/kw-path (cons :verdict-templates.templates.$.draft
                                            path))]
@@ -465,8 +456,7 @@
                        set)]
     (->> organization
          :operation-verdict-templates
-         (filter (fn [[k v]]
-                   (contains? published v)))
+         (filter (fn [[_ v]] (contains? published v)))
          (into {}))))
 
 (defn set-operation-verdict-template [org-id operation template-id]

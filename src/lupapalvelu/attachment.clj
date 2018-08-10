@@ -1,5 +1,5 @@
 (ns lupapalvelu.attachment
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [clojure.java.io :as io]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
@@ -28,6 +28,7 @@
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.states :as states]
+            [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
@@ -38,10 +39,8 @@
             [lupapalvelu.user :as usr]
             [me.raynes.fs :as fs]
             [sade.env :as env]
-            [lupapalvelu.storage.file-storage :as storage]
             [sade.shared-schemas :as sssc]
-            [lupapalvelu.vetuma :as vetuma]
-            [lupapalvelu.domain :as domain])
+            [lupapalvelu.vetuma :as vetuma])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream]))
 
@@ -230,7 +229,7 @@
 ;; Api
 ;;
 
-(defn- by-file-ids [file-ids {versions :versions :as attachment}]
+(defn- by-file-ids [file-ids {:keys [versions]}]
   (some (comp (set file-ids) :fileId) versions))
 
 (defn get-attachments-infos
@@ -250,7 +249,7 @@
   (first (filter (partial by-file-ids #{file-id}) attachments)))
 
 (defn get-attachments-by-operation
-  [{:keys [attachments] :as application} op-id]
+  [{:keys [attachments]} op-id]
   (filter (fn-> att-util/get-operation-ids set (contains? op-id)) attachments))
 
 (defn get-attachments-by-type
@@ -259,7 +258,7 @@
   (filter #(= (:type %) type) attachments))
 
 (defn get-attachments-by-target-type-and-id
-  [{:keys [attachments]} {:keys [type id] :as target}]
+  [{:keys [attachments]} {:keys [type id]}]
   {:pre [(string? type)
          (string? id)]}
   (filter #(and (= (get-in % [:target :type]) type)
@@ -544,7 +543,7 @@
        (when-not version-index
          {$push {:attachments.$.versions version-model}})))))
 
-(defn- remove-old-files! [application {old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
+(defn- remove-old-files! [application {old-versions :versions} {file-id :fileId original-file-id :originalFileId}]
   (some->> (filter (comp #{original-file-id} :originalFileId) old-versions)
            (first)
            ((juxt :fileId :originalFileId))
@@ -946,13 +945,6 @@
       (not (conversion/all-convertable-mime-types (keyword contentType)))
       (warn "Attachment" (:id attachment) "mime type" (keyword contentType) "is not convertible to PDF/A")
 
-      (and (env/feature? :s3) (= :mongodb (keyword (get-in attachment [:latestVersion :storageSystem]))))
-      ; Migrate all application files first to S3
-      (do (storage/move-application-mongodb-files-to-s3 (:id application))
-          (let [updated-app (domain/get-application-no-access-checking (:id application))
-                updated-att (first (filter #(= (:id attachment) (:id %)) (:attachments updated-app)))]
-            (convert-existing-to-pdfa! updated-app updated-att)))
-
       :else
       (if-let [file-content (storage/download application fileId)]
         (with-open [content ((:content file-content))]
@@ -971,11 +963,11 @@
                   result))))
         (error "PDF/A conversion: No file found with file id" fileId)))))
 
-(defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
+(defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState}]
   (boolean (and (states/post-verdict-states (keyword app-state))
                 ((conj states/all-application-states :info) (keyword orig-app-state)))))
 
-(defn validate-attachment-manually-set-construction-time [{{:keys [attachmentId]} :data application :application :as command}]
+(defn validate-attachment-manually-set-construction-time [{{:keys [attachmentId]} :data application :application}]
   (when-not (manually-set-construction-time (get-attachment-info application attachmentId))
     (fail :error.attachment-not-manually-set-construction-time)))
 
@@ -990,7 +982,7 @@
 
 (defn- attachment-assignment-info
   "Return attachment info as assignment target"
-  [{{:keys [type-group type-id]} :type contents :contents id :id :as doc}]
+  [{{:keys [type-group type-id]} :type contents :contents id :id}]
   (util/assoc-when-pred {:id id :type-key (ss/join "." ["attachmentType" type-group type-id])} ss/not-blank?
                         :description contents))
 
@@ -1024,6 +1016,30 @@
                                             attachment)
     (enrich-attachment attachment)))
 
+;;
+;; Comments as attachment
+;;
+
+(defn- comments-empty? [application]
+  (->> application
+       :comments
+       (remove #(-> % :target :type (keyword) (= :attachment)))
+       (empty?)))
+
+(defn save-comments-as-attachment [{lang :lang application :application created :created :as command}]
+  (when-not (comments-empty? application)
+    (let [comments-pdf (comment/get-comments-as-pdf lang application)
+          content (:pdf-file-stream comments-pdf)
+          existing-keskustelu (util/find-by-key :type {:type-id "keskustelu" :type-group "muut"} (:attachments application))
+          file-options {:filename (format "%s-%s.pdf" (:id application) (i18n/localize lang :conversation.title))
+                        :content  content
+                        :size     (.available content)}
+          attachment-options {:attachment-type {:type-id    :keskustelu
+                                                :type-group :muut}
+                              :attachment-id   (when existing-keskustelu (:id existing-keskustelu))
+                              :created         created
+                              :required        false}]
+      (upload-and-attach! command attachment-options file-options))))
 
 ;;
 ;; Pre-checks

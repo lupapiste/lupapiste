@@ -1,9 +1,10 @@
 (ns lupapalvelu.action
-  (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
+  (:require [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [clojure.set :as set]
             [slingshot.slingshot :refer [try+]]
             [monger.operators :refer [$set $push $pull $ne]]
             [schema.core :as sc]
+            [sade.coordinate :as coord]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -235,6 +236,16 @@
                              (partial sc/check schema)
                              error-msg)))
 
+(defn coordinate-parameters
+  "Validates that the given parameters have coordinate values that reside approximately in Finland"
+  [x y command]
+  (or (filter-params-of-command [x] command
+                                (complement coord/valid-x?)
+                                :error.illegal-coordinates)
+      (filter-params-of-command [y] command
+                                (complement coord/valid-y?)
+                                :error.illegal-coordinates)))
+
 (defn valid-db-key
   "Input-validator to check that given parameter is valid db key"
   [param]
@@ -321,7 +332,7 @@
      :user user)))
 
 (defn without-system-keys [application]
-  (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
+  (into {} (filter (fn [[k _]] (not (.startsWith (name k) "_"))) application)))
 
 ;;
 ;; Actions
@@ -352,7 +363,7 @@
 (defn missing-fields [{data :data} {parameters :parameters}]
   (map name (set/difference (set parameters) (set (keys data)))))
 
-(defn- has-required-user-role [command {user-roles :user-roles parameters :parameters :as meta-data}]
+(defn- has-required-user-role [command {user-roles :user-roles parameters :parameters}]
   (let [allowed-roles (or user-roles #{})
         user-role     (-> command :user :role keyword)]
     (or (nil? user-roles) (allowed-roles :anonymous) (allowed-roles user-role) (allowed-financial-authority allowed-roles user-role parameters))))
@@ -508,7 +519,7 @@
         (invalid-state-in-application command application)
         (user-is-not-allowed-to-access? command application)))))
 
-(defn- update-user-application-role [{org-authz :orgAuthz role :role :as user} {app-org :organization :as application}]
+(defn- update-user-application-role [{org-authz :orgAuthz role :role :as user} {app-org :organization}]
   (assoc user :role (cond
                       (nil? app-org) role
                       (contains? org-authz (keyword app-org)) role

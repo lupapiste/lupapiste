@@ -3,7 +3,6 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-bulletins-itest-util :as bulletin-util]
-            [lupapalvelu.cookie :as c]
             [cheshire.core :as json]
             [lupapalvelu.vetuma-itest-util :as vetuma-util]))
 
