@@ -21,7 +21,7 @@
 
             [lupapalvelu.backing-system.allu :as allu
              :refer [ALLUApplications -cancel-application! ALLUAttachments -send-attachment!
-                     ALLUPlacementContracts ->MessageSavingALLU PlacementContract
+                     ALLUPlacementContracts ->MessageSavingALLU ->GetAttachmentFiles PlacementContract
                      -update-placement-contract! -create-placement-contract! allu-fail!]])
   (:import [java.io InputStream]))
 
@@ -148,7 +148,8 @@
       (let [initial-allu-state {:id-counter 0, :applications {}}
             allu-state (atom initial-allu-state)
             failure-counter (atom 0)]
-        (mount/start-with {#'allu/allu-instance (->CheckingALLU (->MessageSavingALLU (->AtomMockALLU allu-state)))})
+        (mount/start-with {#'allu/allu-instance
+                           (->CheckingALLU (->MessageSavingALLU (->GetAttachmentFiles (->AtomMockALLU allu-state))))})
 
         (binding [allu-fail! (fn [text info-map]
                                (fact "error text" text => :error.allu.http)
@@ -255,18 +256,20 @@
             (:id-counter @allu-state) => 0)
 
           (fact "error responses from ALLU produce `fail!`ures"
-            (mount/start-with {#'allu/allu-instance (->MessageSavingALLU
+            (mount/start-with {#'allu/allu-instance
+                               (->MessageSavingALLU (->GetAttachmentFiles
                                                       (->ConstALLU {:status 200} {:status 200}
-                                                                   {:status 400, :body "Your data was bad."} nil))})
+                                                                   {:status 400, :body "Your data was bad."} nil)))})
             (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
               (itu/local-command pena :submit-application :id id)
               @failure-counter => 2)
 
             (reset! failure-counter 0)
 
-            (mount/start-with {#'allu/allu-instance (->MessageSavingALLU
+            (mount/start-with {#'allu/allu-instance
+                               (->MessageSavingALLU (->GetAttachmentFiles
                                                       (->ConstALLU {:status 200} {:status 200}
-                                                                   {:status 401, :body "You are unauthorized."} nil))})
+                                                                   {:status 401, :body "You are unauthorized."} nil)))})
             (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
               (itu/local-command pena :submit-application :id id)
               @failure-counter => 1))))

@@ -405,8 +405,25 @@
         {:status 200, :body ""}
         {:status 404, :body (str "Not Found: " allu-id)}))))
 
-;;;; Integration message <del>Decorator</del> middleware
+;;;; Decorators/Middleware
 ;;;; ===================================================================================================================
+
+(deftype GetAttachmentFiles [inner]
+  ALLUApplications
+  (-cancel-application! [_ command endpoint request] (-cancel-application! inner command endpoint request))
+
+  ALLUPlacementContracts
+  (-create-placement-contract! [_ command endpoint request]
+    (-create-placement-contract! inner command endpoint request))
+  (-update-placement-contract! [_ command endpoint request]
+    (-update-placement-contract! inner command endpoint request))
+
+  ALLUAttachments
+  (-send-attachment! [_ {:keys [application :as command]} endpoint request]
+    (->> (update-in request [:form-params :file] (fn [fileId]
+                                                   (when-let [file-map (get-attachment-file! application fileId)]
+                                                     ((:content file-map)))))
+         (-send-attachment! inner command endpoint))))
 
 (defn- with-integration-messages [command endpoint request message-subtype body]
   (let [{msg-id :id :as msg} (request-integration-message command endpoint request message-subtype)
@@ -432,15 +449,16 @@
 
   ALLUAttachments
   (-send-attachment! [_ command endpoint request]
-    ;; TODO: Instead of just throwing :file away, store the fileId:
-    (with-integration-messages command endpoint (dissoc-in request [:form-params :file]) "attachments.create"
+    (with-integration-messages command endpoint request "attachments.create"
                                #(-send-attachment! inner command endpoint request))))
 
 ;;;; State and error handling
 ;;;; ===================================================================================================================
 
 (defstate allu-instance
-  :start (->MessageSavingALLU (if (env/dev-mode?) (->IntegrationMessagesMockALLU) (->RemoteALLU))))
+  :start (->MessageSavingALLU (->GetAttachmentFiles (if (env/dev-mode?)
+                                                      (->IntegrationMessagesMockALLU)
+                                                      (->RemoteALLU)))))
 
 (def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
 
@@ -512,10 +530,8 @@
 (defn- send-attachment!
   "Send `attachment` of `application to ALLU. Return the fileId of the file that was sent."
   [{:keys [application] :as command} {attachment-id :id {:keys [fileId]} :latestVersion :as attachment}]
-  (let [file-contents (when-let [file-map (get-attachment-file! application fileId)]
-                        ((:content file-map)))
-        [endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) application attachment
-                                            file-contents)]
+  (let [[endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) application attachment
+                                            fileId)]
     (match (-send-attachment! allu-instance command endpoint request)
       {:status (:or 200 201)} (do (info "attachment" attachment-id "of" (:id application) "was sent to ALLU")
                                   fileId)
