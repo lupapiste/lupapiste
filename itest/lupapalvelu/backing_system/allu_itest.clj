@@ -6,8 +6,9 @@
             [clj-http.client :as http]
             [monger.operators :refer [$set]]
             [sade.core :refer [ok?]]
-            [sade.schema-generators :as ssg]
             [sade.env :as env]
+            [sade.files :refer [with-temp-file]]
+            [sade.schema-generators :as ssg]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.domain :as domain]
@@ -156,42 +157,48 @@
                                              ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]]))
               (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Esimerkki Oy"
 
-              (let [filename "dev-resources/test-attachment.txt"
-                    file (io/file filename)
-                    description "Test file"
-                    description* "The best file"
-                    _ (itu/local-command pena :upload-attachment :id id :attachmentId (:id attachment)
-                                         :attachmentType {:type-group "muut", :type-id "muu"} :group {}
-                                         :filename filename :tempfile file :size (.length file)) => ok?
-                    _ (itu/local-command pena :set-attachment-meta :id id :attachmentId (:id attachment)
-                                         :meta {:contents description}) => ok?
-                    {[attachment] :attachments} (domain/get-application-no-access-checking id)]
-                (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
+              (let [filename "dev-resources/test-attachment.txt"]
+                ;; HACK: Have to use a temp file as :upload-attachment expects to get one and deletes it in the end.
+                (with-temp-file file
+                  (io/copy (io/file filename) file)
+                  (let [description "Test file"
+                        description* "The best file"
+                        _ (itu/local-command pena :upload-attachment :id id :attachmentId (:id attachment)
+                                             :attachmentType {:type-group "muut", :type-id "muu"} :group {}
+                                             :filename filename :tempfile file :size (.length file)) => ok?
+                        _ (itu/local-command pena :set-attachment-meta :id id :attachmentId (:id attachment)
+                                             :meta {:contents description}) => ok?
+                        {[attachment] :attachments} (domain/get-application-no-access-checking id)]
+                    (itu/local-command pena :add-comment :id id :text "Added my test text file."
+                                       :target {:type "application"} :roles ["applicant" "authority"]) => ok?
+                    (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
 
-                (count (:applications @allu-state)) => 1
-                (-> (:applications @allu-state) first val :pendingOnClient) => false
-                (-> (:applications @allu-state) first val :attachments)
-                => [{:metadata {:name        description
-                                :description (localize "fi" :attachmentType
-                                                       (-> attachment :type :type-group)
-                                                       (-> attachment :type :type-id))
-                                :mimeType    (-> attachment :latestVersion :contentType)}}]
+                    (count (:applications @allu-state)) => 1
+                    (-> (:applications @allu-state) first val :pendingOnClient) => false
+                    (-> (:applications @allu-state) first val :attachments)
+                    ;; TODO: Should also contain the conversation pdf:
+                    => [{:metadata {:name        description
+                                    :description (localize "fi" :attachmentType
+                                                           (-> attachment :type :type-group)
+                                                           (-> attachment :type :type-id))
+                                    :mimeType    (-> attachment :latestVersion :contentType)}}]
 
-                ;; Upload another attachment for :move-attachments-to-backing-system to send:
-                (itu/local-command raktark-helsinki :upload-attachment :id id :attachmentId (:id attachment)
-                                   :attachmentType {:type-group "muut", :type-id "muu"} :group {}
-                                   :filename filename :tempfile file :size (.length file)) => ok?
-                (itu/local-command raktark-helsinki :set-attachment-meta :id id :attachmentId (:id attachment)
-                                   :meta {:contents description*}) => ok?
-                (itu/local-command raktark-helsinki :move-attachments-to-backing-system :id id :lang "fi"
-                                   :attachmentIds [(:id attachment)]) => ok?
+                    (io/copy (io/file filename) file)
+                    ;; Upload another attachment for :move-attachments-to-backing-system to send:
+                    (itu/local-command raktark-helsinki :upload-attachment :id id :attachmentId (:id attachment)
+                                       :attachmentType {:type-group "muut", :type-id "muu"} :group {}
+                                       :filename filename :tempfile file :size (.length file)) => ok?
+                    (itu/local-command raktark-helsinki :set-attachment-meta :id id :attachmentId (:id attachment)
+                                       :meta {:contents description*}) => ok?
+                    (itu/local-command raktark-helsinki :move-attachments-to-backing-system :id id :lang "fi"
+                                       :attachmentIds [(:id attachment)]) => ok?
 
-                (-> (:applications @allu-state) first val :attachments (get 1))
-                => {:metadata {:name        description*
-                               :description (localize "fi" :attachmentType
-                                                      (-> attachment :type :type-group)
-                                                      (-> attachment :type :type-id))
-                               :mimeType    (-> attachment :latestVersion :contentType)}}))
+                    (-> (:applications @allu-state) first val :attachments (get 1))
+                    => {:metadata {:name        description*
+                                   :description (localize "fi" :attachmentType
+                                                          (-> attachment :type :type-group)
+                                                          (-> attachment :type :type-id))
+                                   :mimeType    (-> attachment :latestVersion :contentType)}}))))
 
             (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
               (itu/local-command pena :submit-application :id id) => ok?

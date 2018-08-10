@@ -37,8 +37,8 @@
   (update-application! [_ updated-application] (allu/update-application! updated-application) true)
   (cancel-application! [_ application] (allu/cancel-application! application))
   (return-to-draft! [_ application] (allu/cancel-application! application))
-  (approve-application! [_ {:keys [application]} submitted-application _]
-    [true (allu/approve-application! application)])
+  (approve-application! [_ command _ _]
+    [true (allu/approve-application! command)])
   (send-attachments! [_ _ _ application attachments _] (allu/send-attachments! application attachments)))
 
 (deftype KRYSPBackingSystem []

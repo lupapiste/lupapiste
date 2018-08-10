@@ -20,6 +20,7 @@
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
 
 ;;;; Schemas
@@ -466,8 +467,9 @@
 
 (defn approve-application!
   "Approve application in ALLU. Returns a seq of attachment file IDs that were sent."
-  [application]
+  [{:keys [application] :as command}]
   ;; TODO: Non-placement-contract ALLU applications
   (lock-placement-contract! application)
-  ;; TODO: Send comments
-  (send-attachments! application (filter attachment/unsent? (:attachments application))))
+  (attachment/save-comments-as-attachment command)
+  (let [{:keys [attachments]} (domain/get-application-no-access-checking (:id application) {:attachments 1})]
+    (send-attachments! application (filter attachment/unsent? attachments))))
