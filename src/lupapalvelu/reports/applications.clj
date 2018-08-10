@@ -234,7 +234,6 @@
 
 (defn ^OutputStream post-verdict-excel [organizationId startTs endTs lang]
   (letfn [(tos-function-name [{tos-function :tosFunction org-id :organization}]
-            (println tos-function org-id)
             (:name (tos/tos-function-with-name tos-function org-id)))]
     (let [archiving-enabled? (:permanent-archive-enabled (org/get-organization organizationId))
           sheet-name         (str (i18n/localize lang "authorityAdmin.postVerdictReports.sheet-name-prefix")
