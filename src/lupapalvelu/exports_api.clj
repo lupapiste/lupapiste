@@ -43,8 +43,8 @@
      before :modifiedBeforeTimestampMillis} :data user :user}]
   (let [query (merge
                 (domain/application-query-for user)
-                {:primaryOperation.id {$exists true}}
-                {:facta-imported {$ne true}}
+                {:primaryOperation.id {$exists true}
+                 :facta-imported {$ne true}} ;; Factasta konvertoituja hankkeita ei laskuteta
                 (when (or (ss/numeric? after) (ss/numeric? before))
                   {:modified (util/assoc-when {}
                                               $gte (when after (Long/parseLong after 10))
