@@ -19,6 +19,16 @@
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]))
 
+(defn get-duplicate-ids
+  "This takes a kuntalupatunnus and returns the LP ids of every application in the database
+  which has contains the same kuntalupatunnus and does not contain :facta-imported true."
+  [kuntalupatunnus]
+  (let [ids (app/get-lp-ids-by-kuntalupatunnus kuntalupatunnus)
+        applications (map (partial mongo/by-id :applications) ids)]
+    (some->> applications
+             (filter #(not= true (:facta-imported %)))
+             (map :id))))
+
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
   ;; Data to be deduced from xml:
@@ -143,10 +153,16 @@
           (info "Saved review updates")
           (infof "Reviews were not saved: %s" (:desc update-result))))
 
-      ;; Add link permits (viitelupien linkitys)
-      (let [app-links (krysp-reader/->viitelupatunnukset xml)]
+      ;; If a version of the application to import already has an instance in the database, the new version
+      ;; is linked to the old one (see PATE-127 for the rationale). This means we link the application to convert
+      ;; to those permits in the db that 1) have the same kuntalupatunnus and 2) do not contain :facta-imported true.
+      ;; Linking these is done at the same run with all the normal app-links (viitelupien linkkaus).
+      (let [app-links (krysp-reader/->viitelupatunnukset xml)
+            kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
+            duplicate-ids (get-duplicate-ids kuntalupatunnus)
+            all-links (clojure.set/union (set app-links) (set duplicate-ids))]
         (infof (format "Linking %d app-links to application %s" (count app-links) (:id created-application)))
-        (doseq [link app-links]
+        (doseq [link all-links]
           (try
             (app/do-add-link-permit created-application link)
             (catch Exception e

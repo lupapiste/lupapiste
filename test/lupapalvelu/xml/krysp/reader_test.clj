@@ -774,3 +774,12 @@
 (facts "Statements can be read from a Krysp document"
   (-> verdict-a ->lausuntotiedot first :viranomainen) => "Huvikummun Voima"
   (-> verdict-tjo ->lausuntotiedot first :viranomainen) => nil)
+
+(facts "Kuntalupatunnus can be read straight from the XML"
+  (letfn [(get-tunnus [filename]
+            (xml->kuntalupatunnus
+              (krysp-fetch/get-local-application-xml-by-filename (str "./dev-resources/krysp/" filename) "R")))]
+    (get-tunnus "verdict-r-2.1.6-type-A.xml") => "01-0001-12-A"
+    (get-tunnus "verdict-r.xml") => "13-0185-R"
+    (get-tunnus "verdict-r-2.1.6-type-TJO.xml") => "01-0012-00-TJO"
+    (get-tunnus "verdict-r-2.2.2-foremen.xml") => "638-2018-0005"))
