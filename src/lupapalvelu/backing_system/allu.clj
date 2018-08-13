@@ -421,7 +421,7 @@
         response (allu-http-fail! response)))))
 
 (defn- send-attachment!
-  "Send `attachment` of `application to ALLU. Return the fileId of the file that was sent."
+  "Send `attachment` of `application` to ALLU. Return the fileId of the file that was sent."
   [app {attachment-id :id {:keys [fileId]} :latestVersion :as attachment}]
   (when-let [file-map (get-attachment-file! app fileId)]
     (let [file-contents ((:content file-map))
