@@ -161,7 +161,7 @@
             kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
             duplicate-ids (get-duplicate-ids kuntalupatunnus)
             all-links (clojure.set/union (set app-links) (set duplicate-ids))]
-        (infof (format "Linking %d app-links to application %s" (count app-links) (:id created-application)))
+        (infof (format "Linking %d app-links to application %s" (count all-links) (:id created-application)))
         (doseq [link all-links]
           (try
             (app/do-add-link-permit created-application link)
