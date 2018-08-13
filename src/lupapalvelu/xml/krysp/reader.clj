@@ -1,27 +1,28 @@
 (ns lupapalvelu.xml.krysp.reader
   "Read the Krysp from municipality Web Feature Service"
-  (:require [taoensso.timbre :refer [trace debug info warn error warnf]]
+  (:require [cheshire.core :as json]
             [clojure.set :refer [rename-keys]]
-            [net.cgrand.enlive-html :as enlive]
-            [sade.env :as env]
-            [sade.xml :refer :all]
-            [sade.util :refer [fn-> fn->>] :as util]
-            [sade.common-reader :as cr]
-            [sade.strings :as ss]
-            [sade.coordinate :as coordinate]
-            [sade.core :refer [now def- fail]]
-            [lupapalvelu.drawing :as drawing]
-            [lupapalvelu.document.schemas]
             [lupapalvelu.conversion.util :as conv-util]
+            [lupapalvelu.document.schemas]
+            [lupapalvelu.drawing :as drawing]
+            [lupapalvelu.find-address :as find-address]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
+            [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.verdict :as verdict]
             [lupapalvelu.xml.krysp.common-reader :as common]
-            [lupapalvelu.find-address :as find-address]
-            [lupapalvelu.proxy-services :as proxy-services]
-            [cheshire.core :as json]))
+            [lupapalvelu.xml.krysp.verdict :as verdict]
+            [net.cgrand.enlive-html :as enlive]
+            [plumbing.core :refer [?>>]]
+            [sade.common-reader :as cr]
+            [sade.coordinate :as coordinate]
+            [sade.core :refer [now def- fail]]
+            [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.util :refer [fn-> fn->>] :as util]
+            [sade.xml :refer :all]
+            [taoensso.timbre :refer [trace debug info warn error warnf]]))
 
 (defn- post-body-for-ya-application [ids id-path]
   (let [filter-content (->> (wfs/property-in id-path ids)
@@ -564,11 +565,11 @@
     (cr/all-of osoitenimi-elem)))
 
 (defn- build-huoneisto [huoneisto jakokirjain jakokirjain2]
-  (when huoneisto
-    (str huoneisto
-         (cond
-           (and jakokirjain jakokirjain2) (str jakokirjain "-" jakokirjain2)
-           :else jakokirjain))))
+  (->> [jakokirjain jakokirjain2]
+       (remove ss/blank?)
+       (ss/join "-")
+       (?>> (ss/not-blank? huoneisto) (str huoneisto))
+       ss/blank-as-nil))
 
 (defn- build-osoitenumero [osoitenumero osoitenumero2]
   (cond
