@@ -21,10 +21,10 @@
 
 (defn get-duplicate-ids
   "This takes a kuntalupatunnus and returns the LP ids of every application in the database
-  which has contains the same kuntalupatunnus and does not contain :facta-imported true."
+  that contains the same kuntalupatunnus and does not contain :facta-imported true."
   [kuntalupatunnus]
   (let [ids (app/get-lp-ids-by-kuntalupatunnus kuntalupatunnus)
-        applications (map (partial mongo/by-id :applications) ids)]
+        applications (map #(mongo/by-id :applications % {:id 1 :facta-imported 1}) ids)]
     (some->> applications
              (filter #(not= true (:facta-imported %)))
              (map :id))))
@@ -153,10 +153,10 @@
           (info "Saved review updates")
           (infof "Reviews were not saved: %s" (:desc update-result))))
 
-      ;; If a version of the application to import already has an instance in the database, the new version
-      ;; is linked to the old one (see PATE-127 for the rationale). This means we link the application to convert
-      ;; to those permits in the db that 1) have the same kuntalupatunnus and 2) do not contain :facta-imported true.
-      ;; Linking these is done at the same run with all the normal app-links (viitelupien linkkaus).
+      ;; The database may already include the same kuntalupatunnus as in the to be imported application
+      ;; (e.g., the application has been imported earlier via previous permit (paperilupa) mechanism).
+      ;; This kind of application 1) has the same kuntalupatunnus and 2) :facta-imported is falsey.
+      ;; After import, the two applications are linked (viitelupien linkkaus).
       (let [app-links (krysp-reader/->viitelupatunnukset xml)
             kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
             duplicate-ids (get-duplicate-ids kuntalupatunnus)
