@@ -27,7 +27,8 @@
   ->simple-verdicts
   party-with-paatos-data
   valid-sijaistustieto?
-  resolve-address-by-point)
+  resolve-address-by-point
+  build-huoneisto)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
@@ -601,7 +602,7 @@
         y => #(and (instance? Double %) (= 6997077.973 %)))
 
       (fact "Address is not changed, it's same as in xml"
-        address => "Granorsvagen 32")
+        address => "Granorsvagen 32 b")
 
       (fact "Property id is fetched from service"
         propertyId => "47540208780003")
@@ -774,6 +775,21 @@
 (facts "Statements can be read from a Krysp document"
   (-> verdict-a ->lausuntotiedot first :viranomainen) => "Huvikummun Voima"
   (-> verdict-tjo ->lausuntotiedot first :viranomainen) => nil)
+
+(fact "build-huoneisto"
+  (build-huoneisto "h" "j1" "j2") => "hj1-j2"
+  (build-huoneisto "" "j1" "j2") => "j1-j2"
+  (build-huoneisto nil "j1" "j2") => "j1-j2"
+  (build-huoneisto "h" "" "j2") => "hj2"
+  (build-huoneisto "h" nil "j2") => "hj2"
+  (build-huoneisto "h" "j1" "") => "hj1"
+  (build-huoneisto "h" "j1" nil) => "hj1"
+  (build-huoneisto "" nil "j2") => "j2"
+  (build-huoneisto "h" "" nil) => "h"
+  (build-huoneisto "" "j1" "") => "j1"
+  (build-huoneisto "" "" "") => nil
+  (build-huoneisto nil nil nil) => nil
+  (build-huoneisto " " "  " "   ") => nil)
 
 (facts "Kuntalupatunnus can be read straight from the XML"
   (letfn [(get-tunnus [filename]
