@@ -18,7 +18,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
+            [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
 
 ;; Helpers
 

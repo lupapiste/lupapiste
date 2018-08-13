@@ -82,7 +82,7 @@ A transacted session can be created. Transaction is never excplicitly started, b
 
 >The transacted session uses a chained-transaction model. In a chained-transaction model, an application does not explicitly start a transaction.
 
-Transaction logic is provided in consumer side code. See `lupapalvelu.xml.krysp.http` namespace for example.
+Transaction logic is provided in consumer side code. See `lupapalvelu.backing_system.krysp.http` namespace for example.
 
 Good explanation _Transacted session_ can be found from [JavaWolrd](https://www.javaworld.com/article/2074123/java-web-development/transaction-and-redelivery-in-jms.html?page=2).
 

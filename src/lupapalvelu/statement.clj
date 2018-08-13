@@ -18,7 +18,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
+            [lupapalvelu.backing-system.krysp.mapping-common :as mapping-common]
             [sade.dns :as dns]))
 
 ;;

@@ -21,6 +21,8 @@
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.backing-system.core :as bs]
+            [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as krysp-output]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.company :as company]
             [lupapalvelu.document.document :as doc]
@@ -30,7 +32,6 @@
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.integrations.allu :as allu]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -45,7 +46,6 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.suti :as suti]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
             [lupapalvelu.ya :as ya])
   (:import (java.net SocketTimeoutException)))
 
@@ -233,9 +233,9 @@
                        :required [:application/cancel]}]
    :notified         true
    :on-success       [(notify :application-state-change)
-                      (fn [{:keys [application]} _]
-                        (when (allu/allu-application? application)
-                          (allu/cancel-application! application)))]
+                      (fn [{:keys [application organization]} _]
+                        (bs/cancel-application! (bs/get-backing-system @organization (permit/permit-type application))
+                                                application))]
    :states           states/all-application-or-archiving-project-states
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
@@ -343,22 +343,21 @@
    :on-success       [(notify :application-state-change)
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)
-                      (notify :organization-housing-office)
-                      (fn [{{:keys [id] :as application} :application} _]
-                        (when (allu/allu-application? application)
-                          ;; TODO: Use message queue to delay and retry interaction with ALLU.
-                          ;; TODO: Save messages for inter-system debugging etc.
-                          ;; TODO: Send errors to authority instead of applicant?
-                          ;; TODO: Non-placement-contract ALLU applications
-                          (let [allu-id (allu/create-placement-contract! application)]
-                            (app/set-integration-key id :ALLU {:id allu-id}))))]
+                      (notify :organization-housing-office)]
    :pre-checks       [(partial sm/validate-state-transition :submitted)]}
-  [{:keys [application] :as command}]
+  [{:keys [application organization] :as command}]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (do (app/submit command)
-          (ok)))))
+      (let [application (if-let [[bs-name integration-key]
+                                 (bs/submit-application! (bs/get-backing-system @organization
+                                                                                (permit/permit-type application))
+                                                         application)]
+                          (do (app/set-integration-key id bs-name integration-key)
+                              (assoc-in application [:integrationKeys bs-name] integration-key)) ; HACK
+                          application)]
+        (app/submit (assoc command :application application))
+        (ok)))))
 
 (defcommand refresh-ktj
   {:parameters [:id]
@@ -660,9 +659,9 @@
    :states           #{:submitted}
    :pre-checks       [(partial sm/validate-state-transition :draft)]
    :on-success       [(notify :application-return-to-draft)
-                      (fn [{:keys [application]} _]
-                        (when (allu/allu-application? application)
-                          (allu/cancel-application! application)))]}
+                      (fn [{:keys [application organization]} _]
+                        (bs/return-to-draft! (bs/get-backing-system @organization (permit/permit-type application))
+                                             application))]}
   [{{:keys [role] :as user}         :user
     {:keys [state] :as application} :application
     created                         :created

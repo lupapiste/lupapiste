@@ -7,7 +7,7 @@
             [lupapalvelu.integrations.ely :as ely]
             [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.xml.asianhallinta.core :as ah]
+            [lupapalvelu.backing-system.asianhallinta.core :as ah]
             [lupapalvelu.xml.validator :as validator]
             [sade.core :refer [now]]
             [sade.env :as env]

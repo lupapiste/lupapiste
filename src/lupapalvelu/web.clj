@@ -54,7 +54,7 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.token :as token]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
+            [lupapalvelu.backing-system.asianhallinta.reader :as ah-reader]
             [lupapalvelu.ya-extension :as yax]
             [lupapalvelu.storage.file-storage :as storage])
   (:import (java.io OutputStreamWriter BufferedWriter)

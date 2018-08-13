@@ -35,7 +35,7 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [sade.coordinate :as coord]
             [sade.core :refer :all]
             [sade.env :as env]
