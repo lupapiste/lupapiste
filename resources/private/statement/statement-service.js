@@ -104,12 +104,18 @@ LUPAPISTE.StatementService = function(params) {
 
   function handleError(err) {
     var modificationConflict = err.text === "error.statement-updated-after-last-save";
-    hub.send("show-dialog", {ltitle: "error.dialog.title",
-                             component: "ok-dialog",
-                             size: "small",
-                             componentParams: {ltext: err.text,
-                                               okFn: modificationConflict ? function() { repository.load(self.applicationId()); } : _.noop,
-                                               okTitle: modificationConflict && loc("statement.refresh")}});
+    var appId = self.applicationId();
+    if( err.text === "error.unsupported-permit-type" ) {
+      hub.send( "indicator", {style: "negative", message: "statement.cannot-edit"} );
+      repository.load( appId );
+    } else {
+      hub.send("show-dialog", {ltitle: "error.dialog.title",
+                               component: "ok-dialog",
+                               size: "small",
+                               componentParams: {ltext: err.text,
+                                                 okFn: modificationConflict ? _.wrap( appId, repository.load )  : _.noop,
+                                                 okTitle: modificationConflict && loc("statement.refresh")}});
+    }
   }
 
   function updateDraft(statementId, tab) {

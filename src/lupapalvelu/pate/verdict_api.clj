@@ -381,7 +381,7 @@
                                              (state-in states/post-submitted-states))
                        ;; As KuntaGML message is generated the
                        ;; application state must be at least :sent
-                       (state-in (set/difference states/post-sent-states
+                       (state-in (set/difference states/post-submitted-states
                                                  #{:complementNeeded})))]
    :notified         true
    :on-success       (notify :application-state-change)}

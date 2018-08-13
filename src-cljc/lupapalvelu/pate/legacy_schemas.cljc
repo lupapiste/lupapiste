@@ -234,6 +234,15 @@
    legsub-attachments
    (verdict-schemas/versub-upload {:type-group #".*" :default :muut.paatosote})))
 
+(def tj-legacy-verdict
+  (build-legacy-schema
+    (legsub-verdict {:select {:loc-prefix :verdict.status
+                              :items      [:1 :2 :21 :37]
+                              :sort-by    :text
+                              :type :autocomplete}})
+    legsub-attachments
+    (verdict-schemas/versub-upload)))
+
 
 (def legsub-contract
   {:dictionary {:kuntalupatunnus {:text      {:i18nkey :verdict.id}
@@ -309,4 +318,5 @@
     :kt       kt-legacy-verdict
     :ymp      ymp-legacy-verdict
     :contract contract-legacy-verdict
+    :tj       tj-legacy-verdict
     (schema-util/pate-assert false "Unsupported legacy category:" category)))

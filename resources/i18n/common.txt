@@ -3182,6 +3182,7 @@
 "statement.confirm.title" "en" "Send statement"
 "statement.confirm.title" "fi" "Lähetä lausunto"
 "statement.confirm.title" "sv" "Skicka utlåtandet"
+"statement.cannot-edit" "fi" "Lausuntoa ei voi enää muokata."
 "statement.delete" "en" "Remove statement"
 "statement.delete" "fi" "Poista lausunto"
 "statement.delete" "sv" "Ta bort utlåtandet"
