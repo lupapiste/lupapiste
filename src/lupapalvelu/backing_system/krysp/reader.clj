@@ -118,7 +118,7 @@
   {:muuTunnus (:tunnus muu-tunnus "")
    :muuTunnusSovellus (:sovellus muu-tunnus "")})
 
-(defn ->lupamaaraukset [paatos-xml-without-ns]
+(defn ->lupamaaraykset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cr/cleanup)
 
@@ -168,7 +168,7 @@
                               :autopaikkojaKiinteistolla
                               :autopaikkojaUlkopuolella])))
 
-(defn- ->lupamaaraukset-text [paatos-xml-without-ns]
+(defn- ->lupamaaraykset-text [paatos-xml-without-ns]
   (let [lupaehdot (select paatos-xml-without-ns :lupaehdotJaMaaraykset)]
     (when (not-empty lupaehdot)
       (-> lupaehdot
@@ -225,7 +225,7 @@
                  paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])]
              (when (and poytakirja (valid-paatospvm? (:paatospvm poytakirja)) (or (not validate-verdict-given-date)
                                                                                   (valid-antopvm? (:anto paivamaarat))))
-               {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
+               {:lupamaaraykset (->lupamaaraykset paatos-xml-without-ns)
                 :paivamaarat    paivamaarat
                 :poytakirjat    (seq poytakirjat)})))
          (select xml-without-ns [:paatostieto :Paatos]))))
@@ -406,7 +406,7 @@
              (let [paatosdokumentinPvm-timestamp (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))]
                (when (and paatosdokumentinPvm-timestamp (> (now) paatosdokumentinPvm-timestamp))
                  {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
-                                   :muutMaaraykset (->lupamaaraukset-text paatos-xml-without-ns)}
+                                   :muutMaaraykset (->lupamaaraykset-text paatos-xml-without-ns)}
                   :paivamaarat    {:paatosdokumentinPvm paatosdokumentinPvm-timestamp}
                   :poytakirjat    (when-let [liitetiedot (seq (select paatos-xml-without-ns [:liitetieto]))]
                                     (map ->liite

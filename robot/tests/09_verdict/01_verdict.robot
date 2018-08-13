@@ -83,7 +83,7 @@ Return to application and check total task numbers
 
 Verdict has tasks
   Open tab  verdict
-  Page Should Not Contain Element  xpath=//div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
+  Page Should Not Contain Element  xpath=//div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraykset.missing'"]
   Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"]  Lopullinen loppukatselmus
   Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//ul[@data-bind="foreach: lupamaaraykset.muutMaaraykset"]/li  Bajamajoja oltava riittävästi
   Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"]  TJ0
