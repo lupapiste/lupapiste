@@ -471,6 +471,9 @@
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
       (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus])))
 
+(defn xml->kuntalupatunnus [xml]
+  (get-in (xml->edn xml) [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus]))
+
 (defn ->backend-ids [xml]
   (->> (enlive/select (cr/strip-xml-namespaces xml) common/case-elem-selector)
        (map ->kuntalupatunnus)
