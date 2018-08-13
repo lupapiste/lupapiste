@@ -9,6 +9,7 @@
             [sade.env :as env]
             [sade.files :refer [with-temp-file]]
             [sade.schema-generators :as ssg]
+            [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.domain :as domain]
@@ -168,20 +169,26 @@
                                              :filename filename :tempfile file :size (.length file)) => ok?
                         _ (itu/local-command pena :set-attachment-meta :id id :attachmentId (:id attachment)
                                              :meta {:contents description}) => ok?
-                        {[attachment] :attachments} (domain/get-application-no-access-checking id)]
+                        {[attachment] :attachments} (domain/get-application-no-access-checking id)
+                        expected-attachments [{:metadata {:name        description
+                                                          :description (localize "fi" :attachmentType
+                                                                                 (-> attachment :type :type-group)
+                                                                                 (-> attachment :type :type-id))
+                                                          :mimeType    (-> attachment :latestVersion :contentType)}}
+                                              {:metadata {:name        ""
+                                                          :description (localize "fi" :attachmentType :muut
+                                                                                 :keskustelu)
+                                                          :mimeType    "application/pdf"}}]
+                        expected-attachments* (conj expected-attachments
+                                                    (assoc-in (first expected-attachments)
+                                                              [:metadata :name] description*))]
                     (itu/local-command pena :add-comment :id id :text "Added my test text file."
                                        :target {:type "application"} :roles ["applicant" "authority"]) => ok?
                     (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
 
                     (count (:applications @allu-state)) => 1
                     (-> (:applications @allu-state) first val :pendingOnClient) => false
-                    (-> (:applications @allu-state) first val :attachments)
-                    ;; TODO: Should also contain the conversation pdf:
-                    => [{:metadata {:name        description
-                                    :description (localize "fi" :attachmentType
-                                                           (-> attachment :type :type-group)
-                                                           (-> attachment :type :type-id))
-                                    :mimeType    (-> attachment :latestVersion :contentType)}}]
+                    (-> (:applications @allu-state) first val :attachments) => expected-attachments
 
                     (io/copy (io/file filename) file)
                     ;; Upload another attachment for :move-attachments-to-backing-system to send:
@@ -193,27 +200,22 @@
                     (itu/local-command raktark-helsinki :move-attachments-to-backing-system :id id :lang "fi"
                                        :attachmentIds [(:id attachment)]) => ok?
 
-                    (-> (:applications @allu-state) first val :attachments (get 1))
-                    => {:metadata {:name        description*
-                                   :description (localize "fi" :attachmentType
-                                                          (-> attachment :type :type-group)
-                                                          (-> attachment :type :type-id))
-                                   :mimeType    (-> attachment :latestVersion :contentType)}}))))
+                    (-> (:applications @allu-state) first val :attachments) => expected-attachments*
 
-            (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-              (itu/local-command pena :submit-application :id id) => ok?
+                    (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
+                      (itu/local-command pena :submit-application :id id) => ok?
 
-              (itu/local-command pena :cancel-application :id id :text "Alkoi nolottaa." :lang "fi") => ok?
-              (:id-counter @allu-state) => 2
-              (count (:applications @allu-state)) => 1)
+                      (itu/local-command pena :cancel-application :id id :text "Alkoi nolottaa." :lang "fi") => ok?
+                      (:id-counter @allu-state) => 2
+                      (count (:applications @allu-state)) => 1)
 
-            (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-              (itu/local-command pena :submit-application :id id) => ok?
+                    (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
+                      (itu/local-command pena :submit-application :id id) => ok?
 
-              (itu/local-command raktark-helsinki :return-to-draft
-                                 :id id :text "Tällaisenaan nolo ehdotus." :lang "fi") => ok?
-              (:id-counter @allu-state) => 3
-              (count (:applications @allu-state)) => 1))
+                      (itu/local-command raktark-helsinki :return-to-draft
+                                         :id id :text "Tällaisenaan nolo ehdotus." :lang "fi") => ok?
+                      (:id-counter @allu-state) => 3
+                      (count (:applications @allu-state)) => 1))))))
 
           (fact "disabled for everything else."
             (reset! allu-state initial-allu-state)

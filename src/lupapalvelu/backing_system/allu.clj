@@ -282,7 +282,7 @@
     [(str allu-url "/applications/" allu-id "/attachments")
      {:headers   {:authorization (str "Bearer " allu-jwt)}
       :multipart [{:name      "metadata"
-                   :content   (json/encode {:name        (:contents attachment)
+                   :content   (json/encode {:name        (or (:contents attachment) "")
                                             :description (localize lang :attachmentType type-group type-id)
                                             :mimeType    (:contentType latestVersion)})
                    :mime-type "application/json"
@@ -423,13 +423,14 @@
 (defn- send-attachment!
   "Send `attachment` of `application to ALLU. Return the fileId of the file that was sent."
   [app {attachment-id :id {:keys [fileId]} :latestVersion :as attachment}]
-  (let [file-contents (when-let [file-map (get-attachment-file! app fileId)]
-                        ((:content file-map)))
-        [endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) app attachment file-contents)]
-    (match (send-allu-attachment! allu-instance endpoint request)
-      {:status (:or 200 201)} (do (info "attachment" attachment-id "of" (:id app) "was sent to ALLU")
-                                  fileId)
-      response (allu-http-fail! response))))
+  (when-let [file-map (get-attachment-file! app fileId)]
+    (let [file-contents ((:content file-map))
+          [endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) app attachment
+                                              file-contents)]
+      (match (send-allu-attachment! allu-instance endpoint request)
+        {:status (:or 200 201)} (do (info "attachment" attachment-id "of" (:id app) "was sent to ALLU")
+                                    fileId)
+        response (allu-http-fail! response)))))
 
 ;;;; Public API
 ;;;; ===================================================================================================================
@@ -471,5 +472,5 @@
   ;; TODO: Non-placement-contract ALLU applications
   (lock-placement-contract! application)
   (attachment/save-comments-as-attachment command)
-  (let [{:keys [attachments]} (domain/get-application-no-access-checking (:id application) {:attachments 1})]
+  (let [{:keys [attachments] :as application} (domain/get-application-no-access-checking (:id application))]
     (send-attachments! application (filter attachment/unsent? attachments))))
