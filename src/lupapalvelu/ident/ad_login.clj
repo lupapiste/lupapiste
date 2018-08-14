@@ -83,6 +83,13 @@
                                                                                                  "Lupapiste"
                                                                                                  acs-uri)}))))
 
+(defn resolve-roles [org-roles ad-params]
+  (let [ad-roles-set (if (string? ad-params) #{ad-params} (set ad-params))
+        orgAuthz     (for [[lp-role ad-role] org-roles]
+                       (when (ad-roles-set ad-role)
+                         (name lp-role)))]
+    (->> orgAuthz (remove nil?) (set))))
+
 (defpage [:get "/api/saml/ad-login/:orgid"] {orgid :orgid}
   (let [org-data (get-in (add-organization-data-to-config! orgid) [:organizational-settings (keyword orgid)])
         saml-request ((:saml-req-factory! org-data))
@@ -110,7 +117,8 @@
         _ (info (str "SAML response validation " (if valid? "was successful" "failed")))
         ]
     (if valid?
-      (let [orgAuthz (if (string? groups) #{groups} (set groups))
+      (let [ad-role-map (-> orgid (get-organization) :ad-login :role-mapping)
+            orgAuthz (resolve-roles ad-role-map groups)  ;; groups or whatever the correct parameter is)
             user-data {:firstName firstName
                        :lastName  lastName
                        :role      "authority"
