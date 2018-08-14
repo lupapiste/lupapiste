@@ -116,7 +116,7 @@
         (let [submitted-application (mongo/by-id :submitted-applications id)
               [integration-available sent-file-ids]
               (bs/approve-application! (bs/get-backing-system @organization (permit/permit-type application))
-                                       command submitted-application lang)
+                                       (assoc command :application application) submitted-application lang)
               all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
               attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids
                                                                                           created)
