@@ -13,7 +13,7 @@
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.integrations.allu :as allu]
+            [lupapalvelu.backing-system.core :as bs]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 
@@ -152,7 +152,7 @@
                       doc-disabled-validator
                       validate-created-after-verdict
                       validate-post-verdict-not-approved]
-   :on-success       allu/updater}
+   :on-success       bs/update-callback}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
@@ -259,7 +259,7 @@
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       user-can-be-set-validator
                       doc-disabled-validator]
-   :on-success       allu/updater}
+   :on-success       bs/update-callback}
   [{:keys [created application user]}]
   (doc-persistence/do-set-user-to-document application documentId userId path created user))
 
@@ -271,7 +271,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       doc-disabled-validator]
-   :on-success       allu/updater}
+   :on-success       bs/update-callback}
   [{:keys [created application user]}]
   (doc-persistence/do-set-user-to-document application documentId (:id user) path created user))
 
@@ -287,7 +287,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       doc-disabled-validator]
-   :on-success       allu/updater}
+   :on-success       bs/update-callback}
   [{:keys [user created application document]}]
   (doc-persistence/do-set-company-to-document application
                                               document

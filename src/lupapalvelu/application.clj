@@ -35,7 +35,7 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [sade.coordinate :as coord]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -707,8 +707,8 @@
                                          :apptype (get-in link-application [:primaryOperation :name])}}
                         :upsert true)))
 
-(defn get-lp-id-by-kuntalupatunnus [kuntalupatunnus]
-  (:id (mongo/select-one :applications {:verdicts.kuntalupatunnus kuntalupatunnus} {:_id 1})))
+(defn get-lp-ids-by-kuntalupatunnus [kuntalupatunnus]
+  (map :id (mongo/select :applications {:verdicts.kuntalupatunnus kuntalupatunnus} {:_id 1})))
 
 (defn update-app-links!
   "To be run after Vantaa-conversion for each imported kuntalupatunnus. Takes a kuntalupatunnus
@@ -720,7 +720,7 @@
         update-info (for [link links-to-app]
                       (let [app-id (->> link :link (filter #(not= kuntalupatunnus %)) first)]
                         {:application (mongo/select-one :applications {:_id app-id}) ;; The applications to which the link points
-                         :link-permit-id (get-lp-id-by-kuntalupatunnus kuntalupatunnus) ;; The new Lupapiste id for kuntalupatunnus
+                         :link-permit-id (-> kuntalupatunnus get-lp-ids-by-kuntalupatunnus first) ;; The new Lupapiste id for kuntalupatunnus
                          :app-link-id (:id link)}))] ;; The id for the link document (format: "14-0633-13-TJO|LP-092-2018-90011")
     (doseq [item update-info
             :when (ss/not-blank? (:link-permit-id item))]

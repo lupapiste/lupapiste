@@ -15,9 +15,19 @@
             [lupapalvelu.statement :as statement]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
+
+(defn get-duplicate-ids
+  "This takes a kuntalupatunnus and returns the LP ids of every application in the database
+  that contains the same kuntalupatunnus and does not contain :facta-imported true."
+  [kuntalupatunnus]
+  (let [ids (app/get-lp-ids-by-kuntalupatunnus kuntalupatunnus)
+        applications (map #(mongo/by-id :applications % {:id 1 :facta-imported 1}) ids)]
+    (some->> applications
+             (filter #(not= true (:facta-imported %)))
+             (map :id))))
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
@@ -143,10 +153,16 @@
           (info "Saved review updates")
           (infof "Reviews were not saved: %s" (:desc update-result))))
 
-      ;; Add link permits (viitelupien linkitys)
-      (let [app-links (krysp-reader/->viitelupatunnukset xml)]
-        (infof (format "Linking %d app-links to application %s" (count app-links) (:id created-application)))
-        (doseq [link app-links]
+      ;; The database may already include the same kuntalupatunnus as in the to be imported application
+      ;; (e.g., the application has been imported earlier via previous permit (paperilupa) mechanism).
+      ;; This kind of application 1) has the same kuntalupatunnus and 2) :facta-imported is falsey.
+      ;; After import, the two applications are linked (viitelupien linkkaus).
+      (let [app-links (krysp-reader/->viitelupatunnukset xml)
+            kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
+            duplicate-ids (get-duplicate-ids kuntalupatunnus)
+            all-links (clojure.set/union (set app-links) (set duplicate-ids))]
+        (infof (format "Linking %d app-links to application %s" (count all-links) (:id created-application)))
+        (doseq [link all-links]
           (try
             (app/do-add-link-permit created-application link)
             (catch Exception e

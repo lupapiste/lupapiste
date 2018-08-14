@@ -228,33 +228,34 @@
 (defn find-company-admins [company-id]
   (usr/get-users {:company.id company-id, :company.role "admin"}))
 
+(defn search-sanity-check
+  "Convenience handler for the most common errors:
+  :already-invited, :not-found, :already-in-company,
+  and :not-applicant. Returns either the error keyword or the user
+  map.
+    caller: Calling user
+    email: Email to be searched"
+  [caller email]
+  (let [user   (usr/find-user {:email email})
+        tokens (find-user-invitations (-> caller :company :id))]
+    (cond
+      (some #(= email (:email %)) tokens) :already-invited
+      (nil? user)                         :not-found
+      (get-in user [:company :id])        :already-in-company
+      (not (or (usr/applicant? user)
+               (usr/dummy? user)))        :not-applicant
+      :else                               user)))
+
 (defn search-result
-  "Convenience handler for the most common search results. The
-  following results are automatically
-  handled/responded: :already-invited, :not-found
-  and :already-in-company. For other results (user is found but not
-  related to the company), the given fun is called.
+  "After `search-sanity-check` either wraps the error or calls fun for the user.
     caller: Calling user
     email: Email to be searched
     fun: Function that takes (found) user as argument."
   [caller email fun]
-  (let [user (usr/find-user {:email email})
-        tokens (find-user-invitations (-> caller :company :id))]
-    (cond
-      (some #(= email (:email %)) tokens)
-      (ok :result :already-invited)
-
-      (nil? user)
-      (ok :result :not-found)
-
-      (get-in user [:company :id])
-      (ok :result :already-in-company)
-
-      (usr/financial-authority? user)
-      (ok :result :financial-authority)
-
-      :else
-      (fun user))))
+  (let [check (search-sanity-check caller email)]
+    (if (keyword? check)
+      (ok :result check)
+      (fun check))))
 
 (defn ensure-custom-limit
   "Checks that custom account's customAccountLimit is set and allowed. Nullifies customAcconutLimit with normal accounts."
