@@ -27,7 +27,6 @@
     (util/destructure-permit-id "75 0549-4242-A") => nil
     (util/destructure-permit-id "751-0549-42-A") => nil))
 
-
 (fact "The reader function rakennelmatieto->kaupunkikuvatoimenpide produces documents as expected"
   (let [xml (get-local-application-xml-by-filename "./dev-resources/krysp/verdict-r-structure.xml" "R")
         rakennelmatiedot (reader/->rakennelmatiedot xml)
@@ -35,3 +34,10 @@
     (facts "The generated document looks sane"
       (get-in doc [:data :kuvaus :value]) => "Katos"
       (get-in doc [:schema-info :name]) => "kaupunkikuvatoimenpide")))
+
+(fact "A large number of unique application ids can be generated for a given year"
+  (let [sequence (atom 0)
+        ids (take 10000 (repeatedly #(util/make-converted-application-id "71-0004-13-C")))]
+    (-> ids set count) => 10000
+    (provided
+      (lupapalvelu.mongo/get-next-sequence-value "applications-092-2013") => (swap! sequence inc))))

@@ -71,4 +71,3 @@
                   (format "9%04d" (mongo/get-next-sequence-value sequence-name))
                   (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
     (ss/join "-" (list "LP" "092" fullyear counter))))
-
