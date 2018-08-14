@@ -935,7 +935,6 @@
     (app/insert-application continuation-app)
     (ok :id (:id continuation-app))))
 
-
 (defn- validate-new-applications-enabled [{{:keys [permitType municipality] :as application} :application}]
   (when application
     (let [scope (org/resolve-organization-scope municipality permitType)]

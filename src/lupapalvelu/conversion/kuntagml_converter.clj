@@ -1,8 +1,6 @@
 (ns lupapalvelu.conversion.kuntagml-converter
   (:require [taoensso.timbre :refer [info infof warn error]]
             [sade.core :refer :all]
-            [sade.env :as env]
-            [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
@@ -20,31 +18,6 @@
             [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
-
-(defn get-duplicate-ids
-  "This takes a kuntalupatunnus and returns the LP ids of every application in the database
-  that contains the same kuntalupatunnus and does not contain :facta-imported true."
-  [kuntalupatunnus]
-  (let [ids (app/get-lp-ids-by-kuntalupatunnus kuntalupatunnus)
-        applications (map #(mongo/by-id :applications % {:id 1 :facta-imported 1}) ids)]
-    (some->> applications
-             (filter #(not= true (:facta-imported %)))
-             (map :id))))
-
-(defn make-converted-application-id
-  "An application id is created for the year found in the kuntalupatunnus, e.g.
-  `LP-092-2013-00123`, not for the current year as in normal paper application imports."
-  [kuntalupatunnus]
-  (let [year (-> kuntalupatunnus conversion-util/destructure-permit-id :vuosi)
-        fullyear (if (> 20 (Integer. year))
-                   (str "20" year)
-                   (str "19" year))
-        municipality "092" ;; Hardcoded since the whole procedure is for Vantaa
-        sequence-name (str "applications-" municipality "-" fullyear)
-        counter (if (env/feature? :prefixed-id)
-                  (format "9%04d" (mongo/get-next-sequence-value sequence-name))
-                  (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
-    (ss/join "-" (list "LP" "092" fullyear counter))))
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
@@ -96,9 +69,8 @@
         ;     `lupapalvelu.application/make-document` for example. And then save to db :)
         ;
         ;
-        ; id (app/make-application-id municipality)
         kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
-        id (make-converted-application-id kuntalupatunnus)
+        id (conversion-util/make-converted-application-id kuntalupatunnus)
         make-app-info {:id              id
                        :organization    organization
                        :operation-name  "aiemmalla-luvalla-hakeminen" ; FIXME: no fixed operation in conversion, see above
