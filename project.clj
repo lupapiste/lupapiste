@@ -144,7 +144,7 @@
 
                  ;; Lupapiste libraries
                  ; Oskari map (https://github.com/lupapiste/oskari)
-                 [lupapiste/oskari "0.9.60"]
+                 [lupapiste/oskari "1.0.0"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
                  [lupapiste/commons "0.9.23"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)

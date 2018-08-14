@@ -1,6 +1,7 @@
 body {
   background: rgb(246,246,246);
-  font: 15px Calibri;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 15px;
 }
 
 h3 {
@@ -15,19 +16,22 @@ h3 {
 }
 
 .oskari-tile-title {
-  font: 15px Calibri;
+  font-size: 15px;
   font-weight: normal;
   margin-left: 10px;
   line-height: 24px;
 }
 .icon-bubble-right {
   border-radius: 10px;
-  background: rgb(245,126,35);
-  font: 15px Calibri;
+  background-color: rgb(245,126,35);
+  background-image: none !important;
+  font-size: 15px;
   font-weight: normal;
+  color: white;
   vertical-align: top;
-  line-height: 18px;
-  margin: 4px;
+  line-height: 19px;
+  margin-top: 8px;
+  margin-right: 5px;
 }
 
 .oskari-flyout {
@@ -69,7 +73,8 @@ h3 {
 }
 
 div.layerselection2 .layer.selected div.layer-info div.layer-title h4 {
-  font: 18px Calibri;
+  font-size: 18px;
+  font-family: 'Source Sans Pro', sans-serif;
   padding: 0;
   margin: 8px 8px;
 }
@@ -79,8 +84,8 @@ div.layerselection2 .layer.selected div.layer-info div.layer-title h4 {
 }
 
 .layer-visibility a, .layer-msg a {
-  font: 15px Calibri;
-  color:  rgb(79,79,79);
+  font-size: 15px;
+  color:  rgb(243, 145, 41);
   text-decoration: none;
 }
 
@@ -89,17 +94,7 @@ div.layerselection2 .layer.selected div.layer-info div.layer-title h4 {
 }
 
 .layer-msg {
-  font: 15px Calibri;
-}
-
-div.pzbDiv {
-  top: 8px;
-  left: 170px;
-  background-color: rgb(246,246,246);
-  background-color: rgba(246,246,246, .8);
-  max-width: 19px;
-  padding: 4px;
-  border-radius: 4px;
+  font-size: 15px;
 }
 
 div.divmanazerpopup.oskari-measurement {
@@ -120,12 +115,13 @@ div.divmanazerpopup.oskari-measurement {
   border-radius: 10px;
   z-index: 9000;
   color:  black;
-  font: 15px Calibri;
+  font-size: 15px;
 }
 
 div.divmanazerpopup.oskari-measurement h3 {
   color:  white;
-  font: 18px Calibri;
+  font-size: 18px;
+  font-family: 'Source Sans Pro', sans-serif;
   text-transform: uppercase;
   background-color: rgb(79,79,79);
   margin-top:  0px;
@@ -167,7 +163,7 @@ div.oskariTabs div.tabsContent {
   border: none;
   color: #000000;
   height: 100%;
-  font: 15px Calibri;
+  font-size: 15px;
 }
 
 .oskari-flyoutcontent {
@@ -248,7 +244,8 @@ input[type="text"] {
   border: none;
   color: rgb(48,48,48);
   position: relative;
-  font: 14px Calibri;
+  font-size: 14px;
+  font-family: 'Source Sans Pro', sans-serif;
   float: right;
   margin-top: 8px;
 }
@@ -261,7 +258,7 @@ input[type="text"] {
 }
 
 div.divmanazerpopup {
-  font: Calibri;
+  font-family: 'Source Sans Pro', sans-serif;
 }
 
 div.layerselection2 .layer.selected div.layer-tools div.left-tools div.layer-opacity input.opacity {
