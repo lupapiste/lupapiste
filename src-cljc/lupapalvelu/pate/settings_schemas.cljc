@@ -135,7 +135,7 @@
                 (schema-util/required {:select {:label?     false
                                                 :loc-prefix :pate.review-type
                                                 :items      review-types
-                           :sort-by    :text}}))
+                                                :sort-by    :text}}))
       (update-in [:section :grid :rows 0 :row] #(conj % {:dict :title-type}))
       (update-in [:section :grid :rows 1 :row 0 :grid :rows 0 :row]
                  #(concat (butlast %)

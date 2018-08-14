@@ -8,17 +8,15 @@
                          :kaava :toimenpide-julkipanoon :yleinen
                          :sopimus})
 
-(def path-type (sc/conditional
+(def path-type (sc/cond-pre
                 ;; Joined kw-path (e.g. :one.two.three)
-                keyword? sc/Keyword
+                sc/Keyword
                 ;; Vector path [:one :two :three] or vector of joined
                 ;; kw-paths [:one.two.three :four.five], depending on
                 ;; the schema.
-                :else    [sc/Keyword]))
+                [sc/Keyword]))
 
-(def keyword-or-string (sc/conditional
-                        keyword? sc/Keyword
-                        :else    sc/Str))
+(def keyword-or-string (sc/cond-pre sc/Keyword sc/Str))
 (defn only-one-of
   "Only one of the given keys are allowed in the data. Note: do not use
   in a `PateComponent`, since the wrapping constraint breaks Pate
@@ -306,7 +304,7 @@
   coresponds to a value. The option text is resolved via regular
   localisation mechanisms."
   (merge PateComponent
-         {:items                          [sc/Keyword]
+         {:items                          [keyword-or-string] ; OR string, for example see 'lammitys'
           ;; If true (default), empty selection (- Choose -) is
           ;; available. For autocomplete, the clear button is shown.
           (sc/optional-key :allow-empty?) sc/Bool
@@ -318,7 +316,9 @@
           (sc/optional-key :type)         (sc/enum :select :autocomplete)
           ;; Item texts can have different loc-prefix in these cases
           ;; the loc-prefix affects only the label.
-          (sc/optional-key :item-loc-prefix) sc/Keyword}))
+          (sc/optional-key :item-loc-prefix) sc/Keyword
+          ; Other key support from docgen
+          (sc/optional-key :other-key)       keyword-or-string}))
 
 (defschema PateLocText
   "Localisation term shown as text."
