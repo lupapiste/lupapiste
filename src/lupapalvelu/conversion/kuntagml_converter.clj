@@ -1,6 +1,8 @@
 (ns lupapalvelu.conversion.kuntagml-converter
   (:require [taoensso.timbre :refer [info infof warn error]]
             [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
@@ -28,6 +30,21 @@
     (some->> applications
              (filter #(not= true (:facta-imported %)))
              (map :id))))
+
+(defn make-converted-application-id
+  "An application id is created for the year found in the kuntalupatunnus, e.g.
+  `LP-092-2013-00123`, not for the current year as in normal paper application imports."
+  [kuntalupatunnus]
+  (let [year (-> kuntalupatunnus conversion-util/destructure-permit-id :vuosi)
+        fullyear (if (> 20 (Integer. year))
+                   (str "20" year)
+                   (str "19" year))
+        municipality "092" ;; Hardcoded since the whole procedure is for Vantaa
+        sequence-name (str "applications-" municipality "-" fullyear)
+        counter (if (env/feature? :prefixed-id)
+                  (format "9%04d" (mongo/get-next-sequence-value sequence-name))
+                  (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
+    (ss/join "-" (list "LP" "092" fullyear counter))))
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
@@ -79,7 +96,9 @@
         ;     `lupapalvelu.application/make-document` for example. And then save to db :)
         ;
         ;
-        id (app/make-application-id municipality)
+        ; id (app/make-application-id municipality)
+        kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
+        id (make-converted-application-id kuntalupatunnus)
         make-app-info {:id              id
                        :organization    organization
                        :operation-name  "aiemmalla-luvalla-hakeminen" ; FIXME: no fixed operation in conversion, see above
@@ -158,7 +177,6 @@
       ;; This kind of application 1) has the same kuntalupatunnus and 2) :facta-imported is falsey.
       ;; After import, the two applications are linked (viitelupien linkkaus).
       (let [app-links (krysp-reader/->viitelupatunnukset xml)
-            kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
             duplicate-ids (get-duplicate-ids kuntalupatunnus)
             all-links (clojure.set/union (set app-links) (set duplicate-ids))]
         (infof (format "Linking %d app-links to application %s" (count all-links) (:id created-application)))
