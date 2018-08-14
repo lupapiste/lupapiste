@@ -1241,3 +1241,30 @@
   {:pre-checks  [org/check-docstore-enabled]
    :permissions [{:required [:organization/admin]}]}
   [_])
+
+(defquery ad-login-enabled
+  {:pre-checks [org/check-ad-login-enabled]
+   :permissions [{:required [:organization/admin]}]}
+  [_])
+
+(defn role-mapping-validator [{data :data user :user}]
+  (let [org-roles (-> user
+                      (usr/authority-admins-organization-id)
+                      (org/get-organization)
+                      (org/allowed-roles-in-organization)
+                      (set))
+        role-mapping-keyset (-> data
+                                :role-map
+                                (keys)
+                                (set))]
+    (when (not= (clojure.set/subset? role-mapping-keyset org-roles))
+      (fail :error.illegal-role))))
+
+(defcommand update-ad-login-role-mapping
+ {:description "Updates active directory role mapping"
+  :parameters [role-map]
+  :pre-checks [org/check-ad-login-enabled]
+  :permissions [{:required [:organization/admin]}]
+  :input-validators [role-mapping-validator]}
+ [{user :user}]
+ (org/update-ad-login-role-mapping role-map user))

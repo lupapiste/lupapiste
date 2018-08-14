@@ -1032,3 +1032,26 @@
                               :ad-login.trusted-domains trusted-domains
                               :ad-login.idp-uri idp-uri
                               :ad-login.idp-cert idp-cert}}))
+
+(defn check-ad-login-enabled [{user :user}]
+  (when-not (-> user
+                roles/authority-admins-organization-id
+                (get-organization [:ad-login])
+                :ad-login
+                :enabled)
+    (fail :error.ad-login-not-enabled)))
+
+(defn update-ad-login-role-mapping [role-map user]
+  (let [org-id (-> user
+                   :orgAuthz
+                   (keys)
+                   (first)
+                   (name))
+        org (get-organization org-id)
+        updated-role-map (-> org
+                             :ad-login
+                             :role-mapping
+                             (merge role-map))
+        changes (into {} (for [[k v] updated-role-map]
+                           [(keyword (str "ad-login.role-mapping." (name k))) v]))]
+    (update-organization org-id {$set changes})))
