@@ -374,7 +374,8 @@
    :permissions      [{:context  {:application {:state #{:draft}}}
                        :required [:application/edit-draft :application/edit-drawings]}
 
-                      {:required [:application/edit-drawings]}]}
+                      {:required [:application/edit-drawings]}]
+   :on-success       bs/update-callback}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
     (let [drawings-with-geojson (map #(assoc % :geometry-wgs84 (draw/wgs84-geometry %)) drawings)]

@@ -5,7 +5,7 @@
             [schema.core :as sc]
             [clj-http.client :as http]
             [monger.operators :refer [$set]]
-            [sade.core :refer [ok?]]
+            [sade.core :refer [def- ok?]]
             [sade.env :as env]
             [sade.files :refer [with-temp-file]]
             [sade.schema-generators :as ssg]
@@ -27,6 +27,22 @@
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
+
+(def- drawings
+  [{:id       1,
+    :name     "A",
+    :desc     "A desc",
+    :category "123",
+    :geometry "POLYGON((438952 6666883.25,441420 6666039.25,441920 6667359.25,439508 6667543.25,438952 6666883.25))",
+    :area     "2686992",
+    :height   "1"}
+   {:id       2,
+    :name     "B",
+    :desc     "B desc",
+    :category "123",
+    :geometry "POLYGON((440652 6667459.25,442520 6668435.25,441912 6667359.25,440652 6667459.25))",
+    :area     "708280",
+    :height   "12"}])
 
 (defn- nullify-doc-ids [doc]
   (-> doc
@@ -157,6 +173,23 @@
                                              ["yritys.yhteyshenkilo.yhteystiedot.email" (:email user)]
                                              ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]]))
               (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Esimerkki Oy"
+
+              (itu/local-command pena :save-application-drawings :id id :drawings drawings) => ok?
+              (-> (:applications @allu-state) first val :geometry)
+              => {:crs        {:type       "name"
+                               :properties {:name "EPSG:4326"}}
+                  :type       "GeometryCollection"
+                  :geometries [{:type        "Polygon"
+                                :coordinates [[[25.901018731807 60.134367126801]
+                                               [25.945680922149 60.127151199835]
+                                               [25.954302160106 60.139072939081]
+                                               [25.910829826268 60.140374902637]
+                                               [25.901018731807 60.134367126801]]]}
+                               {:type        "Polygon"
+                                :coordinates [[[25.931448002235 60.139788526718]
+                                               [25.9647992127 60.148817662889]
+                                               [25.954158152623 60.139071802112]
+                                               [25.931448002235 60.139788526718]]]}]}
 
               (let [filename "dev-resources/test-attachment.txt"]
                 ;; HACK: Have to use a temp file as :upload-attachment expects to get one and deletes it in the end.
