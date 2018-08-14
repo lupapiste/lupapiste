@@ -353,6 +353,14 @@
       starts (assoc-in [:draft :data :start-date] starts)
       ends (assoc-in [:draft :data :end-date] ends))))
 
+(defn init--handler
+  "General handler from application or user from command"
+  [{:keys [application user] :as initmap}]
+    (assoc-in
+      initmap [:draft :data :handler]
+      (if (ss/not-blank? (general-handler application))
+        (general-handler application)
+        (str (:firstName user) " " (:lastName user)))))
 
 
 (defmethod initialize-verdict-draft :r
@@ -384,7 +392,7 @@
 (defmethod initialize-verdict-draft :ya
   [initmap]
   (-> initmap
-      (init--dict-by-application :handler general-handler)
+      init--handler
       init--verdict-dates
       (init--dict-by-application :verdict-type schema-util/ya-verdict-type)
       (init--requirements-references :plans)
@@ -420,7 +428,8 @@
   (let [template       (template/verdict-template options)
         {draft :draft} (-> {:template    template
                             :draft       (default-verdict-draft template)
-                            :application application}
+                            :application application
+                            :user        (:user command)}
                            initialize-verdict-draft
                            (update-in [:draft :data]
                                       (partial metadata/wrap-all (metadata/wrapper command)))
