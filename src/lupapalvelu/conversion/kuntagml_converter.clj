@@ -130,6 +130,7 @@
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :statements given-statements
                                        :opened (:created command)
+                                       :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
                                        :facta-imported true))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
