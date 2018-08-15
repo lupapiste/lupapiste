@@ -3897,6 +3897,8 @@
 "users.table.role" "en" "Role"
 "users.table.role" "fi" "Rooli"
 "users.table.role" "sv" "Roll"
+"users.table.directMarketing" "fi" "Suoramarkkinointi"
+"users.table.directMarketing" "en" "Direct marketing"
 "users.table.zeroRecords" "en" "<div style='padding:50px'>Your search terms did not match any users</div>"
 "users.table.zeroRecords" "fi" "<div style='padding:50px'>Antamillasi hakuehdoilla ei löytynyt yhtään käyttäjää</div>"
 "users.table.zeroRecords" "sv" "<div style='padding:50px'>Med dina sökvillkor hittades inga användare</div>"

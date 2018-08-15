@@ -469,10 +469,12 @@
         query            (limit-organizations (users-for-datatables-query base-query params))
         query-total      (mongo/count :users query)
         users            (mongo/with-collection "users"
-                                                (query/find query)
-                                                (query/fields [:email :firstName :lastName :role :orgAuthz :enabled])
-                                                (query/skip (util/->int (:start params) 0))
-                                                (query/limit (util/->int (:length params) 16)))]
+                           (query/find query)
+                           (query/fields (cond-> [:email :firstName :lastName
+                                                  :role :orgAuthz :enabled]
+                                           (admin? caller) (conj :allowDirectMarketing)))
+                           (query/skip (util/->int (:start params) 0))
+                           (query/limit (util/->int (:length params) 16)))]
     {:rows    users
      :total   base-query-total
      :display query-total
