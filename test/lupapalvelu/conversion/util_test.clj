@@ -36,8 +36,8 @@
       (get-in doc [:schema-info :name]) => "kaupunkikuvatoimenpide")))
 
 (fact "A large number of unique application ids can be generated for a given year"
-  (let [sequence (atom 0)
+  (let [counter (atom 0)
         ids (take 10000 (repeatedly #(util/make-converted-application-id "71-0004-13-C")))]
     (-> ids set count) => 10000
     (provided
-      (lupapalvelu.mongo/get-next-sequence-value "applications-092-2013") => (swap! sequence inc))))
+      (lupapalvelu.mongo/get-next-sequence-value "applications-092-2013") => (swap! counter inc))))
