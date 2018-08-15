@@ -1,5 +1,5 @@
 (ns lupapalvelu.pate.verdict-test
-  (:require[lupapalvelu.inspection-summary :as inspection-summary]
+  (:require [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.schemas :as schemas]
@@ -12,7 +12,8 @@
             [monger.operators :refer :all]
             [sade.shared-schemas :refer [object-id-pattern]]
             [sade.util :as util]
-            [schema.core :as sc]))
+            [schema.core :as sc]
+            [lupapalvelu.mongo :as mongo]))
 
 (testable-privates lupapalvelu.pate.verdict
                    next-section verdict->updates
@@ -1645,6 +1646,7 @@
   (let [{:keys [id code section modified published replaces]} (apply hash-map kvs)]
     {:id          id
      :category    "r"
+     :schema-version 1
      :data        {:verdict-code    code
                    :handler         "Foo Bar"
                    :verdict-section section
@@ -3442,3 +3444,12 @@
       => (just [:header :body :footer] :in-any-order)
       (provided (lupapalvelu.organization/get-organization-name "753-R" nil)
                 => "Sipoon rakennusvalvonta"))))
+
+(facts "Copy old verdict as base of replacement verdict"
+  (let [verdictId (mongo/create-id)
+        verdict (make-verdict :id verdictId :code "myonnetty" :section "123")]
+
+    (copy-verdict-draft {:application (assoc application :pate-verdicts [verdict])
+                         :created 123456789
+                         :user {:id (mongo/create-id) :username "sonja"}}
+                        verdictId) => string?))

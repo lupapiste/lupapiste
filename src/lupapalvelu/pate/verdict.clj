@@ -448,7 +448,7 @@
                                        (sc/validate schemas/PateVerdict draft)}})
     (:id draft)))
 
-(defn copy-verdict-draft [{:keys [application created] :as command} replacement-id]
+(defn copy-verdict-draft [{:keys [application created user] :as command} replacement-id]
   (let [draft (-> (util/find-by-id replacement-id (:pate-verdicts application))
                   (assoc :id (mongo/create-id)
                          :modified created
@@ -462,7 +462,10 @@
                            (dissoc (:data draft)
                                    :attachments
                                    :handler
-                                   :verdict-section))]
+                                   :verdict-section))
+        {draft :draft} (init--handler {:draft draft
+                                       :application application
+                                       :user user})]
 
     (action/update-application command
                                {$push {:pate-verdicts
