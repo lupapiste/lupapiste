@@ -149,7 +149,7 @@
       ;; This kind of application 1) has the same kuntalupatunnus and 2) :facta-imported is falsey.
       ;; After import, the two applications are linked (viitelupien linkkaus).
       (let [app-links (krysp-reader/->viitelupatunnukset xml)
-            duplicate-ids (get-duplicate-ids kuntalupatunnus)
+            duplicate-ids (conversion-util/get-duplicate-ids kuntalupatunnus)
             all-links (clojure.set/union (set app-links) (set duplicate-ids))]
         (infof (format "Linking %d app-links to application %s" (count all-links) (:id created-application)))
         (doseq [link all-links]

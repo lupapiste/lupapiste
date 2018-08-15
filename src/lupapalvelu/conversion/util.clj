@@ -3,6 +3,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
+            [monger.operators :refer [$in $ne]]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]))
@@ -47,16 +48,6 @@
                                {"kaupunkikuvatoimenpide" data}
                                (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
 
-(defn get-duplicate-ids
-  "This takes a kuntalupatunnus and returns the LP ids of every application in the database
-  that contains the same kuntalupatunnus and does not contain :facta-imported true."
-  [kuntalupatunnus]
-  (let [ids (app/get-lp-ids-by-kuntalupatunnus kuntalupatunnus)
-        applications (map #(mongo/by-id :applications % {:id 1 :facta-imported 1}) ids)]
-    (some->> applications
-             (filter #(not= true (:facta-imported %)))
-             (map :id))))
-
 (defn make-converted-application-id
   "An application id is created for the year found in the kuntalupatunnus, e.g.
   `LP-092-2013-00123`, not for the current year as in normal paper application imports."
@@ -71,3 +62,14 @@
                   (format "9%04d" (mongo/get-next-sequence-value sequence-name))
                   (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
     (ss/join "-" (list "LP" "092" fullyear counter))))
+
+
+(defn get-duplicate-ids
+  "This takes a kuntalupatunnus and returns the LP ids of every application in the database
+  that contains the same kuntalupatunnus and does not contain :facta-imported true."
+  [kuntalupatunnus]
+  (let [ids (app/get-lp-ids-by-kuntalupatunnus kuntalupatunnus)]
+    (->> (mongo/select :applications
+                       {:_id {$in ids} :facta-imported {$ne true}}
+                       {:_id 1})
+         (map :id))))
