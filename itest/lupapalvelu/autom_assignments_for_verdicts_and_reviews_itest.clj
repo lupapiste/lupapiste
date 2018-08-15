@@ -16,7 +16,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
 (def db-name (str "test_autom-assignments-for-verd-and-rev-itest_" (now)))
 

@@ -15,7 +15,7 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.user-utils :as uu]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.asianhallinta.core :as ah]
+            [lupapalvelu.backing-system.asianhallinta.core :as ah]
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.strings :as ss]

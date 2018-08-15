@@ -7,7 +7,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [monger.operators :refer :all]
             [sade.core :refer [def- fail]]
             [sade.strings :as ss]

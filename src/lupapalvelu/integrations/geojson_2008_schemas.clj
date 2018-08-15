@@ -5,6 +5,7 @@
             [sade.core :refer [def-]]
             [sade.schema-generators :as ssg]))
 
+;;; TODO: Combine with lupapalvelu.geojson
 ;;; TODO: DRY out the `(and (map? v) (= (:type v) ...`:s
 ;;; TODO: Bounding boxes
 

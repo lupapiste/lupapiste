@@ -7,8 +7,8 @@
             [lupapalvelu.action :refer [defraw defquery] :as action]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]))
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]))
 
 (defraw admin-download-application-xml
   {:parameters [applicationId]

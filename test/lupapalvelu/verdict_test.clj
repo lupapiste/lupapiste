@@ -6,7 +6,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.verdict :refer :all]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.common-reader :as cr]

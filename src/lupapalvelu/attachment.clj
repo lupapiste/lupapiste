@@ -264,6 +264,12 @@
   (filter #(and (= (get-in % [:target :type]) type)
                 (= (get-in % [:target :id])   id))  attachments))
 
+(defn unsent? [{:keys [versions sent] :as attachment}]
+  (and (seq versions)                        ; Has been uploaded
+       (or (not sent)                        ; Never sent to backing system
+           (> (-> versions last :created) sent)) ; Backing system does not have newest version
+       (not (#{"verdict" "statement"} (-> attachment :target :type))))) ; Not generated inside the system
+
 (defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :sent timestamp))
 
@@ -1016,6 +1022,30 @@
                                             attachment)
     (enrich-attachment attachment)))
 
+;;
+;; Comments as attachment
+;;
+
+(defn- comments-empty? [application]
+  (->> application
+       :comments
+       (remove #(-> % :target :type (keyword) (= :attachment)))
+       (empty?)))
+
+(defn save-comments-as-attachment [{lang :lang application :application created :created :as command}]
+  (when-not (comments-empty? application)
+    (let [comments-pdf (comment/get-comments-as-pdf lang application)
+          content (:pdf-file-stream comments-pdf)
+          existing-keskustelu (util/find-by-key :type {:type-id "keskustelu" :type-group "muut"} (:attachments application))
+          file-options {:filename (format "%s-%s.pdf" (:id application) (i18n/localize lang :conversation.title))
+                        :content  content
+                        :size     (.available content)}
+          attachment-options {:attachment-type {:type-id    :keskustelu
+                                                :type-group :muut}
+                              :attachment-id   (when existing-keskustelu (:id existing-keskustelu))
+                              :created         created
+                              :required        false}]
+      (upload-and-attach! command attachment-options file-options))))
 
 ;;
 ;; Pre-checks
