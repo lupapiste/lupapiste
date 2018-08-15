@@ -14817,6 +14817,23 @@ div.automatic-assignments .assignment .editor {
   display: table-row;
 }
 
+span.assignment-target-group + span.assignment-target-group {
+  margin-top: .5em;
+}
+
+table.assignments-search-result__table th {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+table.assignments-search-result__table th > span {
+  vertical-align: middle;
+}
+
+table.assignments-search-result__table th > i {
+  vertical-align: middle;
+}
+
 #ui-datepicker-div {
   background: #f6f6f6;
   border: 1px solid #dddddd;

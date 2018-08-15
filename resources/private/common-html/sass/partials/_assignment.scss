@@ -31,3 +31,18 @@ div.automatic-assignments {
     }
   }
 }
+
+span.assignment-target-group + span.assignment-target-group {
+  margin-top: .5em;
+}
+
+table.assignments-search-result__table th {
+  vertical-align: middle;
+  white-space: nowrap;
+  > span {
+    vertical-align: middle;
+  }
+  > i {
+    vertical-align: middle;
+  }
+}
