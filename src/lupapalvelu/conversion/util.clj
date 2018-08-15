@@ -1,8 +1,11 @@
 (ns lupapalvelu.conversion.util
-  (:require [lupapalvelu.application :as application]
+  (:require [lupapalvelu.application :as app]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.mongo :as mongo]
+            [monger.operators :refer [$in $ne]]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.strings :as ss]))
 
 (def general-permit-id-regex
@@ -40,7 +43,33 @@
                                     :kuvaus (get-in raktieto [:Rakennelma :kuvaus :kuvaus])
                                     :tunnus (get-in raktieto [:Rakennelma :tunnus :rakennusnro])
                                     :valtakunnallinenNumero ""})]
-    (application/make-document "muu-rakentaminen"
+    (app/make-document "muu-rakentaminen"
                                (now)
                                {"kaupunkikuvatoimenpide" data}
                                (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
+
+(defn make-converted-application-id
+  "An application id is created for the year found in the kuntalupatunnus, e.g.
+  `LP-092-2013-00123`, not for the current year as in normal paper application imports."
+  [kuntalupatunnus]
+  (let [year (-> kuntalupatunnus destructure-permit-id :vuosi)
+        fullyear (if (> 20 (Integer. year))
+                   (str "20" year)
+                   (str "19" year))
+        municipality "092" ;; Hardcoded since the whole procedure is for Vantaa
+        sequence-name (str "applications-" municipality "-" fullyear)
+        counter (if (env/feature? :prefixed-id)
+                  (format "9%04d" (mongo/get-next-sequence-value sequence-name))
+                  (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
+    (ss/join "-" (list "LP" "092" fullyear counter))))
+
+
+(defn get-duplicate-ids
+  "This takes a kuntalupatunnus and returns the LP ids of every application in the database
+  that contains the same kuntalupatunnus and does not contain :facta-imported true."
+  [kuntalupatunnus]
+  (let [ids (app/get-lp-ids-by-kuntalupatunnus kuntalupatunnus)]
+    (->> (mongo/select :applications
+                       {:_id {$in ids} :facta-imported {$ne true}}
+                       {:_id 1})
+         (map :id))))

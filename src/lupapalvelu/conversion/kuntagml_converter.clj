@@ -19,16 +19,6 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
-(defn get-duplicate-ids
-  "This takes a kuntalupatunnus and returns the LP ids of every application in the database
-  that contains the same kuntalupatunnus and does not contain :facta-imported true."
-  [kuntalupatunnus]
-  (let [ids (app/get-lp-ids-by-kuntalupatunnus kuntalupatunnus)
-        applications (map #(mongo/by-id :applications % {:id 1 :facta-imported 1}) ids)]
-    (some->> applications
-             (filter #(not= true (:facta-imported %)))
-             (map :id))))
-
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
   ;; Data to be deduced from xml:
@@ -79,7 +69,8 @@
         ;     `lupapalvelu.application/make-document` for example. And then save to db :)
         ;
         ;
-        id (app/make-application-id municipality)
+        kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
+        id (conversion-util/make-converted-application-id kuntalupatunnus)
         make-app-info {:id              id
                        :organization    organization
                        :operation-name  "aiemmalla-luvalla-hakeminen" ; FIXME: no fixed operation in conversion, see above
@@ -158,8 +149,7 @@
       ;; This kind of application 1) has the same kuntalupatunnus and 2) :facta-imported is falsey.
       ;; After import, the two applications are linked (viitelupien linkkaus).
       (let [app-links (krysp-reader/->viitelupatunnukset xml)
-            kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
-            duplicate-ids (get-duplicate-ids kuntalupatunnus)
+            duplicate-ids (conversion-util/get-duplicate-ids kuntalupatunnus)
             all-links (clojure.set/union (set app-links) (set duplicate-ids))]
         (infof (format "Linking %d app-links to application %s" (count all-links) (:id created-application)))
         (doseq [link all-links]
