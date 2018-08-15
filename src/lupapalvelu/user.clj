@@ -12,6 +12,7 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.user-enums :as user-enums]
+            [lupapiste-commons.ring.session-timeout :as session-timeout]
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer [def- ok fail fail! now]]
@@ -797,6 +798,15 @@
       (= s "oirAuthority") "oir"
       (= s "authority") (resolve-authority-page user)
       :else (csk/->kebab-case s))))
+
+(defn merge-login-cookie-for [response user]
+  (assoc-in response
+            [:cookies "lupapiste-login"]
+            (merge
+              {:value (str "/app/" (name (:language user)) "/" (applicationpage-for user))
+               :max-age (int (/ (session-timeout/get-session-timeout {:session {:user user}}) 1000))
+               :path "/"}
+              (env/value :cookie))))
 
 (defn user-in-role [user role & params]
   (merge (apply hash-map params) (assoc (summary user) :role role)))
