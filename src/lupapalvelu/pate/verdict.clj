@@ -448,6 +448,27 @@
                                        (sc/validate schemas/PateVerdict draft)}})
     (:id draft)))
 
+(defn copy-verdict-draft [{:keys [application created] :as command} replacement-id]
+  (let [draft (-> (util/find-by-id replacement-id (:pate-verdicts application))
+                  (assoc :id (mongo/create-id)
+                         :modified created
+                         :user (user-ref command))
+                  (dissoc :verdict-attachment
+                          :published
+                          :archive)
+                  (assoc-in [:replacement :replaces] replacement-id))
+        draft (assoc-in draft[:template :inclusions] (mapv keyword (get-in draft [:template :inclusions])))
+        draft (assoc draft :data
+                           (dissoc (:data draft)
+                                   :attachments
+                                   :handler
+                                   :verdict-section))]
+
+    (action/update-application command
+                               {$push {:pate-verdicts
+                                       (sc/validate schemas/PateVerdict draft)}})
+    (:id draft)))
+
 (defn new-legacy-verdict-draft
   "Legacy verdicts do not have templates or references. Inclusions
   contain every schema dict."
