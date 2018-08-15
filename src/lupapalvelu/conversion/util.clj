@@ -1,5 +1,7 @@
 (ns lupapalvelu.conversion.util
-  (:require [lupapalvelu.application :as app]
+  (:require [clojure.data.csv :as csv]
+            [clojure.java.io :as io]
+            [lupapalvelu.application :as app]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
@@ -73,3 +75,15 @@
                        {:_id {$in ids} :facta-imported {$ne true}}
                        {:_id 1})
          (map :id))))
+
+(defn get-id-listing
+  "Produces a CSV list of converted applications, where LP id is matched to kuntalupatunnus.
+  See PATE-152 for the rationale."
+  [filename]
+  (let [data (->> (mongo/select :applications ;; Data is a sequence of vectors like ["LP-092-2018-90047" "18-0030-13-A"].
+                                {:facta-imported true}
+                                {:_id 1 :verdicts.kuntalupatunnus 1})
+                  (map (fn [item]
+                         [(:id item) (get-in item [:verdicts 0 :kuntalupatunnus])])))]
+  (with-open [writer (io/writer filename)]
+    (csv/write-csv writer data))))
