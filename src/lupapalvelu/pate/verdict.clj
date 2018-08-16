@@ -23,6 +23,7 @@
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.tasks :as pate-tasks]
+            [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.state-machine :as sm]
@@ -43,13 +44,6 @@
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
             [taoensso.timbre :refer [warnf errorf error]]))
-
-;;
-;; Predicates
-;;
-
-(defn contract? [{:keys [category]}]
-  (util/=as-kw category :contract))
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
@@ -465,122 +459,8 @@
 
 (declare verdict-schema)
 
-(defn- title-fn [s fun]
-  (util/pcond-> (-> s ss/->plain-string ss/trim)
-                ss/not-blank? fun))
-
-(defn- verdict-string [lang {:keys [data] :as verdict} dict]
-  (title-fn (dict data)
-            (fn [value]
-              (when-let [{:keys [reference-list
-                                 select
-                                 text]} (some-> (verdict-schema verdict)
-                                                :dictionary
-                                                dict)]
-                (if text
-                  value
-                  (i18n/localize lang
-                                 (:loc-prefix (or reference-list
-                                                  select))
-                                 value))))))
-
-(defn- verdict-section-string [{data :data}]
-  (title-fn (:verdict-section data) #(str "\u00a7" %)))
-
-(defn- verdict-summary-giver [{:keys [data references template]}]
-  (if (util/=as-kw (:giver template) :lautakunta)
-    (:boardname references)
-    (:handler data)))
-
-(defn- verdict-summary-title [{:keys [id published replacement] :as verdict} lang section-strings]
-  (let [rep-string (title-fn (:replaces replacement)
-                             (fn [vid]
-                               (let [section (get section-strings vid)]
-                                 (if (ss/blank? section)
-                                   (i18n/localize lang :pate.replacement-verdict)
-                                   (i18n/localize-and-fill lang
-                                                           :pate.replaces-verdict
-                                                           section)))))]
-    (->> (cond
-           (and (contract? verdict) published)
-           [(i18n/localize lang :pate.verdict-table.contract)]
-
-           published
-           [(get section-strings id)
-            (util/pcond-> (verdict-string lang verdict :verdict-type)
-                          ss/not-blank? (str " -"))
-            (verdict-string lang verdict :verdict-code)
-            rep-string]
-
-           :else
-           [(i18n/localize lang :pate-verdict-draft)
-            rep-string])
-         (remove ss/blank?)
-         (ss/join " "))))
-
-(defn- verdict-summary-signatures [{:keys [data]}]
-  (some->> data :signatures vals
-           (map #(select-keys % [:name :date]))
-           (sort-by :date)
-           seq))
-
-(defn- verdict-summary [lang section-strings
-                        {:keys [id data template replacement
-                                references category
-                                published]
-                         :as   verdict}]
-  (->> (merge (select-keys verdict [:id :published :modified :legacy? :category])
-              {:giver        (verdict-summary-giver verdict)
-               :replaces     (-> verdict :replacement :replaces)
-               :verdict-date (-> verdict :data :verdict-date)
-               :title        (verdict-summary-title verdict lang section-strings)
-               :signatures   (verdict-summary-signatures verdict)})
-       (util/filter-map-by-val some?)))
-
-(defn- section-strings-by-id [verdicts]
-  (->> verdicts
-       (map (juxt :id verdict-section-string))
-       (into {})))
-
-(defn- summaries-by-id [verdicts lang]
-  (let [section-strings (section-strings-by-id verdicts)]
-    (->> verdicts
-         (map (juxt :id #(verdict-summary lang section-strings %)))
-         (into {}))))
-
-(defn- add-chain-of-replacements-to-result
-  "Adds to result the summary of the given verdict along with the
-  chain of replacements. For example, if the given verdict X replaced
-  verdict Y, which replaced verdict Z, then X Y and Z would all be
-  added."
-  [result verdict summaries]
-  (concat result
-          (loop [{:keys [replaces] :as v} verdict
-                 sub []]
-            (if replaces
-              (recur (assoc (get summaries replaces)
-                            :replaced? true)
-                     (conj sub (dissoc v :replaces)))
-              (conj sub (dissoc v :replaces))))))
-
-(defn verdict-list
-  [{:keys [lang application]}]
-  (let [category (schema-util/application->category application)
-        ;; There could be both contracts and verdicts.
-        verdicts        (filter #(util/=as-kw category (:category %))
-                                (:pate-verdicts application))
-        summaries       (summaries-by-id verdicts lang)
-        replaced-verdict-ids (->> (vals summaries)
-                                  (map :replaces)
-                                  (remove nil?)
-                                  set)]
-    (reduce (fn [result verdict]
-              (if (contains? replaced-verdict-ids (:id verdict))
-                result
-                (add-chain-of-replacements-to-result result verdict summaries)))
-            []
-            (->> (vals summaries)
-                 (sort-by (comp - :modified))))))
+(defn verdict-list [command]
+  (vc/verdict-list command))
 
 (defn mask-verdict-data [{:keys [user application]} verdict]
   (cond
@@ -744,41 +624,12 @@
 (defmethod changes :automatic-verdict-dates [options]
   (update-automatic-verdict-dates options))
 
-(defn select-inclusions [dictionary inclusions]
-  (->> (map util/split-kw-path inclusions)
-       (reduce (fn [acc [x & xs]]
-                 (update acc
-                         x
-                         (fn [v]
-                           (if (seq xs)
-                             (conj v (util/kw-path xs))
-                             []))))
-               {})
-       (reduce-kv (fn [acc k v]
-                    (let [dic-value (k dictionary)]
-                      (assoc acc
-                             k
-                             (if (seq v)
-                               (assoc dic-value
-                                      :repeating (select-inclusions
-                                                  (-> dictionary k :repeating)
-                                                  v))
-                               dic-value))))
-                  {})))
-
-(defn- verdict-schema [{:keys [category schema-version legacy? template]}]
-  (update (if legacy?
-            (legacy/legacy-verdict-schema category)
-            (verdict-schemas/verdict-schema category schema-version))
-          :dictionary
-          #(select-inclusions % (map keyword (:inclusions template)))))
-
 (defn verdict-filled?
   "Have all the required fields been filled. Refresh? argument can force
   the read from mongo (see command->verdict)."
   ([command refresh?]
    (let [{:keys [data] :as verdict} (command->verdict command refresh?)
-         schema (verdict-schema verdict)]
+         schema (vc/verdict-schema verdict)]
      (schemas/required-filled? schema data)))
   ([command]
    (verdict-filled? command false)))
@@ -869,7 +720,7 @@
          :as verdict} (command->verdict command)
         {:keys [data value path op]
          :as     processed}    (schemas/validate-and-process-value
-                                (verdict-schema verdict)
+                                (vc/verdict-schema verdict)
                                 path value
                                 ;; Make sure that building related
                                 ;; paths can be resolved.
@@ -942,7 +793,7 @@
                     {:neighbor-states (neighbor-states application)})
                   (when (:statements inc-set)
                     {:statements (statements application final?)})
-                  (when (and (contract? verdict)
+                  (when (and (vc/contract? verdict)
                              final?
                              (not published))
                     ;; Verdict giver (handler) is the initial, implicit signer
@@ -1066,7 +917,7 @@
                                                              pate-verdicts)]
     (and published
          (not legacy?)
-         (not (contract? verdict))
+         (not (vc/contract? verdict))
          (not (some-> replacement :replaced-by))
          (not (util/find-first #(= (get-in % [:replacement :replaces])
                                    verdict-id)
@@ -1142,7 +993,7 @@
     (when (and (ss/blank? section)
                (util/not=as-kw giver :lautakunta)
                (not legacy?)
-               (not (contract? verdict)))
+               (not (vc/contract? verdict)))
       (let [verdict (-> verdict
                         (assoc-in [:data :verdict-section]
                                   (next-section (:organization application)
@@ -1227,7 +1078,7 @@
 (defn finalize--kuntagml
   [{:keys [command application verdict]}]
   (when (and (not (:legacy? verdict))
-             (not (contract? verdict))
+             (not (vc/contract? verdict))
              (org/krysp-integration? @(:organization command)
                                          (:permitType application)))
     {:commit-fn (fn [{:keys [command application verdict]}]

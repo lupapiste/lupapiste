@@ -5,6 +5,7 @@
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict :refer :all]
+            [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
             [midje.sweet :refer :all]
@@ -1364,7 +1365,7 @@
                                               :handler          "Bob Builder"
                                               :paatosteksti     "This is verdict."})
           (fact "select-inclusions"
-            (select-inclusions (:dictionary mini-verdict)
+            (vc/select-inclusions (:dictionary mini-verdict)
                                [:deviations :buildings.paloluokka :foremen-included])
             => {:deviations       {:phrase-text      {:category :yleinen}
                                    :template-section :deviations}
