@@ -8,6 +8,7 @@
             [sade.core :refer [ok?]]
             [sade.schema-generators :as ssg]
             [sade.env :as env]
+            [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.domain :as domain]
@@ -77,7 +78,7 @@
           placement-contract (:form-params request)]
       (if-let [validation-error (sc/check PlacementContract placement-contract)]
         {:status 400, :body validation-error}
-        (if (contains? (:applications state) allu-id)
+        (if (contains? (:applications @state) allu-id)
           (do (swap! state assoc-in [:applications allu-id] placement-contract)
               {:status 200, :body allu-id})
           {:status 404, :body (str "Not Found: " allu-id)}))))
@@ -135,7 +136,7 @@
     (fact "request is well-formed"
       (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
       (-> request :form-params :metadata keys set) => #{:name :description :mimeType}
-      (-> request :form-params :file) => #(instance? InputStream %))
+      (get-attachment-file! application(-> request :form-params :file)) => some?)
 
     (checking-integration-messages application "attachments.create"
                                    #(-send-attachment! inner command endpoint request))))
@@ -278,7 +279,7 @@
                                                                    {:status 400, :body "Your data was bad."} nil)))})
             (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
               (itu/local-command pena :submit-application :id id)
-              @failure-counter => 2)
+              @failure-counter => 1)
 
             (reset! failure-counter 0)
 
