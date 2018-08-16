@@ -60,9 +60,8 @@
                    (str "19" year))
         municipality "092" ;; Hardcoded since the whole procedure is for Vantaa
         sequence-name (str "applications-" municipality "-" fullyear)
-        counter (if (env/feature? :prefixed-id)
-                  (format "9%04d" (mongo/get-next-sequence-value sequence-name))
-                  (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
+        nextvalue (mongo/get-next-sequence-value sequence-name)
+        counter (format (if (> 10000 nextvalue) "9%04d" "%05d") nextvalue)]
     (ss/join "-" (list "LP" "092" fullyear counter))))
 
 
