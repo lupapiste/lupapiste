@@ -39,16 +39,18 @@
 (deftype ALLUBackingSystem []
   BackingSystem
   (-submit-application! [_ command] [:ALLU (allu/submit-application! command)])
-  (-update-application! [_  command updated-application]
+  (-update-application! [_ command updated-application]
     (allu/update-application! (assoc command :application updated-application))
     true)
   (-return-to-draft! [_ command] (allu/cancel-application! command))
   (-cancel-application! [_ command] (allu/cancel-application! command))
-  (-approve-application! [_ command _ _]
+  (-approve-application! [_ {:keys [application] :as command} _ _]
     ;; TODO: Non-placement-contract ALLU applications
     (allu/lock-placement-contract! command)
-    ;; TODO: Send comments
-    [true (allu/send-attachments! command (filter attachment/unsent? (-> command :application :attachments)))])
+    (attachment/save-comments-as-attachment command)
+    (let [{:keys [attachments] :as application} (domain/get-application-no-access-checking (:id application))]
+      [true (allu/send-attachments! (assoc command :application application)
+                                    (filter attachment/unsent? attachments))]))
   (-send-attachments! [_ command attachments _] (allu/send-attachments! command attachments)))
 
 (deftype KRYSPBackingSystem []

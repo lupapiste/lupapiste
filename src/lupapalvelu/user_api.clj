@@ -565,12 +565,13 @@
         (info "login successful, username:" username)
         (usr/clear-logins username)
         (if-let [application-page (usr/applicationpage-for (usr/with-org-auth user))]
-          (ssess/merge-to-session
-            command
-            (ok :user (-> user usr/with-org-auth usr/non-private)
-                :applicationpage application-page
-                :lang (:language user))
-            {:user (usr/session-summary user)})
+          (-> (ssess/merge-to-session
+                command
+                (ok :user (-> user usr/with-org-auth usr/non-private)
+                    :applicationpage application-page
+                    :lang (:language user))
+                {:user (usr/session-summary user)})
+              (usr/merge-login-cookie-for user))
           (do
             (error "Unknown user role:" (:role user))
             (fail :error.login))))

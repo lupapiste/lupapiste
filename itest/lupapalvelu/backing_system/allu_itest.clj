@@ -5,9 +5,10 @@
             [monger.operators :refer [$set]]
             [mount.core :as mount]
             [schema.core :as sc]
-            [sade.core :refer [ok?]]
-            [sade.schema-generators :as ssg]
+            [sade.core :refer [def- ok?]]
             [sade.env :as env]
+            [sade.files :refer [with-temp-file]]
+            [sade.schema-generators :as ssg]
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.tools :refer [doc-name]]
@@ -22,11 +23,26 @@
             [lupapalvelu.backing-system.allu :as allu
              :refer [ALLUApplications -cancel-application! ALLUAttachments -send-attachment!
                      ALLUPlacementContracts ->MessageSavingALLU ->GetAttachmentFiles PlacementContract
-                     -update-placement-contract! -create-placement-contract! allu-fail!]])
-  (:import [java.io InputStream]))
+                     -update-placement-contract! -create-placement-contract! allu-fail!]]))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
+
+(def- drawings
+  [{:id       1,
+    :name     "A",
+    :desc     "A desc",
+    :category "123",
+    :geometry "POLYGON((438952 6666883.25,441420 6666039.25,441920 6667359.25,439508 6667543.25,438952 6666883.25))",
+    :area     "2686992",
+    :height   "1"}
+   {:id       2,
+    :name     "B",
+    :desc     "B desc",
+    :category "123",
+    :geometry "POLYGON((440652 6667459.25,442520 6668435.25,441912 6667359.25,440652 6667459.25))",
+    :area     "708280",
+    :height   "12"}])
 
 (defn- nullify-doc-ids [doc]
   (-> doc
@@ -204,57 +220,81 @@
                                              ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]]))
               (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Esimerkki Oy"
 
-              (let [filename "dev-resources/test-attachment.txt"
-                    file (io/file filename)
-                    description "Test file"
-                    description* "The best file"
-                    _ (itu/local-command pena :upload-attachment :id id :attachmentId (:id attachment)
-                                         :attachmentType {:type-group "muut", :type-id "muu"} :group {}
-                                         :filename filename :tempfile file :size (.length file)) => ok?
-                    _ (itu/local-command pena :set-attachment-meta :id id :attachmentId (:id attachment)
-                                         :meta {:contents description}) => ok?
-                    {[attachment] :attachments} (domain/get-application-no-access-checking id)]
-                (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
+              (itu/local-command pena :save-application-drawings :id id :drawings drawings) => ok?
+              (-> (:applications @allu-state) first val :geometry)
+              => {:crs        {:type       "name"
+                               :properties {:name "EPSG:4326"}}
+                  :type       "GeometryCollection"
+                  :geometries [{:type        "Polygon"
+                                :coordinates [[[25.901018731807 60.134367126801]
+                                               [25.945680922149 60.127151199835]
+                                               [25.954302160106 60.139072939081]
+                                               [25.910829826268 60.140374902637]
+                                               [25.901018731807 60.134367126801]]]}
+                               {:type        "Polygon"
+                                :coordinates [[[25.931448002235 60.139788526718]
+                                               [25.9647992127 60.148817662889]
+                                               [25.954158152623 60.139071802112]
+                                               [25.931448002235 60.139788526718]]]}]}
 
-                (count (:applications @allu-state)) => 1
-                (-> (:applications @allu-state) first val :pendingOnClient) => false
-                (-> (:applications @allu-state) first val :attachments)
-                => [{:metadata {:name        description
-                                :description (localize "fi" :attachmentType
-                                                       (-> attachment :type :type-group)
-                                                       (-> attachment :type :type-id))
-                                :mimeType    (-> attachment :latestVersion :contentType)}}]
+              (let [filename "dev-resources/test-attachment.txt"]
+                ;; HACK: Have to use a temp file as :upload-attachment expects to get one and deletes it in the end.
+                (with-temp-file file
+                  (io/copy (io/file filename) file)
+                  (let [description "Test file"
+                        description* "The best file"
+                        _ (itu/local-command pena :upload-attachment :id id :attachmentId (:id attachment)
+                                             :attachmentType {:type-group "muut", :type-id "muu"} :group {}
+                                             :filename filename :tempfile file :size (.length file)) => ok?
+                        _ (itu/local-command pena :set-attachment-meta :id id :attachmentId (:id attachment)
+                                             :meta {:contents description}) => ok?
+                        {[attachment] :attachments} (domain/get-application-no-access-checking id)
+                        expected-attachments [{:metadata {:name        description
+                                                          :description (localize "fi" :attachmentType
+                                                                                 (-> attachment :type :type-group)
+                                                                                 (-> attachment :type :type-id))
+                                                          :mimeType    (-> attachment :latestVersion :contentType)}}
+                                              {:metadata {:name        ""
+                                                          :description (localize "fi" :attachmentType :muut
+                                                                                 :keskustelu)
+                                                          :mimeType    "application/pdf"}}]
+                        expected-attachments* (conj expected-attachments
+                                                    (assoc-in (first expected-attachments)
+                                                              [:metadata :name] description*))]
+                    (itu/local-command pena :add-comment :id id :text "Added my test text file."
+                                       :target {:type "application"} :roles ["applicant" "authority"]) => ok?
+                    (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
 
-                ;; Upload another attachment for :move-attachments-to-backing-system to send:
-                (itu/local-command raktark-helsinki :upload-attachment :id id :attachmentId (:id attachment)
-                                   :attachmentType {:type-group "muut", :type-id "muu"} :group {}
-                                   :filename filename :tempfile file :size (.length file)) => ok?
-                (itu/local-command raktark-helsinki :set-attachment-meta :id id :attachmentId (:id attachment)
-                                   :meta {:contents description*}) => ok?
-                (itu/local-command raktark-helsinki :move-attachments-to-backing-system :id id :lang "fi"
-                                   :attachmentIds [(:id attachment)]) => ok?
+                    (count (:applications @allu-state)) => 1
+                    (-> (:applications @allu-state) first val :pendingOnClient) => false
+                    (-> (:applications @allu-state) first val :attachments) => expected-attachments
 
-                (-> (:applications @allu-state) first val :attachments (get 1))
-                => {:metadata {:name        description*
-                               :description (localize "fi" :attachmentType
-                                                      (-> attachment :type :type-group)
-                                                      (-> attachment :type :type-id))
-                               :mimeType    (-> attachment :latestVersion :contentType)}}))
+                    (io/copy (io/file filename) file)
+                    ;; Upload another attachment for :move-attachments-to-backing-system to send:
+                    (itu/local-command raktark-helsinki :upload-attachment :id id :attachmentId (:id attachment)
+                                       :attachmentType {:type-group "muut", :type-id "muu"} :group {}
+                                       :filename filename :tempfile file :size (.length file)) => ok?
+                    (itu/local-command raktark-helsinki :set-attachment-meta :id id :attachmentId (:id attachment)
+                                       :meta {:contents description*}) => ok?
+                    (itu/local-command raktark-helsinki :move-attachments-to-backing-system :id id :lang "fi"
+                                       :attachmentIds [(:id attachment)]) => ok?
 
-            (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-              (itu/local-command pena :submit-application :id id) => ok?
+                    (-> (:applications @allu-state) first val :attachments) => expected-attachments*
 
-              (itu/local-command pena :cancel-application :id id :text "Alkoi nolottaa." :lang "fi") => ok?
-              (:id-counter @allu-state) => 2
-              (count (:applications @allu-state)) => 1)
+                    (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
+                      (itu/local-command pena :submit-application :id id) => ok?
 
-            (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-              (itu/local-command pena :submit-application :id id) => ok?
+                      (itu/local-command pena :cancel-application :id id :text "Alkoi nolottaa." :lang "fi") => ok?
+                      (:id-counter @allu-state) => 2
+                      (count (:applications @allu-state)) => 1)
 
-              (itu/local-command raktark-helsinki :return-to-draft
-                                 :id id :text "Tällaisenaan nolo ehdotus." :lang "fi") => ok?
-              (:id-counter @allu-state) => 3
-              (count (:applications @allu-state)) => 1))
+                    (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
+                      (itu/local-command pena :submit-application :id id) => ok?
+
+                      (itu/local-command raktark-helsinki :return-to-draft
+                                         :id id :text "Tällaisenaan nolo ehdotus." :lang "fi") => ok?
+                      (:id-counter @allu-state) => 3
+                      (count (:applications @allu-state)) => 1))))))
 
           (fact "disabled for everything else."
             (reset! allu-state initial-allu-state)

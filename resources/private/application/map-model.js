@@ -98,11 +98,11 @@ LUPAPISTE.MapModel = function(authorizationModel) {
 
         // same location markers
         markerInfos.push({
-          x: data.sameLocation[0].location.x,
-          y: data.sameLocation[0].location.y,
+          x: _.get( data, "sameLocation[0].location.x"),
+          y: _.get( data, "sameLocation[0].location.y"),
           iconName: "sameLocation",
           contents: formMarkerHtmlContents( data.sameLocation ),
-          isCluster: data.sameLocation.length > 1 ? true : false
+          isCluster: _.size( data.sameLocation ) > 1 ? true : false
         });
 
         // same operation markers

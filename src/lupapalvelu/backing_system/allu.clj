@@ -18,12 +18,13 @@
             [sade.schemas :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
                                   ApplicationId ISO-3166-alpha-2 date-string]]
             [lupapalvelu.attachment :refer [get-attachment-file!]]
-            [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common]
+            [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]
             [lupapalvelu.integrations.messages :as imessages :refer [IntegrationMessage]]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
 
 ;;;; Schemas
 ;;;; ===================================================================================================================
@@ -283,7 +284,7 @@
     (assert allu-id (str (:id app) " does not contain an ALLU id"))
     [(str allu-url "/applications/" allu-id "/attachments")
      {:headers     {:authorization (str "Bearer " allu-jwt)}
-      :form-params {:metadata {:name        (:contents attachment)
+      :form-params {:metadata {:name        (or (:contents attachment) "")
                                :description (localize lang :attachmentType type-group type-id)
                                :mimeType    (:contentType latestVersion)}
                     :file     file-contents}}]))
@@ -531,7 +532,7 @@
         response (allu-http-fail! response)))))
 
 (defn- send-attachment!
-  "Send `attachment` of `application to ALLU. Return the fileId of the file that was sent."
+  "Send `attachment` of `application` to ALLU. Return the fileId of the file that was sent."
   [{:keys [application] :as command} {attachment-id :id {:keys [fileId]} :latestVersion :as attachment}]
   (let [[endpoint request] (attachment-send (env/value :allu :url) (env/value :allu :jwt) application attachment
                                             fileId)]

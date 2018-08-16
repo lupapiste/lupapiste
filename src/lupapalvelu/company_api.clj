@@ -158,7 +158,8 @@
                                     (ok (assoc (select-keys user [:firstName :lastName :role]) :result :found)))))
 
 (defcommand company-invite-user
-  {:parameters [email admin submit]
+  {:description "Invite an existing user to the company."
+   :parameters [email admin submit]
    :optional-parameters [firstName lastName]
    :user-roles #{:applicant}
    :input-validators [(partial action/non-blank-parameters [:email])
@@ -168,7 +169,11 @@
    :pre-checks [com/company-not-locked
                 (some-pre-check com/validate-is-admin
                                 (com/validate-has-company-role :admin))
-                user-limit-not-exceeded]}
+                user-limit-not-exceeded
+                (fn [{:keys [user data]}]
+                  (when-let [check (some->> data :email (com/search-sanity-check user))]
+                    (when (keyword? check)
+                      (fail check))))]}
   [{caller :user}]
   (com/search-result caller email (fn [_]
                                   (com/invite-user! caller
@@ -181,7 +186,8 @@
                                   (ok :result :invited))))
 
 (defcommand company-add-user
-  {:user-roles #{:applicant}
+  {:description "Add a non-existing user to the company. "
+   :user-roles #{:applicant}
    :parameters [firstName lastName email admin submit]
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/boolean-parameters [:admin :submit])
@@ -190,7 +196,13 @@
    :pre-checks [com/company-not-locked
                 (some-pre-check com/validate-is-admin
                                 (com/validate-has-company-role :admin))
-                user-limit-not-exceeded]}
+                user-limit-not-exceeded
+                (fn [{:keys [user data]}]
+                  (when-let [check (some->> data :email (com/search-sanity-check user))]
+                    (when-not (= check :not-found)
+                      (fail (if (keyword? check)
+                              check
+                              :error.user-cannot-be-added-to-company)))))]}
   [{user :user}]
   (com/add-user! {:firstName firstName :lastName lastName :email email}
                (assoc (com/find-company-by-id (-> user :company :id)) :admin user)

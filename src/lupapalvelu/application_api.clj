@@ -19,6 +19,7 @@
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.assignment :as assignment]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.backing-system.core :as bs]
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as krysp-output]
@@ -368,7 +369,8 @@
    :permissions      [{:context  {:application {:state #{:draft}}}
                        :required [:application/edit-draft :application/edit-drawings]}
 
-                      {:required [:application/edit-drawings]}]}
+                      {:required [:application/edit-drawings]}]
+   :on-success       bs/update-callback}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
     (let [drawings-with-geojson (map #(assoc % :geometry-wgs84 (draw/wgs84-geometry %)) drawings)]
@@ -632,12 +634,16 @@
         application        (:application command)
         archiving-project? (= (keyword (:permitType application)) :ARK)
         krysp?             (org/krysp-integration? organization (permit/permit-type application))
-        warranty?          (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
+        warranty?          (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))
+        terminal-but-not-canceled? (and (states/terminal-state? (sm/state-graph application) (keyword state))
+                                        (not= :canceled (keyword state)))]
     (if warranty?
       (update-application command (util/deep-merge
                                     (app-state/state-transition-update (keyword state) (:created command) application user)
                                     {$set (app/warranty-period (:created command))}))
       (update-application command (app-state/state-transition-update (keyword state) (:created command) application user)))
+    (when terminal-but-not-canceled?
+      (attachment/save-comments-as-attachment command))
     (when-not archiving-project?
       (archiving-util/mark-application-archived-if-done application (:created command) user))))
 
@@ -922,7 +928,6 @@
     (app/do-add-link-permit continuation-app (:id application))
     (app/insert-application continuation-app)
     (ok :id (:id continuation-app))))
-
 
 (defn- validate-new-applications-enabled [{{:keys [permitType municipality] :as application} :application}]
   (when application

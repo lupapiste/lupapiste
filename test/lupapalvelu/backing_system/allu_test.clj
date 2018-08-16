@@ -68,14 +68,6 @@
                        (not (allu/allu-application? {:id org-id} permit-type))))
         => passing-quick-check))
 
-    (facts "application->allu-placement-contract"
-      (fact "Valid applications produce valid inputs for ALLU."
-        (quick-check 10
-                     (for-all [application (sg/generator ValidPlacementApplication)]
-                       (nil? (sc/check PlacementContract
-                                       (application->allu-placement-contract (sg/generate Bool) application)))))
-        => passing-quick-check))
-
     (facts "application-cancel-request"
       (let [allu-id "23"
             app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)
@@ -90,6 +82,14 @@
         (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
                                     :form-params  (application->allu-placement-contract true app)})))
 
+    (facts "application->allu-placement-contract"
+      (fact "Valid applications produce valid inputs for ALLU."
+        (quick-check 10
+                     (for-all [application (sg/generator ValidPlacementApplication)]
+                       (nil? (sc/check PlacementContract
+                                       (application->allu-placement-contract (sg/generate Bool) application)))))
+        => passing-quick-check))
+
     (facts "attachment-send"
       (let [allu-id "23"
             application (-> (sg/generate ValidPlacementApplication) (assoc-in [:integrationKeys :ALLU :id] allu-id))
@@ -100,7 +100,7 @@
         (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/attachments"))
         (fact "request"
           request => {:headers     {:authorization "Bearer foo.bar.baz"}
-                      :form-params {:metadata {:name        (:contents attachment)
+                      :form-params {:metadata {:name        (or (:contents attachment) "")
                                                :description (localize "fi" :attachmentType type-group type-id)
                                                :mimeType    (:contentType latestVersion)}
                                     :file     contents}})))

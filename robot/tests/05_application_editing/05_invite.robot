@@ -223,6 +223,7 @@ Mikko removes Sven's auth within the dialog
 
 Close dialog and check that Sven no longer is a guest
   Click element  jquery=#modal-dialog span.close
+  No such test id  application-invite-submit
   No such test id  application-guest-table
 
 Mikko can now select Sven

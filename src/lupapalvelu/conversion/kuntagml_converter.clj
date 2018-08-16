@@ -69,7 +69,8 @@
         ;     `lupapalvelu.application/make-document` for example. And then save to db :)
         ;
         ;
-        id (app/make-application-id municipality)
+        kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
+        id (conversion-util/make-converted-application-id kuntalupatunnus)
         make-app-info {:id              id
                        :organization    organization
                        :operation-name  "aiemmalla-luvalla-hakeminen" ; FIXME: no fixed operation in conversion, see above
@@ -115,8 +116,9 @@
         created-application (-> created-application
                                 (update-in [:documents] concat other-building-docs new-parties structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
-                                (assoc :statements given-statements)
-                                (assoc :opened (:created command)))
+                                (assoc :statements given-statements
+                                       :opened (:created command)
+                                       :facta-imported true))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
@@ -142,10 +144,15 @@
           (info "Saved review updates")
           (infof "Reviews were not saved: %s" (:desc update-result))))
 
-      ;; Add link permits (viitelupien linkitys)
-      (let [app-links (krysp-reader/->viitelupatunnukset xml)]
-        (infof (format "Linking %d app-links to application %s" (count app-links) (:id created-application)))
-        (doseq [link app-links]
+      ;; The database may already include the same kuntalupatunnus as in the to be imported application
+      ;; (e.g., the application has been imported earlier via previous permit (paperilupa) mechanism).
+      ;; This kind of application 1) has the same kuntalupatunnus and 2) :facta-imported is falsey.
+      ;; After import, the two applications are linked (viitelupien linkkaus).
+      (let [app-links (krysp-reader/->viitelupatunnukset xml)
+            duplicate-ids (conversion-util/get-duplicate-ids kuntalupatunnus)
+            all-links (clojure.set/union (set app-links) (set duplicate-ids))]
+        (infof (format "Linking %d app-links to application %s" (count all-links) (:id created-application)))
+        (doseq [link all-links]
           (try
             (app/do-add-link-permit created-application link)
             (catch Exception e

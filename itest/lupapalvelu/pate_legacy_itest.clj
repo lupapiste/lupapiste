@@ -236,3 +236,52 @@
                    :verdict-id vid3) => ok?
           (:state (query-application sonja app-id))
           => "sent")))))
+
+(fact "Legacy TJ verdict"
+  (let [{app-id :id} (create-and-submit-application pena
+                                                    :operation :pientalo
+                                                    :propertyId sipoo-property-id)
+        {tj-app-id :id} (command sonja :create-foreman-application :id app-id
+                                 :taskId "" :foremanRole "ei tiedossa" :foremanEmail "foreman@mail.com")]
+
+    (fact "Approve application"
+      (command sonja :update-app-bulletin-op-description
+               :id app-id
+               :description "Donec non mauris quis mauris") => ok?
+      (command sonja :approve-application :id app-id :lang "fi") => ok?)
+
+    (fact "Approve TJ application"
+      (command sonja :change-permit-sub-type :id tj-app-id :permitSubtype "tyonjohtaja-hakemus") => ok?
+      (command sonja :submit-application :id tj-app-id) => ok?
+      (command sonja :approve-application :id tj-app-id :lang "fi") => ok?)
+
+    (fact "Disable Pate in Sipoo"
+      (command admin :set-organization-scope-pate-value
+               :permitType "R"
+               :municipality "753"
+               :value false) => ok?)
+
+    (let [{:keys [verdict-id]} (command sonja :new-legacy-verdict-draft :id tj-app-id)]
+
+      (fact "Fill and publish the TJ verdict"
+        (fill-verdict sonja tj-app-id verdict-id
+                      :kuntalupatunnus "TJ-123"
+                      :verdict-code "1"
+                      :verdict-text "TJ Verdict"
+                      :anto (timestamp "9.8.2018")
+                      :lainvoimainen (timestamp "19.8.2018"))
+        (command sonja :publish-legacy-verdict :id tj-app-id :verdict-id verdict-id) => ok?)
+
+      (let [tj-app (query-application sonja tj-app-id)
+            tj-verdict (first (:pate-verdicts tj-app))]
+
+        (fact "TJ application state is foremanVerdictGiven"
+          tj-app => (contains {:state "foremanVerdictGiven"}))
+
+        (fact "TJ verdict have given data"
+          (get-in tj-verdict [:data :handler]) => "Sonja Sibbo"
+          (get-in tj-verdict [:data :kuntalupatunnus]) => "TJ-123"
+          (get-in tj-verdict [:data :verdict-code]) => "1"
+          (get-in tj-verdict [:data :verdict-text]) => "TJ Verdict"
+          (get-in tj-verdict [:data :anto]) => (timestamp "9.8.2018")
+          (get-in tj-verdict [:data :lainvoimainen]) => (timestamp "19.8.2018"))))))
