@@ -455,10 +455,13 @@
 ;;;; State and error handling
 ;;;; ===================================================================================================================
 
+(defn make-allu []
+  (->MessageSavingALLU (->GetAttachmentFiles (if (env/dev-mode?)
+                                               (->IntegrationMessagesMockALLU)
+                                               (->RemoteALLU)))))
+
 (defstate allu-instance
-  :start (->MessageSavingALLU (->GetAttachmentFiles (if (env/dev-mode?)
-                                                      (->IntegrationMessagesMockALLU)
-                                                      (->RemoteALLU)))))
+  :start (make-allu))
 
 (def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
 

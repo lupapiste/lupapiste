@@ -21,7 +21,8 @@
             [com.gfredericks.test.chuck.generators :refer [string-from-regex]]
             [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
 
-            [lupapalvelu.backing-system.allu :as allu :refer [PlacementContract]]))
+            [lupapalvelu.backing-system.allu :as allu :refer [PlacementContract]])
+  (:import [lupapalvelu.backing_system.allu IntegrationMessagesMockALLU RemoteALLU]))
 
 (testable-privates lupapalvelu.backing-system.allu application->allu-placement-contract
                    application-cancel-request placement-creation-request placement-update-request attachment-send
@@ -156,4 +157,13 @@
                           :action       "submit-application"
                           :data         {:endpoint endpoint
                                          :response response}})
-            (provided (now) => 5)))))))
+            (provided (now) => 5)))))
+
+    (facts "make-allu"
+      (fact "dev mock"
+        (.. (allu/make-allu) inner inner) => (partial instance? IntegrationMessagesMockALLU)
+        (provided (env/dev-mode?) => true))
+
+      (fact "prod HTTP client"
+        (.. (allu/make-allu) inner inner) => (partial instance? RemoteALLU)
+        (provided (env/dev-mode?) => false)))))

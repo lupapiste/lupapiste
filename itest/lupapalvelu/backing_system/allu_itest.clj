@@ -1,7 +1,6 @@
 (ns lupapalvelu.backing_system.allu-itest
   "Integration tests for ALLU integration. Using local (i.e. not over HTTP) testing style."
   (:require [clojure.java.io :as io]
-            [cheshire.core :as json]
             [clj-http.client :as http]
             [monger.operators :refer [$set]]
             [mount.core :as mount]
@@ -92,37 +91,54 @@
           {:status 200, :body ""})
         {:status 404, :body (str "Not Found: " allu-id)}))))
 
+(defn- checking-integration-messages [{:keys [id]} message-type body]
+  (let [imsg-query (fn [direction]
+                     {:partner        "allu"
+                      :messageType    message-type
+                      :direction      direction
+                      :status         "done"
+                      :application.id id})
+        res (body)]
+    (fact "integration messages are saved"
+      (mongo/any? :integration-messages (imsg-query "out")) => true
+      (mongo/any? :integration-messages (imsg-query "in")) => true)
+    res))
+
 (deftype CheckingALLU [inner]
   ALLUApplications
-  (-cancel-application! [_ command endpoint request]
+  (-cancel-application! [_ {:keys [application] :as command} endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/cancelled")))
     (fact "request is well-formed"
       (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt)))
 
-    (-cancel-application! inner command endpoint request))
+    (checking-integration-messages application "applications.cancelled"
+                                   #(-cancel-application! inner command endpoint request)))
 
   ALLUPlacementContracts
-  (-create-placement-contract! [_ command endpoint request]
+  (-create-placement-contract! [_ {:keys [application] :as command} endpoint request]
     (fact "endpoint is correct" endpoint => (str (env/value :allu :url) "/placementcontracts"))
     (check-request true request)
 
-    (-create-placement-contract! inner command endpoint request))
+    (checking-integration-messages application "placementcontracts.create"
+                                   #(-create-placement-contract! inner command endpoint request)))
 
-  (-update-placement-contract! [_ command endpoint request]
+  (-update-placement-contract! [_ {:keys [application] :as command} endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
     (check-request false request)
 
-    (-update-placement-contract! inner command endpoint request))
+    (checking-integration-messages application "placementcontracts.update"
+                                   #(-update-placement-contract! inner command endpoint request)))
 
   ALLUAttachments
-  (-send-attachment! [_ command endpoint request]
+  (-send-attachment! [_ {:keys [application] :as command} endpoint request]
     (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/attachments")))
     (fact "request is well-formed"
       (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
       (-> request :form-params :metadata keys set) => #{:name :description :mimeType}
       (-> request :form-params :file) => #(instance? InputStream %))
 
-    (-send-attachment! inner command endpoint request)))
+    (checking-integration-messages application "attachments.create"
+                                   #(-send-attachment! inner command endpoint request))))
 
 (deftype ConstALLU [cancel-response attach-response creation-response update-response]
   ALLUApplications
@@ -272,7 +288,7 @@
                                                                    {:status 401, :body "You are unauthorized."} nil)))})
             (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
               (itu/local-command pena :submit-application :id id)
-              @failure-counter => 1))))
+              @failure-counter => 1))))))
 
-      ;; FIXME: Does not actually restore an instance of the correct type:
-      (mount/start #'allu/allu-instance))))
+  (mount/stop #'allu/allu-instance)
+  (mount/start-with {#'allu/allu-instance (allu/make-allu)}))
