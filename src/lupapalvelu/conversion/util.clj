@@ -1,10 +1,13 @@
 (ns lupapalvelu.conversion.util
-  (:require [clojure.data.csv :as csv]
+  (:require [clj-time.coerce :as c]
+            [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [lupapalvelu.application :as app]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as usr]
             [monger.operators :refer [$in $ne]]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -55,9 +58,7 @@
   `LP-092-2013-00123`, not for the current year as in normal paper application imports."
   [kuntalupatunnus]
   (let [year (-> kuntalupatunnus destructure-permit-id :vuosi)
-        fullyear (if (> 20 (Integer. year))
-                   (str "20" year)
-                   (str "19" year))
+        fullyear (str (if (> 20 (Integer. year)) "20" "19") year)
         municipality "092" ;; Hardcoded since the whole procedure is for Vantaa
         sequence-name (str "applications-" municipality "-" fullyear)
         nextvalue (mongo/get-next-sequence-value sequence-name)
@@ -86,3 +87,15 @@
                          [(:id item) (get-in item [:verdicts 0 :kuntalupatunnus])])))]
   (with-open [writer (io/writer filename)]
     (csv/write-csv writer data))))
+
+(defn generate-history-array
+  [xml]
+  (let [verdict-given {:state :verdictGiven
+                       :ts (-> xml krysp-reader/->verdict-date (subs 0 10) c/to-long)
+                       :user usr/batchrun-user-data}
+        history (vec
+                  (for [{:keys [pvm tila]} (krysp-reader/get-sorted-tilamuutos-entries xml)]
+                    {:state tila
+                     :ts pvm
+                     :user usr/batchrun-user-data}))]
+    (conj history verdict-given)))

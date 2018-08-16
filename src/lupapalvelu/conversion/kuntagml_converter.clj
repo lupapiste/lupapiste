@@ -19,6 +19,8 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
+(def tila (atom {}))
+
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
   ;; Data to be deduced from xml:
@@ -92,6 +94,7 @@
         ; TODO: create operations from app-info, see above.
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
+        _ (swap! tila assoc :xml xml)
         ; TODO: create secondaryoperations from app-info, see above.
         ;; make secondaryOperations for buildings other than the first one in case there are many
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
@@ -102,6 +105,10 @@
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
 
         state-changes (-> xml krysp-reader/get-sorted-tilamuutos-entries)
+
+        history-array (conversion-util/generate-history-array xml)
+
+        _ (swap! tila assoc :history history-array)
 
         ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
         given-statements (for [st statements

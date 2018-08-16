@@ -2,7 +2,6 @@
   "Read the Krysp from municipality Web Feature Service"
   (:require [cheshire.core :as json]
             [clojure.set :refer [rename-keys]]
-            [lupapalvelu.conversion.util :as conv-util]
             [lupapalvelu.document.schemas]
             [lupapalvelu.drawing :as drawing]
             [lupapalvelu.find-address :as find-address]
@@ -484,6 +483,9 @@
        (map (fn [asia] {:kuntalupatunnus (->kuntalupatunnus asia)
                         :kuvaus (get-text asia [:rakennusvalvontaasianKuvaus])}))
        (remove #(ss/blank? (:kuvaus %)))))
+
+(defn ->verdict-date [xml]
+  (get-in (xml->edn xml) [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :paatostieto :Paatos :paivamaarat :antoPvm]))
 
 (defn read-permit-descriptions-from-xml
   [permit-type xml]

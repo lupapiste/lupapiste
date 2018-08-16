@@ -2,7 +2,8 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.conversion.util :as util]
             [lupapalvelu.backing-system.krysp.application-from-krysp :refer [get-local-application-xml-by-filename]]
-            [lupapalvelu.backing-system.krysp.reader :as reader]))
+            [lupapalvelu.backing-system.krysp.reader :as reader]
+            [lupapalvelu.user :as usr]))
 
 (fact "Conversion of permit ids from 'database-format' works as expected"
   (facts "ids in 'database-format' are converted into 'ui-format'"
@@ -41,3 +42,13 @@
     (-> ids set count) => 10000
     (provided
       (lupapalvelu.mongo/get-next-sequence-value "applications-092-2013") => (swap! counter inc))))
+
+(fact "The history can be generated from tilamuutos-elements"
+  (let [xml (get-local-application-xml-by-filename "./dev-resources/krysp/verdict-r-structure.xml" "R")
+        history (-> xml reader/get-sorted-tilamuutos-entries util/generate-history-array)]
+    (seq? history) => true
+    (count history) => 5
+    (every? map? history) => true
+    (last history) => {:state :constructionStarted
+                       :ts 1364774400000
+                       :user usr/batchrun-user-data}))
