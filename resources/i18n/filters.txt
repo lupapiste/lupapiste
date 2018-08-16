@@ -4,7 +4,7 @@
 "filter.assignment-not-targeted" "en" "No assignments"
 "filter.assignment-not-targeted" "fi" "Ei tehtäviä"
 "filter.assignment-not-targeted" "sv" "Inga uppgifter"
-"filter.assignment-user-created" "en" "Assignments created by handlers"
+"filter.assignment-user-created" "en" "Assignments created by assignees"
 "filter.assignment-user-created" "fi" "Käsittelijöiden luomia tehtäviä"
 "filter.assignment-user-created" "sv" "Uppgifter som skapats av handläggarna"
 "filter.building-site" "en" "Construction site attachments"
