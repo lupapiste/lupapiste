@@ -20,19 +20,6 @@
             [saml20-clj.routes :as saml-routes]
             [saml20-clj.shared :as saml-shared]))
 
-;; Headerit idp:sta
-(def ad-header-translations
-  {:ad-cn        :fullName
-   :ad-firstname :firstName
-   :ad-givenname :givenName
-   :ad-sn        :lastName
-   :ad-mail      :email
-   :ad-address   :street
-   :ad-zip       :zip
-   :ad-city      :city
-   :ad-role      :role
-   :ad-org-authz :orgAuthz})
-
 (defn- parse-certificate
   "Strip the -----BEGIN CERTIFICATE----- and -----END CERTIFICATE----- headers and newlines
   from certificate."
@@ -90,6 +77,25 @@
                          (name lp-role)))]
     (->> orgAuthz (remove nil?) (set))))
 
+(defn validated-login [req orgid firstName lastName email orgAuthz]
+  (let [user-data {:firstName firstName
+                   :lastName  lastName
+                   :role      "authority"
+                   :email     email
+                   :username  email
+                   :enabled   true
+                   :orgAuthz  {(keyword orgid) orgAuthz}}        ;; validointi ja virheiden hallinta?
+        user (if-let [user-from-db (usr/get-user-by-email email)]
+               (let [updated-user-data (util/deep-merge user-from-db user-data)]
+                   (user-api/update-authority user-from-db email updated-user-data)
+                   updated-user-data)
+               (usr/create-new-user {:role "admin"} user-data))
+        response (ssess/merge-to-session
+                   req
+                   (response/redirect (format "%s/app/fi/authority" (:host (env/get-config))))
+                   {:user (usr/session-summary user)})]
+    response))
+
 (defpage [:get "/api/saml/ad-login/:orgid"] {orgid :orgid}
   (let [org-data (get-in (add-organization-data-to-config! orgid) [:organizational-settings (keyword orgid)])
         saml-request ((:saml-req-factory! org-data))
@@ -115,29 +121,13 @@
         {:keys [email firstName lastName groups]} (get-in parsed-saml-info [:assertions :attrs])
         _ (clojure.pprint/pprint parsed-saml-info)
         _ (info (str "SAML response validation " (if valid? "was successful" "failed")))
-        ]
-    (if valid?
-      (let [ad-role-map (-> orgid (get-organization) :ad-login :role-mapping)
-            orgAuthz (resolve-roles ad-role-map groups)  ;; groups or whatever the correct parameter is)
-            user-data {:firstName firstName
-                       :lastName  lastName
-                       :role      "authority"
-                       :email     email
-                       :username  email
-                       :enabled   true
-                       :orgAuthz  {(keyword orgid) orgAuthz}}        ;; validointi ja virheiden hallinta?
-            user (if-let [user-from-db (usr/get-user-by-email email)]
-                   user-from-db
-                   ;; The following form is temporarily commented out since the deep merge breaks orgAuthz field as it is now
-                   #_(let [updated-user-data (util/deep-merge user-from-db user-data)]
-                     (user-api/update-authority user-from-db email updated-user-data)
-                     updated-user-data)
-                   (usr/create-new-user {:role "admin"} user-data))
-            response (ssess/merge-to-session
-                       req
-                       (response/redirect (format "%s/app/fi/authority" (:host (env/get-config))))
-                       {:user (usr/session-summary user)})]
-        response)
-      (do
-        (error "SAML validation failed")
-        (response/status 403 (response/content-type "text/plain" "Validation of SAML response failed"))))))
+        ad-role-map (-> orgid (get-organization) :ad-login :role-mapping)
+        authz (resolve-roles ad-role-map groups)]  ;; groups or whatever the correct parameter is)
+    (cond
+      (and valid? (seq authz)) (validated-login req orgid firstName lastName email authz)
+      valid? (do
+               (error "User does not have organization authorization")
+               (response/redirect (format "%s/app/fi/welcome#!/login" (:host (env/get-config)))))
+      :else (do
+              (error "SAML validation failed")
+              (response/status 403 (response/content-type "text/plain" "Validation of SAML response failed"))))))
