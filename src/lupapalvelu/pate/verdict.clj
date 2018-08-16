@@ -523,43 +523,50 @@
           (remove (comp nil? second))
           (into {}))))
 
+(defn- section-strings-by-id [verdicts]
+  (->> verdicts
+       (map (juxt :id verdict-section-string))
+       (into {})))
+
+(defn- summaries-by-id [verdicts lang]
+  (let [section-strings (section-strings-by-id verdicts)]
+    (->> verdicts
+         (map (juxt :id #(verdict-summary lang section-strings %)))
+         (into {}))))
+
+(defn add-chain-of-replacements-to-result
+  "Adds to result the summary of the given verdict along with the
+  chain of replacements. For example, if the given verdict X replaced
+  verdict Y, which replaced verdict Z, then X Y and Z would all be
+  added."
+  [result verdict summaries]
+  (concat result
+          (loop [{:keys [replaces] :as v} verdict
+                 sub []]
+            (if replaces
+              (recur (assoc (get summaries replaces)
+                            :replaced? true)
+                     (conj sub (dissoc v :replaces)))
+              (conj sub (dissoc v :replaces))))))
+
 (defn verdict-list
   [{:keys [lang application]}]
   (let [category (schema-util/application->category application)
         ;; There could be both contracts and verdicts.
         verdicts        (filter #(util/=as-kw category (:category %))
                                 (:pate-verdicts application))
-        section-strings (reduce (fn [acc v]
-                                  (assoc acc (:id v) (verdict-section-string v)))
-                                {}
-                                verdicts)
-        summaries       (reduce (fn [acc v]
-                                  (assoc acc
-                                         (:id v)
-                                         (verdict-summary lang
-                                                          section-strings
-                                                          v)))
-                                {}
-                                verdicts)
-        replaced        (->> (vals summaries)
-                             (map :replaces)
-                             (remove nil?)
-                             set)]
-    (loop [[x & xs] (->> (vals summaries)
-                         (sort-by :modified)
-                         reverse)
-           result   []]
-      (cond
-        (nil? x) result
-        (contains? replaced (:id x)) (recur xs result)
-        :else (recur xs (concat result
-                                (loop [{:keys [replaces] :as v} x
-                                       sub []]
-                                  (if replaces
-                                    (recur (assoc (get summaries replaces)
-                                                  :replaced? true)
-                                           (conj sub (dissoc v :replaces)))
-                                    (conj sub (dissoc v :replaces))))))))))
+        summaries       (summaries-by-id verdicts lang)
+        replaced-verdict-ids (->> (vals summaries)
+                                  (map :replaces)
+                                  (remove nil?)
+                                  set)]
+    (reduce (fn [result verdict]
+              (if (contains? replaced-verdict-ids (:id verdict))
+                result
+                (add-chain-of-replacements-to-result result verdict summaries)))
+            []
+            (->> (vals summaries)
+                 (sort-by (comp - :modified))))))
 
 (defn mask-verdict-data [{:keys [user application]} verdict]
   (cond
