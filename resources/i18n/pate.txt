@@ -364,7 +364,7 @@
 "pate-verdict.giver.viranhaltija" "en" "Authority"
 "pate-verdict.giver.viranhaltija" "fi" "Viranhaltija"
 "pate-verdict.giver.viranhaltija" "sv" "Tjänsteinnehavare"
-"pate-verdict.handler" "en" "Permit issued by"
+"pate-verdict.handler" "en" "Permit prepared by"
 "pate-verdict.handler" "fi" "Päätöksen käsittelijä"
 "pate-verdict.handler" "sv" "Besluts handläggare"
 "pate-verdict.handler.title" "en" "Title"
