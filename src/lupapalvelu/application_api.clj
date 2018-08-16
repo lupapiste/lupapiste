@@ -234,7 +234,8 @@
    :notified         true
    :on-success       [(notify :application-state-change)
                       (fn [{:keys [application organization]} _]
-                        (bs/cancel-application! (bs/get-backing-system @organization (permit/permit-type application))
+                        (bs/cancel-application! (bs/get-backing-system (:id @organization)
+                                                                       (permit/permit-type application))
                                                 application))]
    :states           states/all-application-or-archiving-project-states
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
@@ -350,7 +351,7 @@
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
       (let [application (if-let [[bs-name integration-key]
-                                 (bs/submit-application! (bs/get-backing-system @organization
+                                 (bs/submit-application! (bs/get-backing-system (:id @organization)
                                                                                 (permit/permit-type application))
                                                          application)]
                           (do (app/set-integration-key id bs-name integration-key)
@@ -661,7 +662,8 @@
    :pre-checks       [(partial sm/validate-state-transition :draft)]
    :on-success       [(notify :application-return-to-draft)
                       (fn [{:keys [application organization]} _]
-                        (bs/return-to-draft! (bs/get-backing-system @organization (permit/permit-type application))
+                        (bs/return-to-draft! (bs/get-backing-system (:id @organization)
+                                                                    (permit/permit-type application))
                                              application))]}
   [{{:keys [role] :as user}         :user
     {:keys [state] :as application} :application
