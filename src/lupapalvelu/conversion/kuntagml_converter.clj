@@ -5,7 +5,7 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.conversion.util :as conversion-util]
+            [lupapalvelu.conversion.util :as conv-util]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
@@ -18,8 +18,6 @@
             [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
-
-(def tila (atom {}))
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
@@ -72,7 +70,7 @@
         ;
         ;
         kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
-        id (conversion-util/make-converted-application-id kuntalupatunnus)
+        id (conv-util/make-converted-application-id kuntalupatunnus)
         make-app-info {:id              id
                        :organization    organization
                        :operation-name  "aiemmalla-luvalla-hakeminen" ; FIXME: no fixed operation in conversion, see above
@@ -94,21 +92,18 @@
         ; TODO: create operations from app-info, see above.
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
-        _ (swap! tila assoc :xml xml)
         ; TODO: create secondaryoperations from app-info, see above.
         ;; make secondaryOperations for buildings other than the first one in case there are many
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
 
-        structures (->> xml krysp-reader/->rakennelmatiedot (map conversion-util/rakennelmatieto->kaupunkikuvatoimenpide))
+        structures (->> xml krysp-reader/->rakennelmatiedot (map conv-util/rakennelmatieto->kaupunkikuvatoimenpide))
 
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
 
         state-changes (-> xml krysp-reader/get-sorted-tilamuutos-entries)
 
-        history-array (conversion-util/generate-history-array xml)
-
-        _ (swap! tila assoc :history history-array)
+        history-array (conv-util/generate-history-array xml)
 
         ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
         given-statements (for [st statements
@@ -128,6 +123,7 @@
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :statements given-statements
                                        :opened (:created command)
+                                       :history history-array
                                        :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
                                        :facta-imported true))
 
@@ -159,8 +155,8 @@
       ;; (e.g., the application has been imported earlier via previous permit (paperilupa) mechanism).
       ;; This kind of application 1) has the same kuntalupatunnus and 2) :facta-imported is falsey.
       ;; After import, the two applications are linked (viitelupien linkkaus).
-      (let [app-links (krysp-reader/->viitelupatunnukset xml)
-            duplicate-ids (conversion-util/get-duplicate-ids kuntalupatunnus)
+      (let [app-links (map conv-util/normalize-permit-id (krysp-reader/->viitelupatunnukset xml))
+            duplicate-ids (conv-util/get-duplicate-ids kuntalupatunnus)
             all-links (clojure.set/union (set app-links) (set duplicate-ids))]
         (infof (format "Linking %d app-links to application %s" (count all-links) (:id created-application)))
         (doseq [link all-links]
@@ -188,7 +184,7 @@
   prev-permit/fetch-prev-application!"
   [{{:keys [kuntalupatunnus authorizeApplicants]} :data :as command}]
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
-        destructured-permit-id (conversion-util/destructure-permit-id kuntalupatunnus)
+        destructured-permit-id (conv-util/destructure-permit-id kuntalupatunnus)
         operation             "aiemmalla-luvalla-hakeminen"
         path                  "../../Desktop/test-data/"
         filename              (str path kuntalupatunnus ".xml")

@@ -44,7 +44,7 @@
       (lupapalvelu.mongo/get-next-sequence-value "applications-092-2013") => (swap! counter inc))))
 
 (fact "The history can be generated from tilamuutos-elements"
-  (let [xml (get-local-application-xml-by-filename "./dev-resources/krysp/verdict-r-structure.xml" "R")
+  (let [xml (get-local-application-xml-by-filename "./dev-resources/krysp/verdict-r-buildings.xml" "R")
         history (-> xml reader/get-sorted-tilamuutos-entries util/generate-history-array)]
     (seq? history) => true
     (count history) => 5

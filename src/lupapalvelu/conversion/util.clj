@@ -3,6 +3,7 @@
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [lupapalvelu.application :as app]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
@@ -88,14 +89,45 @@
   (with-open [writer (io/writer filename)]
     (csv/write-csv writer data))))
 
+(defn translate-state [state]
+  (condp = state
+    "ei tiedossa" nil
+    "rakennusty\u00f6t aloitettu" :constructionStarted
+    "lopullinen loppukatselmus tehty" :closed
+    "lupa hyv\u00e4ksytty" :verdictGiven
+    "lupa k\u00e4sitelty, siirretty p\u00e4\u00e4tt\u00e4j\u00e4lle" :underReview
+    "luvalla ei loppukatselmusehtoa, lupa valmis" :closed
+    "rakennusty\u00f6t aloitettu" :constructionStarted
+    "uusi lupa, ei k\u00e4sittelyss\u00e4" :submitted
+    "vireill\u00e4" :submitted
+    nil))
+
 (defn generate-history-array
   [xml]
   (let [verdict-given {:state :verdictGiven
-                       :ts (-> xml krysp-reader/->verdict-date (subs 0 10) c/to-long)
+                       :ts (krysp-reader/->verdict-date xml); (subs 0 10) c/to-long
                        :user usr/batchrun-user-data}
-        history (vec
-                  (for [{:keys [pvm tila]} (krysp-reader/get-sorted-tilamuutos-entries xml)]
-                    {:state tila
-                     :ts pvm
-                     :user usr/batchrun-user-data}))]
-    (conj history verdict-given)))
+        history (for [{:keys [pvm tila]} (krysp-reader/get-sorted-tilamuutos-entries xml)]
+                  {:state (translate-state tila)
+                   :ts pvm
+                   :user usr/batchrun-user-data})]
+    (->> verdict-given
+         (conj history)
+         (sort-by :ts))))
+
+(def path
+  "/Users/tuomo.virolainen/Desktop/test-data/")
+
+(defn list-all-states
+  "List all unique states found in the test set."
+  [path]
+  (let [files (->> (clojure.java.io/file path)
+                   file-seq
+                   (filter #(.isFile %))
+                   (map #(.getAbsolutePath %)))]
+    (set (mapcat (fn [f]
+                   (let [data (try
+                                (krysp-reader/get-sorted-tilamuutos-entries (krysp-fetch/get-local-application-xml-by-filename f "R"))
+                                (catch Exception e
+                                  (println (.getMessage e))))]
+                     (map :tila data))) files))))
