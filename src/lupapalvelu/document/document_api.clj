@@ -166,7 +166,7 @@
                        :required [:application/read :document/edit-draft]}
                       {:context  {:application {:state states/update-doc-states}}
                        :required [:application/read :document/edit]}
-                      {:context  {:application {:state states/all-application-states-but-draft-or-terminal}}
+                      {:context  {:application {:state states/all-application-or-archiving-project-states}}
                        :required [:application/read :document/edit-identifiers]}]
    :pre-checks       [is-identifier]}
   [command]
