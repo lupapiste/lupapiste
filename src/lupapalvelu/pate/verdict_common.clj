@@ -7,50 +7,97 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.schema-util :as schema-util]
-            [lupapalvelu.pate.verdict-schemas :as verdict-schemas]))
+            [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
+            [lupapalvelu.user :as usr]))
 
 ;;
 ;; Predicates
 ;;
 
-(defn has-category? [{:keys [category]} c]
-  (util/=as-kw category c))
+(defn lupapiste-verdict?
+  "Is the verdict created in Lupapiste, either through Pate or legacy interface"
+  [verdict]
+  ;; TODO Needs a more robust check
+  (boolean (:modified verdict)))
+
+(defn has-category? [{:keys [category] :as verdict} c]
+  (if (lupapiste-verdict? verdict)
+    (util/=as-kw category c)
+    false))
 
 (defn contract? [verdict]
-  (has-category? verdict :contract))
+  (if (lupapiste-verdict? verdict)
+    (has-category? verdict :contract)
+    (-> verdict :sopimus)))
 
 (defn legacy? [verdict]
-  (boolean (:legacy? verdict)))
-
+  (if (lupapiste-verdict? verdict)
+    (boolean (:legacy? verdict))
+    false)) ;; TODO Better to have type enum: pate legacy backing-system
 
 ;;
 ;; Accessors
 ;;
 
+(defn first-pk [verdict]
+  (get-in verdict [:paatokset 0 :poytakirjat 0]))
+
 (defn replaced-verdict-id
   "Returns the id of the verdict replaced by the given verdict, if any"
   [verdict]
-  (-> verdict :replacement :replaces))
+  (if (lupapiste-verdict? verdict)
+    (-> verdict :replacement :replaces)
+    nil))
 
 (defn verdict-date [verdict]
-  (-> verdict :data :verdict-date))
+  (if (lupapiste-verdict? verdict)
+    (-> verdict :data :verdict-date)
+    (-> verdict first-pk :paatospvm))) ;; vs. (-> verdict :paatokset (get 0) :anto) ?
 
 (defn verdict-id [verdict]
   (:id verdict))
 
-(defn verdict-published [verdict]
-  (:published verdict))
-
 (defn verdict-modified [verdict]
-  (:modified verdict))
+  (if (lupapiste-verdict? verdict)
+    (:modified verdict)
+    (:timestamp verdict)))
+
+(defn verdict-published [verdict]
+  (if (lupapiste-verdict? verdict)
+    (:published verdict)
+    (verdict-modified verdict) ;; TODO we are actually not that interested in the moment of publication, this is just a placeholder
+    ))
 
 (defn verdict-category [verdict]
-  (:category verdict))
+  (if (lupapiste-verdict? verdict)
+    (:category verdict)
+    "backing-system")) ;; TODO backing system verdicts don't have category information
 
-(defn verdict-giver [{:keys [data references template]}]
-  (if (util/=as-kw (:giver template) :lautakunta)
-    (:boardname references)
-    (:handler data)))
+(defn verdict-giver [verdict]
+  (if (lupapiste-verdict? verdict)
+    (let [{:keys [data references template]} verdict]
+      (if (util/=as-kw (:giver template) :lautakunta)
+       (:boardname references)
+       (:handler data)))
+    (-> verdict first-pk :paatoksentekija)))
+
+(defn verdict-signatures [verdict]
+  (if (lupapiste-verdict? verdict)
+    (some->> verdict :data :signatures vals
+             (map #(select-keys % [:name :date]))
+             (sort-by :date)
+             seq)
+    (some->> verdict :signatures
+             (sort-by :created)
+             (map (fn [{:keys [created user]}]
+                    {:name (usr/full-name user)
+                     :date created})))))
+
+(defn verdict-section [verdict]
+  (if (lupapiste-verdict? verdict)
+    (-> verdict :data :verdict-section)
+    (-> verdict first-pk :pykala)))
+
 ;;
 ;; Verdict schema
 ;;
@@ -92,16 +139,13 @@
   (util/pcond-> (-> s ss/->plain-string ss/trim)
                 ss/not-blank? fun))
 
-(defn verdict-summary-signatures [{:keys [data]}]
-  (some->> data :signatures vals
-           (map #(select-keys % [:name :date]))
-           (sort-by :date)
-           seq))
+(defn verdict-summary-signatures [verdict]
+  (seq (verdict-signatures verdict)))
 
-(defn- verdict-section-string [{data :data}]
-  (title-fn (:verdict-section data) #(str "\u00a7" %)))
+(defn- verdict-section-string [verdict]
+  (title-fn (verdict-section verdict) #(str "\u00a7" %)))
 
-(defn- verdict-string [lang {:keys [data] :as verdict} dict]
+(defn- lupapiste-verdict-string [lang {:keys [data] :as verdict} dict]
   (title-fn (dict data)
             (fn [value]
               (when-let [{:keys [reference-list
@@ -115,6 +159,11 @@
                                  (:loc-prefix (or reference-list
                                                   select))
                                  value))))))
+
+(defn verdict-string [lang verdict dict]
+  (if (lupapiste-verdict? verdict)
+    (lupapiste-verdict-string lang verdict dict)
+    (-> verdict first-pk :paatoskoodi))) ;; TODO Is this correct?
 
 (defn- verdict-summary-title [verdict lang section-strings]
   (let [id (verdict-id verdict)
@@ -201,8 +250,9 @@
   [{:keys [lang application]}]
   (let [category (schema-util/application->category application)
         ;; There could be both contracts and verdicts.
-        verdicts        (filter #(has-category? % category)
-                                (:pate-verdicts application))
+        verdicts        (concat (filter #(has-category? % category)
+                                        (:pate-verdicts application))
+                                (:verdicts application))
         summaries       (summaries-by-id verdicts lang)
         replaced-verdict-ids (->> (vals summaries)
                                   (map :replaces)
@@ -215,7 +265,7 @@
                 (add-chain-of-replacements-to-result result verdict summaries)))
             []
             (->> (vals summaries)
-                 (sort-by (comp - verdict-modified))))))
+                 (sort-by (comp - :modified))))))
 
 ;;
 ;; Work in progress

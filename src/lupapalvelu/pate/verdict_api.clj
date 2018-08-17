@@ -10,6 +10,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict :as verdict]
+            [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.roles :as roles]
@@ -59,28 +60,26 @@
                           (not verdict)
                           :error.verdict-not-found
 
-                          (util/not=as-kw (schema-util/application->category application)
-                                          (:category verdict))
+                          (not (vc/has-category? verdict
+                                                 (schema-util/application->category application)))
                           :error.invalid-category
 
-                          (and editable? (:published verdict))
+                          (and editable? (vc/verdict-published verdict))
                           :error.verdict.not-draft
 
-                          (and published? (not (:published verdict)))
+                          (and published? (not (vc/verdict-published verdict)))
                           :error.verdict.not-published
 
-                          (and legacy? (not (:legacy? verdict)))
+                          (and legacy? (not (vc/legacy? verdict)))
                           :error.verdict.not-legacy
 
-                          (and modern? (:legacy? verdict))
+                          (and modern? (vc/legacy? verdict))
                           :error.verdict.legacy
 
-                          (and contract? (util/not=as-kw (:category verdict)
-                                                         :contract))
+                          (and contract? (not (vc/contract? verdict)))
                           :error.verdict.not-contract
 
-                          (and verdict? (util/=as-kw (:category verdict)
-                                                     :contract))
+                          (and verdict? (vc/contract? verdict))
                           :error.verdict.contract
 
                           (and html? (not (some-> verdict :verdict-attachment :html)))
