@@ -24,7 +24,8 @@
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]
             [lupapalvelu.integrations.messages :as imessages :refer [IntegrationMessage]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
+            [lupapalvelu.integrations.geojson-2008-schemas :as geo])
+  (:import [java.io InputStream]))
 
 ;;;; Schemas
 ;;;; ===================================================================================================================
@@ -268,6 +269,39 @@
 (sc/defn ^{:private true} application->allu-placement-contract :- PlacementContract [pending-on-client app]
   (->> app flatten-values (convert-value-flattened-app pending-on-client)))
 
+
+;;;; ALLU interface description
+;;;; ===================================================================================================================
+
+(def- allu-interface
+  {:applications       {:cancel {:request-method :put
+                                 :uri            "/applications/:id/cancelled"
+                                 :path-params    {:id sc/Int}}}
+
+   :placementcontracts {:create {:request-method :post
+                                 :uri            "/placementcontracts"
+                                 :body           {:name :application
+                                                  :content      PlacementContract
+                                                  :content-type :json}}
+                        :update {:request-method :put
+                                 :uri            "/placementcontracts/:id"
+                                 :path-params    {:id sc/Int}
+                                 :body           {:name :application
+                                                  :content      PlacementContract
+                                                  :content-type :json}}}
+
+   :attachments        {:create {:request-method :post
+                                 :uri            "/applications/:id/attachments"
+                                 :path-params    {:id sc/Int}
+                                 :body           [{:name      :metadata
+                                                   :content   {:name        NonBlankStr
+                                                               :description NonBlankStr
+                                                               :mimeType    NonBlankStr}
+                                                   :mime-type "application/json"}
+                                                  {:name      :file
+                                                   :content   InputStream
+                                                   :mime-type #(-> % :metadata :mimeType)}]}}})
+                                                   
 ;;;; Requests
 ;;;; ===================================================================================================================
 
