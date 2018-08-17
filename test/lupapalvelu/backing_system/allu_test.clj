@@ -58,14 +58,14 @@
   (sc/with-fn-validation
     (facts "allu-application?"
       (fact "Use ALLU integration for Helsinki YA."
-        (allu/allu-application? {:id "091-YA"} "YA") => true)
+        (allu/allu-application? "091-YA" "YA") => true)
 
       (fact "Do not use ALLU integration for anything else."
         (quick-check 10
                      (for-all [org-id organizations
                                permit-type (sg/generator PermitType)
                                :when (not (and (= org-id "091-YA") (= permit-type "YA")))]
-                       (not (allu/allu-application? {:id org-id} permit-type))))
+                       (not (allu/allu-application? org-id permit-type))))
         => passing-quick-check))
 
     (facts "application-cancel-request"

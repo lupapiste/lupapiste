@@ -151,10 +151,10 @@
    :input-validators [(partial action/non-blank-parameters [:id :lang])
                       (partial action/vector-parameter-of :attachmentIds string?)]
    :user-roles       #{:authority}
-   :pre-checks       [(fn [{:keys [application organization] :as command}]
+   :pre-checks       [(fn [{:keys [application] :as command}]
                         (if-let [err (or ((permit/validate-permit-type-is permit/R) command)
                                          (mapping-to-krysp/http-not-allowed command))]
-                          (if (allu/allu-application? @organization (permit/permit-type application))
+                          (if (allu/allu-application? (:organization application) (permit/permit-type application))
                             nil ; using ALLU
                             err)
                           nil)) ; has SFTP KRYSP support for this
