@@ -200,19 +200,25 @@ LUPAPISTE.AccordionService = function() {
     }
   };
 
+  function saveFailed() {
+    hub.send( "indicator", {style: "negative"});
+  }
+
   hub.subscribe("accordionService::saveIdentifier", function(event) {
     var docId = event.docId;
     var value = _.trim( event.value );
-    var indicatorFn = _.wrap({type: "saved"}, event.indicator || _.noop);
     var doc = _.find(self.identifierFields(), {docId: docId});
     if (doc.value() !== value) {
       ajax.command( "update-doc-identifier", {id: self.appModel.id(),
                                               doc: docId,
                                               value: value,
                                               identifier: event.key})
-      .success( indicatorFn )
-      .call();
-      doc.value(value);
+        .success( function() {
+          doc.value(value);
+          (event.indicator || _.noop)( {type: "saved"} );
+        })
+        .error( saveFailed )
+        .call();
     }
   });
 
@@ -226,14 +232,15 @@ LUPAPISTE.AccordionService = function() {
       ajax.command ("update-op-description", {id: appId,
                                               "op-id": operationId,
                                               desc: value})
-      .success (function() {
-        operation.description(value);
-        hub.send("op-description-changed", {appId: appId,
-                                            "op-id": operationId,
-                                            "op-desc": value});
-        if (indicator) { indicator({type: "saved"}); }
-      })
-      .call();
+        .success (function() {
+          operation.description(value);
+          hub.send("op-description-changed", {appId: appId,
+                                              "op-id": operationId,
+                                              "op-desc": value});
+          if (indicator) { indicator({type: "saved"}); }
+        })
+        .error( saveFailed )
+        .call();
     }
   });
 
