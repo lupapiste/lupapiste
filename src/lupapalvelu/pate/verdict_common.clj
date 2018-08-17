@@ -19,6 +19,38 @@
 (defn contract? [verdict]
   (has-category? verdict :contract))
 
+(defn legacy? [verdict]
+  (boolean (:legacy? verdict)))
+
+
+;;
+;; Accessors
+;;
+
+(defn replaced-verdict-id
+  "Returns the id of the verdict replaced by the given verdict, if any"
+  [verdict]
+  (-> verdict :replacement :replaces))
+
+(defn verdict-date [verdict]
+  (-> verdict :data :verdict-date))
+
+(defn verdict-id [verdict]
+  (:id verdict))
+
+(defn verdict-published [verdict]
+  (:published verdict))
+
+(defn verdict-modified [verdict]
+  (:modified verdict))
+
+(defn verdict-category [verdict]
+  (:category verdict))
+
+(defn verdict-giver [{:keys [data references template]}]
+  (if (util/=as-kw (:giver template) :lautakunta)
+    (:boardname references)
+    (:handler data)))
 ;;
 ;; Verdict schema
 ;;
@@ -69,11 +101,6 @@
 (defn- verdict-section-string [{data :data}]
   (title-fn (:verdict-section data) #(str "\u00a7" %)))
 
-(defn- verdict-summary-giver [{:keys [data references template]}]
-  (if (util/=as-kw (:giver template) :lautakunta)
-    (:boardname references)
-    (:handler data)))
-
 (defn- verdict-string [lang {:keys [data] :as verdict} dict]
   (title-fn (dict data)
             (fn [value]
@@ -89,8 +116,11 @@
                                                   select))
                                  value))))))
 
-(defn- verdict-summary-title [{:keys [id published replacement] :as verdict} lang section-strings]
-  (let [rep-string (title-fn (:replaces replacement)
+(defn- verdict-summary-title [verdict lang section-strings]
+  (let [id (verdict-id verdict)
+        published (verdict-published verdict)
+        replaces (replaced-verdict-id verdict)
+        rep-string (title-fn replaces
                              (fn [vid]
                                (let [section (get section-strings vid)]
                                  (if (ss/blank? section)
@@ -115,29 +145,28 @@
          (remove ss/blank?)
          (ss/join " "))))
 
-(defn verdict-summary [lang section-strings
-                       {:keys [id data template replacement
-                               references category
-                               published]
-                        :as   verdict}]
-  (->> (merge (select-keys verdict [:id :published :modified :category])
-              {:legacy?      (get verdict :legacy? false)
-               :giver        (verdict-summary-giver verdict)
-               :replaces     (-> verdict :replacement :replaces)
-               :verdict-date (-> verdict :data :verdict-date)
-               :title        (verdict-summary-title verdict lang section-strings)
-               :signatures   (verdict-summary-signatures verdict)})
+(defn verdict-summary [lang section-strings verdict]
+  (->> {:id           (verdict-id verdict)
+        :published    (verdict-published verdict)
+        :modified     (verdict-modified verdict)
+        :category     (verdict-category verdict)
+        :legacy?      (legacy? verdict)
+        :giver        (verdict-giver verdict)
+        :replaces     (replaced-verdict-id verdict)
+        :verdict-date (verdict-date verdict)
+        :title        (verdict-summary-title verdict lang section-strings)
+        :signatures   (verdict-summary-signatures verdict)}
        (util/filter-map-by-val some?)))
 
 (defn- section-strings-by-id [verdicts]
   (->> verdicts
-       (map (juxt :id verdict-section-string))
+       (map (juxt verdict-id verdict-section-string))
        (into {})))
 
 (defn- summaries-by-id [verdicts lang]
   (let [section-strings (section-strings-by-id verdicts)]
     (->> verdicts
-         (map (juxt :id #(verdict-summary lang section-strings %)))
+         (map (juxt verdict-id #(verdict-summary lang section-strings %)))
          (into {}))))
 
 (defn- add-chain-of-replacements-to-result
@@ -172,7 +201,7 @@
   [{:keys [lang application]}]
   (let [category (schema-util/application->category application)
         ;; There could be both contracts and verdicts.
-        verdicts        (filter #(util/=as-kw category (:category %))
+        verdicts        (filter #(has-category? % category)
                                 (:pate-verdicts application))
         summaries       (summaries-by-id verdicts lang)
         replaced-verdict-ids (->> (vals summaries)
@@ -180,12 +209,13 @@
                                   (remove nil?)
                                   set)]
     (reduce (fn [result verdict]
-              (if (contains? replaced-verdict-ids (:id verdict))
+              (if (contains? replaced-verdict-ids
+                             (verdict-id verdict))
                 result
                 (add-chain-of-replacements-to-result result verdict summaries)))
             []
             (->> (vals summaries)
-                 (sort-by (comp - :modified))))))
+                 (sort-by (comp - verdict-modified))))))
 
 ;;
 ;; Work in progress
