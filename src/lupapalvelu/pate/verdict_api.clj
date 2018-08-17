@@ -189,12 +189,11 @@
                        published: (optional) timestamp
                        modified:  timestamp
                        category:  Verdict category
-                       legacy?:   (optional) true for legacy verdicts.
+                       legacy?:   true for legacy verdicts.
                        giver:     Either verdict handler or boardname.
                        verdict-date: (optional) timestamp
 
-                       replaced?  (optional) true if the verdict is
-                       replaced.
+                       replaced?  true if the verdict iso replaced.
 
                        title: Friendly title for the verdict. The
                        format depends on the verdict state and

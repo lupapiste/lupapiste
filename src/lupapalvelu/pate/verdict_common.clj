@@ -115,13 +115,14 @@
          (remove ss/blank?)
          (ss/join " "))))
 
-(defn- verdict-summary [lang section-strings
-                        {:keys [id data template replacement
-                                references category
-                                published]
-                         :as   verdict}]
-  (->> (merge (select-keys verdict [:id :published :modified :legacy? :category])
-              {:giver        (verdict-summary-giver verdict)
+(defn verdict-summary [lang section-strings
+                       {:keys [id data template replacement
+                               references category
+                               published]
+                        :as   verdict}]
+  (->> (merge (select-keys verdict [:id :published :modified :category])
+              {:legacy?      (get verdict :legacy? false)
+               :giver        (verdict-summary-giver verdict)
                :replaces     (-> verdict :replacement :replaces)
                :verdict-date (-> verdict :data :verdict-date)
                :title        (verdict-summary-title verdict lang section-strings)
@@ -146,15 +147,28 @@
   added."
   [result verdict summaries]
   (concat result
-          (loop [{:keys [replaces] :as v} verdict
+          (loop [{:keys [replaces] :as v} (assoc verdict :replaced? false)
                  sub []]
             (if replaces
               (recur (assoc (get summaries replaces)
                             :replaced? true)
-                     (conj sub (dissoc v :replaces)))
+                     (conj sub (-> v (dissoc :replaces))))
               (conj sub (dissoc v :replaces))))))
 
-(defn verdict-list
+(sc/defschema VerdictSummary
+  {:id           sc/Str
+   (sc/optional-key :published)    ssc/Timestamp
+   :modified                       ssc/Timestamp
+   :category                       sc/Str
+   :legacy?                        sc/Bool
+   :giver                          sc/Str
+   (sc/optional-key :verdict-date) ssc/Timestamp
+   :replaced?                      sc/Bool
+   :title                          sc/Str
+   (sc/optional-key :signatures)   [{:name sc/Str
+                                     :date ssc/Timestamp}]})
+
+(sc/defn ^:always-validate verdict-list :- [VerdictSummary]
   [{:keys [lang application]}]
   (let [category (schema-util/application->category application)
         ;; There could be both contracts and verdicts.
@@ -180,23 +194,3 @@
 (defn all-verdicts [application]
   (concat (:pate-verdicts application)
           (:verdicts application)))
-
-(sc/defschema VerdictSummary
-  {:id           sc/Str
-   :published    (sc/maybe ssc/Timestamp)
-   :modified     ssc/Timestamp
-   :legacy?      sc/Bool
-   :giver        sc/Str
-   :verdict-date (sc/maybe ssc/Timestamp)
-   :replaced?    sc/Bool
-   :title        sc/Str
-   :signatures   [{:name sc/Str
-                   :date ssc/Timestamp}]})
-
-(sc/defn ^:always-validate verdict-summary :- VerdictSummary
-  [lang section-strings
-   {:keys [id data template replacement
-           references category
-           published]
-    :as   verdict}]
-  nil)

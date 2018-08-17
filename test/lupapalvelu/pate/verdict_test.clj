@@ -19,9 +19,11 @@
                    next-section verdict->updates
                    general-handler application-deviations
                    archive-info application-operation
-                   title-fn verdict-string
-                   verdict-section-string verdict-summary
                    verdict-attachment-items)
+
+(testable-privates lupapalvelu.pate.verdict-common
+                   verdict-section-string
+                   title-fn verdict-string)
 
 (testable-privates lupapalvelu.pate.verdict-template
                    template-inclusions)
@@ -1509,6 +1511,7 @@
       (verdict-summary "fi" section-strings verdict)
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :giver        "Foo Bar"
           :verdict-date 876543
@@ -1518,6 +1521,7 @@
                        (assoc-in verdict [:template :giver] "lautakunta"))
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :giver        "Broad board abroad"
           :verdict-date 876543
@@ -1527,6 +1531,7 @@
                        (assoc-in verdict [:replacement :replaces] "v2"))
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :giver        "Foo Bar"
           :verdict-date 876543
@@ -1537,6 +1542,7 @@
                        (assoc verdict :published 121212))
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :published    121212
           :giver        "Foo Bar"
@@ -1549,6 +1555,7 @@
                            (assoc-in [:data :verdict-section] nil)))
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :published    121212
           :giver        "Foo Bar"
@@ -1561,6 +1568,7 @@
                            (assoc-in [:replacement :replaces] "v2")))
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :published    121212
           :giver        "Foo Bar"
@@ -1574,6 +1582,7 @@
                            (assoc-in [:replacement :replaces] "v2")))
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :published    121212
           :giver        "Foo Bar"
@@ -1614,6 +1623,7 @@
           (verdict-summary "fi" section-strings verdict)
           => {:id           "v1"
               :category     "ya"
+              :legacy?      false
               :modified     12345
               :giver        "Foo Bar"
               :verdict-date 876543
@@ -1623,6 +1633,7 @@
                            (assoc verdict :published 656565))
           => {:id           "v1"
               :category     "ya"
+              :legacy?      false
               :modified     12345
               :published    656565
               :giver        "Foo Bar"
@@ -1635,6 +1646,7 @@
                                   :replacement {:replaces "v2"}))
           => {:id           "v1"
               :category     "ya"
+              :legacy?      false
               :modified     12345
               :published    656565
               :giver        "Foo Bar"

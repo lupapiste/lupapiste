@@ -457,7 +457,8 @@
                                                      :legacy?  true})}})
     verdict-id))
 
-(declare verdict-schema)
+(defn verdict-summary [lang section-strings verdict]
+  (vc/verdict-summary lang section-strings verdict))
 
 (defn verdict-list [command]
   (vc/verdict-list command))
