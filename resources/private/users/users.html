@@ -21,7 +21,7 @@
         </span>
         <span class="filter" data-bind="visible: show.enabledFilter">
           <span data-bind="ltext: 'users.filters.enabled'"></span>
-          <select class="dropdown" 
+          <select class="dropdown"
             data-bind="options: availableEnableds, value: filters.enabled, optionsText: 'name', optionsValue: 'id'"
             data-test-id="users-list-select-enabled">
           </select>
@@ -41,6 +41,7 @@
             <th data-bind="ltext: 'users.table.email'"></th>
             <th data-bind="ltext: 'users.table.name'"></th>
             <th data-bind="ltext: 'users.table.organizationsAndRoles'"></th>
+            <th data-bind="text: show.directMarketing ? loc('users.table.directMarketing') : ''"></th>
             <th data-bind="ltext: 'users.table.active'"></th>
             <th data-bind="ltext: 'users.table.actions'"></th>
           </tr>

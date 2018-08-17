@@ -310,8 +310,8 @@
 ;;;; Should you use this?
 ;;;; ===================================================================================================================
 
-(defn allu-application? [organization permit-type]
-  (and (env/feature? :allu) (= (:id organization) "091-YA") (= permit-type "YA")))
+(defn allu-application? [organization-id permit-type]
+  (and (env/feature? :allu) (= organization-id "091-YA") (= permit-type "YA")))
 
 ;;;; ALLU Proxy
 ;;;; ===================================================================================================================
