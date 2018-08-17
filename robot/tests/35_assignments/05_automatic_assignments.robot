@@ -62,7 +62,7 @@ Sonja adds handler to application
   Edit handler  0  Sibbo Sonja  Käsittelijä
   Logout
 
-Pena uploads two more applications
+Pena uploads two more attachments
   As Pena
   Open application  ${appname}  ${propertyid}
   Open tab  attachments
@@ -92,7 +92,7 @@ Sonja completes the automatic assignment
   Wait until  Element should not be visible  xpath=//div[@data-test-id='automatic-assignment']
   Logout
 
-Pena uploads two more applications belonging in different automatic assignment trigger groups
+Pena uploads two more attachments belonging in different automatic assignment trigger groups
   As Pena
   Open application  ${appname}  ${propertyid}
   Open tab  attachments

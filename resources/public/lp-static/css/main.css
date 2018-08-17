@@ -14821,19 +14821,6 @@ span.assignment-target-group + span.assignment-target-group {
   margin-top: .5em;
 }
 
-table.assignments-search-result__table th {
-  vertical-align: middle;
-  white-space: nowrap;
-}
-
-table.assignments-search-result__table th > span {
-  vertical-align: middle;
-}
-
-table.assignments-search-result__table th > i {
-  vertical-align: middle;
-}
-
 #ui-datepicker-div {
   background: #f6f6f6;
   border: 1px solid #dddddd;
@@ -15789,12 +15776,17 @@ div.search i {
   width: 15%;
 }
 
-.assignments-search-result__table th.first {
-  width: 5%;
+.assignments-search-result__table th {
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
-.assignments-search-result__table th.second {
-  width: 15%;
+.assignments-search-result__table th > span {
+  vertical-align: middle;
+}
+
+.assignments-search-result__table th > i {
+  vertical-align: middle;
 }
 
 .assignments-search-result__table th.third {
@@ -15806,7 +15798,7 @@ div.search i {
 }
 
 .assignments-search-result__table th.fifth {
-  width: 25%;
+  width: 100%;
 }
 
 .assignments-search-result__table th.sixth {
@@ -15823,6 +15815,10 @@ div.search i {
 
 .assignments-search-result__table tr td.targets-added {
   color: #df3215;
+}
+
+.assignments-search-result__table tr td.application-id {
+  white-space: nowrap;
 }
 
 .search-results-waiting i.spin {

@@ -94,7 +94,8 @@
    :recipient   (sc/maybe Recipient)
    :status      (apply sc/enum assignment-statuses)
    :states      [AssignmentState]
-   :description sc/Str})
+   :description sc/Str
+   :modified    ssc/Timestamp})
 
 (sc/defschema NewAssignment
   (-> (select-keys Assignment [:application :description :recipient :targets])
@@ -155,15 +156,16 @@
    created     :- ssc/Timestamp
    description :- sc/Str
    targets     :- [{:group sc/Str, :id sc/Str}]]
-  {:id             (mongo/create-id)
-   :status         "active"
-   :trigger        trigger
-   :application    (select-keys application
-                                [:id :organization :address :municipality])
-   :states         [(new-state "created" user created)]
-   :recipient      recipient
-   :targets        (map #(assoc % :timestamp created) targets)
-   :description    description})
+  {:id          (mongo/create-id)
+   :status      "active"
+   :trigger     trigger
+   :application (select-keys application
+                             [:id :organization :address :municipality])
+   :states      [(new-state "created" user created)]
+   :recipient   recipient
+   :targets     (map #(assoc % :timestamp created) targets)
+   :description description
+   :modified    created})
 
 ;;
 ;; Querying assignments
@@ -205,7 +207,7 @@
                :sort   {:asc true :field "created"}
                :trigger nil})))
 
-(defn- make-query 
+(defn- make-query
     "Returns query parameters in two parts:
    - pre-lookup: query conditions that can be executed directly against the assignments collection itself
    - post-lookup: conditions that need data fetched via the assignments->applications lookup stage in aggregation query
@@ -375,11 +377,13 @@
                                                 timestamp     :- ssc/Timestamp]
   (update-to-db assignment-id
                 (organization-query-for-user completer {:status "active", :states.type {$ne "completed"}})
-                {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
+                {$push {:states (new-state "completed" (usr/summary completer) timestamp)}
+                 $set  {:modified timestamp}}))
 
 (defn- set-assignments-statuses [query status]
   {:pre [(assignment-statuses status)]}
-  (update-assignments query {$set {:status status}}))
+  (update-assignments query {$set {:status   status
+                                   :modified (now)}}))
 
 (sc/defn ^:always-validate cancel-assignments [application-id :- ssc/ApplicationId]
   (set-assignments-statuses {:application.id application-id} "canceled"))
@@ -437,16 +441,17 @@
 
 (defn- upsert-assignment-targets
   [user application trigger timestamp assignment-group targets]
-  (let [query {:application.id (:id application)
-               :status "active"
-               :states.type {$nin ["completed"]}
-               :trigger (:id trigger)}
+  (let [query  {:application.id (:id application)
+                :status         "active"
+                :states.type    {$nin ["completed"]}
+                :trigger        (:id trigger)}
         update {$push {:targets {$each (map (partial ->target assignment-group timestamp)
                                             targets)}
-                       :states (new-state "targets-added"
-                                          user
-                                          timestamp)}
-                $set {:recipient (recipient trigger application)}}]
+                       :states  (new-state "targets-added"
+                                           user
+                                           timestamp)}
+                $set  {:recipient (recipient trigger application)
+                       :modified  timestamp}}]
     ; As of Mongo 3.4, the below cannot be implemented using $setOnInsert due to write conflicts.
     ; https://jira.mongodb.org/browse/SERVER-10711
     (when (not (pos? (mongo/update-n :assignments query update)))
@@ -479,12 +484,13 @@
                                      targets))))))
 
 (defn change-assignment-recipient [app-id role-id handler]
-  (let [query       {:application.id app-id
-                     :status "active"
-                     :states.type {$nin ["completed"]}
-                     :trigger {$nin ["user-created"]}
-                     :recipient.roleId role-id}
-        update      {$set {:recipient (create-recipient handler)}}]
+  (let [query  {:application.id   app-id
+                :status           "active"
+                :states.type      {$nin ["completed"]}
+                :trigger          {$nin ["user-created"]}
+                :recipient.roleId role-id}
+        update {$set {:recipient (create-recipient handler)
+                      :modified  (now)}}]
     (mongo/update-n :assignments query update)))
 
 (defn remove-assignment-recipient [app-id handler-id]

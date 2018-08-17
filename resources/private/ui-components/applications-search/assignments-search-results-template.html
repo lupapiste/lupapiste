@@ -26,8 +26,11 @@
               <td data-bind="css: $data.currentState.type" data-test-col-name="status">
                 <i data-bind="css: $data.statusClass"></i>
               </td>
-              <td data-bind="text: $data.application.id"         data-test-col-name="id"></td>
-              <td data-bind="text: $data.addressAndMunicipality" data-test-col-name="address"></td>
+              <td data-bind="text: $data.application.id"
+                  data-test-col-name="id"
+                  class="application-id"></td>
+              <td data-bind="text: $data.addressAndMunicipality"
+                  data-test-col-name="address"></td>
               <td data-test-col-name="targetGroup">
                 <span data-bind="text: $data.targetGroup, testId: 'target-group'"
                       class="assignment-target-group"></span>

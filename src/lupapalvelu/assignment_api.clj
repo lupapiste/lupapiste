@@ -135,9 +135,10 @@
                       validate-assignment-id
                       disallow-impersonation]
    :states           states/all-application-or-archiving-project-states-but-draft-or-terminal}
-  [_]
+  [{created :created}]
   (ok :id (assignment/update-assignment assignmentId {:recipient   (userid->summary recipientId)
-                                                      :description description})))
+                                                      :description description
+                                                      :modified    created})))
 
 (defcommand complete-assignment
   {:description "Complete an assignment"
