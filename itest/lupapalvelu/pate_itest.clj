@@ -1422,7 +1422,7 @@
               => "Washington")
             (fact "Verdict attachment"
               (xml/get-text xml [:paatostieto :poytakirja :liite :kuvaus])
-              => "Verdict"
+              => "Permit text"
               (let [url                        (xml/get-text xml [:paatostieto :poytakirja
                                                                   :liite :linkkiliitteeseen])
                     {:keys [uri query-string]} (http-client/parse-url url)]
@@ -1433,7 +1433,7 @@
                     "id"         app-id}
                 (fact "verdict-pdf action"
                   (:headers(raw sonja :verdict-pdf :id app-id :verdict-id verdict-id))
-                  => (contains {"Content-Disposition" (contains (format "%s Verdict %s"
+                  => (contains {"Content-Disposition" (contains (format "%s Permit %s"
                                                                         app-id
                                                                         (util/to-local-date (now))))}))))))
 
@@ -1443,12 +1443,12 @@
             attachment
             => (contains {:readOnly         true
                           :locked           true
-                          :contents         "Verdict"
+                          :contents         "Permit text"
                           :type             {:type-group "paatoksenteko"
                                              :type-id    "paatos"}
                           :applicationState "verdictGiven"
                           :latestVersion    (contains {:contentType "application/pdf"
-                                                       :filename    (contains "Verdict")})})
+                                                       :filename    (contains "Permit")})})
             (fact "verdict-attachment"
               (:verdict (open-verdict))
               => (contains {:verdict-attachment att-id}))))))
