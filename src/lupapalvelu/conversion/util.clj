@@ -115,10 +115,15 @@
         history (for [{:keys [pvm tila]} (krysp-reader/get-sorted-tilamuutos-entries xml)]
                   {:state (translate-state tila)
                    :ts pvm
-                   :user usr/batchrun-user-data})]
-    (->> verdict-given
-         (conj history)
-         (sort-by :ts))))
+                   :user usr/batchrun-user-data})
+        history-array (some->> verdict-given (conj history) (sort-by :ts))]
+    (if-not (krysp-reader/is-foreman-application? xml)
+      history-array
+      (map (fn [e]
+             (if (= :verdictGiven (:state e))
+               (assoc e :state :foremanVerdictGiven)
+               e))
+           history-array))))
 
 (def path
   "/Users/tuomo.virolainen/Desktop/test-data/")
