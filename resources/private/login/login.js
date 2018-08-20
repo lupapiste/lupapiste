@@ -6,6 +6,12 @@
   var rememberMe = ko.observable(false);
   var processing = ko.observable(false);
   var pending = ko.observable(false);
+  var passwordVisible = ko.observable(false);
+  var username = ko.observable();
+
+  var validUser = ko.pureComputed(function(){
+    return _.trim(username()).length > 1;
+  });
 
   function recallMe() {
     var oldUsername = _.trim($.cookie(rememberMeCookieName));
@@ -79,10 +85,36 @@
     }
   };
 
+  var checkForSso = function() {
+    clearError();
+    ajax.get("/api/login-sso-uri")
+      .param("username", _.trim(username()))
+      .success(function(data) {
+        if (data.uri) {
+          window.location = data.uri;
+        } else {
+          passwordVisible(true);
+        }
+      })
+      .error(function() {
+        passwordVisible(true);
+      })
+      .call();
+  };
+
   $(function() {
     recallMe();
     if (document.getElementById("login")) {
-      $("#login").applyBindings({rememberMe: rememberMe, processing: processing, pending: pending, handleLoginSubmit: handleLoginSubmit});
+      $("#login").applyBindings({
+        rememberMe: rememberMe,
+        processing: processing,
+        pending: pending,
+        handleLoginSubmit: handleLoginSubmit,
+        passwordVisible: passwordVisible,
+        checkForSso: checkForSso,
+        username: username,
+        validUser: validUser
+      });
       // Refactor to use Knockout at some point. Changes must be synchronized with WordPress theme deployment.
       $("#login-username").keypress(clearError).change(clearError);
       $("#login-password").keypress(clearError).change(clearError);
