@@ -125,9 +125,6 @@
                e))
            history-array))))
 
-(def path
-  "/Users/tuomo.virolainen/Desktop/test-data/")
-
 (defn list-all-states
   "List all unique states found in the test set."
   [path]
