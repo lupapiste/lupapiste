@@ -74,17 +74,6 @@
 
   hub.onPageLoad("login", recallMe);
 
-  function ie8OrOlder() {
-    return $("span.old-ie").length !== 0;
-  }
-
-  var handleLoginSubmit = function() {
-    // jshint devel: true
-    if (!ie8OrOlder() || confirm(loc("error.old-ie"))) {
-      login();
-    }
-  };
-
   var checkForSso = function() {
     clearError();
     ajax.get("/api/login-sso-uri")
@@ -94,12 +83,22 @@
           window.location = data.uri;
         } else {
           passwordVisible(true);
+          document.getElementById("login-password").focus();
         }
       })
       .error(function() {
         passwordVisible(true);
+        document.getElementById("login-password").focus();
       })
       .call();
+  };
+
+  var handleLoginSubmit = function() {
+    if (passwordVisible()) {
+      login();
+    } else {
+      checkForSso();
+    }
   };
 
   $(function() {
