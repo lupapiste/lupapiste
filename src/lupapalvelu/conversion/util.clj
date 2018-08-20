@@ -102,10 +102,15 @@
     "vireill\u00e4" :submitted
     nil))
 
-(defn generate-history-array
-  [xml]
+(defn xml->verdict-timestamp [xml]
+  (let [date (krysp-reader/->verdict-date xml)]
+    (if (string? date)
+      (c/to-long date)
+      date)))
+
+(defn generate-history-array [xml]
   (let [verdict-given {:state :verdictGiven
-                       :ts (krysp-reader/->verdict-date xml); (subs 0 10) c/to-long
+                       :ts (xml->verdict-timestamp xml)
                        :user usr/batchrun-user-data}
         history (for [{:keys [pvm tila]} (krysp-reader/get-sorted-tilamuutos-entries xml)]
                   {:state (translate-state tila)

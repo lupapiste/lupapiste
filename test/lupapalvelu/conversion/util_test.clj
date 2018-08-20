@@ -45,10 +45,10 @@
 
 (fact "The history can be generated from tilamuutos-elements"
   (let [xml (get-local-application-xml-by-filename "./dev-resources/krysp/verdict-r-buildings.xml" "R")
-        history (-> xml reader/get-sorted-tilamuutos-entries util/generate-history-array)]
+        history (-> xml util/generate-history-array)]
     (seq? history) => true
-    (count history) => 5
+    (count history) => 2
     (every? map? history) => true
-    (last history) => {:state :constructionStarted
-                       :ts 1364774400000
+    (last history) => {:state :verdictGiven
+                       :ts 1398816000000
                        :user usr/batchrun-user-data}))

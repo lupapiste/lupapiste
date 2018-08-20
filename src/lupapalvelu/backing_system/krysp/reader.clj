@@ -485,7 +485,10 @@
        (remove #(ss/blank? (:kuvaus %)))))
 
 (defn ->verdict-date [xml]
-  (get-in (xml->edn xml) [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :paatostieto :Paatos :paivamaarat :antoPvm]))
+  (let [date (get-in (xml->edn xml) [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :paatostieto :Paatos :paivamaarat :antoPvm])]
+    (if (clojure.string/includes? date "Z")
+      (subs date 0 10)
+      date)))
 
 (defn read-permit-descriptions-from-xml
   [permit-type xml]
