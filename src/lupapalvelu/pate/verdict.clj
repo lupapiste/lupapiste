@@ -180,7 +180,7 @@
                                 {}
                                 dic)
      ;; Foremen, plans and reviews are initialized in separate init functions.
-     :references (dissoc settings :foremen :plans :reviews)}))
+     :references (dissoc settings :foremen :plans :reviews :handler-titles)}))
 
 
 ;; Argument map:
@@ -397,6 +397,7 @@
       (init--dict-by-application :verdict-type schema-util/ya-verdict-type)
       (init--requirements-references :plans)
       (init--requirements-references :reviews)
+      (init--requirements-references :handler-titles)
       init--upload
       init--verdict-giver-type
       (init--dict-by-application :operation application-operation)

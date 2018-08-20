@@ -74,10 +74,14 @@
                                                         (case category
                                                           :p :pate.prepper
                                                           :pate-verdict.handler)}})
-                 :handler-title {:text {:loc-prefix
-                                        (case category
-                                          :ya :pate-verdict.handler.title.ya
-                                          :pate-verdict.handler.title)}}
+                 :handler-title (case category
+                                  :ya {:reference-list {:path       :handler-titles
+                                                        :type       :select
+                                                        :loc-prefix :pate-verdict.handler.title.ya
+                                                        :item-key   :id
+                                                        :term       {}}
+                                       :template-dict  :handler-titles}
+                                  {:text {:loc-prefix :pate-verdict.handler.title}})
                  :application-id app-id-placeholder)
    :section    {:id   :pate-dates
                 :grid {:columns 7
