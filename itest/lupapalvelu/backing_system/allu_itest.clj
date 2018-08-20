@@ -2,6 +2,7 @@
   "Integration tests for ALLU integration. Using local (i.e. not over HTTP) testing style."
   (:require [clojure.java.io :as io]
             [clj-http.client :as http]
+            [cheshire.core :as json]
             [monger.operators :refer [$set]]
             [mount.core :as mount]
             [schema.core :as sc]
@@ -61,16 +62,16 @@
     (mongo/update-by-id :applications id {$set {:permitSubtype permitSubtype, :documents documents}})
     response))
 
-(defn- check-request [schema-check? request]
+(defn- check-request [schema-check? http-request]
   (fact "request is well-formed"
-    (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
-    (let [contract (:form-params request)]
+    (-> http-request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
+    (let [contract (-> http-request :body (json/decode true))]
       (when schema-check?
         contract => #(nil? (sc/check PlacementContract %))))))
 
 (deftype AtomMockALLU [state]
   ALLUApplications
-  (-cancel-application! [_ _ endpoint _]
+  (-cancel-application! [_ _ {{endpoint :uri} :http-request}]
     (let [allu-id (second (re-find #".*/(\d+)/cancelled" endpoint))]
       (if (contains? (:applications @state) allu-id)
         (do (swap! state update :applications dissoc allu-id)
@@ -78,8 +79,8 @@
         {:status 404, :body (str "Not Found: " allu-id)})))
 
   ALLUPlacementContracts
-  (-create-placement-contract! [_ _ _ request]
-    (let [placement-contract (:form-params request)]
+  (-create-placement-contract! [_ _ {:keys [http-request]}]
+    (let [placement-contract (json/decode (:body http-request) true)]
       (if-let [validation-error (sc/check PlacementContract placement-contract)]
         {:status 400, :body validation-error}
         (let [local-mock-allu-state-push (fn [{:keys [id-counter] :as state}]
@@ -89,9 +90,9 @@
               {:keys [id-counter]} (swap! state local-mock-allu-state-push)]
           {:status 200, :body (str (dec id-counter))}))))
 
-  (-update-placement-contract! [_ _ endpoint request]
+  (-update-placement-contract! [_ _ {{endpoint :uri :as http-request} :http-request}]
     (let [allu-id (second (re-find #".*/(\d+)" endpoint))
-          placement-contract (:form-params request)]
+          placement-contract (json/decode (:body http-request) true)]
       (if-let [validation-error (sc/check PlacementContract placement-contract)]
         {:status 400, :body validation-error}
         (if (contains? (:applications @state) allu-id)
@@ -100,10 +101,10 @@
           {:status 404, :body (str "Not Found: " allu-id)}))))
 
   ALLUAttachments
-  (-send-attachment! [_ _ endpoint request]
+  (-send-attachment! [_ _ {{endpoint :uri :as http-request} :http-request}]
     (let [allu-id (second (re-find #".*/applications/(\d+)/attachments" endpoint))]
       (if (contains? (:applications @state) allu-id)
-        (let [attachment (select-keys (:form-params request) [:metadata])]
+        (let [attachment {:metadata (-> http-request (get-in [:body 0 :content]) (json/decode true))}]
           (swap! state update-in [:applications allu-id :attachments] (fnil conj []) attachment)
           {:status 200, :body ""})
         {:status 404, :body (str "Not Found: " allu-id)}))))
@@ -123,48 +124,50 @@
 
 (deftype CheckingALLU [inner]
   ALLUApplications
-  (-cancel-application! [_ {:keys [application] :as command} endpoint request]
-    (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/cancelled")))
-    (fact "request is well-formed"
-      (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt)))
+  (-cancel-application! [_ {:keys [application] :as command} {:keys [http-request] :as request}]
+    (:uri http-request)
 
-    (checking-integration-messages application "applications.cancelled"
-                                   #(-cancel-application! inner command endpoint request)))
+    (fact "endpoint is correct"
+      (:uri http-request) => (re-pattern (str (env/value :allu :url) "/applications/\\d+/cancelled")))
+    (fact "request is well-formed"
+      (-> http-request :headers :authorization) => (str "Bearer " (env/value :allu :jwt)))
+
+    (checking-integration-messages application "applications.cancel" #(-cancel-application! inner command request)))
 
   ALLUPlacementContracts
-  (-create-placement-contract! [_ {:keys [application] :as command} endpoint request]
-    (fact "endpoint is correct" endpoint => (str (env/value :allu :url) "/placementcontracts"))
-    (check-request true request)
+  (-create-placement-contract! [_ {:keys [application] :as command} {:keys [http-request] :as request}]
+    (fact "endpoint is correct" (:uri http-request) => (str (env/value :allu :url) "/placementcontracts"))
+    (check-request true http-request)
 
     (checking-integration-messages application "placementcontracts.create"
-                                   #(-create-placement-contract! inner command endpoint request)))
+                                   #(-create-placement-contract! inner command request)))
 
-  (-update-placement-contract! [_ {:keys [application] :as command} endpoint request]
-    (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
-    (check-request false request)
+  (-update-placement-contract! [_ {:keys [application] :as command} {:keys [http-request] :as request}]
+    (fact "endpoint is correct" (:uri http-request) => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
+    (check-request false http-request)
 
     (checking-integration-messages application "placementcontracts.update"
-                                   #(-update-placement-contract! inner command endpoint request)))
+                                   #(-update-placement-contract! inner command request)))
 
   ALLUAttachments
-  (-send-attachment! [_ {:keys [application] :as command} endpoint request]
-    (fact "endpoint is correct" endpoint => (re-pattern (str (env/value :allu :url) "/applications/\\d+/attachments")))
+  (-send-attachment! [_ {:keys [application] :as command} {:keys [http-request] :as request}]
+    (fact "endpoint is correct"
+      (:uri http-request) => (re-pattern (str (env/value :allu :url) "/applications/\\d+/attachments")))
     (fact "request is well-formed"
-      (-> request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
-      (-> request :form-params :metadata keys set) => #{:name :description :mimeType}
-      (get-attachment-file! application(-> request :form-params :file)) => some?)
+      (-> http-request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
+      (-> http-request (get-in [:body 0 :content]) (json/decode true) keys set) => #{:name :description :mimeType}
+      (get-attachment-file! application (-> http-request (get-in [:body 1]) :content)) => some?)
 
-    (checking-integration-messages application "attachments.create"
-                                   #(-send-attachment! inner command endpoint request))))
+    (checking-integration-messages application "attachments.create" #(-send-attachment! inner command request))))
 
 (deftype ConstALLU [cancel-response attach-response creation-response update-response]
   ALLUApplications
-  (-cancel-application! [_ _ _ _] cancel-response)
+  (-cancel-application! [_ _ _] cancel-response)
   ALLUPlacementContracts
-  (-create-placement-contract! [_ _ _ _] creation-response)
-  (-update-placement-contract! [_ _ _ _] update-response)
+  (-create-placement-contract! [_ _ _] creation-response)
+  (-update-placement-contract! [_ _ _ ] update-response)
   ALLUAttachments
-  (-send-attachment! [_ _ _ _] attach-response))
+  (-send-attachment! [_ _ _] attach-response))
 
 ;;;; Actual Tests
 ;;;; ===================================================================================================================

@@ -1,6 +1,7 @@
 (ns lupapalvelu.backing-system.allu-test
   "Unit tests for lupapalvelu.backing-system.allu. No side-effects."
-  (:require [schema.core :as sc :refer [defschema Bool]]
+  (:require [cheshire.core :as json]
+            [schema.core :as sc :refer [defschema Bool]]
             [sade.core :refer [def- now]]
             [sade.env :as env]
             [sade.schemas :refer [NonBlankStr Kiinteistotunnus ApplicationId]]
@@ -68,20 +69,6 @@
                        (not (allu/allu-application? org-id permit-type))))
         => passing-quick-check))
 
-    (facts "application-cancel-request"
-      (let [allu-id "23"
-            app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)
-            [endpoint request] (application-cancel-request "https://example.com/api/v1" "foo.bar.baz" app)]
-        (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/cancelled"))
-        (fact "request" request => {:headers {:authorization "Bearer foo.bar.baz"}})))
-
-    (facts "placement-creation-request"
-      (let [app (sg/generate ValidPlacementApplication)
-            [endpoint request] (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
-        (fact "endpoint" endpoint => "https://example.com/api/v1/placementcontracts")
-        (fact "request" request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                                    :form-params  (application->allu-placement-contract true app)})))
-
     (facts "application->allu-placement-contract"
       (fact "Valid applications produce valid inputs for ALLU."
         (quick-check 10
@@ -90,41 +77,66 @@
                                        (application->allu-placement-contract (sg/generate Bool) application)))))
         => passing-quick-check))
 
-    (facts "attachment-send"
+    (facts "application-cancel-request"
       (let [allu-id "23"
-            application (-> (sg/generate ValidPlacementApplication) (assoc-in [:integrationKeys :ALLU :id] allu-id))
-            {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment} (sg/generate Attachment)
-            contents "You will be assimilated."
-            [endpoint request] (attachment-send "https://example.com/api/v1" "foo.bar.baz" application attachment
-                                                contents)]
-        (fact "endpoint" endpoint => (str "https://example.com/api/v1/applications/" allu-id "/attachments"))
-        (fact "request"
-          request => {:headers     {:authorization "Bearer foo.bar.baz"}
-                      :form-params {:metadata {:name        (or (:contents attachment) "")
-                                               :description (localize "fi" :attachmentType type-group type-id)
-                                               :mimeType    (:contentType latestVersion)}
-                                    :file     contents}})))
+            app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)]
+        (:http-request (application-cancel-request "https://example.com/api/v1" "foo.bar.baz" app))
+        => {:request-method :put
+            :uri            (str "https://example.com/api/v1/applications/" allu-id "/cancelled")
+            :headers        {:authorization "Bearer foo.bar.baz"}}))
+
+    (facts "placement-creation-request"
+      (let [app (sg/generate ValidPlacementApplication)
+            {:keys [params http-request]} (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
+        http-request => (contains {:request-method :post
+                                   :uri            "https://example.com/api/v1/placementcontracts"
+                                   :headers        {:authorization "Bearer foo.bar.baz"}})
+        (:body http-request) => string?
+        params => {:application (application->allu-placement-contract true app)}))
 
     (facts "placement-update-request"
       (let [allu-id "23"
             app (assoc-in (sg/generate ValidPlacementApplication) [:integrationKeys :ALLU :id] allu-id)]
         (doseq [pending-on-client [true false]
-                :let [[endpoint request]
+                :let [{:keys [params http-request]}
                       (placement-update-request pending-on-client "https://example.com/api/v1" "foo.bar.baz" app)]]
-          (fact "endpoint" endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
-          (fact "request"
-            request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                        :form-params  (application->allu-placement-contract pending-on-client app)}))))
+          http-request => (contains {:request-method :put
+                                     :uri            (str "https://example.com/api/v1/placementcontracts/" allu-id)
+                                     :headers        {:authorization "Bearer foo.bar.baz"}})
+          (:body http-request) => string?
+          params => {:id          allu-id
+                     :application (application->allu-placement-contract pending-on-client app)})))
+
+    (facts "attachment-send"
+      (let [allu-id "23"
+            application (-> (sg/generate ValidPlacementApplication) (assoc-in [:integrationKeys :ALLU :id] allu-id))
+            {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment} (sg/generate Attachment)
+            contents "You will be assimilated."
+            {:keys [http-request]} (attachment-send "https://example.com/api/v1" "foo.bar.baz" application
+                                                    attachment contents)]
+        http-request => (contains {:request-method :post
+                                   :uri            (str "https://example.com/api/v1/applications/" allu-id
+                                                        "/attachments")
+                                   :headers        {:authorization "Bearer foo.bar.baz"}})
+        (-> http-request (get-in [:body 0]) (update :content #(json/decode % true))) =>
+        {:name      "metadata"
+         :content   {:name        (or (:contents attachment) "")
+                     :description (localize "fi" :attachmentType type-group type-id)
+                     :mimeType    (:contentType latestVersion)}
+         :mime-type "application/json"}
+        (get-in http-request [:body 1]) => {:name      "file"
+                                            :content   contents
+                                            :mime-type (:contentType latestVersion)}))
 
     (facts "integration message generation"
       (let [user (sg/generate (select-keys User [:id :username]))
             app (sg/generate ValidPlacementApplication)
-            [endpoint request] (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
+            {:keys [http-request]} (placement-creation-request "https://example.com/api/v1" "foo.bar.baz" app)]
         (fact "request-integration-message"
           (request-integration-message {:user        user
                                         :application app
                                         :action      "submit-application"}
-                                       endpoint request "placementcontracts.create")
+                                       http-request "placementcontracts.create")
           => (contains {:direction    "out"
                         :messageType  "placementcontracts.create"
                         :transferType "http"
@@ -135,8 +147,7 @@
                         :application  (select-keys app [:id :organization :state])
                         :initator     user
                         :action       "submit-application"
-                        :data         {:endpoint endpoint
-                                       :request  (select-keys request [:form-params])}})
+                        :data         http-request})
           (provided (now) => 5))
 
         (let [response {:status 200, :body "23"}]
@@ -144,7 +155,7 @@
             (response-integration-message {:user        user
                                            :application app
                                            :action      "submit-application"}
-                                          endpoint response "placementcontracts.create")
+                                          (:uri http-request) response "placementcontracts.create")
             => (contains {:direction    "in"
                           :messageType  "placementcontracts.create"
                           :transferType "http"
@@ -155,7 +166,7 @@
                           :application  (select-keys app [:id :organization :state])
                           :initator     user
                           :action       "submit-application"
-                          :data         {:endpoint endpoint
+                          :data         {:endpoint (:uri http-request)
                                          :response response}})
             (provided (now) => 5)))))
 
