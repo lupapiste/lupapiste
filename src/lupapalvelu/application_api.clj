@@ -514,7 +514,7 @@
                        :required [:application/edit-draft :application/edit-operation]}
                       {:context  {:application {:state states/pre-sent-application-states}}
                        :required [:application/edit-operation]}
-                      {:context  {:application {:state states/all-application-states-but-draft-or-terminal}}
+                      {:context  {:application {:state states/all-application-or-archiving-project-states}}
                        :required [:application/edit-operation :document/edit-identifiers]}]}
   [{:keys [application] :as command}]
   (if (= (get-in application [:primaryOperation :id]) op-id)
