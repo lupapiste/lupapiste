@@ -105,9 +105,6 @@
                                       :items      [:shekki :panttaussitoumus]
                                       :sort-by    :text}})
 
-(def handler-title-select {:select {:loc-prefix :pate-verdict.handler.title.ya
-                                    :items [:handler-titles]}})
-
 (def contract-language
   {:select {:loc-prefix :pate.contract.language
             :item-loc-prefix :pate-verdict.language
