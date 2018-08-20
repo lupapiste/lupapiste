@@ -79,7 +79,7 @@
                        :propertyId      (:propertyId location-info)
                        :address         (:address location-info)
                        :municipality    municipality}
-        created-application (app/make-application make-app-info ; Application state is set to verdictGiven at creation
+        created-application (app/make-application make-app-info
                                                   []            ; messages
                                                   (:user command)
                                                   (:created command)
@@ -124,7 +124,7 @@
                                 (assoc :statements given-statements
                                        :opened (:created command)
                                        :history history-array
-                                       :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
+                                       :state :closed ;; Asetetaan hanke "p\u00e4\u00e4t\u00f6s annettu"-tilaan
                                        :facta-imported true))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
