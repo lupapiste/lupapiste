@@ -432,14 +432,14 @@
 
 (deftype RemoteALLU []
   ALLUApplications
-  (-cancel-application! [_ _ request] (perform-http-request! request))
+  (-cancel-application! [_ _ {:keys [http-request]}] (perform-http-request! http-request))
 
   ALLUPlacementContracts
-  (-create-placement-contract! [_ _ request] (perform-http-request! request))
-  (-update-placement-contract! [_ _ request] (perform-http-request! request))
+  (-create-placement-contract! [_ _ {:keys [http-request]}] (perform-http-request! http-request))
+  (-update-placement-contract! [_ _ {:keys [http-request]}] (perform-http-request! http-request))
 
   ALLUAttachments
-  (-send-attachment! [_ _ request] (perform-http-request! request)))
+  (-send-attachment! [_ _ {:keys [http-request]}] (perform-http-request! http-request)))
 
 ;;;; Mock for interactive development
 ;;;; ===================================================================================================================
