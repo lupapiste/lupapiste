@@ -7,6 +7,7 @@
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as krysp]
             [lupapalvelu.company :as com]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.transformations :as transformations]
@@ -30,8 +31,8 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.verdict :as old-verdict]
-            [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as krysp]
             [monger.operators :refer :all]
+            [plumbing.core :refer [defnk]]
             [ring.util.codec :as codec]
             [rum.core :as rum]
             [sade.coordinate :as coord]
@@ -411,29 +412,29 @@
 (defn user-ref [{user :user}]
   (select-keys user [:id :username]))
 
-(defn new-verdict-draft
-  ([template-id command]
-    (new-verdict-draft template-id command nil))
-  ([template-id {:keys [application organization created] :as command} replacement-id]
-   (let [template       (template/verdict-template @organization template-id)
-         {draft :draft} (-> {:template    template
-                             :draft       (default-verdict-draft template)
-                             :application application}
-                            initialize-verdict-draft
-                            (update-in [:draft]
-                                       (fn [draft]
-                                         (cond-> (assoc draft
-                                                  :id (mongo/create-id)
-                                                  :modified created
-                                                  :user (user-ref command))
+(defnk new-verdict-draft
+  [template-id application organization
+   timestamp command {replacement-id nil}
+   :as options]
+  (let [template       (template/verdict-template options)
+        {draft :draft} (-> {:template    template
+                            :draft       (default-verdict-draft template)
+                            :application application}
+                           initialize-verdict-draft
+                           (update-in [:draft]
+                                      (fn [draft]
+                                        (cond-> (assoc draft
+                                                       :id (mongo/create-id)
+                                                       :modified timestamp
+                                                       :user (user-ref options))
 
-                                           replacement-id
-                                           (assoc-in [:replacement :replaces]
-                                                     replacement-id)))))]
-     (action/update-application command
-                                {$push {:pate-verdicts
-                                        (sc/validate schemas/PateVerdict draft)}})
-     (:id draft))))
+                                          replacement-id
+                                          (assoc-in [:replacement :replaces]
+                                                    replacement-id)))))]
+    (action/update-application command
+                               {$push {:pate-verdicts
+                                       (sc/validate schemas/PateVerdict draft)}})
+    (:id draft)))
 
 (defn new-legacy-verdict-draft
   "Legacy verdicts do not have templates or references. Inclusions

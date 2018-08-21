@@ -54,13 +54,18 @@
                                              {:type review-type})]
           (sc/optional-key :plans)   [PateDependency]}))
 
+(defn- wrapped [schema]
+  {:_value    schema
+   :_user     sc/Str
+   :_modified ssc/Timestamp})
+
 (defschema PateSavedTemplate
   (merge PateCategory
-         {:name                        sc/Str
+         {:name                        (wrapped sc/Str)
           :deleted                     sc/Bool
           (sc/optional-key :draft)     sc/Any ;; draft is published data on publish.
           :modified                    ssc/Timestamp
-          (sc/optional-key :published) {:published  ssc/Timestamp
+          (sc/optional-key :published) {:published  (wrapped ssc/Timestamp)
                                         :data       sc/Any
                                         :inclusions [sc/Str]
                                         :settings   PatePublishedTemplateSettings}}))
