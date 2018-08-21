@@ -30,18 +30,21 @@
   timestamp, user, lang and wrapper. Also application, if
   available. The original command is stored just in case."
   [{:keys [created lang data application user] :as command}]
-  {:pre [(empty? (util/intersection-as-kw (keys data)
-                                          [:timestamp :lang :wrapper
-                                           :organization :user :application
-                                           :command]))]}
-  (cond-> (assoc data
-                 :timestamp created
-                 :lang lang
-                 :wrapper (metadata/wrapper command)
-                 :organization (command->organization command)
-                 :user user
-                 :command command)
-    application (assoc :application application)))
+
+  {:pre []}
+  (let [m (util/filter-map-by-val identity
+                                  {:timestamp    created
+                                   :wrapper      (metadata/wrapper command)
+                                   :organization (command->organization command)
+                                   :user         user
+                                   :application  application
+                                   :command      command})]
+    (assert (empty? (util/intersection-as-kw (keys data)
+                                             (keys m)))
+            "Command->options key conflict.")
+    ;; Lang does not cause conflict, because override is a reasonable
+    ;; use case
+    (merge data m {:lang (or (:lang data) lang)})))
 
 (defn organization-categories [{scope :scope}]
   (->> scope
@@ -129,7 +132,7 @@
                                                               :pate-verdict-template))))
                 :category category
                 :modified timestamp
-                :deleted  false})]
+                :deleted  (metadata/wrap wrapper false)})]
      (mongo/update-by-id :organizations
                          org-id
                          {$push {:verdict-templates.templates
@@ -388,9 +391,10 @@
                    {$set {:verdict-templates.templates.$.name
                           (metadata/wrap wrapper name)}}))
 
-(defnk set-deleted [delete :as options]
+(defnk set-deleted [delete wrapper :as options]
   (template-update (dissoc options :timestamp)
-                   {$set {:verdict-templates.templates.$.deleted delete}}))
+                   {$set {:verdict-templates.templates.$.deleted
+                          (metadata/wrap wrapper delete)}}))
 
 (defnk copy-verdict-template [lang wrapper :as options]
   (let [{name :name :as template} (verdict-template (assoc options

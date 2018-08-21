@@ -62,7 +62,7 @@
 (defschema PateSavedTemplate
   (merge PateCategory
          {:name                        (wrapped sc/Str)
-          :deleted                     sc/Bool
+          :deleted                     (wrapped sc/Bool)
           (sc/optional-key :draft)     sc/Any ;; draft is published data on publish.
           :modified                    ssc/Timestamp
           (sc/optional-key :published) {:published  (wrapped ssc/Timestamp)
