@@ -144,7 +144,7 @@
       (infof "Processed applicants, processable applicants count was: %s" (count (filter prev-permit/get-applicant-type hakijat)))
 
       (let [updated-application (mongo/by-id :applications (:id created-application))
-            {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml false false)
+            {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml false true)
             review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-updates")
             update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id)]
         (if (:ok update-result)

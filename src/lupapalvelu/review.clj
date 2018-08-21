@@ -221,7 +221,7 @@
 (defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
-  [user created application app-xml & [overwrite-background-reviews? include-state-updates?]]
+  [user created application app-xml & [overwrite-background-reviews? do-not-include-state-updates?]]
   (let [reviews (vec (reviews-preprocessed app-xml))
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
@@ -270,7 +270,7 @@
         (warnf "Backend task validation error, this was skipped: %s" (pr-str error))))
     (ok :review-count (count review-tasks)
         :updated-tasks (map :id updated-tasks)
-        :updates (util/deep-merge task-updates building-updates (when include-state-updates? state-updates))
+        :updates (util/deep-merge task-updates building-updates (when-not do-not-include-state-updates? state-updates))
         :new-faulty-tasks (map :id new-faulty-tasks)
         :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
