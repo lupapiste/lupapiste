@@ -18,7 +18,7 @@
   "Is the verdict created in Lupapiste, either through Pate or legacy interface"
   [verdict]
   ;; TODO Needs a more robust check
-  (boolean (:modified verdict)))
+  (boolean (:data verdict)))
 
 (defn has-category? [{:keys [category] :as verdict} c]
   (if (lupapiste-verdict? verdict)

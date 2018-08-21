@@ -1466,25 +1466,25 @@
 (facts "verdict-string"
   (fact "legacy verdict-code"
     (verdict-string "fi"
-                         {:legacy? true
-                          :category "r"
-                          :data {:verdict-code "8"}
-                          :template {:inclusions ["verdict-code"]}}
-                         :verdict-code)
+                    {:legacy? true
+                     :category "r"
+                     :data {:verdict-code "8"}
+                     :template {:inclusions ["verdict-code"]}}
+                    :verdict-code)
     => "Ty\u00f6h\u00f6n liittyy ehto")
   (fact "modern verdict-code"
     (verdict-string "en"
-                           {:category "r"
-                            :data {:verdict-code "hallintopakko"}
-                            :template {:inclusions ["verdict-code"]}}
-                           :verdict-code)
+                    {:category "r"
+                     :data {:verdict-code "hallintopakko"}
+                     :template {:inclusions ["verdict-code"]}}
+                    :verdict-code)
     => "Administrative enforcement/penalty proceedings discontinued.")
   (fact "verdict-type"
     (verdict-string "fi"
-                           {:category "ya"
-                            :data {:verdict-type "katulupa"}
-                            :template {:inclusions ["verdict-type"]}}
-                           :verdict-type)
+                    {:category "ya"
+                     :data {:verdict-type "katulupa"}
+                     :template {:inclusions ["verdict-type"]}}
+                    :verdict-type)
     => "Katulupa"))
 
 (fact "verdict-section-string"
