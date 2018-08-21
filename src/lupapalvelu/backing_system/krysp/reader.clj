@@ -2,7 +2,6 @@
   "Read the Krysp from municipality Web Feature Service"
   (:require [cheshire.core :as json]
             [clojure.set :refer [rename-keys]]
-            [lupapalvelu.conversion.util :as conv-util]
             [lupapalvelu.document.schemas]
             [lupapalvelu.drawing :as drawing]
             [lupapalvelu.find-address :as find-address]
@@ -485,6 +484,12 @@
                         :kuvaus (get-text asia [:rakennusvalvontaasianKuvaus])}))
        (remove #(ss/blank? (:kuvaus %)))))
 
+(defn ->verdict-date [xml]
+  (let [date (get-in (xml->edn xml) [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :paatostieto :Paatos :paivamaarat :antoPvm])]
+    (if (clojure.string/includes? date "Z")
+      (subs date 0 10)
+      date)))
+
 (defn read-permit-descriptions-from-xml
   [permit-type xml]
   (when (#{:R} (keyword permit-type))
@@ -666,7 +671,7 @@
   "Takes a parsed XML document, returns a list of viitelupatunnus -ids (in 'permit-id'-format) found therein."
   [xml]
   (->> (select xml [:rakennusvalvontaAsiatieto :viitelupatieto])
-       (map (comp conv-util/normalize-permit-id #(get-in % [:LupaTunnus :kuntalupatunnus]) cr/all-of))))
+       (map #(get-in % [:LupaTunnus :kuntalupatunnus]) cr/all-of)))
 
 (defn is-foreman-application? [xml]
   (let [permit-type (-> xml ->kuntalupatunnus (ss/split #"-") last)]
