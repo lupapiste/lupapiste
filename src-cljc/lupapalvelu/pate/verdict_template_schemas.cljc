@@ -89,7 +89,8 @@
                 :help       :pate.help.temsub-bulletin
                 :grid       {:columns 1
                              :rows    [[{:col  1
-                                         :dict :bulletinOpDescription}]]}}})
+                                         :dict :bulletinOpDescription}]]}}
+   :removable?  true})
 
 (def temsub-foremen
   (->> helper/foreman-codes

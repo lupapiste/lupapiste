@@ -112,9 +112,12 @@
                                                :dict      kw})
                                             dates)}]}}})
 
-(def versub-operation
+(defn versub-operation
+  [category]
   {:dictionary {:operation {:text {:loc-prefix :pate.operation}}
-                :address   {:text {:loc-prefix :pate.address}}}
+                :address   {:text {:loc-prefix (if (= category :ya)
+                                                 :pate.location
+                                                 :pate.address)}}}
    :section    {:id   :pate-operation
                 :grid {:columns 2
                        :rows    [[{:dict  :operation
@@ -429,7 +432,7 @@
                                               (versub-dates :r helper/verdict-dates)
                                               (versub-verdict true)
                                               versub-bulletin
-                                              versub-operation
+                                              (versub-operation :r)
                                               (versub-requirements :foremen :plans :reviews)
                                               versub-conditions
                                               versub-appeal
@@ -470,7 +473,7 @@
                                               (versub-dates :p helper/verdict-dates)
                                               (versub-verdict true)
                                               versub-bulletin
-                                              versub-operation
+                                              (versub-operation :p)
                                               versub-conditions
                                               versub-appeal
                                               versub-statements
@@ -524,7 +527,7 @@
                                                versub-dates-ya
                                                versub-verdict-ya
                                                versub-bulletin
-                                               versub-operation
+                                               (versub-operation :ya)
                                                versub-requirements-ya
                                                versub-conditions
                                                versub-appeal
@@ -553,7 +556,7 @@
 (def tj-verdict-schema-1 (build-verdict-schema :tj 1
                                                (versub-dates :tj helper/tj-verdict-dates)
                                                versub-verdict-tj
-                                               versub-operation
+                                               (versub-operation :tj)
                                                versub-appeal
                                                versub-attachments))
 

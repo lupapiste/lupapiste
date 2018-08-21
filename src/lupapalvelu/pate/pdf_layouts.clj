@@ -55,6 +55,21 @@
           :styles :pad-after}
          {:loc-prefix :rakennuspaikka.kaavatilanne}]))
 
+(def entry--rakennuspaikka-ya
+  (list [{:loc    :rakennuspaikka._group_label
+          :styles :bold}]
+        [{:loc    :rakennuspaikka.kiinteisto.kiinteistotunnus
+          :source :property-id}]
+        [{:loc    :pate.location
+          :source {:dict :address}}]
+        [{:loc    :pdf.pinta-ala
+          :source {:doc [:rakennuspaikka :kiinteisto.maapintaala]}}
+         {:unit :ha}]
+        [{:loc    :rakennuspaikka.kaavatilanne._group_label
+          :source {:doc [:rakennuspaikka :kaavatilanne]}
+          :styles :pad-after}
+         {:loc-prefix :rakennuspaikka.kaavatilanne}]))
+
 (defn entry--applicant [loc loc-many]
   [{:loc      loc
     :loc-many loc-many
@@ -282,7 +297,7 @@
 
 (def ya-pdf-layout
   (build-layout entry--application-id
-                entry--rakennuspaikka
+                entry--rakennuspaikka-ya
                 (entry--applicant :pdf.achiever :pdf.achievers)
                 entry--operation
                 entry--statements
