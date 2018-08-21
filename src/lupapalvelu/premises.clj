@@ -121,7 +121,8 @@
                    (get-huoneistot-from-application doc)
                    (keys)
                    (map (fn [huoneisto-key] [:huoneistot huoneisto-key])))]
-    (doc-persistence/remove-document-data command doc paths :documents)))
+    (when (seq paths)
+      (doc-persistence/remove-document-data command doc paths :documents))))
 
 (defn save-premises-data [model-updates {application :application timestamp :created {role :role} :user :as command} doc-id]
   (let [document                                         (util/find-by-id doc-id (:documents application))
