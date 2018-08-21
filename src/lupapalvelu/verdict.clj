@@ -239,6 +239,19 @@
     (and (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
          (not-empty (enlive/select xml [:luvanTunnisteTiedot :MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))])))))
 
+(defn debugger [arg]
+  (println arg)
+  arg)
+
+;; LPK-3848
+(defn- verdict-party-finder [henkilotiedot-from-doc parties-from-xml]
+  (let [info-fields            {:hetu :henkilotunnus :email :email :sukunimi :sukunimi :puhelin :puhelinnumero}
+        get-info-value         (fn [field] (-> henkilotiedot-from-doc field :value debugger))
+        match-xml-text-to-doc  (fn [doc-field xml-field party] (= (xml/get-text party [xml-field]) (get-info-value doc-field)))
+        find-attr-from-parties (fn [[k v]] (util/find-first (partial match-xml-text-to-doc k v) parties-from-xml))]
+    (->> (map find-attr-from-parties info-fields)
+         (util/find-first seq))))
+
 (defn verdict-xml-with-foreman-designer-verdicts
   "Normalizes special foreman/designer verdict by creating a proper
   paatostieto. Takes data from foreman/designer's party details. The
@@ -249,9 +262,14 @@
   (let [op-name      (-> application :primaryOperation :name)
         tag          (if (ss/starts-with op-name "tyonjohtajan-") :Tyonjohtaja :Suunnittelija)
         op-doc       (domain/get-document-by-operation application (-> application :primaryOperation :id))
-        hetu         (-> op-doc :data :henkilotiedot :hetu :value)
+        henk-tiedot  (-> op-doc :data :henkilotiedot)
+        _ (println "------------------------------ HENK-TIEDOT: " henk-tiedot)
+        yht-tiedot   (-> op-doc :data :yhteystiedot)
+        _ (println "------------------------------ YHT-TIEDOT: " yht-tiedot)
         parties      (enlive/select xml [tag])
-        party        (util/find-first #(= (xml/get-text % [:henkilotunnus]) hetu) parties)
+        _ (println "------------------------------ PARTIES:" parties)
+        party        (verdict-party-finder (merge henk-tiedot yht-tiedot) parties)
+        _ (println "------------------------------ PARTY: " party)
         attachment   (-> party (enlive/select [:liitetieto :Liite]) first enlive/unwrap)
         date         (xml/get-text party [:paatosPvm])
         decision     (xml/get-text party [:paatostyyppi])
