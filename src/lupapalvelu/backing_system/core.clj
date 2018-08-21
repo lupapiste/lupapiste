@@ -3,7 +3,7 @@
             [lupapalvelu.backing-system.allu :as allu]
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.organization :as org :refer [OrgId PermitType]]
+            [lupapalvelu.organization :as org :refer [Organization PermitType]]
             [lupapalvelu.permit :as permit]))
 
 ;;; `get-backing-system` could act as a multimethod dispatcher but the protocol lets us enforce and document the
@@ -52,13 +52,13 @@
   (send-attachments! [_ user organization application attachments lang]
     (mapping-to-krysp/save-unsent-attachments-as-krysp user organization application attachments lang)))
 
-(sc/defn get-backing-system :- (sc/protocol BackingSystem) [organization :- OrgId, permit-type :- PermitType]
+(sc/defn get-backing-system :- (sc/protocol BackingSystem) [organization :- Organization, permit-type :- PermitType]
   (cond
-    (allu/allu-application? organization permit-type) (->ALLUBackingSystem)
+    (allu/allu-application? (:id organization) permit-type) (->ALLUBackingSystem)
     (org/krysp-integration? organization permit-type) (->KRYSPBackingSystem)
     :else (->NoopBackingSystem)))
 
 (defn update-callback [{{:keys [id] :as application} :application :keys [organization]} _]
-  (update-application! (get-backing-system (:id @organization) (permit/permit-type application))
+  (update-application! (get-backing-system @organization (permit/permit-type application))
                        (domain/get-application-no-access-checking id))
   nil)
