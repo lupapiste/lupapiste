@@ -58,3 +58,14 @@
   "Rewraps recursively the whole given structure."
   [wrapper m]
   (walk/prewalk (partial rewrap wrapper) m))
+
+(defn wrap-all
+  "Wraps the whole structure. For each branch the wrapping stops at the
+  first wrap. Branches are maps, all other data types are leaves."
+  [wrapper m]
+  (if (map? m)
+    (reduce-kv (fn [acc k v]
+                 (assoc acc k (wrap-all wrapper v)))
+               {}
+               m)
+    (wrap wrapper m)))
