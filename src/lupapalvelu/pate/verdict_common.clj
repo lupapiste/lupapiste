@@ -6,6 +6,7 @@
             [sade.util :as util]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pate.legacy-schemas :as legacy]
+            [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.user :as usr]))
@@ -250,8 +251,9 @@
   [{:keys [lang application]}]
   (let [category (schema-util/application->category application)
         ;; There could be both contracts and verdicts.
-        verdicts        (concat (filter #(has-category? % category)
-                                        (:pate-verdicts application))
+        verdicts        (concat (->> (:pate-verdicts application)
+                                     (filter #(has-category? % category))
+                                     (map metadata/unwrap-all))
                                 (:verdicts application))
         summaries       (summaries-by-id verdicts lang)
         replaced-verdict-ids (->> (vals summaries)

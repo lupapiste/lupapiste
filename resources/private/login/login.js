@@ -76,6 +76,7 @@
 
   var checkForSso = function() {
     clearError();
+    var passwordElement = document.getElementById("login-password");
     ajax.get("/api/login-sso-uri")
       .param("username", _.trim(username()))
       .success(function(data) {
@@ -83,17 +84,20 @@
           window.location = data.uri;
         } else {
           passwordVisible(true);
-          document.getElementById("login-password").focus();
+          passwordElement.focus();
         }
       })
       .error(function() {
         passwordVisible(true);
-        document.getElementById("login-password").focus();
+        passwordElement.focus();
       })
       .call();
   };
 
   var handleLoginSubmit = function() {
+    if (document.getElementById("login-password").offsetParent !== null) {
+      passwordVisible(true);
+    }
     if (passwordVisible()) {
       login();
     } else {
