@@ -491,9 +491,10 @@
 (declare update-placement-contract!)
 
 ;; TODO: Non-placement-contract ALLU applications
-(def update-application!
+(defn update-application!
   "Update application in ALLU (if it had been sent there)."
-  update-placement-contract!)
+  [command]
+  (update-placement-contract! command))
 
 (defn cancel-application!
   "Cancel application in ALLU (if it had been sent there)."
