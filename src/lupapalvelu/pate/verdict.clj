@@ -812,7 +812,7 @@
 (defn ->buildings-array
   "Construction of the application-buildings array. This should be
   equivalent to ->buildings-summary function in
-  lupapalvelu.backing_system.krysp.building-reader the namespace, but instead of
+  lupapalvelu.backing-system.krysp.building-reader the namespace, but instead of
   the message from backing system, here all the input data is
   originating from PATE verdict."
   [application]

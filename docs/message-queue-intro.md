@@ -2,7 +2,7 @@
 
 # JMS - Java Message Service API
 
-JMS gives good encapsulation for basic messaging needs. 
+JMS gives good encapsulation for basic messaging needs.
 
 JMS is supported by large variety of brokers, which enables to change the underlying message broker without affecting client implementations.
 
@@ -29,7 +29,7 @@ The [jms-client](https://github.com/lupapiste/jms-client) library provides commo
 
 For example if you wan't to connect to broker of your choice, you can create an appropriate ConnectionFactory and juse jms/create-connection to create actual javax.jms.Connection for you.
 
-Client side must deal with state, the provided client is just a thing wrapper for common stuff.   
+Client side must deal with state, the provided client is just a thing wrapper for common stuff.
 
 # TODOs
 
@@ -60,9 +60,9 @@ More precisly:
 
 ~~Thus implementing client doesn't need any special "acknowledging" code: handling callback function successfully does the trick.~~
 
-EDIT: After many tests and research, it seems it's NOT ok to throw exception from consumer in search for redeliveries. 
+EDIT: After many tests and research, it seems it's NOT ok to throw exception from consumer in search for redeliveries.
 
-So use AUTO_ACKNOWLEDGE for simple messaging tasks, that don't need "transactional" semantics. If you need to conditionally send messages back to queue, use SESSION_TRANSACTED. 
+So use AUTO_ACKNOWLEDGE for simple messaging tasks, that don't need "transactional" semantics. If you need to conditionally send messages back to queue, use SESSION_TRANSACTED.
 
 ### CLIENT_ACKNOWLEDGE
 
@@ -78,11 +78,11 @@ Client application code needs to check, if received message is already handled. 
 
 ### SESSION_TRANSACTED
 
-A transacted session can be created. Transaction is never excplicitly started, but `session.commit()` and `session.rollback()` methods can be used to control wheter message(s) should be rolled back or acknowledged to broker. 
+A transacted session can be created. Transaction is never excplicitly started, but `session.commit()` and `session.rollback()` methods can be used to control wheter message(s) should be rolled back or acknowledged to broker.
 
 >The transacted session uses a chained-transaction model. In a chained-transaction model, an application does not explicitly start a transaction.
 
-Transaction logic is provided in consumer side code. See `lupapalvelu.backing_system.krysp.http` namespace for example.
+Transaction logic is provided in consumer side code. See `lupapalvelu.backing-system.krysp.http` namespace for example.
 
 Good explanation _Transacted session_ can be found from [JavaWolrd](https://www.javaworld.com/article/2074123/java-web-development/transaction-and-redelivery-in-jms.html?page=2).
 
@@ -92,22 +92,22 @@ Non-persistent deliveries are not saved on disk in the broker, while persistent 
 
 ## Shared or individual connection/session per message?
 
-This seems to be source of some debate. 
+This seems to be source of some debate.
 
 Majority of sources (eg. [ActiveMQ](http://activemq.apache.org/how-do-i-use-jms-efficiently.html)) suggest to share connections/sessions as long as possible.
 
-Some others (eg. Spring JMS template) have implementations where connections and sessions are created and closed for each message. 
+Some others (eg. Spring JMS template) have implementations where connections and sessions are created and closed for each message.
 For example there is a [comment in Stackoverflow](https://stackoverflow.com/a/24494739) supporting this kind of approach.
 
 There are some considerations on [ActiveMQ site](http://activemq.apache.org/spring-support.html), about using pooling connections to overcome some limitations with this JMS template approach.
 
-> Note: while the PooledConnectionFactory does allow the creation of a collection of active consumers, it does not 'pool' consumers. 
-> Pooling makes sense for connections, sessions and producers, which can be seldom-used resources, are expensive to create and can remain idle a minimal cost. 
-> Consumers, on the other hand, are usually just created at startup and left going, handling incoming messages as they come.   
-  
+> Note: while the PooledConnectionFactory does allow the creation of a collection of active consumers, it does not 'pool' consumers.
+> Pooling makes sense for connections, sessions and producers, which can be seldom-used resources, are expensive to create and can remain idle a minimal cost.
+> Consumers, on the other hand, are usually just created at startup and left going, handling incoming messages as they come.
+
 When reusing connections there are couple of things to consider:
 
-1. During a JMS Session, only one action can be done at a time or else you will face a exception. 
+1. During a JMS Session, only one action can be done at a time or else you will face a exception.
 For example if you share session with producer and consumer, and you produce messages in a loop, consumer side will throw exception because same session is used simultaneously both to produce and consume.
 Solution to this problem is to separate consumer and producer sessions.
 2. If remote broker connection is disconnected (for example network problems or boot), ~~all the sessions get disconnected. It seems those sessions can't be restarted, but instead new ones should be created upon reconnect.~~
@@ -149,7 +149,7 @@ See also the `lupapiste-ansible` repository for `broker.xml` configuration.
 By default Artemis server is provisioned with "auto-create" set to true. This means it will auto-create queue, when message is sent to it. This is good for dynamic queues.
 On the contrary, also "auto-delete" feature is set to true by default. This means queue is deleted from broker when there are 0 consumers and 0 messages. In general this is fine too, as queue is re-created when consumers connect to it or producer procudes a message.
 
-~~It seems it's not possible to retain dynamically created queues between server restarts. When server is restarted, client consumers don't receive messages anymore to queues they subscribed. 
+~~It seems it's not possible to retain dynamically created queues between server restarts. When server is restarted, client consumers don't receive messages anymore to queues they subscribed.
 Instead an exception is raised on server side when consumer re-connects to it with message "Queue X does not exists".~~ This might be a bug in Artemis UPDATE: yes it's a bug: https://issues.apache.org/jira/browse/ARTEMIS-1818.
 
 This bug has been fixed in release 2.6.0 release of Artemis.

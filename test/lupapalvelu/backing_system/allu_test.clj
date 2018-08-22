@@ -22,7 +22,7 @@
             [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
 
             [lupapalvelu.backing-system.allu :as allu :refer [PlacementContract]])
-  (:import [lupapalvelu.backing_system.allu IntegrationMessagesMockALLU RemoteALLU]))
+  (:import [lupapalvelu.backing-system.allu IntegrationMessagesMockALLU RemoteALLU]))
 
 (testable-privates lupapalvelu.backing-system.allu application->allu-placement-contract
                    application-cancel-request placement-creation-request placement-update-request attachment-send
