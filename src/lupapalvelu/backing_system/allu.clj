@@ -12,21 +12,21 @@
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
             [taoensso.timbre :refer [info]]
+            [taoensso.nippy :as nippy]
             [sade.util :refer [dissoc-in assoc-when]]
             [sade.core :refer [def- fail! now]]
             [sade.env :as env]
             [sade.http :as http]
-            [sade.schemas :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
+            [sade.schemas :as ssc :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
                                   ApplicationId ISO-3166-alpha-2 date-string]]
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]
+            [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.messages :as imessages :refer [IntegrationMessage]]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.integrations.geojson-2008-schemas :as geo]
-            [sade.schemas :as ssc])
+            [lupapalvelu.mongo :as mongo])
   (:import [java.io InputStream]))
 
 ;;; FIXME: ALLU does not like the attachment requests now :(
@@ -167,6 +167,8 @@
   "fi")
 
 (def- WGS84-URN "EPSG:4326")
+
+(def- allu-jms-queue-name "lupapalvelu.backing-system.allu")
 
 ;;;; Application conversion
 ;;;; ===================================================================================================================
@@ -347,6 +349,8 @@
 ;;;; Requests
 ;;;; ===================================================================================================================
 
+;;; TODO: Get rid of ::command.
+
 (defn- application-cancel-request [{:keys [application] :as command}]
   (let [allu-id (get-in application [:integrationKeys :ALLU :id])]
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
@@ -382,6 +386,7 @@
 ;;;; integration-messages
 ;;;; ===================================================================================================================
 
+;; TODO: Avoid needing to plumb the entire command here:
 (defn- base-integration-message [{:keys [application user action]} message-subtype direction status data]
   {:id           (mongo/create-id)
    :direction    direction
@@ -465,22 +470,15 @@
 ;;;; Middleware
 ;;;; ===================================================================================================================
 
-(defn- interface-from-path [handler]
-  (fn [{interface-path ::interface-path :as request}]
-    (handler (assoc request ::interface (get-in allu-interface interface-path)))))
+(defn- httpify-request [{interface-path ::interface-path params ::params :as request}]
+  (let [interface (get-in allu-interface interface-path)]
+    (-> request
+        (assoc ::interface interface
+               :uri (interpolate-uri (:uri interface) (:path-params interface) params)
+               :request-method (:request-method interface))
+        (assoc-when :body (params->body (:body interface) params)))))
 
-(defn- uri-from-params [handler]
-  (fn [{interface ::interface params ::params :as request}]
-    (handler (assoc request :uri (interpolate-uri (:uri interface) (:path-params interface) params)))))
-
-(defn- request-method-from-interface [handler]
-  (fn [{interface ::interface :as request}]
-    (handler (assoc request :request-method (:request-method interface)))))
-
-(defn- body-from-params [handler]
-  (fn [{interface ::interface params ::params :as request}]
-    (handler (assoc-when request :body (params->body (:body interface) params)))))
-
+;; TODO: Get by with just [ApplicationId Attachment]:
 (defn- get-attachment-files [handler]
   (fn [{{:keys [application]} ::command interface-path ::interface-path params ::params :as request}]
     (if (= interface-path [:attachments :create])
@@ -530,13 +528,38 @@
        ;; We don't want to save auth headers or file contents. It would also be silly to store the body into MongoDB as
        ;; JSON-encoded strings:
        save-messages
-       body-from-params
-       request-method-from-interface
-       uri-from-params
-       interface-from-path)))
+       ((fn [handler] (fn [request] (handler (httpify-request request))))))))
 
 (defstate allu-instance
   :start (make-handler))
+
+;;; TODO: The (= (env/feature? :jms) false) situation.
+
+;; TODO: Save application.integrationKeys.ALLU
+;; TODO: Logging
+;; FIXME: HTTP timeout and error handling
+;; FIXME: Error handling is very crude
+(defn- allu-jms-msg-handler [session]
+  (fn [msg]
+    (try
+      (allu-instance msg)
+      (jms/commit session)
+
+      (catch Exception _
+        (jms/rollback session)))))
+
+;;; TODO: Manage closing with mount instead of jms/register-*
+
+(defstate ^{:on-reload :noop} allu-jms-session
+  :start (-> (jms/get-default-connection)
+             (jms/create-transacted-session)
+             (jms/register-session :consumer)))
+
+(defstate ^{:on-reload :noop} allu-jms-consumer
+  :start (jms/create-nippy-consumer allu-jms-session allu-jms-queue-name (allu-jms-msg-handler allu-jms-session)))
+
+(defn- produce-allu-msg! [request]
+  (jms/produce-with-context allu-jms-queue-name (nippy/freeze request)))
 
 (def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
 
