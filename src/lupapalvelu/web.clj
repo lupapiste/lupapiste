@@ -354,10 +354,16 @@
                    (execute-command "login" (from-json request) request))]
     (select-keys response [:ok :text :session :applicationpage :lang :cookies])))
 
+(defpage [:get "/api/login-sso-uri"] {username :username}
+  (let [request (request/ring-request)]
+    ; TODO: Resolve SSO URL from db
+    (if false
+      (resp/json (ok {:uri "https://evolta.fi"}))
+      (resp/json (fail :error.unauthorized)))))
+
 ;; Reset password via separate URL outside anti-csrf
 (defjson [:post "/api/reset-password"] []
   (let [request (request/ring-request)]
-
     (execute-command "reset-password" (from-json request) request)))
 
 ;;

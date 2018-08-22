@@ -803,7 +803,7 @@
   (assoc-in response
             [:cookies "lupapiste-login"]
             (merge
-              {:value (str "/app/" (name (:language user)) "/" (applicationpage-for user))
+              {:value (str "/app/" (name (get user :language i18n/default-lang)) "/" (applicationpage-for user))
                :max-age (int (/ (session-timeout/get-session-timeout {:session {:user user}}) 1000))
                :path "/"}
               (env/value :cookie))))
