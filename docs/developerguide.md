@@ -690,11 +690,11 @@ Ks. [database.md](database.md)
 2. Määritä hakemustyypissä käytettävät liitteet (ks. `lupapalvelu.attachment.types/attachment-types-by-permit-type`). Varsinainen liitteiden määritys tehdään [lupapiste-commons](https://github.com/lupapiste/commons) projektiin (*attachment_types.cljc*).
 3. Lisää hakemustyypille tarvittavat toimenpiteet ja luo hakemustyypin toimenpidepuu (operation tree) `lupapalvelu.operations` -nimiavaruuteen.
 4. Jos hakemustyyppiin tulee KRYSP integraatio (Lupapisteestä ulospäin)
-  1. Tee mapping halutusta XML formaatista. Mapping-funktio tulee luoda XML tiedosto ja kirjoittaa se levylle. Toteuta hakemustyypille multimetodi `lupapalvelu.permit/application-krysp-mapper`, joka kutsuu mapping-funktiota. Esimerkkejä: `lupapalvelu.backing_system.krysp.*_mapping`.
+  1. Tee mapping halutusta XML formaatista. Mapping-funktio tulee luoda XML tiedosto ja kirjoittaa se levylle. Toteuta hakemustyypille multimetodi `lupapalvelu.permit/application-krysp-mapper`, joka kutsuu mapping-funktiota. Esimerkkejä: `lupapalvelu.backing-system.krysp.*-mapping`.
   2. Toteuta funktiot muunnokseen hakemus->kanoninenXML (esimerkkiä `lupapalvelu.document.vesihuolto_canonical` -nimiavaruudesta). Kanonisesta mallista luodaan mappingin perusteella XML esitys.
   3. Katso mallia KRYSP putkesta, joka alkaa `lupapalvelu.integrations_api` -nimiavaruuden **approve-application** commandista. Tarkempi kuvaus TODO.
 5. Jos hakemustyyppiin tulee KRYSP integraatio (Lupapisteeseen luku)
-  1. Toteuta hakemustyypille multimetodit (esimerkkejä: `lupapalvelu.backing_system.krysp.reader`):
+  1. Toteuta hakemustyypille multimetodit (esimerkkejä: `lupapalvelu.backing-system.krysp.reader`):
      * sanoman nouto: `lupapalvelu.permit/fetch-xml-from-krysp`
      * päätösten luku: `lupapalvelu.permit/read-verdict-xml`
      * päätösten validointi: `lupapalvelu.permit/validate-verdict-xml`
