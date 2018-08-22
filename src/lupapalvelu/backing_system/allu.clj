@@ -508,10 +508,10 @@
       response)))
 
 (defn- encode-body [handler]
-  (fn [{interface ::interface :keys [body] :as request}]
+  (fn [{interface ::interface :as request}]
     (handler (-> request
                  (update :body (partial body->json (:body interface)))
-                 (assoc-when :content-type (when-not (vector? body) :json))))))
+                 (assoc-when :content-type (when-not (vector? (:body interface))) :json)))))
 
 (defn- jwt-authorize [handler jwt]
   (fn [request]
