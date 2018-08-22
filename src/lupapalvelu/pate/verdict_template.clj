@@ -105,7 +105,7 @@
   corresponding template repeatings. Copying is done when the template
   dictionary has :reviews or :plans. Note that the copied information
   is not wrapped. Returns the updated template."
-  [{:keys [wrapper] :as options} {:keys [category draft] :as template}]
+  [options {:keys [category draft] :as template}]
   (let [{dic :dictionary} (template-schemas/verdict-template-schema category)
         {s-data :draft}   (settings (assoc options :category category))]
     (reduce (fn [acc rep-dict]
@@ -124,26 +124,25 @@
                options
                {:id       (mongo/create-id)
                 :draft    (or draft {})
-                :name     (metadata/wrap wrapper
-                                         (or name
-                                             (i18n/localize lang
-                                                            (if (util/=as-kw category :contract)
-                                                              :pate.contract.template
-                                                              :pate-verdict-template))))
+                :name     (wrapper (or name
+                                       (i18n/localize lang
+                                                      (if (util/=as-kw category :contract)
+                                                        :pate.contract.template
+                                                        :pate-verdict-template))))
                 :category category
                 :modified timestamp
-                :deleted  (metadata/wrap wrapper false)})]
+                :deleted  (wrapper false)})]
      (mongo/update-by-id :organizations
                          org-id
                          {$push {:verdict-templates.templates
                                  (sc/validate schemas/PateSavedTemplate
                                               data)}})
-     (metadata/unwrap-all wrapper data))))
+     (metadata/unwrap-all data))))
 
-(defnk verdict-template [organization wrapper template-id]
+(defnk verdict-template [organization template-id]
   (some->> organization :verdict-templates :templates
            (util/find-by-id template-id)
-           (metadata/unwrap-all wrapper)))
+           metadata/unwrap-all))
 
 (defn verdict-template-summary [{published :published :as template}]
   (assoc (select-keys template
@@ -221,7 +220,7 @@
                                                         [$set
                                                          (util/kw-path :verdict-templates.templates.$.draft
                                                                        dict)]
-                                                        (metadata/wrap wrapper new-dict-value))
+                                                        (wrapper new-dict-value))
                                               acc)))
                                         nil
                                         template-settings-dependencies)]
@@ -231,10 +230,10 @@
         (assoc updated :modified timestamp))
       data)))
 
-(defnk settings [organization wrapper category]
+(defnk settings [organization category]
   (some->> [:verdict-templates :settings (keyword category)]
            (get-in organization)
-           (metadata/unwrap-all wrapper)))
+           metadata/unwrap-all))
 
 (defn- pack-dependencies
   "Packs settings dependency (either :plans or :reviews). Only included
@@ -298,20 +297,21 @@
   "Error code on failure (see schemas for details)."
   [{:keys [organization wrapper path value] :as options}]
   (let [{:keys [category draft]} (verdict-template options)
-        {:keys [path value op] :as  processed} (schemas/validate-and-process-value
-                                                 (template-schemas/verdict-template-schema category)
-                                                 path
-                                                 value
-                                                 draft
-                                                 {:settings (:draft (settings (assoc options
-                                                                                     :category category)))})]
+        {:keys [path value op]
+         :as processed} (schemas/validate-and-process-value
+                         (template-schemas/verdict-template-schema category)
+                         path
+                         value
+                         draft
+                         {:settings (:draft (settings (assoc options
+                                                             :category category)))})]
     (when op ;; Value could be nil
       (let [mongo-path (util/kw-path (cons :verdict-templates.templates.$.draft
                                            path))]
         (template-update options
                          (if (= op :remove)
                           {$unset {mongo-path 1}}
-                          {$set {mongo-path (metadata/wrap wrapper value)}}))))
+                          {$set {mongo-path (wrapper value)}}))))
     (assoc processed :category category)))
 
 (defn- draft-for-publishing
@@ -380,7 +380,7 @@
                                                           draft))]
     (template-update (dissoc options :timestamp)
                      {$set {:verdict-templates.templates.$.published
-                            {:published  (metadata/wrap wrapper timestamp)
+                            {:published  (wrapper timestamp)
                              :data       (dissoc (draft-for-publishing template)
                                                  :reviews :plans)
                              :inclusions (template-inclusions template)
@@ -389,24 +389,23 @@
 (defnk set-name [name wrapper :as options]
   (template-update options
                    {$set {:verdict-templates.templates.$.name
-                          (metadata/wrap wrapper name)}}))
+                          (wrapper name)}}))
 
 (defnk set-deleted [delete wrapper :as options]
   (template-update (dissoc options :timestamp)
                    {$set {:verdict-templates.templates.$.deleted
-                          (metadata/wrap wrapper delete)}}))
+                          (wrapper delete)}}))
 
 (defnk copy-verdict-template [lang wrapper :as options]
-  (let [{name :name :as template} (verdict-template (assoc options
-                                                           :wrapper (metadata/->Identity)))]
-    (new-verdict-template (merge options
-                                 (metadata/rewrap-all wrapper
-                                                      (select-keys template
-                                                                   [:draft :category]))
-                                 {:name (format "%s (%s)"
-                                                (metadata/unwrap wrapper name)
-                                                (i18n/localize lang
-                                                               :pate-copy-postfix))}))))
+  (let [{name :name :as template} (verdict-template options)]
+    (new-verdict-template (-> (select-keys template
+                                           [:draft :category])
+                              (update :draft (partial metadata/wrap-all wrapper) )
+                              (merge options
+                                     {:name (format "%s (%s)"
+                                                    (metadata/unwrap name)
+                                                    (i18n/localize lang
+                                                                   :pate-copy-postfix))})))))
 
 (defn- settings-key [category & extra]
   (->> [:verdict-templates.settings category extra]
@@ -430,7 +429,7 @@
                             (:id organization)
                             (assoc-in (if (= op :remove)
                                         {$unset {mongo-path 1}}
-                                        {$set {mongo-path (metadata/wrap wrapper value)}})
+                                        {$set {mongo-path (wrapper value)}})
                                       [$set (util/kw-path settings-key :modified)]
                                       timestamp))))
     processed))
@@ -466,8 +465,8 @@
        (remove :deleted)
        (filter :published)))
 
-(defnk operation-verdict-templates [organization wrapper]
-  (let [organization (metadata/unwrap-all wrapper organization)
+(defnk operation-verdict-templates [organization]
+  (let [organization (metadata/unwrap-all organization)
         published (->> (published-available-templates organization)
                        (map :id)
                        set)]
@@ -483,7 +482,7 @@
                                {$unset {path true}}
                                {$set {path template-id}}))))
 
-(defn application-verdict-templates [{:keys [organization wrapper]}
+(defn application-verdict-templates [{:keys [organization]}
                                      {:keys [primaryOperation]
                                       :as   application}]
   (let [{:keys [operation-verdict-templates
@@ -492,7 +491,7 @@
         app-operation               (-> primaryOperation :name keyword)]
     (->> verdict-templates
          :templates
-         (metadata/unwrap-all wrapper)
+         metadata/unwrap-all
          (filter (fn [{:keys [deleted published category]}]
                    (and (not deleted)
                         published
@@ -503,9 +502,8 @@
                  :default? (= id (get operation-verdict-templates
                                       app-operation))})))))
 
-(defnk selectable-verdict-templates [organization wrapper]
-  (let [published (published-available-templates (metadata/unwrap-all wrapper
-                                                                      organization))]
+(defnk selectable-verdict-templates [organization]
+  (let [published (published-available-templates (metadata/unwrap-all organization))]
     (->> published
          (map (fn [{:keys [category] :as template}]
                 (assoc template

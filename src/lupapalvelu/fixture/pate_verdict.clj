@@ -14,7 +14,7 @@
 (def users (filter (comp #{"admin" "sonja" "pena" "kaino@solita.fi" "erkki@example.com" "sipoo-r-backend"} :username) minimal/users))
 
 (defn wrap [v]
-  (metadata/wrap (metadata/wrapper "person" 12345) v))
+  ((metadata/wrapper "person" 12345) v))
 
 (defn plan [fi sv en]
   {:fi (wrap fi) :sv (wrap sv) :en (wrap en)})

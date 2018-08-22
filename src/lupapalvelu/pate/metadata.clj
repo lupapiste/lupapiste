@@ -9,63 +9,49 @@
    :_user     sc/Str
    :_modified ssc/Timestamp})
 
-(defprotocol Wrapper
-  (wrap [this value]
-    "Wraps the given value with metadata")
-  (unwrap [this m]
-    "Returns the underlying/initial value. If m is not a wrapped value
-    it is returned as it is.")
-  (rewrap [this m]
-    "Rewraps m only if it has been wrapped."))
-
 (defn- wrapped? [m]
   (and (map? m)
        (= (set (keys m))
           (set (keys WrappedValue)))))
 
-(deftype Metadata [user modified]
-  Wrapper
-  ;; Maps are not wrapped since they are considered as (repeating) branches.
-  (wrap [_ value] (if (map? value)
-                    value
-                    (sc/validate WrappedValue
-                                 {:_value    value
-                                  :_user     user
-                                  :_modified modified})))
-  (unwrap [_ m] (cond-> m
-                  (wrapped? m) :_value))
-  (rewrap [this m] (cond-> m
-                     (wrapped? m) (->>  :_value (wrap this)))))
+(defn wrap
+  "Maps value with given user and timestamp information. Maps are not
+  wrapped since they are considered as (repeating) branches. Thus, if
+  you want to rewrap value, it should be unwrapped first."
+  [user modified value]
+  (if (map? value)
+    value
+    (sc/validate WrappedValue
+                 {:_value    value
+                  :_user     user
+                  :_modified modified})))
 
-(deftype Identity []
-  Wrapper
-  (wrap [_ value] value)
-  (unwrap [_ m] m)
-  (rewrap [_ m] m))
+(defn unwrap
+  "Returns the wrapped underlying value. Unwrapped argument is
+  returned unchanged."
+  [m]
+  (cond-> m
+    (wrapped? m) :_value))
 
 (defn wrapper
+  "Returns the wrap function for given metadata."
   ([user modified]
-   (Metadata. user modified))
+   (partial wrap user modified))
   ([{:keys [user created]}]
    (wrapper (:username user) created)))
 
 (defn unwrap-all
   "Unwraps recursively the whole given structure."
-  [wrapper m]
-  (walk/prewalk (partial unwrap wrapper) m))
-
-(defn rewrap-all
-  "Rewraps recursively the whole given structure."
-  [wrapper m]
-  (walk/prewalk (partial rewrap wrapper) m))
+  [m]
+  (walk/prewalk unwrap m))
 
 (defn wrap-all
   "Wraps the whole structure. For each branch the wrapping stops at the
   first wrap. Branches are maps, all other data types are leaves."
-  [wrapper m]
+  [wrap-fn m]
   (if (map? m)
     (reduce-kv (fn [acc k v]
-                 (assoc acc k (wrap-all wrapper v)))
+                 (assoc acc k (wrap-all wrap-fn v)))
                {}
                m)
-    (wrap wrapper m)))
+    (wrap-fn m)))

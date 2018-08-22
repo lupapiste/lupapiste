@@ -125,11 +125,11 @@
    :input-validators [(partial action/non-blank-parameters [:org-id])]
    :pre-checks       [pate-enabled]}
   [command]
-  (let [{:keys [organization wrapper]} (template/command->options command)]
+  (let [{:keys [organization]} (template/command->options command)]
     (ok :verdict-templates (->> organization
                                 :verdict-templates
                                 :templates
-                                (map (util/fn->> (metadata/unwrap-all wrapper)
+                                (map (util/fn->> metadata/unwrap-all
                                                  template/verdict-template-summary))))))
 
 (defquery verdict-template-categories

@@ -528,13 +528,12 @@
           (into {}))))
 
 (defn verdict-list
-  [{:keys [lang application] :as command}]
+  [{:keys [lang application]}]
   (let [category (schema-util/application->category application)
         ;; There could be both contracts and verdicts.
         verdicts        (->> (:pate-verdicts application)
                              (filter #(util/=as-kw category (:category %)))
-                             (map (partial metadata/unwrap-all
-                                           (metadata/wrapper command))))
+                             (map metadata/unwrap-all))
         section-strings (reduce (fn [acc v]
                                   (assoc acc (:id v) (verdict-section-string v)))
                                 {}
@@ -583,7 +582,7 @@
                   application)
                 :pate-verdicts
                 (util/find-by-id (:verdict-id data))
-                (metadata/unwrap-all (metadata/wrapper command))
+                metadata/unwrap-all
                 (mask-verdict-data command))
            :category keyword))
   ([command]
@@ -662,7 +661,7 @@
     :default        (list a)))
 
 (defn- wrap [command value]
-  (metadata/wrap (metadata/wrapper command) value))
+  ((metadata/wrapper command) value))
 
 (defn- verdict-update
   "Updates application, using $elemMatch query for given verdict."
