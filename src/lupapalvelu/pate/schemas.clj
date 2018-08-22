@@ -54,10 +54,14 @@
                                              {:type review-type})]
           (sc/optional-key :plans)   [PateDependency]}))
 
-(defn- wrapped [schema]
-  {:_value    schema
-   :_user     sc/Str
-   :_modified ssc/Timestamp})
+(defn- wrapped
+  "Unwrapped value is supported as a fallback for existing templates."
+  [schema]
+  (sc/conditional
+   map? {:_value    schema
+         :_user     sc/Str
+         :_modified ssc/Timestamp}
+   :else schema))
 
 (defschema PateSavedTemplate
   (merge PateCategory
