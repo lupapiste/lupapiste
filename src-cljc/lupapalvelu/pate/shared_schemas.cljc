@@ -338,7 +338,7 @@
               (e.g., #'SchemaTypes)
 
   fun: (optional) If given, called for every dict schema
-                  (see VerdictSchemaTypes)"
+                  (see `VerdictSchemaTypes`)"
   ([schema-ref fun]
    {sc/Keyword
     (let [fun (or fun identity)]

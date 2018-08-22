@@ -9,6 +9,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.pate.columns :as cols]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.pdf-html :as html]
@@ -69,14 +70,14 @@
   (not-empty (filter not-empty
                      [(loc-non-blank lang
                                      :pate.complexity
-                                     (html/dict-value options :complexity))
-                      (html/dict-value options :complexity-text)])))
+                                     (cols/dict-value options :complexity))
+                      (cols/dict-value options :complexity-text)])))
 
 (defn property-id [application]
   (join-non-blanks "-"
                    [(-> application :propertyId
                         property/to-human-readable-property-id)
-                    (util/pcond->> (html/doc-value application
+                    (util/pcond->> (cols/doc-value application
                                                    :rakennuspaikka
                                                    :kiinteisto.maaraalaTunnus)
                                    ss/not-blank? (str "M"))]))
@@ -152,7 +153,7 @@
                                (cond-> acc
                                  flag? (assoc k v)))
                              {}
-                             (html/dict-value options :buildings))]
+                             (cols/dict-value options :buildings))]
     (->> (map (comp keyword :id) (operation-infos application))
          (map #(get buildings %))
          (remove nil?))))
@@ -194,7 +195,7 @@
               (assoc type :amount (count xs))))))
 
 (defn verdict-attachments [{:keys [lang application verdict] :as options}]
-  (let [v (html/dict-value options :attachments)]
+  (let [v (cols/dict-value options :attachments)]
 
     (->> (if (:published verdict)
            v
@@ -209,7 +210,7 @@
 
 (defn references [{:keys [lang verdict] :as options} kw]
   (when (references-included? options kw)
-    (let [ids (html/dict-value options kw)]
+    (let [ids (cols/dict-value options kw)]
      (->> (get-in verdict [:references kw])
           (filter #(util/includes-as-kw? ids (:id %)))
           (map (keyword lang))
@@ -217,10 +218,10 @@
 
 (defn review-info [options]
   (when (references-included? options :reviews)
-    (html/dict-value options :review-info)))
+    (cols/dict-value options :review-info)))
 
 (defn conditions [options]
-  (let [tags (->> (html/dict-value options :conditions)
+  (let [tags (->> (cols/dict-value options :conditions)
                   (map (fn [[k v]]
                          {:id   (name k)
                           :text (ss/trim (:condition v))}))
@@ -232,7 +233,7 @@
       [[:div.markup tags]])))
 
 (defn statements [{lang :lang :as options}]
-  (->> (html/dict-value options :statements)
+  (->> (cols/dict-value options :statements)
        (filter :given)
        (map (fn [{:keys [given text status]}]
               (join-non-blanks ", "
@@ -242,14 +243,14 @@
        not-empty))
 
 (defn collateral [{:keys [lang] :as options}]
-  (when (html/dict-value options :collateral-flag)
+  (when (cols/dict-value options :collateral-flag)
     (join-non-blanks ", "
-                     [(html/add-unit lang :eur (html/dict-value options
+                     [(cols/add-unit lang :eur (cols/dict-value options
                                                                 :collateral))
                       (loc-non-blank lang :pate.collateral-type
-                                     (html/dict-value options
+                                     (cols/dict-value options
                                                       :collateral-type))
-                      (html/dict-value options :collateral-date)])))
+                      (cols/dict-value options :collateral-date)])))
 
 
 
@@ -257,7 +258,7 @@
   "Handler with title (if given)"
   [options]
   (->> [:handler-title :handler]
-       (map (partial html/dict-value options))
+       (map (partial cols/dict-value options))
        (map ss/trim)
        (remove ss/blank?)
        (ss/join " ")))
@@ -332,19 +333,19 @@
            :organization (html/organization-name lang application)
            :muutoksenhaku (loc-fill-non-blank lang
                                               :pdf.not-later-than
-                                              (html/dict-value options
+                                              (cols/dict-value options
                                                                :muutoksenhaku))
            :voimassaolo (loc-fill-non-blank lang
                                             :pdf.voimassa.text
-                                            (html/dict-value options
+                                            (cols/dict-value options
                                                              :aloitettava)
-                                            (html/dict-value options
+                                            (cols/dict-value options
                                                              :voimassa))
            :voimassaolo-ya (loc-fill-non-blank lang
                                                :pdf.voimassaolo-ya
-                                               (html/dict-value options
+                                               (cols/dict-value options
                                                                 :start-date)
-                                               (html/dict-value options
+                                               (cols/dict-value options
                                                                 :end-date))
            :handler (handler options)
            :link-permits (link-permits options)

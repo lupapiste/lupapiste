@@ -1,6 +1,7 @@
 (ns lupapalvelu.pate.pdf-test
   "PDF testing concentrates mainly on the source value resolution."
-  (:require [lupapalvelu.pate.pdf :as pdf]
+  (:require [lupapalvelu.pate.columns :as cols]
+            [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.pdf-html :as html]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [midje.sweet :refer :all]))
@@ -81,18 +82,18 @@
                :address "Guang Hua Lu, 88 Beijing, Kiina"}] :in-any-order)))
 
 (facts "pathify"
-  (html/pathify :hello.world.foo.bar) => [:hello :world :foo :bar]
-  (html/pathify :hello) => [:hello]
-  (html/pathify "hello.world") => [:hello :world])
+  (cols/pathify :hello.world.foo.bar) => [:hello :world :foo :bar]
+  (cols/pathify :hello) => [:hello]
+  (cols/pathify "hello.world") => [:hello :world])
 
 (facts "doc-value"
   (let [app {:documents [{:schema-info {:name "foo"}
                           :data {:bar {:baz "hello"}}}]}]
-    (html/doc-value app :foo :hii.hoo) => nil
-    (html/doc-value app :foo :bar) => {:baz "hello"}
-    (html/doc-value app :foo :bar.baz) => "hello"
-    (html/doc-value app :bad :bar.baz) => nil
-    (html/doc-value app :foo :bar.baz.bam) => nil))
+    (cols/doc-value app :foo :hii.hoo) => nil
+    (cols/doc-value app :foo :bar) => {:baz "hello"}
+    (cols/doc-value app :foo :bar.baz) => "hello"
+    (cols/doc-value app :bad :bar.baz) => nil
+    (cols/doc-value app :foo :bar.baz.bam) => nil))
 
 (facts "dict-value"
   (against-background (verdict-schemas/verdict-schema :r nil)
@@ -109,29 +110,29 @@
                             :list {:id1 {:day  1524733200000
                                          :word "### Title"
                                          :bar  true}}}}]
-    (html/dict-value verdict :ts)
+    (cols/dict-value verdict :ts)
     => "25.4.2018"
-    (html/dict-value verdict :txt)
+    (cols/dict-value verdict :txt)
     => '([:div.markup ([:p {} [:span.underline {} "markup text"] [:br]])])
-    (html/dict-value verdict :foo)
+    (cols/dict-value verdict :foo)
     => "*regular text*"
-    (html/dict-value {:verdict verdict} :list.id1.day)
+    (cols/dict-value {:verdict verdict} :list.id1.day)
     => "26.4.2018"
-    (html/dict-value verdict :list.id1.word)
+    (cols/dict-value verdict :list.id1.word)
     => '([:div.markup ([:h3 {} "Title"])])
-    (html/dict-value {:verdict verdict} :list.id1.bar)
+    (cols/dict-value {:verdict verdict} :list.id1.bar)
     => true))
 
 (fact "add-unit"
-  (html/add-unit :fi :ha " ") => nil
-  (html/add-unit :fi :ha nil) => nil
-  (html/add-unit :fi :ha "20") => "20 ha"
-  (html/add-unit :fi :ha 10) => "10 ha"
-  (html/add-unit :fi :m2 88) => [:span 88 " m"[:sup 2]]
-  (html/add-unit :fi :m3 "hello") => [:span "hello" " m"[:sup 3]]
-  (html/add-unit :fi :kpl 8) => "8 kpl"
-  (html/add-unit :fi :section 88) => "\u00a788"
-  (html/add-unit :fi :eur "foo") => "foo\u20ac")
+  (cols/add-unit :fi :ha " ") => nil
+  (cols/add-unit :fi :ha nil) => nil
+  (cols/add-unit :fi :ha "20") => "20 ha"
+  (cols/add-unit :fi :ha 10) => "10 ha"
+  (cols/add-unit :fi :m2 88) => [:span 88 " m"[:sup 2]]
+  (cols/add-unit :fi :m3 "hello") => [:span "hello" " m"[:sup 3]]
+  (cols/add-unit :fi :kpl 8) => "8 kpl"
+  (cols/add-unit :fi :section 88) => "\u00a788"
+  (cols/add-unit :fi :eur "foo") => "foo\u20ac")
 
 (facts "property-id"
   (pdf/property-id {:propertyId "75341600550007"
@@ -445,13 +446,13 @@
   => ["Maanrakennusty\u00f6t" "Ulkopuolinen KVV-ty\u00f6" "Sis\u00e4puolinen KVV-ty\u00f6"])
 
 (facts "resolve-cell"
-  (html/resolve-cell {:lang "fi"} "hello" nil)
+  (cols/resolve-cell {:lang "fi"} "hello" nil)
   => [:div.cell {} "hello"]
-  (html/resolve-cell {:lang "fi"} [:span [:strong.foo "hello"]] nil)
+  (cols/resolve-cell {:lang "fi"} [:span [:strong.foo "hello"]] nil)
   => [:div.cell {} [:span [:strong.foo "hello"]]]
-  (html/resolve-cell {:lang "fi"} "hello" {:text "undo" :loc-prefix :phrase
+  (cols/resolve-cell {:lang "fi"} "hello" {:text "undo" :loc-prefix :phrase
                                            :width 50 :styles :not-supported})
   => [:div.cell {:class '("cell--50")} "Kumoa fraasi"]
-  (html/resolve-cell {:lang "fi"} 123 {:width 80 :styles [:bold :right]
+  (cols/resolve-cell {:lang "fi"} 123 {:width 80 :styles [:bold :right]
                                        :unit :m2})
   => [:div.cell {:class '("cell--80" :bold :right)} [:span 123 " m" [:sup 2]]])
