@@ -78,6 +78,7 @@
             ;; If :loc-many is given it is used as the title key if
             ;; the source value denotes multiple values.
             (sc/optional-key :loc-many) sc/Keyword
+            (sc/optional-key :loc-rule) {:rule sc/Any :key sc/Keyword}
             (sc/optional-key :source)   Source
             ;; Post-processing function for source value.
             (sc/optional-key :post-fn) (sc/conditional
@@ -262,8 +263,15 @@
   (cond-> value
     (and value post-fn) post-fn))
 
+(defn resolve-loc-rule [loc-rule data]
+  (let [rule-value (get-in data (:rule loc-rule))
+        rule-key (keyword (str (name (:key loc-rule)) "." (name rule-value)))]
+    (if (i18n/has-term? (:lang data) rule-key)
+      rule-key
+      (:key loc-rule))))
+
 (defn entry-row
-  [left-width {:keys [lang] :as data} [{:keys [loc loc-many source post-fn styles]} & cells]]
+  [left-width {:keys [lang] :as data} [{:keys [loc loc-many source post-fn styles loc-rule]} & cells]]
   (let [source-value (post-process (util/pcond-> (resolve-source data source)
                                                  string? ss/trim)
                                    post-fn)
@@ -288,7 +296,8 @@
                               (resolve-cell data
                                             (util/pcond-> source-value
                                                           sequential? first)
-                                            (first cells)))]
+                                            (first cells)))
+            loc             (if loc-rule (resolve-loc-rule loc-rule data) loc)]
 
         (when-not (util/empty-or-nil? cell-values)
           [:div.section
