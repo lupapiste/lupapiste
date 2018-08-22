@@ -35,6 +35,7 @@
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.state-machine :as state-machine]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
             [me.raynes.fs :as fs]
@@ -1041,6 +1042,7 @@
               file-options {:filename (format "%s-%s.pdf" (:id application) (i18n/localize lang :conversation.title))
                             :content  content
                             :size     (.available content)}
+              created (if created created (now))
               attachment-options {:attachment-type {:type-id    :keskustelu
                                                     :type-group :muut}
                                   :attachment-id   (when existing-keskustelu (:id existing-keskustelu))
@@ -1048,6 +1050,23 @@
                                   :required        false}]
           (upload-and-attach! command attachment-options file-options))
         (fail! :error.discussion-pdf-generation-failed)))))
+
+(defn comments-saved-as-attachment? [application state]
+  (let [state-kw (keyword state)]
+    (or (and (-> application (state-machine/state-graph) (states/terminal-state? state-kw))
+             (not= :canceled state-kw))
+        (= state-kw :foremanVerdictGiven))))
+
+(defn maybe-generate-comments-attachment [application state]
+  (when (comments-saved-as-attachment? application state)
+    (let [command (-> application
+                      (application->command)
+                      (assoc :lang "fi"))]
+      (try
+        (save-comments-as-attachment command state)
+        (catch Exception ex
+          (errorf ex "Could not produce comments pdf with application %s moving to state %s."
+                  (:id application) state))))))
 
 ;;
 ;; Pre-checks

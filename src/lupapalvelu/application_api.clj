@@ -640,11 +640,8 @@
         application        (:application command)
         archiving-project? (= (keyword (:permitType application)) :ARK)
         krysp?             (org/krysp-integration? organization (permit/permit-type application))
-        warranty?          (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))
-        terminal-but-not-canceled? (and (states/terminal-state? (sm/state-graph application) (keyword state))
-                                        (not= :canceled (keyword state)))
-        foremanVerdictGiven? (-> state (keyword) (= :foremanVerdictGiven))]
-    (when (or terminal-but-not-canceled? foremanVerdictGiven?)
+        warranty?          (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
+    (when (attachment/comments-saved-as-attachment? application state)
       (attachment/save-comments-as-attachment command {:state state}))
     (if warranty?
       (update-application command (util/deep-merge
