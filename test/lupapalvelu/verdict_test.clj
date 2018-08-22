@@ -14,7 +14,7 @@
             [sade.util :as util]
             [sade.xml :as xml]))
 
-(testable-privates lupapalvelu.verdict get-verdicts-with-attachments verdict-in-application-without-attachment? matching-poytakirja)
+(testable-privates lupapalvelu.verdict get-verdicts-with-attachments verdict-in-application-without-attachment? matching-poytakirja verdict-party-finder)
 
 (facts "Verdicts parsing"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/verdict-r-no-verdicts.xml"))]
@@ -143,7 +143,41 @@
                    xml/parse
                    cr/strip-xml-namespaces)]
       (check-for-tj-verdict example-vast-tj-application xml "application #1" "2018-01-15")
-      (check-for-tj-verdict example-iv-tj-application xml "application #2" "2018-01-17"))))
+      (check-for-tj-verdict example-iv-tj-application xml "application #2" "2018-01-17")))
+
+  (facts "Finding verdicts with email, name and phone number in addition to hetu"
+    (let [henk-tiedot (merge {:etunimi  {:value "Veijo"}
+                              :sukunimi {:value "Viranomainen"}
+                              :hetu     {:value "210281-9988"}}
+                             {:puhelin {:value "0123456789"}
+                              :email   {:value "Veijo.Viranomainen@example.com"}})
+          henkilo-hetu {:tag :henkilotunnus :attrs nil :content ["210281-9988"]}
+          henkilo-nimi {:tag :nimi :attrs nil :content [{:tag :sukunimi :attrs nil :content ["Viranomainen Veijo"]}]}
+          henkilo-email {:tag :sahkopostiosoite :attrs nil :content ["Veijo.Viranomainen@example.com"]}
+          henkilo-puhelin {:tag :puhelin :attrs nil :content ["0123456789"]}
+          henkilo-content [{:tag :osoite :attrs nil :content [{:tag :osoitenimi, :attrs nil :content [{:tag :teksti, :attrs {:xml:lang "und"}, :content ["Metsänpojankuja 1"]}]}
+                                                              {:tag :postinumero :attrs nil, :content ["03220"]}
+                                                              {:tag :postitoimipaikannimi, :attrs nil, :content ["TERVALAMPI"]}]}]
+          henkilo-data (fn [content] {:tag :henkilo :attrs nil, :content (concat henkilo-content content)})
+          party {:tag :Tyonjohtaja :attrs nil :content [{:tag :tyonjohtajaRooliKoodi :attrs nil :content ["vastaava työnjohtaja"]}
+                                                         {:tag :VRKrooliKoodi :attrs nil :content ["työnjohtaja"]}
+                                                         {:tag :vaadittuPatevyysluokka :attrs nil, :content ["A"]}
+                                                         {:tag :koulutus :attrs nil :content ["arkkitehti"]}
+                                                         {:tag :valmistumisvuosi :attrs nil :content ["1994"]}
+                                                         {:tag :alkamisPvm :attrs nil :content ["2015-11-29"]}
+                                                         {:tag :hakemuksenSaapumisPvm :attrs nil :content ["2015-11-30"]}
+                                                         {:tag :sijaistettavaHlo :attrs nil :content []}
+                                                         {:tag :paatosPvm :attrs nil :content ["2015-11-29"]}
+                                                         {:tag :paatostyyppi :attrs nil :content ["hyväksytty"]}]}]
+      (verdict-party-finder henk-tiedot [party]) => nil
+      (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-hetu]))]
+        (verdict-party-finder henk-tiedot [amended-party]) => amended-party)
+      (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-email]))]
+        (verdict-party-finder henk-tiedot [amended-party]) => amended-party)
+      (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-nimi]))]
+        (verdict-party-finder henk-tiedot [amended-party]) => amended-party)
+      (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-puhelin]))]
+        (verdict-party-finder henk-tiedot [amended-party]) => amended-party))))
 
 (facts "Section requirement for verdicts"
        (let [org        {:section {:operations ["pool" "house"]
