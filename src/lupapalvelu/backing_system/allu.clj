@@ -333,13 +333,14 @@
     (map? body) (let [{:keys [schema]} body-itf]
                   (when schema (sc/validate schema body))
                   (json/encode body))
-    (vector? body) (mapv (fn [{:keys [schema]} bodypart]
-                           (update bodypart :content (fn [content]
-                                                       (when schema (sc/validate schema content))
-                                                       (if (or (string? content)
-                                                               (instance? InputStream content))
-                                                         content ; HACK
-                                                         (json/encode content)))))
+    (vector? body) (mapv (fn [{:keys [schema]} {:keys [content] :as bodypart}]
+                           (when schema (sc/validate schema content))
+                           (if (or (string? content)
+                                   (instance? InputStream content)) ; HACK
+                             bodypart
+                             (-> bodypart
+                                 (update :content json/encode)
+                                 (assoc :encoding "UTF-8"))))
                          body-itf body)
     :else (assert false (str "Unsupported body type: " body))))
 
@@ -523,10 +524,6 @@
   ([] (make-handler (env/dev-mode?)))
   ([dev-mode?]
    (-> (if dev-mode? imessages-mock-handler (make-remote-handler (env/value :allu :url)))
-       ((fn [handler]
-          (fn [request]
-            (clojure.pprint/pprint (select-keys request [:uri :request-method :headers :content-type :body]))
-            (handler request))))
        (jwt-authorize (env/value :allu :jwt))
        encode-body
        get-attachment-files
