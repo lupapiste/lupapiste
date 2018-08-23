@@ -23,7 +23,7 @@
   (fn [accessor]
     (fn [& args]
       (some->> (apply accessor args)
-               (metadata/wrap "Megamigraatio" timestamp)))))
+               (metadata/wrap "Verdict draft Pate migration" timestamp)))))
 
 
 ;;
@@ -37,6 +37,9 @@
 (defn- get-in-poytakirja [key]
   (get-in-verdict (conj [:paatokset 0 :poytakirjat 0] key)))
 
+(defn get-in-paivamaarat [key]
+  (get-in-verdict (conj [:paatokset 0 :paivamaarat] key)))
+
 (def- wrapper-accessors
   "Contains functions for accessing relevant Pate verdict data from
   current verdict drafts. These return the raw values but are
@@ -46,8 +49,8 @@
    :verdict-section (get-in-poytakirja :pykala)
    :verdict-code    (comp str (get-in-poytakirja :status))
    :verdict-text    (get-in-poytakirja :paatos)
-   :anto            (get-in-verdict [:paivamaarat :anto])
-   :lainvoimainen   (get-in-verdict [:paivamaarat :lainvoimainen])
+   :anto            (get-in-paivamaarat :anto)
+   :lainvoimainen   (get-in-paivamaarat :lainvoimainen)
    :reviews         (constantly "TODO")
    :foremen         (constantly "TODO")
    :conditions      (constantly "TODO")})
@@ -57,7 +60,7 @@
   {:id       (get-in-verdict [:id])
    :modified (get-in-verdict [:timestamp])
    :user     (constantly "TODO")
-   :category (constantly "TODO")
+   :category (constantly "TODO contract?")
    })
 
 (defn- accessors [timestamp]
@@ -96,10 +99,10 @@
           :verdict-text    (access :verdict-text)
           :anto            (access :anto)
           :lainvoimainen   (access :lainvoimainen)
-          :review          (access :reviews)
+          :reviews         (access :reviews)
           :foremen         (access :foremen)
           :conditions      (access :conditions)}
-   :template nil ;; TODO
+   :template "TODO"
    :legacy? true})
 
 (defn ->pate-legacy-verdict [application verdict timestamp]
