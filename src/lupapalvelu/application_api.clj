@@ -634,16 +634,14 @@
         application        (:application command)
         archiving-project? (= (keyword (:permitType application)) :ARK)
         krysp?             (org/krysp-integration? organization (permit/permit-type application))
-        warranty?          (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))
-        terminal-but-not-canceled? (and (states/terminal-state? (sm/state-graph application) (keyword state))
-                                        (not= :canceled (keyword state)))]
+        warranty?          (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
+    (when (attachment/comments-saved-as-attachment? application state)
+      (attachment/save-comments-as-attachment command {:state state}))
     (if warranty?
       (update-application command (util/deep-merge
                                     (app-state/state-transition-update (keyword state) (:created command) application user)
                                     {$set (app/warranty-period (:created command))}))
       (update-application command (app-state/state-transition-update (keyword state) (:created command) application user)))
-    (when terminal-but-not-canceled?
-      (attachment/save-comments-as-attachment command))
     (when-not archiving-project?
       (archiving-util/mark-application-archived-if-done application (:created command) user))))
 
