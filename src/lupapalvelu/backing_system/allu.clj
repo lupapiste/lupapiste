@@ -18,7 +18,8 @@
             [sade.env :as env]
             [sade.http :as http]
             [sade.schemas :as ssc :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
-                                  ApplicationId ISO-3166-alpha-2 date-string]]
+                                          ApplicationId ISO-3166-alpha-2 date-string]]
+            [lupapalvelu.application :as application]
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common]
@@ -26,6 +27,7 @@
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]
             [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.messages :as imessages :refer [IntegrationMessage]]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo])
   (:import [java.io InputStream]))
 
@@ -350,6 +352,7 @@
 ;;;; ===================================================================================================================
 
 ;;; TODO: Get rid of ::command.
+;;; TODO: :: -> :
 
 (defn- application-cancel-request [{:keys [application] :as command}]
   (let [allu-id (get-in application [:integrationKeys :ALLU :id])]
@@ -518,6 +521,11 @@
 ;;;; State and error handling
 ;;;; ===================================================================================================================
 
+(def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
+
+(defn- allu-http-fail! [response]
+  (allu-fail! :error.allu.http (select-keys response [:status :body])))
+
 (defn- make-handler
   ([] (make-handler (env/dev-mode?)))
   ([dev-mode?]
@@ -535,18 +543,25 @@
 
 ;;; TODO: The (= (env/feature? :jms) false) situation.
 
-;; TODO: Save application.integrationKeys.ALLU
 ;; TODO: Logging
-;; FIXME: HTTP timeout and error handling
+;; FIXME: HTTP timeout handling
 ;; FIXME: Error handling is very crude
 (defn- allu-jms-msg-handler [session]
-  (fn [msg]
-    (try
-      (allu-instance msg)
-      (jms/commit session)
+  (fn [{{{app-id :id} :application {user-id :user} :user} ::command interface-path ::interface-path :as msg}]
+    (logging/with-logging-context {:userId user-id :applicationId app-id}
+      (try
+        (match (allu-instance msg)
+          {:status (:or 200 201), :body body}
+          ;; TODO: Get operation name from integration message template:
+          (do (info "ALLU operation" (s/join \. (map name interface-path)) "succeeded")
+              (when (= interface-path [:placementcontracts :create])
+                (application/set-integration-key app-id :ALLU {:id body})))
 
-      (catch Exception _
-        (jms/rollback session)))))
+          response (allu-http-fail! response))
+        (jms/commit session)
+
+        (catch Exception _
+          (jms/rollback session))))))
 
 ;;; TODO: Manage closing with mount instead of jms/register-*
 
@@ -561,81 +576,60 @@
 (defn- produce-allu-msg! [request]
   (jms/produce-with-context allu-jms-queue-name (nippy/freeze request)))
 
-(def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
-
-(defn- allu-http-fail! [response]
-  (allu-fail! :error.allu.http (select-keys response [:status :body])))
-
 ;;;; Mix up pure and impure into an API
 ;;;; ===================================================================================================================
 
 (defn allu-application? [organization-id permit-type]
   (and (env/feature? :allu) (= organization-id "091-YA") (= permit-type "YA")))
 
-;;; TODO: DRY these up:
-
-(declare create-placement-contract!)
-
-(defn submit-application!
-  "Submit application to ALLU. Returns the value that should be saved to application.integrationKeys.ALLU."
-  [{{:keys [permitSubtype]} :application :as command}]
-  {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
-  ;; TODO: Use message queue to delay and retry interaction with ALLU.
-  ;; TODO: Send errors to authority instead of applicant?
-  ;; TODO: Non-placement-contract ALLU applications
-  {:id (create-placement-contract! command)})
-
-(declare update-placement-contract!)
+(defn- create-placement-contract!
+  "Create placement contract in ALLU."
+  [command]
+  (produce-allu-msg! (placement-creation-request command)))
 
 ;; TODO: Non-placement-contract ALLU applications
-(def update-application!
+(defn submit-application!
+  "Submit application to ALLU and save the returned id as application.integrationKeys.ALLU.id."
+  [{{:keys [permitSubtype]} :application :as command}]
+  {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
+  (create-placement-contract! command))
+
+;; TODO: Will error if user changes the application to contain invalid data, is that what we want?
+(defn- update-placement-contract!
+  "Update placement contract in ALLU (if it had been sent there)."
+  [{:keys [application] :as command}]
+  (when (application/submitted? application)
+    (produce-allu-msg! (placement-update-request true command))))
+
+;; TODO: Non-placement-contract ALLU applications
+(defn update-application!
   "Update application in ALLU (if it had been sent there)."
-  update-placement-contract!)
+  [{{:keys [permitSubtype]} :application :as command}]
+  {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
+  (update-placement-contract! command))
 
 (defn cancel-application!
   "Cancel application in ALLU (if it had been sent there)."
   [{:keys [application] :as command}]
-  (when-let [allu-id (-> application :integrationKeys :ALLU :id)]
-    (let [request (application-cancel-request command)]
-      (match (allu-instance request)
-        {:status (:or 200 201)} (info (:id application) "was canceled in ALLU as" allu-id)
-        response (allu-http-fail! response)))))
+  (when (application/submitted? application)
+    (produce-allu-msg! (application-cancel-request command))))
 
-(defn- create-placement-contract!
-  "Create placement contract in ALLU. Returns ALLU id for the contract."
-  [{:keys [application] :as command}]
-  (let [request (placement-creation-request command)]
-    (match (allu-instance request)
-      {:status (:or 200 201), :body allu-id} (do (info (:id application) "was created in ALLU as" allu-id)
-                                                 allu-id)
-      response (allu-http-fail! response))))
-
-(defn lock-placement-contract!
+(defn- lock-placement-contract!
   "Lock placement contract in ALLU for verdict evaluation."
-  [{:keys [application] :as command}]
-  (let [request (placement-update-request false command)]
-    (match (allu-instance request)
-      {:status (:or 200 201), :body allu-id} (info (:id application) "was locked in ALLU as" allu-id)
-      response (allu-http-fail! response))))
+  [command]
+  (produce-allu-msg! (placement-update-request false command)))
 
-;; TODO: Will error if user changes the application to contain invalid data, is that what we want?
-(defn- update-placement-contract!
-  "Update application in ALLU (if it had been sent there)."
-  [{:keys [application] :as command}]
-  (when-let [allu-id (-> application :integrationKeys :ALLU :id)]
-    (let [request (placement-update-request true command)]
-      (match (allu-instance request)
-        {:status (:or 200 201), :body allu-id} (info (:id application) "was updated in ALLU as" allu-id)
-        response (allu-http-fail! response)))))
+;; TODO: Non-placement-contract ALLU applications
+(defn lock-application!
+  "Lock application in ALLU for verdict evaluation."
+  [{{:keys [permitSubtype]} :application :as command}]
+  {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
+  (lock-placement-contract! command))
 
 (defn- send-attachment!
   "Send `attachment` of `application` to ALLU. Return the fileId of the file that was sent."
-  [{:keys [application] :as command} {attachment-id :id {:keys [fileId]} :latestVersion :as attachment}]
-  (let [request (attachment-send command attachment)]
-    (match (allu-instance request)
-      {:status (:or 200 201)} (do (info "attachment" attachment-id "of" (:id application) "was sent to ALLU")
-                                  fileId)
-      response (allu-http-fail! response))))
+  [command attachment]
+  (produce-allu-msg! (attachment-send command attachment)))
 
 (defn send-attachments!
   "Send the specified `attachments` of `(:application command)` to ALLU
