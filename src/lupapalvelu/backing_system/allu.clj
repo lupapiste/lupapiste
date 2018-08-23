@@ -32,8 +32,6 @@
             [lupapalvelu.mongo :as mongo])
   (:import [java.io InputStream]))
 
-;;; FIXME: ALLU does not like the attachment requests now :(
-
 ;;;; Schemas
 ;;;; ===================================================================================================================
 
@@ -360,7 +358,7 @@
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
     {::interface-path [:applications :cancel]
      ::params         {:id allu-id}
-     ::command        (select-keys command [:application :user])}))
+     ::command        (select-keys command [:application :user :action])}))
 
 (defn- attachment-send [{:keys [application] :as command}
                         {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment}]
@@ -372,12 +370,12 @@
                                   :description (localize lang :attachmentType type-group type-id)
                                   :mimeType    (:contentType latestVersion)}
                        :file     (-> attachment :latestVersion :fileId)}
-     ::command        (select-keys command [:application :user])}))
+     ::command        (select-keys command [:application :user :action])}))
 
 (defn- placement-creation-request [{:keys [application] :as command}]
   {::interface-path [:placementcontracts :create]
    ::params         {:application (application->allu-placement-contract true application)}
-   ::command        (select-keys command [:application :user])})
+   ::command        (select-keys command [:application :user :action])})
 
 (defn placement-update-request [pending-on-client {:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)]
@@ -385,7 +383,7 @@
     {::interface-path [:placementcontracts :update]
      ::params         {:id          allu-id
                        :application (application->allu-placement-contract pending-on-client application)}
-     ::command        (select-keys command [:application :user])}))
+     ::command        (select-keys command [:application :user :action])}))
 
 ;;;; integration-messages
 ;;;; ===================================================================================================================
@@ -542,7 +540,7 @@
 (defstate allu-instance
   :start (make-handler))
 
-;;; TODO: The (= (env/feature? :jms) false) situation.
+;;; TODO: The (= (env/feature? :jms) false) situation. Shouldn't we just delete the JMS feature flag?
 
 ;; FIXME: HTTP timeout handling
 ;; FIXME: Error handling is very crude
