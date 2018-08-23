@@ -1176,6 +1176,9 @@
                     (raw sonja :preview-pate-verdict :id app-id
                          :verdict-id verdict-id)
                     => fail?)
+                  (fact "Verdicts can no longer be fetched from the backing system"
+                    (command sonja :check-for-verdict :id app-id)
+                    => (err "error.published-pate-verdicts-exist"))
                   (fact "Pena can see  published verdict"
                     (query pena :pate-verdict
                            :id app-id :verdict-id verdict-id)
@@ -1458,3 +1461,27 @@
     (fact "Published verdict cannot be deleted"
       (command sonja :delete-pate-verdict :id app-id
                :verdict-id verdict-id) => fail?)))
+
+(fact "Presence of backing system verdicts disables Pate commands"
+  ;; -------------------------
+  ;; Test state initialization
+  (let [{template-id :id} (init-verdict-template sipoo org-id :r)
+        application (create-and-submit-application mikko :municipality sonja-muni)
+        application-id (:id application)]
+    (command sipoo :set-verdict-template-name
+             :org-id org-id
+             :template-id template-id
+             :name "Uusi nimi")
+    (command sipoo :save-verdict-template-draft-value
+             :org-id org-id
+             :template-id template-id
+             :path [:giver]
+             :value :viranhaltija)
+    (publish-verdict-template sipoo org-id template-id) => ok?
+    (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
+    (command sonja :approve-application :id application-id :lang "fi") => ok?
+    (command sonja :check-for-verdict :id application-id) => ok?
+  ;; -------------------------
+
+    (command sonja :new-pate-verdict-draft :id application-id :template-id template-id)
+    => (err "error.backing-system-verdicts-exist")))

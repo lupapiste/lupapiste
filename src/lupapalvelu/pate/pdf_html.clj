@@ -14,6 +14,7 @@
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
+            [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.pdf.html-template-common :as common]
             [rum.core :as rum]
@@ -321,9 +322,9 @@
     (let [category-kw    (util/kw-path (when legacy? :legacy) category)
           legacy-kt-ymp? (contains? #{:legacy.kt :legacy.ymp}
                                     category-kw)
-          contract?      (util/=as-kw category :contract)
           loc-fn         (fn [& kws]
-                           (apply i18n/localize lang (flatten kws)))]
+                           (apply i18n/localize lang (flatten kws)))
+          contract?      (vc/contract? verdict)]
       [:div.row.pad-after
        [:div.cell.cell--40
         (organization-name lang application)
@@ -334,7 +335,8 @@
                 (not published)
                 [:span.preview (i18n/localize lang :pdf.preview)]
 
-                (and (not contract?) (not legacy-kt-ymp?))
+                (and (not contract?)
+                     (not legacy-kt-ymp?))
                 (i18n/localize lang (case category-kw
                                       :p :pdf.poikkeamispaatos
                                       :attachmentType.paatoksenteko.paatos)))]]
