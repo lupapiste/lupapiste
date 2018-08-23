@@ -149,13 +149,12 @@
     [:div.row.pad-after.pad-before
      [:cell.cell--100 {:dangerouslySetInnerHTML {:__html "&nbsp;"}}]]]])
 
-(defn language [verdict]
-  (-> verdict :data :language))
+
 
 (defn verdict-html
   "Source-data is a map containing keys referred in pdf-layout source
   definitions. Returns :header, :body, :footer map."
   [application verdict source-data pdf-layout]
   {:body   (html (cols/content source-data pdf-layout))
-   :header (html (verdict-header (language verdict) application verdict) true)
+   :header (html (verdict-header (cols/language verdict) application verdict) true)
    :footer (html (verdict-footer))})

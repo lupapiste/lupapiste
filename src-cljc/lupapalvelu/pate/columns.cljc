@@ -3,7 +3,7 @@
                :cljs [lupapalvelu.ui.common :as common])
             #?(:clj  [lupapalvelu.pate.date :as date])
             #?(:clj  [lupapalvelu.domain :as domain])
-            [clojure.string :as s]
+            [sade.shared-strings :as ss]
             [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.pdf-layouts :as layouts]
@@ -17,15 +17,48 @@
    :cljs (def finnish-date common/format-timestamp))
 
 #?(:clj (def localize i18n/localize)
-   :cljs (defn localize [_ term] (common/loc term)))
+   :cljs (defn localize [_ & terms] (apply common/loc terms)))
+
+#?(:clj (def localize-and-fill i18n/localize-and-fill)
+   :cljs (defn localize-and-fill [lang term & values]
+           (let [s (localize lang (if (sequential? term)
+                                    term
+                                    (ss/split (name term) #"\.")))]
+             (reduce (fn [acc i]
+                       (ss/replace acc
+                                  (js/sprintf "{%s}" i)
+                                  (nth values i)))
+                     s
+                     (range (count values))))))
 
 (defn pathify [kw-path]
-  (map keyword (s/split (name kw-path) #"\.")))
+  (map keyword (ss/split (name kw-path) #"\.")))
 
 #?(:clj (defn doc-value [application doc-name kw-path]
           (get-in (domain/get-document-by-name application (name doc-name))
                   (cons :data (pathify kw-path))))
    :cljs (defn doc-value [& _]))
+
+(defn join-non-blanks
+  "Trims and joins."
+  [separator & coll]
+  (->> coll
+       flatten
+       (map ss/trim)
+       (remove ss/blank?)
+       (ss/join separator)))
+
+(defn loc-non-blank
+  "Localized string or nil if the last part is blank."
+  [lang & parts]
+  (when-not (-> parts last ss/blank?)
+    (localize lang parts)))
+
+(defn loc-fill-non-blank
+  "Localize and fill if every value is non-blank"
+  [lang loc-key & values]
+  (when (every? (comp not ss/blank? str) values)
+    (apply (partial localize-and-fill lang loc-key) values)))
 
 (defn- verdict-schema [{:keys [category schema-version legacy?]}]
   (if legacy?
@@ -44,7 +77,7 @@
                                                         (:dictionary
                                                          (verdict-schema opts)))]
     (cond
-      (and (:phrase-text schema) (not (s/blank? value)))
+      (and (:phrase-text schema) (not (ss/blank? value)))
       (list [:div.markup (markup/markup->tags value)])
 
       (and (:date schema) (integer? value))
@@ -56,7 +89,7 @@
 (defn add-unit
   "Result is nil for blank value."
   [lang unit v]
-  (when-not (s/blank? (str v))
+  (when-not (ss/blank? (str v))
     (case unit
       :ha      (str v " " (localize lang :unit.hehtaaria))
       :m2      [:span v " m" [:sup 2]]
@@ -89,7 +122,7 @@
                                            (cons ::styles path)))
                                  (get-in source-value
                                          [::styles ::cell])))
-        blank-as-nil #(when-not (s/blank? %) %)
+        blank-as-nil #(when-not (ss/blank? %) %)
         value (or text (util/pcond-> (get-in source-value path source-value)
                                      string? blank-as-nil))]
     (when value
@@ -106,7 +139,7 @@
 (defn entry-row
   [left-width {:keys [lang] :as data} [{:keys [loc loc-many source post-fn styles]} & cells]]
   (let [source-value (post-process (util/pcond-> (resolve-source data source)
-                                                 string? s/trim)
+                                                 string? ss/trim)
                                    post-fn)
         multiple?    (and (sequential? source-value)
                           (> (count source-value) 1))]
@@ -151,3 +184,102 @@
   (->> entries
        (map (partial entry-row left-width data))
        (filter not-empty)))
+
+;; Shared verdict properties
+
+(defn complexity [{lang :lang :as options}]
+  (not-empty (filter not-empty
+                     [(loc-non-blank lang
+                                     :pate.complexity
+                                     (dict-value options :complexity))
+                      (dict-value options :complexity-text)])))
+
+(defn references-included? [{:keys [verdict]} kw]
+  (get-in verdict [:data (keyword (str (name kw) "-included"))]))
+
+(defn references [{:keys [lang verdict] :as options} kw]
+  (when (references-included? options kw)
+    (let [ids (dict-value options kw)]
+     (->> (get-in verdict [:references kw])
+          (filter #(util/includes-as-kw? ids (:id %)))
+          (map (keyword lang))
+          sort))))
+
+(defn review-info [options]
+  (when (references-included? options :reviews)
+    (dict-value options :review-info)))
+
+(defn conditions [options]
+  (let [tags (->> (dict-value options :conditions)
+                  (map (fn [[k v]]
+                         {:id   (name k)
+                          :text (ss/trim (:condition v))}))
+                  (remove (comp ss/blank? :text))
+                  (sort-by :id)
+                  (map (comp markup/markup->tags :text)))]
+    (when (seq tags)
+      ;; Extra "layer" needed for proper entry-row layout.
+      [[:div.markup tags]])))
+
+(defn statements [{lang :lang :as options}]
+  (->> (dict-value options :statements)
+       (filter :given)
+       (map (fn [{:keys [given text status]}]
+              (join-non-blanks ", "
+                               text
+                               (finnish-date given)
+                               (localize lang :statement status))))
+       not-empty))
+
+(defn collateral [{:keys [lang] :as options}]
+  (when (dict-value options :collateral-flag)
+    (join-non-blanks ", "
+                     [(add-unit lang :eur (dict-value options
+                                                                :collateral))
+                      (loc-non-blank lang :pate.collateral-type
+                                     (dict-value options
+                                                      :collateral-type))
+                      (dict-value options :collateral-date)])))
+
+(defn muutoksenhaku [{lang :lang :as options}]
+  (loc-fill-non-blank lang
+                      :pdf.not-later-than
+                      (dict-value options :muutoksenhaku)))
+
+(defn voimassaolo [{lang :lang :as options}]
+  (loc-fill-non-blank lang
+                      :pdf.voimassa.text
+                      (dict-value options :aloitettava)
+                      (dict-value options :voimassa)))
+
+(defn voimassaolo-ya [{lang :lang :as options}]
+  (loc-fill-non-blank lang
+                      :pdf.voimassaolo-ya
+                      (dict-value options :start-date)
+                      (dict-value options :end-date)))
+
+(defn signatures
+  "Signatures as a timestamp ordered list"
+  [{:keys [verdict]}]
+  (when (util/=as-kw :contract (:category verdict))
+    (->> verdict :data :signatures
+         vals
+         (sort-by :date)
+         (map #(update % :date finnish-date)))))
+
+(defn verdict-properties [options]
+  (assoc options
+         :complexity (complexity options)
+         :reviews (references options :reviews)
+         :review-info (review-info options)
+         :plans   (references options :plans)
+         :conditions (conditions options)
+         :statements (statements options)
+         :collateral (collateral options)
+         :muutoksenhaku (muutoksenhaku options)
+         :voimassaolo (voimassaolo options)
+         :voimassaolo-ya (voimassaolo-ya options)
+         :signatures (signatures options)))
+
+(defn language [verdict]
+  (-> verdict :data :language))

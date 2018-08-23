@@ -2,8 +2,7 @@
   (:require [cljs-time.coerce :as tc]
             [cljs-time.core :as t]
             [cljs-time.format :as tf]
-            [clojure.string :as s]
-            [clojure.string :as str]
+            [sade.shared-strings :as ss]
             [goog.events :as googe]
             [goog.object :as googo]
             [rum.core :as rum]
@@ -16,7 +15,8 @@
   (->> (flatten args)
        (remove nil?)
        (map name)
-       (apply js/loc)))
+       (ss/join ".")
+       js/loc))
 
 (defn loc-html [tag & args]
   [tag
@@ -119,10 +119,10 @@
   "Upserts existing :class definition. Flags use css-flags semantics."
   [attr & flags]
   (update attr :class (fn [cls]
-                        (let [s       (s/join " " (flatten [cls]))
+                        (let [s       (ss/join " " (flatten [cls]))
                               old-map (zipmap (map keyword
-                                                   (remove s/blank?
-                                                           (s/split s #"\s+")))
+                                                   (remove ss/blank?
+                                                           (ss/split s #"\s+")))
                                               (repeat true))
                               updates (apply hash-map flags)]
                           (->> (merge old-map updates)
@@ -135,9 +135,9 @@
 
   \"hello world\" -> #\"(?mi)^.*hello.*world.*$\""
   [term]
-  (let [fuzzy (->> (s/split term #"\s")
+  (let [fuzzy (->> (ss/split term #"\s")
                    (map goog.string/regExpEscape)
-                   (s/join ".*"))]
+                   (ss/join ".*"))]
     (re-pattern (str "(?mi)^.*" fuzzy ".*$"))))
 
 
@@ -156,7 +156,7 @@
                   (str "lang="  (js/loc.getCurrentLanguage))
                   (str "municipality="  municipality)
                   features]
-        url      (str "/oskari/fullmap.html?" (str/join "&" params))]
+        url      (str "/oskari/fullmap.html?" (ss/join "&" params))]
     (js/window.open url)))
 
 ;; Callthrough for goog.events.getUniqueId.
@@ -219,9 +219,9 @@
                        flatten
                        (remove nil?)
                        (map name)
-                       (s/join "-")))]
+                       (ss/join "-")))]
     (cond
-      (s/blank? test-id) target
+      (ss/blank? test-id) target
       (map? target)      (assoc target :data-test-id test-id)
       (vector? target)   (if (-> target second map?)
                            (assoc-in target [1 :data-test-id] test-id)
@@ -231,7 +231,7 @@
   "Current language is appended to theiven keyword prefix:
   :foo -> :foo-fi"
   [prefix]
-  (when-not (s/blank? prefix)
+  (when-not (ss/blank? prefix)
     (->> (map name [prefix (get-current-language)])
-         (s/join "-")
+         (ss/join "-")
          keyword)))

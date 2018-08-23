@@ -10,6 +10,7 @@
             [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
+            [lupapalvelu.ui.pate.published-verdict :as published]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
@@ -37,8 +38,10 @@
   ([{:keys [state path] :as options}]
    (updater options (path/value path state))))
 
+(defonce raw-verdict (atom {}))
 
 (defn reset-verdict [{:keys [verdict references filled]}]
+  (reset! raw-verdict verdict)
   (reset! state/current-verdict
           (when verdict
             {:state (:data verdict)
@@ -164,7 +167,8 @@
   [options]
   [:div.pate-verdict
    (verdict-toolbar options)
-   (sections/sections options :verdict)])
+   (sections/sections options :verdict)
+   (published/published-verdict @raw-verdict)])
 
 
 (defn current-verdict-schema []

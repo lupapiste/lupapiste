@@ -22,26 +22,6 @@
             [sade.util :as util]
             [swiss.arrows :refer :all]))
 
-(defn join-non-blanks
-  "Trims and joins."
-  [separator & coll]
-  (->> coll
-       flatten
-       (map ss/trim)
-       (remove ss/blank?)
-       (ss/join separator)))
-
-(defn loc-non-blank
-  "Localized string or nil if the last part is blank."
-  [lang & parts]
-  (when-not (-> parts last ss/blank?)
-    (i18n/localize lang parts)))
-
-(defn loc-fill-non-blank
-  "Localize and fill if every value is non-blank"
-  [lang loc-key & values]
-  (when (every? (comp ss/not-blank? str) values)
-    (apply (partial i18n/localize-and-fill lang loc-key) values)))
 
 (defn applicants
   "Returns list of name, address maps for properly filled party
@@ -55,32 +35,25 @@
                 henkilo)))
        (map (fn [{:keys [yritysnimi henkilotiedot osoite]}]
               {:name (or (-> yritysnimi ss/trim not-empty)
-                         (join-non-blanks " "
-                                          (:etunimi henkilotiedot)
-                                          (:sukunimi henkilotiedot)))
+                         (cols/join-non-blanks " "
+                                               (:etunimi henkilotiedot)
+                                               (:sukunimi henkilotiedot)))
                :address (let [{:keys [katu postinumero postitoimipaikannimi
                                       maa]} osoite]
                           (->> [katu (str postinumero " " postitoimipaikannimi)
                                 (when (util/not=as-kw maa :FIN)
                                   (i18n/localize lang :country maa))]
-                               (join-non-blanks ", ")))}))
+                               (cols/join-non-blanks ", ")))}))
        (remove (util/fn-> :name ss/blank?))))
 
-(defn complexity [{lang :lang :as options}]
-  (not-empty (filter not-empty
-                     [(loc-non-blank lang
-                                     :pate.complexity
-                                     (cols/dict-value options :complexity))
-                      (cols/dict-value options :complexity-text)])))
-
 (defn property-id [application]
-  (join-non-blanks "-"
-                   [(-> application :propertyId
-                        property/to-human-readable-property-id)
-                    (util/pcond->> (cols/doc-value application
-                                                   :rakennuspaikka
-                                                   :kiinteisto.maaraalaTunnus)
-                                   ss/not-blank? (str "M"))]))
+  (cols/join-non-blanks "-"
+                        [(-> application :propertyId
+                             property/to-human-readable-property-id)
+                         (util/pcond->> (cols/doc-value application
+                                                        :rakennuspaikka
+                                                        :kiinteisto.maaraalaTunnus)
+                                        ss/not-blank? (str "M"))]))
 
 (defn value-or-other [lang value other & loc-keys]
   (if (util/=as-kw value :other)
@@ -105,9 +78,9 @@
                     info         :henkilotiedot
                     skills       :patevyys
                     role         :role}]
-                (let [designer-name (join-non-blanks " "
-                                                     [(:etunimi info)
-                                                      (:sukunimi info)])]
+                (let [designer-name (cols/join-non-blanks " "
+                                                          [(:etunimi info)
+                                                           (:sukunimi info)])]
                   (when-not (ss/blank? designer-name)
                     {:role       (or role
                                      (value-or-other lang
@@ -118,7 +91,7 @@
                                    (value-or-other lang
                                                    (:koulutusvalinta skills)
                                                    (:koulutus skills))]
-                                  (join-non-blanks ", "))}))))
+                                  (cols/join-non-blanks ", "))}))))
          (remove nil?)
          (sort (fn [a _]
                  (if (= (:role a) head-loc) -1 1))))))
@@ -170,8 +143,8 @@
           (conj <> (park :autopaikat-yhteensa))
           (remove (comp ss/blank? :amount))
           (cons {:text   (-<>> [tag description]
-                               (join-non-blanks ": ")
-                               (join-non-blanks " \u2013 " <> building-id)
+                               (cols/join-non-blanks ": ")
+                               (cols/join-non-blanks " \u2013 " <> building-id)
                                (vector :strong))
                  :amount ""}))))
 
@@ -204,54 +177,6 @@
                {:text   (i18n/localize lang :attachmentType type-group type-id)
                 :amount amount}))
         (sort-by :text))))
-
-(defn references-included? [{:keys [verdict]} kw]
-  (get-in verdict [:data (keyword (str (name kw) "-included"))]))
-
-(defn references [{:keys [lang verdict] :as options} kw]
-  (when (references-included? options kw)
-    (let [ids (cols/dict-value options kw)]
-     (->> (get-in verdict [:references kw])
-          (filter #(util/includes-as-kw? ids (:id %)))
-          (map (keyword lang))
-          sort))))
-
-(defn review-info [options]
-  (when (references-included? options :reviews)
-    (cols/dict-value options :review-info)))
-
-(defn conditions [options]
-  (let [tags (->> (cols/dict-value options :conditions)
-                  (map (fn [[k v]]
-                         {:id   (name k)
-                          :text (ss/trim (:condition v))}))
-                  (remove (comp ss/blank? :text))
-                  (sort-by :id)
-                  (map (comp markup/markup->tags :text)))]
-    (when (seq tags)
-      ;; Extra "layer" needed for proper entry-row layout.
-      [[:div.markup tags]])))
-
-(defn statements [{lang :lang :as options}]
-  (->> (cols/dict-value options :statements)
-       (filter :given)
-       (map (fn [{:keys [given text status]}]
-              (join-non-blanks ", "
-                               text
-                               (date/finnish-date given)
-                               (i18n/localize lang :statement status))))
-       not-empty))
-
-(defn collateral [{:keys [lang] :as options}]
-  (when (cols/dict-value options :collateral-flag)
-    (join-non-blanks ", "
-                     [(cols/add-unit lang :eur (cols/dict-value options
-                                                                :collateral))
-                      (loc-non-blank lang :pate.collateral-type
-                                     (cols/dict-value options
-                                                      :collateral-type))
-                      (cols/dict-value options :collateral-date)])))
-
 
 
 (defn handler
@@ -286,14 +211,7 @@
                         (true? val) (conj result (i18n/localize lang (get vastattavat-loc-keys key)))
                         :else result))
                     []))))
-(defn signatures
-  "Signatures as a timestamp ordered list"
-  [{:keys [verdict]}]
-  (when (util/=as-kw :contract (:category verdict))
-    (->> verdict :data :signatures
-         vals
-         (sort-by :date)
-         (map #(update % :date date/finnish-date)))))
+
 
 (defn verdict-properties
   "Adds all kinds of different properties to the options. It is then up
@@ -301,7 +219,7 @@
   pdf-layouts whether every property is displayed in the pdf or not."
   [{:keys [lang application] :as options}]
   (let [buildings (verdict-buildings options)]
-    (assoc options
+    (assoc (cols/verdict-properties options)
            :application-id (:id application)
            :property-id (property-id application)
            :applicants (->> (applicants options)
@@ -310,7 +228,6 @@
                             (interpose "\n"))
            :operations (assoc-in (operations options)
                                  [0 ::styles :text] :bold)
-           :complexity (complexity options)
            :designers (designers options)
            :primary (primary-operation-data application)
            :paloluokka (->> buildings
@@ -324,40 +241,17 @@
                                       ::styles {:row :pad-before}})
                           flatten)
            :attachments (verdict-attachments options)
-           :reviews (references options :reviews)
-           :review-info (review-info options)
-           :plans   (references options :plans)
-           :conditions (conditions options)
-           :statements (statements options)
-           :collateral (collateral options)
            :organization (html/organization-name lang application)
-           :muutoksenhaku (loc-fill-non-blank lang
-                                              :pdf.not-later-than
-                                              (cols/dict-value options
-                                                               :muutoksenhaku))
-           :voimassaolo (loc-fill-non-blank lang
-                                            :pdf.voimassa.text
-                                            (cols/dict-value options
-                                                             :aloitettava)
-                                            (cols/dict-value options
-                                                             :voimassa))
-           :voimassaolo-ya (loc-fill-non-blank lang
-                                               :pdf.voimassaolo-ya
-                                               (cols/dict-value options
-                                                                :start-date)
-                                               (cols/dict-value options
-                                                                :end-date))
            :handler (handler options)
            :link-permits (link-permits options)
-           :tj-vastattavat-tyot (tj-vastattavat-tyot application lang)
-           :signatures (signatures options))))
+           :tj-vastattavat-tyot (tj-vastattavat-tyot application lang))))
 
 
 (defn verdict-html
   [application verdict]
   (html/verdict-html application
                      verdict
-                     (verdict-properties {:lang        (html/language verdict)
+                     (verdict-properties {:lang        (cols/language verdict)
                                           :application (tools/unwrapped application)
                                           :verdict     verdict})
                      (layouts/pdf-layout verdict)))
@@ -382,11 +276,11 @@
                                 :id   (:id verdict)}
               :locked          true
               :read-only       true
-              :contents        (i18n/localize (html/language verdict)
+              :contents        (i18n/localize (cols/language verdict)
                                               (if contract?
                                                 :pate.verdict-table.contract
                                                 :pate-verdict))}
-             {:filename (i18n/localize-and-fill (html/language verdict)
+             {:filename (i18n/localize-and-fill (cols/language verdict)
                                                 (if contract?
                                                   :pdf.contract.filename
                                                   :pdf.filename)
@@ -412,7 +306,7 @@
       (att/upload-and-attach! command
                               {:created       created
                                :attachment-id attachment-id}
-                              {:filename (i18n/localize-and-fill (html/language verdict)
+                              {:filename (i18n/localize-and-fill (cols/language verdict)
                                                                  (if contract?
                                                                    :pdf.contract.filename
                                                                    :pdf.filename)
@@ -428,7 +322,7 @@
                                 "pate-verdict-draft"
                                 (verdict-html application verdict))]
     (if (:ok pdf)
-      (assoc pdf :filename (i18n/localize-and-fill (html/language verdict)
+      (assoc pdf :filename (i18n/localize-and-fill (cols/language verdict)
                                                    :pdf.draft
                                                    (:id application)
                                                    (date/finnish-date created)))

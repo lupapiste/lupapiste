@@ -17,6 +17,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.columns :as cols]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.metadata :as metadata]
@@ -1021,9 +1022,9 @@
   (merge {:verdict-date  (:verdict-date data)
           :verdict-giver (if (util/=as-kw :lautakunta (:giver template))
                            (:boardname references)
-                           (pdf/join-non-blanks " "
-                                                (:handler-title data)
-                                                (:handler data)))}
+                           (cols/join-non-blanks " "
+                                                 (:handler-title data)
+                                                 (:handler data)))}
          (when-let [lainvoimainen (:lainvoimainen data)]
            (when (integer? lainvoimainen)
              {:lainvoimainen lainvoimainen}))))
