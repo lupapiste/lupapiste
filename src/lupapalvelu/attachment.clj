@@ -1051,11 +1051,14 @@
           (upload-and-attach! command attachment-options file-options))
         (fail! :error.discussion-pdf-generation-failed)))))
 
-(defn comments-saved-as-attachment? [application state]
+(defn comments-saved-as-attachment?
+  "Checks if the application moves to a terminal state. As all of the effectively terminal states are not terminal
+   in the states/terminal-state? sense, the special cases need to be handled separately."
+  [application state]
   (let [state-kw (keyword state)]
     (or (and (-> application (state-machine/state-graph) (states/terminal-state? state-kw))
              (not= :canceled state-kw))
-        (= state-kw :foremanVerdictGiven))))
+        (#{:foremanVerdictGiven :ready :finished :acknowledged} state-kw))))
 
 (defn resolve-lang-for-comments-attachment [application]
   (let [lang (-> application

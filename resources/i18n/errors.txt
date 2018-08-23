@@ -973,4 +973,4 @@
 "permanent-archive-disabled" "en" "Municipality's PDF/A conversion was unavailable when the file was uploaded."
 "permanent-archive-disabled" "fi" "Kunnan PDF/A-konversio ei ollut käytettävissä tiedoston lisäyshetkellä."
 "permanent-archive-disabled" "sv" "Kommunens PDF/A-konvertering var inte i bruk när filen lades till."
-"error.discussion-pdf-generation-failed" "fi" "Keskustelujen tallentaminen pdf-liitteenä epäonnistui. Yritä hetken päästä uudelleen."
+"error.discussion-pdf-generation-failed" "fi" "Keskustelujen tallentaminen PDF-liitteenä epäonnistui. Yritä hetken päästä uudelleen."
