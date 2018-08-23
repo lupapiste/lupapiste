@@ -1057,11 +1057,21 @@
              (not= :canceled state-kw))
         (= state-kw :foremanVerdictGiven))))
 
-(defn maybe-generate-comments-attachment [application state]
+(defn resolve-lang-for-comments-attachment [application]
+  (let [lang (-> application
+                 :handlers
+                 (first)
+                 :id
+                 (usr/get-user-by-id [:language])
+                 :language)]
+    (if lang lang "fi")))
+
+(defn maybe-generate-comments-attachment [user application state]
   (when (comments-saved-as-attachment? application state)
-    (let [command (-> application
+    (let [lang    (resolve-lang-for-comments-attachment application)
+          command (-> application
                       (application->command)
-                      (assoc :lang "fi"))]
+                      (assoc :lang lang :user user))]
       (try
         (save-comments-as-attachment command state)
         (catch Exception ex
