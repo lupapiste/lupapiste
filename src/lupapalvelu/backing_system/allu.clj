@@ -18,6 +18,7 @@
             [sade.core :refer [def- fail! now]]
             [sade.env :as env]
             [sade.http :as http]
+            [sade.shared-schemas :as sssc]
             [sade.schemas :as ssc :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
                                           ApplicationId ISO-3166-alpha-2 date-string]]
             [lupapalvelu.application :as application]
@@ -29,7 +30,8 @@
             [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.messages :as imessages :refer [IntegrationMessage]]
             [lupapalvelu.logging :as logging]
-            [lupapalvelu.mongo :as mongo])
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.states :as states])
   (:import [java.io InputStream]))
 
 ;;;; Schemas
@@ -158,6 +160,16 @@
    (optional-key :propertyIdentificationNumber) Kiinteistotunnus
    :startTime                                   (date-string :date-time-no-ms)
    (optional-key :workDescription)              NonBlankStr})
+
+(defschema MiniCommand
+  {:application                               {:id           ssc/ApplicationId
+                                               :organization sc/Str
+                                               :state        (apply sc/enum (map name states/all-states))}
+   :action                                    sc/Str
+   :user                                      {:id       sc/Str
+                                               :username sc/Str}
+   (sc/optional-key :latestAttachmentVersion) {:fileId        sssc/FileId
+                                               :storageSystem sssc/StorageSystem}})
 
 ;;;; Constants
 ;;;; ===================================================================================================================
@@ -350,15 +362,23 @@
 ;;;; Requests
 ;;;; ===================================================================================================================
 
-;;; TODO: Get rid of ::command.
-;;; TODO: :: -> :
+(sc/defn ^{:private true, :always-validate true} minimize-command :- MiniCommand
+  ([{:keys [application action user]}]
+    {:application (select-keys application (keys (:application MiniCommand)))
+     :action      action
+     :user        (select-keys user (keys (:user MiniCommand)))})
+  ([command attachment]
+    (let [mini-attachment (-> (:latestVersion attachment)
+                              (select-keys (keys (get MiniCommand (sc/optional-key :latestAttachmentVersion))))
+                              (update :storageSystem keyword))]
+      (assoc (minimize-command command) :latestAttachmentVersion mini-attachment))))
 
 (defn- application-cancel-request [{:keys [application] :as command}]
   (let [allu-id (get-in application [:integrationKeys :ALLU :id])]
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
     {::interface-path [:applications :cancel]
      ::params         {:id allu-id}
-     ::command        (select-keys command [:application :user :action])}))
+     ::command        (minimize-command command)}))
 
 (defn- attachment-send [{:keys [application] :as command}
                         {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment}]
@@ -370,12 +390,12 @@
                                   :description (localize lang :attachmentType type-group type-id)
                                   :mimeType    (:contentType latestVersion)}
                        :file     (-> attachment :latestVersion :fileId)}
-     ::command        (select-keys command [:application :user :action])}))
+     ::command        (minimize-command command attachment)}))
 
 (defn- placement-creation-request [{:keys [application] :as command}]
   {::interface-path [:placementcontracts :create]
    ::params         {:application (application->allu-placement-contract true application)}
-   ::command        (select-keys command [:application :user :action])})
+   ::command        (minimize-command command)})
 
 (defn placement-update-request [pending-on-client {:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)]
@@ -383,13 +403,13 @@
     {::interface-path [:placementcontracts :update]
      ::params         {:id          allu-id
                        :application (application->allu-placement-contract pending-on-client application)}
-     ::command        (select-keys command [:application :user :action])}))
+     ::command        (minimize-command command)}))
 
 ;;;; integration-messages
 ;;;; ===================================================================================================================
 
-;; TODO: Avoid needing to plumb the entire command here:
-(defn- base-integration-message [{:keys [application user action]} message-subtype direction status data]
+(sc/defn ^{:private true :always-validate true} base-integration-message :- IntegrationMessage
+  [{:keys [application user action]} :- MiniCommand message-subtype direction status data]
   {:id           (mongo/create-id)
    :direction    direction
    :messageType  message-subtype
@@ -398,18 +418,16 @@
    :format       "json"
    :created      (now)
    :status       status
-   :application  (select-keys application [:id :organization :state])
-   :initator     (select-keys user [:id :username])
+   :application  application
+   :initator     user
    :action       action
    :data         data})
 
 ;; TODO: :attachment-files and :attachmentsCount for attachment messages
-(sc/defn ^{:private true, :always-validate true} request-integration-message :- IntegrationMessage
-  [command http-request message-subtype]
+(defn- request-integration-message [command http-request message-subtype]
   (base-integration-message command message-subtype "out" "processing" http-request))
 
-(sc/defn ^{:private true, :always-validate true} response-integration-message :- IntegrationMessage
-  [command endpoint http-response message-subtype]
+(defn- response-integration-message [command endpoint http-response message-subtype]
   (base-integration-message command message-subtype "in" "done"
                             {:endpoint endpoint
                              :response (select-keys http-response [:status :body])}))
@@ -480,18 +498,17 @@
                :request-method (:request-method interface))
         (assoc-when :body (params->body (:body interface) params)))))
 
-;; TODO: Get by with just [ApplicationId Attachment]:
 (defn- get-attachment-files [handler]
-  (fn [{{:keys [application]} ::command interface-path ::interface-path params ::params :as request}]
+  (fn [{{:keys [application latestAttachmentVersion]} ::command interface-path ::interface-path :as request}]
     (if (= interface-path [:attachments :create])
-      (let [fileId (:file params)]
-        (if-let [file-map (get-attachment-file! application fileId)]
-          (let [file-content ((:content file-map))]
-            (-> request
-                (assoc-in [::params :file] file-content)
-                (assoc-in [:body 1 :content] file-content)
-                handler))
-          (assert false "unimplemented")))
+      (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
+                                              {:versions [latestAttachmentVersion]})] ; HACK
+        (let [file-content ((:content file-map))]
+          (-> request
+              (assoc-in [::params :file] file-content)
+              (assoc-in [:body 1 :content] file-content)
+              handler))
+        (assert false "unimplemented"))
       (handler request))))
 
 (defn- save-messages [handler]
@@ -519,6 +536,8 @@
 
 ;;;; State and error handling
 ;;;; ===================================================================================================================
+
+;;; TODO: make-handler and allu-jms-msg-handler could use some refactoring, they are tangled up.
 
 (def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
 

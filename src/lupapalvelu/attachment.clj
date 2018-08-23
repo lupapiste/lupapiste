@@ -693,9 +693,10 @@
 
 (defn get-attachment-file!
   "Returns the attachment file without access checking, otherwise nil."
-  [application file-id]
-  (when (seq application)
-    (storage/download application file-id)))
+  ([application file-id] (when (seq application)
+                           (storage/download application file-id)))
+  ([application-id file-id attachment] (when application-id
+                                         (storage/download application-id file-id attachment))))
 
 (defn- get-attachment-version-file [application attachment {:keys [fileId onkaloFileId filename contentType]} user preview?]
   (when (or (not user) (access/can-access-attachment? user application attachment))
