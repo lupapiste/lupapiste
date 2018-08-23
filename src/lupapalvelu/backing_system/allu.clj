@@ -6,12 +6,13 @@
             [clojure.walk :refer [postwalk]]
             [monger.operators :refer [$set $in]]
             [cheshire.core :as json]
+            [lupapiste-jms.client :as jms-client]
             [mount.core :refer [defstate]]
             [schema.core :as sc :refer [defschema optional-key enum]]
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
-            [taoensso.timbre :refer [info]]
+            [taoensso.timbre :refer [info error]]
             [taoensso.nippy :as nippy]
             [sade.util :refer [dissoc-in assoc-when]]
             [sade.core :refer [def- fail! now]]
@@ -359,7 +360,7 @@
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
     {::interface-path [:applications :cancel]
      ::params         {:id allu-id}
-     ::command        command}))
+     ::command        (select-keys command [:application :user])}))
 
 (defn- attachment-send [{:keys [application] :as command}
                         {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment}]
@@ -371,12 +372,12 @@
                                   :description (localize lang :attachmentType type-group type-id)
                                   :mimeType    (:contentType latestVersion)}
                        :file     (-> attachment :latestVersion :fileId)}
-     ::command        command}))
+     ::command        (select-keys command [:application :user])}))
 
 (defn- placement-creation-request [{:keys [application] :as command}]
   {::interface-path [:placementcontracts :create]
    ::params         {:application (application->allu-placement-contract true application)}
-   ::command        command})
+   ::command        (select-keys command [:application :user])})
 
 (defn placement-update-request [pending-on-client {:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)]
@@ -384,7 +385,7 @@
     {::interface-path [:placementcontracts :update]
      ::params         {:id          allu-id
                        :application (application->allu-placement-contract pending-on-client application)}
-     ::command        command}))
+     ::command        (select-keys command [:application :user])}))
 
 ;;;; integration-messages
 ;;;; ===================================================================================================================
@@ -512,7 +513,7 @@
   (fn [{interface ::interface :as request}]
     (handler (-> request
                  (update :body (partial body->json (:body interface)))
-                 (assoc-when :content-type (when-not (vector? (:body interface))) :json)))))
+                 (assoc-when :content-type (when-not (vector? (:body interface)) :json))))))
 
 (defn- jwt-authorize [handler jwt]
   (fn [request]
@@ -543,35 +544,36 @@
 
 ;;; TODO: The (= (env/feature? :jms) false) situation.
 
-;; TODO: Logging
 ;; FIXME: HTTP timeout handling
 ;; FIXME: Error handling is very crude
 (defn- allu-jms-msg-handler [session]
   (fn [{{{app-id :id} :application {user-id :user} :user} ::command interface-path ::interface-path :as msg}]
     (logging/with-logging-context {:userId user-id :applicationId app-id}
-      (try
-        (match (allu-instance msg)
-          {:status (:or 200 201), :body body}
-          ;; TODO: Get operation name from integration message template:
-          (do (info "ALLU operation" (s/join \. (map name interface-path)) "succeeded")
-              (when (= interface-path [:placementcontracts :create])
-                (application/set-integration-key app-id :ALLU {:id body})))
+      ;; TODO: Get operation name from integration message template:
+      (let [operation-name (s/join \. (map name interface-path))]
+        (try
+          (match (allu-instance msg)
+            {:status (:or 200 201), :body body}
+            (do (info "ALLU operation" operation-name "succeeded")
+                (when (= interface-path [:placementcontracts :create])
+                  (application/set-integration-key app-id :ALLU {:id body})))
 
-          response (allu-http-fail! response))
-        (jms/commit session)
+            response (allu-http-fail! response))
+          (jms/commit session)
 
-        (catch Exception _
-          (jms/rollback session))))))
+          (catch Exception exn
+            (error operation-name "failed:" (type exn) (.getMessage exn))
+            (error "Rolling back" operation-name)
+            (jms/rollback session)))))))
 
-;;; TODO: Manage closing with mount instead of jms/register-*
+(defstate allu-jms-session
+  :start (jms/create-transacted-session (jms/get-default-connection))
+  :stop (.close allu-jms-session))
 
-(defstate ^{:on-reload :noop} allu-jms-session
-  :start (-> (jms/get-default-connection)
-             (jms/create-transacted-session)
-             (jms/register-session :consumer)))
-
-(defstate ^{:on-reload :noop} allu-jms-consumer
-  :start (jms/create-nippy-consumer allu-jms-session allu-jms-queue-name (allu-jms-msg-handler allu-jms-session)))
+(defstate allu-jms-consumer
+  :start (jms-client/listen allu-jms-session (jms/queue allu-jms-queue-name)
+                            (jms/nippy-callbacker (allu-jms-msg-handler allu-jms-session)))
+  :stop (.close allu-jms-consumer))
 
 (defn- produce-allu-msg! [request]
   (jms/produce-with-context allu-jms-queue-name (nippy/freeze request)))
@@ -629,7 +631,8 @@
 (defn- send-attachment!
   "Send `attachment` of `application` to ALLU. Return the fileId of the file that was sent."
   [command attachment]
-  (produce-allu-msg! (attachment-send command attachment)))
+  (produce-allu-msg! (attachment-send command attachment))
+  (-> attachment :latestVersion :fileId))
 
 (defn send-attachments!
   "Send the specified `attachments` of `(:application command)` to ALLU

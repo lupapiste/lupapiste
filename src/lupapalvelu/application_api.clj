@@ -347,8 +347,8 @@
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (do (bs/submit-application! command)
-          (app/submit (assoc command :application application))
+      (do (app/submit command)
+          (bs/submit-application! command)
           (ok)))))
 
 (defcommand refresh-ktj
