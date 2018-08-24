@@ -178,16 +178,6 @@
                 :amount amount}))
         (sort-by :text))))
 
-
-(defn handler
-  "Handler with title (if given)"
-  [options]
-  (->> [:handler-title :handler]
-       (map (partial cols/dict-value options))
-       (map ss/trim)
-       (remove ss/blank?)
-       (ss/join " ")))
-
 (defn link-permits
   "Since link-permits resolution is quite database intensive operation
   it is only done for YA and TJ category."
@@ -242,7 +232,6 @@
                           flatten)
            :attachments (verdict-attachments options)
            :organization (html/organization-name lang application)
-           :handler (handler options)
            :link-permits (link-permits options)
            :tj-vastattavat-tyot (tj-vastattavat-tyot application lang))))
 

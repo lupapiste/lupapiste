@@ -21,5 +21,5 @@
    (map-indexed (fn [i m]
                   (section i m))
                 (cols/content (cols/verdict-properties {:lang (cols/language verdict)
-                                                        :verdict verdict})
+                                                                 :verdict verdict})
                               (layouts/pdf-layout verdict)))])

@@ -936,6 +936,7 @@ div.published-verdict {
                 display:       table-cell;
                 white-space:   pre-wrap;
                 padding-right: 1em;
+                vertical-align: top;
 
                 &:last-child {
                   padding-right: 0;

@@ -128,7 +128,7 @@
 
 (defn dict-resolve
   "Path format: [repeating index repeating index ... value-dict].
- Repeating denotes :repeating schema, index is arbitrary repeating
+  Repeating denotes :repeating schema, index is arbitrary repeating
   index (skipped during resolution) and value-dict is the final dict
   for the item schema.
 

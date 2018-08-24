@@ -17,13 +17,15 @@
    :cljs (def finnish-date common/format-timestamp))
 
 #?(:clj (def localize i18n/localize)
-   :cljs (defn localize [_ & terms] (apply common/loc terms)))
+   :cljs (defn localize [_ & terms]
+           (->> (flatten terms)
+                (map name)
+                (ss/join "." )
+                common/loc)))
 
 #?(:clj (def localize-and-fill i18n/localize-and-fill)
    :cljs (defn localize-and-fill [lang term & values]
-           (let [s (localize lang (if (sequential? term)
-                                    term
-                                    (ss/split (name term) #"\.")))]
+           (let [s (localize lang term)]
              (reduce (fn [acc i]
                        (ss/replace acc
                                   (js/sprintf "{%s}" i)
@@ -267,6 +269,15 @@
          (sort-by :date)
          (map #(update % :date finnish-date)))))
 
+(defn handler
+  "Handler with title (if given)"
+  [options]
+  (->> [:handler-title :handler]
+       (map (partial dict-value options))
+       (map ss/trim)
+       (remove ss/blank?)
+       (ss/join " ")))
+
 (defn verdict-properties [options]
   (assoc options
          :complexity (complexity options)
@@ -279,7 +290,8 @@
          :muutoksenhaku (muutoksenhaku options)
          :voimassaolo (voimassaolo options)
          :voimassaolo-ya (voimassaolo-ya options)
-         :signatures (signatures options)))
+         :signatures (signatures options)
+         :handler (handler options)))
 
 (defn language [verdict]
   (-> verdict :data :language))

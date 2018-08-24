@@ -30743,6 +30743,7 @@ div.published-verdict .section > .row .cell {
   display: table-cell;
   white-space: pre-wrap;
   padding-right: 1em;
+  vertical-align: top;
 }
 
 div.published-verdict .section > .row .cell:last-child {

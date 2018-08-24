@@ -15,8 +15,7 @@
   (->> (flatten args)
        (remove nil?)
        (map name)
-       (ss/join ".")
-       js/loc))
+       (apply js/loc)))
 
 (defn loc-html [tag & args]
   [tag
