@@ -36,6 +36,7 @@
             [rum.core :as rum]
             [sade.coordinate :as coord]
             [sade.core :refer :all]
+            [sade.property :as sp]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as validators]
@@ -332,6 +333,14 @@
                                                      buildings-inclusion-keys)
                               buildings-inclusion))))))
 
+(defn init--property-id
+  [{:keys [application] :as initmap}]
+  (let [value (when (dict-included? initmap :property-id)
+                (:propertyId application))]
+    (if (nil? value)
+      initmap
+      (assoc-in initmap [:draft :data :property-id] (sp/to-human-readable-property-id value)))))
+
 (defn- integer-or-nil [value]
   (when (integer? value)
     value))
@@ -391,6 +400,7 @@
       init--verdict-giver-type
       (init--dict-by-application :operation application-operation)
       (init--dict-by-application :address :address)
+      init--property-id
       init--permit-period))
 
 (defmethod initialize-verdict-draft :tj

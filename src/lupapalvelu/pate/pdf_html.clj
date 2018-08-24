@@ -78,6 +78,12 @@
             ;; If :loc-many is given it is used as the title key if
             ;; the source value denotes multiple values.
             (sc/optional-key :loc-many) sc/Keyword
+            ;; Localization rule which can be used for different localization key
+            ;; values based on application details.
+            ;; For example: {:rule [:application :operation-name] :key :applications.operation}
+            ;; adds operation name from application at end of given key, like:
+            ;; applications.operation.ya-jatkoaika. If localization key doesn't found, only
+            ;; given :key value is used as localization key.
             (sc/optional-key :loc-rule) {:rule sc/Any :key sc/Keyword}
             (sc/optional-key :source)   Source
             ;; Post-processing function for source value.

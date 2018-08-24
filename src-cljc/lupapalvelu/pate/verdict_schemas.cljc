@@ -114,16 +114,21 @@
 
 (defn versub-operation
   [category]
-  {:dictionary {:operation {:text {:loc-prefix :pate.operation}}
-                :address   {:text {:loc-prefix (if (= category :ya)
-                                                 :pate.location
-                                                 :pate.address)}}}
+  {:dictionary (merge {:operation {:text {:loc-prefix :pate.operation}}
+                       :address   {:text {:loc-prefix (if (= category :ya)
+                                                        :pate.location
+                                                        :pate.address)}}}
+                       (if (= category :ya)
+                         {:property-id {:text {:loc-prefix :pate.property-id}}}))
    :section    {:id   :pate-operation
                 :grid {:columns 2
                        :rows    [[{:dict  :operation
                                    :align :full}]
                                  [{:dict  :address
-                                   :align :full}]]}}})
+                                   :align :full}]
+                                 (if (= category :ya)
+                                   [{:dict  :property-id
+                                     :align :full}])]}}})
 
 (defn versub-verdict
   "Collateral part (toggle, amount, type, date) included only when
