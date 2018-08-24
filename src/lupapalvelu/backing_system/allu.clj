@@ -566,38 +566,39 @@
   "ALLU request handler. Returns nil, calls `allu-fail!` on HTTP errors."
   (combined-middleware (make-handler)))
 
-;;; TODO: The (= (env/feature? :jms) false) situation. Shouldn't we just delete the JMS feature flag?
-
-;; FIXME: HTTP timeout handling
-;; FIXME: Error handling is very crude
-(defn- allu-jms-msg-handler [session]
-  (fn [{{{app-id :id} :application {user-id :user} :user} ::command interface-path ::interface-path :as msg}]
-    (logging/with-logging-context {:userId user-id :applicationId app-id}
-      (try
-        (allu-request-handler msg)
-        (jms/commit session)
-
-        (catch Exception exn
-          (let [operation-name (interface-path->string interface-path)]
-            (error operation-name "failed:" (type exn) (.getMessage exn))
-            (error "Rolling back" operation-name))
-          (jms/rollback session))))))
-
 (def- allu-jms-queue-name "lupapalvelu.backing-system.allu")
 
-(defstate ^AutoCloseable allu-jms-session
-  "JMS session for `allu-jms-consumer`"
-  :start (jms/create-transacted-session (jms/get-default-connection))
-  :stop (.close allu-jms-session))
+(when (env/feature? :jms)
+  ;; FIXME: HTTP timeout handling
+  ;; FIXME: Error handling is very crude
+  (defn- allu-jms-msg-handler [session]
+    (fn [{{{app-id :id} :application {user-id :user} :user} ::command interface-path ::interface-path :as msg}]
+      (logging/with-logging-context {:userId user-id :applicationId app-id}
+        (try
+          (allu-request-handler msg)
+          (jms/commit session)
 
-(defstate ^AutoCloseable allu-jms-consumer
-  "JMS consumer for the ALLU request JMS queue"
-  :start (jms-client/listen allu-jms-session (jms/queue allu-jms-queue-name)
-                            (jms/nippy-callbacker (allu-jms-msg-handler allu-jms-session)))
-  :stop (.close allu-jms-consumer))
+          (catch Exception exn
+            (let [operation-name (interface-path->string interface-path)]
+              (error operation-name "failed:" (type exn) (.getMessage exn))
+              (error "Rolling back" operation-name))
+            (jms/rollback session))))))
 
-(defn- produce-allu-msg! [request]
-  (jms/produce-with-context allu-jms-queue-name (nippy/freeze request)))
+  (defstate ^AutoCloseable allu-jms-session
+    "JMS session for `allu-jms-consumer`"
+    :start (jms/create-transacted-session (jms/get-default-connection))
+    :stop (.close allu-jms-session))
+
+  (defstate ^AutoCloseable allu-jms-consumer
+    "JMS consumer for the ALLU request JMS queue"
+    :start (jms-client/listen allu-jms-session (jms/queue allu-jms-queue-name)
+                              (jms/nippy-callbacker (allu-jms-msg-handler allu-jms-session)))
+    :stop (.close allu-jms-consumer)))
+
+(defn- send-allu-request! [request]
+  (if (env/feature? :jms)
+    (jms/produce-with-context allu-jms-queue-name (nippy/freeze request))
+    (allu-request-handler request)))
 
 ;;;; Mix up pure and impure into an API
 ;;;; ===================================================================================================================
@@ -610,7 +611,7 @@
 (defn- create-placement-contract!
   "Create placement contract in ALLU."
   [command]
-  (produce-allu-msg! (placement-creation-request command)))
+  (send-allu-request! (placement-creation-request command)))
 
 ;; TODO: Non-placement-contract ALLU applications
 (defn submit-application!
@@ -624,7 +625,7 @@
   "Update placement contract in ALLU (if it had been sent there)."
   [{:keys [application] :as command}]
   (when (application/submitted? application)
-    (produce-allu-msg! (placement-update-request true command))))
+    (send-allu-request! (placement-update-request true command))))
 
 ;; TODO: Non-placement-contract ALLU applications
 (defn update-application!
@@ -637,12 +638,12 @@
   "Cancel application in ALLU (if it had been sent there)."
   [{:keys [application] :as command}]
   (when (application/submitted? application)
-    (produce-allu-msg! (application-cancel-request command))))
+    (send-allu-request! (application-cancel-request command))))
 
 (defn- lock-placement-contract!
   "Lock placement contract in ALLU for verdict evaluation."
   [command]
-  (produce-allu-msg! (placement-update-request false command)))
+  (send-allu-request! (placement-update-request false command)))
 
 ;; TODO: Non-placement-contract ALLU applications
 (defn lock-application!
@@ -654,7 +655,7 @@
 (defn- send-attachment!
   "Send `attachment` of `application` to ALLU. Return the fileId of the file that was sent."
   [command attachment]
-  (produce-allu-msg! (attachment-send command attachment))
+  (send-allu-request! (attachment-send command attachment))
   (-> attachment :latestVersion :fileId))
 
 (defn send-attachments!
