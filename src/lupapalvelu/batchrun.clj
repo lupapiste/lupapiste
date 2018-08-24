@@ -9,6 +9,7 @@
             [monger.query :as monger-query]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
+            [lupapalvelu.archive.archiving :as archiving]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.batchrun.fetch-verdict :as fetch-verdict]
             [lupapalvelu.domain :as domain]
@@ -895,4 +896,25 @@
                 attachment (attachment/get-attachment-info updated-app (:id att))]
             (attachment/convert-existing-to-pdfa! updated-app attachment)))
         (info "Attachment" (:id att) "processed"))))
+  (info "Done."))
+
+(defn archive-digitized-projects-in-orgs [& organizations]
+  (when (seq organizations)
+    (mongo/connect!)
+    (info "Archiving digitized projects (ARK/LX) for organizations:" organizations)
+    (doseq [{:keys [attachments] :as app} (mongo/select :applications
+                                                        {:organization {$in organizations}
+                                                         :permitType "ARK"
+                                                         :state "underReview"})
+            :let [att-ids (->> attachments
+                               (filter (fn [att]
+                                         (not= "arkistoitu" (get-in att [:metadata :tila]))))
+                               (map :id))]]
+      (info "Archiving" (:id app))
+      (archiving/send-to-archive
+        {:user (user/batchrun-user organizations)
+         :created (now)
+         :application app}
+        (set att-ids)
+        #{})))
   (info "Done."))
