@@ -38,9 +38,8 @@
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
             [ring.util.codec :as codec]
-            [lupapalvelu.storage.file-storage :as storage])
-  (:import [org.xml.sax SAXParseException]
-           [java.util.concurrent ExecutorService TimeUnit]))
+            [lupapalvelu.archive.archiving :as archiving])
+  (:import [org.xml.sax SAXParseException]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -968,60 +967,23 @@
         (info "Attachment" (:id att) "processed"))))
   (info "Done."))
 
-(defn move-user-files-to-ceph []
-  (info "Moving user files to Ceph")
-  (mongo/connect!)
-  (.addShutdownHook (Runtime/getRuntime)
-                    (Thread.
-                      ^Runnable
-                      (fn []
-                        (println "Interrupt received, shutting down.")
-                        (.shutdownNow ceph-migration-threadpool)
-                        (.awaitTermination ceph-migration-threadpool 60 TimeUnit/SECONDS)
-                        (println "Threads finished"))))
-  (let [threads (->> (mongo/select :users
-                                   {:attachments.storageSystem "mongodb"}
-                                   [:_id]
-                                   {:_id 1})
-                     (mapv (fn [{:keys [id]}]
-                             (threads/submit ceph-migration-threadpool
-                               (logging/with-logging-context {:userId id}
-                                 (info "Checking attachments for migration")
-                                 (try (storage/move-user-mongodb-files-to-s3 id)
-                                      (catch Throwable t
-                                        (error t "Exception occurred during the migration"))))))))]
-    (info "All migration threads submitted. Number of users:" (count threads))
-    (threads/wait-for-threads threads))
-  (info "Done"))
-
-(defn fix-bulletin-files-storage-system []
-  (info "Moving bulletin files to Ceph")
-  (mongo/connect!)
-  (.addShutdownHook (Runtime/getRuntime)
-                    (Thread.
-                      ^Runnable
-                      (fn []
-                        (println "Interrupt received, shutting down.")
-                        (.shutdownNow ceph-migration-threadpool)
-                        (.awaitTermination ceph-migration-threadpool 60 TimeUnit/SECONDS)
-                        (println "Threads finished"))))
-  (let [threads (->> (mongo/select :application-bulletins
-                                   {:versions.attachments.latestVersion.storageSystem "mongodb"}
-                                   [:_id]
-                                   {:_id 1})
-                     (mapv (fn [{:keys [id]}]
-                             (threads/submit ceph-migration-threadpool
-                               (logging/with-logging-context {:applicationId id}
-                                 (info "Checking attachments for migration")
-                                 (try (storage/fix-bulletin-storage-system id)
-                                      (catch Throwable t
-                                        (error t "Exception occurred during the migration"))))))))]
-    (info "All migration threads submitted. Number of bulletins:" (count threads))
-    (threads/wait-for-threads threads))
-  (info "Done"))
-
-(defn clean-orphaned-files-from-mongo []
-  (info "Removing orphaned files from MongoDB GridFS")
-  (mongo/connect!)
-  (storage/clean-unlinked-files-from-mongo)
-  (info "Done"))
+(defn archive-digitized-projects-in-orgs [& organizations]
+  (when (seq organizations)
+    (mongo/connect!)
+    (info "Archiving digitized projects (ARK/LX) for organizations:" organizations)
+    (doseq [{:keys [attachments] :as app} (mongo/select :applications
+                                                        {:organization {$in organizations}
+                                                         :permitType "ARK"
+                                                         :state "underReview"})
+            :let [att-ids (->> attachments
+                               (filter (fn [att]
+                                         (not= "arkistoitu" (get-in att [:metadata :tila]))))
+                               (map :id))]]
+      (info "Archiving" (:id app))
+      (archiving/send-to-archive
+        {:user (user/batchrun-user organizations)
+         :created (now)
+         :application app}
+        (set att-ids)
+        #{})))
+  (info "Done."))
