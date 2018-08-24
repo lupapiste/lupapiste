@@ -14,7 +14,7 @@
             [iso-country-codes.core :refer [country-translate]]
             [taoensso.timbre :refer [info error]]
             [taoensso.nippy :as nippy]
-            [sade.util :refer [dissoc-in assoc-when]]
+            [sade.util :refer [dissoc-in assoc-when fn->]]
             [sade.core :refer [def- fail! now]]
             [sade.env :as env]
             [sade.http :as http]
@@ -32,7 +32,8 @@
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states])
-  (:import [java.io InputStream]))
+  (:import [java.lang AutoCloseable]
+           [java.io InputStream]))
 
 ;;;; Schemas
 ;;;; ===================================================================================================================
@@ -161,7 +162,7 @@
    :startTime                                   (date-string :date-time-no-ms)
    (optional-key :workDescription)              NonBlankStr})
 
-(defschema MiniCommand
+(defschema ^:private MiniCommand
   {:application                               {:id           ssc/ApplicationId
                                                :organization sc/Str
                                                :state        (apply sc/enum (map name states/all-states))}
@@ -171,7 +172,7 @@
    (sc/optional-key :latestAttachmentVersion) {:fileId        sssc/FileId
                                                :storageSystem sssc/StorageSystem}})
 
-;;;; Constants
+;;;; Application conversion
 ;;;; ===================================================================================================================
 
 ;; TODO: Should this be injected from commands instead?
@@ -180,11 +181,6 @@
   "fi")
 
 (def- WGS84-URN "EPSG:4326")
-
-(def- allu-jms-queue-name "lupapalvelu.backing-system.allu")
-
-;;;; Application conversion
-;;;; ===================================================================================================================
 
 (def- flatten-values (partial postwalk (some-fn :value identity)))
 
@@ -288,78 +284,7 @@
 (sc/defn ^{:private true} application->allu-placement-contract :- PlacementContract [pending-on-client app]
   (->> app flatten-values (convert-value-flattened-app pending-on-client)))
 
-;;;; REST API description and request conversion
-;;;; ===================================================================================================================
-
-(def- allu-interface
-  {:applications       {:cancel {:request-method :put
-                                 :uri            "/applications/:id/cancelled"
-                                 :path-params    {:id ssc/NatString}}}
-
-   :placementcontracts {:create {:request-method :post
-                                 :uri            "/placementcontracts"
-                                 :body           {:name :application
-                                                  ;; TODO: :schema PlacementContract
-                                                  }}
-                        :update {:request-method :put
-                                 :uri            "/placementcontracts/:id"
-                                 :path-params    {:id ssc/NatString}
-                                 :body           {:name :application
-                                                  ;; TODO: :schema PlacementContract
-                                                  }}}
-
-   :attachments        {:create {:request-method :post
-                                 :uri            "/applications/:id/attachments"
-                                 :path-params    {:id ssc/NatString}
-                                 :body           [{:name      :metadata
-                                                   :schema    {:name        sc/Str
-                                                               :description sc/Str
-                                                               :mimeType    (sc/maybe sc/Str)}
-                                                   :mime-type "application/json"}
-                                                  {:name      :file
-                                                   :schema    InputStream
-                                                   :mime-type #(-> % :metadata :mimeType)}]}}})
-
-(defn- interpolate-uri [template path-params request-data]
-  (reduce (fn [uri [k schema]]
-            (let [value (k request-data)
-                  kstr (str k)]
-              (when schema (sc/validate schema value))
-              (assert (s/includes? uri kstr) (str uri " does not contain " kstr))
-              (.replace uri kstr value)))
-          template path-params))
-
-(defn- params->body [body-itf params]
-  (cond
-    (nil? body-itf) nil
-    (map? body-itf) ((:name body-itf) params)
-    (vector? body-itf) (mapv (fn [{:keys [mime-type] k :name}]
-                               {:name      (name k)
-                                :mime-type (if (fn? mime-type) ; HACK
-                                             (mime-type params)
-                                             mime-type)
-                                :content   (k params)})
-                             body-itf)
-    :else (assert false (str "Unsupported body type: " body-itf))))
-
-(defn- body->json [body-itf body]
-  (cond
-    (nil? body) nil
-    (map? body) (let [{:keys [schema]} body-itf]
-                  (when schema (sc/validate schema body))
-                  (json/encode body))
-    (vector? body) (mapv (fn [{:keys [schema]} {:keys [content] :as bodypart}]
-                           (when schema (sc/validate schema content))
-                           (if (or (string? content)
-                                   (instance? InputStream content)) ; HACK
-                             bodypart
-                             (-> bodypart
-                                 (update :content json/encode)
-                                 (assoc :encoding "UTF-8"))))
-                         body-itf body)
-    :else (assert false (str "Unsupported body type: " body))))
-
-;;;; Requests
+;;;; Initial request construction
 ;;;; ===================================================================================================================
 
 (sc/defn ^{:private true, :always-validate true} minimize-command :- MiniCommand
@@ -397,7 +322,7 @@
    ::params         {:application (application->allu-placement-contract true application)}
    ::command        (minimize-command command)})
 
-(defn placement-update-request [pending-on-client {:keys [application] :as command}]
+(defn- placement-update-request [pending-on-client {:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)]
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
     {::interface-path [:placementcontracts :update]
@@ -405,7 +330,7 @@
                        :application (application->allu-placement-contract pending-on-client application)}
      ::command        (minimize-command command)}))
 
-;;;; integration-messages
+;;;; IntegrationMessage construction
 ;;;; ===================================================================================================================
 
 (sc/defn ^{:private true :always-validate true} base-integration-message :- IntegrationMessage
@@ -431,6 +356,95 @@
   (base-integration-message command message-subtype "in" "done"
                             {:endpoint endpoint
                              :response (select-keys http-response [:status :body])}))
+
+;;;; REST API description and request conversion
+;;;; ===================================================================================================================
+
+(def- allu-interface
+  {:applications       {:cancel {:request-method :put
+                                 :uri            "/applications/:id/cancelled"
+                                 :path-params    {:id ssc/NatString}}}
+
+   :placementcontracts {:create {:request-method :post
+                                 :uri            "/placementcontracts"
+                                 :body           {:name :application
+                                                  ;; TODO: :schema PlacementContract
+                                                  }}
+                        :update {:request-method :put
+                                 :uri            "/placementcontracts/:id"
+                                 :path-params    {:id ssc/NatString}
+                                 :body           {:name :application
+                                                  ;; TODO: :schema PlacementContract
+                                                  }}}
+
+   :attachments        {:create {:request-method :post
+                                 :uri            "/applications/:id/attachments"
+                                 :path-params    {:id ssc/NatString}
+                                 :body           [{:name      :metadata
+                                                   :schema    {:name        sc/Str
+                                                               :description sc/Str
+                                                               :mimeType    (sc/maybe sc/Str)}
+                                                   :mime-type "application/json"}
+                                                  {:name      :file
+                                                   :schema    InputStream
+                                                   :mime-type #(-> % :metadata :mimeType)}]}}})
+
+(defn- interpolate-uri [template path-params request-data]
+  (reduce (fn [^String uri [k schema]]
+            (let [^String value (k request-data)
+                  kstr (str k)]
+              (when schema (sc/validate schema value))
+              (assert (s/includes? uri kstr) (str uri " does not contain " kstr))
+              (.replace uri kstr value)))
+          template path-params))
+
+(defn- params->body [body-itf params]
+  (cond
+    (nil? body-itf) nil
+    (map? body-itf) ((:name body-itf) params)
+    (vector? body-itf) (mapv (fn [{:keys [mime-type] k :name}]
+                               {:name      (name k)
+                                :mime-type (if (fn? mime-type) ; HACK
+                                             (mime-type params)
+                                             mime-type)
+                                :content   (k params)})
+                             body-itf)
+    :else (assert false (str "Unsupported body type: " body-itf))))
+
+(defn- body->json [body-itf body]
+  (cond
+    (nil? body) nil
+    (map? body) (let [{:keys [schema]} body-itf]
+                  (when schema (sc/validate schema body))
+                  (json/encode body))
+    (vector? body) (mapv (fn [{:keys [schema]} {:keys [content] :as bodypart}]
+                           (when schema (sc/validate schema content))
+                           (if (or (string? content)
+                                   (instance? InputStream content)) ; HACK
+                             bodypart
+                             (-> bodypart
+                                 (update :content json/encode)
+                                 (assoc :encoding "UTF-8"))))
+                         body-itf body)
+    :else (assert false (str "Unsupported body type: " body))))
+
+(defn- httpify-request [{interface-path ::interface-path params ::params :as request}]
+  (let [interface (get-in allu-interface interface-path)]
+    (-> request
+        (assoc ::interface interface
+               :uri (interpolate-uri (:uri interface) (:path-params interface) params)
+               :request-method (:request-method interface))
+        (assoc-when :body (params->body (:body interface) params)))))
+
+(defn- jwt-authorize [request jwt]
+  (assoc-in request [:headers "authorization"] (str "Bearer " jwt)))
+
+(defn- content->json [{interface ::interface :as request}]
+  (-> request
+      (update :body (partial body->json (:body interface)))
+      (assoc-when :content-type (when-not (vector? (:body interface)) :json))))
+
+(defn- interface-path->string [path] (s/join \. (map name path)))
 
 ;;;; HTTP request sender for production
 ;;;; ===================================================================================================================
@@ -490,31 +504,27 @@
 ;;;; Middleware
 ;;;; ===================================================================================================================
 
-(defn- httpify-request [{interface-path ::interface-path params ::params :as request}]
-  (let [interface (get-in allu-interface interface-path)]
-    (-> request
-        (assoc ::interface interface
-               :uri (interpolate-uri (:uri interface) (:path-params interface) params)
-               :request-method (:request-method interface))
-        (assoc-when :body (params->body (:body interface) params)))))
+(defn- preprocessor->middleware
+  "(Request -> Request) -> ((Request -> Response) -> (Request -> Response))"
+  [preprocess]
+  (fn [handler] (fn [request] (handler (preprocess request)))))
 
-(defn- get-attachment-files [handler]
-  (fn [{{:keys [application latestAttachmentVersion]} ::command interface-path ::interface-path :as request}]
-    (if (= interface-path [:attachments :create])
-      (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
-                                              {:versions [latestAttachmentVersion]})] ; HACK
-        (let [file-content ((:content file-map))]
-          (-> request
-              (assoc-in [::params :file] file-content)
-              (assoc-in [:body 1 :content] file-content)
-              handler))
-        (assert false "unimplemented"))
-      (handler request))))
+(defn- get-attachment-files! [{{:keys [application latestAttachmentVersion]} ::command interface-path ::interface-path
+                               :as                                           request}]
+  (if (= interface-path [:attachments :create])
+    (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
+                                            {:versions [latestAttachmentVersion]})] ; HACK
+      (let [file-content ((:content file-map))]
+        (-> request
+            (assoc-in [::params :file] file-content)
+            (assoc-in [:body 1 :content] file-content)))
+      (assert false "unimplemented"))
+    request))
 
-(defn- save-messages [handler]
+(defn- save-messages! [handler]
   (fn [{command ::command :as request}]
     (let [endpoint (-> request :uri)
-          message-subtype (s/join \. (map name (::interface-path request)))
+          message-subtype (interface-path->string (::interface-path request))
           {msg-id :id :as msg} (request-integration-message command
                                                             (select-keys request [:uri :request-method :body])
                                                             message-subtype)
@@ -524,40 +534,37 @@
       (imessages/save (response-integration-message command endpoint response message-subtype))
       response)))
 
-(defn- encode-body [handler]
-  (fn [{interface ::interface :as request}]
-    (handler (-> request
-                 (update :body (partial body->json (:body interface)))
-                 (assoc-when :content-type (when-not (vector? (:body interface)) :json))))))
+(def allu-fail!
+  "A hook for testing error cases. Calls `sade.core/fail!` by default."
+  (fn [text info-map] (fail! text info-map)))
 
-(defn- jwt-authorize [handler jwt]
-  (fn [request]
-    (handler (assoc-in request [:headers "authorization"] (str "Bearer " jwt)))))
+(defn- handle-response
+  [handler]
+  (fn [{{{app-id :id} :application} ::command interface-path ::interface-path :as msg}]
+    (match (handler msg)
+      {:status (:or 200 201), :body body}
+      (do (info "ALLU operation" (interface-path->string interface-path) "succeeded")
+          (when (= interface-path [:placementcontracts :create])
+            (application/set-integration-key app-id :ALLU {:id body})))
 
-;;;; State and error handling
+      response (allu-fail! :error.allu.http (select-keys response [:status :body])))))
+
+(def- combined-middleware
+  (comp handle-response
+        (preprocessor->middleware httpify-request)
+        save-messages!
+        (preprocessor->middleware (fn-> get-attachment-files! content->json (jwt-authorize (env/value :allu :jwt))))))
+
+;;;; Request handling and JMS resources
 ;;;; ===================================================================================================================
-
-;;; TODO: make-handler and allu-jms-msg-handler could use some refactoring, they are tangled up.
-
-(def ^:dynamic allu-fail! (fn [text info-map] (fail! text info-map)))
-
-(defn- allu-http-fail! [response]
-  (allu-fail! :error.allu.http (select-keys response [:status :body])))
 
 (defn- make-handler
   ([] (make-handler (env/dev-mode?)))
-  ([dev-mode?]
-   (-> (if dev-mode? imessages-mock-handler (make-remote-handler (env/value :allu :url)))
-       (jwt-authorize (env/value :allu :jwt))
-       encode-body
-       get-attachment-files
-       ;; We don't want to save auth headers or file contents. It would also be silly to store the body into MongoDB as
-       ;; JSON-encoded strings:
-       save-messages
-       ((fn [handler] (fn [request] (handler (httpify-request request))))))))
+  ([dev-mode?] (if dev-mode? imessages-mock-handler (make-remote-handler (env/value :allu :url)))))
 
-(defstate allu-instance
-  :start (make-handler))
+(def allu-request-handler
+  "ALLU request handler. Returns nil, calls `allu-fail!` on HTTP errors."
+  (combined-middleware (make-handler)))
 
 ;;; TODO: The (= (env/feature? :jms) false) situation. Shouldn't we just delete the JMS feature flag?
 
@@ -566,28 +573,25 @@
 (defn- allu-jms-msg-handler [session]
   (fn [{{{app-id :id} :application {user-id :user} :user} ::command interface-path ::interface-path :as msg}]
     (logging/with-logging-context {:userId user-id :applicationId app-id}
-      ;; TODO: Get operation name from integration message template:
-      (let [operation-name (s/join \. (map name interface-path))]
-        (try
-          (match (allu-instance msg)
-            {:status (:or 200 201), :body body}
-            (do (info "ALLU operation" operation-name "succeeded")
-                (when (= interface-path [:placementcontracts :create])
-                  (application/set-integration-key app-id :ALLU {:id body})))
+      (try
+        (allu-request-handler msg)
+        (jms/commit session)
 
-            response (allu-http-fail! response))
-          (jms/commit session)
-
-          (catch Exception exn
+        (catch Exception exn
+          (let [operation-name (interface-path->string interface-path)]
             (error operation-name "failed:" (type exn) (.getMessage exn))
-            (error "Rolling back" operation-name)
-            (jms/rollback session)))))))
+            (error "Rolling back" operation-name))
+          (jms/rollback session))))))
 
-(defstate allu-jms-session
+(def- allu-jms-queue-name "lupapalvelu.backing-system.allu")
+
+(defstate ^AutoCloseable allu-jms-session
+  "JMS session for `allu-jms-consumer`"
   :start (jms/create-transacted-session (jms/get-default-connection))
   :stop (.close allu-jms-session))
 
-(defstate allu-jms-consumer
+(defstate ^AutoCloseable allu-jms-consumer
+  "JMS consumer for the ALLU request JMS queue"
   :start (jms-client/listen allu-jms-session (jms/queue allu-jms-queue-name)
                             (jms/nippy-callbacker (allu-jms-msg-handler allu-jms-session)))
   :stop (.close allu-jms-consumer))
@@ -598,7 +602,9 @@
 ;;;; Mix up pure and impure into an API
 ;;;; ===================================================================================================================
 
-(defn allu-application? [organization-id permit-type]
+(defn allu-application?
+  "Should ALLU integration be used?"
+  [organization-id permit-type]
   (and (env/feature? :allu) (= organization-id "091-YA") (= permit-type "YA")))
 
 (defn- create-placement-contract!
