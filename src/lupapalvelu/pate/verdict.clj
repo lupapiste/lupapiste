@@ -335,11 +335,11 @@
 
 (defn init--property-id
   [{:keys [application] :as initmap}]
-  (let [value (when (dict-included? initmap :property-id)
-                (:propertyId application))]
+  (let [value (when (dict-included? initmap :propertyIds.property-id)
+                {(mongo/create-id) {:property-id (sp/to-human-readable-property-id (:propertyId application))}})]
     (if (nil? value)
       initmap
-      (assoc-in initmap [:draft :data :property-id] (sp/to-human-readable-property-id value)))))
+      (assoc-in initmap [:draft :data :propertyIds] value))))
 
 (defn- integer-or-nil [value]
   (when (integer? value)

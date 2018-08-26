@@ -112,23 +112,47 @@
                                                :dict      kw})
                                             dates)}]}}})
 
-(defn versub-operation
-  [category]
-  {:dictionary (merge {:operation {:text {:loc-prefix :pate.operation}}
-                       :address   {:text {:loc-prefix (if (= category :ya)
-                                                        :pate.location
-                                                        :pate.address)}}}
-                       (if (= category :ya)
-                         {:property-id {:text {:loc-prefix :pate.property-id}}}))
+(def versub-operation
+  {:dictionary {:operation {:text {:loc-prefix :pate.operation}}
+                :address   {:text {:loc-prefix :pate.address}}}
+   :section    {:id   :pate-operation
+                :grid {:columns 2
+                       :rows    [[{:dict  :operation
+                                   :align :full}]
+                                 [{:dict  :address
+                                   :align :full}]]}}})
+
+(def versub-operation-ya
+  {:dictionary {:operation       {:text {:loc-prefix :pate.operation}}
+                :address         {:text {:loc-prefix :pate.location}}
+                :property-title  {:loc-text :pate.property-id}
+                :propertyIds     {:repeating {:property-id        {:text {:label?     false
+                                                                          :read-only? false}}
+                                              :remove-property-id {:button {:i18nkey :remove
+                                                                            :label?  false
+                                                                            :icon    :lupicon-remove
+                                                                            :css     :secondary
+                                                                            :remove  :propertyIds}}}}
+                :add-property-id {:button {:icon     :lupicon-circle-plus
+                                           :i18nkey  :pate.property-id.add
+                                           :css      :positive
+                                           :add      :propertyIds}}}
    :section    {:id   :pate-operation
                 :grid {:columns 2
                        :rows    [[{:dict  :operation
                                    :align :full}]
                                  [{:dict  :address
                                    :align :full}]
-                                 (if (= category :ya)
-                                   [{:dict  :property-id
-                                     :align :full}])]}}})
+                                 [{:css  :pate-label
+                                   :dict :property-title}]
+                                 [{:grid {:columns   9
+                                          :repeating :propertyIds
+                                          :rows      [[{:col  8
+                                                        :dict  :property-id}
+                                                       {:align :right
+                                                        :dict  :remove-property-id}]]}}]
+                                 [{:show? :_meta.editing?
+                                   :dict  :add-property-id}]]}}})
 
 (defn versub-verdict
   "Collateral part (toggle, amount, type, date) included only when
@@ -437,7 +461,7 @@
                                               (versub-dates :r helper/verdict-dates)
                                               (versub-verdict true)
                                               versub-bulletin
-                                              (versub-operation :r)
+                                              versub-operation
                                               (versub-requirements :foremen :plans :reviews)
                                               versub-conditions
                                               versub-appeal
@@ -478,7 +502,7 @@
                                               (versub-dates :p helper/verdict-dates)
                                               (versub-verdict true)
                                               versub-bulletin
-                                              (versub-operation :p)
+                                              versub-operation
                                               versub-conditions
                                               versub-appeal
                                               versub-statements
@@ -532,7 +556,7 @@
                                                versub-dates-ya
                                                versub-verdict-ya
                                                versub-bulletin
-                                               (versub-operation :ya)
+                                               versub-operation-ya
                                                versub-requirements-ya
                                                versub-conditions
                                                versub-appeal
@@ -561,7 +585,7 @@
 (def tj-verdict-schema-1 (build-verdict-schema :tj 1
                                                (versub-dates :tj helper/tj-verdict-dates)
                                                versub-verdict-tj
-                                               (versub-operation :tj)
+                                               versub-operation
                                                versub-appeal
                                                versub-attachments))
 

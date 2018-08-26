@@ -59,7 +59,7 @@
   (list [{:loc    :rakennuspaikka._group_label
           :styles :bold}]
         [{:loc    :rakennuspaikka.kiinteisto.kiinteistotunnus
-          :source {:dict :property-id}}]
+          :source :property-id-ya}]
         [{:loc    :pate.location
           :source {:dict :address}}]
         [{:loc    :pdf.pinta-ala

@@ -81,6 +81,11 @@
                                                    :kiinteisto.maaraalaTunnus)
                                    ss/not-blank? (str "M"))]))
 
+(defn property-id-ya [options]
+  (join-non-blanks "\n"
+                   (->> (get-in options [:verdict :data :propertyIds])
+                        (map (fn [[_ v]] (ss/trim (:property-id v)))))))
+
 (defn value-or-other [lang value other & loc-keys]
   (if (util/=as-kw value :other)
     other
@@ -303,6 +308,7 @@
     (assoc options
            :application-id (:id application)
            :property-id (property-id application)
+           :property-id-ya (property-id-ya options)
            :applicants (->> (applicants options)
                             (map #(format "%s\n%s"
                                           (:name %) (:address %)))
