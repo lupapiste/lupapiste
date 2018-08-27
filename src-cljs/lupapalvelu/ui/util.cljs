@@ -1,6 +1,6 @@
  (ns lupapalvelu.ui.util
-   (:require [goog.i18n.NumberFormatSymbols :as symbols]
-             [goog.i18n.NumberFormat :as nf]))
+   (:require [goog.i18n.NumberFormatSymbols]
+             [goog.i18n.NumberFormat]))
 
  (defonce elemId (atom 0))
  (defn unique-elem-id

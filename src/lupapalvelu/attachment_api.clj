@@ -84,7 +84,7 @@
   (when (every? (comp empty? :versions) attachments)
     (fail :error.attachment.no-versions)))
 
-(defn- validate-meta [{{meta :meta} :data :as command}]
+(defn- validate-meta [{{meta :meta} :data}]
   (some->> (not-empty (remove (set att/attachment-meta-types) (keys meta)))
            (fail :error.illegal-meta-type :parameters)))
 
@@ -146,7 +146,7 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :states           states/all-states
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
-  [{{attachments :attachments :as application} :application user :user assignments :application-assignments :as command}]
+  [{application :application user :user assignments :application-assignments}]
   (let [attachment (att/get-attachment-info application attachmentId)]
     (if attachment
       (ok :attachment (att/enrich-attachment-with-trigger-tags (maybe-assignments assignments user) attachment))
@@ -229,7 +229,7 @@
                                              (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
                       att/validate-not-included-in-published-bulletin]
    :on-success       [(assignment/run-assignment-triggers on-set-attachment-type-success)]}
-  [{:keys [application user created] :as command}]
+  [{:keys [application created] :as command}]
 
   (let [attachment      (att/get-attachment-info application attachmentId)
         attachment-type (att-type/parse-attachment-type attachmentType)]
@@ -334,7 +334,7 @@
    :input-validators    [(partial action/vector-parameters [:attachmentTypes])]
    :user-roles          #{:authority :oirAuthority}
    :states              (states/all-states-but (conj states/terminal-states :answered :sent))}
-  [{application :application {attachment-types :attachmentTypes} :data created :created}]
+  [{application :application created :created}]
   (if-let [attachment-ids (att/create-attachments! application attachmentTypes group created false true true)]
     (ok :applicationId id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
@@ -388,7 +388,7 @@
                       ram/ram-not-linked
                       attachment-not-requested-by-authority
                       att/validate-not-included-in-published-bulletin]}
-  [{:keys [application user]}]
+  [{:keys [application]}]
   (att/delete-attachments! application [attachmentId])
   (ok))
 
@@ -527,7 +527,7 @@
    :on-success       [(notify :new-comment)
                       open-inforequest/notify-on-comment]
    :description      "Reads :tempfile parameter, which is a java.io.File set by ring"}
-  [{:keys [created user application] {:keys [text target locked]} :data :as command}]
+  [{:keys [created] {:keys [text target locked]} :data :as command}]
 
   (let [file-options       {:filename filename :size size :content tempfile}
         attachment-options {:attachment-id   attachmentId                       ; options for attachment creation (not version)
@@ -631,7 +631,7 @@
    :org-authz-roles roles/default-org-authz-roles
    :states          states/all-application-states
    :description     "Stamps based on organization stamp templates and filled with application data"}
-  [{user :user application :application app-org :organization user-orgs :user-organizations}]
+  [{user :user application :application app-org :organization}]
   (ok :stamps (stamps/stamps @app-org application user)))
 
 (defcommand stamp-attachments
@@ -645,7 +645,7 @@
    :user-roles       #{:authority}
    :states           states/post-submitted-states
    :description      "Stamps all attachments of given application"}
-  [{application :application org :organization {transparency :transparency} :data :as command}]
+  [{application :application :as command}]
   (let [parsed-timestamp (cond
                            (number? timestamp) (long timestamp)
                            (ss/blank? timestamp) (:created command)
@@ -794,7 +794,7 @@
                           (fail :error.select-verdict-attachments.overlapping-ids)))]
    :pre-checks       [any-attachment-has-version
                       att/validate-not-included-in-published-bulletin]}
-  [{:keys [application created] :as command}]
+  [{:keys [application] :as command}]
   (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
         updates-fn      (fn [ids k v] (mongo/generate-array-updates :attachments all-attachments #((set ids) (:id %)) k v))]
     (when (or (seq selectedAttachmentIds) (seq unSelectedAttachmentIds))

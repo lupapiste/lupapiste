@@ -9,11 +9,9 @@
 (apply-remote-minimal)
 
 (facts "Submit-related validation"
-       (let [{application-id :id
-              documents      :documents
-              :as            application} (create-and-open-application pena
-                                                                       :operation "ya-katulupa-vesi-ja-viemarityot"
-                                                                       :propertyId sipoo-property-id)
+  (let [{application-id :id :as application} (create-and-open-application pena
+                                                                          :operation "ya-katulupa-vesi-ja-viemarityot"
+                                                                          :propertyId sipoo-property-id)
              hakija-doc-id (->> application
                                 :documents
                                 (util/find-first #(= "hakija-ya"

@@ -6,7 +6,6 @@
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.generators :as gen]
-            [lupapalvelu.organization :as organization]
             [lupapalvelu.statement :refer :all]))
 
 (def test-app-R  {:application {:municipality 753 :permitType "R"}})

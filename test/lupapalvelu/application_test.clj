@@ -16,7 +16,6 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.ya :as ya]
             [sade.util :as util]
             [sade.env :as env]))
 
@@ -30,7 +29,7 @@
 
 (testable-privates lupapalvelu.application count-required-link-permits
                    attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name
-                   enrich-single-doc-disabled-flag)
+                   enrich-single-doc-disabled-flag remove-draft-foreman-links)
 
 (testable-privates lupapalvelu.ya validate-link-agreements-signature validate-link-agreements-state)
 
@@ -617,3 +616,33 @@
   (jatkoaika-application? {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => false
   (jatkoaika-application? {:primaryOperation {:name ""}}) => false
   (jatkoaika-application? nil) => false)
+
+;; LPK-3856
+(fact "remove draft foreman applinks"
+  (fact "normal case"
+    (remove-draft-foreman-links
+      {:id 1234 :username "pena"}
+      {:appsLinkingToUs [{:operation "tyonjohtajan-nimeaminen-v2" :state "draft"}]})
+    => {:appsLinkingToUs [{:operation "tyonjohtajan-nimeaminen-v2" :state "draft"}]}
+    (provided
+      (lupapalvelu.authorization/application-authority? anything anything) => false
+      (lupapalvelu.authorization/has-auth-role? anything 1234 :writer) => true))
+  (fact "remove draft from authorities"
+    (remove-draft-foreman-links
+      {:id 2345 :username "sonja"}
+      {:appsLinkingToUs [{:operation "tyonjohtajan-nimeaminen-v2" :state "draft"}
+                         {:operation "tyonjohtajan-nimeaminen-v2" :state "approved"}]})
+    => {:appsLinkingToUs [{:operation "tyonjohtajan-nimeaminen-v2" :state "approved"}]}
+    (provided
+      (lupapalvelu.authorization/application-authority? anything anything) => true
+      (lupapalvelu.authorization/has-auth-role? anything 2345 :writer) => false))
+  (fact "do not remove if user is writer"
+    (remove-draft-foreman-links
+      {:id 2345 :username "sonja"}
+      {:appsLinkingToUs [{:operation "tyonjohtajan-nimeaminen-v2" :state "draft"}
+                         {:operation "tyonjohtajan-nimeaminen-v2" :state "approved"}]})
+    => {:appsLinkingToUs [{:operation "tyonjohtajan-nimeaminen-v2" :state "draft"}
+                          {:operation "tyonjohtajan-nimeaminen-v2" :state "approved"}]}
+    (provided
+      (lupapalvelu.authorization/application-authority? anything anything) => true
+      (lupapalvelu.authorization/has-auth-role? anything 2345 :writer) => true)))

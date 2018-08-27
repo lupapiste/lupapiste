@@ -9954,8 +9954,6 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 
 .form-help:before {
   content: " ";
-  background-image: url("/lp-static/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
   width: 16px;
   height: 16px;
   background-position: 0px -2700px;
@@ -9968,7 +9966,6 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
   top: 4px;
   left: 85%;
   bottom: auto;
-  width: 55%;
 }
 
 .form-full-width .form-help:after {
@@ -9983,18 +9980,6 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
   border-top: 14px solid transparent;
   border-bottom: 14px solid transparent;
   border-right: 14px solid #555555;
-}
-
-.form-full-width .form-help:before {
-  content: " ";
-  background-image: url("/lp-static/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
-  background-position: 0px -2700px;
-  position: absolute;
-  top: 6px;
-  right: 6px;
 }
 
 .three-col {
@@ -13656,6 +13641,11 @@ ul.tabs {
   position: static;
 }
 
+#modal-dialog .dialog.autosized > .component {
+  overflow: initial;
+  margin: 12px 12px;
+}
+
 #modal-dialog .dialog .header {
   padding-top: 2px;
   padding-bottom: 4px;
@@ -13848,6 +13838,10 @@ ul.tabs {
   padding-bottom: 0;
 }
 
+.change-location-help {
+  margin-bottom: .5em;
+}
+
 .with-map {
   /* .map-container { */
   /*   //padding: 0; */
@@ -13917,6 +13911,22 @@ ul.tabs {
   color: #df3215;
   margin-top: 6px;
   margin-bottom: 6px;
+}
+
+.authorize-person-content {
+  max-width: 40em;
+}
+
+.authorize-person-content label, .authorize-person-content input, .authorize-person-content textarea, .authorize-person-content button {
+  display: block;
+}
+
+.authorize-person-content label, .authorize-person-content button {
+  margin-top: 1em;
+}
+
+.authorize-person-content input, .authorize-person-content textarea {
+  width: 100%;
 }
 
 /*
@@ -34383,6 +34393,15 @@ span.icon_clear:before {
 
 .application_summary .application_summary_info select, .application_summary .application_summary_info .property-id {
   vertical-align: top;
+}
+
+.application_summary .application_summary_info a.property-id-edit {
+  display: inline-block;
+  float: right;
+}
+
+.application_summary .application_summary_info a.property-id-edit::after {
+  content: "\2026";
 }
 
 .application_summary .application_summary_info ul li {

@@ -255,7 +255,7 @@
       params.lang = loc.getCurrentLanguage();
       params.organizationId = self.selectedPrevPermitOrganization();
       params.kuntalupatunnus = trimBackendId();
-      params.createAnyway = createWithoutPrevPermit;
+      params.createWithoutPreviousPermit = createWithoutPrevPermit;
       params.createWithoutBuildings = createWithoutBuildings;
       params.createWithDefaultLocation = createWithDefaultLocation;
 
@@ -269,7 +269,7 @@
         .error(function(d) {
           if (d.needMorePrevPermitInfo) {
             if (self.needMorePrevPermitInfo()) {
-              notify.error(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
+              notify.error(loc("error.dialog.title"), loc("error.no-previous-permit-found-from-backend"));
             } else {
               self.needMorePrevPermitInfo(true);
             }

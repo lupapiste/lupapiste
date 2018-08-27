@@ -44,10 +44,10 @@
   "Returns a set of organization IDs where user has given roles.
   Note: the user must have gone through with-org-auth (the orgAuthz
   must be keywords)."
-  [{org-authz :orgAuthz :as user} roles]
+  [{org-authz :orgAuthz} roles]
   {:pre [(set? roles) (every? keyword? roles)]}
   (->> org-authz
-       (filter (fn [[org org-roles]] (some roles org-roles)))
+       (filter (fn [[_ org-roles]] (some roles org-roles)))
        (map (comp name first))
        set))
 

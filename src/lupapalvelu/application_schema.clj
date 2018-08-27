@@ -28,4 +28,5 @@
    ;;                    (apply sc/enum)))
    ;; but requiring lupapalvelu.operation results in dependency cycle...
    :applicant      (sc/maybe sc/Str)
-   :infoRequest    sc/Bool})
+   :infoRequest    sc/Bool
+   (sc/optional-key :3dMapActivated) (sc/maybe sc/Num)})

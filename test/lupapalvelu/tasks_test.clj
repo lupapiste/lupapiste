@@ -1,8 +1,7 @@
 (ns lupapalvelu.tasks-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.tasks :refer :all]
-            [lupapalvelu.verdict :as verdict]))
+            [lupapalvelu.tasks :refer :all]))
 
 (testable-privates lupapalvelu.tasks verdict->tasks get-muu-tunnus-data)
 

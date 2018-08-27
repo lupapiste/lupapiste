@@ -1,9 +1,9 @@
 (ns lupapalvelu.conversion.util-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.conversion.util :as util]
-            [lupapalvelu.xml.krysp.application-from-krysp :refer [get-local-application-xml-by-filename]]
-            [lupapalvelu.xml.krysp.reader :as reader]
-            [sade.strings :as ss]))
+            [lupapalvelu.backing-system.krysp.application-from-krysp :refer [get-local-application-xml-by-filename]]
+            [lupapalvelu.backing-system.krysp.reader :as reader]
+            [lupapalvelu.user :as usr]))
 
 (fact "Conversion of permit ids from 'database-format' works as expected"
   (facts "ids in 'database-format' are converted into 'ui-format'"
@@ -28,7 +28,6 @@
     (util/destructure-permit-id "75 0549-4242-A") => nil
     (util/destructure-permit-id "751-0549-42-A") => nil))
 
-
 (fact "The reader function rakennelmatieto->kaupunkikuvatoimenpide produces documents as expected"
   (let [xml (get-local-application-xml-by-filename "./dev-resources/krysp/verdict-r-structure.xml" "R")
         rakennelmatiedot (reader/->rakennelmatiedot xml)
@@ -36,3 +35,20 @@
     (facts "The generated document looks sane"
       (get-in doc [:data :kuvaus :value]) => "Katos"
       (get-in doc [:schema-info :name]) => "kaupunkikuvatoimenpide")))
+
+(fact "A large number of unique application ids can be generated for a given year"
+  (let [counter (atom 0)
+        ids (take 10000 (repeatedly #(util/make-converted-application-id "71-0004-13-C")))]
+    (-> ids set count) => 10000
+    (provided
+      (lupapalvelu.mongo/get-next-sequence-value "applications-092-2013") => (swap! counter inc))))
+
+(fact "The history can be generated from tilamuutos-elements"
+  (let [xml (get-local-application-xml-by-filename "./dev-resources/krysp/verdict-r-buildings.xml" "R")
+        history (-> xml util/generate-history-array)]
+    (seq? history) => true
+    (count history) => 2
+    (every? map? history) => true
+    (last history) => {:state :verdictGiven
+                       :ts 1398816000000
+                       :user usr/batchrun-user-data}))

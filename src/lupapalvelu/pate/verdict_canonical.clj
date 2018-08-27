@@ -4,20 +4,20 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pate.schema-helper :as helper]))
 
-(defn- vaadittu-katselmus-canonical [lang {{reviews :reviews} :references :as verdict} review-id]
+(defn- vaadittu-katselmus-canonical [lang {{reviews :reviews} :references} review-id]
   (let [review (util/find-by-id review-id reviews)]
     {:Katselmus {:katselmuksenLaji (helper/review-type-map (or (keyword (:type review)) :ei-tiedossa))
                  :tarkastuksenTaiKatselmuksenNimi (get review (keyword lang))
                  :muuTunnustieto [#_{:MuuTunnus "yht:MuuTunnusType"}]}})) ; TODO: initialize review tasks and pass ids here
 
-(defn- maarays-seq-canonical [{data :data :as verdict}]
+(defn- maarays-seq-canonical [{:keys [data]}]
   (some->> data :conditions vals
            (map :condition)
            (remove ss/blank?)
            (map #(assoc-in {} [:Maarays :sisalto] %))
            not-empty))
 
-(defn- vaadittu-erityissuunnitelma-canonical [lang {{plans :plans} :references :as verdict} plan-id]
+(defn- vaadittu-erityissuunnitelma-canonical [lang {{plans :plans} :references} plan-id]
   (let [plan (util/find-by-id plan-id plans)]
     {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma (get plan (keyword lang))
                                   :toteutumisPvm nil}}))
@@ -47,7 +47,7 @@
    :vaadittuErityissuunnitelmatieto (map (partial vaadittu-erityissuunnitelma-canonical lang verdict) (:plans data))
    :vaadittuTyonjohtajatieto (map vaadittu-tyonjohtaja-canonical (:foremen data))})
 
-(defn- paivamaarat-type-canonical [lang {data :data :as verdict}]
+(defn- paivamaarat-type-canonical [{:keys [data]}]
   {:aloitettavaPvm (util/to-xml-date (:aloitettava data))
    :lainvoimainenPvm (util/to-xml-date (:lainvoimainen data))
    :voimassaHetkiPvm (util/to-xml-date (:voimassa data))
@@ -56,8 +56,7 @@
    :viimeinenValitusPvm (util/to-xml-date (:valitus data))
    :julkipanoPvm (util/to-xml-date (:julkipano data))})
 
-(defn- paatoksentekija [lang {{handler :handler} :data
-                              {giver :giver} :template :as verdict}]
+(defn- paatoksentekija [lang {{handler :handler} :data {giver :giver} :template}]
   (->> [handler
         (when-not (ss/blank? giver)
           (format "(%s)" (i18n/localize lang :pate-verdict.giver giver)))]
@@ -75,7 +74,7 @@
    :paatospvm (util/to-xml-date (:verdict-date data))
    :pykala (:verdict-section data)})
 
-(defn verdict-canonical [application lang verdict]
+(defn verdict-canonical [lang verdict]
   {:Paatos {:lupamaaraykset (lupamaaraykset-type-canonical lang verdict)
-            :paivamaarat (paivamaarat-type-canonical lang verdict)
+            :paivamaarat (paivamaarat-type-canonical verdict)
             :poytakirja (paatospoytakirja-type-canonical lang verdict)}})

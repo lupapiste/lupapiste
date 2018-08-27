@@ -510,6 +510,18 @@
                 legacy--verdict-giver
                 legacy--dates))
 
+(def tj-legacy-layout
+  (build-layout entry--application-id
+                entry--rakennuspaikka
+                entry--tj
+                entry--link-permits
+                entry--attachments
+                entry--tj-vastattavat-tyot
+                entry--verdict
+                (entry--verdict-giver :applications.authority)
+                entry--dates-tj
+                entry--appeal))
+
 (def ymp-legacy-layout kt-legacy-layout)
 
 ;; ----------------------------------
@@ -579,4 +591,5 @@
     :legacy.p        p-legacy-layout
     :legacy.kt       kt-legacy-layout
     :legacy.ymp      ymp-legacy-layout
-    :legacy.contract contract-legacy-layout))
+    :legacy.contract contract-legacy-layout
+    :legacy.tj       tj-legacy-layout))

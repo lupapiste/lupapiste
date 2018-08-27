@@ -1,7 +1,6 @@
 (ns lupapalvelu.mock.user
   (:require  [lupapalvelu.fixture.minimal :as minimal]
-             [sade.util :refer [key-by mongerify]]
-             [midje.sweet :as midje]))
+             [sade.util :refer [key-by mongerify]]))
 
 
 (defn users-by-key [k]

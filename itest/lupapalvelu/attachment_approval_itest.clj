@@ -28,7 +28,7 @@
       (:timestamp approved) => pos?)))
 
 (defn- reject-attachment-note [application-id {:keys [id latestVersion]} note]
-  (let [{:keys [fileId originalFileId]} latestVersion]
+  (let [{:keys [fileId]} latestVersion]
    (fact {:midje/description (str "reject-note" application-id "/" id ":" note)}
          (command veikko :reject-attachment-note :id application-id :attachmentId id :fileId fileId :note note) => ok?
          (let [approved (latest-approval veikko application-id id)]
@@ -41,7 +41,7 @@
           (command apikey :delete-attachment-version :id application-id
                    :attachmentId id :fileId fileId :originalFileId originalFileId)
           => (if success? ok? unauthorized?)
-          (let [{:keys [approvals] :as att} (get-attachment-by-id veikko application-id id)]
+          (let [{:keys [approvals]} (get-attachment-by-id veikko application-id id)]
             (get approvals (keyword originalFileId)) => (if success? nil? truthy)))))
 
 
@@ -128,9 +128,8 @@
                 (-> approvals vals first :note) => "Bu hao!"))))
 
     (fact "Rotating does not affect approval status"
-      (let [{attachment-id :id :as attachment} (last-attachment application-id)
-            _                                  (upload-attachment veikko application-id attachment true
-                                                                  :filename "dev-resources/test-pdf.pdf")
+      (let [attachment (last-attachment application-id)
+            _ (upload-attachment veikko application-id attachment true :filename "dev-resources/test-pdf.pdf")
             {attachment-id :id :as attachment} (last-attachment application-id)
             _                                  (latest-approval veikko application-id attachment) => {:state "requires_authority_action"}
             _                                  (reject-attachment application-id attachment)
@@ -144,10 +143,9 @@
               => approval
               (not= (:originalFileId latestVersion) (:fileId latestVersion)) => true)))
     (facts "Approval and attachment deletion"
-      (let [file-id          (upload-file-and-bind pena application-id
-                                                   {:type     {:type-group "ennakkoluvat_ja_lausunnot"
-                                                               :type-id    "ennakkoneuvottelumuistio"}
-                                                    :contents "Hello"})
+      (let [_ (upload-file-and-bind pena application-id {:type {:type-group "ennakkoluvat_ja_lausunnot"
+                                                                :type-id    "ennakkoneuvottelumuistio"}
+                                                         :contents "Hello"})
             {att-id :id
              :as    attachment} (last-attachment application-id)]
         (fact "Veikko approves attachment"

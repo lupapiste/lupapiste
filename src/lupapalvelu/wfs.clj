@@ -1,5 +1,5 @@
 (ns lupapalvelu.wfs
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error errorf]]
+  (:require [taoensso.timbre :refer [trace debug info infof warn warnf error errorf]]
             [ring.util.codec :as codec]
             [net.cgrand.enlive-html :as enlive]
             [clojure.string :as s]
@@ -169,6 +169,8 @@
 
 (defn property-name [prop-name] {:tag :ogc:PropertyName :content [prop-name]})
 
+(defn wfs-property-name [prop-name] {:tag :wfs:PropertyName :content [prop-name]})
+
 (defn property-filter [filter-name prop-name value & attrs]
   (let [attributes (if (map? (first attrs) )
                      (first attrs)
@@ -219,10 +221,10 @@
      :location {:x x :y y}}))
 
 (defn feature-to-simple-address-string [feature]
-  (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)]
+  (let [{street :street number :number {fi :fi} :name} (feature-to-address feature)]
     (str street " " number ", " fi)))
 
-(defn feature-to-address-string [[street number city]]
+(defn feature-to-address-string [[_ _ city]]
   (if (s/blank? city)
     (fn [feature]
       (let [{street :street {fi :fi} :name} (feature-to-address feature)]
@@ -313,6 +315,21 @@
        :nimi {:fi muni-fi
               :sv muni-sv}
        :wkt (property-borders-wkt feature)
+       :x x
+       :y y})))
+
+(defn feature-to-core-property-info [feature]
+  "Parses property info without property borders (for property-info-by-point)"
+  (when (seq feature)
+    (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:rekisteriyksikonPalstanTietoja :ktjkiiwfs:RekisteriyksikonPalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")
+          property-id (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kiinteistotunnus text))
+          municipality-code (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kuntaTieto :ktjkiiwfs:KuntaTieto :ktjkiiwfs:kuntatunnus text))
+          muni-fi (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kuntaTieto :ktjkiiwfs:KuntaTieto :ktjkiiwfs:nimiSuomeksi text))
+          muni-sv (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kuntaTieto :ktjkiiwfs:KuntaTieto :ktjkiiwfs:nimiRuotsiksi text))]
+      {:propertyId property-id
+       :municipality municipality-code
+       :name {:fi muni-fi
+              :sv muni-sv}
        :x x
        :y y})))
 
@@ -490,8 +507,7 @@
 (defn property-id-by-point [x y]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
-      (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
-      (property-name "ktjkiiwfs:tunnuspisteSijainti")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:sijainti")
@@ -500,9 +516,9 @@
 (defn location-info-by-property-id [property-id]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
-      (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
-      (property-name "ktjkiiwfs:tunnuspisteSijainti")
-      (property-name "ktjkiiwfs:sijainti")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (wfs-property-name "ktjkiiwfs:tunnuspisteSijainti")
+      (wfs-property-name "ktjkiiwfs:sijainti")
       (ogc-filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
@@ -521,9 +537,11 @@
 (defn property-info-by-radius [x y radius]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
-      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
-      (property-name "ktjkiiwfs:kiinteistotunnus")
-      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (wfs-property-name "ktjkiiwfs:kiinteistotunnus")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:tunnuspisteSijainti")
+      (wfs-property-name "ktjkiiwfs:kuntaTieto")
       (ogc-filter
         (within
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
@@ -533,20 +551,37 @@
 (defn property-info-by-point [x y]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
-      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
-      (property-name "ktjkiiwfs:kiinteistotunnus")
-      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (wfs-property-name "ktjkiiwfs:kiinteistotunnus")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:tunnuspisteSijainti")
+      (wfs-property-name "ktjkiiwfs:kuntaTieto")
       (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (point x y))))))
 
+(defn property-point-id-muni-by-point [x y]
+  (post ktjkii
+        (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+               (wfs-property-name "ktjkiiwfs:kiinteistotunnus")
+               (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:tunnuspisteSijainti")
+               (wfs-property-name "ktjkiiwfs:kuntaTieto")
+               (ogc-filter
+                 (intersects
+                   (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+                   (point x y))))))
+
 (defn property-info-by-line [l]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
-      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
-      (property-name "ktjkiiwfs:kiinteistotunnus")
-      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (wfs-property-name "ktjkiiwfs:kiinteistotunnus")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:tunnuspisteSijainti")
+      (wfs-property-name "ktjkiiwfs:kuntaTieto")
       (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
@@ -555,9 +590,12 @@
 (defn property-info-by-polygon [p]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
-      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
-      (property-name "ktjkiiwfs:kiinteistotunnus")
-      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (wfs-property-name "ktjkiiwfs:kiinteistotunnus")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:tunnuspisteSijainti")
+      (wfs-property-name "ktjkiiwfs:kuntaTieto")
       (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")

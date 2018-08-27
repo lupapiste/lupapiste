@@ -1,12 +1,10 @@
 (ns lupapalvelu.ya-digging-permit
   (:require [lupapalvelu.application :as app]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.copy-application :as copy-app]
             [lupapalvelu.document.tools :as doc-tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.operations :as op]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.user :as usr]
             [lupapalvelu.ya :as ya]
             [sade.core :refer [fail]]
             [sade.util :as util]))

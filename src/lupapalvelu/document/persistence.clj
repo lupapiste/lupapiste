@@ -1,12 +1,12 @@
 (ns lupapalvelu.document.persistence
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.string :refer [replace-first]]
             [clojure.string :as s]
             [monger.operators :refer :all]
             [sade.util :as util :refer [fn->]]
             [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
-            [lupapalvelu.action :refer [update-application application->command] :as action]
+            [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.util :as att-util]
             [lupapalvelu.authorization :as auth]
@@ -157,7 +157,7 @@
                                       (and (sent? document) readonly-after-sent)
                                       (some validate-all-subschemas body)))]
     (doseq [path remove-paths]
-      (let [{:keys [readonly readonly-after-sent] :as subschema} (model/find-by-name (:body doc-schema) path)]
+      (let [subschema (model/find-by-name (:body doc-schema) path)]
         (when (validate-all-subschemas subschema)
           (fail! :error-trying-to-remove-readonly-field))))))
 
@@ -253,7 +253,7 @@
      (when (model/has-errors? post-results) (fail! :document-would-be-in-error-after-update :results post-results))
      document)))
 
-(defn- can-add-schema? [{info :info :as schema} application]
+(defn- can-add-schema? [{:keys [info]} application]
   (let [schema-name         (:name info)
         applicant-schema    (operations/get-applicant-doc-schema-name application)
 

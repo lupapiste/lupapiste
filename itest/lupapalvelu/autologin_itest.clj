@@ -3,7 +3,6 @@
             [lupapalvelu.itest-util :refer :all]
             [sade.core :refer [now]]
             [sade.strings :as ss]
-            [sade.http :as http]
             [midje.sweet :refer :all]))
 
 (apply-remote-minimal)

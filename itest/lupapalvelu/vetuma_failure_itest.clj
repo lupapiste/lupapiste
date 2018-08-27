@@ -1,7 +1,5 @@
 (ns lupapalvelu.vetuma-failure-itest
   (:require [midje.sweet :refer :all]
-            [sade.strings :as ss]
-            [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.itest-util :refer [->cookie-store server-address decode-response
                                             ok? fail? http200? http302?
                                             ]]

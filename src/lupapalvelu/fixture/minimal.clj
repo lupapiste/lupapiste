@@ -531,7 +531,8 @@
     :enabled true
     :language "fi"
     :role "authority"
-    :orgAuthz {:091-R #{:authority :approver :archivist :tos-editor :tos-publisher}}
+    :orgAuthz {:091-R #{:authority :approver :archivist :tos-editor :tos-publisher}
+               :091-YA  #{:authority :approver}}
     :firstName "Hannu"
     :lastName "Helsinki"
     :username "rakennustarkastaja@hel.fi"
@@ -1386,6 +1387,35 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
                                                                       [:paapiirustus :pohjapiirustus]]}
+                       :assignments-enabled true
+                       :permanent-archive-enabled true
+                       :digitizer-tools-enabled true
+                       :permanent-archive-in-use-since 1451613600000
+                       :earliest-allowed-archiving-date 0
+                       :use-attachment-links-integration true
+                       :operations-tos-functions {:masto-tms "10 03 00 01"}
+                       :automatic-review-fetch-enabled true
+                       :automatic-ok-for-attachments-enabled true
+                       :multiple-operations-supported true}
+
+                      ;; Helsinki YA
+                      {:id "091-YA"
+                       :name (names {:fi "Helsingin yleiset alueet"
+                                     :sv "Helsingfors yleiset alueet"})
+                       :scope [{:municipality "091"
+                                :permitType "YA"
+                                :new-application-enabled true
+                                :inforequest-enabled true}]
+                       :links [(link {:fi "Helsinki" :sv "Helsingfors"}
+                                     "http://www.hel.fi")]
+                       :krysp {:R {:url local-krysp :version "2.2.0" :ftpUser "dev_helsinki"}}
+                       :handler-roles [{:id "abba1111111111111111a091"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
+                       :operations-attachments ya-default-attachments-for-operations
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :assignments-enabled true
                        :permanent-archive-enabled true
                        :digitizer-tools-enabled true

@@ -1,5 +1,5 @@
 (ns lupapalvelu.web
-  (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
+  (:require [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.java.io :as io]
             [clojure.string :as s]
@@ -7,7 +7,6 @@
             [clj-time.local :as local]
             [cheshire.core :as json]
             [me.raynes.fs :as fs]
-            [ring.util.request :as ring-request]
             [ring.util.response :refer [resource-response]]
             [ring.util.io :as ring-io]
             [ring.middleware.content-type :refer [content-type-response]]
@@ -15,7 +14,6 @@
             [noir.core :refer [defpage]]
             [noir.request :as request]
             [noir.response :as resp]
-            [noir.session :as session]
             [noir.cookies :as cookies]
             [net.cgrand.enlive-html :as enlive]
             [monger.operators :refer [$set $push $elemMatch]]
@@ -48,7 +46,6 @@
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ident.suomifi]
             [lupapalvelu.idf.idf-api :as idf-api]
-            [lupapalvelu.integrations.messages :as imessages]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.persistence :as doc-persistence]
@@ -57,7 +54,7 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.token :as token]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
+            [lupapalvelu.backing-system.asianhallinta.reader :as ah-reader]
             [lupapalvelu.ya-extension :as yax]
             [lupapalvelu.storage.file-storage :as storage])
   (:import (java.io OutputStreamWriter BufferedWriter)
@@ -74,15 +71,14 @@
      (swap! apis conj {(keyword m#) p#})
      (defpage ~path ~params
        (let [response-data# (do ~@content)
-             response-session# (:session response-data#)]
+             response-session# (:session response-data#)
+             response-cookies# (:cookies response-data#)]
          (resp/set-headers
            http/no-cache-headers
-           (if (contains? response-data# :session)
-             (-> response-data#
-               (dissoc :session)
+           (-> (dissoc response-data# :session :cookies)
                resp/json
-               (assoc :session response-session#))
-             (resp/json response-data#)))))))
+               (util/assoc-when :session response-session#
+                                :cookies response-cookies#)))))))
 
 (defjson "/system/apis" [] @apis)
 
@@ -143,7 +139,7 @@
 
 (defn remove-sensitive-keys [m]
   (util/postwalk-map
-    (partial filter (fn [[k v]] (if (or (string? k) (keyword? k)) (not (re-matches #"(?i).*(passw(or)?d.*|key)$" (name k))) true)))
+    (partial filter (fn [[k _]] (if (or (string? k) (keyword? k)) (not (re-matches #"(?i).*(passw(or)?d.*|key)$" (name k))) true)))
     m))
 
 (status/defstatus :build (assoc env/buildinfo :server-mode env/mode))
@@ -339,6 +335,7 @@
 
 (defn- logout! []
   (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"})
+  (cookies/put! :lupapiste-login {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"})
   {:session nil})
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
@@ -355,7 +352,14 @@
         response (if username
                    (execute-command "login" params request) ; Handles form POST (Nessus)
                    (execute-command "login" (from-json request) request))]
-    (select-keys response [:ok :text :session :applicationpage :lang])))
+    (select-keys response [:ok :text :session :applicationpage :lang :cookies])))
+
+(defpage [:get "/api/login-sso-uri"] {username :username}
+  (let [request (request/ring-request)]
+    ; TODO: Resolve SSO URL from db
+    (if false
+      (resp/json (ok {:uri "https://evolta.fi"}))
+      (resp/json (fail :error.unauthorized)))))
 
 ;; Reset password via separate URL outside anti-csrf
 (defjson [:post "/api/reset-password"] []
@@ -530,7 +534,6 @@
 (defn verbose-csrf-block [req]
    (let [ip (http/client-ip req)
          nothing "(not there)"
-         referer (get-in req [:headers "referer"])
          cookie-csrf (get-in req [:cookies "anti-csrf-token" :value])
          ring-session-full (or (get-in req [:cookies "ring-session" :value]) nothing)
          ring-session (clojure.string/replace ring-session-full #"^(...).*(...)$" "$1...$2")
@@ -604,11 +607,14 @@
         request-session (:session request)
         expires (get request-session :expires now)
         expired? (< expires now)
-        response (handler request)]
+        response (handler request)
+        login-cookie? (get-in request [:cookies "lupapiste-login"])]
     (if expired?
       (assoc response :session nil)
       (if (re-find #"^/api/(command|query|raw|datatables|upload)/" (:uri request))
-        (ssess/merge-to-session request response {:expires (+ now (get-session-timeout request))})
+        (cond-> (ssess/merge-to-session request response {:expires (+ now (get-session-timeout request))})
+                login-cookie?
+                (usr/merge-login-cookie-for (-> request :session :user)))
         response))))
 
 (defn session-timeout [handler]

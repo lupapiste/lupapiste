@@ -3,12 +3,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [taoensso.timbre :refer [debug]]
-            [lupapalvelu.krysp-test-util :as krysp-test-util]
-            [lupapalvelu.batchrun :as batchrun]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [sade.util :as util]))
+            [lupapalvelu.batchrun :as batchrun]))
 
 (testable-privates lupapalvelu.batchrun fetch-reviews-for-organization fetch-reviews-for-organization-permit-type
                    organization-has-krysp-url-function get-valid-applications)
@@ -37,46 +32,45 @@
 
 (facts fetch-reviews-for-organization-permit-type
   (fact "fetch single application"
-    (fetch-reviews-for-organization-permit-type {:id "test-user"} {:id "org-id"} :R [{:id "LP-ORG-2000-00001"}])
+    (fetch-reviews-for-organization-permit-type {:id "org-id"} :R [{:id "LP-ORG-2000-00001"}])
     => [[{:id "LP-ORG-2000-00001"} "xml1"]]
 
-    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+    (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                {:id "org-id"} :R :application-id ["LP-ORG-2000-00001"])
               => {"LP-ORG-2000-00001" "xml1"}))
 
   (fact "fetch two applications in a chunk"
-    (fetch-reviews-for-organization-permit-type {:id "test-user"} {:id "org-id"} :R [{:id "LP-ORG-2000-00001"}
-                                                                                     {:id "LP-ORG-2000-00002"}])
+    (fetch-reviews-for-organization-permit-type {:id "org-id"} :R [{:id "LP-ORG-2000-00001"}
+                                                                   {:id "LP-ORG-2000-00002"}])
     => [[{:id "LP-ORG-2000-00001"} "xml1"]
         [{:id "LP-ORG-2000-00002"} "xml2"]]
 
-    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+    (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                {:id "org-id"} :R :application-id ["LP-ORG-2000-00001" "LP-ORG-2000-00002"])
               => {"LP-ORG-2000-00001" "xml1"
                   "LP-ORG-2000-00002" "xml2"}))
 
   (let [organization {:id "org-id" :krysp {:R {:fetch-chunk-size 2}}}]
     (fact "fetch multiple application in two chunks"
-      (fetch-reviews-for-organization-permit-type {:id "test-user"}  organization :R
-                                                  [{:id "LP-ORG-2000-00001"}
-                                                   {:id "LP-ORG-2000-00002"}
-                                                   {:id "LP-ORG-2000-00003"}])
+      (fetch-reviews-for-organization-permit-type organization :R [{:id "LP-ORG-2000-00001"}
+                                                                   {:id "LP-ORG-2000-00002"}
+                                                                   {:id "LP-ORG-2000-00003"}])
       => [[{:id "LP-ORG-2000-00001"} "xml1"]
           [{:id "LP-ORG-2000-00002"} "xml2"]
           [{:id "LP-ORG-2000-00003"} "xml3"]]
 
-      (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+      (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                  organization :R :application-id ["LP-ORG-2000-00001" "LP-ORG-2000-00002"])
                 => {"LP-ORG-2000-00001" "xml1"
                     "LP-ORG-2000-00002" "xml2"})
 
-      (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+      (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                  organization :R :application-id ["LP-ORG-2000-00003"])
                 => {"LP-ORG-2000-00003" "xml3"})))
 
   (let [organization {:id "org-id" :krysp {:R {:fetch-chunk-size 2}}}]
     (fact "fetching missing xmls is retried with backend id"
-      (fetch-reviews-for-organization-permit-type {:id "test-user"}  organization :R
+      (fetch-reviews-for-organization-permit-type organization :R
                                                   [{:id "LP-ORG-2000-00001"}
                                                    {:id "LP-ORG-2000-00002" :verdicts [{:kuntalupatunnus "bck-id-02"}]}
                                                    {:id "LP-ORG-2000-00003" :verdicts [{:kuntalupatunnus "bck-id-03"}]}
@@ -86,22 +80,22 @@
           [{:id "LP-ORG-2000-00004" :kuntalupatunnus "bck-id-04" :verdicts [{} {:kuntalupatunnus "bck-id-04"}]} "xml4"]]
 
       ;; First chunk with app-id
-      (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+      (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                  organization :R :application-id ["LP-ORG-2000-00001" "LP-ORG-2000-00002"])
                 => {"LP-ORG-2000-00001" "xml1"})
 
       ;; Second chunk with app-id
-      (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+      (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                  organization :R :application-id ["LP-ORG-2000-00003" "LP-ORG-2000-00004"])
                 => {})
 
       ;; First chunk with back-end-id
-      (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+      (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                  organization :R :kuntalupatunnus ["bck-id-02" "bck-id-03"])
                 => {"bck-id-02" "xml2"})
 
       ;; Second chunk with back-end-id
-      (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls
+      (provided (#'lupapalvelu.backing-system.krysp.application-from-krysp/get-application-xmls
                  organization :R :kuntalupatunnus ["bck-id-04"])
                 => {"bck-id-04" "xml4"}))))
 
@@ -114,7 +108,7 @@
               => [{:id "LP-ORG-2000-00001" :permitType "R"}])
 
     (provided (#'lupapalvelu.batchrun/fetch-reviews-for-organization-permit-type
-               ..test-user.. {:id "org-id"} "R" [{:id "LP-ORG-2000-00001" :permitType "R"}])
+               {:id "org-id"} "R" [{:id "LP-ORG-2000-00001" :permitType "R"}])
               => [[{:id "LP-ORG-2000-00001" :permitType "R"} ..xml1..]] :times 1)
 
     (provided (#'lupapalvelu.batchrun/read-reviews-for-application
@@ -147,9 +141,9 @@
                   {:id "LP-ORG-2000-00003" :permitType "R"}])
 
     (provided (#'lupapalvelu.batchrun/fetch-reviews-for-organization-permit-type
-               ..test-user.. {:id "org-id" :krysp {:R {:url "url"}}} :R [{:id "LP-ORG-2000-00001" :permitType "R"}
-                                                                         {:id "LP-ORG-2000-00002" :permitType "R"}
-                                                                         {:id "LP-ORG-2000-00003" :permitType "R"}])
+               {:id "org-id" :krysp {:R {:url "url"}}} :R [{:id "LP-ORG-2000-00001" :permitType "R"}
+                                                           {:id "LP-ORG-2000-00002" :permitType "R"}
+                                                           {:id "LP-ORG-2000-00003" :permitType "R"}])
               => [[{:id "LP-ORG-2000-00001" :permitType "R"} ..xml1..]
                   [{:id "LP-ORG-2000-00003" :permitType "R"} ..xml3..]] :times 1)
 
@@ -201,7 +195,7 @@
 
 
     (provided (#'lupapalvelu.batchrun/fetch-reviews-for-organization-permit-type
-               ..test-user.. {:id "org-id" :krysp {:R {:url "url"}}} :R [{:id "LP-ORG-2000-00001" :permitType "R"}])
+               {:id "org-id" :krysp {:R {:url "url"}}} :R [{:id "LP-ORG-2000-00001" :permitType "R"}])
               => [[{:id "LP-ORG-2000-00001" :permitType "R"} ..xml1..]] :times 1)
 
     (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching "org-id" "R" anything "LP-ORG-2000-00001")
@@ -225,7 +219,7 @@
     (provided (#'lupapalvelu.organization/get-organization anything) => {:only-use-inspection-from-backend true})
 
     (provided (#'lupapalvelu.batchrun/fetch-reviews-for-organization-permit-type
-               ..test-user.. {:id "org-id" :krysp {:R {:url "url"}}} :R [{:id "LP-ORG-2000-00001" :permitType "R" :modified 0}])
+               {:id "org-id" :krysp {:R {:url "url"}}} :R [{:id "LP-ORG-2000-00001" :permitType "R" :modified 0}])
               => [[{:id "LP-ORG-2000-00001" :permitType "R"} ..xml1..]] :times 1)
 
     (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching "org-id" "R" anything "LP-ORG-2000-00001")
@@ -255,12 +249,12 @@
                                                       :faulty-tasks {}})
               => ..test-result.. :times 1)))
 
-(defmethod lupapalvelu.xml.krysp.common-reader/get-tunnus-xml-path :TEST [& _]
+(defmethod lupapalvelu.backing-system.krysp.common-reader/get-tunnus-xml-path :TEST [& _]
   [:tunnus])
 
 (def result (atom []))
 
-(defmethod lupapalvelu.permit/fetch-xml-from-krysp :TEST [permit-type url creds ids st & _]
+(defmethod lupapalvelu.permit/fetch-xml-from-krysp :TEST [_ _ _ ids _ & _]
   (Thread/sleep (+ (* (count ids) 30) 1))
   (swap! result conj ids)
   (->> (map (fn [id] {:tag :app-xml :content [{:tag :tunnus :content [id]}]}) ids)

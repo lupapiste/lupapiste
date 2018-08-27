@@ -4,6 +4,7 @@ Documentation   Application invites
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ../25_company/company_resource.robot
+Resource        ../29_guests/guest_resource.robot
 
 *** Test Cases ***
 
@@ -29,10 +30,10 @@ Mikko invites Teppo
 Mikko can't reinvite Teppo
   Open accordions  parties
   Scroll and click test id  application-invite-paasuunnittelija
-  Wait until  Element should be visible  invite-email
+  Wait test id visible  invite-email
   Sleep  1
-  Input Text  invite-email  teppo@example.com
-  Input Text  invite-text  Tervetuloa muokkaamaan taas hakemusta
+  Input Text by test id  invite-email  teppo@example.com
+  Input Text by test id  invite-text  Tervetuloa muokkaamaan taas hakemusta
   Click by test id  application-invite-submit
   Error message is present on invite form
   Invite count is  1
@@ -112,14 +113,19 @@ Mikko can see invite paasuunnittelija button again
 
 Mikko can't invite himself
   Scroll and click test id  application-invite-paasuunnittelija
-  Input Text  invite-email  mikko@example.com
-  Input Text  invite-text  Voinko kutsua itseni?
+  Input Text by test id  invite-email  mikko@example.com
+  Input Text by test id  invite-text  Voinko kutsua itseni?
   Click by test id  application-invite-submit
   Error message is present on invite form
   Invite count is  0
 
 Mikko invites Solita
   Invite company to application  Solita Oy
+
+Mikko invites Sven as guest
+  Invite application guest  sven@example.com  Come on!
+  Guest row name  sven@example.com  Sven Svensson
+  Wait test id visible  application-guest-table
 
 Mikko decides to go to the desert, put on his ipod, and listen some some British hard-rock band
   Logout
@@ -145,7 +151,14 @@ Let's add Pena to Solita
   Open company user listing
   Invite existing user  pena@example.com  Pena  Panaani
   Accept invitation  pena@example.com
-  [Teardown]  logout
+  [Teardown]  Logout
+
+Let's add Sven to Solita
+  User logs in  kaino@solita.fi  kaino123  Kaino Solita
+  Open company user listing
+  Invite existing user  sven@example.com  Sven  Svensson
+  Accept invitation  sven@example.com
+  [Teardown]  Logout
 
 Pena can open application but cannot manage subscriptions
   Pena logs in
@@ -170,9 +183,9 @@ Mikko invites previously unknown user Oskari as paasuunnittelija
   Open accordions  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
   Scroll and click test id  application-invite-paasuunnittelija
-  Wait until  Element should be visible  invite-email
-  Input Text  invite-email  oskari@example.com
-  Input Text  invite-text  Tuu mukaan tunkkaan lupaa
+  Wait test id visible  invite-email
+  Input Text by test id  invite-email  oskari@example.com
+  Input Text by test id  invite-text  Tuu mukaan tunkkaan lupaa
   Click by test id  application-invite-submit
   Wait until  Mask is invisible
   Wait until  Element should not be visible  invite-email
@@ -190,12 +203,32 @@ Solita is not included in the hakija person select
   Person selector includes  hakija-r  henkilo.userId  Kaino  0
 
 Solita is included in the paasuunnittelija person select
-  # Empty, Mikko, Teppo, Kaino and Pena
-  Person selector count is  paasuunnittelija  userId  5
+  # Empty, Mikko, Teppo, Kaino, Pena and Sven
+  Person selector count is  paasuunnittelija  userId  6
   Person selector includes  paasuunnittelija  userId  Mikko
   Person selector includes  paasuunnittelija  userId  Teppo
   Person selector includes  paasuunnittelija  userId  Solita Kaino, Solita Oy
   Person selector includes  paasuunnittelija  userId  Panaani Pena, Solita Oy
+  Person selector includes  paasuunnittelija  userId  Svensson Sven, Solita Oy
+
+Mikko cannot select Sven as paasuunnittelija
+  Select Sven
+  Wait test id visible  remove-auth
+  No such test id  application-invite-submit
+
+Mikko removes Sven's auth within the dialog
+  Click by test id  remove-auth
+  Test id enabled  application-invite-submit
+  No such test id  remove-auth
+
+Close dialog and check that Sven no longer is a guest
+  Click element  jquery=#modal-dialog span.close
+  No such test id  application-invite-submit
+  No such test id  application-guest-table
+
+Mikko can now select Sven
+  Select Sven
+  No such test id  application-invite-submit
 
 # Tyonjohtaja on poistettu tavallisilta R-hakemuksilta (LUPA-1603).
 # Testataan tyonjohtajan kutsuminen erikseen omalla hakemuksellaan.
@@ -207,15 +240,15 @@ Mikko invites previously unknown user Unto as tyonjohtaja
   Open accordions  parties
   Wait until  Element should be visible  xpath=//div[@id="application-parties-tab"]//*[@data-test-id='application-invite-tyonjohtaja']
   Scroll and click test id  application-invite-tyonjohtaja
-  Wait until  Element should be visible  invite-email
-  Input Text  invite-email  unto@example.com
-  Input Text  invite-text  Tuu mulle tyonjohtajaksi
+  Wait test id visible  invite-email
+  Input Text by test id  invite-email  unto@example.com
+  Input Text by test id  invite-text  Tuu mulle tyonjohtajaksi
   Click by test id  application-invite-submit
   Wait until  Mask is invisible
   Wait until  Element should not be visible  invite-email
   Wait until  Invite count is  1
 
-Unto hasn't accepted auth, so it can't be upgreded
+Unto hasn't accepted auth, so it can't be upgraded
   Element should not be visible by test id  change-auth-unto@example.com
 
 Mikko deletes authorization from Unto
@@ -229,9 +262,17 @@ Frontend errors check
 
 *** Keywords ***
 
+Select Sven
+  Select from test id by text  userId  Svensson Sven, Solita Oy
+  Wait test id visible  invite-email
+  Test id disabled  invite-email
+  Test id input is  invite-email  sven@example.com
+  Input text by test id  invite-text  Yeah!
+  Click by test id  application-invite-submit
+
 Error message is present on invite form
-  Wait until  Element should be visible  xpath=//div[@id='dialog-valtuutus']//div[contains(@class, 'context-error')]
-  Click Element  xpath=//div[@id='dialog-valtuutus']//p[contains(@class,'close')]
+  Wait until  Element should be visible  xpath=//div[@id='modal-dialog']//div[contains(@class, 'context-error')]
+  Click Element  xpath=//div[@id='modal-dialog']//span[contains(@class,'close')]
   Wait until  Mask is invisible
 
 Mask is invisible
@@ -240,16 +281,16 @@ Mask is invisible
 Invite Teppo
   Invite count is  0
   Scroll and click test id  application-invite-paasuunnittelija
-  Wait until  Element should be visible  invite-email
-  Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
+  Wait test id visible  invite-email
+  Input Text by test id  invite-text  Tervetuloa muokkaamaan hakemusta
   Element should be disabled  xpath=//*[@data-test-id='application-invite-submit']
-  Input Text  invite-email  teppo@example
+  Input Text by test id  invite-email  teppo@example
   Element should be disabled  xpath=//*[@data-test-id='application-invite-submit']
-  Input Text  invite-email  teppo@example.com
+  Input Text by test id  invite-email  teppo@example.com
   Element should be enabled  xpath=//*[@data-test-id='application-invite-submit']
   Click by test id  application-invite-submit
   Wait until  Mask is invisible
-  Wait until  Element should not be visible  invite-email
+  No such test id  invite-email
   Wait until  Invite count is  1
 
 Person selector includes

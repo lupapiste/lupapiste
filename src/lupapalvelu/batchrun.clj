@@ -9,6 +9,7 @@
             [monger.query :as monger-query]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
+            [lupapalvelu.archive.archiving :as archiving]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.batchrun.fetch-verdict :as fetch-verdict]
             [lupapalvelu.domain :as domain]
@@ -26,9 +27,9 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.asianhallinta.reader :as ah-reader]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [lupapiste-commons.threads :as threads]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -38,7 +39,7 @@
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
             [ring.util.codec :as codec]
-            [lupapalvelu.archive.archiving :as archiving])
+            [cheshire.core :as json])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -48,8 +49,8 @@
 
 (defn system-not-in-lockdown? []
   (-> (http/get "http://127.0.0.1:8000/system/status")
-      http/decode-response
-      :body :data :not-in-lockdown :data))
+      :body (json/decode true)
+      :data :not-in-lockdown :data))
 
 ;; Email definition for the "open info request reminder"
 
@@ -287,7 +288,7 @@
           {$set {:reminder-sent (now)}})))))
 
 
-(defn send-reminder-emails [& args]
+(defn send-reminder-emails [& _]
   (when (env/feature? :reminders)
     (mongo/connect!)
     (statement-request-reminder)
@@ -438,7 +439,7 @@
           (errorf "Failed to rename %s to %s" zip-path target))))
     (logging/log-event :info {:run-by "Asianhallinta reader" :event "Reader process finished"})))
 
-(defn check-for-asianhallinta-messages [& args]
+(defn check-for-asianhallinta-messages [& _]
   (when-not (system-not-in-lockdown?)
     (logging/log-event :info {:run-by "Asianhallinta reader" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
@@ -480,7 +481,7 @@
                                                                               :event "Failed to read reviews"
                                                                               :validation-errors validation-errors}))
           result)))
-    (catch Throwable t
+    (catch Throwable _
       (errorf "error.integration - Could not read reviews for %s" (:id application)))))
 
 (defn fetch-reviews-for-organization-permit-type-consecutively [organization permit-type applications]
@@ -504,7 +505,7 @@
        (apply concat)
        (remove nil?)))
 
-(defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
+(defn- fetch-reviews-for-organization-permit-type [organization permit-type applications]
   (try+
 
    (logging/log-event :info {:run-by "Automatic review checking"
@@ -515,7 +516,7 @@
 
    (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
 
-   (catch SAXParseException e
+   (catch SAXParseException _
      (logging/log-event :error {:run-by "Automatic review checking"
                                 :organization-id (:id organization)
                                 :event (format "Could not understand response when getting reviews in chunks from %s backend" (:id organization))})
@@ -583,7 +584,7 @@
                        (group-by :permitType applications)
                        (->> (map #(organization-applications-for-review-fetching (:id organization) % projection) permit-types)
                             (zipmap permit-types)))]
-    (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
+    (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type organization) grouped-apps)
          (map (fn [[{app-id :id permit-type :permitType} app-xml]]
                 (let [app    (first (organization-applications-for-review-fetching (:id organization) permit-type projection app-id))
                       result (read-reviews-for-application eraajo-user created app app-xml overwrite-background-reviews?)
@@ -602,7 +603,7 @@
          (log-review-results-for-organization (:id organization)))))
 
 (defn poll-verdicts-for-reviews
-  [& {:keys [application-ids organization-ids overwrite-background-reviews?] :as options}]
+  [& {:keys [application-ids organization-ids] :as options}]
   (let [applications  (when (seq application-ids)
                         (mongo/select :applications {:_id {$in application-ids}}))
         permit-types  (or (->> applications
@@ -627,7 +628,7 @@
                             organizations)]
     (threads/wait-for-threads threads)))
 
-(defn check-for-reviews [& args]
+(defn check-for-reviews [& _]
   (when-not (system-not-in-lockdown?)
     (logging/log-event :info {:run-by "Automatic review checking" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
@@ -684,7 +685,7 @@
       (println "No application id given.")
       1)))
 
-(defn pdfa-convert-review-pdfs [& args]
+(defn pdfa-convert-review-pdfs [& _]
   (mongo/connect!)
   (debug "# of applications with background generated tasks:"
            (mongo/count :applications {:tasks.source.type "background"}))

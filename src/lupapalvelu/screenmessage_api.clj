@@ -1,5 +1,5 @@
 (ns lupapalvelu.screenmessage-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info warn error errorf fatal]]
             [lupapalvelu.action :refer [defcommand defquery] :as action]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [ok]]))

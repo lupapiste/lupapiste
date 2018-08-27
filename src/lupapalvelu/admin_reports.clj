@@ -97,7 +97,7 @@
 
 (defn- user-list [company allow professional]
   (mongo/snapshot :users
-                  (merge {}
+                  (merge {:enabled true}
                          (when-not (= allow :both)
                            {:allowDirectMarketing (= allow :yes)})
                          (when-not (= professional :both)
@@ -137,6 +137,11 @@
        (keyword role)
        ""))
 
+(defn- company-billing-type [billing-type]
+  (if (ss/blank? billing-type)
+    ""
+    (localize :fi (str "register.company.billing." billing-type ".title"))))
+
 (defn user-report-cell-def [row key]
   (let [defs    {:lastName             "Sukunimi"
                  :firstName            "Etunimi"
@@ -153,7 +158,7 @@
                                         :path   [:company :name]}
                  :company.billingType  {:header "Laskutusjakso"
                                         :path   [:company :billingType]
-                                        :fun    #(localize :fi (str "register.company.billing." % ".title"))}
+                                        :fun    company-billing-type}
                  :company.y            {:header "Y-tunnus"
                                         :path   [:company :y]}
                  :company.role         {:header "Yritystilirooli"

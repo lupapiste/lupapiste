@@ -23,7 +23,7 @@
                                                                               {:kerrosala {:pintaAla kerrosala
                                                                                            :paakayttotarkoitusKoodi kayttotarkoitus}})}}})))
 
-(defn- get-toimenpidefull [{{:keys [toimenpiteet kaytettykerrosala kayttotarkoitusKoodi]} :data :as toimenpide}]
+(defn- get-toimenpidefull [{{:keys [kaytettykerrosala]} :data :as toimenpide}]
   (let [{:keys [kayttotarkoitusKoodi pintaAla]} kaytettykerrosala
         kaytettykerrosala-canonical (when (some not-empty [kayttotarkoitusKoodi pintaAla])
                                       {:kerrosalatieto {:kerrosala {:pintaAla pintaAla
@@ -41,7 +41,6 @@
   (let [application (tools/unwrapped application)
         root (root-element application lang)
         documents-by-type (documents-by-type-without-blanks application)
-        lisatiedot (:data (first (:lisatiedot documents-by-type)))
         hanke (:data (first (:hankkeen-kuvaus documents-by-type)))]
     (assoc-in
      root

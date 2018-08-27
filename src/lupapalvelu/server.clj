@@ -1,9 +1,9 @@
 (ns lupapalvelu.server
   (:require [clojure.java.io :as io]
-            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
+            [mount.core :as mount]
+            [taoensso.timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [noir.core :refer [defpage]]
             [noir.server :as server]
-            [noir.response :as response]
             [ring.middleware.session.cookie :as session]
             [sade.core :refer [now]]
             [sade.env :as env]
@@ -172,7 +172,8 @@
   (server/add-middleware control/lockdown-middleware)
   (server/add-middleware web/cookie-monster)
 
-  (jms-consumers/init!))
+  (jms-consumers/init!)
+  (mount/start))
 
 (defn read-session-key []
   {:post [(or (nil? %) (= (count %) 16))]}

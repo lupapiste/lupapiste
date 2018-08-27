@@ -7,8 +7,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.operations :as op]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.permit :as permit]))
 
 (defn sijoittaminen? [{:keys [permitSubtype permitType]}]
   (and (= permit/YA permitType) (true? (some #(= (keyword permitSubtype) %) op/ya-sijoituslupa-subtypes))))

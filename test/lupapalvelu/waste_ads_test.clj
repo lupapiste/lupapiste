@@ -1,18 +1,8 @@
 (ns lupapalvelu.waste-ads-test
   (:require [midje.sweet :refer :all]
-            [clojure.java.io :as io]
-            [cheshire.core :as json]
             [lupapalvelu.waste-ads :as waste-ads]
-            [sade.env :as env]
             [monger.operators :refer :all]
-            [cheshire.core :as json]
-            [hiccup.core :as hiccup]
-            [clj-rss.core :as rss]
-            [sade.strings :as ss]
             [sade.util :refer [fn->>]]
-            [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.waste-schemas :as waste-schemas]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]))
 
 (def model-ad-1

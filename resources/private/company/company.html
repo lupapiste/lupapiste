@@ -361,11 +361,12 @@
           </div>
         </div>
 
-        <div data-bind="visible: showUserIsFinancialAuthority">
-          <span data-bind="text: loc('register.company.add-user.is-financial-authority', email())"></span>
+        <div data-bind="visible: showUserNotApplicant,
+                        testId: 'user-not-applicant'">
+          <span data-bind="text: loc('register.company.add-user.not-applicant', email())"></span>
           <div class="dialog-content__footer">
             <button class="positive close"
-                    data-test-id="company-user-is-financial-authority-close-dialog">
+                    data-test-id="close-not-applicant">
               <i class="lupicon-check"></i>
               <span  data-bind="ltext: 'ok'"></span>
             </button>

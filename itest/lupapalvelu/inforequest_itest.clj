@@ -80,7 +80,7 @@
   (let [application-id (create-app-id pena :propertyId oir-property-id :infoRequest true :address "OIR")
         application    (query-application pena application-id)
         email          (last-email)
-        [url token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain] ""))
+        [url token] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain] ""))
         store (atom {})
         params {:cookie-store (->cookie-store store)
                 :follow-redirects false
@@ -106,7 +106,7 @@
 
     (fact "Auhtority receives email about the comment"
       (let [email          (last-email)
-           [_ token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain] ""))]
+           [_ token] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain] ""))]
        (:to email) => "erajorma@example.com"
        (:subject email) => "Lupapiste: Neuvontapyynt\u00f6 Lupapisteess\u00e4"
        (count token) => pos?))

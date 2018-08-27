@@ -3,15 +3,11 @@
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
             [lupapalvelu.action :refer [execute] :as action]
-            [lupapalvelu.attachment-api :as api]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.itest-util :as itest]
             [lupapalvelu.tiedonohjaus-api :refer :all]
-            [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.archive.archiving :as archiving]
             [lupapalvelu.archive.archiving-util :as archiving-util]
             [lupapalvelu.assignment :as assignment]))
 
@@ -71,7 +67,7 @@
 
 (facts "readonly pre-checks are in place"
   (->> (action/get-actions)
-       (filter (fn [[k v]] (and (= (:type v) :command) (-> v :user-roles :applicant) (-> v :categories :attachments))))
+       (filter (fn [[_ v]] (and (= (:type v) :command) (-> v :user-roles :applicant) (-> v :categories :attachments))))
        (map (fn [[k v]] [k (remove nil? (map (comp #(re-matches #".*readOnly.*" %) str class) (:pre-checks v)))]))
        (filter (comp empty? second))
        (map first)

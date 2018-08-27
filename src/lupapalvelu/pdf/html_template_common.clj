@@ -5,8 +5,7 @@
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.strings :as ss]
-            [sade.util :refer [fn->>] :as util])
-    (:import [java.io InputStream]))
+            [sade.util :refer [fn->>] :as util]))
 
 (def styles-path "private/pdf/style/")
 

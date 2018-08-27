@@ -6,43 +6,34 @@
             [lupapalvelu.document.rakennuslupa-canonical :as rl-canonical]
             [lupapalvelu.document.tools :as doc-tools]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
+            [lupapalvelu.backing-system.krysp.rakennuslupa-mapping :as rl-mapping]))
 
 (defmulti party-canonical-info
   {:arglists '([party-doc])}
   doc-tools/doc-subtype)
 
 (defmethod party-canonical-info :hakija
-  [{doc-data :data {party-type :name doc-subtype :subtype} :schema-info :as party-doc}]
+  [{doc-data :data {party-type :name doc-subtype :subtype} :schema-info}]
   {:osapuolitieto [{:Osapuoli (canonical-common/get-osapuoli-data doc-data party-type doc-subtype)}]})
 
 (defmethod party-canonical-info :suunnittelija
-  [{doc-data :data {party-type :name doc-subtype :subtype} :schema-info :as party-doc}]
+  [{doc-data :data {party-type :name doc-subtype :subtype} :schema-info}]
   {:suunnittelijatieto [{:Suunnittelija (canonical-common/get-suunnittelija-data doc-data party-type doc-subtype)}]})
 
-(defmulti party-usage-info
-  {:arglists '([party-doc])}
-  doc-tools/doc-subtype)
+(defmulti party-usage-info {:arglists '([party-doc])} doc-tools/doc-subtype)
 
-(defmethod party-usage-info :hakija
-  [party-doc]
-  "Hakijatietojen muuttaminen")
+(defmethod party-usage-info :hakija [_] "Hakijatietojen muuttaminen")
 
-(defmethod party-usage-info :suunnittelija
-  [party-doc]
-  "Uuden suunnittelijan nime\u00e4minen")
+(defmethod party-usage-info :suunnittelija [_] "Uuden suunnittelijan nime\u00e4minen")
 
-(defmulti party-krysp-description
-  {:arglists '([party-doc])}
-  doc-tools/doc-subtype)
+(defmulti party-krysp-description {:arglists '([party-doc])} doc-tools/doc-subtype)
 
-(defmethod party-krysp-description :hakija
-  [party-doc]
-  "Hankkeen hakijatietojen muuttaminen.")
+(defmethod party-krysp-description :hakija [_] "Hankkeen hakijatietojen muuttaminen.")
 
 (defmethod party-krysp-description :suunnittelija
-  [{doc-data :data {party-type :name doc-subtype :subtype} :schema-info :as party-doc}]
-  (format "Suunnittelijan (rooli: %s) nime\u00e4minen hankkeelle." (canonical-common/get-kuntaRooliKoodi doc-data party-type doc-subtype)))
+  [{doc-data :data {party-type :name doc-subtype :subtype} :schema-info}]
+  (format "Suunnittelijan (rooli: %s) nime\u00e4minen hankkeelle."
+          (canonical-common/get-kuntaRooliKoodi doc-data party-type doc-subtype)))
 
 (defn- party-doc-to-canonical [application lang party-doc]
   {:Rakennusvalvonta

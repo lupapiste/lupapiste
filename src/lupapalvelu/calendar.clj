@@ -1,6 +1,5 @@
 (ns lupapalvelu.calendar
-  (:require [taoensso.timbre :as timbre :refer [info error]]
-            [cheshire.core :as json]
+  (:require [taoensso.timbre :refer [info error]]
             [monger.operators :refer :all]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]

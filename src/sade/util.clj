@@ -13,8 +13,7 @@
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [debugf warnf]])
   (:import [java.util.jar JarFile]
-           [org.joda.time LocalDateTime]
-           [java.io ByteArrayOutputStream]))
+           [org.joda.time LocalDateTime]))
 
 (defmacro defalias [alias from]
   `(do (def ~alias ~from)
@@ -473,7 +472,7 @@
   [_]
   [0 0 0])
 (defmethod ->version-array clojure.lang.PersistentArrayMap
-  [{major :major minor :minor micro :micro :as v :or {major 0 minor 0 micro 0}}]
+  [{major :major minor :minor micro :micro :or {major 0 minor 0 micro 0}}]
   (mapv ->int [major minor micro]))
 (defmethod ->version-array clojure.lang.PersistentVector
   [v]
@@ -587,7 +586,7 @@
             (fs/mkdirs (fs/parent f))
             (io/copy (.getInputStream zip entry) f))))
 
-       (catch IllegalArgumentException e
+       (catch IllegalArgumentException _
          (if-not (= encoding fallback-encoding)
            (do
              (warnf "Malformed zipfile contents in (%s) with encoding: %s. Fallbacking to CP858 encoding" source encoding)

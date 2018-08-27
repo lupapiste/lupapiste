@@ -319,9 +319,7 @@
                            :template-id id)
                     => (err :error.verdict-template-deleted))
                   (fact "Copying is allowed also for deleted templates"
-                    (let [{:keys [copy-id copy-modified copy-published
-                                  copy-deleted copy-draft copy-name
-                                  copy-category]}
+                    (let [{:keys [copy-id copy-modified copy-published copy-draft copy-name copy-category]}
                           (prefix-keys (command sipoo :copy-verdict-template
                                                 :org-id org-id
                                                 :template-id id)
@@ -723,10 +721,7 @@
      :app-id app-id}))
 
 (facts "Template conditions"
-  (let [{:keys [blank-condition draft empty-condition good-condition
-                other-condition plan1 plan2 plan3 plan4
-                remove-condition review1 review2 review3 review4
-                template-id]} space-saving-definitions]
+  (let [{:keys [plan1 plan2 plan3 remove-condition review1 review2 review3 template-id]} space-saving-definitions]
     (fact "Remove condition"
       (remove-template-condition sipoo org-id template-id remove-condition))
     (fact "Full template without attachments"
@@ -786,7 +781,7 @@
                               :verdict-id verdict-id
                               :path (map name (flatten [%1]))
                               :value %2)
-     :check-changes (fn [{changes :changes :as response} expected]
+     :check-changes (fn [{:keys [changes]} expected]
                       (fact "Check changes"
                         changes => expected)
                       (fact "Check that verdict has been updated"
@@ -799,11 +794,7 @@
                                              changes))))}))
 
 (facts "Verdicts"
-  (let [{:keys [blank-condition draft empty-condition good-condition
-                other-condition plan1 plan2 plan3 plan4
-                remove-condition review1 review2 review3 review4
-                template-id app-id]} space-saving-definitions]
-
+  (let [{:keys [good-condition other-condition template-id app-id]} space-saving-definitions]
     (facts "Pena fills and submits application"
       (fill-sisatila-muutos-application pena app-id)
       (command pena :submit-application :id app-id) => ok?
@@ -1243,7 +1234,7 @@
                              :userId ronja-id
                              :roleId sipoo-general-handler-id) => ok?)
 
-                  (let [{:keys [state buildings id] {operation-id :id} :primaryOperation :as post-verdict-app} (query-application sonja app-id)]
+                  (let [{:keys [state buildings id] {operation-id :id} :primaryOperation} (query-application sonja app-id)]
                     (fact "Application state is verdictGiven"
                       state => "verdictGiven")
                     (fact "Buildings array is created, primaryOperation gets index = 1"
@@ -1431,7 +1422,7 @@
               => "Washington")
             (fact "Verdict attachment"
               (xml/get-text xml [:paatostieto :poytakirja :liite :kuvaus])
-              => "Verdict"
+              => "Permit text"
               (let [url                        (xml/get-text xml [:paatostieto :poytakirja
                                                                   :liite :linkkiliitteeseen])
                     {:keys [uri query-string]} (http-client/parse-url url)]
@@ -1442,7 +1433,7 @@
                     "id"         app-id}
                 (fact "verdict-pdf action"
                   (:headers(raw sonja :verdict-pdf :id app-id :verdict-id verdict-id))
-                  => (contains {"Content-Disposition" (contains (format "%s Verdict %s"
+                  => (contains {"Content-Disposition" (contains (format "%s Permit %s"
                                                                         app-id
                                                                         (util/to-local-date (now))))}))))))
 
@@ -1452,12 +1443,12 @@
             attachment
             => (contains {:readOnly         true
                           :locked           true
-                          :contents         "Verdict"
+                          :contents         "Permit text"
                           :type             {:type-group "paatoksenteko"
                                              :type-id    "paatos"}
                           :applicationState "verdictGiven"
                           :latestVersion    (contains {:contentType "application/pdf"
-                                                       :filename    (contains "Verdict")})})
+                                                       :filename    (contains "Permit")})})
             (fact "verdict-attachment"
               (:verdict (open-verdict))
               => (contains {:verdict-attachment att-id}))))))

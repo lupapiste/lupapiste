@@ -39,5 +39,5 @@
    :org-authz-roles  roles/reader-org-authz-roles
    :states           states/all-states
    :pre-checks       [ddd/three-d-map-enabled]}
-  [{:keys [application user organization]}]
-  (ddd/redirect-to-3d-map user application @organization))
+  [command]
+  (ddd/redirect-to-3d-map command))

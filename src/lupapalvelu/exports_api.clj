@@ -5,7 +5,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
-            [lupapalvelu.action :refer [defexport] :as action]
+            [lupapalvelu.action :refer [defexport]]
             [lupapalvelu.application :as application]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.exports :as exports :refer [application-to-salesforce exported-application validate-application-export-data]]
@@ -43,7 +43,8 @@
      before :modifiedBeforeTimestampMillis} :data user :user}]
   (let [query (merge
                 (domain/application-query-for user)
-                {:primaryOperation.id {$exists true}}
+                {:primaryOperation.id {$exists true}
+                 :facta-imported {$ne true}} ;; Factasta konvertoituja hankkeita ei laskuteta
                 (when (or (ss/numeric? after) (ss/numeric? before))
                   {:modified (util/assoc-when {}
                                               $gte (when after (Long/parseLong after 10))

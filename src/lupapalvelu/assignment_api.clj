@@ -1,7 +1,6 @@
 (ns lupapalvelu.assignment-api
   (:require [lupapalvelu.action :as action :refer [defcommand defquery disallow-impersonation parameters-matching-schema]]
             [lupapalvelu.assignment :as assignment]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]

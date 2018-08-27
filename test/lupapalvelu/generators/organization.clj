@@ -1,6 +1,5 @@
 (ns lupapalvelu.generators.organization
-  (:require [schema.core :as sc]
-            [clojure.test.check.generators :as gen]
+  (:require [clojure.test.check.generators :as gen]
             [lupapalvelu.generators.stamp]
             [lupapalvelu.organization :as org]
             [sade.schema-generators :as ssg]

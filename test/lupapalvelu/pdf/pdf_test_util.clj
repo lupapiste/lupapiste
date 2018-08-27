@@ -1,7 +1,5 @@
 (ns lupapalvelu.pdf.pdf-test-util
-  (:require [lupapalvelu.domain :as domain]
-            [lupapalvelu.itest-util :as util]
-            [lupapalvelu.document.schemas :as schemas]))
+  (:require [lupapalvelu.domain :as domain]))
 
 (def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
                        "poikkeusasian-rakennuspaikka"

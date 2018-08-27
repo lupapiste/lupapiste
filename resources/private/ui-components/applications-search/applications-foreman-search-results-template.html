@@ -82,6 +82,9 @@
               <td data-bind="ltext: $data.foremanRoleI18nkey" data-test-col-name="foremanRole"></td>
               <td data-bind="dateTimeString: $data.submitted" data-test-col-name="submitted"></td>
               <td data-bind="ltext: $data.state, attr: {'data-test-row-state': $data.state}" data-test-col-name="status"></td>
+              <td data-bind="foreach: $data.handlers" data-test-col-name="authority">
+                <span class="handlers" data-bind="fullName: $data"></span>
+              </td>
             </tr>
           </tbody>
         </table>

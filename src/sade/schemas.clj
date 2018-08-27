@@ -3,6 +3,7 @@
             [sade.validators :as validators]
             [sade.strings :as ss]
             [clj-time.format :as ctf]
+            [iso-country-codes.countries :as countries]
             [schema.core :refer [defschema] :as sc]
             [schema.coerce :as coerce]
             [sade.shared-schemas :as sssc]
@@ -170,6 +171,10 @@
 (defschema ApplicationId
   (sc/pred validators/application-id? "Application ID"))
 
+(defschema ISO-3166-alpha-2
+  "Two letter country code (e.g. 'FI')"
+  (apply sc/enum (map :alpha-2 countries/countries)))
+
 ;; Schemas for blank or valid values
 
 (sc/defschema OptionalHttpUrl
@@ -185,7 +190,7 @@
 (defdynamicschema date-string [format]
   (let [formatter (ctf/formatter format)]
     (sc/constrained sc/Str #(try (ctf/parse formatter %)
-                                 (catch IllegalFieldValueException e false))
+                                 (catch IllegalFieldValueException _ false))
                     (str "Date string " format))))
 
 (defdynamicschema fixed-length-string [len]

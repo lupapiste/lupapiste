@@ -1,6 +1,5 @@
 (ns lupapalvelu.ui.company.state
-  (:require [rum.core :as rum]
-            [cljs-time.coerce :as tc]))
+  (:require [rum.core :as rum]))
 
 
 (def empty-component-state {:report {:start-date nil

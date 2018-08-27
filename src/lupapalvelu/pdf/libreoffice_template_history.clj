@@ -1,10 +1,8 @@
 (ns lupapalvelu.pdf.libreoffice-template-history
-  (:require [taoensso.timbre :as log]
-            [lupapalvelu.tiedonohjaus :as toj]
+  (:require [lupapalvelu.tiedonohjaus :as toj]
             [sade.util :as util]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pdf.libreoffice-template :as template]
-            [clojure.string :as s]
             [clojure.java.io :as io]))
 
 (defn- build-history-row [{:keys [type text version category contents ts user]} lang]
@@ -36,7 +34,7 @@
    (or (util/to-local-date ts) "-")
    user])
 
-(defn- build-history-child-rows [action docs lang]
+(defn- build-history-child-rows [docs lang]
   (loop [docs-in docs
          result []]
     (let [[doc-attn & others] docs-in]
@@ -51,7 +49,7 @@
       (let [[history & older] data-in
             new-result (-> result
                            (conj [(:action history) "" (or (util/to-local-date (:start history)) "-") (:user history)])
-                           (into (build-history-child-rows " " (:documents history) lang)))]
+                           (into (build-history-child-rows (:documents history) lang)))]
         (if (nil? older)
           new-result
           (recur older new-result))))))

@@ -6,28 +6,18 @@
   (:require [clojure.java.io :as io]
             [garden.core :as garden]
             [garden.selectors :as sel]
-            [lupapalvelu.application :as app]
-            [lupapalvelu.application-meta-fields :as app-meta]
-            [lupapalvelu.attachment :as att]
-            [lupapalvelu.attachment.bind :as bind]
-            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.logging :as logging]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.markup :as markup]
-            [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
-            [lupapalvelu.pdf.html-template :as html-pdf]
             [lupapalvelu.pdf.html-template-common :as common]
             [rum.core :as rum]
             [sade.core :refer :all]
-            [sade.property :as property]
             [sade.strings :as ss]
             [sade.util :as util]
             [schema.core :refer [defschema] :as sc]
@@ -190,7 +180,7 @@
          [:body body (when script?
                        page-number-script)]])))
 
-(defn- verdict-schema [{:keys [category schema-version legacy?] :as opts}]
+(defn- verdict-schema [{:keys [category schema-version legacy?]}]
   (if legacy?
     (legacy/legacy-verdict-schema category)
     (verdict-schemas/verdict-schema category schema-version)))
@@ -249,9 +239,7 @@
        (concat extra)
        (remove nil?)))
 
-(defn resolve-cell [{lang :lang :as data}
-                    source-value
-                    {:keys [text width unit loc-prefix styles] :as cell}]
+(defn resolve-cell [{:keys [lang]} source-value {:keys [text width unit loc-prefix styles] :as cell}]
   (let [path (some-> cell :path pathify)
         class (resolve-class cell-styles
                              styles

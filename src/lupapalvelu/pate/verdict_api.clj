@@ -9,18 +9,14 @@
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.schema-util :as schema-util]
-            [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.verdict :as verdict]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.roles :as roles]
-            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
-            [sade.strings :as ss]
-            [sade.util :as util]
-            [schema.core :as sc]))
+            [sade.util :as util]))
 
 
 ;; ------------------------------------------
@@ -174,8 +170,8 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks [pate-enabled]
    :states states/post-submitted-states}
-  [{:keys [application organization]}]
-  (ok :templates (template/application-verdict-templates @organization
+  [{:keys [application] :as command}]
+  (ok :templates (template/application-verdict-templates (template/command->options command)
                                                          application)))
 (defquery pate-verdicts
   {:description "List of verdicts. Item properties:
@@ -344,8 +340,8 @@
   template and its settings. Returns the verdict-id."
    :feature             :pate
    :user-roles          #{:authority}
-   :parameters          [id template-id]
-   :optional-parameters [replacement-id]
+   :parameters          [:id :template-id]
+   :optional-parameters [:replacement-id]
    :input-validators    [(partial action/non-blank-parameters [:id])]
    :pre-checks          [pate-enabled
                          (action/not-pre-check legacy-category)
@@ -353,7 +349,7 @@
                          (replacement-check :replacement-id)]
    :states              states/post-submitted-states}
   [command]
-  (ok :verdict-id (verdict/new-verdict-draft template-id command replacement-id)))
+  (ok :verdict-id (verdict/new-verdict-draft (template/command->options command))))
 
 (defcommand delete-pate-verdict
   {:description      "Deletes verdict. Published verdicts cannot be
@@ -385,7 +381,7 @@
                                              (state-in states/post-submitted-states))
                        ;; As KuntaGML message is generated the
                        ;; application state must be at least :sent
-                       (state-in (set/difference states/post-sent-states
+                       (state-in (set/difference states/post-submitted-states
                                                  #{:complementNeeded})))]
    :notified         true
    :on-success       (notify :application-state-change)}

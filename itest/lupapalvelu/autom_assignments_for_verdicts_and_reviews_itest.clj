@@ -16,7 +16,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
 (def db-name (str "test_autom-assignments-for-verd-and-rev-itest_" (now)))
 
@@ -132,7 +132,7 @@
                    (sxml/parse-string "utf-8"))
             (sade.http/get anything :as :stream :throw-exceptions false :conn-timeout 10000)
             => (sample-response))
-          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+          (let [_ (batchrun/poll-verdicts-for-reviews)
                 assignments (get-assignments)]
 
             (fact "attachments trigger assignments"
@@ -150,7 +150,7 @@
             (sade.http/get anything :as :stream :throw-exceptions false :conn-timeout 10000)
             => (sample-response))
           (let [old-assignments (get-assignments)
-                poll-result (batchrun/poll-verdicts-for-reviews)
+                _ (batchrun/poll-verdicts-for-reviews)
                 assignments (get-assignments)]
 
             (fact "no new assignments"

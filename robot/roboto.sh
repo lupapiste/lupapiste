@@ -9,7 +9,7 @@ RESOLUTION=1400x1200
 TIMEOUT=600
 TESTS=
 NOENV=
-BROWSER=chrome
+BROWSER=headlesschrome
 SERVER=http://localhost:8000
 LUPISPID=
 NICENESS=+15
@@ -287,7 +287,7 @@ check_env() {
          FF=$(firefox --version)
          echo "$FF" | grep -q "^Mozilla Firefox 5[2-9]\." || versionfail "Major version '$FF' of Firefox may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
          ;;
-      "chrome" )
+      "chrome" | "headlesschrome" )
          CG=$(google-chrome --version)
          echo "$CG" | grep -q "^Google Chrome \(6[6-8]\)\." || versionfail "Major version '$CG' of Chrome may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
          # Clean up old Chrome temp files if there

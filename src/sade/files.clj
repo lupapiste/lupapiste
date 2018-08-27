@@ -1,5 +1,5 @@
 (ns sade.files
-  (:require [taoensso.timbre :as timbre :refer [warnf]]
+  (:require [taoensso.timbre :refer [warnf]]
             [clojure.java.io :as io]
             [sade.strings :as ss]
             [me.raynes.fs.compression :as fsc]

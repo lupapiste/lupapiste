@@ -1,14 +1,11 @@
 (ns lupapalvelu.suti
   (:require [monger.operators :refer :all]
-            [cheshire.core :as json]
             [swiss.arrows :refer :all]
             [taoensso.timbre :refer [debugf]]
             [sade.core :refer :all]
             [sade.http :as http]
             [sade.strings :as ss]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.operations :as op]
-            [lupapalvelu.user :as usr]
             [lupapalvelu.states :as states]))
 
 
@@ -71,12 +68,10 @@
                    (contains? (conj states/post-verdict-states :sent)
                               (keyword state)))))))
 
-(defn application-data [{:keys [suti primaryOperation state] :as application}
-                        organization]
-  (let [{:keys [enabled www
-                operations]}       (:suti organization)
-        {suti-id :id added :added} suti
-        suti-enabled               (suti-enabled? application organization)]
+(defn application-data [{:keys [suti] :as application} organization]
+  (let [{:keys [www]} (:suti organization)
+        {suti-id :id} suti
+        suti-enabled (suti-enabled? application organization)]
     {:enabled suti-enabled
      :www (when (every? ss/not-blank? [www suti-id])
             (ss/replace www "$$" suti-id))
@@ -84,10 +79,8 @@
 
 (defn application-products
   "In addition to products the suti-id is returned as well just in case."
-  [{:keys [suti primaryOperation state] :as application}
-                            organization]
-  (let [{:keys [enabled www
-                server operations]} (:suti organization)
+  [{:keys [suti] :as application} organization]
+  (let [{:keys [server]} (:suti organization)
         url                         (:url server)
         {suti-id :id added :added}  suti
         suti-enabled                (suti-enabled? application organization)]

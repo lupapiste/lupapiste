@@ -260,7 +260,7 @@ Plans are listed in English
   Check initial plan  1  P2
 
 Publish template
-  Test id text is  template-state  Verdict template has not yet been published.
+  Test id text is  template-state  Permit template has not yet been published.
   Scroll and click test id  publish-template
   Test id should contain  template-state  Last published
   Test id disabled  publish-template
@@ -276,7 +276,7 @@ Published verdict can be copied
   Change template name  Clone
 
 Publish the copy as well
-  Test id text is  template-state  Verdict template has not yet been published.
+  Test id text is  template-state  Permit template has not yet been published.
   Click visible test id  publish-template
   Click back
 

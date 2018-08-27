@@ -3,10 +3,10 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.prev-permit :as pp]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.application :as app]
             [lupapalvelu.action :as action]
             [lupapalvelu.verdict :as verdict]
@@ -152,7 +152,7 @@
    :propertyId (apply str (concat (first (split-at 3 (:id organization))) "00000000000"))})
 
 (defn fetch-or-create-archiving-project!
-  [{{:keys [lang organizationId kuntalupatunnus createAnyway createWithoutBuildings createWithDefaultLocation refreshBuildings]} :data :as command}]
+  [{{:keys [lang organizationId kuntalupatunnus createWithoutPreviousPermit createWithoutBuildings createWithDefaultLocation refreshBuildings]} :data :as command}]
   (let [operation         "archiving-project"
         permit-type       "R"                                ; No support for other permit types currently
         dummy-application {:id "" :permitType permit-type :organization organizationId}
@@ -167,21 +167,21 @@
                               (building-reader/buildings-for-documents building-xml))]
     (cond
       (and (empty? app-info)
-           (not createAnyway))              (fail :error.no-previous-permit-found-from-backend :permitNotFound true)
-      (not location-info)                   (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+           (not createWithoutPreviousPermit)) (fail :error.no-previous-permit-found-from-backend :permitNotFound true)
+      (not location-info)                     (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
       (and (not (:propertyId location-info))
-           (not createWithDefaultLocation)) (fail :error.previous-permit-no-propertyid)
+           (not createWithDefaultLocation))   (fail :error.previous-permit-no-propertyid)
       (and (empty? bldgs-and-structs)
-           (not createWithoutBuildings))    (fail :error.no-buildings-found-from-backend :buildingsNotFound true)
-      :else                                 (let [{id :id} (create-archiving-project-application! command
-                                                                                                  operation
-                                                                                                  bldgs-and-structs
-                                                                                                  app-info
-                                                                                                  location-info
-                                                                                                  permit-type
-                                                                                                  building-xml
-                                                                                                  kuntalupatunnus
-                                                                                                  refreshBuildings)]
+           (not createWithoutBuildings))      (fail :error.no-buildings-found-from-backend :buildingsNotFound true)
+      :else                                   (let [{id :id} (create-archiving-project-application! command
+                                                                                                    operation
+                                                                                                    bldgs-and-structs
+                                                                                                    app-info
+                                                                                                    location-info
+                                                                                                    permit-type
+                                                                                                    building-xml
+                                                                                                    kuntalupatunnus
+                                                                                                    refreshBuildings)]
                                             (ok :id id)))))
 
 (defn update-verdicts [{:keys [application] :as command} verdicts]

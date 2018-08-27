@@ -1,5 +1,5 @@
 (ns lupapalvelu.vetuma
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error errorf fatal]]
             [clojure.set :refer [rename-keys]]
             [noir.core :refer [defpage]]
             [noir.request :as request]
@@ -18,8 +18,8 @@
             [sade.validators :as v]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.vtj :as vtj]
-            [lupapalvelu.ident.session :as ident-session]))
+            [lupapalvelu.ident.session :as ident-session]
+            [lupapalvelu.vtj :as vtj]))
 
 ;;
 ;; Configuration
@@ -268,7 +268,7 @@
         "FAILURE"  (handle-failure params data)))))
 
 (defn vetuma-session []
-  (lupapalvelu.ident.session/get-session (session-id)))
+  (ident-session/get-session (session-id)))
 
 (defpage "/api/vetuma/user" []
   (let [data (vetuma-session)
@@ -277,7 +277,7 @@
 
 (defpage [:delete "/api/vetuma/user"] []
   (if-let [session (vetuma-session)]
-    (lupapalvelu.ident.session/delete-user session))
+    (ident-session/delete-user session))
   ; Always return 200 ok.
   (response/json {:ok true}))
 
@@ -290,10 +290,10 @@
 ;;
 
 (defn get-user [stamp]
-  (lupapalvelu.ident.session/get-user stamp))
+  (ident-session/get-user stamp))
 
 (defn consume-user [stamp]
-  (lupapalvelu.ident.session/consume-user stamp))
+  (ident-session/consume-user stamp))
 
 ;;
 ;; dev test api

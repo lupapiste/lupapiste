@@ -7,7 +7,6 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.data-schema :as dds]
             [sade.schema-generators :as ssg]
-            [sade.util :as util]
             ;; Ensure assignment targets are registered
             [lupapalvelu.document.document]
             ;; Ensure all document schemas are registered
