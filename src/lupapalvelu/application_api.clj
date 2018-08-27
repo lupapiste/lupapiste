@@ -233,10 +233,7 @@
                        :required [:application/cancel]}]
    :notified         true
    :on-success       [(notify :application-state-change)
-                      (fn [{:keys [application organization]} _]
-                        (bs/cancel-application! (bs/get-backing-system (:id @organization)
-                                                                       (permit/permit-type application))
-                                                application))]
+                      (fn [command _] (bs/cancel-application! command))]
    :states           states/all-application-or-archiving-project-states
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
@@ -346,14 +343,11 @@
                       (notify :organization-on-submit)
                       (notify :organization-housing-office)]
    :pre-checks       [(partial sm/validate-state-transition :submitted)]}
-  [{:keys [application organization] :as command}]
+  [{:keys [application] :as command}]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (let [application (if-let [[bs-name integration-key]
-                                 (bs/submit-application! (bs/get-backing-system (:id @organization)
-                                                                                (permit/permit-type application))
-                                                         application)]
+      (let [application (if-let [[bs-name integration-key] (bs/submit-application! command)]
                           (do (app/set-integration-key id bs-name integration-key)
                               (assoc-in application [:integrationKeys bs-name] integration-key)) ; HACK
                           application)]
@@ -514,7 +508,7 @@
                        :required [:application/edit-draft :application/edit-operation]}
                       {:context  {:application {:state states/pre-sent-application-states}}
                        :required [:application/edit-operation]}
-                      {:context  {:application {:state states/all-application-states-but-draft-or-terminal}}
+                      {:context  {:application {:state states/all-application-or-archiving-project-states}}
                        :required [:application/edit-operation :document/edit-identifiers]}]}
   [{:keys [application] :as command}]
   (if (= (get-in application [:primaryOperation :id]) op-id)
@@ -640,16 +634,14 @@
         application        (:application command)
         archiving-project? (= (keyword (:permitType application)) :ARK)
         krysp?             (org/krysp-integration? organization (permit/permit-type application))
-        warranty?          (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))
-        terminal-but-not-canceled? (and (states/terminal-state? (sm/state-graph application) (keyword state))
-                                        (not= :canceled (keyword state)))]
+        warranty?          (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
+    (when (attachment/comments-saved-as-attachment? application state)
+      (attachment/save-comments-as-attachment command {:state state}))
     (if warranty?
       (update-application command (util/deep-merge
                                     (app-state/state-transition-update (keyword state) (:created command) application user)
                                     {$set (app/warranty-period (:created command))}))
       (update-application command (app-state/state-transition-update (keyword state) (:created command) application user)))
-    (when terminal-but-not-canceled?
-      (attachment/save-comments-as-attachment command))
     (when-not archiving-project?
       (archiving-util/mark-application-archived-if-done application (:created command) user))))
 
@@ -661,10 +653,7 @@
    :states           #{:submitted}
    :pre-checks       [(partial sm/validate-state-transition :draft)]
    :on-success       [(notify :application-return-to-draft)
-                      (fn [{:keys [application organization]} _]
-                        (bs/return-to-draft! (bs/get-backing-system (:id @organization)
-                                                                    (permit/permit-type application))
-                                             application))]}
+                      (fn [command _] (bs/return-to-draft! command))]}
   [{{:keys [role] :as user}         :user
     {:keys [state] :as application} :application
     created                         :created

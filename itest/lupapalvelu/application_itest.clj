@@ -791,7 +791,11 @@
       (desc-command sonja "foobar") => ok?)
     (fact "... likewise tag"
       (tag-command pena "cat") => fail?
-      (tag-command sonja "Foo") => ok?)))
+      (tag-command sonja "Foo") => ok?)
+    (fact "Authority can edit tag and description also in the closed state"
+      (command sonja :change-application-state :id app-id :state "closed") => ok?
+      (desc-command sonja "Archive!") => ok?
+      (tag-command sonja "ARC") => ok?)))
 
 (facts "Changing application location"
   (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)

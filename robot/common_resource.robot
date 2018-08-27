@@ -325,7 +325,7 @@ Login
   Wait until  Element should be visible  login-username
   Input text  login-username  ${username}
   Input text  login-password  ${password}
-  Wait and click  login-button
+  Submit form  welcome-login-form
 
 Login fails
   [Arguments]  ${username}  ${password}
@@ -334,6 +334,8 @@ Login fails
 
 User should be logged in
   [Arguments]  ${name}
+  # Give some time for scripts to run
+  Sleep  0.5s
   Run Keyword And Ignore Error  Maximize browser window
   Scroll to top
   Wait Until  Element text should be  user-name  ${name}

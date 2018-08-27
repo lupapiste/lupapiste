@@ -54,13 +54,22 @@
                                              {:type review-type})]
           (sc/optional-key :plans)   [PateDependency]}))
 
+(defn- wrapped
+  "Unwrapped value is supported as a fallback for existing templates."
+  [schema]
+  (sc/conditional
+   map? {:_value    schema
+         :_user     sc/Str
+         :_modified ssc/Timestamp}
+   :else schema))
+
 (defschema PateSavedTemplate
   (merge PateCategory
-         {:name                        sc/Str
-          :deleted                     sc/Bool
+         {:name                        (wrapped sc/Str)
+          :deleted                     (wrapped sc/Bool)
           (sc/optional-key :draft)     sc/Any ;; draft is published data on publish.
           :modified                    ssc/Timestamp
-          (sc/optional-key :published) {:published  ssc/Timestamp
+          (sc/optional-key :published) {:published  (wrapped ssc/Timestamp)
                                         :data       sc/Any
                                         :inclusions [sc/Str]
                                         :settings   PatePublishedTemplateSettings}}))

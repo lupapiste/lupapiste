@@ -492,8 +492,7 @@
 (defn property-id-by-point [x y]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
-      (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
-      (property-name "ktjkiiwfs:tunnuspisteSijainti")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:sijainti")
@@ -502,9 +501,9 @@
 (defn location-info-by-property-id [property-id]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
-      (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
-      (property-name "ktjkiiwfs:tunnuspisteSijainti")
-      (property-name "ktjkiiwfs:sijainti")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (wfs-property-name "ktjkiiwfs:tunnuspisteSijainti")
+      (wfs-property-name "ktjkiiwfs:sijainti")
       (ogc-filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
@@ -523,9 +522,11 @@
 (defn property-info-by-radius [x y radius]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
-      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
-      (property-name "ktjkiiwfs:kiinteistotunnus")
-      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (wfs-property-name "ktjkiiwfs:kiinteistotunnus")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:tunnuspisteSijainti")
+      (wfs-property-name "ktjkiiwfs:kuntaTieto")
       (ogc-filter
         (within
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
@@ -549,9 +550,12 @@
 (defn property-info-by-line [l]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
-      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
-      (property-name "ktjkiiwfs:kiinteistotunnus")
-      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (wfs-property-name "ktjkiiwfs:kiinteistotunnus")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:tunnuspisteSijainti")
+      (wfs-property-name "ktjkiiwfs:kuntaTieto")
       (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
@@ -560,9 +564,12 @@
 (defn property-info-by-polygon [p]
   (post ktjkii
     (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
-      (property-name "ktjkiiwfs:rekisteriyksikkolaji")
-      (property-name "ktjkiiwfs:kiinteistotunnus")
-      (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikkolaji")
+      (wfs-property-name "ktjkiiwfs:kiinteistotunnus")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+      (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:tunnuspisteSijainti")
+      (wfs-property-name "ktjkiiwfs:kuntaTieto")
       (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")

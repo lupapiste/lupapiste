@@ -112,12 +112,12 @@
         application (-> application
                         (assoc :handlers handlers)
                         (app/post-process-app-for-krysp @organization))]
+    (when (attachment/comments-saved-as-attachment? application next-state)
+      (attachment/save-comments-as-attachment command {:state next-state}))
     (or (app/validate-link-permits application)             ; If validation failure is non-nil, just return it.
         (let [submitted-application (mongo/by-id :submitted-applications id)
               [integration-available sent-file-ids]
-              (bs/approve-application! (bs/get-backing-system (:id @organization)
-                                                              (permit/permit-type application))
-                                       (assoc command :application application) submitted-application lang)
+              (bs/approve-application! (assoc command :application application) submitted-application lang)
               all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
               attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids
                                                                                           created)
@@ -153,26 +153,24 @@
    :input-validators [(partial action/non-blank-parameters [:id :lang])
                       (partial action/vector-parameter-of :attachmentIds string?)]
    :user-roles       #{:authority}
-   :pre-checks       [(fn [{:keys [application organization] :as command}]
-                        (if-let [err (or ((permit/validate-permit-type-is permit/R) command)
-                                         (mapping-to-krysp/http-not-allowed command))]
-                          (if (allu/allu-application? (:organization application) (permit/permit-type application))
-                            nil ; using ALLU
-                            err)
-                          nil)) ; has SFTP KRYSP support for this
+   :pre-checks       [(fn [{:keys [application] :as command}]
+                        (if application
+                          ; Must either have SFTP KRYSP support or ALLU support
+                          (when-not (allu/allu-application? (:organization application) (permit/permit-type application))
+                            (or ((permit/validate-permit-type-is permit/R) command)
+                                (mapping-to-krysp/http-not-allowed command)))
+                          (fail :error.invalid-application-parameter)))
                       (application-already-exported :exported-to-backing-system)
                       has-unsent-attachments]
    :states           (conj states/post-verdict-states :sent)
    :description      "Sends such selected attachments to backing system that are not yet sent."}
-  [{:keys [user organization application created] :as command}]
+  [{:keys [created] :as command}]
   (let [all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
         attachments-wo-sent-timestamp (filter (every-pred attachment/unsent? ; unsent...
                                                           (comp (set attachmentIds) :id)) ; ...and requested
                                               all-attachments)]
     (if (seq attachments-wo-sent-timestamp)
-      (let [sent-file-ids (bs/send-attachments! (bs/get-backing-system (:id @organization)
-                                                                       (permit/permit-type application))
-                                                user @organization application attachments-wo-sent-timestamp lang)
+      (let [sent-file-ids (bs/send-attachments! command attachments-wo-sent-timestamp lang)
             data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
             attachments-transfer-data {:data-key :attachments
                                        :data (map :id attachments-wo-sent-timestamp)}

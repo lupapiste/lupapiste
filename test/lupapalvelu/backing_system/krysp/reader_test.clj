@@ -751,18 +751,7 @@
         ids-tjo (->viitelupatunnukset verdict-tjo)]
     (facts "the results are not empty"
       (count ids-a) => pos?
-      (count ids-tjo) => pos?)
-    (facts "the ids are returned in the right format (with type code last)"
-      (letfn [(get-code [id]
-                (-> id (ss/split #"-") last))
-              (code-is-valid? [code]
-                (= code (apply str (filter #(Character/isLetter %) code))))
-              (every-code-is-valid? [idseq]
-                (->> idseq
-                     (map (comp code-is-valid? get-code))
-                     (every? true?)))]
-        (every-code-is-valid? ids-a) => true
-        (every-code-is-valid? ids-tjo) => true))))
+      (count ids-tjo) => pos?)))
 
 (facts "kuntalupatunnus ids can be extracted from XML"
   (->kuntalupatunnus verdict-a) => "01-0001-12-A"
