@@ -113,8 +113,14 @@
                       (placement-update-request pending-on-client "https://example.com/api/v1" "foo.bar.baz" app)]]
           (fact "endpoint" endpoint => (str "https://example.com/api/v1/placementcontracts/" allu-id))
           (fact "request"
-            request => {:headers      {:authorization "Bearer foo.bar.baz"}
-                        :form-params  (application->allu-placement-contract pending-on-client app)}))))
+            (update request
+                    :form-params
+                    dissoc
+                    :startTime
+                    :endTime) => {:headers   {:authorization "Bearer foo.bar.baz"}
+                                              :form-params  (dissoc
+                                                              (application->allu-placement-contract pending-on-client app)
+                                                              :startTime :endTime)}))))
 
     (facts "integration message generation"
       (let [user (sg/generate (select-keys User [:id :username]))
