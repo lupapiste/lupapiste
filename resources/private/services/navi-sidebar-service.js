@@ -54,7 +54,7 @@ LUPAPISTE.NaviSidebarService = function() {
                      {icon: "lupicon-circle-section-sign",
                       page: "pate-verdict-templates",
                       loc: "pate.templates",
-                      showIf: authOk( "pate-enabled")},
+                      showIf: authOk( "pate-enabled-user-org")},
                      {icon: "lupicon-megaphone",
                       page: "organization-bulletins",
                       loc: "auth-admin.bulletin-settings",
