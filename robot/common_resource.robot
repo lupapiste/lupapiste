@@ -506,8 +506,11 @@ Input text with jQuery
 
 Input text by test id
   [Arguments]  ${id}  ${value}  ${leaveFocus}=False
-  ${q}=  Quote  ${id}
-  Input text with jQuery  [data-test-id=${q}]:visible  ${value}  ${leaveFocus}
+  Element should be visible by test id  ${id}
+  Test id enabled  ${id}
+  Set Focus To Element  xpath=//*[@data-test-id="${id}"]
+  Input Text  xpath=//*[@data-test-id="${id}"]  ${value}
+  Run Keyword Unless  ${leaveFocus}  Execute Javascript  document.querySelector('[data-test-id="${id}"]').blur();
 
 Select From List by test id and index
   [Arguments]  ${id}  ${index}
@@ -887,7 +890,7 @@ Upload attachment
   Scroll to top
   Upload batch file  0  ${path}  ${type}  ${contents}  ${grouping}
   Scroll and click test id  batch-ready
-  Wait until  No such test id  batch-ready
+  Wait Until Keyword Succeeds  20s  0.4  Element Should Not Be Visible  xpath=//*[@data-test-id="batch-ready"]
 
 Add attachment
   [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=
