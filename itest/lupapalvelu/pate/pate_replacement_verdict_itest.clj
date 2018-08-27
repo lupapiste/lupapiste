@@ -124,9 +124,22 @@
                 (:verdict-id result) => string?)
 
               (fact "Copied draft contains same data as old one"
-                (:data new-verdict) => (dissoc (:data old-verdict)
-                                                :verdict-section
-                                                :attachments))
+                (get-in new-verdict [:data :address :_value]) =>  (get-in old-verdict [:data :address])
+                (get-in new-verdict [:data :anto :_value]) =>  (get-in old-verdict [:data :anto])
+                (get-in new-verdict [:data :bulletinOpDescription :_value]) =>  (get-in old-verdict [:data :bulletinOpDescription])
+                (get-in new-verdict [:data :foremen :_value]) =>  (get-in old-verdict [:data :foremen])
+                (get-in new-verdict [:data :julkipano :_value]) =>  (get-in old-verdict [:data :julkipano])
+                (get-in new-verdict [:data :lainvoimainen :_value]) =>  (get-in old-verdict [:data :lainvoimainen])
+                (get-in new-verdict [:data :language :_value]) =>  (get-in old-verdict [:data :language])
+                (get-in new-verdict [:data :neighbor-states :_value]) =>  (get-in old-verdict [:data :neighbor-states])
+                (get-in new-verdict [:data :operation :_value]) =>  (get-in old-verdict [:data :operation])
+                (get-in new-verdict [:data :plans :_value]) =>  (get-in old-verdict [:data :plans])
+                (get-in new-verdict [:data :reviews :_value]) =>  (get-in old-verdict [:data :reviews])
+                (get-in new-verdict [:data :statements :_value]) =>  (get-in old-verdict [:data :statements])
+                (get-in new-verdict [:data :verdict-code :_value]) =>  (get-in old-verdict [:data :verdict-code])
+                (get-in new-verdict [:data :verdict-date :_value]) =>  (get-in old-verdict [:data :verdict-date])
+                (get-in new-verdict [:data :verdict-text :_value]) =>  (get-in old-verdict [:data :verdict-text])                )
+
               (fact "Template is same"
                 (:template new-verdict) => (:template old-verdict))
 

@@ -465,9 +465,12 @@
                                    :handler
                                    :verdict-section
                                    :signatures))
-        {draft :draft} (init--handler {:draft draft
-                                       :application application
-                                       :user user})]
+        {draft :draft} (-> {:draft draft
+                            :application application
+                            :user user}
+                           init--handler
+                           (update-in [:draft :data]
+                                      (partial metadata/wrap-all (metadata/wrapper command))))]
 
     (action/update-application command
                                {$push {:pate-verdicts
