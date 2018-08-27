@@ -1,7 +1,8 @@
 (ns lupapalvelu.pate.pdf
   "PDF generation via HTML for Pate verdicts. Utilises a simple
   schema-based mechanism for the layout definiton and generation."
-  (:require [lupapalvelu.application :as app]
+  (:require [clojure.edn :as edn]
+            [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as app-meta]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.document.schemas :as schemas]
@@ -261,7 +262,8 @@
   "Creates PDF for the verdict and uploads it as an attachment. Returns
   the attachment-id."
   [{:keys [application created] :as command} verdict]
-  (when-let [html (get-in verdict [:verdict-attachment :html])]
+  (when-let [html (some-> verdict :published :tags
+                          edn/read-string verdict-tags-html)]
     (let [pdf       (html-pdf/html->pdf application
                                         "pate-verdict"
                                         html)
@@ -286,9 +288,13 @@
                                                   :pdf.contract.filename
                                                   :pdf.filename)
                                                 (:id application)
-                                                (util/to-local-datetime (:published verdict)))
+                                                (util/to-local-datetime (some-> verdict
+                                                                                :published
+                                                                                :published)))
               :content  stream}))))))
 
+;; TODO: Verdict details MUST NOT change in the new version. Only the
+;; signatures must be replaced.
 (defn create-verdict-attachment-version
   "Creates a verdict attachments as a new version to previously created
   verdict attachment. Used when a contract is signed."

@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.verdict
   (:require [clj-time.core :as time]
+            [clojure.edn :as edn]
             [clojure.set :as set]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
@@ -14,6 +15,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.inspection-summary :as inspection-summary]
+            [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as org]
@@ -1227,33 +1229,46 @@
                                  (format "KuntaGML failed for verdict %s (permit-type %s)"
                                          (:id verdict) (:permitType application))))))}))
 
-(defn verdict-html->pdf
-  "Creates verdict attachment if needed. Returns attachment-id or nil."
-  [command {:keys [verdict-attachment] :as verdict}]
-  (when (:html verdict-attachment)
-    (try+
-     (when-let [attachment-id (pdf/create-verdict-attachment command verdict)]
-       (verdict-update command {$set {:pate-verdicts.$.verdict-attachment
-                                      (wrap command attachment-id)}})
-       attachment-id)
-     (catch [:error :pdf/pdf-error] _
-       (errorf "PDF generation for verdict %s failed." (:id verdict)))
-     (catch Object _
-       (errorf "Could not create verdict attachment for verdict %s." (:id verdict))
-       (error (:throwble &throw-context))))))
+;; Published verdict.pdf is created asynchronously via message
+;; queue. If the generation fails, the message is requeued.
+
+(defonce pate-queue "lupapalvelu.pate.queue")
+(defonce pate-session (jms/create-transacted-session (jms/get-default-connection)))
+
+(defn create-verdict-pdf [{:keys [application data] :as command}]
+  (try+
+   (let [verdict (command->verdict command true)]
+     (when-not (some-> verdict :published :attachment-id)
+       (when-let [attachment-id (pdf/create-verdict-attachment command verdict)]
+         (verdict-update command
+                         {$set {:pate-verdicts.$.published.attachment-id attachment-id}}))
+       (.commit pate-session)))
+   (catch [:error :pdf/pdf-error] _
+     (errorf "%s: PDF generation for verdict %s failed."
+             (:id application) (:verdict-id data))
+     (.rollback pate-session))
+   (catch Object _
+     (errorf "%s: Could not create verdict attachment for verdict %s."
+             (:id application) (:verdict-id data))
+     (.rollback pate-session)
+     (error (:throwable &throw-context)))))
+
+(defonce pate-consumer (jms/create-consumer pate-session
+                                            pate-queue
+                                            (comp create-verdict-pdf edn/read-string)))
+
+(defn send-command [{:keys [application] :as command}]
+  (-<>> (select-keys command [:data :user :created])
+        (assoc <> :application {:id (:id application)})
+       pr-str
+       (jms/produce-with-context pate-queue)))
 
 (defn finalize--pdf [{:keys [application verdict]}]
-  (let [tags    (pdf/verdict-tags application verdict)
-        verdict (-> verdict
-                    (assoc-in [:published :tags] (pr-str tags))
-                    (assoc-in [:verdict-attachment :html]
-                              (pdf/verdict-tags-html tags)))]
+  (let [tags    (pdf/verdict-tags application verdict)]
     (-> verdict
-        (verdict->updates :verdict-attachment.html
-                          :published.tags)
-        (assoc :commit-fn (fn [{:keys [command application verdict]}]
-                            (verdict-html->pdf (assoc command :application application)
-                                               verdict))))))
+        (assoc-in [:published :tags] (pr-str tags))
+        (verdict->updates :published.tags)
+        (assoc :commit-fn (util/fn-> :command send-command)))))
 
 (defn process-finalize-pipeline [command application verdict & finalize--fns]
   (let [{:keys [updates commit-fns verdict]
@@ -1327,24 +1342,18 @@
                    (i18n/localize lang :pate.try-again)]]]]))})
 
 (defn download-verdict
-  "Generates PDF when necessary."
+  "PDF verdict. Shows error page if the PDF is not yet ready"
   [{:keys [user] :as command}]
-  (let [{:keys [verdict-attachment]
-         :as   verdict} (command->verdict command)
-        attachment-id   (cond
-                          (string? verdict-attachment)
-                          verdict-attachment
-
-                          (:html verdict-attachment)
-                          (verdict-html->pdf command verdict))]
-    (if attachment-id
-      (att/output-attachment (att/get-attachment-latest-version-file user
-                                                                     attachment-id
-                                                                     false)
-                             true)
-      (try-again-page command  {:status 404 ;; Not Found
-                                :error  :pate.verdict.download-error
-                                :raw    :verdict-pdf}))))
+  (if-let [attachment-id (some-> (command->verdict command)
+                                 :published
+                                 :attachment-id)]
+    (att/output-attachment (att/get-attachment-latest-version-file user
+                                                                   attachment-id
+                                                                   false)
+                           true)
+    (try-again-page command  {:status 202 ;; Accepted
+                              :error  :pate.verdict.download-not-ready
+                              :raw    :verdict-pdf})))
 
 (defn preview-verdict
   "Preview version of the verdict.

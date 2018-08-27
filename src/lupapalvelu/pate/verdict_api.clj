@@ -308,20 +308,6 @@
   (verdict/sign-contract command)
   (ok))
 
-(defcommand generate-pate-pdf
-  {:description      "Regenerates (or at least tries to) verdict pdf if the
-  creation during publishing has failed."
-   :feature          :pate
-   :categories       #{:pate-verdicts}
-   :parameters       [:id :verdict-id]
-   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :published? :html?)]
-   :states           states/post-verdict-states
-   :user-roles       #{:authority}}
-  [command]
-  (ok :attachment-id (verdict/verdict-html->pdf command
-                                                (verdict/command->verdict command))))
-
 (defraw verdict-pdf
   {:description      "Endpoint for downloading the verdict attachment."
    :feature          :pate

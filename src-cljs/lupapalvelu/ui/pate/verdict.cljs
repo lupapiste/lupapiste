@@ -103,16 +103,6 @@
                      :pate.close-all
                      :pate.open-all))])))
 
-(rum/defc generate-pdf-link < rum/reactive
-  [verdict-id]
-  (let [waiting?* (atom false)]
-    [:div.pate-published-note
-     (components/text-and-link {:text-loc :pate.verdict.generate-pdf
-                                :disabled? waiting?*
-                                :click (partial service/generate-pdf @state/application-id
-                                                verdict-id
-                                                waiting?*)})]))
-
 (rum/defc verdict-toolbar < rum/reactive [{:keys [info _meta] :as options}]
   (let [{:keys [id category published]
          :as   info} @info
@@ -156,9 +146,7 @@
           (common/loc (if contract?
                         :pate.contract.published
                         :pate.verdict-published)
-                      (js/util.finnishDate published))]
-         (when (can-generate?)
-           (generate-pdf-link id))]]
+                      (js/util.finnishDate published))]]]
        [:div.row.row--tight
         [:div.col-1
          (pate-components/required-fields-note options)]
