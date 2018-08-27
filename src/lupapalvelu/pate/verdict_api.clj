@@ -351,6 +351,21 @@
   [command]
   (ok :verdict-id (verdict/new-verdict-draft (template/command->options command))))
 
+(defcommand copy-pate-verdict-draft
+  {:description         "Composes new verdict draft from the latest published
+  template and its settings. Returns the verdict-id."
+   :feature             :pate
+   :user-roles          #{:authority}
+   :parameters          [id replacement-id]
+   :input-validators    [(partial action/non-blank-parameters [:id])]
+   :pre-checks          [pate-enabled
+                         (action/not-pre-check legacy-category)
+                         (template/verdict-template-check :application :published)
+                         (replacement-check :replacement-id)]
+   :states              states/post-submitted-states}
+  [command]
+  (ok :verdict-id (verdict/copy-verdict-draft command replacement-id)))
+
 (defcommand delete-pate-verdict
   {:description      "Deletes verdict. Published verdicts cannot be
   deleted."

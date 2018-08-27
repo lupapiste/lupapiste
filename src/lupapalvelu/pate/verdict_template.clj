@@ -98,7 +98,7 @@
                (select-keys t-rep (keys s-rep))
                s-rep)))
 
-(def template-settings-dependencies [:plans :reviews])
+(def template-settings-dependencies [:plans :reviews :handler-titles])
 
 (defn verdict-template-settings-dependencies
   "Reviews and plans information from setting is merged into the
@@ -286,10 +286,11 @@
                              (recur (-> v vals first))
                              v))]))
         board-verdict? (util/=as-kw (:giver template-data) :lautakunta)]
+
     (merge data
-           {:date-deltas (pack-verdict-dates category draft board-verdict?)
-            :plans       (pack-dependencies draft :plans template-data)
-            :reviews     (pack-dependencies draft :reviews template-data)}
+           {:date-deltas    (pack-verdict-dates category draft board-verdict?)}
+           (->> (map #(pack-dependencies draft % template-data) template-settings-dependencies)
+                (into {}))
            (when board-verdict?
              {:boardname (:boardname draft)}))))
 
@@ -380,9 +381,8 @@
                                                           draft))]
     (template-update (dissoc options :timestamp)
                      {$set {:verdict-templates.templates.$.published
-                            {:published  (wrapper timestamp)
-                             :data       (dissoc (draft-for-publishing template)
-                                                 :reviews :plans)
+                            {:published  timestamp
+                             :data       (apply dissoc (draft-for-publishing template) template-settings-dependencies)
                              :inclusions (template-inclusions template)
                              :settings   settings}}})))
 

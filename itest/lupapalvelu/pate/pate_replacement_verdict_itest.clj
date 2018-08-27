@@ -3,7 +3,8 @@
             [lupapalvelu.fixture.pate-verdict :as pate-fixture]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.pate-itest-util :refer :all]
-            [sade.core :as core]))
+            [sade.core :as core]
+            [sade.shared-util :as util]))
 
 (apply-remote-fixture "pate-verdict")
 
@@ -107,4 +108,49 @@
 
           (fact "Old verdict tasks are gone"
             (check-verdict-task-count app-id verdict-id 0)
-            (check-verdict-task-count app-id replacement-verdict-id 6)))))))
+            (check-verdict-task-count app-id replacement-verdict-id 6))
+
+          (facts "Copy verdict as base of replacement verdict"
+            (let [result          (command sonja :copy-pate-verdict-draft
+                                                 :id app-id
+                                                 :replacement-id replacement-verdict-id)
+                  application     (query-application sonja app-id)
+                  verdict-id      (:verdict-id result)
+                  old-verdict     (util/find-by-id replacement-verdict-id (:pate-verdicts application))
+                  new-verdict     (util/find-by-id verdict-id (:pate-verdicts application))]
+
+              (fact "Make draft from old verdict"
+                result => ok?
+                (:verdict-id result) => string?)
+
+              (fact "Copied draft contains same data as old one"
+                (:data new-verdict) => (dissoc (:data old-verdict)
+                                                :verdict-section
+                                                :attachments))
+              (fact "Template is same"
+                (:template new-verdict) => (:template old-verdict))
+
+              (fact "Id and modified ts is different"
+                (:id new-verdict) =not=> (:id old-verdict)
+                (:modified new-verdict) =not=> (:modified old-verdict))
+
+              (fact "Verdict missing some required info"
+                (command sonja :publish-pate-verdict
+                         :id app-id
+                         :verdict-id verdict-id) => (err "pate.required-fields"))
+
+              (fact "Fill verdict"
+                (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
+                         :path [:verdict-section] :value "12") => no-errors?)
+
+              (fact "Copied verdict draft can be published"
+                (command sonja :publish-pate-verdict
+                         :id app-id
+                         :verdict-id (:verdict-id result)) => ok?)
+
+              (fact "Verdicts have replacement information"
+                (let [application (query-application sonja app-id)
+                      old-verdict (util/find-by-id replacement-verdict-id (:pate-verdicts application))
+                      new-verdict (util/find-by-id verdict-id (:pate-verdicts application))]
+                  (get-in old-verdict [:replacement :replaced-by]) => verdict-id
+                  (get-in new-verdict [:replacement :replaces]) => replacement-verdict-id)))))))))

@@ -159,6 +159,9 @@
 (def temsub-plans
   (settings-dependencies :plans :pate.plans))
 
+(def temsub-handler-titles
+  (settings-dependencies :handler-titles :pate.handler-titles))
+
 (def temsub-conditions ;; Muut lupaehdot
   {:dictionary    {:conditions    {:repeating {:condition        {:phrase-text {:i18nkey  :pate-condition
                                                                                 :category :lupaehdot}}
@@ -298,6 +301,7 @@
                                  temsub-bulletin
                                  temsub-reviews-with-phrase
                                  temsub-plans
+                                 temsub-handler-titles
                                  temsub-conditions
                                  temsub-inform-others
                                  temsub-appeal
