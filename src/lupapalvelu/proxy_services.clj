@@ -116,7 +116,8 @@
     (merge (select-keys address [:street :number])
            (select-keys property-info [:municipality :name :propertyId :x :y]))
     (merge                                                  ; fallback with default data
-      (select-keys property-info [:municipality :name :propertyId :x :y]))))
+      (select-keys property-info [:municipality :name :propertyId :x :y])
+      {:street "" :number ""})))
 
 (defn- distance [^double x1 ^double y1 ^double x2 ^double y2]
   {:pre [(and x1 x2 y1 y2)]}
