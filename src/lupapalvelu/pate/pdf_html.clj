@@ -141,20 +141,12 @@
       (cols/add-unit lang :section (cols/dict-value verdict :verdict-section))]
      [:div.cell.cell--20.center
       [:div (cols/dict-value verdict :verdict-date)]]
-     [:div.cell.cell--40.right (i18n/localize lang :pdf.page) " " [:span#page-number ""]]]]])
+     [:div.cell.cell--40.right.page-number
+      (i18n/localize lang :pdf.page)
+      " " [:span#page-number ""]]]]])
 
 (defn verdict-footer []
   [:div.footer
    [:div.section
     [:div.row.pad-after.pad-before
      [:cell.cell--100 {:dangerouslySetInnerHTML {:__html "&nbsp;"}}]]]])
-
-
-
-(defn verdict-html
-  "Source-data is a map containing keys referred in pdf-layout source
-  definitions. Returns :header, :body, :footer map."
-  [application verdict source-data pdf-layout]
-  {:body   (html (cols/content source-data pdf-layout))
-   :header (html (verdict-header (cols/language verdict) application verdict) true)
-   :footer (html (verdict-footer))})

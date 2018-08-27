@@ -32,7 +32,7 @@
                                             :template-id template-id)]
       (fact "User summary is Sonja"
         (-> (query-application sonja  app-id)
-            :pate-verdicts last :user :username)
+            :pate-verdicts last :state :_user)
         => "sonja")
       (fact "Set automatic calculation of other dates"
         (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id

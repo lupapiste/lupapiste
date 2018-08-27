@@ -900,7 +900,6 @@ div.published-verdict {
     left: 2em;
     right: 2em;
   }
-  border-top: 10px dashed  red;
   .section {display: table;
             width:   100%;
             &.border-top {
@@ -952,6 +951,9 @@ div.published-verdict {
                 }
                 &.nowrap {
                   white-space: nowrap;
+                }
+                &.page-number {
+                  display: none;
                 }}
               @for $i from 2 through 20 {
                 .cell.cell--#{$i * 5} {

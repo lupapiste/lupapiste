@@ -71,8 +71,8 @@
            (command sonja :publish-legacy-verdict :id app-id
                     :verdict-id verdict-id) => ok?)
          (fact "Contract is published"
-           (:published (:verdict (open-verdict sonja app-id verdict-id)))
-           => pos?)
+           (let [{:keys [verdict]} (open-verdict sonja app-id verdict-id)]
+             (:state verdict) => "published"))
          (facts "Application updated"
            (let [{:keys [tasks attachments state]} (query-application sonja app-id)
                  source                            {:type "verdict"

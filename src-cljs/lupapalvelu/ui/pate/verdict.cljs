@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.pate.verdict
   "View of an individual Pate verdict."
-  (:require [lupapalvelu.pate.legacy-schemas :as legacy]
+  (:require [cljs.tools.reader :as reader]
+            [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.path :as path]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.ui.common :as common]
@@ -10,7 +11,6 @@
             [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
-            [lupapalvelu.ui.pate.published-verdict :as published]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
@@ -38,28 +38,29 @@
   ([{:keys [state path] :as options}]
    (updater options (path/value path state))))
 
-(defonce raw-verdict (atom {}))
-
 (defn reset-verdict [{:keys [verdict references filled]}]
-  (reset! raw-verdict verdict)
   (reset! state/current-verdict
           (when verdict
-            {:state (:data verdict)
-             :info  (-> (dissoc verdict :data)
-                        (assoc :filled? filled)
-                        (update :inclusions #(set (map keyword %))))
-             :_meta {:updated             updater
-                     :highlight-required? (-> verdict :published not)
-                     :enabled?            (state/verdict-auth? (:id verdict)
-                                                               :edit-pate-verdict)
-                     :published?          (:published verdict)
-                     :upload.filedata     (fn [_ filedata & kvs]
-                                            (apply assoc filedata
-                                                   :target {:type :verdict
-                                                            :id   (:id verdict)}
-                                                   kvs))
-                     :upload.include?     (fn [_ {:keys [target]}]
-                                            (= (:id target) (:id verdict)))}}))
+            (if-let [tags (:tags verdict)]
+              {:tags (reader/read-string tags)
+               :info {:id (:id verdict)}}
+              {:state (:data verdict)
+               :info  (-> (dissoc verdict :data)
+                          (assoc :filled? filled)
+                          (update :inclusions #(set (map keyword %))))
+               :_meta {:updated             updater
+                       :highlight-required? (-> verdict :published not)
+                       :enabled?            (state/verdict-auth? (:id verdict)
+                                                                 :edit-pate-verdict)
+                       :published?          (util/=as-kw :published
+                                                         (:state verdict))
+                       :upload.filedata     (fn [_ filedata & kvs]
+                                              (apply assoc filedata
+                                                     :target {:type :verdict
+                                                              :id   (:id verdict)}
+                                                     kvs))
+                       :upload.include?     (fn [_ {:keys [target]}]
+                                              (= (:id target) (:id verdict)))}})))
   (reset! state/references references)
   (common/reset-if-needed! state/verdict-wait? false))
 
@@ -113,8 +114,10 @@
                                                 waiting?*)})]))
 
 (rum/defc verdict-toolbar < rum/reactive [{:keys [info _meta] :as options}]
-  (let [{:keys [published id category] :as info} @info
-        contract? (util/=as-kw category :contract)
+  (let [{:keys [id category published]
+         :as   info} @info
+        published  (:published published)
+        contract?  (util/=as-kw category :contract)
         yes-fn     (fn []
                      (reset! state/verdict-wait? true)
                      (reset! (rum/cursor-in _meta [:enabled?]) false)
@@ -163,13 +166,18 @@
          (toggle-all options)
          (pate-components/last-saved options)]])]))
 
+(rum/defc published-verdict
+  "Verdict argument must in the backend format."
+  [{:keys [header footer body]}]
+  [:div.published-verdict
+   header
+   (components/add-key-attrs body "tag-")])
+
 (rum/defc verdict < rum/reactive
   [options]
   [:div.pate-verdict
    (verdict-toolbar options)
-   (sections/sections options :verdict)
-   (published/published-verdict @raw-verdict)])
-
+   (sections/sections options :verdict)])
 
 (defn current-verdict-schema []
   (let [{:keys [schema-version legacy?
@@ -177,6 +185,7 @@
     (if legacy?
       (legacy/legacy-verdict-schema category)
       (verdict-schemas/verdict-schema category schema-version))))
+
 
 (rum/defc pate-verdict < rum/reactive
   []
@@ -190,12 +199,15 @@
      [:span (common/loc :back)]]]
    (if (and (rum/react state/current-verdict-id)
             (rum/react state/auth-fn))
-     (let [{dictionary :dictionary :as schema} (current-verdict-schema)]
-       (verdict (assoc (state/select-keys state/current-verdict
-                                          [:state :info :_meta])
-                       :schema (dissoc schema :dictionary)
-                       :dictionary dictionary
-                       :references state/references)))
+     (if (rum/react state/verdict-tags)
+       (published-verdict @state/verdict-tags)
+       (let [{dictionary :dictionary :as schema} (current-verdict-schema)]
+         (verdict (assoc (state/select-keys state/current-verdict
+                                            [:state :info :_meta])
+                         :schema (dissoc schema :dictionary)
+                         :dictionary dictionary
+                         :references state/references))))
+
      [:div.pate-spin [:i.lupicon-refresh]])]])
 
 (defn bootstrap-verdict []
@@ -206,10 +218,14 @@
                                  {:callback #(state/refresh-application-auth-model
                                               app-id
                                               (fn []
-                                                (service/refresh-attachments)
-                                                (service/open-verdict app-id
-                                                                      verdict-id
-                                                                      reset-verdict)))
+                                                (if (state/verdict-auth? verdict-id :published-pate-verdict)
+                                                  (service/open-published-verdict app-id
+                                                                                  verdict-id
+                                                                                  reset-verdict)
+                                                  (do (service/refresh-attachments)
+                                                      (service/open-verdict app-id
+                                                                            verdict-id
+                                                                            reset-verdict)))))
                                   :verdict-id verdict-id})))
 
 (defonce args (atom {}))

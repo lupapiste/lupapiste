@@ -1,4 +1,7 @@
 (ns lupapalvelu.pate.columns
+  "Schema and data driven layout mechanism for static data. Used for
+  creating verdict hard copies. Refactoring into cljc was a bit
+  premature, but might come handy in the future."
   (:require #?(:clj  [lupapalvelu.i18n :as i18n]
                :cljs [lupapalvelu.ui.common :as common])
             #?(:clj  [lupapalvelu.pate.date :as date])
@@ -39,7 +42,7 @@
 #?(:clj (defn doc-value [application doc-name kw-path]
           (get-in (domain/get-document-by-name application (name doc-name))
                   (cons :data (pathify kw-path))))
-   :cljs (defn doc-value [& _]))
+   :cljs (defn doc-value "Doc values not supported on frontend" [& _]))
 
 (defn join-non-blanks
   "Trims and joins."
@@ -112,7 +115,8 @@
 (defn resolve-class [all selected & extra]
   (->> (util/intersection-as-kw all (flatten [selected]))
        (concat extra)
-       (remove nil?)))
+       (remove nil?)
+       (map name)))
 
 (defn resolve-cell [{:keys [lang]} source-value {:keys [text width unit loc-prefix styles] :as cell}]
   (let [path (some-> cell :path pathify)

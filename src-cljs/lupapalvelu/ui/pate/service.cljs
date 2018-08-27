@@ -191,6 +191,12 @@
                 :id app-id
                 :verdict-id verdict-id))
 
+(defn open-published-verdict [app-id verdict-id callback]
+  (common/query "published-pate-verdict"
+                callback
+                :id app-id
+                :verdict-id verdict-id))
+
 (defn delete-verdict [app-id {:keys [id published legacy?]}]
   (common/command {:command (if legacy?
                               :delete-legacy-verdict
@@ -221,7 +227,7 @@
                               (state/refresh-verdict-auths app-id
                                                            {:verdict-id verdict-id})
                               (fetch-verdict-list app-id)
-                              (open-verdict app-id verdict-id callback)
+                              (open-published-verdict app-id verdict-id callback)
                               (js/repository.load app-id))}
                   :id app-id
                   :verdict-id verdict-id))

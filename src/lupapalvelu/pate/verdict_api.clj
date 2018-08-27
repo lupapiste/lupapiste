@@ -8,10 +8,10 @@
             [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict :as verdict]
             [lupapalvelu.pate.verdict-template :as template]
-            [lupapalvelu.roles :as roles]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
@@ -34,10 +34,11 @@
                       :pate-enabled)))
     (fail :error.pate-disabled)))
 
+;; TODO: publishing? support
 (defn- verdict-exists
   "Returns pre-checker that fails if the verdict does not exist.
   Additional conditions:
-    :editable? fails if the verdict has been published.
+    :draft? fails if the verdict state is NOT draft
     :published? fails if the verdict has NOT been published
     :legacy? fails if the verdict is a 'modern' Pate verdict
     :modern? fails if the verdict is a legacy verdict
@@ -46,7 +47,7 @@
     :html? fails if the html version of the verdict attachment is not
            available."
   [& conditions]
-  (let [{:keys [editable? published?
+  (let [{:keys [draft? published?
                 legacy? modern?
                 contract? verdict?
                 html?]} (zipmap conditions
@@ -54,7 +55,8 @@
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
-                                       (:pate-verdicts application))]
+                                       (:pate-verdicts application))
+              state   (metadata/unwrap (:state verdict))]
           (util/pcond-> (cond
                           (not verdict)
                           :error.verdict-not-found
@@ -63,10 +65,10 @@
                                           (:category verdict))
                           :error.invalid-category
 
-                          (and editable? (:published verdict))
+                          (and draft? (not (util/=as-kw state :draft)))
                           :error.verdict.not-draft
 
-                          (and published? (not (:published verdict)))
+                          (and published? (not (util/=as-kw state :published)))
                           :error.verdict.not-published
 
                           (and legacy? (not (:legacy? verdict)))
@@ -220,7 +222,21 @@
    :states           states/post-submitted-states}
   [command]
   (ok (assoc (verdict/open-verdict command)
-        :filled (verdict/verdict-filled? command))))
+             :filled (verdict/verdict-filled? command))))
+
+(defquery published-pate-verdict
+  {:description      "Published tags for the verdict."
+   :feature          :pate
+   :user-roles       #{:authority :applicant}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :parameters       [id verdict-id]
+   :categories       #{:pate-verdicts}
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [(verdict-exists :published?)]
+   :states           states/post-verdict-states}
+  [command]
+  (let [{:keys [id published]} (verdict/command->verdict command)]
+    (ok :verdict {:id id :tags (:tags published)})))
 
 (defcommand edit-pate-verdict
   {:description "Updates verdict data. Returns changes and errors
@@ -231,7 +247,7 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])
                       (partial action/vector-parameters [:path])]
-   :pre-checks       [(verdict-exists :editable?)]
+   :pre-checks       [(verdict-exists :draft?)]
    :states           states/post-submitted-states}
   [command]
   (let [result (verdict/edit-verdict command)]
@@ -247,7 +263,7 @@
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :editable?)
+   :pre-checks       [(verdict-exists :draft?)
                       verdict-filled]
    :states           states/post-submitted-states}
   [command]
@@ -360,7 +376,7 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :editable? :modern?)]
+                      (verdict-exists :draft? :modern?)]
    :states           states/post-submitted-states}
   [command]
   (verdict/delete-verdict verdict-id command)
@@ -374,7 +390,7 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :editable? :modern?)
+                      (verdict-exists :draft? :modern?)
                       verdict-filled
                       (action/some-pre-check
                        (action/and-pre-check (verdict-exists :contract?)
@@ -415,7 +431,7 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists :legacy?)
-                      (action/some-pre-check (verdict-exists :legacy? :editable?)
+                      (action/some-pre-check (verdict-exists :legacy? :draft?)
                                              (state-in states/give-verdict-states))]
    :states           states/post-submitted-states
    :notified         true}
@@ -429,7 +445,7 @@
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :editable? :legacy?)
+   :pre-checks       [(verdict-exists :draft? :legacy?)
                       verdict-filled]
    :states            states/post-submitted-states
    :notified         true
@@ -467,7 +483,7 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :editable? :verdict?)]
+                      (verdict-exists :draft? :verdict?)]
    :states           states/post-submitted-states}
   [{application :application created :created}]
   (let [today-long (tc/to-long (t/today-at-midnight))

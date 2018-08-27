@@ -56,20 +56,23 @@
 
 (defn- wrapped
   "Unwrapped value is supported as a fallback for existing templates."
-  [schema]
-  (sc/conditional
-   map? {:_value    schema
-         :_user     sc/Str
-         :_modified ssc/Timestamp}
-   :else schema))
+  [schema fallback?]
+  (let [md {:_value    schema
+            :_user     sc/Str
+            :_modified ssc/Timestamp}]
+    (if fallback?
+      (sc/conditional
+       map? md
+       :else schema)
+      md)))
 
 (defschema PateSavedTemplate
   (merge PateCategory
-         {:name                        (wrapped sc/Str)
-          :deleted                     (wrapped sc/Bool)
+         {:name                        (wrapped sc/Str true)
+          :deleted                     (wrapped sc/Bool true)
           (sc/optional-key :draft)     sc/Any ;; draft is published data on publish.
           :modified                    ssc/Timestamp
-          (sc/optional-key :published) {:published  (wrapped ssc/Timestamp)
+          (sc/optional-key :published) {:published  (wrapped ssc/Timestamp true)
                                         :data       sc/Any
                                         :inclusions [sc/Str]
                                         :settings   PatePublishedTemplateSettings}}))
@@ -116,21 +119,30 @@
 
 (defschema PateBaseVerdict
   (merge PateCategory
-         {;; Verdict is draft until it is published
-          (sc/optional-key :published)          ssc/Timestamp
+         {(sc/optional-key :published)          {:tags                            sc/Str
+                                                 ;; The same as :state._modified
+                                                 :published                       ssc/Timestamp
+                                                 ;; The same as :verdict-attachment id
+                                                 (sc/optional-key :attachment-id) ssc/AttachmentId}
+          :state                                (wrapped (sc/enum "draft"
+                                                                  "publishing"
+                                                                  "published")
+                                                         true)
           :modified                             ssc/Timestamp
           :data                                 sc/Any
-          (sc/optional-key :archive)            {:verdict-date                    ssc/Timestamp
+          ;; Whether the verdict timestamps are available depends on
+          ;; the verdicty type (legacy or not) and template settings.
+          (sc/optional-key :archive)            {(sc/optional-key :verdict-date)  ssc/Timestamp
+                                                 (sc/optional-key :anto)          ssc/Timestamp
                                                  (sc/optional-key :lainvoimainen) ssc/Timestamp
                                                  :verdict-giver                   sc/Str}
-          ;; Either the drafter or publisher
-          (sc/optional-key :user)               UserRef
           ;; Pointer to the verdict attachment. Either an attachment
           ;; id or html source. The source is stored in order to be
           ;; able to regenerate PDF, when needed (after muuntaja
           ;; failure, for example). After the PDF has been
           ;; successfully generated, the html is replaced with
           ;; attachment id.
+          ;; TODO: Reimplement with message queue
           (sc/optional-key :verdict-attachment) (sc/conditional
                                                  :html {:html sc/Any}
                                                  :else ssc/AttachmentId)}))
@@ -139,7 +151,7 @@
   (merge PateBaseVerdict
          {:schema-version                sc/Int
           (sc/optional-key :references)  PateVerdictReferences
-          :template                      {:inclusions              [sc/Keyword]
+          :template                      {:inclusions              [shared-schemas/keyword-or-string]
                                           (sc/optional-key :giver) (sc/enum "viranhaltija"
                                                                             "lautakunta")}
           (sc/optional-key :replacement) ReplacementPateVerdict}))
@@ -147,7 +159,7 @@
 (defschema PateLegacyVerdict
   (merge PateBaseVerdict
          {:legacy?  (sc/enum true)
-          :template {:inclusions [sc/Keyword]}}))
+          :template {:inclusions [shared-schemas/keyword-or-string]}}))
 
 (defschema PateVerdict
   (sc/conditional

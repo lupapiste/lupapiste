@@ -30694,7 +30694,6 @@ tr.verdict-signatures button.cancel-signing {
 div.published-verdict {
   padding-left: 2em;
   padding-right: 2em;
-  border-top: 10px dashed  red;
 }
 
 div.published-verdict .section {
@@ -30764,6 +30763,10 @@ div.published-verdict .section > .row .cell.bold {
 
 div.published-verdict .section > .row .cell.nowrap {
   white-space: nowrap;
+}
+
+div.published-verdict .section > .row .cell.page-number {
+  display: none;
 }
 
 div.published-verdict .section > .row .cell.cell--10 {

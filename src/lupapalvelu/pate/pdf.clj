@@ -235,15 +235,27 @@
            :link-permits (link-permits options)
            :tj-vastattavat-tyot (tj-vastattavat-tyot application lang))))
 
+(defn verdict-tags
+    "Source-data is a map containing keys referred in pdf-layout source
+  definitions. Returns :header, :body, :footer map."
+  [application verdict]
+  {:body   (cols/content (verdict-properties {:lang        (cols/language verdict)
+                                              :application (tools/unwrapped application)
+                                              :verdict     verdict})
+                         (layouts/pdf-layout verdict))
+   :header (html/verdict-header (cols/language verdict) application verdict)
+   :footer (html/verdict-footer)})
+
+(defn verdict-tags-html
+    "Processes `verdict-tags` result into html."
+  [{:keys [body header footer]}]
+  {:body   (html/html body)
+   :header (html/html header true)
+   :footer (html/html footer)})
 
 (defn verdict-html
   [application verdict]
-  (html/verdict-html application
-                     verdict
-                     (verdict-properties {:lang        (cols/language verdict)
-                                          :application (tools/unwrapped application)
-                                          :verdict     verdict})
-                     (layouts/pdf-layout verdict)))
+  (verdict-tags-html (verdict-tags application verdict)))
 
 (defn create-verdict-attachment
   "Creates PDF for the verdict and uploads it as an attachment. Returns
