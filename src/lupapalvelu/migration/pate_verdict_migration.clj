@@ -2,20 +2,20 @@
   (:require [clojure.walk :refer [postwalk]]
             [sade.core :refer [def-]]
             [sade.util :as util]
-            [lupapalvelu.pate.metadata :as metadata]))
+            [lupapalvelu.pate.metadata :as metadata]
+            [lupapalvelu.pate.schema-util :as schema-util]))
 
 ;;
 ;; Post-walk related helpers
 ;;
 
 ;; The type exists only as an implemention detail for `accessor-key?`
-(deftype VerdictAccessorKey [key])
 
 (defn- access [accessor-key]
-  (->VerdictAccessorKey accessor-key))
+  {::access accessor-key})
 
 (defn- accessor-key? [x]
-  (instance? VerdictAccessorKey x))
+  (boolean (::access x)))
 
 (defn- wrap-accessor
   "Wraps accessor function with metadata/wrap"
@@ -60,7 +60,7 @@
   {:id       (get-in-verdict [:id])
    :modified (get-in-verdict [:timestamp])
    :user     (constantly "TODO")
-   :category (constantly "TODO contract?")
+   :category (fn [application _] (schema-util/application->category application))
    })
 
 (defn- accessors [timestamp]
@@ -76,7 +76,7 @@
   (let [accessor-functions (accessors timestamp)]
     (fn [x]
       (if (accessor-key? x)
-        ((get accessor-functions (.key x)) application verdict)
+        ((get accessor-functions (::access x)) application verdict)
         x))))
 
 

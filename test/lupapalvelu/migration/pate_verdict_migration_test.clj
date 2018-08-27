@@ -5,9 +5,6 @@
 
 (def ts 12345)
 
-(def test-verdict
-  )
-
 (def test-application {:_id "foo"
                        :verdicts [test-verdict]})
 
@@ -39,24 +36,32 @@
                                                   :paatos verdict-text
                                                   :paatospvm paatospvm
                                                   :pykala section
-                                                  :paatoskoodi code}]}]}]
+                                                  :paatoskoodi code}]}]}
+        test-application {:id "app-id"
+                          :verdicts [test-verdict]
+                          :permitType "R"}]
     (->pate-legacy-verdict test-application
                            test-verdict
                            ts)
-        =>
-        {:id "id"
-         :modified 1234
-         :user "TODO"
-         :category "TODO contract?"
-         :data {:handler (wrap handler)
-                :kuntalupatunnus (wrap kuntalupatunnus)
-                :verdict-section (wrap section)
-                :verdict-code    (wrap (str code))
-                :verdict-text    (wrap verdict-text)
-                :anto            (wrap anto)
-                :lainvoimainen   (wrap lainvoimainen)
-                :reviews         (wrap "TODO")
-                :foremen         (wrap "TODO")
-                :conditions      (wrap "TODO")}
-         :template "TODO"
-         :legacy? true}))
+    =>
+    {:id "id"
+     :modified 1234
+     :user "TODO"
+     :category :r
+     :data {:handler (wrap handler)
+            :kuntalupatunnus (wrap kuntalupatunnus)
+            :verdict-section (wrap section)
+            :verdict-code    (wrap (str code))
+            :verdict-text    (wrap verdict-text)
+            :anto            (wrap anto)
+            :lainvoimainen   (wrap lainvoimainen)
+            :reviews         (wrap "TODO")
+            :foremen         (wrap "TODO")
+            :conditions      (wrap "TODO")}
+     :template "TODO"
+     :legacy? true}
+
+    (->pate-legacy-verdict (assoc test-application :permitSubtype "sijoitussopimus")
+                           test-verdict
+                           ts)
+    => (contains {:category :contract})))
