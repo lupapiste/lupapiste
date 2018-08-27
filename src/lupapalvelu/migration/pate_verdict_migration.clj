@@ -1,5 +1,5 @@
 (ns lupapalvelu.migration.pate-verdict-migration
-  (:require [clojure.walk :refer [postwalk]]
+  (:require [clojure.walk :refer [postwalk prewalk walk]]
             [sade.core :refer [def-]]
             [sade.util :as util]
             [lupapalvelu.pate.metadata :as metadata]
@@ -14,72 +14,113 @@
 (defn- access [accessor-key]
   {::access accessor-key})
 
-(defn- accessor-key? [x]
-  (boolean (::access x)))
+(def- accessor-key? (comp boolean ::access))
 
-(defn- wrap-accessor
+(defn- wrap
   "Wraps accessor function with metadata/wrap"
-  [timestamp]
-  (fn [accessor]
-    (fn [& args]
-      (some->> (apply accessor args)
-               (metadata/wrap "Verdict draft Pate migration" timestamp)))))
+  [accessor]
+  {::wrap accessor})
 
+(def- wrap? (comp boolean ::wrap))
+;;
+;; Helpers for obtaining collections from current verdicts
+;;
+
+(defn- from-collection [collection-key element-skeleton]
+  {::from-collection {::collection collection-key
+                      ::element element-skeleton}})
+
+(defn- collection-key? [x]
+  (boolean (::from-collection x)))
 
 ;;
 ;; Helpers for accessing relevant data from current verdicts
 ;;
 
 (defn- get-in-verdict [path]
-  (fn [_ verdict]
+  (fn [_ verdict _]
     (get-in verdict path)))
 
 (defn- get-in-poytakirja [key]
   (get-in-verdict (conj [:paatokset 0 :poytakirjat 0] key)))
 
-(defn get-in-paivamaarat [key]
+(defn- get-in-paivamaarat [key]
   (get-in-verdict (conj [:paatokset 0 :paivamaarat] key)))
 
-(def- wrapper-accessors
+(defn- filter-tasks-of-verdict [p]
+  (fn [app verdict _]
+    (->> app :tasks
+         (filter #(and (= (:id verdict)
+                          (-> % :source :id))
+                       (p %))))))
+(defn- task-name? [tn]
+  (fn [task]
+    (util/=as-kw (-> task :schema-info :name)
+                 tn)))
+
+(defn get-in-context [path]
+  (fn [_ _ context]
+    (get-in context path)))
+
+(def- accessor-functions
   "Contains functions for accessing relevant Pate verdict data from
   current verdict drafts. These return the raw values but are
   subsequently to be wrapped with relevant metadata."
-  {:handler         (get-in-poytakirja :paatoksentekija)
+  {:id       (get-in-verdict [:id])
+   :modified (get-in-verdict [:timestamp])
+   :user     (constantly "TODO")
+   :category (fn [application _ _] (schema-util/application->category application))
+   :handler         (get-in-poytakirja :paatoksentekija)
    :kuntalupatunnus (get-in-verdict [:kuntalupatunnus])
    :verdict-section (get-in-poytakirja :pykala)
    :verdict-code    (comp str (get-in-poytakirja :status))
    :verdict-text    (get-in-poytakirja :paatos)
    :anto            (get-in-paivamaarat :anto)
    :lainvoimainen   (get-in-paivamaarat :lainvoimainen)
-   :reviews         (constantly "TODO")
-   :foremen         (constantly "TODO")
-   :conditions      (constantly "TODO")})
+   :reviews         (filter-tasks-of-verdict (task-name? :task-katselmus))
+   :review-name     (get-in-context [:taskname])
+   :review-type     (get-in-context [:data :katselmuksenLaji :value])
+   :foremen         (filter-tasks-of-verdict (task-name? :task-vaadittu-tyonjohtaja))
+   :foreman-role    (constantly "TODO")
+   :conditions      (filter-tasks-of-verdict (task-name? :task-lupamaarays))
+   :condition-name  (constantly "TODO")})
 
-(def- non-wrapper-accessors
-  "Contains accessor funtions whose values are not wrapped in metadata."
-  {:id       (get-in-verdict [:id])
-   :modified (get-in-verdict [:timestamp])
-   :user     (constantly "TODO")
-   :category (fn [application _] (schema-util/application->category application))
-   })
+(defn- assoc-context [element context]
+  (postwalk (fn [x]
+              (if (accessor-key? x)
+                (assoc x ::context context)
+                x))
+            element))
 
-(defn- accessors [timestamp]
-  (merge (util/map-values (wrap-accessor timestamp)
-                          wrapper-accessors)
-         non-wrapper-accessors))
+(defn- build-collection
+  "Builds a collection skeleton dynamically based on the data present in the
+   `application` and `verdict`."
+  [application verdict {{collection ::collection
+                         element    ::element} ::from-collection}]
+  (->> ((get accessor-functions collection) application verdict nil)
+       (group-by :id)
+       (util/map-values (comp (partial assoc-context element) first))
+       not-empty))
 
 (defn- fetch-with-accessor
   "Given the `application` under migration, the source `verdict` and
   current `timestamp`, returns a function for accessing desired data
   from the `application` and `verdict`. Used with `postwalk`."
-  [application verdict timestamp]
-  (let [accessor-functions (accessors timestamp)]
-    (fn [x]
-      (if (accessor-key? x)
-        ((get accessor-functions (::access x)) application verdict)
-        x))))
+  [application verdict]
+  (fn [x]
+    (cond (accessor-key? x)
+          ((get accessor-functions (::access x)) application verdict (::context x))
 
+          (collection-key? x)
+          (build-collection application verdict x)
 
+          :else x)))
+
+(defn- post-process [timestamp]
+  (fn [x]
+    (if (wrap? x)
+      (metadata/wrap "Verdict draft Pate migration" timestamp (::wrap x))
+      x)))
 ;;
 ;; Core migration functionality
 ;;
@@ -92,22 +133,26 @@
    :modified (access :modified)
    :user     (access :user)
    :category (access :category)
-   :data {:handler         (access :handler)
-          :kuntalupatunnus (access :kuntalupatunnus)
-          :verdict-section (access :verdict-section)
-          :verdict-code    (access :verdict-code)
-          :verdict-text    (access :verdict-text)
-          :anto            (access :anto)
-          :lainvoimainen   (access :lainvoimainen)
-          :reviews         (access :reviews)
-          :foremen         (access :foremen)
-          :conditions      (access :conditions)}
+   :data {:handler         (wrap (access :handler))
+          :kuntalupatunnus (wrap (access :kuntalupatunnus))
+          :verdict-section (wrap (access :verdict-section))
+          :verdict-code    (wrap (access :verdict-code))
+          :verdict-text    (wrap (access :verdict-text))
+          :anto            (wrap (access :anto))
+          :lainvoimainen   (wrap (access :lainvoimainen))
+          :reviews         (from-collection :reviews
+                                            {:name (wrap (access :review-name))
+                                             :type (wrap (access :review-type))})
+          :foremen         (from-collection :foremen
+                                            {:role (wrap (access :foreman-role))})
+          :conditions      (from-collection :conditions
+                                            {:name (wrap (access :condition-name))})}
    :template "TODO"
    :legacy? true})
 
 (defn ->pate-legacy-verdict [application verdict timestamp]
-  (-> (postwalk (fetch-with-accessor application
-                                     verdict
-                                     timestamp)
+  (->> (prewalk (fetch-with-accessor application
+                                     verdict)
                 verdict-migration-skeleton)
-      util/strip-nils))
+       (postwalk (post-process timestamp))
+       util/strip-nils))

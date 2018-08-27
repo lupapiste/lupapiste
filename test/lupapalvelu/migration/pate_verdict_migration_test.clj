@@ -10,6 +10,7 @@
 
 (defn wrap [x]
   (metadata/wrap "Verdict draft Pate migration" ts x))
+
 (fact "->pate-legacy-verdict"
   (let [id "id"
         kuntalupatunnus "lupatunnus"
@@ -39,7 +40,12 @@
                                                   :paatoskoodi code}]}]}
         test-application {:id "app-id"
                           :verdicts [test-verdict]
-                          :permitType "R"}]
+                          :permitType "R"
+                          :tasks [{:id "katselmus-id"
+                                   :schema-info {:name "task-katselmus"}
+                                   :taskname "AloituskoKKous"
+                                   :data {:katselmuksenLaji {:value "aloituskokous"}}
+                                   :source {:id id}}]}]
     (->pate-legacy-verdict test-application
                            test-verdict
                            ts)
@@ -55,9 +61,11 @@
             :verdict-text    (wrap verdict-text)
             :anto            (wrap anto)
             :lainvoimainen   (wrap lainvoimainen)
-            :reviews         (wrap "TODO")
-            :foremen         (wrap "TODO")
-            :conditions      (wrap "TODO")}
+            :reviews         {"katselmus-id" {:name (wrap "AloituskoKKous")
+                                              :type (wrap "aloituskokous")}}
+            ;; :foremen         (wrap "TODO")
+            ;; :conditions      (wrap "TODO")
+            }
      :template "TODO"
      :legacy? true}
 
