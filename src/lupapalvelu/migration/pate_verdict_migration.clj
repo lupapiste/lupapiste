@@ -83,7 +83,7 @@
    :foremen         (filter-tasks-of-verdict (task-name? :task-vaadittu-tyonjohtaja))
    :foreman-role    (get-in-context [:taskname])
    :conditions      (filter-tasks-of-verdict (task-name? :task-lupamaarays))
-   :condition-name  (constantly "TODO")})
+   :condition-name  (get-in-context [:taskname])})
 
 (defn- assoc-context [element context]
   (postwalk (fn [x]

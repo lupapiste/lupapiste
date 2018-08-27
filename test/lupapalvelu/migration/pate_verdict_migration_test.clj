@@ -3,16 +3,11 @@
             [lupapalvelu.migration.pate-verdict-migration :refer :all]
             [lupapalvelu.pate.metadata :as metadata]))
 
-(def ts 12345)
-
-(def test-application {:_id "foo"
-                       :verdicts [test-verdict]})
-
 (defn wrap [x]
   (metadata/wrap "Verdict draft Pate migration" ts x))
 
 (fact "->pate-legacy-verdict"
-  (let [id "id"
+  (let [verdict-id "verdict-id"
         kuntalupatunnus "lupatunnus"
         timestamp 1234
         anto 2345
@@ -22,7 +17,7 @@
         verdict-text "Decisions were made."
         section "1"
         code 2
-        test-verdict {:id id
+        test-verdict {:id verdict-id
                       :kuntalupatunnus kuntalupatunnus
                       :draft true
                       :timestamp timestamp
@@ -45,16 +40,24 @@
                                    :schema-info {:name "task-katselmus"}
                                    :taskname "AloituskoKKous"
                                    :data {:katselmuksenLaji {:value "aloituskokous"}}
-                                   :source {:id id}}
+                                   :source {:id verdict-id}}
                                   {:id "foreman-id"
                                    :schema-info {:name "task-vaadittu-tyonjohtaja"}
                                    :taskname "Supervising supervisor"
-                                   :source {:id id}}]}]
+                                   :source {:id verdict-id}}
+                                  {:id "condition-id1"
+                                   :schema-info {:name "task-lupamaarays"}
+                                   :taskname "Muu 1"
+                                   :source {:id verdict-id}}
+                                  {:id "condition-id2"
+                                   :schema-info {:name "task-lupamaarays"}
+                                   :taskname "Muu 2"
+                                   :source {:id verdict-id}}]}]
     (->pate-legacy-verdict test-application
                            test-verdict
                            ts)
     =>
-    {:id "id"
+    {:id verdict-id
      :modified 1234
      :user "TODO"
      :category :r
@@ -68,7 +71,8 @@
             :reviews         {"katselmus-id" {:name (wrap "AloituskoKKous")
                                               :type (wrap "aloituskokous")}}
             :foremen         {"foreman-id" {:role (wrap "Supervising supervisor")}}
-            ;; :conditions      (wrap "TODO")
+            :conditions      {"condition-id1" {:name (wrap "Muu 1")}
+                              "condition-id2" {:name (wrap "Muu 2")}}
             }
      :template "TODO"
      :legacy? true}
