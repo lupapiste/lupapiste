@@ -286,11 +286,11 @@
                              (recur (-> v vals first))
                              v))]))
         board-verdict? (util/=as-kw (:giver template-data) :lautakunta)]
+
     (merge data
-           {:date-deltas    (pack-verdict-dates category draft board-verdict?)
-            :plans          (pack-dependencies draft :plans template-data)
-            :reviews        (pack-dependencies draft :reviews template-data)
-            :handler-titles (pack-dependencies draft :handler-titles template-data)}
+           {:date-deltas    (pack-verdict-dates category draft board-verdict?)}
+           (->> (map #(pack-dependencies draft % template-data) template-settings-dependencies)
+                (into {}))
            (when board-verdict?
              {:boardname (:boardname draft)}))))
 
@@ -381,9 +381,8 @@
                                                           draft))]
     (template-update (dissoc options :timestamp)
                      {$set {:verdict-templates.templates.$.published
-                            {:published timestamp
-                             :data      (dissoc (draft-for-publishing template)
-                                                :reviews :plans :handler-titles)
+                            {:published  timestamp
+                             :data       (apply dissoc (draft-for-publishing template) template-settings-dependencies)
                              :inclusions (template-inclusions template)
                              :settings   settings}}})))
 

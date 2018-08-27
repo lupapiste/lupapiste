@@ -463,7 +463,8 @@
                            (dissoc (:data draft)
                                    :attachments
                                    :handler
-                                   :verdict-section))
+                                   :verdict-section
+                                   :signatures))
         {draft :draft} (init--handler {:draft draft
                                        :application application
                                        :user user})]

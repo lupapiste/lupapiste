@@ -100,14 +100,10 @@
 "pate-extra-info.text" "en" "Possible additional reports must be written into the permit by hand."
 "pate-extra-info.text" "fi" "Mahdolliset lisäselvitykset tulee kirjata päätökseen käsin."
 "pate-extra-info.text" "sv" "Eventuella tilläggsutredningar ska antecknas på beslutet för hand."
-<<<<<<< HEAD
-"pate-foremen" "en" "Supervisors"
-=======
 "pate.handler-titles" "en" ""
 "pate.handler-titles" "fi" "Tehtävänimikkeet"
 "pate.handler-titles" "sv" ""
-"pate-foremen" "en" "Foremen"
->>>>>>> PATE-139 Handler title select
+"pate-foremen" "en" "Supervisors"
 "pate-foremen" "fi" "Työnjohtajat"
 "pate-foremen" "sv" "Arbetsledare"
 "pate-inform-others" "en" "Notice for residents in the area"
@@ -320,14 +316,10 @@
 "pate-settings.reviews" "en" "Define all inspections in use. Type in name in all languages."
 "pate-settings.reviews" "fi" "Määritä kaikki käytössä olevat katselmukset. Nimi syötetään kaikilla kielillä."
 "pate-settings.reviews" "sv" "Fastställ alla syneförrättningar som används. Namnet anges på alla språk."
-<<<<<<< HEAD
-"pate-settings.verdict" "en" "Select every permit information in use"
-=======
 "pate-settings.handler-titles" "en" ""
 "pate-settings.handler-titles" "fi" "Tehtävänimikkeet"
 "pate-settings.handler-titles" "sv" ""
-"pate-settings.verdict" "en" "Select every verdict information in use"
->>>>>>> PATE-139 Handler title select
+"pate-settings.verdict" "en" "Select every permit information in use"
 "pate-settings.verdict" "fi" "Valitse kaikki käytössä olevat päätöstiedot"
 "pate-settings.verdict" "sv" "Välj all beslutsinformation som används"
 "pate-start-info" "en" "Preceding information"
