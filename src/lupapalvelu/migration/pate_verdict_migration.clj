@@ -81,7 +81,7 @@
    :review-name     (get-in-context [:taskname])
    :review-type     (get-in-context [:data :katselmuksenLaji :value])
    :foremen         (filter-tasks-of-verdict (task-name? :task-vaadittu-tyonjohtaja))
-   :foreman-role    (constantly "TODO")
+   :foreman-role    (get-in-context [:taskname])
    :conditions      (filter-tasks-of-verdict (task-name? :task-lupamaarays))
    :condition-name  (constantly "TODO")})
 
@@ -105,7 +105,7 @@
 (defn- fetch-with-accessor
   "Given the `application` under migration, the source `verdict` and
   current `timestamp`, returns a function for accessing desired data
-  from the `application` and `verdict`. Used with `postwalk`."
+  from the `application` and `verdict`. Used with `prewalk`."
   [application verdict]
   (fn [x]
     (cond (accessor-key? x)

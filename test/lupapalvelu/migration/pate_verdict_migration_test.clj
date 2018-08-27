@@ -45,6 +45,10 @@
                                    :schema-info {:name "task-katselmus"}
                                    :taskname "AloituskoKKous"
                                    :data {:katselmuksenLaji {:value "aloituskokous"}}
+                                   :source {:id id}}
+                                  {:id "foreman-id"
+                                   :schema-info {:name "task-vaadittu-tyonjohtaja"}
+                                   :taskname "Supervising supervisor"
                                    :source {:id id}}]}]
     (->pate-legacy-verdict test-application
                            test-verdict
@@ -63,7 +67,7 @@
             :lainvoimainen   (wrap lainvoimainen)
             :reviews         {"katselmus-id" {:name (wrap "AloituskoKKous")
                                               :type (wrap "aloituskokous")}}
-            ;; :foremen         (wrap "TODO")
+            :foremen         {"foreman-id" {:role (wrap "Supervising supervisor")}}
             ;; :conditions      (wrap "TODO")
             }
      :template "TODO"
