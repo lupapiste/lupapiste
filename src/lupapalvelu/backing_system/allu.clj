@@ -172,6 +172,11 @@
    (sc/optional-key :latestAttachmentVersion) {:fileId        sssc/FileId
                                                :storageSystem sssc/StorageSystem}})
 
+(defschema ^:private FileMetadata
+  {:name        sc/Str
+   :description sc/Str
+   :mimeType    (sc/maybe sc/Str)})
+
 ;;;; Application conversion
 ;;;; ===================================================================================================================
 
@@ -305,18 +310,6 @@
      ::params         {:id allu-id}
      ::command        (minimize-command command)}))
 
-(defn- attachment-send [{:keys [application] :as command}
-                        {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment}]
-  (let [allu-id (-> application :integrationKeys :ALLU :id)]
-    (assert allu-id (str (:id application) " does not contain an ALLU id"))
-    {::interface-path [:attachments :create]
-     ::params         {:id       allu-id
-                       :metadata {:name        (or (:contents attachment) "")
-                                  :description (localize lang :attachmentType type-group type-id)
-                                  :mimeType    (:contentType latestVersion)}
-                       :file     (-> attachment :latestVersion :fileId)}
-     ::command        (minimize-command command attachment)}))
-
 (defn- placement-creation-request [{:keys [application] :as command}]
   {::interface-path [:placementcontracts :create]
    ::params         {:application (application->allu-placement-contract true application)}
@@ -329,6 +322,18 @@
      ::params         {:id          allu-id
                        :application (application->allu-placement-contract pending-on-client application)}
      ::command        (minimize-command command)}))
+
+(defn- attachment-send [{:keys [application] :as command}
+                        {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment}]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)]
+    (assert allu-id (str (:id application) " does not contain an ALLU id"))
+    {::interface-path [:attachments :create]
+     ::params         {:id       allu-id
+                       :metadata {:name        (or (:contents attachment) "")
+                                  :description (localize lang :attachmentType type-group type-id)
+                                  :mimeType    (:contentType latestVersion)}
+                       :file     (-> attachment :latestVersion :fileId)}
+     ::command        (minimize-command command attachment)}))
 
 ;;;; IntegrationMessage construction
 ;;;; ===================================================================================================================
@@ -381,12 +386,10 @@
                                  :uri            "/applications/:id/attachments"
                                  :path-params    {:id ssc/NatString}
                                  :body           [{:name      :metadata
-                                                   :schema    {:name        sc/Str
-                                                               :description sc/Str
-                                                               :mimeType    (sc/maybe sc/Str)}
+                                                   :schema    FileMetadata
                                                    :mime-type "application/json"}
                                                   {:name      :file
-                                                   :schema    InputStream
+                                                   :schema    (sc/cond-pre sc/Str InputStream)
                                                    :mime-type #(-> % :metadata :mimeType)}]}}})
 
 (defn- interpolate-uri [template path-params request-data]
@@ -634,12 +637,6 @@
   {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
   (update-placement-contract! command))
 
-(defn cancel-application!
-  "Cancel application in ALLU (if it had been sent there)."
-  [{:keys [application] :as command}]
-  (when (application/submitted? application)
-    (send-allu-request! (application-cancel-request command))))
-
 (defn- lock-placement-contract!
   "Lock placement contract in ALLU for verdict evaluation."
   [command]
@@ -651,6 +648,12 @@
   [{{:keys [permitSubtype]} :application :as command}]
   {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
   (lock-placement-contract! command))
+
+(defn cancel-application!
+  "Cancel application in ALLU (if it had been sent there)."
+  [{:keys [application] :as command}]
+  (when (application/submitted? application)
+    (send-allu-request! (application-cancel-request command))))
 
 (defn- send-attachment!
   "Send `attachment` of `application` to ALLU. Return the fileId of the file that was sent."
