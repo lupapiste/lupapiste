@@ -78,7 +78,7 @@
 
 (def entry--operation [{:loc      :applications.operation
                         :loc-many :operations
-                        :loc-rule {:rule [:application :operation-name] :key :applications.operation}
+                        :loc-rule {:rule :application.operation-name :key :applications.operation}
                         :source   :operations
                         :styles   :bold}
                        {:path     :text}])

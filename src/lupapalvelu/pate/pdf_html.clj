@@ -82,9 +82,9 @@
             ;; values based on application details.
             ;; For example: {:rule [:application :operation-name] :key :applications.operation}
             ;; adds operation name from application at end of given key, like:
-            ;; applications.operation.ya-jatkoaika. If localization key doesn't found, only
+            ;; applications.operation.ya-jatkoaika. If the localization key is not found, only
             ;; given :key value is used as localization key.
-            (sc/optional-key :loc-rule) {:rule sc/Any :key sc/Keyword}
+            (sc/optional-key :loc-rule) {:rule sc/Keyword :key sc/Keyword}
             (sc/optional-key :source)   Source
             ;; Post-processing function for source value.
             (sc/optional-key :post-fn) (sc/conditional
@@ -270,7 +270,8 @@
     (and value post-fn) post-fn))
 
 (defn resolve-loc-rule [loc-rule data]
-  (let [rule-value (get-in data (:rule loc-rule))
+  (let [rule-kw (into [] (util/split-kw-path (:rule loc-rule)))
+        rule-value (get-in data rule-kw)
         rule-key (keyword (str (name (:key loc-rule)) "." (name rule-value)))]
     (if (i18n/has-term? (:lang data) rule-key)
       rule-key

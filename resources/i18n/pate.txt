@@ -557,7 +557,7 @@
 "pate.property-id" "en" "Property ID"
 "pate.property-id" "fi" "Kiinteistötunnus"
 "pate.property-id" "sv" "Fastighetsbeteckning"
-"pate.property-id.add" "en" "Add property id"
+"pate.property-id.add" "en" "Add property ID"
 "pate.property-id.add" "fi" "Lisää kiinteistötunnus"
 "pate.property-id.add" "sv" ""
 "pate.replace-verdict" "en" "Are you sure you wish to replace the permit with a new permit?"
