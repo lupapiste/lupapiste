@@ -286,11 +286,11 @@
                              (recur (-> v vals first))
                              v))]))
         board-verdict? (util/=as-kw (:giver template-data) :lautakunta)]
-
     (merge data
-           {:date-deltas    (pack-verdict-dates category draft board-verdict?)}
-           (->> (map #(pack-dependencies draft % template-data) template-settings-dependencies)
-                (into {}))
+           {:date-deltas    (pack-verdict-dates category draft board-verdict?)
+            :plans          (pack-dependencies draft :plans template-data)
+            :reviews        (pack-dependencies draft :reviews template-data)
+            :handler-titles (pack-dependencies draft :handler-titles template-data)}
            (when board-verdict?
              {:boardname (:boardname draft)}))))
 
