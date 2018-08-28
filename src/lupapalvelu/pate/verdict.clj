@@ -945,11 +945,10 @@
    (enrich-verdict command verdict false)))
 
 (defn open-verdict [command]
-  (let [{:keys [data state template verdict-attachment]
+  (let [{:keys [data state template]
          :as   verdict} (command->verdict command)
-        fields        (cond-> [:id :modified :state :category
-                               :schema-version :legacy?]
-                        (string? verdict-attachment) (conj :verdict-attachment))]
+        fields        [:id :modified :state :category
+                       :schema-version :legacy?]]
     {:verdict    (assoc (select-keys verdict fields)
                         :data (if (util/=as-kw state :draft)
                                 (:data (enrich-verdict command
@@ -1235,31 +1234,33 @@
 (defonce pate-queue "lupapalvelu.pate.queue")
 (defonce pate-session (jms/create-transacted-session (jms/get-default-connection)))
 
-(defn create-verdict-pdf [{:keys [application data] :as command}]
+(defn create-verdict-pdf [{:keys [data] :as command}]
   (try+
-   (let [verdict (command->verdict command true)]
-     (when-not (some-> verdict :published :attachment-id)
-       (when-let [attachment-id (pdf/create-verdict-attachment command verdict)]
-         (verdict-update command
-                         {$set {:pate-verdicts.$.published.attachment-id attachment-id}}))
-       (.commit pate-session)))
+   (let [command (assoc command
+                        :application (domain/get-application-no-access-checking (:id data)))
+         verdict (command->verdict command)]
+     (if (some-> verdict :published :attachment-id)
+       (.commit pate-session)
+       (if-let [attachment-id (pdf/create-verdict-attachment command verdict)]
+         (do (verdict-update command
+                             {$set {:pate-verdicts.$.published.attachment-id attachment-id}})
+             (.commit pate-session))
+         (.rollback pate-session))))
    (catch [:error :pdf/pdf-error] _
      (errorf "%s: PDF generation for verdict %s failed."
-             (:id application) (:verdict-id data))
+             (:id data) (:verdict-id data))
      (.rollback pate-session))
    (catch Object _
      (errorf "%s: Could not create verdict attachment for verdict %s."
-             (:id application) (:verdict-id data))
-     (.rollback pate-session)
-     (error (:throwable &throw-context)))))
+             (:id data) (:verdict-id data))
+     (.rollback pate-session))))
 
 (defonce pate-consumer (jms/create-consumer pate-session
                                             pate-queue
                                             (comp create-verdict-pdf edn/read-string)))
 
-(defn send-command [{:keys [application] :as command}]
-  (-<>> (select-keys command [:data :user :created])
-        (assoc <> :application {:id (:id application)})
+(defn send-command [command]
+  (->> (select-keys command [:data :user :created])
        pr-str
        (jms/produce-with-context pate-queue)))
 

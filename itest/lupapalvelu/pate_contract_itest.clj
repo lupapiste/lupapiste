@@ -9,10 +9,10 @@
 (def org-id "753-YA")
 
 (fact "Create and submit YA application"
-   (let [{app-id  :id
-          subtype :permitSubtype} (create-and-submit-application pena
-                                                                 :operation :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen
-                                                                 :propertyId sipoo-property-id)]
+  (let [{app-id  :id
+         subtype :permitSubtype} (create-and-submit-application pena
+                                                                :operation :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen
+                                                                :propertyId sipoo-property-id)]
      (fact "Set Sonja as the application handler"
        (command sonja :upsert-application-handler :id app-id
                 :userId sonja-id :roleId sipoo-ya-general-handler-id)
@@ -73,6 +73,12 @@
          (fact "Contract is published"
            (let [{:keys [verdict]} (open-verdict sonja app-id verdict-id)]
              (:state verdict) => "published"))
+         (verdict-pdf-queue-test {:app-id       app-id
+                                  :verdict-id   verdict-id
+                                  :verdict-name "Sopimus"
+                                  :contents     "Sopimus"
+                                  :state        "agreementPrepared"
+                                  :type-group   "muut"})
          (facts "Application updated"
            (let [{:keys [tasks attachments state]} (query-application sonja app-id)
                  source                            {:type "verdict"
@@ -256,6 +262,12 @@
                     (command sonja :publish-pate-verdict :id app-id
                              :verdict-id verdict-id)
                     => ok?)
+                  (verdict-pdf-queue-test {:app-id       app-id
+                                           :verdict-id   verdict-id
+                                           :verdict-name "Sopimus"
+                                           :contents     "Sopimus"
+                                           :state        "agreementPrepared"
+                                           :type-group   "muut"})
                   (let [{:keys [tasks attachments]} (query-application sonja app-id)]
                     (fact "Two tasks have been created"
                       tasks => (contains [(contains {:taskname    "Foo suomeksi"

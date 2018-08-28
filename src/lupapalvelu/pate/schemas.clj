@@ -122,7 +122,7 @@
          {(sc/optional-key :published)          {:tags                            sc/Str
                                                  ;; The same as :state._modified
                                                  :published                       ssc/Timestamp
-                                                 ;; The same as :verdict-attachment id
+                                                 ;; Id for the attachment that is a PDF version of tags.
                                                  (sc/optional-key :attachment-id) ssc/AttachmentId}
           :state                                (wrapped (sc/enum "draft"
                                                                   "publishing"
@@ -135,17 +135,7 @@
           (sc/optional-key :archive)            {(sc/optional-key :verdict-date)  ssc/Timestamp
                                                  (sc/optional-key :anto)          ssc/Timestamp
                                                  (sc/optional-key :lainvoimainen) ssc/Timestamp
-                                                 :verdict-giver                   sc/Str}
-          ;; Pointer to the verdict attachment. Either an attachment
-          ;; id or html source. The source is stored in order to be
-          ;; able to regenerate PDF, when needed (after muuntaja
-          ;; failure, for example). After the PDF has been
-          ;; successfully generated, the html is replaced with
-          ;; attachment id.
-          ;; TODO: Reimplement with message queue
-          (sc/optional-key :verdict-attachment) (sc/conditional
-                                                 :html {:html sc/Any}
-                                                 :else ssc/AttachmentId)}))
+                                                 :verdict-giver                   sc/Str}}))
 
 (defschema PateModernVerdict
   (merge PateBaseVerdict

@@ -70,6 +70,8 @@
         (facts "Publish verdict"
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id verdict-id) => ok?
+          (verdict-pdf-queue-test {:app-id       app-id
+                                   :verdict-id   verdict-id})
           (let [{:keys [tasks attachments
                         state]} (query-application sonja app-id)
                 file-id         (-> attachments first :latestVersion :fileId)
@@ -94,11 +96,7 @@
                                                                  :name    "task-vaadittu-tyonjohtaja"
                                                                  :subtype "foreman"})
                                          :source      {:type "verdict" :id verdict-id}})]))
-            (fact "Attachment has been created"
-              attachments => (just [(contains {:source           {:type "verdicts" :id verdict-id}
-                                               :type             {:type-id    "paatos"
-                                                                  :type-group "paatoksenteko"}
-                                               :applicationState "verdictGiven"})]))
+
             (check-file app-id file-id true)
             (fact "Add attachment to review"
               (let [task-file-id (upload-file-and-bind
@@ -170,6 +168,8 @@
           (add-legacy-review sonja app-id vid1 "Review One" :aloituskokous)
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id vid1) => ok?)
+        (verdict-pdf-queue-test {:app-id       app-id
+                                 :verdict-id   vid1})
         (fact "State is verdictGiven"
           (query-application sonja app-id)
           => (contains {:state "verdictGiven"}))
@@ -183,6 +183,8 @@
           (add-legacy-review sonja app-id vid2 "Review Two" :aloituskokous)
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id vid2) => ok?)
+        (verdict-pdf-queue-test {:app-id       app-id
+                                 :verdict-id   vid2})
         (fact "There are now two tasks and four attachments"
           (let [{:keys [attachments tasks]} (query-application sonja app-id)]
             (count attachments) => 4

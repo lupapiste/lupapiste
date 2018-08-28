@@ -236,7 +236,7 @@
    :states           states/post-verdict-states}
   [command]
   (let [{:keys [id published]} (verdict/command->verdict command)]
-    (ok :verdict {:id id :tags (:tags published)})))
+    (ok :verdict (assoc published :id id))))
 
 (defcommand edit-pate-verdict
   {:description "Updates verdict data. Returns changes and errors
