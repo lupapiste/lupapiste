@@ -112,6 +112,8 @@
         application (-> application
                         (assoc :handlers handlers)
                         (app/post-process-app-for-krysp @organization))]
+    (when (attachment/comments-saved-as-attachment? application next-state)
+      (attachment/save-comments-as-attachment command {:state next-state}))
     (or (app/validate-link-permits application)             ; If validation failure is non-nil, just return it.
         (let [submitted-application (mongo/by-id :submitted-applications id)
               [integration-available sent-file-ids]

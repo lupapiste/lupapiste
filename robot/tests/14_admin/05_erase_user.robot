@@ -29,6 +29,7 @@ Pena can no longer log in
   Login fails  pena  pena
 
 Pena cannot even reset his password
+  Click Element  //section[@id='login']
   Click Link  Oletko unohtanut salasanasi?
   Wait Until  Element Should Be Visible  reset
   Page Should Contain  Salasanan vaihtaminen
