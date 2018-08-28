@@ -22,6 +22,15 @@
         (fail :error.pate-disabled))
       (fail :error.invalid-organization))))
 
+(defn- pate-enabled-user-org
+  "Pre-checker that fails if Pate is not enabled in any organization
+  scope."
+  [command]
+  (when (empty? (->> (mapv :scope (:user-organizations command))
+                     (map #(sade.util/find-by-key :pate-enabled true %))
+                     (remove nil?)))
+    (fail :error.pate-disabled)))
+
 (defn- valid-category [{{category :category} :data :as command}]
   (when category
     (when-not (util/includes-as-kw? (template/organization-categories (template/command->organization command))
@@ -52,6 +61,14 @@
    :parameters       [:org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]
    :pre-checks       [pate-enabled]}
+  [_])
+
+(defquery pate-enabled-user-org
+  {:description "Pre-checker that fails if Pate is not enabled
+  in any of user organization scopes."
+   :feature     :pate
+   :permissions [{:required [:organization/admin]}]
+   :pre-checks  [pate-enabled-user-org]}
   [_])
 
 (defcommand new-verdict-template
