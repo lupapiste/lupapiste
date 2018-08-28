@@ -6,7 +6,7 @@
 (defn wrap [x]
   (metadata/wrap "Verdict draft Pate migration" ts x))
 
-(fact "->pate-legacy-verdict"
+(facts "->pate-legacy-verdict"
   (let [verdict-id "verdict-id"
         kuntalupatunnus "lupatunnus"
         timestamp 1234
@@ -53,6 +53,7 @@
                                    :schema-info {:name "task-lupamaarays"}
                                    :taskname "Muu 2"
                                    :source {:id verdict-id}}]}]
+
     (->pate-legacy-verdict test-application
                            test-verdict
                            ts)
@@ -72,12 +73,23 @@
                                               :type (wrap "aloituskokous")}}
             :foremen         {"foreman-id" {:role (wrap "Supervising supervisor")}}
             :conditions      {"condition-id1" {:name (wrap "Muu 1")}
-                              "condition-id2" {:name (wrap "Muu 2")}}
-            }
+                              "condition-id2" {:name (wrap "Muu 2")}}}
      :template "TODO"
      :legacy? true}
 
-    (->pate-legacy-verdict (assoc test-application :permitSubtype "sijoitussopimus")
-                           test-verdict
-                           ts)
-    => (contains {:category :contract})))
+    (fact "the gategory sijoitussopimus is contract"
+      (->pate-legacy-verdict (assoc test-application :permitSubtype "sijoitussopimus")
+                             test-verdict
+                             ts)
+      => (contains {:category :contract}))
+
+    (fact "only tasks related to given verdict affect the migration"
+      (->pate-legacy-verdict (assoc test-application
+                                    :tasks
+                                    [{:id "condition-id"
+                                      :schema-info {:name "task-lupamaarays"}
+                                      :taskname "Muu"
+                                      :source {:id "This is not the verdict you're looking for"}}]))
+      =not=> (contains {:reviews    anything
+                        :foremen    anything
+                        :conditions anything}))))

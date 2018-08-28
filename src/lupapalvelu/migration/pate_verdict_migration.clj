@@ -125,13 +125,15 @@
 ;; Core migration functionality
 ;;
 
+;; Allekirjoitukset
+
 (def verdict-migration-skeleton
   "This map describes the shape of the migrated verdict. When building the
    migrated verdict, `(access :x)` will be replaced by calling the accessor
    function found under the key :x in the accessor function map. See `accessors`."
   {:id       (access :id)
    :modified (access :modified)
-   :user     (access :user)
+   :user     (access :user)  ;; poisetaan
    :category (access :category)
    :data {:handler         (wrap (access :handler))
           :kuntalupatunnus (wrap (access :kuntalupatunnus))
