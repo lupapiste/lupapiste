@@ -571,7 +571,7 @@
                     :applicationpage application-page
                     :lang (:language user))
                 {:user (usr/session-summary user)})
-              (usr/merge-login-cookie-for user))
+              (usr/merge-login-cookie))
           (do
             (error "Unknown user role:" (:role user))
             (fail :error.login))))
