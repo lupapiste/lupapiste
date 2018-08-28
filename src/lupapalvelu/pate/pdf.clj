@@ -257,11 +257,22 @@
 (defn handler
   "Handler with title (if given)"
   [options]
-  (->> [:handler-title :handler]
-       (map (partial html/dict-value options))
-       (map ss/trim)
-       (remove ss/blank?)
-       (ss/join " ")))
+  (if (util/=as-kw :ya (get-in options [:verdict :category]))
+    (let [title (-> (assoc-in options
+                              [:verdict :data :handler-titles]
+                              [(get-in options [:verdict :data :handler-title])])
+                    (references :handler-titles)
+                    (first))
+          handler (->> (html/dict-value options :handler)
+                       (ss/trim))]
+      (if (ss/blank? title)
+        handler
+        (str title " " handler)))
+    (->> [:handler-title :handler]
+         (map (partial html/dict-value options))
+         (map ss/trim)
+         (remove ss/blank?)
+         (ss/join " "))))
 
 (defn link-permits
   "Since link-permits resolution is quite database intensive operation
