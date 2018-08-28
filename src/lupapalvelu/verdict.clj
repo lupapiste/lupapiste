@@ -239,10 +239,6 @@
     (and (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
          (not-empty (enlive/select xml [:luvanTunnisteTiedot :MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))])))))
 
-(defn debugger [arg]
-  (println arg)
-  arg)
-
 ;; LPK-3848
 (defn- verdict-party-finder [henkilotiedot-from-doc parties-from-xml]
   (let [info-fields            {:hetu :henkilotunnus :email :sahkopostiosoite :nimi {:etunimi [:nimi :etunimi] :sukunimi [:nimi :sukunimi]} :puhelin :puhelin}
