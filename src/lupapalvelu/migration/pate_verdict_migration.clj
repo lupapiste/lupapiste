@@ -76,7 +76,6 @@
   subsequently to be wrapped with relevant metadata."
   {:id       (get-in-verdict [:id])
    :modified (get-in-verdict [:timestamp])
-   :user     (constantly "TODO")
    :category verdict-category
    :handler         (get-in-poytakirja :paatoksentekija)
    :kuntalupatunnus (get-in-verdict [:kuntalupatunnus])
@@ -140,7 +139,6 @@
    function found under the key :x in the accessor function map. See `accessors`."
   {:id       (access :id)
    :modified (access :modified)
-   :user     (access :user)  ;; poisetaan
    :category (access :category)
    :data {:handler         (wrap (access :handler))
           :kuntalupatunnus (wrap (access :kuntalupatunnus))

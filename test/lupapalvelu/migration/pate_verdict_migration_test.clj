@@ -60,7 +60,6 @@
     =>
     {:id verdict-id
      :modified 1234
-     :user "TODO"
      :category :r
      :data {:handler (wrap handler)
             :kuntalupatunnus (wrap kuntalupatunnus)
