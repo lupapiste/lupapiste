@@ -240,22 +240,28 @@
          (not-empty (enlive/select xml [:luvanTunnisteTiedot :MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))])))))
 
 ;; LPK-3848
-(defn- verdict-party-finder [henkilotiedot-from-doc parties-from-xml]
-  (let [info-fields            {:hetu :henkilotunnus :email :sahkopostiosoite :nimi {:etunimi [:nimi :etunimi] :sukunimi [:nimi :sukunimi]} :puhelin :puhelin}
+(defn- verdict-party-finder [roolikoodi henkilotiedot-from-doc parties-from-xml]
+  (let [info-fields            {:hetu    :henkilotunnus
+                                :email   :sahkopostiosoite
+                                :nimi    [:etunimi :sukunimi]
+                                :puhelin :puhelin}
         get-info-value         (fn [field] (-> henkilotiedot-from-doc field :value))
-        match-xml-text-to-doc (fn [doc-field xml-field party]
-                                (if (= :nimi doc-field)
-                                  (let [doc-etunimi (get-info-value :etunimi)
-                                        doc-sukunimi (get-info-value :sukunimi)
-                                        xml-etunimi (xml/get-text party (:etunimi xml-field))
-                                        xml-sukunimi (xml/get-text party (:sukunimi xml-field))]
-                                    (or (and (= doc-etunimi xml-etunimi)
-                                             (= doc-sukunimi xml-sukunimi))
-                                        (= (str doc-sukunimi " " doc-etunimi) xml-sukunimi)))
-                                  (let [xml-text (xml/get-text party [xml-field])
-                                        doc-text (get-info-value doc-field)]
-                                    (= xml-text doc-text))))
-        find-attr-from-parties (fn [[k v]] (util/find-first (partial match-xml-text-to-doc k v) parties-from-xml))]
+        match-xml-text-to-doc  (fn [doc-field xml-field party]
+                                 (if (= :nimi doc-field)
+                                   (let [doc-etunimi  (get-info-value :etunimi)
+                                         doc-sukunimi (get-info-value :sukunimi)
+                                         xml-etunimi  (xml/get-text party [:etunimi])
+                                         xml-sukunimi (xml/get-text party [:sukunimi])]
+                                     (or (and (= doc-etunimi xml-etunimi)
+                                              (= doc-sukunimi xml-sukunimi))
+                                         (= (str doc-sukunimi " " doc-etunimi) xml-sukunimi)))
+                                   (let [xml-text (xml/get-text party [xml-field])
+                                         doc-text (get-info-value doc-field)]
+                                     (= xml-text doc-text))))
+        rooli-filtered-parties (filter (fn [party] (or (= roolikoodi (xml/get-text party [:tyonjohtajaRooliKoodi]))
+                                                       (= roolikoodi (xml/get-text party [:suunnittelijaRooliKoodi]))))
+                                       parties-from-xml)
+        find-attr-from-parties (fn [[k v]] (util/find-first (partial match-xml-text-to-doc k v) rooli-filtered-parties))]
     (->> (map find-attr-from-parties info-fields)
          (util/find-first seq))))
 
@@ -271,8 +277,9 @@
         op-doc       (domain/get-document-by-operation application (-> application :primaryOperation :id))
         henk-tiedot  (-> op-doc :data :henkilotiedot)
         yht-tiedot   (-> op-doc :data :yhteystiedot)
+        roolikoodi   (-> op-doc :data :kuntaRoolikoodi :value)
         parties      (enlive/select xml [tag])
-        party        (verdict-party-finder (merge henk-tiedot yht-tiedot) parties)
+        party        (verdict-party-finder roolikoodi (merge henk-tiedot yht-tiedot) parties)
         attachment   (-> party (enlive/select [:liitetieto :Liite]) first enlive/unwrap)
         date         (xml/get-text party [:paatosPvm])
         decision     (xml/get-text party [:paatostyyppi])

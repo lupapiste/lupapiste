@@ -172,19 +172,28 @@
                                                          {:tag :sijaistettavaHlo :attrs nil :content []}
                                                          {:tag :paatosPvm :attrs nil :content ["2015-11-29"]}
                                                          {:tag :paatostyyppi :attrs nil :content ["hyväksytty"]}]}]
-      (verdict-party-finder henk-tiedot [party]) => nil
+      (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [party]) => nil
+
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-hetu]))]
-        (verdict-party-finder henk-tiedot [amended-party party]) => amended-party)
+        (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [amended-party party]) => amended-party)
+
+      (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-hetu]))]
+        (verdict-party-finder "nonnonnoo-työnjohtaja" henk-tiedot [amended-party party]) => nil)
+
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-email]))]
-        (verdict-party-finder henk-tiedot [party amended-party]) => amended-party)
+        (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [party amended-party]) => amended-party)
+
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-nimi]))]
-        (verdict-party-finder henk-tiedot [amended-party]) => amended-party)
+        (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [amended-party]) => amended-party)
+
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-sukunimi]))]
-        (verdict-party-finder henk-tiedot [amended-party]) => amended-party)
+        (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [amended-party]) => amended-party)
+
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-puhelin]))]
-        (verdict-party-finder henk-tiedot [amended-party]) => amended-party)
+        (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [amended-party]) => amended-party)
+
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-err-puhelin]))]
-        (verdict-party-finder henk-tiedot [amended-party]) => nil))))
+        (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [amended-party]) => nil))))
 
 (facts "Section requirement for verdicts"
        (let [org        {:section {:operations ["pool" "house"]
