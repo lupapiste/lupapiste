@@ -1,4 +1,4 @@
-(ns lupapalvelu.backing_system.allu-itest
+(ns lupapalvelu.backing-system.allu-itest
   "Integration tests for ALLU integration. Using local (i.e. not over HTTP) testing style."
   (:require [clojure.java.io :as io]
             [clj-http.client :as http]

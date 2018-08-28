@@ -97,7 +97,7 @@
 
 (defn- user-list [company allow professional]
   (mongo/snapshot :users
-                  (merge {}
+                  (merge {:enabled true}
                          (when-not (= allow :both)
                            {:allowDirectMarketing (= allow :yes)})
                          (when-not (= professional :both)

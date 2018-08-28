@@ -408,7 +408,8 @@
                        krysp-reader/krysp-state->application-state)]
     (cond
       (nil? new-state) nil
-      (sm/can-proceed? application new-state)  (app-state/state-transition-update new-state created application user)
+      (sm/can-proceed? application new-state)  (do (attachment/maybe-generate-comments-attachment user application new-state)
+                                                   (app-state/state-transition-update new-state created application user))
       (not= new-state (keyword current-state)) (errorf "Invalid state transition. Failed to update application %s state from '%s' to '%s'."
                                                        (:id application) current-state (name new-state)))))
 
