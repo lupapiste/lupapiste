@@ -74,7 +74,7 @@
             :foremen         {"foreman-id" {:role (wrap "Supervising supervisor")}}
             :conditions      {"condition-id1" {:name (wrap "Muu 1")}
                               "condition-id2" {:name (wrap "Muu 2")}}}
-     :template "TODO"
+     :template {:inclusions [:foreman-label :conditions-title :foremen-title :kuntalupatunnus :verdict-section :verdict-text :anto :attachments :foremen.role :foremen.remove :verdict-code :conditions.name :conditions.remove :reviews-title :type-label :reviews.name :reviews.type :reviews.remove :add-review :name-label :condition-label :lainvoimainen :handler :add-foreman :upload :add-condition]}
      :legacy? true}
 
     (fact "the gategory sijoitussopimus is contract"

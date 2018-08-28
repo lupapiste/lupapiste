@@ -440,6 +440,12 @@
                                        (sc/validate schemas/PateVerdict draft)}})
     (:id draft)))
 
+(defn legacy-verdict-inclusions [category]
+  (-> category
+      legacy/legacy-verdict-schema
+      :dictionary
+      dicts->kw-paths))
+
 (defn new-legacy-verdict-draft
   "Legacy verdicts do not have templates or references. Inclusions
   contain every schema dict."
@@ -454,10 +460,7 @@
                                                      :user     (user-ref command)
                                                      :category (name category)
                                                      :data     {:handler (general-handler application)}
-                                                     :template {:inclusions (-> category
-                                                                                legacy/legacy-verdict-schema
-                                                                                :dictionary
-                                                                                dicts->kw-paths)}
+                                                     :template {:inclusions (legacy-verdict-inclusions category)}
                                                      :legacy?  true})}})
     verdict-id))
 

@@ -3,7 +3,8 @@
             [sade.core :refer [def-]]
             [sade.util :as util]
             [lupapalvelu.pate.metadata :as metadata]
-            [lupapalvelu.pate.schema-util :as schema-util]))
+            [lupapalvelu.pate.schema-util :as schema-util]
+            [lupapalvelu.pate.verdict :as verdict]))
 
 ;;
 ;; Post-walk related helpers
@@ -58,9 +59,16 @@
     (util/=as-kw (-> task :schema-info :name)
                  tn)))
 
-(defn get-in-context [path]
+(defn- get-in-context [path]
   (fn [_ _ context]
     (get-in context path)))
+
+(defn- verdict-category [application _ _]
+  (schema-util/application->category application))
+
+(defn- verdict-template [app _ _]
+  {:inclusions (-> (verdict-category app nil nil)
+                   verdict/legacy-verdict-inclusions)})
 
 (def- accessor-functions
   "Contains functions for accessing relevant Pate verdict data from
@@ -69,7 +77,7 @@
   {:id       (get-in-verdict [:id])
    :modified (get-in-verdict [:timestamp])
    :user     (constantly "TODO")
-   :category (fn [application _ _] (schema-util/application->category application))
+   :category verdict-category
    :handler         (get-in-poytakirja :paatoksentekija)
    :kuntalupatunnus (get-in-verdict [:kuntalupatunnus])
    :verdict-section (get-in-poytakirja :pykala)
@@ -83,7 +91,8 @@
    :foremen         (filter-tasks-of-verdict (task-name? :task-vaadittu-tyonjohtaja))
    :foreman-role    (get-in-context [:taskname])
    :conditions      (filter-tasks-of-verdict (task-name? :task-lupamaarays))
-   :condition-name  (get-in-context [:taskname])})
+   :condition-name  (get-in-context [:taskname])
+   :template        verdict-template})
 
 (defn- assoc-context [element context]
   (postwalk (fn [x]
@@ -125,8 +134,6 @@
 ;; Core migration functionality
 ;;
 
-;; Allekirjoitukset
-
 (def verdict-migration-skeleton
   "This map describes the shape of the migrated verdict. When building the
    migrated verdict, `(access :x)` will be replaced by calling the accessor
@@ -149,7 +156,7 @@
                                             {:role (wrap (access :foreman-role))})
           :conditions      (from-collection :conditions
                                             {:name (wrap (access :condition-name))})}
-   :template "TODO"
+   :template (access :template)
    :legacy? true})
 
 (defn ->pate-legacy-verdict [application verdict timestamp]
