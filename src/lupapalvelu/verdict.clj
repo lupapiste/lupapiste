@@ -12,7 +12,7 @@
             [sade.util :refer [fn-> fn->>] :as util]
             [sade.xml :as xml]
             [lupapalvelu.action :refer [update-application application->command] :as action]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application :as app]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.application-meta-fields :as meta-fields]
@@ -214,7 +214,7 @@
             (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} application-op-name)
             (util/version-is-greater-or-equal krysp-version {:major 2 :minor 1 :micro 8}))
       (let [application (meta-fields/enrich-with-link-permit-data application)
-            link-permit (first (application/get-link-permit-apps application))
+            link-permit (first (app/get-link-permit-apps application))
             link-permit-xml (krysp-fetch/get-application-xml-by-application-id link-permit)
             osapuoli-type (cond
                             (or (= "tyonjohtajan-nimeaminen" application-op-name) (= "tyonjohtajan-nimeaminen-v2" application-op-name)) "tyonjohtaja"
@@ -347,7 +347,8 @@
       (fail :info.section-required-in-verdict))))
 
 (defn do-check-for-verdict [{:keys [application organization] :as command}]
-  {:pre [(every? command [:application :user :created])]}
+  {:pre [(every? command [:application :user :created])
+         (not (app/has-published-pate-verdicts? application))]}
   (if-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
                          ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
                          (krysp-fetch/get-application-xml-by-backend-id application (some :kuntalupatunnus (:verdicts application))))]
@@ -367,7 +368,12 @@
     ;; LPK-2459
     (when (or (foreman/foreman-app? application) (app/designer-app? application))
       (debug "Checking foreman/designer verdict...")
-      (fetch-tj-suunnittelija-verdict command))))
+      (fetch-tj-suunnittelija-verdict command)))
+
+  ;; TODO Empty `pate-verdicts`. `pate-verdicts` may contain verdict
+  ;; drafts. Pate verdicts and backend verdicts are mutually
+  ;; exclusive.
+  )
 
 (defn- verdict-task?
   "True if given task is 'rooted' via source chain to the verdict.

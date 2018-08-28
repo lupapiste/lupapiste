@@ -5,6 +5,7 @@
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict :refer :all]
+            [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
             [midje.sweet :refer :all]
@@ -18,9 +19,11 @@
                    next-section verdict->updates
                    general-handler application-deviations
                    archive-info application-operation
-                   title-fn verdict-string
-                   verdict-section-string verdict-summary
                    verdict-attachment-items)
+
+(testable-privates lupapalvelu.pate.verdict-common
+                   verdict-section-string
+                   title-fn verdict-string)
 
 (testable-privates lupapalvelu.pate.verdict-template
                    template-inclusions)
@@ -1364,7 +1367,7 @@
                                               :handler          "Bob Builder"
                                               :paatosteksti     "This is verdict."})
           (fact "select-inclusions"
-            (select-inclusions (:dictionary mini-verdict)
+            (vc/select-inclusions (:dictionary mini-verdict)
                                [:deviations :buildings.paloluokka :foremen-included])
             => {:deviations       {:phrase-text      {:category :yleinen}
                                    :template-section :deviations}
@@ -1463,25 +1466,25 @@
 (facts "verdict-string"
   (fact "legacy verdict-code"
     (verdict-string "fi"
-                         {:legacy? true
-                          :category "r"
-                          :data {:verdict-code "8"}
-                          :template {:inclusions ["verdict-code"]}}
-                         :verdict-code)
+                    {:legacy? true
+                     :category "r"
+                     :data {:verdict-code "8"}
+                     :template {:inclusions ["verdict-code"]}}
+                    :verdict-code)
     => "Ty\u00f6h\u00f6n liittyy ehto")
   (fact "modern verdict-code"
     (verdict-string "en"
-                           {:category "r"
-                            :data {:verdict-code "hallintopakko"}
-                            :template {:inclusions ["verdict-code"]}}
-                           :verdict-code)
+                    {:category "r"
+                     :data {:verdict-code "hallintopakko"}
+                     :template {:inclusions ["verdict-code"]}}
+                    :verdict-code)
     => "Administrative enforcement/penalty proceedings discontinued.")
   (fact "verdict-type"
     (verdict-string "fi"
-                           {:category "ya"
-                            :data {:verdict-type "katulupa"}
-                            :template {:inclusions ["verdict-type"]}}
-                           :verdict-type)
+                    {:category "ya"
+                     :data {:verdict-type "katulupa"}
+                     :template {:inclusions ["verdict-type"]}}
+                    :verdict-type)
     => "Katulupa"))
 
 (fact "verdict-section-string"
@@ -1508,6 +1511,7 @@
       (verdict-summary "fi" section-strings verdict)
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :giver        "Foo Bar"
           :verdict-date 876543
@@ -1517,6 +1521,7 @@
                        (assoc-in verdict [:template :giver] "lautakunta"))
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :giver        "Broad board abroad"
           :verdict-date 876543
@@ -1526,6 +1531,7 @@
                        (assoc-in verdict [:replacement :replaces] "v2"))
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :giver        "Foo Bar"
           :verdict-date 876543
@@ -1536,6 +1542,7 @@
                        (assoc verdict :published 121212))
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :published    121212
           :giver        "Foo Bar"
@@ -1548,6 +1555,7 @@
                            (assoc-in [:data :verdict-section] nil)))
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :published    121212
           :giver        "Foo Bar"
@@ -1560,6 +1568,7 @@
                            (assoc-in [:replacement :replaces] "v2")))
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :published    121212
           :giver        "Foo Bar"
@@ -1573,6 +1582,7 @@
                            (assoc-in [:replacement :replaces] "v2")))
       => {:id           "v1"
           :category     "r"
+          :legacy?      false
           :modified     12345
           :published    121212
           :giver        "Foo Bar"
@@ -1613,6 +1623,7 @@
           (verdict-summary "fi" section-strings verdict)
           => {:id           "v1"
               :category     "ya"
+              :legacy?      false
               :modified     12345
               :giver        "Foo Bar"
               :verdict-date 876543
@@ -1622,6 +1633,7 @@
                            (assoc verdict :published 656565))
           => {:id           "v1"
               :category     "ya"
+              :legacy?      false
               :modified     12345
               :published    656565
               :giver        "Foo Bar"
@@ -1634,6 +1646,7 @@
                                   :replacement {:replaces "v2"}))
           => {:id           "v1"
               :category     "ya"
+              :legacy?      false
               :modified     12345
               :published    656565
               :giver        "Foo Bar"

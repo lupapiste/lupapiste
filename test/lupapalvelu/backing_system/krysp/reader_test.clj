@@ -117,7 +117,7 @@
           paivamaarat    (:paivamaarat verdict)
           poytakirjat    (:poytakirjat verdict)]
 
-      (facts "lupamaaraukset data is correct"
+      (facts "lupamaaraykset data is correct"
         lupamaaraykset => truthy
         (:autopaikkojaEnintaan lupamaaraykset) => 10
         (:autopaikkojaVahintaan lupamaaraykset) => 1
@@ -240,7 +240,7 @@
           lupamaaraykset (:lupamaaraykset verdict)
           maaraykset     (:maaraykset lupamaaraykset)]
 
-      (facts "lupamaaraukset data is correct"
+      (facts "lupamaaraykset data is correct"
         lupamaaraykset => truthy
         (:rakennusoikeudellinenKerrosala lupamaaraykset) => "101"
         (:vaaditutTyonjohtajat lupamaaraykset) => "IV-ty\u00f6njohtaja, KVV-ty\u00f6njohtaja, vastaava ty\u00f6njohtaja"
@@ -342,7 +342,7 @@
           katselmukset   (:vaaditutKatselmukset lupamaaraykset)
           maaraykset     (:maaraykset lupamaaraykset)]
 
-      (facts "lupamaaraukset data is correct"
+      (facts "lupamaaraykset data is correct"
         lupamaaraykset => truthy
         (:kerrosala lupamaaraykset) => "134"
         (:kokonaisala lupamaaraykset) => "134"
@@ -408,7 +408,7 @@
           paivamaarat    (:paivamaarat verdict)
           poytakirjat    (:poytakirjat verdict)]
 
-      (facts "lupamaaraukset data is correct"
+      (facts "lupamaaraykset data is correct"
         lupamaaraykset => truthy
         (:takuuaikaPaivat lupamaaraykset) => "760"
         (let [muutMaaraykset (:muutMaaraykset lupamaaraykset)]
@@ -447,7 +447,7 @@
           paivamaarat    (:paivamaarat verdict)
           poytakirjat    (:poytakirjat verdict)]
 
-      (facts "lupamaaraukset data is correct"
+      (facts "lupamaaraykset data is correct"
         lupamaaraykset => truthy
         (:takuuaikaPaivat lupamaaraykset) => "5"
         (let [muutMaaraykset (:muutMaaraykset lupamaaraykset)]
