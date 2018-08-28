@@ -1,5 +1,6 @@
 (ns lupapalvelu.migration.pate-verdict-migration
   (:require [clojure.walk :refer [postwalk prewalk walk]]
+            [monger.operators :refer :all]
             [sade.core :refer [def-]]
             [sade.util :as util]
             [lupapalvelu.pate.metadata :as metadata]
@@ -130,7 +131,7 @@
       (metadata/wrap "Verdict draft Pate migration" timestamp (::wrap x))
       x)))
 ;;
-;; Core migration functionality
+;; Verdict migration
 ;;
 
 (def verdict-migration-skeleton
@@ -163,3 +164,14 @@
                 verdict-migration-skeleton)
        (postwalk (post-process timestamp))
        util/strip-nils))
+
+;;
+;; Application migration
+;;
+
+(defn migration-updates [application timestamp]
+  (merge {$unset {:verdicts ""}
+          $set {:pate-verdicts [(->pate-legacy-verdict application
+                                                       (first (:verdicts application))
+                                                       timestamp)]}
+          $pull {:tasks {:source.id {$in [(-> application :verdicts first) :id]}}}}))
