@@ -17,11 +17,13 @@
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
+            [lupapalvelu.user :as usr]
 
             [midje.sweet :refer [facts fact =>]]
             [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
 
-            [lupapalvelu.backing-system.allu :as allu :refer [PlacementContract]])
+            [lupapalvelu.backing-system.allu :as allu :refer [PlacementContract]]
+            [lupapalvelu.domain :as domain])
   (:import [java.io InputStream]))
 
 ;;; TODO: Sijoituslupa
@@ -114,6 +116,29 @@
   (fact "submit application"
     (itu/local-command apikey :submit-application :id app-id) => ok?))
 
+(defn- fill [apikey app-id]
+  (let [{:keys [documents]} (domain/get-application-no-access-checking app-id)
+        {descr-id :id} (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa")
+                                      documents))
+        {applicant-id :id} (first (filter #(= (doc-name %) "hakija-ya") documents))]
+    (fact "fill application"
+      (itu/local-command apikey :update-doc :id app-id :doc descr-id :updates [["kayttotarkoitus" "tuijottelu"]]) => ok?
+      (itu/local-command apikey :save-application-drawings :id app-id :drawings drawings) => ok?
+
+      (itu/local-command apikey :set-user-to-document :id app-id :documentId applicant-id
+                         :userId pena-id :path "henkilo") => ok?
+
+      (itu/local-command apikey :set-current-user-to-document :id app-id :documentId applicant-id :path "henkilo") => ok?
+
+      (itu/local-command apikey :set-company-to-document :id app-id :documentId applicant-id
+                         :companyId "esimerkki" :path "yritys") => ok?
+      (let [user (usr/get-user-by-id pena-id)]
+        (itu/local-command apikey :update-doc :id app-id :doc applicant-id
+                           :updates [["yritys.yhteyshenkilo.henkilotiedot.etunimi" (:firstName user)]
+                                     ["yritys.yhteyshenkilo.henkilotiedot.sukunimi" (:lastName user)]
+                                     ["yritys.yhteyshenkilo.yhteystiedot.email" (:email user)]
+                                     ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]])))))
+
 (defn- approve [apikey app-id]
   (fact "approve application"
     (itu/local-command apikey :approve-application :id app-id :lang "fi")) => ok?)
@@ -125,6 +150,15 @@
 (defn- cancel [apikey app-id msg]
   (fact "cancel application"
     (itu/local-command apikey :cancel-application :id app-id :text msg :lang "fi") => ok?))
+
+;;;; Mock Handler
+;;;; ===================================================================================================================
+
+(defn- check-response-ok-middleware [handler]
+  (fn [request]
+    (let [response (handler request)]
+      (fact "response is successful" response => (comp #{200 201} :status))
+      response)))
 
 (defn- check-imessages-middleware [handler]
   (fn [{interface-path ::allu/interface-path {:keys [application]} ::allu/command :as request}]
@@ -197,6 +231,7 @@
             {:status 401, :body "Unauthorized"}))
 
         (not-found "No such route."))
+      check-response-ok-middleware
       (#'allu/combined-middleware)
       check-imessages-middleware))
 
@@ -234,7 +269,9 @@
                                                                     (return-to-draft raktark-helsinki id "Nolo!"))
                                                            :open (fn [_ id] (open pena id "YOLO"))
                                                            :submitted (fn [_ id] (submit pena id))
-                                                           :sent (fn [_ id] (approve raktark-helsinki id))
+                                                           :sent (fn [_ id]
+                                                                   (fill pena id)
+                                                                   (approve raktark-helsinki id))
                                                            :canceled (fn [_ id] (cancel pena id "Alkoi nolottaa."))
                                                            (fn [transition _] (warn "TODO:" transition)))]))
                                               (state-graph->transitions states/ya-sijoitussopimus-state-graph))
@@ -256,46 +293,6 @@
                     {descr-id :id} (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa")
                                                   documents))
                     {applicant-id :id} (first (filter #(= (doc-name %) "hakija-ya") documents))]
-
-                (itu/local-command pena :update-doc :id id :doc descr-id :updates [["kayttotarkoitus" "tuijottelu"]]) => ok?
-                (-> (:applications @allu-state) first val :workDescription) => "tuijottelu"
-
-                (itu/local-command pena :set-user-to-document :id id :documentId applicant-id
-                                   :userId pena-id :path "henkilo") => ok?
-                (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Pena Panaani"
-                (itu/local-command pena :set-current-user-to-document :id id :documentId applicant-id :path "henkilo")
-                => ok?
-                (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Pena Panaani"
-
-                (itu/local-command pena :update-doc :id id :doc applicant-id :updates [["_selected" "yritys"]])
-                ;; Leads to ALLU failure because contact person info is not set:
-                (itu/local-command pena :set-company-to-document :id id :documentId applicant-id
-                                   :companyId "esimerkki" :path "yritys") => ok?
-                (let [user (usr/get-user-by-id pena-id)]
-                  (itu/local-command pena :update-doc :id id :doc applicant-id
-                                     :updates [["yritys.yhteyshenkilo.henkilotiedot.etunimi" (:firstName user)]
-                                               ["yritys.yhteyshenkilo.henkilotiedot.sukunimi" (:lastName user)]
-                                               ["yritys.yhteyshenkilo.yhteystiedot.email" (:email user)]
-                                               ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]]))
-                (-> (:applications @allu-state) first val :customerWithContacts :customer :name) => "Esimerkki Oy"
-
-                (itu/local-command pena :save-application-drawings :id id :drawings drawings) => ok?
-                (-> (:applications @allu-state) first val :geometry)
-                => {:crs        {:type       "name"
-                                 :properties {:name "EPSG:4326"}}
-                    :type       "GeometryCollection"
-                    :geometries [{:type        "Polygon"
-                                  :coordinates [[[25.901018731807 60.134367126801]
-                                                 [25.945680922149 60.127151199835]
-                                                 [25.954302160106 60.139072939081]
-                                                 [25.910829826268 60.140374902637]
-                                                 [25.901018731807 60.134367126801]]]}
-                                 {:type        "Polygon"
-                                  :coordinates [[[25.931448002235 60.139788526718]
-                                                 [25.9647992127 60.148817662889]
-                                                 [25.954158152623 60.139071802112]
-                                                 [25.931448002235 60.139788526718]]]}]}
-
                 (let [filename "dev-resources/test-attachment.txt"]
                   ;; HACK: Have to use a temp file as :upload-attachment expects to get one and deletes it in the end.
                   (with-temp-file file
