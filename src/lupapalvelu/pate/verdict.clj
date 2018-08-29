@@ -1152,7 +1152,11 @@
 ;; queue. If the generation fails, the message is requeued.
 
 (defonce pate-queue "lupapalvelu.pate.queue")
-(defonce pate-session (jms/create-transacted-session (jms/get-default-connection)))
+(def pate-session  (if-let [conn (jms/get-default-connection)]
+                     (-> conn
+                         (jms/create-transacted-session)
+                         (jms/register-session :consumer))
+                     (warn "No JMS connection available")))
 
 (defn create-verdict-pdf [{:keys [data] :as command}]
   (try+
@@ -1175,9 +1179,10 @@
              (:id data) (:verdict-id data))
      (.rollback pate-session))))
 
-(defonce pate-consumer (jms/create-consumer pate-session
-                                            pate-queue
-                                            (comp create-verdict-pdf edn/read-string)))
+(defonce pate-consumer (when pate-session
+                         (jms/create-consumer pate-session
+                                              pate-queue
+                                              (comp create-verdict-pdf edn/read-string))))
 
 (defn send-command [command]
   (->> (select-keys command [:data :user :created])
