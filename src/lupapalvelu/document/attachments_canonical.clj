@@ -187,7 +187,7 @@
                               (env/value :host)
                               (codec/form-encode {:id         (:id application)
                                                   :verdict-id (:id verdict)}))
-   :muokkausHetki     (util/to-xml-datetime (:modified verdict))
+   :muokkausHetki     (-> verdict :published :published util/to-xml-datetime)
    :tyyppi            (:type-id (schemas/resolve-verdict-attachment-type application))
    :versionumero      "0.1" ;; Generated verdict PDF is always the first version
    })

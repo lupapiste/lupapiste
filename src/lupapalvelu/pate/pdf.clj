@@ -58,9 +58,9 @@
                                         ss/not-blank? (str "M"))]))
 
 (defn property-id-ya [options]
-  (join-non-blanks "\n"
-                   (->> (get-in options [:verdict :data :propertyIds])
-                        (map (fn [[_ v]] (ss/trim (:property-id v)))))))
+  (cols/join-non-blanks "\n"
+                        (->> (get-in options [:verdict :data :propertyIds])
+                             (map (fn [[_ v]] (ss/trim (:property-id v)))))))
 
 (defn value-or-other [lang value other & loc-keys]
   (if (util/=as-kw value :other)

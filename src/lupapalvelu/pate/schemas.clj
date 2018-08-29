@@ -133,7 +133,7 @@
           :modified                             ssc/Timestamp
           :data                                 sc/Any
           ;; Whether the verdict timestamps are available depends on
-          ;; the verdicty type (legacy or not) and template settings.
+          ;; the verdict type (legacy or not) and template settings.
           (sc/optional-key :archive)            {(sc/optional-key :verdict-date)  ssc/Timestamp
                                                  (sc/optional-key :anto)          ssc/Timestamp
                                                  (sc/optional-key :lainvoimainen) ssc/Timestamp

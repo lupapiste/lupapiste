@@ -36,6 +36,9 @@
                      s
                      (range (count values))))))
 
+#?(:clj (def has-term? i18n/has-term?)
+   :cljs (def has-term? js/loc.hasTerm))
+
 (defn pathify [kw-path]
   (map keyword (ss/split (name kw-path) #"\.")))
 
@@ -146,8 +149,7 @@
   (let [rule-kw (into [] (util/split-kw-path (:rule loc-rule)))
         rule-value (get-in data rule-kw)
         rule-key (keyword (str (name (:key loc-rule)) "." (name rule-value)))]
-    ;; TODO: has-term? cljs
-    (if (i18n/has-term? (:lang data) rule-key)
+    (if (has-term? (:lang data) rule-key)
       rule-key
       (:key loc-rule))))
 

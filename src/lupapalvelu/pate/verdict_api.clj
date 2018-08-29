@@ -56,7 +56,8 @@
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
-                                       (:pate-verdicts application))]
+                                       (:pate-verdicts application))
+              state (vc/verdict-state verdict)]
           (util/pcond-> (cond
                           (not verdict)
                           :error.verdict-not-found
@@ -65,10 +66,10 @@
                                                  (schema-util/application->category application)))
                           :error.invalid-category
 
-                          (and draft? (vc/verdict-published verdict))
+                          (and draft? (not= state :draft))
                           :error.verdict.not-draft
 
-                          (and published? (not (vc/verdict-published verdict)))
+                          (and published? (not= state :published))
                           :error.verdict.not-published
 
                           (and legacy? (not (vc/legacy? verdict)))
@@ -210,6 +211,7 @@
    :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :states           states/post-submitted-states}
@@ -235,6 +237,7 @@
    :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
@@ -277,25 +280,27 @@
   (verdict/preview-verdict command))
 
 (defquery pate-verdict-tab
-  {:description     "Pseudo-query that fails if the Pate verdicts tab
+  {:description      "Pseudo-query that fails if the Pate verdicts tab
   should not be shown on the UI."
-   :feature         :pate
-   :parameters      [:id]
-   :user-roles      #{:applicant :authority}
-   :org-authz-roles roles/reader-org-authz-roles
-   :states          states/post-submitted-states}
+   :feature          :pate
+   :parameters       [:id]
+   :user-roles       #{:applicant :authority}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :states           states/post-submitted-states}
   [_])
 
 (defquery pate-contract-tab
-  {:description     "Pseudo-query that fails if the Pate contracts tab
+  {:description      "Pseudo-query that fails if the Pate contracts tab
   should not be shown on the UI. Note that pate-contract-tab always
   implies pate-verdict-tab, too."
-   :feature         :pate
-   :parameters      [:id]
-   :user-roles      #{:applicant :authority}
-   :org-authz-roles roles/reader-org-authz-roles
-   :pre-checks      [contractual-application]
-   :states          states/post-submitted-states}
+   :feature          :pate
+   :parameters       [:id]
+   :user-roles       #{:applicant :authority}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :pre-checks       [contractual-application]
+   :states           states/post-submitted-states}
   [_])
 
 (defcommand sign-pate-contract

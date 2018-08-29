@@ -470,9 +470,8 @@
   (let [draft (-> (util/find-by-id replacement-id (:pate-verdicts application))
                   (assoc :id (mongo/create-id)
                          :modified created
-                         :user (user-ref command))
-                  (dissoc :verdict-attachment
-                          :published
+                         :state (wrapped-state command :draft))
+                  (dissoc :published
                           :archive)
                   (assoc-in [:replacement :replaces] replacement-id))
         draft (assoc-in draft[:template :inclusions] (mapv keyword (get-in draft [:template :inclusions])))
@@ -1298,9 +1297,9 @@
 
 (defn latest-published-pate-verdict [{:keys [application]}]
   (->> (:pate-verdicts application)
-       (filter #(some? (:published %)))
+       (filter :published)
        (sort-by (comp :published :published))
-       (last)))
+       last))
 
 (defn user-can-sign? [{:keys [application user] :as command}]
   (let [sigs  (some-> (command->verdict command)
