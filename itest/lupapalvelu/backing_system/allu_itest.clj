@@ -25,6 +25,49 @@
 
             [lupapalvelu.backing-system.allu :as allu :refer [PlacementContract]]))
 
+;;; TODO: Sijoituslupa
+
+;;;; Nano-framework :P for Model-Based Testing
+;;;; ===================================================================================================================
+
+(defn- state-graph->transitions [states]
+  (mapcat (fn [[state succs]] (map #(vector state %) succs)) states))
+
+(defn- next-useful [states visit-goal visited-total current-state]
+  (letfn [(useful [current visited]
+            (let [[usefuls visited]
+                  (reduce (fn [[transitions visited] succ]
+                            (let [transition [current succ]
+                                  visited* (conj visited transition)]
+                              (cond
+                                (< (get visited-total transition) visit-goal) [(conj transitions transition) visited*]
+                                (not (visited transition)) (let [[transition* visited*] (useful succ visited*)]
+                                                             (if transition*
+                                                               [(conj transitions transition) visited*]
+                                                               [transitions visited*]))
+                                :else [transitions visited])))
+                          [[] visited] (get states current))]
+              [(if (seq usefuls) (rand-nth usefuls) nil)
+               visited]))]
+    (first (useful current-state #{}))))
+
+(defn- traverse-state-transitions [states initial-state init! transition-adapters visit-goal]
+  (let [initial-visited (zipmap (state-graph->transitions states) (repeat 0))]
+    (loop [visited-total initial-visited
+           visited visited-total
+           current-state initial-state
+           user-state (init!)]
+      (if-let [[_ next-state :as transition] (next-useful states visit-goal visited-total current-state)]
+        (do (if-let [transition-adapter (get transition-adapters transition)]
+              (transition-adapter transition user-state)
+              (warn "No adapter provided for" transition))
+            (recur (update visited-total transition inc)
+                   (update visited transition inc)
+                   next-state
+                   user-state))
+        (when-not (every? (comp #(>= % visit-goal) val) visited-total)
+          (recur visited-total initial-visited initial-state (init!)))))))
+
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
 
@@ -55,11 +98,33 @@
                                                         :x "385770.46" :y "6672188.964"
                                                         :address "Kaivokatu 1"
                                                         :propertyId "09143200010023")
+        _ (fact "placement application created succesfully" response => ok?)
         documents [(nullify-doc-ids (ssg/generate (dds/doc-data-schema "hakija-ya" true)))
                    (ssg/generate (dds/doc-data-schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" true))
                    (ssg/generate (dds/doc-data-schema "yleiset-alueet-maksaja" true))]]
     (mongo/update-by-id :applications id {$set {:permitSubtype permitSubtype, :documents documents}})
-    response))
+    id))
+
+(defn- open [apikey app-id msg]
+  (fact ":draft -> :open"
+    (itu/local-command apikey :add-comment :id app-id :text msg
+                       :target {:type "application"} :roles ["applicant" "authority"]) => ok?))
+
+(defn- submit [apikey app-id]
+  (fact "submit application"
+    (itu/local-command apikey :submit-application :id app-id) => ok?))
+
+(defn- approve [apikey app-id]
+  (fact "approve application"
+    (itu/local-command apikey :approve-application :id app-id :lang "fi")) => ok?)
+
+(defn- return-to-draft [apikey app-id msg]
+  (fact "return to draft"
+    (itu/local-command apikey :return-to-draft :id app-id :text msg :lang "fi") => ok?))
+
+(defn- cancel [apikey app-id msg]
+  (fact "cancel application"
+    (itu/local-command apikey :cancel-application :id app-id :text msg :lang "fi") => ok?))
 
 (defn- check-request [schema-check? http-request]
   (fact "request is well-formed"
@@ -168,44 +233,6 @@
 ;  ALLUAttachments
 ;  (-send-attachment! [_ _ _] attach-response))
 
-(defn- state-graph->transitions [states]
-  (mapcat (fn [[state succs]] (map #(vector state %) succs)) states))
-
-(defn- next-useful [states visit-goal visited-total current-state]
-  (letfn [(useful [current visited]
-            (let [[usefuls visited]
-                  (reduce (fn [[transitions visited] succ]
-                            (let [transition [current succ]
-                                  visited* (conj visited transition)]
-                              (cond
-                                (< (get visited-total transition) visit-goal) [(conj transitions transition) visited*]
-                                (not (visited transition)) (let [[transition* visited*] (useful succ visited*)]
-                                                             (if transition*
-                                                               [(conj transitions transition) visited*]
-                                                               [transitions visited*]))
-                                :else [transitions visited])))
-                          [[] visited] (get states current))]
-              [(if (seq usefuls) (rand-nth usefuls) nil)
-               visited]))]
-    (first (useful current-state #{}))))
-
-(defn- traverse-state-transitions [states initial-state init transition-adapters visit-goal]
-  (init)
-  (let [initial-visited (zipmap (state-graph->transitions states) (repeat 0))]
-    (loop [visited-total initial-visited
-           visited visited-total
-           current-state initial-state]
-      (if-let [[_ next-state :as transition] (next-useful states visit-goal visited-total current-state)]
-        (do (if-let [transition-adapter (get transition-adapters transition)]
-              (transition-adapter transition)
-              (warn "No adapter provided for" transition))
-            (recur (update visited-total transition inc)
-                   (update visited transition inc)
-                   next-state))
-        (when-not (every? (comp #(>= % visit-goal) val) visited-total)
-          (init)
-          (recur visited-total initial-visited initial-state))))))
-
 ;;;; Actual Tests
 ;;;; ===================================================================================================================
 
@@ -218,11 +245,18 @@
     (mongo/with-db itu/test-db-name
       (lupapalvelu.fixture.core/apply-fixture "minimal")
 
-      ;; TODO: Actually test things with local commands:
       (traverse-state-transitions states/ya-sijoitussopimus-state-graph :draft
-                                  (fn [] (println "creating application"))
-                                  (zipmap (state-graph->transitions states/ya-sijoitussopimus-state-graph)
-                                          (repeat (fn [[start end]] (println "transitioning from" start "to" end))))
+                                  (fn [] (create-and-fill-placement-app pena "sijoitussopimus"))
+                                  (into {} (map (fn [[_ dest :as transition]]
+                                                  [transition
+                                                   (case dest
+                                                     :draft (fn [_ id] (return-to-draft raktark-helsinki id "Nolo!"))
+                                                     :open (fn [_ id] (open pena id "YOLO"))
+                                                     :submitted (fn [_ id] (submit pena id))
+                                                     :sent (fn [_ id] (approve raktark-helsinki id))
+                                                     :canceled (fn [_ id] (cancel pena id "Alkoi nolottaa."))
+                                                     (fn [transition _] (warn "TODO:" transition)))]))
+                                        (state-graph->transitions states/ya-sijoitussopimus-state-graph))
                                   1)
 
       #_(let [initial-allu-state {:id-counter 0, :applications {}}
