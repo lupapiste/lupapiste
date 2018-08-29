@@ -333,8 +333,8 @@
                                         :verdict-id verdict-id)]
       (cond
         (= status 200) (status200-check headers
-                                        (merge {:verdict-name "Päätös"
-                                                :contents     "Päätös"
+                                        (merge {:verdict-name "P\u00e4\u00e4t\u00f6s"
+                                                :contents     "P\u00e4\u00e4t\u00f6s"
                                                 :state        "verdictGiven"
                                                 :type-group   "paatoksenteko"}
                                                options))
