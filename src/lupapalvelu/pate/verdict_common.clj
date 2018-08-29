@@ -58,6 +58,15 @@
 (defn verdict-id [verdict]
   (:id verdict))
 
+(defn verdict-state
+  "If no state key, the verdict is from backend system and thus
+  published."
+  [{state :state :as verdict}]
+  (when verdict
+    (if state
+      (keyword (metadata/unwrap state))
+      :published)))
+
 (defn verdict-modified [verdict]
   (if (lupapiste-verdict? verdict)
     (:modified verdict)
@@ -65,8 +74,11 @@
 
 (defn verdict-published [verdict]
   (if (lupapiste-verdict? verdict)
-    (:published verdict)
-    (verdict-modified verdict) ;; TODO we are actually not that interested in the moment of publication, this is just a placeholder
+    (some-> verdict :published :published)
+    ;; The verdicts fetched from the backend system are published. The
+    ;; actual publishing timestamp is not known, so we just return the
+    ;; modified.
+    (verdict-modified verdict)
     ))
 
 (defn verdict-category [verdict]
