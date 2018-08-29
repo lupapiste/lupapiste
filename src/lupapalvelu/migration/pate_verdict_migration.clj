@@ -28,12 +28,20 @@
 ;; Helpers for obtaining collections from current verdicts
 ;;
 
-(defn- from-collection [collection-key element-skeleton]
-  {::from-collection {::collection collection-key
+(defn- id-map-from [collection-key element-skeleton]
+  {::id-map-from {::collection collection-key
                       ::element element-skeleton}})
 
-(defn- collection-key? [x]
-  (boolean (::from-collection x)))
+(defn- build-id-map? [x]
+  (boolean (::id-map-from x)))
+
+
+(defn- array-from [collection-key element-skeleton]
+  {::array-from {::collection collection-key
+                  ::element element-skeleton}})
+
+(defn- build-array? [x]
+  (boolean (::array-from x)))
 
 ;;
 ;; Helpers for accessing relevant data from current verdicts
@@ -88,26 +96,29 @@
   "Contains functions for accessing relevant Pate verdict data from
   current verdict drafts. These return the raw values but are
   subsequently to be wrapped with relevant metadata."
-  {:id              (get-in-verdict [:id])
-   :modified        (get-in-verdict [:timestamp])
-   :category        verdict-category
-   :handler         (get-in-poytakirja :paatoksentekija)
-   :published       (get-when verdict-published? (get-in-paivamaarat :anto))
-   :archive         (get-when verdict-published? get-archive-data)
-   :kuntalupatunnus (get-in-verdict [:kuntalupatunnus])
-   :verdict-section (get-in-poytakirja :pykala)
-   :verdict-code    (comp str (get-in-poytakirja :status))
-   :verdict-text    (get-in-poytakirja :paatos)
-   :anto            (get-in-paivamaarat :anto)
-   :lainvoimainen   (get-in-paivamaarat :lainvoimainen)
-   :reviews         (filter-tasks-of-verdict (task-name? :task-katselmus))
-   :review-name     (get-in-context [:taskname])
-   :review-type     (get-in-context [:data :katselmuksenLaji :value])
-   :foremen         (filter-tasks-of-verdict (task-name? :task-vaadittu-tyonjohtaja))
-   :foreman-role    (get-in-context [:taskname])
-   :conditions      (filter-tasks-of-verdict (task-name? :task-lupamaarays))
-   :condition-name  (get-in-context [:taskname])
-   :template        verdict-template})
+  {:anto              (get-in-paivamaarat :anto)
+   :archive           (get-when verdict-published? get-archive-data)
+   :category          verdict-category
+   :condition-name    (get-in-context [:taskname])
+   :conditions        (filter-tasks-of-verdict (task-name? :task-lupamaarays))
+   :foreman-role      (get-in-context [:taskname])
+   :foremen           (filter-tasks-of-verdict (task-name? :task-vaadittu-tyonjohtaja))
+   :handler           (get-in-poytakirja :paatoksentekija)
+   :id                (get-in-verdict [:id])
+   :kuntalupatunnus   (get-in-verdict [:kuntalupatunnus])
+   :lainvoimainen     (get-in-paivamaarat :lainvoimainen)
+   :modified          (get-in-verdict [:timestamp])
+   :published         (get-when verdict-published? (get-in-paivamaarat :anto))
+   :review-name       (get-in-context [:taskname])
+   :review-type       (get-in-context [:data :katselmuksenLaji :value])
+   :reviews           (filter-tasks-of-verdict (task-name? :task-katselmus))
+   :signature-date    (get-in-context [:created])
+   :signature-user-id (get-in-context [:user :id])
+   :signatures        (get-in-verdict [:signatures])
+   :template          verdict-template
+   :verdict-code      (comp str (get-in-poytakirja :status))
+   :verdict-section   (get-in-poytakirja :pykala)
+   :verdict-text    (get-in-poytakirja :paatos)})
 
 (defn- assoc-context [element context]
   (postwalk (fn [x]
@@ -116,15 +127,21 @@
                 x))
             element))
 
-(defn- build-collection
+(defn- build-id-map
   "Builds a collection skeleton dynamically based on the data present in the
    `application` and `verdict`."
   [application verdict {{collection ::collection
-                         element    ::element} ::from-collection}]
+                         element    ::element} ::id-map-from}]
   (->> ((get accessor-functions collection) application verdict nil)
        (group-by :id)
        (util/map-values (comp (partial assoc-context element) first))
        not-empty))
+
+(defn- build-array
+  [application verdict {{collection ::collection
+                         element    ::element} ::array-from}]
+  (->> ((get accessor-functions collection) application verdict nil)
+       (mapv (partial assoc-context element))))
 
 (defn- fetch-with-accessor
   "Given the `application` under migration, the source `verdict` and
@@ -135,8 +152,11 @@
     (cond (accessor-key? x)
           ((get accessor-functions (::access x)) application verdict (::context x))
 
-          (collection-key? x)
-          (build-collection application verdict x)
+          (build-id-map? x)
+          (build-id-map application verdict x)
+
+          (build-array? x)
+          (build-array application verdict x)
 
           :else x)))
 
@@ -164,13 +184,16 @@
           :verdict-text    (wrap (access :verdict-text))
           :anto            (wrap (access :anto))
           :lainvoimainen   (wrap (access :lainvoimainen))
-          :reviews         (from-collection :reviews
-                                            {:name (wrap (access :review-name))
-                                             :type (wrap (access :review-type))})
-          :foremen         (from-collection :foremen
-                                            {:role (wrap (access :foreman-role))})
-          :conditions      (from-collection :conditions
-                                            {:name (wrap (access :condition-name))})}
+          :reviews         (id-map-from :reviews
+                                        {:name (wrap (access :review-name))
+                                         :type (wrap (access :review-type))})
+          :foremen         (id-map-from :foremen
+                                        {:role (wrap (access :foreman-role))})
+          :conditions      (id-map-from :conditions
+                                        {:name (wrap (access :condition-name))})}
+   :signatures (array-from :signatures
+                           {:date (access :signature-date)
+                            :user-id (access :signature-user-id)})
    :template (access :template)
    :archive (access :archive)
    :legacy? true})

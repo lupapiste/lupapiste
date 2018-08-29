@@ -31,6 +31,10 @@
 (def verdict-id "verdict-id")
 (def kuntalupatunnus "lupatunnus")
 (def anto 2345)
+(def signed1 4321)
+(def signed2 5432)
+(def signer-id1 "signer")
+(def signer-id2 "singer")
 (def lainvoimainen 3456)
 (def paatospvm 4567)
 (def handler "handler")
@@ -52,7 +56,11 @@
                                                :paatos verdict-text
                                                :paatospvm paatospvm
                                                :pykala section
-                                               :paatoskoodi code}]}]})
+                                               :paatoskoodi code}]}]
+                   :signatures [{:created signed1
+                                 :user {:id signer-id1}}
+                                {:created signed2
+                                 :user {:id signer-id2}}]})
 (def migrated-test-verdict {:id verdict-id
                             :modified 1234
                             :category :r
@@ -69,6 +77,10 @@
                                    :conditions      {"condition-id1" {:name (wrap "Muu 1")}
                                                      "condition-id2" {:name (wrap "Muu 2")}}}
                             :template {:inclusions [:foreman-label :conditions-title :foremen-title :kuntalupatunnus :verdict-section :verdict-text :anto :attachments :foremen.role :foremen.remove :verdict-code :conditions.name :conditions.remove :reviews-title :type-label :reviews.name :reviews.type :reviews.remove :add-review :name-label :condition-label :lainvoimainen :handler :add-foreman :upload :add-condition]}
+                            :signatures [{:date    signed1
+                                          :user-id signer-id1}
+                                         {:date    signed2
+                                          :user-id signer-id2}]
                             :legacy? true})
 (def migrated-test-verdict-no-tasks
   (-> migrated-test-verdict
