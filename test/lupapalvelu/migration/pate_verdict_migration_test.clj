@@ -108,13 +108,15 @@
                       :foremen    anything
                       :conditions anything}))
 
-  (fact "published verdict has published timestamp"
-        (->pate-legacy-verdict (update test-application
-                                       :verdicts
-                                       #(map (fn [v] (assoc v :draft false)) %))
-                               (assoc test-verdict :draft false)
-                               timestamp)
-    => (contains {:published anto})))
+  (fact "published verdict has published timestamp and archive data"
+    (->pate-legacy-verdict (update test-application
+                                   :verdicts
+                                   #(map (fn [v] (assoc v :draft false)) %))
+                           (assoc test-verdict :draft false)
+                           timestamp)
+    => (contains {:published anto
+                  :archive {:verdict-giver handler
+                            :lainvoimainen lainvoimainen}})))
 
 (facts "migration-updates"
   (fact "one draft verdict, no tasks"

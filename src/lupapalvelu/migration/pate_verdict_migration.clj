@@ -79,6 +79,11 @@
 (defn- verdict-published? [_ verdict _]
   (not (:draft verdict)))
 
+(defn- get-archive-data [_ verdict _]
+  {:verdict-date nil
+   :verdict-giver ((get-in-poytakirja :paatoksentekija) nil verdict nil)
+   :lainvoimainen ((get-in-paivamaarat :lainvoimainen) nil verdict nil)})
+
 (def- accessor-functions
   "Contains functions for accessing relevant Pate verdict data from
   current verdict drafts. These return the raw values but are
@@ -88,6 +93,7 @@
    :category        verdict-category
    :handler         (get-in-poytakirja :paatoksentekija)
    :published       (get-when verdict-published? (get-in-paivamaarat :anto))
+   :archive         (get-when verdict-published? get-archive-data)
    :kuntalupatunnus (get-in-verdict [:kuntalupatunnus])
    :verdict-section (get-in-poytakirja :pykala)
    :verdict-code    (comp str (get-in-poytakirja :status))
@@ -166,6 +172,7 @@
           :conditions      (from-collection :conditions
                                             {:name (wrap (access :condition-name))})}
    :template (access :template)
+   :archive (access :archive)
    :legacy? true})
 
 (defn ->pate-legacy-verdict [application verdict timestamp]
