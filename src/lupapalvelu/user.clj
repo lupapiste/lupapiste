@@ -799,14 +799,16 @@
       (= s "authority") (resolve-authority-page user)
       :else (csk/->kebab-case s))))
 
-(defn merge-login-cookie-for [response user]
-  (assoc-in response
-            [:cookies "lupapiste-login"]
-            (merge
-              {:value (str "/app/" (name (get user :language i18n/default-lang)) "/" (applicationpage-for user))
-               :max-age (int (/ (session-timeout/get-session-timeout {:session {:user user}}) 1000))
-               :path "/"}
-              (env/value :cookie))))
+(defn merge-login-cookie [{{user :user} :session :as response}]
+  (if (:role user)
+    (assoc-in response
+              [:cookies "lupapiste-login"]
+              (merge
+                {:value (str "/app/" (name (get user :language i18n/default-lang)) "/" (applicationpage-for user))
+                 :max-age (int (/ (session-timeout/get-session-timeout {:session {:user user}}) 1000))
+                 :path "/"}
+                (env/value :cookie)))
+    response))
 
 (defn user-in-role [user role & params]
   (merge (apply hash-map params) (assoc (summary user) :role role)))

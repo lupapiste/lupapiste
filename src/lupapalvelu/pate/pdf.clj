@@ -16,6 +16,7 @@
             [lupapalvelu.pate.pdf-html :as html]
             [lupapalvelu.pate.pdf-layouts :as layouts]
             [lupapalvelu.pate.schemas :refer [resolve-verdict-attachment-type]]
+            [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.pdf.html-template :as html-pdf]
             [sade.core :refer :all]
             [sade.property :as property]
@@ -55,6 +56,11 @@
                                                         :rakennuspaikka
                                                         :kiinteisto.maaraalaTunnus)
                                         ss/not-blank? (str "M"))]))
+
+(defn property-id-ya [options]
+  (join-non-blanks "\n"
+                   (->> (get-in options [:verdict :data :propertyIds])
+                        (map (fn [[_ v]] (ss/trim (:property-id v)))))))
 
 (defn value-or-other [lang value other & loc-keys]
   (if (util/=as-kw value :other)
@@ -183,8 +189,8 @@
   "Since link-permits resolution is quite database intensive operation
   it is only done for YA and TJ category."
   [{:keys [verdict application]}]
-  (when (or (util/=as-kw :ya (:category verdict))
-            (util/=as-kw :tj (:category verdict)))
+  (when (or (vc/has-category? verdict :ya)
+            (vc/has-category? verdict :tj))
     (:linkPermitData (app-meta/enrich-with-link-permit-data application))))
 
 (defn tj-vastattavat-tyot [application lang]
@@ -202,7 +208,12 @@
                         (true? val) (conj result (i18n/localize lang (get vastattavat-loc-keys key)))
                         :else result))
                     []))))
-
+(defn signatures
+  "Signatures as a timestamp ordered list"
+  [{:keys [verdict]}]
+  (when (vc/contract? verdict)
+    (->> (vc/verdict-summary-signatures verdict)
+         (map #(update % :date date/finnish-date)))))
 
 (defn verdict-properties
   "Adds all kinds of different properties to the options. It is then up
@@ -213,6 +224,7 @@
     (assoc (cols/verdict-properties options)
            :application-id (:id application)
            :property-id (property-id application)
+           :property-id-ya (property-id-ya options)
            :applicants (->> (applicants options)
                             (map #(format "%s\n%s"
                                           (:name %) (:address %)))
@@ -266,8 +278,7 @@
                           edn/read-string verdict-tags-html)]
     (let [pdf       (html-pdf/html->pdf application
                                         "pate-verdict"
-                                        html)
-         contract? (util/=as-kw (:category verdict) :contract)]
+                                        html)]
      (when-not (:ok pdf)
        (fail! :pate.pdf-verdict-error))
      (with-open [stream (:pdf-file-stream pdf)]
@@ -280,11 +291,11 @@
               :locked          true
               :read-only       true
               :contents        (i18n/localize (cols/language verdict)
-                                              (if contract?
+                                              (if (vc/contract? verdict)
                                                 :pate.verdict-table.contract
                                                 :pate-verdict))}
              {:filename (i18n/localize-and-fill (cols/language verdict)
-                                                (if contract?
+                                                (if (vc/contract? verdict)
                                                   :pdf.contract.filename
                                                   :pdf.filename)
                                                 (:id application)
@@ -302,7 +313,6 @@
   (let [pdf                 (html-pdf/html->pdf application
                                                 "pate-verdict"
                                                 (verdict-html application verdict))
-        contract?           (util/=as-kw (:category verdict) :contract)
         {attachment-id :id} (util/find-first (fn [{source :source}]
                                                (and (util/=as-kw (:type source) :verdicts)
                                                     (= (:id source) (:id verdict))))
@@ -314,7 +324,7 @@
                               {:created       created
                                :attachment-id attachment-id}
                               {:filename (i18n/localize-and-fill (cols/language verdict)
-                                                                 (if contract?
+                                                                 (if (vc/contract? verdict)
                                                                    :pdf.contract.filename
                                                                    :pdf.filename)
                                                                  (:id application)

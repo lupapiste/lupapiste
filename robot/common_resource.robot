@@ -512,6 +512,14 @@ Input text by test id
   Input Text  xpath=//*[@data-test-id="${id}"]  ${value}
   Run Keyword Unless  ${leaveFocus}  Execute Javascript  document.querySelector('[data-test-id="${id}"]').blur();
 
+Input text to visible section test id
+  [Arguments]  ${id}  ${value}
+  ${xp}=  Set Variable  //section[contains(@class,"visible")]//*[@data-test-id="${id}"]
+  Wait Until  Element Should Be Visible  ${xp}
+  Wait Until  Element Should Be Enabled  ${xp}
+  Set Focus To Element  ${xp}
+  Input Text  ${xp}  ${value}
+
 Select From List by test id and index
   [Arguments]  ${id}  ${index}
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]

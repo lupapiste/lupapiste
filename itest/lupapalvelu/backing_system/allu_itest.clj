@@ -292,7 +292,7 @@
                       (itu/local-command pena :submit-application :id id) => ok?
 
                       (itu/local-command raktark-helsinki :return-to-draft
-                                         :id id :text "Tällaisenaan nolo ehdotus." :lang "fi") => ok?
+                                         :id id :text "T\u00e4llaisenaan nolo ehdotus." :lang "fi") => ok?
                       (:id-counter @allu-state) => 3
                       (count (:applications @allu-state)) => 1))))))
 

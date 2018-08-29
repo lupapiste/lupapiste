@@ -1,6 +1,7 @@
 (ns lupapalvelu.verdict-api
   (:require [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.appeal-common :as appeal-common]
+            [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
@@ -31,6 +32,10 @@
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
+(defn no-published-pate-verdicts-check [{:keys [application]}]
+  (when (app/has-published-pate-verdicts? application)
+    (fail :error.published-pate-verdicts-exist)))
+
 (defquery verdict-attachment-type
   {:parameters       [:id]
    :states           states/all-states
@@ -47,7 +52,8 @@
    :states      (conj states/give-verdict-states :constructionStarted) ; states reviewed 2015-10-12
    :user-roles  #{:authority}
    :notified    true
-   :pre-checks  [application-has-verdict-given-state]
+   :pre-checks  [application-has-verdict-given-state
+                 no-published-pate-verdicts-check]
    :on-success  (notify :application-state-change)}
   [command]
   (let [result (verdict/do-check-for-verdict command)]

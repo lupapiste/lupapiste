@@ -28,6 +28,7 @@
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.tasks :as pate-tasks]
+            [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.state-machine :as sm]
@@ -41,6 +42,7 @@
             [rum.core :as rum]
             [sade.coordinate :as coord]
             [sade.core :refer :all]
+            [sade.property :as sp]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as validators]
@@ -183,7 +185,7 @@
                                 {}
                                 dic)
      ;; Foremen, plans and reviews are initialized in separate init functions.
-     :references (dissoc settings :foremen :plans :reviews)}))
+     :references (dissoc settings :foremen :plans :reviews :handler-titles)}))
 
 
 ;; Argument map:
@@ -337,6 +339,14 @@
                                                      buildings-inclusion-keys)
                               buildings-inclusion))))))
 
+(defn init--property-id
+  [{:keys [application] :as initmap}]
+  (let [value (when (dict-included? initmap :propertyIds.property-id)
+                {(mongo/create-id) {:property-id (sp/to-human-readable-property-id (:propertyId application))}})]
+    (if (nil? value)
+      initmap
+      (assoc-in initmap [:draft :data :propertyIds] value))))
+
 (defn- integer-or-nil [value]
   (when (integer? value)
     value))
@@ -356,6 +366,14 @@
       starts (assoc-in [:draft :data :start-date] starts)
       ends (assoc-in [:draft :data :end-date] ends))))
 
+(defn init--handler
+  "General handler from application or user from command"
+  [{:keys [application user] :as initmap}]
+    (assoc-in
+      initmap [:draft :data :handler]
+      (if (ss/not-blank? (general-handler application))
+        (general-handler application)
+        (str (:firstName user) " " (:lastName user)))))
 
 
 (defmethod initialize-verdict-draft :r
@@ -387,15 +405,17 @@
 (defmethod initialize-verdict-draft :ya
   [initmap]
   (-> initmap
-      (init--dict-by-application :handler general-handler)
+      init--handler
       init--verdict-dates
       (init--dict-by-application :verdict-type schema-util/ya-verdict-type)
       (init--requirements-references :plans)
       (init--requirements-references :reviews)
+      (init--requirements-references :handler-titles)
       init--upload
       init--verdict-giver-type
       (init--dict-by-application :operation application-operation)
       (init--dict-by-application :address :address)
+      init--property-id
       init--permit-period))
 
 (defmethod initialize-verdict-draft :tj
@@ -426,7 +446,8 @@
   (let [template       (template/verdict-template options)
         {draft :draft} (-> {:template    template
                             :draft       (default-verdict-draft template)
-                            :application application}
+                            :application application
+                            :user        (:user command)}
                            initialize-verdict-draft
                            (update-in [:draft :data]
                                       (partial metadata/wrap-all (metadata/wrapper command)))
@@ -440,6 +461,34 @@
                                           (assoc-in [:replacement :replaces]
                                                     replacement-id))))
                            (assoc-in [:draft :state] (wrapped-state command :draft)))]
+    (action/update-application command
+                               {$push {:pate-verdicts
+                                       (sc/validate schemas/PateVerdict draft)}})
+    (:id draft)))
+
+(defn copy-verdict-draft [{:keys [application created user] :as command} replacement-id]
+  (let [draft (-> (util/find-by-id replacement-id (:pate-verdicts application))
+                  (assoc :id (mongo/create-id)
+                         :modified created
+                         :user (user-ref command))
+                  (dissoc :verdict-attachment
+                          :published
+                          :archive)
+                  (assoc-in [:replacement :replaces] replacement-id))
+        draft (assoc-in draft[:template :inclusions] (mapv keyword (get-in draft [:template :inclusions])))
+        draft (assoc draft :data
+                           (dissoc (:data draft)
+                                   :attachments
+                                   :handler
+                                   :verdict-section
+                                   :signatures))
+        {draft :draft} (-> {:draft draft
+                            :application application
+                            :user user}
+                           init--handler
+                           (update-in [:draft :data]
+                                      (partial metadata/wrap-all (metadata/wrapper command))))]
+
     (action/update-application command
                                {$push {:pate-verdicts
                                        (sc/validate schemas/PateVerdict draft)}})
@@ -468,110 +517,11 @@
 
 (declare verdict-schema)
 
-(defn- title-fn [s fun]
-  (util/pcond-> (-> s ss/->plain-string ss/trim)
-                ss/not-blank? fun))
+(defn verdict-summary [lang section-strings verdict]
+  (vc/verdict-summary lang section-strings verdict))
 
-(defn- verdict-string [lang {:keys [data] :as verdict} dict]
-  (title-fn (dict data)
-            (fn [value]
-              (when-let [{:keys [reference-list
-                                 select
-                                 text]} (some-> (verdict-schema verdict)
-                                                :dictionary
-                                                dict)]
-                (if text
-                  value
-                  (i18n/localize lang
-                                 (:loc-prefix (or reference-list
-                                                  select))
-                                 value))))))
-
-(defn- verdict-section-string [{data :data}]
-  (title-fn (:verdict-section data) #(str "\u00a7" %)))
-
-(defn- verdict-summary [lang section-strings
-                        {:keys [id data template replacement
-                                references category
-                                published]
-                         :as   verdict}]
-  (let [replaces (:replaces replacement)
-        rep-string (title-fn replaces (fn [vid]
-                                        (let [section (get section-strings vid)]
-                                          (if (ss/blank? section)
-                                            (i18n/localize lang :pate.replacement-verdict)
-                                            (i18n/localize-and-fill lang
-                                                                    :pate.replaces-verdict
-                                                                    section)))))]
-    (-<>> (select-keys verdict [:id :modified :legacy? :category])
-          (assoc <>
-                 :published (:published published)
-                 :giver (if (util/=as-kw (:giver template) :lautakunta)
-                          (:boardname references)
-                          (:handler data))
-                 :replaces replaces
-                 :verdict-date (:verdict-date data)
-                 :title (->> (cond
-                               (and (util/=as-kw category :contract) published)
-                               [(i18n/localize lang :pate.verdict-table.contract)]
-
-                               published
-                               [(get section-strings id)
-                                (util/pcond-> (verdict-string lang verdict :verdict-type)
-                                              ss/not-blank? (str " -"))
-                                (verdict-string lang verdict :verdict-code)
-                                rep-string]
-
-                               :else
-                               [(i18n/localize lang :pate-verdict-draft)
-                                rep-string])
-                             (remove ss/blank?)
-                             (ss/join " "))
-                 :signatures (some->> data :signatures vals
-                                      (map #(select-keys % [:name :date]))
-                                      (sort-by :date)
-                                      seq))
-          (remove (comp nil? second))
-          (into {}))))
-
-(defn verdict-list
-  [{:keys [lang application]}]
-  (let [category (schema-util/application->category application)
-        ;; There could be both contracts and verdicts.
-        verdicts        (->> (:pate-verdicts application)
-                             (filter #(util/=as-kw category (:category %)))
-                             (map metadata/unwrap-all))
-        section-strings (reduce (fn [acc v]
-                                  (assoc acc (:id v) (verdict-section-string v)))
-                                {}
-                                verdicts)
-        summaries       (reduce (fn [acc v]
-                                  (assoc acc
-                                         (:id v)
-                                         (verdict-summary lang
-                                                          section-strings
-                                                          v)))
-                                {}
-                                verdicts)
-        replaced        (->> (vals summaries)
-                             (map :replaces)
-                             (remove nil?)
-                             set)]
-    (loop [[x & xs] (->> (vals summaries)
-                         (sort-by :modified)
-                         reverse)
-           result   []]
-      (cond
-        (nil? x) result
-        (contains? replaced (:id x)) (recur xs result)
-        :else (recur xs (concat result
-                                (loop [{:keys [replaces] :as v} x
-                                       sub []]
-                                  (if replaces
-                                    (recur (assoc (get summaries replaces)
-                                                  :replaced? true)
-                                           (conj sub (dissoc v :replaces)))
-                                    (conj sub (dissoc v :replaces))))))))))
+(defn verdict-list [command]
+  (vc/verdict-list command))
 
 (defn mask-verdict-data [{:keys [user application]} verdict]
   (cond
@@ -734,41 +684,12 @@
 (defmethod changes :automatic-verdict-dates [options]
   (update-automatic-verdict-dates options))
 
-(defn select-inclusions [dictionary inclusions]
-  (->> (map util/split-kw-path inclusions)
-       (reduce (fn [acc [x & xs]]
-                 (update acc
-                         x
-                         (fn [v]
-                           (if (seq xs)
-                             (conj v (util/kw-path xs))
-                             []))))
-               {})
-       (reduce-kv (fn [acc k v]
-                    (let [dic-value (k dictionary)]
-                      (assoc acc
-                             k
-                             (if (seq v)
-                               (assoc dic-value
-                                      :repeating (select-inclusions
-                                                  (-> dictionary k :repeating)
-                                                  v))
-                               dic-value))))
-                  {})))
-
-(defn- verdict-schema [{:keys [category schema-version legacy? template]}]
-  (update (if legacy?
-            (legacy/legacy-verdict-schema category)
-            (verdict-schemas/verdict-schema category schema-version))
-          :dictionary
-          #(select-inclusions % (map keyword (:inclusions template)))))
-
 (defn verdict-filled?
   "Have all the required fields been filled. Refresh? argument can force
   the read from mongo (see command->verdict)."
   ([command refresh?]
    (let [{:keys [data] :as verdict} (command->verdict command refresh?)
-         schema (verdict-schema verdict)]
+         schema (vc/verdict-schema verdict)]
      (schemas/required-filled? schema data)))
   ([command]
    (verdict-filled? command false)))
@@ -859,7 +780,7 @@
          :as verdict} (command->verdict command)
         {:keys [data value path op]
          :as     processed}    (schemas/validate-and-process-value
-                                (verdict-schema verdict)
+                                (vc/verdict-schema verdict)
                                 path value
                                 ;; Make sure that building related
                                 ;; paths can be resolved.
@@ -932,7 +853,7 @@
                     {:neighbor-states (neighbor-states application)})
                   (when (:statements inc-set)
                     {:statements (statements application final?)})
-                  (when (and (util/=as-kw :contract category)
+                  (when (and (vc/contract? verdict)
                              final?
                              (not published))
                     ;; Verdict giver (handler) is the initial, implicit signer
@@ -1048,13 +969,13 @@
 (defn can-verdict-be-replaced?
   "Modern verdict can be replaced if its published and not already
   replaced (or being replaced). Contracts cannot be replaced."
-  [{:keys [pate-verdicts]} verdict-id]
+  [{:keys [pate-verdicts] :as verdict} verdict-id]
   (when-let [{:keys [published legacy?
                      replacement category]} (util/find-by-id verdict-id
                                                              pate-verdicts)]
     (and published
          (not legacy?)
-         (util/not=as-kw category :contract)
+         (not (vc/contract? verdict))
          (not (some-> replacement :replaced-by))
          (not (util/find-first #(= (get-in % [:replacement :replaces])
                                    verdict-id)
@@ -1131,7 +1052,7 @@
     (when (and (ss/blank? section)
                (util/not=as-kw giver :lautakunta)
                (not legacy?)
-               (util/not=as-kw category :contract))
+               (not (vc/contract? verdict)))
       (let [verdict (-> verdict
                         (assoc-in [:data :verdict-section]
                                   (next-section (:organization application)
@@ -1216,8 +1137,8 @@
 (defn finalize--kuntagml
   [{:keys [command application verdict]}]
   (when (and (not (:legacy? verdict))
-                 (util/not=as-kw (:category verdict) :contract)
-                 (org/krysp-integration? @(:organization command)
+             (not (vc/contract? verdict))
+             (org/krysp-integration? @(:organization command)
                                          (:permitType application)))
     {:commit-fn (fn [{:keys [command application verdict]}]
                   (try+ (krysp/verdict-as-kuntagml (assoc command

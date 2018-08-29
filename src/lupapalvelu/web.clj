@@ -614,7 +614,7 @@
       (if (re-find #"^/api/(command|query|raw|datatables|upload)/" (:uri request))
         (cond-> (ssess/merge-to-session request response {:expires (+ now (get-session-timeout request))})
                 login-cookie?
-                (usr/merge-login-cookie-for (-> request :session :user)))
+                (usr/merge-login-cookie))
         response))))
 
 (defn session-timeout [handler]

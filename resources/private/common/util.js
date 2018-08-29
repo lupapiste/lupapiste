@@ -435,9 +435,9 @@ var util = (function($) {
         return task.source && task.source.type === "verdict" && task.source.id === verdict.id;
       });
 
-      var lupamaaraukset = _(verdict.paatokset || []).map("lupamaaraykset").filter().value();
+      var lupamaaraykset = _(verdict.paatokset || []).map("lupamaaraykset").filter().value();
 
-      if (lupamaaraukset.length === 0 && myTasks.length > 0) {
+      if (lupamaaraykset.length === 0 && myTasks.length > 0) {
         var katselmukset = tasksDataBySchemaName(myTasks, "task-katselmus", function(task) {
           return {katselmuksenLaji: util.getIn(task, ["data", "katselmuksenLaji", "value"], "muu katselmus"), tarkastuksenTaiKatselmuksenNimi: task.taskname};
         });

@@ -50,9 +50,10 @@
 
 (defschema PatePublishedTemplateSettings
   (merge PatePublishedSettings
-         {(sc/optional-key :reviews) [(merge PateDependency
-                                             {:type review-type})]
-          (sc/optional-key :plans)   [PateDependency]}))
+         {(sc/optional-key :reviews)         [(merge PateDependency
+                                                     {:type review-type})]
+          (sc/optional-key :plans)           [PateDependency]
+          (sc/optional-key :handler-titles)  [PateDependency]}))
 
 (defn- wrapped
   "Unwrapped value is supported as a fallback for existing templates."
@@ -100,9 +101,10 @@
 
 (defschema PateVerdictReferences
   (merge PatePublishedSettings
-         {(sc/optional-key :reviews) [(merge PateVerdictReq
-                                             {:type review-type})]
-          (sc/optional-key :plans)   [PateVerdictReq]}))
+         {(sc/optional-key :reviews)         [(merge PateVerdictReq
+                                                     {:type review-type})]
+          (sc/optional-key :plans)           [PateVerdictReq]
+          (sc/optional-key :handler-titles)  [PateVerdictReq]}))
 
 (defschema UserRef
   "We have to define our own summary, since requiring the

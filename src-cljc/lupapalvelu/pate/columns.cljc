@@ -142,8 +142,17 @@
   (cond-> value
     (and value post-fn) post-fn))
 
+(defn resolve-loc-rule [loc-rule data]
+  (let [rule-kw (into [] (util/split-kw-path (:rule loc-rule)))
+        rule-value (get-in data rule-kw)
+        rule-key (keyword (str (name (:key loc-rule)) "." (name rule-value)))]
+    ;; TODO: has-term? cljs
+    (if (i18n/has-term? (:lang data) rule-key)
+      rule-key
+      (:key loc-rule))))
+
 (defn entry-row
-  [left-width {:keys [lang] :as data} [{:keys [loc loc-many source post-fn styles]} & cells]]
+  [left-width {:keys [lang] :as data} [{:keys [loc loc-many source post-fn styles loc-rule]} & cells]]
   (let [source-value (post-process (util/pcond-> (resolve-source data source)
                                                  string? ss/trim)
                                    post-fn)
@@ -168,7 +177,8 @@
                               (resolve-cell data
                                             (util/pcond-> source-value
                                                           sequential? first)
-                                            (first cells)))]
+                                            (first cells)))
+            loc             (if loc-rule (resolve-loc-rule loc-rule data) loc)]
 
         (when-not (empty? cell-values)
           [:div.section
@@ -264,23 +274,25 @@
                       (dict-value options :start-date)
                       (dict-value options :end-date)))
 
-(defn signatures
-  "Signatures as a timestamp ordered list"
-  [{:keys [verdict]}]
-  (when (util/=as-kw :contract (:category verdict))
-    (->> verdict :data :signatures
-         vals
-         (sort-by :date)
-         (map #(update % :date finnish-date)))))
-
 (defn handler
   "Handler with title (if given)"
   [options]
-  (->> [:handler-title :handler]
-       (map (partial dict-value options))
-       (map ss/trim)
-       (remove ss/blank?)
-       (ss/join " ")))
+  (if (util/=as-kw :ya (get-in options [:verdict :category]))
+    (let [title (-> (assoc-in options
+                              [:verdict :data :handler-titles]
+                              [(get-in options [:verdict :data :handler-title])])
+                    (references :handler-titles)
+                    (first))
+          handler (->> (dict-value options :handler)
+                       (ss/trim))]
+      (if (ss/blank? title)
+        handler
+        (str title " " handler)))
+    (->> [:handler-title :handler]
+         (map (partial dict-value options))
+         (map ss/trim)
+         (remove ss/blank?)
+         (ss/join " "))))
 
 (defn verdict-properties [options]
   (assoc options
@@ -294,7 +306,6 @@
          :muutoksenhaku (muutoksenhaku options)
          :voimassaolo (voimassaolo options)
          :voimassaolo-ya (voimassaolo-ya options)
-         :signatures (signatures options)
          :handler (handler options)))
 
 (defn language [verdict]
