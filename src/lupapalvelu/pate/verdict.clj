@@ -517,12 +517,6 @@
 
 (declare verdict-schema)
 
-(defn verdict-summary [lang section-strings verdict]
-  (vc/verdict-summary lang section-strings verdict))
-
-(defn verdict-list [command]
-  (vc/verdict-list command))
-
 (defn mask-verdict-data [{:keys [user application]} verdict]
   (cond
     (not (auth/application-authority? application user))
@@ -839,7 +833,7 @@
   "Augments verdict data, but MUST NOT update mongo (this is called from
   query actions, too).  If final? is truthy then the enrichment is
   part of publishing."
-  ([{:keys [application]} {:keys [data template category published]
+  ([{:keys [application]} {:keys [data template category]
                            :as   verdict} final?]
    (let [inc-set (->> template
                       :inclusions
@@ -852,15 +846,7 @@
                   (when (:neighbors inc-set)
                     {:neighbor-states (neighbor-states application)})
                   (when (:statements inc-set)
-                    {:statements (statements application final?)})
-                  (when (and (vc/contract? verdict)
-                             final?
-                             (not published))
-                    ;; Verdict giver (handler) is the initial, implicit signer
-                    {:signatures
-                     {(keyword (mongo/create-id))
-                      {:name (:handler data)
-                       :date (:verdict-date data)}}}))]
+                    {:statements (statements application final?)}))]
      (assoc verdict :data (merge data addons))))
   ([command verdict]
    (enrich-verdict command verdict false)))
@@ -1039,6 +1025,21 @@
            (concat data-kws
                    [:template.inclusions :state
                     :published.published :archive]))))
+
+(defn finalize--signatures
+  [{:keys [command verdict]}]
+  (when (vc/contract? verdict)
+    (let [{user :user} command
+          {data :data} verdict]
+      (verdict->updates (assoc verdict
+                               :signatures
+                               ;; Verdict giver (handler) is the
+                               ;; initial, implicit signer
+                               [{:name    (:handler data)
+                                 :user-id (:id user)
+                                 :date    (:verdict-date data)}])
+                        :signatures))))
+
 
 (defn finalize--section
   "Section is generated only for non-board (lautakunta) non-legacy
@@ -1241,6 +1242,7 @@
   [{:keys [application] :as command}]
   (process-finalize-pipeline command application (command->verdict command)
                              finalize--verdict
+                             finalize--signatures
                              finalize--application-state
                              finalize--buildings-and-tasks
                              inspection-summary/finalize--inspection-summary
@@ -1326,7 +1328,7 @@
                                            (:firstName user)
                                            (:lastName user)))
         {company-id :id} (auth/auth-via-company application
-                                                 user)]
+                                                user)]
     [(mongo/create-id)
      (cond-> {:user-id (:id user)
               :date created
@@ -1346,7 +1348,7 @@
   (let [[sid signature] (create-signature command)]
     (verdict-update command
                     (util/deep-merge
-                     {$set {(util/kw-path :pate-verdicts.$.data.signatures sid) signature}}
+                     {$push {(util/kw-path :pate-verdicts.$.signatures) signature}}
                      (when (util/not=as-kw (:state application)
                                            :agreementSigned)
                        (app-state/state-transition-update :agreementSigned

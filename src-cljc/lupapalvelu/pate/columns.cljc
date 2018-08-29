@@ -154,7 +154,10 @@
       (:key loc-rule))))
 
 (defn entry-row
-  [left-width {:keys [lang] :as data} [{:keys [loc loc-many source post-fn styles loc-rule]} & cells]]
+  [left-width
+   {:keys [lang] :as data}
+   [{:keys [loc loc-many source post-fn styles loc-rule id]}
+    & cells]]
   (let [source-value (post-process (util/pcond-> (resolve-source data source)
                                                  string? ss/trim)
                                    post-fn)
@@ -184,7 +187,9 @@
 
         (when-not (empty? cell-values)
           [:div.section
-           {:class (util/intersection-as-kw section-styles row-styles)}
+           (util/filter-map-by-val some?
+                                   {:class (util/intersection-as-kw section-styles row-styles)
+                                    :id id})
            [:div.row
             {:class (util/difference-as-kw row-styles section-styles)}
             [:div.cell

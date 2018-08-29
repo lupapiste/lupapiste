@@ -216,7 +216,7 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :states           states/post-submitted-states}
   [command]
-  (ok :verdicts (verdict/verdict-list command)))
+  (ok :verdicts (vc/verdict-list command)))
 
 (defquery pate-verdict
   {:description      "Verdict and its settings."

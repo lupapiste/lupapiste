@@ -71,10 +71,11 @@
             (sc/optional-key :loc-rule) {:rule sc/Keyword :key sc/Keyword}
             (sc/optional-key :source)   Source
             ;; Post-processing function for source value.
-            (sc/optional-key :post-fn) (sc/conditional
-                                        keyword? sc/Keyword
-                                        :else   (sc/pred fn?))
-            (sc/optional-key :styles)   (styles row-styles)}
+            (sc/optional-key :post-fn)  (sc/conditional
+                                         keyword? sc/Keyword
+                                         :else   (sc/pred fn?))
+            (sc/optional-key :styles)   (styles row-styles)
+            (sc/optional-key :id)       sc/Keyword}
            {})
    ;; Note that the right-hand side can consist of multiple
    ;; cells/columns. As every property is optional, the cells can be
@@ -440,7 +441,8 @@
   '([{:loc      :pdf.signature
       :loc-many :verdict.signatures
       :source   :signatures
-      :styles   [:bold :pad-before]}
+      :styles   [:bold :pad-before]
+      :id       :signatures}
      {:path :name}
      {:path :date}]))
 
@@ -634,42 +636,12 @@
 ;; Legacy contracts
 ;; ----------------------------------
 
-#_(def legacy--contract-text [{:loc    :empty
-                            :source {:dict :contract-text}
-                            :styles :pad-before}])
-
-#_(def entry--case [{:loc       :pdf.contract.case
-                   :loc-many :pdf.contract.cases
-                   :source   :operations
-                   :styles   :bold}
-                  {:path :text}])
-
 (def legacy--contract-conditions
   [{:loc      :pate.contract.condition
     :loc-many :pate.contract.conditions
     :source   {:dict :conditions}
     :post-fn (repeating-texts-post-fn :name)
     :styles   :pad-before}])
-
-#_(def legacy--contract-giver
-  '([{:loc    :verdict.name.sijoitussopimus
-      :source {:dict :handler}
-      :styles :pad-before}]
-    [{:loc    :empty
-      :source :organization
-      :styles :pad-after}]))
-
-#_(def legacy--contract-date
-  '([{:loc    :verdict.contract.date
-      :source {:dict :verdict-date}}]))
-
-#_(def legacy--contract-signatures
-  '([{:loc      :pdf.signature
-      :loc-many :verdict.signatures
-      :source   :signatures
-      :styles   [:bold :pad-before]}
-     {:path :name}
-     {:path :date}]))
 
 (def contract-legacy-layout
   (build-layout entry--application-id
