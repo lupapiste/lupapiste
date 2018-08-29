@@ -10,7 +10,6 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.columns :as cols]
-            [lupapalvelu.pate.columns :as cols]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.markup :as markup]
