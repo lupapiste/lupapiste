@@ -32,6 +32,10 @@
           <li><span data-bind="ltext: 'footer.tel'"></span><br /><span data-bind="ltext: 'footer.tel.price'"></span><br />
           <span data-bind="ltext: 'footer.phoneservice.time.authority'"></span></li>
         <!-- /ko -->
+        <!-- ko if: lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.isApplicant() && !lupapisteApp.models.currentUser.isCompanyUser() -->
+          <li><span data-bind="ltext: 'footer.tel'"></span><br /><span data-bind="ltext: 'footer.tel.price'"></span><br />
+          <span data-bind="ltext: 'footer.phoneservice.time.applicant'"></span></li>
+        <!-- /ko -->
         </ul>
       </div>
       <div class="footer-box">

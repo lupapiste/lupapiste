@@ -15,7 +15,7 @@ Variables      ../06_attachments/variables.py
 
 Olli logs in and creates application
   Select window  main
-  Olli logs in
+  Olli logs in  False
   Create application with state  Silver bulletin  564-404-99-99  meluilmoitus  submitted
 
 Olli approves operation
@@ -56,4 +56,3 @@ No icons
   Scroll and click test id  bulletin-open-${tab}-tab
   Page should not contain  jquery=i.lupicon-circle-check
   Page should not contain  jquery=i.lupicon-circle-attention
-

@@ -2,7 +2,6 @@
   "Read the Krysp from municipality Web Feature Service"
   (:require [cheshire.core :as json]
             [clojure.set :refer [rename-keys]]
-            [lupapalvelu.conversion.util :as conv-util]
             [lupapalvelu.document.schemas]
             [lupapalvelu.drawing :as drawing]
             [lupapalvelu.find-address :as find-address]
@@ -118,7 +117,7 @@
   {:muuTunnus (:tunnus muu-tunnus "")
    :muuTunnusSovellus (:sovellus muu-tunnus "")})
 
-(defn ->lupamaaraukset [paatos-xml-without-ns]
+(defn ->lupamaaraykset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cr/cleanup)
 
@@ -168,7 +167,7 @@
                               :autopaikkojaKiinteistolla
                               :autopaikkojaUlkopuolella])))
 
-(defn- ->lupamaaraukset-text [paatos-xml-without-ns]
+(defn- ->lupamaaraykset-text [paatos-xml-without-ns]
   (let [lupaehdot (select paatos-xml-without-ns :lupaehdotJaMaaraykset)]
     (when (not-empty lupaehdot)
       (-> lupaehdot
@@ -225,7 +224,7 @@
                  paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])]
              (when (and poytakirja (valid-paatospvm? (:paatospvm poytakirja)) (or (not validate-verdict-given-date)
                                                                                   (valid-antopvm? (:anto paivamaarat))))
-               {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
+               {:lupamaaraykset (->lupamaaraykset paatos-xml-without-ns)
                 :paivamaarat    paivamaarat
                 :poytakirjat    (seq poytakirjat)})))
          (select xml-without-ns [:paatostieto :Paatos]))))
@@ -406,7 +405,7 @@
              (let [paatosdokumentinPvm-timestamp (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))]
                (when (and paatosdokumentinPvm-timestamp (> (now) paatosdokumentinPvm-timestamp))
                  {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
-                                   :muutMaaraykset (->lupamaaraukset-text paatos-xml-without-ns)}
+                                   :muutMaaraykset (->lupamaaraykset-text paatos-xml-without-ns)}
                   :paivamaarat    {:paatosdokumentinPvm paatosdokumentinPvm-timestamp}
                   :poytakirjat    (when-let [liitetiedot (seq (select paatos-xml-without-ns [:liitetieto]))]
                                     (map ->liite
@@ -484,6 +483,12 @@
        (map (fn [asia] {:kuntalupatunnus (->kuntalupatunnus asia)
                         :kuvaus (get-text asia [:rakennusvalvontaasianKuvaus])}))
        (remove #(ss/blank? (:kuvaus %)))))
+
+(defn ->verdict-date [xml]
+  (let [date (get-in (xml->edn xml) [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :paatostieto :Paatos :paivamaarat :antoPvm])]
+    (if (clojure.string/includes? date "Z")
+      (subs date 0 10)
+      date)))
 
 (defn read-permit-descriptions-from-xml
   [permit-type xml]
@@ -666,7 +671,7 @@
   "Takes a parsed XML document, returns a list of viitelupatunnus -ids (in 'permit-id'-format) found therein."
   [xml]
   (->> (select xml [:rakennusvalvontaAsiatieto :viitelupatieto])
-       (map (comp conv-util/normalize-permit-id #(get-in % [:LupaTunnus :kuntalupatunnus]) cr/all-of))))
+       (map (comp #(get-in % [:LupaTunnus :kuntalupatunnus]) cr/all-of ))))
 
 (defn is-foreman-application? [xml]
   (let [permit-type (-> xml ->kuntalupatunnus (ss/split #"-") last)]

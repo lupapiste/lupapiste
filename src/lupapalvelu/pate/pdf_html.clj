@@ -14,6 +14,7 @@
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
+            [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.pdf.html-template-common :as common]
             [rum.core :as rum]
@@ -78,6 +79,13 @@
             ;; If :loc-many is given it is used as the title key if
             ;; the source value denotes multiple values.
             (sc/optional-key :loc-many) sc/Keyword
+            ;; Localization rule which can be used for different localization key
+            ;; values based on application details.
+            ;; For example: {:rule [:application :operation-name] :key :applications.operation}
+            ;; adds operation name from application at end of given key, like:
+            ;; applications.operation.ya-jatkoaika. If the localization key is not found, only
+            ;; given :key value is used as localization key.
+            (sc/optional-key :loc-rule) {:rule sc/Keyword :key sc/Keyword}
             (sc/optional-key :source)   Source
             ;; Post-processing function for source value.
             (sc/optional-key :post-fn) (sc/conditional
@@ -262,8 +270,16 @@
   (cond-> value
     (and value post-fn) post-fn))
 
+(defn resolve-loc-rule [loc-rule data]
+  (let [rule-kw (into [] (util/split-kw-path (:rule loc-rule)))
+        rule-value (get-in data rule-kw)
+        rule-key (keyword (str (name (:key loc-rule)) "." (name rule-value)))]
+    (if (i18n/has-term? (:lang data) rule-key)
+      rule-key
+      (:key loc-rule))))
+
 (defn entry-row
-  [left-width {:keys [lang] :as data} [{:keys [loc loc-many source post-fn styles]} & cells]]
+  [left-width {:keys [lang] :as data} [{:keys [loc loc-many source post-fn styles loc-rule]} & cells]]
   (let [source-value (post-process (util/pcond-> (resolve-source data source)
                                                  string? ss/trim)
                                    post-fn)
@@ -288,7 +304,8 @@
                               (resolve-cell data
                                             (util/pcond-> source-value
                                                           sequential? first)
-                                            (first cells)))]
+                                            (first cells)))
+            loc             (if loc-rule (resolve-loc-rule loc-rule data) loc)]
 
         (when-not (util/empty-or-nil? cell-values)
           [:div.section
@@ -321,9 +338,9 @@
     (let [category-kw    (util/kw-path (when legacy? :legacy) category)
           legacy-kt-ymp? (contains? #{:legacy.kt :legacy.ymp}
                                     category-kw)
-          contract?      (util/=as-kw category :contract)
           loc-fn         (fn [& kws]
-                           (apply i18n/localize lang (flatten kws)))]
+                           (apply i18n/localize lang (flatten kws)))
+          contract?      (vc/contract? verdict)]
       [:div.row.pad-after
        [:div.cell.cell--40
         (organization-name lang application)
@@ -334,7 +351,8 @@
                 (not published)
                 [:span.preview (i18n/localize lang :pdf.preview)]
 
-                (and (not contract?) (not legacy-kt-ymp?))
+                (and (not contract?)
+                     (not legacy-kt-ymp?))
                 (i18n/localize lang (case category-kw
                                       :p :pdf.poikkeamispaatos
                                       :attachmentType.paatoksenteko.paatos)))]]

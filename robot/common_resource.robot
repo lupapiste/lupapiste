@@ -325,7 +325,7 @@ Login
   Wait until  Element should be visible  login-username
   Input text  login-username  ${username}
   Input text  login-password  ${password}
-  Wait and click  login-button
+  Submit form  welcome-login-form
 
 Login fails
   [Arguments]  ${username}  ${password}
@@ -334,6 +334,8 @@ Login fails
 
 User should be logged in
   [Arguments]  ${name}
+  # Give some time for scripts to run
+  Sleep  0.5s
   Run Keyword And Ignore Error  Maximize browser window
   Scroll to top
   Wait Until  Element text should be  user-name  ${name}
@@ -504,8 +506,19 @@ Input text with jQuery
 
 Input text by test id
   [Arguments]  ${id}  ${value}  ${leaveFocus}=False
-  ${q}=  Quote  ${id}
-  Input text with jQuery  [data-test-id=${q}]:visible  ${value}  ${leaveFocus}
+  Element should be visible by test id  ${id}
+  Test id enabled  ${id}
+  Set Focus To Element  xpath=//*[@data-test-id="${id}"]
+  Input Text  xpath=//*[@data-test-id="${id}"]  ${value}
+  Run Keyword Unless  ${leaveFocus}  Execute Javascript  document.querySelector('[data-test-id="${id}"]').blur();
+
+Input text to visible section test id
+  [Arguments]  ${id}  ${value}
+  ${xp}=  Set Variable  //section[contains(@class,"visible")]//*[@data-test-id="${id}"]
+  Wait Until  Element Should Be Visible  ${xp}
+  Wait Until  Element Should Be Enabled  ${xp}
+  Set Focus To Element  ${xp}
+  Input Text  ${xp}  ${value}
 
 Select From List by test id and index
   [Arguments]  ${id}  ${index}
@@ -885,7 +898,7 @@ Upload attachment
   Scroll to top
   Upload batch file  0  ${path}  ${type}  ${contents}  ${grouping}
   Scroll and click test id  batch-ready
-  Wait until  No such test id  batch-ready
+  Wait Until Keyword Succeeds  20s  0.4  Element Should Not Be Visible  xpath=//*[@data-test-id="batch-ready"]
 
 Add attachment
   [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=

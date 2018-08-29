@@ -657,7 +657,21 @@ Normally session contains the following keys:
 Session cookien encryption key is read from sessionkey file (in working directory). If the file is missing, a random key will be used.
 
 ## Notifications
-TODO Kuinka lähetän sähköpostia
+When a user needs to be informed about an action that has been taken place, a good practice is to send an email notification.
+
+### Email template
+An email template is used to define the body of the message. A new Template needs be created in ```resources/email-templates```-folder with a proper file name that adheres the following syntax: ```lang-template-name.md``` where lang is replaced with a two letter language code (e.g. ```fi-notify-authority-added.md```). A new file has to be created and the content translated for all supported languages. There are scripts in place to scan for missing translations so if you don't feel comfortable with some of the languages their templates can be left out (i.e. don't create files for them) and a professional translator will do the job for you.
+
+Templates are created using Markdown markup language and they can contain variables that are filled in by the backend. These variables are writen inside double curly brackets like ```{{this}}```.
+
+### Title and other translations
+Define the title of the email (or other localizations related to emails) in the file ```resources/i18n/email.txt``` using the following syntax: ```"variable-name" "lang" "text"``` where lang is replaced with the two letter language code (e.g. ```"email.title.inforequest-invite" "en" "Inforequest at Lupapiste"```). Translate the title to all the supported languages you feel comfortable with.
+
+### Define the email in the backend
+Define the email useing defemail -function in the notifications -namespace. Email must conform the Email -spec that is also defined in the ```notifications``` -namespace.
+
+### Define the command that sends the email
+Define the command that sends the email after a successful execution using ```defcommand``` -macro. Provide the values for the variables used in the email template under ```:parameters```-keyword. Set ```:notified```to ```true``` and under ```on-success``` -keyword provide a function(s) that are called after a successful execution. To send an email declare a function that takes the command as its first (and only) parameter and calls ```notifications/notify!``` with previously defined email as its first, and the command as its second parameter.
 
 ## Integrations
 TODO
@@ -690,11 +704,11 @@ Ks. [database.md](database.md)
 2. Määritä hakemustyypissä käytettävät liitteet (ks. `lupapalvelu.attachment.types/attachment-types-by-permit-type`). Varsinainen liitteiden määritys tehdään [lupapiste-commons](https://github.com/lupapiste/commons) projektiin (*attachment_types.cljc*).
 3. Lisää hakemustyypille tarvittavat toimenpiteet ja luo hakemustyypin toimenpidepuu (operation tree) `lupapalvelu.operations` -nimiavaruuteen.
 4. Jos hakemustyyppiin tulee KRYSP integraatio (Lupapisteestä ulospäin)
-  1. Tee mapping halutusta XML formaatista. Mapping-funktio tulee luoda XML tiedosto ja kirjoittaa se levylle. Toteuta hakemustyypille multimetodi `lupapalvelu.permit/application-krysp-mapper`, joka kutsuu mapping-funktiota. Esimerkkejä: `lupapalvelu.backing_system.krysp.*_mapping`.
+  1. Tee mapping halutusta XML formaatista. Mapping-funktio tulee luoda XML tiedosto ja kirjoittaa se levylle. Toteuta hakemustyypille multimetodi `lupapalvelu.permit/application-krysp-mapper`, joka kutsuu mapping-funktiota. Esimerkkejä: `lupapalvelu.backing-system.krysp.*-mapping`.
   2. Toteuta funktiot muunnokseen hakemus->kanoninenXML (esimerkkiä `lupapalvelu.document.vesihuolto_canonical` -nimiavaruudesta). Kanonisesta mallista luodaan mappingin perusteella XML esitys.
   3. Katso mallia KRYSP putkesta, joka alkaa `lupapalvelu.integrations_api` -nimiavaruuden **approve-application** commandista. Tarkempi kuvaus TODO.
 5. Jos hakemustyyppiin tulee KRYSP integraatio (Lupapisteeseen luku)
-  1. Toteuta hakemustyypille multimetodit (esimerkkejä: `lupapalvelu.backing_system.krysp.reader`):
+  1. Toteuta hakemustyypille multimetodit (esimerkkejä: `lupapalvelu.backing-system.krysp.reader`):
      * sanoman nouto: `lupapalvelu.permit/fetch-xml-from-krysp`
      * päätösten luku: `lupapalvelu.permit/read-verdict-xml`
      * päätösten validointi: `lupapalvelu.permit/validate-verdict-xml`

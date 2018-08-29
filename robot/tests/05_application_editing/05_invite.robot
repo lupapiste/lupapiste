@@ -228,7 +228,6 @@ Close dialog and check that Sven no longer is a guest
 
 Mikko can now select Sven
   Select Sven
-  Click by test id  application-invite-submit
   No such test id  application-invite-submit
 
 # Tyonjohtaja on poistettu tavallisilta R-hakemuksilta (LUPA-1603).
@@ -270,7 +269,6 @@ Select Sven
   Test id input is  invite-email  sven@example.com
   Input text by test id  invite-text  Yeah!
   Click by test id  application-invite-submit
-
 
 Error message is present on invite form
   Wait until  Element should be visible  xpath=//div[@id='modal-dialog']//div[contains(@class, 'context-error')]

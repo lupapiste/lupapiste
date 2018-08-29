@@ -125,7 +125,6 @@
 
 (env/with-feature-value :allu true
   (sc/with-fn-validation
-
     (let [user (sg/generate (select-keys User [:id :username]))
           app (sg/generate ValidPlacementApplication)
           submitted-app (assoc-in app [:integrationKeys :ALLU :id] allu-id)]

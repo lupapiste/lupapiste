@@ -35,6 +35,8 @@
   (:import [java.lang AutoCloseable]
            [java.io InputStream]))
 
+;;; TODO: Sijoituslupa
+
 ;;;; Schemas
 ;;;; ===================================================================================================================
 

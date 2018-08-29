@@ -135,7 +135,7 @@
                                  "LPVALUE_LUPA_AIKA" (if (s/blank? start-time) ""  (str start-time " - " end-time))
 
 
-                                 ;;                                 "LUPAMAARAYKSETHEADER" (i18n/localize lang "verdict.lupamaaraukset")
+                                 ;;                                 "LUPAMAARAYKSETHEADER" (i18n/localize lang "verdict.lupamaaraykset")
                                  ;;                                 "LUPAMAARAYKSETTABLE" (verdict-lupamaaraykset application id paatos-idx lang)
 
                                  ;;                                 "FOREMENHEADER" (i18n/localize lang "foreman.requiredForemen")

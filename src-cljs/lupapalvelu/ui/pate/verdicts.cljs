@@ -19,6 +19,8 @@
               :th-date              [:pate.verdict-table.verdict-date :verdict.contract.date]
               :th-giver             [:pate.verdict-table.verdict-giver :verdict.name.sijoitussopimus]
               :add                  [:application.verdict.add :pate.contract.add]
+              :new                  [:pate.verdict-new :pate.verdict-new]
+              :copy                 [:pate.verdict-copy :pate.verdict-copy]
               :description          [:application.verdictDesc :pate.contract.description
                                      :help.YA.verdictDesc.sijoitussopimus]
               :confirm-delete       [:verdict.confirmdelete :pate.contract.confirm-delete]
@@ -72,7 +74,16 @@
                                                                    open-verdict
                                                                    @state/replacement-verdict)}
                             [:i.lupicon-circle-plus]
-                            [:span (common/loc (loc-key :add))]])]]))))
+                            (if @state/replacement-verdict
+                              [:span (common/loc (loc-key :new))]
+                              [:span (common/loc (loc-key :add))])])
+          (if @state/replacement-verdict
+            (layout/vertical [:button.positive
+                              {:on-click #(service/copy-verdict-draft @state/application-id
+                                                                      open-verdict
+                                                                      @state/replacement-verdict)}
+                              [:i.lupicon-copy]
+                              [:span (common/loc (loc-key :copy))]]))]]))))
 
 (rum/defc new-legacy-verdict []
   (components/icon-button {:icon     :lupicon-circle-plus

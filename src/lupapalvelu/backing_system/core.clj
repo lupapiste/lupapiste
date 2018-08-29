@@ -63,8 +63,7 @@
   (-send-attachments! [_ {:keys [user organization application]} attachments lang]
     (mapping-to-krysp/save-unsent-attachments-as-krysp user @organization application attachments lang)))
 
-(sc/defn ^{:always-validate true, :private true} get-backing-system :- (sc/protocol BackingSystem)
-  [organization :- Organization, permit-type :- PermitType]
+(sc/defn get-backing-system :- (sc/protocol BackingSystem) [organization :- Organization, permit-type :- PermitType]
   (cond
     (allu/allu-application? (:id organization) permit-type) (->ALLUBackingSystem)
     (org/krysp-integration? organization permit-type) (->KRYSPBackingSystem)
