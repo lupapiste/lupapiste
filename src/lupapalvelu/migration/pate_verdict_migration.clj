@@ -71,14 +71,23 @@
   {:inclusions (-> (verdict-category app nil nil)
                    verdict/legacy-verdict-inclusions)})
 
+(defn- get-when [p getter-fn]
+  (fn [& args]
+    (when (apply p args)
+      (apply getter-fn args))))
+
+(defn- verdict-published? [_ verdict _]
+  (not (:draft verdict)))
+
 (def- accessor-functions
   "Contains functions for accessing relevant Pate verdict data from
   current verdict drafts. These return the raw values but are
   subsequently to be wrapped with relevant metadata."
-  {:id       (get-in-verdict [:id])
-   :modified (get-in-verdict [:timestamp])
-   :category verdict-category
+  {:id              (get-in-verdict [:id])
+   :modified        (get-in-verdict [:timestamp])
+   :category        verdict-category
    :handler         (get-in-poytakirja :paatoksentekija)
+   :published       (get-when verdict-published? (get-in-paivamaarat :anto))
    :kuntalupatunnus (get-in-verdict [:kuntalupatunnus])
    :verdict-section (get-in-poytakirja :pykala)
    :verdict-code    (comp str (get-in-poytakirja :status))
@@ -138,9 +147,10 @@
   "This map describes the shape of the migrated verdict. When building the
    migrated verdict, `(access :x)` will be replaced by calling the accessor
    function found under the key :x in the accessor function map. See `accessors`."
-  {:id       (access :id)
-   :modified (access :modified)
-   :category (access :category)
+  {:id        (access :id)
+   :modified  (access :modified)
+   :category  (access :category)
+   :published (access :published)
    :data {:handler         (wrap (access :handler))
           :kuntalupatunnus (wrap (access :kuntalupatunnus))
           :verdict-section (wrap (access :verdict-section))
@@ -165,13 +175,19 @@
        (postwalk (post-process timestamp))
        util/strip-nils))
 
+(defn- draft-verdict-ids [application]
+  (->> application
+       :verdicts
+       (filter :draft)
+       (mapv :id)))
+
 ;;
 ;; Application migration
 ;;
-
+;; TODO also migrate non-draft Lupapiste verdicts
 (defn migration-updates [application timestamp]
   (merge {$unset {:verdicts ""}
           $set {:pate-verdicts [(->pate-legacy-verdict application
                                                        (first (:verdicts application))
                                                        timestamp)]}
-          $pull {:tasks {:source.id {$in [(-> application :verdicts first) :id]}}}}))
+          $pull {:tasks {:source.id {$in (draft-verdict-ids application)}}}}))

@@ -101,20 +101,32 @@
                                   [{:id "condition-id"
                                     :schema-info {:name "task-lupamaarays"}
                                     :taskname "Muu"
-                                    :source {:id "This is not the verdict you're looking for"}}]))
+                                    :source {:id "This is not the verdict you're looking for"}}])
+                           test-verdict
+                           timestamp)
     =not=> (contains {:reviews    anything
                       :foremen    anything
-                      :conditions anything})))
+                      :conditions anything}))
+
+  (fact "published verdict has published timestamp"
+        (->pate-legacy-verdict (update test-application
+                                       :verdicts
+                                       #(map (fn [v] (assoc v :draft false)) %))
+                               (assoc test-verdict :draft false)
+                               timestamp)
+    => (contains {:published anto})))
 
 (facts "migration-updates"
-  (fact "one verdict, no tasks"
+  (fact "one draft verdict, no tasks"
     (migration-updates app-one-verdict-no-tasks timestamp)
     => {$unset {:verdicts ""}
         $set {:pate-verdicts [migrated-test-verdict-no-tasks]}
         $pull {:tasks {:source.id {$in [(:id migrated-test-verdict-no-tasks)]}}}})
 
-  (fact "one verdict with tasks"
+  (fact "one draft verdict with tasks"
     (migration-updates app-one-verdict-with-tasks timestamp)
     => {$unset {:verdicts ""}
         $set {:pate-verdicts [migrated-test-verdict]}
-        $pull {:tasks {:source.id {$in [(:id migrated-test-verdict)]}}}}))
+        $pull {:tasks {:source.id {$in [(:id migrated-test-verdict)]}}}})
+
+  )
