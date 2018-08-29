@@ -49,7 +49,7 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [warnf errorf error]]))
+            [taoensso.timbre :refer [warnf errorf error warn]]))
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
