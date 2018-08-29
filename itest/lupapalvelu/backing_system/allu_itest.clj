@@ -32,7 +32,8 @@
 (defn- state-graph->transitions [states]
   (mapcat (fn [[state succs]] (map #(vector state %) succs)) states))
 
-(defn- next-useful [states visit-goal visited-total current-state]
+(defn- probe-next-transition [states visit-goal visited-total current-state]
+  ;; This code is not so great but does the job for now.
   (letfn [(useful [current visited]
             (let [[usefuls visited]
                   (reduce (fn [[transitions visited] succ]
@@ -56,7 +57,7 @@
            visited visited-total
            current-state initial-state
            user-state (init!)]
-      (if-let [[_ next-state :as transition] (next-useful states visit-goal visited-total current-state)]
+      (if-let [[_ next-state :as transition] (probe-next-transition states visit-goal visited-total current-state)]
         (do (if-let [transition-adapter (get transition-adapters transition)]
               (transition-adapter transition user-state)
               (warn "No adapter provided for" transition))
@@ -168,8 +169,10 @@
               (if-let [validation-error (sc/check PlacementContract placement-contract)]
                 {:status 400, :body validation-error}
                 (if (contains? (:applications @allu-state) id)
-                  (do (swap! allu-state assoc-in [:applications id] placement-contract)
-                      {:status 200, :body id})
+                  (if (get-in @allu-state [:applications id :pendingOnClient])
+                    (do (swap! allu-state assoc-in [:applications id] placement-contract)
+                        {:status 200, :body id})
+                    {:status 403, :body (str id " is not pendingOnClient")})
                   {:status 404, :body (str "Not Found: " id)})))
             {:status 401, :body "Unauthorized"}))
 
@@ -253,9 +256,6 @@
                     {descr-id :id} (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa")
                                                   documents))
                     {applicant-id :id} (first (filter #(= (doc-name %) "hakija-ya") documents))]
-                (itu/local-command pena :submit-application :id id) => ok?
-                (count (:applications @allu-state)) => 1
-                (-> (:applications @allu-state) first val :pendingOnClient) => true
 
                 (itu/local-command pena :update-doc :id id :doc descr-id :updates [["kayttotarkoitus" "tuijottelu"]]) => ok?
                 (-> (:applications @allu-state) first val :workDescription) => "tuijottelu"
@@ -338,22 +338,7 @@
                       (itu/local-command raktark-helsinki :move-attachments-to-backing-system :id id :lang "fi"
                                          :attachmentIds [(:id attachment)]) => ok?
 
-                      (-> (:applications @allu-state) first val :attachments) => expected-attachments*
-
-                      (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-                        (itu/local-command pena :submit-application :id id) => ok?
-
-                        (itu/local-command pena :cancel-application :id id :text "Alkoi nolottaa." :lang "fi") => ok?
-                        (:id-counter @allu-state) => 2
-                        (count (:applications @allu-state)) => 1)
-
-                      (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-                        (itu/local-command pena :submit-application :id id) => ok?
-
-                        (itu/local-command raktark-helsinki :return-to-draft
-                                           :id id :text "Tällaisenaan nolo ehdotus." :lang "fi") => ok?
-                        (:id-counter @allu-state) => 3
-                        (count (:applications @allu-state)) => 1))))))
+                      (-> (:applications @allu-state) first val :attachments) => expected-attachments*)))))
 
             (fact "disabled for everything else."
               (reset! allu-state initial-allu-state)
