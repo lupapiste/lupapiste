@@ -152,6 +152,7 @@
                              {:puhelin {:value "0123456789"}
                               :email   {:value "Veijo.Viranomainen@example.com"}})
           henkilo-hetu {:tag :henkilotunnus :attrs nil :content ["210281-9988"]}
+          henkilo-err-hetu {:tag :henkilotunnus :attrs nil :content ["000000-0000"]}
           henkilo-nimi {:tag :nimi :attrs nil :content [{:tag :sukunimi :attrs nil :content ["Viranomainen"]}
                                                         {:tag :etunimi :attrs nil :content ["Veijo"]}]}
           henkilo-sukunimi {:tag :nimi :attrs nil :content [{:tag :sukunimi :attrs nil :content ["Viranomainen Veijo"]}]}
@@ -162,8 +163,8 @@
                                                               {:tag :postinumero :attrs nil, :content ["03220"]}
                                                               {:tag :postitoimipaikannimi, :attrs nil, :content ["TERVALAMPI"]}]}]
           henkilo-data (fn [content] {:tag :henkilo :attrs nil, :content (concat henkilo-content content)})
-          party {:tag :Tyonjohtaja :attrs nil :content [{:tag :tyonjohtajaRooliKoodi :attrs nil :content ["vastaava työnjohtaja"]}
-                                                         {:tag :VRKrooliKoodi :attrs nil :content ["työnjohtaja"]}
+          party {:tag :Tyonjohtaja :attrs nil :content [{:tag :tyonjohtajaRooliKoodi :attrs nil :content ["vastaava ty\u00f6njohtaja"]}
+                                                         {:tag :VRKrooliKoodi :attrs nil :content ["ty\u00f6njohtaja"]}
                                                          {:tag :vaadittuPatevyysluokka :attrs nil, :content ["A"]}
                                                          {:tag :koulutus :attrs nil :content ["arkkitehti"]}
                                                          {:tag :valmistumisvuosi :attrs nil :content ["1994"]}
@@ -172,28 +173,31 @@
                                                          {:tag :sijaistettavaHlo :attrs nil :content []}
                                                          {:tag :paatosPvm :attrs nil :content ["2015-11-29"]}
                                                          {:tag :paatostyyppi :attrs nil :content ["hyväksytty"]}]}]
-      (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [party]) => nil
+      (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [party]) => nil
 
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-hetu]))]
-        (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [amended-party party]) => amended-party)
+        (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [amended-party party]) => amended-party)
 
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-hetu]))]
-        (verdict-party-finder "nonnonnoo-työnjohtaja" henk-tiedot [amended-party party]) => nil)
+        (verdict-party-finder "nonnonnoo-ty\u00f6njohtaja" henk-tiedot [amended-party party]) => nil)
 
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-email]))]
-        (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [party amended-party]) => amended-party)
+        (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [party amended-party]) => amended-party)
 
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-nimi]))]
-        (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [amended-party]) => amended-party)
+        (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [amended-party]) => amended-party)
 
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-sukunimi]))]
-        (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [amended-party]) => amended-party)
+        (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [amended-party]) => amended-party)
 
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-puhelin]))]
-        (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [amended-party]) => amended-party)
+        (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [amended-party]) => amended-party)
 
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-err-puhelin]))]
-        (verdict-party-finder "vastaava työnjohtaja" henk-tiedot [amended-party]) => nil))))
+        (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [amended-party]) => nil)
+
+      (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-err-hetu henkilo-nimi]))]
+        (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [amended-party]) => nil))))
 
 (facts "Section requirement for verdicts"
        (let [org        {:section {:operations ["pool" "house"]

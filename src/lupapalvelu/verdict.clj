@@ -239,31 +239,56 @@
     (and (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
          (not-empty (enlive/select xml [:luvanTunnisteTiedot :MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))])))))
 
-;; LPK-3848
-(defn- verdict-party-finder [roolikoodi henkilotiedot-from-doc parties-from-xml]
-  (let [info-fields            {:hetu    :henkilotunnus
-                                :email   :sahkopostiosoite
-                                :nimi    [:etunimi :sukunimi]
-                                :puhelin :puhelin}
-        get-info-value         (fn [field] (-> henkilotiedot-from-doc field :value))
-        match-xml-text-to-doc  (fn [doc-field xml-field party]
-                                 (if (= :nimi doc-field)
-                                   (let [doc-etunimi  (get-info-value :etunimi)
-                                         doc-sukunimi (get-info-value :sukunimi)
-                                         xml-etunimi  (xml/get-text party [:etunimi])
-                                         xml-sukunimi (xml/get-text party [:sukunimi])]
-                                     (or (and (= doc-etunimi xml-etunimi)
-                                              (= doc-sukunimi xml-sukunimi))
-                                         (= (str doc-sukunimi " " doc-etunimi) xml-sukunimi)))
-                                   (let [xml-text (xml/get-text party [xml-field])
-                                         doc-text (get-info-value doc-field)]
-                                     (= xml-text doc-text))))
-        rooli-filtered-parties (filter (fn [party] (or (= roolikoodi (xml/get-text party [:tyonjohtajaRooliKoodi]))
+(defn- get-personal-information-value [personal-info key]
+  (-> personal-info key :value))
+
+(defn- match-xml-text-to-doc-info
+  "Matches party-xml to document information. If doc-key is nimi, then checks if both first name and last name match
+  and checks if both names are in last name field. If xml-field is missing, returns nil, otherwise true or false."
+  [personal-info doc-key xml-key party]
+  (if (= :nimi doc-key)
+    (let [doc-etunimi (get-personal-information-value personal-info :etunimi)
+          doc-sukunimi (get-personal-information-value personal-info :sukunimi)
+          xml-etunimi (xml/get-text party [:etunimi])
+          xml-sukunimi (xml/get-text party [:sukunimi])]
+      (when-not (nil? xml-sukunimi)
+        (or (and (= doc-etunimi xml-etunimi)
+                 (= doc-sukunimi xml-sukunimi))
+            (= (str doc-sukunimi " " doc-etunimi) xml-sukunimi))))
+    (let [xml-text (xml/get-text party [xml-key])
+          doc-text (get-personal-information-value personal-info doc-key)]
+      (when-not (nil? xml-text)
+        (= xml-text doc-text)))))
+
+(defn- verdict-party-finder
+  "Hetu is not always available for verdict matching, so it is necessary to compare other attributes to document data sometimes.
+  This function compares role, hetu, email, name and telephone number and returns the match if found."
+  [roolikoodi henkilotiedot-from-doc parties-from-xml]
+  (let [rooli-filtered-parties (filter (fn [party] (or (= roolikoodi (xml/get-text party [:tyonjohtajaRooliKoodi]))
                                                        (= roolikoodi (xml/get-text party [:suunnittelijaRooliKoodi]))))
-                                       parties-from-xml)
-        find-attr-from-parties (fn [[k v]] (util/find-first (partial match-xml-text-to-doc k v) rooli-filtered-parties))]
-    (->> (map find-attr-from-parties info-fields)
-         (util/find-first seq))))
+                                       parties-from-xml)]
+    (loop [info-fields      {:hetu    :henkilotunnus
+                             :email   :sahkopostiosoite
+                             :nimi    [:etunimi :sukunimi]
+                             :puhelin :puhelin}
+           parties          rooli-filtered-parties
+           possible-matches []]
+      (cond
+        (or (empty? info-fields)
+            (and (empty? parties) (empty? possible-matches)))
+        nil
+
+        (empty? parties)
+        (recur (rest info-fields) possible-matches [])
+
+        :else
+        (let [[doc-key xml-key] (first info-fields)
+              party             (first parties)
+              match?            (match-xml-text-to-doc-info henkilotiedot-from-doc doc-key xml-key party)]
+          (cond
+            (nil? match?) (recur info-fields (rest parties) (conj possible-matches party))
+            match?        party
+            (not match?)  (recur info-fields (rest parties) possible-matches)))))))
 
 (defn verdict-xml-with-foreman-designer-verdicts
   "Normalizes special foreman/designer verdict by creating a proper
