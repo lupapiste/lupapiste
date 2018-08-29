@@ -1,6 +1,7 @@
 (ns lupapalvelu.backing-system.allu-itest
   "Integration tests for ALLU integration. Using local (i.e. not over HTTP) testing style."
   (:require [clojure.string :as s]
+            [clojure.java.io :as io]
             [cheshire.core :as json]
             [compojure.core :refer [routes POST PUT]]
             [compojure.route :refer [not-found]]
@@ -117,7 +118,7 @@
     (itu/local-command apikey :submit-application :id app-id) => ok?))
 
 (defn- fill [apikey app-id]
-  (let [{:keys [documents]} (domain/get-application-no-access-checking app-id)
+  (let [{[attachment] :attachments :keys [documents]} (domain/get-application-no-access-checking app-id)
         {descr-id :id} (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa")
                                       documents))
         {applicant-id :id} (first (filter #(= (doc-name %) "hakija-ya") documents))]
@@ -137,7 +138,21 @@
                            :updates [["yritys.yhteyshenkilo.henkilotiedot.etunimi" (:firstName user)]
                                      ["yritys.yhteyshenkilo.henkilotiedot.sukunimi" (:lastName user)]
                                      ["yritys.yhteyshenkilo.yhteystiedot.email" (:email user)]
-                                     ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]])))))
+                                     ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]])))
+
+    (fact "upload attachments"
+      (let [filename "dev-resources/test-attachment.txt"]
+        ;; HACK: Have to use a temp file as :upload-attachment expects to get one and deletes it in the end.
+        (with-temp-file file
+          (io/copy (io/file filename) file)
+          (let [description "Test file"
+                _ (itu/local-command apikey :upload-attachment :id app-id :attachmentId (:id attachment)
+                                     :attachmentType {:type-group "muut", :type-id "muu"} :group {}
+                                     :filename filename :tempfile file :size (.length file)) => ok?
+                _ (itu/local-command apikey :set-attachment-meta :id app-id :attachmentId (:id attachment)
+                                     :meta {:contents description}) => ok?]
+            (itu/local-command apikey :add-comment :id app-id :text "Added my test text file."
+                               :target {:type "application"} :roles ["applicant" "authority"]) => ok?))))))
 
 (defn- approve [apikey app-id]
   (fact "approve application"
@@ -277,6 +292,10 @@
                                               (state-graph->transitions states/ya-sijoitussopimus-state-graph))
                                         1))
 
+          ;;; TODO: move-attachments-to-backing-system
+          ;;; TODO: agreementPrepared/Signed
+          ;;; TODO: Ensure that errors from ALLU don't break the application process
+
           (fact "ALLU integration disabled for"
             (reset! allu-state initial-allu-state)
 
@@ -306,7 +325,7 @@
                                  (fact "response is 4**" info-map => http/client-error?)
                                  (swap! failure-counter inc))]
             (fact "enabled and sending correctly to ALLU for Helsinki YA sijoituslupa and sijoitussopimus."
-              (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?
+              (let [{:keys [id]} (create-and-fill-placement-app apikey "sijoituslupa") => ok?
                     {[attachment] :attachments :keys [documents]} (domain/get-application-no-access-checking id)
                     {descr-id :id} (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa")
                                                   documents))
@@ -317,11 +336,6 @@
                     (io/copy (io/file filename) file)
                     (let [description "Test file"
                           description* "The best file"
-                          _ (itu/local-command pena :upload-attachment :id id :attachmentId (:id attachment)
-                                               :attachmentType {:type-group "muut", :type-id "muu"} :group {}
-                                               :filename filename :tempfile file :size (.length file)) => ok?
-                          _ (itu/local-command pena :set-attachment-meta :id id :attachmentId (:id attachment)
-                                               :meta {:contents description}) => ok?
                           {[attachment] :attachments} (domain/get-application-no-access-checking id)
                           expected-attachments [{:metadata {:name        description
                                                             :description (localize "fi" :attachmentType
@@ -335,13 +349,6 @@
                           expected-attachments* (conj expected-attachments
                                                       (assoc-in (first expected-attachments)
                                                                 [:metadata :name] description*))]
-                      (itu/local-command pena :add-comment :id id :text "Added my test text file."
-                                         :target {:type "application"} :roles ["applicant" "authority"]) => ok?
-                      (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?
-
-                      (count (:applications @allu-state)) => 1
-                      (-> (:applications @allu-state) first val :pendingOnClient) => false
-                      (-> (:applications @allu-state) first val :attachments) => expected-attachments
 
                       (io/copy (io/file filename) file)
                       ;; Upload another attachment for :move-attachments-to-backing-system to send:
@@ -360,8 +367,8 @@
                                  (->MessageSavingALLU (->GetAttachmentFiles
                                                         (->ConstALLU {:status 200} {:status 200}
                                                                      {:status 400, :body "Your data was bad."} nil)))})
-              (let [{:keys [id]} (create-and-fill-placement-app pena "sijoituslupa") => ok?]
-                (itu/local-command pena :submit-application :id id)
+              (let [{:keys [id]} (create-and-fill-placement-app apikey "sijoituslupa") => ok?]
+                (itu/local-command apikey :submit-application :id id)
                 @failure-counter => 1)
 
               (reset! failure-counter 0)
@@ -370,6 +377,6 @@
                                  (->MessageSavingALLU (->GetAttachmentFiles
                                                         (->ConstALLU {:status 200} {:status 200}
                                                                      {:status 401, :body "You are unauthorized."} nil)))})
-              (let [{:keys [id]} (create-and-fill-placement-app pena "sijoitussopimus") => ok?]
-                (itu/local-command pena :submit-application :id id)
+              (let [{:keys [id]} (create-and-fill-placement-app apikey "sijoitussopimus") => ok?]
+                (itu/local-command apikey :submit-application :id id)
                 @failure-counter => 1)))))))
