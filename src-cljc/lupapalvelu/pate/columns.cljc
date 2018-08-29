@@ -5,13 +5,11 @@
   (:require #?(:clj  [lupapalvelu.i18n :as i18n]
                :cljs [lupapalvelu.ui.common :as common])
             #?(:clj  [lupapalvelu.pate.date :as date])
-            #?(:clj  [lupapalvelu.domain :as domain])
             [sade.shared-strings :as ss]
             [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.pdf-layouts :as layouts]
             [lupapalvelu.pate.schema-util :as schema-util]
-            [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [sade.shared-util :as util]
             [schema.core :refer [defschema] :as sc]))
@@ -43,8 +41,10 @@
   (map keyword (ss/split (name kw-path) #"\.")))
 
 #?(:clj (defn doc-value [application doc-name kw-path]
-          (get-in (domain/get-document-by-name application (name doc-name))
-                  (cons :data (pathify kw-path))))
+          (-> (->> (:documents application)
+                   (filter #(= (-> % :schema-info :name) (name doc-name)))
+                   first)
+              (get-in (cons :data (pathify kw-path)))))
    :cljs (defn doc-value "Doc values not supported on frontend" [& _]))
 
 (defn join-non-blanks
