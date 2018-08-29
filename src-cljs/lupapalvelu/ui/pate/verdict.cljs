@@ -155,7 +155,6 @@
          (pate-components/last-saved options)]])]))
 
 (rum/defc published-verdict
-  "Verdict argument must in the backend format."
   [{:keys [header footer body]}]
   [:div.published-verdict
    header
@@ -182,7 +181,10 @@
    (lupapalvelu.ui.attachment.components/dropzone)
    [:div.operation-button-row
     [:button.secondary
-     {:on-click #(common/open-page :application @state/application-id :pate-verdict)}
+     {:on-click (fn [_]
+                  ;; In case we have just published a verdict
+                  (service/refresh-attachments)
+                  (common/open-page :application @state/application-id :pate-verdict))}
      [:i.lupicon-chevron-left]
      [:span (common/loc :back)]]]
    (if (and (rum/react state/current-verdict-id)
