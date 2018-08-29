@@ -246,7 +246,8 @@
            :attachments (verdict-attachments options)
            :organization (html/organization-name lang application)
            :link-permits (link-permits options)
-           :tj-vastattavat-tyot (tj-vastattavat-tyot application lang))))
+           :tj-vastattavat-tyot (tj-vastattavat-tyot application lang)
+           :signatures (signatures options))))
 
 (defn verdict-tags
     "Source-data is a map containing keys referred in pdf-layout source
