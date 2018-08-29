@@ -1,12 +1,10 @@
 (ns lupapalvelu.backing-system.allu-itest
   "Integration tests for ALLU integration. Using local (i.e. not over HTTP) testing style."
-  (:require [clojure.java.io :as io]
-            [clj-http.client :as http]
+  (:require [clojure.string :as s]
             [cheshire.core :as json]
             [compojure.core :refer [routes POST PUT]]
             [compojure.route :refer [not-found]]
             [monger.operators :refer [$set]]
-            [mount.core :as mount]
             [schema.core :as sc]
             [taoensso.timbre :refer [warn]]
             [sade.core :refer [def- ok?]]
@@ -16,16 +14,15 @@
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.tools :refer [doc-name]]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr]
 
             [midje.sweet :refer [facts fact =>]]
             [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
 
-            [lupapalvelu.backing-system.allu :as allu :refer [PlacementContract]]))
+            [lupapalvelu.backing-system.allu :as allu :refer [PlacementContract]])
+  (:import [java.io InputStream]))
 
 ;;; TODO: Sijoituslupa
 
@@ -128,103 +125,78 @@
   (fact "cancel application"
     (itu/local-command apikey :cancel-application :id app-id :text msg :lang "fi") => ok?))
 
+(defn- check-imessages-middleware [handler]
+  (fn [{interface-path ::allu/interface-path {:keys [application]} ::allu/command :as request}]
+    (let [imsg-query (fn [direction]
+                       {:partner        "allu"
+                        :messageType    (s/join \. (map name interface-path))
+                        :direction      direction
+                        :status         "done"
+                        :application.id (:id application)})
+          res (handler request)]
+      (fact "integration messages are saved"
+        (mongo/any? :integration-messages (imsg-query "out")) => true
+        (mongo/any? :integration-messages (imsg-query "in")) => true)
+      res)))
+
 (defn- make-test-handler [allu-state]
-  (#'allu/combined-middleware
-    (routes
-      (PUT "/applications/:id/cancelled" [id :as {:keys [headers]}]
-        (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
-          (if (contains? (:applications @allu-state) id)
-            (do (swap! allu-state update :applications dissoc id)
-                {:status 200, :body ""})
-            {:status 404, :body (str "Not Found: " id)})
-          {:status 401, :body "Unauthorized"}))
+  (-> (routes
+        (PUT "/applications/:id/cancelled" [id :as {:keys [headers]}]
+          (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
+            (if (contains? (:applications @allu-state) id)
+              (do (swap! allu-state update :applications dissoc id)
+                  {:status 200, :body ""})
+              {:status 404, :body (str "Not Found: " id)})
+            {:status 401, :body "Unauthorized"}))
 
-      (POST "/placementcontracts" {:keys [headers body]}
-        (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
-          (let [placement-contract (json/decode body true)]
-            (if-let [validation-error (sc/check PlacementContract placement-contract)]
-              {:status 400, :body validation-error}
-              (let [{:keys [id-counter]}
-                    (swap! allu-state (fn [{:keys [id-counter] :as state}]
-                                        (-> state
-                                            (update :id-counter inc)
-                                            (update :applications assoc (str id-counter) placement-contract))))]
-                {:status 200, :body (str (dec id-counter))})))
-          {:status 401, :body "Unauthorized"}))
+        (POST "/placementcontracts" {:keys [headers body]}
+          (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
+            (let [placement-contract (json/decode body true)]
+              (if-let [validation-error (sc/check PlacementContract placement-contract)]
+                {:status 400, :body validation-error}
+                (let [{:keys [id-counter]}
+                      (swap! allu-state (fn [{:keys [id-counter] :as state}]
+                                          (-> state
+                                              (update :id-counter inc)
+                                              (update :applications assoc (str id-counter) placement-contract))))]
+                  {:status 200, :body (str (dec id-counter))})))
+            {:status 401, :body "Unauthorized"}))
 
-      (PUT "/placementcontracts/:id" [id :as {:keys [headers body]}]
-        (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
-          (let [placement-contract (json/decode body true)]
-            (if-let [validation-error (sc/check PlacementContract placement-contract)]
-              {:status 400, :body validation-error}
-              (if (contains? (:applications @allu-state) id)
-                (do (swap! allu-state assoc-in [:applications id] placement-contract)
-                    {:status 200, :body id})
-                {:status 404, :body (str "Not Found: " id)})))
-          {:status 401, :body "Unauthorized"}))
+        (PUT "/placementcontracts/:id" [id :as {:keys [headers body]}]
+          (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
+            (let [placement-contract (json/decode body true)]
+              (if-let [validation-error (sc/check PlacementContract placement-contract)]
+                {:status 400, :body validation-error}
+                (if (contains? (:applications @allu-state) id)
+                  (do (swap! allu-state assoc-in [:applications id] placement-contract)
+                      {:status 200, :body id})
+                  {:status 404, :body (str "Not Found: " id)})))
+            {:status 401, :body "Unauthorized"}))
 
-      (POST "/applications/:id/attachments" [id :as {:keys [headers body]}]
-        (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
-          (if (contains? (:applications @allu-state) id)
-            (let [attachment {:metadata (-> body (get-in [0 :content]) (json/decode true))}]
-              (swap! allu-state update-in [:applications id :attachments] (fnil conj []) attachment)
-              {:status 200, :body ""})
-            {:status 404, :body (str "Not Found: " id)})
-          {:status 401, :body "Unauthorized"}))
+        (POST "/applications/:id/attachments" [id :as {:keys [headers body]}]
+          (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
+            (let [metadata-error (sc/check {:name      (sc/eq "metadata")
+                                            :mime-type "application/json"
+                                            :content   @#'allu/FileMetadata}
+                                           (update (first body) :content (json/decode true)))
+                  file-error (sc/check {:name      "file"
+                                        :mime-type sc/Str
+                                        :encoding  "UTF-8"
+                                        :content   InputStream}
+                                       (second body))]
+              (if-let [validation-error (or metadata-error file-error)]
+                {:status 400, :body validation-error}
+                (if (contains? (:applications @allu-state) id)
+                  (let [attachment {:metadata (-> body (get-in [0 :content]) (json/decode true))}]
+                    (swap! allu-state update-in [:applications id :attachments] (fnil conj []) attachment)
+                    {:status 200, :body ""})
+                  {:status 404, :body (str "Not Found: " id)})))
+            {:status 401, :body "Unauthorized"}))
 
-      (not-found "No such route."))))
+        (not-found "No such route."))
+      (#'allu/combined-middleware)
+      check-imessages-middleware))
 
-;(defn- checking-integration-messages [{:keys [id]} message-type body]
-;  (let [imsg-query (fn [direction]
-;                     {:partner        "allu"
-;                      :messageType    message-type
-;                      :direction      direction
-;                      :status         "done"
-;                      :application.id id}) ()
-;        res (body)]
-;    (fact "integration messages are saved"
-;      (mongo/any? :integration-messages (imsg-query "out")) => true
-;      (mongo/any? :integration-messages (imsg-query "in")) => true)
-;    res))
-;
-;(deftype CheckingALLU [inner]
-;  ALLUApplications
-;  (-cancel-application! [_ {:keys [application] :as command} {:keys [http-request] :as request}]
-;    (:uri http-request)
-;
-;    (fact "endpoint is correct"
-;      (:uri http-request) => (re-pattern (str (env/value :allu :url) "/applications/\\d+/cancelled")))
-;    (fact "request is well-formed"
-;      (-> http-request :headers :authorization) => (str "Bearer " (env/value :allu :jwt)))
-;
-;    (checking-integration-messages application "applications.cancel" #(-cancel-application! inner command request)))
-;
-;  ALLUPlacementContracts
-;  (-create-placement-contract! [_ {:keys [application] :as command} {:keys [http-request] :as request}]
-;    (fact "endpoint is correct" (:uri http-request) => (str (env/value :allu :url) "/placementcontracts"))
-;    (check-request true http-request)
-;
-;    (checking-integration-messages application "placementcontracts.create"
-;                                   #(-create-placement-contract! inner command request)))
-;
-;  (-update-placement-contract! [_ {:keys [application] :as command} {:keys [http-request] :as request}]
-;    (fact "endpoint is correct" (:uri http-request) => (re-pattern (str (env/value :allu :url) "/placementcontracts/\\d+")))
-;    (check-request false http-request)
-;
-;    (checking-integration-messages application "placementcontracts.update"
-;                                   #(-update-placement-contract! inner command request)))
-;
-;  ALLUAttachments
-;  (-send-attachment! [_ {:keys [application] :as command} {:keys [http-request] :as request}]
-;    (fact "endpoint is correct"
-;      (:uri http-request) => (re-pattern (str (env/value :allu :url) "/applications/\\d+/attachments")))
-;    (fact "request is well-formed"
-;      (-> http-request :headers :authorization) => (str "Bearer " (env/value :allu :jwt))
-;      (-> http-request (get-in [:body 0 :content]) (json/decode true) keys set) => #{:name :description :mimeType}
-;      (get-attachment-file! application (-> http-request (get-in [:body 1]) :content)) => some?)
-;
-;    (checking-integration-messages application "attachments.create" #(-send-attachment! inner command request))))
-;
 ;(deftype ConstALLU [cancel-response attach-response creation-response update-response]
 ;  ALLUApplications
 ;  (-cancel-application! [_ _ _] cancel-response)
@@ -249,19 +221,21 @@
       (let [initial-allu-state {:id-counter 0, :applications {}}
             allu-state (atom initial-allu-state)]
         (with-redefs [allu/allu-request-handler (make-test-handler allu-state)]
-          (traverse-state-transitions states/ya-sijoitussopimus-state-graph :draft
-                                      (fn [] (create-and-fill-placement-app pena "sijoitussopimus"))
-                                      (into {} (map (fn [[_ dest :as transition]]
-                                                      [transition
-                                                       (case dest
-                                                         :draft (fn [_ id] (return-to-draft raktark-helsinki id "Nolo!"))
-                                                         :open (fn [_ id] (open pena id "YOLO"))
-                                                         :submitted (fn [_ id] (submit pena id))
-                                                         :sent (fn [_ id] (approve raktark-helsinki id))
-                                                         :canceled (fn [_ id] (cancel pena id "Alkoi nolottaa."))
-                                                         (fn [transition _] (warn "TODO:" transition)))]))
-                                            (state-graph->transitions states/ya-sijoitussopimus-state-graph))
-                                      1)))
+          (facts "state transitions"
+            (traverse-state-transitions states/ya-sijoitussopimus-state-graph :draft
+                                        (fn [] (create-and-fill-placement-app pena "sijoitussopimus"))
+                                        (into {} (map (fn [[_ dest :as transition]]
+                                                        [transition
+                                                         (case dest
+                                                           :draft (fn [_ id]
+                                                                    (return-to-draft raktark-helsinki id "Nolo!"))
+                                                           :open (fn [_ id] (open pena id "YOLO"))
+                                                           :submitted (fn [_ id] (submit pena id))
+                                                           :sent (fn [_ id] (approve raktark-helsinki id))
+                                                           :canceled (fn [_ id] (cancel pena id "Alkoi nolottaa."))
+                                                           (fn [transition _] (warn "TODO:" transition)))]))
+                                              (state-graph->transitions states/ya-sijoitussopimus-state-graph))
+                                        1))))
 
       #_(let [initial-allu-state {:id-counter 0, :applications {}}
               allu-state (atom initial-allu-state)
