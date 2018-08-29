@@ -275,7 +275,25 @@
                                                            :canceled (fn [_ id] (cancel pena id "Alkoi nolottaa."))
                                                            (fn [transition _] (warn "TODO:" transition)))]))
                                               (state-graph->transitions states/ya-sijoitussopimus-state-graph))
-                                        1))))
+                                        1))
+
+          (fact "ALLU integration disabled for"
+            (reset! allu-state initial-allu-state)
+
+            (fact "Non-Helsinki sijoituslupa"
+              (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate allu/SijoituslupaOperation)) => ok?]
+                (itu/local-command pena :submit-application :id id) => ok?))
+
+            (fact "Helsinki non-sijoituslupa"
+              (let [{:keys [id]} (itu/create-local-app pena
+                                                       :operation "pientalo"
+                                                       :x "385770.46" :y "6672188.964"
+                                                       :address "Kaivokatu 1"
+                                                       :propertyId "09143200010023") => ok?]
+                (itu/local-command pena :submit-application :id id) => ok?
+                (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?))
+
+            (:id-counter @allu-state) => 0)))
 
       #_(let [initial-allu-state {:id-counter 0, :applications {}}
               allu-state (atom initial-allu-state)
@@ -336,22 +354,6 @@
                                          :attachmentIds [(:id attachment)]) => ok?
 
                       (-> (:applications @allu-state) first val :attachments) => expected-attachments*)))))
-
-            (fact "disabled for everything else."
-              (reset! allu-state initial-allu-state)
-
-              (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate allu/SijoituslupaOperation)) => ok?]
-                (itu/local-command pena :submit-application :id id) => ok?)
-
-              (let [{:keys [id]} (itu/create-local-app pena
-                                                       :operation "pientalo"
-                                                       :x "385770.46" :y "6672188.964"
-                                                       :address "Kaivokatu 1"
-                                                       :propertyId "09143200010023") => ok?]
-                (itu/local-command pena :submit-application :id id) => ok?
-                (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?)
-
-              (:id-counter @allu-state) => 0)
 
             (fact "error responses from ALLU produce `fail!`ures"
               (mount/start-with {#'allu/allu-instance
