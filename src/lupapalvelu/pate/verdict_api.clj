@@ -304,7 +304,7 @@
   [_])
 
 (defcommand sign-pate-contract
-  {:description      "Adds the user as signatory to a published Pate
+  {:description      "Adds the user as a signatory to a published Pate
   contract if the password matches."
    :feature          :pate
    :categories       #{:pate-verdicts}
