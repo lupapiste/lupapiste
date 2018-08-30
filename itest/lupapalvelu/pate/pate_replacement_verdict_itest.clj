@@ -33,7 +33,7 @@
                                             :template-id template-id)]
       (fact "User summary is Sonja"
         (-> (query-application sonja  app-id)
-            :pate-verdicts last :user :username)
+            :pate-verdicts last :state :_user)
         => "sonja")
       (fact "Set automatic calculation of other dates"
         (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
@@ -62,9 +62,9 @@
           (fact "Pseudo query succeeds"
             (query sonja :replace-pate-verdict :id app-id
                    :verdict-id verdict-id) => ok?)
-          (let [{vid1 :verdict-id} (command sonja :new-pate-verdict-draft :id app-id
-                                            :template-id template-id
-                                            :replacement-id verdict-id) => ok?]
+          (let [{vid1 :verdict-id}                                      (command sonja :new-pate-verdict-draft :id app-id
+                                                                                 :template-id template-id
+                                                                                 :replacement-id verdict-id) => ok?]
             (fact "Only one replacement draft at the time"
               (command sonja :new-pate-verdict-draft :id app-id
                  :template-id template-id
@@ -111,13 +111,13 @@
             (check-verdict-task-count app-id replacement-verdict-id 6))
 
           (facts "Copy verdict as base of replacement verdict"
-            (let [result          (command sonja :copy-pate-verdict-draft
-                                                 :id app-id
-                                                 :replacement-id replacement-verdict-id)
-                  application     (query-application sonja app-id)
-                  verdict-id      (:verdict-id result)
-                  old-verdict     (util/find-by-id replacement-verdict-id (:pate-verdicts application))
-                  new-verdict     (util/find-by-id verdict-id (:pate-verdicts application))]
+            (let [result      (command sonja :copy-pate-verdict-draft
+                                       :id app-id
+                                       :replacement-id replacement-verdict-id)
+                  application (query-application sonja app-id)
+                  verdict-id  (:verdict-id result)
+                  old-verdict (util/find-by-id replacement-verdict-id (:pate-verdicts application))
+                  new-verdict (util/find-by-id verdict-id (:pate-verdicts application))]
 
               (fact "Make draft from old verdict"
                 result => ok?
@@ -138,7 +138,7 @@
                 (get-in new-verdict [:data :statements :_value]) =>  (get-in old-verdict [:data :statements])
                 (get-in new-verdict [:data :verdict-code :_value]) =>  (get-in old-verdict [:data :verdict-code])
                 (get-in new-verdict [:data :verdict-date :_value]) =>  (get-in old-verdict [:data :verdict-date])
-                (get-in new-verdict [:data :verdict-text :_value]) =>  (get-in old-verdict [:data :verdict-text])                )
+                (get-in new-verdict [:data :verdict-text :_value]) =>  (get-in old-verdict [:data :verdict-text]))
 
               (fact "Template is same"
                 (:template new-verdict) => (:template old-verdict))

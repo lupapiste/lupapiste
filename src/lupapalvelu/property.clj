@@ -8,7 +8,7 @@
   (:import (com.mongodb WriteConcern DuplicateKeyException)))
 
 (defn property-info-from-wfs [property-id]
-  (->> (wfs/get-property-location-info-by-property-id property-id)
+  (->> (wfs/municipality-info-by-property-id property-id)
        (wfs/location-feature-to-property-info)))
 
 (defn location-data-by-property-id-from-wfs

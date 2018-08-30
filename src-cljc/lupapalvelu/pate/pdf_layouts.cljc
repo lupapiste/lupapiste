@@ -2,11 +2,101 @@
   "Verdict PDF layout definitions. Note: keyword
   sources (e.g., :application-id) are defined in
   `lupapalvelu.pate.pdf/verdict-properties`."
-  (:require [sade.strings :as ss]
-            [sade.util :as util]
-            [lupapalvelu.pate.pdf-html :refer [PdfLayout]]
-            [schema.core :as sc]))
+  (:require [clojure.string :as s]
+            [sade.shared-util :as util]
+            [schema.core :refer [defschema] :as sc]
+            [lupapalvelu.pate.shared-schemas :as shared-schemas]))
 
+(def cell-widths (range 10 101 5))
+(def row-styles [:pad-after :pad-before
+                 :border-top :border-bottom
+                 :page-break :bold :spaced])
+(def cell-styles [:bold :center :right :nowrap])
+
+(defschema Source
+  "Value of PdfEntry :source property aka data source for the row."
+  (sc/conditional
+   ;; Keyword corresponds to a key in the data context.
+   keyword? sc/Keyword
+   :else (shared-schemas/only-one-of [:doc :dict]
+                                     ;; Vector is a path to application
+                                     ;; document data. The first item is the
+                                     ;; document name and rest are path within
+                                     ;; the data.
+                                     {(sc/optional-key :doc)     [sc/Keyword]
+                                      ;; Kw-path into published verdict data.
+                                      (sc/optional-key :dict)    sc/Keyword})))
+
+(defn styles
+  "Definition that only allows either individual kw or subset of kws."
+  [kws]
+  (let [enum (apply sc/enum kws)]
+    (sc/conditional
+     keyword? enum
+     :else    [enum])))
+
+(defschema PdfEntry
+  "An entry in the layout consists of left- and right-hand sides. The
+  former contains the entry title and the latter actual data. In the
+  schema, an entry is modeled as a vector, where the first element
+  defines both the title and the data source for the whole entry.
+
+  On styles: the :styles definition of the first item applies to the
+  whole row. Border styles (:border-top and :border-bottom) include
+  padding and margin so the adjacent rows should not add any
+  padding. Cell items' :styles only apply to the corresponding cell.
+
+  In addition to the schema definition, styles can be added in
+  'runtime': if source value has ::styles property, it should be map
+  with the following possible keys:
+
+  :row    Row styles
+
+  :cell   Cell styles (applied to every cell)
+
+  path    Path is the value of the :path property. For example, if
+  the :path has a value of :foo, then the cell could be emphasized
+  with ::styles map {:foo :bold}. "
+  [(sc/one {;; Localisation key for the row (left-hand) title.
+            :loc                        sc/Keyword
+            ;; If :loc-many is given it is used as the title key if
+            ;; the source value denotes multiple values.
+            (sc/optional-key :loc-many) sc/Keyword
+            ;; Localization rule which can be used for different localization key
+            ;; values based on application details.
+            ;; For example: {:rule [:application :operation-name] :key :applications.operation}
+            ;; adds operation name from application at end of given key, like:
+            ;; applications.operation.ya-jatkoaika. If the localization key is not found, only
+            ;; given :key value is used as localization key.
+            (sc/optional-key :loc-rule) {:rule sc/Keyword :key sc/Keyword}
+            (sc/optional-key :source)   Source
+            ;; Post-processing function for source value.
+            (sc/optional-key :post-fn) (sc/conditional
+                                        keyword? sc/Keyword
+                                        :else   (sc/pred fn?))
+            (sc/optional-key :styles)   (styles row-styles)}
+           {})
+   ;; Note that the right-hand side can consist of multiple
+   ;; cells/columns. As every property is optional, the cells can be
+   ;; omitted. In that case, the value of the right-hand side is the
+   ;; source value.
+   ;; Path within the source value. Useful, when the value is a map.
+   {(sc/optional-key :path)       shared-schemas/path-type
+    ;; Textual representation that is static and
+    ;; independent from any source value.
+    (sc/optional-key :text)       shared-schemas/keyword-or-string
+    (sc/optional-key :width)      (apply sc/enum cell-widths)
+    (sc/optional-key :unit)       (sc/enum :ha :m2 :m3 :kpl)
+    ;; Additional localisation key prefix. Is
+    ;; applied both to path and text values.
+    (sc/optional-key :loc-prefix) shared-schemas/path-type
+    (sc/optional-key :styles)     (styles cell-styles)}])
+
+(defschema PdfLayout
+  "PDF contents layout."
+  {;; Width of the left-hand side.
+   :left-width (apply sc/enum cell-widths)
+   :entries    [PdfEntry]})
 
 ;; ------------------------------
 ;; Entries
@@ -55,6 +145,21 @@
           :styles :pad-after}
          {:loc-prefix :rakennuspaikka.kaavatilanne}]))
 
+(def entry--rakennuspaikka-ya
+  (list [{:loc    :rakennuspaikka._group_label
+          :styles :bold}]
+        [{:loc    :rakennuspaikka.kiinteisto.kiinteistotunnus
+          :source :property-id-ya}]
+        [{:loc    :pate.location
+          :source {:dict :address}}]
+        [{:loc    :pdf.pinta-ala
+          :source {:doc [:rakennuspaikka :kiinteisto.maapintaala]}}
+         {:unit :ha}]
+        [{:loc    :rakennuspaikka.kaavatilanne._group_label
+          :source {:doc [:rakennuspaikka :kaavatilanne]}
+          :styles :pad-after}
+         {:loc-prefix :rakennuspaikka.kaavatilanne}]))
+
 (defn entry--applicant [loc loc-many]
   [{:loc      loc
     :loc-many loc-many
@@ -63,6 +168,7 @@
 
 (def entry--operation [{:loc      :applications.operation
                         :loc-many :operations
+                        :loc-rule {:rule :application.operation-name :key :applications.operation}
                         :source   :operations
                         :styles   :bold}
                        {:path     :text}])
@@ -282,7 +388,7 @@
 
 (def ya-pdf-layout
   (build-layout entry--application-id
-                entry--rakennuspaikka
+                entry--rakennuspaikka-ya
                 (entry--applicant :pdf.achiever :pdf.achievers)
                 entry--operation
                 entry--statements
@@ -358,8 +464,8 @@
 
 (defn repeating-texts-post-fn [text-key]
   (util/fn->> vals
-              (map (comp ss/trim text-key))
-              (remove ss/blank?)))
+              (map (comp s/trim text-key))
+              (remove s/blank?)))
 
 (def legacy--application-id [{:loc    :applications.id.longtitle
                               :source :application-id
