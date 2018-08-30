@@ -295,8 +295,8 @@
   "Handles response from 'get-property-location-info-by-property-id'. Feature is of type ktjkiiwfs:RekisteriyksikonSijaintitiedotType."
   [feature-zipper]
   (when (seq feature-zipper)
-    (let [muni-zipper (xml1-> feature-zipper :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kuntaTieto :ktjkiiwfs:KuntaTieto)]
-      {:propertyId (xml1-> feature-zipper :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kiinteistotunnus text)
+    (let [muni-zipper (xml1-> feature-zipper :ktjkiiwfs:RekisteriyksikonSijaintitiedot :ktjkiiwfs:kuntaTieto :ktjkiiwfs:KuntaTieto)]
+      {:propertyId (xml1-> feature-zipper :ktjkiiwfs:RekisteriyksikonSijaintitiedot :ktjkiiwfs:kiinteistotunnus text)
        :municipality (xml1-> muni-zipper :ktjkiiwfs:kuntatunnus text)
        :name {:fi (xml1-> muni-zipper :ktjkiiwfs:nimiSuomeksi text)
               :sv (xml1-> muni-zipper :ktjkiiwfs:nimiRuotsiksi text)}})))
@@ -522,17 +522,13 @@
       (ogc-filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
-(defn get-property-location-info-by-property-id [property-id]
-  (first                                                    ;  MAXFEATURES 1
-    (exec :get ktjkii
-          {:TYPENAME "ktjkiiwfs:RekisteriyksikonSijaintitiedot"
-           :PROPERTYNAME "ktjkiiwfs:kuntaTieto"
-           :REQUEST "GetFeature"
-           :FEATUREID (str "FI.KTJkii-RekisteriyksikonTietoja-" property-id)
-           :SERVICE "WFS"
-           :VERSION "1.1.0"
-           :SRSNAME "EPSG:3067"
-           :MAXFEATURES "1"})))
+(defn municipality-info-by-property-id [property-id]
+  (->> (query {"typeName" "ktjkiiwfs:RekisteriyksikonSijaintitiedot"}
+              (wfs-property-name "ktjkiiwfs:kuntaTieto")
+              (ogc-filter
+                (property-is-equal "ktjkiiwfs:RekisteriyksikonSijaintitiedot/ktjkiiwfs:kiinteistotunnus" property-id)))
+       (post ktjkii)
+       first))
 
 (defn property-info-by-radius [x y radius]
   (post ktjkii
@@ -770,6 +766,7 @@
        (sxml/select1-attribute-value namespace-stripped-xml selector :xlink:href))))
 
 (defn rekisteritiedot-xml [rekisteriyksikon-tunnus]
+  "rekisteriyksikon-tunnus = property id in db format"
   (if (env/feature? :disable-ktj-on-create)
     (infof "ktj-client is disabled - not getting rekisteritiedot for %s" rekisteriyksikon-tunnus)
     (let [url (str (get-rekisteriyksikontietojaFeatureAddress) "SERVICE=WFS&REQUEST=GetFeature&VERSION=1.1.0&NAMESPACE=xmlns%28ktjkiiwfs%3Dhttp%3A%2F%2Fxml.nls.fi%2Fktjkiiwfs%2F2010%2F02%29&TYPENAME=ktjkiiwfs%3ARekisteriyksikonTietoja&PROPERTYNAME=ktjkiiwfs%3Akiinteistotunnus%2Cktjkiiwfs%3Aolotila%2Cktjkiiwfs%3Arekisteriyksikkolaji%2Cktjkiiwfs%3Arekisterointipvm%2Cktjkiiwfs%3Animi%2Cktjkiiwfs%3Amaapintaala%2Cktjkiiwfs%3Avesipintaala&FEATUREID=FI.KTJkii-RekisteriyksikonTietoja-" (codec/url-encode rekisteriyksikon-tunnus) "&SRSNAME=EPSG%3A3067&MAXFEATURES=100&RESULTTYPE=results")
