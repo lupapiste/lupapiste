@@ -333,6 +333,18 @@
        :x x
        :y y})))
 
+(defn feature-to-property-id-municipality [feature]
+  "Parses property info without property borders (for property-info-by-point)"
+  (when (seq feature)
+    (let [property-id (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kiinteistotunnus text))
+          municipality-code (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kuntaTieto :ktjkiiwfs:KuntaTieto :ktjkiiwfs:kuntatunnus text))
+          muni-fi (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kuntaTieto :ktjkiiwfs:KuntaTieto :ktjkiiwfs:nimiSuomeksi text))
+          muni-sv (first (xml-> feature :ktjkiiwfs:RekisteriyksikonTietoja :ktjkiiwfs:kuntaTieto :ktjkiiwfs:KuntaTieto :ktjkiiwfs:nimiRuotsiksi text))]
+      {:propertyId property-id
+       :municipality municipality-code
+       :name {:fi muni-fi
+              :sv muni-sv}})))
+
 (defn- ->features [s parse-fn & [encoding]]
   (when s
     (-> (if encoding (.getBytes s encoding) (.getBytes s))
@@ -563,6 +575,16 @@
         (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
                (wfs-property-name "ktjkiiwfs:kiinteistotunnus")
                (wfs-property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:tunnuspisteSijainti")
+               (wfs-property-name "ktjkiiwfs:kuntaTieto")
+               (ogc-filter
+                 (intersects
+                   (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:RekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
+                   (point x y))))))
+
+(defn property-id-muni-by-point [x y]
+  (post ktjkii
+        (query {"typeName" "ktjkiiwfs:RekisteriyksikonTietoja" "srsName" "EPSG:3067"}
+               (wfs-property-name "ktjkiiwfs:kiinteistotunnus")
                (wfs-property-name "ktjkiiwfs:kuntaTieto")
                (ogc-filter
                  (intersects
