@@ -447,6 +447,6 @@
 
 (facts "Municipality info from KTJKii"
   (fact "Jakkukyla"
-    (->> (wfs/get-property-location-info-by-property-id "56442100060084")
+    (->> (wfs/municipality-info-by-property-id "56442100060084")
          (wfs/location-feature-to-property-info)) => {:propertyId "56442100060084" :municipality "139"
                                                       :name {:fi "Ii", :sv "Ii"}}))
