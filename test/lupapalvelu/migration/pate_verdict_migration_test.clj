@@ -58,9 +58,13 @@
                                                :pykala section
                                                :paatoskoodi code}]}]
                    :signatures [{:created signed1
-                                 :user {:id signer-id1}}
+                                 :user {:id signer-id1
+                                        :firstName "First"
+                                        :lastName "Name"}}
                                 {:created signed2
-                                 :user {:id signer-id2}}]})
+                                 :user {:id signer-id2
+                                        :firstName "Second"
+                                        :lastName "Name"}}]})
 (def migrated-test-verdict {:id verdict-id
                             :modified 1234
                             :category :r
@@ -75,12 +79,17 @@
                                                                      :type (wrap "aloituskokous")}}
                                    :foremen         {"foreman-id" {:role (wrap "Supervising supervisor")}}
                                    :conditions      {"condition-id1" {:name (wrap "Muu 1")}
-                                                     "condition-id2" {:name (wrap "Muu 2")}}}
+                                                     "condition-id2" {:name (wrap "Muu 2")}}
+                                   :attachments     [{:type-group "paatoksenteko"
+                                                      :type-id     "paatos"
+                                                      :amount 1}]}
                             :template {:inclusions [:foreman-label :conditions-title :foremen-title :kuntalupatunnus :verdict-section :verdict-text :anto :attachments :foremen.role :foremen.remove :verdict-code :conditions.name :conditions.remove :reviews-title :type-label :reviews.name :reviews.type :reviews.remove :add-review :name-label :condition-label :lainvoimainen :handler :add-foreman :upload :add-condition]}
                             :signatures [{:date    signed1
-                                          :user-id signer-id1}
+                                          :user-id signer-id1
+                                          :name "First Name"}
                                          {:date    signed2
-                                          :user-id signer-id2}]
+                                          :user-id signer-id2
+                                          :name "Second Name"}]
                             :legacy? true})
 (def migrated-test-verdict-no-tasks
   (-> migrated-test-verdict
@@ -88,7 +97,13 @@
 (def test-application {:id "app-id"
                        :verdicts [test-verdict]
                        :permitType "R"
-                       :tasks (tasks-for-verdict (:id test-verdict))})
+                       :tasks (tasks-for-verdict (:id test-verdict))
+                       :attachments [{:latestVersion {:fileId "attachment-id"}
+                                      :target {:id verdict-id
+                                               :type "verdict"}
+                                      :id "attachment1"
+                                      :type {:type-id    "paatos"
+                                             :type-group "paatoksenteko"}}]})
 
 (def app-one-verdict-no-tasks (dissoc test-application :tasks))
 (def app-one-verdict-with-tasks test-application)

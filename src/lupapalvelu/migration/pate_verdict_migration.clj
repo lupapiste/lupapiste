@@ -2,6 +2,7 @@
   (:require [clojure.walk :refer [postwalk prewalk walk]]
             [monger.operators :refer :all]
             [sade.core :refer [def-]]
+            [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.schema-util :as schema-util]
@@ -72,6 +73,9 @@
   (fn [_ _ context]
     (get-in context path)))
 
+(defn- context [_ _ context]
+  context)
+
 (defn- verdict-category [application _ _]
   (schema-util/application->category application))
 
@@ -92,15 +96,37 @@
    :verdict-giver ((get-in-poytakirja :paatoksentekija) nil verdict nil)
    :lainvoimainen ((get-in-paivamaarat :lainvoimainen) nil verdict nil)})
 
+;; See lupapalvelu.pate.verdict/verdict-attachment-items
+(defn- attachment-summaries [application verdict _]
+  (->> (:attachments application)
+       (filter #(some-> % :latestVersion :fileId ss/not-blank?))
+       (filter (fn [{:keys [target]}]
+                 (= (:id verdict) (:id target))))
+       (mapv (fn [{:keys [type id]}]
+               {:type-group (:type-group type)
+                :type-id    (:type-id type)
+                :id         id}))
+       (group-by #(select-keys % [:type-group
+                                  :type-id]))
+       (map (fn [[k v]]
+              (assoc k :amount (count v))))))
+
+(def- signature-name (comp (partial apply str)
+                           (juxt (get-in-context [:user :firstName])
+                                 (constantly " ")
+                                 (get-in-context [:user :lastName]))))
+
 (def- accessor-functions
   "Contains functions for accessing relevant Pate verdict data from
   current verdict drafts. These return the raw values but are
   subsequently to be wrapped with relevant metadata."
   {:anto              (get-in-paivamaarat :anto)
    :archive           (get-when verdict-published? get-archive-data)
+   :attachment-summaries attachment-summaries
    :category          verdict-category
    :condition-name    (get-in-context [:taskname])
    :conditions        (filter-tasks-of-verdict (task-name? :task-lupamaarays))
+   :context           context
    :foreman-role      (get-in-context [:taskname])
    :foremen           (filter-tasks-of-verdict (task-name? :task-vaadittu-tyonjohtaja))
    :handler           (get-in-poytakirja :paatoksentekija)
@@ -113,12 +139,13 @@
    :review-type       (get-in-context [:data :katselmuksenLaji :value])
    :reviews           (filter-tasks-of-verdict (task-name? :task-katselmus))
    :signature-date    (get-in-context [:created])
+   :signature-name    signature-name
    :signature-user-id (get-in-context [:user :id])
    :signatures        (get-in-verdict [:signatures])
    :template          verdict-template
    :verdict-code      (comp str (get-in-poytakirja :status))
    :verdict-section   (get-in-poytakirja :pykala)
-   :verdict-text    (get-in-poytakirja :paatos)})
+   :verdict-text      (get-in-poytakirja :paatos)})
 
 (defn- assoc-context [element context]
   (postwalk (fn [x]
@@ -190,9 +217,12 @@
           :foremen         (id-map-from :foremen
                                         {:role (wrap (access :foreman-role))})
           :conditions      (id-map-from :conditions
-                                        {:name (wrap (access :condition-name))})}
+                                        {:name (wrap (access :condition-name))})
+          :attachments     (array-from :attachment-summaries
+                                       (access :context))}
    :signatures (array-from :signatures
                            {:date (access :signature-date)
+                            :name (access :signature-name)
                             :user-id (access :signature-user-id)})
    :template (access :template)
    :archive (access :archive)
@@ -214,7 +244,6 @@
 ;;
 ;; Application migration
 ;;
-;; TODO also migrate non-draft Lupapiste verdicts
 (defn migration-updates [application timestamp]
   (merge {$unset {:verdicts ""}
           $set {:pate-verdicts [(->pate-legacy-verdict application
