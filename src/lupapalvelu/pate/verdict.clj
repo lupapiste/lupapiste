@@ -42,6 +42,7 @@
             [rum.core :as rum]
             [sade.coordinate :as coord]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.property :as sp]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -1152,11 +1153,13 @@
 ;; queue. If the generation fails, the message is requeued.
 
 (defonce pate-queue "lupapalvelu.pate.queue")
-(def pate-session  (if-let [conn (jms/get-default-connection)]
-                     (-> conn
-                         (jms/create-transacted-session)
-                         (jms/register-session :consumer))
-                     (warn "No JMS connection available")))
+(def pate-session (if (env/feature? :jms)
+                    (if-let [conn (jms/get-default-connection)]
+                      (-> conn
+                          (jms/create-transacted-session)
+                          (jms/register-session :consumer))
+                      (warn "No JMS connection available"))
+                    (warn "JMS feature disabled")))
 
 (defn create-verdict-pdf [{:keys [data] :as command}]
   (try+
