@@ -43,3 +43,8 @@
 
 (defn property-info-by-point [x y]
   (first (property-infos-by-point x y)))
+
+(defn property-id-municipality-by-point [x y]
+  (->> (wfs/property-id-muni-by-point x y)
+       (map wfs/feature-to-property-id-municipality)
+       first))
