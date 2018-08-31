@@ -285,6 +285,11 @@
                 :jobId job-id
                 :version version))
 
+(defn fetch-application-parties [app-id callback]
+  (common/query "pate-parties"
+                #(reset! state/template-list (:parties %))
+                :id app-id))
+
 (defn- batch-job [status-fn {:keys [job]}]
   (status-fn (when job
                (reduce (fn [acc {:keys [fileId status]}]

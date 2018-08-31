@@ -10,6 +10,8 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
+(enable-console-print!)
+
 (defonce args (atom {}))
 
 (defn loc-key [k]
@@ -41,6 +43,9 @@
 
 (defn- can-sign? [verdict-id]
   (state/react-verdict-auth? verdict-id :sign-pate-contract))
+
+(defn- contract? [{category :category}]
+  (util/=as-kw category :contract))
 
 (defn open-verdict [arg]
   (common/open-page :pate-verdict
@@ -176,6 +181,39 @@
                 :class    :positive
                 :icon     :lupicon-circle-pen}))))]])
 
+(rum/defcs request-signature-row < rum/reactive
+  (rum/local "" ::signer)
+  (rum/local [] ::parties)
+  (rum/local false ::add-signature?)
+  [{signer*         ::signer
+    parties*        ::parties
+    add-signature?* ::add-signature?} app-id id]
+   [:tr.verdict-signatures
+   [:td {:colSpan 2}]
+   [:td {:colSpan 2}
+    [:div.row
+     [:div.col-1
+      (when @add-signature?*
+        (let [callback (fn [result] (reset! parties* (:parties result)))
+              items (rum/react state/template-list)]
+          [:div [:label (common/loc :pate.verdict-table.request-signature.title)]
+           (components/dropdown signer*
+                                {:items items})
+           [:button.signature
+            {:on-click (fn [signer*] (println "Kutsutaan allekirjoittamaan " signer*))
+             :class    :positive}
+            (common/loc :pate.verdict-table.send-signature-request)]]))]]]
+   [:td
+     (if @add-signature?*
+       [:button {:on-click (fn [_] (swap! add-signature?* not))
+                 :class :secondary}
+        (common/loc :cancel)]
+       (components/icon-button
+         {:on-click (fn [_] (swap! add-signature?* not))
+          :text-loc :pate.verdict-table.request-signature
+          :class    :secondary
+          :icon     :lupicon-circle-plus}))]])
+
 (defn- verdict-table [headers verdicts app-id hide-actions]
   [:table.pate-verdicts-table
    [:thead [:tr (map (fn [header] [:th (common/loc header)]) headers)]]
@@ -217,7 +255,9 @@
                                 :on-click #(confirm-and-replace-verdict verdict id)}))])]
                         (when (seq signatures)
                           (rum/with-key (verdict-signatures-row app-id id signatures)
-                            (str id "-signatures")))))
+                                        (str id "-signatures")))
+                        (when (contract? verdict)
+                          (rum/with-key (request-signature-row app-id id) (str id "-request")))))
                 verdicts)]])
 
 (rum/defc verdict-list < rum/reactive
@@ -264,6 +304,7 @@
     (reset! state/template-list [])
     (reset! state/verdict-list nil)
     (reset! state/replacement-verdict nil)
+    (reset! state/parties nil)
     (state/refresh-verdict-auths app-id)
     (state/refresh-application-auth-model app-id
                                           #(when (state/auth? :pate-verdicts)

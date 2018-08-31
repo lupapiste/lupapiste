@@ -7211,6 +7211,13 @@ button:focus {
   float: left;
 }
 
+button.signature {
+  color: white;
+  background-color: #2ca92c;
+  margin-left: 12px;
+  margin-top: -2px;
+}
+
 label.arrow-label {
   width: 100%;
   display: inline-block;

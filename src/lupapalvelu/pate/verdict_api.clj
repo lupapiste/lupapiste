@@ -247,6 +247,17 @@
   (let [{:keys [id published]} (verdict/command->verdict command)]
     (ok :verdict (assoc published :id id))))
 
+(defquery pate-parties
+  {:description       "Application parties"
+   :feature           :pate
+   :user-roles        #{:authority :applicant}
+   :parameters        [id]
+   :categories        #{:pate-verdicts}
+   :input-validators  [(partial action/non-blank-parameters [:id])]
+   :states           states/post-submitted-states}
+  [command]
+  (ok :parties [{:value "jee" :text "jee"}]))
+
 (defcommand edit-pate-verdict
   {:description "Updates verdict data. Returns changes and errors
   lists (items are path-vector value pairs)"
