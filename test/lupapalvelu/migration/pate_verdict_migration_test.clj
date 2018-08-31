@@ -141,7 +141,8 @@
                                    #(map (fn [v] (assoc v :draft false)) %))
                            (assoc test-verdict :draft false)
                            timestamp)
-    => (contains {:published anto
+    => (contains {:published {:published anto
+                              :attachment-id "attachment1"}
                   :archive {:verdict-giver handler
                             :lainvoimainen lainvoimainen}})))
 

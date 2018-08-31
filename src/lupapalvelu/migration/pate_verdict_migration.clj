@@ -5,6 +5,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.pate.metadata :as metadata]
+            [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict :as verdict]))
 
@@ -96,12 +97,15 @@
    :verdict-giver ((get-in-poytakirja :paatoksentekija) nil verdict nil)
    :lainvoimainen ((get-in-paivamaarat :lainvoimainen) nil verdict nil)})
 
+(defn- targets-verdict? [attachment verdict]
+  (= (:id verdict)
+     (-> attachment :target :id)))
+
 ;; See lupapalvelu.pate.verdict/verdict-attachment-items
 (defn- attachment-summaries [application verdict _]
   (->> (:attachments application)
        (filter #(some-> % :latestVersion :fileId ss/not-blank?))
-       (filter (fn [{:keys [target]}]
-                 (= (:id verdict) (:id target))))
+       (filter #(targets-verdict? % verdict))
        (mapv (fn [{:keys [type id]}]
                {:type-group (:type-group type)
                 :type-id    (:type-id type)
@@ -115,6 +119,13 @@
                            (juxt (get-in-context [:user :firstName])
                                  (constantly " ")
                                  (get-in-context [:user :lastName]))))
+
+(defn- published-attachment-id [application verdict _]
+  (->> (:attachments application)
+       (util/find-first #(and (util/=as-kw (-> % :type :type-id)
+                                           :paatos)
+                              (targets-verdict? % verdict)))
+       :id))
 
 (def- accessor-functions
   "Contains functions for accessing relevant Pate verdict data from
@@ -135,6 +146,7 @@
    :lainvoimainen     (get-in-paivamaarat :lainvoimainen)
    :modified          (get-in-verdict [:timestamp])
    :published         (get-when verdict-published? (get-in-paivamaarat :anto))
+   :published-attachment-id (get-when verdict-published? published-attachment-id)
    :review-name       (get-in-context [:taskname])
    :review-type       (get-in-context [:data :katselmuksenLaji :value])
    :reviews           (filter-tasks-of-verdict (task-name? :task-katselmus))
@@ -203,7 +215,9 @@
   {:id        (access :id)
    :modified  (access :modified)
    :category  (access :category)
-   :published (access :published)
+   :published {:published     (access :published)
+               ;; :tags          (access :published-tags)
+               :attachment-id (access :published-attachment-id)}
    :data {:handler         (wrap (access :handler))
           :kuntalupatunnus (wrap (access :kuntalupatunnus))
           :verdict-section (wrap (access :verdict-section))
@@ -233,7 +247,8 @@
                                      verdict)
                 verdict-migration-skeleton)
        (postwalk (post-process timestamp))
-       util/strip-nils))
+       util/strip-nils
+       util/strip-empty-maps))
 
 (defn- draft-verdict-ids [application]
   (->> application
