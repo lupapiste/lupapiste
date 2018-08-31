@@ -194,22 +194,21 @@
     [:div.row
      [:div.col-1
       (when @add-signature?*
-        (let [callback (fn [result] (reset! parties* (:parties result)))
-              items (rum/react state/template-list)]
           [:div [:label (common/loc :pate.verdict-table.request-signature.title)]
            (components/dropdown signer*
-                                {:items items})
+                                {:items (rum/react parties*)})
            [:button.signature
             {:on-click (fn [signer*] (println "Kutsutaan allekirjoittamaan " signer*))
              :class    :positive}
-            (common/loc :pate.verdict-table.send-signature-request)]]))]]]
+            (common/loc :pate.verdict-table.send-signature-request)]])]]]
    [:td
      (if @add-signature?*
        [:button {:on-click (fn [_] (swap! add-signature?* not))
-                 :class :secondary}
+                 :class    :secondary}
         (common/loc :cancel)]
        (components/icon-button
-         {:on-click (fn [_] (swap! add-signature?* not))
+         {:on-click (fn [_] (do (swap! add-signature?* not)
+                                (service/fetch-application-parties app-id #(reset! parties* (:parties %)))))
           :text-loc :pate.verdict-table.request-signature
           :class    :secondary
           :icon     :lupicon-circle-plus}))]])

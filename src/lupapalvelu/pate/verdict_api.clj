@@ -256,7 +256,8 @@
    :input-validators  [(partial action/non-blank-parameters [:id])]
    :states           states/post-submitted-states}
   [command]
-  (ok :parties [{:value "jee" :text "jee"}]))
+  (let [parties (map #()) (get-in command [:application :auth])]
+    (ok :parties [{:value "fizz" :text "fuzz"}])))
 
 (defcommand edit-pate-verdict
   {:description "Updates verdict data. Returns changes and errors

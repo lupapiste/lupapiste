@@ -287,7 +287,7 @@
 
 (defn fetch-application-parties [app-id callback]
   (common/query "pate-parties"
-                #(reset! state/template-list (:parties %))
+                callback
                 :id app-id))
 
 (defn- batch-job [status-fn {:keys [job]}]
