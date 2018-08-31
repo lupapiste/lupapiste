@@ -242,11 +242,19 @@
    :archive (access :archive)
    :legacy? true})
 
+(defn- add-tags [application verdict]
+  (if (-> verdict :published :published)
+    (assoc-in verdict [:published :tags]
+              (pr-str (pdf/verdict-tags application
+                                        (metadata/unwrap-all verdict))))
+    verdict))
+
 (defn ->pate-legacy-verdict [application verdict timestamp]
   (->> (prewalk (fetch-with-accessor application
                                      verdict)
                 verdict-migration-skeleton)
        (postwalk (post-process timestamp))
+       (add-tags application)
        util/strip-nils
        util/strip-empty-maps))
 

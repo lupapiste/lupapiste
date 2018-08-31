@@ -97,13 +97,67 @@
 (def test-application {:id "app-id"
                        :verdicts [test-verdict]
                        :permitType "R"
+                       :organization "753-R"
+                       :primaryOperation {:id "5b868cb8e7d8a158be266085"
+                                          :name "kerrostalo-rivitalo"
+                                          :description nil
+                                          :created 1535544504326}
+                       :propertyId "75341600550007"
                        :tasks (tasks-for-verdict (:id test-verdict))
                        :attachments [{:latestVersion {:fileId "attachment-id"}
                                       :target {:id verdict-id
+
                                                :type "verdict"}
                                       :id "attachment1"
                                       :type {:type-id    "paatos"
-                                             :type-group "paatoksenteko"}}]})
+                                             :type-group "paatoksenteko"}}]
+                       :documents [{:id "5b868cb8e7d8a158be266087"
+                                    :schema-info {:name "hakija-r"
+                                                  :version 1
+                                                  :type "party"
+                                                  :subtype "hakija"}
+                                    :created 1535544504326
+                                    :data {:_selected {:value "henkilo"
+                                                       :modified 1535544504531}
+                                           :henkilo {:userId {:value "777777777777777777000023"
+                                                              :modified 1535544504531}
+                                                     :henkilotiedot {:etunimi {:value "Sonja"
+                                                                               :modified 1535544504531}
+                                                                     :sukunimi {:value "Sibbo"
+                                                                                :modified 1535544504531}
+                                                                     :hetu {:value ""
+                                                                            :modified 1535544504531}
+                                                                     :turvakieltoKytkin {:value false
+                                                                                         :modified 1535544504531}}
+                                                     :osoite {:katu {:value "Katuosoite 1 a 1"
+                                                                     :modified 1535544504531}
+                                                              :postinumero {:value "33456"
+                                                                            :modified 1535544504531}
+                                                              :postitoimipaikannimi {:value "Sipoo"
+                                                                                     :modified 1535544504531}
+                                                              :maa {:value "FIN"}}
+                                                     :yhteystiedot {:puhelin {:value "03121991"
+                                                                              :modified 1535544504531}
+                                                                    :email {:value "sonja.sibbo@sipoo.fi"
+                                                                            :modified 1535544504531}}
+                                                     :kytkimet {:suoramarkkinointilupa {:value false
+                                                                                        :modified 1535544504531}
+                                                                :vainsahkoinenAsiointiKytkin {:value true}}}
+                                           :yritys {:companyId {:value nil}
+                                                    :yritysnimi {:value ""}
+                                                    :liikeJaYhteisoTunnus {:value ""}
+                                                    :osoite {:katu {:value ""}
+                                                             :postinumero {:value ""}
+                                                             :postitoimipaikannimi {:value ""}
+                                                             :maa {:value "FIN"}}
+                                                    :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}
+                                                                                    :sukunimi {:value ""}
+                                                                                    :turvakieltoKytkin {:value false}}
+                                                                    :yhteystiedot {:puhelin {:value ""}
+                                                                                   :email {:value ""}}
+                                                                    :kytkimet {:suoramarkkinointilupa {:value false}
+                                                                               :vainsahkoinenAsiointiKytkin {:value true}}}}}
+                                    :meta {:_indicator_reset {:timestamp 1535544525806}}}]})
 
 (def app-one-verdict-no-tasks (dissoc test-application :tasks))
 (def app-one-verdict-with-tasks test-application)
@@ -141,10 +195,14 @@
                                    #(map (fn [v] (assoc v :draft false)) %))
                            (assoc test-verdict :draft false)
                            timestamp)
-    => (contains {:published {:published anto
-                              :attachment-id "attachment1"}
+    => (contains {:published (contains {:published anto
+                                        :attachment-id "attachment1"
+                                        :tags string?})
                   :archive {:verdict-giver handler
-                            :lainvoimainen lainvoimainen}})))
+                            :lainvoimainen lainvoimainen}}))
+
+  (against-background
+   (lupapalvelu.organization/get-organization-name anything anything) => "Sipoon rakennusvalvonta"))
 
 (facts "migration-updates"
   (fact "one draft verdict, no tasks"
@@ -159,4 +217,5 @@
         $set {:pate-verdicts [migrated-test-verdict]}
         $pull {:tasks {:source.id {$in [(:id migrated-test-verdict)]}}}})
 
-  )
+  (against-background
+   (lupapalvelu.organization/get-organization-name anything anything) => "Sipoon rakennusvalvonta"))

@@ -238,11 +238,11 @@
                             (remove ss/blank?)
                             distinct
                             (ss/join " / "))
-           :parking (->>  buildings
-                          (map (partial building-parking lang))
-                          (interpose {:text    "" :amount ""
-                                      ::styles {:row :pad-before}})
-                          flatten)
+           :parking (->> buildings
+                         (map (partial building-parking lang))
+                         (interpose {:text    "" :amount ""
+                                     ::styles {:row :pad-before}})
+                         flatten)
            :attachments (verdict-attachments options)
            :organization (html/organization-name lang application)
            :link-permits (link-permits options)
