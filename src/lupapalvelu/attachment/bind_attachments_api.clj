@@ -47,6 +47,16 @@
    :assignment-group "attachments"
    :timestamp        (:created command)})
 
+(defn- notify-on-ram-attachments [{:keys [application created]}]
+  (fn [filedatas]
+    (let [ram-ids (->> application
+                       :attachments
+                       (filter :ramLink)
+                       (map :id))]
+      (doseq [att-id (util/intersection-as-kw ram-ids
+                                              (map :attachment-id filedatas))]
+        (ram/notify-new-ram-attachment! application att-id created)))))
+
 (defcommand bind-attachment
   {:description         "API to bind file to attachment, returns job that can be polled for status."
    :parameters          [id attachmentId fileId]
@@ -78,16 +88,6 @@
   [check]
   (fn [{data :data :as command}]
     (reduce #(or %1 (check (assoc command :data %2))) nil (:filedatas data))))
-
-(defn- notify-on-ram-attachments [{:keys [application created]}]
-  (fn [filedatas]
-    (let [ram-ids (->> application
-                       :attachments
-                       (filter :ramLink)
-                       (map :id))]
-      (doseq [att-id (util/intersection-as-kw ram-ids
-                                              (map :attachment-id filedatas))]
-        (ram/notify-new-ram-attachment! application att-id created)))))
 
 (defcommand bind-attachments
   {:description         "API to bind files to attachments, returns job that can be polled for status per file."
