@@ -432,9 +432,14 @@
         jarvenpaa {:x "399309.136" :y "6709508.629"}
         raasepori-island {:x "296734.231" :y "6647154.2190031"}]
     (fact "Jakkukyla"
+      ; was formerly in Oulu, property id indicates that
       (prop-loc/property-info-by-point (:x jakku) (:y jakku)) => (contains {:municipality "139",
                                                                             :name {:fi "Ii", :sv "Ii"},
-                                                                            :propertyId "56442100060084"})) ; was formerly in Oulu, property id indicates that
+                                                                            :propertyId "56442100060084"})
+
+      (prop-loc/property-id-municipality-by-point (:x jakku) (:y jakku)) => (contains {:municipality "139",
+                                                                                       :name {:fi "Ii", :sv "Ii"},
+                                                                                       :propertyId "56442100060084"}))
     (fact "Jarvenpaa in border of Mantsala"
       (prop-loc/property-info-by-point (:x jarvenpaa) (:y jarvenpaa)) => (contains {:municipality "186"
                                                                                     :name {:fi "J\u00e4rvenp\u00e4\u00e4"
@@ -447,6 +452,6 @@
 
 (facts "Municipality info from KTJKii"
   (fact "Jakkukyla"
-    (->> (wfs/get-property-location-info-by-property-id "56442100060084")
+    (->> (wfs/municipality-info-by-property-id "56442100060084")
          (wfs/location-feature-to-property-info)) => {:propertyId "56442100060084" :municipality "139"
                                                       :name {:fi "Ii", :sv "Ii"}}))

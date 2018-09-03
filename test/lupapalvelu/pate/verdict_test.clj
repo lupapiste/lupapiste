@@ -1,5 +1,7 @@
 (ns lupapalvelu.pate.verdict-test
   (:require [lupapalvelu.inspection-summary :as inspection-summary]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.schemas :as schemas]
@@ -13,8 +15,7 @@
             [monger.operators :refer :all]
             [sade.shared-schemas :refer [object-id-pattern]]
             [sade.util :as util]
-            [schema.core :as sc]
-            [lupapalvelu.mongo :as mongo]))
+            [schema.core :as sc]))
 
 (testable-privates lupapalvelu.pate.verdict
                    next-section verdict->updates
@@ -1376,10 +1377,13 @@
                                    :template-section :buildings}
                 :foremen-included {:toggle {}}})))))
 
+(def wrap (partial metadata/wrap "user" 12345))
+
 (facts "archive-info"
   (let [verdict {:id             "5ac78d3e791c066eef7198a2"
                  :category       "r"
                  :schema-version 1
+                 :state          (wrap "draft")
                  :modified       12345
                  :data           {:handler       "Hank Handler"
                                   :verdict-date  8765432
@@ -1406,9 +1410,9 @@
               => nil)))
         (fact "archive info (with lainvoimainen)"
           (let [archive (archive-info (assoc-in v [:data :lainvoimainen] 99999))]
-           archive => {:verdict-date  8765432
-                       :lainvoimainen 99999
-                       :verdict-giver "The Board"}
+            archive => {:verdict-date  8765432
+                        :lainvoimainen 99999
+                        :verdict-giver "The Board"}
            (fact "Archive schema validation"
              (sc/check schemas/PateVerdict (assoc v :archive archive))
              => nil)))))
@@ -1444,19 +1448,26 @@
     (accepted-verdict? {:data {}}) => nil
     (accepted-verdict? nil) => nil))
 
+(defn publish [verdict ts]
+  (-> verdict
+      (assoc :state (metadata/wrap "publisher" ts "published"))
+      (assoc-in [:published :published] ts)))
+
 (facts "Verdict handling helpers"
   (fact "Find latest published pate verdict"
+    (latest-published-pate-verdict {:application {}})
+    => nil
     (latest-published-pate-verdict {:application
                                     {:pate-verdicts
-                                     [(assoc test-verdict :published 1525336290167)]}})
-    => (assoc test-verdict :published 1525336290167)
+                                     [(publish test-verdict 1525336290167)]}})
+    => (publish test-verdict 1525336290167)
     (latest-published-pate-verdict {:application
                                     {:pate-verdicts
                                      [test-verdict
-                                      (assoc test-verdict :published 1525336290167)
-                                      (assoc test-verdict :published 1425330000000)
-                                      (assoc test-verdict :published 1525336290000)]}})
-    => (assoc test-verdict :published 1525336290167)))
+                                      (publish test-verdict 1525336290167)
+                                      (publish test-verdict 1425330000000)
+                                      (publish test-verdict 1525336290000)]}})
+    => (publish test-verdict 1525336290167)))
 
 (fact "title-fn"
   (let [fun (partial format "(%s)")]
@@ -1540,7 +1551,7 @@
           :title        "Luonnos (korvaa p\u00e4\u00e4t\u00f6ksen \u00a72)"})
     (fact "Published"
       (verdict-summary "fi" section-strings
-                       (assoc verdict :published 121212))
+                       (publish verdict 121212))
       => {:id           "v1"
           :category     "r"
           :legacy?      false
@@ -1552,7 +1563,7 @@
     (fact "Published, no section"
       (verdict-summary "fi" {}
                        (-> verdict
-                           (assoc :published 121212)
+                           (publish 121212)
                            (assoc-in [:data :verdict-section] nil)))
       => {:id           "v1"
           :category     "r"
@@ -1565,7 +1576,7 @@
     (fact "Published replacement"
       (verdict-summary "fi" section-strings
                        (-> verdict
-                           (assoc :published 121212)
+                           (publish 121212)
                            (assoc-in [:replacement :replaces] "v2")))
       => {:id           "v1"
           :category     "r"
@@ -1579,7 +1590,7 @@
     (fact "Published replacement, no section"
       (verdict-summary "fi" (dissoc section-strings "v2")
                        (-> verdict
-                           (assoc :published 121212)
+                           (publish 121212)
                            (assoc-in [:replacement :replaces] "v2")))
       => {:id           "v1"
           :category     "r"
@@ -1603,8 +1614,8 @@
     (fact "Legacy published"
       (verdict-summary "fi" section-strings
                        (-> verdict
-                           (assoc :legacy? true
-                                  :published 676767)
+                           (publish 676767)
+                           (assoc :legacy? true)
                            (assoc-in [:data :verdict-code] "41")))
       => {:id           "v1"
           :category     "r"
@@ -1631,7 +1642,7 @@
               :title        "Luonnos"})
         (fact "Published"
           (verdict-summary "fi" section-strings
-                           (assoc verdict :published 656565))
+                           (publish verdict 656565))
           => {:id           "v1"
               :category     "ya"
               :legacy?      false
@@ -1642,8 +1653,7 @@
               :title        "\u00a71 Sijoituslupa - Annettu lausunto"})
         (fact "Published replacement"
           (verdict-summary "fi" section-strings
-                           (assoc verdict
-                                  :published 656565
+                           (assoc (publish verdict 656565)
                                   :replacement {:replaces "v2"}))
           => {:id           "v1"
               :category     "ya"
@@ -1665,7 +1675,7 @@
                    :verdict-section section
                    :verdict-date    876543}
      :modified    (or published modified 1)
-     :published   published
+     :published   (when published {:published published})
      :replacement (when replaces {:replaces replaces})
      :template    {:inclusions ["verdict-code"
                                 "handler"
@@ -2216,6 +2226,7 @@
                  :application application}
         verdict {:id         "vid"
                  :category   "r"
+                 :state      "draft"
                  :data       {:verdict-code "myonnetty"
                               :handler      "Foo Bar"
                               :verdict-date 876543}
@@ -2231,21 +2242,24 @@
     (fact finalize--verdict
       (finalize--verdict c-v-a)
       => {:verdict (util/deep-merge verdict
-                                    {:user      {:id       "user-id"
-                                                 :username "user-email"}
-                                     :archive   {:verdict-date  876543
+                                    {:archive   {:verdict-date  876543
                                                  :verdict-giver "Foo Bar"}
-                                     :published 12345})
+                                     :published {:published 12345}
+                                     :state     {:_value    "published"
+                                                 :_user     "user-email"
+                                                 :_modified 12345}})
           :updates {$set {:pate-verdicts.$.archive             {:verdict-date  876543
                                                                 :verdict-giver "Foo Bar"}
                           :pate-verdicts.$.data.handler        "Foo Bar"
                           :pate-verdicts.$.data.verdict-code   "myonnetty"
                           :pate-verdicts.$.data.verdict-date   876543
-                          :pate-verdicts.$.published           12345
+                          :pate-verdicts.$.published.published 12345
                           :pate-verdicts.$.template.inclusions ["verdict-code"
                                                                 "handler"
                                                                 "verdict-date"]
-                          :pate-verdicts.$.user                {:id "user-id" :username "user-email"}}}})
+                          :pate-verdicts.$.state               {:_value    "published"
+                                                                :_user     "user-email"
+                                                                :_modified 12345}}}})
 
     (fact "finalize--application-state: waste plan"
       (-> application :documents count) => 3
@@ -3453,8 +3467,8 @@
                   => nil)))
 
     (fact "finalize--pdf"
-      (keys (get-in (finalize--pdf c-v-a) [:updates $set :pate-verdicts.$.verdict-attachment.html]))
-      => (just [:header :body :footer] :in-any-order)
+      (get-in (finalize--pdf c-v-a) [:updates $set :pate-verdicts.$.published.tags])
+      => string?
       (provided (lupapalvelu.organization/get-organization-name "753-R" nil)
                 => "Sipoon rakennusvalvonta"))))
 

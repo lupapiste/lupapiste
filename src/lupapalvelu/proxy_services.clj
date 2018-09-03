@@ -125,7 +125,7 @@
 
 (defn address-by-point-proxy [{{:keys [x y lang]} :params}]
   (if (and (coord/valid-x? x) (coord/valid-y? y))
-    (if-let [property (plocation/property-info-by-point x y)]
+    (if-let [property (plocation/property-id-municipality-by-point x y)]
       (let [municipality (:municipality property)
             nls-address-query (future (wfs/address-by-point x y))
             x_d (util/->double x)

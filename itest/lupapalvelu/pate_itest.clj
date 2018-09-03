@@ -793,6 +793,9 @@
                                              {}
                                              changes))))}))
 
+
+
+
 (facts "Verdicts"
   (let [{:keys [good-condition other-condition template-id app-id]} space-saving-definitions]
     (facts "Pena fills and submits application"
@@ -1434,27 +1437,11 @@
                 (http-client/form-decode query-string)
                 => {"verdict-id" verdict-id
                     "id"         app-id}
-                (fact "verdict-pdf action"
-                  (:headers(raw sonja :verdict-pdf :id app-id :verdict-id verdict-id))
-                  => (contains {"Content-Disposition" (contains (format "%s Permit %s"
-                                                                        app-id
-                                                                        (util/to-local-date (now))))}))))))
+                (verdict-pdf-queue-test {:app-id     app-id
+                                         :verdict-id verdict-id
+                                         :verdict-name "Permit"
+                                         :contents "Permit text"})))))))
 
-        (fact "Verdict PDF attachment has been created"
-          (let [{att-id :id
-                 :as    attachment} (last (:attachments (query-application sonja app-id)))]
-            attachment
-            => (contains {:readOnly         true
-                          :locked           true
-                          :contents         "Permit text"
-                          :type             {:type-group "paatoksenteko"
-                                             :type-id    "paatos"}
-                          :applicationState "verdictGiven"
-                          :latestVersion    (contains {:contentType "application/pdf"
-                                                       :filename    (contains "Permit")})})
-            (fact "verdict-attachment"
-              (:verdict (open-verdict))
-              => (contains {:verdict-attachment att-id}))))))
     (fact "Editing no longer allowed"
       (edit-verdict :verdict-text "New verdict text")
       => (err :error.verdict.not-draft))

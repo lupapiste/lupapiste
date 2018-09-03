@@ -266,7 +266,7 @@
 
 (env/with-feature-value :allu true
   (mongo/connect!)
-  <
+
   (facts "Usage of ALLU integration in commands"
     (mongo/with-db itu/test-db-name
       (lupapalvelu.fixture.core/apply-fixture "minimal")
