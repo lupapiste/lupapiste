@@ -24,6 +24,7 @@
             [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.pdf :as pdf]
+            [lupapalvelu.pate.pdf-layouts :as layouts]
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.schemas :as schemas]
@@ -50,7 +51,7 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [warnf errorf error warn]]))
+            [taoensso.timbre :refer [warnf warn  errorf error]]))
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
@@ -1311,44 +1312,68 @@
        (sort-by (comp :published :published))
        last))
 
+(defn- user-person-name [user]
+  (ss/trim (format "%s %s"
+                   (:firstName user)
+                   (:lastName user))))
+
 (defn user-can-sign? [{:keys [application user] :as command}]
-  (let [sigs  (some-> (command->verdict command)
-                      :data :signatures vals)
-        {com-id :id} (auth/auth-via-company application user)]
-    (not (util/find-first (fn [{:keys [user-id company-id]}]
-                            (or (= user-id (:id user))
-                                (and com-id
-                                     (= com-id company-id))))
-                          sigs))))
+  (let [{sigs :signatures} (command->verdict command)
+        {com-id :id}       (auth/auth-via-company application user)]
+    (not-any? (fn [{:keys [user-id company-id name]}]
+                (or (and (= user-id (:id user))
+                         (= name (user-person-name user)))
+                    (and com-id
+                         (= com-id company-id))))
+              sigs)))
 
 (defn- create-signature
-  "Returns [id signature]"
   [{:keys [application user created]}]
-  (let [person            (ss/trim (format "%s %s"
-                                           (:firstName user)
-                                           (:lastName user)))
+  (let [person           (user-person-name user)
         {company-id :id} (auth/auth-via-company application
                                                 user)]
-    [(mongo/create-id)
-     (cond-> {:user-id (:id user)
-              :date created
-              :name person}
-       company-id (assoc
-                   :company-id company-id
-                   ;; Get the up-to-date company name just in case
-                   :name (->> (com/find-company-by-id company-id)
-                              :name
-                              (format "%s, %s" person))))]))
+    (cond-> {:user-id (:id user)
+             :date created
+             :name person}
+      company-id (assoc
+                  :company-id company-id
+                  ;; Get the up-to-date company name just in case
+                  :name (->> (com/find-company-by-id company-id)
+                             :name
+                             (format "%s, %s" person))))))
+
+(defn- update-signature-section
+  "Updates the signatures section with a new signature. Other sections
+  are untouched."
+  [sections verdict signature]
+  (let [verdict (update verdict :signatures concat [signature])
+        entry   (cols/entry-row (:left-width (layouts/pdf-layout verdict))
+                                {:lang       (cols/language verdict)
+                                 :signatures (pdf/signatures {:verdict verdict})}
+                                (first layouts/entry--contract-signatures))]
+    (map (fn [[_ attr & _ :as section]]
+           (if (util/=as-kw (:id attr) :signatures)
+             entry
+             section))
+         sections)))
 
 (defn sign-contract
   "Sign the contract
-   - Update verdict data
+   - Update verdict verdict signatures
+   - Update tags but only the signature part
+   - Change application state to agreementSigned if needed
    - Generate new contract attachment version."
   [{:keys [user created application] :as command}]
-  (let [[sid signature] (create-signature command)]
+  (let [signature (create-signature command)
+        verdict (command->verdict command)
+        tags (-> verdict :published :tags
+                 edn/read-string
+                 (update :body update-signature-section verdict signature)
+                 pr-str)]
     (verdict-update command
                     (util/deep-merge
-                     {$push {(util/kw-path :pate-verdicts.$.signatures) signature}}
+                     {$push {(util/kw-path :pate-verdicts.$.signatures) signature}
+                      $set {(util/kw-path :pate-verdicts.$.published.tags) tags}}
                      (when (util/not=as-kw (:state application)
                                            :agreementSigned)
                        (app-state/state-transition-update :agreementSigned

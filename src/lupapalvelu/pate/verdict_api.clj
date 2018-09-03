@@ -304,8 +304,10 @@
   [_])
 
 (defcommand sign-pate-contract
-  {:description      "Adds the user as a signatory to a published Pate
-  contract if the password matches."
+  {:description "Adds the user as a signatory to a published Pate
+  contract if the password matches. the same name (e.g., the user can resign if the initial handler name
+  is different from the user name or if the user later changes her
+  name)."
    :feature          :pate
    :categories       #{:pate-verdicts}
    :parameters       [:id :verdict-id :password]

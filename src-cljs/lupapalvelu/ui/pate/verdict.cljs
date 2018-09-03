@@ -203,7 +203,6 @@
 (defn bootstrap-verdict []
   (let [[app-id verdict-id] (js/pageutil.getPagePath)]
     (reset-verdict nil)
-    (service/fetch-application-phrases app-id)
     (state/refresh-verdict-auths app-id
                                  {:callback #(state/refresh-application-auth-model
                                               app-id
@@ -213,6 +212,8 @@
                                                                                   verdict-id
                                                                                   reset-verdict)
                                                   (do (service/refresh-attachments)
+                                                      (when (state/auth? :application-phrases)
+                                                        (service/fetch-application-phrases app-id))
                                                       (service/open-verdict app-id
                                                                             verdict-id
                                                                             reset-verdict)))))

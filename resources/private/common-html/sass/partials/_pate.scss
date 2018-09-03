@@ -871,6 +871,7 @@ span.text-and-button > input {
 
 tr.verdict-signatures {
   div.tabby {
+    vertical-align: top;
     margin-left: 1em;
     //max-width: 30em;
     div.tabby__cell {
@@ -888,7 +889,7 @@ tr.verdict-signatures {
     min-width: 16em;
   }
   button.cancel-signing {
-    margin-top: 1.5em;
+    margin-left: 2em;
   }
 }
 

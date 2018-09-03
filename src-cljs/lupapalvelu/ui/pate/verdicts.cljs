@@ -123,58 +123,57 @@
     signing?*     ::signing?
     waiting?*     ::waiting?
     bad-password* ::bad-password} app-id verdict-id signatures]
-  [:tr.verdict-signatures
-   [:td]
-   [:td {:colSpan 3}
-    [:div.pate-grid-3
-     [:div.row
-      [:div.col-1
-       [:div
-        [:div  [:strong (common/loc :verdict.signatures)]]
-        [:div.tabby
-         (map-indexed (fn [i {:keys [name date]}]
-                        [:div.tabby__row {:key i}
-                         [:div.tabby__cell.tabby--100 name]
-                         [:div.tabby__cell.cell--right (js/util.finnishDate date)]])
-                      signatures)]]]
-      (when (can-sign? verdict-id)
-        [:div.col-2.col--right {:key "col-2"}
-         (when @signing?*
-           [:div [:label (common/loc :signAttachment.verifyPassword)]
-            (components/text-and-button password*
-                                        (let [bad? (when (= @password* @bad-password*)
-                                                     :negative)]
-                                          {:input-type   :password
-                                           :disabled?    @waiting?*
-                                           :autoFocus    true
-                                           :class        (common/css-flags :warning bad?)
-                                           :button-class (when bad? :negative)
-                                           :icon         (if @waiting?*
-                                                           :icon-spin.lupicon-refresh
-                                                           :lupicon-circle-pen)
-                                           :callback     (fn [password]
-                                                           (reset! waiting?* true)
-                                                           (service/sign-contract app-id
-                                                                                  verdict-id
-                                                                                  password
-                                                                                  #(do
-                                                                                     (reset! waiting?* false)
-                                                                                     (reset! bad-password*
-                                                                                             password))))}))])])]]]
-   [:td (when (can-sign? verdict-id)
-          (let [click-fn (fn []
-                           (swap! signing?* not)
-                           (reset! password* "")
-                           (reset! waiting?* false)
-                           (reset! bad-password* nil))]
-            (if @signing?*
-              [:button.secondary.cancel-signing {:on-click click-fn}
-               (common/loc :cancel)]
-              (components/icon-button
-               {:on-click click-fn
-                :text-loc :verdict.sign
-                :class    :positive
-                :icon     :lupicon-circle-pen}))))]])
+  (let [click-fn (fn []
+                   (swap! signing?* not)
+                   (reset! password* "")
+                   (reset! waiting?* false)
+                   (reset! bad-password* nil))]
+    [:tr.verdict-signatures
+    [:td]
+    [:td {:colSpan 3}
+     [:div.pate-grid-3
+      [:div.row
+       [:div.col-1
+        [:div
+         [:div  [:strong (common/loc :verdict.signatures)]]
+         [:div.tabby
+          (map-indexed (fn [i {:keys [name date]}]
+                         [:div.tabby__row {:key i}
+                          [:div.tabby__cell.tabby--100 name]
+                          [:div.tabby__cell.cell--right (js/util.finnishDate date)]])
+                       signatures)]]]
+       (when (can-sign? verdict-id)
+         [:div.col-2.col--right {:key "col-2"}
+          (when @signing?*
+            [:div [:label (common/loc :signAttachment.verifyPassword)]
+             (components/text-and-button password*
+                                         (let [bad? (when (= @password* @bad-password*)
+                                                      :negative)]
+                                           {:input-type   :password
+                                            :disabled?    @waiting?*
+                                            :autoFocus    true
+                                            :class        (common/css-flags :warning bad?)
+                                            :button-class (when bad? :negative)
+                                            :icon         (if @waiting?*
+                                                            :icon-spin.lupicon-refresh
+                                                            :lupicon-circle-pen)
+                                            :callback     (fn [password]
+                                                            (reset! waiting?* true)
+                                                            (service/sign-contract app-id
+                                                                                   verdict-id
+                                                                                   password
+                                                                                   #(do
+                                                                                      (reset! waiting?* false)
+                                                                                      (reset! bad-password*
+                                                                                              password))))}))
+             [:button.secondary.cancel-signing {:on-click click-fn} (common/loc :cancel)]])])]]]
+     [:td (when (and (can-sign? verdict-id)
+                     (not (rum/react signing?*)))
+            (components/icon-button
+             {:on-click click-fn
+              :text-loc :verdict.sign
+              :class    :positive
+              :icon     :lupicon-circle-pen}))]]))
 
 (defn- verdict-table [headers verdicts app-id hide-actions]
   [:table.pate-verdicts-table
