@@ -12,7 +12,6 @@ LUPAPISTE.StatementEditModel = function(params) {
 
   self.applicationTitle = params.applicationTitle;
   self.data = params.data;
-  console.log(ko.toJS(self.data));
   self.target = params.target;
 
   self.selectedStatus = ko.observable();
@@ -21,7 +20,6 @@ LUPAPISTE.StatementEditModel = function(params) {
 
   self.newDueDate = ko.observable();
   var dueDateSubscription = self.newDueDate.subscribe(function(newDate) {
-    console.log(newDate);
     if (newDate && params.data) {
       ajax.command("save-statement-due-date-as-draft",
                                     {id: applicationId(),
