@@ -856,6 +856,20 @@
       (poll-job apikey :bind-attachments-job (:id job) (:version job) 25) => ok?)
     file-id))
 
+(defn upload-version-and-bind
+  "Upload new attachment version using bind-attachment"
+  [apikey id attachment-id & [filepath]]
+  (let [file-id (get-in (upload-file apikey (or filepath "dev-resources/test-attachment.txt")) [:files 0 :fileId])
+        {job :job :as resp} (command apikey :bind-attachment
+                                     :id id
+                                     :attachmentId attachment-id
+                                     :fileId file-id)]
+    (fact "Bind-attachment command OK" resp => ok?)
+    (fact "Job id is returned" (:id job) => truthy)
+    (when (and (:ok resp) (not= "done" (:status job)))
+      (poll-job apikey :bind-attachments-job (:id job) (:version job) 25) => ok?)
+    file-id))
+
 ;; statements
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
