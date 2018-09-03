@@ -11,7 +11,7 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.backing-system.krysp.reader :refer :all]
-            [lupapalvelu.backing-system.krysp.common-reader :refer [rakval-case-type property-equals property-in wfs-krysp-url case-elem-selector]]
+            [lupapalvelu.backing-system.krysp.common-reader :refer [rakval-case-type property-equals property-in wfs-krysp-url case-elem-selector get-osoite]]
             [lupapalvelu.backing-system.krysp.review-reader :as review-reader]
             [lupapalvelu.xml.validator :as xml-validator]
             [lupapalvelu.krysp-test-util :refer [build-multi-app-xml]]
@@ -788,3 +788,22 @@
     (get-tunnus "verdict-r.xml") => "13-0185-R"
     (get-tunnus "verdict-r-2.1.6-type-TJO.xml") => "01-0012-00-TJO"
     (get-tunnus "verdict-r-2.2.2-foremen.xml") => "638-2018-0005"))
+
+(fact "get-osoite"
+  (get-osoite {:tag :osoitenimi :attrs nil :content
+               [{:tag :teksti :attrs nil, :content ["Testikatu"]}
+                {:tag :osoitenumero :attrs nil :content ["1"]}]})
+  => "Testikatu 1"
+  (get-osoite {:tag :osoitenimi :attrs nil :content
+               [{:tag :teksti :attrs nil, :content ["Testikatu"]}
+                {:tag :osoitenumero :attrs nil :content ["1"]}
+                {:tag :jakokirjain :attrs nil :content ["c"]}]})
+  => "Testikatu 1c"
+  (get-osoite {:tag :osoitenimi :attrs nil :content
+               [{:tag :teksti :attrs nil, :content ["Testikatu"]}
+                {:tag :osoitenumero :attrs nil :content ["1"]}
+                {:tag :osoitenumero2 :attrs nil :content ["8"]}
+                {:tag :jakokirjain :attrs nil :content ["c"]}
+                {:tag :porras :attrs nil :content ["A"]}
+                {:tag :huoneisto :attrs nil :content ["10"]}]})
+  => "Testikatu 1\u20138c A 10")
