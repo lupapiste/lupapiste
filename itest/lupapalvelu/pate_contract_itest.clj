@@ -8,6 +8,31 @@
 
 (def org-id "753-YA")
 
+(defn check-result [application attachment verdict-id]
+  (fact "Application state is agreementSigned"
+    (:state application) => "agreementSigned")
+
+  (fact "Attachment details"
+    ;; Attachment application state is still
+    ;; agreementPrepared, since it does not change
+    ;; automatically by version.
+    attachment => (contains {:applicationState "agreementPrepared"
+                             :source           {:type "verdicts"
+                                                :id   verdict-id}})))
+
+(defn check-attachments [app-id verdict-id version-count]
+  (facts {:midje/description (format "There are %s attachment versions" version-count)}
+    (loop [i 0]
+     (let [application      (query-application sonja app-id)
+           {versions :versions
+            :as      attachment} (some-> application :attachments last)]
+       (cond
+         (= i 10) (give-up i)
+         (not= (count versions) version-count) (do
+                                                 (Thread/sleep 1000)
+                                                 (recur (inc i)))
+         :else (check-result application attachment verdict-id))))))
+
 (fact "Create and submit YA application"
   (let [{app-id  :id
          subtype :permitSubtype} (create-and-submit-application pena
@@ -121,19 +146,8 @@
                     :verdict-id verdict-id
                     :password "sonja") => ok?)
 
-         (let [{:keys [attachments state]} (query-application sonja app-id)
-               attachment                  (last attachments)]
-           (fact "Application state is agreementSigned"
-             state => "agreementSigned")
-           (fact "There are two verdict attachment versions"
-             ;; Attachment application state is still
-             ;; agreementPrepared, since it does not change
-             ;; automatically by version.
-             attachment => (contains {:applicationState "agreementPrepared"
-                                      :source           {:type "verdicts"
-                                                         :id   verdict-id}})
+         (check-attachments app-id verdict-id 2)
 
-             (count (:versions attachment)) => 2))
          (fact "The contract has two signatures"
            (let [{:keys [verdict]} (open-verdict sonja app-id verdict-id)]
              (-> verdict :signatures)
@@ -168,6 +182,7 @@
                     :verdict-id verdict-id
                     :password "esimerkki")
            => (err :error.already-signed))
+         (check-attachments app-id verdict-id 3)
          (fact "There are now three signatures"
            (let [{:keys [verdict]} (open-verdict sonja app-id verdict-id)]
              (-> verdict :signatures)

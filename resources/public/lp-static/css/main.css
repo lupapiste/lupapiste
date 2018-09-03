@@ -30667,6 +30667,7 @@ span.text-and-button > input {
 }
 
 tr.verdict-signatures div.tabby {
+  vertical-align: top;
   margin-left: 1em;
 }
 
@@ -30688,7 +30689,7 @@ tr.verdict-signatures .text-and-button > input {
 }
 
 tr.verdict-signatures button.cancel-signing {
-  margin-top: 1.5em;
+  margin-left: 2em;
 }
 
 div.published-verdict {

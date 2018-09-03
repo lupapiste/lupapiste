@@ -317,7 +317,7 @@
                             :id            verdict-id
                             :published     pos?})))))
 
-(defn- give-up [i]
+(defn give-up [i]
   (fact "We give up after 10 tries"
     (< i 10) => true))
 

@@ -1689,9 +1689,9 @@
         v2 (make-verdict :id "v2" :code "ei-lausuntoa" :section "" :published 20 :replaces "v1")
         v3 (make-verdict :id "v3" :code "asiakirjat palautettu" :section "33" :modified 30 :replaces "v2")
         v4 (make-verdict :id "v4" :code "ei-puollettu" :section "44" :published 25)]
-    (verdict-list {:lang        "fi"
-                   :application {:pate-verdicts [v1 v2 v3 v4]
-                                 :permitType    "R"}})
+    (vc/verdict-list {:lang        "fi"
+                      :application {:pate-verdicts [v1 v2 v3 v4]
+                                    :permitType    "R"}})
     => (just [(contains {:id       "v3"
                          :modified 30
                          :title    "Luonnos (korvaava p\u00e4\u00e4t\u00f6s)"})
@@ -3480,3 +3480,15 @@
                          :created 123456789
                          :user {:id (mongo/create-id) :username "sonja"}}
                         verdictId) => string?))
+
+(facts "user-person-name"
+  (user-person-name nil) => ""
+  (user-person-name "") => ""
+  (user-person-name {:firstName "Hello"}) => "Hello"
+  (user-person-name {:lastName "World"}) => "World"
+  (user-person-name {:firstName "  Hello  "}) => "Hello"
+  (user-person-name {:lastName "  World  "}) => "World"
+  (user-person-name {:firstName "  Hello  "
+                     :lastName  "  World  "}) => "Hello World"
+  (user-person-name {:firstName "    "
+                     :lastName  "    "}) => "")

@@ -1163,34 +1163,45 @@
                       (warn "No JMS connection available"))
                     (warn "JMS feature disabled")))
 
-(defn create-verdict-pdf [{:keys [data] :as command}]
-  (try+
-   (let [command (assoc command
-                        :application (domain/get-application-no-access-checking (:id data)))
-         verdict (command->verdict command)]
-     (if (some-> verdict :published :attachment-id)
-       (.commit pate-session)
-       (if-let [attachment-id (pdf/create-verdict-attachment command verdict)]
-         (do (verdict-update command
-                             {$set {:pate-verdicts.$.published.attachment-id attachment-id}})
-             (.commit pate-session))
-         (.rollback pate-session))))
-   (catch [:error :pdf/pdf-error] _
-     (errorf "%s: PDF generation for verdict %s failed."
-             (:id data) (:verdict-id data))
-     (.rollback pate-session))
-   (catch Object _
-     (errorf "%s: Could not create verdict attachment for verdict %s."
-             (:id data) (:verdict-id data))
-     (.rollback pate-session))))
+(defn- pdf--verdict [command verdict]
+  (or (some-> verdict :published :attachment-id)
+      (when-let [attachment-id (pdf/create-verdict-attachment command verdict)]
+        (verdict-update command
+                        {$set {:pate-verdicts.$.published.attachment-id attachment-id}})
+        true)))
+
+(declare pdf--signatures)
+
+(defn create-verdict-pdf [{command ::command mode ::mode}]
+  (let [{app-id     :id
+         verdict-id :verdict-id} (:data command)]
+    (try+
+     (let [command (assoc command
+                          :application (domain/get-application-no-access-checking app-id))
+           verdict (command->verdict command)
+           fun     (case mode
+                     ::verdict    pdf--verdict
+                     ::signatures pdf--signatures)]
+       (if (fun command verdict)
+         (.commit pate-session)
+         (.rollback pate-session)))
+     (catch [:error :pdf/pdf-error] _
+       (errorf "%s: PDF generation for verdict %s failed."
+               app-id verdict-id)
+       (.rollback pate-session))
+     (catch Object _
+       (errorf "%s: Could not create verdict attachment for verdict %s."
+               app-id verdict-id)
+       (.rollback pate-session)))))
 
 (defonce pate-consumer (when pate-session
                          (jms/create-consumer pate-session
                                               pate-queue
                                               (comp create-verdict-pdf edn/read-string))))
 
-(defn send-command [command]
-  (->> (select-keys command [:data :user :created])
+(defn send-command [mode command]
+  (->> {::command (select-keys command [:data :user :created])
+        ::mode    mode}
        pr-str
        (jms/produce-with-context pate-queue)))
 
@@ -1199,7 +1210,7 @@
     (-> verdict
         (assoc-in [:published :tags] (pr-str tags))
         (verdict->updates :published.tags)
-        (assoc :commit-fn (util/fn-> :command send-command)))))
+        (assoc :commit-fn (util/fn->> :command (send-command ::verdict))))))
 
 (defn process-finalize-pipeline [command application verdict & finalize--fns]
   (let [{:keys [updates commit-fns verdict]
@@ -1312,10 +1323,14 @@
        (sort-by (comp :published :published))
        last))
 
-(defn- user-person-name [user]
-  (ss/trim (format "%s %s"
-                   (:firstName user)
-                   (:lastName user))))
+(defn user-person-name
+  "Firstname Lastname. Blank name parts are omitted."
+  [user]
+  (->> user
+       ((juxt :firstName :lastName))
+       (map ss/trim)
+       (remove ss/blank?)
+       (ss/join " ")))
 
 (defn user-can-sign? [{:keys [application user] :as command}]
   (let [{sigs :signatures} (command->verdict command)
@@ -1357,6 +1372,10 @@
              section))
          sections)))
 
+(defn- pdf--signatures [command verdict]
+  (pdf/create-verdict-attachment-version command verdict)
+  true)
+
 (defn sign-contract
   "Sign the contract
    - Update verdict verdict signatures
@@ -1380,8 +1399,4 @@
                                                           created
                                                           application
                                                           user))))
-
-    (let [command (assoc command
-                         :application
-                         (domain/get-application-no-access-checking (:id application)))]
-      (pdf/create-verdict-attachment-version command (command->verdict command true)))))
+    (send-command ::signatures command)))
