@@ -153,6 +153,11 @@
          (sc/validate Statement))
     (fail! :error.statement-updated-after-last-save :statementId (:id statement))))
 
+(defn- update-statement-due-date [statement modify-id & updates]
+  (->> (apply assoc statement :modified (now) :modify-id (mongo/create-id) updates)
+       (util/strip-nils)
+       (sc/validate Statement)))
+
 (defn statement-in-sent-state-allowed [{:keys [application] :as command}]
   (when (= (keyword (:state application)) :sent)
     (permit/valid-permit-types {:YI :all :YL :all :YM :all :VVVL :all :MAL :all} command)))
@@ -181,6 +186,15 @@
                     :status status
                     :editor-id editor-id
                     :in-attachment in-attachment))
+
+(defn update-due-date-draft [statement text status modify-id editor-id in-attachment new-due-date]
+  (update-statement-due-date statement modify-id
+                    :state :draft
+                    :text text
+                    :status status
+                    :editor-id editor-id
+                    :in-attachment in-attachment
+                    :dueDate new-due-date))
 
 (defn give-statement [statement text status modify-id editor-id in-attachment]
   (update-statement statement modify-id

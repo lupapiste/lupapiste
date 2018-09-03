@@ -118,7 +118,21 @@
         (->> (:statements application)
              (count)) => 3
         (->> (:statements application)
-             (map #(get-in % [:person :userId]))) => (contains #{sonja-id ronja-id})))))
+             (map #(get-in % [:person :userId]))) => (contains #{sonja-id ronja-id})))
+
+    (fact "requests due date is changed and email notification sent"
+      (let [application (query-application ronja application-id)
+            statement (first (:statements application))]
+        (command ronja :save-statement-due-date-as-draft
+                 :id (:id application)
+                 :statementId (:id statement)
+                 :dueDate 1535462184744
+                 :lang "fi")
+        (let [email (last-email)
+              application (query-application ronja application-id)
+              statement (first (:statements application))]
+          (-> email :body :plain) => (contains "28.08.2018")
+          (:dueDate statement) => 1535462184744)))))
 
 (fact "delete-statement"
   (create-statement-giver sipoo ronja-email)
