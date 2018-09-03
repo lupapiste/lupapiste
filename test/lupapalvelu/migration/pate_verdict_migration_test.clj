@@ -189,7 +189,7 @@
                       :foremen    anything
                       :conditions anything}))
 
-  (fact "published verdict has published timestamp and archive data"
+  (fact "published verdict has published and archive data"
     (->pate-legacy-verdict (update test-application
                                    :verdicts
                                    #(map (fn [v] (assoc v :draft false)) %))
