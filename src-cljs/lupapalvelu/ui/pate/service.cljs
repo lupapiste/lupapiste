@@ -285,10 +285,11 @@
                 :jobId job-id
                 :version version))
 
-(defn fetch-application-parties [app-id callback]
+(defn fetch-application-parties [app-id verdict-id callback]
   (common/query "pate-parties"
                 callback
-                :id app-id))
+                :id app-id
+                :verdict-id verdict-id))
 
 (defn- batch-job [status-fn {:keys [job]}]
   (status-fn (when job

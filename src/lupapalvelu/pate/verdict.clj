@@ -1358,3 +1358,8 @@
                          :application
                          (domain/get-application-no-access-checking (:id application)))]
       (pdf/create-verdict-attachment-version command (command->verdict command true)))))
+
+(defn parties [command]
+  (let [signed (:signatures (command->verdict command))]
+    (->> (get-in command [:application :auth])
+         (mapv (fn [auth] {:value (:id auth) :text (ss/trim (str (:firstName auth) " " (:lastName auth)))})))))

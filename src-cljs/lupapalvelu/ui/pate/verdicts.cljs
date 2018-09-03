@@ -198,7 +198,7 @@
            (components/dropdown signer*
                                 {:items (rum/react parties*)})
            [:button.signature
-            {:on-click (fn [signer*] (println "Kutsutaan allekirjoittamaan " signer*))
+            {:on-click (fn [signer*] (println "Kutsutaan allekirjoittamaan " signer* " id:lle :: " id))
              :class    :positive}
             (common/loc :pate.verdict-table.send-signature-request)]])]]]
    [:td
@@ -208,7 +208,7 @@
         (common/loc :cancel)]
        (components/icon-button
          {:on-click (fn [_] (do (swap! add-signature?* not)
-                                (service/fetch-application-parties app-id #(reset! parties* (:parties %)))))
+                                (service/fetch-application-parties app-id id #(reset! parties* (:parties %)))))
           :text-loc :pate.verdict-table.request-signature
           :class    :secondary
           :icon     :lupicon-circle-plus}))]])

@@ -251,13 +251,12 @@
   {:description       "Application parties"
    :feature           :pate
    :user-roles        #{:authority :applicant}
-   :parameters        [id]
+   :parameters        [id verdict-id]
    :categories        #{:pate-verdicts}
-   :input-validators  [(partial action/non-blank-parameters [:id])]
+   :input-validators  [(partial action/non-blank-parameters [:id :verdict-id])]
    :states           states/post-submitted-states}
   [command]
-  (let [parties (map #()) (get-in command [:application :auth])]
-    (ok :parties [{:value "fizz" :text "fuzz"}])))
+  (ok :parties (verdict/parties command)))
 
 (defcommand edit-pate-verdict
   {:description "Updates verdict data. Returns changes and errors
