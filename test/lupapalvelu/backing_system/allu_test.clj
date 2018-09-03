@@ -4,6 +4,7 @@
             [clojure.walk :refer [postwalk]]
             [cheshire.core :as json]
             [schema.core :as sc :refer [defschema Bool]]
+            [taoensso.timbre :refer [info]]
             [sade.core :refer [def- now]]
             [sade.env :as env]
             [sade.municipality :refer [municipality-codes]]
@@ -32,7 +33,8 @@
 (testable-privates lupapalvelu.backing-system.allu application->allu-placement-contract
                    placement-creation-request
                    request-integration-message response-integration-message
-                   preprocessor->middleware handle-response httpify-request content->json jwt-authorize)
+                   preprocessor->middleware httpify-request content->json jwt-authorize
+                   interface-path->string allu-fail!)
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -56,9 +58,18 @@
 
 (def- invalid-placement-application? (comp not nil? (partial sc/check ValidPlacementApplication)))
 
+(defn- handle-response
+  [handler]
+  (fn [{interface-path ::interface-path :as msg}]
+    (match (handler msg)
+      {:status (:or 200 201), :body body}
+      (info "ALLU operation" (interface-path->string interface-path) "succeeded")
+
+      response (allu-fail! :error.allu.http (select-keys response [:status :body])))))
+
 (def- combined-pure-middleware
   "Like `allu/combined-middleware` but without the side-effecting middlewares."
-  (comp @handle-response
+  (comp handle-response
         (preprocessor->middleware @httpify-request)
         (preprocessor->middleware (fn-> content->json (jwt-authorize (env/value :allu :jwt))))))
 
