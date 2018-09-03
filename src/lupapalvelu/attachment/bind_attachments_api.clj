@@ -70,7 +70,8 @@
                          :oirAuthority (states/all-states-but :canceled)}}
   [command]
   (ok :job (bind/make-bind-job command [{:attachmentId attachmentId :fileId fileId}]
-                               :postprocess-fn (assignment/run-assignment-triggers (partial job-response-fn command)))))
+                               :postprocess-fn [(assignment/run-assignment-triggers (partial job-response-fn command))
+                                                (notify-on-ram-attachments command)])))
 
 (defn filedatas-precheck
   "Executes given pre-check against each individual :filedatas from command"
