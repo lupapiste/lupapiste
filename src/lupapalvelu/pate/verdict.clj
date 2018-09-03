@@ -856,7 +856,7 @@
   (let [{:keys [data state template]
          :as   verdict} (command->verdict command)
         fields        [:id :modified :state :category
-                       :schema-version :legacy?]]
+                       :schema-version :legacy? :signatures]]
     {:verdict    (assoc (select-keys verdict fields)
                         :data (if (util/=as-kw state :draft)
                                 (:data (enrich-verdict command

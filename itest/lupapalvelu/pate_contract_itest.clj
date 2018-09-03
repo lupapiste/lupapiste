@@ -107,7 +107,7 @@
                    => (re-pattern (str app-id " Sopimus .+.pdf")))))))
          (fact "The published contract has one signature"
            (let [{:keys [verdict]} (open-verdict sonja app-id verdict-id)]
-             (-> verdict :data :signatures vals)
+             (-> verdict :signatures)
              => (just [(contains {:name "Random Authority"
                                   :date (-> verdict :data :verdict-date)})])))
 
@@ -136,9 +136,10 @@
              (count (:versions attachment)) => 2))
          (fact "The contract has two signatures"
            (let [{:keys [verdict]} (open-verdict sonja app-id verdict-id)]
-             (-> verdict :data :signatures vals)
-             => (just [{:name "Random Authority"
-                        :date (-> verdict :data :verdict-date)}
+             (-> verdict :signatures)
+             => (just [{:name    "Random Authority"
+                        :user-id sonja-id
+                        :date    (-> verdict :data :verdict-date)}
                        {:name    "Sonja Sibbo"
                         :user-id sonja-id
                         :date    (:modified verdict)}]
@@ -169,9 +170,10 @@
            => (err :error.already-signed))
          (fact "There are now three signatures"
            (let [{:keys [verdict]} (open-verdict sonja app-id verdict-id)]
-             (-> verdict :data :signatures vals)
-             => (just [{:name "Random Authority"
-                        :date (-> verdict :data :verdict-date)}
+             (-> verdict :signatures)
+             => (just [{:name    "Random Authority"
+                        :user-id sonja-id
+                        :date    (-> verdict :data :verdict-date)}
                        (just {:name    "Sonja Sibbo"
                               :user-id sonja-id
                               :date    pos?})
