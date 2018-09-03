@@ -228,12 +228,12 @@
         (POST "/applications/:id/attachments" [id :as {:keys [headers body]}]
           (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
             (let [metadata-error (sc/check {:name      (sc/eq "metadata")
-                                            :mime-type "application/json"
+                                            :mime-type (sc/eq "application/json")
+                                            :encoding  (sc/eq "UTF-8")
                                             :content   @#'allu/FileMetadata}
-                                           (update (first body) :content (json/decode true)))
-                  file-error (sc/check {:name      "file"
+                                           (update (first body) :content json/decode true))
+                  file-error (sc/check {:name      (sc/eq "file")
                                         :mime-type sc/Str
-                                        :encoding  "UTF-8"
                                         :content   InputStream}
                                        (second body))]
               (if-let [validation-error (or metadata-error file-error)]
@@ -266,7 +266,7 @@
 
 (env/with-feature-value :allu true
   (mongo/connect!)
-
+  <
   (facts "Usage of ALLU integration in commands"
     (mongo/with-db itu/test-db-name
       (lupapalvelu.fixture.core/apply-fixture "minimal")
@@ -283,11 +283,14 @@
                                                            :draft (fn [_ id]
                                                                     (return-to-draft raktark-helsinki id "Nolo!"))
                                                            :open (fn [_ id] (open pena id "YOLO"))
-                                                           :submitted (fn [_ id] (submit pena id))
-                                                           :sent (fn [_ id]
-                                                                   (fill pena id)
-                                                                   (approve raktark-helsinki id))
-                                                           :canceled (fn [_ id] (cancel pena id "Alkoi nolottaa."))
+                                                           :submitted (fn [_ id]
+                                                                        (fill pena id)
+                                                                        (submit pena id))
+                                                           :sent (fn [_ id] (approve raktark-helsinki id))
+                                                           :canceled (fn [[current _] id]
+                                                                       (if (contains? #{:draft :open} current)
+                                                                         (cancel pena id "Alkoi nolottaa.")
+                                                                         (cancel raktark-helsinki id "Nolo!")))
                                                            (fn [transition _] (warn "TODO:" transition)))]))
                                               (state-graph->transitions states/ya-sijoitussopimus-state-graph))
                                         1))
@@ -296,23 +299,22 @@
           ;;; TODO: agreementPrepared/Signed
           ;;; TODO: Ensure that errors from ALLU don't break the application process
 
-          (fact "ALLU integration disabled for"
-            (reset! allu-state initial-allu-state)
+          (let [old-id-counter (:id-counter @allu-state)]
+            (fact "ALLU integration disabled for"
+              (fact "Non-Helsinki sijoituslupa"
+                (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate allu/SijoituslupaOperation)) => ok?]
+                  (itu/local-command pena :submit-application :id id) => ok?))
 
-            (fact "Non-Helsinki sijoituslupa"
-              (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate allu/SijoituslupaOperation)) => ok?]
-                (itu/local-command pena :submit-application :id id) => ok?))
+              (fact "Helsinki non-sijoituslupa"
+                (let [{:keys [id]} (itu/create-local-app pena
+                                                         :operation "pientalo"
+                                                         :x "385770.46" :y "6672188.964"
+                                                         :address "Kaivokatu 1"
+                                                         :propertyId "09143200010023") => ok?]
+                  (itu/local-command pena :submit-application :id id) => ok?
+                  (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?))
 
-            (fact "Helsinki non-sijoituslupa"
-              (let [{:keys [id]} (itu/create-local-app pena
-                                                       :operation "pientalo"
-                                                       :x "385770.46" :y "6672188.964"
-                                                       :address "Kaivokatu 1"
-                                                       :propertyId "09143200010023") => ok?]
-                (itu/local-command pena :submit-application :id id) => ok?
-                (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?))
-
-            (:id-counter @allu-state) => 0)))
+              (:id-counter @allu-state) => (partial = old-id-counter)))))
 
       #_(let [initial-allu-state {:id-counter 0, :applications {}}
               allu-state (atom initial-allu-state)
