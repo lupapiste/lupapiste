@@ -119,7 +119,7 @@
               (get-in owner2 [:yritys :yhteyshenkilo :yhteystiedot :email]) => "paavo@example.com"
               (get-in owner2 [:yritys :yritysnimi]) => "Testaajan Putki Oyj"
               (get-in owner2 [:yritys :liikeJaYhteisoTunnus]) => "123"
-              (get-in owner2 [:yritys :osoite :katu]) => "Krysp-testin tie 1\u20132 d\u2013e A 1"
+              (get-in owner2 [:yritys :osoite :katu]) => "Krysp-testin tie 1\u20132d\u2013e A 1"
               (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
               (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))
           (fact "rakentajatyyppi" (get-in building2 [:kaytto :rakentajaTyyppi]) => "muu"))))))
