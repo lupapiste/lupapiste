@@ -8,10 +8,11 @@
             [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict :as verdict]
+            [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.pate.verdict-template :as template]
-            [lupapalvelu.roles :as roles]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
@@ -34,10 +35,11 @@
                       :pate-enabled)))
     (fail :error.pate-disabled)))
 
+;; TODO: publishing? support
 (defn- verdict-exists
   "Returns pre-checker that fails if the verdict does not exist.
   Additional conditions:
-    :editable? fails if the verdict has been published.
+    :draft? fails if the verdict state is NOT draft
     :published? fails if the verdict has NOT been published
     :legacy? fails if the verdict is a 'modern' Pate verdict
     :modern? fails if the verdict is a legacy verdict
@@ -46,7 +48,7 @@
     :html? fails if the html version of the verdict attachment is not
            available."
   [& conditions]
-  (let [{:keys [editable? published?
+  (let [{:keys [draft? published?
                 legacy? modern?
                 contract? verdict?
                 html?]} (zipmap conditions
@@ -54,38 +56,46 @@
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
-                                       (:pate-verdicts application))]
+                                       (:pate-verdicts application))
+              state (vc/verdict-state verdict)]
           (util/pcond-> (cond
                           (not verdict)
                           :error.verdict-not-found
 
-                          (util/not=as-kw (schema-util/application->category application)
-                                          (:category verdict))
+                          (not (vc/has-category? verdict
+                                                 (schema-util/application->category application)))
                           :error.invalid-category
 
-                          (and editable? (:published verdict))
+                          (and draft? (not= state :draft))
                           :error.verdict.not-draft
 
-                          (and published? (not (:published verdict)))
+                          (and published? (not= state :published))
                           :error.verdict.not-published
 
-                          (and legacy? (not (:legacy? verdict)))
+                          (and legacy? (not (vc/legacy? verdict)))
                           :error.verdict.not-legacy
 
-                          (and modern? (:legacy? verdict))
+                          (and modern? (vc/legacy? verdict))
                           :error.verdict.legacy
 
-                          (and contract? (util/not=as-kw (:category verdict)
-                                                         :contract))
+                          (and contract? (not (vc/contract? verdict)))
                           :error.verdict.not-contract
 
-                          (and verdict? (util/=as-kw (:category verdict)
-                                                     :contract))
+                          (and verdict? (vc/contract? verdict))
                           :error.verdict.contract
 
                           (and html? (not (some-> verdict :verdict-attachment :html)))
                           :error.verdict.no-html)
                         identity fail))))))
+
+
+(defn- no-backing-system-verdicts-check
+  [{:keys [application]}]
+  (when (->> application
+             :verdicts       ;; TODO This assumes that all that's left in verdicts are verdicts from backing system
+             (remove :draft) ;; PATE-116 TODO Should not be needed once the drafts are migrated to pate-verdicts
+             not-empty)
+    (fail :error.backing-system-verdicts-exist)))
 
 (defn- replacement-check
   "Fails if the target verdict is a) already replaced, b) already being
@@ -170,8 +180,8 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks [pate-enabled]
    :states states/post-submitted-states}
-  [{:keys [application organization]}]
-  (ok :templates (template/application-verdict-templates @organization
+  [{:keys [application] :as command}]
+  (ok :templates (template/application-verdict-templates (template/command->options command)
                                                          application)))
 (defquery pate-verdicts
   {:description "List of verdicts. Item properties:
@@ -180,12 +190,11 @@
                        published: (optional) timestamp
                        modified:  timestamp
                        category:  Verdict category
-                       legacy?:   (optional) true for legacy verdicts.
+                       legacy?:   true for legacy verdicts.
                        giver:     Either verdict handler or boardname.
                        verdict-date: (optional) timestamp
 
-                       replaced?  (optional) true if the verdict is
-                       replaced.
+                       replaced?  true if the verdict iso replaced.
 
                        title: Friendly title for the verdict. The
                        format depends on the verdict state and
@@ -202,6 +211,7 @@
    :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :states           states/post-submitted-states}
@@ -220,7 +230,22 @@
    :states           states/post-submitted-states}
   [command]
   (ok (assoc (verdict/open-verdict command)
-        :filled (verdict/verdict-filled? command))))
+             :filled (verdict/verdict-filled? command))))
+
+(defquery published-pate-verdict
+  {:description      "Published tags for the verdict."
+   :feature          :pate
+   :user-roles       #{:authority :applicant}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :parameters       [id verdict-id]
+   :categories       #{:pate-verdicts}
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [(verdict-exists :published?)]
+   :states           states/post-verdict-states}
+  [command]
+  (let [{:keys [id published]} (verdict/command->verdict command)]
+    (ok :verdict (assoc published :id id))))
 
 (defcommand edit-pate-verdict
   {:description "Updates verdict data. Returns changes and errors
@@ -231,7 +256,8 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])
                       (partial action/vector-parameters [:path])]
-   :pre-checks       [(verdict-exists :editable?)]
+   :pre-checks       [(verdict-exists :draft?)
+                      no-backing-system-verdicts-check]
    :states           states/post-submitted-states}
   [command]
   (let [result (verdict/edit-verdict command)]
@@ -247,32 +273,34 @@
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :editable?)
+   :pre-checks       [(verdict-exists :draft?)
                       verdict-filled]
    :states           states/post-submitted-states}
   [command]
   (verdict/preview-verdict command))
 
 (defquery pate-verdict-tab
-  {:description     "Pseudo-query that fails if the Pate verdicts tab
+  {:description      "Pseudo-query that fails if the Pate verdicts tab
   should not be shown on the UI."
-   :feature         :pate
-   :parameters      [:id]
-   :user-roles      #{:applicant :authority}
-   :org-authz-roles roles/reader-org-authz-roles
-   :states          states/post-submitted-states}
+   :feature          :pate
+   :parameters       [:id]
+   :user-roles       #{:applicant :authority}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :states           states/post-submitted-states}
   [_])
 
 (defquery pate-contract-tab
-  {:description     "Pseudo-query that fails if the Pate contracts tab
+  {:description      "Pseudo-query that fails if the Pate contracts tab
   should not be shown on the UI. Note that pate-contract-tab always
   implies pate-verdict-tab, too."
-   :feature         :pate
-   :parameters      [:id]
-   :user-roles      #{:applicant :authority}
-   :org-authz-roles roles/reader-org-authz-roles
-   :pre-checks      [contractual-application]
-   :states          states/post-submitted-states}
+   :feature          :pate
+   :parameters       [:id]
+   :user-roles       #{:applicant :authority}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :pre-checks       [contractual-application]
+   :states           states/post-submitted-states}
   [_])
 
 (defcommand sign-pate-contract
@@ -284,27 +312,14 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id :password])]
    :pre-checks       [(verdict-exists :published? :contract?)
                       can-sign
-                      password-matches]
+                      password-matches
+                      no-backing-system-verdicts-check]
    :states           states/post-verdict-states
    :user-roles       #{:applicant :authority}
    :user-authz-roles roles/writer-roles-with-foreman}
   [command]
   (verdict/sign-contract command)
   (ok))
-
-(defcommand generate-pate-pdf
-  {:description      "Regenerates (or at least tries to) verdict pdf if the
-  creation during publishing has failed."
-   :feature          :pate
-   :categories       #{:pate-verdicts}
-   :parameters       [:id :verdict-id]
-   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :published? :html?)]
-   :states           states/post-verdict-states
-   :user-roles       #{:authority}}
-  [command]
-  (ok :attachment-id (verdict/verdict-html->pdf command
-                                                (verdict/command->verdict command))))
 
 (defraw verdict-pdf
   {:description      "Endpoint for downloading the verdict attachment."
@@ -340,8 +355,24 @@
   template and its settings. Returns the verdict-id."
    :feature             :pate
    :user-roles          #{:authority}
-   :parameters          [id template-id]
-   :optional-parameters [replacement-id]
+   :parameters          [:id :template-id]
+   :optional-parameters [:replacement-id]
+   :input-validators    [(partial action/non-blank-parameters [:id])]
+   :pre-checks          [pate-enabled
+                         (action/not-pre-check legacy-category)
+                         (template/verdict-template-check :application :published)
+                         (replacement-check :replacement-id)
+                         no-backing-system-verdicts-check]
+   :states              states/post-submitted-states}
+  [command]
+  (ok :verdict-id (verdict/new-verdict-draft (template/command->options command))))
+
+(defcommand copy-pate-verdict-draft
+  {:description         "Composes new verdict draft from the latest published
+  template and its settings. Returns the verdict-id."
+   :feature             :pate
+   :user-roles          #{:authority}
+   :parameters          [id replacement-id]
    :input-validators    [(partial action/non-blank-parameters [:id])]
    :pre-checks          [pate-enabled
                          (action/not-pre-check legacy-category)
@@ -349,7 +380,7 @@
                          (replacement-check :replacement-id)]
    :states              states/post-submitted-states}
   [command]
-  (ok :verdict-id (verdict/new-verdict-draft template-id command replacement-id)))
+  (ok :verdict-id (verdict/copy-verdict-draft command replacement-id)))
 
 (defcommand delete-pate-verdict
   {:description      "Deletes verdict. Published verdicts cannot be
@@ -360,7 +391,8 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :editable? :modern?)]
+                      (verdict-exists :draft? :modern?)
+                      no-backing-system-verdicts-check]
    :states           states/post-submitted-states}
   [command]
   (verdict/delete-verdict verdict-id command)
@@ -374,15 +406,16 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :editable? :modern?)
+                      (verdict-exists :draft? :modern?)
                       verdict-filled
                       (action/some-pre-check
                        (action/and-pre-check (verdict-exists :contract?)
                                              (state-in states/post-submitted-states))
                        ;; As KuntaGML message is generated the
                        ;; application state must be at least :sent
-                       (state-in (set/difference states/post-sent-states
-                                                 #{:complementNeeded})))]
+                       (state-in (set/difference states/post-submitted-states
+                                                 #{:complementNeeded})))
+                      no-backing-system-verdicts-check]
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]
@@ -401,7 +434,8 @@
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks       [(action/some-pre-check (action/not-pre-check pate-enabled)
-                                             legacy-category)]
+                                             legacy-category)
+                      no-backing-system-verdicts-check]
    :states           states/post-submitted-states}
   [command]
   (ok :verdict-id (verdict/new-legacy-verdict-draft command)))
@@ -415,8 +449,9 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists :legacy?)
-                      (action/some-pre-check (verdict-exists :legacy? :editable?)
-                                             (state-in states/give-verdict-states))]
+                      (action/some-pre-check (verdict-exists :legacy? :draft?)
+                                             (state-in states/give-verdict-states))
+                      no-backing-system-verdicts-check]
    :states           states/post-submitted-states
    :notified         true}
   [command]
@@ -429,8 +464,9 @@
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :editable? :legacy?)
-                      verdict-filled]
+   :pre-checks       [(verdict-exists :draft? :legacy?)
+                      verdict-filled
+                      no-backing-system-verdicts-check]
    :states            states/post-submitted-states
    :notified         true
    :on-success       (notify :application-state-change)}
@@ -467,7 +503,8 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :editable? :verdict?)]
+                      (verdict-exists :draft? :verdict?)
+                      no-backing-system-verdicts-check]
    :states           states/post-submitted-states}
   [{application :application created :created}]
   (let [today-long (tc/to-long (t/today-at-midnight))

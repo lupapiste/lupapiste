@@ -9,6 +9,7 @@
             [monger.query :as monger-query]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
+            [lupapalvelu.archive.archiving :as archiving]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.batchrun.fetch-verdict :as fetch-verdict]
             [lupapalvelu.domain :as domain]
@@ -26,9 +27,9 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.asianhallinta.reader :as ah-reader]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [lupapiste-commons.threads :as threads]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -37,7 +38,8 @@
             [sade.strings :as ss]
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
-            [ring.util.codec :as codec])
+            [ring.util.codec :as codec]
+            [cheshire.core :as json])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -47,8 +49,8 @@
 
 (defn system-not-in-lockdown? []
   (-> (http/get "http://127.0.0.1:8000/system/status")
-      http/decode-response
-      :body :data :not-in-lockdown :data))
+      :body (json/decode true)
+      :data :not-in-lockdown :data))
 
 ;; Email definition for the "open info request reminder"
 
@@ -894,4 +896,25 @@
                 attachment (attachment/get-attachment-info updated-app (:id att))]
             (attachment/convert-existing-to-pdfa! updated-app attachment)))
         (info "Attachment" (:id att) "processed"))))
+  (info "Done."))
+
+(defn archive-digitized-projects-in-orgs [& organizations]
+  (when (seq organizations)
+    (mongo/connect!)
+    (info "Archiving digitized projects (ARK/LX) for organizations:" organizations)
+    (doseq [{:keys [attachments] :as app} (mongo/select :applications
+                                                        {:organization {$in organizations}
+                                                         :permitType "ARK"
+                                                         :state "underReview"})
+            :let [att-ids (->> attachments
+                               (filter (fn [att]
+                                         (not= "arkistoitu" (get-in att [:metadata :tila]))))
+                               (map :id))]]
+      (info "Archiving" (:id app))
+      (archiving/send-to-archive
+        {:user (user/batchrun-user organizations)
+         :created (now)
+         :application app}
+        (set att-ids)
+        #{})))
   (info "Done."))

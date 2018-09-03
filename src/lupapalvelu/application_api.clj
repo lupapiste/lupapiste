@@ -19,7 +19,10 @@
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.assignment :as assignment]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.backing-system.core :as bs]
+            [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as krysp-output]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.company :as company]
             [lupapalvelu.document.document :as doc]
@@ -29,7 +32,6 @@
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.integrations.allu :as allu]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -44,7 +46,6 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.suti :as suti]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
             [lupapalvelu.ya :as ya])
   (:import (java.net SocketTimeoutException)))
 
@@ -232,9 +233,7 @@
                        :required [:application/cancel]}]
    :notified         true
    :on-success       [(notify :application-state-change)
-                      (fn [{:keys [application]} _]
-                        (when (allu/allu-application? application)
-                          (allu/cancel-application! application)))]
+                      (fn [command _] (bs/cancel-application! command))]
    :states           states/all-application-or-archiving-project-states
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
@@ -307,15 +306,14 @@
                       (map (fn [e] {:email e, :role "authority"}) emails)))})
 
 (defn submit-validation-errors [{:keys [application] :as command}]
-  (remove nil? (conj []
-                     (foreman/validate-application application)
-                     (app/validate-link-permits application)
-                     (app/validate-fully-formed application)
-                     (ya/validate-digging-permit application)
-                     (when-not (company/cannot-submit command)
-                       (fail :company.user.cannot.submit))
-                     (suti/suti-submit-validation command)
-                     (restrictions/check-auth-restriction command :application/submit))))
+  (remove nil? [(foreman/validate-application application)
+                (app/validate-link-permits application)
+                (app/validate-fully-formed application)
+                (ya/validate-digging-permit application)
+                (when-not (company/cannot-submit command)
+                  (fail :company.user.cannot.submit))
+                (suti/suti-submit-validation command)
+                (restrictions/check-auth-restriction command :application/submit)]))
 
 (defquery application-submittable
   {:description "Query for frontend, to display possible errors regarding application submit"
@@ -343,22 +341,18 @@
    :on-success       [(notify :application-state-change)
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)
-                      (notify :organization-housing-office)
-                      (fn [{{:keys [id] :as application} :application} _]
-                        (when (allu/allu-application? application)
-                          ;; TODO: Use message queue to delay and retry interaction with ALLU.
-                          ;; TODO: Save messages for inter-system debugging etc.
-                          ;; TODO: Send errors to authority instead of applicant?
-                          ;; TODO: Non-placement-contract ALLU applications
-                          (let [allu-id (allu/create-placement-contract! application)]
-                            (app/set-integration-key id :ALLU {:id allu-id}))))]
+                      (notify :organization-housing-office)]
    :pre-checks       [(partial sm/validate-state-transition :submitted)]}
   [{:keys [application] :as command}]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (do (app/submit command)
-          (ok)))))
+      (let [application (if-let [[bs-name integration-key] (bs/submit-application! command)]
+                          (do (app/set-integration-key id bs-name integration-key)
+                              (assoc-in application [:integrationKeys bs-name] integration-key)) ; HACK
+                          application)]
+        (app/submit (assoc command :application application))
+        (ok)))))
 
 (defcommand refresh-ktj
   {:parameters [:id]
@@ -375,7 +369,8 @@
    :permissions      [{:context  {:application {:state #{:draft}}}
                        :required [:application/edit-draft :application/edit-drawings]}
 
-                      {:required [:application/edit-drawings]}]}
+                      {:required [:application/edit-drawings]}]
+   :on-success       bs/update-callback}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
     (let [drawings-with-geojson (map #(assoc % :geometry-wgs84 (draw/wgs84-geometry %)) drawings)]
@@ -513,7 +508,7 @@
                        :required [:application/edit-draft :application/edit-operation]}
                       {:context  {:application {:state states/pre-sent-application-states}}
                        :required [:application/edit-operation]}
-                      {:context  {:application {:state states/all-application-states-but-draft-or-terminal}}
+                      {:context  {:application {:state states/all-application-or-archiving-project-states}}
                        :required [:application/edit-operation :document/edit-identifiers]}]}
   [{:keys [application] :as command}]
   (if (= (get-in application [:primaryOperation :id]) op-id)
@@ -640,6 +635,8 @@
         archiving-project? (= (keyword (:permitType application)) :ARK)
         krysp?             (org/krysp-integration? organization (permit/permit-type application))
         warranty?          (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
+    (when (attachment/comments-saved-as-attachment? application state)
+      (attachment/save-comments-as-attachment command {:state state}))
     (if warranty?
       (update-application command (util/deep-merge
                                     (app-state/state-transition-update (keyword state) (:created command) application user)
@@ -656,9 +653,7 @@
    :states           #{:submitted}
    :pre-checks       [(partial sm/validate-state-transition :draft)]
    :on-success       [(notify :application-return-to-draft)
-                      (fn [{:keys [application]} _]
-                        (when (allu/allu-application? application)
-                          (allu/cancel-application! application)))]}
+                      (fn [command _] (bs/return-to-draft! command))]}
   [{{:keys [role] :as user}         :user
     {:keys [state] :as application} :application
     created                         :created
@@ -931,7 +926,6 @@
     (app/do-add-link-permit continuation-app (:id application))
     (app/insert-application continuation-app)
     (ok :id (:id continuation-app))))
-
 
 (defn- validate-new-applications-enabled [{{:keys [permitType municipality] :as application} :application}]
   (when application

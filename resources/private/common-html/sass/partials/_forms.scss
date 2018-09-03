@@ -1038,7 +1038,6 @@ div.sticky .form-approval-status.no-border-bottom.own-line {
   }
   &:before {
     content: " ";
-    @include spite-bg;
     width: 16px;
     height: 16px;
     background-position: 0px -2700px;
@@ -1052,7 +1051,6 @@ div.sticky .form-approval-status.no-border-bottom.own-line {
     top: 4px;
     left: 85%;
     bottom: auto;
-    width: 55%;
     &:after {
       content: " ";
       width: 0;
@@ -1065,16 +1063,6 @@ div.sticky .form-approval-status.no-border-bottom.own-line {
       border-top: 14px solid transparent;
       border-bottom: 14px solid transparent;
       border-right:14px solid $lp-dark-grey;
-    }
-    &:before {
-      content: " ";
-      @include spite-bg;
-      width: 16px;
-      height: 16px;
-      background-position: 0px -2700px;
-      position: absolute;
-      top: 6px;
-      right: 6px;
     }
   }
 }

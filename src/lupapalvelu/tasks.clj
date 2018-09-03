@@ -7,7 +7,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [monger.operators :refer :all]
             [sade.core :refer [def- fail]]
             [sade.strings :as ss]
@@ -124,12 +124,12 @@
              {:name "toteamisHetki" :type :date
               :whitelist {:roles [:authority] :otherwise :disabled}
               :auth {:disabled [:is-faulty-review]}}]}
-     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width
+     {:name "lasnaolijat" :type :text :max-len 8000 :layout :full-width
       :css [] :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}
       :auth {:disabled [:is-faulty-review]}}
-     {:name "poikkeamat" :type :text :max-len 4000 :layout
-      :full-width :css [] :readonly-after-sent true
+     {:name "poikkeamat" :type :text :max-len 8000 :layout :full-width
+      :css [] :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}
       :auth {:disabled [:is-faulty-review]}}]}
    {:name "muuTunnus" :type :text :readonly true :hidden true}

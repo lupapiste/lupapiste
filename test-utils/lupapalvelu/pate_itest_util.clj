@@ -1,7 +1,9 @@
 (ns lupapalvelu.pate-itest-util
-  (:require [lupapalvelu.itest-util :refer :all]
+  (:require [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.itest-util :refer :all]
             [midje.sweet :refer :all]
             [monger.operators :refer :all]
+            [sade.core :refer [now]]
             [sade.strings :as ss]
             [sade.util :as util]))
 
@@ -280,3 +282,67 @@
 
 (defn open-verdict [apikey app-id verdict-id]
   (query apikey :pate-verdict :id app-id :verdict-id verdict-id))
+
+
+(defn- status200-check [headers {:keys [app-id verdict-id
+                                        verdict-name contents
+                                        state type-group]}]
+  (fact "Response contains correct attachment"
+    headers => (contains {"Content-Disposition"
+                          (contains (format "%s %s %s"
+                                            app-id
+                                            (ss/encode-filename verdict-name)
+                                            (util/to-local-date (now))))}))
+  (fact "Verdict PDF attachment has been created"
+    (let [{att-id :id
+           :as    attachment} (-> (query-application sonja app-id)
+                                  :attachments last)]
+            attachment
+            => (contains {:readOnly         true
+                          :locked           true
+                          :source           {:type "verdicts"
+                                             :id   verdict-id}
+                          :contents         contents
+                          :type             {:type-group type-group
+                                             :type-id    "paatos"}
+                          :applicationState state
+                          :latestVersion    (contains {:contentType "application/pdf"
+                                                       :filename    (contains verdict-name)})})
+            (fact "published-pate-verdict"
+              (:verdict (query sonja :published-pate-verdict
+                               :id app-id
+                               :verdict-id verdict-id))
+              => (contains {:attachment-id att-id
+                            :tags          string?
+                            :id            verdict-id
+                            :published     pos?})))))
+
+(defn- give-up [i]
+  (fact "We give up after 10 tries"
+    (< i 10) => true))
+
+(defn- bad-status [status]
+  (fact "Bad status"
+    status => 200))
+
+(defn verdict-pdf-queue-test
+  [{:keys [app-id verdict-id] :as options}]
+  (loop [i 0]
+    (let [{:keys [status headers]} (raw sonja :verdict-pdf
+                                        :id app-id
+                                        :verdict-id verdict-id)]
+      (cond
+        (= status 200) (status200-check headers
+                                        (merge {:verdict-name "P\u00e4\u00e4t\u00f6s"
+                                                :contents     "P\u00e4\u00e4t\u00f6s"
+                                                :state        "verdictGiven"
+                                                :type-group   "paatoksenteko"}
+                                               options))
+
+        (> i 9) (give-up i)
+
+        (= status 202) (do
+                         (Thread/sleep 1000)
+                         (recur (inc i)))
+
+        :else (bad-status status)))))

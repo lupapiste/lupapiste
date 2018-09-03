@@ -54,7 +54,7 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.token :as token]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
+            [lupapalvelu.backing-system.asianhallinta.reader :as ah-reader]
             [lupapalvelu.ya-extension :as yax]
             [lupapalvelu.storage.file-storage :as storage])
   (:import (java.io OutputStreamWriter BufferedWriter)
@@ -71,15 +71,14 @@
      (swap! apis conj {(keyword m#) p#})
      (defpage ~path ~params
        (let [response-data# (do ~@content)
-             response-session# (:session response-data#)]
+             response-session# (:session response-data#)
+             response-cookies# (:cookies response-data#)]
          (resp/set-headers
            http/no-cache-headers
-           (if (contains? response-data# :session)
-             (-> response-data#
-               (dissoc :session)
+           (-> (dissoc response-data# :session :cookies)
                resp/json
-               (assoc :session response-session#))
-             (resp/json response-data#)))))))
+               (util/assoc-when :session response-session#
+                                :cookies response-cookies#)))))))
 
 (defjson "/system/apis" [] @apis)
 
@@ -336,6 +335,7 @@
 
 (defn- logout! []
   (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"})
+  (cookies/put! :lupapiste-login {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"})
   {:session nil})
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
@@ -352,7 +352,14 @@
         response (if username
                    (execute-command "login" params request) ; Handles form POST (Nessus)
                    (execute-command "login" (from-json request) request))]
-    (select-keys response [:ok :text :session :applicationpage :lang])))
+    (select-keys response [:ok :text :session :applicationpage :lang :cookies])))
+
+(defpage [:get "/api/login-sso-uri"] {username :username}
+  (let [request (request/ring-request)]
+    ; TODO: Resolve SSO URL from db
+    (if false
+      (resp/json (ok {:uri "https://evolta.fi"}))
+      (resp/json (fail :error.unauthorized)))))
 
 ;; Reset password via separate URL outside anti-csrf
 (defjson [:post "/api/reset-password"] []
@@ -600,11 +607,14 @@
         request-session (:session request)
         expires (get request-session :expires now)
         expired? (< expires now)
-        response (handler request)]
+        response (handler request)
+        login-cookie? (get-in request [:cookies "lupapiste-login"])]
     (if expired?
       (assoc response :session nil)
       (if (re-find #"^/api/(command|query|raw|datatables|upload)/" (:uri request))
-        (ssess/merge-to-session request response {:expires (+ now (get-session-timeout request))})
+        (cond-> (ssess/merge-to-session request response {:expires (+ now (get-session-timeout request))})
+                login-cookie?
+                (usr/merge-login-cookie))
         response))))
 
 (defn session-timeout [handler]

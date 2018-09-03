@@ -180,6 +180,13 @@
                     :template-id template-id
                     :replacement-id replacement-id)))
 
+(defn copy-verdict-draft
+  [app-id callback replacement-id]
+   (common/command {:command "copy-pate-verdict-draft"
+                    :success callback}
+                   :id app-id
+                   :replacement-id replacement-id))
+
 (defn new-legacy-verdict-draft [app-id callback]
   (common/command {:command "new-legacy-verdict-draft"
                    :success callback}
@@ -187,6 +194,12 @@
 
 (defn open-verdict [app-id verdict-id callback]
   (common/query "pate-verdict"
+                callback
+                :id app-id
+                :verdict-id verdict-id))
+
+(defn open-published-verdict [app-id verdict-id callback]
+  (common/query "published-pate-verdict"
                 callback
                 :id app-id
                 :verdict-id verdict-id))
@@ -221,7 +234,7 @@
                               (state/refresh-verdict-auths app-id
                                                            {:verdict-id verdict-id})
                               (fetch-verdict-list app-id)
-                              (open-verdict app-id verdict-id callback)
+                              (open-published-verdict app-id verdict-id callback)
                               (js/repository.load app-id))}
                   :id app-id
                   :verdict-id verdict-id))

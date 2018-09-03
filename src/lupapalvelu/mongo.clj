@@ -89,6 +89,20 @@
         (boolean (and (re-matches key-pattern key) (< (clojure.core/count key) 800)))))
     false))
 
+(defn ^{:perfmon-exclude true} escape-key [k]
+  (if (string? k)
+    (-> (ss/replace k "." "_DOT_")
+        (ss/replace "$" "_DOLLAR_")
+        (ss/replace "\u0000" "_NULL_"))
+    k))
+
+(defn ^{:perfmon-exclude true} unescape-key [k]
+  (if (string? k)
+    (-> (ss/replace k "_DOT_" ".")
+        (ss/replace "_DOLLAR_" "$")
+        (ss/replace "_NULL_" "\u0000"))
+    k))
+
 (defn ^{:perfmon-exclude true} operator? [s]
   (contains? operators s))
 

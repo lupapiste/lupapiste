@@ -2,6 +2,9 @@ var users = (function($) {
   "use strict";
 
   function toActive(data) { return loc(["users.data.enabled", data]); }
+  function toYesNo( data ) { return _.isBoolean( data )
+                             ? loc( data ? "yes" : "no")
+                             : ""; }
   function rowCreated(row, data) { $(row).attr("data-user-email", data[0]); }
 
   function toLocalizedOrgAuthz(data) {
@@ -38,10 +41,11 @@ var users = (function($) {
     };
 
     self.show = {
-      filters:        !opts.hideFilters,
-      roleFilter:     !opts.hideRoleFilter,
-      enabledFilter:  !opts.hideEnabledFilter,
-      search:         !opts.hideSearch
+      filters:         !opts.hideFilters,
+      roleFilter:      !opts.hideRoleFilter,
+      enabledFilter:   !opts.hideEnabledFilter,
+      search:          !opts.hideSearch,
+      directMarketing: opts.directMarketing
     };
 
     self.toOps = function(td, sData, oData) {
@@ -67,8 +71,9 @@ var users = (function($) {
               0: user.email,
               1: user.lastName + " " + user.firstName,
               2: user.orgAuthz ? user.orgAuthz : user.role,
-              3: user.enabled,
-              4: ""}; // column 4 will be set by toOps
+              3: user.allowDirectMarketing,
+              4: user.enabled,
+              5: ""}; // column 4 will be set by toOps
     };
 
     self.processResults = function(r) {
@@ -134,11 +139,12 @@ var users = (function($) {
     self.dataTable = self.table$.dataTable({
       bProcessing:      true, // don't hide this, it brakes layout.
       bServerSide:      true,
-      aoColumnDefs:     [{aTargets: [1,2,3,4], bSortable: false},
+      aoColumnDefs:     [{aTargets: [0,1,2,3,4,5], bSortable: false},
                          {aTargets: [2], mRender: toLocalizedOrgAuthz},
-                         {aTargets: [3], mRender: toActive},
-                         {aTargets: [4], fnCreatedCell: self.toOps}],
-      aaSorting:        [[0, "desc"]],
+                         {aTargets: [3], mRender: toYesNo,},
+                         {aTargets: [4], mRender: toActive},
+                         {aTargets: [5], fnCreatedCell: self.toOps}],
+      aaSorting:        [],
       sDom:             "<t><<r><p><i><l>>", // <'table-filter' f>
       iDisplayLength:   10,
       pagingType:       "simple",

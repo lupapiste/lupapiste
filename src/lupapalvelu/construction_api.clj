@@ -6,7 +6,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [sade.core :refer :all]
             [sade.util :as util]))
 

@@ -52,18 +52,23 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
 
   self.setUserToDocumentOk = ko.observable(false);
 
+  function showDialog( email ) {
+    hub.send( "show-dialog", {ltitle: "application.addInvite",
+                              size: "autosized",
+                              component: "authorize-person-dialog",
+                              componentParams: {documentName: _.get(self.documentSchema, "info.name"),
+                                                path: self.myNs,
+                                                documentId: self.documentId,
+                                                email: email}});
+  }
+
   if (self.authModel.ok("set-user-to-document")) {
     self.disposedSubscribe(self.selectValue, function(value) {
       if (value !== self.value()) {
         var selectedUser = _.find(self.personOptions(), ["id", value]);
         if (selectedUser && self.isDesignerDocument
-                         && selectedUser.notPersonallyAuthorized) {
-          $("#invite-document-name").val(self.schemaName).change();
-          $("#invite-document-path").val(self.myNs).change();
-          $("#invite-document-id").val(self.documentId).change();
-          $("#invite-email").val(selectedUser.email).change();
-          $("#invite-text").val(loc("comment.placeholder")).change();
-          LUPAPISTE.ModalDialog.open("#dialog-valtuutus-yrityskayttaja-suunnittelijaksi");
+            && selectedUser.notPersonallyAuthorized) {
+          showDialog( selectedUser.email );
         } else {
           self.doSetUserToDocument(value || "");
         }
@@ -77,12 +82,8 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
     self.inviteWithRoleOk(true);
   }
 
-
   self.invite = function() {
-    $("#invite-document-name").val(self.schemaName).change();
-    $("#invite-document-path").val(self.myNs).change();
-    $("#invite-document-id").val(self.documentId).change();
-    LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
+    showDialog();
   };
 
 };

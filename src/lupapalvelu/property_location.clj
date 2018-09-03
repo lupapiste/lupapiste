@@ -37,17 +37,14 @@
         (let [missed-infos (pmap property-location-from-wfs unfound-ids)]
           (concat cached-infos (->> missed-infos flatten (remove nil?))))))))
 
-(defn- rename [property-info]
-  (-> property-info
-      (select-keys [:kiinttunnus :kunta :nimi :x :y])
-      (rename-keys {:kiinttunnus :propertyId
-                    :kunta :municipality
-                    :nimi :name})))
-
 (defn property-infos-by-point [x y]
-  (->> (wfs/property-info-by-point x y)
-       (map wfs/feature-to-property-info)
-       (map rename)))
+  (->> (wfs/property-point-id-muni-by-point x y)
+       (map wfs/feature-to-core-property-info)))
 
 (defn property-info-by-point [x y]
   (first (property-infos-by-point x y)))
+
+(defn property-id-municipality-by-point [x y]
+  (->> (wfs/property-id-muni-by-point x y)
+       (map wfs/feature-to-property-id-municipality)
+       first))

@@ -17,11 +17,12 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
             [lupapalvelu.review :as review]
+            [lupapalvelu.statement :as statement]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -140,6 +141,20 @@
 
 (defn tyonjohtaja->tj-document [party]
   (party->party-doc party "tyonjohtaja-v2"))
+
+(defn lausuntotieto->statement
+  "Takes a lausuntotieto-element produced by `lupapalvelu.xml.krysp.reader/->lausuntotiedot`, returns
+  a document that conforms to the Statement schema in the `lupapalvelu.statement` namespace."
+  [lausuntotieto]
+  (let [person {:userId "0"
+                :text "Viranomainen"
+                :email "eratuonti@lupapiste.fi"
+                :name (:viranomainen lausuntotieto)}]
+  (statement/create-statement (now)
+                              (:lausunto lausuntotieto)
+                              (now) ;; Due date
+                              person
+                              {:puoltotieto (get-in lausuntotieto [:puoltotieto :Puolto :puolto])})))
 
 (defn invite-applicants [{:keys [lang created application] :as command} applicants authorize-applicants]
   ;; FIXME: refactor document updates out from here
@@ -305,6 +320,15 @@
         (info "Prev permit application creation, rakennuspaikkatieto information incomplete:" (:rakennuspaikka app-info)))
       location-info)))
 
+(defn existing-application?
+  "True if the target organization already has an application with the
+  same application id"
+  [org-id user {app-id :id}]
+  (boolean (and (ss/not-blank? app-id)
+                (domain/get-application-as {:organization org-id :_id app-id}
+                                           user
+                                           :include-canceled-apps? true))))
+
 (defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
   (let [operation             "aiemmalla-luvalla-hakeminen"
         permit-type           (operations/permit-type-of-operation operation)
@@ -323,6 +347,9 @@
       (not (:propertyId location-info)) (fail :error.previous-permit-no-propertyid)
       (not organizations-match?)        (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       validation-result                 validation-result
+      (existing-application? organizationId
+                             (:user command)
+                             app-info)  (ok :id (:id app-info))
       :else                             (let [{id :id} (do-create-application-from-previous-permit command
                                                                                                    operation
                                                                                                    xml

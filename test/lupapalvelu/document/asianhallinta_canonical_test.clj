@@ -8,13 +8,13 @@
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.document.asianhallinta-canonical :as ah]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.xml.asianhallinta.asianhallinta-mapping :as ahm]
+            [lupapalvelu.backing-system.asianhallinta.asianhallinta-mapping :as ahm]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
             [lupapalvelu.document.rakennuslupa-canonical-test :as rakennus-test]))
 
 
-(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-mapping enrich-attachments-with-operation-data)
+(testable-privates lupapalvelu.backing-system.asianhallinta.asianhallinta-mapping enrich-attachments-with-operation-data)
 
 (def test-attachments [{:id :attachment1
                           :type {:type-group "paapiirustus"

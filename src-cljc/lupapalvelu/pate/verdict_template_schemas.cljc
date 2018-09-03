@@ -89,7 +89,8 @@
                 :help       :pate.help.temsub-bulletin
                 :grid       {:columns 1
                              :rows    [[{:col  1
-                                         :dict :bulletinOpDescription}]]}}})
+                                         :dict :bulletinOpDescription}]]}}
+   :removable?  true})
 
 (def temsub-foremen
   (->> helper/foreman-codes
@@ -158,6 +159,9 @@
 
 (def temsub-plans
   (settings-dependencies :plans :pate.plans))
+
+(def temsub-handler-titles
+  (settings-dependencies :handler-titles :pate.handler-titles))
 
 (def temsub-conditions ;; Muut lupaehdot
   {:dictionary    {:conditions    {:repeating {:condition        {:phrase-text {:i18nkey  :pate-condition
@@ -298,6 +302,7 @@
                                  temsub-bulletin
                                  temsub-reviews-with-phrase
                                  temsub-plans
+                                 temsub-handler-titles
                                  temsub-conditions
                                  temsub-inform-others
                                  temsub-appeal

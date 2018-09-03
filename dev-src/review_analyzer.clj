@@ -2,14 +2,14 @@
   (:require [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [lupapalvelu.review :refer :all]
-            [lupapalvelu.xml.krysp.review-reader :as review-reader]
+            [lupapalvelu.backing-system.krysp.review-reader :as review-reader]
             [sade.util :as util]
             [sade.strings :as ss]))
 
 (mongo/connect!)
 (println "Requiring review-analyzer...")
 (defn analyze-app [app xml]
-  (let [maaraykset (lupapalvelu.xml.krysp.reader/->lupamaaraukset (sade.xml/select xml [:paatostieto :Paatos]))
+  (let [maaraykset (lupapalvelu.backing-system.krysp.reader/->lupamaaraykset (sade.xml/select xml [:paatostieto :Paatos]))
         reviews    (review-reader/xml->reviews xml true)
         app-reviews (filter #(= "task-katselmus" (get-in % [:schema-info :name])) (:tasks app))
         maaraykset-xml (:maaraykset maaraykset)

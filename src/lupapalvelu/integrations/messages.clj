@@ -10,7 +10,10 @@
 
 (def create-id mongo/create-id)
 
-(def partners #{"ely" "mylly" "matti" "internal"})
+(def partners #{"allu" "ely" "mylly" "matti" "internal"})
+
+(sc/defschema IntegrationMessageStatus
+  (sc/enum "done" "published" "processing" "processed" "received" "queued" "consumed"))
 
 (sc/defschema IntegrationMessage
   {:id                                   ssc/ObjectIdStr
@@ -20,7 +23,7 @@
    (sc/optional-key :partner)            (apply sc/enum partners)
    :format                               (sc/enum "xml" "json" "clojure" "bytes")
    :created                              ssc/Timestamp
-   :status                               (sc/enum "done" "published" "processing" "processed" "received" "queued" "consumed")
+   :status                               IntegrationMessageStatus
    (sc/optional-key :external-reference) sc/Str
    (sc/optional-key :output-dir)         sc/Str
    (sc/optional-key :application)        {:id                             ssc/ApplicationId
@@ -56,5 +59,5 @@
   ([message-id updates write-concern]
     (mongo/update-by-id :integration-messages message-id updates :write-concern write-concern)))
 
-(defn set-message-status [message-id status]
+(sc/defn ^:always-validate set-message-status [message-id status :- IntegrationMessageStatus]
   (update-message message-id {$set {:status status}} WriteConcern/UNACKNOWLEDGED))

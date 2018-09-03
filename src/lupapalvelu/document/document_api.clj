@@ -13,6 +13,7 @@
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.backing-system.core :as bs]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 
@@ -150,7 +151,8 @@
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       doc-disabled-validator
                       validate-created-after-verdict
-                      validate-post-verdict-not-approved]}
+                      validate-post-verdict-not-approved]
+   :on-success       bs/update-callback}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
@@ -165,7 +167,7 @@
                        :required [:application/read :document/edit-draft]}
                       {:context  {:application {:state states/update-doc-states}}
                        :required [:application/read :document/edit]}
-                      {:context  {:application {:state states/all-application-states-but-draft-or-terminal}}
+                      {:context  {:application {:state states/all-application-or-archiving-project-states}}
                        :required [:application/read :document/edit-identifiers]}]
    :pre-checks       [is-identifier]}
   [command]
@@ -256,7 +258,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       user-can-be-set-validator
-                      doc-disabled-validator]}
+                      doc-disabled-validator]
+   :on-success       bs/update-callback}
   [{:keys [created application user]}]
   (doc-persistence/do-set-user-to-document application documentId userId path created user))
 
@@ -267,7 +270,8 @@
    :permissions      document-edit-permissions
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(editable-by-state? states/update-doc-states)
-                      doc-disabled-validator]}
+                      doc-disabled-validator]
+   :on-success       bs/update-callback}
   [{:keys [created application user]}]
   (doc-persistence/do-set-user-to-document application documentId (:id user) path created user))
 
@@ -282,7 +286,8 @@
    :permissions      document-edit-permissions
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(editable-by-state? states/update-doc-states)
-                      doc-disabled-validator]}
+                      doc-disabled-validator]
+   :on-success       bs/update-callback}
   [{:keys [user created application document]}]
   (doc-persistence/do-set-company-to-document application
                                               document

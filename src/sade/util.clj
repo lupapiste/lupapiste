@@ -9,16 +9,11 @@
             [me.raynes.fs :as fs]
             [sade.core :refer [fail!]]
             [sade.shared-util :as shared]
-            [sade.strings :refer [numeric? decimal-number? trim] :as ss]
+            [sade.strings :refer [defalias numeric? decimal-number? trim] :as ss]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [debugf warnf]])
   (:import [java.util.jar JarFile]
            [org.joda.time LocalDateTime]))
-
-(defmacro defalias [alias from]
-  `(do (def ~alias ~from)
-       (alter-meta! #'~alias merge (select-keys (meta #'~from) [:arglists]))
-       ~alias))
 
 ;;
 ;; Nil-safe number utilities

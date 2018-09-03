@@ -6,6 +6,12 @@
   var rememberMe = ko.observable(false);
   var processing = ko.observable(false);
   var pending = ko.observable(false);
+  var passwordVisible = ko.observable(false);
+  var username = ko.observable();
+
+  var validUser = ko.pureComputed(function(){
+    return _.trim(username()).length > 1;
+  });
 
   function recallMe() {
     var oldUsername = _.trim($.cookie(rememberMeCookieName));
@@ -68,21 +74,50 @@
 
   hub.onPageLoad("login", recallMe);
 
-  function ie8OrOlder() {
-    return $("span.old-ie").length !== 0;
-  }
+  var checkForSso = function() {
+    clearError();
+    var passwordElement = document.getElementById("login-password");
+    ajax.get("/api/login-sso-uri")
+      .param("username", _.trim(username()))
+      .success(function(data) {
+        if (data.uri) {
+          window.location = data.uri;
+        } else {
+          passwordVisible(true);
+          passwordElement.focus();
+        }
+      })
+      .error(function() {
+        passwordVisible(true);
+        passwordElement.focus();
+      })
+      .call();
+  };
 
   var handleLoginSubmit = function() {
-    // jshint devel: true
-    if (!ie8OrOlder() || confirm(loc("error.old-ie"))) {
+    if (document.getElementById("login-password").offsetParent !== null) {
+      passwordVisible(true);
+    }
+    if (passwordVisible()) {
       login();
+    } else {
+      checkForSso();
     }
   };
 
   $(function() {
     recallMe();
     if (document.getElementById("login")) {
-      $("#login").applyBindings({rememberMe: rememberMe, processing: processing, pending: pending, handleLoginSubmit: handleLoginSubmit});
+      $("#login").applyBindings({
+        rememberMe: rememberMe,
+        processing: processing,
+        pending: pending,
+        handleLoginSubmit: handleLoginSubmit,
+        passwordVisible: passwordVisible,
+        checkForSso: checkForSso,
+        username: username,
+        validUser: validUser
+      });
       // Refactor to use Knockout at some point. Changes must be synchronized with WordPress theme deployment.
       $("#login-username").keypress(clearError).change(clearError);
       $("#login-password").keypress(clearError).change(clearError);

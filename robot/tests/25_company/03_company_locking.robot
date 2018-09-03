@@ -192,6 +192,7 @@ Reset password
 
 Cannot reset password
   [Arguments]  ${email}
+  Click Element  //section[@id='login']
   Click link  jquery=div.passwd-reset a
   Input text with jQuery  input.form-input:visible  ${email}
   Scroll and click test id  reset-send

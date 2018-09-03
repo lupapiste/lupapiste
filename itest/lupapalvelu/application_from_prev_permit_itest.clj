@@ -7,12 +7,14 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.prev-permit-api :refer :all]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [midje.sweet :refer :all]
             [sade.core :refer [def- now]]
             [sade.util :as util]
-            [sade.xml :as xml]))
+            [sade.xml :as xml]
+            [net.cgrand.enlive-html :as enlive]
+            [lupapalvelu.krysp-test-util :as krysp-util]))
 
 (def local-db-name (str "test_app-from-prev-permit-itest_" (now)))
 
@@ -87,24 +89,24 @@
     (fact "ids of the given and resolved organizations do not match"
       (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.previous-permit-found-from-backend-is-of-different-organization")
       (provided
-       (krysp-reader/get-app-info-from-message anything anything) => {:municipality "753"
+       (krysp-reader/get-app-info-from-message anything anything) => {:municipality   "753"
                                                                       :rakennuspaikka {:propertyId "75312312341234"
-                                                                                       :x 444444 :y 6666666
-                                                                                       :address "Virhekuja 12"}}))
+                                                                                       :x          444444 :y 6666666
+                                                                                       :address    "Virhekuja 12"}}))
 
     ;; 6: jos sanomassa ei ollut rakennuspaikkaa/kiinteistotunnusta, ja ei alunperin annettu tarpeeksi parametreja -> (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
 
     (fact "no 'rakennuspaikkatieto' element in the received xml, need more info"
-      (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok false
+      (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok                     false
                                                                     :needMorePrevPermitInfo true
-                                                                    :text "error.more-prev-app-info-needed"})
+                                                                    :text                   "error.more-prev-app-info-needed"})
       (provided
        (krysp-reader/get-app-info-from-message anything anything) => (dissoc example-app-info :rakennuspaikka)))
 
     (fact "propertyId is missing"
-      (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok false
+      (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok                     false
                                                                     :needMorePrevPermitInfo true
-                                                                    :text "error.more-prev-app-info-needed"})
+                                                                    :text                   "error.more-prev-app-info-needed"})
       (provided
         (krysp-reader/get-app-info-from-message anything anything) => (util/dissoc-in example-app-info [:rakennuspaikka :propertyId])))
 
@@ -122,17 +124,17 @@
 
         (facts "authority of same municipality can create application"
           (mongo/with-db local-db-name
-            (let [resp1 (create-app-from-prev-permit raktark-jarvenpaa
-                                                     :x "6707184.319"
-                                                     :y "393021.589"
-                                                     :address "Kylykuja 3"
-                                                     :propertyId property-id)
-                  app-id (:id resp1)
+            (let [resp1       (create-app-from-prev-permit raktark-jarvenpaa
+                                                           :x "6707184.319"
+                                                           :y "393021.589"
+                                                           :address "Kylykuja 3"
+                                                           :propertyId property-id)
+                  app-id      (:id resp1)
                   application (query-application local-query raktark-jarvenpaa app-id)
-                  invites (filter #(= raktark-jarvenpaa-id (get-in % [:invite :inviter :id])) (:auth application))
-                  find-party (fn [schema-name firstname]
-                               (util/find-first (util/fn->> :data :henkilo :henkilotiedot :etunimi :value (= firstname))
-                                                (domain/get-documents-by-name application schema-name)))]
+                  invites     (filter #(= raktark-jarvenpaa-id (get-in % [:invite :inviter :id])) (:auth application))
+                  find-party  (fn [schema-name firstname]
+                                (util/find-first (util/fn->> :data :henkilo :henkilotiedot :etunimi :value (= firstname))
+                                                 (domain/get-documents-by-name application schema-name)))]
 
               resp1  => ok?
 
@@ -162,11 +164,11 @@
                                :id (:id application)
                                :text "Se on peruutus ny!"
                                :lang "fi")
-                (let [resp2 (create-app-from-prev-permit raktark-jarvenpaa
-                                                         :x "6707184.319"
-                                                         :y "393021.589"
-                                                         :address "Kylykuja 3"
-                                                         :propertyId property-id) => ok?]
+                (let [resp2                                                                                                             (create-app-from-prev-permit raktark-jarvenpaa
+                                                                                                                                                                     :x "6707184.319"
+                                                                                                                                                                     :y "393021.589"
+                                                                                                                                                                     :address "Kylykuja 3"
+                                                                                                                                                                     :propertyId property-id) => ok?]
                   (:id resp2) =not=> app-id)))))))
 
 
@@ -229,7 +231,28 @@
       (fact "state is fetched"
         (->> (:id (create-app-from-prev-permit raktark-jarvenpaa))
              (query-application local-query raktark-jarvenpaa)
-             (:state)) => "constructionStarted")))
+             (:state)) => "constructionStarted"))
+  (let [app-id   (:id (create-and-submit-local-application pena
+                                                           :propertyId jarvenpaa-property-id
+                                                           :operation "pientalo"))
+        xml      (enlive/at example-xml
+                            [:rakval:luvanTunnisteTiedot :yht:kuntalupatunnus]
+                            (enlive/after (krysp-util/build-lp-tunnus-xml app-id)))
+        app-info (krysp-reader/get-app-info-from-message xml example-kuntalupatunnus)]
+    (against-background [(krysp-reader/get-app-info-from-message anything anything) => app-info
+                         (krysp-fetch/get-application-xml-by-backend-id anything anything) => xml
+                         (domain/get-application-as {:organization "186-R" :_id app-id}
+                                                    anything
+                                                    :include-canceled-apps? true) => {:id app-id :state "sent"}
+                         (domain/get-application-as anything
+                                                    anything
+                                                    :include-canceled-apps? false) => nil]
+                        (fact "Already existing application with the same app-id as in the xml"
+                          (create-app-from-prev-permit raktark-jarvenpaa
+                                                       :kuntalupatunnus example-kuntalupatunnus
+                                                       :authorizeApplicants false)
+                          => (contains {:id app-id})))
+    ))
 
 (facts "Application from kuntalupatunnus via rest API"      ; DOES NOT USE LOCAL QUERIES
   (let [rest-address (str (server-address) "/rest/get-lp-id-from-previous-permit")

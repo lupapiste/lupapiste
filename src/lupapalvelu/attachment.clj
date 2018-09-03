@@ -35,6 +35,7 @@
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.state-machine :as state-machine]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
             [me.raynes.fs :as fs]
@@ -263,6 +264,12 @@
          (string? id)]}
   (filter #(and (= (get-in % [:target :type]) type)
                 (= (get-in % [:target :id])   id))  attachments))
+
+(defn unsent? [{:keys [versions sent] :as attachment}]
+  (and (seq versions)                        ; Has been uploaded
+       (or (not sent)                        ; Never sent to backing system
+           (> (-> versions last :created) sent)) ; Backing system does not have newest version
+       (not (#{"verdict" "statement"} (-> attachment :target :type))))) ; Not generated inside the system
 
 (defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :sent timestamp))
@@ -1016,6 +1023,63 @@
                                             attachment)
     (enrich-attachment attachment)))
 
+;;
+;; Comments as attachment
+;;
+
+(defn- comments-empty? [application]
+  (->> application
+       :comments
+       (remove #(-> % :target :type (keyword) (= :attachment)))
+       (empty?)))
+
+(defn save-comments-as-attachment [{lang :lang application :application created :created :as command} & [{state :state}]]
+  (when-not (comments-empty? application)
+    (let [comments-pdf (comment/get-comments-as-pdf lang (if state (assoc application :state state) application))]
+      (if (:ok comments-pdf)
+        (let [content (:pdf-file-stream comments-pdf)
+              existing-keskustelu (util/find-by-key :type {:type-id "keskustelu" :type-group "muut"} (:attachments application))
+              file-options {:filename (format "%s-%s.pdf" (:id application) (i18n/localize lang :conversation.title))
+                            :content  content
+                            :size     (.available content)}
+              created (if created created (now))
+              attachment-options {:attachment-type {:type-id    :keskustelu
+                                                    :type-group :muut}
+                                  :attachment-id   (when existing-keskustelu (:id existing-keskustelu))
+                                  :created         created
+                                  :required        false}]
+          (upload-and-attach! command attachment-options file-options))
+        (fail! :error.discussion-pdf-generation-failed)))))
+
+(defn comments-saved-as-attachment?
+  "Checks if the application moves to a terminal state. As all of the effectively terminal states are not terminal
+   in the states/terminal-state? sense, the special cases need to be handled separately."
+  [application state]
+  (let [state-kw (keyword state)]
+    (or (and (-> application (state-machine/state-graph) (states/terminal-state? state-kw))
+             (not= :canceled state-kw))
+        (#{:foremanVerdictGiven :ready :finished :acknowledged} state-kw))))
+
+(defn resolve-lang-for-comments-attachment [application]
+  (let [lang (-> application
+                 :handlers
+                 (first)
+                 :id
+                 (usr/get-user-by-id [:language])
+                 :language)]
+    (if lang lang "fi")))
+
+(defn maybe-generate-comments-attachment [user application state]
+  (when (comments-saved-as-attachment? application state)
+    (let [lang    (resolve-lang-for-comments-attachment application)
+          command (-> application
+                      (application->command)
+                      (assoc :lang lang :user user))]
+      (try
+        (save-comments-as-attachment command state)
+        (catch Exception ex
+          (errorf ex "Could not produce comments pdf with application %s moving to state %s."
+                  (:id application) state))))))
 
 ;;
 ;; Pre-checks
