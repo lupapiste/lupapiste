@@ -250,6 +250,12 @@
     app.showExpiryDate = showExpiryDate(app);
   }
 
+  function initArchiveDates(app) {
+    if (_.isUndefined( app.archived.initial)) {
+      app.archived.initial = null;
+    }
+  }
+
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
@@ -268,6 +274,7 @@
 
       initWarrantyDates(app);
       initExpiryDate(app);
+      initArchiveDates(app);
 
       // Update observables
       var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
