@@ -24,6 +24,11 @@ LUPAPISTE.PublishApplicationModel = function(params) {
     }
   });
 
+  self.showHelp = ko.pureComputed(function() {
+    // Only show the help element if there's some text to show and if the user is an authority
+    return self.helpText.length > 0 && self.authModel.ok("application-authorities");
+  });
+
   self.notYetPublishedForApplicant = ko.pureComputed(function() {
     return !self.bulletinState() && lupapisteApp.models.currentUser.isApplicant();
   });
