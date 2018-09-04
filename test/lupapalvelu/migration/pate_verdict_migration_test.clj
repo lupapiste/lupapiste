@@ -117,6 +117,7 @@
 (def migrated-test-verdict {:id verdict-id
                             :modified timestamp
                             :category :r
+                            :state (wrap "draft")
                             :data {:handler (wrap handler)
                                    :kuntalupatunnus (wrap kuntalupatunnus)
                                    :verdict-section (wrap section)
@@ -188,7 +189,8 @@
                                    :attachment-id "attachment1"
                                    :tags (contains "Sonja Sibbo")})
              :archive {:verdict-giver handler
-                       :lainvoimainen lainvoimainen}}))
+                       :lainvoimainen lainvoimainen}
+             :state (wrap "published")}))
 
 (facts "->pate-legacy-verdict"
   (fact "base case"

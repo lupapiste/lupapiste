@@ -10,10 +10,8 @@
             [lupapalvelu.pate.verdict :as verdict]))
 
 ;;
-;; Post-walk related helpers
+;; Helpers for operating on the verdict skeleton
 ;;
-
-;; The type exists only as an implemention detail for `accessor-key?`
 
 (defn- access [accessor-key]
   {::access accessor-key})
@@ -26,9 +24,6 @@
   {::wrap accessor})
 
 (def- wrap? (comp boolean ::wrap))
-;;
-;; Helpers for obtaining collections from current verdicts
-;;
 
 (defn- id-map-from [collection-key element-skeleton]
   {::id-map-from {::collection collection-key
@@ -44,6 +39,54 @@
 
 (defn- build-array? [x]
   (boolean (::array-from x)))
+
+(defn- assoc-context [element context]
+  (postwalk (fn [x]
+              (if (accessor-key? x)
+                (assoc x ::context context)
+                x))
+            element))
+
+(defn- build-id-map
+  "Builds a collection skeleton dynamically based on the data present in the
+   `application` and `verdict`."
+  [application verdict accessor-functions
+   {{collection ::collection
+     element    ::element} ::id-map-from}]
+  (->> ((get accessor-functions collection) application verdict nil)
+       (group-by :id)
+       (util/map-values (comp (partial assoc-context element) first))
+       not-empty))
+
+(defn- build-array
+  [application verdict accessor-functions
+   {{collection ::collection
+     element    ::element} ::array-from}]
+  (->> ((get accessor-functions collection) application verdict nil)
+       (mapv (partial assoc-context element))))
+
+(defn- fetch-with-accessor
+  "Given the `application` under migration, the source `verdict` and
+  current `timestamp`, returns a function for accessing desired data
+  from the `application` and `verdict`. Used with `prewalk`."
+  [application verdict accessor-functions]
+  (fn [x]
+    (cond (accessor-key? x)
+          ((get accessor-functions (::access x)) application verdict (::context x))
+
+          (build-id-map? x)
+          (build-id-map application verdict accessor-functions x)
+
+          (build-array? x)
+          (build-array application verdict accessor-functions x)
+
+          :else x)))
+
+(defn- post-process [timestamp]
+  (fn [x]
+    (if (wrap? x)
+      (metadata/wrap "Verdict draft Pate migration" timestamp (::wrap x))
+      x)))
 
 ;;
 ;; Helpers for accessing relevant data from current verdicts
@@ -129,53 +172,12 @@
                               (targets-verdict? % verdict)))
        :id))
 
-(defn- assoc-context [element context]
-  (postwalk (fn [x]
-              (if (accessor-key? x)
-                (assoc x ::context context)
-                x))
-            element))
+(def- verdict-state
+  (comp #(if %
+           "published"
+           "draft")
+        verdict-published?))
 
-(defn- build-id-map
-  "Builds a collection skeleton dynamically based on the data present in the
-   `application` and `verdict`."
-  [application verdict accessor-functions
-   {{collection ::collection
-     element    ::element} ::id-map-from}]
-  (->> ((get accessor-functions collection) application verdict nil)
-       (group-by :id)
-       (util/map-values (comp (partial assoc-context element) first))
-       not-empty))
-
-(defn- build-array
-  [application verdict accessor-functions
-   {{collection ::collection
-     element    ::element} ::array-from}]
-  (->> ((get accessor-functions collection) application verdict nil)
-       (mapv (partial assoc-context element))))
-
-(defn- fetch-with-accessor
-  "Given the `application` under migration, the source `verdict` and
-  current `timestamp`, returns a function for accessing desired data
-  from the `application` and `verdict`. Used with `prewalk`."
-  [application verdict accessor-functions]
-  (fn [x]
-    (cond (accessor-key? x)
-          ((get accessor-functions (::access x)) application verdict (::context x))
-
-          (build-id-map? x)
-          (build-id-map application verdict accessor-functions x)
-
-          (build-array? x)
-          (build-array application verdict accessor-functions x)
-
-          :else x)))
-
-(defn- post-process [timestamp]
-  (fn [x]
-    (if (wrap? x)
-      (metadata/wrap "Verdict draft Pate migration" timestamp (::wrap x))
-      x)))
 ;;
 ;; Verdict migration
 ;;
@@ -190,6 +192,7 @@
    :published {:published     (access :published)
                ;; :tags          (access :published-tags)
                :attachment-id (access :published-attachment-id)}
+   :state (wrap (access :state))
    :data {:handler         (wrap (access :handler))
           :kuntalupatunnus (wrap (access :kuntalupatunnus))
           :verdict-section (wrap (access :verdict-section))
@@ -241,6 +244,7 @@
    :signature-name    signature-name
    :signature-user-id (get-in-context [:user :id])
    :signatures        (get-in-verdict [:signatures])
+   :state             verdict-state
    :template          verdict-template
    :verdict-code      (comp str (get-in-poytakirja :status))
    :verdict-section   (get-in-poytakirja :pykala)
