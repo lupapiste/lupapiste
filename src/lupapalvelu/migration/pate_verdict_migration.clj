@@ -49,9 +49,11 @@
 ;; Helpers for accessing relevant data from current verdicts
 ;;
 
-(defn- get-in-verdict [path]
+(defn- get-in-verdict [path & [default]]
   (fn [_ verdict _]
-    (get-in verdict path)))
+    (if-let [result (get-in verdict path)]
+      result
+      default)))
 
 (defn- get-in-poytakirja [key]
   (get-in-verdict (conj [:paatokset 0 :poytakirjat 0] key)))
@@ -127,38 +129,6 @@
                               (targets-verdict? % verdict)))
        :id))
 
-(def- accessor-functions
-  "Contains functions for accessing relevant Pate verdict data from
-  current verdict drafts. These return the raw values but are
-  subsequently to be wrapped with relevant metadata."
-  {:anto              (get-in-paivamaarat :anto)
-   :archive           (get-when verdict-published? get-archive-data)
-   :attachment-summaries attachment-summaries
-   :category          verdict-category
-   :condition-name    (get-in-context [:taskname])
-   :conditions        (filter-tasks-of-verdict (task-name? :task-lupamaarays))
-   :context           context
-   :foreman-role      (get-in-context [:taskname])
-   :foremen           (filter-tasks-of-verdict (task-name? :task-vaadittu-tyonjohtaja))
-   :handler           (get-in-poytakirja :paatoksentekija)
-   :id                (get-in-verdict [:id])
-   :kuntalupatunnus   (get-in-verdict [:kuntalupatunnus])
-   :lainvoimainen     (get-in-paivamaarat :lainvoimainen)
-   :modified          (get-in-verdict [:timestamp])
-   :published         (get-when verdict-published? (get-in-paivamaarat :anto))
-   :published-attachment-id (get-when verdict-published? published-attachment-id)
-   :review-name       (get-in-context [:taskname])
-   :review-type       (get-in-context [:data :katselmuksenLaji :value])
-   :reviews           (filter-tasks-of-verdict (task-name? :task-katselmus))
-   :signature-date    (get-in-context [:created])
-   :signature-name    signature-name
-   :signature-user-id (get-in-context [:user :id])
-   :signatures        (get-in-verdict [:signatures])
-   :template          verdict-template
-   :verdict-code      (comp str (get-in-poytakirja :status))
-   :verdict-section   (get-in-poytakirja :pykala)
-   :verdict-text      (get-in-poytakirja :paatos)})
-
 (defn- assoc-context [element context]
   (postwalk (fn [x]
               (if (accessor-key? x)
@@ -169,16 +139,18 @@
 (defn- build-id-map
   "Builds a collection skeleton dynamically based on the data present in the
    `application` and `verdict`."
-  [application verdict {{collection ::collection
-                         element    ::element} ::id-map-from}]
+  [application verdict accessor-functions
+   {{collection ::collection
+     element    ::element} ::id-map-from}]
   (->> ((get accessor-functions collection) application verdict nil)
        (group-by :id)
        (util/map-values (comp (partial assoc-context element) first))
        not-empty))
 
 (defn- build-array
-  [application verdict {{collection ::collection
-                         element    ::element} ::array-from}]
+  [application verdict accessor-functions
+   {{collection ::collection
+     element    ::element} ::array-from}]
   (->> ((get accessor-functions collection) application verdict nil)
        (mapv (partial assoc-context element))))
 
@@ -186,16 +158,16 @@
   "Given the `application` under migration, the source `verdict` and
   current `timestamp`, returns a function for accessing desired data
   from the `application` and `verdict`. Used with `prewalk`."
-  [application verdict]
+  [application verdict accessor-functions]
   (fn [x]
     (cond (accessor-key? x)
           ((get accessor-functions (::access x)) application verdict (::context x))
 
           (build-id-map? x)
-          (build-id-map application verdict x)
+          (build-id-map application verdict accessor-functions x)
 
           (build-array? x)
-          (build-array application verdict x)
+          (build-array application verdict accessor-functions x)
 
           :else x)))
 
@@ -242,6 +214,41 @@
    :archive (access :archive)
    :legacy? true})
 
+(defn- accessor-functions [defaults]
+  "Contains functions for accessing relevant Pate verdict data from
+  current verdict drafts. These return the raw values but are
+  subsequently to be wrapped with relevant metadata."
+  {:anto              (get-in-paivamaarat :anto)
+   :archive           (get-when verdict-published? get-archive-data)
+   :attachment-summaries attachment-summaries
+   :category          verdict-category
+   :condition-name    (get-in-context [:taskname])
+   :conditions        (filter-tasks-of-verdict (task-name? :task-lupamaarays))
+   :context           context
+   :foreman-role      (get-in-context [:taskname])
+   :foremen           (filter-tasks-of-verdict (task-name? :task-vaadittu-tyonjohtaja))
+   :handler           (get-in-poytakirja :paatoksentekija)
+   :id                (get-in-verdict [:id])
+   :kuntalupatunnus   (get-in-verdict [:kuntalupatunnus])
+   :lainvoimainen     (get-in-paivamaarat :lainvoimainen)
+   :modified          (get-in-verdict [:timestamp] (:modified defaults))
+   :published         (get-when verdict-published? (get-in-paivamaarat :anto))
+   :published-attachment-id (get-when verdict-published? published-attachment-id)
+   :review-name       (get-in-context [:taskname])
+   :review-type       (get-in-context [:data :katselmuksenLaji :value])
+   :reviews           (filter-tasks-of-verdict (task-name? :task-katselmus))
+   :signature-date    (get-in-context [:created])
+   :signature-name    signature-name
+   :signature-user-id (get-in-context [:user :id])
+   :signatures        (get-in-verdict [:signatures])
+   :template          verdict-template
+   :verdict-code      (comp str (get-in-poytakirja :status))
+   :verdict-section   (get-in-poytakirja :pykala)
+   :verdict-text      (get-in-poytakirja :paatos)})
+
+(defn- defaults [timestamp]
+  {:modified timestamp})
+
 (defn- add-tags [application verdict]
   (if (-> verdict :published :published)
     (assoc-in verdict [:published :tags]
@@ -251,7 +258,8 @@
 
 (defn ->pate-legacy-verdict [application verdict timestamp]
   (->> (prewalk (fetch-with-accessor application
-                                     verdict)
+                                     verdict
+                                     (accessor-functions (defaults timestamp)))
                 verdict-migration-skeleton)
        (postwalk (post-process timestamp))
        (add-tags application)
@@ -273,6 +281,9 @@
   ;; in Lupapiste, we are only interested in the existence of the
   ;; field, not the value.
   {:verdicts.draft {$exists true}})
+
+(def migration-projection
+  [:attachments :documents :organization :permitType :primaryOperation :propertyId :tasks :verdicts])
 
 (defn migration-updates [application timestamp]
   (merge {$unset {:verdicts ""}

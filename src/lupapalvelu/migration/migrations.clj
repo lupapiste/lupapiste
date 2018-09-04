@@ -24,6 +24,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.migration.pate-verdict-migration :as pate-verdict-migration]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.tasks :refer [task-doc-validation] :as tasks]
@@ -4001,8 +4002,18 @@
                          {:pop "003710948874"}
                          {$set {:pop "E204503"}}))
 
+(defn update-application-verdicts-to-pate-legacy-verdicts [timestamp application]
+  (mongo/update-by-id :applications (:id application)
+                      (pate-verdict-migration/migration-updates application
+                                                                timestamp)))
 
-
+(defmigration pate-verdicts
+  {:apply-when (pos? (mongo/count :applications pate-verdict-migration/migration-query))}
+  (let [ts (now)]
+    (->> (mongo/select :applications
+                       pate-verdict-migration/migration-query
+                       pate-verdict-migration/migration-projection)
+         (run! (partial update-application-verdicts-to-pate-legacy-verdicts ts)))))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

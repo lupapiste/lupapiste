@@ -115,7 +115,7 @@
                                         :firstName "Second"
                                         :lastName "Name"}}]})
 (def migrated-test-verdict {:id verdict-id
-                            :modified 1234
+                            :modified timestamp
                             :category :r
                             :data {:handler (wrap handler)
                                    :kuntalupatunnus (wrap kuntalupatunnus)
@@ -143,24 +143,25 @@
 (def migrated-test-verdict-no-tasks
   (-> migrated-test-verdict
       (update :data dissoc :reviews :foremen :conditions)))
-(def test-application {:id "app-id"
-                       :verdicts [test-verdict]
-                       :permitType "R"
-                       :organization "753-R"
-                       :primaryOperation {:id "5b868cb8e7d8a158be266085"
-                                          :name "kerrostalo-rivitalo"
-                                          :description nil
-                                          :created 1535544504326}
-                       :propertyId "75341600550007"
-                       :tasks (tasks-for-verdict (:id test-verdict))
-                       :attachments [{:latestVersion {:fileId "attachment-id"}
-                                      :target {:id verdict-id
+(def test-application (-> {:id "app-id"
+                           :verdicts [test-verdict]
+                           :permitType "R"
+                           :organization "753-R"
+                           :primaryOperation {:id "5b868cb8e7d8a158be266085"
+                                              :name "kerrostalo-rivitalo"
+                                              :description nil
+                                              :created 1535544504326}
+                           :propertyId "75341600550007"
+                           :tasks (tasks-for-verdict (:id test-verdict))
+                           :attachments [{:latestVersion {:fileId "attachment-id"}
+                                          :target {:id verdict-id
 
-                                               :type "verdict"}
-                                      :id "attachment1"
-                                      :type {:type-id    "paatos"
-                                             :type-group "paatoksenteko"}}]
-                       :documents [hakija-doc-for-tags]})
+                                                   :type "verdict"}
+                                          :id "attachment1"
+                                          :type {:type-id    "paatos"
+                                                 :type-group "paatoksenteko"}}]
+                           :documents [hakija-doc-for-tags]}
+                          (select-keys migration-projection)))
 
 (def app-one-verdict-no-tasks (dissoc test-application :tasks))
 (def app-one-verdict-with-tasks test-application)

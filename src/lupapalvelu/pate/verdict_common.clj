@@ -19,7 +19,8 @@
   "Is the verdict created in Lupapiste, either through Pate or legacy interface"
   [verdict]
   ;; TODO Needs a more robust check
-  (boolean (:data verdict)))
+  (or (:legacy? verdict)
+      (contains? verdict :draft)))
 
 (defn has-category? [{:keys [category] :as verdict} c]
   (if (lupapiste-verdict? verdict)
@@ -252,7 +253,7 @@
    :modified                       ssc/Timestamp
    :category                       sc/Str
    :legacy?                        sc/Bool
-   :giver                          sc/Str
+   (sc/optional-key :giver)        sc/Str
    (sc/optional-key :verdict-date) ssc/Timestamp
    :replaced?                      sc/Bool
    :title                          sc/Str
@@ -272,6 +273,7 @@
                                   (map :replaces)
                                   (remove nil?)
                                   set)]
+    (clojure.pprint/pprint summaries)
     (reduce (fn [result verdict]
               (if (contains? replaced-verdict-ids
                              (verdict-id verdict))
