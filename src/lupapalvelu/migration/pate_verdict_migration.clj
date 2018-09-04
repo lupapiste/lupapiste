@@ -267,6 +267,13 @@
 ;;
 ;; Application migration
 ;;
+(def migration-query
+  ;; The best indication of a verdict having been created in Lupapiste
+  ;; is the existence of :draft. Since we migrate all verdicts created
+  ;; in Lupapiste, we are only interested in the existence of the
+  ;; field, not the value.
+  {:verdicts.draft {$exists true}})
+
 (defn migration-updates [application timestamp]
   (merge {$unset {:verdicts ""}
           $set {:pate-verdicts [(->pate-legacy-verdict application
