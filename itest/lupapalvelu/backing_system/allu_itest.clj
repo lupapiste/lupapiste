@@ -20,7 +20,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
 
-            [midje.sweet :refer [facts fact =>]]
+            [midje.sweet :refer [facts fact => contains]]
             [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
 
             [lupapalvelu.backing-system.allu :as allu :refer [PlacementContract]]
@@ -162,6 +162,12 @@
   (fact "return to draft"
     (itu/local-command apikey :return-to-draft :id app-id :text msg :lang "fi") => ok?))
 
+(defn- request-for-complement [apikey id]
+  (fact "request for complement"
+    (itu/local-command apikey :request-for-complement :id id)
+    => (contains {:ok   false
+                  :text "error.integration.allu.unsupported-operation"})))
+
 (defn- cancel [apikey app-id msg]
   (fact "cancel application"
     (itu/local-command apikey :cancel-application :id app-id :text msg :lang "fi") => ok?))
@@ -275,25 +281,26 @@
             allu-state (atom initial-allu-state)]
         (with-redefs [allu/allu-request-handler (make-test-handler allu-state)]
           (facts "state transitions"
-            (traverse-state-transitions states/ya-sijoitussopimus-state-graph :draft
-                                        (fn [] (create-and-fill-placement-app pena "sijoitussopimus"))
-                                        (into {} (map (fn [[_ dest :as transition]]
-                                                        [transition
-                                                         (case dest
-                                                           :draft (fn [_ id]
-                                                                    (return-to-draft raktark-helsinki id "Nolo!"))
-                                                           :open (fn [_ id] (open pena id "YOLO"))
-                                                           :submitted (fn [_ id]
-                                                                        (fill pena id)
-                                                                        (submit pena id))
-                                                           :sent (fn [_ id] (approve raktark-helsinki id))
-                                                           :canceled (fn [[current _] id]
-                                                                       (if (contains? #{:draft :open} current)
-                                                                         (cancel pena id "Alkoi nolottaa.")
-                                                                         (cancel raktark-helsinki id "Nolo!")))
-                                                           (fn [transition _] (warn "TODO:" transition)))]))
-                                              (state-graph->transitions states/ya-sijoitussopimus-state-graph))
-                                        1))
+            (traverse-state-transitions
+              states/ya-sijoitussopimus-state-graph :draft
+              (fn [] (create-and-fill-placement-app pena "sijoitussopimus"))
+              (into {} (map (fn [[_ dest :as transition]]
+                              [transition
+                               (case dest
+                                 :draft (fn [_ id] (return-to-draft raktark-helsinki id "Nolo!"))
+                                 :open (fn [_ id] (open pena id "YOLO"))
+                                 :submitted (fn [_ id]
+                                              (fill pena id)
+                                              (submit pena id))
+                                 :sent (fn [_ id] (approve raktark-helsinki id))
+                                 :canceled (fn [[current _] id]
+                                             (if (contains? #{:draft :open} current)
+                                               (cancel pena id "Alkoi nolottaa.")
+                                               (cancel raktark-helsinki id "Nolo!")))
+                                 :complementNeeded (fn [_ id] (request-for-complement raktark-helsinki id))
+                                 (fn [transition _] (warn "TODO:" transition)))]))
+                    (state-graph->transitions states/ya-sijoitussopimus-state-graph))
+              1))
 
           ;;; TODO: move-attachments-to-backing-system
           ;;; TODO: agreementPrepared/Signed

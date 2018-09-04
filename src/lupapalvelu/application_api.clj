@@ -21,6 +21,7 @@
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.backing-system.allu :as allu]
             [lupapalvelu.backing-system.core :as bs]
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as krysp-output]
             [lupapalvelu.comment :as comment]
@@ -262,7 +263,10 @@
    :permissions      [{:required [:application/request-for-complement]}]
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
+   :pre-checks       [(fn [{:keys [application]}]
+                        (when (allu/allu-application? (:organization application) (permit/permit-type application))
+                          (fail :error.integration.allu.unsupported-operation)))
+                      (partial sm/validate-state-transition :complementNeeded)]}
   [{:keys [created user application] :as command}]
   (update-application command (util/deep-merge (app-state/state-transition-update :complementNeeded created application user))))
 
