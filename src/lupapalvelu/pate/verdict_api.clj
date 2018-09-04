@@ -88,6 +88,14 @@
                           :error.verdict.no-html)
                         identity fail))))))
 
+(defn- backing-system-verdict
+  "Pre-check that fails if the target verdict is not a backing system
+  verdict. Note that after Pate has taken into use, verdicts array
+  includes only the backing system verdicts."
+  [{:keys [application data] :as command}]
+  (when application
+    (when-not (verdict/command->backing-system-verdict command)
+      (fail :error.verdict-not-found))))
 
 (defn- no-backing-system-verdicts-check
   [{:keys [application]}]
@@ -241,11 +249,11 @@
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :published?)]
+   :pre-checks       [(action/some-pre-check (verdict-exists :published?)
+                                             backing-system-verdict)]
    :states           states/post-verdict-states}
   [command]
-  (let [{:keys [id published]} (verdict/command->verdict command)]
-    (ok :verdict (assoc published :id id))))
+  (ok :verdict (verdict/published-verdict-details command)))
 
 (defcommand edit-pate-verdict
   {:description "Updates verdict data. Returns changes and errors

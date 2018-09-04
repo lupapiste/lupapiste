@@ -2,16 +2,55 @@
   "Verdict PDF layout definitions. Note: keyword
   sources (e.g., :application-id) are defined in
   `lupapalvelu.pate.pdf/verdict-properties`."
-  (:require [clojure.string :as s]
+  (:require [sade.shared-strings :as ss]
+            #?(:clj  [lupapalvelu.i18n :as i18n]
+               :cljs [lupapalvelu.ui.common :as common])
+            #?(:clj  [lupapalvelu.pate.date :as date]
+               :cljs [lupapalvelu.ui.common :as common])
             [sade.shared-util :as util]
             [schema.core :refer [defschema] :as sc]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]))
+
+#?(:clj (def finnish-date date/finnish-date)
+   :cljs (def finnish-date common/format-timestamp))
+
+#?(:clj (def localize i18n/localize)
+   :cljs (defn localize [_ & terms]
+           (->> (flatten terms)
+                (map name)
+                (ss/join "." )
+                common/loc)))
+
+#?(:clj (def localize-and-fill i18n/localize-and-fill)
+   :cljs (defn localize-and-fill [lang term & values]
+           (let [s (localize lang term)]
+             (reduce (fn [acc i]
+                       (ss/replace acc
+                                  (js/sprintf "{%s}" i)
+                                  (nth values i)))
+                     s
+                     (range (count values))))))
+
+#?(:clj (def has-term? i18n/has-term?)
+   :cljs (def has-term? js/loc.hasTerm))
 
 (def cell-widths (range 10 101 5))
 (def row-styles [:pad-after :pad-before
                  :border-top :border-bottom
                  :page-break :bold :spaced])
 (def cell-styles [:bold :center :right :nowrap])
+
+(defn add-unit
+  "Result is nil for blank value."
+  [lang unit v]
+  (when-not (ss/blank? (str v))
+    (case unit
+      :ha      (str v " " (localize lang :unit.hehtaaria))
+      :m2      [:span v " m" [:sup 2]]
+      :m3      [:span v " m" [:sup 3]]
+      :kpl     (str v " " (localize lang :unit.kpl))
+      :section (str "\u00a7" v)
+      :eur     (str v "\u20ac"))))
 
 (defschema Source
   "Value of PdfEntry :source property aka data source for the row."
@@ -87,7 +126,7 @@
     ;; independent from any source value.
     (sc/optional-key :text)       shared-schemas/keyword-or-string
     (sc/optional-key :width)      (apply sc/enum cell-widths)
-    (sc/optional-key :unit)       (sc/enum :ha :m2 :m3 :kpl)
+    (sc/optional-key :unit)       (sc/enum :ha :m2 :m3 :kpl :section)
     ;; Additional localisation key prefix. Is
     ;; applied both to path and text values.
     (sc/optional-key :loc-prefix) shared-schemas/path-type
@@ -413,7 +452,7 @@
                             :source {:dict :contract-text}
                             :styles :pad-before}])
 
-(def entry--case [{:loc       :pdf.contract.case
+(def entry--case [{:loc      :pdf.contract.case
                    :loc-many :pdf.contract.cases
                    :source   :operations
                    :styles   :bold}
@@ -466,8 +505,8 @@
 
 (defn repeating-texts-post-fn [text-key]
   (util/fn->> vals
-              (map (comp s/trim text-key))
-              (remove s/blank?)))
+              (map (comp ss/trim text-key))
+              (remove ss/blank?)))
 
 (def legacy--application-id [{:loc    :applications.id.longtitle
                               :source :application-id
@@ -656,6 +695,114 @@
                 entry--contract-date
                 entry--attachments
                 entry--contract-signatures))
+
+;; ----------------------------------
+;; Backing system.
+;; Only used for creating tags for UI. The PDF is never generated as
+;; it is received from the backing system. Note that a verdict can
+;; consist of multiple sub-verdicts (poytakirja).
+;; ----------------------------------
+
+(def backing--kuntalupatunnus [{:loc    :verdict.id
+                                :source :kuntalupatunnus
+                                :styles [:bold :pad-after]}])
+
+(defn- autopaikka [k]
+  [{:loc    (util/kw-path :verdict k)
+    :source k}
+   {:unit :kpl}])
+
+(def backing--autopaikat (apply list (map autopaikka
+                                          [:autopaikkojaEnintaan
+                                           :autopaikkojaVahintaan
+                                           :autopaikkojaRakennettava
+                                           :autopaikkojaKiinteistolla
+                                           :autopaikkojaUlkopuolella])))
+
+(defn- area [k]
+  [{:loc    (util/kw-path :verdict k)
+    :source k}
+   {:unit   :m2}])
+
+(def backing--areas (apply list (map area [:kerrosala :kokonaisala])))
+
+(def backing--maaraykset [{:loc-many :verdict.vaaditutErityissuunnitelmat
+                           :loc      :pdf.required-plan
+                           :source   :maaraykset
+                           :styles [:pad-before]}])
+
+(def backing--katselmukset [{:loc      :pdf.required-review
+                             :loc-many :verdict.vaaditutKatselmukset
+                             :source   :vaaditutKatselmukset
+                             :styles   [:pad-before]}])
+
+(def backing--tyonjohtajat [{:loc    :verdict.vaaditutTyonjohtajat
+                             :source :vaaditutTyonjohtajat
+                             :styles [:pad-before]}])
+
+(defn- paiva [k]
+  [{:loc     (util/kw-path :verdict k)
+    :source  k
+    :post-fn finnish-date}])
+
+(def backing--paivamaarat (apply list (map paiva [:anto
+                                                  :julkipano
+                                                  :viimeinenValitus
+                                                  :aloitettava
+                                                  :voimassaHetki
+                                                  :raukeamis
+                                                  :lainvoimainen])))
+
+(def backing-kuntalupatunnus-layout (build-layout backing--kuntalupatunnus))
+
+(def backing-paatos-layout (build-layout backing--autopaikat
+                                         backing--areas
+                                         backing--maaraykset
+                                         backing--katselmukset
+                                         backing--tyonjohtajat
+                                         backing--paivamaarat))
+
+;; Poytakirja
+
+(def pk--verdict-code [{:loc    :pate-verdict
+                        :source :status
+                        :styles [:bold :border-top]}
+                       {:loc-prefix :verdict.status}])
+
+(def pk--verdict-text [{:loc         :empty
+                        :source :paatos
+                        :styles :pad-before}])
+
+(def pk--section [{:loc    :verdict.pykala
+                   :source :pykala}
+                  {:unit :section}])
+
+(def pk--date [{:loc     :empty
+                :source  :paatospvm
+                :styles [:pad-before]
+                :post-fn finnish-date}])
+
+(def pk--author [{:loc    :empty
+                  :source :paatoksentekija
+                  :styles [:pad-after]}])
+
+(defn linkify [{:keys [url text]}]
+  ;; Extra "layer" needed for proper entry-row layout.
+  [[:a {:href url :target "_blank"} text]])
+
+(def pk--attachment [{:loc     :pdf.attachment
+                      :source  :attachment
+                      :post-fn linkify}])
+
+(def backing-poytakirja-layout (build-layout pk--verdict-code
+                                             pk--section
+                                             pk--verdict-text
+                                             pk--date
+                                             pk--author
+                                             pk--attachment))
+
+
+
 
 (defn pdf-layout [{:keys [category legacy?]}]
   (case (util/kw-path (when legacy? :legacy) category)

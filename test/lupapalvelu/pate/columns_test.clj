@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.columns-test
   (:require [lupapalvelu.pate.columns :as cols]
+            [lupapalvelu.pate.pdf-layouts :as layouts]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [midje.sweet :refer :all]))
 
@@ -77,15 +78,15 @@
     => true))
 
 (fact "add-unit"
-  (cols/add-unit :fi :ha " ") => nil
-  (cols/add-unit :fi :ha nil) => nil
-  (cols/add-unit :fi :ha "20") => "20 ha"
-  (cols/add-unit :fi :ha 10) => "10 ha"
-  (cols/add-unit :fi :m2 88) => [:span 88 " m"[:sup 2]]
-  (cols/add-unit :fi :m3 "hello") => [:span "hello" " m"[:sup 3]]
-  (cols/add-unit :fi :kpl 8) => "8 kpl"
-  (cols/add-unit :fi :section 88) => "\u00a788"
-  (cols/add-unit :fi :eur "foo") => "foo\u20ac")
+  (layouts/add-unit :fi :ha " ") => nil
+  (layouts/add-unit :fi :ha nil) => nil
+  (layouts/add-unit :fi :ha "20") => "20 ha"
+  (layouts/add-unit :fi :ha 10) => "10 ha"
+  (layouts/add-unit :fi :m2 88) => [:span 88 " m"[:sup 2]]
+  (layouts/add-unit :fi :m3 "hello") => [:span "hello" " m"[:sup 3]]
+  (layouts/add-unit :fi :kpl 8) => "8 kpl"
+  (layouts/add-unit :fi :section 88) => "\u00a788"
+  (layouts/add-unit :fi :eur "foo") => "foo\u20ac")
 
 (fact "collateral"
   (cols/collateral {:lang    :fi

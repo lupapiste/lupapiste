@@ -204,16 +204,18 @@
                 :id app-id
                 :verdict-id verdict-id))
 
-(defn delete-verdict [app-id {:keys [id published legacy?]}]
-  (common/command {:command (if legacy?
-                              :delete-legacy-verdict
-                              :delete-pate-verdict)
-                   :success #(do (fetch-verdict-list app-id)
-                                 (if published
-                                   (js/repository.load app-id)
-                                   (js/lupapisteApp.services.attachmentsService.queryAll)))}
-                  :id app-id
-                  :verdict-id id))
+(defn delete-verdict [app-id {:keys [id published legacy? category]}]
+  (let [backing-system? (util/=as-kw category :backing-system)]
+    (common/command {:command (cond
+                                legacy?         :delete-legacy-verdict
+                                backing-system? :delete-verdict
+                                :else           :delete-pate-verdict)
+                     :success #(do (fetch-verdict-list app-id)
+                                   (if published
+                                     (js/repository.load app-id)
+                                     (js/lupapisteApp.services.attachmentsService.queryAll)))}
+                   :id app-id
+                   (if backing-system? :verdictId :verdict-id) id)))
 
 (defn edit-verdict [app-id verdict-id path value callback]
   (common/command {:command "edit-pate-verdict"

@@ -32,9 +32,11 @@
       (last v)
       (first v))))
 
-(defn- can-delete? [verdict-id]
-  (or (state/verdict-auth? verdict-id :delete-legacy-verdict)
-      (state/verdict-auth? verdict-id :delete-pate-verdict)))
+(defn- can-delete? [{:keys [id category] :as verdict}]
+  (or (state/verdict-auth? id :delete-legacy-verdict)
+      (state/verdict-auth? id :delete-pate-verdict)
+      (and (util/=as-kw category :backing-system)
+           (state/auth? :delete-verdict))))
 
 (defn- can-replace? [verdict-id]
   (state/verdict-auth? verdict-id :replace-pate-verdict))
@@ -98,7 +100,7 @@
              {:ltitle          "areyousure"
               :size            "medium"
               :component       "yes-no-dialog"
-              :componentParams {:ltext (if (and legacy? published)
+              :componentParams {:ltext (if published
                                          (loc-key :confirm-delete)
                                          (loc-key :confirm-delete-draft))
                                 :yesFn #(service/delete-verdict app-id verdict)}}))
@@ -193,7 +195,7 @@
                          (if hide-actions
                            [:td]
                            [:td
-                            (when (can-delete? id)
+                            (when (can-delete? verdict)
                               (components/icon-button
                                {:text-loc (cond
                                             (and published

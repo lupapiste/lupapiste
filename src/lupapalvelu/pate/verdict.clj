@@ -1323,6 +1323,65 @@
        (sort-by (comp :published :published))
        last))
 
+;; ---------------------------------
+;; Backing system verdicts
+;; The backing system verdicts reside in the verdicts array and never
+;; modified by Pate.
+;; ---------------------------------
+
+(defnk command->backing-system-verdict
+  "Returns the corresponding backing system verdict or nil."
+  [application data]
+  (util/find-by-id (:verdict-id data) (:verdicts application)))
+
+(defn backing-system--poytakirja-properties
+  [application {url-hash :urlHash :as poytakirja}]
+  (util/assoc-when (select-keys poytakirja [:status :paatos :pykala
+                                            :paatospvm :paatoksentekija])
+                   :attachment
+                   (when-let [attachment (and url-hash
+                                              (util/find-first #(= (get-in % [:target :urlHash])
+                                                                   url-hash)
+                                                               (:attachments application)))]
+                     {:url  (str "/api/raw/latest-attachment-version?attachment-id="
+                                 (:id attachment))
+                      :text (get-in attachment [:latestVersion :filename])})))
+
+(defn backing-system--paatos-properties
+  "Properties for an individual paatos (there can multiple within a
+  verdict.). In addition, each paatos can include multiple
+  poytakirjas."
+  [{m :lupamaaraykset :as paatos}]
+  (-> (update m :maaraykset (partial map :sisalto))
+      (update :vaaditutKatselmukset (partial map :tarkastuksenTaiKatselmuksenNimi))
+      (merge (:paivamaarat m))
+      (dissoc :paivamaarat)))
+
+(defn backing-system--tags [application verdict]
+  (reduce (fn [acc paatos]
+            (concat acc
+                    (mapcat #(cols/content (backing-system--poytakirja-properties application %)
+                                           layouts/backing-poytakirja-layout)
+                            (:poytakirjat paatos))
+                    (cols/content (backing-system--paatos-properties paatos)
+                                  layouts/backing-paatos-layout)))
+          (cols/content verdict layouts/backing-kuntalupatunnus-layout)
+          (:paatokset verdict)))
+
+(defnk published-verdict-details
+  "Map of id, published, tags and attachment id (if available)"
+  [application :as command]
+  (if-let [verdict (command->backing-system-verdict command)]
+    {:id (:id verdict)
+     :published (:timestamp verdict)
+     :tags (pr-str {:body (backing-system--tags application verdict)})}
+    (let [{:keys [id published]} (command->verdict command)]
+      (assoc published :id id))))
+
+;; ----------------------------
+;; Signatures
+;; ----------------------------
+
 (defn user-person-name
   "Firstname Lastname. Blank name parts are omitted."
   [user]
