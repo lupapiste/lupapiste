@@ -261,13 +261,15 @@
 (defcommand send-signature-request
   {:description       "Send request to sign contract"
    :feature           :pate
-   :user-roles        #{:authority :applicant}
+   :user-roles        #{:authority}
    :parameters        [id verdict-id signer-id]
    :categories        #{:pate-verdicts}
    :input-validators  [(partial action/non-blank-parameters [:id :verdict-id :signer-id])]
-   :states            states/post-submitted-states}
+   :states            states/post-submitted-states
+   :notified          true
+   :on-success        (notify :application-state-change)}
   [command]
-  (verdict/send-signature-request command)
+  (verdict/add-signature-request command)
   (ok))
 
 (defcommand edit-pate-verdict

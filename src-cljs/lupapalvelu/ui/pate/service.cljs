@@ -295,7 +295,7 @@
 
 (defn send-signature-request [app-id verdict-id signer-id]
   (common/command {:command :send-signature-request
-                   :success (fn [_] (println "Kutsu lähetetty " signer-id))}
+                   :success #(fetch-verdict-list app-id)}
                   :id app-id
                   :verdict-id verdict-id
                   :signer-id signer-id))

@@ -1375,8 +1375,7 @@
     (->> parties
          (mapv (fn [auth] {:value (:id auth) :text (ss/trim (str (:firstName auth) " " (:lastName auth)))})))))
 
-(defn send-signature-request [{:keys [application created data] :as command}]
-  ; send email
+(defn add-signature-request [{:keys [application created data] :as command}]
   (let [signer        (get-user-by-id (:signer-id data))
         [rid request] (create-signature {:application application :user signer :created created})]
     (verdict-update command {$set {(util/kw-path :pate-verdicts.$.signature-requests rid) request}})))

@@ -308,7 +308,7 @@
 "verdict.signatures" "fi" "Allekirjoitukset"
 "verdict.signatures" "sv" "Underskrifter"
 "verdict.signature-requests" "en" ""
-"verdict.signature-requests" "fi" "Pyydetyt allekirjoitukset"
+"verdict.signature-requests" "fi" "Lähetetyt allekirjoituspyynnöt"
 "verdict.signature-requests" "sv" ""
 "verdict.status" "en" "Decision"
 "verdict.status" "fi" "Päätös"
