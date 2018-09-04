@@ -273,7 +273,6 @@
                                   (map :replaces)
                                   (remove nil?)
                                   set)]
-    (clojure.pprint/pprint summaries)
     (reduce (fn [result verdict]
               (if (contains? replaced-verdict-ids
                              (verdict-id verdict))
