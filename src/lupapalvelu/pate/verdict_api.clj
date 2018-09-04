@@ -254,9 +254,21 @@
    :parameters        [id verdict-id]
    :categories        #{:pate-verdicts}
    :input-validators  [(partial action/non-blank-parameters [:id :verdict-id])]
-   :states           states/post-submitted-states}
+   :states            states/post-submitted-states}
   [command]
   (ok :parties (verdict/parties command)))
+
+(defcommand send-signature-request
+  {:description       "Send request to sign contract"
+   :feature           :pate
+   :user-roles        #{:authority :applicant}
+   :parameters        [id verdict-id signer-id]
+   :categories        #{:pate-verdicts}
+   :input-validators  [(partial action/non-blank-parameters [:id :verdict-id :signer-id])]
+   :states            states/post-submitted-states}
+  [command]
+  (verdict/send-signature-request command)
+  (ok))
 
 (defcommand edit-pate-verdict
   {:description "Updates verdict data. Returns changes and errors

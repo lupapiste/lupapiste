@@ -285,11 +285,20 @@
                 :jobId job-id
                 :version version))
 
+;; Signature request
+
 (defn fetch-application-parties [app-id verdict-id callback]
   (common/query "pate-parties"
                 callback
                 :id app-id
                 :verdict-id verdict-id))
+
+(defn send-signature-request [app-id verdict-id signer-id]
+  (common/command {:command :send-signature-request
+                   :success (fn [_] (println "Kutsu lähetetty " signer-id))}
+                  :id app-id
+                  :verdict-id verdict-id
+                  :signer-id signer-id))
 
 (defn- batch-job [status-fn {:keys [job]}]
   (status-fn (when job

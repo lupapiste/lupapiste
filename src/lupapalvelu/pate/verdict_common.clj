@@ -155,6 +155,12 @@
 (defn verdict-summary-signatures [verdict]
   (seq (verdict-signatures verdict)))
 
+(defn verdict-summary-signature-requests [verdict]
+  (some->> verdict :signature-requests vals
+           (map #(select-keys % [:name :date]))
+           (sort-by :date)
+           seq))
+
 (defn- verdict-section-string [verdict]
   (title-fn (verdict-section verdict) #(str "\u00a7" %)))
 
@@ -208,16 +214,17 @@
          (ss/join " "))))
 
 (defn verdict-summary [lang section-strings verdict]
-  (->> {:id           (verdict-id verdict)
-        :published    (verdict-published verdict)
-        :modified     (verdict-modified verdict)
-        :category     (verdict-category verdict)
-        :legacy?      (legacy? verdict)
-        :giver        (verdict-giver verdict)
-        :replaces     (replaced-verdict-id verdict)
-        :verdict-date (verdict-date verdict)
-        :title        (verdict-summary-title verdict lang section-strings)
-        :signatures   (verdict-summary-signatures verdict)}
+  (->> {:id                 (verdict-id verdict)
+        :published          (verdict-published verdict)
+        :modified           (verdict-modified verdict)
+        :category           (verdict-category verdict)
+        :legacy?            (legacy? verdict)
+        :giver              (verdict-giver verdict)
+        :replaces           (replaced-verdict-id verdict)
+        :verdict-date       (verdict-date verdict)
+        :title              (verdict-summary-title verdict lang section-strings)
+        :signatures         (verdict-summary-signatures verdict)
+        :signature-requests (verdict-summary-signature-requests verdict)}
        (util/filter-map-by-val some?)))
 
 (defn- section-strings-by-id [verdicts]
@@ -248,16 +255,18 @@
 
 (sc/defschema VerdictSummary
   {:id           sc/Str
-   (sc/optional-key :published)    ssc/Timestamp
-   :modified                       ssc/Timestamp
-   :category                       sc/Str
-   :legacy?                        sc/Bool
-   :giver                          sc/Str
-   (sc/optional-key :verdict-date) ssc/Timestamp
-   :replaced?                      sc/Bool
-   :title                          sc/Str
-   (sc/optional-key :signatures)   [{:name sc/Str
-                                     :date ssc/Timestamp}]})
+   (sc/optional-key :published)            ssc/Timestamp
+   :modified                               ssc/Timestamp
+   :category                               sc/Str
+   :legacy?                                sc/Bool
+   :giver                                  sc/Str
+   (sc/optional-key :verdict-date)         ssc/Timestamp
+   :replaced?                              sc/Bool
+   :title                                  sc/Str
+   (sc/optional-key :signatures)           [{:name sc/Str
+                                             :date ssc/Timestamp}]
+   (sc/optional-key :signature-requests)   [{:name sc/Str
+                                             :date ssc/Timestamp}]})
 
 (sc/defn ^:always-validate verdict-list :- [VerdictSummary]
   [{:keys [lang application]}]

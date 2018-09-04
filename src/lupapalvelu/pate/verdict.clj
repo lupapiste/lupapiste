@@ -35,6 +35,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
+            [lupapalvelu.user :refer [get-user-by-id]]
             [lupapalvelu.verdict :as old-verdict]
             [monger.operators :refer :all]
             [plumbing.core :refer [defnk]]
@@ -1359,13 +1360,23 @@
                          (domain/get-application-no-access-checking (:id application)))]
       (pdf/create-verdict-attachment-version command (command->verdict command true)))))
 
+(defn- signer-ids [data]
+  (->> data
+       (vals)
+       (map :user-id)
+       (remove nil?)
+       (map keyword)))
+
 (defn parties [command]
-  (let [signed-id (->> (get-in (command->verdict command) [:data :signatures])
-                       (vals)
-                       (map :user-id)
-                       (remove nil?)
-                       (map keyword))
+  (let [signed-id     (signer-ids (get-in (command->verdict command) [:data :signatures]))
+        requested-id  (signer-ids (get-in (command->verdict command) [:signature-requests]))
         parties   (->> (get-in command [:application :auth])
-                       (filter #(not ((set signed-id) (keyword (:id %))))))]
+                       (filter #(not ((set (concat signed-id requested-id)) (keyword (:id %))))))]
     (->> parties
          (mapv (fn [auth] {:value (:id auth) :text (ss/trim (str (:firstName auth) " " (:lastName auth)))})))))
+
+(defn send-signature-request [{:keys [application created data] :as command}]
+  ; send email
+  (let [signer        (get-user-by-id (:signer-id data))
+        [rid request] (create-signature {:application application :user signer :created created})]
+    (verdict-update command {$set {(util/kw-path :pate-verdicts.$.signature-requests rid) request}})))

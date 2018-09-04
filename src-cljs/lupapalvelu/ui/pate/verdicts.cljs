@@ -127,7 +127,7 @@
   [{password*     ::password
     signing?*     ::signing?
     waiting?*     ::waiting?
-    bad-password* ::bad-password} app-id verdict-id signatures]
+    bad-password* ::bad-password} app-id verdict-id signatures title]
   [:tr.verdict-signatures
    [:td]
    [:td {:colSpan 3}
@@ -135,7 +135,7 @@
      [:div.row
       [:div.col-1
        [:div
-        [:div  [:strong (common/loc :verdict.signatures)]]
+        [:div  [:strong (common/loc title)]]
         [:div.tabby
          (map-indexed (fn [i {:keys [name date]}]
                         [:div.tabby__row {:key i}
@@ -198,7 +198,7 @@
            (components/dropdown signer*
                                 {:items (rum/react parties*)})
            [:button.signature
-            {:on-click (fn [signer*] (println "Kutsutaan allekirjoittamaan " signer* " id:lle :: " id))
+            {:on-click (fn [_] (service/send-signature-request app-id id @signer*))
              :class    :positive}
             (common/loc :pate.verdict-table.send-signature-request)]])]]]
    [:td
@@ -218,7 +218,7 @@
    [:thead [:tr (map (fn [header] [:th (common/loc header)]) headers)]]
    [:tbody (map (fn [{:keys [id title published modified
                              verdict-date giver replaced?
-                             category signatures]
+                             category signatures signature-requests]
                       :as   verdict}]
                   (list [:tr {:key id}
                          [:td {:class (common/css-flags :replaced replaced?)}
@@ -253,8 +253,11 @@
                                 :class    (common/css :secondary)
                                 :on-click #(confirm-and-replace-verdict verdict id)}))])]
                         (when (seq signatures)
-                          (rum/with-key (verdict-signatures-row app-id id signatures)
+                          (rum/with-key (verdict-signatures-row app-id id signatures :verdict.signatures)
                                         (str id "-signatures")))
+                        (when (seq signature-requests)
+                          (rum/with-key (verdict-signatures-row app-id id signature-requests :verdict.signature-requests)
+                                        (str id "-signature-request")))
                         (when (contract? verdict)
                           (rum/with-key (request-signature-row app-id id) (str id "-request")))))
                 verdicts)]])
