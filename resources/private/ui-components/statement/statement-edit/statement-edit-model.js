@@ -22,15 +22,16 @@ LUPAPISTE.StatementEditModel = function(params) {
   var dueDateSubscription = self.disposedSubscribe(self.newDueDate, function(newDate) {
     if (newDate && params.data) {
       ajax.command("save-statement-due-date",
-                                    {id: applicationId(),
-                                     statementId: params.data().id(),
-                                     dueDate: newDate.getTime(),
-                                     lang: loc.getCurrentLanguage()})
-                      .success ( function(response) {
-                        hub.send("indicator", {style: "positive", message: "email.notification-sent", sticky: true})
-                      })
-                      .error(util.showSavedIndicator)
-                      .call();
+                   {id: applicationId(),
+                    statementId: params.data().id(),
+                    dueDate: newDate.getTime(),
+                    lang: loc.getCurrentLanguage()
+                   })
+                   .success ( function(response) {
+                     hub.send("indicator", {style: "positive", message: "email.notification-sent", sticky: true})
+                   })
+                   .error(util.showSavedIndicator)
+                   .call();
     }
    });
 
