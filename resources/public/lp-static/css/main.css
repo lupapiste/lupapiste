@@ -30369,6 +30369,11 @@ div.pate-note {
   background-color: #f6f6f6;
 }
 
+div.pate-note-frame {
+  margin: 12px 12px;
+  display: block;
+}
+
 div.pate-required-fields-note {
   border-left: 4px solid #f39129;
   margin-top: 0;

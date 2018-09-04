@@ -20,6 +20,7 @@
               :th-giver             [:pate.verdict-table.verdict-giver :verdict.name.sijoitussopimus]
               :add                  [:application.verdict.add :pate.contract.add]
               :new                  [:pate.verdict-new :pate.verdict-new]
+              :fetch                [:verdict.fetch.button :contract.fetch.button]
               :copy                 [:pate.verdict-copy :pate.verdict-copy]
               :description          [:application.verdictDesc :pate.contract.description
                                      :help.YA.verdictDesc.sijoitussopimus]
@@ -55,7 +56,7 @@
   (let [templates (rum/react state/template-list)]
 
     (if (empty? templates)
-      [:div.pate-note (path/loc (loc-key :no-templates))]
+      [:div.pate-note-frame [:div.pate-note (path/loc (loc-key :no-templates))]]
       (let [items (map #(set/rename-keys % {:id :value :name :text})
                        templates)
             selected (rum/react template*)]
@@ -93,6 +94,21 @@
                            :class    [:positive]
                            :on-click #(service/new-legacy-verdict-draft @state/application-id
                                                                         open-verdict)}))
+
+(rum/defcs check-for-verdict < (rum/local false ::waiting?)
+  [{waiting?* ::waiting?}]
+  (components/icon-button {:icon     :lupicon-download
+                           :text-loc (loc-key :fetch)
+                           :wait?    waiting?*
+                           :class    [:positive]
+                           :on-click #(service/check-for-verdict @state/application-id
+                                                                 waiting?*
+                                                                 (fn [{:keys [verdictCount taskCount]}]
+                                                                   (common/show-dialog {:ltitle :verdict.fetch.title
+                                                                                        :text   (common/loc :verdict.verdicts-found-from-backend
+                                                                                                            (str verdictCount)
+                                                                                                            (str taskCount))})
+                                                                   ))}))
 
 
 (defn- confirm-and-delete-verdict [app-id {:keys [legacy? published] :as verdict}]
@@ -251,7 +267,9 @@
    (when (state/auth? :new-pate-verdict-draft)
      (new-verdict))
    (when (state/auth? :new-legacy-verdict-draft)
-     (new-legacy-verdict))])
+     (new-legacy-verdict))
+   (when (state/auth? :check-for-verdict)
+     (check-for-verdict))])
 
 (rum/defc verdicts < rum/reactive
   []

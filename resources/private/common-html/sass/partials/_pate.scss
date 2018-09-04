@@ -772,6 +772,11 @@ div.pate-note {
   background-color: $gray246;
 }
 
+div.pate-note-frame {
+  margin: $marginM $marginM;
+  display: block;
+}
+
 div.pate-required-fields-note {
   @include patenote( 0, 0);
   padding-left: $marginS;

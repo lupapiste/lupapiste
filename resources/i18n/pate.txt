@@ -1002,3 +1002,5 @@
 "plus" "en" "+"
 "plus" "fi" "+"
 "plus" "sv" "+"
+"contract.fetch.button" "fi" "Hae sopimukset taustajärjestelmästä"
+"contract.fetch.button" "en" "Get contracts from the background system"
