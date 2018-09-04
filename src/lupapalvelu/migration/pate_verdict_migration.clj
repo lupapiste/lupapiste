@@ -279,5 +279,6 @@
           $set {:pate-verdicts (mapv #(->pate-legacy-verdict application
                                                              %
                                                              timestamp)
-                                     (:verdicts application))}
+                                     (:verdicts application))
+                :pre-pate-verdicts (:verdicts application)}
           $pull {:tasks {:source.id {$in (draft-verdict-ids application)}}}}))

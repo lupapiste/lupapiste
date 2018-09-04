@@ -237,29 +237,33 @@
   (fact "one draft verdict, no tasks"
     (migration-updates app-one-verdict-no-tasks timestamp)
     => {$unset {:verdicts ""}
-        $set {:pate-verdicts [migrated-test-verdict-no-tasks]}
+        $set {:pate-verdicts [migrated-test-verdict-no-tasks]
+              :pre-pate-verdicts (:verdicts app-one-verdict-no-tasks)}
         $pull {:tasks {:source.id {$in [(:id migrated-test-verdict-no-tasks)]}}}})
 
   (fact "one draft verdict with tasks"
     (migration-updates app-one-verdict-with-tasks timestamp)
     => {$unset {:verdicts ""}
-        $set {:pate-verdicts [migrated-test-verdict]}
+        $set {:pate-verdicts [migrated-test-verdict]
+              :pre-pate-verdicts (:verdicts app-one-verdict-with-tasks)}
         $pull {:tasks {:source.id {$in [(:id migrated-test-verdict)]}}}})
 
   (fact "two draft verdicts with tasks"
-        (migration-updates app-two-verdicts-with-tasks timestamp)
-        => {$unset {:verdicts ""}
-            $set {:pate-verdicts [migrated-test-verdict migrated-test-verdict2]}
-            $pull {:tasks {:source.id {$in [verdict-id verdict-id2]}}}})
+    (migration-updates app-two-verdicts-with-tasks timestamp)
+    => {$unset {:verdicts ""}
+        $set {:pate-verdicts [migrated-test-verdict migrated-test-verdict2]
+              :pre-pate-verdicts (:verdicts app-two-verdicts-with-tasks)}
+        $pull {:tasks {:source.id {$in [verdict-id verdict-id2]}}}})
 
   (fact "two verdicts with tasks, one draft, one published"
-        (migration-updates app-with-draft-and-published timestamp)
-        => (contains
-            {$unset {:verdicts ""}
-             $set (contains {:pate-verdicts (just [contains-published-and-archive-data?
-                                                   migrated-test-verdict2])})
-             ;; Only tasks related to the unpublished verdict are pulled
-             $pull {:tasks {:source.id {$in [verdict-id2]}}}}))
+    (migration-updates app-with-draft-and-published timestamp)
+    => (contains
+        {$unset {:verdicts ""}
+         $set (contains {:pate-verdicts (just [contains-published-and-archive-data?
+                                               migrated-test-verdict2])
+                         :pre-pate-verdicts (:verdicts app-with-draft-and-published)})
+         ;; Only tasks related to the unpublished verdict are pulled
+         $pull {:tasks {:source.id {$in [verdict-id2]}}}}))
 
   (against-background
    (lupapalvelu.organization/get-organization-name anything anything) => "Sipoon rakennusvalvonta"))
