@@ -1360,6 +1360,12 @@
       (pdf/create-verdict-attachment-version command (command->verdict command true)))))
 
 (defn parties [command]
-  (let [signed (:signatures (command->verdict command))]
-    (->> (get-in command [:application :auth])
+  (let [signed-id (->> (get-in (command->verdict command) [:data :signatures])
+                       (vals)
+                       (map :user-id)
+                       (remove nil?)
+                       (map keyword))
+        parties   (->> (get-in command [:application :auth])
+                       (filter #(not ((set signed-id) (keyword (:id %))))))]
+    (->> parties
          (mapv (fn [auth] {:value (:id auth) :text (ss/trim (str (:firstName auth) " " (:lastName auth)))})))))
