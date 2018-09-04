@@ -256,7 +256,7 @@
        (postwalk (post-process timestamp))
        (add-tags application)
        util/strip-nils
-       util/strip-empty-maps))
+       util/strip-empty-collections))
 
 (defn- draft-verdict-ids [application]
   (->> application
@@ -276,7 +276,8 @@
 
 (defn migration-updates [application timestamp]
   (merge {$unset {:verdicts ""}
-          $set {:pate-verdicts [(->pate-legacy-verdict application
-                                                       (first (:verdicts application))
-                                                       timestamp)]}
+          $set {:pate-verdicts (mapv #(->pate-legacy-verdict application
+                                                             %
+                                                             timestamp)
+                                     (:verdicts application))}
           $pull {:tasks {:source.id {$in (draft-verdict-ids application)}}}}))

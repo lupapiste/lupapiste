@@ -165,6 +165,17 @@
 (def app-one-verdict-no-tasks (dissoc test-application :tasks))
 (def app-one-verdict-with-tasks test-application)
 
+(def verdict-id2 "verdict-id2")
+(def test-verdict2 (assoc test-verdict :id verdict-id2))
+(def migrated-test-verdict2 (-> migrated-test-verdict
+                                (assoc :id verdict-id2)
+                                ;; No attachment in test application referring test verdict 2
+                                (update :data dissoc :attachments)))
+
+(def app-two-verdicts-with-tasks (assoc test-application
+                                        :verdicts [test-verdict test-verdict2]
+                                        :tasks (concat (tasks-for-verdict verdict-id)
+                                                       (tasks-for-verdict verdict-id2))))
 (facts "->pate-legacy-verdict"
   (fact "base case"
     (->pate-legacy-verdict test-application
@@ -225,6 +236,12 @@
     => {$unset {:verdicts ""}
         $set {:pate-verdicts [migrated-test-verdict]}
         $pull {:tasks {:source.id {$in [(:id migrated-test-verdict)]}}}})
+
+  (fact "two draft verdicts with tasks"
+        (migration-updates app-two-verdicts-with-tasks timestamp)
+        => {$unset {:verdicts ""}
+            $set {:pate-verdicts [migrated-test-verdict migrated-test-verdict2]}
+            $pull {:tasks {:source.id {$in [verdict-id verdict-id2]}}}})
 
   (against-background
    (lupapalvelu.organization/get-organization-name anything anything) => "Sipoon rakennusvalvonta"))
