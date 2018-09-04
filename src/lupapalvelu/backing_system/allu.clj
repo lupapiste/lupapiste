@@ -210,12 +210,13 @@
    :postalCode    postinumero
    :streetAddress {:streetName katu}})
 
-(defn- person->customer [{:keys [osoite], {:keys [hetu] :as person} :henkilotiedot}]
-  {:type          "PERSON"
-   :registryKey   hetu
-   :name          (fullname person)
-   :country       (address-country osoite)
-   :postalAddress (convert-address osoite)})
+(declare person->contact)
+
+(defn- person->customer [{:keys [osoite], {:keys [hetu]} :henkilotiedot :as person}]
+  (merge {:type          "PERSON"
+          :registryKey   hetu
+          :country       (address-country osoite)}
+         (person->contact person)))
 
 (defn- company->customer [payee? company]
   (let [{:keys                                                 [osoite liikeJaYhteisoTunnus yritysnimi]
