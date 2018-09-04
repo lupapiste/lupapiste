@@ -347,12 +347,9 @@
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (let [application (if-let [[bs-name integration-key] (bs/submit-application! command)]
-                          (do (app/set-integration-key id bs-name integration-key)
-                              (assoc-in application [:integrationKeys bs-name] integration-key)) ; HACK
-                          application)]
-        (app/submit (assoc command :application application))
-        (ok)))))
+      (do (app/submit command)
+          (bs/submit-application! command)
+          (ok)))))
 
 (defcommand refresh-ktj
   {:parameters [:id]

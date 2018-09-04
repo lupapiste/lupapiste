@@ -16,7 +16,7 @@
 
 (defprotocol BackingSystem
   (-submit-application! [self command]
-    "Send application submit message to backing system. Returns [backing-system-name integration-key-data] or nil.")
+    "Send application submit message to backing system. Returns nil.")
   (-update-application! [self command updated-application]
     "Update application in backing system if supported. Returns true if supported, false if not.")
   (-cancel-application! [self command] "Cancel application in backing system. Returns nil.")
@@ -38,15 +38,14 @@
 
 (deftype ALLUBackingSystem []
   BackingSystem
-  (-submit-application! [_ command] [:ALLU (allu/submit-application! command)])
+  (-submit-application! [_ command] (allu/submit-application! command))
   (-update-application! [_ command updated-application]
     (allu/update-application! (assoc command :application updated-application))
     true)
   (-return-to-draft! [_ command] (allu/cancel-application! command))
   (-cancel-application! [_ command] (allu/cancel-application! command))
   (-approve-application! [_ {:keys [application] :as command} _ _]
-    ;; TODO: Non-placement-contract ALLU applications
-    (allu/lock-placement-contract! command)
+    (allu/lock-application! command)
     (attachment/save-comments-as-attachment command)
     (let [{:keys [attachments] :as application} (domain/get-application-no-access-checking (:id application))]
       [true (allu/send-attachments! (assoc command :application application)
