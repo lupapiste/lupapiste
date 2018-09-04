@@ -42,7 +42,7 @@
   (-update-application! [_ command updated-application]
     (allu/update-application! (assoc command :application updated-application))
     true)
-  (-return-to-draft! [_ command] (allu/cancel-application! command))
+  (-return-to-draft! [_ _] nil)
   (-cancel-application! [_ command] (allu/cancel-application! command))
   (-approve-application! [_ {:keys [application] :as command} _ _]
     (allu/lock-application! command)
