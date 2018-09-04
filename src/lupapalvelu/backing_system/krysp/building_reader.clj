@@ -96,15 +96,6 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
-(defn- get-osoite [osoite]
-  (-> (get-text osoite :osoitenimi :teksti)
-      (common/get-updated-if (common/str-or-nil " " (get-text osoite :osoitenumero)))
-      (common/get-updated-if (common/str-or-nil "\u2013" (get-text osoite :osoitenumero2)));SFS4175 stardardin mukainen valiviiva
-      (common/get-updated-if (common/str-or-nil " " (get-text osoite :jakokirjain)))
-      (common/get-updated-if (common/str-or-nil "\u2013" (get-text osoite :jakokirjain2)))
-      (common/get-updated-if (common/str-or-nil " " (get-text osoite :porras)))
-      (common/get-updated-if (common/str-or-nil " " (get-text osoite :huoneisto)))))
-
 (defn- ->rakennuksen-omistaja-legacy-version [omistaja]
   {:_selected "yritys"
    :yritys {:liikeJaYhteisoTunnus                     (get-text omistaja :tunnus)
