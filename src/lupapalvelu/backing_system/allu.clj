@@ -392,7 +392,7 @@
                                                    :mime-type "application/json"}
                                                   {:name      :file
                                                    :schema    (sc/cond-pre sc/Str InputStream)
-                                                   :mime-type #(-> % :metadata :mimeType)}]}}})
+                                                   :mime-type (fn-> :metadata :mimeType)}]}}})
 
 (defn- interpolate-uri [template path-params request-data]
   (reduce (fn [^String uri [k schema]]
