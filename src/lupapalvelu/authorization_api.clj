@@ -183,7 +183,7 @@
   (do-remove-auth command (get-in command [:user :username])))
 
 ;;
-;; Auhtorizations
+;; Authorizations
 ;;
 
 (defn no-company-users-in-auths-when-company-denies-invitations

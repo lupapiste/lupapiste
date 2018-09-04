@@ -126,8 +126,13 @@
           (fact "Sonja cannot delete base attachment"
             (command sonja :delete-attachment :id application-id :attachmentId (:id base)) => (partial expected-failure? :error.ram-linked))
           (fact "Fill and approve RAM and create one more link"
+            (sent-emails)  ;; Clear inbox
             (let [ram (latest-attachment)]
-              (upload-file-and-bind pena application-id {:type (:type ram)} :attachment-id (:id ram))) => truthy
+              (upload-version-and-bind pena application-id (:id ram))) => truthy
+            (fact "Email notification about new RAM is sent"
+              (let [email (last-email)]
+                (:to email) => (contains (email-for-key ronja))
+                (:subject email) => "Lupapiste: foo 42, bar, Sipoo - Ilmoitus uudesta RAM:sta"))
             (let [middle (latest-attachment)]
               (command sonja :approve-attachment :id application-id
                        :fileId (-> middle :latestVersion :fileId)) => ok?
