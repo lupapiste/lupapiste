@@ -236,8 +236,9 @@
     {:_selected "henkilo", :henkilo person} (person->customer person)
     {:_selected "yritys", :yritys company} (company->customer payee? company)))
 
-(defn- person->contact [{:keys [henkilotiedot], {:keys [puhelin email]} :yhteystiedot}]
-  {:name (fullname henkilotiedot), :phone puhelin, :email email})
+(defn- person->contact [{:keys [henkilotiedot osoite], {:keys [puhelin email]} :yhteystiedot}]
+  (assoc-when {:name (fullname henkilotiedot), :phone puhelin, :email email}
+              :postalAddress (some-> osoite convert-address)))
 
 (defn- customer-contact [customer-doc]
   (match (:data customer-doc)
