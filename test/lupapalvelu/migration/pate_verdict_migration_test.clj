@@ -28,6 +28,55 @@
     :taskname "Muu 2"
     :source {:id verdict-id}}])
 
+(def hakija-doc-for-tags
+  {:id "5b868cb8e7d8a158be266087"
+   :schema-info {:name "hakija-r"
+                 :version 1
+                 :type "party"
+                 :subtype "hakija"}
+   :created 1535544504326
+   :data {:_selected {:value "henkilo"
+                      :modified 1535544504531}
+          :henkilo {:userId {:value "777777777777777777000023"
+                             :modified 1535544504531}
+                    :henkilotiedot {:etunimi {:value "Sonja"
+                                              :modified 1535544504531}
+                                    :sukunimi {:value "Sibbo"
+                                               :modified 1535544504531}
+                                    :hetu {:value ""
+                                           :modified 1535544504531}
+                                    :turvakieltoKytkin {:value false
+                                                        :modified 1535544504531}}
+                    :osoite {:katu {:value "Katuosoite 1 a 1"
+                                    :modified 1535544504531}
+                             :postinumero {:value "33456"
+                                           :modified 1535544504531}
+                             :postitoimipaikannimi {:value "Sipoo"
+                                                    :modified 1535544504531}
+                             :maa {:value "FIN"}}
+                    :yhteystiedot {:puhelin {:value "03121991"
+                                             :modified 1535544504531}
+                                   :email {:value "sonja.sibbo@sipoo.fi"
+                                           :modified 1535544504531}}
+                    :kytkimet {:suoramarkkinointilupa {:value false
+                                                       :modified 1535544504531}
+                               :vainsahkoinenAsiointiKytkin {:value true}}}
+          :yritys {:companyId {:value nil}
+                   :yritysnimi {:value ""}
+                   :liikeJaYhteisoTunnus {:value ""}
+                   :osoite {:katu {:value ""}
+                            :postinumero {:value ""}
+                            :postitoimipaikannimi {:value ""}
+                            :maa {:value "FIN"}}
+                   :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}
+                                                   :sukunimi {:value ""}
+                                                   :turvakieltoKytkin {:value false}}
+                                   :yhteystiedot {:puhelin {:value ""}
+                                                  :email {:value ""}}
+                                   :kytkimet {:suoramarkkinointilupa {:value false}
+                                              :vainsahkoinenAsiointiKytkin {:value true}}}}}
+   :meta {:_indicator_reset {:timestamp 1535544525806}}})
+
 (def verdict-id "verdict-id")
 (def kuntalupatunnus "lupatunnus")
 (def anto 2345)
@@ -111,53 +160,7 @@
                                       :id "attachment1"
                                       :type {:type-id    "paatos"
                                              :type-group "paatoksenteko"}}]
-                       :documents [{:id "5b868cb8e7d8a158be266087"
-                                    :schema-info {:name "hakija-r"
-                                                  :version 1
-                                                  :type "party"
-                                                  :subtype "hakija"}
-                                    :created 1535544504326
-                                    :data {:_selected {:value "henkilo"
-                                                       :modified 1535544504531}
-                                           :henkilo {:userId {:value "777777777777777777000023"
-                                                              :modified 1535544504531}
-                                                     :henkilotiedot {:etunimi {:value "Sonja"
-                                                                               :modified 1535544504531}
-                                                                     :sukunimi {:value "Sibbo"
-                                                                                :modified 1535544504531}
-                                                                     :hetu {:value ""
-                                                                            :modified 1535544504531}
-                                                                     :turvakieltoKytkin {:value false
-                                                                                         :modified 1535544504531}}
-                                                     :osoite {:katu {:value "Katuosoite 1 a 1"
-                                                                     :modified 1535544504531}
-                                                              :postinumero {:value "33456"
-                                                                            :modified 1535544504531}
-                                                              :postitoimipaikannimi {:value "Sipoo"
-                                                                                     :modified 1535544504531}
-                                                              :maa {:value "FIN"}}
-                                                     :yhteystiedot {:puhelin {:value "03121991"
-                                                                              :modified 1535544504531}
-                                                                    :email {:value "sonja.sibbo@sipoo.fi"
-                                                                            :modified 1535544504531}}
-                                                     :kytkimet {:suoramarkkinointilupa {:value false
-                                                                                        :modified 1535544504531}
-                                                                :vainsahkoinenAsiointiKytkin {:value true}}}
-                                           :yritys {:companyId {:value nil}
-                                                    :yritysnimi {:value ""}
-                                                    :liikeJaYhteisoTunnus {:value ""}
-                                                    :osoite {:katu {:value ""}
-                                                             :postinumero {:value ""}
-                                                             :postitoimipaikannimi {:value ""}
-                                                             :maa {:value "FIN"}}
-                                                    :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}
-                                                                                    :sukunimi {:value ""}
-                                                                                    :turvakieltoKytkin {:value false}}
-                                                                    :yhteystiedot {:puhelin {:value ""}
-                                                                                   :email {:value ""}}
-                                                                    :kytkimet {:suoramarkkinointilupa {:value false}
-                                                                               :vainsahkoinenAsiointiKytkin {:value true}}}}}
-                                    :meta {:_indicator_reset {:timestamp 1535544525806}}}]})
+                       :documents [hakija-doc-for-tags]})
 
 (def app-one-verdict-no-tasks (dissoc test-application :tasks))
 (def app-one-verdict-with-tasks test-application)
@@ -197,9 +200,15 @@
                            timestamp)
     => (contains {:published (contains {:published anto
                                         :attachment-id "attachment1"
-                                        :tags string?})
+                                        :tags (contains "Sonja Sibbo")})
                   :archive {:verdict-giver handler
                             :lainvoimainen lainvoimainen}}))
+
+  (fact "verdict can be migrated even when the application does not have applicant document"
+        (->pate-legacy-verdict test-application
+                               (assoc test-verdict :draft false)
+                               timestamp)
+        => (contains {:published (contains {:tags string?})}))
 
   (against-background
    (lupapalvelu.organization/get-organization-name anything anything) => "Sipoon rakennusvalvonta"))
