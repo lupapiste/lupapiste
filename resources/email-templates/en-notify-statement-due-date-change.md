@@ -1,6 +1,6 @@
 # Hello, {{user.firstName}}.
 
-We wish to notify you that a statements due date on a permit application
+We wish to notify you that a statement's due date on a permit application
 at {{address}}, {{municipality}}, has been changed.
 
 A permit is sought for {{operation}}. The new due date set for the statement

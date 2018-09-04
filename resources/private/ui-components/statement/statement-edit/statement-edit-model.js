@@ -19,9 +19,9 @@ LUPAPISTE.StatementEditModel = function(params) {
   self.inAttachment = ko.observable();
 
   self.newDueDate = ko.observable();
-  var dueDateSubscription = self.newDueDate.subscribe(function(newDate) {
+  var dueDateSubscription = self.disposedSubscribe(self.newDueDate, function(newDate) {
     if (newDate && params.data) {
-      ajax.command("save-statement-due-date-as-draft",
+      ajax.command("save-statement-due-date",
                                     {id: applicationId(),
                                      statementId: params.data().id(),
                                      dueDate: newDate.getTime(),
@@ -143,6 +143,5 @@ LUPAPISTE.StatementEditModel = function(params) {
     statusSubscription.dispose();
     submitSubscription.dispose();
     inAttachmentSub.dispose();
-    dueDateSubscription.dispose();
   };
 };

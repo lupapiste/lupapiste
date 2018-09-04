@@ -218,27 +218,24 @@
    :subject-key   "notify-statement-due-date-change"
    :model-fn      request-statement-model})
 
-(defcommand save-statement-due-date-as-draft
-            {:parameters [:id statementId dueDate :lang]
-             :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
-             :pre-checks [statement/statement-not-given
-                          statement/statement-in-sent-state-allowed]
-             :states #{:open :submitted :complementNeeded :sent}
-             :user-roles #{:authority}
-             :user-authz-roles #{}
-             :notified true
-             :on-success [(fn [command _] (notifications/notify! :notify-statement-due-date-change command))]
-             :description "authorities can change statements due date and save the statement as draft."}
-            [{application :application user :user {:keys [text status modify-id in-attachment]} :data :as command}]
-            (when (and status (not ((statement/possible-statement-statuses command) status)))
-              (fail! :error.unknown-statement-status))
-            (let [
-                  statement (-> (util/find-by-id statementId (:statements application))
-                                (statement/update-due-date-draft text status modify-id (:id user) in-attachment dueDate))]
-              (update-application command
-                                  {:statements {$elemMatch {:id statementId}}}
-                                  {$set {:statements.$ statement}})
-              (ok :modify-id (:modify-id statement))))
+(defcommand save-statement-due-date
+  {:parameters [:id statementId dueDate :lang]
+   :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
+   :pre-checks [statement/statement-not-given
+                statement/statement-in-sent-state-allowed
+                statement/statements-due-date-is-timestamp]
+   :states #{:open :submitted :complementNeeded :sent}
+   :user-roles #{:authority}
+   :notified true
+   :on-success [(fn [command _] (notifications/notify! :notify-statement-due-date-change command))]
+   :description "authorities can change statements due date and save the statement as draft."}
+  [{application :application user :user {:keys [text status modify-id in-attachment]} :data :as command}]
+  (let [statement (-> (util/find-by-id statementId (:statements application))
+                      (assoc :dueDate dueDate))]
+    (update-application command
+                        {:statements {$elemMatch {:id statementId}}}
+                        {$set {:statements.$ statement}})
+    (ok :modify-id (:modify-id statement))))
 
 (defcommand give-statement
   {:parameters          [:id statementId status :lang]

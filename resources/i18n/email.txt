@@ -112,7 +112,7 @@
 "email.title.invite-to-prev-permit" "en" "{{address}}, {{municipality}} - the project has been changed into electronic format"
 "email.title.invite-to-prev-permit" "fi" "{{address}}, {{municipality}} - hanke on siirretty sähköiseksi"
 "email.title.invite-to-prev-permit" "sv" "{{address}}, {{municipality}} - projektet har överförts till elektronisk form"
-"email.title.notify-statement-due-date-change" "en" "Notification of changed statements due date"
+"email.title.notify-statement-due-date-change" "en" "Notification of a statement's due date change"
 "email.title.notify-statement-due-date-change" "fi" "Ilmoitus lausunnon määräajan muutoksesta"
 "email.title.organization-housing-office" "en" "An ARA project in Lupapiste has been left pending"
 "email.title.organization-housing-office" "fi" "ARA-hanke Lupapisteessä on jätetty vireille"
