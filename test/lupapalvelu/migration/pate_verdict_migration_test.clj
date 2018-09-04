@@ -176,6 +176,19 @@
                                         :verdicts [test-verdict test-verdict2]
                                         :tasks (concat (tasks-for-verdict verdict-id)
                                                        (tasks-for-verdict verdict-id2))))
+(def app-with-draft-and-published (assoc test-application
+                                         :verdicts [(assoc test-verdict :draft false)
+                                                    test-verdict2]
+                                         :tasks (concat (tasks-for-verdict verdict-id)
+                                                        (tasks-for-verdict verdict-id2))))
+
+(def contains-published-and-archive-data?
+  (contains {:published (contains {:published anto
+                                   :attachment-id "attachment1"
+                                   :tags (contains "Sonja Sibbo")})
+             :archive {:verdict-giver handler
+                       :lainvoimainen lainvoimainen}}))
+
 (facts "->pate-legacy-verdict"
   (fact "base case"
     (->pate-legacy-verdict test-application
@@ -209,11 +222,7 @@
                                    #(map (fn [v] (assoc v :draft false)) %))
                            (assoc test-verdict :draft false)
                            timestamp)
-    => (contains {:published (contains {:published anto
-                                        :attachment-id "attachment1"
-                                        :tags (contains "Sonja Sibbo")})
-                  :archive {:verdict-giver handler
-                            :lainvoimainen lainvoimainen}}))
+    => contains-published-and-archive-data?)
 
   (fact "verdict can be migrated even when the application does not have applicant document"
         (->pate-legacy-verdict test-application
@@ -242,6 +251,15 @@
         => {$unset {:verdicts ""}
             $set {:pate-verdicts [migrated-test-verdict migrated-test-verdict2]}
             $pull {:tasks {:source.id {$in [verdict-id verdict-id2]}}}})
+
+  (fact "two verdicts with tasks, one draft, one published"
+        (migration-updates app-with-draft-and-published timestamp)
+        => (contains
+            {$unset {:verdicts ""}
+             $set (contains {:pate-verdicts (just [contains-published-and-archive-data?
+                                                   migrated-test-verdict2])})
+             ;; Only tasks related to the unpublished verdict are pulled
+             $pull {:tasks {:source.id {$in [verdict-id2]}}}}))
 
   (against-background
    (lupapalvelu.organization/get-organization-name anything anything) => "Sipoon rakennusvalvonta"))
