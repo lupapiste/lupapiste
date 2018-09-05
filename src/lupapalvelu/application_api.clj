@@ -21,7 +21,6 @@
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.backing-system.allu :as allu]
             [lupapalvelu.backing-system.core :as bs]
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as krysp-output]
             [lupapalvelu.comment :as comment]
@@ -245,9 +244,7 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :contexts         [app/canceled-app-context]
    :permissions      [{:required [:application/undo-cancelation]}]
-   :pre-checks       [(fn [{:keys [application]}]
-                        (when (allu/allu-application? (:organization application) (permit/permit-type application))
-                          (fail :error.integration.allu.unsupported-operation)))
+   :pre-checks       [bs/validate-action-support
                       (fn last-history-item-is-canceled [{:keys [application]}]
                         (when-not (= :canceled
                                      ((comp keyword :state) (app-state/last-history-item application)))
@@ -266,9 +263,7 @@
    :permissions      [{:required [:application/request-for-complement]}]
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(fn [{:keys [application]}]
-                        (when (allu/allu-application? (:organization application) (permit/permit-type application))
-                          (fail :error.integration.allu.unsupported-operation)))
+   :pre-checks       [bs/validate-action-support
                       (partial sm/validate-state-transition :complementNeeded)]}
   [{:keys [created user application] :as command}]
   (update-application command (util/deep-merge (app-state/state-transition-update :complementNeeded created application user))))

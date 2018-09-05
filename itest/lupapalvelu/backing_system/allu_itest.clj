@@ -189,7 +189,8 @@
   (fact "request for complement"
     (itu/local-command apikey :request-for-complement :id id)
     => (contains {:ok   false
-                  :text "error.integration.allu.unsupported-operation"})))
+                  :text "error.integration.unsupported-action"
+                  :action "request-for-complement"})))
 
 (defn- cancel [apikey app-id msg]
   (fact "cancel application"
@@ -199,7 +200,8 @@
   (fact "undo cancellation"
     (itu/local-command apikey :undo-cancellation :id app-id)
     => (contains {:ok   false
-                  :text "error.integration.allu.unsupported-operation"})))
+                  :text "error.integration.unsupported-action"
+                  :action "undo-cancellation"})))
 
 ;;;; Mock Handler
 ;;;; ===================================================================================================================
