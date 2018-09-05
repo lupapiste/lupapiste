@@ -620,12 +620,17 @@
   [command]
   (send-allu-request! (placement-creation-request command)))
 
+(declare update-application!)
+
 ;; TODO: Non-placement-contract ALLU applications
 (defn submit-application!
-  "Submit application to ALLU and save the returned id as application.integrationKeys.ALLU.id."
-  [{{:keys [permitSubtype]} :application :as command}]
+  "Submit application to ALLU and save the returned id as application.integrationKeys.ALLU.id. If this is a resubmit
+  (after return-to-draft) just does `update-application!` instead."
+  [{{:keys [permitSubtype] :as application} :application :as command}]
   {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
-  (create-placement-contract! command))
+  (if-not (get-in application [:integrationKeys :ALLU :id])
+    (create-placement-contract! command)
+    (update-application! command)))
 
 ;; TODO: Will error if user changes the application to contain invalid data, is that what we want?
 (defn- update-placement-contract!
