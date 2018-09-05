@@ -772,6 +772,11 @@ div.pate-note {
   background-color: $gray246;
 }
 
+div.pate-note-frame {
+  margin: $marginM $marginM;
+  display: block;
+}
+
 div.pate-required-fields-note {
   @include patenote( 0, 0);
   padding-left: $marginS;
@@ -829,8 +834,18 @@ div.pate-select-application-attachments {
   }
 }
 
+h3.pate-attachments-title {
+  padding-top: $marginM;
+  margin-top: $marginM;
+  border-top: 1px solid black;
+}
+
 .pate-left-space {
   margin-left: $marginM;
+}
+
+.pate-right-space {
+  margin-right: $marginM;
 }
 
 .pate-sandwich {
@@ -871,6 +886,7 @@ span.text-and-button > input {
 
 tr.verdict-signatures {
   div.tabby {
+    vertical-align: top;
     margin-left: 1em;
     //max-width: 30em;
     div.tabby__cell {
@@ -888,7 +904,7 @@ tr.verdict-signatures {
     min-width: 16em;
   }
   button.cancel-signing {
-    margin-top: 1.5em;
+    margin-left: 2em;
   }
 }
 

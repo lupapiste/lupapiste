@@ -2,10 +2,7 @@
   "Schema and data driven layout mechanism for static data. Used for
   creating verdict hard copies. Refactoring into cljc was a bit
   premature, but might come handy in the future."
-  (:require #?(:clj  [lupapalvelu.i18n :as i18n]
-               :cljs [lupapalvelu.ui.common :as common])
-            #?(:clj  [lupapalvelu.pate.date :as date])
-            [sade.shared-strings :as ss]
+  (:require [sade.shared-strings :as ss]
             [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.markup :as markup]
             [lupapalvelu.pate.pdf-layouts :as layouts]
@@ -14,28 +11,6 @@
             [sade.shared-util :as util]
             [schema.core :refer [defschema] :as sc]))
 
-#?(:clj (def finnish-date date/finnish-date)
-   :cljs (def finnish-date common/format-timestamp))
-
-#?(:clj (def localize i18n/localize)
-   :cljs (defn localize [_ & terms]
-           (->> (flatten terms)
-                (map name)
-                (ss/join "." )
-                common/loc)))
-
-#?(:clj (def localize-and-fill i18n/localize-and-fill)
-   :cljs (defn localize-and-fill [lang term & values]
-           (let [s (localize lang term)]
-             (reduce (fn [acc i]
-                       (ss/replace acc
-                                  (js/sprintf "{%s}" i)
-                                  (nth values i)))
-                     s
-                     (range (count values))))))
-
-#?(:clj (def has-term? i18n/has-term?)
-   :cljs (def has-term? js/loc.hasTerm))
 
 (defn pathify [kw-path]
   (map keyword (ss/split (name kw-path) #"\.")))
@@ -60,13 +35,13 @@
   "Localized string or nil if the last part is blank."
   [lang & parts]
   (when-not (-> parts last ss/blank?)
-    (localize lang parts)))
+    (layouts/localize lang parts)))
 
 (defn loc-fill-non-blank
   "Localize and fill if every value is non-blank"
   [lang loc-key & values]
   (when (every? (comp not ss/blank? str) values)
-    (apply (partial localize-and-fill lang loc-key) values)))
+    (apply (partial layouts/localize-and-fill lang loc-key) values)))
 
 (defn- verdict-schema [{:keys [category schema-version legacy?]}]
   (if legacy?
@@ -89,22 +64,10 @@
       (list [:div.markup (markup/markup->tags value)])
 
       (and (:date schema) (integer? value))
-      (finnish-date value)
+      (layouts/finnish-date value)
 
       :else
       value)))
-
-(defn add-unit
-  "Result is nil for blank value."
-  [lang unit v]
-  (when-not (ss/blank? (str v))
-    (case unit
-      :ha      (str v " " (localize lang :unit.hehtaaria))
-      :m2      [:span v " m" [:sup 2]]
-      :m3      [:span v " m" [:sup 3]]
-      :kpl     (str v " " (localize lang :unit.kpl))
-      :section (str "\u00a7" v)
-      :eur     (str v "\u20ac"))))
 
 (defn resolve-source
   [{:keys [application] :as data} {doc-source  :doc
@@ -138,8 +101,8 @@
       [:div.cell (cond-> {}
                    (seq class) (assoc :class class))
        (cond->> value
-         loc-prefix (localize lang loc-prefix)
-         unit (add-unit lang unit))])))
+         loc-prefix (layouts/localize lang loc-prefix)
+         unit (layouts/add-unit lang unit))])))
 
 (defn post-process [value post-fn]
   (cond-> value
@@ -149,18 +112,25 @@
   (let [rule-kw (into [] (util/split-kw-path (:rule loc-rule)))
         rule-value (get-in data rule-kw)
         rule-key (keyword (str (name (:key loc-rule)) "." (name rule-value)))]
-    (if (has-term? (:lang data) rule-key)
+    (if (layouts/has-term? (:lang data) rule-key)
       rule-key
       (:key loc-rule))))
 
+(defn safe-not-empty [a]
+  (when (or (number? a) (not-empty a))
+    a))
+
 (defn entry-row
-  [left-width {:keys [lang] :as data} [{:keys [loc loc-many source post-fn styles loc-rule]} & cells]]
+  [left-width
+   {:keys [lang] :as data}
+   [{:keys [loc loc-many source post-fn styles loc-rule id]}
+    & cells]]
   (let [source-value (post-process (util/pcond-> (resolve-source data source)
                                                  string? ss/trim)
                                    post-fn)
         multiple?    (and (sequential? source-value)
                           (> (count source-value) 1))]
-    (when (or (nil? source) (not-empty source-value))
+    (when (or (nil? source) (safe-not-empty source-value))
       (let [section-styles  [:page-break :border-top :border-bottom]
             row-styles      (resolve-class layouts/row-styles styles
                                            (get-in source-value [::styles :row]))
@@ -184,13 +154,15 @@
 
         (when-not (empty? cell-values)
           [:div.section
-           {:class (util/intersection-as-kw section-styles row-styles)}
+           (util/filter-map-by-val some?
+                                   {:class (util/intersection-as-kw section-styles row-styles)
+                                    :id id})
            [:div.row
             {:class (util/difference-as-kw row-styles section-styles)}
             [:div.cell
              {:class (resolve-class [:bold] styles (when left-width
                                                      (str "cell--" left-width)))}
-             (localize lang (if multiple? (or loc-many loc) loc))]
+             (layouts/localize lang (if multiple? (or loc-many loc) loc))]
             (if multiple-cells?
               [:div.cell
                [:div.section
@@ -201,12 +173,12 @@
   [data {:keys [left-width entries]}]
   (->> entries
        (map (partial entry-row left-width data))
-       (filter not-empty)))
+       (filter safe-not-empty)))
 
 ;; Shared verdict properties
 
 (defn complexity [{lang :lang :as options}]
-  (not-empty (filter not-empty
+  (safe-not-empty (filter safe-not-empty
                      [(loc-non-blank lang
                                      :pate.complexity
                                      (dict-value options :complexity))
@@ -245,15 +217,15 @@
        (map (fn [{:keys [given text status]}]
               (join-non-blanks ", "
                                text
-                               (finnish-date given)
-                               (localize lang :statement status))))
-       not-empty))
+                               (layouts/finnish-date given)
+                               (layouts/localize lang :statement status))))
+       safe-not-empty))
 
 (defn collateral [{:keys [lang] :as options}]
   (when (dict-value options :collateral-flag)
     (join-non-blanks ", "
-                     [(add-unit lang :eur (dict-value options
-                                                                :collateral))
+                     [(layouts/add-unit lang :eur (dict-value options
+                                                              :collateral))
                       (loc-non-blank lang :pate.collateral-type
                                      (dict-value options
                                                       :collateral-type))

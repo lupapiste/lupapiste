@@ -94,16 +94,13 @@
        (:handler data)))
     (-> verdict first-pk :paatoksentekija)))
 
-(defn verdict-signatures [verdict]
+(defn verdict-signatures [{:keys [signatures] :as verdict}]
   (if (lupapiste-verdict? verdict)
-    (some->> verdict :data :signatures vals
-             (map #(select-keys % [:name :date]))
-             (sort-by :date)
-             seq)
-    (some->> verdict :signatures
-             (sort-by :created)
+    (some->> signatures
+             (map #(select-keys % [:name :date])))
+    (some->> signatures
              (map (fn [{:keys [created user]}]
-                    {:name (usr/full-name user)
+                    {:name    (usr/full-name user)
                      :date created})))))
 
 (defn verdict-section [verdict]
@@ -247,14 +244,14 @@
               (conj sub (dissoc v :replaces))))))
 
 (sc/defschema VerdictSummary
-  {:id           sc/Str
+  {:id                             sc/Str
    (sc/optional-key :published)    ssc/Timestamp
    :modified                       ssc/Timestamp
    :category                       sc/Str
    :legacy?                        sc/Bool
-   :giver                          sc/Str
+   (sc/optional-key :giver)        sc/Str
    (sc/optional-key :verdict-date) ssc/Timestamp
-   :replaced?                      sc/Bool
+   (sc/optional-key :replaced?)    sc/Bool
    :title                          sc/Str
    (sc/optional-key :signatures)   [{:name sc/Str
                                      :date ssc/Timestamp}]})

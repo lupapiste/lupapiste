@@ -139,7 +139,7 @@
                                                 [:pdf category :permit])))]]])
     [:div.row
      [:div.cell.cell--40
-      (cols/add-unit lang :section (cols/dict-value verdict :verdict-section))]
+      (layouts/add-unit lang :section (cols/dict-value verdict :verdict-section))]
      [:div.cell.cell--20.center
       [:div (cols/dict-value verdict :verdict-date)]]
      [:div.cell.cell--40.right.page-number
