@@ -3480,3 +3480,24 @@
                          :created 123456789
                          :user {:id (mongo/create-id) :username "sonja"}}
                         verdictId) => string?))
+
+(facts "Signature requests"
+  (let [verdictId   (mongo/create-id)
+        verdict     (make-verdict :id verdictId :code "myonnetty" :section "123")
+        verdict     (assoc-in verdict [:data :signatures] {(keyword (mongo/create-id)) {:user-id "123"
+                                                                                        :name "Signer one"
+                                                                                        :date 1536138000000}})
+        verdict     (assoc verdict :signature-requests {(keyword (mongo/create-id)) {:user-id "111"
+                                                                                     :name "Signer four"
+                                                                                     :date 1536138000000}})
+        application (assoc application :auth [{:id "123" :username "user1" :firstName "signer" :lastName "one"}
+                                              {:id "456" :username "user2" :firstName "signer" :lastName "two"}
+                                              {:id "789" :username "user3" :firstName "signer" :lastName "three"}
+                                              {:id "111" :username "user4" :firstName "signer" :lastName "four"}
+                                              {:id "222" :username "user5" :firstName "signer" :lastName "five"}])
+        application (assoc application :pate-verdicts [verdict])]
+
+    (fact "Should find correct parties into selection")
+    (parties {:application application :data {:verdict-id verdictId}})) => [{:text "signer two" :value "456"}
+                                                                            {:text "signer three" :value "789"}
+                                                                            {:text "signer five" :value "222"}])
