@@ -244,14 +244,14 @@
               (conj sub (dissoc v :replaces))))))
 
 (sc/defschema VerdictSummary
-  {:id           sc/Str
+  {:id                             sc/Str
    (sc/optional-key :published)    ssc/Timestamp
    :modified                       ssc/Timestamp
    :category                       sc/Str
    :legacy?                        sc/Bool
-   :giver                          sc/Str
+   (sc/optional-key :giver)        sc/Str
    (sc/optional-key :verdict-date) ssc/Timestamp
-   :replaced?                      sc/Bool
+   (sc/optional-key :replaced?)    sc/Bool
    :title                          sc/Str
    (sc/optional-key :signatures)   [{:name sc/Str
                                      :date ssc/Timestamp}]})

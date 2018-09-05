@@ -30633,6 +30633,10 @@ input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:
   margin-left: 12px;
 }
 
+.pate-right-space {
+  margin-right: 12px;
+}
+
 .pate-sandwich {
   white-space: nowrap;
 }

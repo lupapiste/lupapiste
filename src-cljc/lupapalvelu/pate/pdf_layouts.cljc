@@ -726,9 +726,14 @@
 
 (def backing--areas (apply list (map area [:kerrosala :kokonaisala])))
 
-(def backing--maaraykset [{:loc-many :verdict.vaaditutErityissuunnitelmat
-                           :loc      :pdf.required-plan
+(def backing--maaraykset [{:loc-many :verdict.lupamaaraykset
+                           :loc      :pate-verdict.lupamaarays
                            :source   :maaraykset
+                           :styles [:pad-before]}])
+
+(def backing--muut-maaraykset [{:loc-many :verdict.muutMaaraykset
+                           :loc      :pate-verdict.muu-maarays
+                           :source   :muutMaaraykset
                            :styles [:pad-before]}])
 
 (def backing--katselmukset [{:loc      :pdf.required-review
@@ -751,13 +756,15 @@
                                                   :aloitettava
                                                   :voimassaHetki
                                                   :raukeamis
-                                                  :lainvoimainen])))
+                                                  :lainvoimainen
+                                                  :paatosdokumentinPvm])))
 
 (def backing-kuntalupatunnus-layout (build-layout backing--kuntalupatunnus))
 
 (def backing-paatos-layout (build-layout backing--autopaikat
                                          backing--areas
                                          backing--maaraykset
+                                         backing--muut-maaraykset
                                          backing--katselmukset
                                          backing--tyonjohtajat
                                          backing--paivamaarat))

@@ -1351,11 +1351,10 @@
   "Properties for an individual paatos (there can multiple within a
   verdict.). In addition, each paatos can include multiple
   poytakirjas."
-  [{m :lupamaaraykset :as paatos}]
-  (-> (update m :maaraykset (partial map :sisalto))
+  [{:keys [lupamaaraykset paivamaarat] :as paatos}]
+  (-> (update lupamaaraykset :maaraykset (partial map :sisalto))
       (update :vaaditutKatselmukset (partial map :tarkastuksenTaiKatselmuksenNimi))
-      (merge (:paivamaarat m))
-      (dissoc :paivamaarat)))
+      (merge paivamaarat)))
 
 (defn backing-system--tags [application verdict]
   (reduce (fn [acc paatos]

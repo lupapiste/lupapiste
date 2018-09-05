@@ -8,6 +8,7 @@
             [lupapalvelu.ui.pate.service :as service]
             [lupapalvelu.ui.pate.state :as state]
             [rum.core :as rum]
+            [sade.shared-strings :as ss]
             [sade.shared-util :as util]))
 
 (defonce args (atom {}))
@@ -91,7 +92,7 @@
 (rum/defc new-legacy-verdict []
   (components/icon-button {:icon     :lupicon-circle-plus
                            :text-loc (loc-key :add)
-                           :class    [:positive]
+                           :class    [:positive :pate-right-space]
                            :on-click #(service/new-legacy-verdict-draft @state/application-id
                                                                         open-verdict)}))
 
@@ -100,7 +101,7 @@
   (components/icon-button {:icon     :lupicon-download
                            :text-loc (loc-key :fetch)
                            :wait?    waiting?*
-                           :class    [:positive]
+                           :class    [:positive :pate-right-space]
                            :on-click #(service/check-for-verdict @state/application-id
                                                                  waiting?*
                                                                  (fn [{:keys [verdictCount taskCount]}]
@@ -110,6 +111,11 @@
                                                                                                             (str taskCount))})
                                                                    ))}))
 
+(rum/defc order-verdict-attachment-prints []
+  (components/icon-button {:icon     :lupicon-documents
+                           :text-loc :verdict.orderAttachmentPrints.button
+                           :class    :positive.pate-right-space
+                           :on-click #(hub/send "order-attachment-prints")}))
 
 (defn- confirm-and-delete-verdict [app-id {:keys [legacy? published] :as verdict}]
   (hub/send  "show-dialog"
@@ -202,7 +208,9 @@
                       :as   verdict}]
                   (list [:tr {:key id}
                          [:td {:class (common/css-flags :replaced replaced?)}
-                          [:a {:on-click #(open-verdict id)} title]]
+                          [:a {:on-click #(open-verdict id)} (if (ss/blank? title)
+                                                               (common/loc :ei-tiedossa)
+                                                               title)]]
                          [:td (js/util.finnishDate verdict-date)]
                          [:td giver]
                          [:td (if published
@@ -269,7 +277,9 @@
    (when (state/auth? :new-legacy-verdict-draft)
      (new-legacy-verdict))
    (when (state/auth? :check-for-verdict)
-     (check-for-verdict))])
+     (check-for-verdict))
+   (when (state/auth? :order-verdict-attachment-prints)
+     (order-verdict-attachment-prints))])
 
 (rum/defc verdicts < rum/reactive
   []
