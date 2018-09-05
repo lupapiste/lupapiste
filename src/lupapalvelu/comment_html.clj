@@ -41,6 +41,7 @@
                                 [(sel/& (sel/nth-child :odd)) {:background "#FFF"}]]
                                [:.commenter-date {:font-weight :bold
                                                   :line-height "1.6"}]
+                               [:.comment-text {:white-space "pre-wrap"}]
                                [:.page-break {:page-break-before :always}]])}}]]
           [:body body]])))
 
