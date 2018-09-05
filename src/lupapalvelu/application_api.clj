@@ -245,7 +245,10 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :contexts         [app/canceled-app-context]
    :permissions      [{:required [:application/undo-cancelation]}]
-   :pre-checks       [(fn last-history-item-is-canceled [{:keys [application]}]
+   :pre-checks       [(fn [{:keys [application]}]
+                        (when (allu/allu-application? (:organization application) (permit/permit-type application))
+                          (fail :error.integration.allu.unsupported-operation)))
+                      (fn last-history-item-is-canceled [{:keys [application]}]
                         (when-not (= :canceled
                                      ((comp keyword :state) (app-state/last-history-item application)))
                           (fail :error.latest-state-not-canceled)))
