@@ -1487,7 +1487,7 @@
         parties   (->> (get-in command [:application :auth])
                        (filter #(not ((set (concat signed-id requested-id (:id user))) (keyword (:id %))))))]
     (->> parties
-         (mapv (fn [auth] {:value (:id auth) :text (ss/trim (str (:firstName auth) " " (:lastName auth)))})))))
+         (mapv (fn [auth] {:value (:id auth) :text (user-person-name auth)})))))
 
 (defn- create-request-email-model [command conf recipient]
   (merge (notifications/create-app-model command conf recipient)
@@ -1502,4 +1502,4 @@
 (defn add-signature-request [{:keys [application created data] :as command}]
   (let [signer        (get-user-by-id (:signer-id data))
         request       (create-signature {:application application :user signer :created created})]
-    (verdict-update command {$push {(util/kw-path :pate-verdicts.$.signature-requests) request}})))
+    (verdict-update command {$push {:pate-verdicts.$.signature-requests request}})))
