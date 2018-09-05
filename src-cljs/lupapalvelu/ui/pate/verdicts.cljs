@@ -10,7 +10,6 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
-(enable-console-print!)
 
 (defonce args (atom {}))
 
@@ -325,7 +324,6 @@
     (reset! state/template-list [])
     (reset! state/verdict-list nil)
     (reset! state/replacement-verdict nil)
-    (reset! state/parties nil)
     (state/refresh-verdict-auths app-id)
     (state/refresh-application-auth-model app-id
                                           #(when (state/auth? :pate-verdicts)
