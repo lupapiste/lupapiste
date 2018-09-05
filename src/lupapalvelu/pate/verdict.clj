@@ -1375,6 +1375,16 @@
     (->> parties
          (mapv (fn [auth] {:value (:id auth) :text (ss/trim (str (:firstName auth) " " (:lastName auth)))})))))
 
+(defn- create-request-email-model [command conf recipient]
+  (merge (notifications/create-app-model command conf recipient)
+         {:recipient-email (:email recipient)
+          :inviter-email (-> command :user :email)}))
+
+(notifications/defemail :pate-signature-request
+  {:subject-key     "pate.signature.request"
+   :recipients-fn   (fn [{:keys [data]}] [(get-user-by-id (:signer-id data))])
+   :model-fn        create-request-email-model})
+
 (defn add-signature-request [{:keys [application created data] :as command}]
   (let [signer        (get-user-by-id (:signer-id data))
         [rid request] (create-signature {:application application :user signer :created created})]

@@ -267,7 +267,7 @@
    :input-validators  [(partial action/non-blank-parameters [:id :verdict-id :signer-id])]
    :states            states/post-submitted-states
    :notified          true
-   :on-success        (notify :application-state-change)}
+   :on-success        (notify :pate-signature-request)}
   [command]
   (verdict/add-signature-request command)
   (ok))
