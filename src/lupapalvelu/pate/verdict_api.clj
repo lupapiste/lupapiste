@@ -275,6 +275,7 @@
    :parameters        [id verdict-id signer-id]
    :categories        #{:pate-verdicts}
    :input-validators  [(partial action/non-blank-parameters [:id :verdict-id :signer-id])]
+   :pre-checks        [(verdict-exists :published? :contract?)]
    :states            states/post-submitted-states
    :notified          true
    :on-success        (notify :pate-signature-request)}

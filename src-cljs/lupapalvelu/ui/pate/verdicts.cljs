@@ -150,7 +150,7 @@
              {:ltitle          "areyousure"
               :size            "medium"
               :component       "yes-no-dialog"
-              :componentParams {:text "Haluatko kutsua henkilön allekirjoittamaan sopimuksen?"
+              :componentParams {:ltext :pate.verdict-table.request-signature.confirm
                                 :yesFn #(do
                                           (service/send-signature-request app-id verdict-id signer-id)
                                           (swap! add-signature?* not))}}))

@@ -1481,11 +1481,11 @@
        (remove nil?)
        (map keyword)))
 
-(defn parties [command]
+(defn parties [{:keys [user] :as command}]
   (let [signed-id     (signer-ids (get-in (command->verdict command) [:signatures]))
         requested-id  (signer-ids (get-in (command->verdict command) [:signature-requests]))
         parties   (->> (get-in command [:application :auth])
-                       (filter #(not ((set (concat signed-id requested-id)) (keyword (:id %))))))]
+                       (filter #(not ((set (concat signed-id requested-id (:id user))) (keyword (:id %))))))]
     (->> parties
          (mapv (fn [auth] {:value (:id auth) :text (ss/trim (str (:firstName auth) " " (:lastName auth)))})))))
 
