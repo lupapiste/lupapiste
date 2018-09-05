@@ -36,6 +36,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
+            [lupapalvelu.user :refer [get-user-by-id]]
             [lupapalvelu.verdict :as old-verdict]
             [monger.operators :refer :all]
             [plumbing.core :refer [defnk]]
@@ -1441,6 +1442,13 @@
   (pdf/create-verdict-attachment-version command verdict)
   true)
 
+(defn- sign-request-id [{:keys [user] :as command}]
+  (->> (command->verdict command)
+       :signature-requests
+       (filter #(= (:user-id (val %)) (:id user)))
+       first
+       key))
+
 (defn sign-contract
   "Sign the contract
    - Update verdict verdict signatures
@@ -1463,5 +1471,37 @@
                        (app-state/state-transition-update :agreementSigned
                                                           created
                                                           application
-                                                          user))))
+                                                          user))
+                     (when-let [request-id (sign-request-id command)]
+                       {$unset {(util/kw-path :pate-verdicts.$.signature-requests request-id) 1}})))
     (send-command ::signatures command)))
+
+(defn- signer-ids [data]
+  (->> data
+       (vals)
+       (map :user-id)
+       (remove nil?)
+       (map keyword)))
+
+(defn parties [command]
+  (let [signed-id     (signer-ids (get-in (command->verdict command) [:data :signatures]))
+        requested-id  (signer-ids (get-in (command->verdict command) [:signature-requests]))
+        parties   (->> (get-in command [:application :auth])
+                       (filter #(not ((set (concat signed-id requested-id)) (keyword (:id %))))))]
+    (->> parties
+         (mapv (fn [auth] {:value (:id auth) :text (ss/trim (str (:firstName auth) " " (:lastName auth)))})))))
+
+(defn- create-request-email-model [command conf recipient]
+  (merge (notifications/create-app-model command conf recipient)
+         {:recipient-email (:email recipient)
+          :inviter-email (-> command :user :email)}))
+
+(notifications/defemail :pate-signature-request
+  {:subject-key     "pate.signature.request"
+   :recipients-fn   (fn [{:keys [data]}] [(get-user-by-id (:signer-id data))])
+   :model-fn        create-request-email-model})
+
+(defn add-signature-request [{:keys [application created data] :as command}]
+  (let [signer        (get-user-by-id (:signer-id data))
+        [rid request] (create-signature {:application application :user signer :created created})]
+    (verdict-update command {$set {(util/kw-path :pate-verdicts.$.signature-requests rid) request}})))
