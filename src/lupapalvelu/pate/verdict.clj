@@ -1442,12 +1442,11 @@
   (pdf/create-verdict-attachment-version command verdict)
   true)
 
-(defn- sign-request-id [{:keys [user] :as command}]
+(defn- sign-requested? [{:keys [user] :as command}]
   (->> (command->verdict command)
        :signature-requests
-       (filter #(= (:user-id (val %)) (:id user)))
-       first
-       key))
+       (filter #(= (:user-id %) (:id user)))
+       first))
 
 (defn sign-contract
   "Sign the contract
@@ -1472,19 +1471,18 @@
                                                           created
                                                           application
                                                           user))
-                     (when-let [request-id (sign-request-id command)]
-                       {$unset {(util/kw-path :pate-verdicts.$.signature-requests request-id) 1}})))
+                     (when (sign-requested? command)
+                       {$pull {(util/kw-path :pate-verdicts.$.signature-requests) {:user-id (:id user)}}})))
     (send-command ::signatures command)))
 
 (defn- signer-ids [data]
   (->> data
-       (vals)
        (map :user-id)
        (remove nil?)
        (map keyword)))
 
 (defn parties [command]
-  (let [signed-id     (signer-ids (get-in (command->verdict command) [:data :signatures]))
+  (let [signed-id     (signer-ids (get-in (command->verdict command) [:signatures]))
         requested-id  (signer-ids (get-in (command->verdict command) [:signature-requests]))
         parties   (->> (get-in command [:application :auth])
                        (filter #(not ((set (concat signed-id requested-id)) (keyword (:id %))))))]
@@ -1503,5 +1501,5 @@
 
 (defn add-signature-request [{:keys [application created data] :as command}]
   (let [signer        (get-user-by-id (:signer-id data))
-        [rid request] (create-signature {:application application :user signer :created created})]
-    (verdict-update command {$set {(util/kw-path :pate-verdicts.$.signature-requests rid) request}})))
+        request       (create-signature {:application application :user signer :created created})]
+    (verdict-update command {$push {(util/kw-path :pate-verdicts.$.signature-requests) request}})))

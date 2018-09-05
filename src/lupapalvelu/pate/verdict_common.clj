@@ -153,7 +153,7 @@
   (seq (verdict-signatures verdict)))
 
 (defn verdict-summary-signature-requests [verdict]
-  (some->> verdict :signature-requests vals
+  (some->> verdict :signature-requests
            (map #(select-keys % [:name :date]))
            (sort-by :date)
            seq))
