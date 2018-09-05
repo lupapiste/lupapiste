@@ -257,7 +257,7 @@
             (= (str doc-sukunimi " " doc-etunimi) xml-sukunimi))))
     (let [xml-text (xml/get-text party [xml-key])
           doc-text (get-personal-information-value personal-info doc-key)]
-      (when-not (nil? xml-text)
+      (when (every? ss/not-blank? [xml-text doc-text])
         (= xml-text doc-text)))))
 
 (defn- verdict-party-finder
