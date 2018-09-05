@@ -7,6 +7,7 @@
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
+            [lupapalvelu.ui.pate.attachments :as att]
             [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
@@ -42,8 +43,9 @@
   (reset! state/current-verdict
           (when verdict
             (if-let [tags (:tags verdict)]
-              {:tags (reader/read-string tags)
-               :info {:id (:id verdict)}}
+              {:tags           (reader/read-string tags)
+               :attachment-ids (:attachment-ids verdict)
+               :info           {:id (:id verdict)}}
               {:state (:data verdict)
                :info  (-> (dissoc verdict :data)
                           (assoc :filled? filled)
@@ -155,10 +157,15 @@
          (pate-components/last-saved options)]])]))
 
 (rum/defc published-verdict
-  [{:keys [header footer body]}]
+  [{:keys [header body]} attachment-ids]
   [:div.published-verdict
    header
-   (components/add-key-attrs body "tag-")])
+   (components/add-key-attrs body "tag-")
+   (when (seq attachment-ids)
+     (list [:h3.pate-attachments-title {:key "attachments-title"}
+            (common/loc :application.attachments)]
+           (rum/with-key (att/attachments-view attachment-ids)
+             "attachments-view")))])
 
 (rum/defc verdict < rum/reactive
   [options]
@@ -190,7 +197,7 @@
    (if (and (rum/react state/current-verdict-id)
             (rum/react state/auth-fn))
      (if (rum/react state/verdict-tags)
-       (published-verdict @state/verdict-tags)
+       (published-verdict @state/verdict-tags @state/verdict-attachment-ids)
        (let [{dictionary :dictionary :as schema} (current-verdict-schema)]
          (verdict (assoc (state/select-keys state/current-verdict
                                             [:state :info :_meta])
@@ -207,12 +214,12 @@
                                  {:callback #(state/refresh-application-auth-model
                                               app-id
                                               (fn []
+                                                (service/refresh-attachments)
                                                 (if (state/verdict-auth? verdict-id :published-pate-verdict)
                                                   (service/open-published-verdict app-id
                                                                                   verdict-id
                                                                                   reset-verdict)
-                                                  (do (service/refresh-attachments)
-                                                      (when (state/auth? :application-phrases)
+                                                  (do (when (state/auth? :application-phrases)
                                                         (service/fetch-application-phrases app-id))
                                                       (service/open-verdict app-id
                                                                             verdict-id

@@ -30629,6 +30629,12 @@ input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:
   text-align: right;
 }
 
+h3.pate-attachments-title {
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid black;
+}
+
 .pate-left-space {
   margin-left: 12px;
 }

@@ -112,7 +112,7 @@
                                                                    ))}))
 
 (rum/defc order-verdict-attachment-prints []
-  (components/icon-button {:icon     :lupicon-documents
+  (components/icon-button {:icon     :lupicon-envelope
                            :text-loc :verdict.orderAttachmentPrints.button
                            :class    :positive.pate-right-space
                            :on-click #(hub/send "order-attachment-prints")}))

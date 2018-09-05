@@ -1368,14 +1368,21 @@
           (:paatokset verdict)))
 
 (defnk published-verdict-details
-  "Map of id, published, tags and attachment id (if available)"
+  "Map of id, published, tags and attachment ids (if available)"
   [application :as command]
-  (if-let [verdict (command->backing-system-verdict command)]
-    {:id (:id verdict)
-     :published (:timestamp verdict)
-     :tags (pr-str {:body (backing-system--tags application verdict)})}
-    (let [{:keys [id published]} (command->verdict command)]
-      (assoc published :id id))))
+  (let [{verdict-id :id
+         :as        details} (if-let [verdict (command->backing-system-verdict command)]
+                               {:id        (:id verdict)
+                                :published (:timestamp verdict)
+                                :tags      (pr-str {:body (backing-system--tags application verdict)})}
+                               (let [{:keys [id published]} (command->verdict command)]
+                                 (assoc published :id id)))]
+    (assoc details
+           :attachment-ids (some->> (:attachments application)
+                                    (filter (fn [{:keys [source target]}]
+                                              (or (= (:id source) verdict-id)
+                                                  (= (:id target) verdict-id))))
+                                    (map :id)))))
 
 ;; ----------------------------
 ;; Signatures

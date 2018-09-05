@@ -460,3 +460,20 @@
   ((if (path/react :published info)
      pate-frozen-application-attachments
      pate-application-attachments) options))
+
+(rum/defc attachments-view < rum/reactive
+  (attachments-refresh-mixin)
+  "Static view of attachments information with view links. Not
+  specific to Pate."
+  [attachment-ids]
+  (let [attachments (filter (util/fn->> :id (util/includes-as-kw? attachment-ids))
+                            (service/attachments))]
+    [:table.pate-attachments
+     [:tbody
+      (for [{:keys [id type contents latestVersion]
+             :as   attachment} attachments]
+        [:tr {:key id}
+         [:td (attachment-file-link attachment
+                                    ". " (-> type kw-type type-loc)
+                                    ": " contents)]
+         [:td (uploader-info latestVersion)]])]]))

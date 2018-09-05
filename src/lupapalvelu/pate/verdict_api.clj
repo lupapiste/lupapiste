@@ -241,7 +241,9 @@
              :filled (verdict/verdict-filled? command))))
 
 (defquery published-pate-verdict
-  {:description      "Published tags for the verdict."
+  {:description      "Published tags for the verdict. The response includes
+  id, published (timestamp), tags and attachment-ids (of both source
+  and target relations)."
    :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
