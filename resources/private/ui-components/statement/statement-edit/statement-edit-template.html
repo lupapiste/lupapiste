@@ -11,7 +11,7 @@
           <!-- ko if: $data.dueDate -->
           (<span data-bind="dateString: dueDate"></span>)
           <!-- /ko -->
-          <!-- ko if: $component.authModel.ok("save-statement-due-date-as-draft") -->
+          <!-- ko if: $component.authModel.ok("save-statement-due-date") -->
           <div class="col-1">
             <input type="text" class="form-input" data-bind="datepicker: $parent.newDueDate" id="maaraaika"></input>
           </div>

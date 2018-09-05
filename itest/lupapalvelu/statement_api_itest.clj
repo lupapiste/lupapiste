@@ -123,7 +123,7 @@
     (fact "requests due date is changed and email notification sent"
       (let [application (query-application ronja application-id)
             statement (first (:statements application))]
-        (command ronja :save-statement-due-date-as-draft
+        (command ronja :save-statement-due-date
                  :id (:id application)
                  :statementId (:id statement)
                  :dueDate 1535462184744
