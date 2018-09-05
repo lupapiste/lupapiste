@@ -1339,6 +1339,13 @@
                               :name
                               (format "%s, %s" person))))]))
 
+(defn- sign-request-id [{:keys [user] :as command}]
+  (->> (command->verdict command)
+       :signature-requests
+       (filter #(= (:user-id (val %)) (:id user)))
+       first
+       key))
+
 (defn sign-contract
   "Sign the contract
    - Update verdict data
@@ -1353,7 +1360,9 @@
                        (app-state/state-transition-update :agreementSigned
                                                           created
                                                           application
-                                                          user))))
+                                                          user))
+                     (when-let [request-id (sign-request-id command)]
+                       {$unset {(util/kw-path :pate-verdicts.$.signature-requests request-id) 1}})))
 
     (let [command (assoc command
                          :application
