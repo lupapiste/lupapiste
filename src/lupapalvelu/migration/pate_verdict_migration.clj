@@ -8,7 +8,8 @@
             [sade.util :as util]
             [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.pdf :as pdf]
-            [lupapalvelu.pate.schemas :refer [PateLegacyVerdict]]
+            [lupapalvelu.pate.legacy-schemas :as legacy-schemas]
+            [lupapalvelu.pate.schemas :as schemas :refer [PateLegacyVerdict]]
             [lupapalvelu.pate.schema-helper :as schema-helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict :as verdict]))
@@ -280,6 +281,11 @@
                       {:verdict verdict}
                       e)))))
 
+(defn validate-verdict [verdict]
+  (schemas/validate-dictionary-data (legacy-schemas/legacy-verdict-schema (:category verdict))
+                                    (:data verdict))
+  (sc/validate PateLegacyVerdict verdict))
+
 (defn ->pate-legacy-verdict [application verdict timestamp]
   (->> (prewalk (fetch-with-accessor application
                                      verdict
@@ -289,7 +295,7 @@
        (add-tags application)
        util/strip-nils
        util/strip-empty-collections
-       (sc/validate PateLegacyVerdict)))
+       validate-verdict))
 
 (defn- draft-verdict-ids [application]
   (->> application
