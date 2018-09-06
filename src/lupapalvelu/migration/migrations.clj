@@ -2,6 +2,7 @@
   (:require [clj-time.coerce :as cljtc]
             [clj-time.core :as cljt]
             [clojure.set :refer [rename-keys] :as set]
+            [clojure.stacktrace :refer [print-stack-trace]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-bulletins :as bulletins]
@@ -4003,9 +4004,15 @@
                          {$set {:pop "E204503"}}))
 
 (defn update-application-verdicts-to-pate-legacy-verdicts [timestamp application]
-  (mongo/update-by-id :applications (:id application)
-                      (pate-verdict-migration/migration-updates application
-                                                                timestamp)))
+  (try
+    (mongo/update-by-id :applications (:id application)
+                        (pate-verdict-migration/migration-updates application
+                                                                  timestamp))
+    (catch Exception e
+      (clojure.pprint/pprint (ex-data e))
+      (throw (ex-info (str "Migration failed for application " (:id application))
+                      {}
+                      e)))))
 
 (defmigration pate-verdicts
   {:apply-when (pos? (mongo/count :applications pate-verdict-migration/migration-query))}
