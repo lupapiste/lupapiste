@@ -1520,7 +1520,7 @@
                                       :giver      "viranhaltija"}
                          :references {:boardname "Broad board abroad"}}]
     (fact "Draft"
-      (verdict-summary "fi" section-strings verdict)
+      (vc/verdict-summary "fi" section-strings verdict)
       => {:id           "v1"
           :category     "r"
           :legacy?      false
@@ -1529,8 +1529,8 @@
           :verdict-date 876543
           :title        "Luonnos"})
     (fact "Board draft"
-      (verdict-summary "fi" section-strings
-                       (assoc-in verdict [:template :giver] "lautakunta"))
+      (vc/verdict-summary "fi" section-strings
+                          (assoc-in verdict [:template :giver] "lautakunta"))
       => {:id           "v1"
           :category     "r"
           :legacy?      false
@@ -1539,8 +1539,8 @@
           :verdict-date 876543
           :title        "Luonnos"})
     (fact "Replacement draft"
-      (verdict-summary "fi" section-strings
-                       (assoc-in verdict [:replacement :replaces] "v2"))
+      (vc/verdict-summary "fi" section-strings
+                          (assoc-in verdict [:replacement :replaces] "v2"))
       => {:id           "v1"
           :category     "r"
           :legacy?      false
@@ -1550,8 +1550,8 @@
           :replaces     "v2"
           :title        "Luonnos (korvaa p\u00e4\u00e4t\u00f6ksen \u00a72)"})
     (fact "Published"
-      (verdict-summary "fi" section-strings
-                       (publish verdict 121212))
+      (vc/verdict-summary "fi" section-strings
+                          (publish verdict 121212))
       => {:id           "v1"
           :category     "r"
           :legacy?      false
@@ -1561,10 +1561,10 @@
           :verdict-date 876543
           :title        "\u00a71 Ehdollinen"})
     (fact "Published, no section"
-      (verdict-summary "fi" {}
-                       (-> verdict
-                           (publish 121212)
-                           (assoc-in [:data :verdict-section] nil)))
+      (vc/verdict-summary "fi" {}
+                          (-> verdict
+                              (publish 121212)
+                              (assoc-in [:data :verdict-section] nil)))
       => {:id           "v1"
           :category     "r"
           :legacy?      false
@@ -1574,10 +1574,10 @@
           :verdict-date 876543
           :title        "Ehdollinen"})
     (fact "Published replacement"
-      (verdict-summary "fi" section-strings
-                       (-> verdict
-                           (publish 121212)
-                           (assoc-in [:replacement :replaces] "v2")))
+      (vc/verdict-summary "fi" section-strings
+                          (-> verdict
+                              (publish 121212)
+                              (assoc-in [:replacement :replaces] "v2")))
       => {:id           "v1"
           :category     "r"
           :legacy?      false
@@ -1588,10 +1588,10 @@
           :replaces     "v2"
           :title        "\u00a71 Ehdollinen (korvaa p\u00e4\u00e4t\u00f6ksen \u00a72)"})
     (fact "Published replacement, no section"
-      (verdict-summary "fi" (dissoc section-strings "v2")
-                       (-> verdict
-                           (publish 121212)
-                           (assoc-in [:replacement :replaces] "v2")))
+      (vc/verdict-summary "fi" (dissoc section-strings "v2")
+                          (-> verdict
+                              (publish 121212)
+                              (assoc-in [:replacement :replaces] "v2")))
       => {:id           "v1"
           :category     "r"
           :legacy?      false
@@ -1602,8 +1602,8 @@
           :replaces     "v2"
           :title        "\u00a71 Ehdollinen (korvaava p\u00e4\u00e4t\u00f6s)"})
     (fact "Legacy draft"
-      (verdict-summary "fi" section-strings
-                       (assoc verdict :legacy? true))
+      (vc/verdict-summary "fi" section-strings
+                          (assoc verdict :legacy? true))
       => {:id           "v1"
           :category     "r"
           :legacy?      true
@@ -1612,11 +1612,11 @@
           :verdict-date 876543
           :title        "Luonnos"})
     (fact "Legacy published"
-      (verdict-summary "fi" section-strings
-                       (-> verdict
-                           (publish 676767)
-                           (assoc :legacy? true)
-                           (assoc-in [:data :verdict-code] "41")))
+      (vc/verdict-summary "fi" section-strings
+                          (-> verdict
+                              (publish 676767)
+                              (assoc :legacy? true)
+                              (assoc-in [:data :verdict-code] "41")))
       => {:id           "v1"
           :category     "r"
           :legacy?      true
@@ -1632,7 +1632,7 @@
                         (assoc-in [:data :verdict-type] "sijoituslupa")
                         (update-in [:template :inclusions] conj "verdict-type"))]
         (fact "Draft"
-          (verdict-summary "fi" section-strings verdict)
+          (vc/verdict-summary "fi" section-strings verdict)
           => {:id           "v1"
               :category     "ya"
               :legacy?      false
@@ -1641,8 +1641,8 @@
               :verdict-date 876543
               :title        "Luonnos"})
         (fact "Published"
-          (verdict-summary "fi" section-strings
-                           (publish verdict 656565))
+          (vc/verdict-summary "fi" section-strings
+                              (publish verdict 656565))
           => {:id           "v1"
               :category     "ya"
               :legacy?      false
@@ -1652,9 +1652,9 @@
               :verdict-date 876543
               :title        "\u00a71 Sijoituslupa - Annettu lausunto"})
         (fact "Published replacement"
-          (verdict-summary "fi" section-strings
-                           (assoc (publish verdict 656565)
-                                  :replacement {:replaces "v2"}))
+          (vc/verdict-summary "fi" section-strings
+                              (assoc (publish verdict 656565)
+                                     :replacement {:replaces "v2"}))
           => {:id           "v1"
               :category     "ya"
               :legacy?      false
@@ -1689,9 +1689,9 @@
         v2 (make-verdict :id "v2" :code "ei-lausuntoa" :section "" :published 20 :replaces "v1")
         v3 (make-verdict :id "v3" :code "asiakirjat palautettu" :section "33" :modified 30 :replaces "v2")
         v4 (make-verdict :id "v4" :code "ei-puollettu" :section "44" :published 25)]
-    (verdict-list {:lang        "fi"
-                   :application {:pate-verdicts [v1 v2 v3 v4]
-                                 :permitType    "R"}})
+    (vc/verdict-list {:lang        "fi"
+                      :application {:pate-verdicts [v1 v2 v3 v4]
+                                    :permitType    "R"}})
     => (just [(contains {:id       "v3"
                          :modified 30
                          :title    "Luonnos (korvaava p\u00e4\u00e4t\u00f6s)"})
@@ -3480,3 +3480,15 @@
                          :created 123456789
                          :user {:id (mongo/create-id) :username "sonja"}}
                         verdictId) => string?))
+
+(facts "user-person-name"
+  (user-person-name nil) => ""
+  (user-person-name "") => ""
+  (user-person-name {:firstName "Hello"}) => "Hello"
+  (user-person-name {:lastName "World"}) => "World"
+  (user-person-name {:firstName "  Hello  "}) => "Hello"
+  (user-person-name {:lastName "  World  "}) => "World"
+  (user-person-name {:firstName "  Hello  "
+                     :lastName  "  World  "}) => "Hello World"
+  (user-person-name {:firstName "    "
+                     :lastName  "    "}) => "")

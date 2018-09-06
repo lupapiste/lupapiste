@@ -2,10 +2,11 @@
   (:require [cljs-time.coerce :as tc]
             [cljs-time.core :as t]
             [cljs-time.format :as tf]
-            [sade.shared-strings :as ss]
             [goog.events :as googe]
             [goog.object :as googo]
+            [lupapalvelu.ui.hub :as hub]
             [rum.core :as rum]
+            [sade.shared-strings :as ss]
             [sade.shared-util :as util]))
 
 (defn get-current-language []
@@ -227,10 +228,30 @@
                            (vec (concat [x  {:data-test-id test-id}] xs))))))
 
 (defn prefix-lang
-  "Current language is appended to theiven keyword prefix:
+  "Current language is appended to the given keyword prefix:
   :foo -> :foo-fi"
   [prefix]
   (when-not (ss/blank? prefix)
     (->> (map name [prefix (get-current-language)])
          (ss/join "-")
          keyword)))
+
+(defn show-dialog
+  "Convenience function for showing dialog without
+  boilerplate. Options [optional]:
+
+  [:ltitle or :title]  Dialog title (default :ltitle is :areyousure)
+  :ltext or :text      Dialog text
+  [:size]              Dialog size (default :medium)
+  :type                Either :ok (default) or :yes-no
+  [:callback]            Callback function for yes/ok action."
+  [{:keys [ltitle title ltext text size type callback]}]
+  (let [type (or type :ok)]
+    (hub/send "show-dialog" {:title (or title (loc (or ltitle :areyousure)))
+                             :size (name (or size :medium))
+                             :component (str (name type) "-dialog")
+                             :componentParams  (cond-> {:text (or text (loc ltext))}
+                                                 callback (assoc (if (util/=as-kw type :ok)
+                                                                   :okFn
+                                                                   :yesFn)
+                                                                 callback))})))

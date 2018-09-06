@@ -119,6 +119,15 @@
                  (sc/optional-key :user)          UserRef
                  (sc/optional-key :replaced-by)   ssc/ObjectIdStr}))
 
+(defschema PateSignature
+  {:date                         ssc/Timestamp
+   :user-id                      ssc/ObjectIdStr
+   ;; Firstname Lastname
+   :name                         sc/Str
+   ;; If the user is authed to the application via company. The
+   ;; company name is also added to the name: User Name, Company Ltd.
+   (sc/optional-key :company-id) ssc/ObjectIdStr})
+
 (defschema PateBaseVerdict
   (merge PateCategory
          {(sc/optional-key :published)          {:tags                            sc/Str
@@ -137,7 +146,8 @@
           (sc/optional-key :archive)            {(sc/optional-key :verdict-date)  ssc/Timestamp
                                                  (sc/optional-key :anto)          ssc/Timestamp
                                                  (sc/optional-key :lainvoimainen) ssc/Timestamp
-                                                 :verdict-giver                   sc/Str}}))
+                                                 :verdict-giver                   sc/Str}
+          (sc/optional-key :signatures) [PateSignature]}))
 
 (defschema PateModernVerdict
   (merge PateBaseVerdict

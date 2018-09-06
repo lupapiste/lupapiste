@@ -311,13 +311,10 @@
   "Creates a verdict attachments as a new version to previously created
   verdict attachment. Used when a contract is signed."
   [{:keys [application created] :as command} verdict]
-  (let [pdf                 (html-pdf/html->pdf application
-                                                "pate-verdict"
-                                                (verdict-html application verdict))
-        {attachment-id :id} (util/find-first (fn [{source :source}]
-                                               (and (util/=as-kw (:type source) :verdicts)
-                                                    (= (:id source) (:id verdict))))
-                                             (:attachments application))]
+  (let [{:keys [tags attachment-id]} (:published verdict)
+        pdf                          (html-pdf/html->pdf application
+                                                         "pate-verdict"
+                                                         (verdict-tags-html (edn/read-string tags)))]
     (when-not (:ok pdf)
       (fail! :pate.pdf-verdict-error))
     (with-open [stream (:pdf-file-stream pdf)]

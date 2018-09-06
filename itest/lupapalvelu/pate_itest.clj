@@ -1160,6 +1160,7 @@
                   (fact "Verdict-section is not included"
                     (-> (open-verdict) :verdict :inclusions)
                     =not=> (contains ["verdict-section"]))
+                  (sent-emails) ;; Clear inbox
                   (fact "Sonja can publish the verdict"
                     (command sonja :publish-pate-verdict :id app-id
                              :verdict-id verdict-id)=> ok?)
@@ -1175,6 +1176,11 @@
                         => (just {:text   "Paloviranomainen"
                                   :given  pos?
                                   :status "puollettu"}))))
+                  (Thread/sleep 100) ; wait for email delivery
+                  (fact "Email notification about application state change is sent"
+                    (let [email (last-email)]
+                      (:to email) => (contains (email-for-key pena))
+                      (:subject email) => "Lupapiste: Dongdaqiao Lu, Sipoo - hankkeen tila on nyt P\u00e4\u00e4t\u00f6s annettu"))
                   (fact "Published verdict can no longer be previewed"
                     (raw sonja :preview-pate-verdict :id app-id
                          :verdict-id verdict-id)
