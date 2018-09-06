@@ -1,5 +1,6 @@
 (ns lupapalvelu.migration.pate-verdict-migration
-  (:require [clojure.walk :refer [postwalk prewalk walk]]
+  (:require [clojure.set :refer [map-invert]]
+            [clojure.walk :refer [postwalk prewalk walk]]
             [monger.operators :refer :all]
             [schema.core :as sc]
             [sade.core :refer [def-]]
@@ -8,6 +9,7 @@
             [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.schemas :refer [PateLegacyVerdict]]
+            [lupapalvelu.pate.schema-helper :as schema-helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict :as verdict]))
 
@@ -182,6 +184,11 @@
            "draft")
         verdict-published?))
 
+(def ->pate-review-type
+  (->> schema-helper/review-type-map
+       map-invert
+       (util/map-values name)))
+
 ;;
 ;; Verdict migration
 ;;
@@ -241,7 +248,7 @@
    :published         (get-when verdict-published? (get-in-paivamaarat :anto))
    :published-attachment-id (get-when verdict-published? published-attachment-id)
    :review-name       (get-in-context [:taskname])
-   :review-type       (get-in-context [:data :katselmuksenLaji :value])
+   :review-type       (comp ->pate-review-type (get-in-context [:data :katselmuksenLaji :value]))
    :reviews           (filter-tasks-of-verdict (task-name? :task-katselmus))
    :signature-date    (get-in-context [:created])
    :signature-name    signature-name

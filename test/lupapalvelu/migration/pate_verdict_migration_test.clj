@@ -13,8 +13,8 @@
 (defn tasks-for-verdict [verdict-id]
   [{:id "katselmus-id"
     :schema-info {:name "task-katselmus"}
-    :taskname "AloituskoKKous"
-    :data {:katselmuksenLaji {:value "aloituskokous"}}
+    :taskname "Tarkastus"
+    :data {:katselmuksenLaji {:value "muu tarkastus"}}
     :source {:id verdict-id}}
    {:id "foreman-id"
     :schema-info {:name "task-vaadittu-tyonjohtaja"}
@@ -126,8 +126,8 @@
                                    :verdict-text    (wrap verdict-text)
                                    :anto            (wrap anto)
                                    :lainvoimainen   (wrap lainvoimainen)
-                                   :reviews         {"katselmus-id" {:name (wrap "AloituskoKKous")
-                                                                     :type (wrap "aloituskokous")}}
+                                   :reviews         {"katselmus-id" {:name (wrap "Tarkastus")
+                                                                     :type (wrap "muu-tarkastus")}}
                                    :foremen         {"foreman-id" {:role (wrap "Supervising supervisor")}}
                                    :conditions      {"condition-id1" {:name (wrap "Muu 1")}
                                                      "condition-id2" {:name (wrap "Muu 2")}}
