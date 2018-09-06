@@ -30,7 +30,7 @@
   [{selected* ::selected} _ callback & [{:keys [include-empty? disabled?
                                                 test-id]}]]
   (let [items (->> (if include-empty?
-                     shared-schemas/phrase-categories
+                     (shared-schemas/phrase-categories-by-template-category (rum/react state/current-category))
                      (non-empty-categories))
                    (map name)
                    (map (fn [n] {:value n :text (category-text n)}))
