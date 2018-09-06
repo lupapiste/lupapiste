@@ -88,6 +88,14 @@
                           :error.verdict.no-html)
                         identity fail))))))
 
+(defn- backing-system-verdict
+  "Pre-check that fails if the target verdict is not a backing system
+  verdict. Note that after Pate has taken into use, verdicts array
+  includes only the backing system verdicts."
+  [{:keys [application data] :as command}]
+  (when application
+    (when-not (verdict/command->backing-system-verdict command)
+      (fail :error.verdict-not-found))))
 
 (defn- no-backing-system-verdicts-check
   [{:keys [application]}]
@@ -216,7 +224,7 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :states           states/post-submitted-states}
   [command]
-  (ok :verdicts (verdict/verdict-list command)))
+  (ok :verdicts (vc/verdict-list command)))
 
 (defquery pate-verdict
   {:description      "Verdict and its settings."
@@ -233,7 +241,9 @@
              :filled (verdict/verdict-filled? command))))
 
 (defquery published-pate-verdict
-  {:description      "Published tags for the verdict."
+  {:description      "Published tags for the verdict. The response includes
+  id, published (timestamp), tags and attachment-ids (of both source
+  and target relations)."
    :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
@@ -241,11 +251,37 @@
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :published?)]
+   :pre-checks       [(action/some-pre-check (verdict-exists :published?)
+                                             backing-system-verdict)]
    :states           states/post-verdict-states}
   [command]
-  (let [{:keys [id published]} (verdict/command->verdict command)]
-    (ok :verdict (assoc published :id id))))
+  (ok :verdict (verdict/published-verdict-details command)))
+
+(defquery pate-parties
+  {:description       "Application parties"
+   :feature           :pate
+   :user-roles        #{:authority :applicant}
+   :parameters        [id verdict-id]
+   :categories        #{:pate-verdicts}
+   :input-validators  [(partial action/non-blank-parameters [:id :verdict-id])]
+   :states            states/post-submitted-states}
+  [command]
+  (ok :parties (verdict/parties command)))
+
+(defcommand send-signature-request
+  {:description       "Send request to sign contract"
+   :feature           :pate
+   :user-roles        #{:authority}
+   :parameters        [id verdict-id signer-id]
+   :categories        #{:pate-verdicts}
+   :input-validators  [(partial action/non-blank-parameters [:id :verdict-id :signer-id])]
+   :pre-checks        [(verdict-exists :published? :contract?)]
+   :states            states/post-submitted-states
+   :notified          true
+   :on-success        (notify :pate-signature-request)}
+  [command]
+  (verdict/add-signature-request command)
+  (ok))
 
 (defcommand edit-pate-verdict
   {:description "Updates verdict data. Returns changes and errors
@@ -304,8 +340,10 @@
   [_])
 
 (defcommand sign-pate-contract
-  {:description      "Adds the user as signatory to a published Pate
-  contract if the password matches."
+  {:description "Adds the user as a signatory to a published Pate
+  contract if the password matches. the same name (e.g., the user can resign if the initial handler name
+  is different from the user name or if the user later changes her
+  name)."
    :feature          :pate
    :categories       #{:pate-verdicts}
    :parameters       [:id :verdict-id :password]

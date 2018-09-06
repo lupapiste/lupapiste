@@ -244,9 +244,9 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :contexts         [app/canceled-app-context]
    :permissions      [{:required [:application/undo-cancelation]}]
-   :pre-checks       [(fn last-history-item-is-canceled [{:keys [application]}]
-                        (when-not (= :canceled
-                                     ((comp keyword :state) (app-state/last-history-item application)))
+   :pre-checks       [bs/validate-action-support
+                      (fn last-history-item-is-canceled [{:keys [application]}]
+                        (when-not (= (:state (app-state/last-history-item application)) "canceled")
                           (fail :error.latest-state-not-canceled)))
                       (fn has-previous-state [{:keys [application]}]
                         (when-not (states/all-states (app-state/get-previous-app-state application))
@@ -262,7 +262,8 @@
    :permissions      [{:required [:application/request-for-complement]}]
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
+   :pre-checks       [bs/validate-action-support
+                      (partial sm/validate-state-transition :complementNeeded)]}
   [{:keys [created user application] :as command}]
   (update-application command (util/deep-merge (app-state/state-transition-update :complementNeeded created application user))))
 

@@ -20,7 +20,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
 
-            [midje.sweet :refer [facts fact =>]]
+            [midje.sweet :refer [facts fact => contains]]
             [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
 
             [lupapalvelu.backing-system.allu :as allu :refer [PlacementContract]]
@@ -35,7 +35,12 @@
 (defn- state-graph->transitions [states]
   (mapcat (fn [[state succs]] (map #(vector state %) succs)) states))
 
-(defn- probe-next-transition [states visit-goal visited-total current-state]
+(defn- transitions-todo [visited-total soured visit-goal]
+  (->> visited-total
+       (filter (fn [[transition visit-count]] (and (not (soured transition)) (< visit-count visit-goal))))
+       (map key)))
+
+(defn- probe-next-transition [states visit-goal visited-total soured current-state]
   ;; This code is not so great but does the job for now.
   (letfn [(useful [current visited]
             (let [[usefuls visited]
@@ -43,33 +48,43 @@
                             (let [transition [current succ]
                                   visited* (conj visited transition)]
                               (cond
+                                (soured transition) [transitions visited*]
                                 (< (get visited-total transition) visit-goal) [(conj transitions transition) visited*]
                                 (not (visited transition)) (let [[transition* visited*] (useful succ visited*)]
                                                              (if transition*
                                                                [(conj transitions transition) visited*]
                                                                [transitions visited*]))
-                                :else [transitions visited])))
+                                :else [transitions visited*])))
                           [[] visited] (get states current))]
               [(if (seq usefuls) (rand-nth usefuls) nil)
                visited]))]
     (first (useful current-state #{}))))
 
-(defn- traverse-state-transitions [states initial-state init! transition-adapters visit-goal]
+(defn- traverse-state-transitions [& {:keys [states initial-state init! transition-adapters visit-goal]}]
   (let [initial-visited (zipmap (state-graph->transitions states) (repeat 0))]
     (loop [visited-total initial-visited
            visited visited-total
+           soured #{}
            current-state initial-state
            user-state (init!)]
-      (if-let [[_ next-state :as transition] (probe-next-transition states visit-goal visited-total current-state)]
-        (do (if-let [transition-adapter (get transition-adapters transition)]
-              (transition-adapter transition user-state)
-              (warn "No adapter provided for" transition))
-            (recur (update visited-total transition inc)
-                   (update visited transition inc)
-                   next-state
-                   user-state))
-        (when-not (every? (comp #(>= % visit-goal) val) visited-total)
-          (recur visited-total initial-visited initial-state (init!)))))))
+      (if-let [[_ next-state :as transition] (probe-next-transition states visit-goal visited-total soured
+                                                                    current-state)]
+        (if-let [transition-adapter (get transition-adapters transition)]
+          (let [next-state* (transition-adapter transition user-state)]
+            (if (or (not= next-state* current-state)        ; Led somewhere else?
+                    (= next-state* next-state))             ; Wasn't supposed to!
+              (recur (update visited-total transition inc) (update visited transition inc) soured
+                     next-state* user-state)
+              (recur (update visited-total transition inc)
+                     (update visited transition inc)
+                     (conj soured transition)               ; Let's not try that again.
+                     next-state*
+                     user-state)))
+          (do (warn "No adapter provided for" transition)
+              (recur (update visited-total transition inc) (update visited transition inc) soured
+                     next-state user-state)))
+        (when (seq (transitions-todo visited-total soured visit-goal))
+          (recur visited-total initial-visited soured initial-state (init!)))))))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -94,6 +109,14 @@
   (-> doc
       (assoc-in [:data :henkilo :userId :value] nil)
       (assoc-in [:data :yritys :companyId :value] nil)))
+
+;; HACK: undo-cancellation bypasses the state graph so we add [:cancel *] arcs here:
+(defn- add-canceled->* [state-graph]
+  (update state-graph :canceled
+          into
+          (comp (filter (fn [[_ succs]] (some (partial = :canceled) succs)))
+                (map key))
+          state-graph))
 
 (defn- create-and-fill-placement-app [apikey permitSubtype]
   (let [{:keys [id] :as response} (itu/create-local-app apikey
@@ -162,9 +185,23 @@
   (fact "return to draft"
     (itu/local-command apikey :return-to-draft :id app-id :text msg :lang "fi") => ok?))
 
+(defn- request-for-complement [apikey id]
+  (fact "request for complement"
+    (itu/local-command apikey :request-for-complement :id id)
+    => (contains {:ok   false
+                  :text "error.integration.unsupported-action"
+                  :action "request-for-complement"})))
+
 (defn- cancel [apikey app-id msg]
   (fact "cancel application"
     (itu/local-command apikey :cancel-application :id app-id :text msg :lang "fi") => ok?))
+
+(defn- undo-cancellation [apikey app-id]
+  (fact "undo cancellation"
+    (itu/local-command apikey :undo-cancellation :id app-id)
+    => (contains {:ok   false
+                  :text "error.integration.unsupported-action"
+                  :action "undo-cancellation"})))
 
 ;;;; Mock Handler
 ;;;; ===================================================================================================================
@@ -272,28 +309,46 @@
       (lupapalvelu.fixture.core/apply-fixture "minimal")
 
       (let [initial-allu-state {:id-counter 0, :applications {}}
-            allu-state (atom initial-allu-state)]
+            allu-state (atom initial-allu-state)
+            full-sijoitussopimus-state-graph (->> states/ya-sijoitussopimus-state-graph
+                                                  add-canceled->*
+                                                  ;; :complementNeeded should be unreachable:
+                                                  (into {} (remove (fn [[src _]] (= src :complementNeeded)))))]
         (with-redefs [allu/allu-request-handler (make-test-handler allu-state)]
           (facts "state transitions"
-            (traverse-state-transitions states/ya-sijoitussopimus-state-graph :draft
-                                        (fn [] (create-and-fill-placement-app pena "sijoitussopimus"))
-                                        (into {} (map (fn [[_ dest :as transition]]
-                                                        [transition
-                                                         (case dest
-                                                           :draft (fn [_ id]
-                                                                    (return-to-draft raktark-helsinki id "Nolo!"))
-                                                           :open (fn [_ id] (open pena id "YOLO"))
-                                                           :submitted (fn [_ id]
-                                                                        (fill pena id)
-                                                                        (submit pena id))
-                                                           :sent (fn [_ id] (approve raktark-helsinki id))
-                                                           :canceled (fn [[current _] id]
-                                                                       (if (contains? #{:draft :open} current)
-                                                                         (cancel pena id "Alkoi nolottaa.")
-                                                                         (cancel raktark-helsinki id "Nolo!")))
-                                                           (fn [transition _] (warn "TODO:" transition)))]))
-                                              (state-graph->transitions states/ya-sijoitussopimus-state-graph))
-                                        1))
+            (traverse-state-transitions
+              :states full-sijoitussopimus-state-graph
+              :initial-state :draft
+              :init! (fn [] (create-and-fill-placement-app pena "sijoitussopimus"))
+              :transition-adapters (into {} (map (fn [[src dest :as transition]]
+                                                   [transition
+                                                    (if (= src :canceled)
+                                                      (fn [[current _] id]
+                                                        (undo-cancellation raktark-helsinki id)
+                                                        current)
+                                                      (case dest
+                                                        :draft (fn [[_ dest] id]
+                                                                 (return-to-draft raktark-helsinki id "Nolo!")
+                                                                 dest)
+                                                        :open (fn [[_ dest] id] (open pena id "YOLO") dest)
+                                                        :submitted (fn [[_ dest] id]
+                                                                     (fill pena id)
+                                                                     (submit pena id)
+                                                                     dest)
+                                                        :sent (fn [[_ dest] id] (approve raktark-helsinki id) dest)
+                                                        :canceled (fn [[current dest] id]
+                                                                    (if (contains? #{:draft :open} current)
+                                                                      (cancel pena id "Alkoi nolottaa.")
+                                                                      (cancel raktark-helsinki id "Nolo!"))
+                                                                    dest)
+                                                        :complementNeeded (fn [[current _] id]
+                                                                            (request-for-complement raktark-helsinki id)
+                                                                            current)
+                                                        (fn [[_ dest :as transition] _]
+                                                          (warn "TODO:" transition)
+                                                          dest)))]))
+                                         (state-graph->transitions full-sijoitussopimus-state-graph))
+              :visit-goal 1))
 
           ;;; TODO: move-attachments-to-backing-system
           ;;; TODO: agreementPrepared/Signed

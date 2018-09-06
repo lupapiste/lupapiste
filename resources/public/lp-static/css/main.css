@@ -7211,6 +7211,13 @@ button:focus {
   float: left;
 }
 
+button.signature {
+  color: white;
+  background-color: #2ca92c;
+  margin-left: 12px;
+  margin-top: -2px;
+}
+
 label.arrow-label {
   width: 100%;
   display: inline-block;
@@ -30369,6 +30376,11 @@ div.pate-note {
   background-color: #f6f6f6;
 }
 
+div.pate-note-frame {
+  margin: 12px 12px;
+  display: block;
+}
+
 div.pate-required-fields-note {
   border-left: 4px solid #f39129;
   margin-top: 0;
@@ -30624,8 +30636,18 @@ input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:
   text-align: right;
 }
 
+h3.pate-attachments-title {
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid black;
+}
+
 .pate-left-space {
   margin-left: 12px;
+}
+
+.pate-right-space {
+  margin-right: 12px;
 }
 
 .pate-sandwich {
@@ -30667,6 +30689,7 @@ span.text-and-button > input {
 }
 
 tr.verdict-signatures div.tabby {
+  vertical-align: top;
   margin-left: 1em;
 }
 
@@ -30688,7 +30711,7 @@ tr.verdict-signatures .text-and-button > input {
 }
 
 tr.verdict-signatures button.cancel-signing {
-  margin-top: 1.5em;
+  margin-left: 2em;
 }
 
 div.published-verdict {

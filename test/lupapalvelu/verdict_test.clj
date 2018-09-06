@@ -153,6 +153,7 @@
                               :email   {:value "Veijo.Viranomainen@example.com"}})
           henkilo-hetu {:tag :henkilotunnus :attrs nil :content ["210281-9988"]}
           henkilo-err-hetu {:tag :henkilotunnus :attrs nil :content ["000000-0000"]}
+          henkilo-empty-hetu {:tag :henkilotunnus :attrs nil :content [""]}
           henkilo-nimi {:tag :nimi :attrs nil :content [{:tag :sukunimi :attrs nil :content ["Viranomainen"]}
                                                         {:tag :etunimi :attrs nil :content ["Veijo"]}]}
           henkilo-sukunimi {:tag :nimi :attrs nil :content [{:tag :sukunimi :attrs nil :content ["Viranomainen Veijo"]}]}
@@ -179,6 +180,11 @@
         (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [amended-party party]) => amended-party)
 
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-hetu]))]
+        (verdict-party-finder "vastaava ty\u00f6njohtaja" {} [amended-party party]) => nil
+        (verdict-party-finder "vastaava ty\u00f6njohtaja" (assoc henk-tiedot :hetu "") [amended-party party])
+        => nil)
+
+      (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-hetu]))]
         (verdict-party-finder "nonnonnoo-ty\u00f6njohtaja" henk-tiedot [amended-party party]) => nil)
 
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-email]))]
@@ -197,7 +203,20 @@
         (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [amended-party]) => nil)
 
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-err-hetu henkilo-nimi]))]
-        (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [amended-party]) => nil))))
+        (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [amended-party]) => nil)
+
+      (fact "Empy fields are ignored"
+        (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-err-hetu henkilo-nimi]))]
+          (verdict-party-finder "vastaava ty\u00f6njohtaja"  (assoc-in henk-tiedot [:hetu :value] "") [amended-party])
+          => amended-party)
+
+        (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-err-hetu henkilo-nimi]))]
+          (verdict-party-finder "vastaava ty\u00f6njohtaja"  (assoc henk-tiedot :hetu "") [amended-party])
+          => amended-party)
+
+        (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-empty-hetu henkilo-nimi]))]
+          (verdict-party-finder "vastaava ty\u00f6njohtaja"  henk-tiedot [amended-party])
+          => amended-party)))))
 
 (facts "Section requirement for verdicts"
        (let [org        {:section {:operations ["pool" "house"]

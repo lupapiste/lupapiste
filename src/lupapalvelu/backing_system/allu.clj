@@ -210,12 +210,13 @@
    :postalCode    postinumero
    :streetAddress {:streetName katu}})
 
-(defn- person->customer [{:keys [osoite], {:keys [hetu] :as person} :henkilotiedot}]
-  {:type          "PERSON"
-   :registryKey   hetu
-   :name          (fullname person)
-   :country       (address-country osoite)
-   :postalAddress (convert-address osoite)})
+(declare person->contact)
+
+(defn- person->customer [{:keys [osoite], {:keys [hetu]} :henkilotiedot :as person}]
+  (merge {:type          "PERSON"
+          :registryKey   hetu
+          :country       (address-country osoite)}
+         (person->contact person)))
 
 (defn- company->customer [payee? company]
   (let [{:keys                                                 [osoite liikeJaYhteisoTunnus yritysnimi]
@@ -236,8 +237,9 @@
     {:_selected "henkilo", :henkilo person} (person->customer person)
     {:_selected "yritys", :yritys company} (company->customer payee? company)))
 
-(defn- person->contact [{:keys [henkilotiedot], {:keys [puhelin email]} :yhteystiedot}]
-  {:name (fullname henkilotiedot), :phone puhelin, :email email})
+(defn- person->contact [{:keys [henkilotiedot osoite], {:keys [puhelin email]} :yhteystiedot}]
+  (assoc-when {:name (fullname henkilotiedot), :phone puhelin, :email email}
+              :postalAddress (some-> osoite convert-address)))
 
 (defn- customer-contact [customer-doc]
   (match (:data customer-doc)
@@ -618,12 +620,17 @@
   [command]
   (send-allu-request! (placement-creation-request command)))
 
+(declare update-application!)
+
 ;; TODO: Non-placement-contract ALLU applications
 (defn submit-application!
-  "Submit application to ALLU and save the returned id as application.integrationKeys.ALLU.id."
-  [{{:keys [permitSubtype]} :application :as command}]
+  "Submit application to ALLU and save the returned id as application.integrationKeys.ALLU.id. If this is a resubmit
+  (after return-to-draft) just does `update-application!` instead."
+  [{{:keys [permitSubtype] :as application} :application :as command}]
   {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
-  (create-placement-contract! command))
+  (if-not (get-in application [:integrationKeys :ALLU :id])
+    (create-placement-contract! command)
+    (update-application! command)))
 
 ;; TODO: Will error if user changes the application to contain invalid data, is that what we want?
 (defn- update-placement-contract!

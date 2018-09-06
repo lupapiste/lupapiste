@@ -176,9 +176,7 @@
                                         setsub-verdict-code
                                         setsub-board))
 
-(def contract-settings (build-settings-schema "pate-contract"
-                                              setsub-lang-titles
-                                              (setsub-reviews helper/ya-review-types)))
+(def contract-settings (build-settings-schema "pate-contract"))
 
 (defn settings-schema [category]
   (case (keyword category)

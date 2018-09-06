@@ -270,34 +270,6 @@
                                    :align :full
                                    :dict  :contract-text}]]}}})
 
-(def legsub-signatures
-  {:dictionary {:signatures-title {:css      :pate-label
-                                   :loc-text :verdict.signatures}
-                :signatures       {:repeating {:name       {:text {:label?     false
-                                                                   :read-only? true}}
-                                               :user-id    {:text {:read-only? true}}
-                                               :company-id {:text {:read-only? true}}
-                                               :date       {:date {:label?     false
-                                                                   :read-only? true}}}
-                                   :sort-by   :date}}
-   :section    {:id       :signatures
-                :buttons? false
-                :show?    :signatures
-                :grid     {:columns 8
-                           :rows    [[{:col  8
-                                       :dict :signatures-title}]
-                                     {:css :row--extra-tight
-                                      :row [{:col  7
-                                             :grid {:columns   16
-                                                    :repeating :signatures
-                                                    :rows      [{:css :row--extra-tight
-                                                                 :row [{}
-                                                                       {:col  4
-                                                                        :dict :name}
-                                                                       {:col  2
-                                                                        :align :right
-                                                                        :dict :date}]}]}}]}]}}})
-
 (def contract-legacy-verdict
   (build-legacy-schema
    legsub-contract
@@ -306,9 +278,7 @@
    legsub-attachments
    (verdict-schemas/versub-upload {:type-group #".*"
                                    :default :muut.paatosote
-                                   :title :verdict.contract.attachments})
-   legsub-signatures))
-
+                                   :title :verdict.contract.attachments})))
 
 (defn legacy-verdict-schema [category]
   (case (keyword category)
