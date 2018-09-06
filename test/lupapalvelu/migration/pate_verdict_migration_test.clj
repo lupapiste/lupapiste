@@ -192,6 +192,7 @@
                                    :attachment-id attachment-id
                                    :tags (contains "Sonja Sibbo")})
              :archive {:verdict-giver handler
+                       :anto anto
                        :lainvoimainen lainvoimainen}
              :state (wrap "published")}))
 

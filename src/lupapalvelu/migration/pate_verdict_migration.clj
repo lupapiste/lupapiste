@@ -142,8 +142,8 @@
   (not (:draft verdict)))
 
 (defn- get-archive-data [_ verdict _]
-  {:verdict-date nil
-   :verdict-giver ((get-in-poytakirja :paatoksentekija) nil verdict nil)
+  {:verdict-giver ((get-in-poytakirja :paatoksentekija) nil verdict nil)
+   :anto          ((get-in-paivamaarat :anto) nil verdict nil)
    :lainvoimainen ((get-in-paivamaarat :lainvoimainen) nil verdict nil)})
 
 (defn- targets-verdict? [attachment verdict]
