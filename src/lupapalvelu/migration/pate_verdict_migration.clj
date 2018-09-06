@@ -128,8 +128,10 @@
 (defn- context [_ _ context]
   context)
 
-(defn- verdict-category [application _ _]
-  (name (schema-util/application->category application)))
+(defn- verdict-category [application verdict _]
+  (if (:sopimus verdict)
+    "contract"
+    (name (schema-util/application->category application))))
 
 (defn- verdict-template [app _ _]
   {:inclusions (-> (schema-util/application->category app)
@@ -264,11 +266,19 @@
   {:modified timestamp})
 
 (defn- add-tags [application verdict]
-  (if (-> verdict :published :published)
-    (assoc-in verdict [:published :tags]
-              (pr-str (pdf/verdict-tags application
-                                        (metadata/unwrap-all verdict))))
-    verdict))
+  (try
+    (if (-> verdict :published :published)
+      (assoc-in verdict [:published :tags]
+                (pr-str (pdf/verdict-tags application
+                                          (metadata/unwrap-all verdict))))
+      verdict)
+    (catch Exception e
+      (throw (ex-info (str "Failed to build tags for application "
+                           (:id application)
+                           ", verdict "
+                           (:id verdict))
+                      {:verdict verdict}
+                      e)))))
 
 (defn ->pate-legacy-verdict [application verdict timestamp]
   (->> (prewalk (fetch-with-accessor application
