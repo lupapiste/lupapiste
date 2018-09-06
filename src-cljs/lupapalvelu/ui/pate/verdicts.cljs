@@ -11,6 +11,7 @@
             [sade.shared-strings :as ss]
             [sade.shared-util :as util]))
 
+
 (defonce args (atom {}))
 
 (defn loc-key [k]
@@ -45,6 +46,12 @@
 
 (defn- can-sign? [verdict-id]
   (state/react-verdict-auth? verdict-id :sign-pate-contract))
+
+(defn- can-send-signature-request? [verdict-id]
+  (state/verdict-auth? verdict-id :send-signature-request))
+
+(defn- contract? [{category :category}]
+  (util/=as-kw category :contract))
 
 (defn open-verdict [arg]
   (common/open-page :pate-verdict
@@ -138,6 +145,17 @@
                                           (reset! state/verdict-list [verdict])
                                           (reset! state/replacement-verdict verdict-id))}}))
 
+(defn- confirm-and-send-signature-request [app-id verdict-id signer-id add-signature?*]
+  (hub/send  "show-dialog"
+             {:ltitle          "areyousure"
+              :size            "medium"
+              :component       "yes-no-dialog"
+              :componentParams {:ltext :pate.verdict-table.request-signature.confirm
+                                :yesFn #(do
+                                          (service/send-signature-request app-id verdict-id signer-id)
+                                          (swap! add-signature?* not))}}))
+
+
 (rum/defcs verdict-signatures-row < rum/reactive
   (rum/local ""    ::password)
   (rum/local false ::signing?)
@@ -146,7 +164,7 @@
   [{password*     ::password
     signing?*     ::signing?
     waiting?*     ::waiting?
-    bad-password* ::bad-password} app-id verdict-id signatures]
+    bad-password* ::bad-password} app-id verdict-id signatures title show-sign-button?]
   (let [click-fn (fn []
                    (swap! signing?* not)
                    (reset! password* "")
@@ -159,7 +177,7 @@
       [:div.row
        [:div.col-1
         [:div
-         [:div  [:strong (common/loc :verdict.signatures)]]
+         [:div  [:strong (common/loc title)]]
          [:div.tabby
           (map-indexed (fn [i {:keys [name date]}]
                          [:div.tabby__row {:key i}
@@ -191,20 +209,54 @@
                                                                                       (reset! bad-password*
                                                                                               password))))}))
              [:button.secondary.cancel-signing {:on-click click-fn} (common/loc :cancel)]])])]]]
-     [:td (when (and (can-sign? verdict-id)
-                     (not (rum/react signing?*)))
-            (components/icon-button
-             {:on-click click-fn
-              :text-loc :verdict.sign
-              :class    :positive
-              :icon     :lupicon-circle-pen}))]]))
+     (if show-sign-button?
+       [:td (when (and (can-sign? verdict-id)
+                       (not (rum/react signing?*)))
+              (components/icon-button
+                {:on-click click-fn
+                 :text-loc :verdict.sign
+                 :class    :positive
+                 :icon     :lupicon-circle-pen}))]
+       [:td])]))
+
+(rum/defcs request-signature-row < rum/reactive
+  (rum/local "" ::signer)
+  (rum/local [] ::parties)
+  (rum/local false ::add-signature?)
+  [{signer*         ::signer
+    parties*        ::parties
+    add-signature?* ::add-signature?} app-id id]
+   [:tr.verdict-signatures
+   [:td {:colSpan 2}]
+   [:td {:colSpan 2}
+    [:div.row
+     [:div.col-1
+      (when @add-signature?*
+          [:div [:label (common/loc :pate.verdict-table.request-signature.title)]
+           (components/dropdown signer*
+                                {:items (rum/react parties*)})
+           [:button.signature
+            {:on-click #(confirm-and-send-signature-request app-id id @signer* add-signature?*)
+             :class    :positive}
+            (common/loc :pate.verdict-table.send-signature-request)]])]]]
+   [:td
+     (if @add-signature?*
+       [:button {:on-click (fn [_] (swap! add-signature?* not))
+                 :class    :secondary}
+        (common/loc :cancel)]
+       (components/icon-button
+         {:on-click (fn [_] (do (swap! add-signature?* not)
+                                (service/fetch-application-parties app-id id #(reset! parties* (:parties %)))))
+          :text-loc :pate.verdict-table.request-signature
+          :class    :secondary
+          :icon     :lupicon-circle-plus}))]])
 
 (defn- verdict-table [headers verdicts app-id hide-actions]
   [:table.pate-verdicts-table
    [:thead [:tr (map (fn [header] [:th (common/loc header)]) headers)]]
    [:tbody (map (fn [{:keys [id title published modified
                              verdict-date giver replaced?
-                             category signatures]
+                             category signatures signature-requests]
                       :as   verdict}]
                   (list [:tr {:key id}
                          [:td {:class (common/css-flags :replaced replaced?)}
@@ -241,8 +293,15 @@
                                 :class    (common/css :secondary)
                                 :on-click #(confirm-and-replace-verdict verdict id)}))])]
                         (when (seq signatures)
-                          (rum/with-key (verdict-signatures-row app-id id signatures)
-                            (str id "-signatures")))))
+                          (rum/with-key (verdict-signatures-row app-id id signatures :verdict.signatures true)
+                                        (str id "-signatures")))
+                        (when (seq signature-requests)
+                          (rum/with-key (verdict-signatures-row app-id id signature-requests :verdict.signature-requests false)
+                                        (str id "-signature-request")))
+                        (when (and published
+                                   (can-send-signature-request? id)
+                                   (contract? verdict))
+                          (rum/with-key (request-signature-row app-id id) (str id "-request")))))
                 verdicts)]])
 
 (rum/defc verdict-list < rum/reactive

@@ -147,7 +147,8 @@
                                                  (sc/optional-key :anto)          ssc/Timestamp
                                                  (sc/optional-key :lainvoimainen) ssc/Timestamp
                                                  :verdict-giver                   sc/Str}
-          (sc/optional-key :signatures) [PateSignature]}))
+          (sc/optional-key :signatures)         [PateSignature]
+          (sc/optional-key :signature-requests) [PateSignature]}))
 
 (defschema PateModernVerdict
   (merge PateBaseVerdict

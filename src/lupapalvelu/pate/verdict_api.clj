@@ -257,6 +257,32 @@
   [command]
   (ok :verdict (verdict/published-verdict-details command)))
 
+(defquery pate-parties
+  {:description       "Application parties"
+   :feature           :pate
+   :user-roles        #{:authority :applicant}
+   :parameters        [id verdict-id]
+   :categories        #{:pate-verdicts}
+   :input-validators  [(partial action/non-blank-parameters [:id :verdict-id])]
+   :states            states/post-submitted-states}
+  [command]
+  (ok :parties (verdict/parties command)))
+
+(defcommand send-signature-request
+  {:description       "Send request to sign contract"
+   :feature           :pate
+   :user-roles        #{:authority}
+   :parameters        [id verdict-id signer-id]
+   :categories        #{:pate-verdicts}
+   :input-validators  [(partial action/non-blank-parameters [:id :verdict-id :signer-id])]
+   :pre-checks        [(verdict-exists :published? :contract?)]
+   :states            states/post-submitted-states
+   :notified          true
+   :on-success        (notify :pate-signature-request)}
+  [command]
+  (verdict/add-signature-request command)
+  (ok))
+
 (defcommand edit-pate-verdict
   {:description "Updates verdict data. Returns changes and errors
   lists (items are path-vector value pairs)"

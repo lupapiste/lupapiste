@@ -218,16 +218,11 @@
       (fact "Legacy contracts no longer supported"
         (command sonja :new-legacy-verdict-draft :id app-id)
         => fail?)
-      (fact "Contract settings consist only of reviews"
-        (let [review-id (add-repeating-setting sipoo-ya org-id :contract :reviews :add-review
-                                               :fi "Foo suomeksi"
-                                               :sv "Foo p\u00e5 svenska"
-                                               :en "Foo in English"
-                                               :type "aloituskatselmus")]
+      (fact "Contract settings consist not even reviews"
           (query sipoo-ya :verdict-template-settings
                  :org-id org-id
                  :category "contract")
-          => (contains {:filled true})
+          => ok?
           (fact "Create contract template"
             (let [{template-id :id} (init-verdict-template sipoo-ya org-id :contract)]
               (fact "Fill template"
@@ -235,9 +230,7 @@
                                            org-id
                                            template-id
                                            :language "fi"
-                                           :contract-text "This is a test contract."
-                                           [:reviews review-id :included] true
-                                           [:reviews review-id :selected] true))
+                                           :contract-text "This is a test contract."))
               (fact "Add condition"
                 (add-template-condition sipoo-ya org-id template-id
                                         "Some random condition."))
@@ -251,18 +244,8 @@
                   verdict => (contains {:category "contract"
                                         :data     (contains {:language         "fi"
                                                              :contract-text    "This is a test contract."
-                                                             :handler          "Sonja Sibbo"
-                                                             :reviews-included true})})
+                                                             :handler          "Sonja Sibbo"})})
                   filled => false
-                  (fact "Review"
-                    (let [review-id (-> references :reviews first :id)]
-                      (-> references :reviews last)
-                      => {:fi   "Foo suomeksi"
-                          :sv   "Foo p\u00e5 svenska"
-                          :en   "Foo in English"
-                          :type "aloituskatselmus"
-                          :id   review-id}
-                      (-> verdict :data :reviews) => [review-id]))
                   (fact "Condition"
                     (-> verdict :data :conditions vals)
                     => (just [{:condition "Some random condition."}]))
@@ -286,17 +269,11 @@
                                            :state        "agreementPrepared"
                                            :type-group   "muut"})
                   (let [{:keys [tasks attachments]} (query-application sonja app-id)]
-                    (fact "Two tasks have been created"
-                      tasks => (contains [(contains {:taskname    "Foo suomeksi"
+                    (fact "Task has been created"
+                      tasks => (contains [(contains {:taskname    "Some random condition."
                                                      :source      {:type "verdict"
                                                                    :id   verdict-id}
-                                                     :schema-info (contains {:name "task-katselmus-ya"})})
-                                          (contains {:taskname    "Some random condition."
-                                                     :source      {:type "verdict"
-                                                                   :id   verdict-id}
-                                                     :schema-info (contains {:name "task-lupamaarays"})})]
-                                         :in-any-order
-                                         :gaps-ok))
+                                                     :schema-info (contains {:name "task-lupamaarays"})})]))
                     (fact "One attachment has been created"
                       attachments => (contains [(contains {:source   {:type "verdicts"
                                                                       :id   verdict-id}
@@ -308,4 +285,31 @@
                             last
                             :latestVersion
                             :filename)
-                        => (re-pattern (str app-id " Sopimus .+.pdf"))))))))))))))
+                        => (re-pattern (str app-id " Sopimus .+.pdf")))))
+
+                (fact "Signature request can be send"
+                  (command sonja :invite-with-role
+                           :id app-id
+                           :email "mikko@example.com"
+                           :text  ""
+                           :documentName ""
+                           :documentId ""
+                           :path ""
+                           :role "writer") => ok?
+
+                  (let [{:keys [parties ok]} (query sonja :pate-parties :id app-id :verdict-id verdict-id)
+                        signer-id (->> parties first :value)]
+
+                    (fact "Parties can be found"
+                      ok = ok?)
+
+                    (fact "Parties are correct"
+                      parties => (contains [(contains {:text "Teppo Nieminen"} :in-any-order)
+                                            (contains {:text "Mikko Intonen"} :in-any-order)]))
+
+                    (fact "Signature request can be send"
+                      (command sonja :send-signature-request :id app-id :verdict-id verdict-id :signer-id signer-id) => ok?)
+
+                    (fact "Contract have signature request"
+                      (let [{:keys [pate-verdicts]} (query-application sonja app-id)]
+                        (->> pate-verdicts first :signature-requests first) => (contains {:name "Teppo Nieminen"})))))))))))))
