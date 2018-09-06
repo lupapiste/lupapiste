@@ -128,6 +128,14 @@ Sonja types in draft
   Reload page and kill dev-box
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
 
+Sonja changes draft's due date
+  Wait Until  Element should be enabled  due-date-input
+  Input Text  due-date-input  18.08.2018
+  Press Key  due-date-input  \\13
+  Press Key  due-date-input  \\13
+  Reload page and kill dev-box
+  Wait Until  Element should contain  due-date-span  18.8.2018
+
 Sonja adds attachment to statement draft
   Upload attachment with default type  ${PDF_TESTFILE_PATH}
 

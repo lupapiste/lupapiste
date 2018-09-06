@@ -9,11 +9,11 @@
         <div data-bind="with: data">
           <span data-bind="ltext: 'add-statement-giver-maaraaika'"></span>
           <!-- ko if: $data.dueDate -->
-          (<span data-bind="dateString: dueDate"></span>)
+          (<span data-bind="dateString: dueDate" id="due-date-span"></span>)
           <!-- /ko -->
           <!-- ko if: $component.authModel.ok("save-statement-due-date") -->
           <div class="col-1">
-            <input type="text" class="form-input" data-bind="datepicker: $parent.newDueDate" id="maaraaika"></input>
+            <input type="text" class="form-input" data-bind="datepicker: $parent.newDueDate" id="due-date-input"></input>
           </div>
           <!-- /ko -->
         </div>
