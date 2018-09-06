@@ -1,6 +1,7 @@
 (ns lupapalvelu.backing-system.core
   "A Facade for backing system integrations."
   (:require [schema.core :as sc]
+            [sade.core :refer [fail]]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.backing-system.allu :as allu]
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
@@ -15,6 +16,8 @@
 ;;; backing system interface better than separate multimethods.
 
 (defprotocol BackingSystem
+  ;; TODO: Call this from action pipeline. NoopBackingSystem.-supported-action? should be fixed first.
+  (-supported-action? [self command] "Is `(:action command)` supported by this backing system?")
   (-submit-application! [self command]
     "Send application submit message to backing system. Returns nil.")
   (-update-application! [self command updated-application]
@@ -29,6 +32,7 @@
 
 (deftype NoopBackingSystem []
   BackingSystem
+  (-supported-action? [_ _] true)                           ; FIXME: Incorrect in general
   (-submit-application! [_ _] nil)
   (-update-application! [_ _ _] false)
   (-return-to-draft! [_ _] nil)
@@ -38,6 +42,9 @@
 
 (deftype ALLUBackingSystem []
   BackingSystem
+  (-supported-action? [_ {:keys [action]}]
+    (not (or (= action "request-for-complement")
+             (= action "undo-cancellation"))))
   (-submit-application! [_ command] (allu/submit-application! command))
   (-update-application! [_ command updated-application]
     (allu/update-application! (assoc command :application updated-application))
@@ -54,6 +61,7 @@
 
 (deftype KRYSPBackingSystem []
   BackingSystem
+  (-supported-action? [_ _] true)
   (-submit-application! [_ _] nil)
   (-update-application! [_ _ _] false)
   (-return-to-draft! [_ _] nil)
@@ -74,6 +82,11 @@
 
 ;;;; API
 ;;;; ===================================================================================================================
+
+(def supported-action? (partial with-implicit-backing-system -supported-action?))
+(defn validate-action-support [{:keys [action] :as command}]
+  (when-not (supported-action? command)
+    (fail :error.integration.unsupported-action :action action)))
 
 (def submit-application! (partial with-implicit-backing-system -submit-application!))
 
