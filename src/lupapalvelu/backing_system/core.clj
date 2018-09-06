@@ -43,7 +43,6 @@
 (deftype ALLUBackingSystem []
   BackingSystem
   (-supported-action? [_ {:keys [action]}]
-    (println action)
     (not (or (= action "request-for-complement")
              (= action "undo-cancellation"))))
   (-submit-application! [_ command] (allu/submit-application! command))

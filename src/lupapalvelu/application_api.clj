@@ -246,8 +246,7 @@
    :permissions      [{:required [:application/undo-cancelation]}]
    :pre-checks       [bs/validate-action-support
                       (fn last-history-item-is-canceled [{:keys [application]}]
-                        (when-not (= :canceled
-                                     ((comp keyword :state) (app-state/last-history-item application)))
+                        (when-not (= (:state (app-state/last-history-item application)) "canceled")
                           (fail :error.latest-state-not-canceled)))
                       (fn has-previous-state [{:keys [application]}]
                         (when-not (states/all-states (app-state/get-previous-app-state application))
