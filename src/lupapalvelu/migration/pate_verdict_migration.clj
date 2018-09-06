@@ -1,11 +1,13 @@
 (ns lupapalvelu.migration.pate-verdict-migration
   (:require [clojure.walk :refer [postwalk prewalk walk]]
             [monger.operators :refer :all]
+            [schema.core :as sc]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.pdf :as pdf]
+            [lupapalvelu.pate.schemas :refer [PateLegacyVerdict]]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict :as verdict]))
 
@@ -72,7 +74,9 @@
   [application verdict accessor-functions]
   (fn [x]
     (cond (accessor-key? x)
-          ((get accessor-functions (::access x)) application verdict (::context x))
+          (if-let [accessor-fn (get accessor-functions (::access x))]
+            (accessor-fn application verdict (::context x))
+            (throw (ex-info "Missing accessor" x)))
 
           (build-id-map? x)
           (build-id-map application verdict accessor-functions x)
@@ -123,10 +127,10 @@
   context)
 
 (defn- verdict-category [application _ _]
-  (schema-util/application->category application))
+  (name (schema-util/application->category application)))
 
 (defn- verdict-template [app _ _]
-  {:inclusions (-> (verdict-category app nil nil)
+  {:inclusions (-> (schema-util/application->category app)
                    verdict/legacy-verdict-inclusions)})
 
 (defn- get-when [p getter-fn]
@@ -190,7 +194,6 @@
    :modified  (access :modified)
    :category  (access :category)
    :published {:published     (access :published)
-               ;; :tags          (access :published-tags)
                :attachment-id (access :published-attachment-id)}
    :state (wrap (access :state))
    :data {:handler         (wrap (access :handler))
@@ -268,7 +271,8 @@
        (postwalk (post-process timestamp))
        (add-tags application)
        util/strip-nils
-       util/strip-empty-collections))
+       util/strip-empty-collections
+       (sc/validate PateLegacyVerdict)))
 
 (defn- draft-verdict-ids [application]
   (->> application

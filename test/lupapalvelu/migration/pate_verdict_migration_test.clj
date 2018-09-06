@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [monger.operators :refer :all]
             [lupapalvelu.migration.pate-verdict-migration :refer :all]
+            [lupapalvelu.mongo :refer [create-id]]
             [lupapalvelu.pate.metadata :as metadata]))
 
 (def timestamp 1234)
@@ -77,13 +78,13 @@
                                               :vainsahkoinenAsiointiKytkin {:value true}}}}}
    :meta {:_indicator_reset {:timestamp 1535544525806}}})
 
-(def verdict-id "verdict-id")
+(def verdict-id (create-id))
 (def kuntalupatunnus "lupatunnus")
 (def anto 2345)
 (def signed1 4321)
 (def signed2 5432)
-(def signer-id1 "signer")
-(def signer-id2 "singer")
+(def signer-id1 (create-id))
+(def signer-id2 (create-id))
 (def lainvoimainen 3456)
 (def paatospvm 4567)
 (def handler "handler")
@@ -116,7 +117,7 @@
                                         :lastName "Name"}}]})
 (def migrated-test-verdict {:id verdict-id
                             :modified timestamp
-                            :category :r
+                            :category "r"
                             :state (wrap "draft")
                             :data {:handler (wrap handler)
                                    :kuntalupatunnus (wrap kuntalupatunnus)
@@ -144,6 +145,8 @@
 (def migrated-test-verdict-no-tasks
   (-> migrated-test-verdict
       (update :data dissoc :reviews :foremen :conditions)))
+
+(def attachment-id (create-id))
 (def test-application (-> {:id "app-id"
                            :verdicts [test-verdict]
                            :permitType "R"
@@ -158,7 +161,7 @@
                                           :target {:id verdict-id
 
                                                    :type "verdict"}
-                                          :id "attachment1"
+                                          :id attachment-id
                                           :type {:type-id    "paatos"
                                                  :type-group "paatoksenteko"}}]
                            :documents [hakija-doc-for-tags]}
@@ -167,7 +170,7 @@
 (def app-one-verdict-no-tasks (dissoc test-application :tasks))
 (def app-one-verdict-with-tasks test-application)
 
-(def verdict-id2 "verdict-id2")
+(def verdict-id2 (create-id))
 (def test-verdict2 (assoc test-verdict :id verdict-id2))
 (def migrated-test-verdict2 (-> migrated-test-verdict
                                 (assoc :id verdict-id2)
@@ -186,7 +189,7 @@
 
 (def contains-published-and-archive-data?
   (contains {:published (contains {:published anto
-                                   :attachment-id "attachment1"
+                                   :attachment-id attachment-id
                                    :tags (contains "Sonja Sibbo")})
              :archive {:verdict-giver handler
                        :lainvoimainen lainvoimainen}
@@ -204,7 +207,7 @@
     (->pate-legacy-verdict (assoc test-application :permitSubtype "sijoitussopimus")
                            test-verdict
                            timestamp)
-    => (contains {:category :contract}))
+    => (contains {:category "contract"}))
 
   (fact "only tasks related to given verdict affect the migration"
     (->pate-legacy-verdict (assoc test-application
