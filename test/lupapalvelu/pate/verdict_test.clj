@@ -3496,12 +3496,12 @@
 (facts "Signature requests"
   (let [verdictId   (mongo/create-id)
         verdict     (make-verdict :id verdictId :code "myonnetty" :section "123")
-        verdict     (assoc-in verdict [:data :signatures] {(keyword (mongo/create-id)) {:user-id "123"
-                                                                                        :name "Signer one"
-                                                                                        :date 1536138000000}})
-        verdict     (assoc verdict :signature-requests {(keyword (mongo/create-id)) {:user-id "111"
-                                                                                     :name "Signer four"
-                                                                                     :date 1536138000000}})
+        verdict     (assoc verdict :signatures [{:user-id "123"
+                                                 :name    "Signer one"
+                                                 :date    1536138000000}])
+        verdict     (assoc verdict :signature-requests [{:user-id "111"
+                                                         :name    "Signer four"
+                                                         :date    1536138000000}])
         application (assoc application :auth [{:id "123" :username "user1" :firstName "signer" :lastName "one"}
                                               {:id "456" :username "user2" :firstName "signer" :lastName "two"}
                                               {:id "789" :username "user3" :firstName "signer" :lastName "three"}
