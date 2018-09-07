@@ -164,8 +164,7 @@
                                           :id attachment-id
                                           :type {:type-id    "paatos"
                                                  :type-group "paatoksenteko"}}]
-                           :documents [hakija-doc-for-tags]}
-                          (select-keys migration-projection)))
+                           :documents [hakija-doc-for-tags]}))
 
 (def app-one-verdict-no-tasks (dissoc test-application :tasks))
 (def app-one-verdict-with-tasks test-application)
@@ -186,6 +185,17 @@
                                                     test-verdict2]
                                          :tasks (concat (tasks-for-verdict verdict-id)
                                                         (tasks-for-verdict verdict-id2))))
+
+(def backing-system-verdict (-> test-verdict
+                                (dissoc :draft)
+                                (assoc :id (create-id))))
+(def backing-system-verdict2 (-> test-verdict
+                                 (dissoc :draft)
+                                 (assoc :id (create-id))))
+(def app-with-backing-system-verdicts (assoc test-application
+                                             :verdicts [backing-system-verdict
+                                                        test-verdict
+                                                        backing-system-verdict2]))
 
 (def contains-published-and-archive-data?
   (contains {:published (contains {:published anto
@@ -243,34 +253,43 @@
 (facts "migration-updates"
   (fact "one draft verdict, no tasks"
     (migration-updates app-one-verdict-no-tasks timestamp)
-    => {$unset {:verdicts ""}
-        $set {:pate-verdicts [migrated-test-verdict-no-tasks]
+    => {$set {:pate-verdicts [migrated-test-verdict-no-tasks]
               :pre-pate-verdicts (:verdicts app-one-verdict-no-tasks)}
-        $pull {:tasks {:source.id {$in [(:id migrated-test-verdict-no-tasks)]}}}})
+        $pull {:tasks {:source.id {$in [(:id migrated-test-verdict-no-tasks)]}}
+               :verdicts {:id {$in [(:id migrated-test-verdict-no-tasks)]}}}})
 
   (fact "one draft verdict with tasks"
     (migration-updates app-one-verdict-with-tasks timestamp)
-    => {$unset {:verdicts ""}
-        $set {:pate-verdicts [migrated-test-verdict]
+    => {$set {:pate-verdicts [migrated-test-verdict]
               :pre-pate-verdicts (:verdicts app-one-verdict-with-tasks)}
-        $pull {:tasks {:source.id {$in [(:id migrated-test-verdict)]}}}})
-
+        $pull {:tasks {:source.id {$in [(:id migrated-test-verdict)]}}
+               :verdicts {:id {$in [(:id migrated-test-verdict)]}}}})
   (fact "two draft verdicts with tasks"
     (migration-updates app-two-verdicts-with-tasks timestamp)
-    => {$unset {:verdicts ""}
-        $set {:pate-verdicts [migrated-test-verdict migrated-test-verdict2]
+    => {$set {:pate-verdicts [migrated-test-verdict migrated-test-verdict2]
               :pre-pate-verdicts (:verdicts app-two-verdicts-with-tasks)}
-        $pull {:tasks {:source.id {$in [verdict-id verdict-id2]}}}})
+        $pull {:tasks {:source.id {$in [verdict-id verdict-id2]}}
+               :verdicts {:id {$in [verdict-id verdict-id2]}}}})
 
   (fact "two verdicts with tasks, one draft, one published"
     (migration-updates app-with-draft-and-published timestamp)
     => (contains
-        {$unset {:verdicts ""}
-         $set (contains {:pate-verdicts (just [contains-published-and-archive-data?
+        {$set (contains {:pate-verdicts (just [contains-published-and-archive-data?
                                                migrated-test-verdict2])
                          :pre-pate-verdicts (:verdicts app-with-draft-and-published)})
          ;; Only tasks related to the unpublished verdict are pulled
-         $pull {:tasks {:source.id {$in [verdict-id2]}}}}))
+         $pull {:tasks {:source.id {$in [verdict-id2]}}
+                :verdicts {:id {$in [verdict-id verdict-id2]}}}}))
+
+  (fact "verdicts from backing system are left intact"
+    (migration-updates app-with-backing-system-verdicts timestamp)
+    => (contains
+        ;; Backing system verdicts are not migrated to pate-verdicts ...
+        {$set (contains {:pate-verdicts [migrated-test-verdict]
+                         :pre-pate-verdicts (:verdicts app-with-backing-system-verdicts)})
+         ;; ... nor are they pulled from verdicts
+         $pull {:tasks {:source.id {$in [verdict-id]}}
+                :verdicts {:id {$in [verdict-id]}}}}))
 
   (against-background
    (lupapalvelu.organization/get-organization-name anything anything) => "Sipoon rakennusvalvonta"))

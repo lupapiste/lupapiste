@@ -12,7 +12,8 @@
             [lupapalvelu.pate.schemas :as schemas :refer [PateLegacyVerdict]]
             [lupapalvelu.pate.schema-helper :as schema-helper]
             [lupapalvelu.pate.schema-util :as schema-util]
-            [lupapalvelu.pate.verdict :as verdict]))
+            [lupapalvelu.pate.verdict :as verdict]
+            [lupapalvelu.pate.verdict-common :as vc]))
 
 ;;
 ;; Helpers for operating on the verdict skeleton
@@ -105,8 +106,8 @@
       result
       default)))
 
-(defn- get-in-poytakirja [key]
-  (get-in-verdict (conj [:paatokset 0 :poytakirjat 0] key)))
+(defn- get-in-poytakirja [key & [default]]
+  (get-in-verdict (conj [:paatokset 0 :poytakirjat 0] key) default))
 
 (defn- get-in-paivamaarat [key]
   (get-in-verdict (conj [:paatokset 0 :paivamaarat] key)))
@@ -146,10 +147,17 @@
 (defn- verdict-published? [_ verdict _]
   (not (:draft verdict)))
 
+(defn- timestamp
+  "If timestamp is 0, return nil"
+  [val]
+  (if (and (integer? val) (zero? val))
+    nil
+    val))
+
 (defn- get-archive-data [_ verdict _]
-  {:verdict-giver ((get-in-poytakirja :paatoksentekija) nil verdict nil)
-   :anto          ((get-in-paivamaarat :anto) nil verdict nil)
-   :lainvoimainen ((get-in-paivamaarat :lainvoimainen) nil verdict nil)})
+  {:verdict-giver ((get-in-poytakirja :paatoksentekija "") nil verdict nil)
+   :anto          (timestamp ((get-in-paivamaarat :anto) nil verdict nil))
+   :lainvoimainen (timestamp ((get-in-paivamaarat :lainvoimainen) nil verdict nil))})
 
 (defn- targets-verdict? [attachment verdict]
   (= (:id verdict)
@@ -234,7 +242,7 @@
   "Contains functions for accessing relevant Pate verdict data from
   current verdict drafts. These return the raw values but are
   subsequently to be wrapped with relevant metadata."
-  {:anto              (get-in-paivamaarat :anto)
+  {:anto              (comp timestamp (get-in-paivamaarat :anto))
    :archive           (get-when verdict-published? get-archive-data)
    :attachment-summaries attachment-summaries
    :category          verdict-category
@@ -246,14 +254,14 @@
    :handler           (get-in-poytakirja :paatoksentekija)
    :id                (get-in-verdict [:id])
    :kuntalupatunnus   (get-in-verdict [:kuntalupatunnus])
-   :lainvoimainen     (get-in-paivamaarat :lainvoimainen)
-   :modified          (get-in-verdict [:timestamp] (:modified defaults))
-   :published         (get-when verdict-published? (get-in-paivamaarat :anto))
+   :lainvoimainen     (comp timestamp (get-in-paivamaarat :lainvoimainen))
+   :modified          (comp timestamp (get-in-verdict [:timestamp] (:modified defaults)))
+   :published         (comp timestamp (get-when verdict-published? (get-in-paivamaarat :anto)))
    :published-attachment-id (get-when verdict-published? published-attachment-id)
    :review-name       (get-in-context [:taskname])
    :review-type       (comp ->pate-review-type (get-in-context [:data :katselmuksenLaji :value]))
    :reviews           (filter-tasks-of-verdict (task-name? :task-katselmus))
-   :signature-date    (get-in-context [:created])
+   :signature-date    (comp timestamp (get-in-context [:created]))
    :signature-name    signature-name
    :signature-user-id (get-in-context [:user :id])
    :signatures        (get-in-verdict [:signatures])
@@ -273,7 +281,7 @@
                 (pr-str (pdf/verdict-tags application
                                           (metadata/unwrap-all verdict))))
       verdict)
-    (catch Exception e
+    (catch Throwable e
       (throw (ex-info (str "Failed to build tags for application "
                            (:id application)
                            ", verdict "
@@ -292,9 +300,9 @@
                                      (accessor-functions (defaults timestamp)))
                 verdict-migration-skeleton)
        (postwalk (post-process timestamp))
-       (add-tags application)
        util/strip-nils
        util/strip-empty-collections
+       (add-tags application)
        validate-verdict))
 
 (defn- draft-verdict-ids [application]
@@ -313,14 +321,16 @@
   ;; field, not the value.
   {:verdicts.draft {$exists true}})
 
-(def migration-projection
-  [:attachments :documents :organization :permitType :primaryOperation :propertyId :tasks :verdicts])
+
 
 (defn migration-updates [application timestamp]
-  (merge {$unset {:verdicts ""}
-          $set {:pate-verdicts (mapv #(->pate-legacy-verdict application
-                                                             %
-                                                             timestamp)
-                                     (:verdicts application))
-                :pre-pate-verdicts (:verdicts application)}
-          $pull {:tasks {:source.id {$in (draft-verdict-ids application)}}}}))
+  (let [lupapiste-verdicts (filter vc/lupapiste-verdict?
+                                   (:verdicts application))]
+    (merge {$set {:pate-verdicts (mapv #(->pate-legacy-verdict application
+                                                               %
+                                                               timestamp)
+                                       lupapiste-verdicts)
+                  :pre-pate-verdicts (:verdicts application)}
+            ;; TODO mitä jos $in ja tyhjä taulukko?
+            $pull {:tasks {:source.id {$in (draft-verdict-ids application)}}
+                   :verdicts {:id {$in (mapv :id lupapiste-verdicts)}}}})))
