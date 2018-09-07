@@ -400,19 +400,21 @@
                                   created
                                   set-process-state
                                   user))))
-      (doseq [attachment selected-attachments
-              :when (not (archival-states (keyword (get-in attachment [:metadata :tila]))))]
-        (let [file-id (get-in attachment [:latestVersion :fileId])
-              {:keys [content contentType]} (get gridfs-results file-id)
-              metadata-fn #(generate-archive-metadata application user :metadata attachment)]
-          (upload-and-set-state (:id attachment)
-                                content
-                                contentType
-                                metadata-fn
-                                application
-                                created
-                                set-attachment-state
-                                user))))
+      (->> selected-attachments
+           (mapv (fn [attachment]
+                   (when-not (archival-states (keyword (get-in attachment [:metadata :tila])))
+                     (let [file-id (get-in attachment [:latestVersion :fileId])
+                          {:keys [content contentType]} (get gridfs-results file-id)
+                           metadata-fn #(generate-archive-metadata application user :metadata attachment)]
+                       (upload-and-set-state (:id attachment)
+                                            content
+                                             contentType
+                                             metadata-fn
+                                             application
+                                             created
+                                             set-attachment-state
+                                             user)))))
+           (remove nil?)))
     {:error :error.invalid-metadata-for-archive}))
 
 (defn mark-application-archived [application now archived-ts-key]
