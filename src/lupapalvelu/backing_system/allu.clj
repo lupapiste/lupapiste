@@ -347,6 +347,15 @@
      ::params         {:id allu-id}
      ::command        (minimize-command command)}))
 
+(defn- contract-approval [{:keys [application user] :as command}]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)]
+    (assert allu-id (str (:id application) " does not contain an ALLU id"))
+    {::interface-path [:placementcontracts :contract :approved]
+     ::params         {:id                  allu-id
+                       :signing-information {:signer      (str (:firstName user) " " (:lastName user))
+                                             :signingTime (format-date-time (t/now))}}
+     ::command        (minimize-command command)}))
+
 (defn- final-contract-request [{:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)]
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
@@ -405,6 +414,12 @@
                         :contract {:proposal {:request-method :get
                                               :uri            "/placementcontracts/:id/contract/proposal"
                                               :path-params    {:id ssc/NatString}}
+                                   :approved {:request-method :post
+                                              :uri            "/placementcontracts/:id/contract/approved"
+                                              :path-params    {:id ssc/NatString}
+                                              :body           {:name   :signing-information
+                                                               :schema {:signer      NonBlankStr
+                                                                        :signingTime (date-string :date-time-no-ms)}}}
                                    :final    {:request-method :get
                                               :uri            "/placementcontracts/:id/contract/final"
                                               :path-params    {:id ssc/NatString}}}}
@@ -485,11 +500,12 @@
 (defn- perform-http-request! [base-url {:keys [request-method uri body] :as request}]
   ((request-method http-method-fns)
     (str base-url uri)
-    (cond
-      (nil? body) request
-      (string? body) request
-      (vector? body) (-> request (dissoc :body) (assoc :multipart body))
-      :else (assert false (str "Unsupported body type: " body)))))
+    (-> (cond
+          (nil? body) request
+          (string? body) request
+          (vector? body) (-> request (dissoc :body) (assoc :multipart body))
+          :else (assert false (str "Unsupported body type: " body)))
+        (assoc :throw-exceptions false))))
 
 (defn- make-remote-handler [allu-url]
   (fn [request]
@@ -530,6 +546,10 @@
     [:placementcontracts :contract (:or :proposal :final)] (if (creation-response-ok? (:id params))
                                                              {:status 200, :body " "}
                                                              {:status 404, :body (str "Not Found: " (:id params))})
+
+    [:placementcontracts :contract :approved] (if (creation-response-ok? (:id params))
+                                                {:status 200, :body ""}
+                                                {:status 404, :body (str "Not Found: " (:id params))})
 
     [:attachments :create] (if (creation-response-ok? (:id params))
                              {:status 200, :body ""}
@@ -726,6 +746,11 @@
   "GET placement contract proposal pdf from ALLU. Saves the proposal pdf using `lupapalvelu.file-upload/save-file`."
   [command]
   (send-allu-request! (contract-proposal-request command)))
+
+(defn approve-placementcontract!
+  "Approve placementcontract proposal in ALLU."
+  [command]
+  (send-allu-request! (contract-approval command)))
 
 (defn load-placementcontract-final
   "GET final placement contract pdf from ALLU. Saves the contract pdf using `lupapalvelu.file-upload/save-file`."
