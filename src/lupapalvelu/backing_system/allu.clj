@@ -728,6 +728,6 @@
   (send-allu-request! (contract-proposal-request command)))
 
 (defn load-placementcontract-final
-  "GET placement contract proposal pdf from ALLU. Saves the proposal pdf using `lupapalvelu.file-upload/save-file`."
+  "GET final placement contract pdf from ALLU. Saves the contract pdf using `lupapalvelu.file-upload/save-file`."
   [command]
   (send-allu-request! (final-contract-request command)))
