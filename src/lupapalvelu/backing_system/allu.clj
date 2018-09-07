@@ -4,6 +4,7 @@
   (:require [clojure.string :as s]
             [clojure.core.match :refer [match]]
             [clojure.walk :refer [postwalk]]
+            [clj-http.core :as clj-http]
             [monger.operators :refer [$set $in]]
             [cheshire.core :as json]
             [lupapiste-jms.client :as jms-client]
@@ -12,6 +13,7 @@
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
+            [reitit.core :as reitit]
             [taoensso.timbre :refer [info error]]
             [taoensso.nippy :as nippy]
             [sade.util :refer [dissoc-in assoc-when fn->]]
@@ -213,9 +215,9 @@
 (declare person->contact)
 
 (defn- person->customer [{:keys [osoite], {:keys [hetu]} :henkilotiedot :as person}]
-  (merge {:type          "PERSON"
-          :registryKey   hetu
-          :country       (address-country osoite)}
+  (merge {:type        "PERSON"
+          :registryKey hetu
+          :country     (address-country osoite)}
          (person->contact person)))
 
 (defn- company->customer [payee? company]
@@ -395,6 +397,22 @@
                                                   {:name      :file
                                                    :schema    (sc/cond-pre sc/Str InputStream)
                                                    :mime-type (fn-> :metadata :mimeType)}]}}})
+
+(def- allu-router
+  (reitit/router
+    [["/applications"                                       ; TODO: {:coercion reitit.coercion.schema/coercion}
+      ["/:id/cancelled" {:name [:applications :cancel]
+                         :put  {:parameters {:path {:id ssc/NatString}}
+                                :handler    clj-http/request}}]
+      ["/:id/attachments" {:name [:attachments :create]
+                           :post {:parameters {:path {:id ssc/NatString}}
+                                  :handler    clj-http/request}}]]
+     ["/placementcontracts"
+      ["" {:name [:placementcontracts :create]
+           :post {:handler clj-http/request}}]
+      ["/:id" {:name [:placementcontracts :update]
+               :put  {:parameters {:path {:id ssc/NatString}}
+                      :handler    clj-http/request}}]]]))
 
 (defn- interpolate-uri [template path-params request-data]
   (reduce (fn [^String uri [k schema]]
