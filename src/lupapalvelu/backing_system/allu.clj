@@ -25,6 +25,7 @@
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.document.canonical-common :as canonical-common]
+            [lupapalvelu.file-upload :refer [save-file]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]
             [lupapalvelu.integrations.jms :as jms]
@@ -33,7 +34,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states])
   (:import [java.lang AutoCloseable]
-           [java.io InputStream]))
+           [java.io InputStream ByteArrayInputStream]))
 
 ;;; TODO: Sijoituslupa
 
@@ -213,9 +214,9 @@
 (declare person->contact)
 
 (defn- person->customer [{:keys [osoite], {:keys [hetu]} :henkilotiedot :as person}]
-  (merge {:type          "PERSON"
-          :registryKey   hetu
-          :country       (address-country osoite)}
+  (merge {:type        "PERSON"
+          :registryKey hetu
+          :country     (address-country osoite)}
          (person->contact person)))
 
 (defn- company->customer [payee? company]
@@ -339,6 +340,13 @@
                        :file     (-> attachment :latestVersion :fileId)}
      ::command        (minimize-command command attachment)}))
 
+(defn- proposal-request [{:keys [application] :as command}]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)]
+    (assert allu-id (str (:id application) " does not contain an ALLU id"))
+    {::interface-path [:placementcontracts :proposal]
+     ::params         {:id allu-id}
+     ::command        (minimize-command command)}))
+
 ;;;; IntegrationMessage construction
 ;;;; ===================================================================================================================
 
@@ -374,17 +382,20 @@
                                  :uri            "/applications/:id/cancelled"
                                  :path-params    {:id ssc/NatString}}}
 
-   :placementcontracts {:create {:request-method :post
-                                 :uri            "/placementcontracts"
-                                 :body           {:name :application
-                                                  ;; TODO: :schema PlacementContract
-                                                  }}
-                        :update {:request-method :put
-                                 :uri            "/placementcontracts/:id"
-                                 :path-params    {:id ssc/NatString}
-                                 :body           {:name :application
-                                                  ;; TODO: :schema PlacementContract
-                                                  }}}
+   :placementcontracts {:create   {:request-method :post
+                                   :uri            "/placementcontracts"
+                                   :body           {:name :application
+                                                    ;; TODO: :schema PlacementContract
+                                                    }}
+                        :update   {:request-method :put
+                                   :uri            "/placementcontracts/:id"
+                                   :path-params    {:id ssc/NatString}
+                                   :body           {:name :application
+                                                    ;; TODO: :schema PlacementContract
+                                                    }}
+                        :proposal {:request-method :get
+                                   :uri            "/placementcontracts/:id/contract/proposal"
+                                   :path-params    {:id ssc/NatString}}}
 
    :attachments        {:create {:request-method :post
                                  :uri            "/applications/:id/attachments"
@@ -457,7 +468,7 @@
 ;;;; ===================================================================================================================
 
 ;; TODO: Use clj-http directly so that this isn't needed:
-(def- http-method-fns {:post http/post, :put http/put})
+(def- http-method-fns {:get http/get, :post http/post, :put http/put})
 
 (defn- perform-http-request! [base-url {:keys [request-method uri body] :as request}]
   ((request-method http-method-fns)
@@ -504,6 +515,10 @@
                                       {:status 200, :body (:id params)}
                                       {:status 404, :body (str "Not Found: " (:id params))}))
 
+    [:placementcontracts :proposal] (if (creation-response-ok? (:id params))
+                                      {:status 200, :body " "}
+                                      {:status 404, :body (str "Not Found: " (:id params))})
+
     [:attachments :create] (if (creation-response-ok? (:id params))
                              {:status 200, :body ""}
                              {:status 404, :body (str "Not Found: " (:id params))})))
@@ -516,17 +531,34 @@
   [preprocess]
   (fn [handler] (fn [request] (handler (preprocess request)))))
 
-(defn- get-attachment-files! [{{:keys [application latestAttachmentVersion]} ::command interface-path ::interface-path
-                               :as                                           request}]
-  (if (= interface-path [:attachments :create])
-    (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
-                                            {:versions [latestAttachmentVersion]})] ; HACK
-      (let [file-content ((:content file-map))]
-        (-> request
-            (assoc-in [::params :file] file-content)
-            (assoc-in [:body 1 :content] file-content)))
-      (assert false "unimplemented"))
-    request))
+(defn- delimit-file-contents! [handler]
+  (fn [{{:keys [application latestAttachmentVersion]} ::command interface-path ::interface-path
+        :as                                           request}]
+    (cond
+      (= interface-path [:attachments :create])
+      (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
+                                              {:versions [latestAttachmentVersion]})] ; HACK
+        (let [file-content ((:content file-map))]
+          (-> request
+              (assoc-in [::params :file] file-content)
+              (assoc-in [:body 1 :content] file-content)
+              handler))
+        (assert false "unimplemented"))                     ; FIXME
+
+      (= interface-path [:placementcontracts :proposal])
+      (let [response (handler request)]
+        (if (= (:status response) 200)
+          (let [content-bytes (.getBytes (:body response) "UTF-8")
+                file-data {:filename     "sopimusehdotus.pdf"
+                           :content      (ByteArrayInputStream. content-bytes)
+                           :content-type (get-in response [:headers "Content-Type"])
+                           :size         (alength content-bytes)}
+                metadata {:application (:id application)
+                          :linked      false}]
+            (assoc response :body (save-file file-data metadata)))
+          response))
+
+      :else (handler request))))
 
 (defn- save-messages! [handler]
   (fn [{command ::command :as request}]
@@ -545,6 +577,7 @@
   "A hook for testing error cases. Calls `sade.core/fail!` by default."
   (fn [text info-map] (fail! text info-map)))
 
+;; TODO: Link the file of [:placementcontracts :create] to the application appropriately.
 (defn- handle-response
   [handler]
   (fn [{{{app-id :id} :application} ::command interface-path ::interface-path :as msg}]
@@ -560,7 +593,8 @@
   (comp handle-response
         (preprocessor->middleware httpify-request)
         save-messages!
-        (preprocessor->middleware (fn-> get-attachment-files! content->json (jwt-authorize (env/value :allu :jwt))))))
+        delimit-file-contents!
+        (preprocessor->middleware (fn-> content->json (jwt-authorize (env/value :allu :jwt))))))
 
 ;;;; Request handling and JMS resources
 ;;;; ===================================================================================================================
@@ -676,3 +710,8 @@
   [command attachments]
   (doall (for [attachment attachments]
            (send-attachment! command attachment))))
+
+(defn load-placementcontract-proposal
+  "GET placement contract proposal pdf from ALLU. Saves the proposal pdf using `lupapalvelu.file-upload/save-file`."
+  [command]
+  (send-allu-request! (proposal-request command)))
