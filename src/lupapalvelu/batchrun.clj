@@ -24,6 +24,7 @@
             [lupapalvelu.review :as review]
             [lupapalvelu.states :as states]
             [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
@@ -898,23 +899,48 @@
         (info "Attachment" (:id att) "processed"))))
   (info "Done."))
 
-(defn archive-digitized-projects-in-orgs [& organizations]
-  (when (seq organizations)
-    (mongo/connect!)
-    (info "Archiving digitized projects (ARK/LX) for organizations:" organizations)
-    (doseq [{:keys [attachments] :as app} (mongo/select :applications
-                                                        {:organization {$in organizations}
-                                                         :permitType "ARK"
-                                                         :state "underReview"})
-            :let [att-ids (->> attachments
-                               (filter (fn [att]
-                                         (not= "arkistoitu" (get-in att [:metadata :tila]))))
-                               (map :id))]]
-      (info "Archiving" (:id app))
-      (archiving/send-to-archive
-        {:user (user/batchrun-user organizations)
-         :created (now)
-         :application app}
-        (set att-ids)
-        #{})))
+(defn archive-digitized-projects-in-orgs [& [start-timestamp end-timestamp & organizations]]
+  (if (and start-timestamp end-timestamp (seq organizations))
+    (do (mongo/connect!)
+        (info "Archiving digitized projects (ARK/LX) for organizations:" organizations "from" start-timestamp "until" end-timestamp)
+        (let [from (util/to-millis-from-local-date-string start-timestamp)
+              until (util/to-millis-from-local-date-string end-timestamp)
+              app-count (mongo/count :applications
+                                     {:organization {$in organizations}
+                                      :permitType   "ARK"
+                                      :state        "underReview"
+                                      :created      {$gte from
+                                                     $lt until}})]
+          (info "Total project count:" app-count)
+          (->> (mongo/select :applications
+                             {:organization {$in organizations}
+                              :permitType   "ARK"
+                              :state        "underReview"
+                              :created      {$gte from
+                                             $lt until}})
+               (mapcat (fn [app]
+                         (when-not (:tosFunction app)
+                           (info "Setting TOS function for" (:id app))
+                           (tos/update-tos-metadata "10 03 00 01"
+                                                    (assoc
+                                                      (application->command app (user/batchrun-user organizations))
+                                                      :created (now))
+                                                    "Menettely asetettu arkistointia varten."))
+                         (info "Archiving" (:id app))
+                         (let [app (mongo/by-id :applications (:id app))]
+                           (archiving/send-to-archive
+                             (assoc
+                               (application->command app (user/batchrun-user organizations))
+                               :created (now))
+                             (->> (:attachments app)
+                                  (filter (fn [att]
+                                            (not= "arkistoitu" (get-in att [:metadata :tila]))))
+                                  (map :id)
+                                  set)
+                             #{}))))
+               (threads/wait-for-threads))
+          ; Post-archiving threads may be running long after and we don't have a handle to them
+          (info "Waiting" app-count "seconds for post-archiving jobs.")
+          (Thread/sleep (* app-count 2 1000))))
+    (println "Need to provide start date, end date and organizations."))
   (info "Done."))
