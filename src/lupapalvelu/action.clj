@@ -23,7 +23,8 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
-            [sade.dns :as dns]))
+            [sade.dns :as dns]
+            [sade.schemas :as ssc]))
 
 ;;
 ;; construct command, query and raw
@@ -194,6 +195,9 @@
 
 (defn numeric-parameters [params command]
   (filter-params-of-command params command (complement ss/numeric?) :error.illegal-number))
+
+(defn timestamp-parameters [params command]
+  (filter-params-of-command params command #(sc/check ssc/Timestamp %) :error.illegal-timestamp))
 
 (defn supported-lang [param-key {data :data}]
   (when-not (i18n/supported-lang? (get data (keyword param-key)))

@@ -220,10 +220,10 @@
 
 (defcommand save-statement-due-date
   {:parameters [:id statementId dueDate :lang]
-   :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
+   :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])
+                      (partial action/timestamp-parameters [:dueDate])]
    :pre-checks [statement/statement-not-given
-                statement/statement-in-sent-state-allowed
-                statement/statements-due-date-is-timestamp]
+                statement/statement-in-sent-state-allowed]
    :states #{:open :submitted :complementNeeded :sent}
    :user-roles #{:authority}
    :notified true

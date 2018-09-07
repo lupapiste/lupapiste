@@ -157,12 +157,6 @@
   (when (= (keyword (:state application)) :sent)
     (permit/valid-permit-types {:YI :all :YL :all :YM :all :VVVL :all :MAL :all} command)))
 
-(defn statements-due-date-is-timestamp [{{:keys [statementId target]} :data application :application}]
-  (let [new-due-date (->> (or statementId (:id target))
-                          (get-statement application)
-                          :dueDate)]
-    (sc/check ssc/Timestamp new-due-date)))
-
 (defmethod att/upload-to-target-allowed :statement [command]
   (or (statement-in-sent-state-allowed command)
       (statement-not-given command)
