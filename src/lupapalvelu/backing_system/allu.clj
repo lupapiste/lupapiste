@@ -479,7 +479,8 @@
         (assoc ::interface interface
                :uri (interpolate-uri (:uri interface) (:path-params interface) params)
                :request-method (:request-method interface))
-        (assoc-when :body (params->body (:body interface) params)))))
+        (assoc-when :headers (:headers interface)
+                    :body (params->body (:body interface) params)))))
 
 (defn- jwt-authorize [request jwt]
   (assoc-in request [:headers "authorization"] (str "Bearer " jwt)))
