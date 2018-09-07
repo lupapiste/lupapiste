@@ -240,6 +240,14 @@ Veikko from Tampere can give statement as attachment
   Statement status is  Ehdollinen  veikko.viranomainen@tampere.fi
   Logout
 
+Pena can't change due date
+  Pena logs in
+  Open application  ${appname}  ${appPropertyId}
+  Open tab  statement
+  Open statement  sonja.sibbo@sipoo.fi
+  Element should not be visible  due-date-input
+  Logout
+
 Sonja can see statement indicator
   Sonja logs in
   Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[contains(@class, 'lupicon-star')]
