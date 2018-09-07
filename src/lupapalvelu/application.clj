@@ -65,14 +65,6 @@
         permit-subtypes (permit/permit-subtypes permit-type)]
     (distinct (concat op-subtypes permit-subtypes))))
 
-
-(defn tos-history-entry [tos-function timestamp user & [correction-reason]]
-  {:pre [(map? tos-function)]}
-  {:tosFunction tos-function
-   :ts timestamp
-   :user (usr/summary user)
-   :correction correction-reason})
-
 (defn handler-history-entry [handler timestamp user]
   {:handler handler
    :ts timestamp
@@ -494,7 +486,7 @@
   {:pre [(pos? created) (string? organization) (states/all-states (keyword state))]}
   (let [tos-function-map (tos/tos-function-with-name tosFunction organization)]
     {:history (cond->> [(app-state/history-entry state created user)]
-                tos-function-map (concat [(tos-history-entry tos-function-map created user)]))}))
+                tos-function-map (concat [(tos/tos-history-entry tos-function-map created user)]))}))
 
 (defn permit-type-and-operation-map [operation-name created]
   (let [op (make-op operation-name created)
