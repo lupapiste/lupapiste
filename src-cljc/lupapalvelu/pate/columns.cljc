@@ -64,7 +64,7 @@
       (list [:div.markup (markup/markup->tags value)])
 
       (and (:date schema) (integer? value))
-      (layouts/finnish-date value)
+      (layouts/finnish-date (long value))
 
       :else
       value)))
