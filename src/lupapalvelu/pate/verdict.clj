@@ -1097,8 +1097,10 @@
 (defn finalize--attachments [{:keys [command application verdict]}]
   (let [{att-items :items
          update-fn :update-fn} (attachment-items command verdict)
-        verdict-attchment?     #(util/includes-as-kw? (map :id att-items)
+        verdict-attachment?    #(util/includes-as-kw? (map :id att-items)
                                                       (:id %))
+        verdict-draft-attachment? #(and (verdict-attachment? %)
+                                        (some-> % :metadata :draftTarget))
         target                 {:type "verdict"
                                 :id   (:id verdict)}]
     (-> (update verdict :data update-fn)
@@ -1107,16 +1109,20 @@
                (update application :attachments
                        #(map (fn [attachment]
                               (util/pcond-> attachment
-                                            verdict-attchment?
+                                            verdict-attachment?
                                             (assoc :target target)))
                             %)))
         (update-in [:updates $set]
                    merge
                    (att/attachment-array-updates (:id application)
-                                                 verdict-attchment?
+                                                 verdict-attachment?
                                                  :readOnly true
                                                  :locked   true
-                                                 :target target))
+                                                 :target target)
+                   (att/attachment-array-updates (:id application)
+                                                 verdict-draft-attachment?
+                                                 :metadata.nakyvyys "julkinen"
+                                                 :metadata.draftTarget false))
         (assoc :commit-fn (fn [{:keys [command application]}]
                             (tiedonohjaus/mark-app-and-attachments-final! (:id application)
                                                                           (:created command)))))))

@@ -287,11 +287,15 @@
   (common/command {:command :remove-uploaded-file}
                   :attachmentId file-id))
 
-(defn bind-attachments [app-id filedatas callback]
-  (common/command {:command :bind-attachments
-                   :success callback}
-                  :id app-id
-                  :filedatas filedatas))
+(defn bind-attachments
+  "If draft? is true, then :bind-draft-attachments command is called."
+  ([app-id filedatas callback draft?]
+   (common/command {:command (if draft?
+                               :bind-draft-attachments
+                               :bind-attachments)
+                    :success callback}
+                   :id app-id
+                   :filedatas filedatas)))
 
 (defn bind-attachments-job [job-id version callback]
   (common/query :bind-attachments-job
@@ -344,17 +348,22 @@
   map. Status can be :pending, :done or :error. The callback will not
   be called after every file has terminal status (:done or :error). In
   other words, when the :pending list is empty. Nil (no job) argument
-  denotes error (e.g., timeout)."
-  [app-id filedatas status-fn]
-  (bind-attachments app-id
-                    (map (fn [{:keys [file-id type] :as filedata}]
-                           (let [[type-group type-id] (util/split-kw-path type)]
-                             (merge (dissoc filedata :file-id :type)
-                                    {:fileId file-id
-                                     :type   {:type-group type-group
-                                              :type-id    type-id}})))
-                         filedatas)
-                    (partial batch-job status-fn)))
+  denotes error (e.g., timeout).
+
+  draft?: If true bind-draft-attachments command is used."
+  ([app-id filedatas status-fn draft?]
+   (bind-attachments app-id
+                     (map (fn [{:keys [file-id type] :as filedata}]
+                            (let [[type-group type-id] (util/split-kw-path type)]
+                              (merge (dissoc filedata :file-id :type)
+                                     {:fileId file-id
+                                      :type   {:type-group type-group
+                                               :type-id    type-id}})))
+                          filedatas)
+                     (partial batch-job status-fn)
+                     draft?))
+  ([app-id filedatas status-fn]
+   (bind-attachments-batch app-id filedatas status-fn nil)))
 
 ;; Co-operation with the AttachmentsService
 

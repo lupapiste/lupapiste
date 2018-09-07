@@ -837,7 +837,8 @@
                       access/has-attachment-auth
                       att/attachment-not-readOnly
                       att/attachment-matches-application
-                      att/validate-not-included-in-published-bulletin]
+                      att/validate-not-included-in-published-bulletin
+                      att/validate-not-draft-target]
    :states           (lupapalvelu.states/all-application-states-but lupapalvelu.states/terminal-states)}
   [command]
   (update-application command

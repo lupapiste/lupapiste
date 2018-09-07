@@ -185,7 +185,8 @@
          (do
            (finalize)
            (hub/send :indicator {:style :negative
-                                 :message :attachment.bind-failed})))))))
+                                 :message :attachment.bind-failed})))))
+   (:draft? options)))
 
 (rum/defc batch-buttons < rum/reactive
   [{:keys [files* fields* binding?*] :as options}]
@@ -304,7 +305,8 @@
      (attachments-batch (assoc options
                               :files*  files*
                               :fields* fields*
-                              :binding?* binding?*))
+                              :binding?* binding?*
+                              :draft? (:draft? schema)))
      (when (path/enabled? options)
        (att/upload-wrapper {:callback  (upload/file-monitors files*)
                             :dropzone  (:dropzone schema)
