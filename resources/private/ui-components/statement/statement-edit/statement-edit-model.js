@@ -35,7 +35,7 @@ LUPAPISTE.StatementEditModel = function(params) {
     }
    });
 
-  var initSubscription = self.disposedSubscribe(self.data, function() {
+  var initSubscription = self.data.subscribe(function() {
     self.selectedStatus(util.getIn(self.data, ["status"]));
     self.text(util.getIn(self.data, ["text"]));
     self.inAttachment(util.getIn(self.data, ["in-attachment"]));
@@ -89,19 +89,19 @@ LUPAPISTE.StatementEditModel = function(params) {
     return self.tab === "statement" && canViewCoverNote ? util.getIn(self.data, ["saateText"]) : "";
   });
 
-  var textSubscription = self.disposedSubscribe(self.text, function(value) {
+  var textSubscription = self.text.subscribe(function(value) {
     if(util.getIn(self.data, ["text"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["text"], value: self.text()});
     }
   });
 
-  var statusSubscription = self.disposedSubscribe(self.selectedStatus, function(value) {
+  var statusSubscription = self.selectedStatus.subscribe(function(value) {
     if(util.getIn(self.data, ["status"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["status"], value: self.selectedStatus()});
     }
   });
 
-  var inAttachmentSub = self.disposedSubscribe(self.inAttachment, function(value) {
+  var inAttachmentSub = self.inAttachment.subscribe(function(value) {
     if(util.getIn(self.data, ["in-attachment"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["in-attachment"], value: self.inAttachment()});
     }
@@ -109,7 +109,7 @@ LUPAPISTE.StatementEditModel = function(params) {
 
   hub.send("statement::submitAllowed", {tab: self.tab, value: submitAllowed()});
 
-  var submitSubscription = self.disposedSubscribe(submitAllowed, function(value) {
+  var submitSubscription = submitAllowed.subscribe(function(value) {
     hub.send("statement::submitAllowed", {tab: self.tab, value: value});
   });
 
@@ -129,9 +129,20 @@ LUPAPISTE.StatementEditModel = function(params) {
   if (applicationId()) {
     initStatementStatuses(applicationId());
   }
-  var initApplicationSubscription = self.disposedSubscribe(applicationId, function(appId) {
+  var initApplicationSubscription = applicationId.subscribe(function(appId) {
     if (appId) {
       initStatementStatuses(appId);
     }
   });
+
+  self.dispose = function() {
+    if (initApplicationSubscription)  {
+      initApplicationSubscription.dispose();
+    }
+    initSubscription.dispose();
+    textSubscription.dispose();
+    statusSubscription.dispose();
+    submitSubscription.dispose();
+    inAttachmentSub.dispose();
+  };
 };
