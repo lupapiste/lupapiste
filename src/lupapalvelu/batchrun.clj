@@ -941,6 +941,6 @@
                (threads/wait-for-threads))
           ; Post-archiving threads may be running long after and we don't have a handle to them
           (info "Waiting" app-count "seconds for post-archiving jobs.")
-          (Thread/sleep (* app-count 1000))))
+          (Thread/sleep (* app-count 2 1000))))
     (println "Need to provide start date, end date and organizations."))
   (info "Done."))
