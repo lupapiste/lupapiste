@@ -4018,8 +4018,7 @@
   {:apply-when (pos? (mongo/count :applications pate-verdict-migration/migration-query))}
   (let [ts (now)]
     (->> (mongo/select :applications
-                       pate-verdict-migration/migration-query
-                       pate-verdict-migration/migration-projection)
+                       pate-verdict-migration/migration-query)
          (run! (partial update-application-verdicts-to-pate-legacy-verdicts ts)))))
 ;;
 ;; ****** NOTE! ******
