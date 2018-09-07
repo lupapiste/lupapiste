@@ -340,10 +340,17 @@
                        :file     (-> attachment :latestVersion :fileId)}
      ::command        (minimize-command command attachment)}))
 
-(defn- proposal-request [{:keys [application] :as command}]
+(defn- contract-proposal-request [{:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)]
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
-    {::interface-path [:placementcontracts :proposal]
+    {::interface-path [:placementcontracts :contract :proposal]
+     ::params         {:id allu-id}
+     ::command        (minimize-command command)}))
+
+(defn- final-contract-request [{:keys [application] :as command}]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)]
+    (assert allu-id (str (:id application) " does not contain an ALLU id"))
+    {::interface-path [:placementcontracts :contract :final]
      ::params         {:id allu-id}
      ::command        (minimize-command command)}))
 
@@ -387,15 +394,20 @@
                                    :body           {:name :application
                                                     ;; TODO: :schema PlacementContract
                                                     }}
+
                         :update   {:request-method :put
                                    :uri            "/placementcontracts/:id"
                                    :path-params    {:id ssc/NatString}
                                    :body           {:name :application
                                                     ;; TODO: :schema PlacementContract
                                                     }}
-                        :proposal {:request-method :get
-                                   :uri            "/placementcontracts/:id/contract/proposal"
-                                   :path-params    {:id ssc/NatString}}}
+
+                        :contract {:proposal {:request-method :get
+                                              :uri            "/placementcontracts/:id/contract/proposal"
+                                              :path-params    {:id ssc/NatString}}
+                                   :final    {:request-method :get
+                                              :uri            "/placementcontracts/:id/contract/final"
+                                              :path-params    {:id ssc/NatString}}}}
 
    :attachments        {:create {:request-method :post
                                  :uri            "/applications/:id/attachments"
@@ -515,9 +527,9 @@
                                       {:status 200, :body (:id params)}
                                       {:status 404, :body (str "Not Found: " (:id params))}))
 
-    [:placementcontracts :proposal] (if (creation-response-ok? (:id params))
-                                      {:status 200, :body " "}
-                                      {:status 404, :body (str "Not Found: " (:id params))})
+    [:placementcontracts :contract (:or :proposal :final)] (if (creation-response-ok? (:id params))
+                                                             {:status 200, :body " "}
+                                                             {:status 404, :body (str "Not Found: " (:id params))})
 
     [:attachments :create] (if (creation-response-ok? (:id params))
                              {:status 200, :body ""}
@@ -534,18 +546,17 @@
 (defn- delimit-file-contents! [handler]
   (fn [{{:keys [application latestAttachmentVersion]} ::command interface-path ::interface-path
         :as                                           request}]
-    (cond
-      (= interface-path [:attachments :create])
-      (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
-                                              {:versions [latestAttachmentVersion]})] ; HACK
-        (let [file-content ((:content file-map))]
-          (-> request
-              (assoc-in [::params :file] file-content)
-              (assoc-in [:body 1 :content] file-content)
-              handler))
-        (assert false "unimplemented"))                     ; FIXME
+    (match interface-path
+      [:attachments :create] (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
+                                                                     {:versions [latestAttachmentVersion]})] ; HACK
+                               (let [file-content ((:content file-map))]
+                                 (-> request
+                                     (assoc-in [::params :file] file-content)
+                                     (assoc-in [:body 1 :content] file-content)
+                                     handler))
+                               (assert false "unimplemented"))
 
-      (= interface-path [:placementcontracts :proposal])
+      [:placementcontracts :contract (:or :proposal :final)]
       (let [response (handler request)]
         (if (= (:status response) 200)
           (let [content-bytes (.getBytes (:body response) "UTF-8")
@@ -558,7 +569,7 @@
             (assoc response :body (save-file file-data metadata)))
           response))
 
-      :else (handler request))))
+      _ (handler request))))
 
 (defn- save-messages! [handler]
   (fn [{command ::command :as request}]
@@ -577,7 +588,7 @@
   "A hook for testing error cases. Calls `sade.core/fail!` by default."
   (fn [text info-map] (fail! text info-map)))
 
-;; TODO: Link the file of [:placementcontracts :create] to the application appropriately.
+;; TODO: Link the files of [:placementcontracts :contract *] to the application appropriately.
 (defn- handle-response
   [handler]
   (fn [{{{app-id :id} :application} ::command interface-path ::interface-path :as msg}]
@@ -714,4 +725,9 @@
 (defn load-placementcontract-proposal
   "GET placement contract proposal pdf from ALLU. Saves the proposal pdf using `lupapalvelu.file-upload/save-file`."
   [command]
-  (send-allu-request! (proposal-request command)))
+  (send-allu-request! (contract-proposal-request command)))
+
+(defn load-placementcontract-final
+  "GET placement contract proposal pdf from ALLU. Saves the proposal pdf using `lupapalvelu.file-upload/save-file`."
+  [command]
+  (send-allu-request! (final-contract-request command)))
