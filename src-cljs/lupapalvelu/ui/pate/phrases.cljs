@@ -66,11 +66,11 @@
   (components/initial-value-mixin ::local)
   (rum/local ::edit ::tab)
   (rum/local false ::phrase-category?)
-  (rum/local nil ::categories)
+  (rum/local nil ::new-category)
   [{local*            ::local
     tab*              ::tab
     phrase-category?* ::phrase-category?
-    categories*       ::categories} _ phrase*]
+    new-category*       ::new-category} _ phrase*]
   [:div.pate-grid-8
    [:div.row
     [:div.col-2
@@ -96,25 +96,25 @@
        [:div.row
         [:div.col-1
          [:label.required (common/loc :pate-verdict.language.fi)]
-         (components/text-edit (:fi @categories*)
+         (components/text-edit (:fi @new-category*)
                                {:callback   (fn [text]
-                                              (swap! categories* #(assoc % :fi text)))
+                                              (swap! new-category* #(assoc % :fi text)))
                                 :required?  true
                                 :immediate? true
                                 :test-id    :phrase-tag})]
         [:div.col-1
          [:label.required (common/loc :pate-verdict.language.sv)]
-         (components/text-edit (:sv @categories*)
+         (components/text-edit (:sv @new-category*)
                                {:callback   (fn [text]
-                                              (swap! categories* #(assoc % :sv text)))
+                                              (swap! new-category* #(assoc % :sv text)))
                                 :required?  true
                                 :immediate? true
                                 :test-id    :phrase-tag})]
         [:div.col-1
          [:label.required (common/loc :pate-verdict.language.en)]
-         (components/text-edit (:en @categories*)
+         (components/text-edit (:en @new-category*)
                                {:callback   (fn [text]
-                                              (swap! categories* #(assoc % :en text)))
+                                              (swap! new-category* #(assoc % :en text)))
                                 :required?  true
                                 :immediate? true
                                 :test-id    :phrase-tag})]]
@@ -126,7 +126,7 @@
                                     :text-loc :save
                                     :class    :positive
                                     :on-click (fn [_]
-                                                (service/save-phrase-category @categories*)
+                                                (service/save-phrase-category @new-category*)
                                                 (reset! phrase* nil))
                                     :test-id  :save-phrase-category})
            [:button.primary.outline

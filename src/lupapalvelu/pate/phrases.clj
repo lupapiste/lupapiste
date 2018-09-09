@@ -50,9 +50,9 @@
   (let [mongo-id (mongo/create-id)]
   (mongo/update-by-id :organizations
                       (:org-id data)
-                      {$set {(util/kw-path :custom-phrase-categories mongo-id :fi) (get-in data [:categories :fi])
-                             (util/kw-path :custom-phrase-categories mongo-id :sv) (get-in data [:categories :sv])
-                             (util/kw-path :custom-phrase-categories mongo-id :en) (get-in data [:categories :en])}})))
+                      {$set {(util/kw-path :custom-phrase-categories mongo-id :fi) (get-in data [:category :fi])
+                             (util/kw-path :custom-phrase-categories mongo-id :sv) (get-in data [:category :sv])
+                             (util/kw-path :custom-phrase-categories mongo-id :en) (get-in data [:category :en])}})))
 
 (defn delete-phrase-category [org-id category-id]
   (mongo/update-by-id :organizations

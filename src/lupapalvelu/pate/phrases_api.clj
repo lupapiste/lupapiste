@@ -91,7 +91,7 @@
 (defcommand save-phrase-category
   {:description      "Save custom phrase category"
    :permissions      [{:required [:organization/admin]}]
-   :parameters       [:categories :org-id]
+   :parameters       [:category :org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]
    :pre-checks       [org-id-valid]
    :feature          :pate}

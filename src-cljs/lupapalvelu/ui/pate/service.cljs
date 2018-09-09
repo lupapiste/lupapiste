@@ -167,11 +167,11 @@
                   :phrase-id phrase-id
                   :org-id @state/org-id))
 
-(defn save-phrase-category [categories]
+(defn save-phrase-category [category]
   (common/command {:command "save-phrase-category"
                    :success (fn []
                              (fetch-custom-organization-phrases))}
-                  :categories categories
+                  :category category
                   :org-id @state/org-id))
 
 (defn delete-phrase-category [category]
