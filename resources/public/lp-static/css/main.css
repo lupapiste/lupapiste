@@ -30872,6 +30872,43 @@ div.published-verdict .section > .row.spaced .row + .row .cell {
   padding-top: 0.5em;
 }
 
+table.pate-appeals tr:hover {
+  background-color: white;
+}
+
+table.pate-appeals tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+table.pate-appeals tr.pate-appeal-row.odd {
+  background-color: #f6f6f6;
+}
+
+table.pate-appeals tr.pate-appeal-row.even {
+  background-color: white;
+}
+
+table.pate-appeals tr.pate-appeal-row.note-or-form {
+  background-color: white;
+}
+
+table.pate-appeals td.align--right {
+  text-align: right;
+}
+
+table.pate-appeals td.pate-appeal-note {
+  white-space: pre-wrap;
+}
+
+table.pate-appeals td.pate-appeal-note span.empty {
+  color: #999999;
+  font-style: italic;
+}
+
+table.pate-appeals a.pate-appeal-operation {
+  margin-right: 2em;
+}
+
 .order-grid-1 {
   width: 100%;
   color: #333333;

@@ -1,18 +1,19 @@
 (ns lupapalvelu.appeal-api
   (:require [clojure.set :refer [difference rename-keys]]
-            [sade.core :refer :all]
-            [sade.util :as util]
-            [sade.schemas :as ssc]
-            [schema.core :as sc]
-            [monger.operators :refer [$push $pull $elemMatch $set]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.appeal :as appeal]
-            [lupapalvelu.appeal-verdict :as appeal-verdict]
             [lupapalvelu.appeal-common :as appeal-common]
+            [lupapalvelu.appeal-verdict :as appeal-verdict]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.appeal :as att-appeal]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.pate.verdict :as pate-verdict]
             [lupapalvelu.states :as states]
-            [lupapalvelu.domain :as domain]))
+            [monger.operators :refer [$push $pull $elemMatch $set]]
+            [sade.core :refer :all]
+            [sade.schemas :as ssc]
+            [sade.util :as util]
+            [schema.core :as sc]))
 
 (defn- verdict-exists
   "Pre-check to validate that for selected verdictId a verdict exists"
@@ -251,3 +252,85 @@
                                           (partial process-appeal application)))
                                (sort-by :datestamp))]
     (ok :data (group-by :target-verdict processed-appeals))))
+
+;; ------------------------
+;; Pate appeals
+;; ------------------------
+
+(defn- common-input-validator [{data :data}]
+  (let [data (rename-keys data {:verdict-di :verdictId
+                                :file-ids   :fileIds})]
+    (if (util/=as-kw (:type data) :appealVerdict)
+      (appeal-verdict/input-validator {:data (rename-keys data {:author :giver})})
+      (appeal/input-validator {:data (rename-keys data {:author :appellant})}))))
+
+
+
+(defn- common-sanity-checks
+  "If appeal-id is given it must exist. The id can denote appeal verdict
+  as well. For appealverdicts, at least one appeal must exist for the
+  same verdict. If upsert? is true then the checks are used for upsert
+  operation otherwise for delete."
+  [upsert?]
+  (fn [{{:keys [type appeal-id verdict-id]} :data
+        {:keys [appeals appealVerdicts] :as application} :application}]
+    (if (util/=as-kw type :appealVerdict)
+      (let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
+        (or
+         (when-not (or (nil? appeal-id) appeal-verdict)
+           (fail :error.unknown-appeal-verdict))
+         (when-not (or (not upsert?)
+                       (util/find-by-key :target-verdict verdict-id appeals))
+           (fail :error.appeals-not-found))
+         (when-not (or (nil? appeal-id)
+                       (appeal-item-editable? application
+                                              (assoc appeal-verdict :type type)))
+           (fail :error.appeal-already-exists))))
+      (let [appeal (util/find-by-id appeal-id appeals)]
+        (or
+         (when-not (or (nil? appeal-id) appeal)
+           (fail :error.unknown-appeal))
+         (when-not (or (nil? appeal-id)
+                       (when-not (appeal-item-editable? application appeal)))
+           (fail :error.appeal-verdict-already-exists))
+         (when-not (or (not upsert?)
+                       (nil? appeal-id)
+                       (util/=as-kw type (:type appeal)))
+           (fail :error.appeal-type-change-denied)))))))
+
+(defcommand upsert-pate-appeal
+  {:description         "Upserts appeal or appealVerdict."
+   :feature             :pate
+   :categories          #{:pate-verdicts}
+   :parameters          [id verdict-id type author datestamp file-ids]
+   :optional-parameters [text appeal-id]
+   :user-roles          #{:authority}
+   :states              states/post-verdict-states
+   :input-validators    [common-input-validator
+                         (partial action/number-parameters [:datestamp])]
+   :pre-checks          [pate-verdict/pate-enabled
+                         (action/some-pre-check (pate-verdict/verdict-exists :published? :not-replaced?)
+                                                pate-verdict/backing-system-verdict)
+                         (common-sanity-checks true)]}
+  [command]
+  (if (util/=as-kw type :appealVerdict)
+    (if-let [verdict-data (appeal-verdict/appeal-verdict-data-for-upsert verdict-id author
+                                                                         datestamp text appeal-id)]
+      (appeal-item-update! command appeal-id verdict-data :appealVerdict file-ids)
+      (fail :error.invalid-appeal-verdict))
+    (if-let [appeal-data (appeal/appeal-data-for-upsert verdict-id type author datestamp text appeal-id)]
+      (appeal-item-update! command appeal-id appeal-data (:type appeal-data) file-ids)
+      (fail :error.invalid-appeal))))
+
+(defcommand delete-pate-appeal
+  {:descriptions "Deletes appeal or appeal verdict."
+   :parameters          [id verdict-id appeal-id]
+   :user-roles          #{:authority}
+   :input-validators    [(partial action/non-blank-parameters [:appeal-id])]
+   :states              states/post-verdict-states
+   :pre-checks          [pate-verdict/pate-enabled
+                         (action/some-pre-check (pate-verdict/verdict-exists :published? :not-replaced?)
+                                                pate-verdict/backing-system-verdict)
+                         (common-sanity-checks false)]}
+  [command]
+  (appeal-common/delete-by-id command appeal-id))

@@ -198,11 +198,27 @@
                 :id app-id
                 :verdict-id verdict-id))
 
+(defn fetch-appeals [app-id verdict-id]
+  (when (state/auth? :appeals)
+    (common/query :appeals
+                  (util/fn->> :data
+                              ((keyword verdict-id))
+                              (reset! state/appeals))
+                  :id app-id)))
+
+(defn delete-appeal [app-id verdict-id appeal-id]
+  (common/command {:command               :delete-pate-appeal
+                   :show-saved-indicator? true
+                   :success               #(fetch-appeals app-id verdict-id)}
+                  :id app-id
+                  :verdictId verdict-id))
+
 (defn open-published-verdict [app-id verdict-id callback]
   (common/query "published-pate-verdict"
                 callback
                 :id app-id
-                :verdict-id verdict-id))
+                :verdict-id verdict-id)
+  (fetch-appeals app-id verdict-id))
 
 (defn delete-verdict [app-id {:keys [id published legacy? category]}]
   (let [backing-system? (util/=as-kw category :backing-system)]

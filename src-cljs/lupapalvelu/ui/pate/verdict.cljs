@@ -7,6 +7,7 @@
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
+            [lupapalvelu.ui.pate.appeal :as appeal]
             [lupapalvelu.ui.pate.attachments :as att]
             [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.sections :as sections]
@@ -165,7 +166,8 @@
      (list [:h3.pate-attachments-title {:key "attachments-title"}
             (common/loc :application.attachments)]
            (rum/with-key (att/attachments-view attachment-ids)
-             "attachments-view")))])
+             "attachments-view")))
+   (appeal/appeals)])
 
 (rum/defc verdict < rum/reactive
   [options]

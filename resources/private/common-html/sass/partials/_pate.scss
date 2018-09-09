@@ -984,3 +984,32 @@ div.published-verdict {
                 }
               }
             }}}
+
+// Appeals
+
+table.pate-appeals {
+  @include no-row-hover;
+  tr.pate-appeal-row.odd {
+    background-color: $gray246;
+  }
+  tr.pate-appeal-row.even {
+    background-color: white;
+  }
+  tr.pate-appeal-row.note-or-form {
+    background-color: white;
+  }
+  td.align--right {
+    text-align: right;
+  }
+  td.pate-appeal-note {
+    white-space: pre-wrap;
+    span.empty {
+      color: $gray153;
+      font-style: italic;
+    }
+  }
+
+  a.pate-appeal-operation {
+    margin-right: 2em;
+  }
+}
