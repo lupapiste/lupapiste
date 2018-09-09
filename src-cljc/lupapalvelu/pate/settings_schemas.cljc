@@ -149,13 +149,6 @@
                        :add-loc     :pate.add-handler-title
                        :remove-dict :remove-handler-title}))
 
-(def setsub-phrase-categories
-  (settings-repeating {:dict        :custom-phrase-categories
-                       :loc-prefix  :pate-settings.handler-titles
-                       :add-dict    :add-custom-phrase-categories
-                       :add-loc     :pate.add-handler-title
-                       :remove-dict :remove-custom-phrase-categories}))
-
 (def r-settings (build-settings-schema "pate-r"
                                        (setsub-date-deltas helper/verdict-dates)
                                        setsub-verdict-code
@@ -176,7 +169,6 @@
                                         setsub-lang-titles
                                         setsub-plans
                                         setsub-handler-titles
-                                        setsub-phrase-categories
                                         (setsub-reviews helper/ya-review-types)))
 
 (def tj-settings (build-settings-schema "pate-tj"
