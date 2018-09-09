@@ -53,3 +53,8 @@
                       {$set {(util/kw-path :custom-phrase-categories mongo-id :fi) (get-in data [:categories :fi])
                              (util/kw-path :custom-phrase-categories mongo-id :sv) (get-in data [:categories :sv])
                              (util/kw-path :custom-phrase-categories mongo-id :en) (get-in data [:categories :en])}})))
+
+(defn delete-phrase-category [org-id category-id]
+  (mongo/update-by-id :organizations
+                      org-id
+                      {$unset {(util/kw-path :custom-phrase-categories category-id) 1}}))

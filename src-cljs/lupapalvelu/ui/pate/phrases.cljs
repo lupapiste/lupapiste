@@ -10,8 +10,6 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
-(enable-console-print!)
-
 (defn phrase-list-for-autocomplete [category]
   (->> @state/phrases
        (filter #(util/=as-kw category (:category %)))
@@ -129,7 +127,6 @@
                                     :class    :positive
                                     :on-click (fn [_]
                                                 (service/save-phrase-category @categories*)
-                                                (swap! phrase-category?* not)
                                                 (reset! phrase* nil))
                                     :test-id  :save-phrase-category})
            [:button.primary.outline
@@ -137,11 +134,23 @@
             (common/loc :cancel)]]]]]]
 
       [:div.row
-       (components/icon-button
-         {:icon       :lupicon-circle-plus
-          :text-loc   :pate.add-phrase-category
-          :class      :positive
-          :on-click   (fn [_] (swap! phrase-category?* not))})])
+       [:div.col-6
+        [:div.col--vertical
+          [:div.col-2.inner-margins
+            (components/icon-button
+              {:icon       :lupicon-circle-plus
+               :text-loc   :pate.add-phrase-category
+               :class      :positive
+               :on-click   (fn [_] (swap! phrase-category?* not))})
+
+            (when (custom-category? (:category @local*))
+              (components/icon-button
+                {:icon       :lupicon-circle-plus
+                 :text-loc   :pate.remove-phrase-category
+                 :class      :negative
+                 :on-click   (fn [_]
+                               (service/delete-phrase-category (:category @local*))
+                               (reset! phrase* nil))}))]]]])
    [:div.row
     [:div.col-8
      (let [phrase (:phrase @local*)]

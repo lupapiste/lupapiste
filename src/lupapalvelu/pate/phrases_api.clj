@@ -97,3 +97,13 @@
    :feature          :pate}
   [command]
   (phrases/save-phrase-category command))
+
+(defcommand delete-phrase-category
+  {:description      "Delete custom phrase category"
+   :permissions      [{:required [:organization/admin]}]
+   :parameters       [category org-id]
+   :input-validators [(partial action/non-blank-parameters [:org-id])]
+   :pre-checks       [org-id-valid]
+   :feature          :pate}
+  [command]
+  (phrases/delete-phrase-category org-id category))

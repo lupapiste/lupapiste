@@ -174,6 +174,13 @@
                   :categories categories
                   :org-id @state/org-id))
 
+(defn delete-phrase-category [category]
+  (common/command {:command "delete-phrase-category"
+                   :success (fn [_]
+                             (fetch-custom-organization-phrases))}
+                  :category category
+                  :org-id @state/org-id))
+
 ;; Application verdict templates
 
 (defn fetch-application-verdict-templates [app-id]
