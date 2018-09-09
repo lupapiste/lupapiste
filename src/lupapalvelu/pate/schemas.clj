@@ -92,6 +92,9 @@
    :tag      sc/Str
    :phrase   sc/Str})
 
+(defschema CustomPhraseCategory
+  PateVerdictReq)
+
 
 ;; Verdicts
 

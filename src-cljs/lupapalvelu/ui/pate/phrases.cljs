@@ -10,6 +10,8 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
+(enable-console-print!)
+
 (defn phrase-list-for-autocomplete [category]
   (->> @state/phrases
        (filter #(util/=as-kw category (:category %)))
@@ -17,23 +19,35 @@
               {:text (str tag " - " phrase)
                :value phrase}))))
 
+(defn phrase-categories [current-category]
+  (shared-schemas/phrase-categories-by-template-category current-category))
+
 (defn non-empty-categories []
   (filter #(util/find-by-key :category (name %)
                              @state/phrases)
-          shared-schemas/phrase-categories))
+          (phrase-categories (rum/react state/current-category))))
+
+(defn- custom-category? [category]
+  (not (util/includes-as-kw? (phrase-categories (rum/react state/current-category)) category)))
 
 (defn- category-text [category]
-  (path/loc [:phrase.category category]))
+  (if (custom-category? category)
+    (:fi ((keyword category) @state/custom-phrases-categories))
+    (path/loc [:phrase.category category])))
+
+(defn- add-custom-categories [items]
+  (concat items (map (fn [category] {:value (name (key category)) :text (:fi (val category))}) @state/custom-phrases-categories)))
 
 (rum/defcs phrase-category-select < rum/reactive
   (components/initial-value-mixin ::selected)
   [{selected* ::selected} _ callback & [{:keys [include-empty? disabled?
                                                 test-id]}]]
   (let [items (->> (if include-empty?
-                     (shared-schemas/phrase-categories-by-template-category (rum/react state/current-category))
+                     (phrase-categories (rum/react state/current-category))
                      (non-empty-categories))
                    (map name)
                    (map (fn [n] {:value n :text (category-text n)}))
+                   (add-custom-categories)
                    (sort-by :text))
         select (fn [value]
                  ;; Nil and "" are treated as equal.
@@ -53,8 +67,12 @@
 (rum/defcs phrase-editor < rum/reactive
   (components/initial-value-mixin ::local)
   (rum/local ::edit ::tab)
-  [{local* ::local
-    tab*   ::tab} _ phrase*]
+  (rum/local false ::phrase-category?)
+  (rum/local nil ::categories)
+  [{local*            ::local
+    tab*              ::tab
+    phrase-category?* ::phrase-category?
+    categories*       ::categories} _ phrase*]
   [:div.pate-grid-8
    [:div.row
     [:div.col-2
@@ -74,6 +92,56 @@
                              :required?  true
                              :immediate? true
                              :test-id    :phrase-tag})]]]
+
+    (if @phrase-category?*
+      [:div.pate-grid-6
+       [:div.row
+        [:div.col-1
+         [:label.required (common/loc :pate-verdict.language.fi)]
+         (components/text-edit (:fi @categories*)
+                               {:callback   (fn [text]
+                                              (swap! categories* #(assoc % :fi text)))
+                                :required?  true
+                                :immediate? true
+                                :test-id    :phrase-tag})]
+        [:div.col-1
+         [:label.required (common/loc :pate-verdict.language.sv)]
+         (components/text-edit (:sv @categories*)
+                               {:callback   (fn [text]
+                                              (swap! categories* #(assoc % :sv text)))
+                                :required?  true
+                                :immediate? true
+                                :test-id    :phrase-tag})]
+        [:div.col-1
+         [:label.required (common/loc :pate-verdict.language.en)]
+         (components/text-edit (:en @categories*)
+                               {:callback   (fn [text]
+                                              (swap! categories* #(assoc % :en text)))
+                                :required?  true
+                                :immediate? true
+                                :test-id    :phrase-tag})]]
+       [:div.row
+        [:div.col-6
+         [:div.col--vertical
+          [:div.col-2.inner-margins
+           (components/icon-button {:icon     :lupicon-save
+                                    :text-loc :save
+                                    :class    :positive
+                                    :on-click (fn [_]
+                                                (service/save-phrase-category @categories*)
+                                                (swap! phrase-category?* not)
+                                                (reset! phrase* nil))
+                                    :test-id  :save-phrase-category})
+           [:button.primary.outline
+            (common/add-test-id {:on-click #(swap! phrase-category?* not)} :cancel-phrase-category)
+            (common/loc :cancel)]]]]]]
+
+      [:div.row
+       (components/icon-button
+         {:icon       :lupicon-circle-plus
+          :text-loc   :pate.add-phrase-category
+          :class      :positive
+          :on-click   (fn [_] (swap! phrase-category?* not))})])
    [:div.row
     [:div.col-8
      (let [phrase (:phrase @local*)]

@@ -220,7 +220,8 @@
                                                                                   verdict-id
                                                                                   reset-verdict)
                                                   (do (when (state/auth? :application-phrases)
-                                                        (service/fetch-application-phrases app-id))
+                                                        (do (service/fetch-application-phrases app-id)
+                                                            (service/fetch-custom-application-phrases app-id)) )
                                                       (service/open-verdict app-id
                                                                             verdict-id
                                                                             reset-verdict)))))
