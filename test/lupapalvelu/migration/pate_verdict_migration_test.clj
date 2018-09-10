@@ -5,7 +5,7 @@
             [lupapalvelu.mongo :refer [create-id]]
             [lupapalvelu.pate.metadata :as metadata]))
 
-(def timestamp 1234)
+(def timestamp 1503003635780)
 
 (defn wrap [x]
   (metadata/wrap "Verdict draft Pate migration" timestamp x))

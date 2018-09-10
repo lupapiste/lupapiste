@@ -290,9 +290,11 @@
                       e)))))
 
 (defn validate-verdict [verdict]
-  (schemas/validate-dictionary-data (legacy-schemas/legacy-verdict-schema (:category verdict))
-                                    (:data verdict))
-  (sc/validate PateLegacyVerdict verdict))
+  (if-let [errors (schemas/validate-dictionary-data (legacy-schemas/legacy-verdict-schema (:category verdict))
+                                                    (:data verdict))]
+    (throw (ex-info (str "Invalid dictionary data for verdict " (:id verdict))
+                    {:errors errors}))
+    (sc/validate PateLegacyVerdict verdict)))
 
 (defn ->pate-legacy-verdict [application verdict timestamp]
   (->> (prewalk (fetch-with-accessor application
