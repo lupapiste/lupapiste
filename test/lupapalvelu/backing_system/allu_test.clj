@@ -75,6 +75,10 @@
 
 (def- allu-id "23")
 
+(def- ^:dynamic sent-attachment
+  "A side channel for providing original attachment data to `test-handler`."
+  nil)
+
 (def- test-handler
   (combined-pure-middleware
     (fn [{interface-path :lupapalvelu.backing-system.allu/interface-path :as request}]
@@ -124,6 +128,13 @@
                                                :mime-type "application/json"
                                                :encoding  "UTF-8"}
                 (sc/check @#'allu/FileMetadata (:content metadata)) => nil
+                (:content metadata) => {:name        (-> sent-attachment :latestVersion :filename)
+                                        :description (let [{{:keys [type-group type-id]} :type} sent-attachment
+                                                           type (localize @#'allu/lang :attachmentType
+                                                                          type-group type-id)
+                                                           description (or (:contents sent-attachment) "")]
+                                                       (if (= type description) type (str type ": " description)))
+                                        :mimeType    (-> sent-attachment :latestVersion :contentType)}
                 (dissoc file :mime-type) => {:name    "file"
                                              :content fileId}
                 ;; Could be improved but generators produce junk for this anyway:
@@ -223,7 +234,8 @@
               version (assoc (sg/generate attachment/Version) :fileId fileId)
               attachment (assoc (sg/generate Attachment) :latestVersion version :versions [version])]
           (facts "send-attachments!"
-            (allu/send-attachments! {:application submitted-app
-                                     :user        user
-                                     :action      "move-attachments-to-backing-system"}
-                                    [attachment]) => [fileId]))))))
+            (binding [sent-attachment attachment]
+              (allu/send-attachments! {:application submitted-app
+                                       :user        user
+                                       :action      "move-attachments-to-backing-system"}
+                                      [attachment])) => [fileId]))))))
