@@ -291,7 +291,7 @@
 
 (defn validate-verdict [verdict]
   (if-let [errors (schemas/validate-dictionary-data (legacy-schemas/legacy-verdict-schema (:category verdict))
-                                                    (:data verdict))]
+                                                    (:data (metadata/unwrap-all verdict)))]
     (throw (ex-info (str "Invalid dictionary data for verdict " (:id verdict))
                     {:errors errors}))
     (sc/validate PateLegacyVerdict verdict)))
