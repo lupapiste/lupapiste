@@ -21,17 +21,23 @@ LUPAPISTE.StatementEditModel = function(params) {
   self.newDueDate = ko.observable();
   var dueDateSubscription = self.newDueDate.subscribe(function(newDate) {
     if (newDate && params.data) {
-      ajax.command("save-statement-due-date",
-                   {id: applicationId(),
-                    statementId: params.data().id(),
-                    dueDate: newDate.getTime(),
-                    lang: loc.getCurrentLanguage()
-                   })
-                   .success ( function(response) {
-                     hub.send("indicator", {style: "positive", message: "email.notification-sent", sticky: true})
-                   })
-                   .error(util.showSavedIndicator)
-                   .call();
+      if (newDate >= new Date().setHours(0,0,0,0)) {
+        ajax.command("save-statement-due-date",
+                           {id: applicationId(),
+                            statementId: params.data().id(),
+                            dueDate: newDate.getTime(),
+                            lang: loc.getCurrentLanguage()
+                           })
+                           .success ( function(response) {
+                             hub.send("indicator", {style: "positive", message: "email.notification-sent", sticky: true})
+                           })
+                           .error(util.showSavedIndicator)
+                           .call();
+      }
+      else {
+        hub.send("indicator", {style: "negative", message: "email.due-date-cant-be-in-the-past", sticky: false});
+        self.newDueDate(null);
+      }
     }
    });
 

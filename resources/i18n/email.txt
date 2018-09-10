@@ -128,6 +128,8 @@
 "email.title.undo-cancellation" "sv" "{{address}}, {{municipality}} - projektet har returnerats till status {{state}}"
 "email.notification-sent" "en" "Notification about the change has been sent"
 "email.notification-sent" "fi" "Ilmoitus muutoksesta lähetetty"
+"email.due-date-cant-be-in-the-past" "en" "Due date can not be in the past"
+"email.due-date-cant-be-in-the-past" "fi" "Määräaikaa ei voi asettaa menneisyyteen"
 "facebook" "en" "[Facebook](https://www.facebook.com/Lupapiste)"
 "facebook" "fi" "[Facebookissa](https://www.facebook.com/Lupapiste)"
 "facebook" "sv" "[Facebook](https://www.facebook.com/Lupapiste)"
