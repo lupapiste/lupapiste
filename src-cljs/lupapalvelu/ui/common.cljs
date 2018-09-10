@@ -18,9 +18,9 @@
        (map name)
        (apply js/loc)))
 
-(defn loc-html [tag & args]
-  [tag
-   {:dangerouslySetInnerHTML {:__html (apply loc args)}}])
+.(defn loc-html [tag & args]
+   [tag
+    {:dangerouslySetInnerHTML {:__html (apply loc args)}}])
 
 (def fi-date-formatter (tf/formatter "d.M.yyyy"))
 
@@ -194,7 +194,7 @@
 
   disabled? If true, button is disabled. Can be either value or atom.
 
-  enabled? If false, button is enabled. Can be either value or
+  enabled? If false, button is disabled. Can be either value or
   atom. Nil value is ignored.
 
   If both disabled? and enabled? are given, the button is disabled if

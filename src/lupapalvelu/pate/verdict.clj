@@ -116,7 +116,8 @@
                           :error.verdict.contract
 
                           (and not-replaced? (or (get-in verdict [:replacement :replaced-by])
-                                                 (some #(some-> % :replacement :replaces (= verdict-id)))))
+                                                 (some #(some-> % :replacement :replaces (= verdict-id))
+                                                       (:pate-verdicts application))))
                           :error.verdict-replaced)
                         identity fail))))))
 

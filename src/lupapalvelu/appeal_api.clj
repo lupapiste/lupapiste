@@ -6,6 +6,7 @@
             [lupapalvelu.appeal-verdict :as appeal-verdict]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.appeal :as att-appeal]
+            [lupapalvelu.attachment.bind :as bind]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.pate.verdict :as pate-verdict]
             [lupapalvelu.states :as states]
@@ -257,8 +258,8 @@
 ;; Pate appeals
 ;; ------------------------
 
-(defn- common-input-validator [{data :data}]
-  (let [data (rename-keys data {:verdict-di :verdictId
+#_(defn- common-input-validator [{data :data}]
+  (let [data (rename-keys data {:verdict-id :verdictId
                                 :file-ids   :fileIds})]
     (if (util/=as-kw (:type data) :appealVerdict)
       (appeal-verdict/input-validator {:data (rename-keys data {:author :giver})})
@@ -274,63 +275,108 @@
   [upsert?]
   (fn [{{:keys [type appeal-id verdict-id]} :data
         {:keys [appeals appealVerdicts] :as application} :application}]
-    (if (util/=as-kw type :appealVerdict)
-      (let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
-        (or
-         (when-not (or (nil? appeal-id) appeal-verdict)
-           (fail :error.unknown-appeal-verdict))
-         (when-not (or (not upsert?)
-                       (util/find-by-key :target-verdict verdict-id appeals))
-           (fail :error.appeals-not-found))
-         (when-not (or (nil? appeal-id)
-                       (appeal-item-editable? application
-                                              (assoc appeal-verdict :type type)))
-           (fail :error.appeal-already-exists))))
-      (let [appeal (util/find-by-id appeal-id appeals)]
-        (or
-         (when-not (or (nil? appeal-id) appeal)
-           (fail :error.unknown-appeal))
-         (when-not (or (nil? appeal-id)
-                       (when-not (appeal-item-editable? application appeal)))
-           (fail :error.appeal-verdict-already-exists))
-         (when-not (or (not upsert?)
-                       (nil? appeal-id)
-                       (util/=as-kw type (:type appeal)))
-           (fail :error.appeal-type-change-denied)))))))
+    (let [type (or type (if (util/find-by-id appeal-id appeals)
+                          :appeal :appealVerdict))]
+      (if (util/=as-kw type :appealVerdict)
+       (let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
+         (or
+          (when-not (or (nil? appeal-id) appeal-verdict)
+            (fail :error.unknown-appeal-verdict))
+          (when-not (or (not upsert?)
+                        (util/find-by-key :target-verdict verdict-id appeals))
+            (fail :error.appeals-not-found))
+          (when-not (or (nil? appeal-id)
+                        (appeal-item-editable? application
+                                               (assoc appeal-verdict :type type)))
+            (fail :error.appeal-already-exists))))
+       (let [appeal (util/find-by-id appeal-id appeals)]
+         (or
+          (when-not (or (nil? appeal-id) appeal)
+            (fail :error.unknown-appeal))
+          (when-not (or (nil? appeal-id)
+                        (appeal-item-editable? application
+                                               (assoc appeal :type type)))
+            (fail :error.appeal-verdict-already-exists))
+          (when-not (or (not upsert?)
+                        (nil? appeal-id)
+                        (util/=as-kw type (:type appeal)))
+            (fail :error.appeal-type-change-denied))))))))
+
+(defn- check-deleted-attachments [{:keys [application data]}]
+  (let [delete-ids (some-> data :deleted-attachment-ids seq)
+        appeal-id  (:appeal-id data)]
+    (when (and delete-ids
+               (some  (fn [{:keys [target id]}]
+                        (and (util/includes-as-kw? delete-ids id)
+                             (not= (:id target) appeal-id)))
+                      (:attachments application)))
+      (fail :error.attachment-cannot-be-deleted))))
+
+(defn- pate-appeal-item-update!
+  "Runs appeal-item updates to application. Appeal-item is either appeal or appeal verdict.
+   Parameters:
+     command
+     appeal-id - appeal-id parameter from command (nil if creation of new appeal, else ID of the update subject)
+     appeal-item - the data of the appeal item to be updated (schema: Appeal or AppealVerdict)
+     appeal-type - appeal/rectification/appealVerdict
+     filedatas - Attachment filedatas
+  Note: attachment updates are handled separately."
+  [{app :application :as command} appeal-id appeal-item appeal-type filedatas]
+  (let [collection (appeal-item-collection appeal-type)
+        updates    (if appeal-id
+                     (update-appeal-data-mongo-updates collection appeal-id appeal-item)
+                     (new-appeal-data-mongo-updates collection appeal-item))]
+    (action/update-application
+     command
+     (:mongo-query updates)
+     (:mongo-updates updates))
+    (when (seq filedatas)
+      (bind/make-bind-job command
+                          (map (fn [fd]
+                                 (assoc fd :target {:id   (or appeal-id (:id appeal-item))
+                                                    :type appeal-type}))
+                               filedatas)))))
 
 (defcommand upsert-pate-appeal
   {:description         "Upserts appeal or appealVerdict."
    :feature             :pate
    :categories          #{:pate-verdicts}
-   :parameters          [id verdict-id type author datestamp file-ids]
-   :optional-parameters [text appeal-id]
+   :parameters          [id verdict-id type author datestamp filedatas]
+   :optional-parameters [text appeal-id deleted-attachment-ids]
    :user-roles          #{:authority}
    :states              states/post-verdict-states
-   :input-validators    [common-input-validator
+   :input-validators    [;;common-input-validator
                          (partial action/number-parameters [:datestamp])]
-   :pre-checks          [pate-verdict/pate-enabled
-                         (action/some-pre-check (pate-verdict/verdict-exists :published? :not-replaced?)
+   :pre-checks          [(action/some-pre-check (pate-verdict/verdict-exists :published? :not-replaced?)
                                                 pate-verdict/backing-system-verdict)
-                         (common-sanity-checks true)]}
-  [command]
-  (if (util/=as-kw type :appealVerdict)
-    (if-let [verdict-data (appeal-verdict/appeal-verdict-data-for-upsert verdict-id author
-                                                                         datestamp text appeal-id)]
-      (appeal-item-update! command appeal-id verdict-data :appealVerdict file-ids)
-      (fail :error.invalid-appeal-verdict))
-    (if-let [appeal-data (appeal/appeal-data-for-upsert verdict-id type author datestamp text appeal-id)]
-      (appeal-item-update! command appeal-id appeal-data (:type appeal-data) file-ids)
-      (fail :error.invalid-appeal))))
+                         (common-sanity-checks true)
+                         check-deleted-attachments]}
+  [{:keys [application] :as command}]
+  ;; Update appeals/appealVerdicts
+  (let [job (if (util/=as-kw type :appealVerdict)
+              (if-let [verdict-data (appeal-verdict/appeal-verdict-data-for-upsert verdict-id author
+                                                                                   datestamp text appeal-id)]
+                (pate-appeal-item-update! command appeal-id verdict-data :appealVerdict filedatas)
+                (fail :error.invalid-appeal-verdict))
+              (if-let [appeal-data (appeal/appeal-data-for-upsert verdict-id type
+                                                                  author datestamp text appeal-id)]
+                (pate-appeal-item-update! command appeal-id appeal-data (:type appeal-data) filedatas)
+                (fail :error.invalid-appeal)))]
+    ;; Delete attachments if needed
+    (when (seq deleted-attachment-ids)
+      (att/delete-attachments! application deleted-attachment-ids))
+    (ok :job job)))
 
 (defcommand delete-pate-appeal
-  {:descriptions "Deletes appeal or appeal verdict."
-   :parameters          [id verdict-id appeal-id]
-   :user-roles          #{:authority}
-   :input-validators    [(partial action/non-blank-parameters [:appeal-id])]
-   :states              states/post-verdict-states
-   :pre-checks          [pate-verdict/pate-enabled
-                         (action/some-pre-check (pate-verdict/verdict-exists :published? :not-replaced?)
-                                                pate-verdict/backing-system-verdict)
-                         (common-sanity-checks false)]}
+  {:description      "Deletes appeal or appeal verdict."
+   :feature          :pate
+   :categories       #{:pate-verdicts}
+   :parameters       [id verdict-id appeal-id]
+   :user-roles       #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:appeal-id])]
+   :states           states/post-verdict-states
+   :pre-checks       [(action/some-pre-check (pate-verdict/verdict-exists :published? :not-replaced?)
+                                             pate-verdict/backing-system-verdict)
+                      (common-sanity-checks false)]}
   [command]
   (appeal-common/delete-by-id command appeal-id))

@@ -834,7 +834,7 @@ div.pate-select-application-attachments {
   }
 }
 
-h3.pate-attachments-title {
+h3.pate-published-title {
   padding-top: $marginM;
   margin-top: $marginM;
   border-top: 1px solid black;
@@ -1001,15 +1001,19 @@ table.pate-appeals {
   td.align--right {
     text-align: right;
   }
-  td.pate-appeal-note {
+  span.pate-appeal-note {
     white-space: pre-wrap;
-    span.empty {
-      color: $gray153;
-      font-style: italic;
-    }
   }
-
+  span.empty {
+    color: $gray153;
+    font-style: italic;
+  }
   a.pate-appeal-operation {
     margin-right: 2em;
   }
+}
+
+div.pate-appeal-border {
+  border: 1px solid $gray187;
+  padding: 2em 2em;
 }

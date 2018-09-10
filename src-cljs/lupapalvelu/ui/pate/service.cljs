@@ -203,15 +203,36 @@
     (common/query :appeals
                   (util/fn->> :data
                               ((keyword verdict-id))
+                              (map (fn [{:keys [giver appellant] :as a}]
+                                     (assoc a :author (or giver appellant))))
                               (reset! state/appeals))
                   :id app-id)))
+
+(declare batch-job)
+
+(defn upsert-appeal [app-id verdict-id params wait?* callback]
+  (apply (partial common/command
+                  {:command               :upsert-pate-appeal
+                   :show-saved-indicator? true
+                   :waiting?              wait?*
+                   :success               (fn [res]
+                                            (batch-job (fn [{:keys [pending]}]
+                                                         (when (empty? pending)
+                                                           (fetch-appeals app-id verdict-id)
+                                                           (callback)))
+                                                       res))}
+                  :id app-id
+                  :verdict-id verdict-id)
+         (->> (util/filter-map-by-val identity params)
+              (mapcat identity))))
 
 (defn delete-appeal [app-id verdict-id appeal-id]
   (common/command {:command               :delete-pate-appeal
                    :show-saved-indicator? true
                    :success               #(fetch-appeals app-id verdict-id)}
                   :id app-id
-                  :verdictId verdict-id))
+                  :verdict-id verdict-id
+                  :appeal-id appeal-id))
 
 (defn open-published-verdict [app-id verdict-id callback]
   (common/query "published-pate-verdict"
@@ -311,7 +332,9 @@
                                :bind-attachments)
                     :success callback}
                    :id app-id
-                   :filedatas filedatas)))
+                   :filedatas filedatas))
+  ([app-id filedatas callback]
+   (bind-attachments app-id callback false)))
 
 (defn bind-attachments-job [job-id version callback]
   (common/query :bind-attachments-job
@@ -351,6 +374,17 @@
                           (:version job)
                           (partial batch-job status-fn))))
 
+(defn canonize-filedatas
+  "Frontend filedatas to backend format."
+  [filedatas]
+  (map (fn [{:keys [file-id type] :as filedata}]
+         (let [[type-group type-id] (util/split-kw-path type)]
+           (merge (select-keys filedata [:target :contents :source])
+                  {:fileId file-id
+                   :type   {:type-group type-group
+                            :type-id    type-id}})))
+       filedatas))
+
 (defn bind-attachments-batch
   "Convenience function that combines the binding and querying of the
   results. Arguments:
@@ -369,13 +403,7 @@
   draft?: If true bind-draft-attachments command is used."
   ([app-id filedatas status-fn draft?]
    (bind-attachments app-id
-                     (map (fn [{:keys [file-id type] :as filedata}]
-                            (let [[type-group type-id] (util/split-kw-path type)]
-                              (merge (dissoc filedata :file-id :type)
-                                     {:fileId file-id
-                                      :type   {:type-group type-group
-                                               :type-id    type-id}})))
-                          filedatas)
+                     (canonize-filedatas filedatas)
                      (partial batch-job status-fn)
                      draft?))
   ([app-id filedatas status-fn]

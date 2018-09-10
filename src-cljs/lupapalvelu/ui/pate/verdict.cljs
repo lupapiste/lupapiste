@@ -163,7 +163,7 @@
    header
    (components/add-key-attrs body "tag-")
    (when (seq attachment-ids)
-     (list [:h3.pate-attachments-title {:key "attachments-title"}
+     (list [:h3.pate-published-title {:key "attachments-title"}
             (common/loc :application.attachments)]
            (rum/with-key (att/attachments-view attachment-ids)
              "attachments-view")))

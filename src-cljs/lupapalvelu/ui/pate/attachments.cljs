@@ -1,7 +1,6 @@
 (ns lupapalvelu.ui.pate.attachments
   "Attachments related components and utilities for Pate."
   (:require [clojure.set :as set]
-            [clojure.string :as s]
             [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.attachment.components :as att]
             [lupapalvelu.ui.attachment.file-upload :as upload]
@@ -13,6 +12,7 @@
             [lupapalvelu.ui.pate.state :as state]
             [lupapalvelu.ui.rum-util :as rum-util]
             [rum.core :as rum]
+            [sade.shared-strings :as ss]
             [sade.shared-util :as util])
   (:import [goog.async Delay]))
 
@@ -202,7 +202,7 @@
         (path/loc :cancel)]
        [:button.positive
         {:disabled (or binding?
-                       (some #(-> % :contents s/blank?)
+                       (some #(-> % :contents ss/blank?)
                              (vals (rum/react fields*)))
                        (not-every? #(-> % :state #{:bad :success :failed})
                                    (rum/react files*)))
@@ -215,9 +215,10 @@
 (rum/defc attachments-batch < rum/reactive
   "Metadata editor for file upload. The name is a hat-tip to the
   AttachmentBatchModel."
-  [{:keys [files* binding?*] :as options}]
+  [{:keys [files* binding?* bind?] :as options}]
   (when (-> files* rum/react seq)
-    (let [binding? (rum/react binding?*)]
+    (let [bind?    (boolean (or (nil? bind?) bind?))
+          binding? (if bind? false (rum/react binding?*))]
       [:div
        [:table.pate-batch-table
         [:thead
@@ -231,8 +232,8 @@
            [:tr
             [:td.batch--file (batch-file-link filedata)]
             (case state
-              :bad (td-error (:message filedata))
-              :failed (td-error (path/loc :file.upload.failed))
+              :bad      (td-error (:message filedata))
+              :failed   (td-error (path/loc :file.upload.failed))
               :progress (td-progress (:progress filedata))
               [
                [:td.batch--type
@@ -245,7 +246,8 @@
              (when-not binding?
                [:i.lupicon-remove.primary
                 {:on-click #(remove-file options filedata)}])]])]
-        (batch-buttons options)]])))
+        (when bind?
+          (batch-buttons options))]])))
 
 (rum/defc add-file-label < rum/reactive
   "Add file label button as a separate component for binding?* atom's
@@ -311,6 +313,52 @@
        (att/upload-wrapper {:callback  (upload/file-monitors files*)
                             :dropzone  (:dropzone schema)
                             :multiple? (:multiple? schema)
+                            :component (fn [{:keys [input input-id]}]
+                                         [:div.add-file-div
+                                          input
+                                          (add-file-label binding?*
+                                                          input-id)])}))]))
+
+
+
+(rum/defc batch-upload-data-conduit < rum/reactive
+  "Update data atom with processed files and fields
+  information. Separate component in order to avoid unnecessary
+  rendering."
+  [data* files* fields*]
+  (let [files (filter #(util/=as-kw (:state %) :success)
+                      (rum/react files*))
+        fields  (rum/react fields*)]
+    (common/reset-if-needed! data*
+                             (mapv (fn [{:keys [filename] :as file}]
+                                     (let [{:keys [type contents]
+                                            :as   field} (get fields (keyword filename))]
+                                       (merge file
+                                              field
+                                              {:filled? (and type (ss/not-blank? contents))})))
+                                   files))
+    nil))
+
+(rum/defcs batch-upload-files < rum/reactive
+  (components/initial-value-mixin ::data)
+  "Adding attachments without Pate dependencies."
+  [{data* ::data} _ {:keys     [bind? draft? enabled?
+                                dropzone multiple?]
+                     :as options}]
+
+  (let [binding?* (atom false)
+        files*    (atom [])
+        fields*   (atom {})]
+    [:div
+     (batch-upload-data-conduit data* files* fields*)
+     (attachments-batch (assoc options
+                               :files* files*
+                               :fields* fields*
+                               :binding?* binding?*))
+     (when path/enabled?
+       (att/upload-wrapper {:callback  (upload/file-monitors files*)
+                            :dropzone  dropzone
+                            :multiple? multiple?
                             :component (fn [{:keys [input input-id]}]
                                          [:div.add-file-div
                                           input
