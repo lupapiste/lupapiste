@@ -290,7 +290,7 @@
    :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
    :docstore-info :3d-map :default-digitalization-location
    :kopiolaitos-email :kopiolaitos-orderer-address :kopiolaitos-orderer-email :kopiolaitos-orderer-phone
-   :app-required-fields-filling-obligatory :state-change-msg-enabled :custom-phrases-categories])
+   :app-required-fields-filling-obligatory :state-change-msg-enabled])
 
 (defn get-organizations
   ([]
