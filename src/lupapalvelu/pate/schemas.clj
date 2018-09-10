@@ -132,7 +132,7 @@
   (merge PateCategory
          {(sc/optional-key :published)          {:tags                            sc/Str
                                                  ;; The same as :state._modified
-                                                 :published                       ssc/Timestamp
+                                                 :published                       sc/Int
                                                  ;; Id for the attachment that is a PDF version of tags.
                                                  (sc/optional-key :attachment-id) ssc/AttachmentId}
           :state                                (wrapped (sc/enum "draft"
@@ -143,9 +143,9 @@
           :data                                 sc/Any
           ;; Whether the verdict timestamps are available depends on
           ;; the verdict type (legacy or not) and template settings.
-          (sc/optional-key :archive)            {(sc/optional-key :verdict-date)  ssc/Timestamp
-                                                 (sc/optional-key :anto)          ssc/Timestamp
-                                                 (sc/optional-key :lainvoimainen) ssc/Timestamp
+          (sc/optional-key :archive)            {(sc/optional-key :verdict-date)  sc/Int
+                                                 (sc/optional-key :anto)          sc/Int
+                                                 (sc/optional-key :lainvoimainen) sc/Int
                                                  :verdict-giver                   sc/Str}
 
           (sc/optional-key :signatures)         [PateSignature]
