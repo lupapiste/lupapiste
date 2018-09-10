@@ -97,7 +97,7 @@
   (query sipoo :organization-phrases :org-id "bad")
   => (err :error.invalid-organization)
 
-(facts "Pharse categories"
+(facts "Phrase categories"
 
   (fact "New custom phrase categories"
     (command sipoo :save-phrase-category
