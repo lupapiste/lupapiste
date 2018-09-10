@@ -84,17 +84,6 @@
                                      (map #(vector (sc/optional-key %) PateSavedSettings))
                                      (into {}))})
 
-;; Phrases
-
-(defschema Phrase
-  {:id       ssc/ObjectIdStr
-   :category (apply sc/enum (map name shared-schemas/phrase-categories))
-   :tag      sc/Str
-   :phrase   sc/Str})
-
-(defschema CustomPhraseCategory
-  PateVerdictReq)
-
 
 ;; Verdicts
 
@@ -108,6 +97,17 @@
                                                      {:type review-type})]
           (sc/optional-key :plans)           [PateVerdictReq]
           (sc/optional-key :handler-titles)  [PateVerdictReq]}))
+
+;; Phrases
+
+(defschema Phrase
+  {:id       ssc/ObjectIdStr
+   :category (apply sc/enum (map name shared-schemas/phrase-categories))
+   :tag      sc/Str
+   :phrase   sc/Str})
+
+(defschema CustomPhraseCategory
+  PateVerdictReq)
 
 (defschema UserRef
   "We have to define our own summary, since requiring the

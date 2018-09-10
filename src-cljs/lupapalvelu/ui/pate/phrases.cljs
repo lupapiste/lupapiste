@@ -95,29 +95,32 @@
       [:div.pate-grid-6
        [:div.row
         [:div.col-1
-         [:label.required (common/loc :pate-verdict.language.fi)]
-         (components/text-edit (:fi @new-category*)
-                               {:callback   (fn [text]
-                                              (swap! new-category* #(assoc % :fi text)))
-                                :required?  true
-                                :immediate? true
-                                :test-id    :phrase-tag})]
+         [:div.col--vertical
+          [:label.required (common/loc :pate-verdict.language.fi)]
+          (components/text-edit (:fi @new-category*)
+                                {:callback   (fn [text]
+                                               (swap! new-category* #(assoc % :fi text)))
+                                 :required?  true
+                                 :immediate? true
+                                 :test-id    :phrase-tag})]]
         [:div.col-1
-         [:label.required (common/loc :pate-verdict.language.sv)]
-         (components/text-edit (:sv @new-category*)
-                               {:callback   (fn [text]
-                                              (swap! new-category* #(assoc % :sv text)))
-                                :required?  true
-                                :immediate? true
-                                :test-id    :phrase-tag})]
+         [:div.col--vertical
+          [:label.required (common/loc :pate-verdict.language.sv)]
+          (components/text-edit (:sv @new-category*)
+                                {:callback   (fn [text]
+                                               (swap! new-category* #(assoc % :sv text)))
+                                 :required?  true
+                                 :immediate? true
+                                 :test-id    :phrase-tag})]]
         [:div.col-1
-         [:label.required (common/loc :pate-verdict.language.en)]
-         (components/text-edit (:en @new-category*)
-                               {:callback   (fn [text]
-                                              (swap! new-category* #(assoc % :en text)))
-                                :required?  true
-                                :immediate? true
-                                :test-id    :phrase-tag})]]
+         [:div.col--vertical
+          [:label.required (common/loc :pate-verdict.language.en)]
+          (components/text-edit (:en @new-category*)
+                                {:callback   (fn [text]
+                                               (swap! new-category* #(assoc % :en text)))
+                                 :required?  true
+                                 :immediate? true
+                                 :test-id    :phrase-tag})]]]
        [:div.row
         [:div.col-6
          [:div.col--vertical
@@ -148,9 +151,14 @@
                 {:icon       :lupicon-circle-plus
                  :text-loc   :pate.remove-phrase-category
                  :class      :negative
-                 :on-click   (fn [_]
-                               (service/delete-phrase-category (:category @local*))
-                               (reset! phrase* nil))}))]]]])
+                 :on-click   (fn []
+                               (components/confirm-dialog
+                                 :phrase.category.remove
+                                 :areyousure
+                                 (fn []
+                                   (service/delete-phrase-category (:category @local*))
+                                   (reset! phrase* nil)))
+                               )}))]]]])
    [:div.row
     [:div.col-8
      (let [phrase (:phrase @local*)]
