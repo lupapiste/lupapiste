@@ -176,6 +176,7 @@
           ; Deleting the only given verdict? Return sent or submitted state.
           step-back? (and (not (:draft verdict))
                           (= 1 (count (remove :draft verdicts)))
+                          (empty? (filter :published (:pate-verdicts application)))
                           (states/verdict-given-states (keyword state)))
           task-ids (verdict/deletable-verdict-task-ids application verdictId)
           attachments (concat attachments (verdict/task-ids->attachments application task-ids))
