@@ -1007,8 +1007,10 @@ table.pate-appeals {
   td.align--half {
     width: 50%;
   }
-  span.pate-appeal-note {
+  div.pate-appeal-note {
     white-space: pre-wrap;
+    padding-left: 2em;
+    padding-right: 2em;
   }
   span.empty {
     color: $gray153;

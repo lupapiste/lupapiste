@@ -305,8 +305,8 @@
                         (util/=as-kw type (:type appeal)))
             (fail :error.appeal-type-change-denied))))))))
 
-(defn- attachments-for-original-file-ids [{:keys [attachments]} file-ids]
-  (filter #(some->> % :versions first :originalFileId
+(defn- attachments-for-file-ids [{:keys [attachments]} file-ids]
+  (filter #(some->> % :latestVersion :fileId
                     (util/includes-as-kw? file-ids))
           attachments))
 
@@ -314,8 +314,8 @@
   (let [delete-ids (some-> data :deleted-file-ids seq)
         appeal-id  (:appeal-id data)]
     (when delete-ids
-      (let [attachments (attachments-for-original-file-ids application
-                                                           delete-ids)]
+      (let [attachments (attachments-for-file-ids application
+                                                  delete-ids)]
         (when (or (not= (count attachments)
                         (count delete-ids))
                   (nil? appeal-id)
@@ -377,8 +377,7 @@
     ;; Delete attachments if needed
     (when (and (seq deleted-file-ids) appeal-id)
       (att/delete-attachments! application
-                               (map :id (attachments-for-original-file-ids application
-                                                                           deleted-file-ids))))
+                               (map :id (attachments-for-file-ids application deleted-file-ids))))
     (ok :job job)))
 
 (defcommand delete-pate-appeal

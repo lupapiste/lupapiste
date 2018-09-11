@@ -30904,8 +30904,10 @@ table.pate-appeals td.align--half {
   width: 50%;
 }
 
-table.pate-appeals span.pate-appeal-note {
+table.pate-appeals div.pate-appeal-note {
   white-space: pre-wrap;
+  padding-left: 2em;
+  padding-right: 2em;
 }
 
 table.pate-appeals span.empty {

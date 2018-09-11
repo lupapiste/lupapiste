@@ -51,9 +51,11 @@
   [{:keys [command  show-saved-indicator? success error waiting?]} & kvs]
   (letfn [(waiting [flag] (when waiting? (reset! waiting? flag)))
           (with-error-handler-if-given [call]
-            (if (or error waiting?)
+            (if (or error waiting? show-saved-indicator?)
               (.error call (fn [js-result]
                              (waiting false)
+                             (when show-saved-indicator?
+                               (js/util.showSavedIndicator js-result))
                              (when error
                                (error (js->clj js-result :keywordize-keys true)))))
               call))]

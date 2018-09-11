@@ -216,10 +216,12 @@
                    :show-saved-indicator? true
                    :waiting?              wait?*
                    :success               (fn [res]
+                                            (reset! wait?* true)
                                             (batch-job (fn [{:keys [pending]}]
                                                          (when (empty? pending)
                                                            (fetch-appeals app-id verdict-id)
-                                                           (callback)))
+                                                           (callback)
+                                                           (reset! wait?* false)))
                                                        res))}
                   :id app-id
                   :verdict-id verdict-id)

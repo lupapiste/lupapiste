@@ -140,9 +140,7 @@
                                               :multiple? true})]]
        [:div.row
         [:div.col-4
-         (appeal-buttons data* filedatas* close-fn)]]]]
-     (components/debug-atom filedatas* "Filedatas")
-     (components/debug-atom data* "Data")]))
+         (appeal-buttons data* filedatas* close-fn)]]]]]))
 
 (rum/defcs appeal-list < rum/reactive
   (rum/local {} ::opened)
@@ -192,7 +190,7 @@
                                    [:td  {:colSpan "7"}
                                    (if can-edit?
                                      (appeal-form (assoc appeal :date date) toggle-fn)
-                                     [:span.pate-appeal-note
+                                     [:div.pate-appeal-note
                                       (if (ss/blank? text)
                                         [:span.empty (common/loc :verdict.muutoksenhaku.no-extra)]
                                         text)])]]))))
