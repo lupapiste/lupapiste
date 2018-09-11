@@ -214,8 +214,15 @@
     =>
     migrated-test-verdict)
 
+  (fact "old agreements are given category migration-contract"
+        (->pate-legacy-verdict test-application
+                               (assoc test-verdict :sopimus true)
+                               timestamp)
+        => (contains {:category "migration-contract"
+                      :data (contains {:contract-text (wrap verdict-text)})}))
+
   (fact "if verdict cannot be validated with the default category, a permissive catchall category is used"
-    (->pate-legacy-verdict (assoc test-application :permitSubtype "sijoitussopimus")
+        (->pate-legacy-verdict (assoc test-application :permitType "YA")
                            test-verdict
                            timestamp)
     => (contains {:category "migration-catchall"}))
@@ -242,10 +249,10 @@
     => contains-published-and-archive-data?)
 
   (fact "verdict can be migrated even when the application does not have applicant document"
-        (->pate-legacy-verdict test-application
-                               (assoc test-verdict :draft false)
-                               timestamp)
-        => (contains {:published (contains {:tags string?})}))
+    (->pate-legacy-verdict test-application
+                           (assoc test-verdict :draft false)
+                           timestamp)
+    => (contains {:published (contains {:tags string?})}))
 
   (against-background
    (lupapalvelu.organization/get-organization-name anything anything) => "Sipoon rakennusvalvonta"))

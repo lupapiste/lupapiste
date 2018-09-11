@@ -1,5 +1,5 @@
 (ns lupapalvelu.migration.pate-verdict-migration
-  (:require [clojure.set :refer [map-invert]]
+  (:require [clojure.set :refer [map-invert rename-keys]]
             [clojure.walk :refer [postwalk prewalk walk]]
             [monger.operators :refer :all]
             [taoensso.timbre :refer [infof warnf]]
@@ -132,10 +132,14 @@
   context)
 
 (defn- verdict-category [application verdict _]
-  (name (schema-util/application->category application)))
+  (if (:sopimus verdict)
+    "migration-contract"
+    (if-let [category (schema-util/application->category application)]
+     (name category)
+     "migration-catchall")))
 
 (defn- verdict-template [app _ _]
-  {:inclusions (-> (schema-util/application->category app)
+  {:inclusions (-> (verdict-category app nil nil)
                    verdict/legacy-verdict-inclusions)})
 
 (defn- get-when [p getter-fn]
@@ -145,6 +149,9 @@
 
 (defn- verdict-published? [_ verdict _]
   (not (:draft verdict)))
+
+(defn- sopimus? [_ verdict _]
+  (:sopimus verdict))
 
 (defn- timestamp
   "If timestamp is 0, return nil"
@@ -218,6 +225,7 @@
           :verdict-section (wrap (access :verdict-section))
           :verdict-code    (wrap (access :verdict-code))
           :verdict-text    (wrap (access :verdict-text))
+          :contract-text   (wrap (access :contract-text))
           :anto            (wrap (access :anto))
           :lainvoimainen   (wrap (access :lainvoimainen))
           :reviews         (id-map-from :reviews
@@ -248,6 +256,7 @@
    :condition-name    (get-in-context [:taskname])
    :conditions        (filter-tasks-of-verdict (task-name? :task-lupamaarays))
    :context           context
+   :contract-text     (get-when sopimus? (get-in-poytakirja :paatos))
    :foreman-role      (get-in-context [:taskname])
    :foremen           (filter-tasks-of-verdict (task-name? :task-vaadittu-tyonjohtaja))
    :handler           (get-in-poytakirja :paatoksentekija)
@@ -268,7 +277,7 @@
    :template          verdict-template
    :verdict-code      (comp str (get-in-poytakirja :status))
    :verdict-section   (get-in-poytakirja :pykala)
-   :verdict-text      (get-in-poytakirja :paatos)})
+   :verdict-text      (get-when (complement sopimus?) (get-in-poytakirja :paatos))})
 
 (defn- defaults [timestamp]
   {:modified timestamp})
@@ -301,7 +310,12 @@
   (add-tags app
             (-> verdict
                 (assoc :category "migration-catchall")
-                (assoc :template (verdict-template app nil nil)))))
+                (assoc :template (verdict-template app nil nil))
+                (update :data
+                        (fn [data]
+                          (if (:contract-text data)
+                            (rename-keys {:contract-text :verdict-text})
+                            data))))))
 
 (defn ensure-valid-category [app verdict]
   (if-let [errors (check-verdict verdict)]
