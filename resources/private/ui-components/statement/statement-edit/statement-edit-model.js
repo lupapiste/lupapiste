@@ -28,8 +28,9 @@ LUPAPISTE.StatementEditModel = function(params) {
                             dueDate: newDate.getTime(),
                             lang: loc.getCurrentLanguage()
                            })
-                           .success ( function(response) {
-                             hub.send("indicator", {style: "positive", message: "email.notification-sent", sticky: true})
+                           .success ( function() {
+                             hub.send("indicator", {style: "positive", message: "email.notification-sent",
+                                                    sticky: true});
                            })
                            .error(util.showSavedIndicator)
                            .call();
