@@ -115,11 +115,19 @@
   (mapv (util/fn-> :schema-info :op)
         (app/get-sorted-operation-documents application)))
 
+(defn operation-name
+  [app op-info]
+  (if (= (:name op-info) "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
+    (:name (util/find-by-id (:id op-info)
+                            (concat [(:primaryOperation app)]
+                                    (:secondaryOperations app))))
+    (:name op-info)))
+
 (defn operations
   "If the verdict has an :operation property, its value overrides the
   application primary operation."
   [{:keys [lang verdict application]}]
-  (let [infos     (map (util/fn->> :name
+  (let [infos     (map (util/fn->> (operation-name application)
                                    (i18n/localize lang :operations)
                                    (hash-map :text))
                        (operation-infos application))
