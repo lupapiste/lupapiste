@@ -3,6 +3,7 @@
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.util :as util]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.building :as building]
@@ -292,6 +293,7 @@
                           (:id att)
                           (.getMessage e)))))
             (when-not (true? (:only-use-inspection-from-backend organization))
-              (tasks/generate-task-pdfa updated-application added-task (:user command) "fi"))))))
+              (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))
+      (attachment/maybe-generate-comments-attachment user updated-application (:state updated-application)))
     (cond-> {:ok update-result}
             (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
