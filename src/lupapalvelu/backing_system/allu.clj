@@ -743,7 +743,8 @@
   (doall (for [attachment attachments]
            (send-attachment! command attachment))))
 
-(defn load-placementcontract-proposal
+;; TODO: Add this to batchrunner
+(defn load-placementcontract-proposal!
   "GET placement contract proposal pdf from ALLU. Saves the proposal pdf using `lupapalvelu.file-upload/save-file`."
   [command]
   (send-allu-request! (contract-proposal-request command)))
@@ -753,7 +754,13 @@
   [command]
   (send-allu-request! (contract-approval command)))
 
-(defn load-placementcontract-final
+;; TODO: Add this to batchrunner
+(defn load-placementcontract-final!
   "GET final placement contract pdf from ALLU. Saves the contract pdf using `lupapalvelu.file-upload/save-file`."
   [command]
   (send-allu-request! (final-contract-request command)))
+
+(defn load-contract-document! [{:keys [application] :as command}]
+  (case (:state application)
+    "sent" (load-placementcontract-proposal! command)
+    "agreementPrepared" (load-placementcontract-final! command)))
