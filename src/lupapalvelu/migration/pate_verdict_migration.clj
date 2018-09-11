@@ -2,6 +2,7 @@
   (:require [clojure.set :refer [map-invert]]
             [clojure.walk :refer [postwalk prewalk walk]]
             [monger.operators :refer :all]
+            [taoensso.timbre :refer [infof warnf]]
             [schema.core :as sc]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
@@ -131,9 +132,7 @@
   context)
 
 (defn- verdict-category [application verdict _]
-  (if (:sopimus verdict)
-    "contract"
-    (name (schema-util/application->category application))))
+  (name (schema-util/application->category application)))
 
 (defn- verdict-template [app _ _]
   {:inclusions (-> (schema-util/application->category app)
@@ -289,12 +288,33 @@
                       {:verdict verdict}
                       e)))))
 
-(defn validate-verdict [verdict]
+(defn- check-verdict [verdict]
   (if-let [errors (schemas/validate-dictionary-data (legacy-schemas/legacy-verdict-schema (:category verdict))
-                                                    (:data (metadata/unwrap-all verdict)))]
+                                                    (dissoc (:data (metadata/unwrap-all verdict))
+                                                            :attachments
+                                                            ;; TODO do we need to dissoc other fields?
+                                                            ))]
+    {:errors errors}
+    (sc/check PateLegacyVerdict verdict)))
+
+(defn change-category-to-catchall [app verdict]
+  (add-tags app
+            (-> verdict
+                (assoc :category "migration-catchall")
+                (assoc :template (verdict-template app nil nil)))))
+
+(defn ensure-valid-category [app verdict]
+  (if-let [errors (check-verdict verdict)]
+    (do (warnf "Verdict %s did not conform to category %s: %s" (:id verdict) (:category verdict) (str errors))
+        (infof "Changing category of verdict %s to migration-catchall" (:id verdict))
+        (change-category-to-catchall app verdict))
+    verdict))
+
+(defn validate-verdict [verdict]
+  (if-let [errors (check-verdict verdict)]
     (throw (ex-info (str "Invalid dictionary data for verdict " (:id verdict))
-                    {:errors errors}))
-    (sc/validate PateLegacyVerdict verdict)))
+                    errors))
+    verdict))
 
 (defn ->pate-legacy-verdict [application verdict timestamp]
   (->> (prewalk (fetch-with-accessor application
@@ -305,6 +325,7 @@
        util/strip-nils
        util/strip-empty-collections
        (add-tags application)
+       (ensure-valid-category application)
        validate-verdict))
 
 (defn- draft-verdict-ids [application]

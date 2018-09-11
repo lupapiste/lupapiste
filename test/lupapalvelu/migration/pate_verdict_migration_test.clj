@@ -80,13 +80,13 @@
 
 (def verdict-id (create-id))
 (def kuntalupatunnus "lupatunnus")
-(def anto 2345)
-(def signed1 4321)
-(def signed2 5432)
+(def anto 1503003635781)
+(def signed1 1503003635782)
+(def signed2 1503003635783)
 (def signer-id1 (create-id))
 (def signer-id2 (create-id))
-(def lainvoimainen 3456)
-(def paatospvm 4567)
+(def lainvoimainen 1503003635784)
+(def paatospvm 1503003635785)
 (def handler "handler")
 (def verdict-text "Decisions were made.")
 (def section "1")
@@ -214,11 +214,11 @@
     =>
     migrated-test-verdict)
 
-  (fact "the gategory sijoitussopimus is contract"
+  (fact "if verdict cannot be validated with the default category, a permissive catchall category is used"
     (->pate-legacy-verdict (assoc test-application :permitSubtype "sijoitussopimus")
                            test-verdict
                            timestamp)
-    => (contains {:category "contract"}))
+    => (contains {:category "migration-catchall"}))
 
   (fact "only tasks related to given verdict affect the migration"
     (->pate-legacy-verdict (assoc test-application

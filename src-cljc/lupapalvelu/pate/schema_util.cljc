@@ -76,7 +76,9 @@
 (def pate-categories   #{:r :tj :p :ya :contract})
 ;; Categories that are only supported by the legacy mechanism.
 (def legacy-categories #{:kt :ymp})
-(def all-categories (set/union pate-categories legacy-categories))
+;; Categories that are only used with migrated legacy verdicts.
+(def migration-categories #{:migration-catchall})
+(def all-categories (set/union pate-categories legacy-categories migration-categories))
 
 (defn pate-category?
   "True if the given category is supported by Pate verdict template

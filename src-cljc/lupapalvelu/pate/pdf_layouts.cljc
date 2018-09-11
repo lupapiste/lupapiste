@@ -824,4 +824,6 @@
     :legacy.kt       kt-legacy-layout
     :legacy.ymp      ymp-legacy-layout
     :legacy.contract contract-legacy-layout
-    :legacy.tj       tj-legacy-layout))
+    :legacy.tj       tj-legacy-layout
+    :legacy.migration-catchall r-legacy-layout ;; TODO
+    ))

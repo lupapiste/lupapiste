@@ -280,13 +280,46 @@
                                    :default :muut.paatosote
                                    :title :verdict.contract.attachments})))
 
+#_(def migration-contract
+  (build-legacy-schema
+   legsub-contract
+   (legsub-verdict {:select {:loc-prefix :verdict.status
+                             :items      (map (comp keyword str) (range 1 43))
+                             :sort-by    :text
+                             :type :autocomplete}})
+   (legsub-reviews {:select {:loc-prefix :pate.review-type
+                             :label?     false
+                             :items      helper/review-types
+                             :sort-by    :text}})
+   legsub-foremen
+   (legsub-conditions true)
+   legsub-attachments
+   (verdict-schemas/versub-upload)))
+
+(def migration-catchall-verdict
+  (build-legacy-schema
+   (legsub-verdict {:select {:loc-prefix :verdict.status
+                             :items      (map (comp keyword str) (range 1 43))
+                             :sort-by    :text
+                             :type :autocomplete}})
+   (legsub-reviews {:select {:loc-prefix :pate.review-type
+                             :label?     false
+                             :items      helper/review-types
+                             :sort-by    :text}})
+   legsub-foremen
+   (legsub-conditions)
+   legsub-attachments
+   (verdict-schemas/versub-upload)))
+
 (defn legacy-verdict-schema [category]
   (case (keyword category)
-    :r        r-legacy-verdict
-    :ya       ya-legacy-verdict
-    :p        p-legacy-verdict
-    :kt       kt-legacy-verdict
-    :ymp      ymp-legacy-verdict
-    :contract contract-legacy-verdict
-    :tj       tj-legacy-verdict
+    :r                  r-legacy-verdict
+    :ya                 ya-legacy-verdict
+    :p                  p-legacy-verdict
+    :kt                 kt-legacy-verdict
+    :ymp                ymp-legacy-verdict
+    :contract           contract-legacy-verdict
+    :tj                 tj-legacy-verdict
+;;    :migration-contract migration-contract
+    :migration-catchall migration-catchall-verdict
     (schema-util/pate-assert false "Unsupported legacy category:" category)))
