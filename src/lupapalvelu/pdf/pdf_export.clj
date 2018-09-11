@@ -5,7 +5,6 @@
             [clj-time.local :as tl]
             [clj-time.format :as tf]
             [lupapalvelu.i18n :refer [loc] :as i18n]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [sade.core :refer :all]
             [sade.files :as files]
@@ -38,7 +37,7 @@
 
 (defn- combine-schema-field-and-value
   "Gets the field name and field value from a datum field and schema"
-  [{field-name :name field-type :type, :keys [i18nkey body label] :as field-schema} data i18npath]
+  [{field-name :name field-type :type, :keys [i18nkey body] :as field-schema} data i18npath]
   (let [locstring (ss/join "." (conj i18npath field-name))
         localized-field-name (cond
                                (not-nil? i18nkey) (loc i18nkey)
@@ -108,10 +107,10 @@
                            (mapv keyword))]
     (get-in doc (conj absolute-path :value))))
 
-(defn- hide-by-hide-when [doc parent-path {hide-when :hide-when :as schema}]
+(defn- hide-by-hide-when [doc parent-path {:keys [hide-when]}]
   (and hide-when ((:values hide-when) (get-value-by-path doc parent-path (:path hide-when)))))
 
-(defn- show-by-show-when [doc parent-path {show-when :show-when :as schema}]
+(defn- show-by-show-when [doc parent-path {:keys [show-when]}]
   (or (not show-when) ((:values show-when) (get-value-by-path doc parent-path (:path show-when)))))
 
 (defn- filter-subschemas-by-data [doc group-schema path subschemas]
@@ -230,7 +229,7 @@
 ; Deprecated, statement is replaced with replaced with libre-template
 (defn- collect-statement-fields [statements]
   (map
-    (fn [{:keys [requested given status text dueDate reply] {giver :name} :person :as stm}]
+    (fn [{:keys [requested given status text dueDate reply] {giver :name} :person}]
       (cond->> [(loc "statement.requested") (str "" (or (util/to-local-date requested) "-"))
                 (loc "statement.giver") (if (ss/blank? giver) (loc "application.export.empty") (str giver))
                 (loc "export.statement.given") (str "" (or (util/to-local-date given) "-"))
@@ -265,7 +264,7 @@
 
 (defn collect-rakennus [rakennus]
   (map
-    (fn [[k v]]
+    (fn [[_ v]]
       (array-map
         (loc "task-katselmus.rakennus.rakennusnumero") (get-in v [:rakennus :rakennusnro :value])
         (loc "task-katselmus.rakennus.kiinteistotunnus") (get-in v [:rakennus :kiinttun :value])
@@ -277,7 +276,7 @@
 
 (defn collect-task-fields [tasks attachment-count app]
   (map
-    (fn [{:keys [duedate taskname closed created state schema-info source assignee data]}]
+    (fn [{:keys [schema-info data]}]
       (let [i18n-prefix (:i18nprefix schema-info)
             katselmuksenLaji (get-in data [:katselmuksenLaji :value])
             vaadittuLupaehtona (get-in data [:vaadittuLupaehtona :value])
@@ -310,7 +309,7 @@
 
 (defn- collect-export-data
   "Create a map containing combined schema and data for pdf export"
-  [app title show-address?]
+  [app title]
   {:title         title
    :address       (:address app)
    :common-fields (collect-common-fields app)
@@ -483,7 +482,7 @@
                 (loc "application.export.title")
                 (loc "permitSubtype" subtype))
         pdf-title (str (:id app) " - " title)
-        app-data (collect-export-data app title true)
+        app-data (collect-export-data app title)
         ; Below, the quote - splice-unquote -syntax (i.e. `[~@(f x y)]) "unwraps" the vector returned by each helper
         ; function into the body of the literal vector defined here.
         ; E.g. if (defn x [] [3 4]) then:
@@ -555,7 +554,7 @@
                   (ss/blank? (str subtype)) (loc "application.export.title")
                   :else (loc "permitSubtype" subtype))
           pdf-title (str (:id app) " - " title)
-          app-data (collect-export-data app title false)
+          app-data (collect-export-data app title)
           child (filter #(= id (:id %)) (child-type app))
           child-data (cond
                        (= child-type :statements) (collect-statement-fields child)

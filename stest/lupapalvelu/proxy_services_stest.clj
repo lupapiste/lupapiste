@@ -5,7 +5,6 @@
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.organization :as org]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.property-location :as prop-loc]
             [sade.core :refer [now]]
             [sade.env :as env]
@@ -211,17 +210,17 @@
           body (json/decode (:body response) true)]
       (count body) => 2
       (first body) => {:id "601"
-                       :kaavalaji "rkm"
-                       :kaavanro "12010"
-                       :kasitt_pvm "4/22/1975 12:00:00 AM"
-                       :linkki "http://194.111.49.141/asemakaavapdf/12010.pdf"
+                       :kaavalaji "RK"
+                       :kaavanro "12021"
+                       :kasitt_pvm "6/1/1984 12:00:00 AM"
+                       :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
                        :type "bentley"}
 
       (second body) => {:id "605"
-                        :kaavalaji "RKM"
-                        :kaavanro "12013"
-                        :kasitt_pvm "7/20/1978 12:00:00 AM"
-                        :linkki "http://194.111.49.141/asemakaavapdf/12013.pdf"
+                        :kaavalaji "RK"
+                        :kaavanro "12001"
+                        :kasitt_pvm "5/31/1967 12:00:00 AM"
+                        :linkki "http://194.111.49.141/asemakaavapdf/12001.pdf"
                         :type "bentley"})))
 
 (facts "general-plan-urls-by-point-proxy"
@@ -433,9 +432,14 @@
         jarvenpaa {:x "399309.136" :y "6709508.629"}
         raasepori-island {:x "296734.231" :y "6647154.2190031"}]
     (fact "Jakkukyla"
+      ; was formerly in Oulu, property id indicates that
       (prop-loc/property-info-by-point (:x jakku) (:y jakku)) => (contains {:municipality "139",
                                                                             :name {:fi "Ii", :sv "Ii"},
-                                                                            :propertyId "56442100060084"})) ; was formerly in Oulu, property id indicates that
+                                                                            :propertyId "56442100060084"})
+
+      (prop-loc/property-id-municipality-by-point (:x jakku) (:y jakku)) => (contains {:municipality "139",
+                                                                                       :name {:fi "Ii", :sv "Ii"},
+                                                                                       :propertyId "56442100060084"}))
     (fact "Jarvenpaa in border of Mantsala"
       (prop-loc/property-info-by-point (:x jarvenpaa) (:y jarvenpaa)) => (contains {:municipality "186"
                                                                                     :name {:fi "J\u00e4rvenp\u00e4\u00e4"
@@ -448,6 +452,6 @@
 
 (facts "Municipality info from KTJKii"
   (fact "Jakkukyla"
-    (->> (wfs/get-property-location-info-by-property-id "56442100060084")
+    (->> (wfs/municipality-info-by-property-id "56442100060084")
          (wfs/location-feature-to-property-info)) => {:propertyId "56442100060084" :municipality "139"
                                                       :name {:fi "Ii", :sv "Ii"}}))

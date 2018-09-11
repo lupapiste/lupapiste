@@ -14,7 +14,7 @@
             [sade.strings :as ss]
             [schema.core :as sc]
             [slingshot.slingshot :refer [try+]]
-            [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]))
+            [taoensso.timbre :refer [trace debug info warn error errorf fatal]]))
 
 ;;
 ;; Onnistuu.fi integration: Web API

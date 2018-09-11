@@ -19,4 +19,4 @@
         (throw (RuntimeException. "Abort with-temp-file block")))
       (fact "Temp file is deleted in with-temp-file block even if an exception is thrown"
         (.exists @saved-file-ref) => false))
-    (catch RuntimeException e)))
+    (catch RuntimeException _)))

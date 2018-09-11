@@ -319,9 +319,7 @@
                            :template-id id)
                     => (err :error.verdict-template-deleted))
                   (fact "Copying is allowed also for deleted templates"
-                    (let [{:keys [copy-id copy-modified copy-published
-                                  copy-deleted copy-draft copy-name
-                                  copy-category]}
+                    (let [{:keys [copy-id copy-modified copy-published copy-draft copy-name copy-category]}
                           (prefix-keys (command sipoo :copy-verdict-template
                                                 :org-id org-id
                                                 :template-id id)
@@ -723,10 +721,7 @@
      :app-id app-id}))
 
 (facts "Template conditions"
-  (let [{:keys [blank-condition draft empty-condition good-condition
-                other-condition plan1 plan2 plan3 plan4
-                remove-condition review1 review2 review3 review4
-                template-id]} space-saving-definitions]
+  (let [{:keys [plan1 plan2 plan3 remove-condition review1 review2 review3 template-id]} space-saving-definitions]
     (fact "Remove condition"
       (remove-template-condition sipoo org-id template-id remove-condition))
     (fact "Full template without attachments"
@@ -786,7 +781,7 @@
                               :verdict-id verdict-id
                               :path (map name (flatten [%1]))
                               :value %2)
-     :check-changes (fn [{changes :changes :as response} expected]
+     :check-changes (fn [{:keys [changes]} expected]
                       (fact "Check changes"
                         changes => expected)
                       (fact "Check that verdict has been updated"
@@ -798,12 +793,11 @@
                                              {}
                                              changes))))}))
 
-(facts "Verdicts"
-  (let [{:keys [blank-condition draft empty-condition good-condition
-                other-condition plan1 plan2 plan3 plan4
-                remove-condition review1 review2 review3 review4
-                template-id app-id]} space-saving-definitions]
 
+
+
+(facts "Verdicts"
+  (let [{:keys [good-condition other-condition template-id app-id]} space-saving-definitions]
     (facts "Pena fills and submits application"
       (fill-sisatila-muutos-application pena app-id)
       (command pena :submit-application :id app-id) => ok?
@@ -1166,6 +1160,7 @@
                   (fact "Verdict-section is not included"
                     (-> (open-verdict) :verdict :inclusions)
                     =not=> (contains ["verdict-section"]))
+                  (sent-emails) ;; Clear inbox
                   (fact "Sonja can publish the verdict"
                     (command sonja :publish-pate-verdict :id app-id
                              :verdict-id verdict-id)=> ok?)
@@ -1181,10 +1176,18 @@
                         => (just {:text   "Paloviranomainen"
                                   :given  pos?
                                   :status "puollettu"}))))
+                  (Thread/sleep 100) ; wait for email delivery
+                  (fact "Email notification about application state change is sent"
+                    (let [email (last-email)]
+                      (:to email) => (contains (email-for-key pena))
+                      (:subject email) => "Lupapiste: Dongdaqiao Lu, Sipoo - hankkeen tila on nyt P\u00e4\u00e4t\u00f6s annettu"))
                   (fact "Published verdict can no longer be previewed"
                     (raw sonja :preview-pate-verdict :id app-id
                          :verdict-id verdict-id)
                     => fail?)
+                  (fact "Verdicts can no longer be fetched from the backing system"
+                    (command sonja :check-for-verdict :id app-id)
+                    => (err "error.published-pate-verdicts-exist"))
                   (fact "Pena can see  published verdict"
                     (query pena :pate-verdict
                            :id app-id :verdict-id verdict-id)
@@ -1243,7 +1246,7 @@
                              :userId ronja-id
                              :roleId sipoo-general-handler-id) => ok?)
 
-                  (let [{:keys [state buildings id] {operation-id :id} :primaryOperation :as post-verdict-app} (query-application sonja app-id)]
+                  (let [{:keys [state buildings id] {operation-id :id} :primaryOperation} (query-application sonja app-id)]
                     (fact "Application state is verdictGiven"
                       state => "verdictGiven")
                     (fact "Buildings array is created, primaryOperation gets index = 1"
@@ -1431,7 +1434,7 @@
               => "Washington")
             (fact "Verdict attachment"
               (xml/get-text xml [:paatostieto :poytakirja :liite :kuvaus])
-              => "Verdict"
+              => "Permit text"
               (let [url                        (xml/get-text xml [:paatostieto :poytakirja
                                                                   :liite :linkkiliitteeseen])
                     {:keys [uri query-string]} (http-client/parse-url url)]
@@ -1440,30 +1443,38 @@
                 (http-client/form-decode query-string)
                 => {"verdict-id" verdict-id
                     "id"         app-id}
-                (fact "verdict-pdf action"
-                  (:headers(raw sonja :verdict-pdf :id app-id :verdict-id verdict-id))
-                  => (contains {"Content-Disposition" (contains (format "%s Verdict %s"
-                                                                        app-id
-                                                                        (util/to-local-date (now))))}))))))
+                (verdict-pdf-queue-test {:app-id     app-id
+                                         :verdict-id verdict-id
+                                         :verdict-name "Permit"
+                                         :contents "Permit text"})))))))
 
-        (fact "Verdict PDF attachment has been created"
-          (let [{att-id :id
-                 :as    attachment} (last (:attachments (query-application sonja app-id)))]
-            attachment
-            => (contains {:readOnly         true
-                          :locked           true
-                          :contents         "Verdict"
-                          :type             {:type-group "paatoksenteko"
-                                             :type-id    "paatos"}
-                          :applicationState "verdictGiven"
-                          :latestVersion    (contains {:contentType "application/pdf"
-                                                       :filename    (contains "Verdict")})})
-            (fact "verdict-attachment"
-              (:verdict (open-verdict))
-              => (contains {:verdict-attachment att-id}))))))
     (fact "Editing no longer allowed"
       (edit-verdict :verdict-text "New verdict text")
       => (err :error.verdict.not-draft))
     (fact "Published verdict cannot be deleted"
       (command sonja :delete-pate-verdict :id app-id
                :verdict-id verdict-id) => fail?)))
+
+(fact "Presence of backing system verdicts disables Pate commands"
+  ;; -------------------------
+  ;; Test state initialization
+  (let [{template-id :id} (init-verdict-template sipoo org-id :r)
+        application (create-and-submit-application mikko :municipality sonja-muni)
+        application-id (:id application)]
+    (command sipoo :set-verdict-template-name
+             :org-id org-id
+             :template-id template-id
+             :name "Uusi nimi")
+    (command sipoo :save-verdict-template-draft-value
+             :org-id org-id
+             :template-id template-id
+             :path [:giver]
+             :value :viranhaltija)
+    (publish-verdict-template sipoo org-id template-id) => ok?
+    (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
+    (command sonja :approve-application :id application-id :lang "fi") => ok?
+    (command sonja :check-for-verdict :id application-id) => ok?
+  ;; -------------------------
+
+    (command sonja :new-pate-verdict-draft :id application-id :template-id template-id)
+    => (err "error.backing-system-verdicts-exist")))

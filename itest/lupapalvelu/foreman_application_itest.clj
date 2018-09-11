@@ -46,18 +46,18 @@
      :hakija-company hakija-company}))
 
 (facts* "Foreman application"
-        (let [fake-application             (create-and-submit-application mikko :operation "pientalo") => truthy
-              {application-id :id}         (create-and-open-application mikko :operation "kerrostalo-rivitalo") => truthy
-              application                  (query-application mikko application-id)
-              _                            (generate-documents application mikko)
+        (let [fake-application          (create-and-submit-application mikko :operation "pientalo")                              => truthy
+              {application-id :id}      (create-and-open-application mikko :operation "kerrostalo-rivitalo")                     => truthy
+              application               (query-application mikko application-id)
+              _                         (generate-documents application mikko)
               {foreman-application-id :id
-               :as foreman-application}    (create-foreman-app teppo sonja application-id)
-              foreman-link-permit-data     (first (foreman-application :linkPermitData))
-              foreman-doc                  (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
-              _                            (command mikko :add-link-permit :id (:id fake-application) :linkPermitId application-id) => ok?
-              application                  (query-application mikko application-id)
-              link-from-foreman            (some #(when (= "tyonjohtajan-nimeaminen-v2" (:operation %)) %) (application :appsLinkingToUs))
-              foreman-applications         (query mikko :foreman-applications :id application-id) => truthy]
+               :as                    foreman-application} (create-foreman-app teppo sonja application-id)
+              foreman-link-permit-data  (first (foreman-application :linkPermitData))
+              foreman-doc               (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
+              _                         (command mikko :add-link-permit :id (:id fake-application) :linkPermitId application-id) => ok?
+              application               (query-application mikko application-id)
+              link-from-foreman         (some #(when (= "tyonjohtajan-nimeaminen-v2" (:operation %)) %) (application :appsLinkingToUs))
+              foreman-applications      (query mikko :foreman-applications :id application-id)                                   => truthy]
 
           (fact "Has two link permits (pientalo and foreman)"
             (count (:appsLinkingToUs application)) => 2)
@@ -89,14 +89,14 @@
                 (:foremanRole link-from-foreman) => "ei tiedossa")
 
           (fact "All linked Foreman applications are returned in query"
-                (let [applications (:applications foreman-applications)]
+            (let [applications (:applications foreman-applications)]
                   (count applications) => 1
                   (:id (first applications)) => foreman-application-id))
 
           (fact "Document data is copied to foreman application"
                 (fact "Hankkeen kuvaus"
-                      (let [foreman-hankkeen-kuvaus (domain/get-document-by-name foreman-application "hankkeen-kuvaus-minimum")
-                            app-hankkeen-kuvaus     (domain/get-document-by-name application "hankkeen-kuvaus")]
+                  (let [foreman-hankkeen-kuvaus (domain/get-document-by-name foreman-application "hankkeen-kuvaus-minimum")
+                        app-hankkeen-kuvaus     (domain/get-document-by-name application "hankkeen-kuvaus")]
 
                         (get-in app-hankkeen-kuvaus [:data :kuvaus :value]) => (get-in foreman-hankkeen-kuvaus [:data :kuvaus :value])))
 
@@ -104,8 +104,8 @@
                       (get-in foreman-doc [:data :kuntaRoolikoodi :value]) => "ei tiedossa")
 
                 (fact "Hakija docs are equal, except the userId"
-                      (let [hakija-doc-data         (:henkilo (:data (domain/get-document-by-name application "hakija-r")))
-                            foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija-tj")))]
+                  (let [hakija-doc-data         (:henkilo (:data (domain/get-document-by-name application "hakija-r")))
+                        foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija-tj")))]
 
                         hakija-doc-data => map?
                         foreman-hakija-doc-data => map?
@@ -114,13 +114,13 @@
 
           (fact "Foreman name index is updated"
                 (command teppo :update-doc :id (:id foreman-application) :doc (:id foreman-doc) :collection "documents"
-                         :updates [["henkilotiedot.etunimi" "foo"] ["henkilotiedot.sukunimi" "bar"] ["kuntaRoolikoodi" "erityisalojen ty\u00F6njohtaja"]]) => ok?
+                         :updates [["henkilotiedot.etunimi" "Veijo"] ["henkilotiedot.sukunimi" "Viranomainen"] ["kuntaRoolikoodi" "vastaava ty\u00F6njohtaja"]]) => ok?
 
                 (let [application-after-update (query-application teppo (:id foreman-application))]
                   (:foreman foreman-application) => ss/blank?
                   (:foremanRole foreman-application) => ss/blank?
-                  (:foreman application-after-update) => "bar foo"
-                  (:foremanRole application-after-update) => "erityisalojen ty\u00F6njohtaja"))
+                  (:foreman application-after-update) => "Viranomainen Veijo"
+                  (:foremanRole application-after-update) => "vastaava ty\u00F6njohtaja"))
 
           (fact "Can't submit foreman app because subtype is not selected"
             (get (query teppo :application-submittable :id foreman-application-id) :errors) => (just [(fail :error.foreman.type-not-selected)])
@@ -150,8 +150,8 @@
           (facts "Auths without foremanEmail"               ; tested after verdict, when it's possible to create foreman-app as writer
             (let [{foreman-id :id :as resp} (command mikko :create-foreman-application :id application-id
                                                      :taskId "" :foremanRole "ei tiedossa" :foremanEmail "")
-                  orig-app (query-application mikko application-id)
-                  foreman-app (query-application mikko foreman-id)]
+                  orig-app                  (query-application mikko application-id)
+                  foreman-app               (query-application mikko foreman-id)]
               resp => ok?
               (fact "original app"
                 (->> (:auth orig-app)
@@ -163,8 +163,8 @@
                      (map #(select-keys % [:username :role]))) => (just [{:username "mikko@example.com" :role "writer"}]))))
 
           ;; delete verdict for next steps
-          (let [app (query-application mikko application-id)
-                verdict-id (-> app :verdicts first :id)
+          (let [app         (query-application mikko application-id)
+                verdict-id  (-> app :verdicts first :id)
                 verdict-id2 (-> app :verdicts second :id)]
             (command sonja :delete-verdict :id application-id :verdictId verdict-id) => ok?
             (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
@@ -189,21 +189,22 @@
                        (comment-application teppo foreman-application-id) => fail?))
 
           (facts "Special foreman/designer verdicts"
-                 (let [xml-file           (fn [filename] (-> filename io/resource slurp
+            (let [foreman-application     (query-application sonja foreman-application-id)
+                  xml-file                (fn [filename] (-> filename io/resource slurp
                                                              (xml/parse-string "utf-8")
                                                              cr/strip-xml-namespaces))
-                       special            (-> "krysp/verdict-r-foremen.xml"
-                                              xml-file
-                                              (enlive/at [:tunnus enlive/any-node]
-                                                         (enlive/replace-vars {:application-id (:id application)})))
-                       typical            (xml-file "krysp/dev/verdict.xml")
-                       ;; LPK-1120: False positives on (at least) some non-special foreman verdicts.
-                       old-false-positive (-> "krysp/old-false-positive-special-foreman-verdict.xml"
-                                              xml-file
-                                              (enlive/at [:tunnus enlive/any-node]
-                                                         (enlive/replace-vars {:application-id (:id application)})))
-                       normalized         (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application special)
-                       poytakirja         (-> normalized (enlive/select [:paatostieto :Paatos :poytakirja :> enlive/any-node]))]
+                  special            (-> "krysp/verdict-r-foremen.xml"
+                                         xml-file
+                                         (enlive/at [:tunnus enlive/any-node]
+                                                    (enlive/replace-vars {:application-id (:id application)})))
+                  typical            (xml-file "krysp/dev/verdict.xml")
+                  ;; LPK-1120: False positives on (at least) some non-special foreman verdicts.
+                  old-false-positive (-> "krysp/old-false-positive-special-foreman-verdict.xml"
+                                         xml-file
+                                         (enlive/at [:tunnus enlive/any-node]
+                                                    (enlive/replace-vars {:application-id (:id application)})))
+                  normalized         (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application special)
+                  poytakirja         (-> normalized (enlive/select [:paatostieto :Paatos :poytakirja :> enlive/any-node]))]
                    (fact "Special verdict"
                          (verdict/special-foreman-designer-verdict? foreman-application special) => truthy)
                    (fact "Typical verdict"
@@ -213,35 +214,35 @@
                    (fact "Paatostieto has replaced the old one"
                           (count (enlive/select normalized [:paatostieto])) => 1)
                    (fact "Paatostieto is in the right place"
-                         (let [elems (-> normalized (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))
-                               elems (mapv :tag elems)
-                               index (.indexOf elems :paatostieto)]
+                     (let [elems (-> normalized (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))
+                           elems (mapv :tag elems)
+                           index (.indexOf elems :paatostieto)]
                            (subvec elems (dec index) (+ index 2))
                            => [:katselmustieto
                                :paatostieto
                                :lisatiedot]))
                    (fact "Poytakirja contents are OK"
-                         (reduce (fn [acc m] (assoc acc (:tag m) (-> m :content))) {} poytakirja)
-                         => {:paatoskoodi ["hyv\u00e4ksytty"]
-                             :paatoksentekija [""]
-                             :paatospvm ["2015-11-29"]
-                             :liite [{:tag :kuvaus
-                                      :attrs nil
-                                      :content []}
-                                     {:tag :linkkiliitteeseen
-                                      :attrs nil
-                                      :content ["http://localhost:8000/dev/sample-attachment.txt"]}]})
+                     (reduce (fn [acc m] (assoc acc (:tag m) (-> m :content))) {} poytakirja)
+                     => {:paatoskoodi     ["hyv\u00e4ksytty"]
+                         :paatoksentekija [""]
+                         :paatospvm       ["2015-11-29"]
+                         :liite           [{:tag     :kuvaus
+                                            :attrs   nil
+                                            :content []}
+                                           {:tag     :linkkiliitteeseen
+                                            :attrs   nil
+                                            :content ["http://localhost:8000/dev/sample-attachment.txt"]}]})
                    (facts "Other paatostieto placements"
-                         (let [minispec (enlive/at special
-                                            [:paatostieto] nil
-                                            [:lisatiedot] nil
-                                            [:liitetieto] nil
-                                            [:asianTiedot] nil)]
+                     (let [minispec (enlive/at special
+                                               [:paatostieto] nil
+                                               [:lisatiedot] nil
+                                               [:liitetieto] nil
+                                               [:asianTiedot] nil)]
                            (fact "Paatostieto will be last element"
-                                 (let [norm (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application minispec)
-                                       elems (-> norm (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))]
+                             (let [norm  (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application minispec)
+                                   elems (-> norm (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))]
                                    (-> elems last :tag) => :paatostieto))
-                           (for [e [:muistiotieto :lisatiedot :liitetieto :kayttotapaus :asianTiedot]
+                           (for [e    [:muistiotieto :lisatiedot :liitetieto :kayttotapaus :asianTiedot]
                                  :let [norm (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application minispec)
                                        elems (-> norm (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))]]
                              (do (fact (str e " is last") (-> elems last :tag) => e)
@@ -406,12 +407,9 @@
 (facts* "Auths and invites"
   (let [apikey pena
         {application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
-        {:keys [hakija1 hakija-no-auth hakija-contact-person hakija-company]} (add-invites apikey application-id)
+        _ (add-invites apikey application-id)
         _ (command apikey :submit-application :id application-id)
         _ (give-verdict sonja application-id :verdictId "321-2016")
-
-        application            (query-application apikey application-id)
-
         has-auth? (fn [email auth]
                         (or (some (partial = email) (map :username auth)) false))]
     (sent-emails) ; clear email box
@@ -638,7 +636,7 @@
        (fact "foreman can NOT upload a new version to applicants attachment on foreman application"
          (upload-attachment foreman foreman-app-id {:id attachment-by-applicant} false) => attachment-by-applicant)
 
-       (let [{actions-by-id :actionsById :as resp} (query foreman :allowed-actions-for-category :category "attachments" :id foreman-app-id)
+       (let [{actions-by-id :actionsById} (query foreman :allowed-actions-for-category :category "attachments" :id foreman-app-id)
              actions-for-foreman-att (get actions-by-id (keyword attachment-by-foreman))
              actions-for-applicant-att (get actions-by-id (keyword attachment-by-applicant))
              actions [:upload-attachment :delete-attachment :delete-attachment-version :rotate-pdf

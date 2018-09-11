@@ -5,10 +5,8 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :refer [safe-update-in]]
-            [clojure.test.check :as tc]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
-            [clojure.test.check.properties :as prop]
             [clojure.test :refer [is]]
             [sade.schema-generators :as ssg]
             [sade.schema-utils :as ssu]
@@ -174,7 +172,12 @@
                           :create-application
                           :document-states
                           :authorized-to-apply-submit-restriction-to-other-auths
-                          :verdict-pdf}
+                          ;; Pate
+                          :verdict-pdf
+                          :published-pate-verdict
+                          :pate-verdict-tab
+                          :pate-contract-tab
+                          :pate-verdicts}
         user {:id "user123"
               :role "authority"}
         application {:organization "999-R"
@@ -232,7 +235,7 @@
                            :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
                            :application-organization-archive-enabled
                            ;; pate
-                           :pate-verdicts :pate-verdict :pate-verdict-tab :pate-contract-tab
+                           :pate-verdicts :pate-verdict :pate-verdict-tab :pate-contract-tab :published-pate-verdict
                            ;; raw
                            :download-all-attachments :download-attachments
                            :pdf-export

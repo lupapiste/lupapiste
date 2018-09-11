@@ -1,6 +1,5 @@
 (ns lupapalvelu.child-to-attachment-test
-  (:require [clojure.java.io :as io]
-            [sade.files :as files]
+  (:require [sade.files :as files]
             [lupapalvelu.child-to-attachment :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
@@ -8,8 +7,7 @@
             [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]])
-  (:import (java.io File)))
+            [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]))
 
 (testable-privates lupapalvelu.child-to-attachment build-attachment-options)
 

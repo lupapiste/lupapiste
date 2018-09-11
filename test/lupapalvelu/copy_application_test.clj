@@ -119,10 +119,10 @@
      (facts new-application-copy
        (facts "No options specified"
          (let [new-app (new-application-copy source-app user organization created {})
-               [new old _] (diff new-app source-app)]
+               [new _ _] (diff new-app source-app)]
 
            (fact "the application is copied almost verbatim"
-             (let [[only-new only-old _] (diff (dissoc-ids-and-timestamps new-app)
+             (let [[only-new _ _] (diff (dissoc-ids-and-timestamps new-app)
                                                (dissoc-ids-and-timestamps source-app))]
                    (keys only-new) ; gives the same result as (keys only-old)
                    => (just [:auth :attachments :comments :history] :in-any-order))
@@ -228,7 +228,7 @@
 
    (facts "handle-copy-action"
      (with-redefs [lupapalvelu.copy-application/empty-document-copy
-                   (fn [document _ & _]
+                   (fn [_ _ & _]
                      {:cleared? true})]
        (let [application {:created 12345
                           :schema-version 1
@@ -238,11 +238,11 @@
              pt-document {:schema-info {:name "paatoksen-toimitus-rakval"}
                           :data (tools/create-document-data (schemas/get-schema 1 "hakija-r"))}]
          (fact "documents with :copy-action defined as :clear in their schema are cleared"
-           (-> (handle-copy-action pt-document application {} {}) :cleared?)
+           (-> (handle-copy-action pt-document application {}) :cleared?)
            => true)
 
          (fact "documents with no specified :copy-action are copied as such"
-           (handle-copy-action hakija-document application {} {}) => hakija-document))))
+           (handle-copy-action hakija-document application {}) => hakija-document))))
 
    (facts "clear-personal-information"
      (let [application {:created 12345

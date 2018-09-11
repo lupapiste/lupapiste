@@ -2,14 +2,13 @@
 <html>
 <body>
   <section class="page welcome_page" id="login">
-    <!--[if lt IE 9 ]> <span class="old-ie"/> <![endif]-->
     <div class="container">
       <div class="welcome_sections">
         <div id="login-form" class="welcome_section">
           <section class="welcome-login-section">
             <h3 data-bind="ltext: 'welcome.login.title'"></h3>
             <p data-bind="ltext: 'welcome.login.desc'"></p>
-            <form data-bind="submit: handleLoginSubmit" class="welcome-login-form">
+            <form data-bind="submit: handleLoginSubmit" class="welcome-login-form" id="welcome-login-form">
               <div class="form-grid no-padding">
                 <div class="row">
                   <div class="col-2">

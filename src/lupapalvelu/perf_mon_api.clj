@@ -1,5 +1,5 @@
 (ns lupapalvelu.perf-mon-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error fatal]]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [sade.core :refer :all]
@@ -38,7 +38,7 @@
   (let [ua (ss/limit (get-in command [:web :user-agent]) 256)
         ts (java.util.Date.)
         timing-events (->
-                        (into {} (filter (fn [[k v]] (number? v)) timing))
+                        (into {} (filter (fn [[_ v]] (number? v)) timing))
                         (select-keys [:navigationStart
                                       :unloadEventStart
                                       :unloadEventEnd

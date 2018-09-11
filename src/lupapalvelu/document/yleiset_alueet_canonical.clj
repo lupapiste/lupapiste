@@ -1,13 +1,11 @@
 (ns lupapalvelu.document.yleiset-alueet-canonical
   (:require [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.domain :as domain]
             [sade.util :as util]
             [sade.strings :as ss]
-            [sade.core :refer :all]
-            [clojure.walk :as walk]))
+            [sade.core :refer :all]))
 
-(defn- get-handler [{handlers :handlers :as application}]
+(defn- get-handler [{:keys [handlers]}]
   (if-let [general-handler (util/find-first :general handlers)]
     {:henkilotieto {:Henkilo {:nimi {:etunimi (:firstName general-handler) :sukunimi (:lastName general-handler)}}}}
     empty-tag))
@@ -187,24 +185,29 @@
 ;; Note: Agreed with Vianova 5.3.2014 that:
 ;;       Mainostuslupa's mainostusaika is put into alku-pvm and loppu-pvm, and tapahtuma-aika into toimintajaksotieto.
 ;;       On the contrary, Viitoituslupa's tapahtuma-aika is put into alku-pvm and loppu-pvm.
-(defn- get-alku-loppu-pvm [application documents-by-type config]
-  (let [main-viit-tapahtuma (-> documents-by-type get-main-viit-tapahtuma-info vals first)
-        tyoaika-doc (when (:tyoaika config) (-> (util/some-key documents-by-type :tyoaika :tyo-aika-for-jatkoaika) first :data))
-        alku-pvm (if (:dummy-alku-and-loppu-pvm config)
-                   (util/to-xml-date (:submitted application))
-                   (if (:mainostus-viitoitus-tapahtuma-pvm config)
-                     (util/to-xml-date-from-string (util/some-key main-viit-tapahtuma :mainostus-alkaa-pvm :tapahtuma-aika-alkaa-pvm))
-                     (if (:tyoaika documents-by-type)
-                       (util/to-xml-date (:tyoaika-alkaa-ms tyoaika-doc))
-                       (util/to-xml-date-from-string (:tyoaika-alkaa-pvm tyoaika-doc)))))
-        loppu-pvm (if (:dummy-alku-and-loppu-pvm config)
-                    (util/to-xml-date (:modified application))
-                    (if (:mainostus-viitoitus-tapahtuma-pvm config)
-                      (util/to-xml-date-from-string (util/some-key main-viit-tapahtuma :mainostus-paattyy-pvm :tapahtuma-aika-paattyy-pvm))
-                      (if (:tyoaika documents-by-type)
-                        (util/to-xml-date (:tyoaika-paattyy-ms tyoaika-doc))
-                        (util/to-xml-date-from-string (:tyoaika-paattyy-pvm tyoaika-doc)))))]
-    [alku-pvm loppu-pvm]))
+(defn- get-alku-loppu-pvm
+  "Returns [alku-pvm loppu-pvm]"
+  [application documents-by-type {:keys [tyoaika dummy-alku-and-loppu-pvm
+                                         mainostus-viitoitus-tapahtuma-pvm]}]
+  (cond dummy-alku-and-loppu-pvm
+        [(util/to-xml-date (:submitted application)) (util/to-xml-date (:modified application))]
+
+        tyoaika
+        (let [tyoaika-doc (-> (util/some-key documents-by-type :tyoaika :tyo-aika-for-jatkoaika)
+                              first :data)]
+          [(or (util/to-xml-date (:tyoaika-alkaa-ms tyoaika-doc))
+               (util/to-xml-date-from-string (:tyoaika-alkaa-pvm tyoaika-doc)))
+           (or (util/to-xml-date (:tyoaika-paattyy-ms tyoaika-doc))
+               (util/to-xml-date-from-string (:tyoaika-paattyy-pvm tyoaika-doc)))])
+
+        mainostus-viitoitus-tapahtuma-pvm
+        (let [main-viit-tapahtuma (-> documents-by-type get-main-viit-tapahtuma-info vals first)]
+          [(util/to-xml-date-from-string (util/some-key main-viit-tapahtuma
+                                                        :mainostus-alkaa-pvm
+                                                        :tapahtuma-aika-alkaa-pvm))
+           (util/to-xml-date-from-string (util/some-key main-viit-tapahtuma
+                                                        :mainostus-paattyy-pvm
+                                                        :tapahtuma-aika-paattyy-pvm))])))
 
 (defn- get-canonical-body [application operation-name-key config documents-by-type]
   ;;
@@ -295,7 +298,9 @@
         ;; When operation is missing, setting kaivulupa as the operation (app created via op tree)
         operation-name-key (or (-> link-permit-data :operation keyword) :ya-katulupa-vesi-ja-viemarityot)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
-        config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
+        config (assoc (or (configs-per-permit-name operation-name-key)
+                          (configs-per-permit-name permit-name-key))
+                      :tyoaika true)
         [alku-pvm loppu-pvm] (get-alku-loppu-pvm application documents-by-type config)
         hankkeen-kuvaus (-> documents-by-type :hankkeen-kuvaus-jatkoaika first :data :kuvaus)
         lisaaikatieto (when alku-pvm {:Lisaaika {:alkuPvm alku-pvm
@@ -319,7 +324,7 @@
 
 (defn- get-ya-katselmus [katselmus]
   (let [data (tools/unwrapped (:data katselmus))
-        {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
+        {:keys [katselmuksenLaji vaadittuLupaehtona]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat]} (:katselmus data)
         huomautukset (-> data :katselmus :huomautukset)
         task-name (:taskname katselmus)]
@@ -345,7 +350,7 @@
                                                             :toteaja (:toteaja huomautukset))
                                                           (select-keys huomautukset [:maaraAika :toteamisHetki])))}})))))
 
-(defn katselmus-canonical [application katselmus lang user]
+(defn katselmus-canonical [application katselmus lang]
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
         operation-name-key (-> application :primaryOperation :name keyword)

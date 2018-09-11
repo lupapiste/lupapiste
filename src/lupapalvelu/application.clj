@@ -1,5 +1,5 @@
 (ns lupapalvelu.application
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warnf error fatal]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clojure.set :refer [difference]]
@@ -35,7 +35,7 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [sade.coordinate :as coord]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -64,14 +64,6 @@
   (let [op-subtypes (op/get-primary-operation-metadata {:primaryOperation op} :subtypes)
         permit-subtypes (permit/permit-subtypes permit-type)]
     (distinct (concat op-subtypes permit-subtypes))))
-
-
-(defn tos-history-entry [tos-function timestamp user & [correction-reason]]
-  {:pre [(map? tos-function)]}
-  {:tosFunction tos-function
-   :ts timestamp
-   :user (usr/summary user)
-   :correction correction-reason})
 
 (defn handler-history-entry [handler timestamp user]
   {:handler handler
@@ -123,6 +115,9 @@
 
 (defn verdict-given? [{:keys [state]}]
   (boolean (states/post-verdict-states (keyword state))))
+
+(defn has-published-pate-verdicts? [{:keys [pate-verdicts]}]
+  (->> pate-verdicts (filter :published) not-empty boolean))
 
 (defn designer-app? [application]
   (= :suunnittelijan-nimeaminen (-> application :primaryOperation :name keyword)))
@@ -181,7 +176,7 @@
               (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
           schema-names))
 
-(defn enrich-application-handlers [application {roles :handler-roles :as organization}]
+(defn enrich-application-handlers [application {roles :handler-roles}]
   (update application :handlers (partial map #(merge (util/find-by-id (:roleId %) roles) %))))
 
 ; Seen updates
@@ -340,6 +335,17 @@
 (defn- enrich-tos-function-name [{tos-function :tosFunction org-id :organization :as application}]
   (assoc application :tosFunctionName (:name (tos/tos-function-with-name tos-function org-id))))
 
+(defn- remove-draft-foreman-links [user {apps-linking-to-us :appsLinkingToUs :as application}]
+  (let [application-authority? (auth/application-authority? application user)
+        application-writer? (auth/has-auth-role? application (:id user) :writer)]
+    (if (and application-authority? (not application-writer?))
+      (update application :appsLinkingToUs
+              (util/fn->> (remove (fn [link-model]
+                                    (and (util/=as-kw (:operation link-model) :tyonjohtajan-nimeaminen-v2)
+                                         (= (:state link-model) "draft"))))
+                          not-empty))
+      application)))
+
 (defn post-process-app [{:keys [user] :as command}]
   (->> (with-auth-models command)
        with-allowed-attachment-types
@@ -347,6 +353,7 @@
        enrich-primary-operation-with-metadata
        att/post-process-attachments
        meta-fields/enrich-with-link-permit-data
+       (remove-draft-foreman-links user)
        (meta-fields/with-meta-fields user)
        action/without-system-keys
        (process-documents-and-tasks user)
@@ -482,7 +489,7 @@
   {:pre [(pos? created) (string? organization) (states/all-states (keyword state))]}
   (let [tos-function-map (tos/tos-function-with-name tosFunction organization)]
     {:history (cond->> [(app-state/history-entry state created user)]
-                tos-function-map (concat [(tos-history-entry tos-function-map created user)]))}))
+                tos-function-map (concat [(tos/tos-history-entry tos-function-map created user)]))}))
 
 (defn permit-type-and-operation-map [operation-name created]
   (let [op (make-op operation-name created)
@@ -508,7 +515,7 @@
                   (make-attachments created primaryOperation organization state tosFunction)
                   [])})
 
-(defn application-documents-map [{:keys [infoRequest created primaryOperation auth] :as application} user organization manual-schema-datas]
+(defn application-documents-map [{:keys [infoRequest created primaryOperation] :as application} user organization manual-schema-datas]
   {:pre [(pos? created) (map? primaryOperation)]}
   {:documents (if-not infoRequest
                 (make-documents user created organization primaryOperation application manual-schema-datas)
@@ -641,7 +648,7 @@
     ;; Cannot update existing array and push new items into it same time with one update
     (when (not-empty attachment-updates) (action/update-application command attachment-updates))))
 
-(defn change-primary-operation [{:keys [application] :as command} id secondaryOperationId]
+(defn change-primary-operation [{:keys [application] :as command} secondaryOperationId]
   (let [old-primary-op                       (:primaryOperation application)
         old-secondary-ops                    (:secondaryOperations application)
         new-primary-op                       (util/find-first #(= secondaryOperationId (:id %)) old-secondary-ops)
@@ -695,6 +702,31 @@
                                          :apptype (get-in link-application [:primaryOperation :name])}}
                         :upsert true)))
 
+(defn get-lp-ids-by-kuntalupatunnus [kuntalupatunnus]
+  (map :id (mongo/select :applications {:verdicts.kuntalupatunnus kuntalupatunnus} {:_id 1})))
+
+(defn update-app-links!
+  "To be run after Vantaa-conversion for each imported kuntalupatunnus. Takes a kuntalupatunnus
+  and updates (i.e. removes and re-links) its references in app-links collection so that the links point to real Lupapiste applications.
+  E.g. '14-0633-13-TJO|LP-092-2018-90011' -> 'LP-092-2018-90012|LP-92-2018-90011' etc.
+  Note! The kuntalupatunnus given as a parameter needs to be in the so-called database format."
+  [kuntalupatunnus]
+  (let [links-to-app (mongo/select :app-links {:_id (re-pattern kuntalupatunnus)}) ;; Fetch all app-links to this id
+        update-info (for [link links-to-app]
+                      (let [app-id (->> link :link (filter #(not= kuntalupatunnus %)) first)]
+                        {:application (mongo/select-one :applications {:_id app-id}) ;; The applications to which the link points
+                         :link-permit-id (-> kuntalupatunnus get-lp-ids-by-kuntalupatunnus first) ;; The new Lupapiste id for kuntalupatunnus
+                         :app-link-id (:id link)}))] ;; The id for the link document (format: "14-0633-13-TJO|LP-092-2018-90011")
+    (doseq [item update-info
+            :when (ss/not-blank? (:link-permit-id item))]
+      (let [{:keys [app-link-id application link-permit-id]} update-info]
+        (if (and (not-any? nil? (vals item)))
+          (do
+            (info (format "Updating app-link: %s -> %s" app-link-id (str link-permit-id "|" (:id application))))
+            (mongo/remove app-link-id)
+            (do-add-link-permit application link-permit-id)))
+        (error (format "Could not update app-link for permit %s / %s" kuntalupatunnus link-permit-id))))))
+
 ;; Submit
 (defn submit [{:keys [application created user] :as command} ]
   (let [transitions (remove nil?
@@ -707,7 +739,7 @@
                                               meta-fields/enrich-with-link-permit-data
                                               (dissoc :id)
                                               (assoc :_id (:id application))))
-    (catch com.mongodb.DuplicateKeyException e
+    (catch com.mongodb.DuplicateKeyException _
       ; This is ok. Only the first submit is saved.
       )))
 
@@ -742,8 +774,7 @@
                 ((change-application-state-targets application) (keyword new-state)))
     (fail :error.illegal-state)))
 
-(defn application-org-authz-users
-  [{org-id :organization :as application} org-authz]
+(defn application-org-authz-users [{org-id :organization} org-authz]
   (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
@@ -758,7 +789,7 @@
 (defn- remove-app-links [id]
   (mongo/remove-many :app-links {:link {$in [id]}}))
 
-(defn cancel-inforequest [{:keys [created user data application] :as command}]
+(defn cancel-inforequest [{:keys [created user application] :as command}]
   {:pre [(seq (:application command))]}
   (action/update-application command (app-state/state-transition-update :canceled created application user))
   (remove-app-links (:id application))

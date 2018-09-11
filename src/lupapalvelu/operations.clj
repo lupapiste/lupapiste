@@ -1,5 +1,5 @@
 (ns lupapalvelu.operations
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error fatal]]
             [schema.core :as sc]
             [sade.util :as util]
             [sade.core :refer :all]
@@ -209,7 +209,7 @@
 
 (def- common-maanmittaus-schemas ["maksaja" "kiinteisto"])
 
-(def- common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka"])
+(def- common-poikkeamis-schemas ["hankkeen-kuvaus" "paatoksen-toimitus-rakval" "maksaja" "poikkeusasian-rakennuspaikka"])
 
 (def- common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
 
@@ -500,12 +500,12 @@
                 :asianhallinta             true}
    })
 
-(defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
+(defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype}]
   (if (= :tyonjohtaja-ilmoitus (keyword subtype))
     states/tj-ilmoitus-state-graph
     states/tj-hakemus-state-graph))
 
-(defn- state-machine-resolver [{subtype :permitSubtype :as application}]
+(defn- state-machine-resolver [{subtype :permitSubtype}]
   (if (= :muutoslupa (keyword subtype))
     states/r-muutoslupa-state-graph
     states/full-application-state-graph))

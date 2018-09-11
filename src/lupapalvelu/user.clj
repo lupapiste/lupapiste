@@ -12,6 +12,7 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.user-enums :as user-enums]
+            [lupapiste-commons.ring.session-timeout :as session-timeout]
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer [def- ok fail fail! now]]
@@ -194,7 +195,7 @@
   [user]
   (dissoc user :private))
 
-(defn create-handler [handler-id role-id {user-id :id first-name :firstName last-name :lastName :as user}]
+(defn create-handler [handler-id role-id {user-id :id first-name :firstName last-name :lastName}]
   {:id        (or handler-id (mongo/create-id))
    :roleId    role-id
    :userId    user-id
@@ -291,7 +292,7 @@
 
 (defn organization-ids
   "Returns user's organizations as a set of strings"
-  [{org-authz :orgAuthz :as user}]
+  [{org-authz :orgAuthz}]
   (->> org-authz keys (map name) set))
 
 (defn get-organizations
@@ -469,10 +470,12 @@
         query            (limit-organizations (users-for-datatables-query base-query params))
         query-total      (mongo/count :users query)
         users            (mongo/with-collection "users"
-                                                (query/find query)
-                                                (query/fields [:email :firstName :lastName :role :orgAuthz :enabled])
-                                                (query/skip (util/->int (:start params) 0))
-                                                (query/limit (util/->int (:length params) 16)))]
+                           (query/find query)
+                           (query/fields (cond-> [:email :firstName :lastName
+                                                  :role :orgAuthz :enabled]
+                                           (admin? caller) (conj :allowDirectMarketing)))
+                           (query/skip (util/->int (:start params) 0))
+                           (query/limit (util/->int (:length params) 16)))]
     {:rows    users
      :total   base-query-total
      :display query-total
@@ -795,6 +798,17 @@
       (= s "oirAuthority") "oir"
       (= s "authority") (resolve-authority-page user)
       :else (csk/->kebab-case s))))
+
+(defn merge-login-cookie [{{user :user} :session :as response}]
+  (if (:role user)
+    (assoc-in response
+              [:cookies "lupapiste-login"]
+              (merge
+                {:value (str "/app/" (name (get user :language i18n/default-lang)) "/" (applicationpage-for user))
+                 :max-age (int (/ (session-timeout/get-session-timeout {:session {:user user}}) 1000))
+                 :path "/"}
+                (env/value :cookie)))
+    response))
 
 (defn user-in-role [user role & params]
   (merge (apply hash-map params) (assoc (summary user) :role role)))

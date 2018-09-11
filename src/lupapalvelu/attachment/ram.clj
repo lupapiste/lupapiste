@@ -71,7 +71,7 @@
   (when (find-by-ram-link attachment-id attachments)
     (fail :error.ram-linked)))
 
-(defn- make-ram-attachment [{:keys [id op groupType target type contents scale size] :as base-attachment} application created]
+(defn- make-ram-attachment [{:keys [id op groupType target type contents scale size]} application created]
   (->> (att/create-attachment-data application {:created created
                                                 :target target
                                                 :group {:operations op :groupType groupType}

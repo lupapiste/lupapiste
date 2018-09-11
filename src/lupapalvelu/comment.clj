@@ -1,11 +1,15 @@
 (ns lupapalvelu.comment
   (:require [monger.operators :refer :all]
             [clojure.set :refer [rename-keys]]
-            [sade.util :as util]
             [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.comment-html :as comment-html]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.pdf.html-template-common :as common]
+            [lupapalvelu.pdf.html-muuntaja-client :as muuntaja]))
 
 (defn- enrich-attachment-comment [attachments {{target-type :type target-id :id :as target} :target :as comment}]
   (if (and (= (keyword target-type) :attachment) target-id)
@@ -54,3 +58,14 @@
           :answered (when (usr/applicant? user) {$set {:state :info}})
 
           nil)))))
+
+(defn get-comments-as-pdf [lang application]
+  (let [org (organization/get-organization (:organization application))
+        {body :body} (comment-html/comment-html lang org application)
+        header (common/apply-page common/basic-header)
+        footer (common/apply-page common/basic-application-footer application)]
+    (muuntaja/convert-html-to-pdf (:id application)
+                                  "conversation-pdf"
+                                  body
+                                  header
+                                  footer)))

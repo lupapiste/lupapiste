@@ -89,6 +89,20 @@
         (boolean (and (re-matches key-pattern key) (< (clojure.core/count key) 800)))))
     false))
 
+(defn ^{:perfmon-exclude true} escape-key [k]
+  (if (string? k)
+    (-> (ss/replace k "." "_DOT_")
+        (ss/replace "$" "_DOLLAR_")
+        (ss/replace "\u0000" "_NULL_"))
+    k))
+
+(defn ^{:perfmon-exclude true} unescape-key [k]
+  (if (string? k)
+    (-> (ss/replace k "_DOT_" ".")
+        (ss/replace "_DOLLAR_" "$")
+        (ss/replace "_NULL_" "\u0000"))
+    k))
+
 (defn ^{:perfmon-exclude true} operator? [s]
   (contains? operators s))
 
@@ -166,11 +180,11 @@
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
   ([collection data] (insert collection data default-write-concern))
-  ([collection data concern] (mc/insert (get-db) collection (with-_id (remove-null-chars data))) nil))
+  ([collection data _] (mc/insert (get-db) collection (with-_id (remove-null-chars data))) nil))
 
 (defn insert-batch
   ([collection data] (insert-batch collection data default-write-concern))
-  ([collection data concern] (mc/insert-batch (get-db) collection (map (comp with-_id remove-null-chars) data))))
+  ([collection data _] (mc/insert-batch (get-db) collection (map (comp with-_id remove-null-chars) data))))
 
 (defn by-id
   ([collection id]
@@ -324,17 +338,15 @@
     (let [conf (env/value :mongodb)
           db   (:dbname conf)
           user (-> conf :credentials :username)
-          pw   (-> conf :credentials :password)
-          ssl  (:ssl conf)]
-      (connect! server-list db user pw ssl)))
+          pw   (-> conf :credentials :password)]
+      (connect! server-list db user pw)))
   ([^String host ^Long port]
     (let [conf (env/value :mongodb)
           dbname   (:dbname conf)
           user (-> conf :credentials :username)
-          pw   (-> conf :credentials :password)
-          ssl  (:ssl conf)]
-      (connect! [(m/server-address host port)] dbname user pw ssl)))
-  ([servers dbname username password ssl]
+          pw   (-> conf :credentials :password)]
+      (connect! [(m/server-address host port)] dbname user pw)))
+  ([servers dbname username password]
     (let [servers (if (string? servers)
                     (let [[host port] (clojure.string/split servers #":")]
                       [(m/server-address host (Long/parseLong port))])

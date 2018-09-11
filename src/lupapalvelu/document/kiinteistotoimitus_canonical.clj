@@ -1,8 +1,7 @@
 (ns lupapalvelu.document.kiinteistotoimitus-canonical
   (:require [clojure.walk :as walk]
             [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
-            [lupapalvelu.document.tools :as tools ]
-            [lupapalvelu.permit :as permit]
+            [lupapalvelu.document.tools :as tools]
             [sade.strings :as str]
             [sade.util :as util]))
 
@@ -24,14 +23,14 @@
 (defmulti kiinteistonmuodostus-details (fn [name _] name))
 
 (defmethod kiinteistonmuodostus-details :default
-  [_ doc])
+  [_ _])
 
 (defmethod kiinteistonmuodostus-details "lohkominen-tonttijako"
-  [_ doc]
+  [_ _]
   {:lohkomisenTyyppi "Tonttijaon mukainen tontti"})
 
 (defmethod kiinteistonmuodostus-details "lohkominen-ohjeellinen"
-  [_ doc]
+  [_ _]
   {:lohkomisenTyyppi "Ohjeellisen tonttijaon mukainen rakennuspaikka"})
 
 (defmulti operation-details (fn [doc]

@@ -22,8 +22,7 @@
 (defn- stringify-keys [{:keys [value] :as job}]
   (when job
     (->> value
-         (map (fn [[k v]] [(name k) v]))
-         (into {})
+         (reduce-kv #(assoc %1 (mongo/unescape-key (name %2)) %3) {})
          (assoc job :value))))
 
 (defn- find-job [^String id]
@@ -36,8 +35,11 @@
     (-> (select-keys job [:id :version :status :value])
         (update-in [:id] str))))
 
-(defn- store-in-db [job]
-  (mongo/insert :jobs job))
+(defn- store-in-db [{:keys [value] :as job}]
+  (->> (if (map? value)
+         (assoc job :value (reduce-kv #(assoc %1 (mongo/escape-key %2) %3) {} value))
+         job)
+       (mongo/insert :jobs)))
 
 (defn start [initial-value]
   (let [job (create-job initial-value)]
@@ -48,7 +50,9 @@
   (let [old-job (find-job id)
         new-value (apply f (:value old-job) args)
         new-job (assoc old-job :version (inc (:version old-job))
-                               :value new-value
+                               :value (if (map? new-value)
+                                        (reduce-kv #(assoc %1 (mongo/escape-key (name %2)) %3) {} new-value)
+                                        new-value)
                                :status (check-status new-value))]
     (mongo/update-by-id :jobs (:id old-job) {$set (dissoc new-job :id)})
     (:version new-job)))
@@ -56,7 +60,7 @@
 (defn update-by-id [job-id sub-task-id sub-task-status]
   (or (let [new-job (mongo/update-one-and-return :jobs
                                                  {:_id (ObjectId. job-id)}
-                                                 {$set {(str "value." sub-task-id) sub-task-status}
+                                                 {$set {(str "value." (mongo/escape-key sub-task-id)) sub-task-status}
                                                   $inc {:version 1}}
                                                  :fields [:version :value :status])]
         (-> (if (and (= :done (check-status (:value new-job)))

@@ -50,4 +50,20 @@
                                                 :status "done"
                                                 :value {id1 {:status "error"} id2 {:status "error"}}
                                                 :version 3}
+                                          :result :update}))
+
+    (fact "value with mongo-incompatible keys works"
+      (let [id3 "$foo.bar.baz"
+            id4 "boo.$.mur"
+            j3 (job/start {id3 {:status :pending}
+                           id4 {:status :pending}})]
+        (job/update-by-id (:id j3) id3 {:status :running}) => 1
+        (job/update-by-id (:id j3) id3 {:status :done}) => 2
+        (job/update (:id j3) assoc id4 {:status :running}) => 3
+        (job/update (:id j3) assoc id4 {:status :done}) => 4
+        (job/status (:id j3) 1 10000) => {:job {:id (:id j3)
+                                                :status "done"
+                                                :value {id3 {:status "done"}
+                                                        id4 {:status "done"}}
+                                                :version 4}
                                           :result :update}))))

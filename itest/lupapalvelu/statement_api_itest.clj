@@ -118,13 +118,28 @@
         (->> (:statements application)
              (count)) => 3
         (->> (:statements application)
-             (map #(get-in % [:person :userId]))) => (contains #{sonja-id ronja-id})))))
+             (map #(get-in % [:person :userId]))) => (contains #{sonja-id ronja-id})))
+
+    (fact "requests due date is changed and email notification sent"
+      (let [application (query-application ronja application-id)
+            statement (first (:statements application))]
+        (command ronja :save-statement-due-date
+                 :id (:id application)
+                 :statementId (:id statement)
+                 :dueDate 1535462184744
+                 :lang "fi")
+        (let [email (last-email)
+              application (query-application ronja application-id)
+              statement (first (:statements application))]
+          (-> email :body :plain) => (contains "28.08.2018")
+          (:dueDate statement) => 1535462184744)))))
 
 (fact "delete-statement"
   (create-statement-giver sipoo ronja-email)
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         statement-giver-ronja (get-statement-giver-by-email sipoo ronja-email)
-        resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-ronja] :saateText "saate" :dueDate 1450994400000) => ok?
+        _ (command sonja :request-for-statement :functionCode nil :id application-id
+                   :selectedPersons [statement-giver-ronja] :saateText "saate" :dueDate 1450994400000) => ok?
         application (query-application ronja application-id) => ok?
         statement-id (:id (get-statement-by-user-id application ronja-id)) => truthy]
     (fact "Statement giver has access to application"
@@ -148,7 +163,8 @@
       (query veikko :application :id application-id) => not-accessible?)
 
     (let [application-before (query-application sonja application-id)
-          resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-veikko] :saateText "saate" :dueDate 1450994400000) => ok?
+          _ (command sonja :request-for-statement :functionCode nil :id application-id
+                     :selectedPersons [statement-giver-veikko] :saateText "saate" :dueDate 1450994400000) => ok?
           application-after  (query-application sonja application-id)
           emails (sent-emails)
           email (first emails)]
@@ -280,11 +296,7 @@
       (fact "Sonja can add attachment"
         (upload-attachment-for-statement sonja ymp-id nil true statement-id) => truthy)
       (fact "Sonja can delete attachment"
-        (let [{:keys [attachments]} (query-application sonja ymp-id)
-              att-id (some (fn [{:keys [target id]}]
-                             (and (= (-> target :type keyword) :statement) id)) attachments)]
-          (command sonja :delete-attachment :id ymp-id
-                   :attachmentId (statement-attachment-id sonja ymp-id)) => ok?))
+         (command sonja :delete-attachment :id ymp-id :attachmentId (statement-attachment-id sonja ymp-id)) => ok?)
       (fact "Sonja can add attachment again"
             (upload-attachment-for-statement sonja ymp-id nil true statement-id) => truthy)
       (fact "Sonja can give statement"
@@ -347,7 +359,8 @@
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         _ (last-email) ; reset
         application-before (query-application sonja application-id)
-        resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-pena] :saateText "saate" :dueDate 1450994400000) => ok?
+        _ (command sonja :request-for-statement :functionCode nil :id application-id
+                   :selectedPersons [statement-giver-pena] :saateText "saate" :dueDate 1450994400000) => ok?
         application-after  (query-application sonja application-id)
         emails (sent-emails)
         email (first emails)]
@@ -456,7 +469,8 @@
   (create-statement-giver sipoo veikko-email)
   (let [statement-giver-veikko (get-statement-giver-by-email sipoo veikko-email)
         application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :operation "ilmoitus-poikkeuksellisesta-tilanteesta"))
-        resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-veikko])
+        _ (command sonja :request-for-statement :functionCode nil :id application-id
+                   :selectedPersons [statement-giver-veikko])
         application (query-application ronja application-id)
         statement-id (:id (get-statement-by-user-id application veikko-id)) => truthy]
 
@@ -492,9 +506,10 @@
   (create-statement-giver sipoo veikko-email)
   (let [statement-giver-veikko (get-statement-giver-by-email sipoo veikko-email)
         application-id (:id (create-and-submit-application pena :propertyId sipoo-property-id :operation "ilmoitus-poikkeuksellisesta-tilanteesta"))
-        resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-veikko] :saateText "saate" :dueDate 1450994400000)
+        _ (command sonja :request-for-statement :functionCode nil :id application-id
+                   :selectedPersons [statement-giver-veikko] :saateText "saate" :dueDate 1450994400000)
         application (query-application sonja application-id)
-        statement-id (:id (get-statement-by-user-id application veikko-id)) => truthy
+        _ (:id (get-statement-by-user-id application veikko-id)) => truthy
         all-statement-keys  #{:id :person :state :requested :dueDate :saateText}
         filtered-statement-keys (disj all-statement-keys :saateText :dueDate)]
 

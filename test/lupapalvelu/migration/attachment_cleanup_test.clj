@@ -10,7 +10,6 @@
             [schema.core :as sc]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
-            [clojure.test.check.generators :as gen]
             [midje.util :refer [testable-privates]]
             [midje.sweet :refer :all]
             [sade.schemas :as ssc]

@@ -1,5 +1,5 @@
 (ns lupapalvelu.ident.suomifi
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error errorf fatal]]
             [noir.core :refer [defpage]]
             [noir.response :as response]
             [noir.request :as request]

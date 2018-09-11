@@ -2,11 +2,11 @@
   (:require [cljs-time.coerce :as tc]
             [cljs-time.core :as t]
             [cljs-time.format :as tf]
-            [clojure.string :as s]
-            [clojure.string :as str]
             [goog.events :as googe]
             [goog.object :as googo]
+            [lupapalvelu.ui.hub :as hub]
             [rum.core :as rum]
+            [sade.shared-strings :as ss]
             [sade.shared-util :as util]))
 
 (defn get-current-language []
@@ -111,7 +111,7 @@
   (css-flags :foo true :bar false) => '(\"foo\")"
   [& flags]
   (->> (apply hash-map flags)
-       (filter (fn [[k v]] v))
+       (filter val)
        keys
        css))
 
@@ -119,10 +119,10 @@
   "Upserts existing :class definition. Flags use css-flags semantics."
   [attr & flags]
   (update attr :class (fn [cls]
-                        (let [s       (s/join " " (flatten [cls]))
+                        (let [s       (ss/join " " (flatten [cls]))
                               old-map (zipmap (map keyword
-                                                   (remove s/blank?
-                                                           (s/split s #"\s+")))
+                                                   (remove ss/blank?
+                                                           (ss/split s #"\s+")))
                                               (repeat true))
                               updates (apply hash-map flags)]
                           (->> (merge old-map updates)
@@ -135,9 +135,9 @@
 
   \"hello world\" -> #\"(?mi)^.*hello.*world.*$\""
   [term]
-  (let [fuzzy (->> (s/split term #"\s")
+  (let [fuzzy (->> (ss/split term #"\s")
                    (map goog.string/regExpEscape)
-                   (s/join ".*"))]
+                   (ss/join ".*"))]
     (re-pattern (str "(?mi)^.*" fuzzy ".*$"))))
 
 
@@ -156,7 +156,7 @@
                   (str "lang="  (js/loc.getCurrentLanguage))
                   (str "municipality="  municipality)
                   features]
-        url      (str "/oskari/fullmap.html?" (str/join "&" params))]
+        url      (str "/oskari/fullmap.html?" (ss/join "&" params))]
     (js/window.open url)))
 
 ;; Callthrough for goog.events.getUniqueId.
@@ -199,7 +199,7 @@
 
   If both disabled? and enabled? are given, the button is disabled if
   either condition results in disabled state."
-  [{:keys [enabled? disabled?] :as options}]
+  [{:keys [enabled? disabled?]}]
   (or (rum/react (atomize disabled?))
       (some-> enabled? atomize rum/react false?)))
 
@@ -219,19 +219,39 @@
                        flatten
                        (remove nil?)
                        (map name)
-                       (s/join "-")))]
+                       (ss/join "-")))]
     (cond
-      (s/blank? test-id) target
+      (ss/blank? test-id) target
       (map? target)      (assoc target :data-test-id test-id)
       (vector? target)   (if (-> target second map?)
                            (assoc-in target [1 :data-test-id] test-id)
                            (vec (concat [x  {:data-test-id test-id}] xs))))))
 
 (defn prefix-lang
-  "Current language is appended to theiven keyword prefix:
+  "Current language is appended to the given keyword prefix:
   :foo -> :foo-fi"
   [prefix]
-  (when-not (s/blank? prefix)
+  (when-not (ss/blank? prefix)
     (->> (map name [prefix (get-current-language)])
-         (s/join "-")
+         (ss/join "-")
          keyword)))
+
+(defn show-dialog
+  "Convenience function for showing dialog without
+  boilerplate. Options [optional]:
+
+  [:ltitle or :title]  Dialog title (default :ltitle is :areyousure)
+  :ltext or :text      Dialog text
+  [:size]              Dialog size (default :medium)
+  :type                Either :ok (default) or :yes-no
+  [:callback]            Callback function for yes/ok action."
+  [{:keys [ltitle title ltext text size type callback]}]
+  (let [type (or type :ok)]
+    (hub/send "show-dialog" {:title (or title (loc (or ltitle :areyousure)))
+                             :size (name (or size :medium))
+                             :component (str (name type) "-dialog")
+                             :componentParams  (cond-> {:text (or text (loc ltext))}
+                                                 callback (assoc (if (util/=as-kw type :ok)
+                                                                   :okFn
+                                                                   :yesFn)
+                                                                 callback))})))

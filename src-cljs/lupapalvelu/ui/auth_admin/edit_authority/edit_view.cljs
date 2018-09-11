@@ -1,6 +1,5 @@
 (ns lupapalvelu.ui.auth-admin.edit-authority.edit-view
-  (:require [lupapalvelu.ui.authorization :as auth]
-            [lupapalvelu.ui.common :refer [loc query command]]
+  (:require [lupapalvelu.ui.common :refer [loc query command]]
             [lupapalvelu.ui.auth-admin.edit-authority.edit-info :as info]
             [lupapalvelu.ui.auth-admin.edit-authority.edit-roles :as roles]
             [lupapalvelu.ui.auth-admin.edit-authority.state :as state]
@@ -18,7 +17,7 @@
 (rum/defc edit-authority-view < rum/reactive
   {:init         init
    :will-unmount (fn [& _] (reset! state/component-state {}))}
-  [authority-id]
+  [_]
   (let [user (rum/react state/authority)]
     [:div
      [:h1 (str (loc "auth-admin.edit-authority.title") ", " (:firstName user) " " (:lastName user))]

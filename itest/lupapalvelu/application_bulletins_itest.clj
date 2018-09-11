@@ -2,14 +2,10 @@
    (:require [clj-time.coerce :as c]
              [clj-time.core :as t]
              [midje.sweet :refer :all]
-             [lupapalvelu.fixture.core :as fixture]
              [lupapalvelu.itest-util :refer :all]
-             [lupapalvelu.mongo :as mongo]
-             [lupapalvelu.application-bulletins-api :as bulletins-api]
              [lupapalvelu.application-bulletins-itest-util :refer :all]
              [lupapalvelu.factlet :refer :all]
              [sade.util :as util]
-             [sade.strings :as ss]
              [sade.core :refer [now]]))
 
 (apply-remote-minimal)

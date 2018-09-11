@@ -1,5 +1,5 @@
 (ns lupapalvelu.rest.rest-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error errorf fatal]]
             [noir.core :refer [defpage]]
             [noir.request :as request]
             [noir.response :as resp]

@@ -55,7 +55,7 @@
 (defn- merge-to-vector [m1 m2] (merge-with #(flatten [%1 %2]) m1 m2))
 (defn- childs? [v] (map? (first v)))
 (defn- lift-text-nodes [m] (if (= (keys m) [:##text]) (val (first m)) m))
-(defn- parts [{:keys [attrs content]}]
+(defn- parts [{:keys [content]}]
   (merge {}  #_(decorate-attrs attrs)
          (if (childs? content)
            (reduce merge-to-vector (map xml->edn content))

@@ -210,7 +210,8 @@ jQuery(document).ready(function() {
     {name: "backend-id-manager"},
     {name: "generic-bulletin-tab"},
     {name: "add-link-permit"},
-    {name: "premises-upload", template: "premises-upload-template"}
+    {name: "premises-upload", template: "premises-upload-template"},
+    {name: "authorize-person-dialog"}
 ];
 
   ko.registerLupapisteComponents(components);

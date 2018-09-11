@@ -2,7 +2,6 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.test-util :refer [walk-dissoc-keys]]
-            [lupapalvelu.application :as app]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.operations :as operations]
             [sade.env :as env]
@@ -45,7 +44,7 @@
           _                     (command pena :invite-with-role :id app-id :email (email-for-key teppo)
                                          :role "writer" :text "huanying" :documentName "" :documentId "" :path "") => ok?
           hakija-doc-id         (:id (domain/get-applicant-document (:documents app)))
-          resp                  (command pena :update-doc :id app-id :doc hakija-doc-id  :collection "documents"
+          _                     (command pena :update-doc :id app-id :doc hakija-doc-id  :collection "documents"
                                          :updates [["henkilo.henkilotiedot.etunimi" (:firstName mikko-user)]
                                                    ["henkilo.henkilotiedot.sukunimi" (:lastName mikko-user)]
                                                    ["henkilo.userId" (:id mikko-user)]]) => ok?]

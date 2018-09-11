@@ -36,7 +36,7 @@
     [application neighborId neighbors]))
 
 (facts "create app, add neighbor"
-  (let [[application neighborId neighbors] (create-app-with-neighbor)
+  (let [[_ neighborId neighbors] (create-app-with-neighbor)
         neighbor (util/find-by-id neighborId neighbors)]
     (fact neighbor => (contains {:propertyId "12312312341234"
                                  :owner {:name "n"
@@ -137,7 +137,7 @@
 
     (let [email               (query pena :last-email)
           body                (get-in email [:message :body :plain])
-          [_ a-id n-id token] (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
+          [_ _ _ token] (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
 
     token => truthy
     token =not=> #"="

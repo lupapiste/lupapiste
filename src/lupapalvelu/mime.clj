@@ -48,4 +48,4 @@
 
 (try
   (add-pattern "application/x-extension-ifc" ".+\\.ifc$" "foo.ifc")
-  (catch java.lang.AssertionError e)) ; Pattern had already been added
+  (catch java.lang.AssertionError _)) ; Pattern had already been added

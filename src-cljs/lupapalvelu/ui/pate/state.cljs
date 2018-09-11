@@ -24,6 +24,8 @@
 (def application-id          (state-cursor :application-id))
 (def current-verdict         (state-cursor :current-verdict))
 (def current-verdict-id      (rum/cursor-in current-verdict [:info :id]))
+(def verdict-tags            (rum/cursor-in current-verdict [:tags]))
+(def verdict-attachment-ids  (rum/cursor-in current-verdict [:attachment-ids]) )
 (def verdict-list            (state-cursor :verdict-list))
 (def replacement-verdict     (state-cursor :replacement-verdict))
 (def allowed-verdict-actions (state-cursor :allowed-verdict-actions))

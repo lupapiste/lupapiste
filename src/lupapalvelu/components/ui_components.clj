@@ -1,5 +1,5 @@
 (ns lupapalvelu.components.ui-components
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error fatal]]
             [swiss.arrows :refer [-<>>]]
             [clojure.java.io :as io]
             [clojure.string :as s]
@@ -7,7 +7,6 @@
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
-            [lupapalvelu.action :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-scales, attachment-sizes]]
             [lupapalvelu.attachment.type :as att-type]
@@ -329,7 +328,7 @@
 
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
                             :signing :invites :verdict-attachment-prints :calendar-view :printing-order]
-                  :js ["map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
+                  :js ["map-model.js" "change-location.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "add-party.js" "archival-summary.js" "case-file.js"
                        "create-digging-permit.js"

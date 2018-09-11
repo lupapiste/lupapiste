@@ -1,10 +1,8 @@
 (ns lupapalvelu.pdf.libreoffice-template-verdict
-  (:require [taoensso.timbre :as timbre]
-            [sade.util :as util]
+  (:require [sade.util :as util]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pdf.libreoffice-template :refer [get-organization-name applicant-index] :as template]
             [clojure.string :as s]
-            [lupapalvelu.domain :as domain]
             [clojure.java.io :as io]))
 
 (defn- get-lupamaaraykset [application verdict-id paatos-idx]
@@ -61,7 +59,7 @@
           (map (fn [row] [(str (get-in row [:data :maarays :value]) " (" (:taskname row) ")")]) (filter-tasks application verdict-id "task-lupamaarays")))))
 
 ;;(sc/optional-key :vaaditutKatselmukset)           [Katselmus]
-(defn- verdict-vaaditutKatselmukset [application verdict-id paatos-idx lang]
+(defn- verdict-vaaditutKatselmukset [application verdict-id paatos-idx]
   (if-let [krysp-other-requirements (:vaaditutKatselmukset (get-lupamaaraykset application verdict-id paatos-idx))]
     (map (fn [val] [(str (:katselmuksenLaji val)) (str (:tarkastuksenTaiKatselmuksenNimi val))])
          krysp-other-requirements)
@@ -137,7 +135,7 @@
                                  "LPVALUE_LUPA_AIKA" (if (s/blank? start-time) ""  (str start-time " - " end-time))
 
 
-                                 ;;                                 "LUPAMAARAYKSETHEADER" (i18n/localize lang "verdict.lupamaaraukset")
+                                 ;;                                 "LUPAMAARAYKSETHEADER" (i18n/localize lang "verdict.lupamaaraykset")
                                  ;;                                 "LUPAMAARAYKSETTABLE" (verdict-lupamaaraykset application id paatos-idx lang)
 
                                  ;;                                 "FOREMENHEADER" (i18n/localize lang "foreman.requiredForemen")
@@ -147,7 +145,7 @@
                                  ;;                                 "PLANSTABLE" (verdict-vaaditutErityissuunnitelmat application id paatos-idx)
 
                                  "REVIEWHEADER" (i18n/localize lang "verdict.vaaditutKatselmukset")
-                                 "REVIEWSTABLE" (verdict-vaaditutKatselmukset application id paatos-idx lang)
+                                 "REVIEWSTABLE" (verdict-vaaditutKatselmukset application id paatos-idx)
 
                                  "OTHERHEADER" (i18n/localize lang "verdict.muutMaaraykset")
                                  "OTHERTABLE" (verdict-muutMaaraykset application id paatos-idx)

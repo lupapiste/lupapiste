@@ -1,6 +1,5 @@
 (ns lupapalvelu.reports.applications
-  (:require [dk.ative.docjure.spreadsheet :as spreadsheet]
-            [monger.operators :refer :all]
+  (:require [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [now]]
@@ -16,10 +15,9 @@
             [lupapalvelu.application-meta-fields :as meta]
             [lupapalvelu.organization :as org]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr])
-  (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
-           (org.apache.poi.xssf.usermodel XSSFWorkbook)
-           (org.apache.poi.ss.usermodel CellType)))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.tiedonohjaus :as tos])
+  (:import (java.io OutputStream)))
 
 (defn handler-roles-org [org-id]
   (mongo/select-one :organizations {:_id org-id} [:handler-roles]))
@@ -92,7 +90,7 @@
                                              {:organization organizationId
                                               :state {$in states/post-verdict-states}
                                               :verdicts {$elemMatch {:timestamp {$gte startTs}}}}
-                                             [:_id :state :primaryOperation :verdicts :documents])
+                                             [:_id :state :primaryOperation :verdicts :documents :tosFunction :organization])
         verdict-in-time-period (fn [app] (< startTs (get-latest-verdict-ts app) (if (< (now) endTs) (now) endTs)))]
     (filter verdict-in-time-period applications)))
 
@@ -232,23 +230,32 @@
     (excel/xlsx-stream wb)))
 
 (defn ^OutputStream post-verdict-excel [organizationId startTs endTs lang]
-  (let [sheet-name         (str (i18n/localize lang "authorityAdmin.postVerdictReports.sheet-name-prefix")
-                                " "
-                                (util/to-local-date (now)))
-        header-row-content (map (partial i18n/localize lang) ["applications.id.longtitle"
-                                                              "application.applicants"
-                                                              "application.applicants.email"
-                                                              "operations.primary"
-                                                              "applications.status"
-                                                              "verdictGiven"])
-        data                (post-verdict-applications organizationId startTs endTs)
-        row-fn              (juxt :id
-                                  applicants
-                                  applicants-emails
-                                  (partial localized-primary-operation lang)
-                                  (partial localized-state lang)
-                                  #(-> % get-latest-verdict-ts util/to-local-date))]
-    (excel/xlsx-stream (excel/create-workbook data sheet-name header-row-content row-fn))))
+  (letfn [(tos-function-name [{tos-function :tosFunction org-id :organization}]
+            (:name (tos/tos-function-with-name tos-function org-id)))]
+    (let [archiving-enabled? (:permanent-archive-enabled (org/get-organization organizationId))
+          sheet-name         (str (i18n/localize lang "authorityAdmin.postVerdictReports.sheet-name-prefix")
+                                  " "
+                                  (util/to-local-date (now)))
+          header-titles      ["applications.id.longtitle"
+                              "application.applicants"
+                              "application.applicants.email"
+                              "operations.primary"
+                              "applications.status"
+                              "verdictGiven"
+                              (when archiving-enabled? "tos.function")]
+          header-row-content (map (partial i18n/localize lang) (remove nil? header-titles))
+          data               (post-verdict-applications organizationId startTs endTs)
+          cell-data-fns      [:id
+                              applicants
+                              applicants-emails
+                              (partial localized-primary-operation lang)
+                              (partial localized-state lang)
+                              #(-> % get-latest-verdict-ts util/to-local-date)
+                              (when archiving-enabled? tos-function-name)]
+          row-fn             (->> cell-data-fns
+                                  (remove nil?)
+                                  (apply juxt))]
+      (excel/xlsx-stream (excel/create-workbook data sheet-name header-row-content row-fn)))))
 
 (defn- company-report-headers [lang]
   (map (partial i18n/localize lang) ["company.report.excel.header.buildingid"
@@ -372,8 +379,7 @@
                                          (apply +))}))))
 
 (defn ^OutputStream digitized-attachments [user start-ts end-ts lang]
-  (let [org-ids       (mapv :id (usr/get-organizations user))
-        applications  (digitized-applications-between user start-ts end-ts)
+  (let [applications  (digitized-applications-between user start-ts end-ts)
         row-data      (map #(digi-report-data %) applications)
         sum-data      (digi-report-sum row-data)
         sum-sheet     (i18n/localize lang "digitizer.excel.sum.sheet.name")
@@ -386,5 +392,5 @@
                           :header      (rest (digitizer-report-headers lang))
                           :row-fn      (juxt :date :attachments)
                           :data        sum-data}])
-        sum-row       (excel/add-sum-row! sum-sheet wb [(i18n/localize lang "digitizer.excel.sum") (apply + (map :attachments sum-data))])]
+        _       (excel/add-sum-row! sum-sheet wb [(i18n/localize lang "digitizer.excel.sum") (apply + (map :attachments sum-data))])]
     (excel/xlsx-stream wb)))

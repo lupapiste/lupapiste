@@ -1,6 +1,6 @@
 (ns lupapalvelu.proxy-services
   (:require [clojure.data.zip.xml :refer :all]
-            [taoensso.timbre :as timbre :refer [debug debugf info warn error errorf]]
+            [taoensso.timbre :refer [debug debugf info warn error errorf]]
             [monger.operators :refer [$exists]]
             [noir.response :as resp]
             [sade.core :refer :all]
@@ -67,7 +67,7 @@
         (resp/json (or (find-address/search normalized-term lang) [])))
       (resp/status 400 "Missing query parameters")))
 
-(defn point-by-property-id-proxy [{{property-id :property-id} :params :as request}]
+(defn point-by-property-id-proxy [{{property-id :property-id} :params}]
   (if (and (string? property-id) (re-matches p/db-property-id-pattern property-id))
     (let [features (plocation/property-location-info property-id)]
       (if features
@@ -111,14 +111,13 @@
   "Feature is from NLS nearestfeature. Try to parse address from feature.
    If no address available, address details are returned as empty strings.
    Municipality and propertyId are returned from property-info."
-  [feature lang x_d y_d property-info]
+  [feature lang property-info]
   (if-let [address (wfs/feature-to-address-details (or lang "fi") feature)]
     (merge (select-keys address [:street :number])
-           (select-keys property-info [:municipality :name :propertyId])
-           {:x x_d :y y_d})
+           (select-keys property-info [:municipality :name :propertyId :x :y]))
     (merge                                                  ; fallback with default data
-      (select-keys property-info [:municipality :name :propertyId])
-      {:street "" :number "" :x x_d :y y_d})))
+      (select-keys property-info [:municipality :name :propertyId :x :y])
+      {:street "" :number ""})))
 
 (defn- distance [^double x1 ^double y1 ^double x2 ^double y2]
   {:pre [(and x1 x2 y1 y2)]}
@@ -126,7 +125,7 @@
 
 (defn address-by-point-proxy [{{:keys [x y lang]} :params}]
   (if (and (coord/valid-x? x) (coord/valid-y? y))
-    (if-let [property (plocation/property-info-by-point x y)]
+    (if-let [property (plocation/property-id-municipality-by-point x y)]
       (let [municipality (:municipality property)
             nls-address-query (future (wfs/address-by-point x y))
             x_d (util/->double x)
@@ -138,7 +137,8 @@
                                           (map (fn [{x2 :x y2 :y :as f}]
                                                  (assoc f :distance (distance x_d y_d x2 y2)
                                                           :name {:fi (i18n/localize :fi :municipality municipality)
-                                                                 :sv (i18n/localize :sv :municipality municipality)})))
+                                                                 :sv (i18n/localize :sv :municipality municipality)}
+                                                          :propertyId (:propertyId property))))
                                           (sort-by :distance)
                                           first)]
             (do
@@ -146,8 +146,8 @@
               (resp/json address-from-muni))
             (do
               (errorf "error.integration - Fallback to NSL address data - no addresses found from %s by x/y %s/%s" (i18n/localize :fi :municipality municipality) x y)
-              (resp/json (address-from-nls @nls-address-query lang x_d y_d property))))
-          (resp/json (address-from-nls @nls-address-query lang x_d y_d property))))
+              (resp/json (address-from-nls @nls-address-query lang property))))
+          (resp/json (address-from-nls @nls-address-query lang property))))
       (resp/status 404 (fail :error.property-not-found)))
     (resp/status 400 "Bad Request")))
 

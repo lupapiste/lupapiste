@@ -12,9 +12,9 @@
              (state/refresh))
            :stamp-id stamp-id))
 
-(defn- save-stamp [{:keys [name position background page qrCode rows] :as stamp} stamp-id]
+(defn- save-stamp [{:keys [name position background page qrCode rows]} stamp-id]
   (command :upsert-stamp-template
-           (fn [{ok :ok id :stamp-id}]
+           (fn [{id :stamp-id}]
              (state/refresh (fn [_] (state/update-stamp-view id))))
            :stamp-id stamp-id
            :name name

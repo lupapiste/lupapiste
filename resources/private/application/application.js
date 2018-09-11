@@ -44,7 +44,6 @@
   };
 
 
-  var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
   var verdictAttachmentPrintsOrderModel = new LUPAPISTE.VerdictAttachmentPrintsOrderModel();
@@ -251,6 +250,12 @@
     app.showExpiryDate = showExpiryDate(app);
   }
 
+  function initArchiveDates(app) {
+    if (_.isUndefined( app.archived.initial)) {
+      app.archived.initial = null;
+    }
+  }
+
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
@@ -269,6 +274,7 @@
 
       initWarrantyDates(app);
       initExpiryDate(app);
+      initArchiveDates(app);
 
       // Update observables
       var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
@@ -276,9 +282,6 @@
       applicationModel.stateChanged(false);
 
       addFieldSubscription(applicationModel.bulletinOpDescription, saveBulletinOpDescription);
-
-      // Invite
-      inviteModel.setApplicationId(app.id);
 
       // Verdict details
       verdictModel.refresh(app);
@@ -418,10 +421,6 @@
       hub.send("application-model-updated", {applicationId: app.id});
     });
   }
-
-  hub.subscribe({eventType: "dialog-close", id: "dialog-valtuutus"}, function() {
-    inviteModel.reset();
-  });
 
   // tabs
   var selectedTabName = ko.observable();
@@ -671,7 +670,6 @@
       changeLocationModel: changeLocationModel,
       constructionStateChangeModel: constructionStateChangeModel,
       createTask: createTaskController,
-      invite: inviteModel,
       foreman: foremanModel,
       map: mapModel,
       neighbor: neighborActions,

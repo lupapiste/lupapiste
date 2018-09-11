@@ -135,12 +135,19 @@
                 (schema-util/required {:select {:label?     false
                                                 :loc-prefix :pate.review-type
                                                 :items      review-types
-                           :sort-by    :text}}))
+                                                :sort-by    :text}}))
       (update-in [:section :grid :rows 0 :row] #(conj % {:dict :title-type}))
       (update-in [:section :grid :rows 1 :row 0 :grid :rows 0 :row]
                  #(concat (butlast %)
                           [{:align :full :dict :type}]
                           [(last %)]))))
+
+(def setsub-handler-titles
+  (settings-repeating {:dict        :handler-titles
+                       :loc-prefix  :pate-settings.handler-titles
+                       :add-dict    :add-handler-title
+                       :add-loc     :pate.add-handler-title
+                       :remove-dict :remove-handler-title}))
 
 (def r-settings (build-settings-schema "pate-r"
                                        (setsub-date-deltas helper/verdict-dates)
@@ -161,6 +168,7 @@
                                         setsub-board
                                         setsub-lang-titles
                                         setsub-plans
+                                        setsub-handler-titles
                                         (setsub-reviews helper/ya-review-types)))
 
 (def tj-settings (build-settings-schema "pate-tj"
@@ -168,9 +176,7 @@
                                         setsub-verdict-code
                                         setsub-board))
 
-(def contract-settings (build-settings-schema "pate-contract"
-                                              setsub-lang-titles
-                                              (setsub-reviews helper/ya-review-types)))
+(def contract-settings (build-settings-schema "pate-contract"))
 
 (defn settings-schema [category]
   (case (keyword category)

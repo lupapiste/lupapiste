@@ -1,7 +1,5 @@
 (ns lupapalvelu.pate.pate-test
-  (:require [clj-time.core :as time]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pate.date :as date]
+  (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.schemas :as schemas]
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
@@ -280,6 +278,50 @@
     (validate-path-value [:text] "hello") => nil)
   (fact "Readonly"
     (validate-path-value [:readonly] "hi") => :error.read-only))
+
+(defn validate-data [data & [references]]
+  (schemas/validate-dictionary-data test-template
+                                    data
+                                    references))
+
+(facts "Data validation against dictionary"
+  (validate-data {:check true
+                  :delta 20}) => nil
+  (validate-data {:check true
+                  :delta -2})
+  =>  [[:error.invalid-value [:delta -2]]]
+  (validate-data {:bad "yeah"})
+  => [[:error.invalid-value-path [:bad "yeah"]]]
+  (validate-data {:date (timestamp "6.9.2018")
+                  :loop {:i {:date2 (timestamp "7.10.2018")
+                             :inner-loop {:j {:date true}}}}
+                  :text "Hello"})=> nil
+  (validate-data {:date "6.9.2018"
+                  :loop {:H {:date2 (timestamp "7.10.2018")
+                             :dum "dum"
+                             :inner-loop {:M {:date "blaah"}}}}
+                  :text "Hello"})
+  => (just [[:error.invalid-value [:date "6.9.2018"]]
+            [:error.invalid-value-path [:loop :H :dum "dum"]]
+            [:error.invalid-value [:loop :H :inner-loop :M :date "blaah"]]]
+           :in-any-order)
+
+  (validate-data {:ref-select "baaad"
+                  "toggle" false}
+                 {:path {:to {:somewhere [:one :two :three]}}})
+  => [[:error.invalid-value [:ref-select "baaad"]]]
+
+  (validate-data {:ref-select "one"
+                  :toggle true
+                  :attachments ["id1" "id2"]}
+                 {:path {:to {:somewhere [:one :two :three]}}})
+  => nil
+
+  (validate-data {:ref-select "one"
+                  :toggle true
+                  :attachments ["id1" "id2"]}
+                 {:path {:to {:somewhere [:two :three]}}})
+  => [[:error.invalid-value [:ref-select "one"]]])
 
 (defn validate-and-process-value [path value old-data & [references]]
   (schemas/validate-and-process-value test-template

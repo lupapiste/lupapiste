@@ -72,7 +72,7 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
         .center(404168, 7205000, mapOptions.initialZoom)
         .addClickHandler(function(x, y) {
           self.reset().setXY(x, y)
-            .beginUpdateRequest().searchPropertyInfo(x, y).searchAddress(x, y);
+            .beginUpdateRequest().searchAddress(x, y);
           if (_.isFunction(mapOptions.afterClick)) {mapOptions.afterClick();}
         });
 
@@ -165,7 +165,16 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
 
   self.searchAddress = function(x, y) {
     if (x && y) {
-      locationSearch.addressByPoint(self.requestContext, x, y, self.setAddress, self.onError, self.processingAddress);
+      locationSearch.addressByPoint(self.requestContext, x, y, function(resp) {
+        self.locationServiceUnavailable(false);
+        self.propertyId(resp.propertyId);
+        self.municipalityCode(resp.municipality);
+        self.propertyIdValidated(true);
+        self.setAddress(resp);
+      }, function(err) {
+        self.locationServiceUnavailable(true);
+        self.onError(err);
+      }, self.processing);
     }
     return self;
   };

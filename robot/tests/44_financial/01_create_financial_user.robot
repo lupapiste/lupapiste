@@ -12,7 +12,7 @@ Admin logs in and goes to 'users' page
   Wait until  Element should be visible  xpath=//section[@id='users']
 
 Admin filters financial users
-  Input text by test id  users-list-input-search  ARA
+  Input text to visible section test id  users-list-input-search  ARA
   Set Suite Variable  ${userRowXpath}  //div[contains(@class, 'users-table')]//table/tbody/tr
   Wait Until  Element Should Be Visible  ${userRowXpath}
   ${userCount} =  Get Matching Xpath Count  ${userRowXpath}

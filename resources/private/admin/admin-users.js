@@ -3,6 +3,7 @@
 
   var usersList = null;
   var usersTableConfig = {
+    directMarketing: true,
     ops: [{name: "enable",
            button: "secondary",
            showFor: function(user) { return !user.enabled; },

@@ -2,14 +2,14 @@
   (:require [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [lupapalvelu.review :refer :all]
-            [lupapalvelu.xml.krysp.review-reader :as review-reader]
+            [lupapalvelu.backing-system.krysp.review-reader :as review-reader]
             [sade.util :as util]
             [sade.strings :as ss]))
 
 (mongo/connect!)
 (println "Requiring review-analyzer...")
 (defn analyze-app [app xml]
-  (let [maaraykset (lupapalvelu.xml.krysp.reader/->lupamaaraukset (sade.xml/select xml [:paatostieto :Paatos]))
+  (let [maaraykset (lupapalvelu.backing-system.krysp.reader/->lupamaaraykset (sade.xml/select xml [:paatostieto :Paatos]))
         reviews    (review-reader/xml->reviews xml true)
         app-reviews (filter #(= "task-katselmus" (get-in % [:schema-info :name])) (:tasks app))
         maaraykset-xml (:maaraykset maaraykset)
@@ -31,12 +31,8 @@
           :xml tj-xml
           :app tj-app}}))
 
-(def explainers {:reviews (constantly nil)
-                 :tj (constantly nil)})
-
 (defn get-result-for-key [results k]
-  (let [{:keys [count-xml count-app] :as data} (get results k)
-        explain-fn (get explainers k)]
+  (let [{:keys [count-xml count-app]} (get results k)]
     (when (> count-app count-xml)
       {:msg (format "count does not match, XML: %d , app: %d" count-xml count-app )
        :type k})))

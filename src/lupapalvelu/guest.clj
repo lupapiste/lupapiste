@@ -133,7 +133,7 @@
 (defn- usercatname [{:keys [firstName lastName]}]
   (ss/trim (str firstName " " lastName)))
 
-(defn- auth-info [ga-description-map {:keys [id role unsubscribed username inviter] :as auth}]
+(defn- auth-info [ga-description-map {:keys [id role unsubscribed username inviter]}]
   (let [role (keyword role)
         {:keys [email] :as user} (usr/get-user-by-id id)
         inviter (usr/get-user-by-id inviter)]

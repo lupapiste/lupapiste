@@ -47,8 +47,7 @@
                {:keys [tasks]} (query-application sonja application-id)
                task-id (some #(and (= "Aloituskokous" (:taskname %))
                                    (not= root-id (:id %))
-                                   (:id %)) tasks)
-               verdict-id (-> root :source :id)]
+                                   (:id %)) tasks)]
            (fact "RAM is not allowed for review minutes"
                  (let [minutes (->> (query-application sonja application-id)
                                     :attachments

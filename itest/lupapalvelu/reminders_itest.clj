@@ -1,6 +1,5 @@
 (ns lupapalvelu.reminders-itest
-  (:require [clojure.java.io :as io]
-            [monger.operators :refer :all]
+  (:require [monger.operators :refer :all]
             [midje.sweet :refer :all]
             [sade.dummy-email-server :as dummy-email-server]
             [sade.core :refer [def- now]]
@@ -480,8 +479,7 @@
     (fact "an very old \"reminder-sent\" status already exists -> reminder is not sent"
       (mongo/with-db db-name
         ;; in "neighbor-matching", set the :created timestamp of the "email-sent" status to "timestamp-the-beginning-of-time"
-        (let [now-timestamp (now)
-              app (mongo/by-id :applications (:id reminder-application))
+        (let [app (mongo/by-id :applications (:id reminder-application))
               new-neighbors (map
                               (fn [neighbor]
                                 (if (= (:id neighbor-matching) (:id neighbor))

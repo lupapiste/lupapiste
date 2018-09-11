@@ -1,6 +1,6 @@
 (ns lupapalvelu.main
   (:require [lupapalvelu.logging]
-            [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]])
+            [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]])
   (:gen-class))
 
 (def services {"server"                     'lupapalvelu.server/-main
@@ -22,7 +22,8 @@
                "pdf-to-pdfa-conversion"     'lupapalvelu.batchrun/pdf-to-pdfa-conversion
                "cleanup-uploaded-files"     'lupapalvelu.storage.file-storage/delete-old-unlinked-files
                "unarchive"                  'lupapalvelu.batchrun/unarchive
-               "fix-helsinki-pdfa"          'lupapalvelu.batchrun/fix-bad-archival-conversions-in-091-R})
+               "fix-helsinki-pdfa"          'lupapalvelu.batchrun/fix-bad-archival-conversions-in-091-R
+               "archive-digitized-projects" 'lupapalvelu.batchrun/archive-digitized-projects-in-orgs})
 
 (defn launch! [service args]
   (debugf "Loading namespace '%s'...\n" (namespace service))

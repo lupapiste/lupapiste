@@ -1,11 +1,8 @@
 (ns lupapalvelu.pate.schemas
   (:require [clojure.set :as set]
             [lupapalvelu.attachment.type :as att-type]
-            [lupapalvelu.document.schemas :as doc-schemas]
-            [lupapalvelu.document.tools :refer [body] :as tools]
-            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.document.tools :refer [body]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
@@ -53,17 +50,30 @@
 
 (defschema PatePublishedTemplateSettings
   (merge PatePublishedSettings
-         {(sc/optional-key :reviews) [(merge PateDependency
-                                             {:type review-type})]
-          (sc/optional-key :plans)   [PateDependency]}))
+         {(sc/optional-key :reviews)         [(merge PateDependency
+                                                     {:type review-type})]
+          (sc/optional-key :plans)           [PateDependency]
+          (sc/optional-key :handler-titles)  [PateDependency]}))
+
+(defn- wrapped
+  "Unwrapped value is supported as a fallback for existing templates."
+  [schema fallback?]
+  (let [md {:_value    schema
+            :_user     sc/Str
+            :_modified ssc/Timestamp}]
+    (if fallback?
+      (sc/conditional
+       map? md
+       :else schema)
+      md)))
 
 (defschema PateSavedTemplate
   (merge PateCategory
-         {:name                        sc/Str
-          :deleted                     sc/Bool
+         {:name                        (wrapped sc/Str true)
+          :deleted                     (wrapped sc/Bool true)
           (sc/optional-key :draft)     sc/Any ;; draft is published data on publish.
           :modified                    ssc/Timestamp
-          (sc/optional-key :published) {:published  ssc/Timestamp
+          (sc/optional-key :published) {:published  (wrapped ssc/Timestamp true)
                                         :data       sc/Any
                                         :inclusions [sc/Str]
                                         :settings   PatePublishedTemplateSettings}}))
@@ -91,9 +101,10 @@
 
 (defschema PateVerdictReferences
   (merge PatePublishedSettings
-         {(sc/optional-key :reviews) [(merge PateVerdictReq
-                                             {:type review-type})]
-          (sc/optional-key :plans)   [PateVerdictReq]}))
+         {(sc/optional-key :reviews)         [(merge PateVerdictReq
+                                                     {:type review-type})]
+          (sc/optional-key :plans)           [PateVerdictReq]
+          (sc/optional-key :handler-titles)  [PateVerdictReq]}))
 
 (defschema UserRef
   "We have to define our own summary, since requiring the
@@ -108,32 +119,42 @@
                  (sc/optional-key :user)          UserRef
                  (sc/optional-key :replaced-by)   ssc/ObjectIdStr}))
 
+(defschema PateSignature
+  {:date                         ssc/Timestamp
+   :user-id                      ssc/ObjectIdStr
+   ;; Firstname Lastname
+   :name                         sc/Str
+   ;; If the user is authed to the application via company. The
+   ;; company name is also added to the name: User Name, Company Ltd.
+   (sc/optional-key :company-id) ssc/ObjectIdStr})
+
 (defschema PateBaseVerdict
   (merge PateCategory
-         {;; Verdict is draft until it is published
-          (sc/optional-key :published)          ssc/Timestamp
+         {(sc/optional-key :published)          {:tags                            sc/Str
+                                                 ;; The same as :state._modified
+                                                 :published                       ssc/Timestamp
+                                                 ;; Id for the attachment that is a PDF version of tags.
+                                                 (sc/optional-key :attachment-id) ssc/AttachmentId}
+          :state                                (wrapped (sc/enum "draft"
+                                                                  "publishing"
+                                                                  "published")
+                                                         true)
           :modified                             ssc/Timestamp
           :data                                 sc/Any
-          (sc/optional-key :archive)            {:verdict-date                    ssc/Timestamp
+          ;; Whether the verdict timestamps are available depends on
+          ;; the verdict type (legacy or not) and template settings.
+          (sc/optional-key :archive)            {(sc/optional-key :verdict-date)  ssc/Timestamp
+                                                 (sc/optional-key :anto)          ssc/Timestamp
                                                  (sc/optional-key :lainvoimainen) ssc/Timestamp
                                                  :verdict-giver                   sc/Str}
-          ;; Either the drafter or publisher
-          (sc/optional-key :user)               UserRef
-          ;; Pointer to the verdict attachment. Either an attachment
-          ;; id or html source. The source is stored in order to be
-          ;; able to regenerate PDF, when needed (after muuntaja
-          ;; failure, for example). After the PDF has been
-          ;; successfully generated, the html is replaced with
-          ;; attachment id.
-          (sc/optional-key :verdict-attachment) (sc/conditional
-                                                 :html {:html sc/Any}
-                                                 :else ssc/AttachmentId)}))
+          (sc/optional-key :signatures)         [PateSignature]
+          (sc/optional-key :signature-requests) [PateSignature]}))
 
 (defschema PateModernVerdict
   (merge PateBaseVerdict
          {:schema-version                sc/Int
           (sc/optional-key :references)  PateVerdictReferences
-          :template                      {:inclusions              [sc/Keyword]
+          :template                      {:inclusions              [shared-schemas/keyword-or-string]
                                           (sc/optional-key :giver) (sc/enum "viranhaltija"
                                                                             "lautakunta")}
           (sc/optional-key :replacement) ReplacementPateVerdict}))
@@ -141,7 +162,7 @@
 (defschema PateLegacyVerdict
   (merge PateBaseVerdict
          {:legacy?  (sc/enum true)
-          :template {:inclusions [sc/Keyword]}}))
+          :template {:inclusions [shared-schemas/keyword-or-string]}}))
 
 (defschema PateVerdict
   (sc/conditional
@@ -163,9 +184,7 @@
 
 (defmulti validate-resolution :type)
 
-(defmethod validate-resolution :default
-  [options]
-  :error.invalid-value-path)
+(defmethod validate-resolution :default [_] :error.invalid-value-path)
 
 (defn schema-error [{:keys [schema path value schema-overrides type]}]
   (if-let [schema (st/get-in (get schema-overrides type schema) path)]
@@ -177,8 +196,7 @@
   (when (not= (count path) (or size 0))
     :error.invalid-value-path))
 
-(defmethod validate-resolution :date-delta
-  [{:keys [path schema value] :as options}]
+(defmethod validate-resolution :date-delta [{:keys [path value] :as options}]
   (or (path-error path)
       (schema-error (assoc options
                            :value (parse-int value)
@@ -195,21 +213,18 @@
       (not (set/subset? v-set d-set))    :error.invalid-value
       (not= (count items) (count v-set)) :error.duplicate-items)))
 
-(defmethod validate-resolution :date
-  [{:keys [path value] :as options}]
+(defmethod validate-resolution :date [{:keys [path value] :as options}]
   (or (path-error path)
       (schema-error (assoc options
                            :value (parse-int value)
                            :path [:value]))))
 
-(defmethod validate-resolution :select
-  [{:keys [path value data] :as options}]
+(defmethod validate-resolution :select [{:keys [path value data]}]
   (or (path-error path)
       (when-not (ss/blank? (str value))
         (check-items [value] (:items data)))))
 
-(defmethod validate-resolution :multi-select
-  [{:keys [path schema data value] :as options}]
+(defmethod validate-resolution :multi-select [{:keys [path data value] :as options}]
   ;; Items should not be part of the original path.
   (or (path-error path)
       (schema-error (assoc options
@@ -221,8 +236,7 @@
     (util/split-kw-path path)
     path))
 
-(defmethod validate-resolution :reference-list
-  [{:keys [path schema data value references] :as options}]
+(defmethod validate-resolution :reference-list [{:keys [path data value references]}]
   (let [canon-value (->> [value] flatten (remove nil?))
         data-type   (:type data)]
     (or
@@ -245,42 +259,34 @@
                                         map? (map (fn [[k v]]
                                                     (assoc v :MAP-KEY k))))))))))
 
-(defmethod validate-resolution :phrase-text
-  [{:keys [path schema value data] :as options}]
+(defmethod validate-resolution :phrase-text [{:keys [path] :as options}]
   (or (path-error path)
       (schema-error (assoc options :path [:text]))))
 
-(defmethod validate-resolution :keymap
-  [{:keys [path schema value data] :as options}]
+(defmethod validate-resolution :keymap [{:keys [path data]}]
   (or (path-error path 1)
       (when-not (util/includes-as-kw? (keys data) (first path))
         :error.invalid-value-path)))
 
-(defmethod validate-resolution :button
-  [{:keys [path]}]
+(defmethod validate-resolution :button [{:keys [path]}]
   (path-error path))
 
-(defmethod validate-resolution :application-attachments
-  [{:keys [path  value]}]
+(defmethod validate-resolution :application-attachments [{:keys [path  value]}]
   (or (path-error path)
       (when (sc/check [sc/Str] value)
         :error.invalid-value)))
 
-(defn- simple-value-resolution
-  [{:keys [path value] :as options}]
+(defn- simple-value-resolution [{:keys [path] :as options}]
   (or (path-error path)
       (schema-error (assoc options :path [:value]))))
 
-(defmethod validate-resolution :toggle
-  [options]
+(defmethod validate-resolution :toggle [options]
   (simple-value-resolution options))
 
-(defmethod validate-resolution :text
-  [options]
+(defmethod validate-resolution :text [options]
   (simple-value-resolution options))
 
-(defn- resolve-dict-value
-  [data]
+(defn- resolve-dict-value [data]
   (let [{:keys [reference-list date-delta multi-select
                 phrase-text keymap button application-attachments
                 toggle text date select]} data
@@ -342,7 +348,7 @@
   button always presents either adding or removing item from a
   repeating structure. This function is called from
   validate-and-process-value (see below)."
-  [{:keys [path old-data dict-schema dict-path dictionary err]}]
+  [{:keys [path old-data dict-schema dictionary err]}]
   (let [add    (-> dict-schema :button :add)
         remove (-> dict-schema :button :remove)]
     (or
@@ -432,7 +438,7 @@
   [schema data]
   (->> schema
        :dictionary
-       (filter (fn [[k v]]
+       (filter (fn [[_ v]]
                  (or (:required? v)
                      (:repeating v))))
        (every? (fn [[k v]]
@@ -480,3 +486,33 @@
                     {})))
   ([application]
    (resolve-verdict-attachment-type application :paatos)))
+
+(defn map->paths
+  "Flattens map into paths.
+  {:one 1 :two 2 :three {:four [1 2 3 4]}}
+  -> ([:two 2] [:one 1] (:three :four [1 2 3 4]))"
+  [m]
+  (reduce-kv (fn [acc k v]
+               (if (map? v)
+                 (concat acc (map (partial cons k) (map->paths v)))
+                 (cons [k v] acc)))
+             []
+             m))
+
+(defn validate-dictionary-data
+  "Validates given data against the dictionary in the schema. Returs
+  validation errors as a list of lists where each item is in the
+  format [error-code path] where the last path item is the
+  value: [:error.invalid-value [:path :to :toggle 999]].
+
+  Note: the data cannot contain metadata."
+  [schema data & [references]]
+  (->> (map->paths data)
+       (map (fn [path]
+              (when-let [err (validate-path-value schema
+                                                  (butlast path)
+                                                  (last path)
+                                                  references)]
+                [err path])))
+       (remove nil?)
+       seq))

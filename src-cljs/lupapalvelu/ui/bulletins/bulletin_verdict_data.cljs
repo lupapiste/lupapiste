@@ -52,7 +52,7 @@
          [:span.value  (common/format-timestamp (:appealPeriodEndsAt bulletin))]]]
        (when-let [maaraykset (:lupamaaraykset paatos)]
          [:div.spacerL
-          [:h4 (common/loc :verdict.lupamaaraukset)]
+          [:h4 (common/loc :verdict.lupamaaraykset)]
           [:div.accordion-content-part.spacerM
            (kv-pair :verdict.autopaikkojaEnintaan (:autopaikkojaEnintaan maaraykset))
            (kv-pair :verdict.autopaikkojaVahintaan (:autopaikkojaVahintaan maaraykset))
@@ -111,7 +111,7 @@
                 [:td (:paatoksentekija pk)]
                 [:td (common/format-timestamp (:paatospvm pk))]])]]]])])]))
 
-(rum/defc init-identification-link [bulletin]
+(rum/defc init-identification-link [_]
   (let [pathname (aget js/window.location "pathname")
         search (aget js/window.location "search")
         hash (aget js/window.location "hash")

@@ -22,13 +22,13 @@
 
 (defn =as-kw
   "Converts arguments to keywords and compares if they are the same"
-  ([x] true)
+  ([_] true)
   ([x y] (= (keyword x) (keyword y)))
   ([x y & more] (apply = (keyword x) (keyword y) (map keyword more))))
 
 (defn not=as-kw
   "Converts arguments to keywords and compares if they are the same"
-  ([x] false)
+  ([_] false)
   ([x y] (not= (keyword x) (keyword y)))
   ([x y & more] (apply not= (keyword x) (keyword y) (map keyword more))))
 
@@ -184,3 +184,35 @@
       (if (contains? a-map fst)
         (apply update a-map fst safe-update-in rst fn params)
         a-map))))
+
+(defmacro pcond->
+  "Takes an expression and a set of pred/form pairs. Threads expr (via ->)
+  through each form for which the corresponding pred returns truthy value
+  for threaded expr. Otherwise form is skipped and expr is passed to next
+  form. Note: like cond-> but static test is replaced by pred"
+  [expr & clauses]
+  (assert (even? (count clauses)))
+  (let [g (gensym)
+        steps (map (fn [[pred step]] `(if (~pred ~g) (-> ~g ~step) ~g))
+                   (partition 2 clauses))]
+    `(let [~g ~expr
+           ~@(interleave (repeat g) (butlast steps))]
+       ~(if (empty? steps)
+          g
+          (last steps)))))
+
+(defmacro pcond->>
+  "Takes an expression and a set of pred/form pairs. Threads expr (via ->>)
+  through each form for which the corresponding pred returns truthy value
+  for threaded expr. Otherwise form is skipped and expr is passed to next
+  form.  Note: like cond-> but static test is replaced by pred"
+  [expr & clauses]
+  (assert (even? (count clauses)))
+  (let [g (gensym)
+        steps (map (fn [[pred step]] `(if (~pred ~g) (->> ~g ~step) ~g))
+                   (partition 2 clauses))]
+    `(let [~g ~expr
+           ~@(interleave (repeat g) (butlast steps))]
+       ~(if (empty? steps)
+          g
+          (last steps)))))

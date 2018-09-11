@@ -1,6 +1,5 @@
 (ns lupapalvelu.pate.verdict-schemas
   (:require [clojure.set :as set]
-            [clojure.string :as s]
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.shared-schemas :as schemas]
@@ -64,19 +63,26 @@
   {:dictionary (assoc (->> dates
                            (map (fn [kw]
                                   [kw (schema-util/required
-                                       {:date {:disabled? :automatic-verdict-dates
-                                               :i18nkey   (util/kw-path :pate-verdict kw)}})]))
+                                        {:date {:disabled? :automatic-verdict-dates
+                                                :i18nkey   (util/kw-path :pate-verdict kw)}})]))
                            (into {}))
-                      :language                (schema-util/required (assoc helper/language-select
-                                                                            :template-dict :language))
-                      :verdict-date            (schema-util/required {:date {}})
-                      :automatic-verdict-dates {:toggle {}}
-                      :handler               (schema-util/required {:text {:loc-prefix
-                                                                           (case category
-                                                                             :p :pate.prepper
-                                                                             :pate-verdict.handler)}})
-                      :handler-title         {:text {:loc-prefix :pate-verdict.handler.title}}
-                      :application-id        app-id-placeholder)
+                 :language (schema-util/required (assoc helper/language-select
+                                                   :template-dict :language))
+                 :verdict-date (schema-util/required {:date {}})
+                 :automatic-verdict-dates {:toggle {}}
+                 :handler (schema-util/required {:text {:loc-prefix
+                                                        (case category
+                                                          :p :pate.prepper
+                                                          :pate-verdict.handler)}})
+                 :handler-title (case category
+                                  :ya {:reference-list {:path       :handler-titles
+                                                        :type       :select
+                                                        :loc-prefix :pate-verdict.handler.title.ya
+                                                        :item-key   :id
+                                                        :term       {}}
+                                       :template-dict  :handler-titles}
+                                  {:text {:loc-prefix :pate-verdict.handler.title}})
+                 :application-id app-id-placeholder)
    :section    {:id   :pate-dates
                 :grid {:columns 7
                        :rows    [[{:col   7
@@ -106,13 +112,12 @@
                                    :col   2
                                    :show? :_meta.editing?
                                    :dict  :automatic-verdict-dates}]
-                                 {:id         "deltas"
-                                  :css        [:pate-date]
-                                  :row        (map (fn [kw]
-                                                     (let [id (name kw)]
-                                                       {:disabled? :automatic-verdict-dates
-                                                        :dict      kw}))
-                                                   dates)}]}}})
+                                 {:id  "deltas"
+                                  :css [:pate-date]
+                                  :row (map (fn [kw]
+                                              {:disabled? :automatic-verdict-dates
+                                               :dict      kw})
+                                            dates)}]}}})
 
 (def versub-operation
   {:dictionary {:operation {:text {:loc-prefix :pate.operation}}
@@ -123,6 +128,38 @@
                                    :align :full}]
                                  [{:dict  :address
                                    :align :full}]]}}})
+
+(def versub-operation-ya
+  {:dictionary {:operation       {:text {:loc-prefix :pate.operation}}
+                :address         {:text {:loc-prefix :pate.location}}
+                :property-title  {:loc-text :pate.property-id}
+                :propertyIds     {:repeating {:property-id        {:text {:label?     false
+                                                                          :read-only? false}}
+                                              :remove-property-id {:button {:i18nkey :remove
+                                                                            :label?  false
+                                                                            :icon    :lupicon-remove
+                                                                            :css     :secondary
+                                                                            :remove  :propertyIds}}}}
+                :add-property-id {:button {:icon     :lupicon-circle-plus
+                                           :i18nkey  :pate.property-id.add
+                                           :css      :positive
+                                           :add      :propertyIds}}}
+   :section    {:id   :pate-operation
+                :grid {:columns 2
+                       :rows    [[{:dict  :operation
+                                   :align :full}]
+                                 [{:dict  :address
+                                   :align :full}]
+                                 [{:css  :pate-label
+                                   :dict :property-title}]
+                                 [{:grid {:columns   9
+                                          :repeating :propertyIds
+                                          :rows      [[{:col  8
+                                                        :dict  :property-id}
+                                                       {:align :right
+                                                        :dict  :remove-property-id}]]}}]
+                                 [{:show? :_meta.editing?
+                                   :dict  :add-property-id}]]}}})
 
 (defn versub-verdict
   "Collateral part (toggle, amount, type, date) included only when
@@ -526,7 +563,7 @@
                                                versub-dates-ya
                                                versub-verdict-ya
                                                versub-bulletin
-                                               versub-operation
+                                               versub-operation-ya
                                                versub-requirements-ya
                                                versub-conditions
                                                versub-appeal

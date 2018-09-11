@@ -6,7 +6,6 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.vetuma-itest-util :as vetuma]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.fixture.company-application :as comp-app]
             [lupapalvelu.dummy-ident-itest-util :refer :all]
             [lupapalvelu.ident.dummy :as dummy]
             [lupapalvelu.factlet :refer :all]
@@ -91,18 +90,35 @@
 
 (fact "Invitation is sent and cancelled"
       (fact "Invite is sent"
-            (command kaino :company-invite-user :email "rakennustarkastaja@jarvenpaa.fi" :admin false :submit true) => ok?
+            (command kaino :company-invite-user :email "pena@example.com" :admin false :submit true) => ok?
             (let [company (query kaino :company :company "solita" :users true)]
               (count (:invitations company)) => 1
               (count (:users company)) => 2))
 
       (fact "Invitation is cancelled"
             (let [email (last-email)
-                  [uri token] (re-find #"http.+/app/fi/welcome#!/invite-company-user/ok/([A-Za-z0-9-]+)" (:plain (:body email)))]
+                  [_ token] (re-find #"http.+/app/fi/welcome#!/invite-company-user/ok/([A-Za-z0-9-]+)" (:plain (:body email)))]
               (command kaino :company-cancel-invite :tokenId token) => ok?
               (let [company (query kaino :company :company "solita" :users true)]
                 (count (:invitations company)) => 0
                 (count (:users company)) => 2))))
+
+(facts "Not-supported user roles for company"
+  (doseq [email (map email-for-key [sipoo sonja admin])]
+    (fact {:midje/description (str "Invite " email)}
+      (command kaino :company-invite-user :email email :admin false :submit true)
+      => (partial expected-failure? "not-applicant"))))
+
+(fact "Non-existing user cannot be invited"
+  (command kaino :company-invite-user :email "no@such.usr" :admin false :submit true)
+  => (partial expected-failure? "not-found"))
+
+(fact "Existing user cannot be added"
+  (command erkki :company-add-user :email (email-for-key pena)
+           :firstName "Pena" :lastName "Panaani"
+           :admin false :submit true)
+  => (partial expected-failure? "error.user-cannot-be-added-to-company"))
+
 
 (facts "Teppo cannot submit even his own applications"
        (let [application-id (create-app-id teppo :propertyId sipoo-property-id :address "Xi Dawang Lu 8")]
@@ -199,7 +215,13 @@
        (fact "Teppo cannot search"
              (query teppo :company-search-user :email (email-for-key pena)) => unauthorized?)
        (fact "Pena is not in the company"
-             (query kaino :company-search-user :email (email-for-key pena)) => (result :found :firstName "Pena" :lastName "Panaani" :role "applicant"))
+         (query kaino :company-search-user :email (email-for-key pena)) => (result :found :firstName "Pena" :lastName "Panaani" :role "applicant"))
+       (fact "Sonja is not an applicant"
+         (query kaino :company-search-user :email (email-for-key sonja)) => (result :not-applicant))
+       (fact "Sipoo admin is not an applicant"
+         (query kaino :company-search-user :email (email-for-key sipoo)) => (result :not-applicant))
+       (fact "Admin is not an applicant"
+         (query kaino :company-search-user :email (email-for-key admin)) => (result :not-applicant))
        (fact "Foobar is not a known user"
              (query kaino :company-search-user :email foobar) => (result :not-found))
        (fact "Kaino adds user foobar"
@@ -488,10 +510,9 @@
   (let [store (atom {})
         params (vetuma/default-vetuma-params (->cookie-store store))
         trid (dummy-ident-init params vetuma/default-token-query)
-        ident-finish (dummy-ident-finish params {:personId dummy/dummy-person-id} trid)
+        _ (dummy-ident-finish params {:personId dummy/dummy-person-id} trid)
         vetuma-data (decode-body (http-get (str (server-address) "/api/vetuma/user") params))
         stamp (:stamp vetuma-data)
-        person-id (:userid vetuma-data)
         params (update params :headers assoc "x-anti-forgery-token" (-> (get @store "anti-csrf-token") .getValue codec/url-decode))
         old-details (first (:users (query admin :users :email "foo@example.com")))
         reg-resp (vetuma/register params {:email "foo@example.com"

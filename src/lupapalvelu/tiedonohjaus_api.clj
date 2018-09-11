@@ -11,7 +11,6 @@
             [schema.core :as s]
             [taoensso.timbre :as timbre]
             [lupapiste-commons.schema-utils :as schema-utils]
-            [lupapalvelu.application :as a]
             [lupapalvelu.permit :as permit]
             [lupapiste-commons.operations :as operations]
             [lupapalvelu.archive.archiving-util :as archiving-util]))
@@ -57,21 +56,10 @@
     (o/update-organization orgId {$unset {(str "operations-tos-functions." operation) ""}})
     (ok)))
 
-(defn- update-tos-metadata [function-code {:keys [application created user] :as command} & [correction-reason]]
-  (if-let [tos-function-map (t/tos-function-with-name function-code (:organization application))]
-    (let [orgId               (:organization application)
-          updated-attachments (pmap #(t/document-with-updated-metadata % orgId function-code application) (:attachments application))
-          {updated-metadata :metadata} (t/document-with-updated-metadata application orgId function-code application "hakemus")
-          process-metadata    (t/calculate-process-metadata (t/metadata-for-process orgId function-code) updated-metadata updated-attachments)]
-      (action/update-application command
-                                 {$set  {:modified        created
-                                         :tosFunction     function-code
-                                         :metadata        updated-metadata
-                                         :processMetadata process-metadata
-                                         :attachments     updated-attachments}
-                                  $push {:history (a/tos-history-entry tos-function-map created user correction-reason)}})
-      (ok))
-    (fail "error.invalid-tos-function")))
+(defn- update-tos-metadata [function-code command & [correction-reason]]
+  (if (t/update-tos-metadata function-code command correction-reason)
+    (ok)
+    (fail :error.invalid-tos-function)))
 
 (defcommand set-tos-function-for-application
   {:parameters       [:id functionCode]

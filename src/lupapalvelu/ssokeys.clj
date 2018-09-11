@@ -49,7 +49,7 @@
 (defn update-to-db [{id :id :as sso-key}]
   (try
     (mongo/update-by-id :ssoKeys id (mongo/with-_id sso-key) :upsert true)
-    (catch DuplicateKeyException e (fail! :error.ip-already-in-use)))
+    (catch DuplicateKeyException _ (fail! :error.ip-already-in-use)))
   id)
 
 (defn remove-from-db [id]

@@ -1,20 +1,18 @@
 (ns lupapalvelu.review
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+  (:require [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.util :as util]
             [lupapalvelu.tasks :as tasks]
-            [plumbing.core :as pc]
-            [lupapalvelu.action :refer [update-application application->command] :as action]
+            [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.building :as building]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.xml.krysp.review-reader :as review-reader]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.review-reader :as review-reader]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.document.tools :as tools]
             [sade.strings :as ss]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.verdict-review-util :as verdict-review-util]
-            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.organization :as organization]))
 
 (defn- empty-review-task? [t]
@@ -223,8 +221,7 @@
 (defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
-  [user created application app-xml & [overwrite-background-reviews?]]
-
+  [user created application app-xml & [overwrite-background-reviews? do-not-include-state-updates?]]
   (let [reviews (vec (reviews-preprocessed app-xml))
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
@@ -266,17 +263,14 @@
     (assert (every? map? updated-tasks) "tasks are maps")
     (debugf "save-reviews-from-xml: post merge counts: %s review tasks from xml, %s pre-existing tasks in application, %s tasks after merge" (count review-tasks) (count (:tasks application)) (count updated-tasks))
     (assert (>= (count updated-tasks) (count (:tasks application))) "have fewer tasks after merge than before")
-
     ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks-with-updated-buildings))
-
-
     (when (some seq validation-errors)
       (doseq [error (remove empty? validation-errors)]
         (warnf "Backend task validation error, this was skipped: %s" (pr-str error))))
     (ok :review-count (count review-tasks)
         :updated-tasks (map :id updated-tasks)
-        :updates (util/deep-merge task-updates building-updates state-updates)
+        :updates (util/deep-merge task-updates building-updates (when-not do-not-include-state-updates? state-updates))
         :new-faulty-tasks (map :id new-faulty-tasks)
         :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))

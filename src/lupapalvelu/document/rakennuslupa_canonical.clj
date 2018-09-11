@@ -23,6 +23,15 @@
       default
       (:muutostapa huoneisto))))
 
+(defn- schema-body-required-fields [schema]
+  (->> (:body schema)
+       (filter :required)
+       (map (comp keyword :name))))
+
+(defn- required-fields-have-value? [schema huoneisto]
+  (let [required-fields (schema-body-required-fields schema)]
+    (every? #(some? (get huoneisto %)) required-fields)))
+
 (defn- get-huoneistot-schema [schema-name]
   (->> {:name schema-name}
        schemas/get-schema
@@ -36,8 +45,9 @@
           :let      [huoneistonumero (-> huoneisto :huoneistonumero)
                      huoneistoPorras (-> huoneisto :porras)
                      jakokirjain (-> huoneisto :jakokirjain)
-                     muutostapa (muutostapa huoneisto schema)]
-          :when     (and muutostapa (seq huoneisto))]
+                     muutostapa (muutostapa huoneisto schema)
+                     required-filled? (required-fields-have-value? schema huoneisto)]
+          :when     (and muutostapa (seq huoneisto) required-filled?)]
       (merge {:muutostapa       muutostapa
               :huoneluku        (-> huoneisto :huoneluku)
               :keittionTyyppi   (-> huoneisto :keittionTyyppi)
@@ -85,7 +95,7 @@
       (assoc defaults :rakennusnro manuaalinen_rakennusnro)
       defaults)))
 
-(defn- get-rakennus [application {id :id created :created info :schema-info toimenpide :data :as doc}]
+(defn- get-rakennus [application {created :created info :schema-info toimenpide :data}]
   (let [{:keys [kaytto mitat rakenne lammitys luokitus huoneistot]} toimenpide
         kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (:muuRakennusaine rakenne)
                                                   :rakennusaine (:kantavaRakennusaine rakenne))
@@ -105,27 +115,35 @@
                      {:huoneisto huoneistot-data})
         vaestonsuoja-value (ss/trim (get-in toimenpide [:varusteet :vaestonsuoja]))
         vaestonsuoja (when (ss/numeric? vaestonsuoja-value) (util/->int vaestonsuoja-value))
+        verkostoliittymat (if (some true? (vals (:verkostoliittymat toimenpide)))
+                            {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin))
+                             :maakaasuKytkin (true? (-> toimenpide :verkostoliittymat :maakaasuKytkin))
+                             :viemariKytkin (true? (-> toimenpide :verkostoliittymat :viemariKytkin))
+                             :vesijohtoKytkin (true? (-> toimenpide :verkostoliittymat :vesijohtoKytkin))
+                             :kaapeliKytkin (true? (-> toimenpide :verkostoliittymat :kaapeliKytkin))}
+                            {})
+        varusteet (if (or (some true? (vals (:varusteet toimenpide)))
+                          (util/not-empty-or-nil? vaestonsuoja)
+                          (util/not-empty-or-nil? (-> toimenpide :varusteet :saunoja positive-integer)))
+                    {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin))
+                     :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin))
+                     :viemariKytkin (true? (-> toimenpide :varusteet :viemariKytkin))
+                     :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin))
+                     :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin))
+                     :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin))
+                     :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
+                     :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
+                     :saunoja (-> toimenpide :varusteet :saunoja positive-integer)
+                     :vaestonsuoja vaestonsuoja}
+                    {})
         rakennuksen-tiedot-basic-info {:kayttotarkoitus (:kayttotarkoitus kaytto)
                                        :rakentamistapa (:rakentamistapa rakenne)
-                                       :verkostoliittymat {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin))
-                                                           :maakaasuKytkin (true? (-> toimenpide :verkostoliittymat :maakaasuKytkin))
-                                                           :viemariKytkin (true? (-> toimenpide :verkostoliittymat :viemariKytkin))
-                                                           :vesijohtoKytkin (true? (-> toimenpide :verkostoliittymat :vesijohtoKytkin))
-                                                           :kaapeliKytkin (true? (-> toimenpide :verkostoliittymat :kaapeliKytkin))}
+                                       :verkostoliittymat verkostoliittymat
                                        :lammitystapa (cond
                                                        (= lammitystapa "suorasahk\u00f6") "suora s\u00e4hk\u00f6"
                                                        (= lammitystapa "eiLammitysta") "ei l\u00e4mmityst\u00e4"
                                                        :default lammitystapa)
-                                       :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin))
-                                                   :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin))
-                                                   :viemariKytkin (true? (-> toimenpide :varusteet :viemariKytkin))
-                                                   :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin))
-                                                   :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin))
-                                                   :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin))
-                                                   :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
-                                                   :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
-                                                   :saunoja (-> toimenpide :varusteet :saunoja positive-integer)
-                                                   :vaestonsuoja vaestonsuoja}
+                                       :varusteet varusteet
                                        :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))
                                        :rakennustunnus (get-rakennustunnus toimenpide application info)}
         rakennuksen-tiedot (merge
@@ -241,30 +259,23 @@
                             (assoc % :jarjestysnumero n)
                             %) toimenpide))
 
-(defmulti operation-canonical
-  {:arglists '([application document])}
-  (fn [application document] (-> document :schema-info :name keyword)))
+(defmulti operation-canonical {:arglists '([application document])}
+  (fn [_ document] (-> document :schema-info :name keyword)))
 
-(defmethod operation-canonical :hankkeen-kuvaus-minimum [& _]
-  nil)
+(defmethod operation-canonical :hankkeen-kuvaus-minimum [& _] nil)
 
 (defmethod operation-canonical :hankkeen-kuvaus [& _] ;; For prev permit applications
   nil)
 
-(defmethod operation-canonical :jatkoaika-hankkeen-kuvaus [& _]
-  nil)
+(defmethod operation-canonical :jatkoaika-hankkeen-kuvaus [& _] nil)
 
-(defmethod operation-canonical :maisematyo [& _]
-  nil)
+(defmethod operation-canonical :maisematyo [& _] nil)
 
-(defmethod operation-canonical :aloitusoikeus [& _]
-  nil)
+(defmethod operation-canonical :aloitusoikeus [& _] nil)
 
-(defmethod operation-canonical :aiemman-luvan-toimenpide [& _]
-  nil)
+(defmethod operation-canonical :aiemman-luvan-toimenpide [& _] nil)
 
-(defmethod operation-canonical :tyonjohtaja-v2 [& _]
-  nil)
+(defmethod operation-canonical :tyonjohtaja-v2 [& _] nil)
 
 (defmethod operation-canonical :uusiRakennus [application document]
   (get-uusi-toimenpide document application))
@@ -447,7 +458,7 @@
        (remove (comp ss/blank? :tunnus))
        (map (partial hash-map :MuuTunnus))))
 
-(defn- get-review-rakennustunnus [[{rakennus :rakennus :as building} & _]]
+(defn- get-review-rakennustunnus [[{:keys [rakennus]} & _]]
   (util/assoc-when-pred
       (select-keys rakennus [:jarjestysnumero :kiinttun]) util/not-empty-or-nil?
       :rakennusnro (:rakennusnro rakennus)
@@ -468,14 +479,14 @@
                             {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
          :rakennuksenSelite (:description rakennus)))})
 
-(defn- get-review-huomautus [{kuvaus :kuvaus toteaja :toteaja maara-aika :maaraAika toteamis-hetki :toteamisHetki :as huomautukset}]
+(defn- get-review-huomautus [{kuvaus :kuvaus toteaja :toteaja maara-aika :maaraAika toteamis-hetki :toteamisHetki}]
   (when kuvaus
     {:huomautus (util/assoc-when-pred
-                    {:kuvaus "-"} util/not-empty-or-nil?
-                    :kuvaus kuvaus
-                    :toteaja toteaja
-                    :maaraAika (util/to-xml-date-from-string maara-aika)
-                    :toteamisHetki (util/to-xml-date-from-string toteamis-hetki))}))
+                  {:kuvaus "-"} util/not-empty-or-nil?
+                  :kuvaus kuvaus
+                  :toteaja toteaja
+                  :maaraAika (util/to-xml-date-from-string maara-aika)
+                  :toteamisHetki (util/to-xml-date-from-string toteamis-hetki))}))
 
 (defn katselmus-canonical [application lang task user]
   (let [{{{pito-pvm     :pitoPvm
@@ -527,8 +538,7 @@
         :kayttotapaus (katselmus-kayttotapaus katselmuksen-laji :katselmus)}}}}))
 
 (defn unsent-attachments-to-canonical [application lang]
-  (let [application (tools/unwrapped application)
-        documents-by-type (documents-by-type-without-blanks application)]
+  (let [application (tools/unwrapped application)]
     {:Rakennusvalvonta
      {:toimituksenTiedot (toimituksen-tiedot application lang)
       :rakennusvalvontaAsiatieto

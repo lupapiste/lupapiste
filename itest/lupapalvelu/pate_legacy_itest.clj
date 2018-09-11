@@ -70,6 +70,8 @@
         (facts "Publish verdict"
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id verdict-id) => ok?
+          (verdict-pdf-queue-test {:app-id       app-id
+                                   :verdict-id   verdict-id})
           (let [{:keys [tasks attachments
                         state]} (query-application sonja app-id)
                 file-id         (-> attachments first :latestVersion :fileId)
@@ -94,11 +96,7 @@
                                                                  :name    "task-vaadittu-tyonjohtaja"
                                                                  :subtype "foreman"})
                                          :source      {:type "verdict" :id verdict-id}})]))
-            (fact "Attachment has been created"
-              attachments => (just [(contains {:source           {:type "verdicts" :id verdict-id}
-                                               :type             {:type-id    "paatos"
-                                                                  :type-group "paatoksenteko"}
-                                               :applicationState "verdictGiven"})]))
+
             (check-file app-id file-id true)
             (fact "Add attachment to review"
               (let [task-file-id (upload-file-and-bind
@@ -122,8 +120,7 @@
                     (query sonja :pate-verdict :id app-id
                            :verdict-id verdict-id)
                     => fail?)
-                  (let [{:keys [attachments tasks state
-                                history]} (query-application sonja app-id)]
+                  (let [{:keys [attachments tasks state]} (query-application sonja app-id)]
                     (fact "No attachments and the file has been removed"
                       attachments => empty?
                       (check-file app-id file-id false))
@@ -171,6 +168,8 @@
           (add-legacy-review sonja app-id vid1 "Review One" :aloituskokous)
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id vid1) => ok?)
+        (verdict-pdf-queue-test {:app-id       app-id
+                                 :verdict-id   vid1})
         (fact "State is verdictGiven"
           (query-application sonja app-id)
           => (contains {:state "verdictGiven"}))
@@ -184,6 +183,8 @@
           (add-legacy-review sonja app-id vid2 "Review Two" :aloituskokous)
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id vid2) => ok?)
+        (verdict-pdf-queue-test {:app-id       app-id
+                                 :verdict-id   vid2})
         (fact "There are now two tasks and four attachments"
           (let [{:keys [attachments tasks]} (query-application sonja app-id)]
             (count attachments) => 4
@@ -237,3 +238,52 @@
                    :verdict-id vid3) => ok?
           (:state (query-application sonja app-id))
           => "sent")))))
+
+(fact "Legacy TJ verdict"
+  (let [{app-id :id} (create-and-submit-application pena
+                                                    :operation :pientalo
+                                                    :propertyId sipoo-property-id)
+        {tj-app-id :id} (command sonja :create-foreman-application :id app-id
+                                 :taskId "" :foremanRole "ei tiedossa" :foremanEmail "foreman@mail.com")]
+
+    (fact "Approve application"
+      (command sonja :update-app-bulletin-op-description
+               :id app-id
+               :description "Donec non mauris quis mauris") => ok?
+      (command sonja :approve-application :id app-id :lang "fi") => ok?)
+
+    (fact "Approve TJ application"
+      (command sonja :change-permit-sub-type :id tj-app-id :permitSubtype "tyonjohtaja-hakemus") => ok?
+      (command sonja :submit-application :id tj-app-id) => ok?
+      (command sonja :approve-application :id tj-app-id :lang "fi") => ok?)
+
+    (fact "Disable Pate in Sipoo"
+      (command admin :set-organization-scope-pate-value
+               :permitType "R"
+               :municipality "753"
+               :value false) => ok?)
+
+    (let [{:keys [verdict-id]} (command sonja :new-legacy-verdict-draft :id tj-app-id)]
+
+      (fact "Fill and publish the TJ verdict"
+        (fill-verdict sonja tj-app-id verdict-id
+                      :kuntalupatunnus "TJ-123"
+                      :verdict-code "1"
+                      :verdict-text "TJ Verdict"
+                      :anto (timestamp "9.8.2018")
+                      :lainvoimainen (timestamp "19.8.2018"))
+        (command sonja :publish-legacy-verdict :id tj-app-id :verdict-id verdict-id) => ok?)
+
+      (let [tj-app (query-application sonja tj-app-id)
+            tj-verdict (first (:pate-verdicts tj-app))]
+
+        (fact "TJ application state is foremanVerdictGiven"
+          tj-app => (contains {:state "foremanVerdictGiven"}))
+
+        (fact "TJ verdict have given data"
+          (get-in tj-verdict [:data :handler]) => "Sonja Sibbo"
+          (get-in tj-verdict [:data :kuntalupatunnus]) => "TJ-123"
+          (get-in tj-verdict [:data :verdict-code]) => "1"
+          (get-in tj-verdict [:data :verdict-text]) => "TJ Verdict"
+          (get-in tj-verdict [:data :anto]) => (timestamp "9.8.2018")
+          (get-in tj-verdict [:data :lainvoimainen]) => (timestamp "19.8.2018"))))))

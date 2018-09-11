@@ -1,6 +1,5 @@
 (ns lupapalvelu.verdict-api
-  (:require [clojure.set :as set]
-            [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
+  (:require [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
@@ -33,6 +32,10 @@
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
+(defn no-published-pate-verdicts-check [{:keys [application]}]
+  (when (app/has-published-pate-verdicts? application)
+    (fail :error.published-pate-verdicts-exist)))
+
 (defquery verdict-attachment-type
   {:parameters       [:id]
    :states           states/all-states
@@ -49,9 +52,10 @@
    :states      (conj states/give-verdict-states :constructionStarted) ; states reviewed 2015-10-12
    :user-roles  #{:authority}
    :notified    true
-   :pre-checks  [application-has-verdict-given-state]
+   :pre-checks  [application-has-verdict-given-state
+                 no-published-pate-verdicts-check]
    :on-success  (notify :application-state-change)}
-  [{app :application :as command}]
+  [command]
   (let [result (verdict/do-check-for-verdict command)]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)
@@ -200,7 +204,7 @@
    :states     states/post-verdict-states
    :user-roles #{:applicant :authority}
    :user-authz-roles roles/writer-roles-with-foreman}
-  [{:keys [application created user created] :as command}]
+  [{:keys [application user created] :as command}]
   (if (usr/get-user-with-password (:username user) password)
     (when-let [verdict (find-verdict application verdictId)]
       (let [result (update-application command

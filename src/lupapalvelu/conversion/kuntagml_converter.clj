@@ -1,23 +1,23 @@
 (ns lupapalvelu.conversion.kuntagml-converter
-  (:require [taoensso.timbre :refer [info infof warn]]
+  (:require [taoensso.timbre :refer [info infof warn error]]
             [sade.core :refer :all]
             [sade.util :as util]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.conversion.util :as conversion-util]
-            [lupapalvelu.document.model :as model]
+            [lupapalvelu.conversion.util :as conv-util]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.review :as review]
+            [lupapalvelu.statement :as statement]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
@@ -69,7 +69,8 @@
         ;     `lupapalvelu.application/make-document` for example. And then save to db :)
         ;
         ;
-        id (app/make-application-id municipality)
+        kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
+        id (conv-util/make-converted-application-id kuntalupatunnus)
         make-app-info {:id              id
                        :organization    organization
                        :operation-name  "aiemmalla-luvalla-hakeminen" ; FIXME: no fixed operation in conversion, see above
@@ -83,6 +84,7 @@
                                                   (:user command)
                                                   (:created command)
                                                   manual-schema-datas)
+
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))))
@@ -95,12 +97,35 @@
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
 
-        structures (->> xml krysp-reader/->rakennelmatiedot (map conversion-util/rakennelmatieto->kaupunkikuvatoimenpide))
+        structures (->> xml krysp-reader/->rakennelmatiedot (map conv-util/rakennelmatieto->kaupunkikuvatoimenpide))
+
+        statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
+
+        state-changes (-> xml krysp-reader/get-sorted-tilamuutos-entries)
+
+        history-array (conv-util/generate-history-array xml)
+
+        ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
+        given-statements (for [st statements
+                               :when (map? st)]
+                           (try
+                             (statement/give-statement st
+                                                       (:saateText st)
+                                                       (get-in st [:metadata :puoltotieto])
+                                                       (mongo/create-id)
+                                                       (mongo/create-id)
+                                                       false)
+                             (catch Exception e
+                               (error "Moving statement to statement given -state failed: %s" (.getMessage e)))))
 
         created-application (-> created-application
                                 (update-in [:documents] concat other-building-docs new-parties structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
-                                (assoc :opened (:created command)))
+                                (assoc :statements given-statements
+                                       :opened (:created command)
+                                       :history history-array
+                                       :state :closed ;; Asetetaan hanke "p\u00e4\u00e4t\u00f6s annettu"-tilaan
+                                       :facta-imported true))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
@@ -112,19 +137,33 @@
              (get-in command [:data :kuntalupatunnus])
              authorize-applicants)
       ;; Get verdicts for the application
-      (when-let [updates (verdict/find-verdicts-from-xml command xml)]
+      (when-let [updates (verdict/find-verdicts-from-xml command xml false)]
         (action/update-application command updates))
 
       (prev-permit/invite-applicants command hakijat authorize-applicants)
       (infof "Processed applicants, processable applicants count was: %s" (count (filter prev-permit/get-applicant-type hakijat)))
 
       (let [updated-application (mongo/by-id :applications (:id created-application))
-            {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml)
+            {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml false true)
             review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-updates")
             update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id)]
         (if (:ok update-result)
           (info "Saved review updates")
           (infof "Reviews were not saved: %s" (:desc update-result))))
+
+      ;; The database may already include the same kuntalupatunnus as in the to be imported application
+      ;; (e.g., the application has been imported earlier via previous permit (paperilupa) mechanism).
+      ;; This kind of application 1) has the same kuntalupatunnus and 2) :facta-imported is falsey.
+      ;; After import, the two applications are linked (viitelupien linkkaus).
+      (let [app-links (map conv-util/normalize-permit-id (krysp-reader/->viitelupatunnukset xml))
+            duplicate-ids (conv-util/get-duplicate-ids kuntalupatunnus)
+            all-links (clojure.set/union (set app-links) (set duplicate-ids))]
+        (infof (format "Linking %d app-links to application %s" (count all-links) (:id created-application)))
+        (doseq [link all-links]
+          (try
+            (app/do-add-link-permit created-application link)
+            (catch Exception e
+              (error "Adding app-link %s -> %s failed: %s" (:id created-application) link (.getMessage e))))))
 
       (let [fetched-application (mongo/by-id :applications (:id created-application))]
         (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
@@ -143,11 +182,11 @@
   1) The local MongoDB has to contain the location info for the municipality in question (here Vantaa)
   2) this function needs to be called from prev-permit-api/create-application-from-previous-permit instead of
   prev-permit/fetch-prev-application!"
-  [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
+  [{{:keys [kuntalupatunnus authorizeApplicants]} :data :as command}]
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
-        destructured-permit-id (conversion-util/destructure-permit-id kuntalupatunnus)
+        destructured-permit-id (conv-util/destructure-permit-id kuntalupatunnus)
         operation             "aiemmalla-luvalla-hakeminen"
-        path                  "./src/lupapalvelu/conversion/test-data/"
+        path                  "../../Desktop/test-data/"
         filename              (str path kuntalupatunnus ".xml")
         permit-type           "R"
         xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)

@@ -1,8 +1,7 @@
 (ns lupapalvelu.document.document-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn error]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
-            [sade.env :as env]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.application :as application]
@@ -14,6 +13,7 @@
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.backing-system.core :as bs]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 
@@ -151,7 +151,8 @@
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       doc-disabled-validator
                       validate-created-after-verdict
-                      validate-post-verdict-not-approved]}
+                      validate-post-verdict-not-approved]
+   :on-success       bs/update-callback}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
@@ -166,7 +167,7 @@
                        :required [:application/read :document/edit-draft]}
                       {:context  {:application {:state states/update-doc-states}}
                        :required [:application/read :document/edit]}
-                      {:context  {:application {:state states/all-application-states-but-draft-or-terminal}}
+                      {:context  {:application {:state states/all-application-or-archiving-project-states}}
                        :required [:application/read :document/edit-identifiers]}]
    :pre-checks       [is-identifier]}
   [command]
@@ -257,8 +258,9 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(editable-by-state? states/update-doc-states)
                       user-can-be-set-validator
-                      doc-disabled-validator]}
-  [{:keys [created application user] :as command}]
+                      doc-disabled-validator]
+   :on-success       bs/update-callback}
+  [{:keys [created application user]}]
   (doc-persistence/do-set-user-to-document application documentId userId path created user))
 
 (defcommand set-current-user-to-document
@@ -268,8 +270,9 @@
    :permissions      document-edit-permissions
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(editable-by-state? states/update-doc-states)
-                      doc-disabled-validator]}
-  [{:keys [created application user] :as command}]
+                      doc-disabled-validator]
+   :on-success       bs/update-callback}
+  [{:keys [created application user]}]
   (doc-persistence/do-set-user-to-document application documentId (:id user) path created user))
 
 (defcommand set-company-to-document
@@ -283,8 +286,9 @@
    :permissions      document-edit-permissions
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks       [(editable-by-state? states/update-doc-states)
-                      doc-disabled-validator]}
-  [{:keys [user created application document] :as command}]
+                      doc-disabled-validator]
+   :on-success       bs/update-callback}
+  [{:keys [user created application document]}]
   (doc-persistence/do-set-company-to-document application
                                               document
                                               companyId

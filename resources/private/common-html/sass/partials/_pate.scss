@@ -772,6 +772,11 @@ div.pate-note {
   background-color: $gray246;
 }
 
+div.pate-note-frame {
+  margin: $marginM $marginM;
+  display: block;
+}
+
 div.pate-required-fields-note {
   @include patenote( 0, 0);
   padding-left: $marginS;
@@ -829,8 +834,18 @@ div.pate-select-application-attachments {
   }
 }
 
+h3.pate-attachments-title {
+  padding-top: $marginM;
+  margin-top: $marginM;
+  border-top: 1px solid black;
+}
+
 .pate-left-space {
   margin-left: $marginM;
+}
+
+.pate-right-space {
+  margin-right: $marginM;
 }
 
 .pate-sandwich {
@@ -871,6 +886,7 @@ span.text-and-button > input {
 
 tr.verdict-signatures {
   div.tabby {
+    vertical-align: top;
     margin-left: 1em;
     //max-width: 30em;
     div.tabby__cell {
@@ -888,6 +904,83 @@ tr.verdict-signatures {
     min-width: 16em;
   }
   button.cancel-signing {
-    margin-top: 1.5em;
+    margin-left: 2em;
   }
 }
+
+
+// Copied from/influenced by the style definitions in pdf_html.clj
+
+div.published-verdict {
+  padding: {
+    left: 2em;
+    right: 2em;
+  }
+  .section {display: table;
+            width:   100%;
+            &.border-top {
+              margin-top:  1em;
+              border-top:  1px solid black;
+              padding-top: 1em;
+            }
+            &.border-bottom {
+              margin-bottom:  1em;
+              border-bottom:  1px solid black;
+              padding-bottom: 1em;
+            }
+            &.header {
+              padding: 0;
+              border-bottom: 1px solid black;
+            }
+            >.row {
+              display: table-row;
+
+              &.border-top >.cell {
+                border-top: 1px solid black;
+              }
+              &.border-bottom >.cell {
+                border-bottom: 1px solid black;
+              }
+              &.pad-after >.cell {
+                padding-bottom: 0.5em;
+              }
+              &.pad-before >.cell {
+                padding-top: 0.5em
+              }
+              .cell {
+                display:       table-cell;
+                white-space:   pre-wrap;
+                padding-right: 1em;
+                vertical-align: top;
+
+                &:last-child {
+                  padding-right: 0;
+                }
+                &.right {
+                  text-align: right;
+                }
+                &.center {
+                  text-align: center;
+                }
+                &.bold {
+                  font-weight: bold;
+                }
+                &.nowrap {
+                  white-space: nowrap;
+                }
+                &.page-number {
+                  display: none;
+                }}
+              @for $i from 2 through 20 {
+                .cell.cell--#{$i * 5} {
+                  width: $i * 5%;
+                }
+              }
+              &.spaced {
+                .row + .row {
+                  .cell {
+                    padding-top: 0.5em;
+                  }
+                }
+              }
+            }}}

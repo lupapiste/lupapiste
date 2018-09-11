@@ -13,7 +13,7 @@
             [lupapalvelu.operations]
             [lupapalvelu.organization :as org]
             [lupapalvelu.xml.emit :refer :all]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
+            [lupapalvelu.backing-system.krysp.rakennuslupa-mapping :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.core :refer :all]
@@ -695,7 +695,6 @@
   (let [osapuoli (tools/unwrapped (:data hakija-henkilo))
         hakija-model (get-osapuoli-data osapuoli (-> hakija-henkilo :schema-info :name keyword))
         henkilo (:henkilo hakija-model)
-        ht (:henkilotiedot henkilo)
         yritys (:yritys hakija-model)]
     (fact "model" hakija-model => truthy)
     (fact "kuntaRooliKoodi" (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
@@ -710,7 +709,6 @@
   (let [osapuoli (tools/unwrapped (:data asiamies-henkilo))
         asiamies-model (get-osapuoli-data osapuoli (-> asiamies-henkilo :schema-info :name keyword))
         henkilo (:henkilo asiamies-model)
-        ht (:henkilotiedot henkilo)
         yritys (:yritys asiamies-model)]
     (fact "model" asiamies-model => truthy)
     (fact "kuntaRooliKoodi" (:kuntaRooliKoodi asiamies-model) => "Hakijan asiamies")
@@ -894,7 +892,7 @@
 (facts "Canonical tyonjohtajan vastattavaTyotieto is correct"
   (let [tyonjohtaja       (-> tyonjohtaja :data (dissoc :sijaistus) tools/unwrapped)
         tyonjohtaja-model (get-tyonjohtaja-data {} "fi" tyonjohtaja :tyonjohtaja)
-        sijaistus-213     (-> tyonjohtaja-model :sijaistustieto)]
+        _     (-> tyonjohtaja-model :sijaistustieto)]
     (:sijaistustieto tyonjohtaja-model) => nil
     (fact "no dates" (-> tyonjohtaja-model :vastattavaTyotieto first :VastattavaTyo keys) => [:vastattavaTyo])
     (fact "vastattavaTyo"
@@ -962,7 +960,11 @@
                      (get-operations))]
     (fact "actions" (seq actions) => truthy)))
 
-(testable-privates lupapalvelu.document.rakennuslupa-canonical get-huoneisto-data)
+(testable-privates lupapalvelu.document.rakennuslupa-canonical
+                   get-huoneisto-data
+                   get-huoneistot-schema
+                   schema-body-required-fields
+                   required-fields-have-value?)
 
 (facts "Huoneisto is correct"
   (let [huoneistot (get-huoneisto-data (-> uusi-rakennus
@@ -1026,6 +1028,14 @@
         h2         (last huoneistot)]
     (fact "h2 muutostapa" (:muutostapa h2) => "muutos")))
 
+(facts "Huoneistot with created default data shouldn't create data into canonical"                       ; LPK-3844
+  (let [huoneistot (get-huoneisto-data (-> (doc-schemas/get-schema 1 "uusiRakennus")
+                                           (tools/create-document-data tools/default-values)
+                                           :huoneistot
+                                           tools/unwrapped)
+                                       "uusiRakennus")]
+    huoneistot => empty?))
+
 (testable-privates lupapalvelu.document.rakennuslupa-canonical get-rakennus)
 
 (facts "When muu-lammonlahde is empty, lammonlahde is used"
@@ -1081,6 +1091,50 @@
                                    :muuTunnustieto [{:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "toimenpideId"}}
                                                     {:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "Lupapiste"}}]
                                    :rakennuksenSelite "A: kerrostalo-rivitalo-kuvaus"})))
+
+(facts "rakennuksenTiedot : varusteet"
+  (against-background
+    (org/pate-scope? irrelevant) => true)
+  (let [doc (tools/unwrapped  {:schema-info {:name "uusiRakennus"}
+                               :data {:varusteet {:viemariKytkin true
+                                                  :hissiKytkin true
+                                                  :sahkoKytkin true}}})
+        {tiedot :rakennuksenTiedot} (get-rakennus application-rakennuslupa (tools/unwrapped  {:schema-info {:name "uusiRakennus"}}))
+        {tiedot2 :rakennuksenTiedot} (get-rakennus application-rakennuslupa doc)]
+
+    (fact "when all varusteet flags are false varusteet map should be empty"
+      (:varusteet tiedot) => {})
+
+    (fact "If one varuste is selected then all should be in map"
+      (:varusteet tiedot2) => {:sahkoKytkin true
+                               :kaasuKytkin false
+                               :viemariKytkin true
+                               :vesijohtoKytkin false
+                               :lamminvesiKytkin false
+                               :aurinkopaneeliKytkin false
+                               :hissiKytkin true
+                               :koneellinenilmastointiKytkin false
+                               :saunoja nil
+                               :vaestonsuoja nil})))
+
+(facts "rakennuksenTiedot : verkostoliittymat"
+  (against-background
+    (org/pate-scope? irrelevant) => true)
+  (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
+                              :data {:verkostoliittymat {:sahkoKytkin true
+                                                         :viemariKytkin true}}})
+        {tiedot :rakennuksenTiedot} (get-rakennus application-rakennuslupa (tools/unwrapped {:schema-info {:name "uusiRakennus"}}))
+        {tiedot2 :rakennuksenTiedot} (get-rakennus application-rakennuslupa doc)]
+
+    (fact "When theres no verkostoliittymat map should be empty"
+      (:verkostoliittymat tiedot) => {})
+
+    (fact "If one liittyma is selected then all should be in map"
+      (:verkostoliittymat tiedot2) => {:sahkoKytkin true
+                                       :viemariKytkin true
+                                       :maakaasuKytkin false
+                                       :kaapeliKytkin false
+                                       :vesijohtoKytkin false})))
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
   (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]
@@ -1138,7 +1192,6 @@
         aineistonnimi (:aineistonnimi toimituksenTiedot )
         lausuntotieto (first (:lausuntotieto rakennusvalvontaasia))
         Lausunto (:Lausunto lausuntotieto)
-        viranomainen (:viranomainen Lausunto)
         pyyntoPvm (:pyyntoPvm Lausunto)
         lausuntotieto (:lausuntotieto Lausunto)
         LL (:Lausunto lausuntotieto)  ;Lausunto oli jo kaytossa, siksi LL
@@ -1160,7 +1213,6 @@
         tyonjohtajatieto (:Tyonjohtaja (last tyonjohtajat))
 
         sijaistus (:sijaistustieto tyonjohtajatieto)
-        sijaistus (:Sijaistus (last sijaistus))
         rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia)
         rakennuspaikkatieto (first rakennuspaikkatiedot)
         rakennuspaikka (:Rakennuspaikka rakennuspaikkatieto)
@@ -1420,7 +1472,7 @@
 
             viitelupatieto (first (:viitelupatieto rakennusvalvontaasia)) => truthy
             viitelupatieto-LupaTunnus (:LupaTunnus viitelupatieto) => truthy
-            viitelupatieto-MuuTunnus (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => falsey
+            _ (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => falsey
 
             luvanTunnisteTiedot-MuuTunnus (-> rakennusvalvontaasia
                                               :luvanTunnisteTiedot
@@ -1446,7 +1498,7 @@
 
             kayttotapaus (:kayttotapaus rakennusvalvontaasia) => truthy
             Asiantiedot (-> rakennusvalvontaasia :asianTiedot :Asiantiedot) => truthy
-            vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot) => falsey
+            _ (:vahainenPoikkeaminen Asiantiedot) => falsey
             rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => truthy
 
             viitelupatieto-LupaTunnus_2 (:LupaTunnus (get-viitelupatieto link-permit-data-lupapistetunnus))]
@@ -1496,7 +1548,7 @@
 
         viitelupatieto (first (:viitelupatieto rakennusvalvontaasia)) => truthy
         viitelupatieto-LupaTunnus (:LupaTunnus viitelupatieto) => truthy
-        viitelupatieto-MuuTunnus (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => truthy
+        _ (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => truthy
 
         osapuolet-vec (-> rakennusvalvontaasia :osapuolettieto :Osapuolet :osapuolitieto) => truthy
 
@@ -1515,7 +1567,7 @@
 
         kayttotapaus (:kayttotapaus rakennusvalvontaasia) => truthy
         Asiantiedot (-> rakennusvalvontaasia :asianTiedot :Asiantiedot) => truthy
-        vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot) => falsey
+        _ (:vahainenPoikkeaminen Asiantiedot) => falsey
         rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => truthy]
 
     (facts "Maksaja is correct"
@@ -1844,32 +1896,32 @@
         canonical (katselmus-canonical application "sv" review authority-user-jussi)
         Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
-        kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+        _ (:kuntakoodi toimituksenTiedot) => truthy
         rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
         RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
         kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
         Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => truthy
-        tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
+        _ (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
         luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
         mt (:MuuTunnus muuTunnustieto) => truthy
 
-        tunnus (:tunnus mt) => "LP-753-2013-00001"
-        sovellus (:sovellus mt) => "Lupapiste"
+        _ (:tunnus mt) => "LP-753-2013-00001"
+        _ (:sovellus mt) => "Lupapiste"
 
         osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
         Osapuolet (:Osapuolet osapuolettieto) => truthy
         osapuolitieto (:osapuolitieto Osapuolet) => truthy
         Osapuoli (:Osapuoli osapuolitieto) => truthy
-        kuntaRooliKoodi (:kuntaRooliKoodi Osapuoli) => "Ilmoituksen tekij\u00e4"
+        _ (:kuntaRooliKoodi Osapuoli) => "Ilmoituksen tekij\u00e4"
         henkilo (:henkilo Osapuoli) => truthy
         nimi (:nimi henkilo) => truthy
-        etunimi (:etunimi nimi) => "Jussi"
-        sukunimi (:sukunimi nimi) => "Viranomainen"
+        _ (:etunimi nimi) => "Jussi"
+        _ (:sukunimi nimi) => "Viranomainen"
         osoite (:osoite henkilo) => truthy
-        osoitenimi (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1"
-        puhelin (:puhelin henkilo) => "1231234567"
+        _ (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1"
+        _ (:puhelin henkilo) => "1231234567"
 
         katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
         Katselmus (:Katselmus katselmustieto) => truthy
@@ -1903,7 +1955,7 @@
 
         Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
-        kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+        _ (:kuntakoodi toimituksenTiedot) => truthy
         rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
         RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
         kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
@@ -2006,55 +2058,55 @@
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
-                 kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+                 _ (:kuntakoodi toimituksenTiedot) => truthy
                  rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
                  RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
                  kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
                  Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => map?
-                 tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
+                 _ (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
 
                  luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
                  LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
-                 kuntalupatunnus (:kuntalupatunnus LupaTunnus) => "2013-01"
+                 _ (:kuntalupatunnus LupaTunnus) => "2013-01"
                  muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
                  mt (:MuuTunnus muuTunnustieto) => truthy
 
-                 tunnus (:tunnus mt) => "LP-753-2013-00001"
-                 sovellus (:sovellus mt) => "Lupapiste"
+                 _ (:tunnus mt) => "LP-753-2013-00001"
+                 _ (:sovellus mt) => "Lupapiste"
 
                  osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
                  Osapuolet (:Osapuolet osapuolettieto) => truthy
                  osapuolitieto (:osapuolitieto Osapuolet) => truthy
                  Osapuoli (:Osapuoli osapuolitieto) => truthy
-                 kuntaRooliKoodi (:kuntaRooliKoodi Osapuoli) => "Ilmoituksen tekij\u00e4"
+                 _ (:kuntaRooliKoodi Osapuoli) => "Ilmoituksen tekij\u00e4"
                  henkilo (:henkilo Osapuoli) => truthy
                  nimi (:nimi henkilo) => truthy
-                 etunimi (:etunimi nimi) => "Jussi"
-                 sukunimi (:sukunimi nimi) => "Viranomainen"
+                 _ (:etunimi nimi) => "Jussi"
+                 _ (:sukunimi nimi) => "Viranomainen"
                  osoite (:osoite henkilo) => truthy
-                 osoitenimi (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1"
-                 puhelin (:puhelin henkilo) => "1231234567"
+                 _ (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1"
+                 _ (:puhelin henkilo) => "1231234567"
 
                  katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
                  Katselmus (:Katselmus katselmustieto) => truthy
                  rakennustunnus (:rakennustunnus Katselmus) => truthy
-                 jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
-                 rakennusnumero (:rakennusnro rakennustunnus) => "002"
-                 kiinttun (:kiinttun rakennustunnus) => "01234567891234"
-                 pitoPvm (:pitoPvm Katselmus) => "2012-12-03"
-                 osittainen (:osittainen Katselmus) => "pidetty"
-                 pitaja (:pitaja Katselmus) => "Sonja Silja"
+                 _ (:jarjestysnumero rakennustunnus) => 1
+                 _ (:rakennusnro rakennustunnus) => "002"
+                 _ (:kiinttun rakennustunnus) => "01234567891234"
+                 _ (:pitoPvm Katselmus) => "2012-12-03"
+                 _ (:osittainen Katselmus) => "pidetty"
+                 _ (:pitaja Katselmus) => "Sonja Silja"
                  huomautus (-> Katselmus :huomautukset :huomautus)
-                 katselmuksenLaji (:katselmuksenLaji Katselmus) => "pohjakatselmus"
-                 lasnaolijat (:lasnaolijat Katselmus ) => "Tiivi Taavi, Hipsu ja Lala"
-                 poikkeamat (:poikkeamat Katselmus) => "Ei poikkeamisia"
-                 tiedoksianto (:verottajanTvLlKytkin Katselmus) => false
-                 tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Pohjakatselmus 1"
-                 kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Uusi katselmus"
+                 _ (:katselmuksenLaji Katselmus) => "pohjakatselmus"
+                 _ (:lasnaolijat Katselmus ) => "Tiivi Taavi, Hipsu ja Lala"
+                 _ (:poikkeamat Katselmus) => "Ei poikkeamisia"
+                 _ (:verottajanTvLlKytkin Katselmus) => false
+                 _ (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Pohjakatselmus 1"
+                 _ (:kayttotapaus RakennusvalvontaAsia) => "Uusi katselmus"
 
                  rakennustieto (first (:katselmuksenRakennustieto Katselmus)) => truthy
-                 rakennusOsittainen (get-in rakennustieto [:KatselmuksenRakennus :katselmusOsittainen]) => "pidetty"
-                 rakennusKayttoonotto (get-in rakennustieto [:KatselmuksenRakennus :kayttoonottoKytkin]) => false]
+                 _ (get-in rakennustieto [:KatselmuksenRakennus :katselmusOsittainen]) => "pidetty"
+                 _ (get-in rakennustieto [:KatselmuksenRakennus :kayttoonottoKytkin]) => false]
 
              (:kuvaus huomautus) => "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
              (:maaraAika huomautus) => "2014-05-05"
@@ -2109,7 +2161,7 @@
                    authority-user-jussi) => truthy
         Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
-        kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+        _ (:kuntakoodi toimituksenTiedot) => truthy
         rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
         RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
         katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
@@ -2213,7 +2265,7 @@
         Asiantiedot (:Asiantiedot asianTiedot)
         lisatiedot (:lisatiedot rakennusvalvontaasia) => truthy
         Lisatiedot (:Lisatiedot lisatiedot) => truthy
-        vakuus (:vakuus Lisatiedot) => nil?]
+        _ (:vakuus Lisatiedot) => nil?]
 
         (:aineistonnimi toimituksenTiedot ) => "Vainuddintie 92"
         (:rakennusvalvontaasianKuvaus Asiantiedot) => "Tarttis aloitta asp rakentaminen."
@@ -2320,3 +2372,18 @@
   (get-huoneistot-pintaala (get-huoneisto-data (assoc-in huoneistot [:0 :huoneistoala] "") "uusiRakennus")) => 41.5
   (get-huoneistot-pintaala (get-huoneisto-data (assoc-in huoneistot [:0 :huoneistoala] :bar) "uusiRakennus")) => 41.5
   (get-huoneistot-pintaala (get-huoneisto-data (assoc-in huoneistot [:0 :huoneistoala] "10,0") "uusiRakennus")) => 51.5)
+
+(facts "huoneisto - required fields filled?"
+  (let [schema (get-huoneistot-schema "uusiRakennus")
+        fields (schema-body-required-fields schema)
+        default-doc-data (-> (doc-schemas/get-schema 1 "uusiRakennus")
+                             (tools/create-document-data tools/default-values)
+                             :huoneistot
+                             tools/unwrapped)]
+    fields => (just [:huoneistonumero :huoneluku :keittionTyyppi :huoneistoala])
+    (required-fields-have-value? schema {}) => false
+    (required-fields-have-value? schema {:huoneistonumero "1"}) => false
+    (fact "tools/default-values doesnt fill required data"  ; LPk-3844
+      (required-fields-have-value? schema default-doc-data) => false)
+    (fact "all test huoneistot are valid, as they have required fileld"
+      (vals huoneistot) => (has every? (partial required-fields-have-value? schema)))))

@@ -82,10 +82,11 @@ Can not add the same user again
 Can not add the financial authority as company user
   Click enabled by test id  company-add-user
   Wait until  Element should be visible  dialog-company-new-user
+  No such test id  user-not-applicant
   Input text by test id  company-new-user-email  financial@ara.fi
   Click enabled by test id  company-search-email
-  Wait until  Element should be visible  //div[@id="dialog-company-new-user"]//span[@data-bind="text: loc('register.company.add-user.is-financial-authority', email())"]
-  Click enabled by test id  company-user-is-financial-authority-close-dialog
+  Wait test id visible  user-not-applicant
+  Click enabled by test id  close-not-applicant
   Wait until  Element should not be visible  dialog-company-new-user
 
 Delete Duff3

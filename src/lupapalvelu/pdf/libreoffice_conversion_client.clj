@@ -1,6 +1,6 @@
 (ns lupapalvelu.pdf.libreoffice-conversion-client
   (:require [clojure.java.io :as io]
-            [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
+            [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf.libreoffice-template :refer :all]

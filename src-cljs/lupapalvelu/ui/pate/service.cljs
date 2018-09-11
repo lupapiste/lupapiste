@@ -2,7 +2,6 @@
   (:require [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.pate.state :as state]
-            [lupapalvelu.ui.authorization :as auth]
             [sade.shared-util :as util]))
 
 (defn fetch-template-list []
@@ -22,7 +21,7 @@
   is a 'top-level' atom that contains the info property (including
   modified and filled?)."
   [container* {:keys [state path]}]
-  (fn [{:keys [modified changes errors removals filled] :as response}]
+  (fn [{:keys [modified changes errors removals filled]}]
     (swap! state (fn [state]
                    (let [state (as-> state $
                                  (reduce (fn [acc [k v]]
@@ -181,6 +180,13 @@
                     :template-id template-id
                     :replacement-id replacement-id)))
 
+(defn copy-verdict-draft
+  [app-id callback replacement-id]
+   (common/command {:command "copy-pate-verdict-draft"
+                    :success callback}
+                   :id app-id
+                   :replacement-id replacement-id))
+
 (defn new-legacy-verdict-draft [app-id callback]
   (common/command {:command "new-legacy-verdict-draft"
                    :success callback}
@@ -192,16 +198,36 @@
                 :id app-id
                 :verdict-id verdict-id))
 
-(defn delete-verdict [app-id {:keys [id published legacy?]}]
-  (common/command {:command (if legacy?
-                              :delete-legacy-verdict
-                              :delete-pate-verdict)
-                   :success #(do (fetch-verdict-list app-id)
-                                 (if published
-                                   (js/repository.load app-id)
-                                   (js/lupapisteApp.services.attachmentsService.queryAll)))}
-                  :id app-id
-                  :verdict-id id))
+(defn open-published-verdict [app-id verdict-id callback]
+  (common/query "published-pate-verdict"
+                callback
+                :id app-id
+                :verdict-id verdict-id))
+
+(defn delete-verdict [app-id {:keys [id published legacy? category]}]
+  (let [backing-system? (util/=as-kw category :backing-system)]
+    (common/command {:command (cond
+                                legacy?         :delete-legacy-verdict
+                                backing-system? :delete-verdict
+                                :else           :delete-pate-verdict)
+                     :success #(do (fetch-verdict-list app-id)
+                                   (if published
+                                     (js/repository.load app-id)
+                                     (js/lupapisteApp.services.attachmentsService.queryAll))
+                                   (state/refresh-application-auth-model app-id))}
+                   :id app-id
+                   (if backing-system? :verdictId :verdict-id) id)))
+
+(defn check-for-verdict [app-id waiting?* callback]
+  (common/command {:command :check-for-verdict
+                   :waiting? waiting?*
+                   :success (fn [response]
+                              (fetch-verdict-list app-id)
+                              (js/repository.load app-id)
+                              (state/refresh-application-auth-model app-id)
+                              (js/lupapisteApp.services.attachmentsService.queryAll)
+                              (callback response))}
+                  :id app-id))
 
 (defn edit-verdict [app-id verdict-id path value callback]
   (common/command {:command "edit-pate-verdict"
@@ -222,7 +248,7 @@
                               (state/refresh-verdict-auths app-id
                                                            {:verdict-id verdict-id})
                               (fetch-verdict-list app-id)
-                              (open-verdict app-id verdict-id callback)
+                              (open-published-verdict app-id verdict-id callback)
                               (js/repository.load app-id))}
                   :id app-id
                   :verdict-id verdict-id))
@@ -273,6 +299,21 @@
                 :jobId job-id
                 :version version))
 
+;; Signature request
+
+(defn fetch-application-parties [app-id verdict-id callback]
+  (common/query "pate-parties"
+                callback
+                :id app-id
+                :verdict-id verdict-id))
+
+(defn send-signature-request [app-id verdict-id signer-id]
+  (common/command {:command :send-signature-request
+                   :success #(fetch-verdict-list app-id)}
+                  :id app-id
+                  :verdict-id verdict-id
+                  :signer-id signer-id))
+
 (defn- batch-job [status-fn {:keys [job]}]
   (status-fn (when job
                (reduce (fn [acc {:keys [fileId status]}]
@@ -305,16 +346,15 @@
   other words, when the :pending list is empty. Nil (no job) argument
   denotes error (e.g., timeout)."
   [app-id filedatas status-fn]
-  (let [result* (atom {})]
-    (bind-attachments app-id
-                      (map (fn [{:keys [file-id type] :as filedata}]
-                             (let [[type-group type-id] (util/split-kw-path type)]
-                               (merge (dissoc filedata :file-id :type)
-                                      {:fileId   file-id
-                                       :type {:type-group type-group
-                                              :type-id type-id}})))
-                           filedatas)
-                      (partial batch-job status-fn))))
+  (bind-attachments app-id
+                    (map (fn [{:keys [file-id type] :as filedata}]
+                           (let [[type-group type-id] (util/split-kw-path type)]
+                             (merge (dissoc filedata :file-id :type)
+                                    {:fileId file-id
+                                     :type   {:type-group type-group
+                                              :type-id    type-id}})))
+                         filedatas)
+                    (partial batch-job status-fn)))
 
 ;; Co-operation with the AttachmentsService
 

@@ -1,7 +1,6 @@
 (ns lupapalvelu.ddd-map-itest
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.fixture.core :as fixture]))
+            [lupapalvelu.itest-util :refer :all]))
 
 (apply-remote-minimal)
 

@@ -1,7 +1,6 @@
 (ns lupapalvelu.verdict
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+  (:require [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.data :refer [diff]]
-            [clojure.java.io :as io]
             [monger.operators :refer :all]
             [net.cgrand.enlive-html :as enlive]
             [swiss.arrows :refer :all]
@@ -13,7 +12,7 @@
             [sade.util :refer [fn-> fn->>] :as util]
             [sade.xml :as xml]
             [lupapalvelu.action :refer [update-application application->command] :as action]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application :as app]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.application-meta-fields :as meta-fields]
@@ -36,15 +35,13 @@
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict-review-util :as verdict-review-util]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.organization :as org]
             [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.application :as app])
-  (:import [java.net URL]
-           [java.nio.charset StandardCharsets]))
+            [lupapalvelu.application :as app]))
 
 (def Timestamp sc/Num) ;; Some timestamps are casted as double during mongo export
 
@@ -161,7 +158,7 @@
        (filter seq)))
 
 
-(defn- get-app-descriptions [{:keys [permitType] :as application} xml]
+(defn- get-app-descriptions [{:keys [permitType]} xml]
   (krysp-reader/read-permit-descriptions-from-xml permitType (cr/strip-xml-namespaces xml)))
 
 (defn- get-task-updates [application user created verdicts app-xml]
@@ -217,7 +214,7 @@
             (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} application-op-name)
             (util/version-is-greater-or-equal krysp-version {:major 2 :minor 1 :micro 8}))
       (let [application (meta-fields/enrich-with-link-permit-data application)
-            link-permit (first (application/get-link-permit-apps application))
+            link-permit (first (app/get-link-permit-apps application))
             link-permit-xml (krysp-fetch/get-application-xml-by-application-id link-permit)
             osapuoli-type (cond
                             (or (= "tyonjohtajan-nimeaminen" application-op-name) (= "tyonjohtajan-nimeaminen-v2" application-op-name)) "tyonjohtaja"
@@ -237,11 +234,61 @@
   differently. These 'special' verdicts contain reference permit id in
   MuuTunnus. xml should be without namespaces"
   [application xml]
-  (let [app-id (:id application)
-        op-name (-> application :primaryOperation :name)
+  (let [op-name (-> application :primaryOperation :name)
         link-permit-id (-> application :linkPermitData first :id)]
     (and (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
          (not-empty (enlive/select xml [:luvanTunnisteTiedot :MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))])))))
+
+(defn- get-personal-information-value [personal-info key]
+  (-> personal-info key :value))
+
+(defn- match-xml-text-to-doc-info
+  "Matches party-xml to document information. If doc-key is nimi, then checks if both first name and last name match
+  and checks if both names are in last name field. If xml-field is missing, returns nil, otherwise true or false."
+  [personal-info doc-key xml-key party]
+  (if (= :nimi doc-key)
+    (let [doc-etunimi (get-personal-information-value personal-info :etunimi)
+          doc-sukunimi (get-personal-information-value personal-info :sukunimi)
+          xml-etunimi (xml/get-text party [:etunimi])
+          xml-sukunimi (xml/get-text party [:sukunimi])]
+      (when-not (nil? xml-sukunimi)
+        (or (and (= doc-etunimi xml-etunimi)
+                 (= doc-sukunimi xml-sukunimi))
+            (= (str doc-sukunimi " " doc-etunimi) xml-sukunimi))))
+    (let [xml-text (xml/get-text party [xml-key])
+          doc-text (get-personal-information-value personal-info doc-key)]
+      (when (every? ss/not-blank? [xml-text doc-text])
+        (= xml-text doc-text)))))
+
+(defn- verdict-party-finder
+  "Hetu is not always available for verdict matching, so it is necessary to compare other attributes to document data sometimes.
+  This function compares role, hetu, email, name and telephone number and returns the match if found."
+  [roolikoodi henkilotiedot-from-doc parties-from-xml]
+  (let [rooli-filtered-parties (filter (fn [party] (or (= roolikoodi (xml/get-text party [:tyonjohtajaRooliKoodi]))
+                                                       (= roolikoodi (xml/get-text party [:suunnittelijaRooliKoodi]))))
+                                       parties-from-xml)]
+    (loop [info-fields      {:hetu    :henkilotunnus
+                             :email   :sahkopostiosoite
+                             :nimi    [:etunimi :sukunimi]
+                             :puhelin :puhelin}
+           parties          rooli-filtered-parties
+           possible-matches []]
+      (cond
+        (or (empty? info-fields)
+            (and (empty? parties) (empty? possible-matches)))
+        nil
+
+        (empty? parties)
+        (recur (rest info-fields) possible-matches [])
+
+        :else
+        (let [[doc-key xml-key] (first info-fields)
+              party             (first parties)
+              match?            (match-xml-text-to-doc-info henkilotiedot-from-doc doc-key xml-key party)]
+          (cond
+            (nil? match?) (recur info-fields (rest parties) (conj possible-matches party))
+            match?        party
+            (not match?)  (recur info-fields (rest parties) possible-matches)))))))
 
 (defn verdict-xml-with-foreman-designer-verdicts
   "Normalizes special foreman/designer verdict by creating a proper
@@ -253,9 +300,11 @@
   (let [op-name      (-> application :primaryOperation :name)
         tag          (if (ss/starts-with op-name "tyonjohtajan-") :Tyonjohtaja :Suunnittelija)
         op-doc       (domain/get-document-by-operation application (-> application :primaryOperation :id))
-        hetu         (-> op-doc :data :henkilotiedot :hetu :value)
+        henk-tiedot  (-> op-doc :data :henkilotiedot)
+        yht-tiedot   (-> op-doc :data :yhteystiedot)
+        roolikoodi   (-> op-doc :data :kuntaRoolikoodi :value)
         parties      (enlive/select xml [tag])
-        party        (util/find-first #(= (xml/get-text % [:henkilotunnus]) hetu) parties)
+        party        (verdict-party-finder roolikoodi (merge henk-tiedot yht-tiedot) parties)
         attachment   (-> party (enlive/select [:liitetieto :Liite]) first enlive/unwrap)
         date         (xml/get-text party [:paatosPvm])
         decision     (xml/get-text party [:paatostyyppi])
@@ -351,7 +400,8 @@
       (fail :info.section-required-in-verdict))))
 
 (defn do-check-for-verdict [{:keys [application organization] :as command}]
-  {:pre [(every? command [:application :user :created])]}
+  {:pre [(every? command [:application :user :created])
+         (not (app/has-published-pate-verdicts? application))]}
   (if-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
                          ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
                          (krysp-fetch/get-application-xml-by-backend-id application (some :kuntalupatunnus (:verdicts application))))]
@@ -371,14 +421,19 @@
     ;; LPK-2459
     (when (or (foreman/foreman-app? application) (app/designer-app? application))
       (debug "Checking foreman/designer verdict...")
-      (fetch-tj-suunnittelija-verdict command))))
+      (fetch-tj-suunnittelija-verdict command)))
+
+  ;; TODO Empty `pate-verdicts`. `pate-verdicts` may contain verdict
+  ;; drafts. Pate verdicts and backend verdicts are mutually
+  ;; exclusive.
+  )
 
 (defn- verdict-task?
   "True if given task is 'rooted' via source chain to the verdict.
    tasks: tasks of the application
    verdict-id: Id of the target verdict
    task: task to be analyzed."
-  [tasks verdict-id {{source-type :type source-id :id} :source :as task}]
+  [tasks verdict-id {{source-type :type source-id :id} :source}]
   (case (keyword source-type)
     :verdict (= verdict-id source-id)
     :task (verdict-task? tasks verdict-id (some #(when (= (:id %) source-id) %) tasks))
@@ -387,7 +442,7 @@
 (defn deletable-verdict-task-ids
   "Task ids that a) can be deleted and b) belong to the
   verdict with the given id."
-  [{:keys [tasks attachments]} verdict-id]
+  [{:keys [tasks]} verdict-id]
   (->> tasks
        (filter #(and (not= (-> % :state keyword) :sent)
                      (verdict-task? tasks verdict-id %)))
@@ -406,7 +461,8 @@
                        krysp-reader/krysp-state->application-state)]
     (cond
       (nil? new-state) nil
-      (sm/can-proceed? application new-state)  (app-state/state-transition-update new-state created application user)
+      (sm/can-proceed? application new-state)  (do (attachment/maybe-generate-comments-attachment user application new-state)
+                                                   (app-state/state-transition-update new-state created application user))
       (not= new-state (keyword current-state)) (errorf "Invalid state transition. Failed to update application %s state from '%s' to '%s'."
                                                        (:id application) current-state (name new-state)))))
 
@@ -525,7 +581,7 @@
     (assoc app-paatos
            :poytakirjat
            (doall
-            (for [{:keys [action pk] :as update-info} update-actions]
+            (for [{:keys [action pk]} update-actions]
               (case action
                 :keep   pk
                 :update (get-poytakirja! application

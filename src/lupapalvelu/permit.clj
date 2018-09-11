@@ -1,5 +1,5 @@
 (ns lupapalvelu.permit
-  (:require [taoensso.timbre :as timbre :refer [error errorf warn]]
+  (:require [taoensso.timbre :refer [error errorf warn]]
             [schema.core :as sc]
             [sade.core :refer [fail]]
             [sade.strings :as ss]
@@ -360,7 +360,7 @@
 (defn archiving-project? [{:keys [permitType]}]
   (= permitType (name ARK)))
 
-(defn is-archiving-project [{{:keys [permitType] :as application} :application}]
+(defn is-archiving-project [{:keys [application]}]
   (when-not (archiving-project? application)
     (fail :error.unsupported-permit-type)))
 

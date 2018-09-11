@@ -2,7 +2,8 @@
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/data.codec "0.1.0"]
-                 [org.clojure/data.zip "0.1.1"]             ; Note: 0.1.2 breaks lupapalvelu.wfs
+                 [org.clojure/data.csv "0.1.4"]
+                 [org.clojure/data.zip "0.1.1"] ; Note: 0.1.2 breaks lupapalvelu.wfs
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.13"]
                  [org.clojure/tools.reader "1.1.3.1"]
@@ -145,9 +146,9 @@
 
                  ;; Lupapiste libraries
                  ; Oskari map (https://github.com/lupapiste/oskari)
-                 [lupapiste/oskari "0.9.60"]
+                 [lupapiste/oskari "1.47.1.3"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.9.20"]
+                 [lupapiste/commons "0.9.25"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -177,7 +178,7 @@
             [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
             [lupapiste/lein-buildid "0.4.2"]
             [lupapiste/lein-nitpicker "0.5.1"]
-            [lein-figwheel "0.5.15"]]
+            [lein-figwheel "0.5.16"]]
 
   :clean-targets ^{:protect false} ["resources/public/lp-static/js/rum-app.js"
                                     "resources/public/lp-static/js/rum-app.js.map"
@@ -193,8 +194,8 @@
                                          [org.apache.activemq/artemis-jms-server "2.6.0"]
                                          [rhizome "0.2.7"]
                                          [pdfboxing "0.1.13"]
-                                         [com.cemerick/piggieback "0.2.2"]
-                                         [figwheel-sidecar "0.5.14"]
+                                         [cider/piggieback "0.3.6"]
+                                         [figwheel-sidecar "0.5.16"]
                                          ;; Better Chrome Dev Tools support
                                          [binaryage/devtools "0.9.4"]]
                         :resource-paths ["dev-resources"]
@@ -205,7 +206,7 @@
                                          :test-paths            []}
                         :sass           {:output-style :expanded
                                          :source-map   true}
-                        :repl-options   {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
+                        :repl-options   {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]
                                          :timeout          200000}
                         :cljsbuild      {:builds {:rum {:figwheel {:websocket-host  :js-client-host
                                                                    :on-jsload        lupapalvelu.ui.ui-components/reload-hook

@@ -6,7 +6,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [sade.core :refer :all]
             [sade.util :as util]))
 
@@ -32,7 +32,7 @@
    :pre-checks       [(permit/validate-permit-type-is permit/YA)
                       (partial sm/validate-state-transition :constructionStarted)]
    :input-validators [(partial action/non-blank-parameters [:startedTimestampStr])]}
-  [{:keys [user created application organization] :as command}]
+  [{:keys [user created application] :as command}]
   (let [timestamp   (util/to-millis-from-local-date-string startedTimestampStr)
         app-updates {:startedBy (select-keys user [:id :firstName :lastName])
                      :started   timestamp}
@@ -50,7 +50,7 @@
    :pre-checks       [(permit/validate-permit-type-is permit/YA)
                       (partial sm/validate-state-transition :closed)]
    :input-validators [(partial action/non-blank-parameters [:readyTimestampStr])]}
-  [{user :user created :created orig-app :application org :organization :as command}]
+  [{user :user created :created orig-app :application :as command}]
   (let [timestamp   (util/to-millis-from-local-date-string readyTimestampStr)
         app-updates {:modified created
                      :closed   timestamp

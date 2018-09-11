@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.canonical-test-common
-  (:require [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.ymparisto-schemas]
+  (:require [lupapalvelu.document.ymparisto-schemas]
             [lupapalvelu.document.yleiset-alueet-schemas]
             [lupapalvelu.document.model :refer [validate get-document-schema]]
             [midje.sweet :refer :all]))

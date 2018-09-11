@@ -1,5 +1,5 @@
 (ns lupapalvelu.attachment
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [clojure.java.io :as io]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
@@ -35,6 +35,7 @@
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.state-machine :as state-machine]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
             [me.raynes.fs :as fs]
@@ -229,7 +230,7 @@
 ;; Api
 ;;
 
-(defn- by-file-ids [file-ids {versions :versions :as attachment}]
+(defn- by-file-ids [file-ids {:keys [versions]}]
   (some (comp (set file-ids) :fileId) versions))
 
 (defn get-attachments-infos
@@ -249,7 +250,7 @@
   (first (filter (partial by-file-ids #{file-id}) attachments)))
 
 (defn get-attachments-by-operation
-  [{:keys [attachments] :as application} op-id]
+  [{:keys [attachments]} op-id]
   (filter (fn-> att-util/get-operation-ids set (contains? op-id)) attachments))
 
 (defn get-attachments-by-type
@@ -258,11 +259,17 @@
   (filter #(= (:type %) type) attachments))
 
 (defn get-attachments-by-target-type-and-id
-  [{:keys [attachments]} {:keys [type id] :as target}]
+  [{:keys [attachments]} {:keys [type id]}]
   {:pre [(string? type)
          (string? id)]}
   (filter #(and (= (get-in % [:target :type]) type)
                 (= (get-in % [:target :id])   id))  attachments))
+
+(defn unsent? [{:keys [versions sent] :as attachment}]
+  (and (seq versions)                        ; Has been uploaded
+       (or (not sent)                        ; Never sent to backing system
+           (> (-> versions last :created) sent)) ; Backing system does not have newest version
+       (not (#{"verdict" "statement"} (-> attachment :target :type))))) ; Not generated inside the system
 
 (defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :sent timestamp))
@@ -543,7 +550,7 @@
        (when-not version-index
          {$push {:attachments.$.versions version-model}})))))
 
-(defn- remove-old-files! [application {old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
+(defn- remove-old-files! [application {old-versions :versions} {file-id :fileId original-file-id :originalFileId}]
   (some->> (filter (comp #{original-file-id} :originalFileId) old-versions)
            (first)
            ((juxt :fileId :originalFileId))
@@ -687,9 +694,10 @@
 
 (defn get-attachment-file!
   "Returns the attachment file without access checking, otherwise nil."
-  [application file-id]
-  (when (seq application)
-    (storage/download application file-id)))
+  ([application file-id] (when (seq application)
+                           (storage/download application file-id)))
+  ([application-id file-id attachment] (when application-id
+                                         (storage/download application-id file-id attachment))))
 
 (defn- get-attachment-version-file [application attachment {:keys [fileId onkaloFileId filename contentType]} user preview?]
   (when (or (not user) (access/can-access-attachment? user application attachment))
@@ -963,11 +971,11 @@
                   result))))
         (error "PDF/A conversion: No file found with file id" fileId)))))
 
-(defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
+(defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState}]
   (boolean (and (states/post-verdict-states (keyword app-state))
                 ((conj states/all-application-states :info) (keyword orig-app-state)))))
 
-(defn validate-attachment-manually-set-construction-time [{{:keys [attachmentId]} :data application :application :as command}]
+(defn validate-attachment-manually-set-construction-time [{{:keys [attachmentId]} :data application :application}]
   (when-not (manually-set-construction-time (get-attachment-info application attachmentId))
     (fail :error.attachment-not-manually-set-construction-time)))
 
@@ -982,7 +990,7 @@
 
 (defn- attachment-assignment-info
   "Return attachment info as assignment target"
-  [{{:keys [type-group type-id]} :type contents :contents id :id :as doc}]
+  [{{:keys [type-group type-id]} :type contents :contents id :id}]
   (util/assoc-when-pred {:id id :type-key (ss/join "." ["attachmentType" type-group type-id])} ss/not-blank?
                         :description contents))
 
@@ -1016,6 +1024,63 @@
                                             attachment)
     (enrich-attachment attachment)))
 
+;;
+;; Comments as attachment
+;;
+
+(defn- comments-empty? [application]
+  (->> application
+       :comments
+       (remove #(-> % :target :type (keyword) (= :attachment)))
+       (empty?)))
+
+(defn save-comments-as-attachment [{lang :lang application :application created :created :as command} & [{state :state}]]
+  (when-not (comments-empty? application)
+    (let [comments-pdf (comment/get-comments-as-pdf lang (if state (assoc application :state state) application))]
+      (if (:ok comments-pdf)
+        (let [content (:pdf-file-stream comments-pdf)
+              existing-keskustelu (util/find-by-key :type {:type-id "keskustelu" :type-group "muut"} (:attachments application))
+              file-options {:filename (format "%s-%s.pdf" (:id application) (i18n/localize lang :conversation.title))
+                            :content  content
+                            :size     (.available content)}
+              created (if created created (now))
+              attachment-options {:attachment-type {:type-id    :keskustelu
+                                                    :type-group :muut}
+                                  :attachment-id   (when existing-keskustelu (:id existing-keskustelu))
+                                  :created         created
+                                  :required        false}]
+          (upload-and-attach! command attachment-options file-options))
+        (fail! :error.discussion-pdf-generation-failed)))))
+
+(defn comments-saved-as-attachment?
+  "Checks if the application moves to a terminal state. As all of the effectively terminal states are not terminal
+   in the states/terminal-state? sense, the special cases need to be handled separately."
+  [application state]
+  (let [state-kw (keyword state)]
+    (or (and (-> application (state-machine/state-graph) (states/terminal-state? state-kw))
+             (not= :canceled state-kw))
+        (#{:foremanVerdictGiven :ready :finished :acknowledged} state-kw))))
+
+(defn resolve-lang-for-comments-attachment [application]
+  (let [lang (-> application
+                 :handlers
+                 (first)
+                 :id
+                 (usr/get-user-by-id [:language])
+                 :language)]
+    (if lang lang "fi")))
+
+(defn maybe-generate-comments-attachment [user application state]
+  (when (comments-saved-as-attachment? application state)
+    (let [lang    (resolve-lang-for-comments-attachment application)
+          command (-> application
+                      (application->command)
+                      (assoc :lang lang :user user))]
+      (try
+        (save-comments-as-attachment command state)
+        (catch Exception ex
+          (errorf ex "Could not produce comments pdf with application %s moving to state %s."
+                  (:id application) state))))))
 
 ;;
 ;; Pre-checks
