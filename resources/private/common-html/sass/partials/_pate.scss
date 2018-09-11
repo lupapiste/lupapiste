@@ -989,6 +989,9 @@ div.published-verdict {
 
 table.pate-appeals {
   @include no-row-hover;
+  td {
+    vertical-align: top;
+  }
   tr.pate-appeal-row.odd {
     background-color: $gray246;
   }
@@ -1001,6 +1004,9 @@ table.pate-appeals {
   td.align--right {
     text-align: right;
   }
+  td.align--half {
+    width: 50%;
+  }
   span.pate-appeal-note {
     white-space: pre-wrap;
   }
@@ -1009,7 +1015,17 @@ table.pate-appeals {
     font-style: italic;
   }
   a.pate-appeal-operation {
-    margin-right: 2em;
+    padding-right: 2em;
+  }
+  &.form-files {
+    width: initial;
+    margin-bottom: 0;
+    td {
+      vertical-align: middle;
+    }
+    tr {
+      border: none;
+    }
   }
 }
 

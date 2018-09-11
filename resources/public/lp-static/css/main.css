@@ -30880,6 +30880,10 @@ table.pate-appeals tr:hover:nth-child(even) {
   background: #f6f6f6;
 }
 
+table.pate-appeals td {
+  vertical-align: top;
+}
+
 table.pate-appeals tr.pate-appeal-row.odd {
   background-color: #f6f6f6;
 }
@@ -30896,6 +30900,10 @@ table.pate-appeals td.align--right {
   text-align: right;
 }
 
+table.pate-appeals td.align--half {
+  width: 50%;
+}
+
 table.pate-appeals span.pate-appeal-note {
   white-space: pre-wrap;
 }
@@ -30906,7 +30914,20 @@ table.pate-appeals span.empty {
 }
 
 table.pate-appeals a.pate-appeal-operation {
-  margin-right: 2em;
+  padding-right: 2em;
+}
+
+table.pate-appeals.form-files {
+  width: initial;
+  margin-bottom: 0;
+}
+
+table.pate-appeals.form-files td {
+  vertical-align: middle;
+}
+
+table.pate-appeals.form-files tr {
+  border: none;
 }
 
 div.pate-appeal-border {

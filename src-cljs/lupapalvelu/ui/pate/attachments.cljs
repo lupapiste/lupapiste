@@ -111,8 +111,8 @@
 
 (rum/defcs contents-editor < rum/reactive
   (rum/local [] ::types)
-  [{types*  ::types} {:keys [fields* binding?*]} {filename :filename
-                                                  :as filedata}]
+  [{types* ::types} {:keys [fields* binding?*]} {filename :filename
+                                                 :as filedata}]
   (attachment-types types*)
   (let [{:keys [type contents]} (field-info fields* filedata)
         att-types               (rum/react types*)
@@ -342,10 +342,10 @@
 (rum/defcs batch-upload-files < rum/reactive
   (components/initial-value-mixin ::data)
   "Adding attachments without Pate dependencies."
-  [{data* ::data} _ {:keys     [bind? draft? enabled?
-                                dropzone multiple?]
-                     :as options}]
-
+  [{data* ::data} _
+   {:keys [bind? draft? enabled?
+           dropzone multiple?]
+    :as   options}]
   (let [binding?* (atom false)
         files*    (atom [])
         fields*   (atom {})]

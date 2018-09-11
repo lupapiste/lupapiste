@@ -20,21 +20,24 @@
                                  :text-loc :save
                                  :wait?    wait?*
                                  :enabled? (boolean (and
-                                                     (seq (rum/react filedatas*))
+                                                     (or (seq (rum/react filedatas*))
+                                                         (seq (path/react [:files] data*)))
                                                      (every? :filled? (rum/react filedatas*))
                                                      (path/react [:type] data*)
                                                      (ss/not-blank? (path/react [:author] data*))
                                                      (ss/not-blank? (path/react [:date] data*))))
-                                 :on-click #(let [{:keys [id type author date text]} @data*]
+                                 :on-click #(let [{:keys [id type author date text
+                                                          deleted-file-ids]} @data*]
                                               (service/upsert-appeal @state/application-id
                                                                      @state/current-verdict-id
-                                                                     {:appeal-id id
-                                                                      :type      type
-                                                                      :author    (ss/trim author)
+                                                                     {:appeal-id        id
+                                                                      :type             type
+                                                                      :author           (ss/trim author)
                                                                       ;; Appeal timestamps are in seconds
-                                                                      :datestamp (.unix (js/util.toMoment date "fi"))
-                                                                      :text      (ss/trim text)
-                                                                      :filedatas (service/canonize-filedatas @filedatas*)}
+                                                                      :datestamp        (.unix (js/util.toMoment date "fi"))
+                                                                      :text             (ss/trim text)
+                                                                      :filedatas        (service/canonize-filedatas @filedatas*)
+                                                                      :deleted-file-ids deleted-file-ids}
                                                                      wait?*
                                                                      close-fn))})
    (components/icon-button {:icon     :lupicon-remove
@@ -42,12 +45,37 @@
                             :text-loc :cancel
                             :on-click close-fn})])
 
-(rum/defcs appeal-form < rum/reactive
-  (components/initial-value-mixin ::data)
-  (rum/local [] ::filedatas)
-  [{data* ::data} _ close-fn]
-  (let [uid        (common/unique-id "appeal")
-        appeal-id  (path/value :id data*)
+(defn file-cell [{:keys [contentType filename fileId size]}]
+  [:div
+   [:a {:href   (js/sprintf "/api/raw/download-attachment?view=true&file-id=%s&id=%s"
+                            fileId @state/application-id)
+        :target "_blank"} filename]
+   [:span.pate-left-space (if (js/loc.hasTerm contentType)
+      (common/loc contentType)
+      contentType)]
+   [:span.pate-left-space (js/util.sizeString size)]])
+
+(rum/defc old-file-list < rum/reactive
+  [data*]
+  (when-let [old-files (some-> data* rum/react :files seq)]
+    [:table.pate-appeals.form-files
+     [:tbody
+      (map-indexed (fn [i {file-id :fileId :as file}]
+                     [:tr.pate-appeal-row
+                      {::key  (str "file-" i)
+                       :class (common/css-flags :odd (odd? i) :even (even? i))}
+                      [:td (file-cell file)]
+                      [:td [:i.primary.lupicon-remove
+                            {:on-click (fn [_]
+                                         (swap! data* update :deleted-file-ids conj file-id)
+                                         (swap! data* update :files
+                                                (util/fn->> (remove #(= (:fileId %) file-id)))))}]]])
+                   old-files)]]))
+
+(rum/defc appeal-form < rum/reactive
+  [{appeal-id :id :as data} close-fn]
+  (let [data*      (atom data)
+        uid        (common/unique-id "appeal")
         filedatas* (atom [])]
     [:div.container {:class (common/css-flags :pate-appeal-border (nil? appeal-id))}
      [:div {:id uid}
@@ -67,8 +95,11 @@
                                                 {:items     (map (fn [t]
                                                                    {:value t
                                                                     :text  (path/loc :verdict.muutoksenhaku t)})
-                                                                 [:appeal :rectification :appealVerdict])
+                                                                 (cond-> [:appeal :rectification]
+                                                                   (some (util/fn-> :type (util/not=as-kw :appealVerdict))
+                                                                         @state/appeals) (conj :appealVerdict)))
                                                  :id        (str uid "-type")
+                                                 :sort-by   :text
                                                  :required? true})))
         (layout/vertical {:label     :verdict.muutoksenhaku.tekijat
                           :col       2
@@ -96,26 +127,22 @@
                                                    {:id (str uid "-text")}))]
        [:div.row
         [:div.col-4
-         [:label.pate-label.required (common/loc :verdict.muutoksenhaku.liitteet)]
-         [:span.pate-left-space (common/loc :verdict.muutoksenhaku.liitteet.info)]]]
+         (old-file-list data*)]]
        [:div.row
         [:div.col-4
-         (att/batch-upload-files  filedatas* {:bind?     false
+         [:label.pate-label.required (common/loc :verdict.muutoksenhaku.liitteet)]
+         [:span.pate-left-space (common/loc :verdict.muutoksenhaku.liitteet.info)]]]
+
+       [:div.row
+        [:div.col-4
+         (att/batch-upload-files  filedatas* { :bind?    false
                                               :dropzone  (str "#" uid)
                                               :multiple? true})]]
        [:div.row
         [:div.col-4
-         (appeal-buttons data* filedatas* close-fn)]]]]]))
-
-(defn file-cells [{:keys [contentType filename fileId size]}]
-  (list [:td
-         [:a {:href   (js/sprintf "/api/raw/download-attachment?view=true&file-id=%s&id=%s"
-                                  fileId @state/application-id)
-              :target "_blank"} filename]]
-        [:td (if (js/loc.hasTerm contentType)
-               (common/loc contentType)
-               contentType)]
-        [:td.align--right (js/util.sizeString size)]))
+         (appeal-buttons data* filedatas* close-fn)]]]]
+     (components/debug-atom filedatas* "Filedatas")
+     (components/debug-atom data* "Data")]))
 
 (rum/defcs appeal-list < rum/reactive
   (rum/local {} ::opened)
@@ -134,8 +161,6 @@
           [:th (common/loc :verdict.muutoksenhaku.tekijat)]
           [:th (common/loc :verdict.muutoksenhaku.pvm)]
           [:th (common/loc :verdict.attachments)]
-          [:th] ;; File type
-          [:th] ;; File size
           [:th]]]
         [:tbody
          (map-indexed (fn [i {:keys [author editable
@@ -152,9 +177,9 @@
                                                                                :even (even? i))
                                                       :key   (str "appeal-" i)}
                                  [:td (path/loc :verdict.muutoksenhaku type)]
-                                 [:td author]
+                                 [:td.align--half author]
                                  [:td.align--right date]
-                                 (map file-cells files)
+                                 [:td.align--half (map file-cell files)]
                                  [:td.align--right
                                   [:a.pate-appeal-operation {:on-click toggle-fn}
                                    (common/loc (if can-edit? :edit :verdict.muutoksenhaku.show-extra))]

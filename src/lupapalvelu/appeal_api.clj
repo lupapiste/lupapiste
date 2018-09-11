@@ -275,8 +275,11 @@
   [upsert?]
   (fn [{{:keys [type appeal-id verdict-id]} :data
         {:keys [appeals appealVerdicts] :as application} :application}]
-    (let [type (or type (if (util/find-by-id appeal-id appeals)
-                          :appeal :appealVerdict))]
+    (let [type (or type
+                   (when (util/find-by-id appeal-id appeals)
+                     :appeal)
+                   (when (util/find-by-id appeal-id appealVerdicts)
+                     :appealVerdict))]
       (if (util/=as-kw type :appealVerdict)
        (let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
          (or
@@ -302,15 +305,24 @@
                         (util/=as-kw type (:type appeal)))
             (fail :error.appeal-type-change-denied))))))))
 
-(defn- check-deleted-attachments [{:keys [application data]}]
-  (let [delete-ids (some-> data :deleted-attachment-ids seq)
+(defn- attachments-for-original-file-ids [{:keys [attachments]} file-ids]
+  (filter #(some->> % :versions first :originalFileId
+                    (util/includes-as-kw? file-ids))
+          attachments))
+
+(defn- check-deleted-file-ids [{:keys [application data]}]
+  (let [delete-ids (some-> data :deleted-file-ids seq)
         appeal-id  (:appeal-id data)]
-    (when (and delete-ids
-               (some  (fn [{:keys [target id]}]
-                        (and (util/includes-as-kw? delete-ids id)
-                             (not= (:id target) appeal-id)))
-                      (:attachments application)))
-      (fail :error.attachment-cannot-be-deleted))))
+    (when delete-ids
+      (let [attachments (attachments-for-original-file-ids application
+                                                           delete-ids)]
+        (when (or (not= (count attachments)
+                        (count delete-ids))
+                  (nil? appeal-id)
+                  (some (fn [{:keys [target]}]
+                          (not= (:id target) appeal-id))
+                        attachments))
+          (fail :error.file-cannot-be-deleted))))))
 
 (defn- pate-appeal-item-update!
   "Runs appeal-item updates to application. Appeal-item is either appeal or appeal verdict.
@@ -342,7 +354,7 @@
    :feature             :pate
    :categories          #{:pate-verdicts}
    :parameters          [id verdict-id type author datestamp filedatas]
-   :optional-parameters [text appeal-id deleted-attachment-ids]
+   :optional-parameters [text appeal-id deleted-file-ids]
    :user-roles          #{:authority}
    :states              states/post-verdict-states
    :input-validators    [;;common-input-validator
@@ -350,7 +362,7 @@
    :pre-checks          [(action/some-pre-check (pate-verdict/verdict-exists :published? :not-replaced?)
                                                 pate-verdict/backing-system-verdict)
                          (common-sanity-checks true)
-                         check-deleted-attachments]}
+                         check-deleted-file-ids]}
   [{:keys [application] :as command}]
   ;; Update appeals/appealVerdicts
   (let [job (if (util/=as-kw type :appealVerdict)
@@ -363,8 +375,10 @@
                 (pate-appeal-item-update! command appeal-id appeal-data (:type appeal-data) filedatas)
                 (fail :error.invalid-appeal)))]
     ;; Delete attachments if needed
-    (when (seq deleted-attachment-ids)
-      (att/delete-attachments! application deleted-attachment-ids))
+    (when (and (seq deleted-file-ids) appeal-id)
+      (att/delete-attachments! application
+                               (map :id (attachments-for-original-file-ids application
+                                                                           deleted-file-ids))))
     (ok :job job)))
 
 (defcommand delete-pate-appeal
