@@ -555,7 +555,7 @@
 
    ;; Pori
 
-   ;; Porin pääkäyttäjä - pori/pori
+   ;; Porin p\u00e4\u00e4k\u00e4ytt\u00e4j\u00e4 - pori/pori
    {:id "lt04rjfneklrfx5mvnjer094"
     :username "pori"
     :role "authority"
@@ -566,7 +566,7 @@
     :lastName "Porilainen"
     :language "fi"
     :phone "0501233210"
-    :street "Vähäuusikatu 1 a 1"
+    :street "V\u00e4h\u00e4uusikatu 1 a 1"
     :zip "28100"
     :city "Pori"
     :private {:password "$2a$10$H3D35GclLgHRUIUfQtEQZe5FlrVR2iYoV8Babw4C8D8ANLvuulEmu"
@@ -1389,7 +1389,7 @@
                       ;; Pori R, has ad-login settings and only-use-inspection-from-backend set to true
                       {:id "609-R"
                        :name (names {:fi "Pori - Rakennusvalvonta"
-                                     :sv "Björneborg - Byggnadstilsyn"})
+                                     :sv "Bj\u00f6rneborg - Byggnadstilsyn"})
                        :scope [{:open-inforequest-email nil
                                 :open-inforequest false
                                 :new-application-enabled true

@@ -12,6 +12,6 @@
 (defn session-id [] (get-in (request/ring-request) [:session :id]))
 
 (defn resolve-redirect [command]
-  (let [; jos sessio niin sisään vaan jos ei sessiota niin käydään kirjautumassa
+  (let [; jos sessio niin sis\u00e4\u00e4n vaan jos ei sessiota niin k\u00e4yd\u00e4\u00e4n kirjautumassa
        ]
     "/api/saml/ad-login"))

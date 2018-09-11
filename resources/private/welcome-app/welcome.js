@@ -12,7 +12,6 @@
 
    //ajax.query("pre-login", {parameter: "parametri"})
    //    .success( function( res ) {
-   //        console.log(res);
    //        var whereTo =  _.get(res, "message");
 
    //        if (whereTo === "norm-login") {
@@ -38,7 +37,6 @@
 
    //    })
    //    .error( function( res ) {
-   //        console.log(res);
    //        self.whereTo(  _.get(res, "message") );
    //    })
    //    .call();
