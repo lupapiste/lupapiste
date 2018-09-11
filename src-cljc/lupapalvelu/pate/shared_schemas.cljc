@@ -259,7 +259,9 @@
           (sc/optional-key :dropzone)   sc/Str
           ;; If true, multiple files can be uploaded at the same
           ;; time. Default false.
-          (sc/optional-key :multiple?)  sc/Bool}))
+          (sc/optional-key :multiple?)  sc/Bool
+          ;; If true, the bind command is :bind-draft-attachments.
+          (sc/optional-key :draft?)     sc/Bool}))
 
 (defschema PateToggle
   (merge (dissoc PateComponent :css)

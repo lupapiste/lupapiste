@@ -3420,6 +3420,9 @@
                                                 :type-id    "paatos"}))})
         (provided (lupapalvelu.attachment/attachment-array-updates
                    "LP-753-2018-90008" anything :readOnly true :locked true :target {:type "verdict", :id "vid"})
+                  => nil
+                  (lupapalvelu.attachment/attachment-array-updates
+                   "LP-753-2018-90008" anything :metadata.nakyvyys "julkinen" :metadata.draftTarget false)
                   => nil))
       (fact "verdict-attachment-items"
         (verdict-attachment-items {:application {:attachments [att-paatosote att-ilmoitus att-empty]}}
@@ -3464,6 +3467,9 @@
                                                         :in-any-order)})})})
         (provided (lupapalvelu.attachment/attachment-array-updates
                    "LP-753-2018-90008" anything :readOnly true :locked true :target {:type "verdict", :id "vid"})
+                  => nil
+                  (lupapalvelu.attachment/attachment-array-updates
+                   "LP-753-2018-90008" anything :metadata.nakyvyys "julkinen" :metadata.draftTarget false)
                   => nil)))
 
     (fact "finalize--pdf"

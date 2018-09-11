@@ -30636,7 +30636,7 @@ input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:
   text-align: right;
 }
 
-h3.pate-attachments-title {
+h3.pate-published-title {
   padding-top: 12px;
   margin-top: 12px;
   border-top: 1px solid black;
@@ -30870,6 +30870,71 @@ div.published-verdict .section > .row .cell.cell--100 {
 
 div.published-verdict .section > .row.spaced .row + .row .cell {
   padding-top: 0.5em;
+}
+
+table.pate-appeals tr:hover {
+  background-color: white;
+}
+
+table.pate-appeals tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+table.pate-appeals td {
+  vertical-align: top;
+}
+
+table.pate-appeals tr.pate-appeal-row.odd {
+  background-color: #f6f6f6;
+}
+
+table.pate-appeals tr.pate-appeal-row.even {
+  background-color: white;
+}
+
+table.pate-appeals tr.pate-appeal-row.note-or-form {
+  background-color: white;
+}
+
+table.pate-appeals td.align--right {
+  text-align: right;
+}
+
+table.pate-appeals td.align--half {
+  width: 50%;
+}
+
+table.pate-appeals div.pate-appeal-note {
+  white-space: pre-wrap;
+  padding-left: 2em;
+  padding-right: 2em;
+}
+
+table.pate-appeals span.empty {
+  color: #999999;
+  font-style: italic;
+}
+
+table.pate-appeals a.pate-appeal-operation {
+  padding-right: 2em;
+}
+
+table.pate-appeals.form-files {
+  width: initial;
+  margin-bottom: 0;
+}
+
+table.pate-appeals.form-files td {
+  vertical-align: middle;
+}
+
+table.pate-appeals.form-files tr {
+  border: none;
+}
+
+div.pate-appeal-border {
+  border: 1px solid #bbbbbb;
+  padding: 2em 2em;
 }
 
 .order-grid-1 {

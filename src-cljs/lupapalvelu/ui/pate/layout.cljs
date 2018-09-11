@@ -57,18 +57,24 @@
     [align] column alignment (:left, :right, :center or :full)
     [label]  keyword -> localization key
              string  -> label string
-             Default is common/nbsp (non-breaking space)"
+             Default is common/nbsp (non-breaking space)
+   [label-for] For attribute for label.
+   [required?] If true, then the label is formatted accordingly."
   ([component]
    (vertical {} component))
-  ([{:keys [col align label]} component]
+  ([{:keys [col align label label-for required?]} component]
    [:div
     {:class (cond->> [(str "col-" (or col 1))]
               align (cons (str "col--" (name align))))}
     [:div.col--vertical
-     [:label.pate-label (cond
-                           (keyword? label) (common/loc label)
-                           (string? label) label
-                           :default common/nbsp)]
+     (let [label-str (cond
+                       (keyword? label) (common/loc label)
+                       (string? label)  label)]
+       [:label.pate-label
+        (cond-> {:class (common/css-flags :required required?)}
+             label-for        (assoc :for label-for)
+             (nil? label-str) (merge common/nbsp))
+           label-str])
      component]]))
 
 ;; -------------------------------
