@@ -19,6 +19,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.migration.attachment-type-mapping :as attachment-type-mapping]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.mime :as mime]
@@ -4004,15 +4005,16 @@
                          {$set {:pop "E204503"}}))
 
 (defn update-application-verdicts-to-pate-legacy-verdicts [timestamp application]
-  (try
-    (mongo/update-by-id :applications (:id application)
-                        (pate-verdict-migration/migration-updates application
-                                                                  timestamp))
-    (catch Exception e
-      (clojure.pprint/pprint (ex-data e))
-      (throw (ex-info (str "Migration failed for application " (:id application))
-                      {}
-                      e)))))
+  (logging/with-logging-context {:applicationId (:id application)}
+    (try
+     (mongo/update-by-id :applications (:id application)
+                         (pate-verdict-migration/migration-updates application
+                                                                   timestamp))
+     (catch Exception e
+       (clojure.pprint/pprint (ex-data e))
+       (throw (ex-info (str "Migration failed for application " (:id application))
+                       {}
+                       e))))))
 
 (defmigration pate-verdicts
   {:apply-when (pos? (mongo/count :applications pate-verdict-migration/migration-query))}
