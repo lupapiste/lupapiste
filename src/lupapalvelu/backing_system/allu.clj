@@ -12,6 +12,7 @@
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
+            [slingshot.slingshot :refer [try+]]
             [taoensso.timbre :refer [info error]]
             [taoensso.nippy :as nippy]
             [sade.util :refer [dissoc-in assoc-when fn->]]
@@ -614,10 +615,11 @@
   [handler]
   (fn [{{{app-id :id} :application} ::command interface-path ::interface-path :as msg}]
     (match (handler msg)
-      {:status (:or 200 201), :body body}
+      ({:status (:or 200 201), :body body} :as response)
       (do (info "ALLU operation" (interface-path->string interface-path) "succeeded")
           (when (= interface-path [:placementcontracts :create])
-            (application/set-integration-key app-id :ALLU {:id body})))
+            (application/set-integration-key app-id :ALLU {:id body}))
+          response)
 
       response (allu-fail! :error.allu.http (select-keys response [:status :body])))))
 
@@ -760,7 +762,12 @@
   [command]
   (send-allu-request! (final-contract-request command)))
 
-(defn load-contract-document! [{:keys [application] :as command}]
-  (case (:state application)
-    "sent" (load-placementcontract-proposal! command)
-    "agreementPrepared" (load-placementcontract-final! command)))
+(defn load-contract-document!
+  "Load placement contract proposal or final from ALLU. Returns fileId of the pdf or nil. Bypasses JMS."
+  [{:keys [application] :as command}]
+  (try+
+    (-> (allu-request-handler (case (:state application)
+                                "sent" (contract-proposal-request command)
+                                "agreementPrepared" (final-contract-request command)))
+        :body :fileId)
+    (catch [:text "error.allu.http"] _ nil)))

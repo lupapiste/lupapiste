@@ -51,7 +51,7 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [warnf warn  errorf error]]))
+            [taoensso.timbre :refer [warnf warn errorf error]]))
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
@@ -515,6 +515,19 @@
                                                                                 dicts->kw-paths)}
                                                      :legacy?  true})}})
     verdict-id))
+
+(sc/defn ^:always-validate new-allu-verdict :- schemas/PateVerdict [{:keys [application created] :as command}]
+  (let [category (schema-util/application->category application)]
+    {:id       (mongo/create-id)
+     :modified created
+     :state    (wrapped-state command :published)
+     :category (name category)
+     :data     {:handler (general-handler application)}
+     :template {:inclusions (-> category
+                                legacy/legacy-verdict-schema
+                                :dictionary
+                                dicts->kw-paths)}
+     :legacy?  true}))
 
 (declare verdict-schema)
 

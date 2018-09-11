@@ -22,7 +22,10 @@
             [sade.util :as util]
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [lupapalvelu.application-bulletins :as bulletins]
-            [lupapalvelu.roles :as roles]))
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.backing-system.allu :as allu]
+            [lupapalvelu.pate.verdict :as pate-verdict]
+            [lupapalvelu.permit :as permit]))
 
 ;;
 ;; KRYSP verdicts
@@ -55,8 +58,20 @@
    :pre-checks  [application-has-verdict-given-state
                  no-published-pate-verdicts-check]
    :on-success  (notify :application-state-change)}
-  [command]
-  (let [result (verdict/do-check-for-verdict command)]
+  [{:keys [application created user] :as command}]
+  (let [result (if (allu/allu-application? (:organization application) (permit/permit-type application))
+                 ;; HACK: This is here instead of e.g. do-check-for-verdict to avoid verdict/allu/pate-verdict
+                 ;;       dependency cycles:
+                 (when-let [file-id (allu/load-contract-document! command)]
+                   (let [verdict (pate-verdict/new-allu-verdict command)
+                         transition-update (app-state/state-transition-update (sm/next-state application)
+                                                                              created application user)]
+                     ;; TODO: Some sort of verdict attachment
+                     (action/update-application command (if (seq (:pate-verdicts application))
+                                                          (assoc transition-update $push {:pate-verdicts verdict})
+                                                          transition-update))
+                     (ok :verdicts [verdict])))
+                 (verdict/do-check-for-verdict command))]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)
       (ok? result)  (ok :verdictCount (count (:verdicts result))

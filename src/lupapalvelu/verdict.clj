@@ -41,8 +41,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.application :as app]
-            [lupapalvelu.backing-system.allu :as allu]))
+            [lupapalvelu.application :as app]))
 
 (def Timestamp sc/Num) ;; Some timestamps are casted as double during mongo export
 
@@ -403,29 +402,26 @@
 (defn do-check-for-verdict [{:keys [application organization] :as command}]
   {:pre [(every? command [:application :user :created])
          (not (app/has-published-pate-verdicts? application))]}
-  (if (allu/allu-application? (:organization application) (permit/permit-type application))
-    (do (allu/load-contract-document! command)
-        (ok :verdicts [1]))
-    (if-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
-                         ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
-                         (krysp-fetch/get-application-xml-by-backend-id application (some :kuntalupatunnus (:verdicts application))))]
-      (let [app-xml (normalize-special-verdict application app-xml)
-            organization (if organization @organization (org/get-organization (:organization application)))
-            validation-error (or (permit/validate-verdict-xml (:permitType application) app-xml organization)
-                                 (validate-section-requirement application
-                                                               app-xml
-                                                               organization))]
-        (if-not validation-error
-          (save-verdicts-from-xml command app-xml)
-          (let [extras-updates (permit/read-verdict-extras-xml application app-xml)
-                backend-id-updates (->> (seq (krysp-reader/->backend-ids app-xml))
-                                        (backend-id-mongo-updates application))]
-            (some->> (util/deep-merge extras-updates backend-id-updates) (update-application command))
-            validation-error)))
-      ;; LPK-2459
-      (when (or (foreman/foreman-app? application) (app/designer-app? application))
-        (debug "Checking foreman/designer verdict...")
-        (fetch-tj-suunnittelija-verdict command))))
+  (if-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
+                       ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
+                       (krysp-fetch/get-application-xml-by-backend-id application (some :kuntalupatunnus (:verdicts application))))]
+    (let [app-xml (normalize-special-verdict application app-xml)
+          organization (if organization @organization (org/get-organization (:organization application)))
+          validation-error (or (permit/validate-verdict-xml (:permitType application) app-xml organization)
+                               (validate-section-requirement application
+                                                             app-xml
+                                                             organization))]
+      (if-not validation-error
+        (save-verdicts-from-xml command app-xml)
+        (let [extras-updates (permit/read-verdict-extras-xml application app-xml)
+              backend-id-updates (->> (seq (krysp-reader/->backend-ids app-xml))
+                                      (backend-id-mongo-updates application))]
+          (some->> (util/deep-merge extras-updates backend-id-updates) (update-application command))
+          validation-error)))
+    ;; LPK-2459
+    (when (or (foreman/foreman-app? application) (app/designer-app? application))
+      (debug "Checking foreman/designer verdict...")
+      (fetch-tj-suunnittelija-verdict command)))
 
   ;; TODO Empty `pate-verdicts`. `pate-verdicts` may contain verdict
   ;; drafts. Pate verdicts and backend verdicts are mutually
