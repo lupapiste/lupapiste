@@ -359,8 +359,8 @@
    :states              states/post-verdict-states
    :input-validators    [;;common-input-validator
                          (partial action/number-parameters [:datestamp])]
-   :pre-checks          [(action/some-pre-check (pate-verdict/verdict-exists :published? :not-replaced?)
-                                                pate-verdict/backing-system-verdict)
+   :pre-checks          [(action/some-pre-check pate-verdict/backing-system-verdict
+                                                (pate-verdict/verdict-exists :published? :not-replaced?))
                          (common-sanity-checks true)
                          check-deleted-file-ids]}
   [{:keys [application] :as command}]
@@ -369,11 +369,11 @@
               (if-let [verdict-data (appeal-verdict/appeal-verdict-data-for-upsert verdict-id author
                                                                                    datestamp text appeal-id)]
                 (pate-appeal-item-update! command appeal-id verdict-data :appealVerdict filedatas)
-                (fail :error.invalid-appeal-verdict))
+                (fail! :error.invalid-appeal-verdict))
               (if-let [appeal-data (appeal/appeal-data-for-upsert verdict-id type
                                                                   author datestamp text appeal-id)]
                 (pate-appeal-item-update! command appeal-id appeal-data (:type appeal-data) filedatas)
-                (fail :error.invalid-appeal)))]
+                (fail! :error.invalid-appeal)))]
     ;; Delete attachments if needed
     (when (and (seq deleted-file-ids) appeal-id)
       (att/delete-attachments! application
