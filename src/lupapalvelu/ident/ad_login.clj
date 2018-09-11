@@ -26,7 +26,7 @@
   [certstring]
   (ss/replace certstring #"[\n ]|(BEGIN|END) CERTIFICATE|-{5}" ""))
 
-(defn parse-saml-info
+(defn- parse-saml-info
   "The saml-info map returned by saml20-clj comes in a wacky format, so its best to
   parse it into a more manageable form (without string keys or single-element lists etc)."
   [element]
@@ -70,7 +70,9 @@
                                                                                                  "Lupapiste"
                                                                                                  acs-uri)}))))
 
-(defn resolve-roles [org-roles ad-params]
+(defn resolve-roles
+  "Takes a seq of user roles from the SAML, returns a set of corresponding LP roles."
+  [org-roles ad-params]
   (let [ad-roles-set (if (string? ad-params) #{ad-params} (set ad-params))
         orgAuthz     (for [[lp-role ad-role] org-roles]
                        (when (ad-roles-set ad-role)
@@ -112,9 +114,14 @@
         [valid-relay-state? continue-url] (saml-routes/valid-hmac-relay-state? (:secret-key-spec (:mutables @ad-config)) relay-state)
         saml-resp (saml-sp/xml-string->saml-resp xml-response)
         idp-cert (get-in @ad-config [:organizational-settings (keyword orgid) :idp-cert])
-        valid-signature? (if idp-cert
-                           (saml-sp/validate-saml-response-signature saml-resp idp-cert)
-                           false)
+        valid-signature? (if-not idp-cert
+                           false
+                           (try
+                             (saml-sp/validate-saml-response-signature saml-resp idp-cert)
+                             (catch java.security.cert.CertificateException e
+                               (do
+                                 (error (.getMessage e))
+                                 false))))
         valid? (and valid-relay-state? valid-signature?)
         saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp (:decrypter @ad-config)))
         parsed-saml-info (parse-saml-info saml-info)
@@ -122,12 +129,16 @@
         _ (clojure.pprint/pprint parsed-saml-info)
         _ (info (str "SAML response validation " (if valid? "was successful" "failed")))
         ad-role-map (-> orgid (get-organization) :ad-login :role-mapping)
-        authz (resolve-roles ad-role-map groups)]  ;; groups or whatever the correct parameter is)
+        authz (resolve-roles ad-role-map groups)
+        _ (println valid-signature?)]  ;; groups or whatever the correct parameter is)
     (cond
       (and valid? (seq authz)) (validated-login req orgid firstName lastName email authz)
       valid? (do
                (error "User does not have organization authorization")
                (response/redirect (format "%s/app/fi/welcome#!/login" (:host (env/get-config)))))
+      (false? valid-signature?) (do
+                                  (error "Certificate was invalid")
+                                  (response/status 403 (response/content-type "text/plain" "Certificate was invalid")))
       :else (do
               (error "SAML validation failed")
               (response/status 403 (response/content-type "text/plain" "Validation of SAML response failed"))))))
