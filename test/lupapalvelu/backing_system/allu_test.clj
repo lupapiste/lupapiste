@@ -132,8 +132,10 @@
                                         :description (let [{{:keys [type-group type-id]} :type} sent-attachment
                                                            type (localize @#'allu/lang :attachmentType
                                                                           type-group type-id)
-                                                           description (or (:contents sent-attachment) "")]
-                                                       (if (= type description) type (str type ": " description)))
+                                                           description (:contents sent-attachment)]
+                                                       (if (or (not description) (= type description))
+                                                         type
+                                                         (str type ": " description)))
                                         :mimeType    (-> sent-attachment :latestVersion :contentType)}
                 (dissoc file :mime-type) => {:name    "file"
                                              :content fileId}

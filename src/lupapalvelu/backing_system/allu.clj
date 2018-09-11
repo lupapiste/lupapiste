@@ -213,9 +213,9 @@
 (declare person->contact)
 
 (defn- person->customer [{:keys [osoite], {:keys [hetu]} :henkilotiedot :as person}]
-  (merge {:type          "PERSON"
-          :registryKey   hetu
-          :country       (address-country osoite)}
+  (merge {:type        "PERSON"
+          :registryKey hetu
+          :country     (address-country osoite)}
          (person->contact person)))
 
 (defn- company->customer [payee? company]
@@ -335,8 +335,8 @@
      ::params         {:id       allu-id
                        :metadata {:name        (:filename latestVersion)
                                   :description (let [type (localize lang :attachmentType type-group type-id)
-                                                     description (or (:contents attachment) "")]
-                                                 (if (= type description)
+                                                     description (:contents attachment)]
+                                                 (if (or (not description) (= type description))
                                                    type
                                                    (str type ": " description)))
                                   :mimeType    (:contentType latestVersion)}
