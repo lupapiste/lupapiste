@@ -293,7 +293,7 @@
                           (:id att)
                           (.getMessage e)))))
             (when-not (true? (:only-use-inspection-from-backend organization))
-              (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))
-      (attachment/maybe-generate-comments-attachment user updated-application (:state updated-application)))
+              (tasks/generate-task-pdfa updated-application added-task (:user command) "fi"))))))
+    (attachment/maybe-generate-comments-attachment user updated-application (:state updated-application))
     (cond-> {:ok update-result}
             (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
