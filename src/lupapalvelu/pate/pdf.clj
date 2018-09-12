@@ -63,7 +63,7 @@
                              (map (fn [[_ v]] (ss/trim (:property-id v)))))))
 
 (defn value-or-other [lang value other & loc-keys]
-  (cond (nil? value) ""
+  (cond (or (nil? value) (empty? value)) ""
         (util/=as-kw value :other) other
         (seq loc-keys) (i18n/localize lang loc-keys value)
         :else value))
