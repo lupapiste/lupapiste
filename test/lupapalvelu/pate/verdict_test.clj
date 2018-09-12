@@ -3420,6 +3420,9 @@
                                                 :type-id    "paatos"}))})
         (provided (lupapalvelu.attachment/attachment-array-updates
                    "LP-753-2018-90008" anything :readOnly true :locked true :target {:type "verdict", :id "vid"})
+                  => nil
+                  (lupapalvelu.attachment/attachment-array-updates
+                   "LP-753-2018-90008" anything :metadata.nakyvyys "julkinen" :metadata.draftTarget false)
                   => nil))
       (fact "verdict-attachment-items"
         (verdict-attachment-items {:application {:attachments [att-paatosote att-ilmoitus att-empty]}}
@@ -3464,6 +3467,9 @@
                                                         :in-any-order)})})})
         (provided (lupapalvelu.attachment/attachment-array-updates
                    "LP-753-2018-90008" anything :readOnly true :locked true :target {:type "verdict", :id "vid"})
+                  => nil
+                  (lupapalvelu.attachment/attachment-array-updates
+                   "LP-753-2018-90008" anything :metadata.nakyvyys "julkinen" :metadata.draftTarget false)
                   => nil)))
 
     (fact "finalize--pdf"
@@ -3492,3 +3498,24 @@
                      :lastName  "  World  "}) => "Hello World"
   (user-person-name {:firstName "    "
                      :lastName  "    "}) => "")
+
+(facts "Signature requests"
+  (let [verdictId   (mongo/create-id)
+        verdict     (make-verdict :id verdictId :code "myonnetty" :section "123")
+        verdict     (assoc verdict :signatures [{:user-id "123"
+                                                 :name    "Signer one"
+                                                 :date    1536138000000}])
+        verdict     (assoc verdict :signature-requests [{:user-id "111"
+                                                         :name    "Signer four"
+                                                         :date    1536138000000}])
+        application (assoc application :auth [{:id "123" :username "user1" :firstName "signer" :lastName "one"}
+                                              {:id "456" :username "user2" :firstName "signer" :lastName "two"}
+                                              {:id "789" :username "user3" :firstName "signer" :lastName "three"}
+                                              {:id "111" :username "user4" :firstName "signer" :lastName "four"}
+                                              {:id "222" :username "user5" :firstName "signer" :lastName "five"}])
+        application (assoc application :pate-verdicts [verdict])]
+
+    (fact "Should find correct parties into selection")
+    (parties {:application application :data {:verdict-id verdictId}})) => [{:text "signer two" :value "456"}
+                                                                            {:text "signer three" :value "789"}
+                                                                            {:text "signer five" :value "222"}])

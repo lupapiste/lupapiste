@@ -834,7 +834,7 @@ div.pate-select-application-attachments {
   }
 }
 
-h3.pate-attachments-title {
+h3.pate-published-title {
   padding-top: $marginM;
   margin-top: $marginM;
   border-top: 1px solid black;
@@ -984,3 +984,54 @@ div.published-verdict {
                 }
               }
             }}}
+
+// Appeals
+
+table.pate-appeals {
+  @include no-row-hover;
+  td {
+    vertical-align: top;
+  }
+  tr.pate-appeal-row.odd {
+    background-color: $gray246;
+  }
+  tr.pate-appeal-row.even {
+    background-color: white;
+  }
+  tr.pate-appeal-row.note-or-form {
+    background-color: white;
+  }
+  td.align--right {
+    text-align: right;
+  }
+  td.align--half {
+    width: 50%;
+  }
+  div.pate-appeal-note {
+    white-space: pre-wrap;
+    padding-left: 2em;
+    padding-right: 2em;
+  }
+  span.empty {
+    color: $gray153;
+    font-style: italic;
+  }
+  a.pate-appeal-operation {
+    padding-right: 2em;
+  }
+  &.form-files {
+    width: initial;
+    margin-bottom: 0;
+    td {
+      vertical-align: middle;
+    }
+    tr {
+      border: none;
+    }
+  }
+}
+
+div.pate-appeal-border {
+  border: 1px solid $gray187;
+  padding: 2em 2em;
+}

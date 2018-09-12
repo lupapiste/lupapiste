@@ -18,6 +18,30 @@ LUPAPISTE.StatementEditModel = function(params) {
   self.text = ko.observable();
   self.inAttachment = ko.observable();
 
+  self.newDueDate = ko.observable();
+  var dueDateSubscription = self.newDueDate.subscribe(function(newDate) {
+    if (newDate && params.data) {
+      if (newDate >= new Date().setHours(0,0,0,0)) {
+        ajax.command("save-statement-due-date",
+                           {id: applicationId(),
+                            statementId: params.data().id(),
+                            dueDate: newDate.getTime(),
+                            lang: loc.getCurrentLanguage()
+                           })
+                           .success ( function() {
+                             hub.send("indicator", {style: "positive", message: "email.notification-sent",
+                                                    sticky: true});
+                           })
+                           .error(util.showSavedIndicator)
+                           .call();
+      }
+      else {
+        hub.send("indicator", {style: "negative", message: "email.due-date-cant-be-in-the-past", sticky: false});
+        self.newDueDate(null);
+      }
+    }
+   });
+
   var initSubscription = self.data.subscribe(function() {
     self.selectedStatus(util.getIn(self.data, ["status"]));
     self.text(util.getIn(self.data, ["text"]));
@@ -127,5 +151,6 @@ LUPAPISTE.StatementEditModel = function(params) {
     statusSubscription.dispose();
     submitSubscription.dispose();
     inAttachmentSub.dispose();
+    dueDateSubscription.dispose();
   };
 };

@@ -47,6 +47,21 @@
                :value v))
     id))
 
+(defn check-draft-attachment [app-id attachment-id verdict-id]
+  (fact "Attachment has draft target"
+    (let [{:keys [attachments]} (query-application sonja app-id)]
+      (util/find-by-id attachment-id attachments)
+      => (contains {:target   {:type "verdict"
+                               :id   verdict-id}
+                    :metadata {:nakyvyys    "viranomainen"
+                               :draftTarget true}})))
+  (fact "Attachment visibility cannot be changed"
+    (command sonja :set-attachment-visibility
+             :id app-id
+             :attachmentId attachment-id
+             :value "julkinen")
+    => (err :error.attachment-target-is-draft)))
+
 (defn check-file [app-id file-id exists?]
   (fact {:midje/description (str "Check that file "
                                  (if exists? "exists" "does not exist"))}
@@ -166,14 +181,15 @@
 
 (defn add-attachment
   "Adds attachment to the application. Contents is mainly for logging. Returns attachment id."
-  [app-id contents type-group type-id & [target]]
+  [app-id contents type-group type-id & [{:keys [target draft?]}]]
   (let [file-id               (upload-file-and-bind sonja
                                                     app-id
                                                     (merge {:contents contents
                                                             :type     {:type-group type-group
                                                                        :type-id    type-id}}
                                                            (when target
-                                                             {:target target})))
+                                                             {:target target}))
+                                                    :draft? draft?)
         {:keys [attachments]} (query-application sonja app-id)
         {attachment-id :id}   (util/find-first (fn [{:keys [latestVersion]}]
                                                  (= (:originalFileId latestVersion) file-id))

@@ -454,7 +454,8 @@
                     :type-group (or type-group #"paatoksenteko")
                     :default    (or default :paatoksenteko.paatosote)
                     :dropzone   "#pate-verdict-page"
-                    :multiple?  true}}}
+                    :multiple?  true
+                    :draft?     true}}}
     :section {:id       :upload
               :hide?    :_meta.published?
               :css      :pate-section--no-border
