@@ -178,6 +178,10 @@
 "osapuoli.suunnittelutehtavanVaativuusluokka.C" "en" "Low"
 "osapuoli.suunnittelutehtavanVaativuusluokka.C" "fi" "Vähäinen"
 "osapuoli.suunnittelutehtavanVaativuusluokka.C" "sv" "Ringa"
+"osapuoli.suunnittelutehtavanVaativuusluokka.ei tiedossa" "en" "Not known"
+"osapuoli.suunnittelutehtavanVaativuusluokka.ei tiedossa" "fi" "Ei tiedossa"
+"osapuoli.suunnittelutehtavanVaativuusluokka.ei tiedossa" "sv" "Okänd"
+
 "osapuoli.suunnittelutehtavanVaativuusluokka._group_label" "en" "Complexity of design task"
 "osapuoli.suunnittelutehtavanVaativuusluokka._group_label" "fi" "Suunnittelutehtävän vaativuusluokka"
 "osapuoli.suunnittelutehtavanVaativuusluokka._group_label" "sv" "Planeringsuppgiftens svårighetsgrad"
