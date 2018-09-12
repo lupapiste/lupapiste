@@ -809,6 +809,45 @@
                                              pk--attachment))
 
 
+;; Verdict migration layouts
+(def migration-verdict-layout
+  (build-layout legacy--application-id
+                legacy--kuntalupatunnus
+                entry--rakennuspaikka
+                (entry--applicant :pdf.achiever :pdf.achievers)
+                entry--operation
+                entry--designers
+                entry--dimensions
+                entry--statements
+                entry--neighbors
+                entry--attachments
+                legacy--verdict-code
+                legacy--verdict-text
+                legacy--foremen
+                legacy--reviews
+                legacy--conditions
+                legacy--verdict-giver
+                legacy--dates))
+
+(def migration-contract-layout
+  (build-layout legacy--application-id
+                legacy--kuntalupatunnus
+                entry--rakennuspaikka
+                (entry--applicant :pdf.applicant :pdf.applicants)
+                entry--operation
+                entry--designers
+                entry--dimensions
+                entry--statements
+                entry--neighbors
+                entry--attachments
+                legacy--verdict-code
+                entry--contract-text
+                legacy--foremen
+                legacy--reviews
+                legacy--conditions
+                legacy--verdict-giver
+                legacy--dates
+                entry--contract-signatures))
 
 
 (defn pdf-layout [{:keys [category legacy?]}]
@@ -825,6 +864,5 @@
     :legacy.ymp      ymp-legacy-layout
     :legacy.contract contract-legacy-layout
     :legacy.tj       tj-legacy-layout
-    :legacy.migration-contract r-legacy-layout ;; TODO
-    :legacy.migration-verdict r-legacy-layout ;; TODO
-    ))
+    :legacy.migration-contract migration-contract-layout
+    :legacy.migration-verdict  migration-verdict-layout))
