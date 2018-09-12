@@ -215,17 +215,33 @@
     migrated-test-verdict)
 
   (fact "old agreements are given category migration-contract"
-        (->pate-legacy-verdict test-application
+    (->pate-legacy-verdict test-application
+                           (assoc test-verdict :sopimus true)
+                           timestamp)
+    => (contains {:category "migration-contract"
+                  :data (contains {:contract-text (wrap verdict-text)})}))
+
+  (fact "if verdict cannot be validated with the default category, a permissive migration-verdict category is used"
+    (->pate-legacy-verdict (assoc test-application :permitType "YA")
+                           test-verdict
+                           timestamp)
+    => (contains {:category "migration-verdict"
+                  :data (contains {:verdict-text (wrap verdict-text)})}))
+
+  (fact "if contract cannot be validated with the default category, a permissive migration-contract category is used"
+        (->pate-legacy-verdict (assoc test-application :permitType "YA")
                                (assoc test-verdict :sopimus true)
                                timestamp)
         => (contains {:category "migration-contract"
-                      :data (contains {:contract-text (wrap verdict-text)})}))
+                      :data (contains {:contract-text (wrap verdict-text)})})
 
-  (fact "if verdict cannot be validated with the default category, a permissive catchall category is used"
-        (->pate-legacy-verdict (assoc test-application :permitType "YA")
-                           test-verdict
-                           timestamp)
-    => (contains {:category "migration-verdict"}))
+        (->pate-legacy-verdict (assoc test-application
+                                      :permitType "YA"
+                                      :permitSubtype "sijoitussopimus")
+                               test-verdict
+                               timestamp)
+        => (contains {:category "migration-contract"
+                      :data (contains {:contract-text (wrap verdict-text)})}))
 
   (fact "only tasks related to given verdict affect the migration"
     (->pate-legacy-verdict (assoc test-application

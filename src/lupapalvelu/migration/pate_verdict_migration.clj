@@ -139,8 +139,8 @@
      (name category)
      "migration-verdict")))
 
-(defn- verdict-template [app _ _]
-  {:inclusions (-> (verdict-category app nil nil)
+(defn- verdict-template [app verdict _]
+  {:inclusions (-> (verdict-category app verdict nil)
                    verdict/legacy-verdict-inclusions)})
 
 (defn- get-when [p getter-fn]
@@ -151,8 +151,10 @@
 (defn- verdict-published? [_ verdict _]
   (not (:draft verdict)))
 
+(def contract-category? #{"contract" "migration-contract"})
+
 (defn- contract? [app verdict _]
-  (#{"contract" "migration-contract"} (verdict-category app verdict nil)))
+  (contract-category? (verdict-category app verdict nil)))
 
 (defn- timestamp
   "If timestamp is 0, return nil"
@@ -307,22 +309,21 @@
     {:errors errors}
     (sc/check PateLegacyVerdict verdict)))
 
-(defn change-category-to-migration-verdict [app verdict]
+(defn- update-template [verdict app]
+  (assoc verdict :template (verdict-template app verdict nil)))
+
+(defn change-category [app verdict new-category]
   (add-tags app
             (-> verdict
-                (assoc :category "migration-verdict")
-                (assoc :template (verdict-template app nil nil))
-                (update :data
-                        (fn [data]
-                          (if (:contract-text data)
-                            (rename-keys {:contract-text :verdict-text})
-                            data))))))
+                (assoc :category new-category)
+                (update-template app))))
 
 (defn ensure-valid-category [app verdict]
   (if-let [errors (check-verdict verdict)]
-    (do (warnf "Verdict %s did not conform to category %s: %s" (:id verdict) (:category verdict) (str errors))
-        (infof "Changing category of verdict %s to migration-verdict" (:id verdict))
-        (change-category-to-migration-verdict app verdict))
+    (let [new-category (if (contract-category? (:category verdict)) "migration-contract" "migration-verdict")]
+      (warnf "Verdict %s did not conform to category %s: %s" (:id verdict) (:category verdict) (str errors))
+      (infof "Changing category of verdict %s to %s" (:id verdict) new-category)
+      (change-category app verdict new-category))
     verdict))
 
 (defn validate-verdict [verdict]
