@@ -63,13 +63,25 @@
                  ;; HACK: This is here instead of e.g. do-check-for-verdict to avoid verdict/allu/pate-verdict
                  ;;       dependency cycles:
                  (when-let [file-id (allu/load-contract-document! command)]
+                   ;; FIXME: Some times should be dates, not timestamps:
                    (let [verdict (pate-verdict/new-allu-verdict command)
+                         verdict (assoc verdict
+                                   :published {:published created
+                                               :tags      (pr-str {:body (pate-verdict/backing-system--tags
+                                                                           application verdict)})}
+                                   ;; FIXME: Should be general-handler fullname instead of current username:
+                                   :archive {:verdict-giver (:username user)}
+                                   ;; FIXME: Should be general-handler fullname instead of current username:
+                                   :signatures [{:name (:username user)
+                                                 :user-id (:id user)
+                                                 :date created}]) ; HACK
                          transition-update (app-state/state-transition-update (sm/next-state application)
                                                                               created application user)]
                      ;; TODO: Some sort of verdict attachment
                      (action/update-application command (if (seq (:pate-verdicts application))
-                                                          (assoc transition-update $push {:pate-verdicts verdict})
-                                                          transition-update))
+                                                          transition-update
+                                                          (util/deep-merge transition-update
+                                                                           {$push {:pate-verdicts verdict}})))
                      (ok :verdicts [verdict])))
                  (verdict/do-check-for-verdict command))]
     (cond

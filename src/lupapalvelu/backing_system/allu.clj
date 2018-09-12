@@ -550,8 +550,10 @@
                                       {:status 404, :body (str "Not Found: " (:id params))}))
 
     [:placementcontracts :contract (:or :proposal :final)] (if (creation-response-ok? (:id params))
-                                                             {:status 200, :body " "}
-                                                             {:status 404, :body (str "Not Found: " (:id params))})
+                                                             {:status 200, :headers {"Content-Type" "application/pdf"}
+                                                              :body   " "}
+                                                             {:status 404, :headers {"Content-Type" "application/pdf"}
+                                                              :body   (str "Not Found: " (:id params))})
 
     [:placementcontracts :contract :approved] (if (creation-response-ok? (:id params))
                                                 {:status 200, :body ""}
