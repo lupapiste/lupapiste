@@ -175,6 +175,7 @@
             [lupapiste/lein-buildid "0.4.2"]
             [lupapiste/lein-nitpicker "0.5.1"]
             [lein-figwheel "0.5.16"]]
+  :hooks [leiningen.cljsbuild]
 
   :clean-targets ^{:protect false} ["resources/public/lp-static/js/rum-app.js"
                                     "resources/public/lp-static/js/rum-app.js.map"
