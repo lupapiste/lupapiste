@@ -199,6 +199,13 @@
     {:attachment-id attachment-id
      :file-id       file-id}))
 
+(defn add-verdict-attachment
+  "Adds attachment to the verdict. Contents is mainly for logging. Returns attachment id."
+  [app-id verdict-id contents]
+  (add-attachment app-id contents "paatoksenteko" "paatosote" {:target {:type "verdict"
+                                                                        :id verdict-id}
+                                                               :draft? true}))
+
 (defn add-condition [add-cmd fill-cmd condition]
   (let [changes      (:changes (add-cmd))
         condition-id (-> changes first first last keyword)]
@@ -300,9 +307,9 @@
   (query apikey :pate-verdict :id app-id :verdict-id verdict-id))
 
 
-(defn- status200-check [headers {:keys [app-id verdict-id
-                                        verdict-name contents
-                                        state type-group]}]
+(defn- status200-check [apikey headers {:keys [app-id verdict-id
+                                               verdict-name contents
+                                               state type-group]}]
   (fact "Response contains correct attachment"
     headers => (contains {"Content-Disposition"
                           (contains (format "%s %s %s"
@@ -311,7 +318,7 @@
                                             (util/to-local-date (now))))}))
   (fact "Verdict PDF attachment has been created"
     (let [{att-id :id
-           :as    attachment} (-> (query-application sonja app-id)
+           :as    attachment} (-> (query-application apikey app-id)
                                   :attachments last)]
             attachment
             => (contains {:readOnly         true
@@ -325,7 +332,7 @@
                           :latestVersion    (contains {:contentType "application/pdf"
                                                        :filename    (contains verdict-name)})})
             (fact "published-pate-verdict"
-              (:verdict (query sonja :published-pate-verdict
+              (:verdict (query apikey :published-pate-verdict
                                :id app-id
                                :verdict-id verdict-id))
               => (contains {:attachment-id att-id
@@ -342,13 +349,14 @@
     status => 200))
 
 (defn verdict-pdf-queue-test
-  [{:keys [app-id verdict-id] :as options}]
+  [apikey {:keys [app-id verdict-id] :as options}]
   (loop [i 0]
-    (let [{:keys [status headers]} (raw sonja :verdict-pdf
+    (let [{:keys [status headers]} (raw apikey :verdict-pdf
                                         :id app-id
                                         :verdict-id verdict-id)]
       (cond
-        (= status 200) (status200-check headers
+        (= status 200) (status200-check apikey
+                                        headers
                                         (merge {:verdict-name "P\u00e4\u00e4t\u00f6s"
                                                 :contents     "P\u00e4\u00e4t\u00f6s"
                                                 :state        "verdictGiven"

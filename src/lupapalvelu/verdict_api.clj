@@ -32,10 +32,6 @@
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
-(defn no-published-pate-verdicts-check [{:keys [application]}]
-  (when (app/has-published-pate-verdicts? application)
-    (fail :error.published-pate-verdicts-exist)))
-
 (defquery verdict-attachment-type
   {:parameters       [:id]
    :states           states/all-states
@@ -52,8 +48,7 @@
    :states      (conj states/give-verdict-states :constructionStarted) ; states reviewed 2015-10-12
    :user-roles  #{:authority}
    :notified    true
-   :pre-checks  [application-has-verdict-given-state
-                 no-published-pate-verdicts-check]
+   :pre-checks  [application-has-verdict-given-state]
    :on-success  (notify :application-state-change)}
   [command]
   (let [result (verdict/do-check-for-verdict command)]
@@ -167,36 +162,9 @@
    :states     states/give-verdict-states
    :notified true
    :user-roles #{:authority}}
-  [{:keys [application created user] :as command}]
+  [{:keys [application] :as command}]
   (when-let [verdict (find-verdict application verdictId)]
-    (let [target {:type "verdict", :id verdictId} ; key order seems to be significant!
-          is-verdict-attachment? #(= (select-keys (:target %) [:id :type]) target)
-          attachments (filter is-verdict-attachment? (:attachments application))
-          {:keys [sent state verdicts]} application
-          ; Deleting the only given verdict? Return sent or submitted state.
-          step-back? (and (not (:draft verdict))
-                          (= 1 (count (remove :draft verdicts)))
-                          (empty? (filter :published (:pate-verdicts application)))
-                          (states/verdict-given-states (keyword state)))
-          task-ids (verdict/deletable-verdict-task-ids application verdictId)
-          attachments (concat attachments (verdict/task-ids->attachments application task-ids))
-          updates (merge {$pull {:verdicts {:id verdictId}
-                                 :comments {:target target}
-                                 :tasks {:id {$in task-ids}}}}
-                         (when step-back?
-                           (app-state/state-transition-update (if (and sent (sm/valid-state? application :sent))
-                                                          :sent
-                                                          :submitted)
-                                                        created
-                                                        application
-                                                        user)))]
-      (update-application command updates)
-      (bulletins/process-delete-verdict id verdictId)
-      (attachment/delete-attachments! application (remove nil? (map :id attachments)))
-      (appeal-common/delete-by-verdict command verdictId)
-      (child-to-attachment/delete-child-attachment application :verdicts verdictId)
-      (when step-back?
-        (notifications/notify! :application-state-change command)))))
+    (verdict/delete-verdict command verdict true)))
 
 (defcommand sign-verdict
   {:description "Applicant/application owner can sign an application's verdict"
