@@ -358,10 +358,11 @@
   ;; field, not the value.
   {:verdicts.draft {$exists true}})
 
-
+(defn lupapiste-verdict? [verdict]
+  (contains? verdict :draft))
 
 (defn migration-updates [application timestamp]
-  (let [lupapiste-verdicts (filter vc/lupapiste-verdict?
+  (let [lupapiste-verdicts (filter lupapiste-verdict?
                                    (:verdicts application))]
     (merge {$set {:pate-verdicts (mapv #(->pate-legacy-verdict application
                                                                %

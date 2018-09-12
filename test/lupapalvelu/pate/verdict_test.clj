@@ -1500,8 +1500,8 @@
     => "Katulupa"))
 
 (fact "verdict-section-string"
-  (verdict-section-string {:data {:verdict-section " 22 "}}) => "\u00a722"
-  (verdict-section-string {:data {:verdict-section ""}}) => "")
+  (verdict-section-string {:category "r" :data {:verdict-section " 22 "} :legacy? false}) => "\u00a722"
+  (verdict-section-string {:category "r" :data {:verdict-section ""} :legacy? false}) => "")
 
 
 (facts "Verdict summary"
