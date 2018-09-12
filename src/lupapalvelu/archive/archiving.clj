@@ -114,10 +114,9 @@
 
 (defn- do-post-archival-ops
   "Does the post-archiving stuff in a separate single threaded pool to prevent race-condition with Mongo"
-  [state-update-fn id application now user]
+  [id application now user]
   (threads/submit
     post-archiving-pool
-    (state-update-fn :arkistoitu application now id)
     (info "State for attachment id" id "from application" (:id application) "updated to arkistoitu.")
     (mark-first-time-archival application now)
     (mark-application-archived-if-done application now user)
@@ -140,12 +139,14 @@
             (= 200 status)
             (do
               (info "Archived attachment id" id "from application" app-id)
-              (do-post-archival-ops state-update-fn id application now user))
+              (state-update-fn :arkistoitu application now id)
+              (do-post-archival-ops id application now user))
 
             (and (= status 409) (string/includes? body "already exists"))
             (do
               (warn "Onkalo response indicates that" id "is already in archive. Updating state to match.")
-              (do-post-archival-ops state-update-fn id application now user))
+              (state-update-fn :arkistoitu application now id)
+              (do-post-archival-ops id application now user))
 
             :else
             (do
@@ -400,19 +401,21 @@
                                   created
                                   set-process-state
                                   user))))
-      (doseq [attachment selected-attachments
-              :when (not (archival-states (keyword (get-in attachment [:metadata :tila]))))]
-        (let [file-id (get-in attachment [:latestVersion :fileId])
-              {:keys [content contentType]} (get gridfs-results file-id)
-              metadata-fn #(generate-archive-metadata application user :metadata attachment)]
-          (upload-and-set-state (:id attachment)
-                                content
-                                contentType
-                                metadata-fn
-                                application
-                                created
-                                set-attachment-state
-                                user))))
+      (->> selected-attachments
+           (mapv (fn [attachment]
+                   (when-not (archival-states (keyword (get-in attachment [:metadata :tila])))
+                     (let [file-id (get-in attachment [:latestVersion :fileId])
+                          {:keys [content contentType]} (get gridfs-results file-id)
+                           metadata-fn #(generate-archive-metadata application user :metadata attachment)]
+                       (upload-and-set-state (:id attachment)
+                                            content
+                                             contentType
+                                             metadata-fn
+                                             application
+                                             created
+                                             set-attachment-state
+                                             user)))))
+           (remove nil?)))
     {:error :error.invalid-metadata-for-archive}))
 
 (defn mark-application-archived [application now archived-ts-key]

@@ -30,9 +30,10 @@
    :states           (conj states/post-verdict-states :underReview)
    :pre-checks       [application-within-time-limit]}
   [{:keys [organization] :as command}]
-  (if-let [{:keys [error]} (-> (update command :application app/enrich-application-handlers @organization)
-                               (archiving/send-to-archive (set attachmentIds) (set documentIds)))]
-    (fail error)
+  (let [result (-> (update command :application app/enrich-application-handlers @organization)
+                   (archiving/send-to-archive (set attachmentIds) (set documentIds)))]
+    (if (map? result)
+      (fail (:error result)))
     (ok)))
 
 (defquery document-states

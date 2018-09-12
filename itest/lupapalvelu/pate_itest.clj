@@ -529,9 +529,9 @@
 (defn add-verdict-attachment
   "Adds attachment to the verdict. Contents is mainly for logging. Returns attachment id."
   [app-id verdict-id contents]
-  (add-attachment app-id contents "paatoksenteko" "paatosote" {:type "verdict"
-                                                               :id verdict-id}))
-
+  (add-attachment app-id contents "paatoksenteko" "paatosote" {:target {:type "verdict"
+                                                                        :id verdict-id}
+                                                               :draft? true}))
 
 ;;; Verdicts
 
@@ -1271,6 +1271,7 @@
                                                                        verdict-id
                                                                        "Hello world!")]
                   (check-file app-id file-id true)
+                  (check-draft-attachment app-id attachment-id verdict-id)
                   (fact "Modern verdict cannot be deleted with legacy command"
                     (command sonja :delete-legacy-verdict :id app-id
                              :verdict-id verdict-id) => fail?)
@@ -1375,6 +1376,7 @@
                                                         "ennakkoluvat_ja_lausunnot" "suunnittelutarveratkaisu")
             {pseudo-id :attachment-id}  (add-attachment app-id "sotaaP"
                                                         "paatoksenteko" "paatos")]
+        (check-draft-attachment app-id attachment-id verdict-id)
         (fact "Regular, pseudo and bogus-ids as application attachments"
           (edit-verdict "attachments" [regular-id "bogus-id" pseudo-id])
           => no-errors?)
@@ -1415,10 +1417,14 @@
           (let [details {:readOnly true
                          :locked   true
                          :target   {:type "verdict"
-                                    :id   verdict-id}}
+                                    :id   verdict-id}
+                         :metadata (just {:nakyvyys "julkinen"})}
                 atts    (:attachments (query-application sonja app-id))]
             (util/find-by-id attachment-id atts)
-            => (contains (assoc details :id attachment-id))
+            => (contains (assoc details
+                                :id attachment-id
+                                :metadata (just {:nakyvyys    "julkinen"
+                                                 :draftTarget false})))
             (util/find-by-id regular-id atts)
             => (contains (assoc details :id regular-id))))
 
@@ -1443,10 +1449,10 @@
                 (http-client/form-decode query-string)
                 => {"verdict-id" verdict-id
                     "id"         app-id}
-                (verdict-pdf-queue-test {:app-id     app-id
-                                         :verdict-id verdict-id
+                (verdict-pdf-queue-test {:app-id       app-id
+                                         :verdict-id   verdict-id
                                          :verdict-name "Permit"
-                                         :contents "Permit text"})))))))
+                                         :contents     "Permit text"})))))))
 
     (fact "Editing no longer allowed"
       (edit-verdict :verdict-text "New verdict text")

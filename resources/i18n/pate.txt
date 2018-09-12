@@ -1,5 +1,6 @@
 "contract.fetch.button" "en" "Get contracts from the background system"
 "contract.fetch.button" "fi" "Hae sopimukset taustajärjestelmästä"
+"error.file-cannot-be-deleted" "fi" "Tiedoston poistaminen epäonnistui"
 "error.invalid-value" "en" "Invalid value"
 "error.invalid-value" "fi" "Virheellinen arvo"
 "error.invalid-value" "sv" "Felaktigt värde"

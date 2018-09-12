@@ -838,12 +838,16 @@
 (defn upload-file-and-bind
   "Uploads file and then bind using bind-attachments. To upload new file, specify metadata using filedata.
   If upload to existing attachment, filedata can be empty but :attachment-id should be defined."
-  [apikey id filedata & {:keys [fails attachment-id]}]
+  [apikey id filedata & {:keys [fails attachment-id draft?]}]
   (let [file-id (get-in (upload-file apikey (or (:filename filedata) "dev-resources/test-attachment.txt")) [:files 0 :fileId])
         data (if (ss/not-blank? attachment-id)
                {:attachmentId attachment-id}
                (select-keys filedata [:type :group :target :contents :constructionTime :sign]))
-        {job :job :as resp} (command apikey :bind-attachments :id id :filedatas [(assoc data :fileId file-id)])]
+        {job :job :as resp} (command apikey
+                                     (if draft?
+                                       :bind-draft-attachments
+                                       :bind-attachments)
+                                     :id id :filedatas [(assoc data :fileId file-id)])]
     (if-not fails
       (do
         (fact "Bind-attachments command OK" resp => ok?)
