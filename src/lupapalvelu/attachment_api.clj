@@ -434,14 +434,15 @@
   (att/output-file fileId (or (:id user) (:id session))))
 
 (defraw "download-attachment"
-  {:parameters       [:file-id :id]
-   :categories       #{:attachments}
-   :input-validators [(partial action/non-blank-parameters [:file-id :id])]
-   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
-   :states           states/all-application-or-archiving-project-states
-   :user-authz-roles roles/all-authz-roles}
+  {:parameters          [:file-id :id]
+   :optional-parameters [view]
+   :categories          #{:attachments}
+   :input-validators    [(partial action/non-blank-parameters [:file-id :id])]
+   :user-roles          #{:applicant :authority :oirAuthority :financialAuthority}
+   :states              states/all-application-or-archiving-project-states
+   :user-authz-roles    roles/all-authz-roles}
   [{{:keys [file-id]} :data user :user application :application}]
-  (att/output-attachment file-id true (partial att/get-attachment-file-as! user application)))
+  (att/output-attachment file-id (not view) (partial att/get-attachment-file-as! user application)))
 
 (defraw "latest-attachment-version"
   {:parameters          [:attachment-id]
@@ -837,7 +838,8 @@
                       access/has-attachment-auth
                       att/attachment-not-readOnly
                       att/attachment-matches-application
-                      att/validate-not-included-in-published-bulletin]
+                      att/validate-not-included-in-published-bulletin
+                      att/validate-not-draft-target]
    :states           (lupapalvelu.states/all-application-states-but lupapalvelu.states/terminal-states)}
   [command]
   (update-application command

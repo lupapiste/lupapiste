@@ -1018,3 +1018,4 @@
 "contract.fetch.button" "en" "Get contracts from the background system"
 "pate-verdict.lupamaarays" "fi" "Lupamääräys"
 "pate-verdict.muu-lupamaarays" "fi" "Muu lupamääräys"
+"error.file-cannot-be-deleted" "fi" "Tiedoston poistaminen epäonnistui"
