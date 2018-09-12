@@ -63,11 +63,10 @@
                              (map (fn [[_ v]] (ss/trim (:property-id v)))))))
 
 (defn value-or-other [lang value other & loc-keys]
-  (if (util/=as-kw value :other)
-    other
-    (if (seq loc-keys)
-      (i18n/localize lang loc-keys value)
-      value)))
+  (cond (nil? value) ""
+        (util/=as-kw value :other) other
+        (seq loc-keys) (i18n/localize lang loc-keys value)
+        :else value))
 
 (defn designers [{lang :lang app :application}]
   (let [role-keys [:pdf :kuntaRoolikoodi]
