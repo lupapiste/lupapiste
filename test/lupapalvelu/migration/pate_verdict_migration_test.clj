@@ -102,7 +102,7 @@
                                               :lainvoimainen lainvoimainen}
                                 :poytakirjat [{:paatoksentekija handler
                                                :urlHash "5b7e5772e7d8a1a88e669356"
-                                               :status 2
+                                               :status code
                                                :paatos verdict-text
                                                :paatospvm paatospvm
                                                :pykala section

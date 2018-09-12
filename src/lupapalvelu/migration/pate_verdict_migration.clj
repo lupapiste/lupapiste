@@ -1,5 +1,6 @@
 (ns lupapalvelu.migration.pate-verdict-migration
-  (:require [clojure.set :refer [map-invert rename-keys]]
+  (:require [clojure.edn :as edn]
+            [clojure.set :refer [map-invert rename-keys]]
             [clojure.walk :refer [postwalk prewalk walk]]
             [monger.operators :refer :all]
             [taoensso.timbre :refer [infof warnf]]
@@ -286,6 +287,7 @@
   {:modified timestamp})
 
 (defn- add-tags [application verdict]
+  {:post [(if (-> % :published :published) (edn/read-string (-> % :published :tags)) true)]}
   (try
     (if (-> verdict :published :published)
       (assoc-in verdict [:published :tags]

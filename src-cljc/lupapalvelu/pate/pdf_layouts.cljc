@@ -664,7 +664,7 @@
                 entry--link-permits
                 entry--attachments
                 entry--tj-vastattavat-tyot
-                entry--verdict
+                legacy--verdict-code
                 (entry--verdict-giver :applications.authority)
                 entry--dates-tj
                 entry--appeal))
