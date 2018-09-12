@@ -225,7 +225,7 @@
         (->pate-legacy-verdict (assoc test-application :permitType "YA")
                            test-verdict
                            timestamp)
-    => (contains {:category "migration-catchall"}))
+    => (contains {:category "migration-verdict"}))
 
   (fact "only tasks related to given verdict affect the migration"
     (->pate-legacy-verdict (assoc test-application

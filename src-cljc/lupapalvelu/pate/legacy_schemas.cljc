@@ -347,7 +347,7 @@
    legsub-attachments
    (verdict-schemas/versub-upload)))
 
-(def migration-catchall-verdict
+(def migration-verdict
   (build-legacy-schema
    (legsub-verdict {:select {:loc-prefix :verdict.status
                              :items      (map (comp keyword str) (range 1 43))
@@ -372,5 +372,5 @@
     :contract           contract-legacy-verdict
     :tj                 tj-legacy-verdict
     :migration-contract migration-contract
-    :migration-catchall migration-catchall-verdict
+    :migration-verdict  migration-verdict
     (schema-util/pate-assert false "Unsupported legacy category:" category)))
