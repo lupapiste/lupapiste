@@ -156,7 +156,7 @@
         (:voimassaHetki paivamaarat) => (to-timestamp "2013-09-03")
         (:raukeamis paivamaarat) => (to-timestamp "2013-09-04")
         (:anto paivamaarat) => (to-timestamp "2013-09-05")
-        (:viimeinenValitus paivamaarat) => (to-timestamp "2018-09-06")
+        (:viimeinenValitus paivamaarat) => (to-timestamp "2100-09-06")
         (:julkipano paivamaarat) => (to-timestamp "2013-09-07"))
 
       (facts "p\u00f6yt\u00e4kirjat data is correct"
