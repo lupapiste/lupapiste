@@ -1427,6 +1427,36 @@
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
+                      ;; Vantaa rakennusvalvonta
+                      {:id "092-R"
+                       :name (names {:fi "Vantaa - Rakennusvalvonta"
+                                     :sv "Vanda - Byggnadstillsyn"})
+                       :scope [{:municipality "092"
+                                :permitType "R"
+                                :new-application-enabled true
+                                :inforequest-enabled true}]
+                       :links [(link {:fi "Vantaa" :sv "Vanda"}
+                                     "http://www.vantaa.fi")]
+                       :krysp {:R {:url local-krysp :version "2.2.0" :ftpUser "dev_vantaa"}}
+                       :handler-roles [{:id "abba1111111111111111a091"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
+                                                                      [:paapiirustus :pohjapiirustus]]}
+                       :assignments-enabled true
+                       :permanent-archive-enabled true
+                       :digitizer-tools-enabled true
+                       :permanent-archive-in-use-since 1451613600000
+                       :earliest-allowed-archiving-date 0
+                       :use-attachment-links-integration true
+                       :operations-tos-functions {:masto-tms "10 03 00 01"}
+                       :automatic-review-fetch-enabled true
+                       :automatic-ok-for-attachments-enabled true
+                       :multiple-operations-supported true}
+
                       ;;
                       ;; Ymparisto organisaatiot
                       ;;
