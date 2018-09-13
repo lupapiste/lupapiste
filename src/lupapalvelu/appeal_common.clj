@@ -28,12 +28,12 @@
 (defn- id-list [vid xs]
   (->> xs (filter #(= vid (:target-verdict %))) (map :id)))
 
-(defn delete-by-verdict
+(defn delete-by-verdicts
   "Deletes every appeal/appealVerdict and their attachments for the
-  given verdict."
-  [{application :application :as command} verdict-id]
-  (let [appeal-ids               (id-list verdict-id (:appeals application) )
-        appeal-verdict-ids       (id-list verdict-id (:appealVerdicts application))
+  given verdict ids."
+  [{application :application :as command} verdict-ids]
+  (let [appeal-ids               (mapcat #(id-list % (:appeals application)) verdict-ids)
+        appeal-verdict-ids       (mapcat #(id-list % (:appealVerdicts application)) verdict-ids)
         removable-attachment-ids (map :id (att-appeal/appeals-attachments application (concat appeal-ids appeal-verdict-ids)))]
     (att/delete-attachments! application removable-attachment-ids)
     (action/update-application
@@ -41,12 +41,8 @@
      {$pull {:appeals        {:id {$in appeal-ids}}
              :appealVerdicts {:id {$in appeal-verdict-ids}}}})))
 
-(defn delete-all
+(defn delete-by-verdict
   "Deletes every appeal/appealVerdict and their attachments for the
-  application."
-  [{{:keys [appeals appealVerdicts] :as application} :application :as command}]
-  (let [appeal-ids (concat (map :id appeals) (map :id appealVerdicts))
-        removable-attachment-ids (map :id (att-appeal/appeals-attachments application appeal-ids))]
-    (att/delete-attachments! application removable-attachment-ids)
-    (action/update-application command {$set {:appeals        []
-                                              :appealVerdicts []}})))
+  given verdict id."
+  [{application :application :as command} verdict-id]
+  (delete-by-verdicts command [verdict-id]))

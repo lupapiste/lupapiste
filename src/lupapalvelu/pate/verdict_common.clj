@@ -199,8 +199,10 @@
 
            published
            [(get section-strings id)
-            (util/pcond-> (verdict-string lang verdict :verdict-type)
-                          ss/not-blank? (str " -"))
+
+            (when (lupapiste-verdict? verdict)
+              (util/pcond-> (verdict-string lang verdict :verdict-type)
+                            ss/not-blank? (str " -")))
             (verdict-string lang verdict :verdict-code)
             rep-string]
 
