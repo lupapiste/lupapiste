@@ -1297,7 +1297,7 @@
 (defn finalize--pdf [{:keys [application verdict]}]
   (let [tags    (pdf/verdict-tags application verdict)]
     (-> verdict
-        (assoc-in [:published :tags] (pr-str tags))
+        (assoc-in [:published :tags] (ss/serialize tags))
         (verdict->updates :published.tags)
         (assoc :commit-fn (util/fn->> :command (send-command ::verdict))))))
 
@@ -1463,7 +1463,7 @@
          :as        details} (if-let [verdict (command->backing-system-verdict command)]
                                {:id        (:id verdict)
                                 :published (:timestamp verdict)
-                                :tags      (pr-str {:body (backing-system--tags application verdict)})}
+                                :tags      (ss/serialize {:body (backing-system--tags application verdict)})}
                                (let [{:keys [id published]} (command->verdict command)]
                                  (assoc published :id id)))]
     (assoc details
@@ -1548,7 +1548,7 @@
         tags (-> verdict :published :tags
                  edn/read-string
                  (update :body update-signature-section verdict signature)
-                 pr-str)]
+                 ss/serialize)]
     (verdict-update command
                     (util/deep-merge
                      {$push {(util/kw-path :pate-verdicts.$.signatures) signature}
