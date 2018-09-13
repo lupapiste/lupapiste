@@ -338,27 +338,6 @@
       (verdict-xml-with-foreman-designer-verdicts application xml)
       app-xml)))
 
-#_(defn- delete-deprecated-verdict-attachments!
-  "Verdict attachment is deprecated if its target or source verdict no
-  longer exists."
-  [app-id]
-  (let [{:keys [verdicts
-                pate-verdicts
-                attachments]
-         :as   application} (domain/get-application-no-access-checking app-id)
-        verdict-ids         (set (remove nil?
-                                         (concat (map :id verdicts)
-                                                 (map :id pate-verdicts))))
-        deprecated-ids      (->> attachments
-                                 (filter (fn [{:keys [target source]}]
-                                           (or (and (util/=as-kw (:type target) :verdict)
-                                                    (not (contains? verdict-ids (:id target))))
-                                               (and (util/=as-kw (:type source) :verdictsx)
-                                                    (not (contains? verdict-ids (:id source)))))))
-                                 (map :id))]
-    (when (seq deprecated-ids)
-      (attachment/delete-attachments! application deprecated-ids))))
-
 (defn- verdict-task?
   "True if given task is 'rooted' via source chain to the verdict.
    tasks: tasks of the application
@@ -415,14 +394,13 @@
                                                                                   user)))]
       (update-application command updates)
       (bulletins/process-delete-verdict (:id application) verdict-id)
-      (println "Attachment ids to be deleted:" (remove nil? (map :id attachments)))
       (attachment/delete-attachments! application (remove nil? (map :id attachments)))
       (appeal-common/delete-by-verdict command verdict-id)
       (child-to-attachment/delete-child-attachment application :verdicts verdict-id)
       (when step-back?
         (notifications/notify! :application-state-change command))))
 
-(defn- save-verdicts-from-xml
+(defn- replace-backing-system-verdicts-from-xml
   "Saves verdict's from valid app-xml to application. Returns (ok) with
   updated verdicts and tasks. Note: nukes the old backing system
   verdicts (including the corresponding tasks, attachemnts and
@@ -482,7 +460,7 @@
                                                              app-xml
                                                              organization))]
       (if-not validation-error
-        (save-verdicts-from-xml command app-xml)
+        (replace-backing-system-verdicts-from-xml command app-xml)
         (let [extras-updates     (permit/read-verdict-extras-xml application app-xml)
               backend-id-updates (->> (seq (krysp-reader/->backend-ids app-xml))
                                       (backend-id-mongo-updates application))]

@@ -241,7 +241,7 @@
         (toggle-pate "753-R" false)
         (command sonja :new-legacy-verdict-draft :id app-id)
         => ok?)
-      (facts "Deleting backend verdicts does not rewing the application state"
+      (facts "Deleting backend verdicts does not rewind the application state"
         (fact "Delete backend verdicts"
           (let [{:keys [verdicts]} (query-application sonja app-id)]
             (command sonja :delete-verdict
