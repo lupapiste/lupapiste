@@ -997,7 +997,7 @@
 "phrase.remove" "fi" "Poista fraasi"
 "phrase.remove" "sv" "Ta bort frasen"
 "phrase.category.remove" "en" "Remove phrase category"
-"phrase.category.remove" "fi" "Poista fraasi kategoria"
+"phrase.category.remove" "fi" "Poista fraasikategoria"
 "phrase.category.remove" "sv" "Ta bort frasen"
 "phrase.tag" "en" "Id"
 "phrase.tag" "fi" "Tunniste"

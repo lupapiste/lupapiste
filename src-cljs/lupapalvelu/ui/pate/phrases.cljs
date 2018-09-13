@@ -70,7 +70,7 @@
   [{local*            ::local
     tab*              ::tab
     phrase-category?* ::phrase-category?
-    new-category*       ::new-category} _ phrase*]
+    new-category*     ::new-category} _ phrase*]
   [:div.pate-grid-8
    [:div.row
     [:div.col-2
