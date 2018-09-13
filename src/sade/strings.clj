@@ -237,7 +237,5 @@
 (defn serialize
   "Serialze with `pr-str` but enforce evaluation first. The resulting
   string can be parsed with `clojure.edn/read-string`."
-  [& args]
-  (->> args
-       (walk/postwalk identity)
-       (apply pr-str)))
+  [arg]
+  (pr-str (walk/postwalk identity arg)))
