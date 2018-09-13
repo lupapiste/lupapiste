@@ -291,8 +291,8 @@
   (try
     (if (-> verdict :published :published)
       (assoc-in verdict [:published :tags]
-                (pr-str (pdf/verdict-tags application
-                                          (metadata/unwrap-all verdict))))
+                (ss/serialize (pdf/verdict-tags application
+                                                (metadata/unwrap-all verdict))))
       verdict)
     (catch Throwable e
       (throw (ex-info (str "Failed to build tags for application "
