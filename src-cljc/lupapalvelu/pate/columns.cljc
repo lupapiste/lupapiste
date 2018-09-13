@@ -97,7 +97,7 @@
         blank-as-nil #(when-not (ss/blank? %) %)
         value (or text (util/pcond-> (get-in source-value path source-value)
                                      string? blank-as-nil))]
-    (when value
+    (when (and value (not (coll? value)))
       [:div.cell (cond-> {}
                    (seq class) (assoc :class class))
        (cond->> value
