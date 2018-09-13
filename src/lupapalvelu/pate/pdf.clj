@@ -43,7 +43,7 @@
                :address (let [{:keys [katu postinumero postitoimipaikannimi
                                       maa]} osoite]
                           (->> [katu (str postinumero " " postitoimipaikannimi)
-                                (when (and maa (util/not=as-kw maa :FIN))
+                                (when (and (not-empty maa) (util/not=as-kw maa :FIN))
                                   (i18n/localize lang :country maa))]
                                (cols/join-non-blanks ", ")))}))
        (remove (util/fn-> :name ss/blank?))))
