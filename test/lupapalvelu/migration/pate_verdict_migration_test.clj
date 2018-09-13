@@ -279,7 +279,14 @@
     => {$set {:pate-verdicts [migrated-test-verdict-no-tasks]
               :pre-pate-verdicts (:verdicts app-one-verdict-no-tasks)}
         $pull {:tasks {:source.id {$in [(:id migrated-test-verdict-no-tasks)]}}
-               :verdicts {:id {$in [(:id migrated-test-verdict-no-tasks)]}}}})
+               :verdicts {:id {$in [(:id migrated-test-verdict-no-tasks)]}}}}
+    (migration-updates (update app-one-verdict-no-tasks
+                               :verdicts
+                               (fn [verdicts]
+                                 (map #(assoc % :draft false)
+                                      verdicts)))
+                       timestamp)
+    =not=> (contains {$pull (contains {:tasks anything})}))
 
   (fact "one draft verdict with tasks"
     (migration-updates app-one-verdict-with-tasks timestamp)

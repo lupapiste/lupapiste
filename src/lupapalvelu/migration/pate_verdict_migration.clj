@@ -286,7 +286,10 @@
 (defn- defaults [timestamp]
   {:modified timestamp})
 
-(defn- add-tags [application verdict]
+(defn- add-tags
+  "For published verdicts, adds :tags, wich is a serialized hiccup
+  string representing the verdict."
+  [application verdict]
   {:post [(if (-> % :published :published) (edn/read-string (-> % :published :tags)) true)]}
   (try
     (if (-> verdict :published :published)
@@ -302,7 +305,11 @@
                       {:verdict verdict}
                       e)))))
 
-(defn- check-verdict [verdict]
+(defn- check-verdict
+  "Checks whether the verdict has valid dictionary data and conforms
+  to legacy verdict schema. Returns nil on success, otherwise
+  validation errors."
+  [verdict]
   (if-let [errors (schemas/validate-dictionary-data (legacy-schemas/legacy-verdict-schema (:category verdict))
                                                     (dissoc (:data (metadata/unwrap-all verdict))
                                                             :attachments
@@ -310,6 +317,7 @@
                                                             ))]
     {:errors errors}
     (sc/check PateLegacyVerdict verdict)))
+
 
 (defn- update-template [verdict app]
   (assoc verdict :template (verdict-template app verdict nil)))
@@ -328,25 +336,39 @@
       (change-category app verdict new-category))
     verdict))
 
-(defn validate-verdict [verdict]
+(defn validate-verdict
+  "Throws if the verdict does not validate according to check-verdict,
+  otherwise returns the given verdict"
+  [verdict]
   (if-let [errors (check-verdict verdict)]
     (throw (ex-info (str "Invalid dictionary data for verdict " (:id verdict))
                     errors))
     verdict))
 
-(defn ->pate-legacy-verdict [application verdict timestamp]
+(defn ->pate-legacy-verdict
+  "Builds a Pate legacy verdict from the old one"
+  [application verdict timestamp]
+       ;; Build a new verdict by fetching the necessary data from the old one
   (->> (prewalk (fetch-with-accessor application
                                      verdict
                                      (accessor-functions (defaults timestamp)))
                 verdict-migration-skeleton)
+       ;; Add metadata to fields marked for wrapping in the verdict skeleton
        (postwalk (post-process timestamp))
+       ;; Cleanup
        util/strip-nils
        util/strip-empty-collections
+       ;; Add tags using the almost finished Pate verdict
        (add-tags application)
+       ;; If the verdict doesn't validate for the intended category, use more
+       ;; permissive migration-verdict or migration-contract
        (ensure-valid-category application)
+       ;; Finally, validate the verdict again
        validate-verdict))
 
-(defn- draft-verdict-ids [application]
+(defn- draft-verdict-ids
+  "Return the ids of the draft verdicts in the application"
+  [application]
   (->> application
        :verdicts
        (filter :draft)
@@ -362,17 +384,23 @@
   ;; field, not the value.
   {:verdicts.draft {$exists true}})
 
-(defn lupapiste-verdict? [verdict]
+(defn lupapiste-verdict?
+  "Is the verdict created in Lupapiste, as opposed to having been
+  fetched from a backing system"
+  [verdict]
   (contains? verdict :draft))
 
-(defn migration-updates [application timestamp]
+(defn migration-updates
+  "Return a map of mongo updates for a given application"
+  [application timestamp]
   (let [lupapiste-verdicts (filter lupapiste-verdict?
-                                   (:verdicts application))]
+                                   (:verdicts application))
+        draft-ids (draft-verdict-ids application)]
     (merge {$set {:pate-verdicts (mapv #(->pate-legacy-verdict application
                                                                %
                                                                timestamp)
                                        lupapiste-verdicts)
                   :pre-pate-verdicts (:verdicts application)}
-            ;; TODO mitä jos $in ja tyhjä taulukko?
-            $pull {:tasks {:source.id {$in (draft-verdict-ids application)}}
-                   :verdicts {:id {$in (mapv :id lupapiste-verdicts)}}}})))
+            $pull (merge (when (not-empty draft-ids)
+                           {:tasks {:source.id {$in draft-ids}}})
+                         {:verdicts {:id {$in (mapv :id lupapiste-verdicts)}}})})))
