@@ -339,7 +339,6 @@
 
 (def contract-template-schema
   (build-verdict-template-schema temsub-contract
-                                 temsub-reviews
                                  temsub-contract-conditions
                                  temsub-contract-attachments))
 

@@ -150,7 +150,8 @@
                                                  (sc/optional-key :anto)          ssc/Timestamp
                                                  (sc/optional-key :lainvoimainen) ssc/Timestamp
                                                  :verdict-giver                   sc/Str}
-          (sc/optional-key :signatures) [PateSignature]}))
+          (sc/optional-key :signatures)         [PateSignature]
+          (sc/optional-key :signature-requests) [PateSignature]}))
 
 (defschema PateModernVerdict
   (merge PateBaseVerdict
@@ -488,3 +489,33 @@
                     {})))
   ([application]
    (resolve-verdict-attachment-type application :paatos)))
+
+(defn map->paths
+  "Flattens map into paths.
+  {:one 1 :two 2 :three {:four [1 2 3 4]}}
+  -> ([:two 2] [:one 1] (:three :four [1 2 3 4]))"
+  [m]
+  (reduce-kv (fn [acc k v]
+               (if (map? v)
+                 (concat acc (map (partial cons k) (map->paths v)))
+                 (cons [k v] acc)))
+             []
+             m))
+
+(defn validate-dictionary-data
+  "Validates given data against the dictionary in the schema. Returs
+  validation errors as a list of lists where each item is in the
+  format [error-code path] where the last path item is the
+  value: [:error.invalid-value [:path :to :toggle 999]].
+
+  Note: the data cannot contain metadata."
+  [schema data & [references]]
+  (->> (map->paths data)
+       (map (fn [path]
+              (when-let [err (validate-path-value schema
+                                                  (butlast path)
+                                                  (last path)
+                                                  references)]
+                [err path])))
+       (remove nil?)
+       seq))

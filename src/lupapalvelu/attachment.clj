@@ -1228,3 +1228,10 @@
   (when (and (not ignore)
              (included-in-published-bulletin? application bulletins attachment-id))
     (fail :error.attachment-included-in-published-bulletin)))
+
+(defn validate-not-draft-target [{:keys [data application]}]
+  (when-let [{:keys [attachmentId]} data]
+    (when (some->> application :attachments
+                   (util/find-by-id attachmentId)
+                   :metadata :draftTarget)
+      (fail :error.attachment-target-is-draft))))

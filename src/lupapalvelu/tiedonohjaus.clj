@@ -11,7 +11,8 @@
             [sade.util :as util]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [clojure.string :as s])
+            [clojure.string :as s]
+            [lupapalvelu.user :as usr])
   (:import (lupapalvelu.tiedonohjaus CaseFile RestrictionType PublicityClassType PersonalDataType
                                      ProtectionLevelType SecurityClassType AccessRightType ActionType
                                      RecordType AgentType ActionEvent Custom ClassificationScheme)
@@ -356,6 +357,32 @@
             {$set {:modified               now
                    :attachments.$.metadata new-metadata}}
             :return-count? true))))))
+
+(defn tos-history-entry [tos-function timestamp user & [correction-reason]]
+  {:pre [(map? tos-function)]}
+  {:tosFunction tos-function
+   :ts          timestamp
+   :user        (usr/summary user)
+   :correction  correction-reason})
+
+(defn update-tos-metadata [function-code {:keys [application created user] :as command} correction-reason]
+  (if-let [tos-function-map (tos-function-with-name function-code (:organization application))]
+    (let [orgId               (:organization application)
+          updated-attachments (pmap #(document-with-updated-metadata % orgId function-code application) (:attachments application))
+          {updated-metadata :metadata} (document-with-updated-metadata application orgId function-code application "hakemus")
+          process-metadata    (calculate-process-metadata (metadata-for-process orgId function-code) updated-metadata updated-attachments)]
+      (action/update-application command
+                                 {$set  {:modified        created
+                                         :tosFunction     function-code
+                                         :metadata        updated-metadata
+                                         :processMetadata process-metadata
+                                         :attachments     updated-attachments}
+                                  $push {:history (tos-history-entry tos-function-map created user correction-reason)}})
+      true)
+    false))
+
+;;;; Case file XML creation
+;;;; ===================================================================================================================
 
 (defn- classification-xml [organization tos-function]
   (if-let [xml-str (get-from-toj-api organization false tos-function "/classification")]

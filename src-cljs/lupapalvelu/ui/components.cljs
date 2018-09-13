@@ -470,7 +470,7 @@
      [test-id] Test id for the button.
 
    Any other options are passed to the :button
-   tag (e.g, :class, :on-click). The only exception is :disabled,
+   tag (e.g, :on-click). The only exception is :disabled,
    since it is overridden with :disabled?"
   [{:keys [icon wait? class test-id] :as options}]
   (let [waiting? (rum/react (common/atomize wait?))
