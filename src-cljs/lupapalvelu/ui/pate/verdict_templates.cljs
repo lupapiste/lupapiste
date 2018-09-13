@@ -287,5 +287,6 @@
     (service/fetch-categories (fn [categories]
                                 (set-category (first categories))))
     (service/fetch-organization-phrases)
+    (service/fetch-custom-organization-phrases)
     (reset-template nil)
     (mount-component)))

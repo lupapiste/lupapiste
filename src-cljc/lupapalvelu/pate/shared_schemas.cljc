@@ -4,9 +4,17 @@
             [schema.core :refer [defschema] :as sc]))
 
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit
-                         :muutoksenhaku :vaativuus :rakennusoikeus
-                         :kaava :toimenpide-julkipanoon :yleinen
-                         :sopimus})
+                                 :muutoksenhaku :vaativuus :rakennusoikeus
+                                 :kaava :toimenpide-julkipanoon :yleinen
+                                 :sopimus})
+
+(def phrase-categories-ya #{:paatosteksti :lupaehdot :muutoksenhaku
+                            :toimenpide-julkipanoon :yleinen :sopimus})
+
+(defn phrase-categories-by-template-category [category]
+  (case (keyword category)
+    :ya phrase-categories-ya
+    phrase-categories))
 
 (def path-type (sc/cond-pre
                 ;; Joined kw-path (e.g. :one.two.three)

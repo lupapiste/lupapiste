@@ -3,7 +3,9 @@
             [clojure.edn :as edn]
             [clojure.set :as set]
             [lupapalvelu.action :as action]
+            [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-meta-fields :as meta]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as att]
@@ -656,9 +658,12 @@
         target                             {:type "verdict"
                                             :id verdict-id} ; key order seems to be significant!
         {:keys [sent state pate-verdicts]} application
-        ;; Deleting the only given verdict? Return sent or submitted state.
+        ;; Deleting the only given verdict? Return sent or submitted
+        ;; state.  When Pate is in production every backing-system
+        ;; verdict (in verdicts) is published.
         step-back?                         (and published
                                                 (= 1 (count (filter :published pate-verdicts)))
+                                                (empty? (:verdicts application))
                                                 (states/verdict-given-states (keyword state)))
         {:keys [task-ids
                 task-attachment-ids]}      (delete-verdict-tasks-helper application verdict-id)
@@ -676,13 +681,12 @@
                                                      application
                                                      user)))]
       (action/update-application command updates)
-      ;;(bulletins/process-delete-verdict id verdict-id)
+      (bulletins/process-delete-verdict (:id application) verdict-id)
       (att/delete-attachments! application
                                (->> task-attachment-ids
                                     (concat (verdict-attachment-ids application verdict-id))
                                     (remove nil?)))
-
-      ;;(appeal-common/delete-by-verdict command verdict-id)
+      (appeal-common/delete-by-verdict command verdict-id)
       (when step-back?
         (notifications/notify! :application-state-change command))))
 
@@ -1295,7 +1299,7 @@
 (defn finalize--pdf [{:keys [application verdict]}]
   (let [tags    (pdf/verdict-tags application verdict)]
     (-> verdict
-        (assoc-in [:published :tags] (pr-str tags))
+        (assoc-in [:published :tags] (ss/serialize tags))
         (verdict->updates :published.tags)
         (assoc :commit-fn (util/fn->> :command (send-command ::verdict))))))
 
@@ -1461,7 +1465,7 @@
          :as        details} (if-let [verdict (command->backing-system-verdict command)]
                                {:id        (:id verdict)
                                 :published (:timestamp verdict)
-                                :tags      (pr-str {:body (backing-system--tags application verdict)})}
+                                :tags      (ss/serialize {:body (backing-system--tags application verdict)})}
                                (let [{:keys [id published]} (command->verdict command)]
                                  (assoc published :id id)))]
     (assoc details
@@ -1546,7 +1550,7 @@
         tags (-> verdict :published :tags
                  edn/read-string
                  (update :body update-signature-section verdict signature)
-                 pr-str)]
+                 ss/serialize)]
     (verdict-update command
                     (util/deep-merge
                      {$push {(util/kw-path :pate-verdicts.$.signatures) signature}

@@ -1,14 +1,16 @@
 (ns lupapalvelu.pate-appeal-itest
   "Appeal itest transformed into Pate world."
-  (:require [midje.sweet :refer :all]
-            [lupapalvelu.factlet :refer :all]
+  (:require [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [sade.core :refer [now]]
             [lupapalvelu.mongo :as mongo]
-            [sade.util :as util]
-            [sade.env :as env]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
-            [lupapalvelu.pdf.pdfa-conversion :as pdfa-conversion]))
+            [lupapalvelu.pdf.pdfa-conversion :as pdfa-conversion]
+            [midje.sweet :refer :all]
+            [sade.core :refer [now]]
+            [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
@@ -300,7 +302,7 @@
             (:editable (last appeals-after)) => true))))))
 
 (defn upsert-and-poll [& kvs]
-  (fact {:midje/description (apply str "Upsert-appeal: " kvs)}
+  (fact {:midje/description (apply str "Upsert-appeal: " (ss/join " " kvs))}
     (let [{{:keys [id version]} :job} (apply (partial command
                                                       raktark-jarvenpaa
                                                       :upsert-pate-appeal)
@@ -470,16 +472,17 @@
                  :id app-id) => http404?))))))
 
 (facts "Files vs. attachments"
-  (let [{app-id :id}                (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
-        {:keys [attachments]}       (query-application pena app-id)
-        created                     (now)
-        {vid :verdict-id :as resp0} (give-verdict raktark-jarvenpaa app-id :verdictId "321-2016")
-        expected-att-cnt            1
-        resp1                       (upload-file raktark-jarvenpaa "dev-resources/test-attachment.txt")
-        file-id-1                   (get-in resp1 [:files 0 :fileId])
-        resp2                       (upload-file raktark-jarvenpaa "dev-resources/invalid-pdfa.pdf")
-        file-id-2                   (get-in resp2 [:files 0 :fileId])
-        pdfa-conversion?            (and (string? (env/value :pdf2pdf :license-key)) (pdfa-conversion/pdf2pdf-executable))]
+  (let [{app-id :id}          (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
+        {:keys [attachments]} (query-application pena app-id)
+        created               (now)
+        vid                   (give-legacy-r-verdict raktark-jarvenpaa app-id)
+        expected-att-cnt      1
+        resp1                 (upload-file raktark-jarvenpaa "dev-resources/test-attachment.txt")
+        file-id-1             (get-in resp1 [:files 0 :fileId])
+        resp2                 (upload-file raktark-jarvenpaa "dev-resources/invalid-pdfa.pdf")
+        file-id-2             (get-in resp2 [:files 0 :fileId])
+        resp3                 (upload-file raktark-jarvenpaa "dev-resources/cake.png")
+        file-id-3             (get-in resp3 [:files 0 :fileId])]
     (fact "New appeal with file"
       (upsert-and-poll :id app-id :verdict-id vid :type "appeal" :author "Author" :datestamp 12345
                        :text "Hello world!" :filedatas [{:fileId   file-id-1
@@ -539,4 +542,31 @@
                                   :appellant      "Somebody Else"
                                   :datestamp      56789
                                   :target-verdict vid
-                                  :text           "Nimen hao!"})))))))
+                                  :text           "Nimen hao!"})
+            (fact "New appeal verdict with file"
+              (upsert-and-poll :id app-id :verdict-id vid :type "appealVerdict" :author "Verdict Author" :datestamp 12345
+                               :text "Have a cake!" :filedatas [{:fileId   file-id-3
+                                                                 :type     {:type-group "muut"
+                                                                            :type-id    "valokuva"}
+                                                                 :contents "VA"}]))))))
+    (facts "Deleting legacy verdict wipes out appeals as well"
+      (fact "Status before deletion"
+        (let [{:keys [pate-verdicts appeals appealVerdicts
+                      attachments state]} (query-application raktark-jarvenpaa app-id)]
+          (count pate-verdicts) => 1
+          (count appeals) => 1
+          (count appealVerdicts) => 1
+          (count attachments) => 3
+          state => "verdictGiven"))
+      (fact "Delete verdict"
+        (command raktark-jarvenpaa :delete-legacy-verdict
+                 :id app-id
+                 :verdict-id vid) => ok?)
+      (fact "Status after deletion"
+        (let [{:keys [pate-verdicts appeals appealVerdicts
+                      attachments state]} (query-application raktark-jarvenpaa app-id)]
+          (count pate-verdicts) => 0
+          (count appeals) => 0
+          (count appealVerdicts) => 0
+          (count attachments) => 0
+          state => "submitted")))))

@@ -1,5 +1,6 @@
 (ns sade.strings-test
   (:require [sade.strings :refer :all]
+            [clojure.edn :as edn]
             [midje.sweet :refer :all])
   (:refer-clojure :exclude [replace contains? empty?]))
 
@@ -204,3 +205,15 @@
   (strip-trailing-slashes "/foo/") => "/foo"
   (strip-trailing-slashes "/foo///") => "/foo"
   (strip-trailing-slashes "/foo///fofo///") => "/foo///fofo")
+
+(fact "serialize"
+  (pr-str (map #(do (println "hello" %)
+                    (inc %))
+               (range 3))) => "(hello 0\nhello 1\nhello 2\n1 2 3)"
+  (serialize (map #(do (println "hello" %)
+                       (inc %))
+                  (range 3))) => "(1 2 3)"
+  (edn/read-string (serialize (map #(do (println "hello" %)
+                                        (inc %))
+                                   (range 3))))
+  => '(1 2 3))

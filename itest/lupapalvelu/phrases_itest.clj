@@ -95,4 +95,33 @@
 
 (fact "Bad org-id"
   (query sipoo :organization-phrases :org-id "bad")
-  => (err :error.invalid-organization))
+  => (err :error.invalid-organization)
+
+(facts "Phrase categories"
+
+  (fact "New custom phrase categories"
+    (command sipoo :save-phrase-category
+             :category {:fi "category1" :en "category1" :sv "category1"}
+             :org-id org-id) => ok?
+    (command sipoo :save-phrase-category
+             :category {:fi "category2" :en "category2" :sv "category2"}
+             :org-id org-id) => ok?)
+
+  (fact "Newly added phrase categories can be fetched"
+    (let [categories (:custom-categories (query sipoo :custom-organization-phrase-categories
+                                                :org-id org-id))
+          first-id (->> categories first key name)]
+      (vals categories) => [{:en "category1" :fi "category1" :sv "category1"}
+                            {:en "category2" :fi "category2" :sv "category2"}]
+
+      (fact "Custom category can be deleted"
+        (command sipoo :delete-phrase-category
+                 :org-id org-id
+                 :category first-id) => ok?)
+
+      (fact "After delete one category there is only one left"
+        (->> (query sipoo :custom-organization-phrase-categories
+                      :org-id org-id)
+             :custom-categories
+             keys
+             count) => 1)))))
