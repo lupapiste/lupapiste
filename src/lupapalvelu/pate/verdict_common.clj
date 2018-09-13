@@ -272,7 +272,9 @@
         verdicts        (concat (->> (:pate-verdicts application)
                                      (filter #(has-category? % category))
                                      (map metadata/unwrap-all))
-                                (:verdicts application))
+                                ;; TODO: remove draft filter after migration.
+                                (some->> application :verdicts
+                                         (remove :draft)))
         summaries       (summaries-by-id verdicts lang)
         replaced-verdict-ids (->> (vals summaries)
                                   (map :replaces)
