@@ -105,7 +105,7 @@
   (let [terms (get-localizations)]
     (or (terms (keyword lang)) (terms default-lang))))
 
-(defn- terms->term [terms] (s/join \. (map #(if (nil? %) "" (name %)) (flatten terms))))
+(defn- terms->term [terms] (s/join \. (map #(if (nil? %) "" (ss/->plain-string %)) (flatten terms))))
 
 (defn unknown-term [& terms]
   (let [term (terms->term terms)]
