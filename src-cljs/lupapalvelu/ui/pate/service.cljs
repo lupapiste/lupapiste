@@ -140,11 +140,22 @@
                 #(reset! state/phrases (get % :phrases []))
                 :id app-id))
 
+(defn fetch-custom-application-phrases [app-id]
+  (common/query "custom-application-phrase-categories"
+                #(reset! state/custom-phrases-categories (get % :custom-categories []))
+                :id app-id))
+
+(defn fetch-custom-organization-phrases []
+  (common/query "custom-organization-phrase-categories"
+                #(reset! state/custom-phrases-categories (get % :custom-categories []))
+                :org-id @state/org-id))
+
 (defn upsert-phrase [phrase-map callback]
   (apply common/command
          "upsert-phrase"
          (fn []
-           (fetch-organization-phrases)
+           (concat (fetch-organization-phrases)
+                   (fetch-custom-organization-phrases))
            (callback))
          (flatten (into [:org-id @state/org-id] phrase-map))))
 
@@ -154,6 +165,20 @@
                               (fetch-organization-phrases)
                               (callback))}
                   :phrase-id phrase-id
+                  :org-id @state/org-id))
+
+(defn save-phrase-category [category]
+  (common/command {:command "save-phrase-category"
+                   :success (fn []
+                             (fetch-custom-organization-phrases))}
+                  :category category
+                  :org-id @state/org-id))
+
+(defn delete-phrase-category [category]
+  (common/command {:command "delete-phrase-category"
+                   :success (fn [_]
+                             (fetch-custom-organization-phrases))}
+                  :category category
                   :org-id @state/org-id))
 
 ;; Application verdict templates
