@@ -46,8 +46,8 @@
   (when-not (ss/blank? (str v))
     (case unit
       :ha      (str v " " (localize lang :unit.hehtaaria))
-      :m2      [:span v " m" [:sup 2]]
-      :m3      [:span v " m" [:sup 3]]
+      :m2      [:span {} v " m" [:sup 2]]
+      :m3      [:span {} v " m" [:sup 3]]
       :kpl     (str v " " (localize lang :unit.kpl))
       :section (str "\u00a7" v)
       :eur     (str v "\u20ac"))))
