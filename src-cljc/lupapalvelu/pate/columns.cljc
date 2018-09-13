@@ -109,9 +109,9 @@
     (and value post-fn) post-fn))
 
 (defn resolve-loc-rule [loc-rule data]
-  (let [rule-kw (into [] (util/split-kw-path (:rule loc-rule)))
+  (let [rule-kw    (into [] (util/split-kw-path (:rule loc-rule)))
         rule-value (get-in data rule-kw)
-        rule-key (keyword (str (name (:key loc-rule)) "." (name rule-value)))]
+        rule-key   (util/kw-path (:key loc-rule) rule-value)]
     (if (layouts/has-term? (:lang data) rule-key)
       rule-key
       (:key loc-rule))))
