@@ -93,8 +93,7 @@
                           (not verdict)
                           :error.verdict-not-found
 
-                          (not (vc/has-category? verdict
-                                                 (schema-util/application->category application)))
+                          (not (vc/allowed-category-for-application? verdict application))
                           :error.invalid-category
 
                           (and draft? (not= state :draft))

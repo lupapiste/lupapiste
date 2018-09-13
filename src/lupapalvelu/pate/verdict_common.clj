@@ -264,12 +264,17 @@
    (sc/optional-key :signature-requests)   [{:name sc/Str
                                              :date ssc/Timestamp}]})
 
+(defn allowed-category-for-application? [verdict application]
+  (or (has-category? verdict (schema-util/application->category application))
+      (has-category? verdict :migration-verdict)
+      (has-category? verdict :migration-contract)))
+
 (sc/defn ^:always-validate verdict-list :- [VerdictSummary]
   [{:keys [lang application]}]
   (let [category (schema-util/application->category application)
         ;; There could be both contracts and verdicts.
         verdicts        (concat (->> (:pate-verdicts application)
-                                     (filter #(has-category? % category))
+                                     (filter #(allowed-category-for-application? % application))
                                      (map metadata/unwrap-all))
                                 (:verdicts application))
         summaries       (summaries-by-id verdicts lang)
