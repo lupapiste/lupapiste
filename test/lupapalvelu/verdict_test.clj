@@ -286,3 +286,32 @@
                              [:a :b :c]
                              [{:a 1 :b 3}
                               {:a 1}]) => nil))
+
+(fact "Precheck: no-sent-backing-system-verdict-tasks"
+  (let [error (partial expected-failure? :error.verdicts-have-sent-tasks)]
+    (no-sent-backing-system-verdict-tasks {:application {:verdicts [{:id "vid1"}]
+                                                         :tasks []}})
+    => nil
+    (no-sent-backing-system-verdict-tasks {:application {:verdicts [{:id "vid1"}]
+                                                         :tasks [{:source {:type "hello"
+                                                                           :id "vid1"}
+                                                                  :state "sent"}]}})
+    => nil
+    (no-sent-backing-system-verdict-tasks {:application {:verdicts [{:id "vid1"}]
+                                                         :tasks [{:source {:type "verdict"
+                                                                           :id "vid1"}
+                                                                  :state "foo"}]}})
+    => nil
+    (no-sent-backing-system-verdict-tasks {:application {:verdicts [{:id "vid1"}]
+                                                         :tasks [{:source {:type "verdict"
+                                                                           :id "vid1"}
+                                                                  :state "sent"}]}})
+    => error
+    (no-sent-backing-system-verdict-tasks {:application {:verdicts [{:id "vid1"}]
+                                                         :tasks [{:source {:type "verdict"
+                                                                           :id "vid1"}
+                                                                  :state "foo"}
+                                                                 {:source {:type "verdict"
+                                                                           :id "vid1"}
+                                                                  :state "ok"}]}})
+    => error))

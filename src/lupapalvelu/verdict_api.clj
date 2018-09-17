@@ -42,13 +42,15 @@
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.
   If the command is run more than once, existing verdicts are replaced
-  by the new ones. After successful fetching and update, deprecated
-  attachments are deleted."
+  by the new ones. Note: everything related to old backing system
+  verdicts (tasks, attaachments, appeals, appealVerdicts) are
+  deleted."
    :parameters  [:id]
    :states      (conj states/give-verdict-states :constructionStarted) ; states reviewed 2015-10-12
    :user-roles  #{:authority}
    :notified    true
-   :pre-checks  [application-has-verdict-given-state]
+   :pre-checks  [application-has-verdict-given-state
+                 verdict/no-sent-backing-system-verdict-tasks]
    :on-success  (notify :application-state-change)}
   [command]
   (let [result (verdict/do-check-for-verdict command)]
