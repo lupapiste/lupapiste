@@ -144,6 +144,9 @@
                                                      "condition-id2" {:name (wrap "Muu 2")}}
                                    :attachments     [{:type-group "paatoksenteko"
                                                       :type-id     "paatos"
+                                                      :amount 1}
+                                                     {:type-group "muut"
+                                                      :type-id    "paatosote"
                                                       :amount 1}]}
                             :template {:inclusions [:foreman-label :conditions-title :foremen-title :kuntalupatunnus :verdict-section :verdict-text :anto :attachments :foremen.role :foremen.remove :verdict-code :conditions.name :conditions.remove :reviews-title :type-label :reviews.name :reviews.type :reviews.remove :add-review :name-label :condition-label :lainvoimainen :handler :add-foreman :upload :add-condition]}
                             :legacy? true})
@@ -155,6 +158,7 @@
       (update :data dissoc :reviews :foremen :conditions)))
 
 (def attachment-id (create-id))
+(def attachment-id2 (create-id))
 (def test-application (-> {:id "app-id"
                            :verdicts [test-verdict]
                            :permitType "R"
@@ -171,7 +175,14 @@
                                                    :type "verdict"}
                                           :id attachment-id
                                           :type {:type-id    "paatos"
-                                                 :type-group "paatoksenteko"}}]
+                                                 :type-group "paatoksenteko"}}
+                                         {:latestVersion {:fileId "attachment-id"}
+                                          :source {:id verdict-id
+
+                                                   :type "verdicts"}
+                                          :id attachment-id2
+                                          :type {:type-id    "paatosote"
+                                                 :type-group "muut"}}]
                            :documents [hakija-doc-for-tags]}))
 
 (def app-one-verdict-no-tasks (dissoc test-application :tasks))

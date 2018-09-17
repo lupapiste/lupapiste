@@ -171,8 +171,10 @@
    :lainvoimainen (timestamp ((get-in-paivamaarat :lainvoimainen) nil verdict nil))})
 
 (defn- targets-verdict? [attachment verdict]
-  (= (:id verdict)
-     (-> attachment :target :id)))
+  (or (= (:id verdict)
+         (-> attachment :source :id))
+      (= (:id verdict)
+         (-> attachment :target :id))))
 
 ;; See lupapalvelu.pate.verdict/verdict-attachment-items
 (defn- attachment-summaries [application verdict _]
