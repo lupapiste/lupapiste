@@ -931,8 +931,8 @@
   [app-id]
   (let [application (mongo/by-id :applications app-id)
         projection [:id :firstName :lastName :username]
-        pena (-> (usr/get-user-by-email "pena@example.com") (select-keys projection) (assoc :role "applicant"))
-        sonja (-> (usr/get-user-by-email "sonja.sibbo@sipoo.fi") (select-keys projection) (assoc :role "writer"))
+        pena (-> (usr/get-user-by-email "pena@example.com") (select-keys projection) (assoc :role "writer"))
+        sonja (-> (usr/get-user-by-email "sonja.sibbo@sipoo.fi") (select-keys projection) (assoc :role "authority"))
         updated-auth (-> (filter #(false? (contains? #{"pena" "sonja"} (:username %))) (:auth application))
                          (conj pena sonja))]
     (mongo/update-by-id :applications app-id (assoc application :auth updated-auth))))
