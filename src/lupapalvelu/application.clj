@@ -922,3 +922,17 @@
 
 (defn set-integration-key [app-id system-name key-data]
   (mongo/update-by-id :applications app-id {$set {(str "integrationKeys." (name system-name)) key-data}}))
+
+
+;; Utils for the sheriff
+
+(defn bananize
+  "Set pena as applicant, sonja as authority for an application"
+  [app-id]
+  (let [application (mongo/by-id :applications app-id)
+        projection [:id :firstName :lastName :username]
+        pena (-> (usr/get-user-by-email "pena@example.com") (select-keys projection) (assoc :role "applicant"))
+        sonja (-> (usr/get-user-by-email "sonja.sibbo@sipoo.fi") (select-keys projection) (assoc :role "writer"))
+        updated-auth (-> (filter #(false? (contains? #{"pena" "sonja"} (:username %))) (:auth application))
+                         (conj pena sonja))]
+    (mongo/update-by-id :applications app-id (assoc application :auth updated-auth))))
