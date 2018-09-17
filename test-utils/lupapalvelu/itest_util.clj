@@ -503,7 +503,7 @@
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
-(defn give-verdict-with-fn [f apikey application-id
+#_(defn give-verdict-with-fn [f apikey application-id
                             & {:keys [verdictId status name given official agreement]
                                :or   {verdictId "aaa", status 1, name "Name", given 12300000000, official 12400000000 agreement false}}]
   (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id :lang "fi")
@@ -516,7 +516,7 @@
          (f apikey :publish-verdict :id application-id :verdictId verdict-id :lang "fi")
          :verdict-id verdict-id)))))
 
-(defn give-verdict [apikey application-id & args]
+#_(defn give-verdict [apikey application-id & args]
   (apply give-verdict-with-fn command apikey application-id args))
 
 (defn allowed? [action & args]
