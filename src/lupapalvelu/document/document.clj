@@ -75,7 +75,7 @@
   ;; Hide the "Lisaa osapuoli" button when application contains "party" type documents and more can not be added.
   (when (and
           (not (permit/multiple-parties-allowed? permit-type))
-          (some (comp (partial = "party") :type :schema-info) documents))
+          (some (comp (partial = "party") name :type :schema-info) documents))
     (fail :error.create-doc-not-allowed)))
 
 (defn user-can-be-set-validator [{{user-id :userId} :data application :application}]
