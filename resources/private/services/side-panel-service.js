@@ -146,7 +146,7 @@ LUPAPISTE.SidePanelService = function() {
 
   // refresh conversation when page changes
   function refresh(pageChange) {
-    self.application["authorityNotice"] = ko.observable();
+    self.application.authorityNotice = ko.observable();
     var page = pageChange.pageId;
     if (page) {
       var type = pageutil.getPage();
