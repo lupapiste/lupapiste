@@ -58,37 +58,37 @@
 (defn- build-id-map
   "Builds a collection skeleton dynamically based on the data present in the
    `application` and `verdict`."
-  [application verdict accessor-functions
+  [context accessor-functions
    {{collection ::collection
      element    ::element} ::id-map-from}]
-  (->> ((get accessor-functions collection) application verdict nil)
+  (->> ((get accessor-functions collection) context)
        (group-by :id)
        (util/map-values (comp (partial assoc-context element) first))
        not-empty))
 
 (defn- build-array
-  [application verdict accessor-functions
+  [context accessor-functions
    {{collection ::collection
      element    ::element} ::array-from}]
-  (->> ((get accessor-functions collection) application verdict nil)
+  (->> ((get accessor-functions collection) context)
        (mapv (partial assoc-context element))))
 
 (defn- fetch-with-accessor
   "Given the `application` under migration, the source `verdict` and
   current `timestamp`, returns a function for accessing desired data
   from the `application` and `verdict`. Used with `prewalk`."
-  [application verdict accessor-functions]
+  [context accessor-functions]
   (fn [x]
     (cond (accessor-key? x)
           (if-let [accessor-fn (get accessor-functions (::access x))]
-            (accessor-fn application verdict (::context x))
+            (accessor-fn (assoc context :context (::context x)))
             (throw (ex-info "Missing accessor" x)))
 
           (build-id-map? x)
-          (build-id-map application verdict accessor-functions x)
+          (build-id-map context accessor-functions x)
 
           (build-array? x)
-          (build-array application verdict accessor-functions x)
+          (build-array context accessor-functions x)
 
           :else x)))
 
@@ -103,7 +103,7 @@
 ;;
 
 (defn- get-in-verdict [path & [default]]
-  (fn [_ verdict _]
+  (fn [{:keys [verdict]}]
     (if-let [result (get-in verdict path)]
       result
       default)))
@@ -115,8 +115,8 @@
   (get-in-verdict (conj [:paatokset 0 :paivamaarat] key)))
 
 (defn- filter-tasks-of-verdict [p]
-  (fn [app verdict _]
-    (->> app :tasks
+  (fn [{:keys [application verdict]}]
+    (->> application :tasks
          (filter #(and (= (:id verdict)
                           (-> % :source :id))
                        (p %))))))
@@ -126,13 +126,13 @@
                  tn)))
 
 (defn- get-in-context [path]
-  (fn [_ _ context]
+  (fn [{:keys [context]}]
     (get-in context path)))
 
-(defn- context [_ _ context]
+(defn- context [{:keys [context]}]
   context)
 
-(defn- verdict-category [application verdict _]
+(defn- verdict-category [{:keys [application verdict]}]
   (if (or (not-empty (:signatures verdict))
           (:sopimus verdict)
           (= (:permitSubtype application) "sijoitussopimus"))
@@ -141,39 +141,39 @@
      (name category)
      "migration-verdict")))
 
-(defn- verdict-template [app verdict _]
-  {:inclusions (-> (verdict-category app verdict nil)
+(defn- verdict-template [context]
+  {:inclusions (-> (verdict-category context)
                    verdict/legacy-verdict-inclusions)})
 
 (defn- get-when [p getter-fn]
-  (fn [& args]
-    (when (apply p args)
-      (apply getter-fn args))))
+  (fn [context]
+    (when (p context)
+      (getter-fn context))))
 
-(defn- verdict-published? [_ verdict _]
+(defn- verdict-published? [{:keys [verdict]}]
   (not (:draft verdict)))
 
 (def contract-category? #{"contract" "migration-contract"})
 
-(defn- contract? [app verdict _]
-  (contract-category? (verdict-category app verdict nil)))
+(defn- contract? [context]
+  (contract-category? (verdict-category context)))
 
 (defn- timestamp
   "For unpublished verdicts, if timestamp is 0, return nil. If the
   verdict is published, we have to accept the 0 timestamp."
   [accessor-fn]
-  (fn [app verdict context]
-    (let [val (accessor-fn app verdict context)]
-      (if (and (not (verdict-published? app verdict context))
+  (fn [context]
+    (let [val (accessor-fn context)]
+      (if (and (not (verdict-published? context))
                (integer? val)
                (zero? val))
         nil
         val))))
 
-(defn- get-archive-data [_ verdict _]
-  {:verdict-giver ((get-in-poytakirja :paatoksentekija "") nil verdict nil)
-   :anto          ((timestamp (get-in-paivamaarat :anto)) nil verdict nil)
-   :lainvoimainen ((timestamp (get-in-paivamaarat :lainvoimainen)) nil verdict nil)})
+(defn- get-archive-data [context]
+  {:verdict-giver ((get-in-poytakirja :paatoksentekija "") context)
+   :anto          ((timestamp (get-in-paivamaarat :anto)) context)
+   :lainvoimainen ((timestamp (get-in-paivamaarat :lainvoimainen)) context)})
 
 (defn- targets-verdict? [attachment verdict]
   (or (= (:id verdict)
@@ -182,7 +182,7 @@
          (-> attachment :target :id))))
 
 ;; See lupapalvelu.pate.verdict/verdict-attachment-items
-(defn- attachment-summaries [application verdict _]
+(defn- attachment-summaries [{:keys [application verdict]}]
   (->> (:attachments application)
        (filter #(some-> % :latestVersion :fileId ss/not-blank?))
        (filter #(targets-verdict? % verdict))
@@ -200,7 +200,7 @@
                                  (constantly " ")
                                  (get-in-context [:user :lastName]))))
 
-(defn- published-attachment-id [application verdict _]
+(defn- published-attachment-id [{:keys [application verdict]}]
   (->> (:attachments application)
        (util/find-first #(and (util/=as-kw (-> % :type :type-id)
                                            :paatos)
@@ -328,7 +328,8 @@
 
 
 (defn- update-template [verdict app]
-  (assoc verdict :template (verdict-template app verdict nil)))
+  (assoc verdict :template (verdict-template {:application app
+                                              :verdict verdict})))
 
 (defn change-category [app verdict new-category]
   (add-tags app
@@ -357,8 +358,8 @@
   "Builds a Pate legacy verdict from the old one"
   [application verdict timestamp]
        ;; Build a new verdict by fetching the necessary data from the old one
-  (->> (prewalk (fetch-with-accessor application
-                                     verdict
+  (->> (prewalk (fetch-with-accessor {:application application
+                                      :verdict     verdict}
                                      (accessor-functions (defaults timestamp)))
                 verdict-migration-skeleton)
        ;; Add metadata to fields marked for wrapping in the verdict skeleton
@@ -412,13 +413,3 @@
             $pull (merge (when (not-empty draft-ids)
                            {:tasks {:source.id {$in draft-ids}}})
                          {:verdicts {:id {$in (mapv :id lupapiste-verdicts)}}})})))
-
-;; TODO
-
-(def app (lupapalvelu.mongo/select-one :applications
-                                       {:_id "LP-491-2017-01651"}))
-#_(do (lupapalvelu.mongo/connect!)
-    (lupapalvelu.mongo/update-by-query :applications
-                                       {:pre-pate-verdicts {$exists true}}
-                                       {$rename {"pre-pate-verdicts" "verdicts"}
-                                        $unset {"pate-verdicts" ""}}))
