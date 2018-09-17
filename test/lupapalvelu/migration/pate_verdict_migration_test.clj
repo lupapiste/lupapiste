@@ -91,6 +91,15 @@
 (def verdict-text "Decisions were made.")
 (def section "1")
 (def code 2)
+(def signatures
+  [{:created signed1
+    :user {:id signer-id1
+           :firstName "First"
+           :lastName "Name"}}
+   {:created signed2
+    :user {:id signer-id2
+           :firstName "Second"
+           :lastName "Name"}}])
 (def test-verdict {:id verdict-id
                    :kuntalupatunnus kuntalupatunnus
                    :draft true
@@ -106,15 +115,17 @@
                                                :paatos verdict-text
                                                :paatospvm paatospvm
                                                :pykala section
-                                               :paatoskoodi code}]}]
-                   :signatures [{:created signed1
-                                 :user {:id signer-id1
-                                        :firstName "First"
-                                        :lastName "Name"}}
-                                {:created signed2
-                                 :user {:id signer-id2
-                                        :firstName "Second"
-                                        :lastName "Name"}}]})
+                                               :paatoskoodi code}]}]})
+
+(def test-verdict-with-signatures (assoc test-verdict :signatures signatures))
+
+(def migrated-signatures
+  [{:date    signed1
+    :user-id signer-id1
+    :name "First Name"}
+   {:date    signed2
+    :user-id signer-id2
+    :name "Second Name"}])
 (def migrated-test-verdict {:id verdict-id
                             :modified timestamp
                             :category "r"
@@ -135,13 +146,10 @@
                                                       :type-id     "paatos"
                                                       :amount 1}]}
                             :template {:inclusions [:foreman-label :conditions-title :foremen-title :kuntalupatunnus :verdict-section :verdict-text :anto :attachments :foremen.role :foremen.remove :verdict-code :conditions.name :conditions.remove :reviews-title :type-label :reviews.name :reviews.type :reviews.remove :add-review :name-label :condition-label :lainvoimainen :handler :add-foreman :upload :add-condition]}
-                            :signatures [{:date    signed1
-                                          :user-id signer-id1
-                                          :name "First Name"}
-                                         {:date    signed2
-                                          :user-id signer-id2
-                                          :name "Second Name"}]
                             :legacy? true})
+
+(def migrated-test-verdict-with-signatures (assoc migrated-test-verdict :signatures migrated-signatures))
+
 (def migrated-test-verdict-no-tasks
   (-> migrated-test-verdict
       (update :data dissoc :reviews :foremen :conditions)))
@@ -220,6 +228,13 @@
                            timestamp)
     => (contains {:category "migration-contract"
                   :data (contains {:contract-text (wrap verdict-text)})}))
+
+  (fact "verdicts with signatures given category migration-contract"
+        (->pate-legacy-verdict test-application
+                               test-verdict-with-signatures
+                               timestamp)
+        => (contains {:category "migration-contract"
+                      :signatures migrated-signatures}))
 
   (fact "if verdict cannot be validated with the default category, a permissive migration-verdict category is used"
     (->pate-legacy-verdict (assoc test-application :permitType "YA")

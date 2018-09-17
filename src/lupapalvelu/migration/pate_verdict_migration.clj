@@ -133,7 +133,8 @@
   context)
 
 (defn- verdict-category [application verdict _]
-  (if (or (:sopimus verdict)
+  (if (or (not-empty (:signatures verdict))
+          (:sopimus verdict)
           (= (:permitSubtype application) "sijoitussopimus"))
     "migration-contract"
     (if-let [category (schema-util/application->category application)]
