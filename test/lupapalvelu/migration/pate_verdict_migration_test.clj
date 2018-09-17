@@ -290,6 +290,22 @@
                            timestamp)
     => contains-published-and-archive-data?)
 
+  (fact "for published verdicts, timestamp 0 is not cleaned up"
+        (->pate-legacy-verdict (update test-application
+                                       :verdicts
+                                       #(map (fn [v] (assoc v :draft false)) %))
+                               (-> test-verdict
+                                   (assoc :draft false)
+                                   (assoc-in [:paatokset 0 :paivamaarat :anto] 0))
+                               timestamp)
+        => (contains {:published (contains {:published 0
+                                            :attachment-id attachment-id
+                                            :tags (contains "Sonja Sibbo")})
+                      :archive {:verdict-giver handler
+                                :anto 0
+                                :lainvoimainen lainvoimainen}
+                      :state (wrap "published")}))
+
   (fact "verdict can be migrated even when the application does not have applicant document"
     (->pate-legacy-verdict test-application
                            (assoc test-verdict :draft false)

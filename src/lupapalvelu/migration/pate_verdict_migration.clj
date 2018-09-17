@@ -159,16 +159,21 @@
   (contract-category? (verdict-category app verdict nil)))
 
 (defn- timestamp
-  "If timestamp is 0, return nil"
-  [val]
-  (if (and (integer? val) (zero? val))
-    nil
-    val))
+  "For unpublished verdicts, if timestamp is 0, return nil. If the
+  verdict is published, we have to accept the 0 timestamp."
+  [accessor-fn]
+  (fn [app verdict context]
+    (let [val (accessor-fn app verdict context)]
+      (if (and (not (verdict-published? app verdict context))
+               (integer? val)
+               (zero? val))
+        nil
+        val))))
 
 (defn- get-archive-data [_ verdict _]
   {:verdict-giver ((get-in-poytakirja :paatoksentekija "") nil verdict nil)
-   :anto          (timestamp ((get-in-paivamaarat :anto) nil verdict nil))
-   :lainvoimainen (timestamp ((get-in-paivamaarat :lainvoimainen) nil verdict nil))})
+   :anto          ((timestamp (get-in-paivamaarat :anto)) nil verdict nil)
+   :lainvoimainen ((timestamp (get-in-paivamaarat :lainvoimainen)) nil verdict nil)})
 
 (defn- targets-verdict? [attachment verdict]
   (or (= (:id verdict)
@@ -256,7 +261,7 @@
   "Contains functions for accessing relevant Pate verdict data from
   current verdict drafts. These return the raw values but are
   subsequently to be wrapped with relevant metadata."
-  {:anto              (comp timestamp (get-in-paivamaarat :anto))
+  {:anto              (timestamp (get-in-paivamaarat :anto))
    :archive           (get-when verdict-published? get-archive-data)
    :attachment-summaries attachment-summaries
    :category          verdict-category
@@ -269,14 +274,14 @@
    :handler           (get-in-poytakirja :paatoksentekija)
    :id                (get-in-verdict [:id])
    :kuntalupatunnus   (get-in-verdict [:kuntalupatunnus])
-   :lainvoimainen     (comp timestamp (get-in-paivamaarat :lainvoimainen))
-   :modified          (comp timestamp (get-in-verdict [:timestamp] (:modified defaults)))
-   :published         (comp timestamp (get-when verdict-published? (get-in-paivamaarat :anto)))
+   :lainvoimainen     (timestamp (get-in-paivamaarat :lainvoimainen))
+   :modified          (timestamp (get-in-verdict [:timestamp] (:modified defaults)))
+   :published         (timestamp (get-when verdict-published? (get-in-paivamaarat :anto)))
    :published-attachment-id (get-when verdict-published? published-attachment-id)
    :review-name       (get-in-context [:taskname])
    :review-type       (comp ->pate-review-type (get-in-context [:data :katselmuksenLaji :value]))
    :reviews           (filter-tasks-of-verdict (task-name? :task-katselmus))
-   :signature-date    (comp timestamp (get-in-context [:created]))
+   :signature-date    (timestamp (get-in-context [:created]))
    :signature-name    signature-name
    :signature-user-id (get-in-context [:user :id])
    :signatures        (get-in-verdict [:signatures])
@@ -407,3 +412,13 @@
             $pull (merge (when (not-empty draft-ids)
                            {:tasks {:source.id {$in draft-ids}}})
                          {:verdicts {:id {$in (mapv :id lupapiste-verdicts)}}})})))
+
+;; TODO
+
+(def app (lupapalvelu.mongo/select-one :applications
+                                       {:_id "LP-491-2017-01651"}))
+#_(do (lupapalvelu.mongo/connect!)
+    (lupapalvelu.mongo/update-by-query :applications
+                                       {:pre-pate-verdicts {$exists true}}
+                                       {$rename {"pre-pate-verdicts" "verdicts"}
+                                        $unset {"pate-verdicts" ""}}))
