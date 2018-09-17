@@ -181,8 +181,8 @@
 
 (defn add-attachment
   "Adds attachment to the application. Contents is mainly for logging. Returns attachment id."
-  [app-id contents type-group type-id & [{:keys [target draft?]}]]
-  (let [file-id               (upload-file-and-bind sonja
+  [apikey app-id contents type-group type-id & [{:keys [target draft?]}]]
+  (let [file-id               (upload-file-and-bind apikey
                                                     app-id
                                                     (merge {:contents contents
                                                             :type     {:type-group type-group
@@ -190,7 +190,7 @@
                                                            (when target
                                                              {:target target}))
                                                     :draft? draft?)
-        {:keys [attachments]} (query-application sonja app-id)
+        {:keys [attachments]} (query-application apikey app-id)
         {attachment-id :id}   (util/find-first (fn [{:keys [latestVersion]}]
                                                  (= (:originalFileId latestVersion) file-id))
                                                attachments)]
@@ -201,10 +201,12 @@
 
 (defn add-verdict-attachment
   "Adds attachment to the verdict. Contents is mainly for logging. Returns attachment id."
-  [app-id verdict-id contents]
-  (add-attachment app-id contents "paatoksenteko" "paatosote" {:target {:type "verdict"
-                                                                        :id verdict-id}
-                                                               :draft? true}))
+  [apikey app-id verdict-id contents]
+  (add-attachment apikey app-id contents
+                  "paatoksenteko" "paatosote"
+                  {:target {:type "verdict"
+                            :id verdict-id}
+                   :draft? true}))
 
 (defn add-condition [add-cmd fill-cmd condition]
   (let [changes      (:changes (add-cmd))
