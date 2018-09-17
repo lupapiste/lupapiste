@@ -26,7 +26,7 @@
             [lupapalvelu.attachment.util :as att-util]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
-            [lupapalvelu.file-upload :as file-upload]
+            [lupapalvelu.file-upload :as file-upload :refer [SavedFileData]]
             [lupapalvelu.states :as states]
             [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.comment :as comment]
@@ -875,6 +875,28 @@
                 out (ByteArrayOutputStream.)]
       (io/copy is out)
       (ByteArrayInputStream. (.toByteArray out)))))
+
+;; TODO: DRY
+(sc/defn ^:always-validate convert-and-attach! :- SetAttachmentVersionResult
+  "1) Validates and converts for archivability, uploads converted file to GridFS/S3 if applicable
+   2) Creates and saves attachment model for application, or fetches it if attachment-id is given
+   3) Creates preview image in separate thread
+   4) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to
+      original file)
+   Returns attached version."
+  [{:keys [application] {user-id :id} :user {session-id :id} :session :as command}
+   attachment-options :- AttachmentOptions
+   original-filedata :- SavedFileData]
+  (let [session-id (when-not user-id
+                     (or session-id
+                         (vetuma/session-id)
+                         "system-process"))
+        content ((:content (storage/download (:fileId original-filedata))))
+        conversion-data (conversion user-id session-id application (assoc original-filedata :content content))
+        attached-version (attach! command session-id attachment-options original-filedata conversion-data)]
+    (cleanup-temp-file (:result conversion-data))
+    (.close content)
+    attached-version))
 
 (sc/defn ^:always-validate upload-and-attach! :- SetAttachmentVersionResult
   "1) Uploads original file to GridFS/S3

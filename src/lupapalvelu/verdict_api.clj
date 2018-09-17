@@ -62,7 +62,7 @@
   (let [result (if (allu/allu-application? (:organization application) (permit/permit-type application))
                  ;; HACK: This is here instead of e.g. do-check-for-verdict to avoid verdict/allu/pate-verdict
                  ;;       dependency cycles:
-                 (when-let [file-id (allu/load-contract-document! command)]
+                 (when-let [filedata (allu/load-contract-document! command)]
                    ;; FIXME: Some times should be dates, not timestamps:
                    (let [verdict (pate-verdict/new-allu-verdict command)
                          verdict (assoc verdict
@@ -77,7 +77,16 @@
                                                  :date created}]) ; HACK
                          transition-update (app-state/state-transition-update (sm/next-state application)
                                                                               created application user)]
-                     ;; TODO: Some sort of verdict attachment
+                     (attachment/convert-and-attach! command
+                                                     {:created created
+                                                      :attachment-type {:type-group :muut
+                                                                        :type-id :sopimus}
+                                                      :target {:id (:id verdict)
+                                                               :type :verdict}
+                                                      :modified created
+                                                      :locked true
+                                                      :read-only true}
+                                                     filedata)
                      (action/update-application command (if (seq (:pate-verdicts application))
                                                           transition-update
                                                           (util/deep-merge transition-update

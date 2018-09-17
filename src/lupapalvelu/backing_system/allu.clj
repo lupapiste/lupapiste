@@ -775,5 +775,5 @@
     (-> (allu-request-handler (case (:state application)
                                 "sent" (contract-proposal-request command)
                                 "agreementPrepared" (final-contract-request command)))
-        :body :fileId)
+        :body)
     (catch [:text "error.allu.http"] _ nil)))
