@@ -27,7 +27,8 @@
 
 (defn contract? [verdict]
   (if (lupapiste-verdict? verdict)
-    (has-category? verdict :contract)
+    (or (has-category? verdict :contract)
+        (has-category? verdict :migration-contract))
     (-> verdict :sopimus)))
 
 (defn legacy? [verdict]
