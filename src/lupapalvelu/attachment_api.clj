@@ -467,6 +467,10 @@
    :headers {"Content-Type" "text/plain"}
    :body    "500 Too many attachments"})
 
+(defn allowed-number-of-attachments? [attachments]
+  (<= (count attachments)
+      (env/value :attachments :download :max-number)))
+
 (defraw "download-all-attachments"
   {:parameters       [:id]
    :user-roles       #{:applicant :authority :oirAuthority}
@@ -475,8 +479,7 @@
    :org-authz-roles  roles/reader-org-authz-roles}
   [{:keys [application user lang]}]
   (cond (and application
-             (<= (count (:attachments application))
-                 (env/value :attachments :download :max-number)))
+             (allowed-number-of-attachments? (:attachments application)))
         {:status  200
          :headers {"Content-Type"        "application/octet-stream"
                    "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
@@ -485,8 +488,7 @@
                       (files/temp-file-input-stream))}
 
         (and application
-             (> (count (:attachments application))
-                (env/value :attachments :download :max-number)))
+             (not (allowed-number-of-attachments? (:attachments application))))
         error-too-many-attachments
 
         :else
@@ -505,8 +507,7 @@
   (let [attachments (:attachments application)
         ids         (ss/split ids #",")
         atts        (filter (fn [att] (some (partial = (:id att)) ids)) attachments)]
-    (if (<= (count atts)
-            (env/value :attachments :download :max-number))
+    (if (allowed-number-of-attachments? atts)
       {:status  200
       :headers {"Content-Type"        "application/octet-stream"
                 "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
