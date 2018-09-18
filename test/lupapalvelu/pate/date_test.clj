@@ -39,7 +39,12 @@
   (finnish-date "foobar") => nil
   (finnish-date (util/to-millis-from-local-date-string "6.4.2018"))
   => "6.4.2018"
-  (finnish-date "04.05.2018") => "4.5.2018")
+  (finnish-date (Long. (util/to-millis-from-local-date-string "6.4.2018")))
+  => "6.4.2018"
+  (finnish-date "04.05.2018") => "4.5.2018"
+  (finnish-date (Integer. 0))
+  => "1.1.1970"
+  (finnish-date nil) => nil)
 
 (facts "Holidays"
   (holiday "New Year" "1.1.2018" true)

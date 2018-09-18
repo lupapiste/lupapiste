@@ -199,8 +199,10 @@
 
            published
            [(get section-strings id)
-            (util/pcond-> (verdict-string lang verdict :verdict-type)
-                          ss/not-blank? (str " -"))
+
+            (when (lupapiste-verdict? verdict)
+              (util/pcond-> (verdict-string lang verdict :verdict-type)
+                            ss/not-blank? (str " -")))
             (verdict-string lang verdict :verdict-code)
             rep-string]
 
@@ -272,7 +274,9 @@
         verdicts        (concat (->> (:pate-verdicts application)
                                      (filter #(has-category? % category))
                                      (map metadata/unwrap-all))
-                                (:verdicts application))
+                                ;; TODO: remove draft filter after migration.
+                                (some->> application :verdicts
+                                         (remove :draft)))
         summaries       (summaries-by-id verdicts lang)
         replaced-verdict-ids (->> (vals summaries)
                                   (map :replaces)
