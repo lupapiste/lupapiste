@@ -426,8 +426,9 @@
                    :js (distinct (conj (get-ui-components :authority-admin-components :models) "register-authority-admin-components.js"))
                                 :html (get-ui-components :authority-admin-components :templates)}
    :pate {:depends [:common-html]
-          :html ["pate-verdict.html"]
-          :js ["pate-verdict.js"]}
+          :html ["pate-verdict.html" "pate-invoice.html"]
+          :js ["pate-verdict.js" "pate-invoice.js"]}
+
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)

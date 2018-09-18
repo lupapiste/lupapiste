@@ -5,6 +5,7 @@
             [lupapalvelu.ui.auth-admin.edit-authority.edit-view :as edit-authority-view]
             [lupapalvelu.ui.pate.verdict-templates :as verdict-templates]
             [lupapalvelu.ui.pate.verdicts :as verdicts]
+            [lupapalvelu.ui.pate.invoices :as invoices]
             [lupapalvelu.ui.pate.verdict :as verdict]
             [lupapalvelu.ui.printing-order.composer :as printing-order-composer]
             [lupapalvelu.ui.bulletins.bulletin-preamble :as bulletin-preamble]
@@ -18,6 +19,7 @@
         stamp-editor/mount-component
         verdict-templates/mount-component
         verdicts/mount-component
+        invoices/mount-component
         verdict/mount-component
         printing-order-composer/mount-component
         local-bulletins/mount-component
