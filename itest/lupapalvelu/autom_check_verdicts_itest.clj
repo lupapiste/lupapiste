@@ -1,19 +1,20 @@
 (ns lupapalvelu.autom-check-verdicts-itest
-  (:require [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]
-            [taoensso.timbre :refer [warnf]]
-            [lupapalvelu.batchrun.fetch-verdict-consumer :refer [create-fetch-verdict-consumers!]]
+  (:require [lupapalvelu.batchrun.fetch-verdict-consumer :refer [create-fetch-verdict-consumers!]]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.integrations-api]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
             [lupapalvelu.verdict-api]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [sade.core :refer [now fail]]
-            [sade.env :as env]
             [sade.dummy-email-server :as dummy-email-server]
-            [sade.shared-util :as util]))
+            [sade.env :as env]
+            [sade.shared-util :as util]
+            [taoensso.timbre :refer [warnf]]))
 
 (if-not (env/feature? :jms)
 (warnf "JMS not enabled for unit testing")
@@ -52,7 +53,7 @@
 
       (local-command sonja :approve-application :id application-id-sent :lang "fi") => ok?
       (local-command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?
-      (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+      (give-local-legacy-verdict sonja application-id-verdict-given)
 
       (let [emails (dummy-email-server/messages :reset true)
             application-submitted (query-application local-query sonja application-id-submitted) => truthy

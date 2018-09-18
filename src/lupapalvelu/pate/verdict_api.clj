@@ -362,7 +362,8 @@
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :states           (states/all-application-states-but :finished)
+   :states           (set/difference states/post-submitted-states
+                                     #{:finished})
    :pre-checks       [pate-enabled
                       (verdict-exists :draft? :modern?)
                       verdict-filled

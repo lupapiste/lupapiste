@@ -1,13 +1,7 @@
 (ns lupapalvelu.autom-assignments-for-verdicts-and-reviews-itest
   (:require [clojure.java.io :as io]
             [clojure.test :refer :all]
-            [midje.sweet :refer :all]
-            [monger.operators :refer [$set]]
-            [ring.util.response :as resp]
-            [schema.core :as sc]
-            [sade.core :refer [now]]
-            [sade.strings :as ss]
-            [sade.xml :as sxml]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [lupapalvelu.batchrun :as batchrun]
             [lupapalvelu.batchrun.fetch-verdict]
             [lupapalvelu.fixture.core :as fixture]
@@ -15,8 +9,15 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
+            [midje.sweet :refer :all]
+            [monger.operators :refer [$set]]
+            [ring.util.response :as resp]
+            [sade.core :refer [now]]
+            [sade.strings :as ss]
+            [sade.xml :as sxml]
+            [schema.core :as sc]))
 
 (def db-name (str "test_autom-assignments-for-verd-and-rev-itest_" (now)))
 
@@ -122,7 +123,7 @@
           (count (get-assignments)) => 0)
 
         (fact "verdict to application"
-          (give-local-verdict sonja application-id-submitted :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
+          (give-local-legacy-verdict sonja application-id-submitted))
 
         (fact "first batchrun creates assignments"
           (against-background

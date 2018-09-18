@@ -102,6 +102,7 @@
       (local-command apikey :publish-legacy-verdict
                      :id app-id
                      :verdict-id verdict-id) => ok?
+      ;; TODO: Do not know how to make this work locally.
       #_(local-verdict-pdf-queue-test apikey
                                     {:app-id     app-id
                                      :verdict-id verdict-id}))
