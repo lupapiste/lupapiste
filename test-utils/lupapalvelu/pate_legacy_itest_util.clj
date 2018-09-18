@@ -26,10 +26,10 @@
     (facts "Create, fill and publish legacy verdict"
       (->> (apply hash-map kvs)
            (merge {:kuntalupatunnus "888-10-12"
-                   :verdict-code "1" ;; Granted
-                   :verdict-text "Lorem ipsum"
-                   :handler      "Decider"
-                   :anto         (timestamp "21.5.2018")
+                   :verdict-code    "1" ;; Granted
+                   :verdict-text    "Lorem ipsum"
+                   :handler         "Decider"
+                   :anto            (timestamp "21.5.2018")
                    :lainvoimainen   (timestamp "30.5.2018")})
            (into [])
            (apply concat)

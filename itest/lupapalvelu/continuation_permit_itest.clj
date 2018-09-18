@@ -1,7 +1,9 @@
 (ns lupapalvelu.continuation-permit-itest
-  (:require [midje.sweet :refer :all]
+  (:require [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]))
+            [lupapalvelu.pate-itest-util :refer :all]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [midje.sweet :refer :all]))
 
 (fact* "Continuation permit creation"
   (apply-remote-minimal)
@@ -25,12 +27,12 @@
     (command apikey :approve-application :id verdict-given-application-ya-id :lang "fi") => ok?
     ;; Jatkoaika permit can be applied only for applications in state "verdictGiven or "constructionStarted
     (command apikey :create-continuation-period-permit :id verdict-given-application-ya-id) => (partial expected-failure? "error.command-illegal-state")
-    (give-verdict apikey verdict-given-application-ya-id) => ok?
+    (give-legacy-verdict apikey verdict-given-application-ya-id)
     ;; R app
     (generate-documents verdict-given-application-r apikey)
     (command apikey :update-app-bulletin-op-description :id verdict-given-application-r-id :description "otsikko julkipanoon") => ok?
     (command apikey :approve-application :id verdict-given-application-r-id :lang "fi") => ok?
-    (give-verdict apikey verdict-given-application-r-id) => ok?
+    (give-legacy-verdict apikey verdict-given-application-r-id)
     ;; Jatkoaika permit can be applied also for R type of applications
     (command apikey :create-continuation-period-permit :id verdict-given-application-r-id) => ok?
 
@@ -49,7 +51,19 @@
       ;; When a jatkoaika application is approved it goes straight into the state "finished".
       ;; It is forbidden to add jatkolupa for a jatkolupa, but already the wrong state blocks the try.
       (:state jatkoaika-application) => "finished"
-      (give-verdict apikey jatkoaika-application-id) => (partial expected-failure? "error.command-illegal-state")
+      (fact "Verdict cannot be given in the finished state"
+        (let [{:keys [verdict-id]} (command apikey :new-legacy-verdict-draft
+                                            :id jatkoaika-application-id)]
+          (fill-verdict apikey jatkoaika-application-id verdict-id
+                        :kuntalupatunnus "888-10-12"
+                        :verdict-code    "1" ;; Granted
+                        :verdict-text    "Lorem ipsum"
+                        :handler         "Decider"
+                        :anto            (timestamp "21.5.2018")
+                        :lainvoimainen   (timestamp "30.5.2018"))
+          (command apikey :publish-legacy-verdict
+                   :id jatkoaika-application-id
+                   :verdict-id verdict-id) => (err :error.command-illegal-state)))
       (command apikey :create-continuation-period-permit :id jatkoaika-application-id) => (partial expected-failure? "error.command-illegal-state"))))
 
 (facts "raktyo-aloit-loppuunsaat (R continuation application)"
