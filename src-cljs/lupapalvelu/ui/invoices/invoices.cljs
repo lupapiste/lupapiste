@@ -1,4 +1,4 @@
-(ns lupapalvelu.ui.pate.invoices
+(ns lupapalvelu.ui.invoices.invoices
   (:require [clojure.set :as set]
             [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
@@ -250,14 +250,15 @@
 ;;              (rum/react state/auth-fn))
 ;;     (verdict-list @state/verdict-list @state/application-id @state/replacement-verdict)))
 
-(rum/defc verdicts < rum/reactive
-  []
-  [:div [:h1 "amazing!"]]
-  )
+;; (rum/defc verdicts < rum/reactive
+;;   []
+;;   [:div [:h1 "amazing!"]]
+;;   (service/fetch-verdict-list app-id)
+;;   )
 
 
 
-(defn bootstrap-verdicts []
+(defn bootstrap-invoices []
   (when-let [app-id (js/pageutil.hashApplicationId)]
     (reset! state/template-list [])
     (reset! state/verdict-list nil)
@@ -269,9 +270,16 @@
                                              (when (state/auth? :application-verdict-templates)
                                                (service/fetch-application-verdict-templates app-id))))))
 
+
+(rum/defc invoices < rum/reactive
+  []
+  [:div [:h1 "invoices dude!"]]
+
+  )
+
 (defn mount-component []
   (when (common/feature? :pate)
-    (rum/mount (verdicts)
+    (rum/mount (invoices)
                (.getElementById js/document (:dom-id @args)))))
 
 (defn ^:export start [domId params]
@@ -280,5 +288,5 @@
     (swap! args assoc
            :contracts? (common/oget params :contracts)
            :dom-id (name domId))
-    (bootstrap-verdicts)
+    (bootstrap-invoices)
     (mount-component)))

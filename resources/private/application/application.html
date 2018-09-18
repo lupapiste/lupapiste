@@ -138,9 +138,9 @@
                             <li>
                               <a  data-bind="click: changeTab,
                                              feature: 'pate'"
-                                  href="#" data-target="pate-invoice" data-test-id="pate-invoice-tab"
+                                  href="#" data-target="invoice" data-test-id="invoice-tab"
                                   class="link-btn">
-                                <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
+                                <span data-bind="ltext: 'application.tabInvoice' + $root.application.verdictPostfix()"></span>
                               </a>
                             </li>
 
@@ -450,9 +450,9 @@
 
                     <!-- Pate invoice tab -->
                     <!-- ko -->
-                    <div id="application-pate-invoice-tab"
+                    <div id="application-invoice-tab"
                          class="tab-content feature--no-border" data-bind="feature: 'pate'">
-                      <cljs-pate_invoices></cljs-pate_invoices>
+                      <cljs-invoices_invoices></cljs-invoices_invoices>
                     </div>
                     <!-- /ko -->
 
