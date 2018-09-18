@@ -301,9 +301,22 @@
       result => no-errors?)
     result))
 
+(defn local-edit-verdict [apikey app-id verdict-id path value]
+  (let [result (local-command apikey :edit-pate-verdict :id app-id
+                              :verdict-id verdict-id
+                              :path (vec (flatten [path]))
+                              :value value)]
+    (fact {:midje/description (format "Edit verdict: %s -> %s" path value)}
+      result => no-errors?)
+    result))
+
 (defn fill-verdict [apikey app-id verdict-id & kvs]
   (doseq [[k v] (apply hash-map kvs)]
     (edit-verdict apikey app-id verdict-id k v)))
+
+(defn local-fill-verdict [apikey app-id verdict-id & kvs]
+  (doseq [[k v] (apply hash-map kvs)]
+    (local-edit-verdict apikey app-id verdict-id k v)))
 
 (defn open-verdict [apikey app-id verdict-id]
   (query apikey :pate-verdict :id app-id :verdict-id verdict-id))
@@ -330,9 +343,9 @@
                     :source           {:type "verdicts"
                                        :id   verdict-id}
                     :contents         contents
-                    :type             {:type-group (if (util/=as-kw permit-type :YA)
-                                                     "muut"
-                                                     "paatoksenteko")
+                    :type             {:type-group (or type-group (if (util/=as-kw permit-type :YA)
+                                                                    "muut"
+                                                                    "paatoksenteko"))
                                        :type-id    "paatos"}
                     :applicationState state
                     :latestVersion    (contains {:contentType "application/pdf"
