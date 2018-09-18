@@ -484,8 +484,7 @@
          :headers {"Content-Type"        "application/octet-stream"
                    "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
          :body    (-> (:attachments application)
-                      (att/get-all-attachments! application user lang)
-                      (files/temp-file-input-stream))}
+                      (att/get-all-attachments-as-input-stream! application user lang))}
 
         (and application
              (not (allowed-number-of-attachments? (:attachments application))))

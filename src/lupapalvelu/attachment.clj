@@ -43,7 +43,7 @@
             [sade.shared-schemas :as sssc]
             [lupapalvelu.vetuma :as vetuma])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream]))
+           [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream PipedInputStream PipedOutputStream]))
 
 
 ;;
@@ -852,6 +852,18 @@
       (with-open [in (content)]
         (append-stream zip (str filename-prefix id "_" filename) in)))))
 
+(defn- append-application-pdfs-to-zip! [zip application user application-pdf-lang]
+  (when application-pdf-lang
+    ; Add submitted PDF, if exists:
+    (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
+      (->> (-> (app-utils/with-masked-person-ids submitted-application user)
+               (pdf-export/generate application-pdf-lang))
+           (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted"))))
+    ; Add current PDF:
+    (->> (-> (app-utils/with-masked-person-ids application user)
+             (pdf-export/generate application-pdf-lang))
+         (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current")))))
+
 (defn ^java.io.File get-all-attachments!
   "Returns attachments as zip file.
    If application-pdf-lang is provided, application and submitted application PDFs are included.
@@ -864,19 +876,31 @@
      (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
        ; Add all attachments:
        (append-attachments-to-zip! zip user attachments application nil)
-       (when application-pdf-lang
-         ; Add submitted PDF, if exists:
-         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-           (->> (-> (app-utils/with-masked-person-ids submitted-application user)
-                    (pdf-export/generate application-pdf-lang))
-                (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted"))))
-         ; Add current PDF:
-         (->> (-> (app-utils/with-masked-person-ids application user)
-                  (pdf-export/generate application-pdf-lang))
-              (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current"))))
+       (append-application-pdfs-to-zip! zip application user application-pdf-lang)
        (.finish zip))
      (debugf "Size of the temporary zip file: %d" (.length temp-file))
      temp-file)))
+
+(defn ^java.io.InputStream get-all-attachments-as-input-stream!
+  "Returns attachments as zip file.
+   If application-pdf-lang is provided, application and submitted application PDFs are included.
+   Callers responsibility is to close the returned input stream."
+  ([attachments application user]
+   (get-all-attachments-as-input-stream! attachments application user nil))
+  ([attachments application user application-pdf-lang]
+   (let [pos (PipedOutputStream.)
+         is (PipedInputStream. pos)
+         zip (ZipOutputStream. pos)]
+     (debugf "Streaming zip file for %d attachments" (count attachments))
+     (future
+       ; This runs in a separate thread so that the input stream can be returned immediately
+       (append-attachments-to-zip! zip user attachments application nil)
+       (append-application-pdfs-to-zip! zip application user application-pdf-lang)
+       (.finish zip)
+       (.flush zip)
+       (.close zip)
+       (.close pos))
+     is)))
 
 (defn ^java.io.InputStream get-attachments-for-user!
   "Returns the latest corresponding attachment files readable by the user as an input stream of a self-destructing ZIP file"
