@@ -4,7 +4,7 @@
             [swiss.arrows :refer [-<>>]]
             [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
-            [sade.util :as util]
+            [sade.util :as util :refer [=as-kw]]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.assignment :as assignment]
@@ -75,7 +75,7 @@
   ;; Hide the "Lisaa osapuoli" button when application contains "party" type documents and more can not be added.
   (when (and
           (not (permit/multiple-parties-allowed? permit-type))
-          (some (comp (partial = "party") :type :schema-info) documents))
+          (some (comp (partial =as-kw :party) name :type :schema-info) documents))
     (fail :error.create-doc-not-allowed)))
 
 (defn user-can-be-set-validator [{{user-id :userId} :data application :application}]
