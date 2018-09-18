@@ -3,6 +3,7 @@
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! now def-]]
+            [sade.env :as env]
             [sade.files :as files]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
@@ -462,6 +463,11 @@
   [_]
   (att/output-attachment attachment-id true (partial bulletins/get-bulletin-attachment bulletin-id)))
 
+(def error-too-many-attachments
+  {:status  500
+   :headers {"Content-Type" "text/plain"}
+   :body    "500 Too many attachments"})
+
 (defraw "download-all-attachments"
   {:parameters       [:id]
    :user-roles       #{:applicant :authority :oirAuthority}
@@ -469,16 +475,25 @@
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles  roles/reader-org-authz-roles}
   [{:keys [application user lang]}]
-  (if application
-    {:status  200
-     :headers {"Content-Type"        "application/octet-stream"
-               "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-     :body    (-> (:attachments application)
-                  (att/get-all-attachments! application user lang)
-                  (files/temp-file-input-stream))}
-    {:status  404
-     :headers {"Content-Type" "text/plain"}
-     :body    "404"}))
+  (cond (and application
+             (<= (count (:attachments application))
+                 (env/value :attachments :download :max-number)))
+        {:status  200
+         :headers {"Content-Type"        "application/octet-stream"
+                   "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+         :body    (-> (:attachments application)
+                      (att/get-all-attachments! application user lang)
+                      (files/temp-file-input-stream))}
+
+        (and application
+             (> (count (:attachments application))
+                (env/value :attachments :download :max-number)))
+        error-too-many-attachments
+
+        :else
+        {:status  404
+         :headers {"Content-Type" "text/plain"}
+         :body    "404"}))
 
 (defraw "download-attachments"
   {:parameters       [:id ids]
@@ -491,10 +506,13 @@
   (let [attachments (:attachments application)
         ids         (ss/split ids #",")
         atts        (filter (fn [att] (some (partial = (:id att)) ids)) attachments)]
-    {:status  200
-     :headers {"Content-Type"        "application/octet-stream"
-               "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-     :body    (att/get-attachments-for-user! user application atts)}))
+    (if (<= (count atts)
+            (env/value :attachments :download :max-number))
+      {:status  200
+      :headers {"Content-Type"        "application/octet-stream"
+                "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+       :body    (att/get-attachments-for-user! user application atts)}
+      error-too-many-attachments)))
 
 ;;
 ;; Upload
