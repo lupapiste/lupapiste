@@ -588,7 +588,7 @@
     resp => ok?
     (query-application local-query apikey id)))
 
-(defn give-local-verdict [apikey application-id & args]
+#_(defn give-local-verdict [apikey application-id & args]
   (apply give-verdict-with-fn local-command apikey application-id args))
 
 (defn create-foreman-application [project-app-id apikey userId role difficulty]
