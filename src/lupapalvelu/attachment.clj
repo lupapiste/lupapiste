@@ -903,15 +903,18 @@
      is)))
 
 (defn ^java.io.InputStream get-attachments-for-user!
-  "Returns the latest corresponding attachment files readable by the user as an input stream of a self-destructing ZIP file"
+  "Returns the latest corresponding attachment files readable by the user as an input stream"
   [user application attachments]
-  (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; deleted via temp-file-input-stream
-    (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
-    (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
+  (let [pos (PipedOutputStream.)
+        is (PipedInputStream. pos)
+        zip (ZipOutputStream. pos)]
+    (future
       (append-attachments-to-zip! zip user attachments application (str (:id application) "_"))
-      (.finish zip))
-    (debugf "Size of the temporary zip file: %d" (.length temp-file))
-    (files/temp-file-input-stream temp-file)))
+      (.finish zip)
+      (.flush zip)
+      (.close zip)
+      (.close pos))
+    is))
 
 (defn- post-process-attachment [attachment]
   (assoc attachment :isPublic (metadata/public-attachment? attachment)))
