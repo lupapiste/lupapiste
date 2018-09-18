@@ -594,35 +594,34 @@
   ([] (innermost-handler (env/dev-mode?)))
   ([dev-mode?] (if dev-mode? imessages-mock-handler (make-remote-handler (env/value :allu :url)))))
 
-(defn- make-router
-  ([handler] (make-router (env/dev-mode?) handler))
+(defn- routes
+  ([handler] (routes (env/dev-mode?) handler))
   ([disable-io-middlewares? handler]
-   (reitit-ring/router
-     ["/" {:middleware (if disable-io-middlewares?
-                         [handle-response
-                          (preprocessor->middleware httpify-request)
-                          (preprocessor->middleware (fn-> content->json (jwt-authorize (env/value :allu :jwt))))]
-                         [handle-response
-                          (preprocessor->middleware httpify-request)
-                          save-messages!
-                          (preprocessor->middleware
-                            (fn-> get-attachment-files! content->json (jwt-authorize (env/value :allu :jwt))))])
-           :coercion   reitit.coercion.schema/coercion}
-      ["applications"
-       ["/:id/cancelled" {:name [:applications :cancel]
-                          :put  {:parameters {:path {:id ssc/NatString}}
-                                 :handler    handler}}]
-       ["/:id/attachments" {:name [:attachments :create]
-                            :post {:parameters {:path {:id ssc/NatString}}
-                                   :handler    handler}}]]
-      ["placementcontracts"
-       ["" {:name [:placementcontracts :create]
-            :post {:handler handler}}]
-       ["/:id" {:name [:placementcontracts :update]
-                :put  {:parameters {:path {:id ssc/NatString}}
-                       :handler    handler}}]]])))
+   ["/" {:middleware (if disable-io-middlewares?
+                       [handle-response
+                        (preprocessor->middleware httpify-request)
+                        (preprocessor->middleware (fn-> content->json (jwt-authorize (env/value :allu :jwt))))]
+                       [handle-response
+                        (preprocessor->middleware httpify-request)
+                        save-messages!
+                        (preprocessor->middleware
+                          (fn-> get-attachment-files! content->json (jwt-authorize (env/value :allu :jwt))))])
+         :coercion   reitit.coercion.schema/coercion}
+    ["applications"
+     ["/:id/cancelled" {:name [:applications :cancel]
+                        :put  {:parameters {:path {:id ssc/NatString}}
+                               :handler    handler}}]
+     ["/:id/attachments" {:name [:attachments :create]
+                          :post {:parameters {:path {:id ssc/NatString}}
+                                 :handler    handler}}]]
+    ["placementcontracts"
+     ["" {:name [:placementcontracts :create]
+          :post {:handler handler}}]
+     ["/:id" {:name [:placementcontracts :update]
+              :put  {:parameters {:path {:id ssc/NatString}}
+                     :handler    handler}}]]]))
 
-(def- allu-router (make-router (innermost-handler)))
+(def- allu-router (reitit-ring/router (routes false (innermost-handler))))
 
 (def allu-request-handler
   "ALLU request handler. Returns nil, calls `allu-fail!` on HTTP errors."
