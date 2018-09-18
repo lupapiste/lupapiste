@@ -19,11 +19,11 @@
                       [:reviews review-id :type] review-type)
         => (contains {:filled true})))))
 
-(defn give-legacy-r-verdict
+(defn give-legacy-verdict
   [apikey app-id & kvs]
   (let [{:keys [verdict-id]} (command apikey :new-legacy-verdict-draft
                                       :id app-id)]
-    (facts "Create, fill and publish R legacy verdict"
+    (facts "Create, fill and publish legacy verdict"
       (->> (apply hash-map kvs)
            (merge {:kuntalupatunnus "888-10-12"
                    :verdict-code "1" ;; Granted
@@ -40,4 +40,28 @@
       (verdict-pdf-queue-test apikey
                               {:app-id     app-id
                                :verdict-id verdict-id}))
+    verdict-id))
+
+(defn give-legacy-contract
+  [apikey app-id & kvs]
+  (let [{:keys [verdict-id]} (command apikey :new-legacy-verdict-draft
+                                      :id app-id)]
+    (facts "Create, fill and publish legacy contract"
+      (->> (apply hash-map kvs)
+           (merge {:kuntalupatunnus "888-10-12"
+                   :contract-text   "Lorem ipsum"
+                   :handler         "Decider"
+                   :verdict-date    (timestamp "21.5.2018")})
+           (into [])
+           (apply concat)
+           (apply (partial fill-verdict apikey app-id verdict-id)))
+      (command apikey :publish-legacy-verdict
+               :id app-id
+               :verdict-id verdict-id) => ok?
+      (verdict-pdf-queue-test apikey
+                              {:app-id       app-id
+                               :verdict-id   verdict-id
+                               :state        "agreementPrepared"
+                               :verdict-name "Sopimus"
+                               :contents     "Sopimus"}))
     verdict-id))

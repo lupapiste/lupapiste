@@ -81,7 +81,7 @@
 
     (facts "by verdict ID"
       (fact "no verdict, matches" (search "Hakup\u00e4\u00e4t\u00f6s-2014") => no-results?)
-      (give-legacy-r-verdict sonja application-id :kuntalupatunnus "Hakup\u00e4\u00e4t\u00f6s-2014-1") => truthy
+      (give-legacy-verdict sonja application-id :kuntalupatunnus "Hakup\u00e4\u00e4t\u00f6s-2014-1") => truthy
       (fact "no matches" (search "Hakup\u00e4\u00e4t\u00f6s-2014-2") => no-results?)
       (fact "one match" (search "Hakup\u00e4\u00e4t\u00f6s-2014") => id-matches?)
       (fact "Legacy draft"

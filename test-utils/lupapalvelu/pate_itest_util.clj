@@ -312,35 +312,39 @@
 (defn- status200-check [apikey headers {:keys [app-id verdict-id
                                                verdict-name contents
                                                state type-group]}]
-  (fact "Response contains correct attachment"
-    headers => (contains {"Content-Disposition"
-                          (contains (format "%s %s %s"
-                                            app-id
-                                            (ss/encode-filename verdict-name)
-                                            (util/to-local-date (now))))}))
-  (fact "Verdict PDF attachment has been created"
-    (let [{att-id :id
-           :as    attachment} (-> (query-application apikey app-id)
-                                  :attachments last)]
-            attachment
-            => (contains {:readOnly         true
-                          :locked           true
-                          :source           {:type "verdicts"
-                                             :id   verdict-id}
-                          :contents         contents
-                          :type             {:type-group type-group
-                                             :type-id    "paatos"}
-                          :applicationState state
-                          :latestVersion    (contains {:contentType "application/pdf"
-                                                       :filename    (contains verdict-name)})})
-            (fact "published-pate-verdict"
-              (:verdict (query apikey :published-pate-verdict
-                               :id app-id
-                               :verdict-id verdict-id))
-              => (contains {:attachment-id att-id
-                            :tags          string?
-                            :id            verdict-id
-                            :published     pos?})))))
+  (let [{permit-type :permitType
+         :as         application}   (query-application apikey app-id)
+        {att-id :id
+         :as    attachment} (-> application :attachments last)]
+    (fact "Response contains correct attachment"
+      headers => (contains {"Content-Disposition"
+                            (contains (format "%s %s %s"
+                                              app-id
+                                              (ss/encode-filename verdict-name)
+                                              (util/to-local-date (now))))}))
+
+    (fact "Verdict PDF attachment has been created"
+      attachment
+      => (contains {:readOnly         true
+                    :locked           true
+                    :source           {:type "verdicts"
+                                       :id   verdict-id}
+                    :contents         contents
+                    :type             {:type-group (if (util/=as-kw permit-type :YA)
+                                                     "muut"
+                                                     "paatoksenteko")
+                                       :type-id    "paatos"}
+                    :applicationState state
+                    :latestVersion    (contains {:contentType "application/pdf"
+                                                 :filename    (contains verdict-name)})}))
+    (fact "published-pate-verdict"
+      (:verdict (query apikey :published-pate-verdict
+                       :id app-id
+                       :verdict-id verdict-id))
+      => (contains {:attachment-id att-id
+                    :tags          string?
+                    :id            verdict-id
+                    :published     pos?}))))
 
 (defn give-up [i]
   (fact "We give up after 10 tries"
@@ -361,8 +365,7 @@
                                         headers
                                         (merge {:verdict-name "P\u00e4\u00e4t\u00f6s"
                                                 :contents     "P\u00e4\u00e4t\u00f6s"
-                                                :state        "verdictGiven"
-                                                :type-group   "paatoksenteko"}
+                                                :state        "verdictGiven"}
                                                options))
 
         (> i 9) (give-up i)

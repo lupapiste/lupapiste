@@ -703,7 +703,11 @@
                         :upsert true)))
 
 (defn get-lp-ids-by-kuntalupatunnus [kuntalupatunnus]
-  (map :id (mongo/select :applications {:verdicts.kuntalupatunnus kuntalupatunnus} {:_id 1})))
+  (map :id (mongo/select :applications
+                         {$or [{:verdicts.kuntalupatunnus kuntalupatunnus}       ;; Backing system
+                               {:pate-verdicts.kuntalupatunnus kuntalupatunnus}  ;; Legacy published
+                               {:pate-verdicts.kuntalupatunnus._value kuntalupatunnus}]}  ;; Legacy draft
+                         {:_id 1})))
 
 (defn update-app-links!
   "To be run after Vantaa-conversion for each imported kuntalupatunnus. Takes a kuntalupatunnus

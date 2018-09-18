@@ -332,8 +332,8 @@
         jarvenpaa-application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
         sipoo-app-id             (:id sipoo-application)
         jarvenpaa-app-id         (:id jarvenpaa-application)
-        _                        (give-legacy-r-verdict sonja sipoo-app-id)
-        _                        (give-legacy-r-verdict raktark-jarvenpaa jarvenpaa-app-id)]
+        _                        (give-legacy-verdict sonja sipoo-app-id)
+        _                        (give-legacy-verdict raktark-jarvenpaa jarvenpaa-app-id)]
 
     (fact "Application should be in verdict given state"
       (:state (query-application pena sipoo-app-id)) => "verdictGiven")

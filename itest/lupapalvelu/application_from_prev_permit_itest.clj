@@ -274,8 +274,8 @@
                         (facts "should return the LP application if the kuntalupatunnus matches an existing app"
                           (fact "Pate verdict"
                             (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id)
-                                  _            (give-legacy-r-verdict raktark-jarvenpaa app-id
-                                                                      :kuntalupatunnus example-kuntalupatunnus)
+                                  _            (give-legacy-verdict raktark-jarvenpaa app-id
+                                                                    :kuntalupatunnus example-kuntalupatunnus)
                                   response     (http-get rest-address params)
                                   resp-body    (:body (decode-response response))]
                               response => http200?
@@ -306,8 +306,8 @@
 
                         (fact "create new LP app if kuntalupatunnus matches existing app in another organization"
                           (let [{app-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
-                                _            (give-legacy-r-verdict sonja app-id
-                                                                    :kuntalupatunnus example-kuntalupatunnus)
+                                _            (give-legacy-verdict sonja app-id
+                                                                  :kuntalupatunnus example-kuntalupatunnus)
                                 response     (http-get rest-address params)
                                 resp-body    (:body (decode-response response))]
                             response => http200?

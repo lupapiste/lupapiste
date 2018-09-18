@@ -28,7 +28,7 @@
                :text "foo"
                :filedatas []) => (partial expected-failure? :error.command-illegal-state))
 
-    (let [vid (give-legacy-r-verdict sonja app-id)]
+    (let [vid (give-legacy-verdict sonja app-id)]
       vid => string?
       (fact "wrong verdict ID"
         (command sonja :upsert-pate-appeal
@@ -149,7 +149,7 @@
                :text "foo"
                :filedatas []) => (partial expected-failure? :error.command-illegal-state))
 
-    (let [vid (give-legacy-r-verdict sonja app-id)]
+    (let [vid (give-legacy-verdict sonja app-id)]
       vid => string?
       (fact "wrong verdict ID"
         (command sonja :upsert-pate-appeal
@@ -316,7 +316,7 @@
   (let [{app-id :id}          (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
         {:keys [attachments]} (query-application pena app-id)
         created               (now)
-        vid                   (give-legacy-r-verdict raktark-jarvenpaa app-id)
+        vid                   (give-legacy-verdict raktark-jarvenpaa app-id)
         expected-att-cnt      1
         resp1                 (upload-file raktark-jarvenpaa "dev-resources/test-attachment.txt")
         file-id-1             (get-in resp1 [:files 0 :fileId])
@@ -473,7 +473,7 @@
   (let [{app-id :id}          (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
         {:keys [attachments]} (query-application pena app-id)
         created               (now)
-        vid                   (give-legacy-r-verdict raktark-jarvenpaa app-id)
+        vid                   (give-legacy-verdict raktark-jarvenpaa app-id)
         expected-att-cnt      1
         resp1                 (upload-file raktark-jarvenpaa "dev-resources/test-attachment.txt")
         file-id-1             (get-in resp1 [:files 0 :fileId])
