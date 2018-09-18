@@ -47,9 +47,9 @@
                    :path [:verdict-code] :value "hyvaksytty") => no-errors?)
         (fact "Publish verdict"
           (command sonja :publish-pate-verdict :id foreman-app-id :verdict-id verdict-id) => no-errors?)
-        (verdict-pdf-queue-test {:app-id     foreman-app-id
-                                 :verdict-id verdict-id
-                                 :state      "foremanVerdictGiven"})
+        (verdict-pdf-queue-test sonja {:app-id     foreman-app-id
+                                       :verdict-id verdict-id
+                                       :state      "foremanVerdictGiven"})
         (fact "Applicant cant create verdict"
           (command pena :new-pate-verdict-draft :id foreman-app-id :template-id template-id) => unauthorized?)
 

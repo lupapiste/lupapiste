@@ -4,9 +4,17 @@
             [schema.core :refer [defschema] :as sc]))
 
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit
-                         :muutoksenhaku :vaativuus :rakennusoikeus
-                         :kaava :toimenpide-julkipanoon :yleinen
-                         :sopimus})
+                                 :muutoksenhaku :vaativuus :rakennusoikeus
+                                 :kaava :toimenpide-julkipanoon :yleinen
+                                 :sopimus})
+
+(def phrase-categories-ya #{:paatosteksti :lupaehdot :muutoksenhaku
+                            :toimenpide-julkipanoon :yleinen :sopimus})
+
+(defn phrase-categories-by-template-category [category]
+  (case (keyword category)
+    :ya phrase-categories-ya
+    phrase-categories))
 
 (def path-type (sc/cond-pre
                 ;; Joined kw-path (e.g. :one.two.three)
@@ -259,7 +267,9 @@
           (sc/optional-key :dropzone)   sc/Str
           ;; If true, multiple files can be uploaded at the same
           ;; time. Default false.
-          (sc/optional-key :multiple?)  sc/Bool}))
+          (sc/optional-key :multiple?)  sc/Bool
+          ;; If true, the bind command is :bind-draft-attachments.
+          (sc/optional-key :draft?)     sc/Bool}))
 
 (defschema PateToggle
   (merge (dissoc PateComponent :css)

@@ -70,8 +70,8 @@
         (facts "Publish verdict"
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id verdict-id) => ok?
-          (verdict-pdf-queue-test {:app-id       app-id
-                                   :verdict-id   verdict-id})
+          (verdict-pdf-queue-test sonja {:app-id     app-id
+                                         :verdict-id verdict-id})
           (let [{:keys [tasks attachments
                         state]} (query-application sonja app-id)
                 file-id         (-> attachments first :latestVersion :fileId)
@@ -168,8 +168,8 @@
           (add-legacy-review sonja app-id vid1 "Review One" :aloituskokous)
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id vid1) => ok?)
-        (verdict-pdf-queue-test {:app-id       app-id
-                                 :verdict-id   vid1})
+        (verdict-pdf-queue-test sonja {:app-id     app-id
+                                       :verdict-id vid1})
         (fact "State is verdictGiven"
           (query-application sonja app-id)
           => (contains {:state "verdictGiven"}))
@@ -183,8 +183,8 @@
           (add-legacy-review sonja app-id vid2 "Review Two" :aloituskokous)
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id vid2) => ok?)
-        (verdict-pdf-queue-test {:app-id       app-id
-                                 :verdict-id   vid2})
+        (verdict-pdf-queue-test sonja {:app-id     app-id
+                                       :verdict-id vid2})
         (fact "There are now two tasks and four attachments"
           (let [{:keys [attachments tasks]} (query-application sonja app-id)]
             (count attachments) => 4

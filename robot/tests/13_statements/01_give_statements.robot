@@ -128,6 +128,14 @@ Sonja types in draft
   Reload page and kill dev-box
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
 
+Sonja changes draft's due date
+  Wait Until  Element should be enabled  due-date-input
+  Input Text  due-date-input  18.08.2018
+  Press Key  due-date-input  \\13
+  Press Key  due-date-input  \\13
+  Reload page and kill dev-box
+  Wait Until  Element should contain  due-date-span  18.8.2018
+
 Sonja adds attachment to statement draft
   Upload attachment with default type  ${PDF_TESTFILE_PATH}
 
@@ -230,6 +238,17 @@ Veikko from Tampere can give statement as attachment
   Click Element  statement-submit
   Confirm yes no dialog
   Statement status is  Ehdollinen  veikko.viranomainen@tampere.fi
+  Logout
+
+Pena can't change due date in a statement where Sonja or Pena are statement givers
+  Pena logs in
+  Open application  ${appname}  ${appPropertyId}
+  Open tab  statement
+  Open statement  sonja.sibbo@sipoo.fi
+  Element should not be visible  due-date-input
+  Return from statement
+  Open statement  pena@example.com
+  Element should not be visible  due-date-input
   Logout
 
 Sonja can see statement indicator

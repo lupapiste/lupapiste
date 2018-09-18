@@ -2,14 +2,20 @@
   (:require [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as org]
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.util :as util]))
 
 (defn valid-category
   "Input validator for category parameter."
-  [{data :data}]
-  (when-not (util/includes-as-kw? shared-schemas/phrase-categories (:category data))
+  [{:keys [data]}]
+  (when-not (util/includes-as-kw?
+              (concat shared-schemas/phrase-categories
+                      (->> (:custom-phrase-categories (org/get-organization (:org-id data)))
+                           (keys)
+                           (set)))
+              (:category data))
     (fail :error.invalid-category)))
 
 (defn phrase-id-exists [command]
@@ -39,3 +45,16 @@
   (mongo/update-by-id :organizations
                       org-id
                       {$pull {:phrases {:id phrase-id}}}))
+
+(defn save-phrase-category [{:keys [data]}]
+  (let [mongo-id (mongo/create-id)]
+  (mongo/update-by-id :organizations
+                      (:org-id data)
+                      {$set {(util/kw-path :custom-phrase-categories mongo-id :fi) (get-in data [:category :fi])
+                             (util/kw-path :custom-phrase-categories mongo-id :sv) (get-in data [:category :sv])
+                             (util/kw-path :custom-phrase-categories mongo-id :en) (get-in data [:category :en])}})))
+
+(defn delete-phrase-category [org-id category-id]
+  (mongo/update-by-id :organizations
+                      org-id
+                      {$unset {(util/kw-path :custom-phrase-categories category-id) 1}}))

@@ -62,16 +62,31 @@
           (fact "Pseudo query succeeds"
             (query sonja :replace-pate-verdict :id app-id
                    :verdict-id verdict-id) => ok?)
-          (let [{vid1 :verdict-id}                                      (command sonja :new-pate-verdict-draft :id app-id
-                                                                                 :template-id template-id
-                                                                                 :replacement-id verdict-id) => ok?]
+          (let [{vid1 :verdict-id} (command sonja :new-pate-verdict-draft :id app-id
+                                            :template-id template-id
+                                            :replacement-id verdict-id)
+                =>                 ok?]
+            (fact "Appeal is not allowed for replaced verdict"
+              (command sonja :upsert-pate-appeal :id app-id
+                       :verdict-id verdict-id
+                       :type "appeal"
+                       :author "One"
+                       :datestamp 12345
+                       :filedatas []) => (err :error.verdict-replaced))
             (fact "Only one replacement draft at the time"
               (command sonja :new-pate-verdict-draft :id app-id
                  :template-id template-id
                  :replacement-id verdict-id) => fail?)
             (fact "Delete the only replacement draft"
               (command sonja :delete-pate-verdict :id app-id
-                       :verdict-id vid1) => ok?)))
+                       :verdict-id vid1) => ok?)
+            (fact "Appeal is now allowed"
+              (command sonja :upsert-pate-appeal :id app-id
+                       :verdict-id verdict-id
+                       :type "appeal"
+                       :author "One"
+                       :datestamp 12345
+                       :filedatas []) => ok?)))
         (check-verdict-task-count app-id verdict-id 6)
 
         (let [{replacement-verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
@@ -98,6 +113,14 @@
             (command sonja :publish-pate-verdict
                      :id app-id
                      :verdict-id replacement-verdict-id) => ok?)
+
+          (fact "Appeal is not allowed for replaced verdict"
+              (command sonja :upsert-pate-appeal :id app-id
+                       :verdict-id verdict-id
+                       :type "appeal"
+                       :author "One"
+                       :datestamp 12345
+                       :filedatas []) => (err :error.verdict-replaced))
 
           (fact "Verdicts have replacement information"
             (let [application (query-application sonja app-id)

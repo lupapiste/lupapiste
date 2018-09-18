@@ -198,3 +198,15 @@
        (zipmap supported-langs (map #(localize % "error.unknown") supported-langs))) => true)
   (fact "with string"
     (:fi (to-lang-map "error.unknown")) => unknown-as-fi))
+
+(facts "localize"
+  (localize "fi" "verdict.status") => "P\u00e4\u00e4t\u00f6s"
+  (localize "fi" "verdict" "status") => "P\u00e4\u00e4t\u00f6s"
+  (localize :fi :verdict :status) => "P\u00e4\u00e4t\u00f6s"
+  (localize :fi :verdict nil :status) => "???verdict..status???"
+  (localize :fi :verdict :status nil) => "???verdict.status.???"
+  (localize :fi :verdict :status :6) => "Ehdollinen"
+  (localize :fi :verdict :status "6") => "Ehdollinen"
+  (localize :fi :verdict :status 6) => "Ehdollinen"
+  (localize :fi :verdict.status.6) => "Ehdollinen"
+  (localize :fi "verdict" :status 6) => "Ehdollinen")

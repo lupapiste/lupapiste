@@ -62,7 +62,6 @@
   (rum/local nil ::template)
   [{template* ::template}]
   (let [templates (rum/react state/template-list)]
-
     (if (empty? templates)
       [:div.pate-note-frame [:div.pate-note (path/loc (loc-key :no-templates))]]
       (let [items (map #(set/rename-keys % {:id :value :name :text})

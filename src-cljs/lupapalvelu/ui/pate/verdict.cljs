@@ -7,6 +7,7 @@
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
+            [lupapalvelu.ui.pate.appeal :as appeal]
             [lupapalvelu.ui.pate.attachments :as att]
             [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.sections :as sections]
@@ -162,10 +163,11 @@
    header
    (components/add-key-attrs body "tag-")
    (when (seq attachment-ids)
-     (list [:h3.pate-attachments-title {:key "attachments-title"}
+     (list [:h3.pate-published-title {:key "attachments-title"}
             (common/loc :application.attachments)]
            (rum/with-key (att/attachments-view attachment-ids)
-             "attachments-view")))])
+             "attachments-view")))
+   (appeal/appeals)])
 
 (rum/defc verdict < rum/reactive
   [options]
@@ -220,7 +222,8 @@
                                                                                   verdict-id
                                                                                   reset-verdict)
                                                   (do (when (state/auth? :application-phrases)
-                                                        (service/fetch-application-phrases app-id))
+                                                        (do (service/fetch-application-phrases app-id)
+                                                            (service/fetch-custom-application-phrases app-id)) )
                                                       (service/open-verdict app-id
                                                                             verdict-id
                                                                             reset-verdict)))))

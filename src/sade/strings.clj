@@ -1,9 +1,10 @@
 (ns sade.strings
   (:require [clojure.string :as s]
+            [clojure.walk :as walk]
             [sade.shared-strings :as shared])
   (:import [java.text Normalizer Normalizer$Form]
-           [org.apache.commons.lang3 StringUtils]
-           [org.apache.commons.codec.binary Base64])
+           [org.apache.commons.codec.binary Base64]
+           [org.apache.commons.lang3 StringUtils])
   (:refer-clojure :exclude [replace contains? empty?]))
 
 (defmacro defalias [alias from]
@@ -232,3 +233,9 @@
 
 (defn strip-trailing-slashes [string]
   (replace string #"/+$" ""))
+
+(defn serialize
+  "Serialze with `pr-str` but enforce evaluation first. The resulting
+  string can be parsed with `clojure.edn/read-string`."
+  [arg]
+  (pr-str (walk/postwalk identity arg)))

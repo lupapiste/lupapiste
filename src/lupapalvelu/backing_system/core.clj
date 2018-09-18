@@ -84,9 +84,10 @@
 ;;;; ===================================================================================================================
 
 (def supported-action? (partial with-implicit-backing-system -supported-action?))
-(defn validate-action-support [{:keys [action] :as command}]
-  (when-not (supported-action? command)
-    (fail :error.integration.unsupported-action :action action)))
+(defn validate-action-support [{:keys [action application organization] :as command}]
+  (when (and application organization)
+    (when-not (supported-action? command)
+     (fail :error.integration.unsupported-action :action action))))
 
 (def submit-application! (partial with-implicit-backing-system -submit-application!))
 

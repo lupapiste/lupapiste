@@ -3,7 +3,9 @@
             [clojure.edn :as edn]
             [clojure.set :as set]
             [lupapalvelu.action :as action]
+            [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-meta-fields :as meta]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as att]
@@ -53,6 +55,84 @@
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
             [taoensso.timbre :refer [warnf warn  errorf error]]))
+
+;; ------------------------------------------
+;; Pre-checks
+;; Called from multiple api namespaces.
+;; ------------------------------------------
+
+(defn pate-enabled
+  "Pre-checker that fails if Pate is not enabled in the application organization scope."
+  [{:keys [organization application]}]
+  (when (and organization
+             (not (-> (org/resolve-organization-scope (:municipality application) (:permitType application) @organization)
+                      :pate-enabled)))
+    (fail :error.pate-disabled)))
+
+;; TODO: publishing? support
+(defn verdict-exists
+  "Returns pre-checker that fails if the verdict does not exist.
+  Additional conditions:
+    :draft? fails if the verdict state is NOT draft
+    :published? fails if the verdict has NOT been published
+    :legacy? fails if the verdict is a 'modern' Pate verdict
+    :modern? fails if the verdict is a legacy verdict
+    :contract? fails if the verdict is not a contract
+    :verdict? fails for contracts
+    :not-replaced? Fails if the verdict has been OR is being replaced. "
+  [& conditions]
+  (let [{:keys [draft? published?
+                legacy? modern?
+                contract? verdict?
+                html? not-replaced?]} (zipmap conditions
+                                              (repeat true))]
+    (fn [{:keys [data application]}]
+      (when-let [verdict-id (:verdict-id data)]
+        (let [verdict (util/find-by-id verdict-id
+                                       (:pate-verdicts application))
+              state (vc/verdict-state verdict)]
+          (util/pcond-> (cond
+                          (not verdict)
+                          :error.verdict-not-found
+
+                          (not (vc/has-category? verdict
+                                                 (schema-util/application->category application)))
+                          :error.invalid-category
+
+                          (and draft? (not= state :draft))
+                          :error.verdict.not-draft
+
+                          (and published? (not= state :published))
+                          :error.verdict.not-published
+
+                          (and legacy? (not (vc/legacy? verdict)))
+                          :error.verdict.not-legacy
+
+                          (and modern? (vc/legacy? verdict))
+                          :error.verdict.legacy
+
+                          (and contract? (not (vc/contract? verdict)))
+                          :error.verdict.not-contract
+
+                          (and verdict? (vc/contract? verdict))
+                          :error.verdict.contract
+
+                          (and not-replaced? (or (get-in verdict [:replacement :replaced-by])
+                                                 (some #(some-> % :replacement :replaces (= verdict-id))
+                                                       (:pate-verdicts application))))
+                          :error.verdict-replaced)
+                        identity fail))))))
+
+(declare command->backing-system-verdict)
+
+(defn backing-system-verdict
+  "Pre-check that fails if the target verdict is not a backing system
+  verdict. Note that after Pate has taken into use, verdicts array
+  includes only the backing system verdicts."
+  [{:keys [application data] :as command}]
+  (when application
+    (when-not (command->backing-system-verdict command)
+      (fail :error.verdict-not-found))))
 
 (defn neighbor-states
   "Application neighbor-states data in a format suitable for verdicts: list
@@ -576,9 +656,12 @@
         target                             {:type "verdict"
                                             :id verdict-id} ; key order seems to be significant!
         {:keys [sent state pate-verdicts]} application
-        ;; Deleting the only given verdict? Return sent or submitted state.
+        ;; Deleting the only given verdict? Return sent or submitted
+        ;; state.  When Pate is in production every backing-system
+        ;; verdict (in verdicts) is published.
         step-back?                         (and published
                                                 (= 1 (count (filter :published pate-verdicts)))
+                                                (empty? (:verdicts application))
                                                 (states/verdict-given-states (keyword state)))
         {:keys [task-ids
                 task-attachment-ids]}      (delete-verdict-tasks-helper application verdict-id)
@@ -596,13 +679,12 @@
                                                      application
                                                      user)))]
       (action/update-application command updates)
-      ;;(bulletins/process-delete-verdict id verdict-id)
+      (bulletins/process-delete-verdict (:id application) verdict-id)
       (att/delete-attachments! application
                                (->> task-attachment-ids
                                     (concat (verdict-attachment-ids application verdict-id))
                                     (remove nil?)))
-
-      ;;(appeal-common/delete-by-verdict command verdict-id)
+      (appeal-common/delete-by-verdict command verdict-id)
       (when step-back?
         (notifications/notify! :application-state-change command))))
 
@@ -957,10 +1039,10 @@
 (defn can-verdict-be-replaced?
   "Modern verdict can be replaced if its published and not already
   replaced (or being replaced). Contracts cannot be replaced."
-  [{:keys [pate-verdicts] :as verdict} verdict-id]
+  [{:keys [pate-verdicts]} verdict-id]
   (when-let [{:keys [published legacy?
-                     replacement category]} (util/find-by-id verdict-id
-                                                             pate-verdicts)]
+                     replacement category]
+              :as   verdict} (util/find-by-id verdict-id pate-verdicts)]
     (and published
          (not legacy?)
          (not (vc/contract? verdict))
@@ -1097,8 +1179,10 @@
 (defn finalize--attachments [{:keys [command application verdict]}]
   (let [{att-items :items
          update-fn :update-fn} (attachment-items command verdict)
-        verdict-attchment?     #(util/includes-as-kw? (map :id att-items)
+        verdict-attachment?    #(util/includes-as-kw? (map :id att-items)
                                                       (:id %))
+        verdict-draft-attachment? #(and (verdict-attachment? %)
+                                        (some-> % :metadata :draftTarget))
         target                 {:type "verdict"
                                 :id   (:id verdict)}]
     (-> (update verdict :data update-fn)
@@ -1107,16 +1191,20 @@
                (update application :attachments
                        #(map (fn [attachment]
                               (util/pcond-> attachment
-                                            verdict-attchment?
+                                            verdict-attachment?
                                             (assoc :target target)))
                             %)))
         (update-in [:updates $set]
                    merge
                    (att/attachment-array-updates (:id application)
-                                                 verdict-attchment?
+                                                 verdict-attachment?
                                                  :readOnly true
                                                  :locked   true
-                                                 :target target))
+                                                 :target target)
+                   (att/attachment-array-updates (:id application)
+                                                 verdict-draft-attachment?
+                                                 :metadata.nakyvyys "julkinen"
+                                                 :metadata.draftTarget false))
         (assoc :commit-fn (fn [{:keys [command application]}]
                             (tiedonohjaus/mark-app-and-attachments-final! (:id application)
                                                                           (:created command)))))))
@@ -1209,7 +1297,7 @@
 (defn finalize--pdf [{:keys [application verdict]}]
   (let [tags    (pdf/verdict-tags application verdict)]
     (-> verdict
-        (assoc-in [:published :tags] (pr-str tags))
+        (assoc-in [:published :tags] (ss/serialize tags))
         (verdict->updates :published.tags)
         (assoc :commit-fn (util/fn->> :command (send-command ::verdict))))))
 
@@ -1375,7 +1463,7 @@
          :as        details} (if-let [verdict (command->backing-system-verdict command)]
                                {:id        (:id verdict)
                                 :published (:timestamp verdict)
-                                :tags      (pr-str {:body (backing-system--tags application verdict)})}
+                                :tags      (ss/serialize {:body (backing-system--tags application verdict)})}
                                (let [{:keys [id published]} (command->verdict command)]
                                  (assoc published :id id)))]
     (assoc details
@@ -1460,7 +1548,7 @@
         tags (-> verdict :published :tags
                  edn/read-string
                  (update :body update-signature-section verdict signature)
-                 pr-str)]
+                 ss/serialize)]
     (verdict-update command
                     (util/deep-merge
                      {$push {(util/kw-path :pate-verdicts.$.signatures) signature}

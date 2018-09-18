@@ -335,10 +335,14 @@
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
     {::interface-path [:attachments :create]
      ::params         {:id       allu-id
-                       :metadata {:name        (or (:contents attachment) "")
-                                  :description (localize lang :attachmentType type-group type-id)
+                       :metadata {:name        (:filename latestVersion)
+                                  :description (let [type (localize lang :attachmentType type-group type-id)
+                                                     description (:contents attachment)]
+                                                 (if (or (not description) (= type description))
+                                                   type
+                                                   (str type ": " description)))
                                   :mimeType    (:contentType latestVersion)}
-                       :file     (-> attachment :latestVersion :fileId)}
+                       :file     (:fileId latestVersion)}
      ::command        (minimize-command command attachment)}))
 
 ;;;; IntegrationMessage construction
