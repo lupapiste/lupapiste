@@ -14,6 +14,7 @@
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
             [reitit.core :as reitit]
+            [reitit.coercion.schema]
             [taoensso.timbre :refer [info error]]
             [taoensso.nippy :as nippy]
             [sade.util :refer [dissoc-in assoc-when fn->]]
@@ -404,14 +405,14 @@
 
 (def- allu-router
   (reitit/router
-    [["/applications"                                       ; TODO: {:coercion reitit.coercion.schema/coercion}
+    [["/applications" {:coercion reitit.coercion.schema/coercion}
       ["/:id/cancelled" {:name [:applications :cancel]
                          :put  {:parameters {:path {:id ssc/NatString}}
                                 :handler    clj-http/request}}]
       ["/:id/attachments" {:name [:attachments :create]
                            :post {:parameters {:path {:id ssc/NatString}}
                                   :handler    clj-http/request}}]]
-     ["/placementcontracts"
+     ["/placementcontracts" {:coercion reitit.coercion.schema/coercion}
       ["" {:name [:placementcontracts :create]
            :post {:handler clj-http/request}}]
       ["/:id" {:name [:placementcontracts :update]

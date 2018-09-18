@@ -22,9 +22,9 @@
                  [ring "1.6.2" :exclusions [commons-fileupload org.clojure/tools.reader]]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro ring]]
-                 [metosin/ring-swagger "0.22.12"]
-                 [metosin/ring-swagger-ui "2.2.5-0"]
-                 [metosin/reitit-core "0.2.1"]
+                 [metosin/ring-swagger "0.26.1"]
+                 [metosin/ring-swagger-ui "3.17.2"]
+                 [metosin/reitit "0.2.2"]
 
                  ; Namespace finder library
                  [bultitude "0.2.8"] ; noir requires 0.2.0
