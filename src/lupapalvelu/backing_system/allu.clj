@@ -13,7 +13,7 @@
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
-            [reitit.core :as reitit]
+            [reitit.ring :as reitit-ring]
             [reitit.coercion.schema]
             [taoensso.timbre :refer [info error]]
             [taoensso.nippy :as nippy]
@@ -403,22 +403,6 @@
                                                    :schema    (sc/cond-pre sc/Str InputStream)
                                                    :mime-type (fn-> :metadata :mimeType)}]}}})
 
-(def- allu-router
-  (reitit/router
-    [["/applications" {:coercion reitit.coercion.schema/coercion}
-      ["/:id/cancelled" {:name [:applications :cancel]
-                         :put  {:parameters {:path {:id ssc/NatString}}
-                                :handler    clj-http/request}}]
-      ["/:id/attachments" {:name [:attachments :create]
-                           :post {:parameters {:path {:id ssc/NatString}}
-                                  :handler    clj-http/request}}]]
-     ["/placementcontracts" {:coercion reitit.coercion.schema/coercion}
-      ["" {:name [:placementcontracts :create]
-           :post {:handler clj-http/request}}]
-      ["/:id" {:name [:placementcontracts :update]
-               :put  {:parameters {:path {:id ssc/NatString}}
-                      :handler    clj-http/request}}]]]))
-
 (defn- interpolate-uri [template path-params request-data]
   (reduce (fn [^String uri [k schema]]
             (let [^String value (k request-data)
@@ -579,22 +563,47 @@
 
       response (allu-fail! :error.allu.http (select-keys response [:status :body])))))
 
-(def- combined-middleware
-  (comp handle-response
-        (preprocessor->middleware httpify-request)
-        save-messages!
-        (preprocessor->middleware (fn-> get-attachment-files! content->json (jwt-authorize (env/value :allu :jwt))))))
-
 ;;;; Request handling and JMS resources
 ;;;; ===================================================================================================================
 
+(defn- make-router [disable-io-middlewares? handler]
+  (reitit-ring/router
+    ["/" {:middleware (if disable-io-middlewares?
+                        [handle-response
+                         (preprocessor->middleware httpify-request)
+                         (preprocessor->middleware (fn-> content->json (jwt-authorize (env/value :allu :jwt))))]
+                        [handle-response
+                         (preprocessor->middleware httpify-request)
+                         save-messages!
+                         (preprocessor->middleware
+                           (fn-> get-attachment-files! content->json (jwt-authorize (env/value :allu :jwt))))])
+          :coercion   reitit.coercion.schema/coercion}
+     ["applications"
+      ["/:id/cancelled" {:name [:applications :cancel]
+                         :put  {:parameters {:path {:id ssc/NatString}}
+                                :handler    handler}}]
+      ["/:id/attachments" {:name [:attachments :create]
+                           :post {:parameters {:path {:id ssc/NatString}}
+                                  :handler    handler}}]]
+     ["placementcontracts"
+      ["" {:name [:placementcontracts :create]
+           :post {:handler handler}}]
+      ["/:id" {:name [:placementcontracts :update]
+               :put  {:parameters {:path {:id ssc/NatString}}
+                      :handler    handler}}]]]))
+
+(defn- wrap-handler [disable-io-middlewares? handler]
+  (reitit-ring/ring-handler (make-router disable-io-middlewares? handler)))
+
 (defn- make-handler
   ([] (make-handler (env/dev-mode?)))
-  ([dev-mode?] (if dev-mode? imessages-mock-handler (make-remote-handler (env/value :allu :url)))))
+  ([dev-mode?] (wrap-handler dev-mode? (if dev-mode?
+                                         imessages-mock-handler
+                                         (make-remote-handler (env/value :allu :url))))))
 
 (def allu-request-handler
   "ALLU request handler. Returns nil, calls `allu-fail!` on HTTP errors."
-  (combined-middleware (make-handler)))
+  (make-handler))
 
 (def- allu-jms-queue-name "lupapalvelu.backing-system.allu")
 

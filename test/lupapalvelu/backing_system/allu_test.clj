@@ -33,7 +33,7 @@
 (testable-privates lupapalvelu.backing-system.allu application->allu-placement-contract
                    placement-creation-request
                    request-integration-message response-integration-message
-                   preprocessor->middleware httpify-request content->json jwt-authorize
+                   wrap-handler
                    interface-path->string allu-fail!)
 
 ;;;; Refutation Utilities
@@ -67,12 +67,6 @@
 
       response (allu-fail! :error.allu.http (select-keys response [:status :body])))))
 
-(def- combined-pure-middleware
-  "Like `allu/combined-middleware` but without the side-effecting middlewares."
-  (comp handle-response
-        (preprocessor->middleware @httpify-request)
-        (preprocessor->middleware (fn-> content->json (jwt-authorize (env/value :allu :jwt))))))
-
 (def- allu-id "23")
 
 (def- ^:dynamic sent-attachment
@@ -80,7 +74,7 @@
   nil)
 
 (def- test-handler
-  (combined-pure-middleware
+  (wrap-handler true
     (fn [{interface-path :lupapalvelu.backing-system.allu/interface-path :as request}]
       (let [http-request (-> (into {} (remove (comp namespace key)) request)
                              (update :body (fn [body]
