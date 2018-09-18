@@ -160,7 +160,7 @@
           henkilo-email {:tag :sahkopostiosoite :attrs nil :content ["Veijo.Viranomainen@example.com"]}
           henkilo-puhelin {:tag :puhelin :attrs nil :content ["0123456789"]}
           henkilo-err-puhelin {:tag :puhelin :attrs nil :content ["0000000000"]}
-          henkilo-content [{:tag :osoite :attrs nil :content [{:tag :osoitenimi, :attrs nil :content [{:tag :teksti, :attrs {:xml:lang "und"}, :content ["Metsänpojankuja 1"]}]}
+          henkilo-content [{:tag :osoite :attrs nil :content [{:tag :osoitenimi, :attrs nil :content [{:tag :teksti, :attrs {:xml:lang "und"}, :content ["Mets\u00e4npojankuja 1"]}]}
                                                               {:tag :postinumero :attrs nil, :content ["03220"]}
                                                               {:tag :postitoimipaikannimi, :attrs nil, :content ["TERVALAMPI"]}]}]
           henkilo-data (fn [content] {:tag :henkilo :attrs nil, :content (concat henkilo-content content)})
@@ -173,7 +173,7 @@
                                                          {:tag :hakemuksenSaapumisPvm :attrs nil :content ["2015-11-30"]}
                                                          {:tag :sijaistettavaHlo :attrs nil :content []}
                                                          {:tag :paatosPvm :attrs nil :content ["2015-11-29"]}
-                                                         {:tag :paatostyyppi :attrs nil :content ["hyväksytty"]}]}]
+                                                         {:tag :paatostyyppi :attrs nil :content ["hyv\u00e4ksytty"]}]}]
       (verdict-party-finder "vastaava ty\u00f6njohtaja" henk-tiedot [party]) => nil
 
       (let [amended-party (update-in party [:content] conj (henkilo-data [henkilo-hetu]))]
