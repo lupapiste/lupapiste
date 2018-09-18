@@ -3,6 +3,7 @@
   (:require [clojure.core.match :refer [match]]
             [clojure.walk :refer [postwalk]]
             [cheshire.core :as json]
+            [reitit.ring :as reitit-ring]
             [schema.core :as sc :refer [defschema Bool]]
             [taoensso.timbre :refer [info]]
             [sade.core :refer [def- now]]
@@ -33,7 +34,7 @@
 (testable-privates lupapalvelu.backing-system.allu application->allu-placement-contract
                    placement-creation-request
                    request-integration-message response-integration-message
-                   wrap-handler
+                   make-router
                    interface-path->string allu-fail!)
 
 ;;;; Refutation Utilities
@@ -74,69 +75,73 @@
   nil)
 
 (def- test-handler
-  (wrap-handler true
-    (fn [{interface-path :lupapalvelu.backing-system.allu/interface-path :as request}]
-      (let [http-request (-> (into {} (remove (comp namespace key)) request)
-                             (update :body (fn [body]
-                                             (cond
-                                               (string? body) (->> (json/decode body true)
-                                                                   (postwalk (fn [v] ; HACK
-                                                                               (case v
-                                                                                 "NaN" ##NaN
-                                                                                 "Infinity" ##Inf
-                                                                                 "-Infinity" ##-Inf
-                                                                                 v))))
-                                               (vector? body) (update-in body [0 :content] json/decode true)))))
-            headers {"authorization" (str "Bearer " (env/value :allu :jwt))}]
-        (match interface-path
-          [:applications :cancel] (facts "applications.cancel request"
-                                    http-request => {:uri            (str "/applications/" allu-id "/cancelled")
-                                                     :request-method :put
-                                                     :headers        headers
-                                                     :content-type   :json
-                                                     :body           nil})
+  (reitit-ring/ring-handler
+    (make-router
+      true
+      (fn [{interface-path :lupapalvelu.backing-system.allu/interface-path :as request}]
+        (let [http-request (-> (into {} (remove (comp namespace key)) request)
+                               (update :body (fn [body]
+                                               (cond
+                                                 (string? body) (->> (json/decode body true)
+                                                                     (postwalk (fn [v] ; HACK
+                                                                                 (case v
+                                                                                   "NaN" ##NaN
+                                                                                   "Infinity" ##Inf
+                                                                                   "-Infinity" ##-Inf
+                                                                                   v))))
+                                                 (vector? body) (update-in body [0 :content] json/decode true)))))
+              headers {"authorization" (str "Bearer " (env/value :allu :jwt))}]
+          (match interface-path
+            [:applications :cancel] (facts "applications.cancel request"
+                                      http-request
+                                      => (contains {:uri            (str "/applications/" allu-id "/cancelled")
+                                                    :request-method :put
+                                                    :headers        headers
+                                                    :content-type   :json
+                                                    :body           nil}))
 
-          [:placementcontracts :create] (facts "placementcontracts.create request"
-                                          (dissoc http-request :body) => {:uri            "/placementcontracts"
-                                                                          :request-method :post
-                                                                          :headers        headers
-                                                                          :content-type   :json}
-                                          (sc/check PlacementContract (:body http-request)) => nil)
+            [:placementcontracts :create] (facts "placementcontracts.create request"
+                                            (dissoc http-request :body)
+                                            => (contains {:uri            "/placementcontracts"
+                                                          :request-method :post
+                                                          :headers        headers
+                                                          :content-type   :json})
+                                            (sc/check PlacementContract (:body http-request)) => nil)
 
-          [:placementcontracts :update]
-          (facts "placementcontracts.update request"
-            (dissoc http-request :body) => {:uri            (str "/placementcontracts/" allu-id)
-                                            :request-method :put
-                                            :headers        headers
-                                            :content-type   :json}
-            (sc/check PlacementContract (:body http-request)) => nil)
+            [:placementcontracts :update]
+            (facts "placementcontracts.update request"
+              (dissoc http-request :body) => (contains {:uri            (str "/placementcontracts/" allu-id)
+                                                        :request-method :put
+                                                        :headers        headers
+                                                        :content-type   :json})
+              (sc/check PlacementContract (:body http-request)) => nil)
 
-          [:attachments :create]
-          (let [fileId (get-in request [:lupapalvelu.backing-system.allu/command :latestAttachmentVersion :fileId])]
-            (facts "attachments.create request"
-              (dissoc http-request :body) => {:uri            (str "/applications/" allu-id "/attachments")
-                                              :request-method :post
-                                              :headers        headers}
-              (let [[metadata file] (:body http-request)]
-                (dissoc metadata :content) => {:name      "metadata"
-                                               :mime-type "application/json"
-                                               :encoding  "UTF-8"}
-                (sc/check @#'allu/FileMetadata (:content metadata)) => nil
-                (:content metadata) => {:name        (-> sent-attachment :latestVersion :filename)
-                                        :description (let [{{:keys [type-group type-id]} :type} sent-attachment
-                                                           type (localize @#'allu/lang :attachmentType
-                                                                          type-group type-id)
-                                                           description (:contents sent-attachment)]
-                                                       (if (or (not description) (= type description))
-                                                         type
-                                                         (str type ": " description)))
-                                        :mimeType    (-> sent-attachment :latestVersion :contentType)}
-                (dissoc file :mime-type) => {:name    "file"
-                                             :content fileId}
-                ;; Could be improved but generators produce junk for this anyway:
-                (:mime-type file) => string?))))
+            [:attachments :create]
+            (let [fileId (get-in request [:lupapalvelu.backing-system.allu/command :latestAttachmentVersion :fileId])]
+              (facts "attachments.create request"
+                (dissoc http-request :body) => (contains {:uri            (str "/applications/" allu-id "/attachments")
+                                                          :request-method :post
+                                                          :headers        headers})
+                (let [[metadata file] (:body http-request)]
+                  (dissoc metadata :content) => {:name      "metadata"
+                                                 :mime-type "application/json"
+                                                 :encoding  "UTF-8"}
+                  (sc/check @#'allu/FileMetadata (:content metadata)) => nil
+                  (:content metadata) => {:name        (-> sent-attachment :latestVersion :filename)
+                                          :description (let [{{:keys [type-group type-id]} :type} sent-attachment
+                                                             type (localize @#'allu/lang :attachmentType
+                                                                            type-group type-id)
+                                                             description (:contents sent-attachment)]
+                                                         (if (or (not description) (= type description))
+                                                           type
+                                                           (str type ": " description)))
+                                          :mimeType    (-> sent-attachment :latestVersion :contentType)}
+                  (dissoc file :mime-type) => {:name    "file"
+                                               :content fileId}
+                  ;; Could be improved but generators produce junk for this anyway:
+                  (:mime-type file) => string?))))
 
-        {:status 200, :body allu-id}))))
+          {:status 200, :body allu-id})))))
 
 ;;;; Actual Tests
 ;;;; ==================================================================================================================

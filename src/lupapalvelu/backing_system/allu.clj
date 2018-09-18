@@ -4,7 +4,6 @@
   (:require [clojure.string :as s]
             [clojure.core.match :refer [match]]
             [clojure.walk :refer [postwalk]]
-            [clj-http.core :as clj-http]
             [monger.operators :refer [$set $in]]
             [cheshire.core :as json]
             [lupapiste-jms.client :as jms-client]
@@ -13,6 +12,7 @@
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
+            [reitit.core :as reitit]
             [reitit.ring :as reitit-ring]
             [reitit.coercion.schema]
             [taoensso.timbre :refer [info error]]
@@ -310,41 +310,65 @@
                               (update :storageSystem keyword))]
       (assoc (minimize-command command) :latestAttachmentVersion mini-attachment))))
 
+(declare allu-router)
+
+(defn- route-match->request-method [route-match]
+  (some #{:get :put :post :delete} (keys (:data route-match))))
+
 (defn- application-cancel-request [{:keys [application] :as command}]
-  (let [allu-id (get-in application [:integrationKeys :ALLU :id])]
+  (let [allu-id (get-in application [:integrationKeys :ALLU :id])
+        interface-path [:applications :cancel]
+        path-params {:id allu-id}
+        route-match (reitit/match-by-name allu-router interface-path path-params)]
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
-    {::interface-path [:applications :cancel]
-     ::params         {:id allu-id}
-     ::command        (minimize-command command)}))
+    {::interface-path interface-path
+     ::params         path-params
+     ::command        (minimize-command command)
+     :uri             (:path route-match)
+     :request-method  (route-match->request-method route-match)}))
 
 (defn- placement-creation-request [{:keys [application] :as command}]
-  {::interface-path [:placementcontracts :create]
-   ::params         {:application (application->allu-placement-contract true application)}
-   ::command        (minimize-command command)})
+  (let [interface-path [:placementcontracts :create]
+        route-match (reitit/match-by-name allu-router interface-path)]
+    {::interface-path interface-path
+     ::params         {:application (application->allu-placement-contract true application)}
+     ::command        (minimize-command command)
+     :uri             (:path route-match)
+     :request-method  (route-match->request-method route-match)}))
 
 (defn- placement-update-request [pending-on-client {:keys [application] :as command}]
-  (let [allu-id (-> application :integrationKeys :ALLU :id)]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)
+        interface-path [:placementcontracts :update]
+        path-params {:id allu-id}
+        route-match (reitit/match-by-name allu-router interface-path path-params)]
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
-    {::interface-path [:placementcontracts :update]
-     ::params         {:id          allu-id
-                       :application (application->allu-placement-contract pending-on-client application)}
-     ::command        (minimize-command command)}))
+    {::interface-path interface-path
+     ::params         (assoc path-params
+                        :application (application->allu-placement-contract pending-on-client application))
+     ::command        (minimize-command command)
+     :uri             (:path route-match)
+     :request-method  (route-match->request-method route-match)}))
 
 (defn- attachment-send [{:keys [application] :as command}
                         {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment}]
-  (let [allu-id (-> application :integrationKeys :ALLU :id)]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)
+        interface-path [:attachments :create]
+        path-params {:id allu-id}
+        route-match (reitit/match-by-name allu-router interface-path path-params)]
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
-    {::interface-path [:attachments :create]
-     ::params         {:id       allu-id
-                       :metadata {:name        (:filename latestVersion)
-                                  :description (let [type (localize lang :attachmentType type-group type-id)
-                                                     description (:contents attachment)]
-                                                 (if (or (not description) (= type description))
-                                                   type
-                                                   (str type ": " description)))
-                                  :mimeType    (:contentType latestVersion)}
-                       :file     (:fileId latestVersion)}
-     ::command        (minimize-command command attachment)}))
+    {::interface-path interface-path
+     ::params         (assoc path-params
+                        :metadata {:name        (:filename latestVersion)
+                                   :description (let [type (localize lang :attachmentType type-group type-id)
+                                                      description (:contents attachment)]
+                                                  (if (or (not description) (= type description))
+                                                    type
+                                                    (str type ": " description)))
+                                   :mimeType    (:contentType latestVersion)}
+                        :file (:fileId latestVersion))
+     ::command        (minimize-command command attachment)
+     :uri             (:path route-match)
+     :request-method  (route-match->request-method route-match)}))
 
 ;;;; IntegrationMessage construction
 ;;;; ===================================================================================================================
@@ -566,44 +590,43 @@
 ;;;; Request handling and JMS resources
 ;;;; ===================================================================================================================
 
-(defn- make-router [disable-io-middlewares? handler]
-  (reitit-ring/router
-    ["/" {:middleware (if disable-io-middlewares?
-                        [handle-response
-                         (preprocessor->middleware httpify-request)
-                         (preprocessor->middleware (fn-> content->json (jwt-authorize (env/value :allu :jwt))))]
-                        [handle-response
-                         (preprocessor->middleware httpify-request)
-                         save-messages!
-                         (preprocessor->middleware
-                           (fn-> get-attachment-files! content->json (jwt-authorize (env/value :allu :jwt))))])
-          :coercion   reitit.coercion.schema/coercion}
-     ["applications"
-      ["/:id/cancelled" {:name [:applications :cancel]
-                         :put  {:parameters {:path {:id ssc/NatString}}
-                                :handler    handler}}]
-      ["/:id/attachments" {:name [:attachments :create]
-                           :post {:parameters {:path {:id ssc/NatString}}
-                                  :handler    handler}}]]
-     ["placementcontracts"
-      ["" {:name [:placementcontracts :create]
-           :post {:handler handler}}]
-      ["/:id" {:name [:placementcontracts :update]
-               :put  {:parameters {:path {:id ssc/NatString}}
-                      :handler    handler}}]]]))
+(defn- innermost-handler
+  ([] (innermost-handler (env/dev-mode?)))
+  ([dev-mode?] (if dev-mode? imessages-mock-handler (make-remote-handler (env/value :allu :url)))))
 
-(defn- wrap-handler [disable-io-middlewares? handler]
-  (reitit-ring/ring-handler (make-router disable-io-middlewares? handler)))
+(defn- make-router
+  ([handler] (make-router (env/dev-mode?) handler))
+  ([disable-io-middlewares? handler]
+   (reitit-ring/router
+     ["/" {:middleware (if disable-io-middlewares?
+                         [handle-response
+                          (preprocessor->middleware httpify-request)
+                          (preprocessor->middleware (fn-> content->json (jwt-authorize (env/value :allu :jwt))))]
+                         [handle-response
+                          (preprocessor->middleware httpify-request)
+                          save-messages!
+                          (preprocessor->middleware
+                            (fn-> get-attachment-files! content->json (jwt-authorize (env/value :allu :jwt))))])
+           :coercion   reitit.coercion.schema/coercion}
+      ["applications"
+       ["/:id/cancelled" {:name [:applications :cancel]
+                          :put  {:parameters {:path {:id ssc/NatString}}
+                                 :handler    handler}}]
+       ["/:id/attachments" {:name [:attachments :create]
+                            :post {:parameters {:path {:id ssc/NatString}}
+                                   :handler    handler}}]]
+      ["placementcontracts"
+       ["" {:name [:placementcontracts :create]
+            :post {:handler handler}}]
+       ["/:id" {:name [:placementcontracts :update]
+                :put  {:parameters {:path {:id ssc/NatString}}
+                       :handler    handler}}]]])))
 
-(defn- make-handler
-  ([] (make-handler (env/dev-mode?)))
-  ([dev-mode?] (wrap-handler dev-mode? (if dev-mode?
-                                         imessages-mock-handler
-                                         (make-remote-handler (env/value :allu :url))))))
+(def- allu-router (make-router (innermost-handler)))
 
 (def allu-request-handler
   "ALLU request handler. Returns nil, calls `allu-fail!` on HTTP errors."
-  (make-handler))
+  (reitit-ring/ring-handler allu-router))
 
 (def- allu-jms-queue-name "lupapalvelu.backing-system.allu")
 
