@@ -1,41 +1,42 @@
 (ns lupapalvelu.backing-system.krysp.krysp-itest
-  (:require [taoensso.timbre :refer (trace debug info warn error fatal)]
-      [clojure.string :as s]
+  (:require [clojure.data.xml :refer :all]
       [clojure.java.io :as io]
-      [clojure.data.xml :refer :all]
+      [clojure.string :as s]
+      [lupapalvelu.backing-system.krysp.maa-aines-mapping :refer [maa-aines_to_krysp_221]]
+      [lupapalvelu.backing-system.krysp.poikkeamis-mapping :refer [poikkeamis_to_krysp_221]]
+      [lupapalvelu.backing-system.krysp.rakennuslupa-mapping :refer [get-rakennuslupa-mapping]]
+      [lupapalvelu.backing-system.krysp.vesihuolto-mapping :refer [vesihuolto-to-krysp_221]]
+      [lupapalvelu.backing-system.krysp.yleiset-alueet-mapping :refer [get-yleiset-alueet-krysp-mapping]]
+      [lupapalvelu.backing-system.krysp.ymparisto-ilmoitukset-mapping :refer [ilmoitus_to_krysp_221]]
+      [lupapalvelu.backing-system.krysp.ymparistolupa-mapping :refer [ymparistolupa_to_krysp_221]]
+      [lupapalvelu.document.canonical-common :refer [by-type ya-operation-type-to-schema-name-key]]
+      [lupapalvelu.document.maa-aines-canonical :as maa-aines-canonical]
+      [lupapalvelu.document.model :as model]
+      [lupapalvelu.document.poikkeamis-canonical :as poikkeamis-canonical]
+      [lupapalvelu.document.rakennuslupa-canonical :as rakennuslupa_canonical]
+      [lupapalvelu.document.tools :as tools]
+      [lupapalvelu.document.vesihuolto-canonical :as vesihuolto-canonical]
+      [lupapalvelu.document.yleiset-alueet-canonical :as yleiset-alueet-canonical]
+      [lupapalvelu.document.ymparisto-ilmoitukset-canonical :as ympilm-canonical]
+      [lupapalvelu.document.ymparistolupa-canonical :as ymparistolupa-canonical]
+      [lupapalvelu.domain :as domain]
+      [lupapalvelu.factlet :refer :all]
+      [lupapalvelu.i18n :refer [with-lang loc localize]]
+      [lupapalvelu.itest-util :refer :all]
+      [lupapalvelu.pate-legacy-itest-util :refer :all]
+      [lupapalvelu.permit :as permit]
+      [lupapalvelu.tasks]                                   ; ensure task schemas are loaded
+      [lupapalvelu.xml.emit :refer :all]
+      [lupapalvelu.xml.validator :refer [validate]]
       [midje.sweet :refer :all]
       [midje.util :refer [testable-privates]]
       [net.cgrand.enlive-html :as enlive]
-      [lupapalvelu.itest-util :refer :all]
-      [lupapalvelu.factlet :refer :all]
-      [lupapalvelu.domain :as domain]
-      [lupapalvelu.xml.emit :refer :all]
-      [lupapalvelu.xml.validator :refer [validate]]
-      [lupapalvelu.backing-system.krysp.rakennuslupa-mapping :refer [get-rakennuslupa-mapping]]
-      [lupapalvelu.backing-system.krysp.poikkeamis-mapping :refer [poikkeamis_to_krysp_221]]
-      [lupapalvelu.backing-system.krysp.ymparisto-ilmoitukset-mapping :refer [ilmoitus_to_krysp_221]]
-      [lupapalvelu.backing-system.krysp.ymparistolupa-mapping :refer [ymparistolupa_to_krysp_221]]
-      [lupapalvelu.backing-system.krysp.maa-aines-mapping :refer [maa-aines_to_krysp_221]]
-      [lupapalvelu.backing-system.krysp.vesihuolto-mapping :refer [vesihuolto-to-krysp_221]]
-      [lupapalvelu.backing-system.krysp.yleiset-alueet-mapping :refer [get-yleiset-alueet-krysp-mapping]]
-      [lupapalvelu.document.canonical-common :refer [by-type ya-operation-type-to-schema-name-key]]
-      [lupapalvelu.document.rakennuslupa-canonical :as rakennuslupa_canonical]
-      [lupapalvelu.document.yleiset-alueet-canonical :as yleiset-alueet-canonical]
-      [lupapalvelu.document.poikkeamis-canonical :as poikkeamis-canonical]
-      [lupapalvelu.document.ymparisto-ilmoitukset-canonical :as ympilm-canonical]
-      [lupapalvelu.document.ymparistolupa-canonical :as ymparistolupa-canonical]
-      [lupapalvelu.document.maa-aines-canonical :as maa-aines-canonical]
-      [lupapalvelu.document.vesihuolto-canonical :as vesihuolto-canonical]
-      [lupapalvelu.document.tools :as tools]
-      [lupapalvelu.document.model :as model]
-      [lupapalvelu.permit :as permit]
-      [lupapalvelu.i18n :refer [with-lang loc localize]]
-      [lupapalvelu.tasks]                                   ; ensure task schemas are loaded
+      [sade.core :refer [def- now]]
       [sade.env :as env]
-      [sade.xml :as xml]
-      [sade.util :as util]
       [sade.strings :as ss]
-      [sade.core :refer [def- now]])
+      [sade.util :as util]
+      [sade.xml :as xml]
+      [taoensso.timbre :refer (trace debug info warn error fatal)])
     (:import [java.net URI]))
 
 (apply-remote-minimal)
@@ -338,7 +339,7 @@
                        (map :versions (:attachments application)) => (partial every? empty?)
                        (get-in application [:attachments 0 :sent]) => nil)
 
-                 (give-verdict sonja application-id) => ok?
+                 (give-legacy-verdict sonja application-id)
                  (upload-attachment sonja application-id first-attachment true)
 
                  (let [application (query-application sonja application-id) => truthy]

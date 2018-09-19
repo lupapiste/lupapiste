@@ -1545,7 +1545,7 @@
 
 (defn sign-contract
   "Sign the contract
-   - Update verdict verdict signatures
+   - Update verdict signatures
    - Update tags but only the signature part
    - Change application state to agreementSigned if needed
    - Generate new contract attachment version."

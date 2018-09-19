@@ -1,13 +1,14 @@
 (ns lupapalvelu.foreman-application-itest
-  (:require [midje.sweet :refer :all]
-            [clojure.java.io :as io]
-            [net.cgrand.enlive-html :as enlive]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]
+  (:require [clojure.java.io :as io]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
             [lupapalvelu.verdict :as verdict]
-            [sade.core :refer [fail]]
+            [midje.sweet :refer :all]
+            [net.cgrand.enlive-html :as enlive]
             [sade.common-reader :as cr]
+            [sade.core :refer [fail]]
             [sade.strings :as ss]
             [sade.xml :as xml]))
 
@@ -166,8 +167,8 @@
           (let [app         (query-application mikko application-id)
                 verdict-id  (-> app :verdicts first :id)
                 verdict-id2 (-> app :verdicts second :id)]
-            (command sonja :delete-verdict :id application-id :verdictId verdict-id) => ok?
-            (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
+            (command sonja :delete-verdict :id application-id :verdict-id verdict-id) => ok?
+            (command sonja :delete-verdict :id application-id :verdict-id verdict-id2) => ok?
             (fact "is submitted" (:state (query-application mikko application-id)) => "submitted"))
 
           (facts "approve foreman"
@@ -312,7 +313,7 @@
 (facts "foreman history"
   (apply-remote-minimal) ; clean mikko before history tests
   (let [{history-base-app-id :id} (create-and-submit-application mikko :operation "kerrostalo-rivitalo")
-        _                    (give-verdict sonja history-base-app-id :verdictId "321-2016")
+        _                    (give-legacy-verdict sonja history-base-app-id)
         {other-r-app-id :id} (create-app mikko :operation "kerrostalo-rivitalo")
         {ya-app-id :id}      (create-app mikko :operation "ya-kayttolupa-muu-tyomaakaytto")
         foreman-app-id1      (create-foreman-application history-base-app-id mikko mikko-id "KVV-ty\u00F6njohtaja" "B"); -> should be visible
@@ -409,7 +410,7 @@
         {application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
         _ (add-invites apikey application-id)
         _ (command apikey :submit-application :id application-id)
-        _ (give-verdict sonja application-id :verdictId "321-2016")
+        _ (give-legacy-verdict sonja application-id)
         has-auth? (fn [email auth]
                         (or (some (partial = email) (map :username auth)) false))]
     (sent-emails) ; clear email box
@@ -453,7 +454,7 @@
 
     (fact "Create foreman application with the applicant as foreman"
           (let [{application-id :id} (create-and-submit-application apikey :operation "kerrostalo-rivitalo") => truthy
-                _                    (give-verdict sonja application-id :verdictId "321-2016")
+                _                    (give-legacy-verdict sonja application-id)
                 {foreman-app-id :id} (command apikey :create-foreman-application :id application-id
                                               :taskId "" :foremanRole "ei tiedossa" :foremanEmail "pena@example.com") => truthy
                 {auth-array :auth}   (query-application pena foreman-app-id) => truthy
@@ -473,7 +474,7 @@
                 _ (command apikey :invite-with-role :id application-id :email "contact@example.com" :text "" :documentName ""
                            :documentId "" :path "" :role "writer") => ok?
                 _ (command apikey :remove-doc :id application-id :docId hakija1) => ok? ; remove one applicant
-                _ (give-verdict sonja application-id :verdictId "321-2016")
+                _ (give-legacy-verdict sonja application-id)
 
                 ; This foreman application is created only to cause an invite to the original application
                 _  (command apikey :create-foreman-application :id application-id
@@ -506,7 +507,7 @@
                                                 :documentId "" :path "" :role "writer")
                _                       (command teppo :approve-invite :id application-id)
                ;; Teppo (with writer role) creates foreman-application
-               _                       (give-verdict sonja application-id :verdictId "321-2016")
+               _                       (give-legacy-verdict sonja application-id)
                {foreman-app-id :id}    (command teppo :create-foreman-application :id application-id
                                                 :taskId "" :foremanRole "ei tiedossa" :foremanEmail "heppu@example.com") => truthy
                {auth-array :auth}      (query-application teppo foreman-app-id) => truthy]
@@ -523,7 +524,7 @@
         main-attachment-1 (-> main-application :attachments first)
 
         ; Verdict is given so that the foreman application can be created by applicant
-        _ (give-verdict sonja application-id :verdictId "321-2016")
+        _ (give-legacy-verdict sonja application-id)
 
         resp (command applicant :create-foreman-application :id application-id
                :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email)
@@ -655,7 +656,14 @@
        (fact "Foreman CAN set attachment meta data"
          (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents"}) => ok?)
 
-       (give-verdict sonja foreman-app-id) => ok?
+       (give-generic-legacy-verdict sonja foreman-app-id
+                                    {:fields {:kuntalupatunnus "888-10-12"
+                                              :verdict-code    "1" ;; Granted
+                                              :verdict-text    "Lorem ipsum"
+                                              :handler         "Decider"
+                                              :anto            (timestamp "21.5.2018")
+                                              :lainvoimainen   (timestamp "30.5.2018")}
+                                     :attachment {:state "foremanVerdictGiven"}})
 
        (fact "Foreman can NOT upload new attachment after verduct is given"
          (upload-attachment foreman foreman-app-id nil false))

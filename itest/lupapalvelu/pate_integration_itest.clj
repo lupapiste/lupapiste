@@ -1,14 +1,12 @@
 (ns lupapalvelu.pate-integration-itest
-  (:require [midje.sweet :refer :all]
-            [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.itest-util :refer :all]))
+  (:require [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.fixture.pate-verdict :as pate-fixture]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.pate-itest-util :refer :all]
+            [midje.sweet :refer :all]
+            [sade.core :refer [now]]))
 
-(apply-remote-minimal)
-
-(command admin :set-organization-scope-pate-value
-         :permitType "R"
-         :municipality "753"
-         :value true)
+(apply-remote-fixture "pate-verdict")
 
 (defn check-count-and-last-state [id msg-count state]
   (fact
@@ -40,7 +38,24 @@
       (command sonja :approve-application :id app-id :lang "fi") => ok?
       (check-count-and-last-state app-id 4 "sent"))
     (fact "verdictGiven generates message"
-      (give-verdict sonja app-id :verdictId "321-2016-PATE")
+      (facts "Publish verdict for application"
+      (let [{verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
+                                              :id app-id
+                                              :template-id (-> pate-fixture/verdic-templates-setting
+                                                               :templates
+                                                               first
+                                                               :id))]
+
+        (fact "Set automatic calculation of other dates"
+          (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
+                   :path [:automatic-verdict-dates] :value true) => no-errors?)
+        (fact "Verdict date"
+          (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
+                   :path [:verdict-date] :value (now)) => no-errors?)
+        (fact "Verdict code"
+          (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
+                   :path [:verdict-code] :value "hyvaksytty") => no-errors?)
+        (command sonja :publish-pate-verdict :id app-id :verdict-id verdict-id) => no-errors?))
       (check-count-and-last-state app-id 5 "verdictGiven"))
     #_(fact "canceled generates message"
       (command pena :cancel-application :id app-id :lang "fi" :text "prkl") => ok?

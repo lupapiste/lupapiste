@@ -56,7 +56,6 @@
 (defquery pate-enabled
   {:description      "Query that fails if Pate is not enabled in the
   organization. Thus, the result does not matter."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]
@@ -66,7 +65,6 @@
 (defquery pate-enabled-user-org
   {:description "Pre-checker that fails if Pate is not enabled
   in any of user organization scopes."
-   :feature     :pate
    :permissions [{:required [:organization/admin]}]
    :pre-checks  [pate-enabled-user-org]}
   [_])
@@ -74,7 +72,6 @@
 (defcommand new-verdict-template
   {:description      "Creates new empty template. Returns template id, name
   and draft."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id :category]
    :input-validators [(partial action/non-blank-parameters [:org-id :category])]
@@ -88,7 +85,6 @@
 
 (defcommand set-verdict-template-name
   {:description      "Name cannot be empty."
-   :feature          :pate
    :parameters       [:org-id :template-id :name]
    :input-validators [(partial action/non-blank-parameters [:org-id :template-id :name])]
    :pre-checks       [pate-enabled
@@ -101,7 +97,6 @@
 (defcommand save-verdict-template-draft-value
   {:description      "Incremental save support for verdict template
   drafts. Returns modified timestamp."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id :template-id :path :value]
    ;; Value is validated upon saving according to the schema.
@@ -123,7 +118,6 @@
 (defcommand publish-verdict-template
   {:description      "Publish creates a frozen snapshot of the current
   template draft. The snapshot includes also the current settings."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id :template-id]
    :input-validators [(partial action/non-blank-parameters [:org-id :template-id])]
@@ -136,7 +130,6 @@
 (defquery verdict-templates
   {:description      "Id, name, modified, published and deleted maps for
   every verdict template."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]
@@ -152,7 +145,6 @@
 (defquery verdict-template-categories
   {:description      "Categories for the user's organization. Does not
    include legacy-only categories."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]
@@ -163,7 +155,6 @@
 (defquery verdict-template
   {:description      "Verdict template summary plus draft data. The
   template must be editable."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id :template-id]
    :input-validators [(partial action/non-blank-parameters [:org-id :template-id])]
@@ -175,7 +166,6 @@
 (defcommand update-and-open-verdict-template
   {:description      "Like verdict-template but also updates the template's
   settings dependencies."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id :template-id]
    :input-validators [(partial action/non-blank-parameters [:org-id :template-id])]
@@ -186,7 +176,6 @@
 
 (defcommand toggle-delete-verdict-template
   {:description      "Toggle template's deletion status"
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id :template-id :delete]
    :input-validators [(partial action/non-blank-parameters [:org-id :template-id])
@@ -200,7 +189,6 @@
   {:description      "Makes copy of the template. The new template does not
   have any published versions. In other words, the draft of the
   original is copied."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [org-id template-id]
    :input-validators [(partial action/non-blank-parameters [:org-id :template-id])]
@@ -217,7 +205,6 @@
 
 (defquery verdict-template-settings
   {:description      "Settings matching the category or empty response."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id :category]
    :input-validators [(partial action/non-blank-parameters [:org-id :category])]
@@ -233,7 +220,6 @@
 (defcommand save-verdict-template-settings-value
   {:description      "Incremental save support for verdict template
   settings. Returns modified timestamp. Creates settings if needed."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id :category :path :value]
    ;; Value is validated against schema on saving.
@@ -284,7 +270,6 @@
 (defquery default-operation-verdict-templates
   {:description      "Map where keys are operations and values template
   ids. Deleted templates are filtered out."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]
@@ -296,7 +281,6 @@
   {:description         "Set default verdict template for a selected operation
   in the organization. If template-id is not given, the default is
   cleared."
-   :feature             :pate
    :permissions         [{:required [:organization/admin]}]
    :parameters          [org-id operation]
    :optional-parameters [template-id]
@@ -313,7 +297,6 @@
   operation names and templates (id, name pairs) are values. Permit
   types that are missing are not supported by Pate verdict template
   mechanism."
-   :feature          :pate
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]

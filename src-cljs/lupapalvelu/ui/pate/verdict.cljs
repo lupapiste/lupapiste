@@ -193,7 +193,7 @@
      {:on-click (fn [_]
                   ;; In case we have just published a verdict
                   (service/refresh-attachments)
-                  (common/open-page :application @state/application-id :pate-verdict))}
+                  (common/open-page :application @state/application-id :verdict))}
      [:i.lupicon-chevron-left]
      [:span (common/loc :back)]]]
    (if (and (rum/react state/current-verdict-id)
@@ -232,13 +232,11 @@
 (defonce args (atom {}))
 
 (defn mount-component []
-  (when (common/feature? :pate)
-    (rum/mount (pate-verdict)
-               (.getElementById js/document (:dom-id @args)))))
+  (rum/mount (pate-verdict)
+             (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId _]
-  (when (common/feature? :pate)
-    (swap! args assoc
-           :dom-id (name domId))
-    (bootstrap-verdict)
-    (mount-component)))
+  (swap! args assoc
+         :dom-id (name domId))
+  (bootstrap-verdict)
+  (mount-component))

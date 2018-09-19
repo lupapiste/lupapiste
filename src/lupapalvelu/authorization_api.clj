@@ -331,7 +331,6 @@
 
 (defquery pate-enabled-basic
   {:description "Pre-checker that fails if Pate is not enabled in the application organization."
-   :feature     :pate
    :user-roles  #{:applicant :authority}
    :pre-checks  [pate-enabled]}
   [_])
