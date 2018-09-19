@@ -1,7 +1,7 @@
 (ns lupapalvelu.ui.invoices.service
   (:require [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.hub :as hub]
-            [lupapalvelu.ui.pate.state :as state]
+            [lupapalvelu.ui.invoices.state :as state]
             [sade.shared-util :as util]))
 
 (defn fetch-template-list []
@@ -191,9 +191,33 @@
 ;; Verdicts
 
 (defn fetch-verdict-list [app-id]
+  (println ">> fetch-verdict-list")
   (common/query "pate-verdicts"
                 #(reset! state/verdict-list (:verdicts %))
                 :id app-id))
+
+(defn fetch-invoices-list [app-id]
+  (println ">> fetch-invoices-list app-id: " app-id)
+  (common/query "pate-verdicts"
+                ;;#(reset! state/verdict-list (:verdicts %))
+                (fn [{:keys [verdicts]}]
+                  (println "verdicts: " verdicts)
+                  (reset! state/verdict-list verdicts)
+                  (println "verdicts after fetch: " @state/verdict-list))
+                :id app-id))
+
+(defn fetch-invoice-templates [app-id]
+  (println ">> fetch-invoices-templates app-id: " app-id)
+  (common/query "invoice-templates"
+                ;;#(reset! state/verdict-list (:verdicts %))
+                (fn [result]
+                  (println "invoice-templates response: " result)
+                  ;;(reset! state/verdict-list verdicts)
+                  ;;(println "verdicts after fetch: " @state/verdict-list)
+                  )
+                :id app-id))
+
+
 
 (defn new-verdict-draft
   ([app-id template-id callback]
@@ -223,50 +247,50 @@
                 :id app-id
                 :verdict-id verdict-id))
 
-(defn fetch-appeals [app-id verdict-id]
-  (when (state/auth? :appeals)
-    (common/query :appeals
-                  (util/fn->> :data
-                              ((keyword verdict-id))
-                              (map (fn [{:keys [giver appellant] :as a}]
-                                     (assoc a :author (or giver appellant))))
-                              (reset! state/appeals))
-                  :id app-id)))
+;; (defn fetch-appeals [app-id verdict-id]
+;;   (when (state/auth? :appeals)
+;;     (common/query :appeals
+;;                   (util/fn->> :data
+;;                               ((keyword verdict-id))
+;;                               (map (fn [{:keys [giver appellant] :as a}]
+;;                                      (assoc a :author (or giver appellant))))
+;;                               (reset! state/appeals))
+;;                   :id app-id)))
 
 (declare batch-job)
 
-(defn upsert-appeal [app-id verdict-id params wait?* callback]
-  (apply (partial common/command
-                  {:command               :upsert-pate-appeal
-                   :show-saved-indicator? true
-                   :waiting?              wait?*
-                   :success               (fn [res]
-                                            (reset! wait?* true)
-                                            (batch-job (fn [{:keys [pending]}]
-                                                         (when (empty? pending)
-                                                           (fetch-appeals app-id verdict-id)
-                                                           (callback)
-                                                           (reset! wait?* false)))
-                                                       res))}
-                  :id app-id
-                  :verdict-id verdict-id)
-         (->> (util/filter-map-by-val identity params)
-              (mapcat identity))))
+;; (defn upsert-appeal [app-id verdict-id params wait?* callback]
+;;   (apply (partial common/command
+;;                   {:command               :upsert-pate-appeal
+;;                    :show-saved-indicator? true
+;;                    :waiting?              wait?*
+;;                    :success               (fn [res]
+;;                                             (reset! wait?* true)
+;;                                             (batch-job (fn [{:keys [pending]}]
+;;                                                          (when (empty? pending)
+;;                                                            (fetch-appeals app-id verdict-id)
+;;                                                            (callback)
+;;                                                            (reset! wait?* false)))
+;;                                                        res))}
+;;                   :id app-id
+;;                   :verdict-id verdict-id)
+;;          (->> (util/filter-map-by-val identity params)
+;;               (mapcat identity))))
 
-(defn delete-appeal [app-id verdict-id appeal-id]
-  (common/command {:command               :delete-pate-appeal
-                   :show-saved-indicator? true
-                   :success               #(fetch-appeals app-id verdict-id)}
-                  :id app-id
-                  :verdict-id verdict-id
-                  :appeal-id appeal-id))
+;; (defn delete-appeal [app-id verdict-id appeal-id]
+;;   (common/command {:command               :delete-pate-appeal
+;;                    :show-saved-indicator? true
+;;                    :success               #(fetch-appeals app-id verdict-id)}
+;;                   :id app-id
+;;                   :verdict-id verdict-id
+;;                   :appeal-id appeal-id))
 
-(defn open-published-verdict [app-id verdict-id callback]
-  (common/query "published-pate-verdict"
-                callback
-                :id app-id
-                :verdict-id verdict-id)
-  (fetch-appeals app-id verdict-id))
+;; (defn open-published-verdict [app-id verdict-id callback]
+;;   (common/query "published-pate-verdict"
+;;                 callback
+;;                 :id app-id
+;;                 :verdict-id verdict-id)
+;;   (fetch-appeals app-id verdict-id))
 
 (defn delete-verdict [app-id {:keys [id published legacy? category]}]
   (let [backing-system? (util/=as-kw category :backing-system)]
@@ -304,18 +328,18 @@
                   :path path
                   :value value))
 
-(defn publish-and-reopen-verdict [app-id {verdict-id :id legacy? :legacy?} callback]
-  (common/command {:command (if legacy?
-                              :publish-legacy-verdict
-                              :publish-pate-verdict)
-                   :success (fn []
-                              (state/refresh-verdict-auths app-id
-                                                           {:verdict-id verdict-id})
-                              (fetch-verdict-list app-id)
-                              (open-published-verdict app-id verdict-id callback)
-                              (js/repository.load app-id))}
-                  :id app-id
-                  :verdict-id verdict-id))
+;; (defn publish-and-reopen-verdict [app-id {verdict-id :id legacy? :legacy?} callback]
+;;   (common/command {:command (if legacy?
+;;                               :publish-legacy-verdict
+;;                               :publish-pate-verdict)
+;;                    :success (fn []
+;;                               (state/refresh-verdict-auths app-id
+;;                                                            {:verdict-id verdict-id})
+;;                               (fetch-verdict-list app-id)
+;;                               (open-published-verdict app-id verdict-id callback)
+;;                               (js/repository.load app-id))}
+;;                   :id app-id
+;;                   :verdict-id verdict-id))
 
 (defn sign-contract [app-id verdict-id password error-callback]
   (common/command {:command :sign-pate-contract

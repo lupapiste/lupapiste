@@ -63,6 +63,13 @@
                                  {:id "id2" :text "price row 2" :unit :m2 :price-per-unit 30}]})
 
 (defn bootstrap-invoices []
+  (println ">> bootstrap-invoices")
+
+  ;; (let [app-id (js/pageutil.hashApplicationId)]
+  ;;    (println "app-id: " app-id)
+  ;;    (service/fetch-invoices-list app-id)
+  ;;    )
+
   (when-let [app-id (js/pageutil.hashApplicationId)]
     (reset! state/price-catalog dummy-price-catalog)
     (reset! state/invoices dummy-invoices)
@@ -70,11 +77,25 @@
     (reset! state/verdict-list nil)
     (reset! state/replacement-verdict nil)
     (state/refresh-verdict-auths app-id)
+
     (state/refresh-application-auth-model app-id
-                                          #(when (state/auth? :pate-verdicts)
-                                             (service/fetch-verdict-list app-id)
-                                             (when (state/auth? :application-verdict-templates)
-                                               (service/fetch-application-verdict-templates app-id))))))
+                                          #(service/fetch-invoices-list app-id))
+
+    (println "state/auth? :pate-verdicts:" (state/auth? :pate-verdicts))
+
+    ;;(service/fetch-verdict-list app-id)
+
+    ;; (state/refresh-application-auth-model app-id
+
+    ;;                                       #(when (state/auth? :pate-verdicts)
+    ;;                                          (service/fetch-verdict-list app-id)
+    ;;                                          (when (state/auth? :application-verdict-templates)
+    ;;                                            (service/fetch-application-verdict-templates app-id)))
+    ;;                                       ;; (fn []
+    ;;                                       ;;   (service/fetch-verdict-list app-id)
+    ;;                                       ;;   (service/fetch-application-verdict-templates app-id))
+    ;;                                       )
+    ))
 
 
 (rum/defc invoices < rum/reactive
