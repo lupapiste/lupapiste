@@ -1,21 +1,22 @@
 (ns lupapalvelu.document.document-api-itest
-  (:require [midje.sweet :refer :all]
-            [clojure.data.xml :refer [parse]]
+  (:require [clojure.data.xml :refer [parse]]
             [clojure.java.io :as io]
+            [lupapalvelu.application :refer [get-operations]]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.fixture.pate-verdict :as pate-fixture]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.pate-itest-util :refer :all]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.xml.validator :refer [validate]]
+            [midje.sweet :refer :all]
             [sade.core :as core]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
-            [sade.xml :as xml]
-            [lupapalvelu.application :refer [get-operations]]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.fixture.pate-verdict :as pate-fixture]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.pate-itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.validator :refer [validate]]))
+            [sade.xml :as xml]))
 
 (apply-remote-minimal)
 
@@ -167,7 +168,7 @@
       party-document-names => ["hakija-r" "hakijan-asiamies" "suunnittelija"])
 
     (command pena :submit-application :id application-id) => ok?
-    (give-verdict sonja application-id) => ok?
+    (give-legacy-verdict sonja application-id)
 
     (fact "post-verdict"
       (:partyDocumentNames (query pena :party-document-names :id application-id)) => (just ["suunnittelija"]))))
@@ -296,7 +297,7 @@
         pre-verdict-suunnittelija (domain/get-document-by-name documents "suunnittelija")
         _ (command pena :update-doc :id application-id :doc (:id applicant-doc) :updates [["henkilo.henkilotiedot.etunimi" "test1"]]) => ok?
         _ (command pena :update-doc :id application-id :doc (:id pre-verdict-suunnittelija) :updates [["henkilotiedot.etunimi" "DeSigner"]]) => ok?
-        _ (give-verdict sonja application-id) => ok?
+        _ (give-legacy-verdict sonja application-id)
         suunnittelija-resp (command pena :create-doc :id application-id :schemaName "suunnittelija")]
 
     (facts "disabling document - can set status for only documents with 'disableable'"

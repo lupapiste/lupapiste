@@ -503,22 +503,6 @@
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
-(defn give-verdict-with-fn [f apikey application-id
-                            & {:keys [verdictId status name given official agreement]
-                               :or   {verdictId "aaa", status 1, name "Name", given 12300000000, official 12400000000 agreement false}}]
-  (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id :lang "fi")
-        verdict-id (or (:verdictId new-verdict-resp))]
-    (if-not (ok? new-verdict-resp)
-      new-verdict-resp
-      (do
-       (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement agreement :section "" :lang "fi")
-       (assoc
-         (f apikey :publish-verdict :id application-id :verdictId verdict-id :lang "fi")
-         :verdict-id verdict-id)))))
-
-(defn give-verdict [apikey application-id & args]
-  (apply give-verdict-with-fn command apikey application-id args))
-
 (defn allowed? [action & args]
   (fn [apikey]
     (let [{:keys [ok actions]} (apply query apikey :allowed-actions args)
@@ -587,9 +571,6 @@
         resp  (local-command apikey :submit-application :id id)]
     resp => ok?
     (query-application local-query apikey id)))
-
-(defn give-local-verdict [apikey application-id & args]
-  (apply give-verdict-with-fn local-command apikey application-id args))
 
 (defn create-foreman-application [project-app-id apikey userId role difficulty]
   (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role :foremanEmail "")

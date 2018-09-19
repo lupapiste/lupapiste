@@ -5,6 +5,6 @@
   "use strict";
 
   $(function() {
-    $("#pate-verdict").applyBindings( {} );
+    $("#verdict").applyBindings( {} );
   });
 })();

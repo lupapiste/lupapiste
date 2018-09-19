@@ -105,7 +105,6 @@
 (defquery application-verdict-templates
   {:description "List of id, name, default? maps for suitable
   application verdict templates."
-   :feature :pate
    :user-roles #{:authority}
    :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
@@ -139,7 +138,6 @@
                       If the user is applicant, only published
                       verdicts are returned. Note that verdicts can be
                       contracts."
-   :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
    :user-authz-roles roles/all-authz-roles
@@ -151,7 +149,6 @@
 
 (defquery pate-verdict
   {:description      "Verdict and its settings."
-   :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id verdict-id]
@@ -167,7 +164,6 @@
   {:description      "Published tags for the verdict. The response includes
   id, published (timestamp), tags and attachment-ids (of both source
   and target relations)."
-   :feature          :pate
    :user-roles       #{:authority :applicant}
    :org-authz-roles  roles/reader-org-authz-roles
    :user-authz-roles roles/all-authz-roles
@@ -182,7 +178,6 @@
 
 (defquery pate-parties
   {:description       "Application parties"
-   :feature           :pate
    :user-roles        #{:authority :applicant}
    :parameters        [id verdict-id]
    :categories        #{:pate-verdicts}
@@ -193,7 +188,6 @@
 
 (defcommand send-signature-request
   {:description       "Send request to sign contract"
-   :feature           :pate
    :user-roles        #{:authority}
    :parameters        [id verdict-id signer-id]
    :categories        #{:pate-verdicts}
@@ -209,7 +203,6 @@
 (defcommand edit-pate-verdict
   {:description "Updates verdict data. Returns changes and errors
   lists (items are path-vector value pairs)"
-   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id path value]
    :categories       #{:pate-verdicts}
@@ -226,7 +219,6 @@
 
 (defraw preview-pate-verdict
   {:description      "Generate preview version of the verdict PDF."
-   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
@@ -240,7 +232,6 @@
 (defquery pate-verdict-tab
   {:description      "Pseudo-query that fails if the Pate verdicts tab
   should not be shown on the UI."
-   :feature          :pate
    :parameters       [:id]
    :user-roles       #{:applicant :authority}
    :org-authz-roles  roles/reader-org-authz-roles
@@ -252,7 +243,6 @@
   {:description      "Pseudo-query that fails if the Pate contracts tab
   should not be shown on the UI. Note that pate-contract-tab always
   implies pate-verdict-tab, too."
-   :feature          :pate
    :parameters       [:id]
    :user-roles       #{:applicant :authority}
    :org-authz-roles  roles/reader-org-authz-roles
@@ -266,7 +256,6 @@
   contract if the password matches. the same name (e.g., the user can resign if the initial handler name
   is different from the user name or if the user later changes her
   name)."
-   :feature          :pate
    :categories       #{:pate-verdicts}
    :parameters       [:id :verdict-id :password]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id :password])]
@@ -282,7 +271,6 @@
 
 (defraw verdict-pdf
   {:description      "Endpoint for downloading the verdict attachment."
-   :feature          :pate
    :parameters       [:id :verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
@@ -299,7 +287,6 @@
 (defquery replace-pate-verdict
   {:description      "Pseudo-query for checking whether a verdict can be
   replaced."
-   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [:id :verdict-id]
    :categories       #{:pate-verdicts}
@@ -312,7 +299,6 @@
 (defcommand new-pate-verdict-draft
   {:description         "Composes new verdict draft from the latest published
   template and its settings. Returns the verdict-id."
-   :feature             :pate
    :user-roles          #{:authority}
    :parameters          [:id :template-id]
    :optional-parameters [:replacement-id]
@@ -328,7 +314,6 @@
 (defcommand copy-pate-verdict-draft
   {:description         "Composes new verdict draft from the latest published
   template and its settings. Returns the verdict-id."
-   :feature             :pate
    :user-roles          #{:authority}
    :parameters          [id replacement-id]
    :input-validators    [(partial action/non-blank-parameters [:id])]
@@ -343,7 +328,6 @@
 (defcommand delete-pate-verdict
   {:description      "Deletes verdict. Published verdicts cannot be
   deleted."
-   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
@@ -357,11 +341,12 @@
 
 (defcommand publish-pate-verdict
   {:description      "Publishes verdict."
-   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :states           (set/difference states/post-submitted-states
+                                     #{:finished})
    :pre-checks       [pate-enabled
                       (verdict-exists :draft? :modern?)
                       verdict-filled
@@ -385,7 +370,6 @@
   {:description "Composes new legacy verdict draft. Even if Pate is
   enabled, some categories are only supported by legacy
   verdicts. Returns the verdict-id."
-   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
@@ -398,7 +382,6 @@
 (defcommand delete-legacy-verdict
   {:description      "Deletes legacy verdict, its tasks and
   attachments. Rewinds application state if needed."
-   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [:id :verdict-id]
    :categories       #{:pate-verdicts}
@@ -413,14 +396,14 @@
 
 (defcommand publish-legacy-verdict
   {:description      "Publishes legacy verdict."
-   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists :draft? :legacy?)
                       verdict-filled]
-   :states            states/post-submitted-states
+   :states           (set/difference states/post-submitted-states
+                                     #{:finished})
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]
@@ -450,7 +433,6 @@
 
 (defcommand upsert-pate-verdict-bulletin
   {:description      ""
-   :feature          :pate
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}

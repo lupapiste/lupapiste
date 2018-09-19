@@ -3,6 +3,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
             [midje.sweet :refer :all]
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]))
@@ -327,20 +328,21 @@
       (command sonja :check-for-verdict :id application-id) => ok?)))
 
 (facts "Reviews with PATE"
-  (command admin :set-organization-scope-pate-value
-           :permitType "R"
-           :municipality "753"
-           :value true)
   (let [sipoo-application        (create-and-submit-application pena :propertyId sipoo-property-id)
         jarvenpaa-application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
         sipoo-app-id             (:id sipoo-application)
         jarvenpaa-app-id         (:id jarvenpaa-application)
-        _                        (give-verdict sonja sipoo-app-id :verdictId "753-2018-PATE")
-        _                        (give-verdict raktark-jarvenpaa jarvenpaa-app-id :verdictId "186-2018-0001")]
+        _                        (give-legacy-verdict sonja sipoo-app-id)
+        _                        (give-legacy-verdict raktark-jarvenpaa jarvenpaa-app-id)]
 
     (fact "Application should be in verdict given state"
       (:state (query-application pena sipoo-app-id)) => "verdictGiven")
 
+    (fact "Enable Pate in Sipoo"
+      (command admin :set-organization-scope-pate-value
+               :permitType "R"
+               :municipality "753"
+               :value true) => ok?)
     (fact "First review marked done should change state when PATE in use"
      (let [result  (command sonja :create-task :id sipoo-app-id :taskName "Aloituskokous" :schemaName "task-katselmus" :taskSubtype "aloituskokous") => ok?
            task-id (:taskId result)]
