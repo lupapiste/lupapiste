@@ -1,26 +1,27 @@
 (ns lupapalvelu.backing-system.asianhallinta.ah-verdict-itest
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
-            [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]
             [lupapalvelu.application :as app]
-            [lupapalvelu.batchrun :as batch]
             [lupapalvelu.backing-system.asianhallinta.reader :as ah-reader]
+            [lupapalvelu.batchrun :as batch]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.integrations-api]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict-api]                       ; for notification definition
             [me.raynes.fs :as fs]
-            [lupapalvelu.mongo :as mongo]
-            [sade.core :refer [now]]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [sade.common-reader :as cr]
-            [sade.files :as files]
-            [sade.env :as env]
-            [sade.util :as util]
+            [sade.core :refer [now]]
+            [sade.dummy-email-server :as dummy-email]
             [sade.email]
-            [sade.dummy-email-server :as dummy-email]))
+            [sade.env :as env]
+            [sade.files :as files]
+            [sade.util :as util]))
 
 
 (def db-name (str "test_xml_asianhallinta_verdict-itest_" (now)))
@@ -58,11 +59,6 @@
     :propertyId "29703401070010"
     :y 6965051.2333374 :x 535179.5
     :address "Suusaarenkierto 44"))
-
-(defn- add-new-verdict [application-id]
-  (let [new-verdict-resp (local-command velho :new-verdict-draft :id application-id)
-        verdict-id (:verdictId new-verdict-resp)]
-    (local-command velho :save-verdict-draft :id application-id :verdictId verdict-id :backendId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124 :text "" :agreement false :section "")))
 
 (testable-privates lupapalvelu.backing-system.asianhallinta.verdict build-verdict)
 (testable-privates lupapalvelu.backing-system.asianhallinta.reader unzip-file)
@@ -192,10 +188,10 @@
 
             (let [app (create-local-ah-app)
                   app-id (:id app)]
-              (add-new-verdict app-id)
+              (local-command velho :new-legacy-verdict-draft :id app-id) => ok?
 
               (let [application (query-application local-query velho app-id)
-                    orig-verdicts (:verdicts application) =not=> empty?
+                    orig-verdicts (:pate-verdicts application) =not=> empty?
                     orig-verdict-count (count orig-verdicts)]
                 (generate-documents application pena true)
                 (local-command velho :application-to-asianhallinta :id app-id :lang "fi")
@@ -204,7 +200,8 @@
 
                 (let [application (query-application local-query velho app-id)
                       new-verdict (last (:verdicts application))]
-                  (count (:verdicts application)) => (+ orig-verdict-count 1)
+                  (count (:verdicts application)) => 1 ;; from asianhallinta
+                  (count (:pate-verdicts application)) => 1  ;; manually created draft
                   (:kuntalupatunnus new-verdict) => (:AsianTunnus AsianPaatos)
 
                   (fact "application state is verdictGiven" (keyword (:state application)) => :verdictGiven)
