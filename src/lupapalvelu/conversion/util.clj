@@ -5,6 +5,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
+            [lupapalvelu.backing-system.krysp.review-reader :as review-reader]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
@@ -138,3 +139,23 @@
                                 (catch Exception e
                                   (println (.getMessage e))))]
                      (map :tila data))) files))))
+
+(defn get-building-type [xml]
+  (let [reviews (review-reader/xml->reviews xml)
+        katselmuksenRakennustieto (:katselmuksenRakennustieto (first reviews))]
+    (as-> katselmuksenRakennustieto x
+      (filter #(= "1" (get-in % [:KatselmuksenRakennus :jarjestysnumero])) x)
+      (first x)
+      (get-in x [:KatselmuksenRakennus :rakennuksenSelite]))))
+
+(defn deduce-operation-name
+  "Figure out the right primaryOperation for the application."
+  [xml]
+  (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
+        suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
+        btype (get-building-type xml)]
+    (cond
+      (= "TJO" suffix) "tyonjohtajan-nimeaminen-v2"
+      (and (= "A" suffix)
+           (contains? #{"Asuinkerrostalo" "Kerrostalo"} btype)) "kerrostalo-rivitalo"
+      :else "aiemmalla-luvalla-hakeminen")))
