@@ -8,6 +8,7 @@
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.data-skeleton :as ds]
             [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.legacy-schemas :as legacy-schemas]
@@ -17,80 +18,12 @@
             [lupapalvelu.pate.verdict :as verdict]
             [lupapalvelu.pate.verdict-common :as vc]))
 
-;;
-;; Helpers for operating on the verdict skeleton
-;;
-
-(defn- access [accessor-key]
-  {::access accessor-key})
-
-(def- accessor-key? (comp boolean ::access))
-
 (defn- wrap
   "Wraps accessor function with metadata/wrap"
   [accessor]
   {::wrap accessor})
 
 (def- wrap? (comp boolean ::wrap))
-
-(defn- id-map-from [collection-key element-skeleton]
-  {::id-map-from {::collection collection-key
-                      ::element element-skeleton}})
-
-(defn- build-id-map? [x]
-  (boolean (::id-map-from x)))
-
-
-(defn- array-from [collection-key element-skeleton]
-  {::array-from {::collection collection-key
-                  ::element element-skeleton}})
-
-(defn- build-array? [x]
-  (boolean (::array-from x)))
-
-(defn- assoc-context [element context]
-  (postwalk (fn [x]
-              (if (accessor-key? x)
-                (assoc x ::context context)
-                x))
-            element))
-
-(defn- build-id-map
-  "Builds a collection skeleton dynamically based on the data present in the
-   `application` and `verdict`."
-  [context accessor-functions
-   {{collection ::collection
-     element    ::element} ::id-map-from}]
-  (->> ((get accessor-functions collection) context)
-       (group-by :id)
-       (util/map-values (comp (partial assoc-context element) first))
-       not-empty))
-
-(defn- build-array
-  [context accessor-functions
-   {{collection ::collection
-     element    ::element} ::array-from}]
-  (->> ((get accessor-functions collection) context)
-       (mapv (partial assoc-context element))))
-
-(defn- fetch-with-accessor
-  "Given the `application` under migration, the source `verdict` and
-  current `timestamp`, returns a function for accessing desired data
-  from the `application` and `verdict`. Used with `prewalk`."
-  [context accessor-functions]
-  (fn [x]
-    (cond (accessor-key? x)
-          (if-let [accessor-fn (get accessor-functions (::access x))]
-            (accessor-fn (assoc context :context (::context x)))
-            (throw (ex-info "Missing accessor" x)))
-
-          (build-id-map? x)
-          (build-id-map context accessor-functions x)
-
-          (build-array? x)
-          (build-array context accessor-functions x)
-
-          :else x)))
 
 (defn- post-process [timestamp]
   (fn [x]
@@ -224,37 +157,37 @@
 
 (def verdict-migration-skeleton
   "This map describes the shape of the migrated verdict. When building the
-   migrated verdict, `(access :x)` will be replaced by calling the accessor
+   migrated verdict, `(ds/access :x)` will be replaced by calling the accessor
    function found under the key :x in the accessor function map. See `accessors`."
-  {:id        (access :id)
-   :modified  (access :modified)
-   :category  (access :category)
-   :published {:published     (access :published)
-               :attachment-id (access :published-attachment-id)}
-   :state (wrap (access :state))
-   :data {:handler         (wrap (access :handler))
-          :kuntalupatunnus (wrap (access :kuntalupatunnus))
-          :verdict-section (wrap (access :verdict-section))
-          :verdict-code    (wrap (access :verdict-code))
-          :verdict-text    (wrap (access :verdict-text))
-          :contract-text   (wrap (access :contract-text))
-          :anto            (wrap (access :anto))
-          :lainvoimainen   (wrap (access :lainvoimainen))
-          :reviews         (id-map-from :reviews
-                                        {:name (wrap (access :review-name))
-                                         :type (wrap (access :review-type))})
-          :foremen         (id-map-from :foremen
-                                        {:role (wrap (access :foreman-role))})
-          :conditions      (id-map-from :conditions
-                                        {:name (wrap (access :condition-name))})
-          :attachments     (array-from :attachment-summaries
-                                       (access :context))}
-   :signatures (array-from :signatures
-                           {:date (access :signature-date)
-                            :name (access :signature-name)
-                            :user-id (access :signature-user-id)})
-   :template (access :template)
-   :archive (access :archive)
+  {:id        (ds/access :id)
+   :modified  (ds/access :modified)
+   :category  (ds/access :category)
+   :published {:published     (ds/access :published)
+               :attachment-id (ds/access :published-attachment-id)}
+   :state (wrap (ds/access :state))
+   :data {:handler         (wrap (ds/access :handler))
+          :kuntalupatunnus (wrap (ds/access :kuntalupatunnus))
+          :verdict-section (wrap (ds/access :verdict-section))
+          :verdict-code    (wrap (ds/access :verdict-code))
+          :verdict-text    (wrap (ds/access :verdict-text))
+          :contract-text   (wrap (ds/access :contract-text))
+          :anto            (wrap (ds/access :anto))
+          :lainvoimainen   (wrap (ds/access :lainvoimainen))
+          :reviews         (ds/id-map-from :reviews
+                                           {:name (wrap (ds/access :review-name))
+                                            :type (wrap (ds/access :review-type))})
+          :foremen         (ds/id-map-from :foremen
+                                           {:role (wrap (ds/access :foreman-role))})
+          :conditions      (ds/id-map-from :conditions
+                                           {:name (wrap (ds/access :condition-name))})
+          :attachments     (ds/array-from :attachment-summaries
+                                          (ds/access :context))}
+   :signatures (ds/array-from :signatures
+                              {:date (ds/access :signature-date)
+                               :name (ds/access :signature-name)
+                               :user-id (ds/access :signature-user-id)})
+   :template (ds/access :template)
+   :archive (ds/access :archive)
    :legacy? true})
 
 (defn- accessor-functions [defaults]
@@ -358,10 +291,10 @@
   "Builds a Pate legacy verdict from the old one"
   [application verdict timestamp]
        ;; Build a new verdict by fetching the necessary data from the old one
-  (->> (prewalk (fetch-with-accessor {:application application
-                                      :verdict     verdict}
-                                     (accessor-functions (defaults timestamp)))
-                verdict-migration-skeleton)
+  (->> (ds/build-with-skeleton verdict-migration-skeleton
+                               {:application application
+                                :verdict     verdict}
+                               (accessor-functions (defaults timestamp)))
        ;; Add metadata to fields marked for wrapping in the verdict skeleton
        (postwalk (post-process timestamp))
        ;; Cleanup
