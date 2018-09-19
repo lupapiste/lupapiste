@@ -148,7 +148,7 @@
 (defn- title-fn [s fun]
   (util/pcond-> (-> s ss/->plain-string ss/trim)
                 #(and (ss/not-blank? %)
-                      (not= (first s) \u00a7)) fun))
+                      (not= (first %) \u00a7)) fun))
 
 (defn verdict-summary-signatures [verdict]
   (seq (verdict-signatures verdict)))
