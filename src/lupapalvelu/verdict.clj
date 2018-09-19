@@ -162,6 +162,19 @@
 (defn- get-app-descriptions [{:keys [permitType]} xml]
   (krysp-reader/read-permit-descriptions-from-xml permitType (cr/strip-xml-namespaces xml)))
 
+(defn no-sent-backing-system-verdict-tasks
+  "Precheck that fails if any :sent or :ok tasks has a backing system
+  verdict as source. Note: faulty tasks are allowed."
+  [{:keys [application]}]
+  (let [verdict-ids (map :id (:verdicts application))]
+    (when (and (seq verdict-ids)
+               (some (fn [{:keys [state source]}]
+                       (and (util/includes-as-kw? [:sent :ok] state)
+                            (util/=as-kw (:type source) :verdict)
+                            (util/includes-as-kw? verdict-ids (:id source))))
+                     (:tasks application)))
+      (fail :error.verdicts-have-sent-tasks))))
+
 (defn- get-task-updates [application user created verdicts app-xml]
   {$push {:tasks {$each (-> (assoc application
                                    :verdicts verdicts
@@ -417,7 +430,7 @@
         (bulletins/process-check-for-verdicts-result command verdicts app-descriptions)
         (t/mark-app-and-attachments-final! (:id application) (:created command))))
     (ok :verdicts verdicts
-        :tasks (get-in updates [$push :tasks])
+        :tasks (get-in updates [$push :tasks $each])
         :state (get-in updates [$set :state] (:state application)))))
 
 (defn backend-id-mongo-updates
