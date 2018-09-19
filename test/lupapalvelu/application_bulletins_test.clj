@@ -135,7 +135,33 @@
       (util/dissoc-in [:paatokset 0 :id])                       ; Not available, assume not needed, use verdict id
       (dissoc :metadata)))                                      ; Not needed
 
-(fact "->old-school-verdict"
-      (let [old-school-verdict (->old-school-verdict pate-test-verdict)]
-        (ignore-some-data old-school-verdict)
-        => (ignore-some-data test-verdict)))
+(fact "->backing-system-verdict"
+  (let [backing-system-verdict (->backing-system-verdict pate-test-verdict)]
+    (ignore-some-data backing-system-verdict)
+    => (ignore-some-data test-verdict)
+
+    (get-in backing-system-verdict [:paatokset 0 :poytakirjat 0 :paatospvm])
+    => (-> pate-test-verdict :data :anto :_value)
+    (get-in backing-system-verdict [:paatokset 0 :paivamaarat :anto])
+    => (-> pate-test-verdict :data :anto :_value)))
+
+
+(def example-app-with-verdict (assoc example-app :verdicts [test-verdict]))
+(def example-app-with-pate-verdict (assoc example-app :pate-verdicts [pate-test-verdict]))
+(def example-app-with-both-verdicts (assoc example-app
+                                           :verdicts [test-verdict]
+                                           :pate-verdicts [pate-test-verdict]))
+
+(facts "further create-bulletin-snapshot tests"
+  (let [verdict-snapshot (create-bulletin-snapshot example-app-with-verdict)
+        pate-verdict-snapshot (create-bulletin-snapshot example-app-with-pate-verdict)
+        both-snapshot (create-bulletin-snapshot example-app-with-both-verdicts)]
+    (fact "apart from :verdicts and :id, the two snapshots are the same"
+          (dissoc verdict-snapshot :verdicts :id) => (dissoc pate-verdict-snapshot :verdicts :id))
+    (fact "the verdicts differ only within the constraints of ->backing-system-verdict"
+          (mapv ignore-some-data (:verdicts verdict-snapshot))
+          => (mapv ignore-some-data (:verdicts pate-verdict-snapshot)))
+    (fact "if both backing system and Pate verdicts are present, Pate takes precedence"
+      ;; Feel free to disagree, just spelling out the existing implementation
+      (:verdicts both-snapshot) => [(->backing-system-verdict pate-test-verdict) test-verdict]
+      (:verdictData both-snapshot) => (verdict-data-for-bulletin-snapshot pate-test-verdict))))

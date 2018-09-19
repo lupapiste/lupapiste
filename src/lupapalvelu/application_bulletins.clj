@@ -147,7 +147,7 @@
       result
       default)))
 
-(def old-school-verdict-skeleton
+(def backing-system-verdict-skeleton
   {:id (ds/access :id)
    :kuntalupatunnus (ds/access :kuntalupatunnus)
    :draft (ds/access :draft)
@@ -164,7 +164,7 @@
                                :pykala (ds/access :pykala)
                                :paatoskoodi (ds/access :paatoskoodi)}]}]})
 
-(def old-school-verdict-accessors
+(def backing-system-verdict-accessors
   {:id (with-path [:id])
    :kuntalupatunnus (with-path [:data :kuntalupatunnus])
    :draft (complement (with-path [:published :published]))
@@ -182,11 +182,11 @@
                       #(i18n/localize "fi" (str "verdict.status." %))
                       vc/verdict-code)})
 
-(defn ->old-school-verdict [verdict]
+(defn ->backing-system-verdict [verdict]
   (if (vc/lupapiste-verdict? verdict)
-    (ds/build-with-skeleton old-school-verdict-skeleton
+    (ds/build-with-skeleton backing-system-verdict-skeleton
                             (pate-metadata/unwrap-all verdict)
-                            old-school-verdict-accessors)
+                            backing-system-verdict-accessors)
     verdict))
 
 (defn create-bulletin-snapshot [{[pate-verdict & _] :pate-verdicts [verdict & _] :verdicts permitType :permitType
@@ -218,7 +218,10 @@
                                    (permit/ymp-permit-type? (:permitType application)) "ymp"
                                    pate-verdict (:category pate-verdict)
                                    :default (ss/lower-case (name permitType)))
-                       :bulletinState (bulletin-state (:state app-snapshot)))]
+                       :bulletinState (bulletin-state (:state app-snapshot))
+                       :verdicts (concat (mapv ->backing-system-verdict (:pate-verdicts application))
+                                         (:verdicts application)))
+        app-snapshot (dissoc app-snapshot :pate-verdicts)]
     app-snapshot))
 
 (defn snapshot-updates [snapshot search-fields ts]
