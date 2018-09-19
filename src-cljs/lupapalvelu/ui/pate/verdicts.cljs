@@ -54,7 +54,7 @@
   (util/=as-kw category :contract))
 
 (defn open-verdict [arg]
-  (common/open-page :pate-verdict
+  (common/open-page :verdict
                     @state/application-id
                     (get arg :verdict-id arg)))
 

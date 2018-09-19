@@ -193,7 +193,7 @@
      {:on-click (fn [_]
                   ;; In case we have just published a verdict
                   (service/refresh-attachments)
-                  (common/open-page :application @state/application-id :pate-verdict))}
+                  (common/open-page :application @state/application-id :verdict))}
      [:i.lupicon-chevron-left]
      [:span (common/loc :back)]]]
    (if (and (rum/react state/current-verdict-id)
