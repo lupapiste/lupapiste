@@ -18,8 +18,7 @@
 (defn lupapiste-verdict?
   "Is the verdict created in Lupapiste, either through Pate or legacy interface"
   [verdict]
-  ;; TODO Needs a more robust check
-  (boolean (:data verdict)))
+  (contains? verdict :category))
 
 (defn has-category? [{:keys [category] :as verdict} c]
   (if (lupapiste-verdict? verdict)
@@ -28,7 +27,8 @@
 
 (defn contract? [verdict]
   (if (lupapiste-verdict? verdict)
-    (has-category? verdict :contract)
+    (or (has-category? verdict :contract)
+        (has-category? verdict :migration-contract))
     (-> verdict :sopimus)))
 
 (defn legacy? [verdict]
@@ -147,7 +147,8 @@
 
 (defn- title-fn [s fun]
   (util/pcond-> (-> s ss/->plain-string ss/trim)
-                ss/not-blank? fun))
+                #(and (ss/not-blank? %)
+                      (not= (first s) \u00a7)) fun))
 
 (defn verdict-summary-signatures [verdict]
   (seq (verdict-signatures verdict)))
@@ -267,12 +268,17 @@
    (sc/optional-key :signature-requests)   [{:name sc/Str
                                              :date ssc/Timestamp}]})
 
+(defn allowed-category-for-application? [verdict application]
+  (or (has-category? verdict (schema-util/application->category application))
+      (has-category? verdict :migration-verdict)
+      (has-category? verdict :migration-contract)))
+
 (sc/defn ^:always-validate verdict-list :- [VerdictSummary]
   [{:keys [lang application]}]
   (let [category (schema-util/application->category application)
         ;; There could be both contracts and verdicts.
         verdicts        (concat (->> (:pate-verdicts application)
-                                     (filter #(has-category? % category))
+                                     (filter #(allowed-category-for-application? % application))
                                      (map metadata/unwrap-all))
                                 ;; TODO: remove draft filter after migration.
                                 (some->> application :verdicts
@@ -290,6 +296,8 @@
             []
             (->> (vals summaries)
                  (sort-by (comp - :modified))))))
+
+
 
 ;;
 ;; Work in progress

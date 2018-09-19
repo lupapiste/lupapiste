@@ -46,8 +46,8 @@
   (when-not (ss/blank? (str v))
     (case unit
       :ha      (str v " " (localize lang :unit.hehtaaria))
-      :m2      [:span v " m" [:sup 2]]
-      :m3      [:span v " m" [:sup 3]]
+      :m2      [:span {} v " m" [:sup 2]]
+      :m3      [:span {} v " m" [:sup 3]]
       :kpl     (str v " " (localize lang :unit.kpl))
       :section (str "\u00a7" v)
       :eur     (str v "\u20ac"))))
@@ -208,7 +208,7 @@
 
 (def entry--operation [{:loc      :applications.operation
                         :loc-many :operations
-                        :loc-rule {:rule :application.operation-name :key :applications.operation}
+                        :loc-rule {:rule :application.primaryOperation.name :key :applications.operation}
                         :source   :operations
                         :styles   :bold}
                        {:path     :text}])
@@ -664,7 +664,7 @@
                 entry--link-permits
                 entry--attachments
                 entry--tj-vastattavat-tyot
-                entry--verdict
+                legacy--verdict-code
                 (entry--verdict-giver :applications.authority)
                 entry--dates-tj
                 entry--appeal))
@@ -809,6 +809,45 @@
                                              pk--attachment))
 
 
+;; Verdict migration layouts
+(def migration-verdict-layout
+  (build-layout legacy--application-id
+                legacy--kuntalupatunnus
+                entry--rakennuspaikka
+                (entry--applicant :pdf.achiever :pdf.achievers)
+                entry--operation
+                entry--designers
+                entry--dimensions
+                entry--statements
+                entry--neighbors
+                entry--attachments
+                legacy--verdict-code
+                legacy--verdict-text
+                legacy--foremen
+                legacy--reviews
+                legacy--conditions
+                legacy--verdict-giver
+                legacy--dates))
+
+(def migration-contract-layout
+  (build-layout legacy--application-id
+                legacy--kuntalupatunnus
+                entry--rakennuspaikka
+                (entry--applicant :pdf.applicant :pdf.applicants)
+                entry--operation
+                entry--designers
+                entry--dimensions
+                entry--statements
+                entry--neighbors
+                entry--attachments
+                legacy--verdict-code
+                entry--contract-text
+                legacy--foremen
+                legacy--reviews
+                legacy--conditions
+                legacy--verdict-giver
+                legacy--dates
+                entry--contract-signatures))
 
 
 (defn pdf-layout [{:keys [category legacy?]}]
@@ -824,4 +863,6 @@
     :legacy.kt       kt-legacy-layout
     :legacy.ymp      ymp-legacy-layout
     :legacy.contract contract-legacy-layout
-    :legacy.tj       tj-legacy-layout))
+    :legacy.tj       tj-legacy-layout
+    :legacy.migration-contract migration-contract-layout
+    :legacy.migration-verdict  migration-verdict-layout))
