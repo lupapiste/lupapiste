@@ -1473,7 +1473,8 @@
   (let [fun (partial format "(%s)")]
     (title-fn " hello " fun) => "(hello)"
     (title-fn " " fun) => ""
-    (title-fn nil fun) => ""))
+    (title-fn nil fun) => ""
+    (title-fn 1 fun) => "(1)"))
 
 (facts "verdict-string"
   (fact "legacy verdict-code"
@@ -1519,7 +1520,47 @@
                                                    "verdict-date"
                                                    "verdict-section"]
                                       :giver      "viranhaltija"}
-                         :references {:boardname "Broad board abroad"}}]
+                         :references {:boardname "Broad board abroad"}}
+        backend-verdict {:kuntalupatunnus "13-0185-R"
+                         :paatokset       [{:paivamaarat {:aloitettava      1377993600000
+                                                          :lainvoimainen    1378080000000
+                                                          :voimassaHetki    1378166400000
+                                                          :raukeamis        1378252800000
+                                                          :anto             1378339200000
+                                                          :viimeinenValitus 1536192000000
+                                                          :julkipano        1378512000000}
+                                            :poytakirjat [{:paatoskoodi     "myönnetty"
+                                                           :paatospvm       112233
+                                                           :pykala          "1"
+                                                           :paatoksentekija "viranomainen"
+                                                           :paatos          "Päätös 1"
+                                                           :status          "1"
+                                                           :urlHash         "236d9b2cfff88098d4f8ad532820c9fb93393237"}
+                                                          {:paatoskoodi     "ehdollinen"
+                                                           :paatospvm       998877
+                                                           :pykala          "2"
+                                                           :paatoksentekija "Mölli Keinonen"
+                                                           :status          "6"
+                                                           :urlHash         "b55ae9c30533428bd9965a84106fb163611c1a7d"}]
+                                            :id          "5b99044bfb2de0f550b64e44"}
+                                           {:paivamaarat {:anto 1378339200000}
+                                            :poytakirjat [{:paatoskoodi     "myönnetty"
+                                                           :paatospvm       445566
+                                                           :paatoksentekija "johtava viranomainen"
+                                                           :paatos          "Päätös 2"
+                                                           :status          "1"}
+                                                          {:paatospvm nil}
+                                                          {}
+                                                          nil]
+                                            :id          "5b99044cfb2de0f550b64e4f"}]
+                         :id              "backend-id"
+                         :timestamp       12345}
+        ]
+    (fact "Nil"
+      (vc/verdict-summary "fi" nil nil)
+      => {:category "backing-system"
+          :legacy?  false
+          :title    "Luonnos"})
     (fact "Draft"
       (vc/verdict-summary "fi" section-strings verdict)
       => {:id           "v1"
@@ -1604,19 +1645,22 @@
           :title        "\u00a71 Ehdollinen (korvaava p\u00e4\u00e4t\u00f6s)"})
     (fact "Legacy draft"
       (vc/verdict-summary "fi" section-strings
-                          (assoc verdict :legacy? true))
+                          (-> verdict
+                              (assoc :legacy? true)
+                              (assoc-in [:data :anto] 98765)))
       => {:id           "v1"
           :category     "r"
           :legacy?      true
           :modified     12345
           :giver        "Foo Bar"
-          :verdict-date 876543
+          :verdict-date 98765
           :title        "Luonnos"})
     (fact "Legacy published"
       (vc/verdict-summary "fi" section-strings
                           (-> verdict
                               (publish 676767)
                               (assoc :legacy? true)
+                              (assoc-in [:data :anto] 98765)
                               (assoc-in [:data :verdict-code] "41")))
       => {:id           "v1"
           :category     "r"
@@ -1624,8 +1668,26 @@
           :modified     12345
           :published    676767
           :giver        "Foo Bar"
-          :verdict-date 876543
+          :verdict-date 98765
           :title        "\u00a71 Ilmoitus merkitty tiedoksi"})
+    (fact "latest-pk"
+      (vc/latest-pk backend-verdict)
+      => {:paatoskoodi     "ehdollinen"
+          :paatospvm       998877
+          :pykala          "2"
+          :paatoksentekija "Mölli Keinonen"
+          :status          "6"
+          :urlHash         "b55ae9c30533428bd9965a84106fb163611c1a7d"})
+    (fact "Backend verdit"
+      (vc/verdict-summary "fi" section-strings backend-verdict)
+      => {:id           "backend-id"
+          :category     "backing-system"
+          :legacy?      false
+          :modified     12345
+          :published    12345
+          :giver        "Mölli Keinonen"
+          :verdict-date 998877
+          :title        "ehdollinen"})
     (facts "YA verdict-type"
       (let [verdict (-> verdict
                         (assoc :category "ya")

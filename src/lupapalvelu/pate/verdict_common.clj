@@ -43,6 +43,15 @@
 (defn first-pk [verdict]
   (get-in verdict [:paatokset 0 :poytakirjat 0]))
 
+(defn latest-pk
+  "Poytakirja with the latest paatospvm"
+  [verdict]
+  (->> verdict
+       :paatokset
+       (mapcat :poytakirjat)
+       (sort-by :paatospvm)
+       last))
+
 (defn replaced-verdict-id
   "Returns the id of the verdict replaced by the given verdict, if any"
   [verdict]
@@ -51,9 +60,15 @@
     nil))
 
 (defn verdict-date [verdict]
-  (if (lupapiste-verdict? verdict)
+  (cond
+    (legacy? verdict)
+    (-> verdict :data :anto)
+
+    (lupapiste-verdict? verdict)
     (-> verdict :data :verdict-date)
-    (-> verdict first-pk :paatospvm))) ;; vs. (-> verdict :paatokset (get 0) :anto) ?
+
+    :else
+    (:paatospvm (latest-pk verdict))))
 
 (defn verdict-id [verdict]
   (:id verdict))
@@ -92,7 +107,7 @@
       (if (util/=as-kw (:giver template) :lautakunta)
        (:boardname references)
        (:handler data)))
-    (-> verdict first-pk :paatoksentekija)))
+    (-> verdict latest-pk :paatoksentekija)))
 
 (defn verdict-signatures [{:keys [signatures] :as verdict}]
   (if (lupapiste-verdict? verdict)
@@ -106,7 +121,7 @@
 (defn verdict-section [verdict]
   (if (lupapiste-verdict? verdict)
     (-> verdict :data :verdict-section)
-    (-> verdict first-pk :pykala)))
+    (-> verdict latest-pk :pykala)))
 
 ;;
 ;; Verdict schema
@@ -180,7 +195,7 @@
 (defn verdict-string [lang verdict dict]
   (if (lupapiste-verdict? verdict)
     (lupapiste-verdict-string lang verdict dict)
-    (-> verdict first-pk :paatoskoodi))) ;; TODO Is this correct?
+    (-> verdict latest-pk :paatoskoodi)))
 
 (defn- verdict-summary-title [verdict lang section-strings]
   (let [id (verdict-id verdict)
