@@ -467,9 +467,9 @@
    :headers {"Content-Type" "text/plain"}
    :body    "500 Too many attachments"})
 
-(defn allowed-number-of-attachments? [attachments]
+(defn use-tempfile-for-attachments? [attachments]
   (<= (count attachments)
-      (env/value :attachments :download :max-number)))
+      (env/value :attachments :download :max-tempfile-number)))
 
 (defraw "download-all-attachments"
   {:parameters       [:id]
@@ -478,22 +478,19 @@
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles  roles/reader-org-authz-roles}
   [{:keys [application user lang]}]
-  (cond (and application
-             (allowed-number-of-attachments? (:attachments application)))
-        {:status  200
-         :headers {"Content-Type"        "application/octet-stream"
-                   "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-         :body    (-> (:attachments application)
-                      (att/get-all-attachments-as-input-stream! application user lang))}
-
-        (and application
-             (not (allowed-number-of-attachments? (:attachments application))))
-        error-too-many-attachments
-
-        :else
-        {:status  404
-         :headers {"Content-Type" "text/plain"}
-         :body    "404"}))
+  (if application
+    {:status  200
+     :headers {"Content-Type"        "application/octet-stream"
+               "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+     :body    (if (use-tempfile-for-attachments? (:attachments application))
+                (-> (:attachments application)
+                    (att/get-all-attachments! application user lang)
+                    (files/temp-file-input-stream))
+                (-> (:attachments application)
+                    (att/get-all-attachments-as-input-stream! application user lang)))}
+    {:status  404
+     :headers {"Content-Type" "text/plain"}
+     :body    "404"}))
 
 (defraw "download-attachments"
   {:parameters       [:id ids]
@@ -506,12 +503,10 @@
   (let [attachments (:attachments application)
         ids         (ss/split ids #",")
         atts        (filter (fn [att] (some (partial = (:id att)) ids)) attachments)]
-    (if (allowed-number-of-attachments? atts)
-      {:status  200
-      :headers {"Content-Type"        "application/octet-stream"
-                "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body    (att/get-attachments-for-user! user application atts)}
-      error-too-many-attachments)))
+    {:status  200
+     :headers {"Content-Type"        "application/octet-stream"
+               "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+     :body    (att/get-attachments-for-user! user application atts (not (use-tempfile-for-attachments? atts)))}))
 
 ;;
 ;; Upload

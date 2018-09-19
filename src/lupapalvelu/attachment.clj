@@ -850,7 +850,9 @@
   (doseq [{:keys [id]} attachments]
     (when-let [{:keys [content filename]} (get-attachment-latest-version-file user id false application)]
       (with-open [in (content)]
-        (append-stream zip (str filename-prefix id "_" filename) in)))))
+        (append-stream zip (str filename-prefix id "_" filename) in))
+      ; Flush after each attachment to ensure data flows into the output pipe
+      (.flush zip))))
 
 (defn- append-application-pdfs-to-zip! [zip application user application-pdf-lang]
   (when application-pdf-lang
@@ -881,6 +883,24 @@
      (debugf "Size of the temporary zip file: %d" (.length temp-file))
      temp-file)))
 
+(defn- piped-zip-input-stream [content-fn]
+  (let [pos (PipedOutputStream.)
+        ; Use 16 MB pipe buffer
+        is (PipedInputStream. pos 16777216)
+        zip (ZipOutputStream. pos)]
+    (future
+      ; This runs in a separate thread so that the input stream can be returned immediately
+      (try
+        (content-fn zip)
+        (.finish zip)
+        (.flush zip)
+        (catch Throwable t
+          (error t "Error occurred while generating ZIP output stream"))
+        (finally
+          (.close zip)
+          (.close pos))))
+    is))
+
 (defn ^java.io.InputStream get-all-attachments-as-input-stream!
   "Returns attachments as zip file.
    If application-pdf-lang is provided, application and submitted application PDFs are included.
@@ -888,33 +908,26 @@
   ([attachments application user]
    (get-all-attachments-as-input-stream! attachments application user nil))
   ([attachments application user application-pdf-lang]
-   (let [pos (PipedOutputStream.)
-         is (PipedInputStream. pos)
-         zip (ZipOutputStream. pos)]
-     (debugf "Streaming zip file for %d attachments" (count attachments))
-     (future
-       ; This runs in a separate thread so that the input stream can be returned immediately
+   (debugf "Streaming zip file for %d attachments" (count attachments))
+   (piped-zip-input-stream
+     (fn [zip]
        (append-attachments-to-zip! zip user attachments application nil)
-       (append-application-pdfs-to-zip! zip application user application-pdf-lang)
-       (.finish zip)
-       (.flush zip)
-       (.close zip)
-       (.close pos))
-     is)))
+       (append-application-pdfs-to-zip! zip application user application-pdf-lang)))))
 
 (defn ^java.io.InputStream get-attachments-for-user!
   "Returns the latest corresponding attachment files readable by the user as an input stream"
-  [user application attachments]
-  (let [pos (PipedOutputStream.)
-        is (PipedInputStream. pos)
-        zip (ZipOutputStream. pos)]
-    (future
-      (append-attachments-to-zip! zip user attachments application (str (:id application) "_"))
-      (.finish zip)
-      (.flush zip)
-      (.close zip)
-      (.close pos))
-    is))
+  [user application attachments piped?]
+  (if piped?
+    (piped-zip-input-stream
+      (fn [zip]
+        (debugf "Streaming zip file for %d attachments" (count attachments))
+        (append-attachments-to-zip! zip user attachments application (str (:id application) "_"))))
+    (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")]
+      (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
+      (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
+        (append-attachments-to-zip! zip user attachments application (str (:id application) "_"))
+        (.finish zip))
+      (files/temp-file-input-stream temp-file))))
 
 (defn- post-process-attachment [attachment]
   (assoc attachment :isPublic (metadata/public-attachment? attachment)))
