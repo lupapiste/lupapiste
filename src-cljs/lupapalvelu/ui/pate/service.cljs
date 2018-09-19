@@ -280,7 +280,7 @@
                                      (js/lupapisteApp.services.attachmentsService.queryAll))
                                    (state/refresh-application-auth-model app-id))}
                    :id app-id
-                   (if backing-system? :verdictId :verdict-id) id)))
+                   :verdict-id id)))
 
 (defn check-for-verdict [app-id waiting?* callback]
   (common/command {:command :check-for-verdict
