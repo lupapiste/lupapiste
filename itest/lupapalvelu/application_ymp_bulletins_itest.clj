@@ -1,15 +1,17 @@
 (ns lupapalvelu.application-ymp-bulletins-itest
-  (:require [midje.sweet :refer :all]
-            [lupapalvelu.itest-util :refer :all]
+  (:require [cheshire.core :as json]
             [lupapalvelu.application-bulletins-itest-util :refer :all]
-            [lupapalvelu.vetuma-itest-util :as vetuma-util]
             [lupapalvelu.factlet :refer :all]
-            [sade.util :as util]
-            [sade.strings :as ss]
-            [sade.core :refer [now]]
-            [cheshire.core :as json]
+            [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture.core :as fixture]))
+            [lupapalvelu.pate-itest-util :refer :all]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [lupapalvelu.vetuma-itest-util :as vetuma-util]
+            [midje.sweet :refer :all]
+            [sade.core :refer [now]]
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
@@ -34,15 +36,15 @@
       (query olli :ymp-publish-bulletin-enabled :id (:id ym-app)) => ok?)))
 
 (facts "Publishing YMP bulletins"
-  (let [ts-now  (now)
-        app (create-and-submit-application pena :operation "jatteen-keraystoiminta"
-                                           :propertyId oulu-property-id
-                                           :x 430109.3125 :y 7210461.375
-                                           :address "Oulu 10")
-        app-id (:id app)
-        _ (upload-file-and-bind pena app-id {:type {:type-group "muut" :type-id "muu"}}) => true
-        _ (upload-file-and-bind pena app-id {:type {:type-group "kartat" :type-id "jatteen-sijainti"}}) => true
-        _ (upload-file-and-bind pena app-id {:type {:type-group "jatteen_kerays" :type-id "vastaanottopaikan_tiedot"}}) => true
+  (let [ts-now                     (now)
+        app                        (create-and-submit-application pena :operation "jatteen-keraystoiminta"
+                                                                  :propertyId oulu-property-id
+                                                                  :x 430109.3125 :y 7210461.375
+                                                                  :address "Oulu 10")
+        app-id                     (:id app)
+        _                          (upload-file-and-bind pena app-id {:type {:type-group "muut" :type-id "muu"}})                                => true
+        _                          (upload-file-and-bind pena app-id {:type {:type-group "kartat" :type-id "jatteen-sijainti"}})                 => true
+        _                          (upload-file-and-bind pena app-id {:type {:type-group "jatteen_kerays" :type-id "vastaanottopaikan_tiedot"}}) => true
         {attachments :attachments} (query-application pena app-id)]
     (fact "Pena sets CV not public"
       (command pena :set-attachment-visibility :id app-id :attachmentId (:id (first attachments)) :value "asiakas-ja-viranomainen") => ok?)
@@ -132,7 +134,14 @@
         (command olli :move-to-final
                  :id app-id
                  :officialAt ts-now) => (partial expected-failure? :error.command-illegal-state))
-      (give-verdict olli app-id :verdictId "12330-2016") => ok?
+      (give-generic-legacy-verdict olli app-id {:fields     {:kuntalupatunnus "12330-2016"
+                                                             :verdict-code    "2"
+                                                             :handler         "Olli Oulu"
+                                                             :verdict-text    "Lorem Ipsum"
+                                                             :anto            (timestamp "18.9.2018")
+                                                             :lainvoimainen   (timestamp "18.10.2018")}
+                                                :attachment {:state      "verdictGiven"
+                                                             :type-group "muut"}})
       (fact "Cant move to final before bulletin of verdictGiven exists"
         (command olli :move-to-final
                  :id app-id
@@ -290,7 +299,7 @@
             (:id (first data)) => (:id sipoo-app))))
 
       (facts "verdict given bulletin"
-        (let [_ (give-local-verdict olli (:id oulu-app) :verdictId "12330-2016")
+        (let [_ (give-local-legacy-verdict olli (:id oulu-app) :kuntalupatunnus "12330-2016")
               ts (+ 1000 (util/get-timestamp-from-now :day 1))
               resp (local-command olli :move-to-verdict-given
                                  :id (:id oulu-app)

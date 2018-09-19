@@ -129,7 +129,11 @@
    :draft           true})
 
 (defn verdict-tab-action? [{action-name :action}]
-  (boolean (#{:publish-verdict :check-for-verdict :process-ah-verdict :fetch-verdicts} (keyword action-name))))
+  (boolean (#{:publish-legacy-verdict
+              :publish-pate-verdict
+              :check-for-verdict
+              :process-ah-verdict
+              :fetch-verdicts} (keyword action-name))))
 
 (defn- get-poytakirja!
   "Fetches the verdict attachments listed in the verdict xml. If the

@@ -273,20 +273,18 @@
 (defonce args (atom {}))
 
 (defn mount-component []
-  (when (common/feature? :pate)
-    (rum/mount (verdict-templates)
-               (.getElementById js/document (:dom-id @args)))))
+  (rum/mount (verdict-templates)
+             (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId params]
-  (when (common/feature? :pate)
-    (swap! args assoc
-           :dom-id (name domId))
-    (reset! state/org-id (js/ko.unwrap (common/oget params "orgId")))
-    (reset! state/auth-fn lupapisteApp.models.globalAuthModel.ok)
-    (service/fetch-template-list)
-    (service/fetch-categories (fn [categories]
-                                (set-category (first categories))))
-    (service/fetch-organization-phrases)
-    (service/fetch-custom-organization-phrases)
-    (reset-template nil)
-    (mount-component)))
+  (swap! args assoc
+         :dom-id (name domId))
+  (reset! state/org-id (js/ko.unwrap (common/oget params "orgId")))
+  (reset! state/auth-fn lupapisteApp.models.globalAuthModel.ok)
+  (service/fetch-template-list)
+  (service/fetch-categories (fn [categories]
+                              (set-category (first categories))))
+  (service/fetch-organization-phrases)
+  (service/fetch-custom-organization-phrases)
+  (reset-template nil)
+  (mount-component))

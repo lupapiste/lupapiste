@@ -132,10 +132,14 @@
                      (:statements app))))
     0))
 
-(defn- count-unseen-verdicts [user app]
+(defn- count-unseen-verdicts [user {:keys [verdicts pate-verdicts] :as app}]
   (if (and (usr/applicant? user) (not (:infoRequest app)))
     (let [last-seen (get-in app [:_verdicts-seen-by (keyword (:id user))] 0)]
-      (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdicts app))))
+      (count (filter (fn [verdict] (> (or (:timestamp verdict)
+                                          (:modified verdict)
+                                          0)
+                                      last-seen))
+                     (concat verdicts pate-verdicts))))
     0))
 
 (defn- state-base-filter [required-state attachment]

@@ -95,8 +95,7 @@
                           (not verdict)
                           :error.verdict-not-found
 
-                          (not (vc/has-category? verdict
-                                                 (schema-util/application->category application)))
+                          (not (vc/allowed-category-for-application? verdict application))
                           :error.invalid-category
 
                           (and draft? (not= state :draft))
@@ -576,6 +575,12 @@
                                        (sc/validate schemas/PateVerdict draft)}})
     (:id draft)))
 
+(defn legacy-verdict-inclusions [category]
+  (-> category
+      legacy/legacy-verdict-schema
+      :dictionary
+      dicts->kw-paths))
+
 (defn new-legacy-verdict-draft
   "Legacy verdicts do not have templates or references. Inclusions
   contain every schema dict."
@@ -590,10 +595,7 @@
                                                      :state    (wrapped-state command :draft)
                                                      :category (name category)
                                                      :data     {:handler (general-handler application)}
-                                                     :template {:inclusions (-> category
-                                                                                legacy/legacy-verdict-schema
-                                                                                :dictionary
-                                                                                dicts->kw-paths)}
+                                                     :template {:inclusions (legacy-verdict-inclusions category)}
                                                      :legacy?  true})}})
     verdict-id))
 
@@ -1536,9 +1538,14 @@
        (filter #(= (:user-id %) (:id user)))
        first))
 
+(defn- transition-to-assignmentSigned-state? [application]
+  (and (sm/valid-state? application :agreementSigned)
+       (util/not=as-kw (:state application)
+                       :agreementSigned)))
+
 (defn sign-contract
   "Sign the contract
-   - Update verdict verdict signatures
+   - Update verdict signatures
    - Update tags but only the signature part
    - Change application state to agreementSigned if needed
    - Generate new contract attachment version."
@@ -1553,8 +1560,7 @@
                     (util/deep-merge
                      {$push {(util/kw-path :pate-verdicts.$.signatures) signature}
                       $set {(util/kw-path :pate-verdicts.$.published.tags) tags}}
-                     (when (util/not=as-kw (:state application)
-                                           :agreementSigned)
+                     (when (transition-to-assignmentSigned-state? application)
                        (app-state/state-transition-update :agreementSigned
                                                           created
                                                           application

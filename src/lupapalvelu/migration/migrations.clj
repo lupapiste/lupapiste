@@ -2,6 +2,7 @@
   (:require [clj-time.coerce :as cljtc]
             [clj-time.core :as cljt]
             [clojure.set :refer [rename-keys] :as set]
+            [clojure.stacktrace :refer [print-stack-trace]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-bulletins :as bulletins]
@@ -18,12 +19,14 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.migration.attachment-type-mapping :as attachment-type-mapping]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.migration.pate-verdict-migration :as pate-verdict-migration]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.tasks :refer [task-doc-validation] :as tasks]
@@ -4001,8 +4004,24 @@
                          {:pop "003710948874"}
                          {$set {:pop "E204503"}}))
 
+(defn update-application-verdicts-to-pate-legacy-verdicts [timestamp application]
+  (logging/with-logging-context {:applicationId (:id application)}
+    (try
+     (mongo/update-by-id :applications (:id application)
+                         (pate-verdict-migration/migration-updates application
+                                                                   timestamp))
+     (catch Exception e
+       (clojure.pprint/pprint (ex-data e))
+       (throw (ex-info (str "Migration failed for application " (:id application))
+                       {}
+                       e))))))
 
-
+(defmigration pate-verdicts
+  {:apply-when (pos? (mongo/count :applications pate-verdict-migration/migration-query))}
+  (let [ts (now)]
+    (->> (mongo/select :applications
+                       pate-verdict-migration/migration-query)
+         (run! (partial update-application-verdicts-to-pate-legacy-verdicts ts)))))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

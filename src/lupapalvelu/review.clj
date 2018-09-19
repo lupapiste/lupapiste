@@ -279,7 +279,8 @@
 (defn save-review-updates [{user :user application :application :as command} updates added-tasks-with-updated-buildings attachments-by-task-id]
   (let [update-result (pos? (update-application command {:modified (:modified application)} updates :return-count? true))
         updated-application (domain/get-application-no-access-checking (:id application)) ;; TODO: mongo projection
-        organization (organization/get-organization (:organization application))]
+        organization (organization/get-organization (:organization application))
+        state-changed (not= (keyword (:state application)) (keyword (:state updated-application)))]
     (when update-result
       (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
         (let [attachments (get attachments-by-task-id id)]
@@ -294,6 +295,7 @@
                           (.getMessage e)))))
             (when-not (true? (:only-use-inspection-from-backend organization))
               (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))
-      (attachment/maybe-generate-comments-attachment user updated-application (:state updated-application)))
+      (when state-changed
+        (attachment/maybe-generate-comments-attachment user updated-application (:state updated-application))))
     (cond-> {:ok update-result}
             (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
