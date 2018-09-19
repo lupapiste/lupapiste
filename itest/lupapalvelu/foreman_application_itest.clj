@@ -3,6 +3,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.pate-itest-util :refer :all]
             [lupapalvelu.pate-legacy-itest-util :refer :all]
             [lupapalvelu.verdict :as verdict]
             [midje.sweet :refer :all]
