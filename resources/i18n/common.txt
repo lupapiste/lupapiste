@@ -865,7 +865,7 @@
 "email.title.open-inforequest-reminder" "sv" "{{address}} - påminnelse om väntande begäran om rådgivning"
 "email.title.pate.signature.request" "en" ""
 "email.title.pate.signature.request" "fi" "Allekirjoituspyyntö Lupapisteessä"
-"email.title.pate.signature.request" "sv" ""
+"email.title.pate.signature.request" "sv" "Begäran om underteckning i Lupapiste"
 "email.title.reminder-statement-due-date" "en" "{{address}}, {{municipality}} - statement deadline reminder"
 "email.title.reminder-statement-due-date" "fi" "{{address}}, {{municipality}} - muistutus erääntyvästä lausuntopyynnöstä"
 "email.title.reminder-statement-due-date" "sv" "{{address}}, {{municipality}} - påminnelse om förfallande begäran om utlåtande"
