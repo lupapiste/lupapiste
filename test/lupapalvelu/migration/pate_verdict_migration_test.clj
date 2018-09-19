@@ -267,7 +267,20 @@
                                test-verdict
                                timestamp)
         => (contains {:category "migration-contract"
+                      :data (contains {:contract-text (wrap verdict-text)})})
+
+        (->pate-legacy-verdict test-application
+                               (assoc test-verdict :sopimus true)
+                               timestamp)
+        => (contains {:category "migration-contract"
                       :data (contains {:contract-text (wrap verdict-text)})}))
+
+  (fact "published migration contracts have 'Päätös / Sopimus' in tags"
+        (->pate-legacy-verdict test-application
+                               (assoc test-verdict :draft false :sopimus true)
+                               timestamp)
+        => (contains {:category "migration-contract"
+                      :published (contains {:tags (contains "Päätös / Sopimus")})}))
 
   (fact "only tasks related to given verdict affect the migration"
     (->pate-legacy-verdict (assoc test-application
