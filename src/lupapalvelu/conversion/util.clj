@@ -158,4 +158,8 @@
       (= "TJO" suffix) "tyonjohtajan-nimeaminen-v2"
       (and (= "A" suffix)
            (contains? #{"Asuinkerrostalo" "Kerrostalo"} btype)) "kerrostalo-rivitalo"
+      (and (= "A" suffix)
+           (contains? #{"Omakotitalo"} btype)) "pientalo"
+      (and (= "B" suffix)
+           (contains? #{"Omakotitalo"} btype)) "pientalo-laaj"
       :else "aiemmalla-luvalla-hakeminen")))
