@@ -232,13 +232,11 @@
 (defonce args (atom {}))
 
 (defn mount-component []
-  (when (common/feature? :pate)
-    (rum/mount (pate-verdict)
-               (.getElementById js/document (:dom-id @args)))))
+  (rum/mount (pate-verdict)
+             (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId _]
-  (when (common/feature? :pate)
-    (swap! args assoc
-           :dom-id (name domId))
-    (bootstrap-verdict)
-    (mount-component)))
+  (swap! args assoc
+         :dom-id (name domId))
+  (bootstrap-verdict)
+  (mount-component))

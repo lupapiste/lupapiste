@@ -180,7 +180,6 @@
 
 (defcommand upsert-pate-appeal
   {:description         "Upserts appeal or appealVerdict."
-   :feature             :pate
    :categories          #{:pate-verdicts}
    :parameters          [id verdict-id type author datestamp filedatas]
    :optional-parameters [text appeal-id deleted-file-ids]
@@ -211,7 +210,6 @@
 
 (defcommand delete-pate-appeal
   {:description      "Deletes appeal or appeal verdict."
-   :feature          :pate
    :categories       #{:pate-verdicts}
    :parameters       [id verdict-id appeal-id]
    :user-roles       #{:authority}

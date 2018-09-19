@@ -359,14 +359,12 @@
                                                (service/fetch-application-verdict-templates app-id))))))
 
 (defn mount-component []
-  (when (common/feature? :pate)
-    (rum/mount (verdicts)
-               (.getElementById js/document (:dom-id @args)))))
+  (rum/mount (verdicts)
+             (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId params]
-  (when (common/feature? :pate)
-    (swap! args assoc
-           :contracts? (common/oget params :contracts)
-           :dom-id (name domId))
-    (bootstrap-verdicts)
-    (mount-component)))
+  (swap! args assoc
+         :contracts? (common/oget params :contracts)
+         :dom-id (name domId))
+  (bootstrap-verdicts)
+  (mount-component))
