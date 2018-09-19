@@ -1538,6 +1538,11 @@
        (filter #(= (:user-id %) (:id user)))
        first))
 
+(defn- transition-to-assignmentSigned-state? [application]
+  (and (sm/valid-state? application :agreementSigned)
+       (util/not=as-kw (:state application)
+                       :agreementSigned)))
+
 (defn sign-contract
   "Sign the contract
    - Update verdict verdict signatures
@@ -1555,8 +1560,7 @@
                     (util/deep-merge
                      {$push {(util/kw-path :pate-verdicts.$.signatures) signature}
                       $set {(util/kw-path :pate-verdicts.$.published.tags) tags}}
-                     (when (util/not=as-kw (:state application)
-                                           :agreementSigned)
+                     (when (transition-to-assignmentSigned-state? application)
                        (app-state/state-transition-update :agreementSigned
                                                           created
                                                           application
