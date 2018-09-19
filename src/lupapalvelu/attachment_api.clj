@@ -462,11 +462,6 @@
   [_]
   (att/output-attachment attachment-id true (partial bulletins/get-bulletin-attachment bulletin-id)))
 
-(def error-too-many-attachments
-  {:status  500
-   :headers {"Content-Type" "text/plain"}
-   :body    "500 Too many attachments"})
-
 (defn use-tempfile-for-attachments? [attachments]
   (<= (count attachments)
       (env/value :attachments :download :max-tempfile-number)))
