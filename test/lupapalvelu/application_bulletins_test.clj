@@ -4,7 +4,8 @@
             [monger.operators :refer :all]
             [lupapalvelu.application-bulletins :refer :all]
             [lupapalvelu.mongo :refer [create-id]]
-            [lupapalvelu.pate.metadata :as metadata]))
+            [lupapalvelu.pate.metadata :as metadata]
+            [sade.util :as util]))
 
 (def example-app {:documents [{:schema-info {:type :party} :data {:name "party 1"}}
                               {:schema-info {:type "party"} :data {:name "party 2"}}
@@ -60,7 +61,8 @@
 (def handler "handler")
 (def verdict-text "Decisions were made.")
 (def section "1")
-(def code 2)
+(def status 2)
+(def code "hyväksytty")
 (def signatures
   [{:created signed1
     :user {:id signer-id1
@@ -81,7 +83,7 @@
                                               :lainvoimainen lainvoimainen}
                                 :poytakirjat [{:paatoksentekija handler
                                                :urlHash "5b7e5772e7d8a1a88e669356"
-                                               :status code
+                                               :status status
                                                :paatos verdict-text
                                                :paatospvm paatospvm
                                                :pykala section
@@ -105,7 +107,7 @@
                         :data {:handler (wrap handler)
                                :kuntalupatunnus (wrap kuntalupatunnus)
                                :verdict-section (wrap section)
-                               :verdict-code    (wrap (str code))
+                               :verdict-code    (wrap (str status))
                                :verdict-text    (wrap verdict-text)
                                :anto            (wrap anto)
                                :lainvoimainen   (wrap lainvoimainen)
@@ -125,3 +127,15 @@
 
 (fact "verdict-data-for-bulletin-snapshot"
       (verdict-data-for-bulletin-snapshot test-verdict) => (verdict-data-for-bulletin-snapshot pate-test-verdict))
+
+(defn- ignore-some-data [verdict]
+  (-> verdict
+      (util/dissoc-in [:paatokset 0 :poytakirjat 0 :paatospvm]) ; No place for this in Pate, replaced by :anto
+      (util/dissoc-in [:paatokset 0 :poytakirjat 0 :urlHash])   ; Not available, assume not needed
+      (util/dissoc-in [:paatokset 0 :id])                       ; Not available, assume not needed, use verdict id
+      (dissoc :metadata)))                                      ; Not needed
+
+(fact "->old-school-verdict"
+      (let [old-school-verdict (->old-school-verdict pate-test-verdict)]
+        (ignore-some-data old-school-verdict)
+        => (ignore-some-data test-verdict)))

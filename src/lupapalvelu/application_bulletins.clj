@@ -7,11 +7,13 @@
             [sade.util :refer [fn->] :as util]
             [sade.core :refer :all]
             [lupapalvelu.attachment.metadata :as metadata]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.metadata :as pate-metadata]
             [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.data-skeleton :as ds]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.application-bulletin-utils :refer :all]
             [schema.core :as sc]
@@ -40,7 +42,7 @@
    :modified        ssc/Timestamp
    :verdictCategory sc/Str
    (sc/optional-key :verdicts) [sc/Any]
-   (sc/optional-key :pate-verdict) sc/Any})
+   (sc/optional-key :pate-verdicts) [sc/Any]})
 
 (sc/defschema CommentFile
   {:fileId                          sssc/FileId
@@ -124,7 +126,7 @@
 (def app-snapshot-fields
   [:_applicantIndex :address :applicant :created :documents :location
    :modified :municipality :organization :permitType :bulletinOpDescription
-   :primaryOperation :propertyId :state :verdicts :pate-verdict :tasks])
+   :primaryOperation :propertyId :state :verdicts :pate-verdicts :tasks])
 
 (def attachment-snapshot-fields
   [:id :type :latestVersion :auth :metadata :contents :target])
@@ -139,7 +141,55 @@
      :contact (vc/verdict-giver v)
      :text    (vc/verdict-text v)}))
 
-(defn create-bulletin-snapshot [{pate-verdict :pate-verdict [verdict & _] :verdicts permitType :permitType
+(defn with-path [path & [default]]
+  (fn [verdict]
+    (if-let [result (get-in verdict path)]
+      result
+      default)))
+
+(def old-school-verdict-skeleton
+  {:id (ds/access :id)
+   :kuntalupatunnus (ds/access :kuntalupatunnus)
+   :draft (ds/access :draft)
+   :timestamp (ds/access :timestamp)
+   :sopimus (ds/access :sopimus)
+   :paatokset [{:id (ds/access :id)
+                :paivamaarat {:anto (ds/access :anto)
+                              :lainvoimainen (ds/access :lainvoimainen)}
+                :poytakirjat [{:paatoksentekija (ds/access :paatoksentekija)
+                               :urlHash nil
+                               :status (ds/access :status)
+                               :paatos (ds/access :paatos)
+                               :paatospvm (ds/access :paatospvm)
+                               :pykala (ds/access :pykala)
+                               :paatoskoodi (ds/access :paatoskoodi)}]}]})
+
+(def old-school-verdict-accessors
+  {:id (with-path [:id])
+   :kuntalupatunnus (with-path [:data :kuntalupatunnus])
+   :draft (complement (with-path [:published :published]))
+   :timestamp vc/verdict-modified
+   :sopimus vc/contract?
+   :anto (with-path [:data :anto])
+   :lainvoimainen (with-path [:data :lainvoimainen])
+   :paatoksentekija (with-path [:data :handler])
+   :urlHash nil
+   :status (comp util/->int vc/verdict-code)
+   :paatos vc/verdict-text
+   :paatospvm (with-path [:data :anto])
+   :pykala vc/verdict-section
+   :paatoskoodi (comp ss/lower-case
+                      #(i18n/localize "fi" (str "verdict.status." %))
+                      vc/verdict-code)})
+
+(defn ->old-school-verdict [verdict]
+  (if (vc/lupapiste-verdict? verdict)
+    (ds/build-with-skeleton old-school-verdict-skeleton
+                            (pate-metadata/unwrap-all verdict)
+                            old-school-verdict-accessors)
+    verdict))
+
+(defn create-bulletin-snapshot [{[pate-verdict & _] :pate-verdicts [verdict & _] :verdicts permitType :permitType
                                  applicationId :id :as application}]
   (let [verdict (or pate-verdict verdict)
         app-snapshot (-> application
@@ -185,7 +235,7 @@
        app-snapshot (if updates
                       (merge app-snapshot updates)
                       app-snapshot)
-       search-fields [:municipality :address :verdicts :pate-verdict :_applicantIndex
+       search-fields [:municipality :address :verdicts :pate-verdicts :_applicantIndex
                       :bulletinOpDescription :bulletinState :applicant :verdictData]
        search-updates (get-search-fields search-fields app-snapshot)]
    (snapshot-updates app-snapshot search-updates created)))
