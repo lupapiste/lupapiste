@@ -8,6 +8,8 @@
             [sade.core :refer :all]
             [lupapalvelu.attachment.metadata :as metadata]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pate.metadata :as pate-metadata]
+            [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.document.model :as model]
@@ -130,9 +132,17 @@
 (def remove-party-docs-fn
   (partial remove (fn-> :schema-info :type keyword (= :party))))
 
+(defn verdict-data-for-bulletin-snapshot [verdict]
+  (let [v (pate-metadata/unwrap-all verdict)]
+    {:section (vc/verdict-section v)
+     :status  (util/->int (vc/verdict-code v) nil)
+     :contact (vc/verdict-giver v)
+     :text    (vc/verdict-text v)}))
+
 (defn create-bulletin-snapshot [{pate-verdict :pate-verdict [verdict & _] :verdicts permitType :permitType
-                                applicationId :id :as application}]
-  (let [app-snapshot (-> application
+                                 applicationId :id :as application}]
+  (let [verdict (or pate-verdict verdict)
+        app-snapshot (-> application
                          (select-keys app-snapshot-fields)
                          (model/strip-blacklisted-data :bulletin)
                          (model/strip-turvakielto-data))
@@ -144,13 +154,7 @@
                        app-snapshot
                        [:documents]
                        (partial map #(dissoc % :meta)))
-        verdict-data (cond
-                       pate-verdict   {:section (:verdict-section pate-verdict)
-                                        :code    (:verdict-code pate-verdict)}
-                       verdict         {:section  (-> verdict :paatokset first :poytakirjat first :pykala)
-                                        :status   (-> verdict :paatokset first :poytakirjat first :status)
-                                        :contact  (-> verdict :paatokset first :poytakirjat first :paatoksentekija)
-                                        :text     (-> verdict :paatokset first :poytakirjat last :paatos)})
+        verdict-data (verdict-data-for-bulletin-snapshot verdict)
         attachments (->> (:attachments application)
                          (filter #(and (:latestVersion %) (metadata/public-attachment? %)))
                          (map #(select-keys % attachment-snapshot-fields))

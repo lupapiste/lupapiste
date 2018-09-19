@@ -64,6 +64,10 @@
        (sort-by :paatospvm)
        last))
 
+(defn last-pk [verdict]
+  (-> verdict :paatokset first :poytakirjat last))
+>>>>>>> PATE-161 Make bulletin verdict data Pate agnostic
+
 (defn replaced-verdict-id
   "Returns the id of the verdict replaced by the given verdict, if any"
   [verdict]
@@ -134,6 +138,18 @@
   (if (lupapiste-verdict? verdict)
     (-> verdict :data :verdict-section)
     (-> verdict latest-pk :pykala)))
+
+(defn verdict-text [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (contract? verdict)
+      (-> verdict :data :contract-text)
+      (-> verdict :data :verdict-text))
+    (-> verdict last-pk :paatos))) ;; Notice last-pk, this came from bulletins verdict data
+
+(defn verdict-code [verdict]
+  (if (lupapiste-verdict? verdict)
+    (-> verdict :data :verdict-code)
+    (some-> verdict first-pk :status str)))
 
 ;;
 ;; Verdict schema
