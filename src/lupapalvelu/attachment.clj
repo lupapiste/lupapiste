@@ -316,9 +316,9 @@
   [created application-state attachment-types-with-metadata group locked? required? requested-by-authority?]
   (map #(make-attachment created nil required? requested-by-authority? locked? (keyword application-state) group (:type %) (:metadata %)) attachment-types-with-metadata))
 
-(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts primaryOperation submitted]} myyntipalvelu-disabled?]
+(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction pate-verdicts verdicts primaryOperation submitted]} myyntipalvelu-disabled?]
   (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
-                     (tos/update-end-dates verdicts primaryOperation submitted))]
+                     (tos/update-end-dates (concat verdicts pate-verdicts) primaryOperation submitted))]
     (if (seq metadata)
       ; Myyntipalvelu can be only negatively overridden, it can't be forced on if TOS says otherwise
       (if (and myyntipalvelu-disabled? (:myyntipalvelu metadata))

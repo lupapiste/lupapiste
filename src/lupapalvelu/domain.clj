@@ -98,9 +98,15 @@
   [{{company-id :id} :company} company-notes]
   (filter (comp #{company-id} :companyId) company-notes))
 
-(defn- relates-to-draft-verdict? [{verdicts :verdicts} {target :target source :source}]
-  (or (and (= (:type target) "verdict") (:draft (util/find-by-id (:id target) verdicts)))
-      (and (= (:type source) "verdict") (:draft (util/find-by-id (:id source) verdicts)))))
+(defn- relates-to-draft-verdict?
+  "Backing system verdicts (in verdicts) can never be drafts."
+  [{verdicts :pate-verdicts} {target :target source :source}]
+  (let [draft-verdict-ids (->> verdicts
+                               (remove :published)
+                               (map :id)
+                               set) ]
+    (or (and (= (:type target) "verdict") (contains? draft-verdict-ids (:id target)))
+        (and (= (:type source) "verdicts") (contains? draft-verdict-ids (:id source))))))
 
 (defn- authorized-to-statement? [user statement]
   (or (:given statement)
