@@ -4028,10 +4028,12 @@
 (defmigration pate-verdicts
   {:apply-when (pos? (mongo/count :applications pate-verdict-migration/migration-query))}
   (let [ts (now)]
-    (let [applications (mongo/select :applications
-                                     pate-verdict-migration/migration-query)]
-      (->> applications (run! (partial update-application-verdicts-to-pate-legacy-verdicts-dry-run ts)))
-      (->> applications (run! (partial update-application-verdicts-to-pate-legacy-verdicts ts))))))
+    (->> (mongo/select :applications
+                       pate-verdict-migration/migration-query)
+         (run! (partial update-application-verdicts-to-pate-legacy-verdicts-dry-run ts)))
+    (->> (mongo/select :applications
+                       pate-verdict-migration/migration-query)
+         (run! (partial update-application-verdicts-to-pate-legacy-verdicts ts)))))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
