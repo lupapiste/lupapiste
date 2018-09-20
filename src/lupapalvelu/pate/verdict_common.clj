@@ -73,7 +73,6 @@
 
 (defn last-pk [verdict]
   (-> verdict :paatokset first :poytakirjat last))
->>>>>>> PATE-161 Make bulletin verdict data Pate agnostic
 
 (defn replaced-verdict-id
   "Returns the id of the verdict replaced by the given verdict, if any"
