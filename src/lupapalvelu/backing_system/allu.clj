@@ -141,7 +141,6 @@
 
   clientApplicationKind: Hakemuksen laji
   customerReference: viitenumero laskuun
-  customerWithContacts: hakijan yleiset ja yhteystiedot
   endTime: alueen k\u00e4yt\u00f6n loppuaika (ei k\u00e4yt\u00f6ss\u00e4 Lupapisteess\u00e4)
   geometry: k\u00e4ytett\u00e4v\u00e4n alueen geometriat
   identificationNumber: (Lupapisteen) hakemustunnus
@@ -317,58 +316,49 @@
 
 (defn- application-cancel-request [{:keys [application] :as command}]
   (let [allu-id (get-in application [:integrationKeys :ALLU :id])
-        interface-path [:applications :cancel]
-        path-params {:id allu-id}
-        route-match (reitit/match-by-name allu-router interface-path path-params)]
+        route-match (reitit/match-by-name allu-router [:applications :cancel] {:id allu-id})]
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
-    {::interface-path interface-path
-     ::params         path-params
-     ::command        (minimize-command command)
-     :uri             (:path route-match)
-     :request-method  (route-match->request-method route-match)}))
+    {::command       (minimize-command command)
+     :uri            (:path route-match)
+     :request-method (route-match->request-method route-match)}))
 
 (defn- placement-creation-request [{:keys [application] :as command}]
-  (let [interface-path [:placementcontracts :create]
-        route-match (reitit/match-by-name allu-router interface-path)]
-    {::interface-path interface-path
-     ::params         {:application (application->allu-placement-contract true application)}
-     ::command        (minimize-command command)
-     :uri             (:path route-match)
-     :request-method  (route-match->request-method route-match)}))
+  (let [route-match (reitit/match-by-name allu-router [:placementcontracts :create])]
+    {::command       (minimize-command command)
+     :uri            (:path route-match)
+     :request-method (route-match->request-method route-match)
+     :body           (application->allu-placement-contract true application)}))
 
 (defn- placement-update-request [pending-on-client {:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
-        interface-path [:placementcontracts :update]
-        path-params {:id allu-id}
-        route-match (reitit/match-by-name allu-router interface-path path-params)]
+        route-match (reitit/match-by-name allu-router [:placementcontracts :update] {:id allu-id})]
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
-    {::interface-path interface-path
-     ::params         (assoc path-params
-                        :application (application->allu-placement-contract pending-on-client application))
-     ::command        (minimize-command command)
-     :uri             (:path route-match)
-     :request-method  (route-match->request-method route-match)}))
+    {::command       (minimize-command command)
+     :uri            (:path route-match)
+     :request-method (route-match->request-method route-match)
+     :body           (application->allu-placement-contract pending-on-client application)}))
 
 (defn- attachment-send [{:keys [application] :as command}
                         {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
-        interface-path [:attachments :create]
-        path-params {:id allu-id}
-        route-match (reitit/match-by-name allu-router interface-path path-params)]
+        route-match (reitit/match-by-name allu-router [:attachments :create] {:id allu-id})]
     (assert allu-id (str (:id application) " does not contain an ALLU id"))
-    {::interface-path interface-path
-     ::params         (assoc path-params
-                        :metadata {:name        (:filename latestVersion)
+    {::command       (minimize-command command attachment)
+     :uri            (:path route-match)
+     :request-method (route-match->request-method route-match)
+     :multipart      [{:name      "metadata"
+                       :mime-type "application/json"
+                       :encoding  "UTF-8"
+                       :content   {:name        (:filename latestVersion)
                                    :description (let [type (localize lang :attachmentType type-group type-id)
                                                       description (:contents attachment)]
                                                   (if (or (not description) (= type description))
                                                     type
                                                     (str type ": " description)))
-                                   :mimeType    (:contentType latestVersion)}
-                        :file (:fileId latestVersion))
-     ::command        (minimize-command command attachment)
-     :uri             (:path route-match)
-     :request-method  (route-match->request-method route-match)}))
+                                   :mimeType    (:contentType latestVersion)}}
+                      {:name      "file"
+                       :mime-type (:contentType latestVersion)
+                       :content   (:fileId latestVersion)}]}))
 
 ;;;; IntegrationMessage construction
 ;;;; ===================================================================================================================
@@ -400,89 +390,21 @@
 ;;;; REST API description and request conversion
 ;;;; ===================================================================================================================
 
-(def- allu-interface
-  {:applications       {:cancel {:request-method :put
-                                 :uri            "/applications/:id/cancelled"
-                                 :path-params    {:id ssc/NatString}}}
-
-   :placementcontracts {:create {:request-method :post
-                                 :uri            "/placementcontracts"
-                                 :body           {:name :application
-                                                  ;; TODO: :schema PlacementContract
-                                                  }}
-                        :update {:request-method :put
-                                 :uri            "/placementcontracts/:id"
-                                 :path-params    {:id ssc/NatString}
-                                 :body           {:name :application
-                                                  ;; TODO: :schema PlacementContract
-                                                  }}}
-
-   :attachments        {:create {:request-method :post
-                                 :uri            "/applications/:id/attachments"
-                                 :path-params    {:id ssc/NatString}
-                                 :body           [{:name      :metadata
-                                                   :schema    FileMetadata
-                                                   :mime-type "application/json"}
-                                                  {:name      :file
-                                                   :schema    (sc/cond-pre sc/Str InputStream)
-                                                   :mime-type (fn-> :metadata :mimeType)}]}}})
-
-(defn- interpolate-uri [template path-params request-data]
-  (reduce (fn [^String uri [k schema]]
-            (let [^String value (k request-data)
-                  kstr (str k)]
-              (when schema (sc/validate schema value))
-              (assert (s/includes? uri kstr) (str uri " does not contain " kstr))
-              (.replace uri kstr value)))
-          template path-params))
-
-(defn- params->body [body-itf params]
-  (cond
-    (nil? body-itf) nil
-    (map? body-itf) ((:name body-itf) params)
-    (vector? body-itf) (mapv (fn [{:keys [mime-type] k :name}]
-                               {:name      (name k)
-                                :mime-type (if (fn? mime-type) ; HACK
-                                             (mime-type params)
-                                             mime-type)
-                                :content   (k params)})
-                             body-itf)
-    :else (assert false (str "Unsupported body type: " body-itf))))
-
-(defn- body->json [body-itf body]
-  (cond
-    (nil? body) nil
-    (map? body) (let [{:keys [schema]} body-itf]
-                  (when schema (sc/validate schema body))
-                  (json/encode body))
-    (vector? body) (mapv (fn [{:keys [schema]} {:keys [content] :as bodypart}]
-                           (when schema (sc/validate schema content))
-                           (if (or (string? content)
-                                   (instance? InputStream content)) ; HACK
-                             bodypart
-                             (-> bodypart
-                                 (update :content json/encode)
-                                 (assoc :encoding "UTF-8"))))
-                         body-itf body)
-    :else (assert false (str "Unsupported body type: " body))))
-
-(defn- httpify-request [{interface-path ::interface-path params ::params :as request}]
-  (let [interface (get-in allu-interface interface-path)]
-    (-> request
-        (assoc ::interface interface
-               :uri (interpolate-uri (:uri interface) (:path-params interface) params)
-               :request-method (:request-method interface))
-        (assoc-when :body (params->body (:body interface) params)))))
-
 (defn- jwt-authorize [request jwt]
   (assoc-in request [:headers "authorization"] (str "Bearer " jwt)))
 
-(defn- content->json [{interface ::interface :as request}]
-  (-> request
-      (update :body (partial body->json (:body interface)))
-      (assoc-when :content-type (when-not (vector? (:body interface)) :json))))
+(defn- content->json [request]
+  (cond
+    (contains? request :body) (-> request (update :body json/encode) (assoc :content-type :json))
+    (contains? request :multipart) (update request :multipart
+                                           (partial mapv (fn [{:keys [content] :as part}]
+                                                           (if (or (string? content)
+                                                                   (instance? InputStream content)) ; HACK
+                                                             part
+                                                             (update part :content json/encode)))))
+    :else request))
 
-(defn- interface-path->string [path] (s/join \. (map name path)))
+(defn- route-name->string [path] (s/join \. (map name path)))
 
 ;;;; HTTP request sender for production
 ;;;; ===================================================================================================================
@@ -490,14 +412,8 @@
 ;; TODO: Use clj-http directly so that this isn't needed:
 (def- http-method-fns {:post http/post, :put http/put})
 
-(defn- perform-http-request! [base-url {:keys [request-method uri body] :as request}]
-  ((request-method http-method-fns)
-    (str base-url uri)
-    (cond
-      (nil? body) request
-      (string? body) request
-      (vector? body) (-> request (dissoc :body) (assoc :multipart body))
-      :else (assert false (str "Unsupported body type: " body)))))
+(defn- perform-http-request! [base-url {:keys [request-method uri] :as request}]
+  ((request-method http-method-fns) (str base-url uri) request))
 
 (defn- make-remote-handler [allu-url]
   (fn [request]
@@ -517,27 +433,30 @@
                                      :data.response.status {$in [200 201]}}))
 
 ;; This approximates the ALLU state with the `imessages` data:
-(defn- imessages-mock-handler [{interface-path ::interface-path params ::params}]
-  (match interface-path
-    [:applications :cancel] (if (creation-response-ok? (:id params))
-                              {:status 200, :body ""}
-                              {:status 404, :body (str "Not Found: " (:id params))})
+(defn- imessages-mock-handler [{:keys [body] :as request}]
+  (let [route-match (reitit-ring/get-match request)]
+    (match (-> route-match :data :name)
+      [:applications :cancel] (let [id (-> route-match :data :path-params :id)]
+                                (if (creation-response-ok? id)
+                                  {:status 200, :body ""}
+                                  {:status 404, :body (str "Not Found: " id)}))
 
-    [:placementcontracts :create] (if-let [validation-error (sc/check PlacementContract (:application params))]
-                                    {:status 400, :body validation-error}
-                                    {:status 200
-                                     :body   (.replace (subs (-> params :application :identificationNumber) 3)
-                                                       "-" "")})
+      [:placementcontracts :create] (if-let [validation-error (sc/check PlacementContract body)]
+                                      {:status 400, :body validation-error}
+                                      {:status 200
+                                       :body   (.replace (subs (:identificationNumber body) 3) "-" "")})
 
-    [:placementcontracts :update] (if-let [validation-error (sc/check PlacementContract (:application params))]
-                                    {:status 400, :body validation-error}
-                                    (if (creation-response-ok? (:id params))
-                                      {:status 200, :body (:id params)}
-                                      {:status 404, :body (str "Not Found: " (:id params))}))
+      [:placementcontracts :update] (let [id (-> route-match :data :path-params :id)]
+                                      (if-let [validation-error (sc/check PlacementContract body)]
+                                        {:status 400, :body validation-error}
+                                        (if (creation-response-ok? id)
+                                          {:status 200, :body id}
+                                          {:status 404, :body (str "Not Found: " id)})))
 
-    [:attachments :create] (if (creation-response-ok? (:id params))
-                             {:status 200, :body ""}
-                             {:status 404, :body (str "Not Found: " (:id params))})))
+      [:attachments :create] (let [id (-> route-match :data :path-params :id)]
+                               (if (creation-response-ok? id)
+                                 {:status 200, :body ""}
+                                 {:status 404, :body (str "Not Found: " id)})))))
 
 ;;;; Middleware
 ;;;; ===================================================================================================================
@@ -547,25 +466,22 @@
   [preprocess]
   (fn [handler] (fn [request] (handler (preprocess request)))))
 
-(defn- get-attachment-files! [{{:keys [application latestAttachmentVersion]} ::command interface-path ::interface-path
-                               :as                                           request}]
-  (if (= interface-path [:attachments :create])
-    (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
-                                            {:versions [latestAttachmentVersion]})] ; HACK
-      (let [file-content ((:content file-map))]
-        (-> request
-            (assoc-in [::params :file] file-content)
-            (assoc-in [:body 1 :content] file-content)))
-      (assert false "unimplemented"))
-    request))
+(defn- get-attachment-files! [{{:keys [application latestAttachmentVersion]} ::command :as request}]
+  (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
+                                          {:versions [latestAttachmentVersion]})] ; HACK
+    (assoc-in request [:body 1 :content] ((:content file-map)))
+    (assert false "unimplemented")))
 
 (defn- save-messages! [handler]
   (fn [{command ::command :as request}]
     (let [endpoint (-> request :uri)
-          message-subtype (interface-path->string (::interface-path request))
-          {msg-id :id :as msg} (request-integration-message command
-                                                            (select-keys request [:uri :request-method :body])
-                                                            message-subtype)
+          message-subtype (route-name->string (-> request reitit-ring/get-match :data :name))
+          {msg-id :id :as msg} (request-integration-message
+                                 command
+                                 (select-keys request [:uri :request-method (if (contains? request :multipart)
+                                                                              :multipart
+                                                                              :body)])
+                                 message-subtype)
           _ (imessages/save msg)
           response (handler request)]
       (imessages/update-message msg-id {$set {:status "done", :acknowledged (now)}})
@@ -578,14 +494,15 @@
 
 (defn- handle-response
   [handler]
-  (fn [{{{app-id :id} :application} ::command interface-path ::interface-path :as msg}]
-    (match (handler msg)
-      {:status (:or 200 201), :body body}
-      (do (info "ALLU operation" (interface-path->string interface-path) "succeeded")
-          (when (= interface-path [:placementcontracts :create])
-            (application/set-integration-key app-id :ALLU {:id body})))
+  (fn [{{{app-id :id} :application} ::command :as request}]
+    (let [route-name (-> request reitit-ring/get-match :data :name)]
+      (match (handler request)
+        {:status (:or 200 201), :body body}
+        (do (info "ALLU operation" (route-name->string route-name) "succeeded")
+            (when (= route-name [:placementcontracts :create])
+              (application/set-integration-key app-id :ALLU {:id body})))
 
-      response (allu-fail! :error.allu.http (select-keys response [:status :body])))))
+        response (allu-fail! :error.allu.http (select-keys response [:status :body]))))))
 
 ;;;; Request handling and JMS resources
 ;;;; ===================================================================================================================
@@ -594,26 +511,27 @@
   ([] (innermost-handler (env/dev-mode?)))
   ([dev-mode?] (if dev-mode? imessages-mock-handler (make-remote-handler (env/value :allu :url)))))
 
+;; TODO: Moar Schema validation:
 (defn- routes
   ([handler] (routes (env/dev-mode?) handler))
   ([disable-io-middlewares? handler]
    ["/" {:middleware (if disable-io-middlewares?
                        [handle-response
-                        (preprocessor->middleware httpify-request)
                         (preprocessor->middleware (fn-> content->json (jwt-authorize (env/value :allu :jwt))))]
                        [handle-response
-                        (preprocessor->middleware httpify-request)
                         save-messages!
-                        (preprocessor->middleware
-                          (fn-> get-attachment-files! content->json (jwt-authorize (env/value :allu :jwt))))])
+                        (preprocessor->middleware (fn-> content->json (jwt-authorize (env/value :allu :jwt))))])
          :coercion   reitit.coercion.schema/coercion}
     ["applications"
      ["/:id/cancelled" {:name [:applications :cancel]
                         :put  {:parameters {:path {:id ssc/NatString}}
                                :handler    handler}}]
-     ["/:id/attachments" {:name [:attachments :create]
-                          :post {:parameters {:path {:id ssc/NatString}}
-                                 :handler    handler}}]]
+     ["/:id/attachments" {:name       [:attachments :create]
+                          :middleware (if disable-io-middlewares?
+                                        []
+                                        [(preprocessor->middleware get-attachment-files!)])
+                          :post       {:parameters {:path {:id ssc/NatString}}
+                                       :handler    handler}}]]
     ["placementcontracts"
      ["" {:name [:placementcontracts :create]
           :post {:handler handler}}]
@@ -633,14 +551,14 @@
   ;; FIXME: HTTP timeout handling
   ;; FIXME: Error handling is very crude
   (defn- allu-jms-msg-handler [session]
-    (fn [{{{app-id :id} :application {user-id :user} :user} ::command interface-path ::interface-path :as msg}]
+    (fn [{{{app-id :id} :application {user-id :user} :user} ::command uri :uri :as msg}]
       (logging/with-logging-context {:userId user-id :applicationId app-id}
         (try
           (allu-request-handler msg)
           (jms/commit session)
 
           (catch Exception exn
-            (let [operation-name (interface-path->string interface-path)]
+            (let [operation-name (route-name->string (-> (reitit/match-by-path allu-router uri) :data :name))]
               (error operation-name "failed:" (type exn) (.getMessage exn))
               (error "Rolling back" operation-name))
             (jms/rollback session))))))
