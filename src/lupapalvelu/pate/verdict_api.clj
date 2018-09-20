@@ -88,15 +88,21 @@
     (fail :error.invalid-category)))
 
 (defmethod action/allowed-actions-for-category :pate-verdicts
-  [command]
+  [{:keys [application] :as command}]
   (if-let [verdict-id (get-in command [:data :verdict-id])]
     {verdict-id (action/allowed-category-actions-for-command :pate-verdicts
                                                              command)}
-    (action/allowed-actions-for-collection :pate-verdicts
-                                           (fn [application verdict]
-                                             {:id         (:id application)
-                                              :verdict-id (:id verdict)})
-                                           command)))
+    (let [all-verdicts (concat (:verdicts application)
+                               (:pate-verdicts application))]
+      (->> all-verdicts
+           (map (fn [verdict]
+                 (assoc command
+                        :data {:id         (:id application)
+                               :verdict-id (:id verdict)})))
+           (map action/foreach-action)
+           (map (partial action/filter-actions-by-category :pate-verdicts))
+           (map action/validate-actions)
+           (zipmap (map :id all-verdicts))))))
 
 ;; ------------------------------------------
 ;; Actions common with modern and legacy

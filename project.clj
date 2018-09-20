@@ -264,7 +264,7 @@
                             ["figwheel"]]]}
   :aot [lupapalvelu.main clj-time.core]
   :main ^:skip-aot lupapalvelu.server
-  :repl-options {:init-ns lupapalvelu.server}
+  :repl-options {:init-ns user}
   :pom-plugins [[org.fusesource.mvnplugins/maven-graph-plugin "1.4"]
                 [com.googlecode.maven-overview-plugin/maven-overview-plugin "1.6"]]
   :min-lein-version "2.5.0")

@@ -38,8 +38,7 @@
 (defn- can-delete? [{:keys [id category] :as verdict}]
   (or (state/verdict-auth? id :delete-legacy-verdict)
       (state/verdict-auth? id :delete-pate-verdict)
-      (and (util/=as-kw category :backing-system)
-           (state/auth? :delete-verdict))))
+      (state/verdict-auth? id :delete-verdict)))
 
 (defn- can-replace? [verdict-id]
   (state/verdict-auth? verdict-id :replace-pate-verdict))
