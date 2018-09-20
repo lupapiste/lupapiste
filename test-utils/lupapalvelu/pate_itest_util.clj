@@ -360,8 +360,8 @@
                     :published     pos?}))))
 
 (defn give-up [i]
-  (fact "We give up after 10 tries"
-    (< i 10) => true))
+  (fact "We give up after 20 tries"
+    (< i 20) => true))
 
 (defn- bad-status [status]
   (fact "Bad status"
@@ -381,10 +381,10 @@
                                                 :state        "verdictGiven"}
                                                options))
 
-        (> i 9) (give-up i)
+        (> i 19) (give-up i)
 
         (= status 202) (do
-                         (Thread/sleep 1000)
+                         (Thread/sleep 2000)
                          (recur (inc i)))
 
         :else (bad-status status)))))
