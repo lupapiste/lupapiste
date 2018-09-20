@@ -387,25 +387,6 @@
                             {:endpoint endpoint
                              :response (select-keys http-response [:status :body])}))
 
-;;;; REST API description and request conversion
-;;;; ===================================================================================================================
-
-(defn- jwt-authorize [request jwt]
-  (assoc-in request [:headers "authorization"] (str "Bearer " jwt)))
-
-(defn- content->json [request]
-  (cond
-    (contains? request :body) (-> request (update :body json/encode) (assoc :content-type :json))
-    (contains? request :multipart) (update request :multipart
-                                           (partial mapv (fn [{:keys [content] :as part}]
-                                                           (if (or (string? content)
-                                                                   (instance? InputStream content)) ; HACK
-                                                             part
-                                                             (update part :content json/encode)))))
-    :else request))
-
-(defn- route-name->string [path] (s/join \. (map name path)))
-
 ;;;; HTTP request sender for production
 ;;;; ===================================================================================================================
 
@@ -460,13 +441,29 @@
                                  {:status 200, :body ""}
                                  {:status 404, :body (str "Not Found: " id)})))))
 
-;;;; Middleware
+;;;; Custom middlewares
 ;;;; ===================================================================================================================
+
+(defn- route-name->string [path] (s/join \. (map name path)))
 
 (defn- preprocessor->middleware
   "(Request -> Request) -> ((Request -> Response) -> (Request -> Response))"
   [preprocess]
   (fn [handler] (fn [request] (handler (preprocess request)))))
+
+(defn- jwt-authorize [request jwt]
+  (assoc-in request [:headers "authorization"] (str "Bearer " jwt)))
+
+(defn- content->json [request]
+  (cond
+    (contains? request :body) (-> request (update :body json/encode) (assoc :content-type :json))
+    (contains? request :multipart) (update request :multipart
+                                           (partial mapv (fn [{:keys [content] :as part}]
+                                                           (if (or (string? content)
+                                                                   (instance? InputStream content)) ; HACK
+                                                             part
+                                                             (update part :content json/encode)))))
+    :else request))
 
 (defn- get-attachment-files! [{{:keys [application latestAttachmentVersion]} ::command :as request}]
   (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
@@ -506,7 +503,7 @@
 
         response (allu-fail! :error.allu.http (select-keys response [:status :body]))))))
 
-;;;; Request handling and JMS resources
+;;;; Router and request handler
 ;;;; ===================================================================================================================
 
 (defn- innermost-handler
@@ -546,6 +543,9 @@
 (def allu-request-handler
   "ALLU request handler. Returns nil, calls `allu-fail!` on HTTP errors."
   (reitit-ring/ring-handler allu-router))
+
+;;;; JMS resources
+;;;; ===================================================================================================================
 
 (def- allu-jms-queue-name "lupapalvelu.backing-system.allu")
 
