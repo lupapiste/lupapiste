@@ -217,6 +217,9 @@
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
+(defn ->asian-tiedot [xml]
+  (-> xml cr/strip-xml-namespaces (select [:asianTiedot :rakennusvalvontaasianKuvaus]) first (get-in [:content 0])))
+
 (defn- ->rakennelman-tiedot [rakennelma]
   {:rakennusnro (ss/trim (get-text rakennelma :tunnus :rakennusnro))
    :rakennelman-kuvaus  (get-text rakennelma :kuvaus :kuvaus)})

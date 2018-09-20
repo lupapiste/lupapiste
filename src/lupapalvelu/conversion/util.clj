@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [lupapalvelu.application :as app]
             [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [lupapalvelu.backing-system.krysp.review-reader :as review-reader]
             [lupapalvelu.document.model :as model]
@@ -126,16 +127,25 @@
                e))
            history-array))))
 
+(defn read-all-test-files
+  ([] (read-all-test-files "/Users/tuomo.virolainen/Desktop/test-data"))
+  ([path]
+   (let [files (->> (clojure.java.io/file path)
+                    file-seq
+                    (filter #(.isFile %))
+                    (map #(.getAbsolutePath %)))]
+     (map #(try
+             (krysp-fetch/get-local-application-xml-by-filename % "R")
+             (catch Exception e
+               (println (.getMessage e)))) files))))
+
 (defn list-all-states
   "List all unique states found in the test set."
-  [path]
-  (let [files (->> (clojure.java.io/file path)
-                   file-seq
-                   (filter #(.isFile %))
-                   (map #(.getAbsolutePath %)))]
+  []
+  (let [files (read-all-test-files)]
     (set (mapcat (fn [f]
                    (let [data (try
-                                (krysp-reader/get-sorted-tilamuutos-entries (krysp-fetch/get-local-application-xml-by-filename f "R"))
+                                (krysp-reader/get-sorted-tilamuutos-entries f)
                                 (catch Exception e
                                   (println (.getMessage e))))]
                      (map :tila data))) files))))
@@ -148,6 +158,14 @@
       (first x)
       (get-in x [:KatselmuksenRakennus :rakennuksenSelite]))))
 
+(defn get-building-types []
+  (frequencies (map get-building-type (read-all-test-files))))
+
+(defn get-asian-kuvaukset []
+  (->> (read-all-test-files)
+       (map building-reader/->asian-tiedot)
+       (filter string?)))
+
 (defn deduce-operation-name
   "Figure out the right primaryOperation for the application."
   [xml]
@@ -156,6 +174,7 @@
         btype (get-building-type xml)]
     (cond
       (= "TJO" suffix) "tyonjohtajan-nimeaminen-v2"
+      (contains? #{"P" "PI"} suffix) "purkaminen"
       (and (= "A" suffix)
            (contains? #{"Asuinkerrostalo" "Kerrostalo"} btype)) "kerrostalo-rivitalo"
       (and (= "A" suffix)
@@ -163,3 +182,6 @@
       (and (= "B" suffix)
            (contains? #{"Omakotitalo"} btype)) "pientalo-laaj"
       :else "aiemmalla-luvalla-hakeminen")))
+
+(def tyyppi
+  (get-building-type (:xml @lupapalvelu.conversion.kuntagml-converter/tila)))
