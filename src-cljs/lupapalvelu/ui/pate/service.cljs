@@ -289,6 +289,7 @@
                               (fetch-verdict-list app-id)
                               (js/repository.load app-id)
                               (state/refresh-application-auth-model app-id)
+                              (state/refresh-verdict-auths app-id)
                               (js/lupapisteApp.services.attachmentsService.queryAll)
                               (callback response))}
                   :id app-id))

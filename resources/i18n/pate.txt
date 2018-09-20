@@ -1044,3 +1044,5 @@
 "plus" "en" "+"
 "plus" "fi" "+"
 "plus" "sv" "+"
+"pate.check-for-verdict.confirm" "fi" "Päätöstietojen haku poistaa kaikki aiemmin noudetut päätökset ja sopimukset sekä niiden liitteet, valmistelumerkinnät, lupaehdot, määräaykset ja muutoksenhaun hakemukselta. Oletko varma?"
+"pate.check-for-contract.confirm" "fi" "Sopimustietojen haku poistaa kaikki aiemmin noudetut sopimukset ja päätökset sekä niiden liitteet, valmistelumerkinnät, lupaehdot, määräaykset ja muutoksenaun hakemukselta. Oletko varma?"
