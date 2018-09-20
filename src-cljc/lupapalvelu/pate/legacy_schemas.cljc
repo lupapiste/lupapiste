@@ -320,20 +320,6 @@
                                   {:col 2
                                    :dict :lainvoimainen}]]}}})
 
-(def r-legacy-verdict
-  (build-legacy-schema
-   (legsub-verdict {:select {:loc-prefix :verdict.status
-                             :items      (map (comp keyword str) (range 1 43))
-                             :sort-by    :text
-                             :type :autocomplete}})
-   (legsub-reviews {:select {:loc-prefix :pate.review-type
-                             :label?     false
-                             :items      helper/review-types
-                             :sort-by    :text}})
-   legsub-foremen
-   (legsub-conditions)
-   legsub-attachments
-   (verdict-schemas/versub-upload)))
 
 (def migration-contract
   (build-legacy-schema

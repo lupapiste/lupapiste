@@ -357,9 +357,8 @@
 
 (facts "Attachments query"
   (let [{application-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
-        {verdict-id :verdictId :as verdict-resp} (command sonja :new-verdict-draft :id application-id)]
+        {:keys [verdict-id]} (command sonja :new-legacy-verdict-draft :id application-id)]
     (facts "initialization"
-      (fact "verdict" verdict-resp => ok?)
       (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => truthy))
 
     (facts "Authority"
@@ -382,9 +381,8 @@
 
 (facts "Single attachment query"
   (let [{application-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
-        {verdict-id :verdictId :as verdict-resp} (command sonja :new-verdict-draft :id application-id)]
+        {:keys [verdict-id]} (command sonja :new-legacy-verdict-draft :id application-id)]
     (facts "initialization"
-      (fact "verdict" verdict-resp => ok?)
       (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => truthy)
       (let [{attachments :attachments :as attachments-resp} (query sonja :attachments :id application-id)
             attachment-id (->> attachments (filter (comp #{"verdict"} :type :target)) first :id)]
