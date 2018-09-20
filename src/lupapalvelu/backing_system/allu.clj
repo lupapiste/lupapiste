@@ -433,27 +433,29 @@
                                      :data.response.status {$in [200 201]}}))
 
 ;; This approximates the ALLU state with the `imessages` data:
-(defn- imessages-mock-handler [{:keys [body] :as request}]
+(defn- imessages-mock-handler [request]
   (let [route-match (reitit-ring/get-match request)]
     (match (-> route-match :data :name)
-      [:applications :cancel] (let [id (-> route-match :data :path-params :id)]
+      [:applications :cancel] (let [id (-> route-match :path-params :id)]
                                 (if (creation-response-ok? id)
                                   {:status 200, :body ""}
                                   {:status 404, :body (str "Not Found: " id)}))
 
-      [:placementcontracts :create] (if-let [validation-error (sc/check PlacementContract body)]
-                                      {:status 400, :body validation-error}
-                                      {:status 200
-                                       :body   (.replace (subs (:identificationNumber body) 3) "-" "")})
+      [:placementcontracts :create] (let [body (json/decode (:body request) true)]
+                                      (if-let [validation-error (sc/check PlacementContract body)]
+                                        {:status 400, :body validation-error}
+                                        {:status 200
+                                         :body   (.replace (subs (:identificationNumber body) 3) "-" "")}))
 
-      [:placementcontracts :update] (let [id (-> route-match :data :path-params :id)]
+      [:placementcontracts :update] (let [id (-> route-match :path-params :id)
+                                          body (json/decode (:body request) true)]
                                       (if-let [validation-error (sc/check PlacementContract body)]
                                         {:status 400, :body validation-error}
                                         (if (creation-response-ok? id)
                                           {:status 200, :body id}
                                           {:status 404, :body (str "Not Found: " id)})))
 
-      [:attachments :create] (let [id (-> route-match :data :path-params :id)]
+      [:attachments :create] (let [id (-> route-match :path-params :id)]
                                (if (creation-response-ok? id)
                                  {:status 200, :body ""}
                                  {:status 404, :body (str "Not Found: " id)})))))
@@ -469,7 +471,7 @@
 (defn- get-attachment-files! [{{:keys [application latestAttachmentVersion]} ::command :as request}]
   (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
                                           {:versions [latestAttachmentVersion]})] ; HACK
-    (assoc-in request [:body 1 :content] ((:content file-map)))
+    (assoc-in request [:multipart 1 :content] ((:content file-map)))
     (assert false "unimplemented")))
 
 (defn- save-messages! [handler]

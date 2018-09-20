@@ -214,10 +214,10 @@
       response)))
 
 (defn- check-imessages-middleware [handler]
-  (fn [{interface-path ::allu/interface-path {:keys [application]} ::allu/command :as request}]
+  (fn [{{:keys [application]} ::allu/command :as request}]
     (let [imsg-query (fn [direction]
                        {:partner        "allu"
-                        :messageType    (s/join \. (map name interface-path))
+                        :messageType    (s/join \. (map name (-> request reitit-ring/get-match :data :name)))
                         :direction      direction
                         :status         "done"
                         :application.id (:id application)})
