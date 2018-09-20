@@ -36,6 +36,18 @@
     (boolean (:legacy? verdict))
     false)) ;; TODO Better to have type enum: pate legacy backing-system
 
+(defn draft? [verdict]
+  (cond
+    (lupapiste-verdict? verdict) (not (:published verdict))
+    (contains? verdict draft?) (boolean (:draft verdict))
+    :else false))
+
+(defn published? [verdict]
+  (cond
+    (lupapiste-verdict? verdict) (boolean (:published verdict))
+    (contains? verdict :draft) (not (:draft verdict))
+    :else false))
+
 ;;
 ;; Accessors
 ;;
