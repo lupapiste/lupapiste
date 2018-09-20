@@ -95,7 +95,6 @@
   [context category]
   (if (verdict-code-is-free-text? category)
     (i18n/try-localize (fn [& args]
-                         (println args)
                          ((get-in-poytakirja :code) context))
                        "fi"
                        ["verdict" "status" (str ((get-in-poytakirja :status) context))])
