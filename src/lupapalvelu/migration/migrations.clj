@@ -4011,17 +4011,27 @@
                          (pate-verdict-migration/migration-updates application
                                                                    timestamp))
      (catch Exception e
-       (clojure.pprint/pprint (ex-data e))
        (throw (ex-info (str "Migration failed for application " (:id application))
                        {}
                        e))))))
 
+(defn update-application-verdicts-to-pate-legacy-verdicts-dry-run [timestamp application]
+  (logging/with-logging-context {:applicationId (:id application)}
+    (try
+      (pate-verdict-migration/migration-updates application
+                                                timestamp)
+      (catch Exception e
+        (throw (ex-info (str "Migration dry run failed for application " (:id application))
+                        {}
+                        e))))))
+
 (defmigration pate-verdicts
   {:apply-when (pos? (mongo/count :applications pate-verdict-migration/migration-query))}
   (let [ts (now)]
-    (->> (mongo/select :applications
-                       pate-verdict-migration/migration-query)
-         (run! (partial update-application-verdicts-to-pate-legacy-verdicts ts)))))
+    (let [applications (mongo/select :applications
+                                     pate-verdict-migration/migration-query)]
+      (->> applications (run! (partial update-application-verdicts-to-pate-legacy-verdicts-dry-run ts)))
+      (->> applications (run! (partial update-application-verdicts-to-pate-legacy-verdicts ts))))))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

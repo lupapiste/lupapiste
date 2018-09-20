@@ -26,10 +26,13 @@
 
 (def- wrap? (comp boolean ::wrap))
 
+(defn wrap-metadata [x timestamp]
+  (metadata/wrap "Verdict draft Pate migration" timestamp x))
+
 (defn- post-process [timestamp]
   (fn [x]
     (if (wrap? x)
-      (metadata/wrap "Verdict draft Pate migration" timestamp (::wrap x))
+      (wrap-metadata (::wrap x) timestamp)
       x)))
 
 ;;
@@ -288,24 +291,25 @@
   (assoc verdict :template (verdict-template {:application app
                                               :verdict verdict})))
 
-(defn- update-verdict-code [verdict original-verdict new-category]
-  (assoc-in verdict [:data :verdict-code :_value]
-            (verdict-code-for-category {:verdict original-verdict}
-                                       new-category)))
+(defn- update-verdict-code [verdict original-verdict new-category timestamp]
+  (assoc-in verdict [:data :verdict-code ]
+            (wrap-metadata (verdict-code-for-category {:verdict original-verdict}
+                                                      new-category)
+                           timestamp)))
 
-(defn change-category [app verdict original-verdict new-category]
+(defn change-category [app verdict original-verdict new-category timestamp]
   (add-tags app
             (-> verdict
                 (assoc :category new-category)
-                (update-verdict-code original-verdict new-category)
+                (update-verdict-code original-verdict new-category timestamp)
                 (update-template app))))
 
-(defn ensure-valid-category [app original-verdict verdict]
+(defn ensure-valid-category [app original-verdict timestamp verdict]
   (if-let [errors (check-verdict verdict)]
     (let [new-category (if (contract-category? (:category verdict)) "migration-contract" "migration-verdict")]
       (warnf "Verdict %s did not conform to category %s: %s" (:id verdict) (:category verdict) (str errors))
       (infof "Changing category of verdict %s to %s" (:id verdict) new-category)
-      (change-category app verdict original-verdict new-category))
+      (change-category app verdict original-verdict new-category timestamp))
     verdict))
 
 (defn validate-verdict
@@ -334,7 +338,7 @@
        (add-tags application)
        ;; If the verdict doesn't validate for the intended category, use more
        ;; permissive migration-verdict or migration-contract
-       (ensure-valid-category application verdict)
+       (ensure-valid-category application verdict timestamp)
        ;; Finally, validate the verdict again
        validate-verdict))
 
