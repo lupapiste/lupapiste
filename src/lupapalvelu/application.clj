@@ -60,10 +60,15 @@
 
 (defn resolve-valid-subtypes
   "Returns a set of valid permit and operation subtypes for the application."
-  [{permit-type :permitType op :primaryOperation}]
+  [{permit-type :permitType op :primaryOperation org :organization}]
   (let [op-subtypes (op/get-primary-operation-metadata {:primaryOperation op} :subtypes)
-        permit-subtypes (permit/permit-subtypes permit-type)]
-    (distinct (concat op-subtypes permit-subtypes))))
+        permit-subtypes (permit/permit-subtypes permit-type)
+        all-subtypes (distinct (concat op-subtypes permit-subtypes))]
+    ;; If organization is 091-YA (= Helsinki yleiset alueet) and the user is requesting sijoituslupa or sijoitussopimus, return a list
+    ;; where :sijoitussopimus comes before :sijoituslupa so it acts as a default value
+    (if (and (= "091-YA" org) (= (set all-subtypes) #{:sijoitussopimus :sijoituslupa}))
+      (reverse all-subtypes)
+      all-subtypes)))
 
 (defn handler-history-entry [handler timestamp user]
   {:handler handler
@@ -491,12 +496,12 @@
     {:history (cond->> [(app-state/history-entry state created user)]
                 tos-function-map (concat [(tos/tos-history-entry tos-function-map created user)]))}))
 
-(defn permit-type-and-operation-map [operation-name created]
+(defn permit-type-and-operation-map [operation-name organization created]
   (let [op (make-op operation-name created)
         classification {:permitType       (op/permit-type-of-operation operation-name)
                         :primaryOperation op}]
     (merge classification
-           {:permitSubtype (first (resolve-valid-subtypes classification))})))
+           {:permitSubtype (first (resolve-valid-subtypes (assoc classification :organization organization)))})))
 
 (defn application-auth [user operation-name]
   (let [user-auth    (usr/user-in-role user :writer)
@@ -564,7 +569,7 @@
   {:pre [user created]}
   (let [application (merge domain/application-skeleton
                            (dissoc application-info :propertyIdSource)
-                           (permit-type-and-operation-map (:operation-name application-info) created)
+                           (permit-type-and-operation-map (:operation-name application-info) (:id organization) created)
                            (location-map (:location application-info))
                            {:auth            (application-auth user operation-name)
                             :comments        (application-comments user messages (:openInfoRequest application-info) created)
