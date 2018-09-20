@@ -164,6 +164,18 @@
                                :pykala (ds/access :pykala)
                                :paatoskoodi (ds/access :paatoskoodi)}]}]})
 
+(defn- backing-system-status [verdict]
+  (if (vc/verdict-code-is-free-text? verdict)
+    nil
+    (util/->int (vc/verdict-code verdict))))
+
+(defn- backing-system-paatoskoodi [verdict]
+  (if (vc/verdict-code-is-free-text? verdict)
+    (vc/verdict-code verdict)
+    (ss/lower-case (i18n/localize "fi"
+                                  (str "verdict.status."
+                                       (vc/verdict-code verdict))))))
+
 (def backing-system-verdict-accessors
   {:id (with-path [:id])
    :kuntalupatunnus (with-path [:data :kuntalupatunnus])
@@ -174,13 +186,11 @@
    :lainvoimainen (with-path [:data :lainvoimainen])
    :paatoksentekija (with-path [:data :handler])
    :urlHash nil
-   :status (comp util/->int vc/verdict-code)
+   :status backing-system-status
    :paatos vc/verdict-text
    :paatospvm (with-path [:data :anto])
    :pykala vc/verdict-section
-   :paatoskoodi (comp ss/lower-case
-                      #(i18n/localize "fi" (str "verdict.status." %))
-                      vc/verdict-code)})
+   :paatoskoodi backing-system-paatoskoodi})
 
 (defn ->backing-system-verdict [verdict]
   (if (vc/lupapiste-verdict? verdict)

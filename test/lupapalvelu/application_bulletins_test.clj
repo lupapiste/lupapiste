@@ -143,7 +143,14 @@
     (get-in backing-system-verdict [:paatokset 0 :poytakirjat 0 :paatospvm])
     => (-> pate-test-verdict :data :anto :_value)
     (get-in backing-system-verdict [:paatokset 0 :paivamaarat :anto])
-    => (-> pate-test-verdict :data :anto :_value)))
+    => (-> pate-test-verdict :data :anto :_value))
+
+  (let [backing-system-verdict (->backing-system-verdict (assoc pate-test-verdict
+                                                                :category "ymp"))]
+    (get-in backing-system-verdict [:paatokset 0 :poytakirjat 0 :status])
+    => nil   ;; Since for Pate legacy YMP verdicts the verdict code is interpreted as free text
+    (get-in backing-system-verdict [:paatokset 0 :poytakirjat 0 :paatoskoodi])
+    => "2")) ;; Since for Pate legacy YMP verdicts the verdict code is interpreted as free text
 
 
 (def example-app-with-verdict (assoc example-app :verdicts [test-verdict]))

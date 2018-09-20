@@ -48,6 +48,13 @@
     (contains? verdict :draft) (not (:draft verdict))
     :else false))
 
+;; Maybe not the most useful predicate, maybe clean up later?
+(defn verdict-code-is-free-text? [verdict]
+  (-> (:category verdict)
+      legacy/legacy-verdict-schema
+      :dictionary :verdict-code
+      (contains? :text)))
+
 ;;
 ;; Accessors
 ;;
