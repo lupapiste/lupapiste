@@ -95,6 +95,7 @@
             [lupapalvelu.pate.verdict-template-api]
             [lupapalvelu.pate.verdict-api]
             [lupapalvelu.pate.phrases-api]
+            [lupapalvelu.invoice-api]
             [lupapalvelu.financial-api]
             [lupapalvelu.premises-api]
             [lupapalvelu.onkalo-operations-api])
