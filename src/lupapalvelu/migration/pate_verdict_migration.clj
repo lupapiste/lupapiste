@@ -91,7 +91,7 @@
 (defn- verdict-code-for-category
   "If verdict code should be free text, attempt to localize the
   numeric 'status', falling back to 'code', which can be
-  eg. 'hyväksytty'. If it should be numeric, use 'status' as string."
+  eg. 'hyv\00e4ksytty'. If it should be numeric, use 'status' as string."
   [context category]
   (if (verdict-code-is-free-text? category)
     (i18n/try-localize (fn [& args]
