@@ -90,7 +90,8 @@
 (def handler "handler")
 (def verdict-text "Decisions were made.")
 (def section "1")
-(def code 2)
+(def status 2)
+(def code "hyväksytty")
 (def signatures
   [{:created signed1
     :user {:id signer-id1
@@ -111,7 +112,7 @@
                                               :lainvoimainen lainvoimainen}
                                 :poytakirjat [{:paatoksentekija handler
                                                :urlHash "5b7e5772e7d8a1a88e669356"
-                                               :status code
+                                               :status status
                                                :paatos verdict-text
                                                :paatospvm paatospvm
                                                :pykala section
@@ -133,7 +134,7 @@
                             :data {:handler (wrap handler)
                                    :kuntalupatunnus (wrap kuntalupatunnus)
                                    :verdict-section (wrap section)
-                                   :verdict-code    (wrap (str code))
+                                   :verdict-code    (wrap (str status))
                                    :verdict-text    (wrap verdict-text)
                                    :anto            (wrap anto)
                                    :lainvoimainen   (wrap lainvoimainen)
@@ -253,6 +254,20 @@
                            timestamp)
     => (contains {:category "migration-verdict"
                   :data (contains {:verdict-text (wrap verdict-text)})}))
+
+  (fact "YMP verdicts have textual verdict code instead of numeric"
+        (->pate-legacy-verdict (assoc app-one-verdict-no-tasks :permitType "YI")
+                               test-verdict
+                               timestamp)
+        => (contains {:category "ymp"
+                      :data (contains {:verdict-code (wrap "Hyväksytty")})}))
+
+  (fact "YMP verdicts that need to be migrated as migration-verdicts have numeric verdict-codes"
+        (->pate-legacy-verdict (assoc test-application :permitType "YI")
+                               test-verdict
+                               timestamp)
+        => (contains {:category "migration-verdict"
+                      :data (contains {:verdict-code (wrap (str status))})}))
 
   (fact "if contract cannot be validated with the default category, a permissive migration-contract category is used"
         (->pate-legacy-verdict (assoc test-application :permitType "YA")

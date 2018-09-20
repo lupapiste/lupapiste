@@ -9,6 +9,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.data-skeleton :as ds]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.legacy-schemas :as legacy-schemas]
@@ -77,6 +78,29 @@
 (defn- verdict-template [context]
   {:inclusions (-> (verdict-category context)
                    verdict/legacy-verdict-inclusions)})
+
+(defn- verdict-code-is-free-text? [category]
+  (-> category
+      legacy-schemas/legacy-verdict-schema
+      :dictionary :verdict-code
+      (contains? :text)))
+
+(defn- verdict-code-for-category
+  "If verdict code should be free text, attempt to localize the
+  numeric 'status', falling back to 'code', which can be
+  eg. 'hyväksytty'. If it should be numeric, use 'status' as string."
+  [context category]
+  (if (verdict-code-is-free-text? category)
+    (i18n/try-localize (fn [& args]
+                         (println args)
+                         ((get-in-poytakirja :code) context))
+                       "fi"
+                       ["verdict" "status" (str ((get-in-poytakirja :status) context))])
+    (str ((get-in-poytakirja :status) context))))
+
+(defn verdict-code [context]
+  (verdict-code-for-category context
+                             (verdict-category context)))
 
 (defn- get-when [p getter-fn]
   (fn [context]
@@ -220,7 +244,7 @@
    :signatures        (get-in-verdict [:signatures])
    :state             verdict-state
    :template          verdict-template
-   :verdict-code      (comp str (get-in-poytakirja :status))
+   :verdict-code      verdict-code
    :verdict-section   (get-in-poytakirja :pykala)
    :verdict-text      (get-when (complement contract?) (get-in-poytakirja :paatos))})
 
@@ -264,18 +288,24 @@
   (assoc verdict :template (verdict-template {:application app
                                               :verdict verdict})))
 
-(defn change-category [app verdict new-category]
+(defn- update-verdict-code [verdict original-verdict new-category]
+  (assoc-in verdict [:data :verdict-code :_value]
+            (verdict-code-for-category {:verdict original-verdict}
+                                       new-category)))
+
+(defn change-category [app verdict original-verdict new-category]
   (add-tags app
             (-> verdict
                 (assoc :category new-category)
+                (update-verdict-code original-verdict new-category)
                 (update-template app))))
 
-(defn ensure-valid-category [app verdict]
+(defn ensure-valid-category [app original-verdict verdict]
   (if-let [errors (check-verdict verdict)]
     (let [new-category (if (contract-category? (:category verdict)) "migration-contract" "migration-verdict")]
       (warnf "Verdict %s did not conform to category %s: %s" (:id verdict) (:category verdict) (str errors))
       (infof "Changing category of verdict %s to %s" (:id verdict) new-category)
-      (change-category app verdict new-category))
+      (change-category app verdict original-verdict new-category))
     verdict))
 
 (defn validate-verdict
@@ -304,7 +334,7 @@
        (add-tags application)
        ;; If the verdict doesn't validate for the intended category, use more
        ;; permissive migration-verdict or migration-contract
-       (ensure-valid-category application)
+       (ensure-valid-category application verdict)
        ;; Finally, validate the verdict again
        validate-verdict))
 
