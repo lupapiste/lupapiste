@@ -103,18 +103,27 @@
 
 (rum/defcs check-for-verdict < (rum/local false ::waiting?)
   [{waiting?* ::waiting?}]
-  (components/icon-button {:icon     :lupicon-download
-                           :text-loc (loc-key :fetch)
-                           :wait?    waiting?*
-                           :class    [:positive :pate-right-space]
-                           :on-click #(service/check-for-verdict @state/application-id
-                                                                 waiting?*
-                                                                 (fn [{:keys [verdictCount taskCount]}]
-                                                                   (common/show-dialog {:ltitle :verdict.fetch.title
-                                                                                        :text   (common/loc :verdict.verdicts-found-from-backend
-                                                                                                            (str verdictCount)
-                                                                                                            (str taskCount))})
-                                                                   ))}))
+  (let [check-fn   #(service/check-for-verdict @state/application-id
+                                               waiting?*
+                                               (fn [{:keys [verdictCount taskCount]}]
+                                                 (common/show-dialog {:ltitle :verdict.fetch.title
+                                                                      :text   (common/loc :verdict.verdicts-found-from-backend
+                                                                                          (str verdictCount)
+                                                                                          (str taskCount))})))
+        confirm-fn #(if (some (fn [{:keys [category]}]
+                                (util/=as-kw category :backing-system))
+                              @state/verdict-list)
+                      (common/show-dialog {:type     :yes-no
+                                           :ltext (if (:contracts? @args)
+                                                    :pate.check-for-contract.confirm
+                                                    :pate.check-for-verdict.confirm)
+                                           :callback check-fn})
+                      (check-fn))]
+    (components/icon-button {:icon     :lupicon-download
+                             :text-loc  (loc-key :fetch)
+                             :wait?     waiting?*
+                             :class     [:positive :pate-right-space]
+                             :on-click confirm-fn})))
 
 (rum/defc order-verdict-attachment-prints []
   (components/icon-button {:icon     :lupicon-envelope
@@ -123,35 +132,26 @@
                            :on-click #(hub/send "order-attachment-prints")}))
 
 (defn- confirm-and-delete-verdict [app-id {:keys [legacy? published] :as verdict}]
-  (hub/send  "show-dialog"
-             {:ltitle          "areyousure"
-              :size            "medium"
-              :component       "yes-no-dialog"
-              :componentParams {:ltext (if published
-                                         (loc-key :confirm-delete)
-                                         (loc-key :confirm-delete-draft))
-                                :yesFn #(service/delete-verdict app-id verdict)}}))
+  (common/show-dialog {:type     :yes-no
+                       :ltext    (if published
+                                   (loc-key :confirm-delete)
+                                   (loc-key :confirm-delete-draft))
+                       :callback #(service/delete-verdict app-id verdict)}))
 
 (defn- confirm-and-replace-verdict [verdict verdict-id]
-  (hub/send  "show-dialog"
-             {:ltitle          "areyousure"
-              :size            "medium"
-              :component       "yes-no-dialog"
-              :componentParams {:ltext "pate.replace-verdict"
-                                :yesFn #(do
-                                          (reset! state/verdict-list nil)
-                                          (reset! state/verdict-list [verdict])
-                                          (reset! state/replacement-verdict verdict-id))}}))
+  (common/show-dialog {:type     :yes-no
+                       :ltext    :pate.replace-verdict
+                       :callback #(do
+                                    (reset! state/verdict-list nil)
+                                    (reset! state/verdict-list [verdict])
+                                    (reset! state/replacement-verdict verdict-id))}))
 
 (defn- confirm-and-send-signature-request [app-id verdict-id signer-id add-signature?*]
-  (hub/send  "show-dialog"
-             {:ltitle          "areyousure"
-              :size            "medium"
-              :component       "yes-no-dialog"
-              :componentParams {:ltext :pate.verdict-table.request-signature.confirm
-                                :yesFn #(do
-                                          (service/send-signature-request app-id verdict-id signer-id)
-                                          (swap! add-signature?* not))}}))
+  (common/show-dialog {:type     :yes-no
+                       :ltext    :pate.verdict-table.request-signature.confirm
+                       :callback #(do
+                                    (service/send-signature-request app-id verdict-id signer-id)
+                                    (swap! add-signature?* not))}))
 
 
 (rum/defcs verdict-signatures-row < rum/reactive
