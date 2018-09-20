@@ -1,9 +1,16 @@
 (ns sade.strings
-  (:require [clojure.string :as s])
+  (:require [clojure.string :as s]
+            [clojure.walk :as walk]
+            [sade.shared-strings :as shared])
   (:import [java.text Normalizer Normalizer$Form]
-           [org.apache.commons.lang3 StringUtils]
-           [org.apache.commons.codec.binary Base64])
+           [org.apache.commons.codec.binary Base64]
+           [org.apache.commons.lang3 StringUtils])
   (:refer-clojure :exclude [replace contains? empty?]))
+
+(defmacro defalias [alias from]
+  `(do (def ~alias ~from)
+       (alter-meta! #'~alias merge (select-keys (meta #'~from) [:arglists]))
+       ~alias))
 
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
@@ -141,21 +148,13 @@
 
 (defn capitalize ^String [^CharSequence x] (when x (s/capitalize x)))
 
-(defn trim ^String [^CharSequence x] (when x (s/trim x)))
+(defalias trim       shared/trim)
+(defalias split      shared/split)
+(defalias replace    shared/replace)
+(def blank?     shared/blank?)
+(defalias not-blank? shared/not-blank?)
+(def join       shared/join)
 
-(defn split
-  ([^CharSequence s ^java.util.regex.Pattern re] (when s (s/split s re)))
-  ([^CharSequence s ^java.util.regex.Pattern re ^Integer limit] (when s (s/split s re limit))))
-
-(defn replace ^String [^CharSequence s match replacement] (when s (s/replace s match replacement)))
-
-; alias common clojure.string stuff, so that you dont need to require both namespaces:
-
-(def ^{:doc "Alias to clojure.string/blank?"} blank? s/blank?)
-
-(defn not-blank? [s] (not (blank? s)))
-
-(def ^{:doc "Arguments: [coll] or [separator coll]. Alias to clojure.string/join"} join s/join)
 
 ;; File name handling
 
@@ -234,3 +233,9 @@
 
 (defn strip-trailing-slashes [string]
   (replace string #"/+$" ""))
+
+(defn serialize
+  "Serialze with `pr-str` but enforce evaluation first. The resulting
+  string can be parsed with `clojure.edn/read-string`."
+  [arg]
+  (pr-str (walk/postwalk identity arg)))

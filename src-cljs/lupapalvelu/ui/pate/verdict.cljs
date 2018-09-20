@@ -1,11 +1,14 @@
 (ns lupapalvelu.ui.pate.verdict
   "View of an individual Pate verdict."
-  (:require [lupapalvelu.pate.legacy-schemas :as legacy]
+  (:require [cljs.tools.reader :as reader]
+            [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.path :as path]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
+            [lupapalvelu.ui.pate.appeal :as appeal]
+            [lupapalvelu.ui.pate.attachments :as att]
             [lupapalvelu.ui.pate.components :as pate-components]
             [lupapalvelu.ui.pate.sections :as sections]
             [lupapalvelu.ui.pate.service :as service]
@@ -37,26 +40,30 @@
   ([{:keys [state path] :as options}]
    (updater options (path/value path state))))
 
-
 (defn reset-verdict [{:keys [verdict references filled]}]
   (reset! state/current-verdict
           (when verdict
-            {:state (:data verdict)
-             :info  (-> (dissoc verdict :data)
-                        (assoc :filled? filled)
-                        (update :inclusions #(set (map keyword %))))
-             :_meta {:updated             updater
-                     :highlight-required? (-> verdict :published not)
-                     :enabled?            (state/verdict-auth? (:id verdict)
-                                                               :edit-pate-verdict)
-                     :published?          (:published verdict)
-                     :upload.filedata     (fn [_ filedata & kvs]
-                                            (apply assoc filedata
-                                                   :target {:type :verdict
-                                                            :id   (:id verdict)}
-                                                   kvs))
-                     :upload.include?     (fn [_ {:keys [target]}]
-                                            (= (:id target) (:id verdict)))}}))
+            (if-let [tags (:tags verdict)]
+              {:tags           (reader/read-string tags)
+               :attachment-ids (:attachment-ids verdict)
+               :info           {:id (:id verdict)}}
+              {:state (:data verdict)
+               :info  (-> (dissoc verdict :data)
+                          (assoc :filled? filled)
+                          (update :inclusions #(set (map keyword %))))
+               :_meta {:updated             updater
+                       :highlight-required? (-> verdict :published not)
+                       :enabled?            (state/verdict-auth? (:id verdict)
+                                                                 :edit-pate-verdict)
+                       :published?          (util/=as-kw :published
+                                                         (:state verdict))
+                       :upload.filedata     (fn [_ filedata & kvs]
+                                              (apply assoc filedata
+                                                     :target {:type :verdict
+                                                              :id   (:id verdict)}
+                                                     kvs))
+                       :upload.include?     (fn [_ {:keys [target]}]
+                                              (= (:id target) (:id verdict)))}})))
   (reset! state/references references)
   (common/reset-if-needed! state/verdict-wait? false))
 
@@ -99,19 +106,11 @@
                      :pate.close-all
                      :pate.open-all))])))
 
-(rum/defc generate-pdf-link < rum/reactive
-  [verdict-id]
-  (let [waiting?* (atom false)]
-    [:div.pate-published-note
-     (components/text-and-link {:text-loc :pate.verdict.generate-pdf
-                                :disabled? waiting?*
-                                :click (partial service/generate-pdf @state/application-id
-                                                verdict-id
-                                                waiting?*)})]))
-
 (rum/defc verdict-toolbar < rum/reactive [{:keys [info _meta] :as options}]
-  (let [{:keys [published id category] :as info} @info
-        contract? (util/=as-kw category :contract)
+  (let [{:keys [id category published]
+         :as   info} @info
+        published  (:published published)
+        contract?  (util/=as-kw category :contract)
         yes-fn     (fn []
                      (reset! state/verdict-wait? true)
                      (reset! (rum/cursor-in _meta [:enabled?]) false)
@@ -150,9 +149,7 @@
           (common/loc (if contract?
                         :pate.contract.published
                         :pate.verdict-published)
-                      (js/util.finnishDate published))]
-         (when (can-generate?)
-           (generate-pdf-link id))]]
+                      (js/util.finnishDate published))]]]
        [:div.row.row--tight
         [:div.col-1
          (pate-components/required-fields-note options)]
@@ -160,12 +157,23 @@
          (toggle-all options)
          (pate-components/last-saved options)]])]))
 
+(rum/defc published-verdict
+  [{:keys [header body]} attachment-ids]
+  [:div.published-verdict
+   header
+   (components/add-key-attrs body "tag-")
+   (when (seq attachment-ids)
+     (list [:h3.pate-published-title {:key "attachments-title"}
+            (common/loc :application.attachments)]
+           (rum/with-key (att/attachments-view attachment-ids)
+             "attachments-view")))
+   (appeal/appeals)])
+
 (rum/defc verdict < rum/reactive
   [options]
   [:div.pate-verdict
    (verdict-toolbar options)
    (sections/sections options :verdict)])
-
 
 (defn current-verdict-schema []
   (let [{:keys [schema-version legacy?
@@ -174,6 +182,7 @@
       (legacy/legacy-verdict-schema category)
       (verdict-schemas/verdict-schema category schema-version))))
 
+
 (rum/defc pate-verdict < rum/reactive
   []
   [:div.container
@@ -181,43 +190,53 @@
    (lupapalvelu.ui.attachment.components/dropzone)
    [:div.operation-button-row
     [:button.secondary
-     {:on-click #(common/open-page :application @state/application-id :pate-verdict)}
+     {:on-click (fn [_]
+                  ;; In case we have just published a verdict
+                  (service/refresh-attachments)
+                  (common/open-page :application @state/application-id :verdict))}
      [:i.lupicon-chevron-left]
      [:span (common/loc :back)]]]
    (if (and (rum/react state/current-verdict-id)
             (rum/react state/auth-fn))
-     (let [{dictionary :dictionary :as schema} (current-verdict-schema)]
-       (verdict (assoc (state/select-keys state/current-verdict
-                                          [:state :info :_meta])
-                       :schema (dissoc schema :dictionary)
-                       :dictionary dictionary
-                       :references state/references)))
+     (if (rum/react state/verdict-tags)
+       (published-verdict @state/verdict-tags @state/verdict-attachment-ids)
+       (let [{dictionary :dictionary :as schema} (current-verdict-schema)]
+         (verdict (assoc (state/select-keys state/current-verdict
+                                            [:state :info :_meta])
+                         :schema (dissoc schema :dictionary)
+                         :dictionary dictionary
+                         :references state/references))))
+
      [:div.pate-spin [:i.lupicon-refresh]])]])
 
 (defn bootstrap-verdict []
   (let [[app-id verdict-id] (js/pageutil.getPagePath)]
     (reset-verdict nil)
-    (service/fetch-application-phrases app-id)
     (state/refresh-verdict-auths app-id
                                  {:callback #(state/refresh-application-auth-model
                                               app-id
                                               (fn []
                                                 (service/refresh-attachments)
-                                                (service/open-verdict app-id
-                                                                      verdict-id
-                                                                      reset-verdict)))
+                                                (if (state/verdict-auth? verdict-id :published-pate-verdict)
+                                                  (service/open-published-verdict app-id
+                                                                                  verdict-id
+                                                                                  reset-verdict)
+                                                  (do (when (state/auth? :application-phrases)
+                                                        (do (service/fetch-application-phrases app-id)
+                                                            (service/fetch-custom-application-phrases app-id)) )
+                                                      (service/open-verdict app-id
+                                                                            verdict-id
+                                                                            reset-verdict)))))
                                   :verdict-id verdict-id})))
 
 (defonce args (atom {}))
 
 (defn mount-component []
-  (when (common/feature? :pate)
-    (rum/mount (pate-verdict)
-               (.getElementById js/document (:dom-id @args)))))
+  (rum/mount (pate-verdict)
+             (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId _]
-  (when (common/feature? :pate)
-    (swap! args assoc
-           :dom-id (name domId))
-    (bootstrap-verdict)
-    (mount-component)))
+  (swap! args assoc
+         :dom-id (name domId))
+  (bootstrap-verdict)
+  (mount-component))

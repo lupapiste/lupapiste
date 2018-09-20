@@ -7211,6 +7211,13 @@ button:focus {
   float: left;
 }
 
+button.signature {
+  color: white;
+  background-color: #2ca92c;
+  margin-left: 12px;
+  margin-top: -2px;
+}
+
 label.arrow-label {
   width: 100%;
   display: inline-block;
@@ -30369,6 +30376,11 @@ div.pate-note {
   background-color: #f6f6f6;
 }
 
+div.pate-note-frame {
+  margin: 12px 12px;
+  display: block;
+}
+
 div.pate-required-fields-note {
   border-left: 4px solid #f39129;
   margin-top: 0;
@@ -30624,8 +30636,18 @@ input:disabled + .pate-attachment-check-label:hover.pate-attachment-check-label:
   text-align: right;
 }
 
+h3.pate-published-title {
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid black;
+}
+
 .pate-left-space {
   margin-left: 12px;
+}
+
+.pate-right-space {
+  margin-right: 12px;
 }
 
 .pate-sandwich {
@@ -30667,6 +30689,7 @@ span.text-and-button > input {
 }
 
 tr.verdict-signatures div.tabby {
+  vertical-align: top;
   margin-left: 1em;
 }
 
@@ -30688,7 +30711,230 @@ tr.verdict-signatures .text-and-button > input {
 }
 
 tr.verdict-signatures button.cancel-signing {
-  margin-top: 1.5em;
+  margin-left: 2em;
+}
+
+div.published-verdict {
+  padding-left: 2em;
+  padding-right: 2em;
+}
+
+div.published-verdict .section {
+  display: table;
+  width: 100%;
+}
+
+div.published-verdict .section.border-top {
+  margin-top: 1em;
+  border-top: 1px solid black;
+  padding-top: 1em;
+}
+
+div.published-verdict .section.border-bottom {
+  margin-bottom: 1em;
+  border-bottom: 1px solid black;
+  padding-bottom: 1em;
+}
+
+div.published-verdict .section.header {
+  padding: 0;
+  border-bottom: 1px solid black;
+}
+
+div.published-verdict .section > .row {
+  display: table-row;
+}
+
+div.published-verdict .section > .row.border-top > .cell {
+  border-top: 1px solid black;
+}
+
+div.published-verdict .section > .row.border-bottom > .cell {
+  border-bottom: 1px solid black;
+}
+
+div.published-verdict .section > .row.pad-after > .cell {
+  padding-bottom: 0.5em;
+}
+
+div.published-verdict .section > .row.pad-before > .cell {
+  padding-top: 0.5em;
+}
+
+div.published-verdict .section > .row .cell {
+  display: table-cell;
+  white-space: pre-wrap;
+  padding-right: 1em;
+  vertical-align: top;
+}
+
+div.published-verdict .section > .row .cell:last-child {
+  padding-right: 0;
+}
+
+div.published-verdict .section > .row .cell.right {
+  text-align: right;
+}
+
+div.published-verdict .section > .row .cell.center {
+  text-align: center;
+}
+
+div.published-verdict .section > .row .cell.bold {
+  font-weight: bold;
+}
+
+div.published-verdict .section > .row .cell.nowrap {
+  white-space: nowrap;
+}
+
+div.published-verdict .section > .row .cell.page-number {
+  display: none;
+}
+
+div.published-verdict .section > .row .cell.cell--10 {
+  width: 10%;
+}
+
+div.published-verdict .section > .row .cell.cell--15 {
+  width: 15%;
+}
+
+div.published-verdict .section > .row .cell.cell--20 {
+  width: 20%;
+}
+
+div.published-verdict .section > .row .cell.cell--25 {
+  width: 25%;
+}
+
+div.published-verdict .section > .row .cell.cell--30 {
+  width: 30%;
+}
+
+div.published-verdict .section > .row .cell.cell--35 {
+  width: 35%;
+}
+
+div.published-verdict .section > .row .cell.cell--40 {
+  width: 40%;
+}
+
+div.published-verdict .section > .row .cell.cell--45 {
+  width: 45%;
+}
+
+div.published-verdict .section > .row .cell.cell--50 {
+  width: 50%;
+}
+
+div.published-verdict .section > .row .cell.cell--55 {
+  width: 55%;
+}
+
+div.published-verdict .section > .row .cell.cell--60 {
+  width: 60%;
+}
+
+div.published-verdict .section > .row .cell.cell--65 {
+  width: 65%;
+}
+
+div.published-verdict .section > .row .cell.cell--70 {
+  width: 70%;
+}
+
+div.published-verdict .section > .row .cell.cell--75 {
+  width: 75%;
+}
+
+div.published-verdict .section > .row .cell.cell--80 {
+  width: 80%;
+}
+
+div.published-verdict .section > .row .cell.cell--85 {
+  width: 85%;
+}
+
+div.published-verdict .section > .row .cell.cell--90 {
+  width: 90%;
+}
+
+div.published-verdict .section > .row .cell.cell--95 {
+  width: 95%;
+}
+
+div.published-verdict .section > .row .cell.cell--100 {
+  width: 100%;
+}
+
+div.published-verdict .section > .row.spaced .row + .row .cell {
+  padding-top: 0.5em;
+}
+
+table.pate-appeals tr:hover {
+  background-color: white;
+}
+
+table.pate-appeals tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+table.pate-appeals td {
+  vertical-align: top;
+}
+
+table.pate-appeals tr.pate-appeal-row.odd {
+  background-color: #f6f6f6;
+}
+
+table.pate-appeals tr.pate-appeal-row.even {
+  background-color: white;
+}
+
+table.pate-appeals tr.pate-appeal-row.note-or-form {
+  background-color: white;
+}
+
+table.pate-appeals td.align--right {
+  text-align: right;
+}
+
+table.pate-appeals td.align--half {
+  width: 50%;
+}
+
+table.pate-appeals div.pate-appeal-note {
+  white-space: pre-wrap;
+  padding-left: 2em;
+  padding-right: 2em;
+}
+
+table.pate-appeals span.empty {
+  color: #999999;
+  font-style: italic;
+}
+
+table.pate-appeals a.pate-appeal-operation {
+  padding-right: 2em;
+}
+
+table.pate-appeals.form-files {
+  width: initial;
+  margin-bottom: 0;
+}
+
+table.pate-appeals.form-files td {
+  vertical-align: middle;
+}
+
+table.pate-appeals.form-files tr {
+  border: none;
+}
+
+div.pate-appeal-border {
+  border: 1px solid #bbbbbb;
+  padding: 2em 2em;
 }
 
 .order-grid-1 {

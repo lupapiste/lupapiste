@@ -175,6 +175,7 @@
             [lupapiste/lein-buildid "0.4.2"]
             [lupapiste/lein-nitpicker "0.5.1"]
             [lein-figwheel "0.5.16"]]
+  :hooks [leiningen.cljsbuild]
 
   :clean-targets ^{:protect false} ["resources/public/lp-static/js/rum-app.js"
                                     "resources/public/lp-static/js/rum-app.js.map"
@@ -183,7 +184,8 @@
   :source-paths ["src" "src-cljc"]
   :java-source-paths ["java-src"]
   :cljsbuild {:builds {:rum {:source-paths ^:replace ["src-cljs" "src-cljc"]}}}
-  :profiles {:dev      {:dependencies   [[midje "1.9.1"]
+  :profiles {:dev      {:dependencies   [[cljsbuild "1.1.7"] ; workaround for lein-cljsbuild issue #204
+                                         [midje "1.9.1"]
                                          [com.cemerick/pomegranate "1.0.0"]                                             ; midje.repl needs this
                                          [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                          [com.raspasov/clj-ssh "0.5.12"]
@@ -196,7 +198,7 @@
                                          [binaryage/devtools "0.9.4"]]
                         :resource-paths ["dev-resources"]
                         :source-paths   ["dev-src" "test-utils"]
-                        :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
+                        :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8" "-Xverify:none"]
                         :eastwood       {:continue-on-exception true
                                          :source-paths          ["src"]
                                          :test-paths            []}
@@ -262,7 +264,7 @@
                             ["figwheel"]]]}
   :aot [lupapalvelu.main clj-time.core]
   :main ^:skip-aot lupapalvelu.server
-  :repl-options {:init-ns lupapalvelu.server}
+  :repl-options {:init-ns user}
   :pom-plugins [[org.fusesource.mvnplugins/maven-graph-plugin "1.4"]
                 [com.googlecode.maven-overview-plugin/maven-overview-plugin "1.6"]]
   :min-lein-version "2.5.0")

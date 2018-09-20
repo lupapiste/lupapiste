@@ -1,7 +1,9 @@
 (ns lupapalvelu.pate-itest-util
-  (:require [lupapalvelu.itest-util :refer :all]
+  (:require [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.itest-util :refer :all]
             [midje.sweet :refer :all]
             [monger.operators :refer :all]
+            [sade.core :refer [now]]
             [sade.strings :as ss]
             [sade.util :as util]))
 
@@ -44,6 +46,21 @@
                :path [rep-dict id k]
                :value v))
     id))
+
+(defn check-draft-attachment [app-id attachment-id verdict-id]
+  (fact "Attachment has draft target"
+    (let [{:keys [attachments]} (query-application sonja app-id)]
+      (util/find-by-id attachment-id attachments)
+      => (contains {:target   {:type "verdict"
+                               :id   verdict-id}
+                    :metadata {:nakyvyys    "viranomainen"
+                               :draftTarget true}})))
+  (fact "Attachment visibility cannot be changed"
+    (command sonja :set-attachment-visibility
+             :id app-id
+             :attachmentId attachment-id
+             :value "julkinen")
+    => (err :error.attachment-target-is-draft)))
 
 (defn check-file [app-id file-id exists?]
   (fact {:midje/description (str "Check that file "
@@ -164,15 +181,16 @@
 
 (defn add-attachment
   "Adds attachment to the application. Contents is mainly for logging. Returns attachment id."
-  [app-id contents type-group type-id & [target]]
-  (let [file-id               (upload-file-and-bind sonja
+  [apikey app-id contents type-group type-id & [{:keys [target draft?]}]]
+  (let [file-id               (upload-file-and-bind apikey
                                                     app-id
                                                     (merge {:contents contents
                                                             :type     {:type-group type-group
                                                                        :type-id    type-id}}
                                                            (when target
-                                                             {:target target})))
-        {:keys [attachments]} (query-application sonja app-id)
+                                                             {:target target}))
+                                                    :draft? draft?)
+        {:keys [attachments]} (query-application apikey app-id)
         {attachment-id :id}   (util/find-first (fn [{:keys [latestVersion]}]
                                                  (= (:originalFileId latestVersion) file-id))
                                                attachments)]
@@ -180,6 +198,15 @@
       attachment-id => truthy)
     {:attachment-id attachment-id
      :file-id       file-id}))
+
+(defn add-verdict-attachment
+  "Adds attachment to the verdict. Contents is mainly for logging. Returns attachment id."
+  [apikey app-id verdict-id contents]
+  (add-attachment apikey app-id contents
+                  "paatoksenteko" "paatosote"
+                  {:target {:type "verdict"
+                            :id verdict-id}
+                   :draft? true}))
 
 (defn add-condition [add-cmd fill-cmd condition]
   (let [changes      (:changes (add-cmd))
@@ -274,9 +301,90 @@
       result => no-errors?)
     result))
 
+(defn local-edit-verdict [apikey app-id verdict-id path value]
+  (let [result (local-command apikey :edit-pate-verdict :id app-id
+                              :verdict-id verdict-id
+                              :path (vec (flatten [path]))
+                              :value value)]
+    (fact {:midje/description (format "Edit verdict: %s -> %s" path value)}
+      result => no-errors?)
+    result))
+
 (defn fill-verdict [apikey app-id verdict-id & kvs]
   (doseq [[k v] (apply hash-map kvs)]
     (edit-verdict apikey app-id verdict-id k v)))
 
+(defn local-fill-verdict [apikey app-id verdict-id & kvs]
+  (doseq [[k v] (apply hash-map kvs)]
+    (local-edit-verdict apikey app-id verdict-id k v)))
+
 (defn open-verdict [apikey app-id verdict-id]
   (query apikey :pate-verdict :id app-id :verdict-id verdict-id))
+
+
+(defn- status200-check [apikey headers {:keys [app-id verdict-id
+                                               verdict-name contents
+                                               state type-group]}]
+  (let [{permit-type :permitType
+         :as         application}   (query-application apikey app-id)
+        {att-id :id
+         :as    attachment} (-> application :attachments last)]
+    (fact "Response contains correct attachment"
+      headers => (contains {"Content-Disposition"
+                            (contains (format "%s %s %s"
+                                              app-id
+                                              (ss/encode-filename verdict-name)
+                                              (util/to-local-date (now))))}))
+
+    (fact "Verdict PDF attachment has been created"
+      attachment
+      => (contains {:readOnly         true
+                    :locked           true
+                    :source           {:type "verdicts"
+                                       :id   verdict-id}
+                    :contents         contents
+                    :type             {:type-group (or type-group (if (util/=as-kw permit-type :YA)
+                                                                    "muut"
+                                                                    "paatoksenteko"))
+                                       :type-id    "paatos"}
+                    :applicationState state
+                    :latestVersion    (contains {:contentType "application/pdf"
+                                                 :filename    (contains verdict-name)})}))
+    (fact "published-pate-verdict"
+      (:verdict (query apikey :published-pate-verdict
+                       :id app-id
+                       :verdict-id verdict-id))
+      => (contains {:attachment-id att-id
+                    :tags          string?
+                    :id            verdict-id
+                    :published     pos?}))))
+
+(defn give-up [i]
+  (fact "We give up after 20 tries"
+    (< i 20) => true))
+
+(defn- bad-status [status]
+  (fact "Bad status"
+    status => 200))
+
+(defn verdict-pdf-queue-test
+  [apikey {:keys [app-id verdict-id] :as options}]
+  (loop [i 0]
+    (let [{:keys [status headers]} (raw apikey :verdict-pdf
+                                        :id app-id
+                                        :verdict-id verdict-id)]
+      (cond
+        (= status 200) (status200-check apikey
+                                        headers
+                                        (merge {:verdict-name "P\u00e4\u00e4t\u00f6s"
+                                                :contents     "P\u00e4\u00e4t\u00f6s"
+                                                :state        "verdictGiven"}
+                                               options))
+
+        (> i 19) (give-up i)
+
+        (= status 202) (do
+                         (Thread/sleep 2000)
+                         (recur (inc i)))
+
+        :else (bad-status status)))))

@@ -76,7 +76,9 @@
 (def pate-categories   #{:r :tj :p :ya :contract})
 ;; Categories that are only supported by the legacy mechanism.
 (def legacy-categories #{:kt :ymp})
-(def all-categories (set/union pate-categories legacy-categories))
+;; Categories that are only used with migrated legacy verdicts.
+(def migration-categories #{:migration-contract :migration-verdict})
+(def all-categories (set/union pate-categories legacy-categories migration-categories))
 
 (defn pate-category?
   "True if the given category is supported by Pate verdict template
@@ -128,7 +130,7 @@
 
 (defn dict-resolve
   "Path format: [repeating index repeating index ... value-dict].
- Repeating denotes :repeating schema, index is arbitrary repeating
+  Repeating denotes :repeating schema, index is arbitrary repeating
   index (skipped during resolution) and value-dict is the final dict
   for the item schema.
 

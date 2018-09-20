@@ -10,6 +10,7 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
+            [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -120,3 +121,26 @@
    :states              (states/all-states-but :canceled)}
   [{{job-id :jobId version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (ok (job/status job-id (util/->long version) (util/->long timeout))))
+
+(defn- update-draft-attachment-metadata [{:keys [application] :as command}]
+  (fn [filedatas]
+    (let [att-ids (map :attachment-id filedatas)]
+      (action/update-application command
+                                 {$set (att/attachment-array-updates (:id application)
+                                                                     (util/fn->> :id (util/includes-as-kw? att-ids))
+                                                                     :metadata.draftTarget true
+                                                                     :metadata.nakyvyys    "viranomainen")}))))
+
+(defcommand bind-draft-attachments
+  {:description         "Attachments belong to drafts: metadata: {:draftTarget true :nakyvyys 'viranomainen'}."
+   :parameters          [id filedatas]
+   :input-validators    [(partial action/vector-parameters-with-map-items-with-required-keys [:filedatas] [:fileId])]
+   :user-roles          #{:authority}
+   :pre-checks          [app/validate-authority-in-drafts
+                         (filedatas-precheck att/upload-to-target-allowed)
+                         validate-attachment-ids
+                         validate-attachment-groups]
+   :states              (states/all-states-but :canceled)}
+  [command]
+  (ok :job (bind/make-bind-job command filedatas
+                               :postprocess-fn [(update-draft-attachment-metadata command)])))

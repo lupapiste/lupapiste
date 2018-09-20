@@ -23,7 +23,8 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
-            [sade.dns :as dns]))
+            [sade.dns :as dns]
+            [sade.schemas :as ssc]))
 
 ;;
 ;; construct command, query and raw
@@ -195,6 +196,9 @@
 (defn numeric-parameters [params command]
   (filter-params-of-command params command (complement ss/numeric?) :error.illegal-number))
 
+(defn timestamp-parameters [params command]
+  (filter-params-of-command params command #(sc/check ssc/Timestamp %) :error.illegal-timestamp))
+
 (defn supported-lang [param-key {data :data}]
   (when-not (i18n/supported-lang? (get data (keyword param-key)))
     (fail :error.unsupported-language)))
@@ -303,7 +307,8 @@
           ; Inforequest state chenges don't require logging
           (states/all-inforequest-states new-state)
           ; delete-verdict commands sets state back, but no logging is required (LPK-917)
-          (seq (get-in changes [$pull :verdicts])))
+          (seq (get-in changes [$pull :verdicts]))
+          (seq (get-in changes [$pull :pate-verdicts])))
         "event must be pushed to history array when state is set")
       (if (env/dev-mode?)
         (when-not (map? (:user command))

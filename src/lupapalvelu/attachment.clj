@@ -316,9 +316,9 @@
   [created application-state attachment-types-with-metadata group locked? required? requested-by-authority?]
   (map #(make-attachment created nil required? requested-by-authority? locked? (keyword application-state) group (:type %) (:metadata %)) attachment-types-with-metadata))
 
-(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts primaryOperation submitted]} myyntipalvelu-disabled?]
+(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction pate-verdicts verdicts primaryOperation submitted]} myyntipalvelu-disabled?]
   (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
-                     (tos/update-end-dates verdicts primaryOperation submitted))]
+                     (tos/update-end-dates (concat verdicts pate-verdicts) primaryOperation submitted))]
     (if (seq metadata)
       ; Myyntipalvelu can be only negatively overridden, it can't be forced on if TOS says otherwise
       (if (and myyntipalvelu-disabled? (:myyntipalvelu metadata))
@@ -694,9 +694,10 @@
 
 (defn get-attachment-file!
   "Returns the attachment file without access checking, otherwise nil."
-  [application file-id]
-  (when (seq application)
-    (storage/download application file-id)))
+  ([application file-id] (when (seq application)
+                           (storage/download application file-id)))
+  ([application-id file-id attachment] (when application-id
+                                         (storage/download application-id file-id attachment))))
 
 (defn- get-attachment-version-file [application attachment {:keys [fileId onkaloFileId filename contentType]} user preview?]
   (when (or (not user) (access/can-access-attachment? user application attachment))
@@ -1267,3 +1268,10 @@
   (when (and (not ignore)
              (included-in-published-bulletin? application bulletins attachment-id))
     (fail :error.attachment-included-in-published-bulletin)))
+
+(defn validate-not-draft-target [{:keys [data application]}]
+  (when-let [{:keys [attachmentId]} data]
+    (when (some->> application :attachments
+                   (util/find-by-id attachmentId)
+                   :metadata :draftTarget)
+      (fail :error.attachment-target-is-draft))))

@@ -30,10 +30,10 @@
     (command sonja :approve-application :id foreman-app-id :lang "fi") => ok?
 
     (facts "Create, edit and publish TJ verdict"
-      (let [template-id               (->> (:templates pate-fixture/verdic-templates-setting)
-                                           (filter #(= "tj" (:category %)))
-                                           (first)
-                                           :id)
+      (let [template-id              (->> (:templates pate-fixture/verdic-templates-setting)
+                                          (filter #(= "tj" (:category %)))
+                                          (first)
+                                          :id)
             {verdict-id :verdict-id} (command sonja :new-pate-verdict-draft :id foreman-app-id :template-id template-id)]
 
         (fact "Set automatic calculation of other dates"
@@ -47,7 +47,9 @@
                    :path [:verdict-code] :value "hyvaksytty") => no-errors?)
         (fact "Publish verdict"
           (command sonja :publish-pate-verdict :id foreman-app-id :verdict-id verdict-id) => no-errors?)
-
+        (verdict-pdf-queue-test sonja {:app-id     foreman-app-id
+                                       :verdict-id verdict-id
+                                       :state      "foremanVerdictGiven"})
         (fact "Applicant cant create verdict"
           (command pena :new-pate-verdict-draft :id foreman-app-id :template-id template-id) => unauthorized?)
 
@@ -60,4 +62,3 @@
           (fact "Verdict date" (get-in tj-verdict [:data :verdict-date]) => tj-verdict-date
           (fact "Appeal" (get-in tj-verdict [:data :appeal]) => "Ohje muutoksen hakuun.\n"
           (fact "Handler" (get-in tj-verdict [:data :handler]) => "Sonja Sibbo"))))))))))))
-

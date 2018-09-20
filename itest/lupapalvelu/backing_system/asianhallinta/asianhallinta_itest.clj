@@ -1,21 +1,22 @@
 (ns lupapalvelu.backing-system.asianhallinta.asianhallinta-itest
-  (:require [clojure.java.io :as io]
-            [clojure.data.xml :as xml]
+  (:require [clojure.data.xml :as xml]
+            [clojure.java.io :as io]
+            [lupapalvelu.backing-system.asianhallinta.core :as ah]
+            [lupapalvelu.factlet :as fl]
+            [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [lupapalvelu.xml.validator :as validator]
+            [midje.repl]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.factlet :as fl]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.backing-system.asianhallinta.core :as ah]
-            [lupapalvelu.xml.validator :as validator]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture.core :as fixture]
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.strings :as ss]
-            [sade.xml :as sxml]
             [sade.util :as util]
-            [midje.repl])
+            [sade.xml :as sxml])
   (:import [java.net URI]))
 
 (def db-name (str "test_asianhallinta-itest_" (now)))
@@ -128,10 +129,7 @@
                       :y 6965051.2333374 :x 535179.5
                       :address "Suusaarenkierto 44") => truthy
             link-app-id (:id link-app)
-            new-verdict-resp (command velho :new-verdict-draft :id link-app-id) => ok?
-            verdict-id (:verdictId new-verdict-resp) => truthy
-            _ (command velho :save-verdict-draft :id link-app-id :verdictId verdict-id :backendId "KLTunnus1" :status 42 :name "Paatoksen antaja" :given 123 :official 124 :text "" :agreement false :section "") => ok?
-            _ (command velho :publish-verdict :id link-app-id :verdictId verdict-id :lang :fi) => ok?
+            _         (give-legacy-verdict velho link-app-id :kuntalupatunnus "KLTunnus1")
             manual-link "Another kuntalupatunnus"
 
             application (create-and-submit-application ; Actual app for asianhallinta

@@ -116,6 +116,9 @@
 (defn verdict-given? [{:keys [state]}]
   (boolean (states/post-verdict-states (keyword state))))
 
+(defn has-published-pate-verdicts? [{:keys [pate-verdicts]}]
+  (->> pate-verdicts (filter :published) not-empty boolean))
+
 (defn designer-app? [application]
   (= :suunnittelijan-nimeaminen (-> application :primaryOperation :name keyword)))
 
@@ -700,7 +703,11 @@
                         :upsert true)))
 
 (defn get-lp-ids-by-kuntalupatunnus [kuntalupatunnus]
-  (map :id (mongo/select :applications {:verdicts.kuntalupatunnus kuntalupatunnus} {:_id 1})))
+  (map :id (mongo/select :applications
+                         {$or [{:verdicts.kuntalupatunnus kuntalupatunnus}       ;; Backing system
+                               {:pate-verdicts.kuntalupatunnus kuntalupatunnus}  ;; Legacy published
+                               {:pate-verdicts.kuntalupatunnus._value kuntalupatunnus}]}  ;; Legacy draft
+                         {:_id 1})))
 
 (defn update-app-links!
   "To be run after Vantaa-conversion for each imported kuntalupatunnus. Takes a kuntalupatunnus

@@ -244,13 +244,15 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :contexts         [app/canceled-app-context]
    :permissions      [{:required [:application/undo-cancelation]}]
-   :pre-checks       [(fn last-history-item-is-canceled [{:keys [application]}]
-                        (when-not (= :canceled
-                                     ((comp keyword :state) (app-state/last-history-item application)))
-                          (fail :error.latest-state-not-canceled)))
+   :pre-checks       [bs/validate-action-support
+                      (fn last-history-item-is-canceled [{:keys [application]}]
+                        (when application
+                          (when-not (= (:state (app-state/last-history-item application)) "canceled")
+                           (fail :error.latest-state-not-canceled))))
                       (fn has-previous-state [{:keys [application]}]
-                        (when-not (states/all-states (app-state/get-previous-app-state application))
-                          (fail :error.illegal-state)))]
+                        (when application
+                          (when-not (states/all-states (app-state/get-previous-app-state application))
+                           (fail :error.illegal-state))))]
    :on-success       (notify :undo-cancellation)
    :states           #{:canceled}}
   [command]
@@ -262,7 +264,8 @@
    :permissions      [{:required [:application/request-for-complement]}]
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
+   :pre-checks       [bs/validate-action-support
+                      (partial sm/validate-state-transition :complementNeeded)]}
   [{:keys [created user application] :as command}]
   (update-application command (util/deep-merge (app-state/state-transition-update :complementNeeded created application user))))
 
@@ -347,12 +350,9 @@
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (let [application (if-let [[bs-name integration-key] (bs/submit-application! command)]
-                          (do (app/set-integration-key id bs-name integration-key)
-                              (assoc-in application [:integrationKeys bs-name] integration-key)) ; HACK
-                          application)]
-        (app/submit (assoc command :application application))
-        (ok)))))
+      (do (app/submit command)
+          (bs/submit-application! command)
+          (ok)))))
 
 (defcommand refresh-ktj
   {:parameters [:id]

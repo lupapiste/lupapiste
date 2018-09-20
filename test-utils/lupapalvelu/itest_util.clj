@@ -503,22 +503,6 @@
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
-(defn give-verdict-with-fn [f apikey application-id
-                            & {:keys [verdictId status name given official agreement]
-                               :or   {verdictId "aaa", status 1, name "Name", given 12300000000, official 12400000000 agreement false}}]
-  (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id :lang "fi")
-        verdict-id (or (:verdictId new-verdict-resp))]
-    (if-not (ok? new-verdict-resp)
-      new-verdict-resp
-      (do
-       (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement agreement :section "" :lang "fi")
-       (assoc
-         (f apikey :publish-verdict :id application-id :verdictId verdict-id :lang "fi")
-         :verdict-id verdict-id)))))
-
-(defn give-verdict [apikey application-id & args]
-  (apply give-verdict-with-fn command apikey application-id args))
-
 (defn allowed? [action & args]
   (fn [apikey]
     (let [{:keys [ok actions]} (apply query apikey :allowed-actions args)
@@ -587,9 +571,6 @@
         resp  (local-command apikey :submit-application :id id)]
     resp => ok?
     (query-application local-query apikey id)))
-
-(defn give-local-verdict [apikey application-id & args]
-  (apply give-verdict-with-fn local-command apikey application-id args))
 
 (defn create-foreman-application [project-app-id apikey userId role difficulty]
   (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role :foremanEmail "")
@@ -838,12 +819,16 @@
 (defn upload-file-and-bind
   "Uploads file and then bind using bind-attachments. To upload new file, specify metadata using filedata.
   If upload to existing attachment, filedata can be empty but :attachment-id should be defined."
-  [apikey id filedata & {:keys [fails attachment-id]}]
+  [apikey id filedata & {:keys [fails attachment-id draft?]}]
   (let [file-id (get-in (upload-file apikey (or (:filename filedata) "dev-resources/test-attachment.txt")) [:files 0 :fileId])
         data (if (ss/not-blank? attachment-id)
                {:attachmentId attachment-id}
                (select-keys filedata [:type :group :target :contents :constructionTime :sign]))
-        {job :job :as resp} (command apikey :bind-attachments :id id :filedatas [(assoc data :fileId file-id)])]
+        {job :job :as resp} (command apikey
+                                     (if draft?
+                                       :bind-draft-attachments
+                                       :bind-attachments)
+                                     :id id :filedatas [(assoc data :fileId file-id)])]
     (if-not fails
       (do
         (fact "Bind-attachments command OK" resp => ok?)

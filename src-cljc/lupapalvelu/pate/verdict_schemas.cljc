@@ -74,7 +74,14 @@
                                                         (case category
                                                           :p :pate.prepper
                                                           :pate-verdict.handler)}})
-                 :handler-title {:text {:loc-prefix :pate-verdict.handler.title}}
+                 :handler-title (case category
+                                  :ya {:reference-list {:path       :handler-titles
+                                                        :type       :select
+                                                        :loc-prefix :pate-verdict.handler.title.ya
+                                                        :item-key   :id
+                                                        :term       {}}
+                                       :template-dict  :handler-titles}
+                                  {:text {:loc-prefix :pate-verdict.handler.title}})
                  :application-id app-id-placeholder)
    :section    {:id   :pate-dates
                 :grid {:columns 7
@@ -121,6 +128,38 @@
                                    :align :full}]
                                  [{:dict  :address
                                    :align :full}]]}}})
+
+(def versub-operation-ya
+  {:dictionary {:operation       {:text {:loc-prefix :pate.operation}}
+                :address         {:text {:loc-prefix :pate.location}}
+                :property-title  {:loc-text :pate.property-id}
+                :propertyIds     {:repeating {:property-id        {:text {:label?     false
+                                                                          :read-only? false}}
+                                              :remove-property-id {:button {:i18nkey :remove
+                                                                            :label?  false
+                                                                            :icon    :lupicon-remove
+                                                                            :css     :secondary
+                                                                            :remove  :propertyIds}}}}
+                :add-property-id {:button {:icon     :lupicon-circle-plus
+                                           :i18nkey  :pate.property-id.add
+                                           :css      :positive
+                                           :add      :propertyIds}}}
+   :section    {:id   :pate-operation
+                :grid {:columns 2
+                       :rows    [[{:dict  :operation
+                                   :align :full}]
+                                 [{:dict  :address
+                                   :align :full}]
+                                 [{:css  :pate-label
+                                   :dict :property-title}]
+                                 [{:grid {:columns   9
+                                          :repeating :propertyIds
+                                          :rows      [[{:col  8
+                                                        :dict  :property-id}
+                                                       {:align :right
+                                                        :dict  :remove-property-id}]]}}]
+                                 [{:show? :_meta.editing?
+                                   :dict  :add-property-id}]]}}})
 
 (defn versub-verdict
   "Collateral part (toggle, amount, type, date) included only when
@@ -415,7 +454,8 @@
                     :type-group (or type-group #"paatoksenteko")
                     :default    (or default :paatoksenteko.paatosote)
                     :dropzone   "#pate-verdict-page"
-                    :multiple?  true}}}
+                    :multiple?  true
+                    :draft?     true}}}
     :section {:id       :upload
               :hide?    :_meta.published?
               :css      :pate-section--no-border
@@ -524,7 +564,7 @@
                                                versub-dates-ya
                                                versub-verdict-ya
                                                versub-bulletin
-                                               versub-operation
+                                               versub-operation-ya
                                                versub-requirements-ya
                                                versub-conditions
                                                versub-appeal

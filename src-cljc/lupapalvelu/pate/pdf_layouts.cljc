@@ -2,11 +2,141 @@
   "Verdict PDF layout definitions. Note: keyword
   sources (e.g., :application-id) are defined in
   `lupapalvelu.pate.pdf/verdict-properties`."
-  (:require [sade.strings :as ss]
-            [sade.util :as util]
-            [lupapalvelu.pate.pdf-html :refer [PdfLayout]]
-            [schema.core :as sc]))
+  (:require [sade.shared-strings :as ss]
+            #?(:clj  [lupapalvelu.i18n :as i18n]
+               :cljs [lupapalvelu.ui.common :as common])
+            #?(:clj  [lupapalvelu.pate.date :as date]
+               :cljs [lupapalvelu.ui.common :as common])
+            [sade.shared-util :as util]
+            [schema.core :refer [defschema] :as sc]
+            [lupapalvelu.pate.shared-schemas :as shared-schemas]))
 
+#?(:clj (def finnish-date date/finnish-date)
+   :cljs (def finnish-date common/format-timestamp))
+
+#?(:clj (def localize i18n/localize)
+   :cljs (defn localize [_ & terms]
+           (->> (flatten terms)
+                (map name)
+                (ss/join "." )
+                common/loc)))
+
+#?(:clj (def localize-and-fill i18n/localize-and-fill)
+   :cljs (defn localize-and-fill [lang term & values]
+           (let [s (localize lang term)]
+             (reduce (fn [acc i]
+                       (ss/replace acc
+                                  (js/sprintf "{%s}" i)
+                                  (nth values i)))
+                     s
+                     (range (count values))))))
+
+#?(:clj (def has-term? i18n/has-term?)
+   :cljs (def has-term? js/loc.hasTerm))
+
+(def cell-widths (range 10 101 5))
+(def row-styles [:pad-after :pad-before
+                 :border-top :border-bottom
+                 :page-break :bold :spaced])
+(def cell-styles [:bold :center :right :nowrap])
+
+(defn add-unit
+  "Result is nil for blank value."
+  [lang unit v]
+  (when-not (ss/blank? (str v))
+    (case unit
+      :ha      (str v " " (localize lang :unit.hehtaaria))
+      :m2      [:span {} v " m" [:sup 2]]
+      :m3      [:span {} v " m" [:sup 3]]
+      :kpl     (str v " " (localize lang :unit.kpl))
+      :section (str "\u00a7" v)
+      :eur     (str v "\u20ac"))))
+
+(defschema Source
+  "Value of PdfEntry :source property aka data source for the row."
+  (sc/conditional
+   ;; Keyword corresponds to a key in the data context.
+   keyword? sc/Keyword
+   :else (shared-schemas/only-one-of [:doc :dict]
+                                     ;; Vector is a path to application
+                                     ;; document data. The first item is the
+                                     ;; document name and rest are path within
+                                     ;; the data.
+                                     {(sc/optional-key :doc)     [sc/Keyword]
+                                      ;; Kw-path into published verdict data.
+                                      (sc/optional-key :dict)    sc/Keyword})))
+
+(defn styles
+  "Definition that only allows either individual kw or subset of kws."
+  [kws]
+  (let [enum (apply sc/enum kws)]
+    (sc/conditional
+     keyword? enum
+     :else    [enum])))
+
+(defschema PdfEntry
+  "An entry in the layout consists of left- and right-hand sides. The
+  former contains the entry title and the latter actual data. In the
+  schema, an entry is modeled as a vector, where the first element
+  defines both the title and the data source for the whole entry.
+
+  On styles: the :styles definition of the first item applies to the
+  whole row. Border styles (:border-top and :border-bottom) include
+  padding and margin so the adjacent rows should not add any
+  padding. Cell items' :styles only apply to the corresponding cell.
+
+  In addition to the schema definition, styles can be added in
+  'runtime': if source value has ::styles property, it should be map
+  with the following possible keys:
+
+  :row    Row styles
+
+  :cell   Cell styles (applied to every cell)
+
+  path    Path is the value of the :path property. For example, if
+  the :path has a value of :foo, then the cell could be emphasized
+  with ::styles map {:foo :bold}. "
+  [(sc/one {;; Localisation key for the row (left-hand) title.
+            :loc                        sc/Keyword
+            ;; If :loc-many is given it is used as the title key if
+            ;; the source value denotes multiple values.
+            (sc/optional-key :loc-many) sc/Keyword
+            ;; Localization rule which can be used for different localization key
+            ;; values based on application details.
+            ;; For example: {:rule [:application :operation-name] :key :applications.operation}
+            ;; adds operation name from application at end of given key, like:
+            ;; applications.operation.ya-jatkoaika. If the localization key is not found, only
+            ;; given :key value is used as localization key.
+            (sc/optional-key :loc-rule) {:rule sc/Keyword :key sc/Keyword}
+            (sc/optional-key :source)   Source
+            ;; Post-processing function for source value.
+            (sc/optional-key :post-fn)  (sc/conditional
+                                         keyword? sc/Keyword
+                                         :else   (sc/pred fn?))
+            (sc/optional-key :styles)   (styles row-styles)
+            (sc/optional-key :id)       sc/Keyword}
+           {})
+   ;; Note that the right-hand side can consist of multiple
+   ;; cells/columns. As every property is optional, the cells can be
+   ;; omitted. In that case, the value of the right-hand side is the
+   ;; source value.
+   ;; Path within the source value. Useful, when the value is a map.
+   {(sc/optional-key :path)       shared-schemas/path-type
+    ;; Textual representation that is static and
+    ;; independent from any source value.
+    (sc/optional-key :text)       shared-schemas/keyword-or-string
+    (sc/optional-key :width)      (apply sc/enum cell-widths)
+    (sc/optional-key :unit)       (sc/enum :ha :m2 :m3 :kpl :section)
+    ;; Additional localisation key prefix. Is
+    ;; applied both to path and text values.
+    (sc/optional-key :loc-prefix) shared-schemas/path-type
+    (sc/optional-key :styles)     (styles cell-styles)}])
+
+(defschema PdfLayout
+  "PDF contents layout."
+  {;; Width of the left-hand side.
+   :left-width (apply sc/enum cell-widths)
+   :entries    [PdfEntry]})
 
 ;; ------------------------------
 ;; Entries
@@ -55,6 +185,21 @@
           :styles :pad-after}
          {:loc-prefix :rakennuspaikka.kaavatilanne}]))
 
+(def entry--rakennuspaikka-ya
+  (list [{:loc    :rakennuspaikka._group_label
+          :styles :bold}]
+        [{:loc    :rakennuspaikka.kiinteisto.kiinteistotunnus
+          :source :property-id-ya}]
+        [{:loc    :pate.location
+          :source {:dict :address}}]
+        [{:loc    :pdf.pinta-ala
+          :source {:doc [:rakennuspaikka :kiinteisto.maapintaala]}}
+         {:unit :ha}]
+        [{:loc    :rakennuspaikka.kaavatilanne._group_label
+          :source {:doc [:rakennuspaikka :kaavatilanne]}
+          :styles :pad-after}
+         {:loc-prefix :rakennuspaikka.kaavatilanne}]))
+
 (defn entry--applicant [loc loc-many]
   [{:loc      loc
     :loc-many loc-many
@@ -63,6 +208,7 @@
 
 (def entry--operation [{:loc      :applications.operation
                         :loc-many :operations
+                        :loc-rule {:rule :application.primaryOperation.name :key :applications.operation}
                         :source   :operations
                         :styles   :bold}
                        {:path     :text}])
@@ -282,7 +428,7 @@
 
 (def ya-pdf-layout
   (build-layout entry--application-id
-                entry--rakennuspaikka
+                entry--rakennuspaikka-ya
                 (entry--applicant :pdf.achiever :pdf.achievers)
                 entry--operation
                 entry--statements
@@ -306,7 +452,7 @@
                             :source {:dict :contract-text}
                             :styles :pad-before}])
 
-(def entry--case [{:loc       :pdf.contract.case
+(def entry--case [{:loc      :pdf.contract.case
                    :loc-many :pdf.contract.cases
                    :source   :operations
                    :styles   :bold}
@@ -334,7 +480,8 @@
   '([{:loc      :pdf.signature
       :loc-many :verdict.signatures
       :source   :signatures
-      :styles   [:bold :pad-before]}
+      :styles   [:bold :pad-before]
+      :id       :signatures}
      {:path :name}
      {:path :date}]))
 
@@ -517,7 +664,7 @@
                 entry--link-permits
                 entry--attachments
                 entry--tj-vastattavat-tyot
-                entry--verdict
+                legacy--verdict-code
                 (entry--verdict-giver :applications.authority)
                 entry--dates-tj
                 entry--appeal))
@@ -528,42 +675,12 @@
 ;; Legacy contracts
 ;; ----------------------------------
 
-#_(def legacy--contract-text [{:loc    :empty
-                            :source {:dict :contract-text}
-                            :styles :pad-before}])
-
-#_(def entry--case [{:loc       :pdf.contract.case
-                   :loc-many :pdf.contract.cases
-                   :source   :operations
-                   :styles   :bold}
-                  {:path :text}])
-
 (def legacy--contract-conditions
   [{:loc      :pate.contract.condition
     :loc-many :pate.contract.conditions
     :source   {:dict :conditions}
     :post-fn (repeating-texts-post-fn :name)
     :styles   :pad-before}])
-
-#_(def legacy--contract-giver
-  '([{:loc    :verdict.name.sijoitussopimus
-      :source {:dict :handler}
-      :styles :pad-before}]
-    [{:loc    :empty
-      :source :organization
-      :styles :pad-after}]))
-
-#_(def legacy--contract-date
-  '([{:loc    :verdict.contract.date
-      :source {:dict :verdict-date}}]))
-
-#_(def legacy--contract-signatures
-  '([{:loc      :pdf.signature
-      :loc-many :verdict.signatures
-      :source   :signatures
-      :styles   [:bold :pad-before]}
-     {:path :name}
-     {:path :date}]))
 
 (def contract-legacy-layout
   (build-layout entry--application-id
@@ -579,6 +696,160 @@
                 entry--attachments
                 entry--contract-signatures))
 
+;; ----------------------------------
+;; Backing system.
+;; Only used for creating tags for UI. The PDF is never generated as
+;; it is received from the backing system. Note that a verdict can
+;; consist of multiple sub-verdicts (poytakirja).
+;; ----------------------------------
+
+(def backing--kuntalupatunnus [{:loc    :verdict.id
+                                :source :kuntalupatunnus
+                                :styles [:bold :pad-after]}])
+
+(defn- autopaikka [k]
+  [{:loc    (util/kw-path :verdict k)
+    :source k}
+   {:unit :kpl}])
+
+(def backing--autopaikat (apply list (map autopaikka
+                                          [:autopaikkojaEnintaan
+                                           :autopaikkojaVahintaan
+                                           :autopaikkojaRakennettava
+                                           :autopaikkojaKiinteistolla
+                                           :autopaikkojaUlkopuolella])))
+
+(defn- area [k]
+  [{:loc    (util/kw-path :verdict k)
+    :source k}
+   {:unit   :m2}])
+
+(def backing--areas (apply list (map area [:kerrosala :kokonaisala])))
+
+(def backing--maaraykset [{:loc-many :verdict.lupamaaraykset
+                           :loc      :pate-verdict.lupamaarays
+                           :source   :maaraykset
+                           :styles [:pad-before]}])
+
+(def backing--muut-maaraykset [{:loc-many :verdict.muutMaaraykset
+                           :loc      :pate-verdict.muu-maarays
+                           :source   :muutMaaraykset
+                           :styles [:pad-before]}])
+
+(def backing--katselmukset [{:loc      :pdf.required-review
+                             :loc-many :verdict.vaaditutKatselmukset
+                             :source   :vaaditutKatselmukset
+                             :styles   [:pad-before]}])
+
+(def backing--tyonjohtajat [{:loc    :verdict.vaaditutTyonjohtajat
+                             :source :vaaditutTyonjohtajat
+                             :styles [:pad-before]}])
+
+(defn- paiva [k]
+  [{:loc     (util/kw-path :verdict k)
+    :source  k
+    :post-fn finnish-date}])
+
+(def backing--paivamaarat (apply list (map paiva [:anto
+                                                  :julkipano
+                                                  :viimeinenValitus
+                                                  :aloitettava
+                                                  :voimassaHetki
+                                                  :raukeamis
+                                                  :lainvoimainen
+                                                  :paatosdokumentinPvm])))
+
+(def backing-kuntalupatunnus-layout (build-layout backing--kuntalupatunnus))
+
+(def backing-paatos-layout (build-layout backing--autopaikat
+                                         backing--areas
+                                         backing--maaraykset
+                                         backing--muut-maaraykset
+                                         backing--katselmukset
+                                         backing--tyonjohtajat
+                                         backing--paivamaarat))
+
+;; Poytakirja
+
+(def pk--verdict-code [{:loc    :pate-verdict
+                        :source :status
+                        :styles [:bold :border-top]}
+                       {:loc-prefix :verdict.status}])
+
+(def pk--verdict-text [{:loc         :empty
+                        :source :paatos
+                        :styles :pad-before}])
+
+(def pk--section [{:loc    :verdict.pykala
+                   :source :pykala}
+                  {:unit :section}])
+
+(def pk--date [{:loc     :empty
+                :source  :paatospvm
+                :styles [:pad-before]
+                :post-fn finnish-date}])
+
+(def pk--author [{:loc    :empty
+                  :source :paatoksentekija
+                  :styles [:pad-after]}])
+
+(defn linkify [{:keys [url text]}]
+  ;; Extra "layer" needed for proper entry-row layout.
+  [[:a {:href url :target "_blank"} text]])
+
+(def pk--attachment [{:loc     :pdf.attachment
+                      :source  :attachment
+                      :post-fn linkify}])
+
+(def backing-poytakirja-layout (build-layout pk--verdict-code
+                                             pk--section
+                                             pk--verdict-text
+                                             pk--date
+                                             pk--author
+                                             pk--attachment))
+
+
+;; Verdict migration layouts
+(def migration-verdict-layout
+  (build-layout legacy--application-id
+                legacy--kuntalupatunnus
+                entry--rakennuspaikka
+                (entry--applicant :pdf.achiever :pdf.achievers)
+                entry--operation
+                entry--designers
+                entry--dimensions
+                entry--statements
+                entry--neighbors
+                entry--attachments
+                legacy--verdict-code
+                legacy--verdict-text
+                legacy--foremen
+                legacy--reviews
+                legacy--conditions
+                legacy--verdict-giver
+                legacy--dates))
+
+(def migration-contract-layout
+  (build-layout legacy--application-id
+                legacy--kuntalupatunnus
+                entry--rakennuspaikka
+                (entry--applicant :pdf.applicant :pdf.applicants)
+                entry--operation
+                entry--designers
+                entry--dimensions
+                entry--statements
+                entry--neighbors
+                entry--attachments
+                legacy--verdict-code
+                entry--contract-text
+                legacy--foremen
+                legacy--reviews
+                legacy--conditions
+                legacy--verdict-giver
+                legacy--dates
+                entry--contract-signatures))
+
+
 (defn pdf-layout [{:keys [category legacy?]}]
   (case (util/kw-path (when legacy? :legacy) category)
     :r               r-pdf-layout
@@ -592,4 +863,6 @@
     :legacy.kt       kt-legacy-layout
     :legacy.ymp      ymp-legacy-layout
     :legacy.contract contract-legacy-layout
-    :legacy.tj       tj-legacy-layout))
+    :legacy.tj       tj-legacy-layout
+    :legacy.migration-contract migration-contract-layout
+    :legacy.migration-verdict  migration-verdict-layout))

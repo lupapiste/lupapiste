@@ -270,34 +270,6 @@
                                    :align :full
                                    :dict  :contract-text}]]}}})
 
-(def legsub-signatures
-  {:dictionary {:signatures-title {:css      :pate-label
-                                   :loc-text :verdict.signatures}
-                :signatures       {:repeating {:name       {:text {:label?     false
-                                                                   :read-only? true}}
-                                               :user-id    {:text {:read-only? true}}
-                                               :company-id {:text {:read-only? true}}
-                                               :date       {:date {:label?     false
-                                                                   :read-only? true}}}
-                                   :sort-by   :date}}
-   :section    {:id       :signatures
-                :buttons? false
-                :show?    :signatures
-                :grid     {:columns 8
-                           :rows    [[{:col  8
-                                       :dict :signatures-title}]
-                                     {:css :row--extra-tight
-                                      :row [{:col  7
-                                             :grid {:columns   16
-                                                    :repeating :signatures
-                                                    :rows      [{:css :row--extra-tight
-                                                                 :row [{}
-                                                                       {:col  4
-                                                                        :dict :name}
-                                                                       {:col  2
-                                                                        :align :right
-                                                                        :dict :date}]}]}}]}]}}})
-
 (def contract-legacy-verdict
   (build-legacy-schema
    legsub-contract
@@ -306,17 +278,85 @@
    legsub-attachments
    (verdict-schemas/versub-upload {:type-group #".*"
                                    :default :muut.paatosote
-                                   :title :verdict.contract.attachments})
-   legsub-signatures))
+                                   :title :verdict.contract.attachments})))
 
+
+(def legsub-migration-contract
+  {:dictionary {:kuntalupatunnus {:text      {:i18nkey :verdict.id}
+                                  :required? true}
+                :handler         {:text      {:i18nkey :verdict.name}
+                                  :required? true}
+                :verdict-code    {:select {:loc-prefix :verdict.status
+                                           :items      (map (comp keyword str) (range 1 43))
+                                           :sort-by    :text
+                                           :type :autocomplete}
+                                  :required? true}
+                :verdict-section {:text {:i18nkey :verdict.section
+                                         :before  :section}}
+                :anto            {:date      {:i18nkey :verdict.anto}
+                                  :required? true}
+                :lainvoimainen   {:date {:i18nkey :verdict.lainvoimainen}}
+                :contract-text    {:text {:i18nkey :verdict.contract.text
+                                         :lines   20}}}
+   :section    {:id   :verdict
+                :grid {:columns 12
+                       :rows    [[{:col   2
+                                   :align :full
+                                   :dict  :kuntalupatunnus}
+                                  {}
+                                  {:col   4
+                                   :align :full
+                                   :dict  :handler}]
+                                 [{:dict :verdict-section}
+                                  {:col 2}
+                                  {:col   4
+                                   :align :full
+                                   :dict  :verdict-code}]
+                                 [{:col   10
+                                   :align :full
+                                   :dict  :contract-text}]
+                                 [{:col 2
+                                   :dict :anto}
+                                  {:col 2
+                                   :dict :lainvoimainen}]]}}})
+
+
+(def migration-contract
+  (build-legacy-schema
+   legsub-migration-contract
+   (legsub-reviews {:select {:loc-prefix :pate.review-type
+                             :label?     false
+                             :items      helper/review-types
+                             :sort-by    :text}})
+   legsub-foremen
+   (legsub-conditions true)
+   legsub-attachments
+   (verdict-schemas/versub-upload)))
+
+(def migration-verdict
+  (build-legacy-schema
+   (legsub-verdict {:select {:loc-prefix :verdict.status
+                             :items      (map (comp keyword str) (range 1 43))
+                             :sort-by    :text
+                             :type :autocomplete}})
+   (legsub-reviews {:select {:loc-prefix :pate.review-type
+                             :label?     false
+                             :items      helper/review-types
+                             :sort-by    :text}})
+   legsub-foremen
+   (legsub-conditions)
+   legsub-attachments
+   (verdict-schemas/versub-upload)))
 
 (defn legacy-verdict-schema [category]
   (case (keyword category)
-    :r        r-legacy-verdict
-    :ya       ya-legacy-verdict
-    :p        p-legacy-verdict
-    :kt       kt-legacy-verdict
-    :ymp      ymp-legacy-verdict
-    :contract contract-legacy-verdict
-    :tj       tj-legacy-verdict
+    :r                  r-legacy-verdict
+    :ya                 ya-legacy-verdict
+    :p                  p-legacy-verdict
+    :kt                 kt-legacy-verdict
+    :ymp                ymp-legacy-verdict
+    :contract           contract-legacy-verdict
+    :tj                 tj-legacy-verdict
+    :migration-contract migration-contract
+    :migration-verdict  migration-verdict
     (schema-util/pate-assert false "Unsupported legacy category:" category)))

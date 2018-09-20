@@ -526,11 +526,6 @@
                          :default? false
                          :name     "Uusi nimi"})] :in-any-order)))))
 
-(defn add-verdict-attachment
-  "Adds attachment to the verdict. Contents is mainly for logging. Returns attachment id."
-  [app-id verdict-id contents]
-  (add-attachment app-id contents "paatoksenteko" "paatosote" {:type "verdict"
-                                                               :id verdict-id}))
 
 
 ;;; Verdicts
@@ -1157,6 +1152,7 @@
                   (fact "Verdict-section is not included"
                     (-> (open-verdict) :verdict :inclusions)
                     =not=> (contains ["verdict-section"]))
+                  (sent-emails) ;; Clear inbox
                   (fact "Sonja can publish the verdict"
                     (command sonja :publish-pate-verdict :id app-id
                              :verdict-id verdict-id)=> ok?)
@@ -1172,6 +1168,11 @@
                         => (just {:text   "Paloviranomainen"
                                   :given  pos?
                                   :status "puollettu"}))))
+                  (Thread/sleep 100) ; wait for email delivery
+                  (fact "Email notification about application state change is sent"
+                    (let [email (last-email)]
+                      (:to email) => (contains (email-for-key pena))
+                      (:subject email) => "Lupapiste: Dongdaqiao Lu, Sipoo - hankkeen tila on nyt P\u00e4\u00e4t\u00f6s annettu"))
                   (fact "Published verdict can no longer be previewed"
                     (raw sonja :preview-pate-verdict :id app-id
                          :verdict-id verdict-id)
@@ -1255,10 +1256,12 @@
                                                         :id app-id
                                                         :template-id template-id)
                       {:keys [attachment-id
-                              file-id]}        (add-verdict-attachment app-id
+                              file-id]}        (add-verdict-attachment sonja
+                                                                       app-id
                                                                        verdict-id
                                                                        "Hello world!")]
                   (check-file app-id file-id true)
+                  (check-draft-attachment app-id attachment-id verdict-id)
                   (fact "Modern verdict cannot be deleted with legacy command"
                     (command sonja :delete-legacy-verdict :id app-id
                              :verdict-id verdict-id) => fail?)
@@ -1346,7 +1349,8 @@
                         [["muutoksenhaku"] (timestamp "22.1.2018")]
                         [["voimassa"] (timestamp "28.1.2021")]])))
     (facts "Add attachment to verdict draft"
-      (let [{:keys [attachment-id]} (add-verdict-attachment app-id
+      (let [{:keys [attachment-id]} (add-verdict-attachment sonja
+                                                            app-id
                                                             verdict-id
                                                             "Paatosote")]
         (fact "Attachment can be deleted"
@@ -1358,11 +1362,12 @@
     (fact "Add required verdict date"
       (edit-verdict "verdict-date" verdict-date) => no-errors?)
     (facts "Add attachment to verdict draft again. Add regular attachment to the application, too. Add pseudo verdict attachment"
-      (let [{:keys [attachment-id]}     (add-verdict-attachment app-id verdict-id "Otepaatos")
-            {regular-id :attachment-id} (add-attachment app-id "Lupa lausua"
+      (let [{:keys [attachment-id]}     (add-verdict-attachment sonja app-id verdict-id "Otepaatos")
+            {regular-id :attachment-id} (add-attachment sonja app-id "Lupa lausua"
                                                         "ennakkoluvat_ja_lausunnot" "suunnittelutarveratkaisu")
-            {pseudo-id :attachment-id}  (add-attachment app-id "sotaaP"
+            {pseudo-id :attachment-id}  (add-attachment sonja app-id "sotaaP"
                                                         "paatoksenteko" "paatos")]
+        (check-draft-attachment app-id attachment-id verdict-id)
         (fact "Regular, pseudo and bogus-ids as application attachments"
           (edit-verdict "attachments" [regular-id "bogus-id" pseudo-id])
           => no-errors?)
@@ -1403,10 +1408,14 @@
           (let [details {:readOnly true
                          :locked   true
                          :target   {:type "verdict"
-                                    :id   verdict-id}}
+                                    :id   verdict-id}
+                         :metadata (just {:nakyvyys "julkinen"})}
                 atts    (:attachments (query-application sonja app-id))]
             (util/find-by-id attachment-id atts)
-            => (contains (assoc details :id attachment-id))
+            => (contains (assoc details
+                                :id attachment-id
+                                :metadata (just {:nakyvyys    "julkinen"
+                                                 :draftTarget false})))
             (util/find-by-id regular-id atts)
             => (contains (assoc details :id regular-id))))
 
@@ -1431,27 +1440,11 @@
                 (http-client/form-decode query-string)
                 => {"verdict-id" verdict-id
                     "id"         app-id}
-                (fact "verdict-pdf action"
-                  (:headers(raw sonja :verdict-pdf :id app-id :verdict-id verdict-id))
-                  => (contains {"Content-Disposition" (contains (format "%s Permit %s"
-                                                                        app-id
-                                                                        (util/to-local-date (now))))}))))))
+                (verdict-pdf-queue-test sonja {:app-id       app-id
+                                               :verdict-id   verdict-id
+                                               :verdict-name "Permit"
+                                               :contents     "Permit text"})))))))
 
-        (fact "Verdict PDF attachment has been created"
-          (let [{att-id :id
-                 :as    attachment} (last (:attachments (query-application sonja app-id)))]
-            attachment
-            => (contains {:readOnly         true
-                          :locked           true
-                          :contents         "Permit text"
-                          :type             {:type-group "paatoksenteko"
-                                             :type-id    "paatos"}
-                          :applicationState "verdictGiven"
-                          :latestVersion    (contains {:contentType "application/pdf"
-                                                       :filename    (contains "Permit")})})
-            (fact "verdict-attachment"
-              (:verdict (open-verdict))
-              => (contains {:verdict-attachment att-id}))))))
     (fact "Editing no longer allowed"
       (edit-verdict :verdict-text "New verdict text")
       => (err :error.verdict.not-draft))

@@ -140,11 +140,22 @@
                 #(reset! state/phrases (get % :phrases []))
                 :id app-id))
 
+(defn fetch-custom-application-phrases [app-id]
+  (common/query "custom-application-phrase-categories"
+                #(reset! state/custom-phrases-categories (get % :custom-categories []))
+                :id app-id))
+
+(defn fetch-custom-organization-phrases []
+  (common/query "custom-organization-phrase-categories"
+                #(reset! state/custom-phrases-categories (get % :custom-categories []))
+                :org-id @state/org-id))
+
 (defn upsert-phrase [phrase-map callback]
   (apply common/command
          "upsert-phrase"
          (fn []
-           (fetch-organization-phrases)
+           (concat (fetch-organization-phrases)
+                   (fetch-custom-organization-phrases))
            (callback))
          (flatten (into [:org-id @state/org-id] phrase-map))))
 
@@ -154,6 +165,20 @@
                               (fetch-organization-phrases)
                               (callback))}
                   :phrase-id phrase-id
+                  :org-id @state/org-id))
+
+(defn save-phrase-category [category]
+  (common/command {:command "save-phrase-category"
+                   :success (fn []
+                             (fetch-custom-organization-phrases))}
+                  :category category
+                  :org-id @state/org-id))
+
+(defn delete-phrase-category [category]
+  (common/command {:command "delete-phrase-category"
+                   :success (fn [_]
+                             (fetch-custom-organization-phrases))}
+                  :category category
                   :org-id @state/org-id))
 
 ;; Application verdict templates
@@ -180,6 +205,13 @@
                     :template-id template-id
                     :replacement-id replacement-id)))
 
+(defn copy-verdict-draft
+  [app-id callback replacement-id]
+   (common/command {:command "copy-pate-verdict-draft"
+                    :success callback}
+                   :id app-id
+                   :replacement-id replacement-id))
+
 (defn new-legacy-verdict-draft [app-id callback]
   (common/command {:command "new-legacy-verdict-draft"
                    :success callback}
@@ -191,16 +223,76 @@
                 :id app-id
                 :verdict-id verdict-id))
 
-(defn delete-verdict [app-id {:keys [id published legacy?]}]
-  (common/command {:command (if legacy?
-                              :delete-legacy-verdict
-                              :delete-pate-verdict)
-                   :success #(do (fetch-verdict-list app-id)
-                                 (if published
-                                   (js/repository.load app-id)
-                                   (js/lupapisteApp.services.attachmentsService.queryAll)))}
+(defn fetch-appeals [app-id verdict-id]
+  (when (state/auth? :appeals)
+    (common/query :appeals
+                  (util/fn->> :data
+                              ((keyword verdict-id))
+                              (map (fn [{:keys [giver appellant] :as a}]
+                                     (assoc a :author (or giver appellant))))
+                              (reset! state/appeals))
+                  :id app-id)))
+
+(declare batch-job)
+
+(defn upsert-appeal [app-id verdict-id params wait?* callback]
+  (apply (partial common/command
+                  {:command               :upsert-pate-appeal
+                   :show-saved-indicator? true
+                   :waiting?              wait?*
+                   :success               (fn [res]
+                                            (reset! wait?* true)
+                                            (batch-job (fn [{:keys [pending]}]
+                                                         (when (empty? pending)
+                                                           (fetch-appeals app-id verdict-id)
+                                                           (callback)
+                                                           (reset! wait?* false)))
+                                                       res))}
                   :id app-id
-                  :verdict-id id))
+                  :verdict-id verdict-id)
+         (->> (util/filter-map-by-val identity params)
+              (mapcat identity))))
+
+(defn delete-appeal [app-id verdict-id appeal-id]
+  (common/command {:command               :delete-pate-appeal
+                   :show-saved-indicator? true
+                   :success               #(fetch-appeals app-id verdict-id)}
+                  :id app-id
+                  :verdict-id verdict-id
+                  :appeal-id appeal-id))
+
+(defn open-published-verdict [app-id verdict-id callback]
+  (common/query "published-pate-verdict"
+                callback
+                :id app-id
+                :verdict-id verdict-id)
+  (fetch-appeals app-id verdict-id))
+
+(defn delete-verdict [app-id {:keys [id published legacy? category]}]
+  (let [backing-system? (util/=as-kw category :backing-system)]
+    (common/command {:command (cond
+                                legacy?         :delete-legacy-verdict
+                                backing-system? :delete-verdict
+                                :else           :delete-pate-verdict)
+                     :success #(do (fetch-verdict-list app-id)
+                                   (if published
+                                     (js/repository.load app-id)
+                                     (js/lupapisteApp.services.attachmentsService.queryAll))
+                                   (state/refresh-application-auth-model app-id))}
+                   :id app-id
+                   :verdict-id id)))
+
+(defn check-for-verdict [app-id waiting?* callback]
+  (common/command {:command :check-for-verdict
+                   :waiting? waiting?*
+                   :success (fn [response]
+                              (fetch-verdict-list app-id)
+                              (js/repository.load app-id)
+                              (state/refresh-application-auth-model app-id)
+                              (state/refresh-verdict-auths app-id)
+                              (js/lupapisteApp.services.attachmentsService.queryAll)
+                              (callback response))}
+                  :id app-id))
 
 (defn edit-verdict [app-id verdict-id path value callback]
   (common/command {:command "edit-pate-verdict"
@@ -221,7 +313,7 @@
                               (state/refresh-verdict-auths app-id
                                                            {:verdict-id verdict-id})
                               (fetch-verdict-list app-id)
-                              (open-verdict app-id verdict-id callback)
+                              (open-published-verdict app-id verdict-id callback)
                               (js/repository.load app-id))}
                   :id app-id
                   :verdict-id verdict-id))
@@ -260,17 +352,38 @@
   (common/command {:command :remove-uploaded-file}
                   :attachmentId file-id))
 
-(defn bind-attachments [app-id filedatas callback]
-  (common/command {:command :bind-attachments
-                   :success callback}
-                  :id app-id
-                  :filedatas filedatas))
+(defn bind-attachments
+  "If draft? is true, then :bind-draft-attachments command is called."
+  ([app-id filedatas callback draft?]
+   (common/command {:command (if draft?
+                               :bind-draft-attachments
+                               :bind-attachments)
+                    :success callback}
+                   :id app-id
+                   :filedatas filedatas))
+  ([app-id filedatas callback]
+   (bind-attachments app-id callback false)))
 
 (defn bind-attachments-job [job-id version callback]
   (common/query :bind-attachments-job
                 callback
                 :jobId job-id
                 :version version))
+
+;; Signature request
+
+(defn fetch-application-parties [app-id verdict-id callback]
+  (common/query "pate-parties"
+                callback
+                :id app-id
+                :verdict-id verdict-id))
+
+(defn send-signature-request [app-id verdict-id signer-id]
+  (common/command {:command :send-signature-request
+                   :success #(fetch-verdict-list app-id)}
+                  :id app-id
+                  :verdict-id verdict-id
+                  :signer-id signer-id))
 
 (defn- batch-job [status-fn {:keys [job]}]
   (status-fn (when job
@@ -289,6 +402,17 @@
                           (:version job)
                           (partial batch-job status-fn))))
 
+(defn canonize-filedatas
+  "Frontend filedatas to backend format."
+  [filedatas]
+  (map (fn [{:keys [file-id type] :as filedata}]
+         (let [[type-group type-id] (util/split-kw-path type)]
+           (merge (select-keys filedata [:target :contents :source])
+                  {:fileId file-id
+                   :type   {:type-group type-group
+                            :type-id    type-id}})))
+       filedatas))
+
 (defn bind-attachments-batch
   "Convenience function that combines the binding and querying of the
   results. Arguments:
@@ -302,17 +426,16 @@
   map. Status can be :pending, :done or :error. The callback will not
   be called after every file has terminal status (:done or :error). In
   other words, when the :pending list is empty. Nil (no job) argument
-  denotes error (e.g., timeout)."
-  [app-id filedatas status-fn]
-  (bind-attachments app-id
-                    (map (fn [{:keys [file-id type] :as filedata}]
-                           (let [[type-group type-id] (util/split-kw-path type)]
-                             (merge (dissoc filedata :file-id :type)
-                                    {:fileId file-id
-                                     :type   {:type-group type-group
-                                              :type-id    type-id}})))
-                         filedatas)
-                    (partial batch-job status-fn)))
+  denotes error (e.g., timeout).
+
+  draft?: If true bind-draft-attachments command is used."
+  ([app-id filedatas status-fn draft?]
+   (bind-attachments app-id
+                     (canonize-filedatas filedatas)
+                     (partial batch-job status-fn)
+                     draft?))
+  ([app-id filedatas status-fn]
+   (bind-attachments-batch app-id filedatas status-fn nil)))
 
 ;; Co-operation with the AttachmentsService
 

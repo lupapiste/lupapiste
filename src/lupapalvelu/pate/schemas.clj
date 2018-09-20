@@ -50,26 +50,30 @@
 
 (defschema PatePublishedTemplateSettings
   (merge PatePublishedSettings
-         {(sc/optional-key :reviews) [(merge PateDependency
-                                             {:type review-type})]
-          (sc/optional-key :plans)   [PateDependency]}))
+         {(sc/optional-key :reviews)         [(merge PateDependency
+                                                     {:type review-type})]
+          (sc/optional-key :plans)           [PateDependency]
+          (sc/optional-key :handler-titles)  [PateDependency]}))
 
 (defn- wrapped
   "Unwrapped value is supported as a fallback for existing templates."
-  [schema]
-  (sc/conditional
-   map? {:_value    schema
-         :_user     sc/Str
-         :_modified ssc/Timestamp}
-   :else schema))
+  [schema fallback?]
+  (let [md {:_value    schema
+            :_user     sc/Str
+            :_modified ssc/Timestamp}]
+    (if fallback?
+      (sc/conditional
+       map? md
+       :else schema)
+      md)))
 
 (defschema PateSavedTemplate
   (merge PateCategory
-         {:name                        (wrapped sc/Str)
-          :deleted                     (wrapped sc/Bool)
+         {:name                        (wrapped sc/Str true)
+          :deleted                     (wrapped sc/Bool true)
           (sc/optional-key :draft)     sc/Any ;; draft is published data on publish.
           :modified                    ssc/Timestamp
-          (sc/optional-key :published) {:published  (wrapped ssc/Timestamp)
+          (sc/optional-key :published) {:published  (wrapped ssc/Timestamp true)
                                         :data       sc/Any
                                         :inclusions [sc/Str]
                                         :settings   PatePublishedTemplateSettings}}))
@@ -80,14 +84,6 @@
                                      (map #(vector (sc/optional-key %) PateSavedSettings))
                                      (into {}))})
 
-;; Phrases
-
-(defschema Phrase
-  {:id       ssc/ObjectIdStr
-   :category (apply sc/enum (map name shared-schemas/phrase-categories))
-   :tag      sc/Str
-   :phrase   sc/Str})
-
 
 ;; Verdicts
 
@@ -97,9 +93,21 @@
 
 (defschema PateVerdictReferences
   (merge PatePublishedSettings
-         {(sc/optional-key :reviews) [(merge PateVerdictReq
-                                             {:type review-type})]
-          (sc/optional-key :plans)   [PateVerdictReq]}))
+         {(sc/optional-key :reviews)         [(merge PateVerdictReq
+                                                     {:type review-type})]
+          (sc/optional-key :plans)           [PateVerdictReq]
+          (sc/optional-key :handler-titles)  [PateVerdictReq]}))
+
+;; Phrases
+
+(defschema Phrase
+  {:id       ssc/ObjectIdStr
+   :category (apply sc/enum (map name shared-schemas/phrase-categories))
+   :tag      sc/Str
+   :phrase   sc/Str})
+
+(defschema CustomPhraseCategory
+  PateVerdictReq)
 
 (defschema UserRef
   "We have to define our own summary, since requiring the
@@ -114,32 +122,43 @@
                  (sc/optional-key :user)          UserRef
                  (sc/optional-key :replaced-by)   ssc/ObjectIdStr}))
 
+(defschema PateSignature
+  {:date                         ssc/Timestamp
+   :user-id                      ssc/ObjectIdStr
+   ;; Firstname Lastname
+   :name                         sc/Str
+   ;; If the user is authed to the application via company. The
+   ;; company name is also added to the name: User Name, Company Ltd.
+   (sc/optional-key :company-id) ssc/ObjectIdStr})
+
 (defschema PateBaseVerdict
   (merge PateCategory
-         {;; Verdict is draft until it is published
-          (sc/optional-key :published)          ssc/Timestamp
+         {(sc/optional-key :published)          {:tags                            sc/Str
+                                                 ;; The same as :state._modified
+                                                 :published                       sc/Int
+                                                 ;; Id for the attachment that is a PDF version of tags.
+                                                 (sc/optional-key :attachment-id) ssc/AttachmentId}
+          :state                                (wrapped (sc/enum "draft"
+                                                                  "publishing"
+                                                                  "published")
+                                                         true)
           :modified                             ssc/Timestamp
           :data                                 sc/Any
-          (sc/optional-key :archive)            {:verdict-date                    ssc/Timestamp
-                                                 (sc/optional-key :lainvoimainen) ssc/Timestamp
+          ;; Whether the verdict timestamps are available depends on
+          ;; the verdict type (legacy or not) and template settings.
+          (sc/optional-key :archive)            {(sc/optional-key :verdict-date)  sc/Int
+                                                 (sc/optional-key :anto)          sc/Int
+                                                 (sc/optional-key :lainvoimainen) sc/Int
                                                  :verdict-giver                   sc/Str}
-          ;; Either the drafter or publisher
-          (sc/optional-key :user)               UserRef
-          ;; Pointer to the verdict attachment. Either an attachment
-          ;; id or html source. The source is stored in order to be
-          ;; able to regenerate PDF, when needed (after muuntaja
-          ;; failure, for example). After the PDF has been
-          ;; successfully generated, the html is replaced with
-          ;; attachment id.
-          (sc/optional-key :verdict-attachment) (sc/conditional
-                                                 :html {:html sc/Any}
-                                                 :else ssc/AttachmentId)}))
+
+          (sc/optional-key :signatures)         [PateSignature]
+          (sc/optional-key :signature-requests) [PateSignature]}))
 
 (defschema PateModernVerdict
   (merge PateBaseVerdict
          {:schema-version                sc/Int
           (sc/optional-key :references)  PateVerdictReferences
-          :template                      {:inclusions              [sc/Keyword]
+          :template                      {:inclusions              [shared-schemas/keyword-or-string]
                                           (sc/optional-key :giver) (sc/enum "viranhaltija"
                                                                             "lautakunta")}
           (sc/optional-key :replacement) ReplacementPateVerdict}))
@@ -147,7 +166,7 @@
 (defschema PateLegacyVerdict
   (merge PateBaseVerdict
          {:legacy?  (sc/enum true)
-          :template {:inclusions [sc/Keyword]}}))
+          :template {:inclusions [shared-schemas/keyword-or-string]}}))
 
 (defschema PateVerdict
   (sc/conditional
@@ -471,3 +490,33 @@
                     {})))
   ([application]
    (resolve-verdict-attachment-type application :paatos)))
+
+(defn map->paths
+  "Flattens map into paths.
+  {:one 1 :two 2 :three {:four [1 2 3 4]}}
+  -> ([:two 2] [:one 1] (:three :four [1 2 3 4]))"
+  [m]
+  (reduce-kv (fn [acc k v]
+               (if (map? v)
+                 (concat acc (map (partial cons k) (map->paths v)))
+                 (cons [k v] acc)))
+             []
+             m))
+
+(defn validate-dictionary-data
+  "Validates given data against the dictionary in the schema. Returs
+  validation errors as a list of lists where each item is in the
+  format [error-code path] where the last path item is the
+  value: [:error.invalid-value [:path :to :toggle 999]].
+
+  Note: the data cannot contain metadata."
+  [schema data & [references]]
+  (->> (map->paths data)
+       (map (fn [path]
+              (when-let [err (validate-path-value schema
+                                                  (butlast path)
+                                                  (last path)
+                                                  references)]
+                [err path])))
+       (remove nil?)
+       seq))

@@ -1,8 +1,9 @@
 (ns lupapalvelu.link-permit-itest
-  (:require [midje.sweet :refer :all]
-            [sade.util :as util]
+  (:require [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]))
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [midje.sweet :refer :all]
+            [sade.util :as util]))
 
 (fact* "Link permit creation and removal"
   (apply-remote-minimal)
@@ -27,7 +28,7 @@
         verdict-given-application-id (:id verdict-given-application)
         _                         (generate-documents verdict-given-application apikey)
         _                         (command apikey :approve-application :id verdict-given-application-id :lang "fi") => ok?
-        _                         (give-verdict apikey verdict-given-application-id) => ok?
+        _                         (give-legacy-verdict apikey verdict-given-application-id)
 
         ;; App 3 - with same permit type, verdict given, of operation "ya-jatkoaika"
         create-jatkoaika-resp     (command apikey :create-continuation-period-permit :id verdict-given-application-id) => ok?
@@ -147,22 +148,29 @@
         (command apikey :submit-application :id tyolupa-application-id) => (partial expected-failure? "error.link-permit-app-not-in-post-verdict-state"))
 
       (fact "Tyolupa can be submitted without signatures, if linked is of type sijoituslupa and has verdict"
-        (give-verdict apikey sijoitussopimus-application-id :agreement false)
-        (let [app (query-application apikey sijoitussopimus-application-id)]
+        (let [vid (give-legacy-verdict apikey sijoitussopimus-application-id)
+              app (query-application apikey sijoitussopimus-application-id)]
           (:state app) => "verdictGiven"
           (:permitSubtype app) => "sijoituslupa"
           (fact "with verdictGiven, tyolupa is submittable"
             (query apikey :application-submittable :id tyolupa-application-id) => ok?)
-          (command apikey :delete-verdict :id sijoitussopimus-application-id :verdictId (-> app :verdicts first :id)) => ok?
+          (fact "Delete verdict"
+            (command apikey :delete-legacy-verdict :id sijoitussopimus-application-id
+                     :verdict-id vid) => ok?)
           (:state (query-application apikey sijoitussopimus-application-id)) => "sent"))
 
       (fact "Tyolupa cant be submitted before linked sijoitussopimus is signed"
-        (give-verdict apikey sijoitussopimus-application-id :agreement true) => ok?
-        (:permitSubtype (query-application apikey sijoitussopimus-application-id)) => "sijoitussopimus"
-        (command apikey :submit-application :id tyolupa-application-id) => (partial expected-failure? "error.link-permit-app-not-signed"))
+        (command sonja :request-for-complement :id sijoitussopimus-application-id) => ok?
+        (command sonja :change-permit-sub-type :id sijoitussopimus-application-id
+                 :permitSubtype "sijoitussopimus") => ok?
+        (command sonja :approve-application :id sijoitussopimus-application-id
+                 :lang "fi") => ok?
 
-      (fact "Tyolupa should be able to submit when linked sijoitussopimus is signed"
-        (let [linked-application (query-application apikey sijoitussopimus-application-id)
-              verdict-id (:id (first (:verdicts linked-application)))]
-          (command apikey :sign-verdict :id sijoitussopimus-application-id :verdictId verdict-id :password "sonja" :lang "fi") => ok?)
-        (command apikey :submit-application :id tyolupa-application-id) => ok?))))
+        (let [vid (give-legacy-contract apikey sijoitussopimus-application-id)]
+          (:permitSubtype (query-application apikey sijoitussopimus-application-id)) => "sijoitussopimus"
+          (command apikey :submit-application :id tyolupa-application-id) => (partial expected-failure? "error.link-permit-app-not-signed")
+
+          (fact "Tyolupa should be able to submit when linked sijoitussopimus is signed"
+            (command apikey :sign-pate-contract :id sijoitussopimus-application-id
+                     :verdict-id vid :password "sonja") => ok?
+            (command apikey :submit-application :id tyolupa-application-id) => ok?))))))

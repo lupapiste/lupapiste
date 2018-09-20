@@ -3,7 +3,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa]]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.pate.verdict-canonical-test :refer [verdict-with-attachment]]
+            [lupapalvelu.pate.verdict-canonical-test :as vct]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.backing-system.krysp.verdict-mapping]
             [lupapalvelu.xml.validator :as validator]
@@ -13,9 +13,11 @@
             [sade.common-reader :as cr]
             [sade.xml :as xml]))
 
-(def verdict (assoc verdict-with-attachment
-                    :published 1531465278654 ;; 13.7.2018
-                    ))
+
+
+(def verdict (assoc-in vct/verdict
+                       [:published :published] 1531465278654 ;; 13.7.2018
+                       ))
 
 (def app (assoc application-rakennuslupa :attachments [{:id "11"
                                                         :type {:type-id "paatosote" :type-group "paatoksenteko"}

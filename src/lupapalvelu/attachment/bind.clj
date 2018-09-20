@@ -1,20 +1,21 @@
 (ns lupapalvelu.attachment.bind
-  (:require [taoensso.timbre :refer [info warnf]]
-            [sade.core :refer :all]
-            [sade.util :as util]
-            [schema.core :as sc]
-            [lupapalvelu.attachment :as att]
-            [lupapalvelu.attachment.tags :as att-tags]
+  (:require [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.preview :as preview]
-            [lupapalvelu.job :as job]
-            [lupapalvelu.storage.file-storage :as storage]
-            [lupapalvelu.organization :as org]
-            [lupapalvelu.user :as usr]
+            [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.job :as job]
+
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.storage.file-storage :as storage]
+            [lupapalvelu.user :as usr]
             [lupapiste-commons.attachment-types :as att-types]
             [monger.operators :refer :all]
+            [sade.core :refer :all]
             [sade.schemas :as ssc]
-            [sade.shared-schemas :as sssc]))
+            [sade.shared-schemas :as sssc]
+            [sade.util :as util]
+            [schema.core :as sc]
+            [taoensso.timbre :refer [info warnf]]))
 
 (sc/defschema NewVersion
   {(sc/required-key :fileId)           sssc/FileId

@@ -210,17 +210,17 @@
           body (json/decode (:body response) true)]
       (count body) => 2
       (first body) => {:id "601"
-                       :kaavalaji "rkm"
-                       :kaavanro "12010"
-                       :kasitt_pvm "4/22/1975 12:00:00 AM"
-                       :linkki "http://194.111.49.141/asemakaavapdf/12010.pdf"
+                       :kaavalaji "RK"
+                       :kaavanro "12021"
+                       :kasitt_pvm "6/1/1984 12:00:00 AM"
+                       :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
                        :type "bentley"}
 
       (second body) => {:id "605"
-                        :kaavalaji "RKM"
-                        :kaavanro "12013"
-                        :kasitt_pvm "7/20/1978 12:00:00 AM"
-                        :linkki "http://194.111.49.141/asemakaavapdf/12013.pdf"
+                        :kaavalaji "RK"
+                        :kaavanro "12001"
+                        :kasitt_pvm "5/31/1967 12:00:00 AM"
+                        :linkki "http://194.111.49.141/asemakaavapdf/12001.pdf"
                         :type "bentley"})))
 
 (facts "general-plan-urls-by-point-proxy"

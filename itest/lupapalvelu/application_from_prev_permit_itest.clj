@@ -1,20 +1,23 @@
 (ns lupapalvelu.application-from-prev-permit-itest
   (:require [clojure.java.io :as io]
             [lupapalvelu.application-api] ; require local endpoints
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.krysp-test-util :as krysp-util]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pate-itest-util :refer :all]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
             [lupapalvelu.prev-permit-api :refer :all]
-            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [midje.sweet :refer :all]
+            [net.cgrand.enlive-html :as enlive]
+            [ring.util.codec :as codec]
             [sade.core :refer [def- now]]
             [sade.util :as util]
-            [sade.xml :as xml]
-            [net.cgrand.enlive-html :as enlive]
-            [lupapalvelu.krysp-test-util :as krysp-util]))
+            [sade.xml :as xml]))
 
 (def local-db-name (str "test_app-from-prev-permit-itest_" (now)))
 
@@ -268,22 +271,45 @@
                             (let [application (query-application raktark-jarvenpaa (:id resp-body))]
                               (:opened application) => truthy)))
 
-                        (fact "should return the LP application if the kuntalupatunnus matches an existing app"
-                          (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id)
-                                verdict-resp (give-verdict raktark-jarvenpaa app-id :verdictId example-kuntalupatunnus)
-                                response     (http-get rest-address params)
-                                resp-body    (:body (decode-response response))]
-                            verdict-resp => ok?
-                            response => http200?
-                            resp-body => ok?
-                            (keyword (:text resp-body)) => :already-existing-application))
+                        (facts "should return the LP application if the kuntalupatunnus matches an existing app"
+                          (fact "Pate verdict"
+                            (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+                                  _            (give-legacy-verdict raktark-jarvenpaa app-id
+                                                                    :kuntalupatunnus example-kuntalupatunnus)
+                                  response     (http-get rest-address params)
+                                  resp-body    (:body (decode-response response))]
+                              response => http200?
+                              resp-body => ok?
+                              (keyword (:text resp-body)) => :already-existing-application))
+                          (fact "Pate verdict draft"
+                            (let [{app-id :id}      (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+                                  {vid :verdict-id} (command raktark-jarvenpaa :new-legacy-verdict-draft
+                                                             :id app-id)
+                                  _                 (fill-verdict raktark-jarvenpaa app-id vid
+                                                                  :kuntalupatunnus example-kuntalupatunnus)
+                                  response          (http-get rest-address params)
+                                  resp-body         (:body (decode-response response))]
+                              response => http200?
+                              resp-body => ok?
+                              (keyword (:text resp-body)) => :already-existing-application))
+                          (fact "Check for verdict"
+                            (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+                                  _            (override-krysp-xml jarvenpaa "186-R" :R
+                                                                   [{:selector [:yht:kuntalupatunnus]
+                                                                     :value    (codec/url-encode example-kuntalupatunnus)}])
+                                  _            (command raktark-jarvenpaa :check-for-verdict :id app-id)
+                                  response     (http-get rest-address params)
+                                  resp-body    (:body (decode-response response))]
+                              response => http200?
+                              resp-body => ok?
+                              (keyword (:text resp-body)) => :already-existing-application)))
 
                         (fact "create new LP app if kuntalupatunnus matches existing app in another organization"
                           (let [{app-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
-                                verdict-resp (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
+                                _            (give-legacy-verdict sonja app-id
+                                                                  :kuntalupatunnus example-kuntalupatunnus)
                                 response     (http-get rest-address params)
                                 resp-body    (:body (decode-response response))]
-                            verdict-resp => ok?
                             response => http200?
                             resp-body => ok?
                             (keyword (:text resp-body)) => :created-new-application)))))

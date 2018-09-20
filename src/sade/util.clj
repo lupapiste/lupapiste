@@ -9,16 +9,11 @@
             [me.raynes.fs :as fs]
             [sade.core :refer [fail!]]
             [sade.shared-util :as shared]
-            [sade.strings :refer [numeric? decimal-number? trim] :as ss]
+            [sade.strings :refer [defalias numeric? decimal-number? trim] :as ss]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [debugf warnf]])
   (:import [java.util.jar JarFile]
            [org.joda.time LocalDateTime]))
-
-(defmacro defalias [alias from]
-  `(do (def ~alias ~from)
-       (alter-meta! #'~alias merge (select-keys (meta #'~from) [:arglists]))
-       ~alias))
 
 ;;
 ;; Nil-safe number utilities
@@ -66,6 +61,12 @@
   "removes recursively all keys from map which have empty map as value"
   [m] (postwalk-map (partial filter (comp (partial not= {}) val)) m))
 
+(defn strip-empty-collections
+  "removes recursively all keys from map which are empty collections"
+  [m] (postwalk-map (partial filter (comp #(or (not (coll? %))
+                                               (not-empty %))
+                                          val))
+                    m))
 (defn strip-nils
   "removes recursively all keys from map which have value of nil"
   [m] (postwalk-map (partial filter (comp not nil? val)) m))

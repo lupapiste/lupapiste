@@ -12,21 +12,32 @@
                    describe-parties-assignment-targets
                    describe-non-party-document-assignment-targets)
 
+(defn- keywordize-schema-info-types [command]
+  (update-in command [:application :documents] (partial map (fn [doc] (update-in doc [:schema-info :type] keyword)))))
+
 (facts create-doc-validator
   ; type is "YA" and at least one doc is "party" -> fail
-  (create-doc-validator {:application {:permitType "YA"
-                                       :documents [{:schema-info {:type "festivity"}}
-                                                   {:schema-info {:type "party"}}
-                                                   {:schema-info {:type "celebration"}}]}}) => {:ok false, :text "error.create-doc-not-allowed"}
+  (let [command {:application {:permitType "YA"
+                               :documents  [{:schema-info {:type "festivity"}}
+                                            {:schema-info {:type "party"}}
+                                            {:schema-info {:type "celebration"}}]}}]
+    (create-doc-validator command) => {:ok false, :text "error.create-doc-not-allowed"}
+    (create-doc-validator (keywordize-schema-info-types command)) => {:ok false, :text "error.create-doc-not-allowed"})
+
   ; none of the docs are "party"
-  (create-doc-validator {:application {:permitType "YA"
-                                       :documents [{:schema-info {:type "festivity"}}
-                                                   {:schema-info {:type "celebration"}}]}}) => nil
+  (let [command {:application {:permitType "YA"
+                               :documents  [{:schema-info {:type "festivity"}}
+                                            {:schema-info {:type "celebration"}}]}}]
+    (create-doc-validator command) => nil
+    (create-doc-validator (keywordize-schema-info-types command)) => nil)
+
   ; type is not "YA"
-  (create-doc-validator {:application {:permitType "R"
-                                       :documents [{:schema-info {:type "festivity"}}
-                                                   {:schema-info {:type "party"}}
-                                                   {:schema-info {:type "celebration"}}]}}) => nil)
+  (let [command {:application {:permitType "R"
+                               :documents  [{:schema-info {:type "festivity"}}
+                                            {:schema-info {:type "party"}}
+                                            {:schema-info {:type "celebration"}}]}}]
+    (create-doc-validator command) => nil
+    (create-doc-validator (keywordize-schema-info-types command)) => nil))
 
 (facts "deny-remove-of-last-document"
   (fact "default with nil args"

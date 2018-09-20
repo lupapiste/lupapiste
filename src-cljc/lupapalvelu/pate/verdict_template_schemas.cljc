@@ -61,8 +61,6 @@
                                                   :category   :paatosteksti}}}
    :section    {:id         :verdict
                 :loc-prefix :pate-verdict-template.verdict-info
-                :help       {:loc   :pate.help.temsub-verdict
-                             :html? true}
                 :grid       {:columns 12
                              :rows    [[{:col  6
                                          :dict :language}]
@@ -86,10 +84,10 @@
                                                       :i18nkey  :phrase.category.toimenpide-julkipanoon}}}
    :section    {:id         :bulletin
                 :loc-prefix :bulletin
-                :help       :pate.help.temsub-bulletin
                 :grid       {:columns 1
                              :rows    [[{:col  1
-                                         :dict :bulletinOpDescription}]]}}})
+                                         :dict :bulletinOpDescription}]]}}
+   :removable?  true})
 
 (def temsub-foremen
   (->> helper/foreman-codes
@@ -158,6 +156,9 @@
 
 (def temsub-plans
   (settings-dependencies :plans :pate.plans))
+
+(def temsub-handler-titles
+  (settings-dependencies :handler-titles :pate.handler-titles))
 
 (def temsub-conditions ;; Muut lupaehdot
   {:dictionary    {:conditions    {:repeating {:condition        {:phrase-text {:i18nkey  :pate-condition
@@ -298,6 +299,7 @@
                                  temsub-bulletin
                                  temsub-reviews-with-phrase
                                  temsub-plans
+                                 temsub-handler-titles
                                  temsub-conditions
                                  temsub-inform-others
                                  temsub-appeal
@@ -334,7 +336,6 @@
 
 (def contract-template-schema
   (build-verdict-template-schema temsub-contract
-                                 temsub-reviews
                                  temsub-contract-conditions
                                  temsub-contract-attachments))
 
