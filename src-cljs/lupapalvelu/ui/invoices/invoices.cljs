@@ -4,8 +4,8 @@
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
-            [lupapalvelu.ui.pate.layout :as layout]
-            [lupapalvelu.ui.pate.service :as service]
+            [lupapalvelu.ui.invoices.layout :as layout]
+            [lupapalvelu.ui.invoices.service :as service]
             [lupapalvelu.ui.invoices.state :as state]
             [rum.core :as rum]
             [sade.shared-util :as util]))
@@ -71,7 +71,7 @@
   ;;    )
 
   (when-let [app-id (js/pageutil.hashApplicationId)]
-    (reset! state/price-catalog dummy-price-catalog)
+    (reset! state/price-catalogue dummy-price-catalog)
     (reset! state/invoices dummy-invoices)
     (reset! state/template-list [])
     (reset! state/verdict-list nil)
@@ -79,7 +79,7 @@
     (state/refresh-verdict-auths app-id)
 
     (state/refresh-application-auth-model app-id
-                                          #(service/fetch-invoices-list app-id))
+                                          #(service/fetch-price-catalogue app-id))
 
     (println "state/auth? :pate-verdicts:" (state/auth? :pate-verdicts))
 
