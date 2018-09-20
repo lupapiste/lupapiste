@@ -9,6 +9,8 @@
 (defn- state-cursor [key]
   (rum/cursor-in state* [key]))
 
+(def invoices                  (state-cursor :invoices))
+(def price-catalog             (state-cursor :price-catalog))
 (def current-template          (state-cursor :current-template))
 (def current-view              (state-cursor :current-view))
 (def current-category          (state-cursor :current-category))
