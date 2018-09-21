@@ -30650,6 +30650,10 @@ h3.pate-published-title {
   margin-right: 12px;
 }
 
+.pate-bottom-space {
+  margin-bottom: 12px;
+}
+
 .pate-sandwich {
   white-space: nowrap;
 }

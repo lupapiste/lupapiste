@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.pate.state
   (:refer-clojure :exclude [select-keys])
   (:require [clojure.string :as s]
+            [lupapalvelu.ui.rum-util :as rum-util]
             [lupapalvelu.ui.common :as common]
             [rum.core :as rum]))
 
@@ -61,6 +62,14 @@
   ([app-id]
    (refresh-application-auth-model app-id nil)))
 
+(defn application-model-updated-mixin
+  "Refreshes auth model after the applicaiton model has been updated."
+  []
+  (rum-util/hubscribe "application-model-updated"
+                      {}
+                      (fn [state]
+                        (refresh-application-auth-model @application-id nil)
+                        state)))
 
 ;; Convenience wrappers for the verdicts category allowed
 ;; actions. Since the actions are only used for ClojureScript we can

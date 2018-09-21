@@ -70,7 +70,7 @@
           (common/reset-if-needed! template*
                                    (:value (or (util/find-by-key :default? true items)
                                                (first items)))))
-        [:div.pate-grid-6
+        [:div.pate-grid-6.pate-bottom-space
          [:div.row
           (layout/vertical {:label (loc-key :template)
                             :align :full}
@@ -130,6 +130,12 @@
                            :text-loc :verdict.orderAttachmentPrints.button
                            :class    :positive.pate-right-space
                            :on-click #(hub/send "order-attachment-prints")}))
+
+(rum/defc print-order-history []
+  (components/icon-button {:icon     :lupicon-documents
+                           :text-loc :application.printsOrderHistory
+                           :class    :positive.pate-right-space
+                           :on-click #(hub/send "attachment-prints-order-history")}))
 
 (defn- confirm-and-delete-verdict [app-id {:keys [legacy? published] :as verdict}]
   (common/show-dialog {:type     :yes-no
@@ -336,9 +342,12 @@
    (when (state/auth? :check-for-verdict)
      (check-for-verdict))
    (when (state/auth? :order-verdict-attachment-prints)
-     (order-verdict-attachment-prints))])
+     (order-verdict-attachment-prints))
+   (when (state/auth? :attachment-print-order-history)
+     (print-order-history))])
 
 (rum/defc verdicts < rum/reactive
+  (state/application-model-updated-mixin)
   []
   (when (and (rum/react state/application-id)
              (rum/react state/verdict-list)
