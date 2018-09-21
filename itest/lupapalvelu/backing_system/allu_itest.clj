@@ -189,8 +189,8 @@
 (defn- request-for-complement [apikey id]
   (fact "request for complement"
     (itu/local-command apikey :request-for-complement :id id)
-    => (contains {:ok   false
-                  :text "error.integration.unsupported-action"
+    => (contains {:ok     false
+                  :text   "error.integration.unsupported-action"
                   :action "request-for-complement"})))
 
 (defn- cancel [apikey app-id msg]
@@ -200,8 +200,8 @@
 (defn- undo-cancellation [apikey app-id]
   (fact "undo cancellation"
     (itu/local-command apikey :undo-cancellation :id app-id)
-    => (contains {:ok   false
-                  :text "error.integration.unsupported-action"
+    => (contains {:ok     false
+                  :text   "error.integration.unsupported-action"
                   :action "undo-cancellation"})))
 
 ;;;; Mock Handler
@@ -227,71 +227,70 @@
         (mongo/any? :integration-messages (imsg-query "in")) => true)
       res)))
 
-(defn- make-test-handler [allu-state]
-  (reitit-ring/ring-handler
-    (reitit-ring/router
-      (#'allu/routes
-        false
-        (routes
-          (PUT "/applications/:id/cancelled" [id :as {:keys [headers]}]
-            (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
-              (if (contains? (:applications @allu-state) id)
-                (do (swap! allu-state update :applications dissoc id)
+(defn- make-test-router [allu-state]
+  (reitit-ring/router
+    (#'allu/routes
+      false
+      (routes
+        (PUT "/applications/:id/cancelled" [id :as {:keys [headers]}]
+          (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
+            (if (contains? (:applications @allu-state) id)
+              (do (swap! allu-state update :applications dissoc id)
+                  {:status 200, :body ""})
+              {:status 404, :body (str "Not Found: " id)})
+            {:status 401, :body "Unauthorized"}))
+
+        (POST "/placementcontracts" {:keys [headers body]}
+          (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
+            (let [placement-contract (json/decode body true)]
+              (if-let [validation-error (sc/check PlacementContract placement-contract)]
+                {:status 400, :body validation-error}
+                (let [{:keys [id-counter]}
+                      (swap! allu-state (fn [{:keys [id-counter] :as state}]
+                                          (-> state
+                                              (update :id-counter inc)
+                                              (update :applications assoc (str id-counter) placement-contract))))]
+                  {:status 200, :body (str (dec id-counter))})))
+            {:status 401, :body "Unauthorized"}))
+
+        (PUT "/placementcontracts/:id" [id :as {:keys [headers body]}]
+          (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
+            (let [placement-contract (json/decode body true)]
+              (if-let [validation-error (sc/check PlacementContract placement-contract)]
+                {:status 400, :body validation-error}
+                (if (contains? (:applications @allu-state) id)
+                  (if (get-in @allu-state [:applications id :pendingOnClient])
+                    (do (swap! allu-state assoc-in [:applications id] placement-contract)
+                        {:status 200, :body id})
+                    {:status 403, :body (str id " is not pendingOnClient")})
+                  {:status 404, :body (str "Not Found: " id)})))
+            {:status 401, :body "Unauthorized"}))
+
+        (POST "/applications/:id/attachments" [id :as {:keys [headers multipart]}]
+          (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
+            (let [metadata-error (sc/check {:name      (sc/eq "metadata")
+                                            :mime-type (sc/eq "application/json")
+                                            :encoding  (sc/eq "UTF-8")
+                                            :content   @#'allu/FileMetadata}
+                                           (update (first multipart) :content json/decode true))
+                  file-error (sc/check {:name      (sc/eq "file")
+                                        :mime-type sc/Str
+                                        :content   InputStream}
+                                       (second multipart))]
+              (if-let [validation-error (or metadata-error file-error)]
+                {:status 400, :body validation-error}
+                (if (contains? (:applications @allu-state) id)
+                  (let [attachment {:metadata (-> multipart (get-in [0 :content]) (json/decode true))}]
+                    (swap! allu-state update-in [:applications id :attachments] (fnil conj []) attachment)
                     {:status 200, :body ""})
-                {:status 404, :body (str "Not Found: " id)})
-              {:status 401, :body "Unauthorized"}))
+                  {:status 404, :body (str "Not Found: " id)})))
+            {:status 401, :body "Unauthorized"}))
 
-          (POST "/placementcontracts" {:keys [headers body]}
-            (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
-              (let [placement-contract (json/decode body true)]
-                (if-let [validation-error (sc/check PlacementContract placement-contract)]
-                  {:status 400, :body validation-error}
-                  (let [{:keys [id-counter]}
-                        (swap! allu-state (fn [{:keys [id-counter] :as state}]
-                                            (-> state
-                                                (update :id-counter inc)
-                                                (update :applications assoc (str id-counter) placement-contract))))]
-                    {:status 200, :body (str (dec id-counter))})))
-              {:status 401, :body "Unauthorized"}))
-
-          (PUT "/placementcontracts/:id" [id :as {:keys [headers body]}]
-            (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
-              (let [placement-contract (json/decode body true)]
-                (if-let [validation-error (sc/check PlacementContract placement-contract)]
-                  {:status 400, :body validation-error}
-                  (if (contains? (:applications @allu-state) id)
-                    (if (get-in @allu-state [:applications id :pendingOnClient])
-                      (do (swap! allu-state assoc-in [:applications id] placement-contract)
-                          {:status 200, :body id})
-                      {:status 403, :body (str id " is not pendingOnClient")})
-                    {:status 404, :body (str "Not Found: " id)})))
-              {:status 401, :body "Unauthorized"}))
-
-          (POST "/applications/:id/attachments" [id :as {:keys [headers multipart]}]
-            (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
-              (let [metadata-error (sc/check {:name      (sc/eq "metadata")
-                                              :mime-type (sc/eq "application/json")
-                                              :encoding  (sc/eq "UTF-8")
-                                              :content   @#'allu/FileMetadata}
-                                             (update (first multipart) :content json/decode true))
-                    file-error (sc/check {:name      (sc/eq "file")
-                                          :mime-type sc/Str
-                                          :content   InputStream}
-                                         (second multipart))]
-                (if-let [validation-error (or metadata-error file-error)]
-                  {:status 400, :body validation-error}
-                  (if (contains? (:applications @allu-state) id)
-                    (let [attachment {:metadata (-> multipart (get-in [0 :content]) (json/decode true))}]
-                      (swap! allu-state update-in [:applications id :attachments] (fnil conj []) attachment)
-                      {:status 200, :body ""})
-                    {:status 404, :body (str "Not Found: " id)})))
-              {:status 401, :body "Unauthorized"}))
-
-          (not-found "No such route.")))
-      {:reitit.middleware/transform (fn [middlewares]
-                                      (-> [check-imessages-middleware]
-                                          (into middlewares)
-                                          (conj check-response-ok-middleware)))})))
+        (not-found "No such route.")))
+    {:reitit.middleware/transform (fn [middlewares]
+                                    (-> [check-imessages-middleware]
+                                        (into middlewares)
+                                        (conj check-response-ok-middleware)))}))
 
 ;(deftype ConstALLU [cancel-response attach-response creation-response update-response]
 ;  ALLUApplications
@@ -319,8 +318,10 @@
             full-sijoitussopimus-state-graph (->> states/ya-sijoitussopimus-state-graph
                                                   add-canceled->*
                                                   ;; :complementNeeded should be unreachable:
-                                                  (into {} (remove (fn [[src _]] (= src :complementNeeded)))))]
-        (with-redefs [allu/allu-request-handler (make-test-handler allu-state)]
+                                                  (into {} (remove (fn [[src _]] (= src :complementNeeded)))))
+            router (make-test-router allu-state)]
+        (with-redefs [allu/allu-router router
+                      allu/allu-request-handler (reitit-ring/ring-handler router)]
           (facts "state transitions"
             (traverse-state-transitions
               :states full-sijoitussopimus-state-graph

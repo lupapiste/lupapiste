@@ -24,7 +24,11 @@
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro ring]]
                  [metosin/ring-swagger "0.26.1"]
                  [metosin/ring-swagger-ui "3.17.2"]
-                 [metosin/reitit "0.2.2"]
+                 [metosin/reitit-core "0.2.2"]
+                 [metosin/reitit-schema "0.2.2"]
+                 [metosin/reitit-ring "0.2.2"]
+                 [metosin/reitit-middleware "0.2.2"]
+                 [metosin/spec-tools "0.7.1"]               ; for reitit-middleware
 
                  ; Namespace finder library
                  [bultitude "0.2.8"] ; noir requires 0.2.0
