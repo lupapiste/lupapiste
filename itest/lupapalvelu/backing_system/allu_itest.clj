@@ -267,21 +267,21 @@
                     {:status 404, :body (str "Not Found: " id)})))
               {:status 401, :body "Unauthorized"}))
 
-          (POST "/applications/:id/attachments" [id :as {:keys [headers body]}]
+          (POST "/applications/:id/attachments" [id :as {:keys [headers multipart]}]
             (if (= (get headers "authorization") (str "Bearer " (env/value :allu :jwt)))
               (let [metadata-error (sc/check {:name      (sc/eq "metadata")
                                               :mime-type (sc/eq "application/json")
                                               :encoding  (sc/eq "UTF-8")
                                               :content   @#'allu/FileMetadata}
-                                             (update (first body) :content json/decode true))
+                                             (update (first multipart) :content json/decode true))
                     file-error (sc/check {:name      (sc/eq "file")
                                           :mime-type sc/Str
                                           :content   InputStream}
-                                         (second body))]
+                                         (second multipart))]
                 (if-let [validation-error (or metadata-error file-error)]
                   {:status 400, :body validation-error}
                   (if (contains? (:applications @allu-state) id)
-                    (let [attachment {:metadata (-> body (get-in [0 :content]) (json/decode true))}]
+                    (let [attachment {:metadata (-> multipart (get-in [0 :content]) (json/decode true))}]
                       (swap! allu-state update-in [:applications id :attachments] (fnil conj []) attachment)
                       {:status 200, :body ""})
                     {:status 404, :body (str "Not Found: " id)})))
