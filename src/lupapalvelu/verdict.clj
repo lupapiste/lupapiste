@@ -121,7 +121,7 @@
    (sc/optional-key :signatures) [Signature]
    (sc/optional-key :metadata)   (sc/eq nil)})
 
-(defn- backend-id->verdict [backend-id]
+(defn backend-id->verdict [backend-id]
   {:id              (mongo/create-id)
    :kuntalupatunnus backend-id
    :timestamp       nil

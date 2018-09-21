@@ -17,7 +17,8 @@
             [lupapalvelu.pate.schema-helper :as schema-helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict :as verdict]
-            [lupapalvelu.pate.verdict-common :as vc]))
+            [lupapalvelu.pate.verdict-common :as vc]
+            [lupapalvelu.verdict :refer [backend-id->verdict]]))
 
 (defn- wrap
   "Wraps accessor function with metadata/wrap"
@@ -379,3 +380,57 @@
             $pull (merge (when (not-empty draft-ids)
                            {:tasks {:source.id {$in draft-ids}}})
                          {:verdicts {:id {$in (mapv :id lupapiste-verdicts)}}})})))
+
+
+;;
+;; Hotfix PATE-171
+;;
+(def- dummy-verdict
+  {:id              {$type "string"}
+   :kuntalupatunnus {$type "string"}
+   :timestamp       nil
+   :paatokset       []
+   :draft           true})
+
+(def PATE-171-hotfix-query
+  {:pre-pate-verdicts {$elemMatch dummy-verdict}})
+
+(defn dummy-verdict? [verdict]
+  (= (-> verdict
+         (dissoc :id))
+     (-> (backend-id->verdict (:kuntalupatunnus verdict))
+         (dissoc :id))))
+
+(defn original-dummy-verdicts
+  "Returns the verdicts that contain no information besides `id` and
+  `kuntalupatunnus` from `pre-pate-verdicts`."
+  [{:keys [pre-pate-verdicts]}]
+  (some->> pre-pate-verdicts
+           (filter dummy-verdict?)
+           seq
+           (into [])))
+
+(defn- dummies-without-matching-kuntalupatunnus-in-verdicts
+  "Returns from `dummies` the verdicts whose `kuntalupatunnus` is not
+  present in the verdicts in `verdicts` array. This is because if the
+  `kuntalupatunnus` is present, the dummy should have been
+  overwritten."
+  [dummies application]
+  (let [kuntalupatunnus-in-verdicts? (->> application
+                                          :verdicts
+                                          (map :kuntalupatunnus)
+                                          set)]
+    (some->> dummies
+             (remove (comp kuntalupatunnus-in-verdicts? :kuntalupatunnus))
+             seq
+             (into []))))
+
+(defn return-dummies-to-verdicts-array [application]
+  (if-let [dummies (original-dummy-verdicts application)]
+    (merge {$pull {:pate-verdicts {:id {$in (mapv :id dummies)}}}}
+           (if-let [dummies-to-verdict (dummies-without-matching-kuntalupatunnus-in-verdicts dummies
+                                                                                             application)]
+             {$push {:verdicts {$each dummies-to-verdict}}}))
+    (throw (ex-info (str "Attempted dummy verdict migration without dummy verdicts:"
+                         (:id application))
+                    application))))
