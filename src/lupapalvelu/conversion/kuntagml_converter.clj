@@ -77,7 +77,7 @@
         make-app-info {:id              id
                        :organization    organization
                        ; :operation-name  "aiemmalla-luvalla-hakeminen" ; FIXME: no fixed operation in conversion, see above
-                       :operation-name  (conv-util/deduce-operation-name xml)
+                       :operation-name  (conv-util/deduce-operation-type xml)
                        ; or maybe something like:               :operation-name  "conversion"
                        :location        (app/->location (:x location-info) (:y location-info))
                        :propertyId      (:propertyId location-info)

@@ -166,22 +166,51 @@
        (map building-reader/->asian-tiedot)
        (filter string?)))
 
-(defn deduce-operation-name
+(defn get-xml-for-kuntalupatunnus [kuntalupatunnus]
+  (->> (read-all-test-files)
+       (filter #(= kuntalupatunnus (krysp-reader/xml->kuntalupatunnus %)))
+       first))
+
+(defn deduce-operation-type
   "Figure out the right primaryOperation for the application."
   [xml]
   (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
-        btype (get-building-type xml)]
-    (cond
-      (= "TJO" suffix) "tyonjohtajan-nimeaminen-v2"
-      (contains? #{"P" "PI"} suffix) "purkaminen"
-      (and (= "A" suffix)
-           (contains? #{"Asuinkerrostalo" "Kerrostalo"} btype)) "kerrostalo-rivitalo"
-      (and (= "A" suffix)
-           (contains? #{"Omakotitalo"} btype)) "pientalo"
-      (and (= "B" suffix)
-           (contains? #{"Omakotitalo"} btype)) "pientalo-laaj"
-      :else "aiemmalla-luvalla-hakeminen")))
+        btype (get-building-type xml)
+        {:keys [description usage]} (-> xml building-reader/->buildings-summary first)]
+      (cond
+        (= "TJO" suffix) "tyonjohtajan-nimeaminen-v2"
+        (contains? #{"P" "PI"} suffix) "purkaminen"
+        (and (= "A" suffix)
+             (contains? #{"Asuinkerrostalo" "Kerrostalo"} btype)) "kerrostalo-rivitalo"
+        (and (= "A" suffix)
+             (contains? #{"Omakotitalo"} btype)) "pientalo"
+        (and (= "B" suffix)
+             (or (contains? #{"Omakotitalo"} btype)
+                 (re-find #"yhden asunnon talo" usage))) "pientalo-laaj"
+        (and (= "B" suffix)
+             (re-find #"kerrosta|rivita" usage)) "kerrostalo-rt-laaj"
+        (and (= "B" suffix)
+             (ss/contains? usage "toimisto")) "muu-rakennus-laaj"
+        (and (= "B" suffix)
+             (ss/contains? usage "teollisuu")) "teollisuusrakennus-laaj"
+        :else "aiemmalla-luvalla-hakeminen")))
 
-(def tyyppi
-  (get-building-type (:xml @lupapalvelu.conversion.kuntagml-converter/tila)))
+(defn get-operation-types-for-testset
+  "Returns a sequence for maps describing the deduced operation types
+  for Krysp files in the test-set. Takes a kuntalupatunnus suffix as an
+  optional argument. Calling the function with e.g. argument 'A' returns
+  the operation types for A-type permits only."
+  [& [suffix]]
+  (let [rawdata (read-all-test-files)
+        data (if suffix
+               (filter #(= suffix (some->
+                                       %
+                                       krysp-reader/xml->kuntalupatunnus
+                                       destructure-permit-id
+                                       :tyyppi))
+                       rawdata)
+                       rawdata)]
+    (map #(assoc {}
+                 :type (some-> % deduce-operation-type)
+                 :tunnus (krysp-reader/xml->kuntalupatunnus %)) data)))
