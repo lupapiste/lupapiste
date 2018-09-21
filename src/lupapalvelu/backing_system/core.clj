@@ -3,7 +3,7 @@
   (:require [schema.core :as sc]
             [sade.core :refer [fail]]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.backing-system.allu :as allu]
+            [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as org :refer [Organization PermitType]]

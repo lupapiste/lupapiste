@@ -24,7 +24,8 @@
             [midje.sweet :refer [facts fact => contains]]
             [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
 
-            [lupapalvelu.backing-system.allu :as allu :refer [PlacementContract]]
+            [lupapalvelu.backing-system.allu.core :as allu]
+            [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract FileMetadata]]
             [lupapalvelu.domain :as domain])
   (:import [java.io InputStream]))
 
@@ -121,7 +122,7 @@
 
 (defn- create-and-fill-placement-app [apikey permitSubtype]
   (let [{:keys [id] :as response} (itu/create-local-app apikey
-                                                        :operation (ssg/generate allu/SijoituslupaOperation)
+                                                        :operation (ssg/generate SijoituslupaOperation)
                                                         :x "385770.46" :y "6672188.964"
                                                         :address "Kaivokatu 1"
                                                         :propertyId "09143200010023")
@@ -271,7 +272,7 @@
             (let [metadata-error (sc/check {:name      (sc/eq "metadata")
                                             :mime-type (sc/eq "application/json")
                                             :encoding  (sc/eq "UTF-8")
-                                            :content   @#'allu/FileMetadata}
+                                            :content   FileMetadata}
                                            (update (first multipart) :content json/decode true))
                   file-error (sc/check {:name      (sc/eq "file")
                                         :mime-type sc/Str
@@ -364,7 +365,7 @@
           (let [old-id-counter (:id-counter @allu-state)]
             (fact "ALLU integration disabled for"
               (fact "Non-Helsinki sijoituslupa"
-                (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate allu/SijoituslupaOperation)) => ok?]
+                (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate SijoituslupaOperation)) => ok?]
                   (itu/local-command pena :submit-application :id id) => ok?))
 
               (fact "Helsinki non-sijoituslupa"
