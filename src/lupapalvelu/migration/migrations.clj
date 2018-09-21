@@ -4055,10 +4055,9 @@
   "For apply-when. After the migration there should be no verdicts in `pate-verdicts`
   that are dummy verdicts in `pre-pate-verdicts`."
   []
-  (let [eligible-apps (mongo/select :applications
-                                    pate-verdict-migration/PATE-171-hotfix-query)]
-    (boolean (some dummy-verdicts-in-pate-verdicts?
-                   eligible-apps))))
+  (boolean (some dummy-verdicts-in-pate-verdicts?
+                 (mongo/select :applications
+                               pate-verdict-migration/PATE-171-hotfix-query))))
 
 (defmigration PATE-171-hotfix
   {:apply-when (pre-migration-dummy-verdicts-in-pate-verdicts?)}
