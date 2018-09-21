@@ -4057,12 +4057,14 @@
   []
   (boolean (some dummy-verdicts-in-pate-verdicts?
                  (mongo/select :applications
-                               pate-verdict-migration/PATE-171-hotfix-query))))
+                               pate-verdict-migration/PATE-171-hotfix-query
+                               [:pre-pate-verdicts :pate-verdicts :verdicts]))))
 
 (defmigration PATE-171-hotfix
   {:apply-when (pre-migration-dummy-verdicts-in-pate-verdicts?)}
   (->> (mongo/select :applications
-                     pate-verdict-migration/PATE-171-hotfix-query)
+                     pate-verdict-migration/PATE-171-hotfix-query
+                     [:pre-pate-verdicts :pate-verdicts :verdicts])
        (run! PATE-171-hotfix-update)))
 ;;
 ;; ****** NOTE! ******
