@@ -1,8 +1,8 @@
 (ns lupapalvelu.ui.pate.state
   (:refer-clojure :exclude [select-keys])
   (:require [clojure.string :as s]
-            [lupapalvelu.ui.rum-util :as rum-util]
             [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.rum-util :as rum-util]
             [rum.core :as rum]))
 
 (defonce state* (atom {}))
@@ -63,7 +63,7 @@
    (refresh-application-auth-model app-id nil)))
 
 (defn application-model-updated-mixin
-  "Refreshes auth model after the applicaiton model has been updated."
+  "Refreshes auth model after the application model has been updated."
   []
   (rum-util/hubscribe "application-model-updated"
                       {}

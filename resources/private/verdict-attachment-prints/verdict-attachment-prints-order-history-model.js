@@ -20,6 +20,6 @@ LUPAPISTE.VerdictAttachmentPrintsOrderHistoryModel = function() {
   self.openPrintsOrderHistoryDialog = _.partial(LUPAPISTE.ModalDialog.open, self.dialogSelector);
 
   self.addHubListener("refresh-verdict-attchments-orders", self.refresh);
-  self.addHubListener("attachment-prints-order-history", self.openPrintsOrderHistoryDialog);
+  self.addHubListener("show-attachment-prints-order-history", self.openPrintsOrderHistoryDialog);
 
 };

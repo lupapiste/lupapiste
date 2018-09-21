@@ -135,7 +135,7 @@
   (components/icon-button {:icon     :lupicon-documents
                            :text-loc :application.printsOrderHistory
                            :class    :positive.pate-right-space
-                           :on-click #(hub/send "attachment-prints-order-history")}))
+                           :on-click #(hub/send "show-attachment-prints-order-history")}))
 
 (defn- confirm-and-delete-verdict [app-id {:keys [legacy? published] :as verdict}]
   (common/show-dialog {:type     :yes-no
