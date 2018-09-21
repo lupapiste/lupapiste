@@ -59,13 +59,13 @@
          (sort-by (util/fn-> :schema-info :op :id (util/position-by-id operations))))))
 
 (defn resolve-valid-subtypes
-  "Returns a set of valid permit and operation subtypes for the application."
+  "Returns a list with no duplicates (~= set) of valid permit and operation subtypes for the application."
   [{permit-type :permitType op :primaryOperation org :organization}]
   (let [op-subtypes (op/get-primary-operation-metadata {:primaryOperation op} :subtypes)
         permit-subtypes (permit/permit-subtypes permit-type)
         all-subtypes (distinct (concat op-subtypes permit-subtypes))]
-    ;; If organization is 091-YA (= Helsinki yleiset alueet) and the user is requesting sijoituslupa or sijoitussopimus, return a list
-    ;; where :sijoitussopimus comes before :sijoituslupa so it acts as a default value
+    ;; If organization is 091-YA (= Helsinki yleiset alueet) and the user is requesting sijoituslupa or sijoitussopimus,
+    ;; return a list where :sijoitussopimus comes before :sijoituslupa so it acts as a default value
     (if (and (= "091-YA" org) (= (set all-subtypes) #{:sijoitussopimus :sijoituslupa}))
       (reverse all-subtypes)
       all-subtypes)))
