@@ -3,7 +3,8 @@
             [monger.operators :refer :all]
             [lupapalvelu.migration.pate-verdict-migration :refer :all]
             [lupapalvelu.mongo :refer [create-id]]
-            [lupapalvelu.pate.metadata :as metadata]))
+            [lupapalvelu.pate.metadata :as metadata]
+            [lupapalvelu.verdict :refer [backend-id->verdict]]))
 
 (def timestamp 1503003635780)
 
@@ -393,3 +394,31 @@
 
   (against-background
    (lupapalvelu.organization/get-organization-name anything anything) => "Sipoon rakennusvalvonta"))
+
+(facts "Hotfix PATE-171 - return-dummies-to-verdicts-array"
+  (fact "moves dummy verdicts from pate-verdicts to verdicts..."
+    (let [dummy-verdict1 (backend-id->verdict "123")
+          dummy-verdict2 (backend-id->verdict "321")]
+      (return-dummies-to-verdicts-array {:pre-pate-verdicts [dummy-verdict1
+                                                             {:from :backing-system}
+                                                             dummy-verdict2]
+                                         :pate-verdicts [{:id (:id dummy-verdict1)}
+                                                         {:id (:id dummy-verdict2)}]
+                                         :verdicts [{:from :backing-system}]})
+      =>
+      {$pull {:pate-verdicts {:id {$in [(:id dummy-verdict1) (:id dummy-verdict2)]}}}
+       $push {:verdicts {$each [dummy-verdict1 dummy-verdict2]}}}))
+
+  (fact "...unless there is already a verdict with corresponding kuntalupatunnus, in which case dummy is removed"
+    (let [dummy-verdict (backend-id->verdict "123")]
+          (return-dummies-to-verdicts-array {:pre-pate-verdicts [dummy-verdict]
+                                             :pate-verdicts [{:id (:id dummy-verdict)}]
+                                             :verdicts [{:from :backing-system
+                                                         :kuntalupatunnus "123"}]})
+          =>
+          {$pull {:pate-verdicts {:id {$in [(:id dummy-verdict)]}}}}))
+
+  (fact "throws if there are no dummy verdicts"
+    (return-dummies-to-verdicts-array {:application :without
+                                       :any :dummy-verdicts})
+    => (throws #"Attempted dummy verdict migration")))
