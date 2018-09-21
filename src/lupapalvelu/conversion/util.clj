@@ -177,6 +177,7 @@
   (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
         btype (get-building-type xml)
+        asiantiedot (building-reader/->asian-tiedot xml)
         {:keys [description usage]} (-> xml building-reader/->buildings-summary first)]
       (cond
         (= "TJO" suffix) "tyonjohtajan-nimeaminen-v2"
@@ -194,6 +195,20 @@
              (ss/contains? usage "toimisto")) "muu-rakennus-laaj"
         (and (= "B" suffix)
              (ss/contains? usage "teollisuu")) "teollisuusrakennus-laaj"
+        (and (= "C" suffix)
+             (re-find #"mainos" asiantiedot)) "mainoslaite"
+        (and (= "C" suffix)
+             (re-find #"maalämpökaivo" (ss/lower-case asiantiedot))) "maalampokaivo"
+        (and (= "C" suffix)
+             (re-find #"pysäköintialue" (ss/lower-case asiantiedot))) "muu-rakentaminen"
+        (and (= "D" suffix)
+             (re-find #"yhdistäminen" (ss/lower-case asiantiedot))) "jakaminen-tai-yhdistaminen"
+        (and (= "D" suffix)
+             (re-find #"johtojen uusiminen" (ss/lower-case asiantiedot))) "linjasaneeraus"
+        (and (= "D" suffix)
+             (re-find #"käyttötarkoituksen muutos" (ss/lower-case asiantiedot))) "kayttotark-muutos"
+        (and (= "D" suffix)
+             (re-find #"muuttaminen .*huoneeksi" (ss/lower-case asiantiedot))) "sisatila-muutos"
         :else "aiemmalla-luvalla-hakeminen")))
 
 (defn get-operation-types-for-testset
