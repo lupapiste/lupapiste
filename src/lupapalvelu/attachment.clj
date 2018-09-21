@@ -654,7 +654,7 @@
    Non-atomic operation: first deletes files, then updates document."
   [application attachment-ids]
   (when (seq attachment-ids)
-    (let [ids-str (pr-str attachment-ids)]
+    (let [ids-str (ss/serialize attachment-ids)]
       (info "1/4 deleting assignments regarding attachments" ids-str)
       (run! (partial assignment/remove-target-from-assignments (:id application)) attachment-ids)
       (info "2/4 deleting files of attachments" ids-str)
