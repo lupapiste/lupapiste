@@ -116,9 +116,6 @@
 (defn verdict-given? [{:keys [state]}]
   (boolean (states/post-verdict-states (keyword state))))
 
-(defn has-published-pate-verdicts? [{:keys [pate-verdicts]}]
-  (->> pate-verdicts (filter :published) not-empty boolean))
-
 (defn designer-app? [application]
   (= :suunnittelijan-nimeaminen (-> application :primaryOperation :name keyword)))
 
