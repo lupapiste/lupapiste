@@ -55,3 +55,19 @@ Test id warning
 
 Click back
   Scroll and click test id  back
+
+# --------------------------
+# Verdicts
+# --------------------------
+
+Check verdict row
+  [Arguments]  ${index}  ${link}  ${date}  ${giver}
+  Test id text is  verdict-link-${index}  ${link}
+  Test id text is  verdict-date-${index}  ${date}
+  Test id text is  verdict-giver-${index}  ${giver}
+
+Open verdict
+  [Arguments]  ${index}=0
+  Scroll and click test id  verdict-link-${index}
+  Wait test id visible  back
+  No such test id  pate-spin

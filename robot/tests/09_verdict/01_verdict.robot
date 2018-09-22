@@ -3,6 +3,7 @@
 Documentation   Application gets verdict
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Variables       ../../common_variables.py
 Variables       ../06_attachments/variables.py
 
@@ -25,16 +26,16 @@ Sonja logs in
   Sonja logs in
   Open application  ${appname}  753-416-25-30
 
-Sonja fetches verdict from municipality KRYSP service
+Sonja fetches verdict from municipality KuntaGML service
   Open tab  verdict
   Fetch verdict
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
-  No such test id  verdict-requirements-0
-  Wait test id visible  verdict-requirements-1
+  Check verdict row  0  §1 myönnetty  1.9.2013  elmo viranomainen
+  Check verdict row  1  myönnetty  1.9.2013  johtava viranomainen
 
-Attachments are visible
-  Wait until  Element should be visible  jquery=tr.statement-row td a
+Sonja opens the first verdict
+  debug
+  Open verdict
+
 
 Application summary tab is visible
   Element should be visible  jquery=a[data-test-id=application-open-applicationSummary-tab]

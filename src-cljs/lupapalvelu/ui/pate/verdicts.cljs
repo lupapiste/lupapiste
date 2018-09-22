@@ -31,6 +31,7 @@
                                      :pate.contract.confirm-delete-draft]
               :no-templates         [:pate.no-verdict-templates :pate.no-contract-templates]
               :template             [:pate-verdict-template :pate.contract.template]
+              :fetch-confirm        [:pate.check-for-verdict.confirm :pate.check-for-contract.confirm]
               :default-title        [:pate-verdict :pate.verdict-table.contract]})]
     (if (:contracts? @args)
       (last v)
@@ -115,15 +116,14 @@
                                 (util/=as-kw category :backing-system))
                               @state/verdict-list)
                       (common/show-dialog {:type     :yes-no
-                                           :ltext (if (:contracts? @args)
-                                                    :pate.check-for-contract.confirm
-                                                    :pate.check-for-verdict.confirm)
+                                           :ltext    (loc-key :fetch-confirm)
                                            :callback check-fn})
                       (check-fn))]
     (components/icon-button {:icon     :lupicon-download
-                             :text-loc  (loc-key :fetch)
-                             :wait?     waiting?*
-                             :class     [:positive :pate-right-space]
+                             :test-id  :fetch-verdict
+                             :text-loc (loc-key :fetch)
+                             :wait?    waiting?*
+                             :class    [:positive :pate-right-space]
                              :on-click confirm-fn})))
 
 (rum/defc order-verdict-attachment-prints []
@@ -259,55 +259,63 @@
 (defn- verdict-table [headers verdicts app-id hide-actions]
   [:table.pate-verdicts-table
    [:thead [:tr (map (fn [header] [:th (common/loc header)]) headers)]]
-   [:tbody (map (fn [{:keys [id title published modified
-                             verdict-date giver replaced?
-                             category signatures signature-requests]
-                      :as   verdict}]
-                  (list [:tr {:key id}
-                         [:td {:class (common/css-flags :replaced replaced?)}
-                          [:a {:on-click #(open-verdict id)} (if (ss/blank? title)
-                                                               (common/loc (loc-key :default-title))
-                                                               title)]]
-                         [:td (js/util.finnishDate verdict-date)]
-                         [:td giver]
-                         [:td (if published
-                                (common/loc :pate.published-date (js/util.finnishDate published))
-                                (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
-                         (if hide-actions
-                           [:td]
-                           [:td
-                            (when (can-delete? verdict)
-                              (components/icon-button
-                               {:text-loc (cond
-                                            (and published
-                                                 (util/=as-kw :contract category))
-                                            :pate.contract.delete
+   [:tbody (map-indexed (fn [i {:keys [id title published modified
+                                       verdict-date giver replaced?
+                                       category signatures signature-requests]
+                                :as   verdict}]
+                          (list [:tr {:key id}
+                                 [:td {:class (common/css-flags :replaced replaced?)}
+                                  [:a (common/add-test-id {:on-click #(open-verdict id)}
+                                                          :verdict-link i)
+                                   (if (ss/blank? title)
+                                     (common/loc (loc-key :default-title))
+                                     title)]]
+                                 [:td (common/add-test-id {} :verdict-date i)
+                                  (js/util.finnishDate verdict-date)]
+                                 [:td (common/add-test-id {} :verdict-giver i) giver]
+                                 [:td (common/add-test-id {} :verdict-published i)
+                                  (if published
+                                    (common/loc :pate.published-date (js/util.finnishDate published))
+                                    (common/loc :pate.last-saved (js/util.finnishDateAndTime modified)))]
+                                 (if hide-actions
+                                   [:td]
+                                   [:td
+                                    (when (can-delete? verdict)
+                                      (components/icon-button
+                                       {:text-loc (cond
+                                                    (and published
+                                                         (util/=as-kw :contract category))
+                                                    :pate.contract.delete
 
-                                            published
-                                            :pate.verdict-table.remove-verdict
+                                                    published
+                                                    :pate.verdict-table.remove-verdict
 
-                                            :else
-                                            :pate.verdict-table.remove-draft)
-                                :icon     :lupicon-remove
-                                :class    (common/css :secondary)
-                                :on-click #(confirm-and-delete-verdict app-id verdict)}))
-                            (when (can-replace? id)
-                              (components/icon-button
-                               {:text-loc :pate.verdict-table.replace-verdict
-                                :icon     :lupicon-refresh-section-sign
-                                :class    (common/css :secondary)
-                                :on-click #(confirm-and-replace-verdict verdict id)}))])]
-                        (when (seq signatures)
-                          (rum/with-key (verdict-signatures-row app-id id signatures :verdict.signatures true)
-                                        (str id "-signatures")))
-                        (when (seq signature-requests)
-                          (rum/with-key (verdict-signatures-row app-id id signature-requests :verdict.signature-requests false)
-                                        (str id "-signature-request")))
-                        (when (and published
-                                   (can-send-signature-request? id)
-                                   (contract? verdict))
-                          (rum/with-key (request-signature-row app-id id) (str id "-request")))))
-                verdicts)]])
+                                                    :else
+                                                    :pate.verdict-table.remove-draft)
+                                        :icon     :lupicon-remove
+                                        :test-id  (common/test-id :verdict-delete i)
+                                        :class    (common/css :secondary)
+                                        :on-click #(confirm-and-delete-verdict app-id verdict)}))
+                                    (when (can-replace? id)
+                                      (components/icon-button
+                                       {:text-loc :pate.verdict-table.replace-verdict
+                                        :test-id  (common/test-id :verdict-replace i)
+                                        :icon     :lupicon-refresh-section-sign
+                                        :class    (common/css :secondary)
+                                        :on-click #(confirm-and-replace-verdict verdict id)}))])]
+                                (when (seq signatures)
+                                  (rum/with-key (verdict-signatures-row app-id id signatures
+                                                                        :verdict.signatures true)
+                                    (str id "-signatures")))
+                                (when (seq signature-requests)
+                                  (rum/with-key (verdict-signatures-row app-id id signature-requests
+                                                                        :verdict.signature-requests false)
+                                    (str id "-signature-request")))
+                                (when (and published
+                                           (can-send-signature-request? id)
+                                           (contract? verdict))
+                                  (rum/with-key (request-signature-row app-id id) (str id "-request")))))
+                        verdicts)]])
 
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id replacement-verdict]

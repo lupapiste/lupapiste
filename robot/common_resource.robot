@@ -1478,13 +1478,13 @@ Do fetch verdict
   [Arguments]  ${fetchConfirmationText}
   Click enabled by test id  fetch-verdict
   Wait for jQuery
-  Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
-  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[contains(@class, 'dialog-user-content')]/p  ${fetchConfirmationText}
-  Confirm  dynamic-ok-confirm-dialog
+  Wait test id visible  ok-dialog
+  Element Text Should Be  jquery=p.dialog-desc:visible  ${fetchConfirmationText}
+  Confirm ok dialog
 
 Fetch verdict
   Do fetch verdict  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
-  Verdict is given  2013-01  0
+
 
 Fetch YA verdict
   Do fetch verdict  Taustajärjestelmästä haettiin 1 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 2 uutta vaatimusta Rakentaminen-välilehdelle.

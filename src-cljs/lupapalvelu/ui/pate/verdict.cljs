@@ -188,16 +188,17 @@
 (rum/defc pate-verdict < rum/reactive
   []
   [:div.container
-  [:div.pate-verdict-page {:id "pate-verdict-page"}
+   [:div.pate-verdict-page {:id "pate-verdict-page"}
    (lupapalvelu.ui.attachment.components/dropzone)
    [:div.operation-button-row
-    [:button.secondary
-     {:on-click (fn [_]
-                  ;; In case we have just published a verdict
-                  (service/refresh-attachments)
-                  (common/open-page :application @state/application-id :verdict))}
-     [:i.lupicon-chevron-left]
-     [:span (common/loc :back)]]]
+    (components/icon-button {:class    :secondary
+                             :icon     :lupicon-chevron-left
+                             :text-loc :back
+                             :test-id  :back
+                             :on-click (fn [_]
+                                         ;; In case we have just published a verdict
+                                         (service/refresh-attachments)
+                                         (common/open-page :application @state/application-id :verdict))})]
    (if (and (rum/react state/current-verdict-id)
             (rum/react state/auth-fn))
      (if (rum/react state/verdict-tags)
@@ -209,7 +210,8 @@
                          :dictionary dictionary
                          :references state/references))))
 
-     [:div.pate-spin [:i.lupicon-refresh]])]])
+     [:div.pate-spin {:data-test-id :pate-spin}
+      [:i.lupicon-refresh]])]])
 
 (defn bootstrap-verdict []
   (let [[app-id verdict-id] (js/pageutil.getPagePath)]
