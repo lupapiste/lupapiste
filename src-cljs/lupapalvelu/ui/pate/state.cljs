@@ -76,12 +76,12 @@
 ;; bypass the JavaScript auth models.
 
 (defn verdict-auth? [verdict-id action]
-  (get-in @allowed-verdict-actions
-          [(keyword verdict-id) (keyword action) :ok]))
+  (boolean (get-in @allowed-verdict-actions
+                   [(keyword verdict-id) (keyword action) :ok])))
 
 (defn react-verdict-auth? [verdict-id action]
-  (rum/react (rum/cursor-in allowed-verdict-actions
-                            [(keyword verdict-id) (keyword action) :ok])))
+  (boolean (rum/react (rum/cursor-in allowed-verdict-actions
+                                     [(keyword verdict-id) (keyword action) :ok]))))
 
 (defn- update-allowed-if-needed [verdict-id new-actions]
   (let [ok-keys-fn #(->> %
