@@ -7,6 +7,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.autologin :as autologin]
             [lupapalvelu.backing-system.core :as bs]
             [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.backing-system.asianhallinta.core :as ah]
