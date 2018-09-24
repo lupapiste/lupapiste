@@ -270,7 +270,7 @@
   [{open?*   ::open?
     term*    ::term
     latest*  ::latest
-    :as      local-state} _ {:keys [callback required? disabled?] :as options}]
+    :as      local-state} _ {:keys [callback required? disabled? test-id] :as options}]
   (let [{:keys [text-edit
                 menu-items
                 items-fn]} (complete-parts local-state
@@ -282,6 +282,7 @@
                                                   :combobox? true)
                                            {:on-focus  #(common/reset-if-needed! open?* true)
                                             :required? required?
+                                            :test-id   test-id
                                             :disabled  disabled?})]
     [:div.pate-autocomplete
      [:div.ac--combobox text-edit]
@@ -499,16 +500,19 @@
    Options:
      url: Link url
 
-   In addition, text, text-loc, enabled? and disabled? options are
+   In addition, text, text-loc, test-id, enabled? and disabled? options are
    supported."
-  [{:keys [url] :as options}]
+  [{:keys [url test-id] :as options}]
   (let [disabled? (common/resolve-disabled options)
-        text      (common/resolve-text options)]
+        text      (common/resolve-text options)
+        tid       (cond-> {}
+                    test-id (common/add-test-id test-id))]
     (if disabled?
-      [:span.btn.primary.outline.disabled text]
+      [:span.btn.primary.outline.disabled tid text]
       [:a.btn.primary.outline
-       {:href   url
-        :target :_blank}
+       (merge tid
+              {:href   url
+               :target :_blank})
        text])))
 
 (rum/defcs toggle < rum/reactive

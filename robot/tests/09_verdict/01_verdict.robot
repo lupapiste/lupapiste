@@ -33,9 +33,16 @@ Sonja fetches verdict from municipality KuntaGML service
   Check verdict row  1  myönnetty  1.9.2013  johtava viranomainen
 
 Sonja opens the first verdict
-  debug
   Open verdict
+  No verdict attachments
+  Wait test id visible  new-appeal
+  Click back
 
+Sonja opens the second verdict
+  Open verdict  1
+  Verdict attachment count  2
+  Wait test id visible  new-appeal
+  Click back
 
 Application summary tab is visible
   Element should be visible  jquery=a[data-test-id=application-open-applicationSummary-tab]
@@ -50,20 +57,17 @@ Check task counts
   Foreman count is  3
   Task count is  task-lupamaarays  3
 
-Sonja creates verdict with adds comment
-  Go to give new verdict
-  Title Should Be  ${appname} - Lupapiste
-  Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
+Sonja creates verdict and adds comment
+  Go to give new legacy verdict
+  Input legacy verdict  123567890  Kaarina Krysp III  Ehdollinen  1.5.2018
   Comment verdict  Myönnetään...
 
 Sonja adds attachment to verdict
-  Upload verdict or task attachment  ${TXT_TESTFILE_PATH}  Päätösote  Päätösote  Yleisesti hankkeeseen
-  Wait test id visible  targetted-attachments-table
+  Pate upload  0  ${TXT_TESTFILE_PATH}  Päätösote  Description
+  Pate batch ready
 
 Add katselmus
-  Create task  task-katselmus  Lopullinen loppukatselmus  loppukatselmus
-  # One on this verdict screen (and 3 hidden in tasks tab)
-  Task count is  task-katselmus  1
+  debug
 
 Add foreman
   Create task  task-vaadittu-tyonjohtaja  TJ0

@@ -204,6 +204,7 @@
       (appeal-form {} toggle-fn)
       (components/icon-button {:icon     :lupicon-circle-plus
                                :class    :positive
+                               :test-id  :new-appeal
                                :text-loc :verdict.muutoksenhaku.kirjaa
                                :on-click toggle-fn}))))
 

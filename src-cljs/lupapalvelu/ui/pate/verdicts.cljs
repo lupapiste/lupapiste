@@ -99,6 +99,7 @@
 (rum/defc new-legacy-verdict []
   (components/icon-button {:icon     :lupicon-circle-plus
                            :text-loc (loc-key :add)
+                           :test-id  :new-legacy-verdict
                            :class    [:positive :pate-right-space]
                            :on-click #(service/new-legacy-verdict-draft @state/application-id
                                                                         open-verdict)}))

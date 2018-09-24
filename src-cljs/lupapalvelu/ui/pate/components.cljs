@@ -39,12 +39,7 @@
     component))
 
 (defn test-id [{:keys [path schema]} & extras]
-  (let [join-fn #(->> (flatten %)
-                      (remove nil?)
-                      (map name)
-                      (remove s/blank?)
-                      (s/join "-"))]
-    (join-fn [(get schema :test-id path) extras])))
+  (common/test-id (get schema :test-id path) extras))
 
 (defn test-id-wrap [options target]
   (common/add-test-id target (test-id options)))

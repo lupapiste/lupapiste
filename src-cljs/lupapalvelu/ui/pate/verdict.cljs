@@ -96,14 +96,15 @@
           open-sections (filter #(get meta-map (util/kw-path % :editing?))
                                 all-editable-sections)]
       [:a.pate-left-space
-       {:on-click #(swap! _meta (fn [m]
-                                  (->> (or (not-empty open-sections)
-                                           all-editable-sections)
-                                       (map (fn [id]
-                                              [(util/kw-path id :editing?)
-                                               (empty? open-sections)]))
-                                       (into {})
-                                       (merge m))))}
+       (common/add-test-id {:on-click #(swap! _meta (fn [m]
+                                                      (->> (or (not-empty open-sections)
+                                                               all-editable-sections)
+                                                           (map (fn [id]
+                                                                  [(util/kw-path id :editing?)
+                                                                   (empty? open-sections)]))
+                                                           (into {})
+                                                           (merge m))))}
+                           :toggle-all)
        (common/loc (if (seq open-sections)
                      :pate.close-all
                      :pate.open-all))])))
@@ -125,6 +126,7 @@
                                               :pate.contract.publish
                                               :verdict.submit)
                                   :class    (common/css :primary :pate-left-space)
+                                  :test-id  :publish-verdict
                                   :icon     (if contract?
                                               :lupicon-undersign
                                               :lupicon-document-section-sign)
@@ -143,6 +145,7 @@
                                                         @state/application-id
                                                         id)
                                   :enabled? (can-preview?)
+                                  :test-id  :preview-verdict
                                   :text-loc :pdf.preview})]])
      (if published
        [:div.row
