@@ -288,7 +288,10 @@
              :propertyIdentificationNumber propertyId
              :startTime                    (format-date-time start)
              :workDescription              (-> work-description :data :kayttotarkoitus)}]
-    (assoc-when res :customerReference (not-empty (-> payee-doc :data :laskuviite)))))
+    (assoc-when res :customerReference (let [cref (-> payee-doc :data :laskuviite)]
+                                         (when-not (sc/check (get PlacementContract (optional-key :customerReference))
+                                                             cref)
+                                           cref)))))
 
 (sc/defn ^{:private true} application->allu-placement-contract :- PlacementContract [pending-on-client app]
   (->> app flatten-values (convert-value-flattened-app pending-on-client)))
