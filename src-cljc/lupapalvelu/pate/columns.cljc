@@ -64,7 +64,7 @@
       (list [:div.markup (markup/markup->tags value)])
 
       (and (:date schema) (integer? value))
-      (layouts/finnish-date value)
+      (layouts/finnish-date (long value))
 
       :else
       value)))
@@ -97,7 +97,7 @@
         blank-as-nil #(when-not (ss/blank? %) %)
         value (or text (util/pcond-> (get-in source-value path source-value)
                                      string? blank-as-nil))]
-    (when value
+    (when (and value (not (map? value)))
       [:div.cell (cond-> {}
                    (seq class) (assoc :class class))
        (cond->> value

@@ -82,8 +82,8 @@
   (layouts/add-unit :fi :ha nil) => nil
   (layouts/add-unit :fi :ha "20") => "20 ha"
   (layouts/add-unit :fi :ha 10) => "10 ha"
-  (layouts/add-unit :fi :m2 88) => [:span 88 " m"[:sup 2]]
-  (layouts/add-unit :fi :m3 "hello") => [:span "hello" " m"[:sup 3]]
+  (layouts/add-unit :fi :m2 88) => [:span {} 88 " m"[:sup 2]]
+  (layouts/add-unit :fi :m3 "hello") => [:span {} "hello" " m"[:sup 3]]
   (layouts/add-unit :fi :kpl 8) => "8 kpl"
   (layouts/add-unit :fi :section 88) => "\u00a788"
   (layouts/add-unit :fi :eur "foo") => "foo\u20ac")
@@ -212,4 +212,4 @@
   => [:div.cell {:class '("cell--50")} "Kumoa fraasi"]
   (cols/resolve-cell {:lang "fi"} 123 {:width 80 :styles [:bold :right]
                                        :unit :m2})
-  => [:div.cell {:class '("cell--80" "bold" "right")} [:span 123 " m" [:sup 2]]])
+  => [:div.cell {:class '("cell--80" "bold" "right")} [:span {} 123 " m" [:sup 2]]])

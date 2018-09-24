@@ -20,7 +20,6 @@
 (defquery organization-phrases
   {:description      "Phrases for an authority admin's organization."
    :permissions      [{:required [:organization/admin]}]
-   :feature          :pate
    :parameters       [:org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]
    :pre-checks       [org-id-valid]}
@@ -34,7 +33,6 @@
    :user-roles       #{:authority}
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :feature          :pate
    ;; TODO: Refine states
    :states           states/all-states}
   [{:keys [organization]}]
@@ -43,7 +41,6 @@
 (defquery custom-organization-phrase-categories
   {:description      "Phrases categories added by user for an authority admin's organization."
    :permissions      [{:required [:organization/admin]}]
-   :feature          :pate
    :parameters       [:org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]
    :pre-checks       [org-id-valid]}
@@ -57,7 +54,6 @@
    :user-roles       #{:authority}
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :feature          :pate
    :states           states/all-states}
   [{:keys [organization]}]
   (ok :custom-categories (get @organization
@@ -72,8 +68,7 @@
    :input-validators    [phrases/valid-category
                          (partial action/non-blank-parameters [:org-id :tag :phrase])]
    :pre-checks          [org-id-valid
-                         phrases/phrase-id-ok]
-   :feature             :pate}
+                         phrases/phrase-id-ok]}
   [command]
   (phrases/upsert-phrase command))
 
@@ -83,8 +78,7 @@
    :parameters       [org-id phrase-id]
    :input-validators [(partial action/non-blank-parameters [:org-id :phrase-id])]
    :pre-checks       [org-id-valid
-                      phrases/phrase-id-exists]
-   :feature          :pate}
+                      phrases/phrase-id-exists]}
   [_]
   (phrases/delete-phrase org-id phrase-id))
 
@@ -93,8 +87,7 @@
    :permissions      [{:required [:organization/admin]}]
    :parameters       [:category :org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]
-   :pre-checks       [org-id-valid]
-   :feature          :pate}
+   :pre-checks       [org-id-valid]}
   [command]
   (phrases/save-phrase-category command))
 
@@ -103,7 +96,6 @@
    :permissions      [{:required [:organization/admin]}]
    :parameters       [category org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]
-   :pre-checks       [org-id-valid]
-   :feature          :pate}
+   :pre-checks       [org-id-valid]}
   [command]
   (phrases/delete-phrase-category org-id category))

@@ -68,7 +68,11 @@
   (pdf/value-or-other :fi "yleinen" "world" :phrase :category)
   => "Yleinen"
   (pdf/value-or-other :fi "Hello" "world")
-  => "Hello")
+  => "Hello"
+  (pdf/value-or-other :fi nil "world")
+  => ""
+  (pdf/value-or-other :fi nil "world" :hii :hoo)
+  => "")
 
 (defn head-designer [firstname lastname difficulty
                      education-select education-other]

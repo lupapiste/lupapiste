@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [select-keys])
   (:require [clojure.string :as s]
             [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.rum-util :as rum-util]
             [rum.core :as rum]))
 
 (defonce state* (atom {}))
@@ -61,18 +62,26 @@
   ([app-id]
    (refresh-application-auth-model app-id nil)))
 
+(defn application-model-updated-mixin
+  "Refreshes auth model after the application model has been updated."
+  []
+  (rum-util/hubscribe "application-model-updated"
+                      {}
+                      (fn [state]
+                        (refresh-application-auth-model @application-id nil)
+                        state)))
 
 ;; Convenience wrappers for the verdicts category allowed
 ;; actions. Since the actions are only used for ClojureScript we can
 ;; bypass the JavaScript auth models.
 
 (defn verdict-auth? [verdict-id action]
-  (get-in @allowed-verdict-actions
-          [(keyword verdict-id) (keyword action) :ok]))
+  (boolean (get-in @allowed-verdict-actions
+                   [(keyword verdict-id) (keyword action) :ok])))
 
 (defn react-verdict-auth? [verdict-id action]
-  (rum/react (rum/cursor-in allowed-verdict-actions
-                            [(keyword verdict-id) (keyword action) :ok])))
+  (boolean (rum/react (rum/cursor-in allowed-verdict-actions
+                                     [(keyword verdict-id) (keyword action) :ok]))))
 
 (defn- update-allowed-if-needed [verdict-id new-actions]
   (let [ok-keys-fn #(->> %

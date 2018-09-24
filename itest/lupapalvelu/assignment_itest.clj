@@ -1,14 +1,15 @@
 (ns lupapalvelu.assignment-itest
-  (:require [midje.sweet :refer :all]
-            [schema.core :as sc]
-            [sade.util :as util]
-            [lupapalvelu.itest-util :refer :all]
+  (:require [clj-time.coerce :as tc]
+            [clj-time.core :as t]
             [lupapalvelu.assignment :refer [Assignment]]
             [lupapalvelu.assignment-api :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
-            [clj-time.core :as t]
-            [clj-time.coerce :as tc]))
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [midje.sweet :refer :all]
+            [sade.util :as util]
+            [schema.core :as sc]))
 
 (apply-remote-minimal)
 
@@ -233,7 +234,7 @@
           assignment-id1 (:id (create-assignment sonja sonja-id app-id [{:group "documents" :id (:id designer-doc)}] "Tarkista!"))
           assignment-id2 (:id (create-assignment sonja sonja-id app-id [{:group "documents" :id (:id designer-doc)}
                                                                         {:group "documents" :id (:id maksaja-doc)}] "Kaksi kohdetta"))
-          _              (give-verdict sonja app-id) => ok?
+          _              (give-legacy-verdict sonja app-id)
           assignments    (get-user-assignments sonja)]
       (fact "when document is disabled, assignments with the document as only target are canceled"
         (command sonja :approve-doc :id app-id :doc (:id designer-doc) :path nil :collection "documents") => ok?

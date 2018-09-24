@@ -1,21 +1,22 @@
 (ns lupapalvelu.ya-extension-itest
-  (:require [midje.sweet :refer :all]
-            [sade.core :as sade]
-            [sade.xml :as xml]
-            [sade.common-reader :refer [strip-xml-namespaces]]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]
-            [lupapalvelu.fixture.core :as fixture]
-            [lupapalvelu.ya-extension-api]
-            [lupapalvelu.ya-extension :as yax]
-            [clj-time.core :as time]
+  (:require [clj-time.core :as time]
             [clj-time.format :as fmt]
             [clj-time.local :as local]
-            [net.cgrand.enlive-html :as enlive]
             [clojure.java.io :as io]
-            [sade.strings :as str]))
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [lupapalvelu.ya-extension :as yax]
+            [lupapalvelu.ya-extension-api]
+            [midje.sweet :refer :all]
+            [monger.operators :refer :all]
+            [net.cgrand.enlive-html :as enlive]
+            [sade.common-reader :refer [strip-xml-namespaces]]
+            [sade.core :as sade]
+            [sade.strings :as str]
+            [sade.xml :as xml]))
 
 (apply-remote-minimal)
 
@@ -152,27 +153,9 @@
                                     xml/parse
                                     strip-xml-namespaces)
                krysp-start-date "04.10.2016"
-               krysp-end-date   "22.11.2016"
-               {verdict-id :verdictId} (local-command sonja :new-verdict-draft :id app-id)]
+               krysp-end-date   "22.11.2016"]
+           (give-local-legacy-verdict sonja app-id)
            ;; Local command does not work with :check-for-verdict on CI
-           (fact "Save verdict draft"
-                 (local-command sonja
-                                :save-verdict-draft
-                                :id app-id
-                                :agreement false
-                                :backendId "12345"
-                                :verdictId verdict-id
-                                :given (sade/now)
-                                :name "Sonja Sibbo"
-                                :official 0
-                                :section nil
-                                :text "This is my verdict.") => ok?)
-           (fact "Publish verdict"
-                 (local-command sonja
-                                :publish-verdict
-                                :id app-id
-                                :lang "fi"
-                                :verdictId verdict-id) => ok?)
            (fact "No extensions"
                  (local-query pena :ya-extensions :id app-id)
                  => (err :error.no-extensions))

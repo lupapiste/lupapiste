@@ -45,7 +45,10 @@
                      :documents.data.henkilo.henkilotiedot.sukunimi.value
                      :documents.data.yritys.yritysnimi.value
                      :foreman
-                     :verdicts.kuntalupatunnus]
+                     :verdicts.kuntalupatunnus
+                     :pate-verdicts.data.kuntalupatunnus._value ;; Draft
+                     :pate-verdicts.data.kuntalupatunnus ;; Published
+                     ]
         fuzzy       (ss/fuzzy-re filter-search)
         or-query    {$or (map #(hash-map % {$regex fuzzy $options "i"}) search-keys)}
         ops         (operations/operation-names filter-search)]

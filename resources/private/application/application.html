@@ -118,20 +118,14 @@
                                     <span data-bind="if: unseenStatements">
                                         <span data-bind="text: unseenStatements" id="applicationUnseenStatements" class="indicator"></span></span></a></li>
 
-                            <li data-bind="ifnot: _.includes(['draft', 'open'], state()) || !$root.authorization.ok( 'application-verdict-tab-visible'),
+                            <li data-bind="if: $root.authorization.ok( 'pate-verdict-tab'),
                                            css: {'active': $parent.selectedTabName() === 'verdict'}">
-                              <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab"
-                                 class="link-btn">
-                                <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
-                                <span data-bind="if: unseenVerdicts">
-                                      <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
-
-                            <li data-bind="if: $root.authorization.ok( 'pate-verdict-tab')">
-                              <a  data-bind="click: changeTab,
-                                             feature: 'pate'"
-                                  href="#" data-target="pate-verdict" data-test-id="pate-verdict-tab"
+                              <a  data-bind="click: changeTab"
+                                  href="#" data-target="verdict" data-test-id="pate-verdict-tab"
                                   class="link-btn">
                                 <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
+                                <span data-bind="if: unseenVerdicts">
+                                      <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span>
                               </a>
                             </li>
 
@@ -363,62 +357,10 @@
 
                     </div>
 
-                    <!-- Verdict tab -->
-
-                    <!-- ko if: selectedTabName() === 'verdict' -->
-                    <div id="application-verdict-tab" class="tab-content">
-                        <h1 data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></h1>
-                        <span data-bind="{component: {
-                                         name: 'help-toggle',
-                                         params: {lhtml: 'help.' + $root.application.permitType() + '.verdictDesc' + $root.application.verdictPostfix()}
-                                         }}"></span>
-
-                        <div data-bind="if: $root.verdictModel.verdicts()">
-                            <div data-bind="ifnot: $root.verdictModel.verdicts().length">
-                                <p data-bind="lhtml: 'application.verdictDesc'"></p>
-                            </div>
-                            <div data-bind="template: 'verdicts-template'"></div>
-                        </div>
-
-                        <button data-bind="click: $root.verdictModel.newVerdict, visible: $root.authorization.ok('new-verdict-draft'), disable: $root.verdictModel.newProcessing"
-                                class="positive"
-                                data-test-id="give-verdict">
-                            <em data-bind="visible: $root.verdictModel.newPending" class="button-loader"></em>
-                            <span data-bind="ltext: 'application.verdict.add'"></span>
-                        </button>
-
-                        <button data-bind="click: $root.verdictModel.checkVerdict,
-                                           visible: $root.authorization.ok('check-for-verdict'),
-                                           disable: $root.verdictModel.processing,
-                                           css: {waiting: $root.verdictModel.pending}"
-                                class="positive"
-                                data-test-id="fetch-verdict">
-                          <i class="wait spin lupicon-refresh"></i>
-                          <span data-bind="ltext: 'verdict.fetch.button'"></span>
-                        </button>
-
-                        <button data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
-                                           enable: !$root.verdictModel.processing(),
-                                           visible: $root.authorization.ok('order-verdict-attachment-prints'),
-                                           attr: {'title': $root.verdictAttachmentPrintsOrderModel.printsOrderButtonTitle}"
-                                class="positive"
-                                data-test-id="test-order-attachment-prints">
-                            <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
-                            <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
-                        </button>
-
-                        <a data-bind="click: $root.verdictAttachmentPrintsOrderHistoryModel.openPrintsOrderHistoryDialog,
-                                      ltext: 'application.printsOrderHistory',
-                                      visible: $root.authorization.ok('order-verdict-attachment-prints') && $root.verdictAttachmentPrintsOrderHistoryModel.historyItems().length"
-                           href="#" data-test-id="test-open-prints-order-history"></a>
-
-                    </div>
-                    <!-- /ko -->
-
                     <!-- Pate verdict tab -->
-                    <!-- ko if: selectedTabName() === 'pate-verdict' && lupapisteApp.models.rootVMO.currentPage() === 'application' -->
-                    <div id="application-pate-verdict-tab"
-                         class="tab-content feature--no-border" data-bind="feature: 'pate'">
+                    <!-- ko if: selectedTabName() === 'verdict' && lupapisteApp.models.rootVMO.currentPage() === 'application' -->
+                    <div id="application-verdict-tab"
+                         class="tab-content">
                       <!-- ko if: $root.authorization.ok( 'pate-contract-tab') -->
                       <cljs-pate_verdicts params="contracts: true"></cljs-pate_verdicts>
                       <!-- /ko -->

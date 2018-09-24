@@ -111,7 +111,10 @@
                                     category-kw)
           loc-fn         (fn [& kws]
                            (apply i18n/localize lang (flatten kws)))
-          contract?      (vc/contract? verdict)]
+          contract?      (vc/contract? verdict)
+          non-migration-contract? (and contract?
+                                       (not (vc/has-category? verdict
+                                                              :migration-contract)))]
       [:div.row.pad-after
        [:div.cell.cell--40
         (organization-name lang application)
@@ -129,14 +132,15 @@
                                       :attachmentType.paatoksenteko.paatos)))]]
        [:div.cell.cell--40.right
         [:div.permit (loc-fn (cond
-                               legacy-kt-ymp? :attachmentType.paatoksenteko.paatos
-                               contract?      :pate.verdict-table.contract
-                               :else          (case category-kw
-                                                :ya        [:pate.verdict-type
-                                                            (cols/dict-value verdict :verdict-type)]
-                                                :legacy.ya [:pate.verdict-type
-                                                            (schema-util/ya-verdict-type application)]
-                                                [:pdf category :permit])))]]])
+                               legacy-kt-ymp?          :attachmentType.paatoksenteko.paatos
+                               non-migration-contract? :pate.verdict-table.contract
+                               :else
+                               (case category-kw
+                                 :ya        [:pate.verdict-type
+                                             (cols/dict-value verdict :verdict-type)]
+                                 :legacy.ya [:pate.verdict-type
+                                             (schema-util/ya-verdict-type application)]
+                                 [:pdf category :permit])))]]])
     [:div.row
      [:div.cell.cell--40
       (layouts/add-unit lang :section (cols/dict-value verdict :verdict-section))]

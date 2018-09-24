@@ -1,7 +1,8 @@
 (ns lupapalvelu.construction-started-ready-itest
-  (:require [midje.sweet :refer :all]
+  (:require [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]))
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [midje.sweet :refer :all]))
 
 (apply-remote-minimal)
 
@@ -17,7 +18,7 @@
         _              (command sonja :inform-construction-started :id application-id
                                 :startedTimestampStr "31.12.2013" :lang "fi")
         => (partial expected-failure? "error.command-illegal-state")
-        _              (give-verdict sonja application-id) => ok?
+        _              (give-legacy-verdict sonja application-id)
         application    (query-application sonja application-id) => truthy]
 
     (facts "Documents got an indicator reset timestamp"
@@ -72,7 +73,7 @@
         application-id (:id application)
         _              (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
         _              (command sonja :approve-application :id application-id :lang "fi") => ok?
-        _              (give-verdict sonja application-id) => ok?
+        _              (give-legacy-verdict sonja application-id)
         application    (query-application sonja application-id) => truthy
         _              (:state application) => "verdictGiven"]
     (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013"
