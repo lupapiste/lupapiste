@@ -295,7 +295,7 @@
      ["/:id/attachments" {:name       [:attachments :create]
                           :parameters {:path      {:id ssc/NatString}
                                        :multipart {:metadata FileMetadata
-                                                   :file     (sc/cond-pre InputStream sc/Str)}}
+                                                   :file     sssc/FileId}}
                           :middleware (if disable-io-middlewares?
                                         []
                                         [(preprocessor->middleware get-attachment-files!)])
