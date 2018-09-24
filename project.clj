@@ -173,7 +173,7 @@
             [lein-midje "3.2.1"]
             [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
             [lupapiste/lein-buildid "0.4.2"]
-            [lupapiste/lein-nitpicker "0.5.1"]
+            [lupapiste/lein-nitpicker "0.6.0"]
             [lein-figwheel "0.5.16"]]
   :hooks [leiningen.cljsbuild]
 
