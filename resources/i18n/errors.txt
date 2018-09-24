@@ -134,6 +134,7 @@
 "error.dialog.title" "fi" "Virhe"
 "error.dialog.title" "sv" "Fel"
 "error.discussion-pdf-generation-failed" "fi" "Keskustelujen tallentaminen PDF-liitteenä epäonnistui. Yritä hetken päästä uudelleen."
+"error.discussion-pdf-generation-failed" "sv" "Lagring av diskussion som pdf-fil misslyckades. Försök på nytt senare."
 "error.document-not-approvable" "en" "Approval of the form is not possible"
 "error.document-not-approvable" "fi" "Lomakkeen hyväksyntä ei ole mahdollista"
 "error.document-not-approvable" "sv" "Det är inte möjligt att godkänna blanketten"

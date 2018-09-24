@@ -43,7 +43,7 @@
                :address (let [{:keys [katu postinumero postitoimipaikannimi
                                       maa]} osoite]
                           (->> [katu (str postinumero " " postitoimipaikannimi)
-                                (when (util/not=as-kw maa :FIN)
+                                (when (and (not-empty maa) (util/not=as-kw maa :FIN))
                                   (i18n/localize lang :country maa))]
                                (cols/join-non-blanks ", ")))}))
        (remove (util/fn-> :name ss/blank?))))
@@ -63,11 +63,10 @@
                              (map (fn [[_ v]] (ss/trim (:property-id v)))))))
 
 (defn value-or-other [lang value other & loc-keys]
-  (if (util/=as-kw value :other)
-    other
-    (if (seq loc-keys)
-      (i18n/localize lang loc-keys value)
-      value)))
+  (cond (or (nil? value) (empty? value)) ""
+        (util/=as-kw value :other) other
+        (seq loc-keys) (i18n/localize lang loc-keys value)
+        :else value))
 
 (defn designers [{lang :lang app :application}]
   (let [role-keys [:pdf :kuntaRoolikoodi]
@@ -115,11 +114,19 @@
   (mapv (util/fn-> :schema-info :op)
         (app/get-sorted-operation-documents application)))
 
+(defn operation-name
+  [app op-info]
+  (if (= (:name op-info) "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
+    (:name (util/find-by-id (:id op-info)
+                            (concat [(:primaryOperation app)]
+                                    (:secondaryOperations app))))
+    (:name op-info)))
+
 (defn operations
   "If the verdict has an :operation property, its value overrides the
   application primary operation."
   [{:keys [lang verdict application]}]
-  (let [infos     (map (util/fn->> :name
+  (let [infos     (map (util/fn->> (operation-name application)
                                    (i18n/localize lang :operations)
                                    (hash-map :text))
                        (operation-infos application))
@@ -238,11 +245,11 @@
                             (remove ss/blank?)
                             distinct
                             (ss/join " / "))
-           :parking (->>  buildings
-                          (map (partial building-parking lang))
-                          (interpose {:text    "" :amount ""
-                                      ::styles {:row :pad-before}})
-                          flatten)
+           :parking (->> buildings
+                         (map (partial building-parking lang))
+                         (interpose {:text    "" :amount ""
+                                     ::styles {:row :pad-before}})
+                         flatten)
            :attachments (verdict-attachments options)
            :organization (html/organization-name lang application)
            :link-permits (link-permits options)

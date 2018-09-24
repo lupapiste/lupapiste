@@ -1,9 +1,10 @@
 (ns lupapalvelu.change-permit-itest
-  (:require [midje.sweet :refer :all]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]
+  (:require [clojure.set :refer [intersection]]
             [lupapalvelu.domain :as domain]
-            [clojure.set :refer [intersection]]))
+            [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [midje.sweet :refer :all]))
 
 (apply-remote-minimal)
 
@@ -42,7 +43,7 @@
       (command apikey :create-change-permit :id application-id) => (partial expected-failure? "error.command-illegal-state"))
 
     (fact "Give verdict to original application"
-      (give-verdict apikey application-id) => ok?)
+      (give-legacy-verdict apikey application-id))
 
     (let [application (query-application apikey application-id)]
       (:state application) => "verdictGiven")
@@ -88,7 +89,7 @@
 
     (generate-documents application apikey)
     (command apikey :approve-application :id application-id :lang "fi") => ok?
-    (give-verdict apikey application-id) => ok?
+    (give-legacy-verdict apikey application-id)
     (let [application (query-application apikey application-id) => truthy]
       (:state application) => "verdictGiven")
     (command apikey :create-change-permit :id application-id) => (partial expected-failure? "error.invalid-permit-type")))

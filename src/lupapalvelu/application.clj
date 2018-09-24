@@ -116,9 +116,6 @@
 (defn verdict-given? [{:keys [state]}]
   (boolean (states/post-verdict-states (keyword state))))
 
-(defn has-published-pate-verdicts? [{:keys [pate-verdicts]}]
-  (->> pate-verdicts (filter :published) not-empty boolean))
-
 (defn designer-app? [application]
   (= :suunnittelijan-nimeaminen (-> application :primaryOperation :name keyword)))
 
@@ -703,7 +700,11 @@
                         :upsert true)))
 
 (defn get-lp-ids-by-kuntalupatunnus [kuntalupatunnus]
-  (map :id (mongo/select :applications {:verdicts.kuntalupatunnus kuntalupatunnus} {:_id 1})))
+  (map :id (mongo/select :applications
+                         {$or [{:verdicts.kuntalupatunnus kuntalupatunnus}       ;; Backing system
+                               {:pate-verdicts.kuntalupatunnus kuntalupatunnus}  ;; Legacy published
+                               {:pate-verdicts.kuntalupatunnus._value kuntalupatunnus}]}  ;; Legacy draft
+                         {:_id 1})))
 
 (defn update-app-links!
   "To be run after Vantaa-conversion for each imported kuntalupatunnus. Takes a kuntalupatunnus
@@ -925,3 +926,17 @@
 
 (defn set-integration-key [app-id system-name key-data]
   (mongo/update-by-id :applications app-id {$set {(str "integrationKeys." (name system-name)) key-data}}))
+
+
+;; Utils for the sheriff
+
+(defn bananize
+  "Set pena as applicant, sonja as authority for an application"
+  [app-id]
+  (let [application (mongo/by-id :applications app-id)
+        projection [:id :firstName :lastName :username]
+        pena (-> (usr/get-user-by-email "pena@example.com") (select-keys projection) (assoc :role "writer"))
+        sonja (-> (usr/get-user-by-email "sonja.sibbo@sipoo.fi") (select-keys projection) (assoc :role "authority"))
+        updated-auth (-> (filter #(false? (contains? #{"pena" "sonja"} (:username %))) (:auth application))
+                         (conj pena sonja))]
+    (mongo/update-by-id :applications app-id (assoc application :auth updated-auth))))

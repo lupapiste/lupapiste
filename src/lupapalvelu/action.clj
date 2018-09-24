@@ -307,7 +307,8 @@
           ; Inforequest state chenges don't require logging
           (states/all-inforequest-states new-state)
           ; delete-verdict commands sets state back, but no logging is required (LPK-917)
-          (seq (get-in changes [$pull :verdicts])))
+          (seq (get-in changes [$pull :verdicts]))
+          (seq (get-in changes [$pull :pate-verdicts])))
         "event must be pushed to history array when state is set")
       (if (env/dev-mode?)
         (when-not (map? (:user command))

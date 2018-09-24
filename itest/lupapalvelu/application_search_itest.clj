@@ -1,12 +1,14 @@
 (ns lupapalvelu.application-search-itest
   (:require [clojure.string :as s]
-            [midje.sweet :refer :all]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.pate-itest-util :refer :all]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [midje.sweet :refer :all]
             [sade.property :as p]
-            [sade.util :as util]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 (defn- num-of-results? [n response]
   (and
@@ -79,9 +81,15 @@
 
     (facts "by verdict ID"
       (fact "no verdict, matches" (search "Hakup\u00e4\u00e4t\u00f6s-2014") => no-results?)
-      (give-verdict sonja application-id :verdictId "Hakup\u00e4\u00e4t\u00f6s-2014-1") => ok?
+      (give-legacy-verdict sonja application-id :kuntalupatunnus "Hakup\u00e4\u00e4t\u00f6s-2014-1") => truthy
       (fact "no matches" (search "Hakup\u00e4\u00e4t\u00f6s-2014-2") => no-results?)
-      (fact "one match" (search "Hakup\u00e4\u00e4t\u00f6s-2014") => id-matches?))
+      (fact "one match" (search "Hakup\u00e4\u00e4t\u00f6s-2014") => id-matches?)
+      (fact "Legacy draft"
+        (let [{vid :verdict-id} (command sonja :new-legacy-verdict-draft :id application-id)]
+          (fill-verdict sonja application-id vid :kuntalupatunnus "Hakup\u00e4\u00e4t\u00f6s-2014-3")
+          (fact "no matches" (search "Hakup\u00e4\u00e4t\u00f6s-2014-2") => no-results?)
+          (fact "one match" (search "Hakup\u00e4\u00e4t\u00f6s-2014") => id-matches?)
+          (fact "also one match" (search "Hakup\u00e4\u00e4t\u00f6s-2014-3") => id-matches?))))
 
     (facts "by operation name"
       (fact "no matches" (search "vaihtolavan sijoittaminen") => no-results?)

@@ -526,12 +526,7 @@
                          :default? false
                          :name     "Uusi nimi"})] :in-any-order)))))
 
-(defn add-verdict-attachment
-  "Adds attachment to the verdict. Contents is mainly for logging. Returns attachment id."
-  [app-id verdict-id contents]
-  (add-attachment app-id contents "paatoksenteko" "paatosote" {:target {:type "verdict"
-                                                                        :id verdict-id}
-                                                               :draft? true}))
+
 
 ;;; Verdicts
 
@@ -792,9 +787,6 @@
                                                       y))
                                              {}
                                              changes))))}))
-
-
-
 
 (facts "Verdicts"
   (let [{:keys [good-condition other-condition template-id app-id]} space-saving-definitions]
@@ -1185,9 +1177,6 @@
                     (raw sonja :preview-pate-verdict :id app-id
                          :verdict-id verdict-id)
                     => fail?)
-                  (fact "Verdicts can no longer be fetched from the backing system"
-                    (command sonja :check-for-verdict :id app-id)
-                    => (err "error.published-pate-verdicts-exist"))
                   (fact "Pena can see  published verdict"
                     (query pena :pate-verdict
                            :id app-id :verdict-id verdict-id)
@@ -1267,7 +1256,8 @@
                                                         :id app-id
                                                         :template-id template-id)
                       {:keys [attachment-id
-                              file-id]}        (add-verdict-attachment app-id
+                              file-id]}        (add-verdict-attachment sonja
+                                                                       app-id
                                                                        verdict-id
                                                                        "Hello world!")]
                   (check-file app-id file-id true)
@@ -1359,7 +1349,8 @@
                         [["muutoksenhaku"] (timestamp "22.1.2018")]
                         [["voimassa"] (timestamp "28.1.2021")]])))
     (facts "Add attachment to verdict draft"
-      (let [{:keys [attachment-id]} (add-verdict-attachment app-id
+      (let [{:keys [attachment-id]} (add-verdict-attachment sonja
+                                                            app-id
                                                             verdict-id
                                                             "Paatosote")]
         (fact "Attachment can be deleted"
@@ -1371,10 +1362,10 @@
     (fact "Add required verdict date"
       (edit-verdict "verdict-date" verdict-date) => no-errors?)
     (facts "Add attachment to verdict draft again. Add regular attachment to the application, too. Add pseudo verdict attachment"
-      (let [{:keys [attachment-id]}     (add-verdict-attachment app-id verdict-id "Otepaatos")
-            {regular-id :attachment-id} (add-attachment app-id "Lupa lausua"
+      (let [{:keys [attachment-id]}     (add-verdict-attachment sonja app-id verdict-id "Otepaatos")
+            {regular-id :attachment-id} (add-attachment sonja app-id "Lupa lausua"
                                                         "ennakkoluvat_ja_lausunnot" "suunnittelutarveratkaisu")
-            {pseudo-id :attachment-id}  (add-attachment app-id "sotaaP"
+            {pseudo-id :attachment-id}  (add-attachment sonja app-id "sotaaP"
                                                         "paatoksenteko" "paatos")]
         (check-draft-attachment app-id attachment-id verdict-id)
         (fact "Regular, pseudo and bogus-ids as application attachments"
@@ -1449,10 +1440,10 @@
                 (http-client/form-decode query-string)
                 => {"verdict-id" verdict-id
                     "id"         app-id}
-                (verdict-pdf-queue-test {:app-id       app-id
-                                         :verdict-id   verdict-id
-                                         :verdict-name "Permit"
-                                         :contents     "Permit text"})))))))
+                (verdict-pdf-queue-test sonja {:app-id       app-id
+                                               :verdict-id   verdict-id
+                                               :verdict-name "Permit"
+                                               :contents     "Permit text"})))))))
 
     (fact "Editing no longer allowed"
       (edit-verdict :verdict-text "New verdict text")
@@ -1460,27 +1451,3 @@
     (fact "Published verdict cannot be deleted"
       (command sonja :delete-pate-verdict :id app-id
                :verdict-id verdict-id) => fail?)))
-
-(fact "Presence of backing system verdicts disables Pate commands"
-  ;; -------------------------
-  ;; Test state initialization
-  (let [{template-id :id} (init-verdict-template sipoo org-id :r)
-        application (create-and-submit-application mikko :municipality sonja-muni)
-        application-id (:id application)]
-    (command sipoo :set-verdict-template-name
-             :org-id org-id
-             :template-id template-id
-             :name "Uusi nimi")
-    (command sipoo :save-verdict-template-draft-value
-             :org-id org-id
-             :template-id template-id
-             :path [:giver]
-             :value :viranhaltija)
-    (publish-verdict-template sipoo org-id template-id) => ok?
-    (command sonja :update-app-bulletin-op-description :id application-id :description "otsikko julkipanoon") => ok?
-    (command sonja :approve-application :id application-id :lang "fi") => ok?
-    (command sonja :check-for-verdict :id application-id) => ok?
-  ;; -------------------------
-
-    (command sonja :new-pate-verdict-draft :id application-id :template-id template-id)
-    => (err "error.backing-system-verdicts-exist")))

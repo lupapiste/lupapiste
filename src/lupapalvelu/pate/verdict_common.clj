@@ -18,8 +18,7 @@
 (defn lupapiste-verdict?
   "Is the verdict created in Lupapiste, either through Pate or legacy interface"
   [verdict]
-  ;; TODO Needs a more robust check
-  (boolean (:data verdict)))
+  (contains? verdict :category))
 
 (defn has-category? [{:keys [category] :as verdict} c]
   (if (lupapiste-verdict? verdict)
@@ -28,7 +27,8 @@
 
 (defn contract? [verdict]
   (if (lupapiste-verdict? verdict)
-    (has-category? verdict :contract)
+    (or (has-category? verdict :contract)
+        (has-category? verdict :migration-contract))
     (-> verdict :sopimus)))
 
 (defn legacy? [verdict]
@@ -36,12 +36,43 @@
     (boolean (:legacy? verdict))
     false)) ;; TODO Better to have type enum: pate legacy backing-system
 
+(defn draft? [verdict]
+  (cond
+    (lupapiste-verdict? verdict) (not (:published verdict))
+    (contains? verdict draft?) (boolean (:draft verdict))
+    :else false))
+
+(defn published? [verdict]
+  (cond
+    (lupapiste-verdict? verdict) (boolean (:published verdict))
+    (contains? verdict :draft) (not (:draft verdict))
+    :else false))
+
+;; Maybe not the most useful predicate, maybe clean up later?
+(defn verdict-code-is-free-text? [verdict]
+  (-> (:category verdict)
+      legacy/legacy-verdict-schema
+      :dictionary :verdict-code
+      (contains? :text)))
+
 ;;
 ;; Accessors
 ;;
 
 (defn first-pk [verdict]
   (get-in verdict [:paatokset 0 :poytakirjat 0]))
+
+(defn latest-pk
+  "Poytakirja with the latest paatospvm"
+  [verdict]
+  (->> verdict
+       :paatokset
+       (mapcat :poytakirjat)
+       (sort-by :paatospvm)
+       last))
+
+(defn last-pk [verdict]
+  (-> verdict :paatokset first :poytakirjat last))
 
 (defn replaced-verdict-id
   "Returns the id of the verdict replaced by the given verdict, if any"
@@ -51,9 +82,15 @@
     nil))
 
 (defn verdict-date [verdict]
-  (if (lupapiste-verdict? verdict)
+  (cond
+    (legacy? verdict)
+    (-> verdict :data :anto)
+
+    (lupapiste-verdict? verdict)
     (-> verdict :data :verdict-date)
-    (-> verdict first-pk :paatospvm))) ;; vs. (-> verdict :paatokset (get 0) :anto) ?
+
+    :else
+    (:paatospvm (latest-pk verdict))))
 
 (defn verdict-id [verdict]
   (:id verdict))
@@ -92,7 +129,7 @@
       (if (util/=as-kw (:giver template) :lautakunta)
        (:boardname references)
        (:handler data)))
-    (-> verdict first-pk :paatoksentekija)))
+    (-> verdict latest-pk :paatoksentekija)))
 
 (defn verdict-signatures [{:keys [signatures] :as verdict}]
   (if (lupapiste-verdict? verdict)
@@ -106,7 +143,19 @@
 (defn verdict-section [verdict]
   (if (lupapiste-verdict? verdict)
     (-> verdict :data :verdict-section)
-    (-> verdict first-pk :pykala)))
+    (-> verdict latest-pk :pykala)))
+
+(defn verdict-text [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (contract? verdict)
+      (-> verdict :data :contract-text)
+      (-> verdict :data :verdict-text))
+    (-> verdict last-pk :paatos))) ;; Notice last-pk, this came from bulletins verdict data
+
+(defn verdict-code [verdict]
+  (if (lupapiste-verdict? verdict)
+    (-> verdict :data :verdict-code)
+    (some-> verdict first-pk :status str)))
 
 ;;
 ;; Verdict schema
@@ -147,7 +196,8 @@
 
 (defn- title-fn [s fun]
   (util/pcond-> (-> s ss/->plain-string ss/trim)
-                ss/not-blank? fun))
+                #(and (ss/not-blank? %)
+                      (not= (first %) \u00a7)) fun))
 
 (defn verdict-summary-signatures [verdict]
   (seq (verdict-signatures verdict)))
@@ -179,7 +229,7 @@
 (defn verdict-string [lang verdict dict]
   (if (lupapiste-verdict? verdict)
     (lupapiste-verdict-string lang verdict dict)
-    (-> verdict first-pk :paatoskoodi))) ;; TODO Is this correct?
+    (-> verdict latest-pk :paatoskoodi)))
 
 (defn- verdict-summary-title [verdict lang section-strings]
   (let [id (verdict-id verdict)
@@ -199,8 +249,10 @@
 
            published
            [(get section-strings id)
-            (util/pcond-> (verdict-string lang verdict :verdict-type)
-                          ss/not-blank? (str " -"))
+
+            (when (lupapiste-verdict? verdict)
+              (util/pcond-> (verdict-string lang verdict :verdict-type)
+                            ss/not-blank? (str " -")))
             (verdict-string lang verdict :verdict-code)
             rep-string]
 
@@ -265,14 +317,21 @@
    (sc/optional-key :signature-requests)   [{:name sc/Str
                                              :date ssc/Timestamp}]})
 
+(defn allowed-category-for-application? [verdict application]
+  (or (has-category? verdict (schema-util/application->category application))
+      (has-category? verdict :migration-verdict)
+      (has-category? verdict :migration-contract)))
+
 (sc/defn ^:always-validate verdict-list :- [VerdictSummary]
   [{:keys [lang application]}]
   (let [category (schema-util/application->category application)
         ;; There could be both contracts and verdicts.
         verdicts        (concat (->> (:pate-verdicts application)
-                                     (filter #(has-category? % category))
+                                     (filter #(allowed-category-for-application? % application))
                                      (map metadata/unwrap-all))
-                                (:verdicts application))
+                                ;; TODO: remove draft filter after migration.
+                                (some->> application :verdicts
+                                         (remove :draft)))
         summaries       (summaries-by-id verdicts lang)
         replaced-verdict-ids (->> (vals summaries)
                                   (map :replaces)
@@ -286,6 +345,8 @@
             []
             (->> (vals summaries)
                  (sort-by (comp - :modified))))))
+
+
 
 ;;
 ;; Work in progress

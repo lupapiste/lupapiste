@@ -3,6 +3,7 @@
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! now def-]]
+            [sade.env :as env]
             [sade.files :as files]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
@@ -462,6 +463,10 @@
   [_]
   (att/output-attachment attachment-id true (partial bulletins/get-bulletin-attachment bulletin-id)))
 
+(defn use-tempfile-for-attachments? [attachments]
+  (<= (count attachments)
+      (env/value :attachments :download :max-tempfile-number)))
+
 (defraw "download-all-attachments"
   {:parameters       [:id]
    :user-roles       #{:applicant :authority :oirAuthority}
@@ -473,9 +478,12 @@
     {:status  200
      :headers {"Content-Type"        "application/octet-stream"
                "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-     :body    (-> (:attachments application)
-                  (att/get-all-attachments! application user lang)
-                  (files/temp-file-input-stream))}
+     :body    (if (use-tempfile-for-attachments? (:attachments application))
+                (-> (:attachments application)
+                    (att/get-all-attachments! application user lang)
+                    (files/temp-file-input-stream))
+                (-> (:attachments application)
+                    (att/get-all-attachments-as-input-stream! application user lang)))}
     {:status  404
      :headers {"Content-Type" "text/plain"}
      :body    "404"}))
@@ -494,7 +502,7 @@
     {:status  200
      :headers {"Content-Type"        "application/octet-stream"
                "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-     :body    (att/get-attachments-for-user! user application atts)}))
+     :body    (att/get-attachments-for-user! user application atts (not (use-tempfile-for-attachments? atts)))}))
 
 ;;
 ;; Upload

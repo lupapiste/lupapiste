@@ -352,10 +352,6 @@
                   :js ["statement-service.js" "statement.js"]
                   :html ["statement.html"]}
 
-   :verdict      {:depends [:common-html :repository :attachment]
-                  :js ["verdict.js"]
-                  :html ["verdict.html"]}
-
    :neighbors    {:depends [:common-html :repository]
                   :js ["neighbors.js"]
                   :html ["neighbors.html"]}
@@ -460,7 +456,7 @@
    :authority-app {:depends [] :js ["authority.js"]}
    :authority     {:depends [:pate :authority-app :common-html :external-api :authenticated :map :applications
                              :integration-message-monitor :application
-                             :statement :verdict :neighbors :docgen :create :copy :digitizer :mypage :header :debug
+                             :statement :neighbors :docgen :create :copy :digitizer :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer :mycalendar :ui-components
                              ]}
 

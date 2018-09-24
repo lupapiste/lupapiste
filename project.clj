@@ -198,7 +198,7 @@
                                          [binaryage/devtools "0.9.4"]]
                         :resource-paths ["dev-resources"]
                         :source-paths   ["dev-src" "test-utils"]
-                        :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
+                        :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8" "-Xverify:none"]
                         :eastwood       {:continue-on-exception true
                                          :source-paths          ["src"]
                                          :test-paths            []}
@@ -264,7 +264,7 @@
                             ["figwheel"]]]}
   :aot [lupapalvelu.main clj-time.core]
   :main ^:skip-aot lupapalvelu.server
-  :repl-options {:init-ns lupapalvelu.server}
+  :repl-options {:init-ns user}
   :pom-plugins [[org.fusesource.mvnplugins/maven-graph-plugin "1.4"]
                 [com.googlecode.maven-overview-plugin/maven-overview-plugin "1.6"]]
   :min-lein-version "2.5.0")

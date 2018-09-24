@@ -3,6 +3,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
             [midje.sweet :refer :all]
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]))
@@ -11,15 +12,15 @@
 
 (defn- task-by-type [task-type task] (= (str "task-" task-type) (-> task :schema-info :name)))
 
-(let [application (create-and-submit-application pena :propertyId sipoo-property-id)
+(let [application    (create-and-submit-application pena :propertyId sipoo-property-id)
       application-id (:id application)
-      resp (command sonja :check-for-verdict :id application-id)
-      application (query-application pena application-id)
-      modified (:modified application)
-      tasks (:tasks application)
-      katselmukset (filter (partial task-by-type "katselmus") tasks)
-      maaraykset (filter (partial task-by-type "lupamaarays") tasks)
-      tyonjohtajat (filter (partial task-by-type "vaadittu-tyonjohtaja") tasks)]
+      resp           (command sonja :check-for-verdict :id application-id)
+      application    (query-application pena application-id)
+      modified       (:modified application)
+      tasks          (:tasks application)
+      katselmukset   (filter (partial task-by-type "katselmus") tasks)
+      maaraykset     (filter (partial task-by-type "lupamaarays") tasks)
+      tyonjohtajat   (filter (partial task-by-type "vaadittu-tyonjohtaja") tasks)]
 
   (fact "fixture has 2 verdicts and 9 tasks"
     resp => ok?
@@ -65,9 +66,9 @@
   (fact "totally 9 tasks in fixture"
     (count tasks) => 9)
 
-  (let [resp (command sonja :check-for-verdict :id application-id)
+  (let [resp        (command sonja :check-for-verdict :id application-id)
         application (query-application pena application-id)
-        tasks (:tasks application)]
+        tasks       (:tasks application)]
 
     (fact "read 2 verdicts again"
       resp => ok?
@@ -76,23 +77,28 @@
     (fact "application has been modified"
       (:modified application) => (partial < modified))
 
-    (fact "tasks were not generated again"
-      (:taskCount resp) => 0
-      (distinct (map :created tasks)) => [modified]
+    (fact "tasks were generated again"
+      (:taskCount resp) => 9
+      (distinct (map :created tasks)) => [(:modified application)]
 
-      (reduce + 0 (map #(let [schema (schemas/get-schema (:schema-info %))]
-                         (model/modifications-since-approvals (:body schema) [] (:data %) {} true modified)) tasks)) => 0))
+      ;; (reduce + 0 (map #(let [schema (schemas/get-schema (:schema-info %))]
+      ;;                     (model/modifications-since-approvals (:body schema) [] (:data %) {} true modified)) tasks)) => 0
 
-  (let [task-id (->> tasks (remove (fn->> :schema-info :subtype keyword (= :review))) first :id)
-        review-id (->> tasks (filter (fn->> :schema-info :subtype keyword (= :review))) first :id)
-        task (util/find-by-id task-id (:tasks application))]
+      )
+
+    )
+
+  (let [{tasks :tasks :as application} (query-application sonja application-id)
+        task-id                        (->> tasks (remove (fn->> :schema-info :subtype keyword (= :review))) first :id)
+        review-id                      (->> tasks (filter (fn->> :schema-info :subtype keyword (= :review))) first :id)
+        task                           (util/find-by-id task-id (:tasks application))]
     (fact "Pena can't approve"
       (command pena :approve-task :id application-id :taskId task-id) => unauthorized?)
 
     (facts* "Approve the first non-review task"
-      (let [_ (command sonja :approve-task :id application-id :taskId task-id) => ok?
-            updated-app (query-application pena application-id)
-            updated-task (util/find-by-id task-id (:tasks updated-app))]
+            (let [_            (command sonja :approve-task :id application-id :taskId task-id) => ok?
+                  updated-app  (query-application pena application-id)
+                  updated-task (util/find-by-id task-id (:tasks updated-app))]
         (:state task) => "requires_user_action"
         (:state updated-task) => "ok"))
 
@@ -100,9 +106,9 @@
        (command sonja :approve-task :id application-id :taskId review-id) => (partial expected-failure? "error.invalid-task-type"))
 
     (facts* "Reject the first task"
-      (let [_ (command sonja :reject-task :id application-id :taskId task-id) => ok?
-            updated-app (query-application pena application-id)
-            updated-task (util/find-by-id task-id (:tasks updated-app))]
+            (let [_            (command sonja :reject-task :id application-id :taskId task-id) => ok?
+                  updated-app  (query-application pena application-id)
+                  updated-task (util/find-by-id task-id (:tasks updated-app))]
         (:state updated-task) => "requires_user_action"))
 
     (fact "Review cannot be rejected"
@@ -115,13 +121,13 @@
       (command pena :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus") => unauthorized?)
     (fact "Authority can create tasks"
       (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus" :taskSubtype "aloituskokous") => ok?
-      (let [application (query-application pena application-id)
-            tasks (:tasks application)
-            buildings (:buildings application)
-            katselmus-task (some #(when (and (= "task-katselmus" (-> % :schema-info :name))
-                                             (= "do the shopping" (:taskname %)))
-                                   %)
-                                 tasks)
+      (let [application             (query-application pena application-id)
+            tasks                   (:tasks application)
+            buildings               (:buildings application)
+            katselmus-task          (some #(when (and (= "task-katselmus" (-> % :schema-info :name))
+                                                      (= "do the shopping" (:taskname %)))
+                                             %)
+                                          tasks)
             katselmus-rakennus-data (-> katselmus-task :data :rakennus)]
         katselmus-task => truthy
         (fact "katselmuksenLaji saved to doc"
@@ -135,7 +141,8 @@
       (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus" :taskSubtype "foofaa") => (partial expected-failure? "error.illegal-value:select")))
 
   (facts "review edit and done"
-    (let [task-id (-> tasks second :id)]
+    (let [{tasks :tasks :as application} (query-application sonja application-id)
+          task-id (-> tasks second :id)]
       (fact "readonly field can't be updated"
         (command sonja :update-task :id application-id :doc task-id :updates [["katselmuksenLaji" "rakennekatselmus"]]) => (partial expected-failure? :error-trying-to-update-readonly-field))
 
@@ -161,11 +168,11 @@
         (fact "review state can no longer be updated"
           (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.tila" "osittainen"]]) => fail?)
 
-        (let [app (query-application sonja application-id)
-              tasks (:tasks app)
+        (let [app            (query-application sonja application-id)
+              tasks          (:tasks app)
               expected-count (+ 9 1 1) ; fixture + prev. facts + review-done
-              new-task (last tasks)
-              new-id (:id new-task)]
+              new-task       (last tasks)
+              new-id         (:id new-task)]
           (fact "as the review was not final, a new task has been createad"
             (count tasks) => expected-count)
           (fact "buildings are populated to newly created task"
@@ -217,6 +224,9 @@
       (fact "Mark review as done"
         (command sonja :review-done :id application-id :lang "fi" :taskId loppukatselmus-id)
         => ok?)
+      (fact "Verdicts cannot be fetched when sent reviews"
+        (command sonja :check-for-verdict :id application-id)
+        => (partial expected-failure? :error.verdicts-have-sent-tasks))
       (let [review-attachments      (->> (query-application sonja application-id)
                                          :attachments
                                          (filter #(= loppukatselmus-id (-> % :target :id)) ))
@@ -305,23 +315,34 @@
               (:state ak) => "faulty_review_task")
             (fact "Attachment file is stored and available"
               (decode-body (http-get (str url (-> ak :faulty :files first :originalFileId)) {}))
-              => (contains {:fileId (-> ak :faulty :files first :originalFileId)}))))))))
+              => (contains {:fileId (-> ak :faulty :files first :originalFileId)}))))))
+    (fact "Approve Radontekninen suunnitelma"
+      (let [{radon-id :id} (util/find-by-key :taskname "Radontekninen suunnitelma" tasks)]
+        (command sonja :approve-task :id application-id :taskId radon-id) => ok?
+        (fact "Check-for-verdict fails"
+          (command sonja :check-for-verdict :id application-id)
+          => (partial expected-failure? :error.verdicts-have-sent-tasks))
+        (fact "Reject Radontekninen suunnitelma"
+          (command sonja :reject-task :id application-id :taskId radon-id) => ok?)))
+    (fact "Check for verdict succeeds"
+      (command sonja :check-for-verdict :id application-id) => ok?)))
 
 (facts "Reviews with PATE"
-  (command admin :set-organization-scope-pate-value
-           :permitType "R"
-           :municipality "753"
-           :value true)
   (let [sipoo-application        (create-and-submit-application pena :propertyId sipoo-property-id)
         jarvenpaa-application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
         sipoo-app-id             (:id sipoo-application)
         jarvenpaa-app-id         (:id jarvenpaa-application)
-        _                        (give-verdict sonja sipoo-app-id :verdictId "753-2018-PATE")
-        _                        (give-verdict raktark-jarvenpaa jarvenpaa-app-id :verdictId "186-2018-0001")]
+        _                        (give-legacy-verdict sonja sipoo-app-id)
+        _                        (give-legacy-verdict raktark-jarvenpaa jarvenpaa-app-id)]
 
     (fact "Application should be in verdict given state"
       (:state (query-application pena sipoo-app-id)) => "verdictGiven")
 
+    (fact "Enable Pate in Sipoo"
+      (command admin :set-organization-scope-pate-value
+               :permitType "R"
+               :municipality "753"
+               :value true) => ok?)
     (fact "First review marked done should change state when PATE in use"
      (let [result  (command sonja :create-task :id sipoo-app-id :taskName "Aloituskokous" :schemaName "task-katselmus" :taskSubtype "aloituskokous") => ok?
            task-id (:taskId result)]
@@ -344,7 +365,7 @@
      (count (:tasks (query-application pena sipoo-app-id))) => 2
      (:state (query-application pena sipoo-app-id)) => "verdictGiven"))
 
-   (fact "First review marked done without PATE shouldnt change state"
+   (fact "First review marked done without PATE shouldn't change state"
      (let [result  (command raktark-jarvenpaa :create-task :id jarvenpaa-app-id :taskName "Aloituskokous" :schemaName "task-katselmus" :taskSubtype "aloituskokous") => ok?
            task-id (:taskId result)]
        (command raktark-jarvenpaa :update-task :id jarvenpaa-app-id :doc task-id :updates [["katselmus.tila" "lopullinen"] ["katselmus.pitoPvm" "15.02.2018"] ["katselmus.pitaja" "Auburn Authority"]]) => ok?

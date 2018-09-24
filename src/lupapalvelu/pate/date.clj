@@ -2,7 +2,8 @@
   "Date handling utilities. Limited to Finnish time zone and formats."
   (:require [clj-time.coerce :as timec]
             [clj-time.core :as time]
-            [clj-time.format :as timef]))
+            [clj-time.format :as timef]
+            [sade.util :as util]))
 
 (defn- divide
   "Returns [integer-ratio remainder].
@@ -90,6 +91,7 @@
              (string? date) (some-> date parse-finnish-date timec/to-long)
              (instance? org.joda.time.LocalDate date) (timec/to-long date)
              (instance? org.joda.time.DateTime date) (timec/to-long date)
+             (instance? Integer date) (util/->long date)
              (integer? date) date)
            timec/from-long
            (timef/unparse finnish-formatter)))

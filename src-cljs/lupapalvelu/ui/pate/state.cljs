@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [select-keys])
   (:require [clojure.string :as s]
             [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.rum-util :as rum-util]
             [rum.core :as rum]))
 
 (defonce state* (atom {}))
@@ -9,29 +10,30 @@
 (defn- state-cursor [key]
   (rum/cursor-in state* [key]))
 
-(def current-template        (state-cursor :current-template))
-(def current-view            (state-cursor :current-view))
-(def current-category        (state-cursor :current-category))
-(def org-id                  (state-cursor :org-id))
-(def template-list           (state-cursor :template-list))
-(def categories              (state-cursor :categories))
-(def references              (state-cursor :references))
-(def settings                (rum/cursor-in references [:settings]))
-(def settings-info           (state-cursor :settings-info))
-(def reviews                 (rum/cursor-in references [:reviews]))
-(def plans                   (rum/cursor-in references [:plans]))
-(def phrases                 (state-cursor :phrases))
-(def application-id          (state-cursor :application-id))
-(def current-verdict         (state-cursor :current-verdict))
-(def current-verdict-id      (rum/cursor-in current-verdict [:info :id]))
-(def verdict-tags            (rum/cursor-in current-verdict [:tags]))
-(def verdict-attachment-ids  (rum/cursor-in current-verdict [:attachment-ids]) )
-(def verdict-list            (state-cursor :verdict-list))
-(def replacement-verdict     (state-cursor :replacement-verdict))
-(def allowed-verdict-actions (state-cursor :allowed-verdict-actions))
+(def current-template          (state-cursor :current-template))
+(def current-view              (state-cursor :current-view))
+(def current-category          (state-cursor :current-category))
+(def org-id                    (state-cursor :org-id))
+(def template-list             (state-cursor :template-list))
+(def categories                (state-cursor :categories))
+(def references                (state-cursor :references))
+(def settings                  (rum/cursor-in references [:settings]))
+(def settings-info             (state-cursor :settings-info))
+(def reviews                   (rum/cursor-in references [:reviews]))
+(def plans                     (rum/cursor-in references [:plans]))
+(def phrases                   (state-cursor :phrases))
+(def application-id            (state-cursor :application-id))
+(def current-verdict           (state-cursor :current-verdict))
+(def current-verdict-id        (rum/cursor-in current-verdict [:info :id]))
+(def verdict-tags              (rum/cursor-in current-verdict [:tags]))
+(def verdict-attachment-ids    (rum/cursor-in current-verdict [:attachment-ids]) )
+(def verdict-list              (state-cursor :verdict-list))
+(def replacement-verdict       (state-cursor :replacement-verdict))
+(def allowed-verdict-actions   (state-cursor :allowed-verdict-actions))
 ;; Wait state for verdict publishing. True when waiting.
-(def verdict-wait?           (state-cursor :verdict-wait?))
-(def appeals                 (state-cursor :appeals))
+(def verdict-wait?             (state-cursor :verdict-wait?))
+(def custom-phrases-categories (state-cursor :custom-phrases-categories))
+(def appeals                   (state-cursor :appeals))
 
 ;; ok function of the currently active authModel.
 (defonce auth-fn (atom nil))
@@ -60,18 +62,26 @@
   ([app-id]
    (refresh-application-auth-model app-id nil)))
 
+(defn application-model-updated-mixin
+  "Refreshes auth model after the application model has been updated."
+  []
+  (rum-util/hubscribe "application-model-updated"
+                      {}
+                      (fn [state]
+                        (refresh-application-auth-model @application-id nil)
+                        state)))
 
 ;; Convenience wrappers for the verdicts category allowed
 ;; actions. Since the actions are only used for ClojureScript we can
 ;; bypass the JavaScript auth models.
 
 (defn verdict-auth? [verdict-id action]
-  (get-in @allowed-verdict-actions
-          [(keyword verdict-id) (keyword action) :ok]))
+  (boolean (get-in @allowed-verdict-actions
+                   [(keyword verdict-id) (keyword action) :ok])))
 
 (defn react-verdict-auth? [verdict-id action]
-  (rum/react (rum/cursor-in allowed-verdict-actions
-                            [(keyword verdict-id) (keyword action) :ok])))
+  (boolean (rum/react (rum/cursor-in allowed-verdict-actions
+                                     [(keyword verdict-id) (keyword action) :ok]))))
 
 (defn- update-allowed-if-needed [verdict-id new-actions]
   (let [ok-keys-fn #(->> %

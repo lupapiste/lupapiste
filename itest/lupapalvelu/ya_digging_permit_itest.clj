@@ -1,7 +1,8 @@
 (ns lupapalvelu.ya-digging-permit-itest
-  (:require [midje.sweet :refer :all]
+  (:require [lupapalvelu.domain :as domain]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [midje.sweet :refer :all]))
 
 (apply-remote-minimal)
 
@@ -17,14 +18,14 @@
 
   (fact "fails if operation is not digging operation"
     (let [source-app (create-and-submit-application pena :operation "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen")]
-      (give-verdict sonja (:id source-app)) => ok?
+      (give-legacy-verdict sonja (:id source-app))
       (command pena :create-digging-permit :id (:id source-app)
                :operation "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen")
       => (partial expected-failure? "error.not-digging-permit-operation")))
 
   (fact "fails if operation is not selected for source permit's organization"
     (let [source-app (create-and-submit-application pena :operation "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen")]
-      (give-verdict sonja (:id source-app)) => ok?
+      (give-legacy-verdict sonja (:id source-app))
       (command pena :create-digging-permit :id (:id source-app)
                :operation "ya-katulupa-maalampotyot") ; not selected for Sipoo YA in minimal fixture
       => (partial expected-failure? "error.operations.hidden")))
@@ -67,7 +68,7 @@
                            :area "2686992",
                            :height "1"}])
 
-      (give-verdict sonja app-id) => ok?
+      (give-legacy-verdict sonja app-id)
 
       (let [{digging-app-id :id} (command pena :create-digging-permit :id (:id source-app)
                                           :operation "ya-katulupa-vesi-ja-viemarityot")
