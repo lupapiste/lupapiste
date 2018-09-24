@@ -21,7 +21,7 @@
                  ; Web frameworks
                  [ring "1.6.2" :exclusions [commons-fileupload org.clojure/tools.reader]]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
-                 [compojure "1.1.9" :exclusions [org.clojure/tools.macro ring]]
+                 [compojure "1.1.9" :exclusions [org.clojure/tools.macro ring]] ; force noir to use newer version
                  [metosin/ring-swagger "0.26.1"]
                  [metosin/ring-swagger-ui "3.17.2"]
                  [metosin/reitit-core "0.2.2"]
