@@ -89,14 +89,16 @@
 (rum/defc toggle-all < rum/reactive
   [{:keys [schema _meta]}]
   (when (can-edit?)
-    (let [all-sections  (map :id (:sections schema))
+    (let [all-editable-sections  (->>  (:sections schema)
+                                       (remove #(= (:buttons? %) false))
+                                       (map :id))
           meta-map (rum/react _meta)
           open-sections (filter #(get meta-map (util/kw-path % :editing?))
-                                all-sections)]
+                                all-editable-sections)]
       [:a.pate-left-space
        {:on-click #(swap! _meta (fn [m]
                                   (->> (or (not-empty open-sections)
-                                           all-sections)
+                                           all-editable-sections)
                                        (map (fn [id]
                                               [(util/kw-path id :editing?)
                                                (empty? open-sections)]))
