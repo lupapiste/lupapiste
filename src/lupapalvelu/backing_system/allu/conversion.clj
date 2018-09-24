@@ -5,7 +5,7 @@
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [iso-country-codes.core :refer [country-translate]]
-            [schema.core :as sc]
+            [schema.core :as sc :refer [optional-key]]
             [sade.core :refer [def-]]
             [sade.util :refer [assoc-when]]
             [lupapalvelu.backing-system.allu.schemas :refer [PlacementContract]]
@@ -119,7 +119,10 @@
              :propertyIdentificationNumber propertyId
              :startTime                    (format-date-time start)
              :workDescription              (-> work-description :data :kayttotarkoitus)}]
-    (assoc-when res :customerReference (not-empty (-> payee-doc :data :laskuviite)))))
+    (assoc-when res :customerReference (let [cref (-> payee-doc :data :laskuviite)]
+                                         (when-not (sc/check (get PlacementContract (optional-key :customerReference))
+                                                             cref)
+                                           cref)))))
 
 (sc/defn application->allu-placement-contract :- PlacementContract [pending-on-client app]
   (->> app flatten-values (convert-value-flattened-app pending-on-client)))
