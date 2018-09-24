@@ -37,6 +37,12 @@
 
 ;;; TODO: Sijoituslupa
 
+(def- current-jwt (atom nil))
+
+(defschema LoginCredentials
+  {:password sc/Str
+   :username sc/Str})
+
 ;;;; Initial request construction
 ;;;; ===================================================================================================================
 
@@ -65,6 +71,12 @@
 
 (defn- route-match->request-method [route-match]
   (some #{:get :put :post :delete} (keys (:data route-match))))
+
+(defn- login-request [username password]
+  (let [route-match (reitit/match-by-name allu-router [:login])]
+    {:uri            (:path route-match)
+     :request-method (route-match->request-method route-match)
+     :body           {:username username, :password password}}))
 
 (defn- application-cancel-request [{:keys [application] :as command}]
   (let [allu-id (get-in application [:integrationKeys :ALLU :id])
@@ -175,6 +187,12 @@
 (defn- imessages-mock-handler [request]
   (let [route-match (reitit-ring/get-match request)]
     (match (-> route-match :data :name)
+      [:login] (let [{:keys [username password]} (json/decode (:body request) true)]
+                 (if (and (= username (env/value :allu :username))
+                          (= password (env/value :allu :password)))
+                   {:status 200, :body password}
+                   {:status 404, :body "Wrong username and/or password"}))
+
       [:applications :cancel] (let [id (-> route-match :path-params :id)]
                                 (if (creation-response-ok? id)
                                   {:status 200, :body ""}
@@ -264,6 +282,8 @@
         (match (handler request)
           {:status (:or 200 201), :body body}
           (do (info "ALLU operation" (route-name->string route-name) "succeeded")
+              (when (= route-name [:login])
+                (reset! current-jwt body))
               (when (and (not disable-io-middlewares?) (= route-name [:placementcontracts :create]))
                 (application/set-integration-key app-id :ALLU {:id body})))
 
@@ -279,38 +299,47 @@
 (defn- routes
   ([handler] (routes (env/dev-mode?) handler))
   ([disable-io-middlewares? handler]
-   ["/" {:middleware (-> [(preprocessor->middleware body&multipart-as-params)
-                          multipart-middleware
-                          reitit.ring.coercion/coerce-request-middleware
-                          (handle-response disable-io-middlewares?)]
-                         (into (if disable-io-middlewares? [] [save-messages!]))
-                         (conj (preprocessor->middleware (fn-> content->json
-                                                               (jwt-authorize (env/value :allu :jwt))))))
-         :coercion   reitit.coercion.schema/coercion}
-    ["applications"
-     ["/:id/cancelled" {:name       [:applications :cancel]
-                        :parameters {:path {:id ssc/NatString}}
-                        :put        {:handler handler}}]
-
-     ["/:id/attachments" {:name       [:attachments :create]
-                          :parameters {:path      {:id ssc/NatString}
-                                       :multipart {:metadata FileMetadata
-                                                   :file     sssc/FileId}}
-                          :middleware (if disable-io-middlewares?
-                                        []
-                                        [(preprocessor->middleware get-attachment-files!)])
-                          :post       {:handler handler}}]]
+   [["/login" {:middleware [(preprocessor->middleware body&multipart-as-params)
+                            reitit.ring.coercion/coerce-request-middleware
+                            (handle-response disable-io-middlewares?)
+                            (preprocessor->middleware content->json)]
+               :name       [:login]
+               :parameters {:body LoginCredentials}
+               :post       {:handler handler}}]
 
 
-    ["placementcontracts"
-     ["" {:name       [:placementcontracts :create]
-          :parameters {:body PlacementContract}
-          :post       {:handler handler}}]
+    ["/" {:middleware (-> [(preprocessor->middleware body&multipart-as-params)
+                           multipart-middleware
+                           reitit.ring.coercion/coerce-request-middleware
+                           (handle-response disable-io-middlewares?)]
+                          (into (if disable-io-middlewares? [] [save-messages!]))
+                          (conj (preprocessor->middleware (fn-> content->json
+                                                                (jwt-authorize (env/value :allu :jwt))))))
+          :coercion   reitit.coercion.schema/coercion}
+     ["applications"
+      ["/:id/cancelled" {:name       [:applications :cancel]
+                         :parameters {:path {:id ssc/NatString}}
+                         :put        {:handler handler}}]
 
-     ["/:id" {:name       [:placementcontracts :update]
-              :parameters {:path {:id ssc/NatString}
-                           :body PlacementContract}
-              :put        {:handler handler}}]]]))
+      ["/:id/attachments" {:name       [:attachments :create]
+                           :parameters {:path      {:id ssc/NatString}
+                                        :multipart {:metadata FileMetadata
+                                                    :file     sssc/FileId}}
+                           :middleware (if disable-io-middlewares?
+                                         []
+                                         [(preprocessor->middleware get-attachment-files!)])
+                           :post       {:handler handler}}]]
+
+
+     ["placementcontracts"
+      ["" {:name       [:placementcontracts :create]
+           :parameters {:body PlacementContract}
+           :post       {:handler handler}}]
+
+      ["/:id" {:name       [:placementcontracts :update]
+               :parameters {:path {:id ssc/NatString}
+                            :body PlacementContract}
+               :put        {:handler handler}}]]]]))
 
 (def- allu-router (reitit-ring/router (routes false (innermost-handler))))
 
@@ -362,6 +391,9 @@
   "Should ALLU integration be used?"
   [organization-id permit-type]
   (and (env/feature? :allu) (= organization-id "091-YA") (= permit-type "YA")))
+
+(defn- login! []
+  (allu-request-handler (login-request (env/value :allu :username) (env/value :allu :password))))
 
 (defn- create-placement-contract!
   "Create placement contract in ALLU."
