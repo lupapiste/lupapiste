@@ -555,7 +555,7 @@
   (let [area-coordinates           (area-coordinates xml)
         source-projection          (common/->polygon-source-projection xml)
         converted-coordinates      (map #(coordinate/convert source-projection target-projection 6 (ss/split % #",")) area-coordinates)
-        converted-coordinates-str  (apply str (mapv #(str (first %) " " (last %) ", ") converted-coordinates))
+        converted-coordinates-str  (ss/join (mapv #(str (first %) " " (last %) ", ") converted-coordinates))
         first-coordinate           (first converted-coordinates)
         first-coordinate-str       (str (first first-coordinate) " " (last first-coordinate))]
     (str geometry-type "((" converted-coordinates-str first-coordinate-str "))")))

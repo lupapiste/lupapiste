@@ -80,7 +80,7 @@
 (defmethod ->str :hr      [_] hr-as-text)
 (defmethod ->str :blockquote [element] (-> element :content ->str* (ss/replace #"\n{2,}" "\n  ") (ss/replace #"^\n" "  ")))
 (defmethod ->str :table      [element] (str \newline (->str* (filter map? (:content element))) \newline))
-(defmethod ->str :tr         [element] (let [contents (filter #(map? %) (:content element))]
+(defmethod ->str :tr         [element] (let [contents (filter map? (:content element))]
                                          (ss/join \tab (map #(ss/join (:content %)) contents))))
 
 ;;

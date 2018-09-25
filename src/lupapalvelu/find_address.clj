@@ -46,8 +46,8 @@
 (defn municipality-codes [municipality-name-starts]
   (let [index (apply concat (vals @municipality-index))
         n (ss/lower-case (ss/trim municipality-name-starts))]
-    (when (not (ss/blank? n))
-      (->> (filter #(ss/starts-with (first %) n) index)
+    (when-not (ss/blank? n)
+      (->> (filter (fn* [p1__399098#] (ss/starts-with (first p1__399098#) n)) index)
            (map second)
            set))))
 

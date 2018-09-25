@@ -7,7 +7,7 @@
   "Parses Clojure maps from event log lines"
   [filename]
   (with-open [rdr (io/reader filename)]
-    (into []
+    (vec
       (for [line (line-seq rdr)
             :let [i (.indexOf line "{")
                   event (subs line i (.length line))]
@@ -26,5 +26,4 @@
 
   (write "mongo_scripts/prod/muutoslupa.json"
     (map (fn [e] (str (json/encode {:_id (e "created") :user (select-keys (get e "user") (map name lupapalvelu.user/summary-keys) ), :sourceAppId (get-in e ["data" "id"])}) \newline))
-      (parse-events "muutoslupa.txt")))
-  )
+      (parse-events "muutoslupa.txt"))))
