@@ -149,7 +149,7 @@
   {:x          (get-in organization [:default-digitalization-location :x])
    :y          (get-in organization [:default-digitalization-location :y])
    :address    (i18n/localize lang "digitizer.location.missing")
-   :propertyId (apply str (concat (first (split-at 3 (:id organization))) "00000000000"))})
+   :propertyId (clojure.string/join (concat (first (split-at 3 (:id organization))) "00000000000"))})
 
 (defn fetch-or-create-archiving-project!
   [{{:keys [lang organizationId kuntalupatunnus createWithoutPreviousPermit createWithoutBuildings createWithDefaultLocation refreshBuildings]} :data :as command}]
