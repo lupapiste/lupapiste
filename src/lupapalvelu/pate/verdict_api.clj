@@ -409,7 +409,7 @@
    :pre-checks       [(verdict-exists :draft? :legacy?)
                       verdict-filled]
    :states           (set/difference states/post-submitted-states
-                                     #{:finished})
+                                     #{:finished :complementNeeded})
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]
