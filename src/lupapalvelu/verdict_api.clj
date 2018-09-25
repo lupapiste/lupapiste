@@ -1,7 +1,7 @@
 (ns lupapalvelu.verdict-api
   "Backing system verdicts. The API for manually created verdicts
   resides in `pate/verdict_api.clj`."
-  (:require [lupapalvelu.action :refer [defcommand  notify] :as action]
+  (:require [lupapalvelu.action :refer [defcommand notify] :as action]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.verdict :as verdict]
@@ -18,7 +18,9 @@
             [lupapalvelu.pate.verdict :as pate-verdict]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.pate.verdict :refer [backing-system-verdict command->backing-system-verdict]]
-            [sade.core :refer [ok fail fail! ok?]]))
+            [sade.core :refer [ok fail fail! ok?]]
+            [lupapalvelu.application-state :as app-state]
+            [lupapalvelu.attachment :as attachment]))
 
 ;;
 ;; KRYSP verdicts
