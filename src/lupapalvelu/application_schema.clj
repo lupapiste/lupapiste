@@ -12,16 +12,17 @@
    (sc/optional-key :description) (sc/maybe sc/Str)})
 
 (defschema Application                                      ; WIP, used initially in state-change JSON
-  {:id             ssc/ApplicationId
-   :operations     [Operation]
-   :propertyId     sc/Str
-   :municipality   sc/Str
-   :location       [sc/Num sc/Num]
-   :location-wgs84 [sc/Num sc/Num]
-   :address        sc/Str
-   :state          (apply sc/enum (map name states/all-states))
-   :permitType     (apply sc/enum (map name (keys (permit/permit-types))))
-   :permitSubtype  (sc/maybe sc/Str)
+  {:id                               ssc/ApplicationId
+   :primaryOperation                 Operation
+   :secondaryOperations              [Operation]
+   :propertyId                       sc/Str
+   :municipality                     sc/Str
+   :location                         [(sc/one sc/Num "X") (sc/one sc/Num "Y")]
+   :location-wgs84                   [(sc/one sc/Num "X") (sc/one sc/Num "Y")]
+   :address                          sc/Str
+   :state                            (apply sc/enum (map name states/all-states))
+   :permitType                       (apply sc/enum (map name (keys (permit/permit-types))))
+   :permitSubtype                    (sc/maybe sc/Str)
    ;; or (sc/maybe (->> (concat
    ;;                     (->> (permit/permit-types) vals (map :subtypes) flatten distinct)
    ;;                     (->> (vals op/operations) (map :subtypes) flatten distinct))

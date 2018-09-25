@@ -38,7 +38,7 @@
 (def base-keys
   [:address :infoRequest :municipality
    :state :permitType :permitSubtype
-   :id :applicant :operations :propertyId
+   :id :applicant :propertyId
    :location-wgs84 :location])
 
 (sc/defschema ApplicationBaseData                           ; Format application schema appropriate for integration
