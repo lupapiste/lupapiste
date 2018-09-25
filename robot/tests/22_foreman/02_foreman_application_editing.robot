@@ -214,7 +214,7 @@ Change subtype back to foreman application
 
 Verdict could be not given in complementNeeded (LPK-2559)
   Go to give new legacy verdict
-  Input legacy verdict  foo  Hello  Myönnetty  25.9.2018
+  Input legacy verdict  foo  Hello  Myönnetty  25.9.2018  False
   Test id disabled  publish-verdict
   Test id enabled  preview-verdict
   Click back

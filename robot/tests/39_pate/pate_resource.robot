@@ -81,16 +81,16 @@ Go to give new legacy verdict
   Click visible test id  toggle-all
 
 Input legacy verdict
-  [Arguments]  ${backend-id}  ${giver}  ${term}  ${date}
+  [Arguments]  ${backend-id}  ${giver}  ${term}  ${date}  ${check-buttons}=True
   Input text by test id  kuntalupatunnus  ${backend-id}
   Input text by test id  handler  ${giver}
   Input text by test id  verdict-section  22
   Pate autocomplete select  verdict-code  ${term}
   Input text by test id  verdict-text  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ut leo a ipsum sagittis faucibus. Integer ac velit eget odio tincidunt facilisis. Duis eu purus elementum, efficitur eros non, ultrices lectus. Praesent non ipsum id sapien dictum pharetra. Etiam sit amet sodales urna, ultricies pellentesque metus. Aliquam posuere, eros ac volutpat posuere, velit leo sagittis ipsum, nec interdum risus arcu vitae nunc. Cras blandit dignissim nunc, quis dapibus nisl eleifend vitae. Cras sed ornare augue.
-  Link button disabled  preview-verdict
-  Test id disabled  publish-verdict
+  Run keyword if  ${check-buttons}  Link button disabled  preview-verdict
+  Run keyword if  ${check-buttons}  Test id disabled  publish-verdict
   Input text by test id  anto  ${date}
-  Test id enabled  publish-verdict
+  Run keyword if  ${check-buttons}  Test id enabled  publish-verdict
   Link button enabled  preview-verdict
 
 Publish verdict
