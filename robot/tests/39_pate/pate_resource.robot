@@ -5,6 +5,9 @@ Resource       ../../common_resource.robot
 
 *** Keywords ***
 
+Safe kill dev-box
+  Execute Javascript  $(".dev-debug").hide();
+
 Phrase categories
   [Arguments]  ${tid}  @{categories}
   Test id select values are  ${tid}-category  @{categories}
@@ -72,6 +75,7 @@ Go to give new legacy verdict
   Open tab  verdict
   Click enabled by test id  new-legacy-verdict
   Fields required
+  Safe kill dev-box
   Link button disabled  preview-verdict
   Test id disabled  publish-verdict
   Click visible test id  toggle-all
@@ -88,6 +92,23 @@ Input legacy verdict
   Input text by test id  anto  ${date}
   Test id enabled  publish-verdict
   Link button enabled  preview-verdict
+
+Publish verdict
+  Click enabled by test id  publish-verdict
+  Confirm yes no dialog
+  Wait test id visible  new-appeal  30 s
+
+Give legacy verdict
+  [Arguments]  ${backend-id}  ${giver}  ${term}  ${date}
+  Go to give new legacy verdict
+  Input legacy verdict  ${backend-id}  ${giver}  ${term}  ${date}
+  Publish verdict
+
+Submit empty verdict
+  [Arguments]  ${targetState}=verdictGiven
+  Give legacy verdict  12345  -  Myönnetty  1.5.2018
+  Click back
+  Wait until  Application state should be  ${targetState}
 
 Pate upload
   [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${test-id}=upload-input
@@ -113,22 +134,23 @@ Add legacy review
   Input text by test id  ${name-tid}  ${name}
   Select from list by test id  ${type-tid}  ${type}
 
+Add legacy foreman
+  [Arguments]  ${index}  ${role}
+  Scroll and click test id  add-foreman
+  ${tid}=  Test id for  foremen  ${index}  role
+  Input text by test id  ${tid}  ${role}
 
-# Submit empty verdict
-#   [Arguments]  ${targetState}=verdictGiven  ${targetStatus}=6
-#   Go to give new verdict
-#   Input verdict  -  ${targetStatus}  01.05.2018  01.06.2018  -
-#   Click enabled by test id  verdict-publish
-#   Sleep  1s
-#   Confirm  dynamic-yes-no-confirm-dialog
-#   Wait for jQuery
-#   Wait until  Application state should be  ${targetState}
+Add legacy condition
+  [Arguments]  ${index}  ${name}
+  Scroll and click test id  add-condition
+  ${tid}=  Test id for  conditions  ${index}  name
+  Input text by test id  ${tid}  ${name}
 
 Do fetch verdict
   [Arguments]  ${fetchConfirmationText}
   Click enabled by test id  fetch-verdict
-  Wait for jQuery
-  Wait test id visible  ok-dialog
+  #Wait for jQuery
+  Wait test id visible  ok-dialog  60 s
   Element Text Should Be  jquery=p.dialog-desc:visible  ${fetchConfirmationText}
   Confirm ok dialog
   Wait test id visible  verdict-link-0
@@ -139,18 +161,18 @@ Fetch verdict
 Fetch YA verdict
   Do fetch verdict  Taustajärjestelmästä haettiin 1 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 2 uutta vaatimusta Rakentaminen-välilehdelle.
 
-Verdict is given
-  [Arguments]  ${kuntalupatunnus}  ${i}
-  Wait until  Element should be visible  application-verdict-details
-  Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
+# Verdict is given
+#   [Arguments]  ${kuntalupatunnus}  ${i}
+#   Wait until  Element should be visible  application-verdict-details
+#   Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
 
-Sign verdict
-  [Arguments]  ${password}  ${idx}=0
-  Click Element  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//button[@data-test-id='sign-verdict-button']
-  Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
-  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  ${password}
-  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//div[@data-test-id='verdict-signature-listing']
+# Sign verdict
+#   [Arguments]  ${password}  ${idx}=0
+#   Click Element  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//button[@data-test-id='sign-verdict-button']
+#   Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
+#   Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  ${password}
+#   Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
+#   Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//div[@data-test-id='verdict-signature-listing']
 
 
 Check verdict row
@@ -172,5 +194,16 @@ Verdict attachment count
   [Arguments]  ${amount}
   jQuery should match X times  table.pate-attachments tr  ${amount}
 
+Verdict count is
+  [Arguments]  ${amount}
+  jQuery should match X times  table.pate-verdicts-table tbody tr  ${amount}
+
+
 Fields required
   Wait until  Element should be visible  jquery=div.pate-required-fields-note:visible
+
+Delete verdict
+  [Arguments]  ${index}=0
+  Click enabled by test id  verdict-delete-${index}
+  Confirm yes no dialog
+  No such test id  verdict-delete-${index}

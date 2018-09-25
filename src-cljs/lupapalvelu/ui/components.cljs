@@ -266,11 +266,12 @@
             and optional :group key.
      [callback] change callback that is called when after list selection or blur.
      [disabled?] Is component disabled? (false)
-     [required?] Is component required? (false)"
-  [{open?*   ::open?
-    term*    ::term
-    latest*  ::latest
-    :as      local-state} _ {:keys [callback required? disabled? test-id] :as options}]
+     [required?] Is component required? (false)
+     [test-id] Test id"
+  [{open?*  ::open?
+    term*   ::term
+    latest* ::latest
+    :as     local-state} _ {:keys [callback required? disabled? test-id] :as options}]
   (let [{:keys [text-edit
                 menu-items
                 items-fn]} (complete-parts local-state
@@ -280,10 +281,10 @@
                                                                  (reset! latest* %)
                                                                  (callback %)))
                                                   :combobox? true)
-                                           {:on-focus  #(common/reset-if-needed! open?* true)
-                                            :required? required?
-                                            :test-id   test-id
-                                            :disabled  disabled?})]
+                                           (merge {:on-focus  #(common/reset-if-needed! open?* true)
+                                                   :required? required?
+                                                   :disabled  disabled?
+                                                   :test-id   test-id}))]
     [:div.pate-autocomplete
      [:div.ac--combobox text-edit]
      (let [items (items-fn @term*)]

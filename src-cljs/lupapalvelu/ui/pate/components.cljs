@@ -357,7 +357,6 @@
                         identity))))
 
 (rum/defc pate-text < rum/reactive
-  ;;{:key-fn (fn [_ {path :path} _ & _] (path/id path))}
   "Update the options model state only on blur. Immediate update does
   not work reliably."
   [{:keys [schema state path] :as options} & [wrap-label?]]
@@ -378,7 +377,8 @@
                               (attr-fn {:items     (sort-by-schema {:sort-by :text}
                                                                    (map #(hash-map :text (path/loc %))
                                                                         items))
-                                        :disabled? disabled?}))
+                                        :disabled? disabled?
+                                        :test-id   (test-id options)}))
 
                              lines
                              (components/textarea-edit

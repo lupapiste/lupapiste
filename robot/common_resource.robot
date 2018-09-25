@@ -1581,10 +1581,10 @@ Scroll to and click xpath results
   Execute javascript  var result = ${xfn}; var node = result.iterateNext(); while (node) { node.scrollIntoView(false); node.click(); try {node = result.iterateNext();} catch(e){node = null;}}
 
 Wait test id visible
-  [Arguments]  ${id}
+  [Arguments]  ${id}  ${timeout}=None
   Scroll to test id  ${id}
   ${q}=  Quote  ${id}
-  Wait Until  Element should be visible  xpath=//*[@data-test-id=${q}]
+  Wait Until Element is visible  xpath=//*[@data-test-id=${q}]  ${timeout}
 
 Wait test id hidden
   [Arguments]  ${id}

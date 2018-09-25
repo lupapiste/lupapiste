@@ -66,47 +66,48 @@ Sonja adds attachment to verdict
   Pate upload  0  ${TXT_TESTFILE_PATH}  Päätösote  Description
   Pate batch ready
 
-Add katselmus
-  debug
+Add review
+  Add legacy review  0  Lopullinen loppukatselmus  loppukatselmus
 
 Add foreman
-  Create task  task-vaadittu-tyonjohtaja  TJ0
-  # One on this verdict screen (and 3 hidden in tasks tab)
-  Task count is  task-vaadittu-tyonjohtaja  1
+  Add legacy foreman  0  Vastaava työnjohtaja
 
-Add other task
-  Create task  task-lupamaarays  Bajamajoja oltava riittävästi
-  # One on this verdict screen (and 3 hidden in tasks tab)
-  Task count is  task-lupamaarays  1
+Add condition
+  Add legacy condition  0  Bajamajoja oltava riittvästi
 
-Return to application and check total task numbers
-  Scroll and click test id  return-from-verdict
+Return to application and check old task counts
+  Click back
+  Open tab  tasks
+  Task count is  task-katselmus  3
+  Foreman count is  3
+  Task count is  task-lupamaarays  3
+
+# Verdict has tasks
+#   Open tab  verdict
+#   Page Should Not Contain Element  xpath=//div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraykset.missing'"]
+#   Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"]  Lopullinen loppukatselmus
+#   Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//ul[@data-bind="foreach: lupamaaraykset.muutMaaraykset"]/li  Bajamajoja oltava riittävästi
+#   Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"]  TJ0
+
+Sonja publishes verdict
+  Open tab  verdict
+  Open verdict  0
+  Publish verdict
+
+Return to application and check updated task counts
+  Click back
   Open tab  tasks
   Task count is  task-katselmus  4
   Foreman count is  4
   Task count is  task-lupamaarays  4
 
-Verdict has tasks
+Add and delete verdict draft
   Open tab  verdict
-  Page Should Not Contain Element  xpath=//div[@data-test-id="given-verdict-id-2-content"]//div[@data-bind="ltext: 'verdict.lupamaaraykset.missing'"]
-  Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"]  Lopullinen loppukatselmus
-  Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//ul[@data-bind="foreach: lupamaaraykset.muutMaaraykset"]/li  Bajamajoja oltava riittävästi
-  Wait until  Element Text Should Be  xpath=//div[@data-test-id="given-verdict-id-2-content"]//span[@data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"]  TJ0
-
-Sonja publishes verdict
-  Click enabled by test id  edit-verdict
-  Click enabled by test id  verdict-publish
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Application state should be  verdictGiven
-  Verdict is given  123567890  2
-  Wait Until  Element text should be  xpath=//div[@data-test-id='given-verdict-id-2-content']//span[@data-bind='dateString: paivamaarat.anto']  1.5.2018
-
-Add and delete verdict
   Verdict count is  3
-  Go to give new verdict
+  Go to give new legacy verdict
+  Click back
   Verdict count is  4
-  Click enabled by test id  delete-verdict
-  Confirm  dynamic-yes-no-confirm-dialog
+  Delete verdict  0
   Verdict count is  3
 
 Correct tab opening elements are visible
@@ -129,7 +130,7 @@ Accordions in the Application Summary tab are closed
   Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[contains(@class, 'accordion')]//div[@data-accordion-state='open']  1
   Element should be visible  //div[@id='application-applicationSummary-tab']//section[@id='accordion-application-summary-statements']//div[contains(@class, 'accordion_content')]
 
-Stamping page opens, verdict details can be seen
+Stamping page opens, backing system verdict details can be seen
   Open tab  attachments
   Click by test id  stamp-attachments
   Wait Until  Element should be visible  stamping-container
@@ -143,34 +144,29 @@ Mikko sees that the application has verdicts
   Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[contains(@class, 'lupicon-star')]
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
-  Verdict is given  2013-01  0
-  Verdict is given  123567890  2
+  Verdict count is  3
 
-Mikko tries to sign the verdict with wrong password
-  Click Element  xpath=//div[@data-test-id='given-verdict-id-2-content']//button[@data-test-id='sign-verdict-button']
-  Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
-  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  wrong_password
-  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
-  Wait Until  Element should be visible  xpath=//div[@id='dialog-sign-verdict']//div[@data-test-id='verdict-signature-error-message']
-  Click Element  xpath=//div[@id='dialog-sign-verdict']//p[@data-test-id='verdict-signature-close-dialog']
+# Mikko tries to sign the verdict with wrong password
+#   Click Element  xpath=//div[@data-test-id='given-verdict-id-2-content']//button[@data-test-id='sign-verdict-button']
+#   Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
+#   Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  wrong_password
+#   Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
+#   Wait Until  Element should be visible  xpath=//div[@id='dialog-sign-verdict']//div[@data-test-id='verdict-signature-error-message']
+#   Click Element  xpath=//div[@id='dialog-sign-verdict']//p[@data-test-id='verdict-signature-close-dialog']
 
-Mikko signs the verdict
-  Wait until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-ui']
-  Element should not be visible  xpath=//div[@data-test-id='given-verdict-id-0-content']//div[@data-test-id='verdict-signature-ui']
-  Click Element  xpath=//div[@data-test-id='given-verdict-id-2-content']//button[@data-test-id='sign-verdict-button']
-  Wait Until  Element Should Be Visible  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']
-  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  mikko123
-  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']
-  Element should not be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-ui']
-  Element should Contain  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']  Intonen Mikko
-  Element should Contain  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']  ${CURRENT_DATE}
+# Mikko signs the verdict
+#   Wait until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-ui']
+#   Element should not be visible  xpath=//div[@data-test-id='given-verdict-id-0-content']//div[@data-test-id='verdict-signature-ui']
+#   Click Element  xpath=//div[@data-test-id='given-verdict-id-2-content']//button[@data-test-id='sign-verdict-button']
+#   Wait Until  Element Should Be Visible  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']
+#   Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  mikko123
+#   Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
+#   Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']
+#   Element should not be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-ui']
+#   Element should Contain  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']  Intonen Mikko
+#   Element should Contain  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']  ${CURRENT_DATE}
 
 *** Keywords ***
-
-Verdict count is
-  [Arguments]  ${amount}
-  Wait until  Xpath Should Match X Times  //div[@id="application-verdict-tab"]//h2[contains(@class, 'application_section_header')]  ${amount}
 
 Comment verdict
   [Arguments]  ${message}
@@ -180,14 +176,3 @@ Comment verdict
   Click element  xpath=//div[@id='conversation-panel']//*[@data-test-id='application-new-comment-btn']
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
   Close side panel  conversation
-
-Create task
-  [Arguments]  ${taskType}  ${message}  ${taskSubtype}=
-  Click enabled by test id  verdict-new-task
-  Wait until  Element should be visible  dialog-create-task
-  Wait until  Select From List By Value  choose-task-type   ${taskType}
-  Run Keyword If  $taskSubtype  Wait until  Element should be visible  choose-task-subtype
-  Run Keyword If  $taskSubtype  Select From List By Value  choose-task-subtype   ${taskSubtype}
-  Input text  create-task-name  ${message}
-  Click enabled by test id  create-task-save
-  Wait until  Element should not be visible  dialog-create-task
