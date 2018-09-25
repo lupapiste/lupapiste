@@ -47,9 +47,8 @@
   (let [index (apply concat (vals @municipality-index))
         n (ss/lower-case (ss/trim municipality-name-starts))]
     (when-not (ss/blank? n)
-      (->> (filter (fn* [p1__399098#] (ss/starts-with (first p1__399098#) n)) index)
-           (map second)
-           set))))
+      (->> (filter #(ss/starts-with (first %) n) index)
+           (map second) set))))
 
 ;;;
 ;;; All search-... functions return a sequence of items, where each item is a map
