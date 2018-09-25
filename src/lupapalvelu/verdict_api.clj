@@ -14,7 +14,7 @@
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.roles :as roles]
-            [lupapalvelu.backing-system.allu :as allu]
+            [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.pate.verdict :as pate-verdict]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.pate.verdict :refer [backing-system-verdict command->backing-system-verdict]]

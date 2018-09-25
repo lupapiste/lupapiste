@@ -5,7 +5,7 @@
             [noir.response :as resp]
             [noir.server :as server]
             [ring.swagger.swagger2 :as rs]
-            [ring.swagger.ui :as ui]
+            [ring.swagger.swagger-ui :as ui]
             [schema.core :as sc]
             [sade.core :refer [fail ok now]]
             [sade.env :as env]
@@ -193,4 +193,4 @@
 
 (server/add-middleware
   (fn [handler]
-    (ui/wrap-swagger-ui handler "/rest/api-docs/" :swagger-docs "/rest/swagger.json" :validator-uri nil)))
+    (ui/wrap-swagger-ui handler {:path "/rest/api-docs/", :swagger-docs "/rest/swagger.json", :validator-uri nil})))

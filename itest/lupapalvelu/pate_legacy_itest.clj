@@ -237,7 +237,36 @@
           (command sonja :delete-legacy-verdict :id app-id
                    :verdict-id vid3) => ok?
           (:state (query-application sonja app-id))
-          => "sent")))))
+          => "sent")
+        (fact "Disable Pate in Sipoo"
+          (command admin :set-organization-scope-pate-value
+                   :permitType "R"
+                   :municipality "753"
+                   :value false) => ok?)
+        (fact "Verdict cannot be published in complementNeeded state"
+          (command sonja :request-for-complement :id app-id) => ok?
+          (:state (query-application sonja app-id)) => "complementNeeded"
+          (let [{:keys [verdict-id]} (command sonja :new-legacy-verdict-draft
+                                              :id app-id)]
+            verdict-id => truthy
+            (fill-verdict sonja app-id verdict-id
+                          :kuntalupatunnus "888-10-15"
+                          :verdict-code "4" ;; Upheld partially ...
+                          :verdict-text "Vestibulum quis eros sit amet "
+                          :anto (timestamp "24.5.2018")
+                          :lainvoimainen (timestamp "3.6.2018"))
+            (command sonja :publish-legacy-verdict :id app-id
+                     :verdict-id verdict-id)
+            => (err :error.command-illegal-state)
+            (fact "Preview fetch works, though"
+              (:headers (raw sonja :preview-pate-verdict :id app-id
+                             :verdict-id verdict-id))
+              => (contains {"Content-Disposition" (contains "P\u00e4\u00e4t\u00f6sluonnos")}))
+            (fact "Approve application and publish"
+              (command sonja :approve-application :id app-id :lang "fi") => ok?
+              (command sonja :publish-legacy-verdict :id app-id
+                       :verdict-id verdict-id) => ok?
+              (:state (query-application sonja app-id)) => "verdictGiven")))))))
 
 (fact "Legacy TJ verdict"
   (let [{app-id :id} (create-and-submit-application pena
@@ -256,12 +285,6 @@
       (command sonja :change-permit-sub-type :id tj-app-id :permitSubtype "tyonjohtaja-hakemus") => ok?
       (command sonja :submit-application :id tj-app-id) => ok?
       (command sonja :approve-application :id tj-app-id :lang "fi") => ok?)
-
-    (fact "Disable Pate in Sipoo"
-      (command admin :set-organization-scope-pate-value
-               :permitType "R"
-               :municipality "753"
-               :value false) => ok?)
 
     (let [{:keys [verdict-id]} (command sonja :new-legacy-verdict-draft :id tj-app-id)]
 

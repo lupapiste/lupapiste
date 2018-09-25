@@ -21,9 +21,14 @@
                  ; Web frameworks
                  [ring "1.6.2" :exclusions [commons-fileupload org.clojure/tools.reader]]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
-                 [compojure "1.1.9" :exclusions [org.clojure/tools.macro ring]]
-                 [metosin/ring-swagger "0.22.12"]
-                 [metosin/ring-swagger-ui "2.2.5-0"]
+                 [compojure "1.1.9" :exclusions [org.clojure/tools.macro ring]] ; force noir to use newer version
+                 [metosin/ring-swagger "0.26.1"]
+                 [metosin/ring-swagger-ui "3.17.2"]
+                 [metosin/reitit-core "0.2.2"]
+                 [metosin/reitit-schema "0.2.2"]
+                 [metosin/reitit-ring "0.2.2"]
+                 [metosin/reitit-middleware "0.2.2"]
+                 [metosin/spec-tools "0.7.1"]               ; for reitit-middleware
 
                  ; Namespace finder library
                  [bultitude "0.2.8"] ; noir requires 0.2.0
@@ -173,7 +178,7 @@
             [lein-midje "3.2.1"]
             [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
             [lupapiste/lein-buildid "0.4.2"]
-            [lupapiste/lein-nitpicker "0.5.1"]
+            [lupapiste/lein-nitpicker "0.6.0"]
             [lein-figwheel "0.5.16"]]
   :hooks [leiningen.cljsbuild]
 
