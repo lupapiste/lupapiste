@@ -165,7 +165,6 @@
                           :tasks-tab-visible
                           :application-info-tab-visible
                           :application-summary-tab-visible
-                          :application-verdict-tab-visible
                           :application-statement-tab-visible
                           :application-handlers
                           :application-organization-archive-enabled
@@ -241,8 +240,7 @@
                            :pdf-export
                            :application-guests :submitted-application-pdf-export
                            ;; tab visibility
-                           :tasks-tab-visible :application-info-tab-visible :application-summary-tab-visible
-                           :application-verdict-tab-visible}]
+                           :tasks-tab-visible :application-info-tab-visible :application-summary-tab-visible}]
     (doseq [command (foreach-action {:web {} :user user :application application :data {}})
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]
