@@ -831,7 +831,7 @@
      $push {:history (handler-history-entry (util/assoc-when handler :new-entry (nil? ind)) created user)}}))
 
 (defn autofill-rakennuspaikka [application time & [force?]]
-  (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
+  (when (and (not= "Y" (:permitType application)) (not (:infoRequest application)))
     (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]
       (doseq [rakennuspaikka rakennuspaikka-docs
               :when (seq rakennuspaikka)]

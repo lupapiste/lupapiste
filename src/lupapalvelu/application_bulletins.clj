@@ -165,8 +165,7 @@
                                :paatoskoodi (ds/access :paatoskoodi)}]}]})
 
 (defn- backing-system-status [verdict]
-  (if (vc/verdict-code-is-free-text? verdict)
-    nil
+  (when-not (vc/verdict-code-is-free-text? verdict)
     (util/->int (vc/verdict-code verdict))))
 
 (defn- backing-system-paatoskoodi [verdict]
