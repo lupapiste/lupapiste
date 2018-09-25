@@ -33,9 +33,6 @@ Phrase text is
   ${contents}=  Get text  jquery=[data-test-id=${tid}-edit]
   Should be equal  ${contents}  ${text}
 
-Go back
-  Click visible test id  back
-
 Type fill test id
   [Arguments]  ${tid}  ${text}
   Fill test id  ${tid}  ${EMPTY}
