@@ -52,9 +52,9 @@
                                     :tunnus (get-in raktieto [:Rakennelma :tunnus :rakennusnro])
                                     :valtakunnallinenNumero ""})]
     (app/make-document "muu-rakentaminen"
-                               (now)
-                               {"kaupunkikuvatoimenpide" data}
-                               (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
+                       (now)
+                       {"kaupunkikuvatoimenpide" data}
+                       (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
 
 (defn make-converted-application-id
   "An application id is created for the year found in the kuntalupatunnus, e.g.
@@ -67,7 +67,6 @@
         nextvalue (mongo/get-next-sequence-value sequence-name)
         counter (format (if (> 10000 nextvalue) "9%04d" "%05d") nextvalue)]
     (ss/join "-" (list "LP" "092" fullyear counter))))
-
 
 (defn get-duplicate-ids
   "This takes a kuntalupatunnus and returns the LP ids of every application in the database
@@ -88,8 +87,8 @@
                                 {:_id 1 :verdicts.kuntalupatunnus 1})
                   (map (fn [item]
                          [(:id item) (get-in item [:verdicts 0 :kuntalupatunnus])])))]
-  (with-open [writer (io/writer filename)]
-    (csv/write-csv writer data))))
+    (with-open [writer (io/writer filename)]
+      (csv/write-csv writer data))))
 
 (defn translate-state [state]
   (condp = state
@@ -179,37 +178,37 @@
         btype (get-building-type xml)
         asiantiedot (building-reader/->asian-tiedot xml)
         {:keys [description usage]} (-> xml building-reader/->buildings-summary first)]
-      (cond
-        (= "TJO" suffix) "tyonjohtajan-nimeaminen-v2"
-        (contains? #{"P" "PI"} suffix) "purkaminen"
-        (and (= "A" suffix)
-             (contains? #{"Asuinkerrostalo" "Kerrostalo"} btype)) "kerrostalo-rivitalo"
-        (and (= "A" suffix)
-             (contains? #{"Omakotitalo"} btype)) "pientalo"
-        (and (= "B" suffix)
-             (or (contains? #{"Omakotitalo"} btype)
-                 (re-find #"yhden asunnon talo" usage))) "pientalo-laaj"
-        (and (= "B" suffix)
-             (re-find #"kerrosta|rivita" usage)) "kerrostalo-rt-laaj"
-        (and (= "B" suffix)
-             (ss/contains? usage "toimisto")) "muu-rakennus-laaj"
-        (and (= "B" suffix)
-             (ss/contains? usage "teollisuu")) "teollisuusrakennus-laaj"
-        (and (= "C" suffix)
-             (re-find #"mainos" asiantiedot)) "mainoslaite"
-        (and (= "C" suffix)
-             (re-find #"maalämpökaivo" (ss/lower-case asiantiedot))) "maalampokaivo"
-        (and (= "C" suffix)
-             (re-find #"pysäköintialue" (ss/lower-case asiantiedot))) "muu-rakentaminen"
-        (and (= "D" suffix)
-             (re-find #"yhdistäminen" (ss/lower-case asiantiedot))) "jakaminen-tai-yhdistaminen"
-        (and (= "D" suffix)
-             (re-find #"johtojen uusiminen" (ss/lower-case asiantiedot))) "linjasaneeraus"
-        (and (= "D" suffix)
-             (re-find #"käyttötarkoituksen muutos" (ss/lower-case asiantiedot))) "kayttotark-muutos"
-        (and (= "D" suffix)
-             (re-find #"muuttaminen .*huoneeksi" (ss/lower-case asiantiedot))) "sisatila-muutos"
-        :else "aiemmalla-luvalla-hakeminen")))
+    (cond
+      (= "TJO" suffix) "tyonjohtajan-nimeaminen-v2"
+      (contains? #{"P" "PI"} suffix) "purkaminen"
+      (and (= "A" suffix)
+           (contains? #{"Asuinkerrostalo" "Kerrostalo"} btype)) "kerrostalo-rivitalo"
+      (and (= "A" suffix)
+           (contains? #{"Omakotitalo"} btype)) "pientalo"
+      (and (= "B" suffix)
+           (or (contains? #{"Omakotitalo"} btype)
+               (re-find #"yhden asunnon talo" usage))) "pientalo-laaj"
+      (and (= "B" suffix)
+           (re-find #"kerrosta|rivita" usage)) "kerrostalo-rt-laaj"
+      (and (= "B" suffix)
+           (ss/contains? usage "toimisto")) "muu-rakennus-laaj"
+      (and (= "B" suffix)
+           (ss/contains? usage "teollisuu")) "teollisuusrakennus-laaj"
+      (and (= "C" suffix)
+           (re-find #"mainos" asiantiedot)) "mainoslaite"
+      (and (= "C" suffix)
+           (re-find #"maalämpökaivo" (ss/lower-case asiantiedot))) "maalampokaivo"
+      (and (= "C" suffix)
+           (re-find #"pysäköintialue" (ss/lower-case asiantiedot))) "muu-rakentaminen"
+      (and (= "D" suffix)
+           (re-find #"yhdistäminen" (ss/lower-case asiantiedot))) "jakaminen-tai-yhdistaminen"
+      (and (= "D" suffix)
+           (re-find #"johtojen uusiminen" (ss/lower-case asiantiedot))) "linjasaneeraus"
+      (and (= "D" suffix)
+           (re-find #"käyttötarkoituksen muutos" (ss/lower-case asiantiedot))) "kayttotark-muutos"
+      (and (= "D" suffix)
+           (re-find #"muuttaminen .*huoneeksi" (ss/lower-case asiantiedot))) "sisatila-muutos"
+      :else "aiemmalla-luvalla-hakeminen")))
 
 (defn get-operation-types-for-testset
   "Returns a sequence for maps describing the deduced operation types
@@ -220,12 +219,12 @@
   (let [rawdata (read-all-test-files)
         data (if suffix
                (filter #(= suffix (some->
-                                       %
-                                       krysp-reader/xml->kuntalupatunnus
-                                       destructure-permit-id
-                                       :tyyppi))
+                                   %
+                                   krysp-reader/xml->kuntalupatunnus
+                                   destructure-permit-id
+                                   :tyyppi))
                        rawdata)
-                       rawdata)]
+               rawdata)]
     (map #(assoc {}
                  :type (some-> % deduce-operation-type)
                  :tunnus (krysp-reader/xml->kuntalupatunnus %)) data)))
