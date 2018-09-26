@@ -184,39 +184,45 @@
                                                                    (subs allu-id 7 12))
                                      :data.response.status {$in [200 201]}}))
 
+(defstate ^:private mock-logged-in?
+  :start (atom false))
+
 ;; This approximates the ALLU state with the `imessages` data:
 (defn- imessages-mock-handler [request]
   (let [route-match (reitit-ring/get-match request)]
-    (match (-> route-match :data :name)
-      [:login] (let [{:keys [username password]} (json/decode (:body request) true)]
-                 (if (and (= username (env/value :allu :username))
-                          (= password (env/value :allu :password)))
-                   {:status 200, :body password}
-                   {:status 404, :body "Wrong username and/or password"}))
+    (if (and (not @mock-logged-in?) (not= (-> route-match :data :name) [:login]))
+      {:status 401 :body "Unauthorized"}
+      (match (-> route-match :data :name)
+        [:login] (let [{:keys [username password]} (json/decode (:body request) true)]
+                   (if (and (= username (env/value :allu :username))
+                            (= password (env/value :allu :password)))
+                     (do (reset! mock-logged-in? true)
+                         {:status 200, :body (json/encode password)})
+                     {:status 404, :body "Wrong username and/or password"}))
 
-      [:applications :cancel] (let [id (-> route-match :path-params :id)]
-                                (if (creation-response-ok? id)
-                                  {:status 200, :body ""}
-                                  {:status 404, :body (str "Not Found: " id)}))
+        [:applications :cancel] (let [id (-> route-match :path-params :id)]
+                                  (if (creation-response-ok? id)
+                                    {:status 200, :body ""}
+                                    {:status 404, :body (str "Not Found: " id)}))
 
-      [:placementcontracts :create] (let [body (json/decode (:body request) true)]
-                                      (if-let [validation-error (sc/check PlacementContract body)]
-                                        {:status 400, :body validation-error}
-                                        {:status 200
-                                         :body   (.replace (subs (:identificationNumber body) 3) "-" "")}))
+        [:placementcontracts :create] (let [body (json/decode (:body request) true)]
+                                        (if-let [validation-error (sc/check PlacementContract body)]
+                                          {:status 400, :body validation-error}
+                                          {:status 200
+                                           :body   (.replace (subs (:identificationNumber body) 3) "-" "")}))
 
-      [:placementcontracts :update] (let [id (-> route-match :path-params :id)
-                                          body (json/decode (:body request) true)]
-                                      (if-let [validation-error (sc/check PlacementContract body)]
-                                        {:status 400, :body validation-error}
-                                        (if (creation-response-ok? id)
-                                          {:status 200, :body id}
-                                          {:status 404, :body (str "Not Found: " id)})))
+        [:placementcontracts :update] (let [id (-> route-match :path-params :id)
+                                            body (json/decode (:body request) true)]
+                                        (if-let [validation-error (sc/check PlacementContract body)]
+                                          {:status 400, :body validation-error}
+                                          (if (creation-response-ok? id)
+                                            {:status 200, :body id}
+                                            {:status 404, :body (str "Not Found: " id)})))
 
-      [:attachments :create] (let [id (-> route-match :path-params :id)]
-                               (if (creation-response-ok? id)
-                                 {:status 200, :body ""}
-                                 {:status 404, :body (str "Not Found: " id)})))))
+        [:attachments :create] (let [id (-> route-match :path-params :id)]
+                                 (if (creation-response-ok? id)
+                                   {:status 200, :body ""}
+                                   {:status 404, :body (str "Not Found: " id)}))))))
 
 ;;;; Custom middlewares
 ;;;; ===================================================================================================================
