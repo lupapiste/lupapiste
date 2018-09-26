@@ -37,7 +37,8 @@
 
 ;;; TODO: Sijoituslupa
 
-(def- current-jwt (atom nil))
+(defstate ^:private current-jwt
+  :start (atom (env/value :allu :jwt)))
 
 (defschema LoginCredentials
   {:password sc/Str
@@ -164,7 +165,7 @@
 (def- http-method-fns {:post http/post, :put http/put})
 
 (defn- perform-http-request! [base-url {:keys [request-method uri] :as request}]
-  ((request-method http-method-fns) (str base-url uri) request))
+  ((request-method http-method-fns) (str base-url uri) (assoc request :throw-exceptions false)))
 
 (defn- make-remote-handler [allu-url]
   (fn [request]
@@ -235,8 +236,8 @@
                                      (assoc request :multipart-params (reduce params+part {} (:multipart request))))
     :else request))
 
-(defn- jwt-authorize [request jwt]
-  (assoc-in request [:headers "authorization"] (str "Bearer " jwt)))
+(defn- jwt-authorize [request]
+  (assoc-in request [:headers "authorization"] (str "Bearer " @current-jwt)))
 
 (defn- content->json [request]
   (cond
@@ -275,15 +276,25 @@
   "A hook for testing error cases. Calls `sade.core/fail!` by default."
   (fn [text info-map] (fail! text info-map)))
 
+(declare allu-request-handler)
+
+(defn- login! []
+  (allu-request-handler (login-request (env/value :allu :username) (env/value :allu :password))))
+
 (defn- handle-response [disable-io-middlewares?]
   (fn [handler]
     (fn [{{{app-id :id} :application} ::command :as request}]
-      (let [route-name (-> request reitit-ring/get-match :data :name)]
-        (match (handler request)
+      (let [route-name (-> request reitit-ring/get-match :data :name)
+            {:keys [status] :as response} (handler request)]
+        (when (and (= status 401)
+                   (not= route-name [:login]))              ; guard against runaway recursion
+          (login!))
+
+        (match response
           {:status (:or 200 201), :body body}
           (do (info "ALLU operation" (route-name->string route-name) "succeeded")
               (when (= route-name [:login])
-                (reset! current-jwt body))
+                (reset! current-jwt (json/decode body)))    ; for some reason body is a JSON-encoded string
               (when (and (not disable-io-middlewares?) (= route-name [:placementcontracts :create]))
                 (application/set-integration-key app-id :ALLU {:id body})))
 
@@ -313,8 +324,7 @@
                            reitit.ring.coercion/coerce-request-middleware
                            (handle-response disable-io-middlewares?)]
                           (into (if disable-io-middlewares? [] [save-messages!]))
-                          (conj (preprocessor->middleware (fn-> content->json
-                                                                (jwt-authorize (env/value :allu :jwt))))))
+                          (conj (preprocessor->middleware (fn-> content->json jwt-authorize))))
           :coercion   reitit.coercion.schema/coercion}
      ["applications"
       ["/:id/cancelled" {:name       [:applications :cancel]
@@ -391,9 +401,6 @@
   "Should ALLU integration be used?"
   [organization-id permit-type]
   (and (env/feature? :allu) (= organization-id "091-YA") (= permit-type "YA")))
-
-(defn- login! []
-  (allu-request-handler (login-request (env/value :allu :username) (env/value :allu :password))))
 
 (defn- create-placement-contract!
   "Create placement contract in ALLU."
