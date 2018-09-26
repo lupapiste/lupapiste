@@ -1003,7 +1003,7 @@
                                             (not (ss/blank? backend-id-url)))
                                      [backend-id-url vendor-backend-id]
                                      [lp-id-url id])
-        redirect-url               (clojure.string/join url-parts)]
+        redirect-url               (ss/join url-parts)]
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
 
