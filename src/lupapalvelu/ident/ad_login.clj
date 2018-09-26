@@ -103,9 +103,13 @@
         saml-request ((:saml-req-factory! org-data))
         hmac-relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec (:mutables @ad-config)) "target")
         req (request/ring-request)]
-    (saml-sp/get-idp-redirect (:idp-uri org-data)
-                              saml-request
-                              hmac-relay-state)))
+    (do
+      (info req)
+      (info hmac-relay-state)
+      (info saml-request)
+      (saml-sp/get-idp-redirect (:idp-uri org-data)
+                                saml-request
+                                hmac-relay-state))))
 
 (defpage [:post "/api/saml/ad-login/:orgid"] {orgid :orgid}
   (let [req (request/ring-request)
