@@ -54,6 +54,7 @@ Test id warning
   Wait until  Element should be visible  jquery=[data-test-id=${tid}].warning:visible
 
 Click back
+  Wait test id visible  back
   Scroll and click test id  back
 
 # --------------------------

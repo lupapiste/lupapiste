@@ -3,6 +3,7 @@
 Documentation   Appeals management
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Variables       ../../common_variables.py
 Variables       ../06_attachments/variables.py
 
@@ -30,29 +31,28 @@ Sonja logs in
 Sonja fetches verdict from municipality KRYSP service
   Open tab  verdict
   Fetch verdict
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
-  No such test id  verdict-requirements-0
-  Wait test id visible  verdict-requirements-1
+  Open verdict
 
 There are no appeals yet
-  Element should not be visible  jquery=table.appeals-table
-  jQuery should match X times  h2[data-test-id=verdict-appeal-title]  3
+  Element should not be visible  jquery=table.pate-appeals
+  Wait test id visible  new-appeal
 
 Sonja adds appeal to the first verdict
-  Add to verdict  0-0  appeal  Veijo  1.4.2016  Hello world
-  Appeals row check  0-0  0  appeal  Veijo  1.4.2016
+  Add appeal  appeal  Veijo  1.4.2016  Hello world
+  Appeals row check  0  appeal  Veijo  1.4.2016
 
 The appeal is visible on the Attachments tab
   Sleep  1.0s
+  Click back
   Open tab  attachments
-  Element should be visible  jquery=tr[data-test-type='muutoksenhaku.valitus']
+  Element should be visible  jquery=tr[data-test-type='muutoksenhaku.oikaisuvaatimus']
   Open tab  verdict
+  debug
 
 Sonja edits appeal
-  Wait test id visible  edit-appeal-0-0-0
-  Click by test id  edit-appeal-0-0-0
-  Check appeal bubble  0-0-0  appeal  Veijo  01.04.2016  Hello world
+  Wait test id visible  appeal-0-toggle
+  Click by test id  appeal-0-toggle
+  Check appeal form  0-0-0  appeal  Veijo  01.04.2016  Hello world
   Edit authors  0-0-0  Liisa
   Edit date  0-0-0  5.5.2015
   OK bubble 0-0-0
@@ -244,37 +244,31 @@ There are no appeals attachments in the Attachments tab
 *** Keywords ***
 
 Edit authors
-  [Arguments]  ${postfix}  ${authors}
-  Fill test id  appeal-authors-${postfix}  ${authors}
+  [Arguments]  ${authors}
+  Fill test id  appeal-authors  ${authors}
 
 Edit date
-  [Arguments]  ${postfix}  ${date}
-  ## Disable date picker
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Fill test id  appeal-date-${postfix}  ${date}
+  [Arguments]  ${date}
+  Fill test id  appeal-date  ${date}
 
 Edit extra
-  [Arguments]  ${postfix}  ${extra}
-  Fill test id  appeal-extra-${postfix}  ${extra}
+  [Arguments]  ${extra}
+  Fill test id  appeal-text  ${extra}
 
 Add file
-  [Arguments]  ${postfix}  ${path}=${TXT_TESTFILE_PATH}
-  Execute JavaScript  $('div[data-test-id=appeal-files-${postfix}] input[type=file]').attr("class", "")
-  Choose File  jquery=div[data-test-id=appeal-files-${postfix}] input[type=file]  ${path}
-  Sleep  1s
+  [Arguments]  ${path}=${TXT_TESTFILE_PATH}
+  Pate upload  0  ${path}  Oikaisuvaatimus  Complaint  pate-upload-input
 
-OK bubble ${postfix}
-  Wait until  Test id enabled  appeal-${postfix}-bubble-dialog-ok
-  Scroll and click test id  appeal-${postfix}-bubble-dialog-ok
-  # DOM changes after OK, so let's wait a bit.
-  Sleep  4s
+Save appeal
+  Wait until  Test id enabled  save-appeal
+  Scroll and click test id  save-appeal
 
 Cancel bubble ${postfix}
   Scroll and click test id  appeal-${postfix}-bubble-dialog-cancel
 
-Check appeal bubble
-  [Arguments]  ${postfix}  ${appealType}  ${authors}  ${date}  ${extra}=${EMPTY}
-  Scroll to test id  appeal-${postfix}-bubble-dialog-ok
+Check appeal form
+  [Arguments]  ${appealType}  ${authors}  ${date}  ${extra}=${EMPTY}
+  Scroll to test id  save-appeal
   Element should be visible  jquery=span[data-test-id=appeal-type-${postfix}][data-appeal-type=${appealType}]
   Textfield value should be  jquery=input[data-test-id=appeal-authors-${postfix}]  ${authors}
   ## Disable date picker
@@ -282,36 +276,35 @@ Check appeal bubble
   Textfield value should be  jquery=input[data-test-id=appeal-date-${postfix}]  ${date}
   Textarea value should be  jquery=textarea[data-test-id=appeal-extra-${postfix}]  ${extra}
 
-Add to verdict
-  [Arguments]  ${postfix}  ${appealType}  ${authors}  ${date}  ${extra}=${EMPTY}
-  Scroll and click test id  add-appeal-${postfix}
-  Scroll to test id  appeal-${postfix}-bubble-dialog-ok
-  Test id disabled  appeal-${postfix}-bubble-dialog-ok
-  List selection should be  jquery=select[data-test-id=appeal-type-${postfix}]  ${EMPTY}
-  Select From List By Value  jquery=select[data-test-id=appeal-type-${postfix}]  ${appealType}
-  Test id disabled  appeal-${postfix}-bubble-dialog-ok
-  Textfield value should be  jquery=input[data-test-id=appeal-authors-${postfix}]  ${EMPTY}
-  Edit authors  ${postfix}  ${authors}
-  Test id disabled  appeal-${postfix}-bubble-dialog-ok
-  Textfield value should be  jquery=input[data-test-id=appeal-date-${postfix}]  ${EMPTY}
-  Edit date  ${postfix}  ${date}
-  Test id disabled  appeal-${postfix}-bubble-dialog-ok
-  Textarea value should be  jquery=textarea[data-test-id=appeal-extra-${postfix}]  ${EMPTY}
-  Edit extra  ${postfix}  ${extra}
-  Test id disabled  appeal-${postfix}-bubble-dialog-ok
-  Add file  ${postfix}
-  Ok bubble ${postfix}
+Add appeal
+  [Arguments]  ${appealType}  ${authors}  ${date}  ${extra}=${EMPTY}
+  Scroll and click test id  new-appeal
+  Scroll to test id  save-appeal
+  Test id disabled  save-appeal
+  List selection should be  jquery=select[data-test-id=appeal-type]  ${EMPTY}
+  Select From List By Value  jquery=select[data-test-id=appeal-type]  ${appealType}
+  Test id disabled  save-appeal
+  Textfield value should be  jquery=input[data-test-id=appeal-authors]  ${EMPTY}
+  Edit authors  ${authors}
+  Test id disabled  save-appeal
+  Textfield value should be  jquery=input[data-test-id=appeal-date]  ${EMPTY}
+  Edit date  ${date}
+  Test id disabled  save-appeal
+  Textarea value should be  jquery=textarea[data-test-id=appeal-text]  ${EMPTY}
+  Edit extra  ${extra}
+  Test id disabled  save-appeal
+  Add file
+  Save appeal
 
 Set Row Selector
   [Arguments]  ${postfix}  ${row}
   Set Suite Variable  ${selector}  jquery=table[data-test-id=appeals-table-${postfix}] tr[data-test-id=appeals-table-row-${row}]
 
 Appeals row check
-  [Arguments]  ${postfix}  ${row}  ${appealType}  ${authors}  ${date}
-  Set Row Selector  ${postfix}  ${row}
-  Wait Until  Element Should Be Visible  ${selector} td[data-appeal-type=${appealType}]
-  Wait Until  Element should contain  ${selector}  ${authors}
-  Wait Until  Element should contain  ${selector}  ${date}
+  [Arguments]  ${index}  ${appealType}  ${authors}  ${date}
+  Wait test id visible  appeal-${index}-${appealType}
+  Test id text is  appeal-${index}-authors  ${authors}
+  Test id text is  appeal-${index}-date  ${date}
 
 Appeals row file check
   [Arguments]  ${postfix}  ${row}  ${filename}  ${index}=0
@@ -321,4 +314,3 @@ Appeals row file check
 No frontend errors
   Logout
   There are no frontend errors
-

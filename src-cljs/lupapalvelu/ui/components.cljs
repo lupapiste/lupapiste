@@ -423,14 +423,15 @@
 (rum/defcs date-edit < rum/reactive
   (initial-value-mixin ::date)
   (datepicker/date-state-mixin ::date {:format "D.M.YYYY"})
-  [{date* ::date} _ {:keys [callback] :as options}]
+  [{date* ::date} _ {:keys [callback test-id] :as options}]
   [:input.dateinput.dateinput--safe
-   (merge {:type      "text"
-           :value     @date*
-           :on-blur #(set-selected date*
-                                   (.. % -target -value)
-                                   callback)}
-          (dissoc options :callback))])
+   (common/add-test-id (merge {:type      "text"
+                               :value     @date*
+                               :on-blur #(set-selected date*
+                                                       (.. % -target -value)
+                                                       callback)}
+                              (dissoc options :callback))
+                       test-id)])
 
 (rum/defc text-and-link < rum/reactive
 "Renders text with included link
