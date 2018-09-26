@@ -8,6 +8,7 @@
             [lupapalvelu.calendar :as cal]
             [lupapalvelu.change-email :as change-email]
             [lupapalvelu.company :as company]
+            [lupapalvelu.ident.ident-util :as ident-util]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.idf.idf-client :as idf]
             [lupapalvelu.logging :as logging]
@@ -402,7 +403,7 @@
         actual-roles    (org/filter-valid-user-roles-in-organization organization-id roles)]
     (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})))
 
-(defn- update-authority [authority email data]
+(defn update-authority [authority email data]
   (let [new-email (:email data)]
     (when (not= email new-email)
       (change-email/update-email-in-application-auth! (:id authority) email new-email)
@@ -548,6 +549,14 @@
 ;; ==============================================================================
 ;;
 
+
+(defquery pre-login
+  {:parameters [parameter]
+   :input-validators [(partial action/non-blank-parameters [:parameter])]
+   :user-roles roles/all-user-roles}
+  [command]
+  (println command)
+  (ok :message (ident-util/resolve-redirect command)))
 
 (defcommand login
   {:parameters          [username password]

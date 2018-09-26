@@ -47,9 +47,7 @@
    :extradata "VTJTT=VTJ-VETUMA-Perus"
    :key       (env/value :vetuma :key)})
 
-;; log error for all missing env keys.
-(doseq [[k v] (config)]
-  (when (nil? v) (errorf "missing key '%s' value from property file" (name k))))
+(util/log-missing-keys! (config))
 
 ;;
 ;; Helpers
@@ -191,7 +189,6 @@
         vetuma-request (request-data (host :secure) lang)
         trid      (vetuma-request "TRID")
         label     (i18n/localize lang "vetuma.continue")]
-
     (when (env/feature? :dummy-ident)
       (response/status 400 (response/content-type "text/plain" "VETUMA feature deprecated")))
     (if sessionid
@@ -207,7 +204,7 @@
             (response/content-type "text/html")
             (response/set-headers {"Cache-Control" "no-store, no-cache, must-revalidate"})))
         (response/status 400 (response/content-type "text/plain" "invalid return paths")))
-      (response/status 400 (response/content-type "test/plain" "Session not initialized")))))
+      (response/status 400 (response/content-type "text/plain" "Session not initialized")))))
 
 (defpage [:post "/api/vetuma"] []
   (let [form-params (:form-params (request/ring-request))
