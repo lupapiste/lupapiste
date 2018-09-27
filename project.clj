@@ -28,11 +28,11 @@
                  [metosin/reitit-schema "0.2.2"]
                  [metosin/reitit-ring "0.2.2"]
                  [metosin/reitit-middleware "0.2.2"]
-                 [metosin/spec-tools "0.7.1"]               ; for reitit-middleware
+                 [metosin/spec-tools "0.7.1"] ; for reitit-middleware
 
                  ; Namespace finder library
-                 [bultitude "0.2.8"]                        ; noir requires 0.2.0
-                 [org.tcrawley/dynapath "1.0.0"]            ; bultitudes requires 0.2.3, but midje needs 1.0.0, should be compatible
+                 [bultitude "0.2.8"] ; noir requires 0.2.0
+                 [org.tcrawley/dynapath "1.0.0"] ; bultitudes requires 0.2.3, but midje needs 1.0.0, should be compatible
 
                  ; MongoDB driver
                  [com.novemberain/monger "3.1.0" :exclusions [[com.google.guava/guava]]]
@@ -79,7 +79,7 @@
                  [org.mnode.ical4j/ical4j "1.0.7" :exclusions [commons-logging]]
 
                  ; Apache Commons
-                 [commons-fileupload "1.3.3"]               ; explicit requirement to catch version upgrades
+                 [commons-fileupload "1.3.3"] ; explicit requirement to catch version upgrades
                  [org.apache.commons/commons-lang3 "3.5"]
                  [commons-io "2.5"]
                  [commons-codec "1.10"]
@@ -121,7 +121,7 @@
                  ; MS Office document processing
                  [ontodev/excel "0.2.4" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
                  [org.apache.poi/poi-ooxml "3.15"]
-                 [dk.ative/docjure "1.11.0"]                ; this also depends on Apache POI v3.14
+                 [dk.ative/docjure "1.11.0"] ; this also depends on Apache POI v3.14
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf "1.0.6"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension "1.0.6" :exclusions [com.lowagie/itext]]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx "1.0.6"]
@@ -195,7 +195,7 @@
   :cljsbuild {:builds {:rum {:source-paths ^:replace ["src-cljs" "src-cljc"]}}}
   :profiles {:dev      {:dependencies   [[cljsbuild "1.1.7"] ; workaround for lein-cljsbuild issue #204
                                          [midje "1.9.1"]
-                                         [com.cemerick/pomegranate "1.0.0"]                                             ; midje.repl needs this
+                                         [com.cemerick/pomegranate "1.0.0"] ; midje.repl needs this
                                          [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                          [com.raspasov/clj-ssh "0.5.12"]
                                          [org.apache.activemq/artemis-jms-server "2.6.0"]

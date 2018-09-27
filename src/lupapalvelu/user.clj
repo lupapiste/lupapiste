@@ -34,7 +34,7 @@
   {:id     sc/Str
    :title  sc/Str
    :sort   {:field (sc/enum "type" "location" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole" "id")
-            :asc   sc/Bool}
+            :asc sc/Bool}
    :filter {(sc/optional-key :handlers)      [sc/Str]
             (sc/optional-key :tags)          [sc/Str]
             (sc/optional-key :companyTags)   [sc/Str]
