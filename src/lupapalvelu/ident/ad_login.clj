@@ -89,8 +89,8 @@
                    :orgAuthz  {(keyword orgid) orgAuthz}}        ;; validointi ja virheiden hallinta?
         user (if-let [user-from-db (usr/get-user-by-email email)]
                (let [updated-user-data (util/deep-merge user-from-db user-data)]
-                   (user-api/update-authority user-from-db email updated-user-data)
-                   updated-user-data)
+                 (user-api/update-authority user-from-db email updated-user-data)
+                 updated-user-data)
                (usr/create-new-user {:role "admin"} user-data))
         response (ssess/merge-to-session
                    req
@@ -103,13 +103,9 @@
         saml-request ((:saml-req-factory! org-data))
         hmac-relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec (:mutables @ad-config)) "target")
         req (request/ring-request)]
-    (do
-      (info req)
-      (info hmac-relay-state)
-      (info saml-request)
-      (saml-sp/get-idp-redirect (:idp-uri org-data)
-                                saml-request
-                                hmac-relay-state))))
+    (saml-sp/get-idp-redirect (:idp-uri org-data)
+                              saml-request
+                              hmac-relay-state)))
 
 (defpage [:post "/api/saml/ad-login/:orgid"] {orgid :orgid}
   (let [req (request/ring-request)
