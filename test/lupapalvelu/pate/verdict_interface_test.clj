@@ -41,3 +41,15 @@
     (published-kuntalupatunnus {:pate-verdicts [draft modern blank wrapped unwrapped]
                                 :verdicts      backends})
     => "first"))
+
+(fact "verdict-date"
+  (verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1536537600000}]}]}]}) => 1536537600000
+  (verdict-date {:pate-verdicts [{:data {:verdict-date 1538038800000}}]}) => 1538038800000
+  (verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1536537600000}]}]}
+                            {:paatokset [{:poytakirjat [{:paatospvm 1536539600000}]}]}
+                            {:paatokset [{:poytakirjat [{:paatospvm 1536538600000}]}]}]}) => 1536539600000
+  (verdict-date {:pate-verdicts [{:data {:verdict-date 1538036800000}}
+                                 {:data {:verdict-date 1538038800000}}
+                                 {:data {:verdict-date 1538037800000}}]}) => 1538038800000
+  (verdict-date {:pate-verdicts [{:data {:foo :bar}}]}) => nil
+  (verdict-date {:verdicts [{:paatokset nil}]}) => nil)

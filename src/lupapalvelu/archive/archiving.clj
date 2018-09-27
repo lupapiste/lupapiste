@@ -29,6 +29,7 @@
             [lupapalvelu.domain :as domain]
             [lupapiste-commons.schema-utils :as su]
             [lupapalvelu.states :as states]
+            [lupapalvelu.pate.verdict-interface :as verdict]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.storage.file-storage :as storage])
   (:import [java.io InputStream]))
@@ -164,7 +165,7 @@
 (defn- ->iso-8601-date [date]
   (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) date))
 
-(defn- ts->iso-8601-date [ts]
+(defn ts->iso-8601-date [ts]
   (when (number? ts)
     (->iso-8601-date (c/from-long (long ts)))))
 
@@ -193,15 +194,8 @@
 (defn archiving-project? [application]
   (= :ARK (keyword (:permitType application))))
 
-(defn- get-paatospvm [{:keys [verdicts]}]
-  (let [ts (->> verdicts
-                (map (fn [{:keys [paatokset]}]
-                       (map (fn [pt] (map :paatospvm (:poytakirjat pt))) paatokset)))
-                (flatten)
-                (remove nil?)
-                (sort)
-                (last))]
-    (ts->iso-8601-date ts)))
+(defn- get-paatospvm [application]
+  (ts->iso-8601-date (verdict/verdict-date application)))
 
 (defn- get-jattopvm [application]
   (ts->iso-8601-date (:submitted application)))

@@ -25,3 +25,17 @@
                (map (util/fn-> :data :kuntalupatunnus metadata/unwrap))
                (remove ss/blank?)
                first)))
+
+(defn verdict-date
+  "Verdict date from latest verdict"
+  [{:keys [verdicts pate-verdicts]}]
+  (let [legacy-ts (some->> verdicts
+                           (map (fn [{:keys [paatokset]}]
+                                  (map (fn [pt] (map :paatospvm (:poytakirjat pt))) paatokset))))
+        pate-ts   (some->> pate-verdicts
+                           (map #(get-in % [:data :verdict-date])))]
+    (->> (if (empty? legacy-ts) pate-ts legacy-ts)
+         (flatten)
+         (remove nil?)
+         (sort)
+         (last))))
