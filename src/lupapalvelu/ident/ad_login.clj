@@ -100,9 +100,9 @@
         saml-request ((:saml-req-factory! org-data))
         hmac-relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec (:mutables @ad-config)) "target")
         req (request/ring-request)]
-    (saml-sp/get-idp-redirect (:idp-uri org-data)
-                              saml-request
-                              hmac-relay-state)))
+      (saml-sp/get-idp-redirect (:idp-uri org-data)
+                                saml-request
+                                hmac-relay-state)))
 
 (defpage [:post "/api/saml/ad-login/:orgid"] {orgid :orgid}
   (let [req (request/ring-request)
@@ -111,6 +111,9 @@
         [valid-relay-state? continue-url] (saml-routes/valid-hmac-relay-state? (:secret-key-spec (:mutables @ad-config)) relay-state)
         saml-resp (saml-sp/xml-string->saml-resp xml-response)
         idp-cert (get-in @ad-config [:organizational-settings (keyword orgid) :idp-cert])
+        _ (println saml-resp)
+        _ (println "IDP-CERT: " idp-cert)
+        _ (println "VALIDOIDAAN SERTTI: " (saml-sp/validate-saml-response-signature saml-resp idp-cert))
         valid-signature? (if-not idp-cert
                            false
                            (try
@@ -120,13 +123,15 @@
                                  (error (.getMessage e))
                                  false))))
         valid? (and valid-relay-state? valid-signature?)
+        _ (info (str "HMAC relay state was " (if valid-relay-state? "valid" "invalid")))
+        _ (info (str "SAML message signature was " (if valid-signature? "valid" "invalid")))
+        _ (info (str "SAML response validation " (if valid? "was successful" "failed")))
         saml-info (when valid? (saml-sp/saml-resp->assertions saml-resp (:decrypter @ad-config)))
         parsed-saml-info (parse-saml-info saml-info)
         {:keys [email firstName lastName groups]} (get-in parsed-saml-info [:assertions :attrs])
         _ (clojure.pprint/pprint parsed-saml-info)
-        _ (info (str "SAML response validation " (if valid? "was successful" "failed")))
         ad-role-map (-> orgid (get-organization) :ad-login :role-mapping)
-        authz (resolve-roles ad-role-map groups)
+        authz (resolve-roles ad-role-map groups) ;; Disable this check for now
         _ (println valid-signature?)]  ;; groups or whatever the correct parameter is)
     (cond
       (and valid? (seq authz)) (validated-login req orgid firstName lastName email authz)
