@@ -1402,10 +1402,6 @@
                                 :inforequest-enabled true
                                 :municipality "609"
                                 :permitType "P"}]
-                       :link [(link {:fi "Rakennusvalvonta"
-                                     :sv "Byggnadstilsyn"
-                                     :en "Rakennusvalvonta"}
-                                     "https://www.pori.fi/asuminen-ja-ymparisto/rakentaminen/rakennusvalvonta")]
                        :handler-roles [{:id "abba1111111111111111b297"
                                         :name {:fi "K\u00e4sittelij\u00e4"
                                                :sv "Handl\u00e4ggare"
@@ -1420,7 +1416,7 @@
                        :multiple-operations-supported false
                        :only-use-inspection-from-backend true
                        :ad-login {:enabled true
-                                  :idp-cert (ss/join "\n" ["-----BEGIN CERTIFICATE-----"
+                                  :idp-cert (ss/join "\n" ["-----BEGIN CERTIFICATE-----" ;; A certicate generated for mock-saml
                                                            "MIIDkDCCAngCCQDPO1LUkvgKbTANBgkqhkiG9w0BAQsFADCBiTELMAkGA1UEBhMC"
                                                            "RkkxGTAXBgNVBAMMEFNpbW8gU3V1cnZpc2lpcmkxGTAXBgNVBAsMEFJha2VubnVz"
                                                            "dmFsdm9udGExEDAOBgNVBAgMB1V1c2ltYWExDjAMBgNVBAcMBVNpcG9vMQ4wDAYD"
