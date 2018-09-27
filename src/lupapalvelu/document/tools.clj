@@ -236,7 +236,7 @@
     (seq? node)
     (and
       (map? node)
-      (not (= :select (:type node)))
+      (not= :select (:type node))
       (contains? node :body))))
 
 (def schema-leaf? (complement schema-branch?))

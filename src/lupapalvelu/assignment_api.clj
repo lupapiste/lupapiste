@@ -12,7 +12,7 @@
 ;; Helpers and validators
 
 (defn- userid->summary [id]
-  (when (not (ss/empty? id)) (usr/summary (usr/get-user-by-id id))))
+  (when-not (ss/empty? id) (usr/summary (usr/get-user-by-id id))))
 
 (defn- userid->session-summary [id]
   (usr/session-summary (usr/get-user-by-id id)))
@@ -149,6 +149,6 @@
    :categories #{:documents}}
   [{user    :user
     created :created}]
-  (if (> (assignment/complete-assignment assignmentId user created) 0)
+  (if (pos? (assignment/complete-assignment assignmentId user created))
     (ok)
     (fail :error.assignment-not-completed)))

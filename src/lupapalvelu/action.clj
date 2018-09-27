@@ -323,7 +323,7 @@
             (when (and (env/feature? :pate-json) organization (org/pate-scope? (:application command)))
               (util/future*
                 (state-change/trigger-state-change command new-state))))
-          (if return-count? n nil))))))
+          (when return-count? n))))))
 
 (defn application->command
   "Creates a command data structure that is suitable for update-application and with-application functions.
@@ -703,7 +703,7 @@
     validator
     (let [checker       (sc/checker validator)
           error-message (str "input does not match schema " (or (-> validator meta :name)
-                                                                (-> validator pr-str)))]
+                                                                (pr-str validator)))]
       (fn [command]
         (when-let [schema-errors (-> command :data checker)]
           (error error-message (pr-str schema-errors))

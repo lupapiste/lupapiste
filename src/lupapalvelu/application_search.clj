@@ -89,10 +89,9 @@
         from-ts-by-orgs (map (fn [org] {:org org :ts (organization/earliest-archive-enabled-ts [org])}) user-orgs)
         base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed" "inUse" "foremanVerdictGiven" "acknowledged"]}} {:archived.application nil} {:permitType {$ne "YA"}}]}
                          {$and [{:state {$in states/archival-final-states}} {:archived.completed nil}]}]}]
-    (if (not (empty? from-ts-by-orgs))
-      {$and [base-query
-             {$or
-              (map (fn [org-detail] (archival-start-ts-query (:org org-detail) (:ts org-detail))) from-ts-by-orgs)}]}
+    (if-not (empty? from-ts-by-orgs)
+      {$and [base-query {$or
+                         (map (fn [org-detail] (archival-start-ts-query (:org org-detail) (:ts org-detail))) from-ts-by-orgs)}]}
       base-query)))
 
 (defn- event-search [event]

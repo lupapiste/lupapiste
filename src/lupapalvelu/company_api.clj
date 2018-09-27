@@ -34,7 +34,7 @@
   [{{auth :auth} :application}]
   (let [authorised-companies (map #(select-keys % [:id :name])
                                   (filter #(and (= (:type %) "company")
-                                           (not (= (:role %) "reader"))) auth))]
+                                           (not= (:role %) "reader")) auth))]
     (ok :users
         (mapcat (fn [{:keys [id name]}]
                   (->> (com/find-company-users id)
