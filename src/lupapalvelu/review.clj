@@ -1,20 +1,21 @@
 (ns lupapalvelu.review
-  (:require [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
-            [monger.operators :refer :all]
-            [sade.core :refer :all]
-            [sade.util :as util]
+  (:require [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.tasks :as tasks]
-            [lupapalvelu.action :refer [update-application application->command]]
-            [lupapalvelu.building :as building]
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.review-reader :as review-reader]
-            [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.building :as building]
             [lupapalvelu.document.tools :as tools]
-            [sade.strings :as ss]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.verdict :as verdict]
             [lupapalvelu.verdict-review-util :as verdict-review-util]
-            [lupapalvelu.organization :as organization]))
+            [monger.operators :refer :all]
+            [sade.core :refer :all]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [swiss.arrows :refer :all]
+            [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]))
 
 (defn- empty-review-task? [t]
   (let [katselmus-data (-> t :data :katselmus)
@@ -44,7 +45,8 @@
 (defn- non-empty-review-task? [task]
   (and (tasks/task-is-review? task) (not (empty-review-task? task))))
 
-(defn- task-with-matching-background-id [mongo-task tasks]
+(defn- task-with-matching-background-id
+  [mongo-task tasks]
   (let [mongo-task-bg-id (background-id mongo-task)]
     (when-not (ss/empty? mongo-task-bg-id)
       (util/find-first #(= mongo-task-bg-id
@@ -219,11 +221,30 @@
          (map review-to-task)
          drop-reviews-with-lupapiste-muuTunnus)))
 
+(defn- remove-repeating-background-ids
+  "Remove repeating background ids from preprocessed review tasks."
+  [reviews]
+  (let [get-id        #(get-in % [:muuTunnustieto 0 :MuuTunnus :tunnus])
+        repeating-ids (-<>> (map get-id reviews)
+                            (remove nil?)
+                            (group-by identity)
+                            (filter (fn [[id xs]]
+                                      (> (count xs) 1)))
+                            (map first)
+                            set)]
+    (map (fn [review]
+           (if (contains? repeating-ids (get-id review))
+             (dissoc review :muuTunnustieto)
+             review))
+         reviews)))
+
 (defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
   [user created application app-xml & [overwrite-background-reviews? do-not-include-state-updates?]]
-  (let [reviews (vec (reviews-preprocessed app-xml))
+  (let [reviews (-> (reviews-preprocessed app-xml)
+                    remove-repeating-background-ids
+                    vec )
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
