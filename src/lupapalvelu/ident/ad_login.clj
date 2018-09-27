@@ -1,10 +1,9 @@
 (ns lupapalvelu.ident.ad-login
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug info warn error errorf fatal]]
             [noir.core :refer [defpage]]
             [noir.response :as response]
             [noir.request :as request]
             [lupapalvelu.organization :refer [ad-login-data-by-domain get-organization]]
-            [lupapalvelu.security :as security]
             [lupapalvelu.user-api :as user-api]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
@@ -14,8 +13,6 @@
             [sade.session :as ssess]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.xml :as sxml]
-            [schema.core :as sc]
             [saml20-clj.sp :as saml-sp]
             [saml20-clj.routes :as saml-routes]
             [saml20-clj.shared :as saml-shared]))

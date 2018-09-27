@@ -167,7 +167,7 @@
             self.adLoginDomains("");
             self.adLoginIdPUri("");
             self.adLoginIdPCert("");
-          };
+          }
 
           var archiveTs= result.data["earliest-allowed-archiving-date"];
           if (archiveTs && archiveTs > 0) {
@@ -269,7 +269,7 @@
 
     self.saveAdLoginSettings = function() {
       ajax
-        .command("update-adlogin-settings", {
+        .command("update-ad-login-settings", {
           "org-id": self.organization().id(),
           "enabled": self.adLoginEnabled(),
           "trusted-domains": self.adLoginDomains().split(",").map(uri => uri.trim()),

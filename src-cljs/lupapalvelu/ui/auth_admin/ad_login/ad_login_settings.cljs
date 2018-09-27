@@ -12,12 +12,12 @@
 (defn role-key-textfield [role]
   (let [role-name (name role)]
     [:tr {:key (str "role-key-" role-name)}
-   [:td (loc (str "authorityrole." role-name))]
-   [:td {:class "value"}
-    [:input {:type "text"
-             :name role-name
-             :value (get @state/current-role-mapping role)
-             :on-change #(swap! state/current-role-mapping assoc role (-> % .-target .-value))}]]]))
+     [:td (loc (str "authorityrole." role-name))]
+     [:td {:class "value"}
+      [:input {:type "text"
+               :name role-name
+               :value (get @state/current-role-mapping role)
+               :on-change #(swap! state/current-role-mapping assoc role (-> % .-target .-value))}]]]))
 
 (defn save-role-mapping [keys]
   (command {:command "update-ad-login-role-mapping"
@@ -36,23 +36,23 @@
   []
   (let [user (rum/react state/authority)]
     [:div
-      [:h2 (loc "auth-admin.ad-login-settings.title")]
-      [:div (loc "auth-admin.ad-login-settings.info-text")]
+     [:h2 (loc "auth-admin.ad-login-settings.title")]
+     [:div (loc "auth-admin.ad-login-settings.info-text")]
 
-      [:table {:class "admin-settings"}
-       [:thead
-        [:tr
-         [:th (loc "auth-admin.ad-login-settings.lp-role")]
-         [:th (loc "auth-admin.ad-login-settings.ad-role")]]]
+     [:table {:class "admin-settings"}
+      [:thead
+       [:tr
+        [:th (loc "auth-admin.ad-login-settings.lp-role")]
+        [:th (loc "auth-admin.ad-login-settings.ad-role")]]]
 
-       [:tbody
-        (for [role (rum/react state/allowed-roles)]
-        (role-key-textfield role))]]
-      (components/icon-button {:icon     :lupicon-save
-                               :wait?    state/saving-info?
-                               :on-click #(save-role-mapping state/current-role-mapping)
-                               :text-loc "save"
-                               :class    "positive"})]))
+      [:tbody
+       (for [role (rum/react state/allowed-roles)]
+         (role-key-textfield role))]]
+     (components/icon-button {:icon     :lupicon-save
+                              :wait?    state/saving-info?
+                              :on-click #(save-role-mapping state/current-role-mapping)
+                              :text-loc "save"
+                              :class    "positive"})]))
 
 (defonce args (atom {}))
 

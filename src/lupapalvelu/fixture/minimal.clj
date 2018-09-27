@@ -555,7 +555,7 @@
 
    ;; Pori
 
-   ;; Porin p\u00e4\u00e4k\u00e4ytt\u00e4j\u00e4 - pori/pori
+   ;; Porin pääkäyttäjä - pori/pori
    {:id "pori"
     :username "pori"
     :role "authority"
@@ -566,7 +566,7 @@
     :lastName "Porilainen"
     :language "fi"
     :phone "0501233210"
-    :street "V\u00e4h\u00e4uusikatu 1 a 1"
+    :street "Vähäuusikatu 1 a 1"
     :zip "28100"
     :city "Pori"
     :private {:password "$2a$10$H3D35GclLgHRUIUfQtEQZe5FlrVR2iYoV8Babw4C8D8ANLvuulEmu"

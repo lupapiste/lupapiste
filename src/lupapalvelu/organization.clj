@@ -1027,7 +1027,7 @@
                 :docTerminalInUse)
     (fail :error.docterminal-not-enabled)))
 
-(defn set-adlogin-settings [org-id enabled trusted-domains idp-uri idp-cert]
+(defn set-ad-login-settings [org-id enabled trusted-domains idp-uri idp-cert]
   (update-organization org-id
                        {$set {:ad-login.enabled enabled
                               :ad-login.trusted-domains trusted-domains
