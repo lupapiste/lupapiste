@@ -172,7 +172,7 @@
 (defn- get-lainvoimainen-date [application]
   (ts->iso-8601-date (verdict/lainvoimainen-date application)))
 
-(defn- get-from-verdict-minutes [{:keys [verdicts]} key]
+(defn get-from-verdict-minutes [{:keys [verdicts]} key]
   (->> verdicts
        (map (fn [{:keys [paatokset]}]
               (map (fn [pt] (map key (:poytakirjat pt))) paatokset)))

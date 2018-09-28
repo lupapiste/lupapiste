@@ -8,6 +8,8 @@
             [sade.strings :as ss]
             [sade.util :as util]))
 
+(def legacy-date-keys #{:aloitettava :lainvoimainen :voimassaHetki :anto :viimeinenValitus :julkipano})
+
 (defn all-verdicts
   "All verdicts regardless of state or origin."
   [{:keys [verdicts pate-verdicts]}]
@@ -39,17 +41,28 @@
         pate-ts   (get-in (verdict/latest-published-pate-verdict {:application application}) [:data :verdict-date])]
     (or legacy-ts pate-ts)))
 
-(defn lainvoimainen-date
-  "Lainvoimainen date from latest verdict"
-  [{:keys [verdicts] :as application}]
-  (let [legacy-ts (some->> verdicts
-                           (map (fn [{:keys [paatokset]}]
-                                  (->> (map #(get-in % [:paivamaarat :lainvoimainen]) paatokset)
-                                       (remove nil?)
-                                       (first))))
-                           (flatten)
-                           (remove nil?)
-                           (sort)
-                           (last))
-        pate-ts   (get-in (verdict/latest-published-pate-verdict {:application application}) [:data :lainvoimainen])]
-      (or legacy-ts pate-ts)))
+(defn- legacy-date-data [verdicts key]
+  (->> verdicts
+       (map (fn [{:keys [paatokset]}]
+              (->> (map #(get-in % [:paivamaarat (keyword key)]) paatokset)
+                   (remove nil?)
+                   (first))))
+       (flatten)
+       (remove nil?)
+       (sort)
+       (last)))
+
+(defn- legacy-data [verdicts key]
+  (->> verdicts
+       (map (fn [{:keys [paatokset]}]
+              (map (fn [pt] (map key (:poytakirjat pt))) paatokset)))
+       (flatten)
+       (remove nil?)
+       (first)))
+
+(defn verdict-data
+  "Get verdict data with given key"
+  [{:keys [verdicts pate-verdicts] :as application} key]
+  (if (some? pate-verdicts)
+    (get-in (verdict/latest-published-pate-verdict {:application application}) [:data (keyword key)])
+    (if (contains? legacy-date-keys key) (legacy-date-data verdicts key) (legacy-data verdicts key))))
