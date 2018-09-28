@@ -240,7 +240,7 @@
                                          :action      "move-attachments-to-backing-system"}
                                         [attachment]) => [fileId])))))
 
-      (doseq [status (range 400 405)]
+      (doseq [status (conj (range 400 405) 500)]
         (facts (str "ALLU HTTP error " status)
           (let [router (test-router {:status status, :body allu-id})
                 handler (reitit-ring/ring-handler router)]
