@@ -3,7 +3,7 @@
             [noir.core :refer [defpage]]
             [noir.response :as response]
             [noir.request :as request]
-            [lupapalvelu.organization :refer [ad-login-data-by-domain get-organization]]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.user-api :as user-api]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
@@ -42,14 +42,14 @@
                          (name lp-role)))]
     (->> orgAuthz (remove nil?) (set))))
 
-(defn validated-login [req orgid firstName lastName email orgAuthz]
+(defn validated-login [req org-id firstName lastName email orgAuthz]
   (let [user-data {:firstName firstName
                    :lastName  lastName
                    :role      "authority"
                    :email     email
                    :username  email
                    :enabled   true
-                   :orgAuthz  {(keyword orgid) orgAuthz}}        ;; validointi ja virheiden hallinta?
+                   :orgAuthz  {(keyword org-id) orgAuthz}}        ;; validointi ja virheiden hallinta?
         user (if-let [user-from-db (usr/get-user-by-email email)]
                (let [updated-user-data (util/deep-merge user-from-db user-data)]
                  (user-api/update-authority user-from-db email updated-user-data)
@@ -61,13 +61,13 @@
                    {:user (usr/session-summary user)})]
     response))
 
-(defn make-ad-config [orgid]
+(defn make-ad-config [org-id]
   (let [c (env/get-config)
         {:keys [keystore key-password]} (:ssl c)
         key-alias "jetty"
-        ad-login (-> orgid get-organization :ad-login)
+        ad-login (-> org-id org/get-organization :ad-login)
         {:keys [enabled idp-cert idp-uri trusted-domains]} ad-login
-        acs-uri (str (:host (env/get-config)) "/api/saml/ad-login/" orgid)
+        acs-uri (str (:host (env/get-config)) "/api/saml/ad-login/" org-id)
         mutables (assoc (saml-sp/generate-mutables)
                         :xml-signer (saml-sp/make-saml-signer keystore
                                                               key-password
@@ -79,6 +79,7 @@
      :keystore-password key-password
      :key-alias key-alias
      :mutables mutables
+     :token-timeout 10 ; This is in minutes
      :sp-cert (saml-shared/get-certificate-b64 keystore key-password key-alias)
      :decrypter (saml-sp/make-saml-decrypter keystore key-password key-alias)
      :organizational-settings {:enabled enabled
@@ -92,23 +93,28 @@
                                                     "Lupapiste"
                                                     acs-uri)}}))
 
-(defpage [:get "/api/saml/ad-login/:orgid"] {orgid :orgid}
-  (let [ad-config (make-ad-config orgid)
+(defpage [:get "/api/saml/ad-login/:org-id"] {org-id :org-id}
+  (let [ad-config (make-ad-config org-id)
         saml-req-factory! (get-in ad-config [:organizational-settings :saml-req-factory!])
         saml-request (saml-req-factory!)
-        ; Even though we don't use state in our SAML login, a relay state token is created since 'saml-sp/get-idp-redirect' expects it.
-        ; It's just not validated when receiving the response.
-        hmac-relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec (:mutables ad-config)) "target")]
+        relay-state-token (saml-routes/create-hmac-relay-state (:secret-key-spec (:mutables ad-config)) "target")]
+    (do
+      (org/add-token-to-org org-id relay-state-token)
       (saml-sp/get-idp-redirect (get-in ad-config [:organizational-settings :idp-uri])
                                 saml-request
-                                hmac-relay-state)))
+                                relay-state-token))))
 
-(defpage [:post "/api/saml/ad-login/:orgid"] {orgid :orgid}
-  (let [ad-config (make-ad-config orgid)
+(defpage [:post "/api/saml/ad-login/:org-id"] {org-id :org-id}
+  (let [ad-config (make-ad-config org-id)
         req (request/ring-request)
+        _ (org/purge-time-out-tokens! org-id (:token-timeout ad-config)) ; Accept only tokens that are not older than the amount specified in ad-config
+        sent-tokens (org/get-sent-tokens org-id)
         xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse]))
         saml-resp (saml-sp/xml-string->saml-resp xml-response)
         idp-cert (get-in ad-config [:organizational-settings :idp-cert])
+        relay-state-token (get-in req [:params :RelayState])
+        tokens (->> (org/get-sent-tokens org-id) (map :token) set)
+        token-found? (contains? tokens relay-state-token)
         valid-signature? (if-not idp-cert
                            false
                            (try
@@ -117,15 +123,17 @@
                                (do
                                  (error (.getMessage e))
                                  false))))
+        _ (info (str "RelayState parameter was " (if token-found? " found" "not found!")))
         _ (info (str "SAML message signature was " (if valid-signature? "valid" "invalid")))
+        valid? (and token-found? valid-signature?)
+        _ (info (str "SAML login credentials " (if valid? "valid!" "invalid")))
         saml-info (when valid-signature? (saml-sp/saml-resp->assertions saml-resp (:decrypter ad-config)))
         parsed-saml-info (parse-saml-info saml-info)
         {:keys [email firstName lastName groups]} (get-in parsed-saml-info [:assertions :attrs])
-        _ (clojure.pprint/pprint parsed-saml-info)
-        ad-role-map (-> orgid (get-organization) :ad-login :role-mapping)
+        ad-role-map (-> org-id (org/get-organization) :ad-login :role-mapping)
         authz (resolve-roles ad-role-map groups)]
     (cond
-      (and valid-signature? (seq authz)) (validated-login req orgid firstName lastName email authz)
+      (and valid? (seq authz)) (validated-login req org-id firstName lastName email authz)
       valid-signature? (do
                          (error "User does not have organization authorization")
                          (response/redirect (format "%s/app/fi/welcome#!/login" (:host (env/get-config)))))
