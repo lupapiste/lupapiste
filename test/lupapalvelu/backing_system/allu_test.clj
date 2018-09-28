@@ -19,7 +19,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :refer [User]]
 
-            [midje.sweet :refer [facts fact => contains provided]]
+            [midje.sweet :refer [facts fact => contains provided throws]]
             [midje.util :refer [testable-privates]]
             [clojure.test.check :refer [quick-check]]
             [com.gfredericks.test.chuck.properties :refer [for-all]]
@@ -37,6 +37,10 @@
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
+
+(defn- schema-error? [exn] (= (:type (ex-data exn)) :schema.core/error))
+
+(defn- http-error? [http-status] (fn [exn] (= (:status (ex-data exn)) http-status)))
 
 (defschema ValidPlacementApplication
   {:id               ApplicationId
@@ -63,7 +67,7 @@
   "A side channel for providing original attachment data to `test-handler`."
   nil)
 
-(def- test-router
+(defn- test-router [response]
   (reitit-ring/router
     (#'allu/routes
       true
@@ -131,9 +135,7 @@
                   ;; Could be improved but generators produce junk for this anyway:
                   (:mime-type file) => string?))))
 
-          {:status 200, :body allu-id})))))
-
-(def- test-handler (reitit-ring/ring-handler test-router))
+          response)))))
 
 ;;;; Actual Tests
 ;;;; ==================================================================================================================
@@ -142,7 +144,9 @@
   (sc/with-fn-validation
     (let [user (sg/generate (select-keys User [:id :username]))
           app (sg/generate ValidPlacementApplication)
-          submitted-app (assoc-in app [:integrationKeys :ALLU :id] allu-id)]
+          submitted-app (assoc-in app [:integrationKeys :ALLU :id] allu-id)
+          invalid-app (assoc app :address "")
+          invalid-submitted-app (assoc submitted-app :address "")]
       (facts "integration message generation"
         (let [request (placement-creation-request {:application app
                                                    :user        user
@@ -193,35 +197,56 @@
                          (not (allu/allu-application? org-id permit-type))))
           => passing-quick-check))
 
-      (with-redefs [allu/allu-router test-router
-                    allu/allu-request-handler test-handler
-                    allu/send-allu-request! test-handler]   ; Since these are unit tests we bypass JMS.
-        (facts "submit-application!"
-          (allu/submit-application! {:application app
-                                     :user        user
-                                     :action      "submit-application"}) => nil)
-
-        (facts "update-application!"
-          (allu/update-application! {:application submitted-app
-                                     :user        user
-                                     :action      "update-document"}) => nil)
-
-        (facts "lock-application!"
-          (allu/lock-application! {:application submitted-app
-                                   :user        user
-                                   :action      "approve-application"}) => nil)
-
-        (facts "cancel-application!"
-          (allu/cancel-application! {:application submitted-app
-                                     :user        user
-                                     :action      "cancel-application"}) => nil)
-
-        (let [fileId (sg/generate sssc/FileId)
-              version (assoc (sg/generate attachment/Version) :fileId fileId)
-              attachment (assoc (sg/generate Attachment) :latestVersion version :versions [version])]
-          (facts "send-attachments!"
-            (binding [sent-attachment attachment]
-              (allu/send-attachments! {:application submitted-app
+      (let [router (test-router {:status 200, :body allu-id})
+            handler (reitit-ring/ring-handler router)]
+        (with-redefs [allu/allu-router router
+                      allu/allu-request-handler handler
+                      allu/send-allu-request! handler]      ; Since these are unit tests we bypass JMS.
+          (facts "submit-application!"
+            (allu/submit-application! {:application app
                                        :user        user
-                                       :action      "move-attachments-to-backing-system"}
-                                      [attachment])) => [fileId]))))))
+                                       :action      "submit-application"}) => nil
+            (allu/submit-application! {:application invalid-app, :user user, :action "submit-application"})
+            => (throws schema-error?))
+
+          (facts "update-application!"
+            (allu/update-application! {:application submitted-app
+                                       :user        user
+                                       :action      "update-document"}) => nil
+            (allu/update-application! {:application invalid-submitted-app
+                                       :user        user
+                                       :action      "update-document"}) => (throws schema-error?))
+
+          (facts "lock-application!"
+            (allu/lock-application! {:application submitted-app
+                                     :user        user
+                                     :action      "approve-application"}) => nil
+            (allu/lock-application! {:application invalid-submitted-app
+                                     :user        user
+                                     :action      "approve-application"}) => (throws schema-error?))
+
+          (facts "cancel-application!"
+            (allu/cancel-application! {:application submitted-app
+                                       :user        user
+                                       :action      "cancel-application"}) => nil)
+
+          (facts "send-attachments!"
+            (let [fileId (sg/generate sssc/FileId)
+                  version (assoc (sg/generate attachment/Version) :fileId fileId)
+                  attachment (assoc (sg/generate Attachment) :latestVersion version :versions [version])]
+              (binding [sent-attachment attachment]
+                (allu/send-attachments! {:application submitted-app
+                                         :user        user
+                                         :action      "move-attachments-to-backing-system"}
+                                        [attachment]) => [fileId])))))
+
+      (doseq [status (range 400 405)]
+        (facts (str "ALLU HTTP error " status)
+          (let [router (test-router {:status status, :body allu-id})
+                handler (reitit-ring/ring-handler router)]
+            (with-redefs [allu/allu-router router
+                          allu/allu-request-handler handler
+                          allu/send-allu-request! handler]  ; Since these are unit tests we bypass JMS.
+              (allu/submit-application! {:application app
+                                         :user        user
+                                         :action      "submit-application"}) => (throws (http-error? status)))))))))
