@@ -169,15 +169,8 @@
   (when (number? ts)
     (->iso-8601-date (c/from-long (long ts)))))
 
-(defn- get-verdict-date [{:keys [verdicts]} type]
-  (let [ts (->> verdicts
-                (map (fn [{:keys [paatokset]}]
-                       (->> (map #(get-in % [:paivamaarat type]) paatokset)
-                            (remove nil?)
-                            (first))))
-                (remove nil?)
-                (first))]
-    (ts->iso-8601-date ts)))
+(defn- get-lainvoimainen-date [application]
+  (ts->iso-8601-date (verdict/lainvoimainen-date application)))
 
 (defn- get-from-verdict-minutes [{:keys [verdicts]} key]
   (->> verdicts
@@ -279,14 +272,9 @@
       (conj (remove (fn [id] (= id (:backendId attachment))) backend-ids) (:backendId attachment)))))
 
 (defn get-ark-paatospvm [verdicts attachment]
-    (->> (filter #(= (:kuntalupatunnus %) (:backendId attachment)) verdicts)
-         first
-         :paatokset
-         first
-         :poytakirjat
-         :0
-         :paatospvm
-         ts->iso-8601-date))
+  (->> {:verdicts (filter #(= (:kuntalupatunnus %) (:backendId attachment)) verdicts)}
+       (verdict/verdict-date)
+       ts->iso-8601-date))
 
 (defn- generate-archive-metadata
   [{:keys [id propertyId _applicantIndex address organization municipality permitType

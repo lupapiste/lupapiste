@@ -44,12 +44,36 @@
 
 (fact "verdict-date"
   (verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1536537600000}]}]}]}) => 1536537600000
-  (verdict-date {:pate-verdicts [{:data {:verdict-date 1538038800000}}]}) => 1538038800000
+  (verdict-date {:pate-verdicts [{:data {:verdict-date 1538038800000}
+                                  :published {:published 1538038700000}}]}) => 1538038800000
   (verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1536537600000}]}]}
                             {:paatokset [{:poytakirjat [{:paatospvm 1536539600000}]}]}
                             {:paatokset [{:poytakirjat [{:paatospvm 1536538600000}]}]}]}) => 1536539600000
-  (verdict-date {:pate-verdicts [{:data {:verdict-date 1538036800000}}
-                                 {:data {:verdict-date 1538038800000}}
-                                 {:data {:verdict-date 1538037800000}}]}) => 1538038800000
+  (verdict-date {:pate-verdicts [{:data {:verdict-date 1538036800000}
+                                  :published {:published 1538031800001}}
+                                 {:data {:verdict-date 1538038800000}
+                                  :published {:published 1538031800003}}
+                                 {:data {:verdict-date 1538037800000}
+                                  :published {:published 1538031800002}}]}) => 1538038800000
   (verdict-date {:pate-verdicts [{:data {:foo :bar}}]}) => nil
   (verdict-date {:verdicts [{:paatokset nil}]}) => nil)
+
+(fact "lainvoimainen-date"
+  (lainvoimainen-date {:verdicts [{:paatokset [{:paivamaarat {:lainvoimainen 1536537600000}}]}]}) => 1536537600000
+  (lainvoimainen-date {:pate-verdicts [{:data {:lainvoimainen 1538038800000}
+                                        :published {:published 1538038700000}}]}) => 1538038800000
+  (lainvoimainen-date {:verdicts [{:paatokset [{:paivamaarat {:lainvoimainen 1536537600000}}]}
+                                  {:paatokset [{:paivamaarat {:lainvoimainen 1536537900000}}]}
+                                  {:paatokset [{:paivamaarat {:lainvoimainen 1536537500000}}]}]}) => 1536537900000
+  (lainvoimainen-date {:pate-verdicts [{:data      {:lainvoimainen 1538039200000}
+                                        :published {:published 1538031800001}}
+                                       {:data      {:lainvoimainen 1538039100000}
+                                        :published {:published 1538031800003}}
+                                       {:data      {:lainvoimainen 1538039000000}
+                                        :published {:published 1538031800002}}]}) => 1538039100000
+  (lainvoimainen-date {:pate-verdicts [{:data {:foo :bar}}]}) => nil
+  (lainvoimainen-date {:verdicts [{:paatokset nil}]}) => nil)
+
+(fact "arkistointi-date"
+  (verdict-date {:verdicts [{:paatokset [{:poytakirjat {:0 {:paatospvm 1538082000000}}}]}]}) => 1538082000000
+  (verdict-date {:verdicts [{:paatokset [{:poytakirjat {:0 {:paatospvm nil}}}]}]}) => nil)

@@ -28,14 +28,28 @@
 
 (defn verdict-date
   "Verdict date from latest verdict"
-  [{:keys [verdicts pate-verdicts]}]
+  [{:keys [verdicts] :as application}]
   (let [legacy-ts (some->> verdicts
                            (map (fn [{:keys [paatokset]}]
-                                  (map (fn [pt] (map :paatospvm (:poytakirjat pt))) paatokset))))
-        pate-ts   (some->> pate-verdicts
-                           (map #(get-in % [:data :verdict-date])))]
-    (->> (if (empty? legacy-ts) pate-ts legacy-ts)
-         (flatten)
-         (remove nil?)
-         (sort)
-         (last))))
+                                  (map (fn [pt] (map (fn [pk] (get (second pk) :paatospvm (get pk :paatospvm))) (:poytakirjat pt))) paatokset)))
+                           (flatten)
+                           (remove nil?)
+                           (sort)
+                           (last))
+        pate-ts   (get-in (verdict/latest-published-pate-verdict {:application application}) [:data :verdict-date])]
+    (or legacy-ts pate-ts)))
+
+(defn lainvoimainen-date
+  "Lainvoimainen date from latest verdict"
+  [{:keys [verdicts] :as application}]
+  (let [legacy-ts (some->> verdicts
+                           (map (fn [{:keys [paatokset]}]
+                                  (->> (map #(get-in % [:paivamaarat :lainvoimainen]) paatokset)
+                                       (remove nil?)
+                                       (first))))
+                           (flatten)
+                           (remove nil?)
+                           (sort)
+                           (last))
+        pate-ts   (get-in (verdict/latest-published-pate-verdict {:application application}) [:data :lainvoimainen])]
+      (or legacy-ts pate-ts)))
