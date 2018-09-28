@@ -3,6 +3,7 @@
   (:require [clojure.core.match :refer [match]]
             [clojure.walk :refer [postwalk]]
             [cheshire.core :as json]
+            [mount.core :as mount]
             [reitit.ring :as reitit-ring]
             [schema.core :as sc :refer [defschema]]
             [sade.core :refer [def- now]]
@@ -147,6 +148,8 @@
 ;;;; ==================================================================================================================
 
 (env/with-feature-value :allu true
+  (mount/start #'allu/current-jwt)
+
   (sc/with-fn-validation
     (let [user (sg/generate (select-keys User [:id :username]))
           app (sg/generate ValidPlacementApplication)
