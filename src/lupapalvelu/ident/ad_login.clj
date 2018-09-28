@@ -131,6 +131,7 @@
         parsed-saml-info (parse-saml-info saml-info)
         {:keys [email firstName lastName groups]} (get-in parsed-saml-info [:assertions :attrs])
         ad-role-map (-> org-id (org/get-organization) :ad-login :role-mapping)
+        _ (org/remove-used-token! org-id relay-state-token)
         authz (resolve-roles ad-role-map groups)]
     (cond
       (and valid? (seq authz)) (validated-login req org-id firstName lastName email authz)

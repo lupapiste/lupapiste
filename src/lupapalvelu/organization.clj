@@ -1079,3 +1079,7 @@
     (let [valid-tokens (filter #(newer-than-timeout? (:timestamp %) timeout) tokens)]
       (when (not= (count valid-tokens) (count tokens))
         (update-organization org-id {$set {:ad-login.sent-tokens valid-tokens}})))))
+
+(defn remove-used-token! [org-id token]
+  (let [unused-tokens (filter #(not= token (:token %)) (get-sent-tokens org-id))]
+    (update-organization org-id {$set {:ad-login.sent-tokens unused-tokens}})))
