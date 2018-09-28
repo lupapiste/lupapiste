@@ -5,6 +5,7 @@
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.core :refer [ok fail]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]))
@@ -25,8 +26,37 @@
 (sc/defn ^:always-validate price-catalogue :- PriceCatalogue
   [{:keys [lang application]}]
   (let [catalogue (fetch-price-catalogue "vantaa-hinnasto-1")]
-    (info "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
-    (info ">> invoices/price-catalogue lang:" lang " application: " application)
-    (info "catalogue: " catalogue)
+    (debug "PPPPPPPPPPPPPPPP")
+    (debug ">> invoices/price-catalogue lang:" lang " application: " (keys application))
+    (debug "data: " (:data application))
+    (debug "application: " application)
+    (debug "catalogue: " catalogue)
     catalogue
     ))
+
+(sc/defschema InvoiceRow
+  {:text sc/Str
+   :unit (sc/enum "m2" "m3" "kpl")
+   :price-per-unit sc/Num
+   :units sc/Num})
+
+(sc/defschema InvoiceOperation
+  {:operation-id sc/Str
+   :name sc/Str
+   :invoice-rows [InvoiceRow]})
+
+(sc/defschema InvoiceInsertRequest
+  {:operations [InvoiceOperation]})
+
+(defn validate-new-invoice [{{invoice-data :invoice} :data}]
+  (debug ">>> validate-invoice data: " invoice-data)
+  (debug "(sc/check InvoiceNewFromUI invoice-data): " (sc/check InvoiceInsertRequest invoice-data))
+  (when (sc/check InvoiceInsertRequest invoice-data)
+    (fail :error.invalid-invoice)))
+
+(defn create-invoice!
+  [{{invoice-data :invoice} :data}]
+  (debug ">> create-invoice! invoice-data: " invoice-data)
+  (let [id (mongo/create-id)]
+    (mongo/insert :invoices (merge invoice-data {:id id}))
+    id))

@@ -1,5 +1,6 @@
 (ns lupapalvelu.invoice-api
-  (:require [clj-time.coerce :as tc]
+  (:require [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
+            [clj-time.coerce :as tc]
             [clj-time.core :as t]
             [clojure.set :as set]
             [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
@@ -31,3 +32,19 @@
    :states           states/post-submitted-states}
   [command]
   (ok :verdicts (invoices/price-catalogue command)))
+
+(defcommand insert-invoice
+  {:description "A collection of prices. Item properties:
+                       id:        catalogue id
+                       prices:    list of prices"
+   :feature          :invoices
+   :user-roles       #{:authority}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :parameters       [id invoice]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      invoices/validate-new-invoice]
+   :states           states/post-submitted-states}
+  [command]
+  (debug "XX COMMAND insert-invoice invoice:" (get-in command [:data :invoice]))
+  (ok :invoice-id (invoices/create-invoice! command)))

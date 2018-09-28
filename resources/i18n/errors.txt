@@ -440,6 +440,8 @@
 "error.invalid-drawing" "en" "A map drawing is invalid. Please check that the lines of a drawing do not intersect each other."
 "error.invalid-drawing" "fi" "Piirretty kartta-alue on virheellinen. Tarkista, että piirretyn alueen viivat eivät leikkaa toisiaan."
 "error.invalid-drawing" "sv" "Det området ritats ut på kartan är felaktigt. Var vänlig och kontrollera att de strecken på det utritade området inte skär varandra."
+"error.invalid-invoice" "en" "Invalid invoice"
+"error.invalid-invoice" "fi" "Virheellinen lasku"
 "error.invalid-key" "en" "Invalid key"
 "error.invalid-key" "fi" "Virheellinen avain"
 "error.invalid-key" "sv" "Felaktig nyckel"
