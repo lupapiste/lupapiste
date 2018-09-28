@@ -1017,7 +1017,8 @@
                        :scope [{:municipality "753"
                                 :permitType "YA"
                                 :inforequest-enabled true
-                                :new-application-enabled true}]
+                                :new-application-enabled true
+                                :pate-enabled true}]
                        :links [(link {:fi "Sipoo", :sv "Sibbo"}
                                      "http://sipoo.fi")]
                        :krysp {:YA {:url local-krysp :ftpUser "dev_ya_sipoo" :version "2.2.1"}}

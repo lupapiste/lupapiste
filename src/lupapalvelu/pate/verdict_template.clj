@@ -438,7 +438,7 @@
   (org/get-organization org-id {:verdict-templates 1}))
 
 (defn settings-filled?
-  "Settings are filled properly if every requireid field has been filled."
+  "Settings are filled properly if every required field has been filled."
   [{ready :settings data :data category :category :as options}]
   (schemas/required-filled? (settings-schemas/settings-schema category)
                             (or data
