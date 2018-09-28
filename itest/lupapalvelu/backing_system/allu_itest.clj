@@ -27,6 +27,7 @@
             [lupapalvelu.domain :as domain])
   (:import [java.io InputStream]))
 
+;;; TODO: Ensure that errors from ALLU don't break the application process
 ;;; TODO: Sijoituslupa
 
 ;;;; Nano-framework :P for Model-Based Testing
@@ -365,8 +366,7 @@
               :visit-goal 1))
 
           ;;; TODO: move-attachments-to-backing-system
-          ;;; TODO: agreementPrepared/Signed
-          ;;; TODO: Ensure that errors from ALLU don't break the application process
+          ;;; TODO: agreementPrepared/Signed (LPK-3888)
 
           (let [old-id-counter (:id-counter @allu-state)]
             (fact "ALLU integration disabled for"

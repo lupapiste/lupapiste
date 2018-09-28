@@ -35,6 +35,7 @@
   (:import [java.lang AutoCloseable]
            [java.io InputStream]))
 
+;;; TODO: Ensure that errors from ALLU don't break the application process
 ;;; TODO: Sijoituslupa
 
 ;;;; Initial request construction
