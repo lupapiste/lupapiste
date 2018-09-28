@@ -132,6 +132,30 @@
     (mongo/update-by-id :applications id {$set {:permitSubtype permitSubtype, :documents documents}})
     id))
 
+(defn- upload-attachment
+  ([apikey app-id] (upload-attachment apikey app-id nil))
+  ([apikey app-id attachment]
+   (let [filename "dev-resources/test-attachment.txt"]
+     ;; HACK: Have to use a temp file as :upload-attachment expects to get one and deletes it in the end.
+     (with-temp-file file
+       (io/copy (io/file filename) file)
+       (let [description "Test file"
+             {:keys [attachmentId] :as upload-res} (itu/local-command apikey :upload-attachment :id app-id
+                                                                      :attachmentId (:id attachment)
+                                                                      :attachmentType {:type-group "muut"
+                                                                                       :type-id "muu"}
+                                                                      :locked false
+                                                                      :group {} :filename filename :tempfile file
+                                                                      :size (.length file))
+             _ (fact "upload attachment" upload-res => ok?)
+             _ (fact "set-attachment-meta"
+                 (itu/local-command apikey :set-attachment-meta :id app-id :attachmentId attachmentId
+                                    :meta {:contents description}) => ok?)]
+         (fact "add-comment"
+           (itu/local-command apikey :add-comment :id app-id :text "Added my test text file."
+                              :target {:type "application"} :roles ["applicant" "authority"]) => ok?)
+         attachmentId)))))
+
 (defn- open [apikey app-id msg]
   (fact ":draft -> :open"
     (itu/local-command apikey :add-comment :id app-id :text msg
@@ -164,23 +188,15 @@
                                      ["yritys.yhteyshenkilo.yhteystiedot.email" (:email user)]
                                      ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]])))
 
-    (fact "upload attachments"
-      (let [filename "dev-resources/test-attachment.txt"]
-        ;; HACK: Have to use a temp file as :upload-attachment expects to get one and deletes it in the end.
-        (with-temp-file file
-          (io/copy (io/file filename) file)
-          (let [description "Test file"
-                _ (itu/local-command apikey :upload-attachment :id app-id :attachmentId (:id attachment)
-                                     :attachmentType {:type-group "muut", :type-id "muu"} :group {}
-                                     :filename filename :tempfile file :size (.length file)) => ok?
-                _ (itu/local-command apikey :set-attachment-meta :id app-id :attachmentId (:id attachment)
-                                     :meta {:contents description}) => ok?]
-            (itu/local-command apikey :add-comment :id app-id :text "Added my test text file."
-                               :target {:type "application"} :roles ["applicant" "authority"]) => ok?))))))
+    (upload-attachment apikey app-id attachment)))
 
 (defn- approve [apikey app-id]
   (fact "approve application"
-    (itu/local-command apikey :approve-application :id app-id :lang "fi")) => ok?)
+    (itu/local-command apikey :approve-application :id app-id :lang "fi") => ok?
+
+    ;; HACK: Testing move-attachments-to-backing-system here for lack of a better place:
+    (itu/local-command apikey :move-attachments-to-backing-system :id app-id :lang "fi"
+                       :attachmentIds [(upload-attachment apikey app-id)]) => ok?))
 
 (defn- return-to-draft [apikey app-id msg]
   (fact "return to draft"
@@ -365,7 +381,6 @@
                                          (state-graph->transitions full-sijoitussopimus-state-graph))
               :visit-goal 1))
 
-          ;;; TODO: move-attachments-to-backing-system
           ;;; TODO: agreementPrepared/Signed (LPK-3888)
 
           (let [old-id-counter (:id-counter @allu-state)]
