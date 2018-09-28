@@ -17,6 +17,7 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.ya-extension :refer [ya-extension-app?]]
             [sade.core :refer :all]
             [sade.util :as util]))
 
@@ -27,6 +28,13 @@
 
 ;; TODO: Make sure that the functionality (including notifications)
 ;; and constraints are in sync with the legacy verdict API.
+
+(defn- verdicts-supported
+  "Precheck that fails if the verdict functionality is not supported for
+  the application"
+  [{:keys [application]}]
+  (when (ya-extension-app? application)
+    (fail :ya-extension-application)))
 
 (defn- replacement-check
   "Fails if the target verdict is a) already replaced, b) already being
@@ -114,7 +122,8 @@
    :user-roles #{:authority}
    :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks [pate-enabled]
+   :pre-checks [pate-enabled
+                verdicts-supported]
    :states states/post-submitted-states}
   [{:keys [application] :as command}]
   (ok :templates (template/application-verdict-templates (template/command->options command)
@@ -149,6 +158,7 @@
    :user-authz-roles roles/all-authz-roles
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
+   :pre-checks       [verdicts-supported]
    :states           states/post-submitted-states}
   [command]
   (ok :verdicts (vc/verdict-list command)))
@@ -242,6 +252,7 @@
    :user-roles       #{:applicant :authority}
    :org-authz-roles  roles/reader-org-authz-roles
    :user-authz-roles roles/all-authz-roles
+   :pre-checks       [verdicts-supported]
    :states           states/post-submitted-states}
   [_])
 
@@ -253,7 +264,8 @@
    :user-roles       #{:applicant :authority}
    :org-authz-roles  roles/reader-org-authz-roles
    :user-authz-roles roles/all-authz-roles
-   :pre-checks       [contractual-application]
+   :pre-checks       [contractual-application
+                      verdicts-supported]
    :states           states/post-submitted-states}
   [_])
 
@@ -310,6 +322,7 @@
    :optional-parameters [:replacement-id]
    :input-validators    [(partial action/non-blank-parameters [:id])]
    :pre-checks          [pate-enabled
+                         verdicts-supported
                          (action/not-pre-check legacy-category)
                          (template/verdict-template-check :application :published)
                          (replacement-check :replacement-id)]
@@ -379,7 +392,8 @@
    :user-roles       #{:authority}
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [(action/some-pre-check (action/not-pre-check pate-enabled)
+   :pre-checks       [verdicts-supported
+                      (action/some-pre-check (action/not-pre-check pate-enabled)
                                              legacy-category)]
    :states           states/post-submitted-states}
   [command]

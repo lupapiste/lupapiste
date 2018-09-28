@@ -561,12 +561,10 @@
                                   sequential? (zipmap (repeat true)))))))
 
 (defn mark-reviews-faulty-for-application [application {:keys [new-faulty-tasks]}]
-  (when (not (empty? new-faulty-tasks))
+  (when-not (empty? new-faulty-tasks)
     (let [timestamp (now)]
       (doseq [task-id new-faulty-tasks]
-        (tasks/task->faulty (assoc (application->command application)
-                                   :created timestamp)
-                            task-id)))))
+        (tasks/task->faulty (assoc (application->command application) :created timestamp) task-id)))))
 
 (defn- log-review-results-for-organization [organization-id results-by-app-id]
   (logging/log-event :info {:run-by "Automatic review checking"
@@ -689,18 +687,17 @@
 (defn pdfa-convert-review-pdfs [& _]
   (mongo/connect!)
   (debug "# of applications with background generated tasks:"
-           (mongo/count :applications {:tasks.source.type "background"}))
+         (mongo/count :applications {:tasks.source.type "background"}))
   (let [eraajo-user (user/batchrun-user (map :id (orgs-for-review-fetch)))]
     (doseq [application (mongo/select :applications {:tasks.source.type "background"})]
       (let [command (assoc (application->command application) :user eraajo-user :created (now))]
         (doseq [task (:tasks application)]
           (if (= "background" (:type (:source task)))
-            (do
-              (doseq [att (:attachments application)]
-                (if (= (:id task) (:id (:source att)))
-                  (do
-                    (debug "application" (:id (:application command)) "- converting task" (:id task) "-> attachment" (:id att) )
-                    (attachment/convert-existing-to-pdfa! (:application command) att)))))))))))
+            (doseq [att (:attachments application)]
+              (if (= (:id task) (:id (:source att)))
+                (do
+                  (debug "application" (:id (:application command)) "- converting task" (:id task) "-> attachment" (:id att))
+                  (attachment/convert-existing-to-pdfa! (:application command) att))))))))))
 
 (defn pdf-to-pdfa-conversion [& [organization start-date end-date]]
   (if (and organization start-date end-date)
@@ -711,14 +708,14 @@
       (env/disable-feature! :convert-pdfs-with-libre)
       (info "Starting pdf to pdf/a conversion for" organization "from" start-date "to" end-date)
       (doseq [application (->> (mongo/with-collection "applications"
-                                                      (monger-query/find {:organization organization
-                                                                          :state {$in states/post-verdict-states}
-                                                                          :permitType {$nin ["ARK"]}
-                                                                          :archived.completed nil
-                                                                          $or [{:submitted {$gte start-ts $lte end-ts}}
-                                                                               {:submitted nil
-                                                                                :created   {$gte start-ts $lte end-ts}}]})
-                                                      (monger-query/sort {:submitted 1}))
+                                 (monger-query/find {:organization organization
+                                                     :state {$in states/post-verdict-states}
+                                                     :permitType {$nin ["ARK"]}
+                                                     :archived.completed nil
+                                                     $or [{:submitted {$gte start-ts $lte end-ts}}
+                                                          {:submitted nil
+                                                           :created   {$gte start-ts $lte end-ts}}]})
+                                 (monger-query/sort {:submitted 1}))
                                (map mongo/with-id))]
         (logging/with-logging-context {:applicationId (:id application)}
           (info "Checking attachments of application" (:id application))

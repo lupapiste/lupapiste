@@ -1004,7 +1004,7 @@
      :attrs nil
      :content (cond
                 (map? v)        (->xml v)
-                (sequential? v) (apply concat (map ->xml v))
+                (sequential? v) (mapcat ->xml v)
                 :default        [(str v)])}))
 
 ;;

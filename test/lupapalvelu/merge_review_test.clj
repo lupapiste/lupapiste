@@ -7,7 +7,9 @@
              [sade.util :as util]))
 
 
-(testable-privates lupapalvelu.review merge-review-tasks matching-task)
+(testable-privates lupapalvelu.review
+                   merge-review-tasks matching-task
+                   remove-repeating-background-ids)
 
 (def rakennustieto-fixture [{:KatselmuksenRakennus {:kiinttun "54300601900001",
                                                     :rakennusnro "001",
@@ -218,3 +220,35 @@
         (matching-task mongo-task [held-review-task
                                    {:data {:muuTunnus {:value "ID"}}}])
         => {:data {:muuTunnus {:value "ID"}}})))))
+
+(fact "Remove repeating background ids"
+  (let [reviews [{:pitaja "One"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "foo"}}]}
+                 {:pitaja "Two"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "bar"}}]}
+                 {:pitaja "Three"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "hello"}}]}
+                 {:pitaja "Four"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "foo"}}]}
+                 {:pitaja "Five"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "foo"}}]}
+                 {:pitaja "Six"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
+                 {:pitaja "Seven"}
+                 {:pitaja "Eight"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "bar"}}]}
+                 {:pitaja "Nine"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "world"}}]}]]
+    (remove-repeating-background-ids reviews)
+    => [{:pitaja "One"}
+        {:pitaja "Two"}
+        {:pitaja "Three"
+         :muuTunnustieto [{:MuuTunnus {:tunnus "hello"}}]}
+        {:pitaja "Four"}
+        {:pitaja "Five"}
+        {:pitaja "Six"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
+        {:pitaja "Seven"}
+        {:pitaja "Eight"}
+        {:pitaja "Nine"
+         :muuTunnustieto [{:MuuTunnus {:tunnus "world"}}]}]))

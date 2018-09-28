@@ -117,9 +117,20 @@
                  (fact "Statement giver can call query"
                        (query teppo :ya-extensions :id ya-id) => ok?)
                  (fact "Submit extension application"
-                       (command pena :submit-application :id ext-id) => ok?)
+                   (command pena :submit-application :id ext-id) => ok?)
+                 (fact "No verdict tab for extension permit"
+                   (query pena :pate-verdict-tab :id ext-id)
+                   => (err :ya-extension-application))
+                 (fact "No contract tab for extension permit"
+                   (query pena :pate-contract-tab :id ext-id)
+                   => (err :error.verdict.not-contract))
+                 (fact "Pate commands disabled"
+                   (query sonja :pate-verdicts :id ext-id)
+                   => (err :ya-extension-application)
+                   (command sonja :new-legacy-verdict-draft :id ext-id)
+                   => (err :ya-extension-application))
                  (fact "Approve extension pseudo query"
-                       (query sonja :approve-ya-extension :id ext-id) => ok?)
+                   (query sonja :approve-ya-extension :id ext-id) => ok?)
                  (fact "Approve application"
                        (command sonja :approve-application :id ext-id :lang :fi) => ok?)
                  (facts "Application state is finished with matching history"
