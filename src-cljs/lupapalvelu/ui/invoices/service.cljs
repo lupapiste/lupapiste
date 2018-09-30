@@ -4,13 +4,10 @@
             [lupapalvelu.ui.invoices.state :as state]
             [sade.shared-util :as util]))
 
-(defn fetch-price-catalogue [app-id]
-  (println ">>> fetch-price-catalogue app-id: " app-id)
-  (common/query "price-catalogue"
-                (fn [result]
-                  (println "fetch-price-catalogue response: " result)
-                  ;;TODO: check why data under key verdicts and change it
-                  (reset! state/price-catalogue (:verdicts result))
-                  (println "price-catalogue-after fetch: " @state/price-catalogue)
-                  )
-                :id app-id))
+(defn insert-invoice [app-id data]
+  (println ">> insert-invoice app-id: " app-id " data: " data)
+  (common/command "insert-invoice"
+                  (fn [result]
+                    (println "insert-invoice response: " result))
+                  :id app-id
+                  :invoice data))

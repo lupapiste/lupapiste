@@ -79,7 +79,22 @@
     (state/refresh-verdict-auths app-id)
 
     (state/refresh-application-auth-model app-id
-                                          #(service/fetch-price-catalogue app-id))
+                                          (fn []
+                                            (service/insert-invoice app-id
+                                                                    {:operations [{:operation-id :linjasaneeraus
+                                                                                   :name "linjasaneeraus"
+                                                                                   :invoice-rows [{:text "Laskurivi1 kpl"
+                                                                                                   :unit :kpl
+                                                                                                   :price-per-unit 10
+                                                                                                   :units 2}
+                                                                                                  {:text "Laskurivi2 m2 "
+                                                                                                   :unit :m2
+                                                                                                   :price-per-unit 20.5
+                                                                                                   :units 15.8}
+                                                                                                  {:text "Laskurivi3 m3 "
+                                                                                                   :unit :m3
+                                                                                                   :price-per-unit 20.5
+                                                                                                   :units 15.8}]}]})))
 
     (println "state/auth? :pate-verdicts:" (state/auth? :pate-verdicts))
 
