@@ -1,38 +1,10 @@
 (ns lupapalvelu.invoices
   "A common interface for accessing invoices, price catalogues and related data"
-  (:require [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
+  (:require [lupapalvelu.mongo :as mongo]
             [schema.core :as sc]
-            [sade.schemas :as ssc]
-            [sade.strings :as ss]
-            [sade.util :as util]
             [sade.core :refer [ok fail]]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as usr]))
-
-(defn fetch-price-catalogue
-  "Fetches price catalogue for the db"
-  ([id]
-   (debug ">> fetch-price-catalogue")
-   (let [query {:_id id}
-         result (mongo/select-one :price-catalogues query)]
-     (info "result:" result)
-     result)))
-
-(sc/defschema PriceCatalogue
-  {:id                                     sc/Str
-   :foo                                    sc/Str})
-
-(sc/defn ^:always-validate price-catalogue :- PriceCatalogue
-  [{:keys [lang application]}]
-  (let [catalogue (fetch-price-catalogue "vantaa-hinnasto-1")]
-    (debug "PPPPPPPPPPPPPPPP")
-    (debug ">> invoices/price-catalogue lang:" lang " application: " (keys application))
-    (debug "data: " (:data application))
-    (debug "application: " application)
-    (debug "catalogue: " catalogue)
-    catalogue
-    ))
+            [taoensso.timbre :refer [trace tracef debug debugf info infof
+                                     warn warnf error errorf fatal fatalf]]))
 
 (sc/defschema InvoiceRow
   {:text sc/Str
@@ -45,18 +17,42 @@
    :name sc/Str
    :invoice-rows [InvoiceRow]})
 
+(sc/defschema Invoice
+  {:id sc/Str
+   :state (sc/enum "draft"       ;;created
+                   "checked"     ;;checked by decision maker and moved to biller
+                   "confirmed"   ;;biller has confirmed the invoice
+                   "transferred" ;;biller has exported the invoice
+                   "billed"      ;;biler has marked the invoice as billed
+                   )
+   :application-id sc/Str
+   :organization-id sc/Str
+   :operations [InvoiceOperation]})
+
 (sc/defschema InvoiceInsertRequest
   {:operations [InvoiceOperation]})
 
-(defn validate-new-invoice [{{invoice-data :invoice} :data}]
-  (debug ">>> validate-invoice data: " invoice-data)
-  (debug "(sc/check InvoiceNewFromUI invoice-data): " (sc/check InvoiceInsertRequest invoice-data))
+(defn validate-insert-invoice-request [{{invoice-data :invoice} :data :as command}]
+  (debug ">> validate-invoice data: " invoice-data)
   (when (sc/check InvoiceInsertRequest invoice-data)
     (fail :error.invalid-invoice)))
 
+(defn validate-invoice [invoice]
+  (debug ">>> validate-invoice: " invoice)
+  (sc/validate Invoice invoice))
+
 (defn create-invoice!
-  [{{invoice-data :invoice} :data}]
-  (debug ">> create-invoice! invoice-data: " invoice-data)
-  (let [id (mongo/create-id)]
-    (mongo/insert :invoices (merge invoice-data {:id id}))
+  [invoice]
+  (debug ">> create-invoice! invoice-request: " invoice)
+  (let [id (mongo/create-id)
+        invoice-with-id (assoc invoice :id id)]
+    (validate-invoice invoice-with-id)
+    (mongo/insert :invoices invoice-with-id)
     id))
+
+(defn ->invoice-db
+  [invoice {:keys [id organization] :as application}]
+  (debug "->invoice-db invoice-request: " invoice " app id: " id)
+  (merge invoice
+         {:application-id id
+          :organization-id organization}))

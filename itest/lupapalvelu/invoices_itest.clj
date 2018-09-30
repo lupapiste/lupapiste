@@ -5,6 +5,7 @@
             [lupapalvelu.integrations-api]
             [lupapalvelu.itest-util :refer :all :as itu]
             [lupapalvelu.invoice-api]
+            [lupapalvelu.invoices :refer [validate-invoice]]
             [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
@@ -25,9 +26,8 @@
      ;;:propertyId "09143200010023"
      ))
 
-
     (fact "Invoice"
-          (fact "should be created given a valid invoice"
+          (fact "should be fetchable from db after insertion and have all the required fields"
                 (let [{:keys [id] :as app} (dummy-submitted-application)
                       invoice {:operations [{:operation-id "linjasaneeraus"
                                              :name "linjasaneeraus"
@@ -42,8 +42,12 @@
                                                             {:text "Laskurivi3 m3 "
                                                              :unit "m3"
                                                              :price-per-unit 20.5
-                                                             :units 15.8}]}]}]
-                  (itu/local-command sonja :insert-invoice :id id :invoice invoice) => ok?))
+                                                             :units 15.8}]}]}
+                      {:keys [invoice-id]} (itu/local-command sonja :insert-invoice
+                                                              :id id
+                                                              :invoice invoice) => ok?]
+                  invoice-id => string?
+                  (validate-invoice  (mongo/by-id "invoices" invoice-id))))
 
           (fact "should not be created when one of the invoice-rows has an unknown unit"
                 (let [{:keys [id] :as app} (dummy-submitted-application)
@@ -60,9 +64,3 @@
                   (itu/local-command sonja :insert-invoice :id id :invoice invoice) => fail?))
           )
     ))
-
-
-(defn foo []
-  lupapalvelu.invoices/InvoiceRow)
-
-(foo)
