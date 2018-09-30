@@ -56,3 +56,6 @@
   (merge invoice
          {:application-id id
           :organization-id organization}))
+
+(defn fetch-by-application-id [application-id]
+  (mongo/select "invoices" {:application-id application-id}))
