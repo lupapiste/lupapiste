@@ -130,7 +130,7 @@
    (invoice-list @state/invoices)])
 
 (defn mount-component []
-  (when (common/feature? :pate)
+  (when (common/feature? :invoices)
     (rum/mount (invoices)
                (.getElementById js/document (:dom-id @args)))))
 
