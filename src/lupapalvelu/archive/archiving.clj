@@ -265,8 +265,8 @@
      :location-wgs84        (location application op-filtered-bldgs :location-wgs84)
      :projectDescription    (project-description application op-filtered-docs)}))
 
-(defn permit-ids-for-archiving [verdicts attachment permitType]
-  (let [backend-ids (remove nil? (map :kuntalupatunnus verdicts))]
+(defn permit-ids-for-archiving [application attachment permitType]
+  (let [backend-ids (verdict/kuntalupatunnukset application)]
     (if (not= permitType permit/ARK)
       backend-ids
       (conj (remove (fn [id] (= id (:backendId attachment))) backend-ids) (:backendId attachment)))))
@@ -283,7 +283,7 @@
    s2-md-key
    & [attachment]]
   (let [s2-metadata (or (s2-md-key attachment) (s2-md-key application))
-        permit-ids (permit-ids-for-archiving verdicts attachment permitType)
+        permit-ids (permit-ids-for-archiving application attachment permitType)
         base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
                        ; Don't use application ids for archiving projects if there are municipal permit ids
                        :applicationId         (when (or (not= permitType permit/ARK) (empty? permit-ids)) id)
@@ -296,14 +296,14 @@
                        :organization          organization
                        :municipality          municipality
                        :kuntalupatunnukset    permit-ids
-                       :lupapvm               (or (get-verdict-date application :lainvoimainen)
-                                                  (get-paatospvm application))
+                       :lupapvm               (or (verdict/lainvoimainen application ts->iso-8601-date)
+                                                  (verdict/verdict-date application ts->iso-8601-date))
                        :paatospvm             (if (not= permitType permit/ARK)
-                                                (get-paatospvm application)
+                                                (verdict/verdict-date application ts->iso-8601-date)
                                                 (or (get-ark-paatospvm verdicts attachment)
-                                                    (get-paatospvm application)))
-                       :jattopvm              (get-jattopvm application)
-                       :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
+                                                    (verdict/verdict-date application ts->iso-8601-date)))
+                       :jattopvm              (ts->iso-8601-date (:submitted application))
+                       :paatoksentekija       (verdict/handler application)
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
                        :kasittelija           (select-keys (util/find-first :general handlers) [:userId :firstName :lastName])
                        :arkistoija            (select-keys user [:username :firstName :lastName])
@@ -330,7 +330,7 @@
   "Prepares metadata for selected attachments/documents
    and sends them to Onkalo archive in a separate thread"
   [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
-  (if (or (get-paatospvm application)
+  (if (or (verdict/verdict-date application)
           (foreman/foreman-app? application)
           (valid-ya-state? application)
           (archiving-project? application))
