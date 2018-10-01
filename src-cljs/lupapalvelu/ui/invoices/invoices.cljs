@@ -3,31 +3,70 @@
             [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
+            [lupapalvelu.ui.components.accordion :refer [accordion caret-toggle]]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.invoices.layout :as layout]
             [lupapalvelu.ui.invoices.service :as service]
             [lupapalvelu.ui.invoices.state :as state]
             [rum.core :as rum]
-            [sade.shared-util :as util]))
+            [sade.shared-util :as util]
+            [lupapalvelu.ui.components :refer [autocomplete]]))
 
 (enable-console-print!)
 
 (defonce args (atom {}))
 
+(rum/defc autosaving-input [invoice-row value-key invoice-id]
+  [:input {:class-name "invoice-autosaving-input" :value (value-key invoice-row)}])
+
+(rum/defc invoice-table-row [invoice-row invoice-id]
+  [:tr
+   [:td (:text invoice-row)]
+   [:td (autosaving-input invoice-row :units invoice-id)]
+   [:td (str (:unit invoice-row))]
+   [:td (:price-per-unit invoice-row)]
+   [:td (autosaving-input {:ale "20"} :ale invoice-id)]
+   [:td "0.00"]
+   [:td (* (:units invoice-row) (:price-per-unit invoice-row))]])
+
+(rum/defc filterable-select-row []
+  [:tr {:style {:border-style "dashed" :border-width "1px" :border-color "#dddddd"}}
+   [:td {:col-span 7} (autocomplete "groo" {:items [{:text "foo" :value "foo value"} {:text "faa" :value "groo"}] })]])
+
+(rum/defc operations-component [operation invoice-id]
+  (let [invoice-rows (map (fn [row] (invoice-table-row row invoice-id)) (:invoice-rows operation))]
+    [:table {:class-name "invoice-operations-table"}
+     [:thead
+      [:tr
+       [:th (:name operation)]
+       [:th "määrä"]
+       [:th "Yksikkö"]
+       [:th "A-Hinta (€)"]
+       [:th "Ale (%)"]
+       [:th "Alv (€)"]
+       [:th "Yhteensä (€)"]]]
+     [:tbody
+      invoice-rows
+      (filterable-select-row)]]))
+
+(rum/defc invoice-data
+  [invoice]
+  [:div {:class-name "invoice-operations-table-wrapper"}
+   (map (fn [operation]
+          (operations-component operation (:id invoice))) (:operations invoice))])
+
 (rum/defc invoice-component
   [invoice]
-  (let [foo (js/console.log invoice)]
-    [:div
-     [:h1 (:id invoice)]]))
+  (let []
+    (accordion {:accordion-toggle-component caret-toggle
+                :accordion-content-component (invoice-data invoice)
+                :extra-class "invoice-accordion"})))
 
 (rum/defc invoice-table
   [invoices]
   [:div
    (map (fn [invoice]
-          [:section {:class-name "accordion" :key (:id invoice)}
-           [:div {:class-name "accordion_content" "data-accordion-state" "open"}
-            (invoice-component invoice)
-            ]]) invoices)])
+          (invoice-component invoice)) invoices)])
 
 (rum/defc invoice-list < rum/reactive
   [invoices]
@@ -37,25 +76,23 @@
      {:on-click #(do (js/console.log "Adding new invoice"))}
      [:i.lupicon-circle-plus]
      [:span "Uusi lasku"]]
-    [:h2 "Laskutus"]
-    [:div
-     (invoice-table invoices)
-     ]
-    ]])
+    [:h2 "Laskutus"]]
+   [:div
+     (invoice-table invoices)]])
 
 
 (def dummy-invoices [{:id "1"
-                      :operations [:oper1 {:name "foo-operation"
+                      :operations [{:name "foo-operation"
                                            :invoice-rows [{:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}
                                                           {:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 40}
                                                           {:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}]}
-                                   :oper2 {:name "bar-operation"
+                                   {:name "bar-operation"
                                            :invoice-rows [{:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}
                                                           {:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}]}]}
                      {:id "2"
-                      :operations [:oper1 {:name "foo-operation"
+                      :operations [{:name "foo-operation"
                                            :invoice-rows {:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}}
-                                   :oper2 {:name "bar-operation"
+                                   {:name "bar-operation"
                                            :invoice-rows [{:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}
                                                           {:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}]}]}])
 
@@ -125,7 +162,7 @@
 
 (defn ^:export start [domId params]
   (println "invoices.cljs start  domId:" domId " params: " params)
-  (when (common/feature? :pate)
+  (when (common/feature? :invoices)
     (swap! args assoc
            :contracts? (common/oget params :contracts)
            :dom-id (name domId))

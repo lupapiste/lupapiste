@@ -1,0 +1,32 @@
+.invoice-accordion.rollup {
+    border-width: 1px;
+    border-color: $gray119;
+    border-style: solid;
+    width: 100%;
+    margin-bottom: $marginL;
+}
+
+.invoice-accordion .roll-up-header {
+    background-color: $gray119;
+}
+
+.invoice-operations-table-wrapper {
+    margin: {
+        top: $marginL;
+        right: $marginM;
+        left: $marginM;
+        bottom: $marginL;
+    }
+}
+
+.invoice-operations-table {
+    box-sizing: border-box;
+    border-width: 1px;
+    border-color: $gray221;
+    border-style: solid;
+
+    > thead {
+        background-color: $gray221;
+    }
+
+}
