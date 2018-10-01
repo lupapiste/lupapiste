@@ -10,7 +10,6 @@ LUPAPISTE.SidePanelService = function() {
   // Observables will have objects with id and value.
   var noticeLatest = {urgency: ko.observable({}),
                       authorityNotice: ko.observable({})};
-
   function latestNotice( field ) {
     return ko.computed({
       read: function() {
@@ -74,11 +73,13 @@ LUPAPISTE.SidePanelService = function() {
     }
   });
 
-  hub.subscribe( "application-loaded", function() {
+  function clearNotice() {
     noticeLatest.urgency({} );
     noticeLatest.authorityNotice( {} );
     noticeSeenAppId("");
-  });
+  }
+
+  hub.subscribe( "application-model-updated", clearNotice );
 
   var changeNoticeInfo = _.debounce(function(command, data) {
     ajax
@@ -147,9 +148,6 @@ LUPAPISTE.SidePanelService = function() {
   // refresh conversation when page changes
   function refresh(pageChange) {
     self.application.authorityNotice = ko.observable();
-    if( self.application.id() ) {
-      self.application.reload();
-    }
     var page = pageChange.pageId;
     if (page) {
       var type = pageutil.getPage();
