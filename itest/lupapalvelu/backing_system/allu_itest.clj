@@ -28,7 +28,6 @@
   (:import [java.io InputStream]))
 
 ;;; TODO: Ensure that errors from ALLU don't break the application process
-;;; TODO: Sijoituslupa
 
 ;;;; Nano-framework :P for Model-Based Testing
 ;;;; ===================================================================================================================

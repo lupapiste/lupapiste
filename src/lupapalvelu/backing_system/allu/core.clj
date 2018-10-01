@@ -416,7 +416,6 @@
 
 (declare update-application!)
 
-;; TODO: Non-placement-contract ALLU applications
 (defn submit-application!
   "Submit application to ALLU and save the returned id as application.integrationKeys.ALLU.id. If this is a resubmit
   (after return-to-draft) just does `update-application!` instead."
@@ -433,7 +432,6 @@
   (when (application/submitted? application)
     (send-allu-request! (placement-update-request true command))))
 
-;; TODO: Non-placement-contract ALLU applications
 (defn update-application!
   "Update application in ALLU (if it had been sent there)."
   [{{:keys [permitSubtype]} :application :as command}]
@@ -445,7 +443,6 @@
   [command]
   (send-allu-request! (placement-update-request false command)))
 
-;; TODO: Non-placement-contract ALLU applications
 (defn lock-application!
   "Lock application in ALLU for verdict evaluation."
   [{{:keys [permitSubtype]} :application :as command}]
