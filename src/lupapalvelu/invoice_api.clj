@@ -4,7 +4,7 @@
             [lupapalvelu.invoices :refer [Invoice] :as invoices]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
-            [sade.core :refer :all]
+            [sade.core :refer [ok fail]]
             [schema.core :as sc]))
 
 ;; ------------------------------------------
@@ -28,6 +28,22 @@
     (debug "insert-invoice invoice-to-db:" invoice-to-db)
     (ok :invoice-id (invoices/create-invoice! (merge invoice-to-db
                                                      {:state "draft"})))))
+
+(defcommand update-invoice
+  {:description      "Updates one invoice to db with state as draft"
+   :feature          :invoices
+   :user-roles       #{:authority}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :parameters       [id invoice]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      ;;(partial action/non-blank-parameters [:invoice])
+                      ]
+   :states           states/post-submitted-states}
+  [{:keys [data] :as command}]
+  (do (debug "update-invoice invoice-request:" (:invoice data))
+      (invoices/update-invoice! (:invoice data))
+      (ok)))
 
 (defquery application-invoices
   {:description      "Returns all invoices for an application"

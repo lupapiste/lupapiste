@@ -12,6 +12,8 @@
    :price-per-unit sc/Num
    :units sc/Num})
 
+;;TODO should operation-id and name come from constants in lupapalvelu.operations
+;;     and/or a schema somewhere else?
 (sc/defschema InvoiceOperation
   {:operation-id sc/Str
    :name sc/Str
@@ -49,6 +51,13 @@
     (validate-invoice invoice-with-id)
     (mongo/insert :invoices invoice-with-id)
     id))
+
+(defn update-invoice!
+  [{:keys [id] :as invoice}]
+  (let [current-invoice (mongo/by-id "invoices" id)
+        new-invoice (merge current-invoice (select-keys invoice [:operations :state]))]
+    (validate-invoice new-invoice)
+    (mongo/update-by-id "invoices" id new-invoice)))
 
 (defn ->invoice-db
   [invoice {:keys [id organization] :as application}]
