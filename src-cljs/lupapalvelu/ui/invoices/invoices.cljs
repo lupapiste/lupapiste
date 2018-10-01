@@ -131,7 +131,8 @@
                                                                                                   {:text "Laskurivi3 m3 "
                                                                                                    :unit :m3
                                                                                                    :price-per-unit 20.5
-                                                                                                   :units 15.8}]}]})))
+                                                                                                   :units 15.8}]}]})
+                                            (service/fetch-invoices app-id)))
 
     (println "state/auth? :pate-verdicts:" (state/auth? :pate-verdicts))
 

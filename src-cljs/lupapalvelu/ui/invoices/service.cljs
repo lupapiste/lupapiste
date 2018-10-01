@@ -11,3 +11,10 @@
                     (println "insert-invoice response: " result))
                   :id app-id
                   :invoice data))
+
+(defn fetch-invoices [app-id]
+  (common/query :application-invoices
+                (fn [data]
+                  (println data)
+                  (reset! state/invoices (:invoices data)))
+                :id app-id))
