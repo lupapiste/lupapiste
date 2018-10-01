@@ -100,9 +100,7 @@
                                             http-request
                                             => (contains {:uri            (str "/applications/" allu-id "/cancelled")
                                                           :request-method :put
-                                                          :headers        headers
-                                                          :content-type   :json})
-                                            (sc/check PlacementContract (:body http-request)) => nil)
+                                                          :headers        headers}))
 
                   [:placementcontracts :create] (facts "placementcontracts.create request"
                                                   (dissoc http-request :body)
