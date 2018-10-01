@@ -79,7 +79,7 @@
      :keystore-password key-password
      :key-alias key-alias
      :mutables mutables
-     :token-timeout 10 ; This is in minutes
+     :token-timeout 5 ; This is in minutes
      :sp-cert (saml-shared/get-certificate-b64 keystore key-password key-alias)
      :decrypter (saml-sp/make-saml-decrypter keystore key-password key-alias)
      :organizational-settings {:enabled enabled
