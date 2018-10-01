@@ -35,9 +35,6 @@
   (:import [java.lang AutoCloseable]
            [java.io InputStream]))
 
-;;; TODO: Ensure that errors from ALLU don't break the application process
-;;; TODO: Sijoituslupa
-
 (defstate ^:private current-jwt
   :start (atom (env/value :allu :jwt)))
 
@@ -150,7 +147,6 @@
    :action       action
    :data         data})
 
-;; TODO: :attachment-files and :attachmentsCount for attachment messages
 (defn- request-integration-message [command http-request message-subtype]
   (base-integration-message command message-subtype "out" "processing" http-request))
 
@@ -425,7 +421,7 @@
     (create-placement-contract! command)
     (update-application! command)))
 
-;; TODO: Will error if user changes the application to contain invalid data, is that what we want?
+;; TODO: If the update message data is the same as the previous one or invalid, don't send/enqueue the message at all:
 (defn- update-placement-contract!
   "Update placement contract in ALLU (if it had been sent there)."
   [{:keys [application] :as command}]

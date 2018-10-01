@@ -13,9 +13,9 @@
             [lupapalvelu.document.tools :refer [doc-name]]
             [lupapalvelu.i18n :refer [localize]]))
 
-;; TODO: Should this be injected from commands instead?
 (def lang
-  "The language to use when localizing output to ALLU"
+  "The language to use when localizing output to ALLU. ALLU seems to operate in finnish only so it is better to hardcode
+  this here instead of using e.g. the applicant's language setting."
   "fi")
 
 (def- WGS84-URN "EPSG:4326")

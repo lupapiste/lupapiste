@@ -27,8 +27,6 @@
             [lupapalvelu.domain :as domain])
   (:import [java.io InputStream]))
 
-;;; TODO: Ensure that errors from ALLU don't break the application process
-
 ;;;; Nano-framework :P for Model-Based Testing
 ;;;; ===================================================================================================================
 
@@ -378,13 +376,12 @@
                                                         :complementNeeded (fn [[current _] id]
                                                                             (request-for-complement raktark-helsinki id)
                                                                             current)
+                                                        (:agreementPrepared :agreementSigned) ; TODO
                                                         (fn [[_ dest :as transition] _]
                                                           (warn "TODO:" transition)
                                                           dest)))]))
                                          (state-graph->transitions full-sijoitussopimus-state-graph))
               :visit-goal 1))
-
-          ;;; TODO: agreementPrepared/Signed (LPK-3888)
 
           (let [old-id-counter (:id-counter @allu-state)]
             (fact "ALLU integration disabled for"
