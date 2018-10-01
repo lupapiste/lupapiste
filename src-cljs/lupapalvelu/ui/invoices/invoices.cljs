@@ -49,11 +49,29 @@
       invoice-rows
       (filterable-select-row)]]))
 
+(rum/defcs invoice-add-operation-row < (rum/local false ::is-open?)
+  [state invoice]
+  (let [is-open? (::is-open? state)]
+    [:div {:class-name "button-row-left"}
+     [:button.secondary {:on-click #(reset! is-open? (not @is-open?))}
+      [:i.lupicon-circle-plus]
+      [:span "Lisää toimenpide"]]
+     (if @is-open?
+       (autocomplete :uusi-talo {:items [{:text "Uusi talo" :value :uusi-talo}
+                                         {:text "Linjasaneeraus" :value :linjasaneeraus}]
+                                 :callback (fn [value]
+                                             (reset! is-open? false)
+                                             (println value)
+                                             (service/add-operation-to-invoice (:id invoice) value))}))])
+  )
+
 (rum/defc invoice-data
   [invoice]
   [:div {:class-name "invoice-operations-table-wrapper"}
    (map (fn [operation]
-          (operations-component operation (:id invoice))) (:operations invoice))])
+          (operations-component operation (:id invoice))) (:operations invoice))
+   (invoice-add-operation-row invoice)
+   ])
 
 (rum/defc invoice-component
   [invoice]
@@ -62,39 +80,33 @@
                 :accordion-content-component (invoice-data invoice)
                 :extra-class "invoice-accordion"})))
 
-(rum/defc invoice-table
+(rum/defc invoice-table < rum/reactive
   [invoices]
-  [:div
-   (map (fn [invoice]
-          (invoice-component invoice)) invoices)])
+  (let [new-invoice  @state/new-invoice]
+    [:div
+     (if new-invoice
+       (invoice-component new-invoice))
+     (map (fn [invoice]
+            (invoice-component invoice)) invoices)]))
+
+(rum/defc new-invoice-button < rum/reactive
+  [new-invoice]
+  [:button.primary {:disabled (not (nil? new-invoice))
+                    :on-click #(service/create-invoice)}
+      [:i.lupicon-circle-plus]
+      [:span "Uusi lasku"]])
 
 (rum/defc invoice-list < rum/reactive
   [invoices]
-  [:div
+  [:div {:class-name "invoice-list-wrapper"}
    [:div.operation-button-row
-    [:button.primary
-     {:on-click #(do (js/console.log "Adding new invoice"))}
-     [:i.lupicon-circle-plus]
-     [:span "Uusi lasku"]]
-    [:h2 "Laskutus"]]
+    [:div
+     [:h2 "LASKUTUS"]]
+    [:div {:class-name "new-invoice-button-container"}
+     (new-invoice-button (rum/react state/new-invoice))]
+    [:div {:class-name "clear"}]]
    [:div
      (invoice-table invoices)]])
-
-
-(def dummy-invoices [{:id "1"
-                      :operations [{:name "foo-operation"
-                                           :invoice-rows [{:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}
-                                                          {:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 40}
-                                                          {:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}]}
-                                   {:name "bar-operation"
-                                           :invoice-rows [{:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}
-                                                          {:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}]}]}
-                     {:id "2"
-                      :operations [{:name "foo-operation"
-                                           :invoice-rows {:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}}
-                                   {:name "bar-operation"
-                                           :invoice-rows [{:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}
-                                                          {:id "row1" :text "laskurivin teksti 1" :unit :m2 :price-per-unit 30 :units 20}]}]}])
 
 (def dummy-price-catalog {:rows [{:id "id1" :text "price row 1" :unit :m2 :price-per-unit 30}
                                  {:id "id2" :text "price row 2" :unit :m2 :price-per-unit 30}]})
@@ -104,6 +116,7 @@
   (when-let [app-id (js/pageutil.hashApplicationId)]
     (reset! state/price-catalogue dummy-price-catalog)
     (reset! state/invoices [])
+    (reset! state/new-invoice nil)
     (state/refresh-verdict-auths app-id)
     (state/refresh-application-auth-model app-id
                                           (fn []

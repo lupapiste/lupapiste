@@ -1,3 +1,28 @@
+.invoice-list-wrapper {
+    .operation-button-row {
+        div {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        div:first-child {
+            float: left;
+
+
+        }
+        div.new-invoice-button-container {
+            float: right;
+            button {
+
+            }
+
+        }
+        div.clear {
+            clear: both;
+            width: 100%;
+        }
+    }
+}
+
 .invoice-accordion.rollup {
     border-width: 1px;
     border-color: $gray119;

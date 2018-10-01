@@ -18,3 +18,16 @@
                   (println data)
                   (reset! state/invoices (:invoices data)))
                 :id app-id))
+
+(defn create-invoice []
+  (reset! state/new-invoice {:state "draft"}))
+
+(defn cancel-new-invoice []
+  (reset! state/new-invoice nil))
+
+(defn add-operation-to-invoice [invoice-id operation]
+  (let [invoice (some (fn [_invoice] (if (= (:id _invoice) invoice-id) _invoice false))
+                      @state/invoices)
+        updated-invoice (assoc-in invoice [:operations] (-> (:operations invoice)
+                                                           (conj {:operation-id operation :name operation :invoice-rows []})))
+        foo (println updated-invoice)]))
