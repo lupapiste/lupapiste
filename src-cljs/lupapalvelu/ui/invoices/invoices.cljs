@@ -103,6 +103,7 @@
   (println ">> bootstrap-invoices")
   (when-let [app-id (js/pageutil.hashApplicationId)]
     (reset! state/price-catalogue dummy-price-catalog)
+    (reset! state/invoices [])
     (state/refresh-verdict-auths app-id)
     (state/refresh-application-auth-model app-id
                                           (fn []
@@ -121,13 +122,13 @@
                                                                                                    :unit :m3
                                                                                                    :price-per-unit 20.5
                                                                                                    :units 15.8}]}]})
-    ))
+                                            (service/fetch-invoices app-id)))    ))
 
 
 (rum/defc invoices < rum/reactive
   []
   [:div
-   (invoice-list @state/invoices)])
+   (invoice-list (rum/react state/invoices))])
 
 (defn mount-component []
   (when (common/feature? :invoices)
