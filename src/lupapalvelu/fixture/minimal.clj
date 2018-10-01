@@ -1051,7 +1051,8 @@
                                 :permitType "YA"
                                 :inforequest-enabled true
                                 :new-application-enabled true
-                                :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}]
+                                :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}
+                                :pate-enabled true}]
                        :links [(link {:fi "Kuopio", :sv "Kuopio"}
                                      "http://www.kuopio.fi")]
                        :krysp {:YA {:url local-krysp :version "2.1.2" :ftpUser "dev_ya_kuopio"}}
@@ -1144,8 +1145,7 @@
                        :scope [{:municipality "837"
                                 :permitType "YA"
                                 :inforequest-enabled true
-                                :new-application-enabled true
-                                :pate-enabled true}]
+                                :new-application-enabled true}]
                        :statementGivers [{:id "521f1e82e4b0d14f5a87f179"
                                           :text "Paloviranomainen"
                                           :email "jussi.viranomainen@tampere.fi"

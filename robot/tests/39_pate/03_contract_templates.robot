@@ -8,8 +8,8 @@ Resource       pate_resource.robot
 
 *** Test Cases ***
 
-Tampere YA admin logs in
-  Tampere-ya logs in
+Kuopio YA admin logs in
+  Kuopio-ya logs in
   Go to page  pate-verdict-templates
 
 Only Pate-supported categories are selectable
