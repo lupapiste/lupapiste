@@ -34,8 +34,9 @@
                                                                      {:appeal-id        id
                                                                       :type             type
                                                                       :author           (ss/trim author)
-                                                                      ;; Appeal timestamps are in seconds
-                                                                      :datestamp        (.unix (js/util.toMoment date "fi"))
+                                                                      ;; Appeal timestamps are in seconds. The ISO fallback is needed for robots.
+                                                                      :datestamp        (.unix (or (js/util.toMoment date "fi")
+                                                                                                   (js/util.toMoment date "iso")))
                                                                       :text             (ss/trim text)
                                                                       :filedatas        (service/canonize-filedatas @filedatas*)
                                                                       :deleted-file-ids deleted-file-ids}
@@ -47,11 +48,12 @@
                             :test-id  :cancel-appeal
                             :on-click close-fn})])
 
-(defn file-cell [{:keys [contentType filename fileId size]}]
+(defn- file-cell [postfix {:keys [contentType filename fileId size]}]
   [:div
-   [:a {:href   (js/sprintf "/api/raw/download-attachment?view=true&file-id=%s&id=%s"
-                            fileId @state/application-id)
-        :target "_blank"} filename]
+   [:a (common/add-test-id {:href   (js/sprintf "/api/raw/download-attachment?view=true&file-id=%s&id=%s"
+                                                fileId @state/application-id)
+                            :target "_blank"}
+                           :appeal-file postfix) filename]
    [:span.pate-left-space (if (js/loc.hasTerm contentType)
       (common/loc contentType)
       contentType)]
@@ -66,12 +68,13 @@
                      [:tr.pate-appeal-row
                       {::key  (str "file-" i)
                        :class (common/css-flags :odd (odd? i) :even (even? i))}
-                      [:td (file-cell file)]
+                      [:td (file-cell i file)]
                       [:td [:i.primary.lupicon-remove
-                            {:on-click (fn [_]
-                                         (swap! data* update :deleted-file-ids conj file-id)
-                                         (swap! data* update :files
-                                                (util/fn->> (remove #(= (:fileId %) file-id)))))}]]])
+                            (common/add-test-id {:on-click (fn [_]
+                                                             (swap! data* update :deleted-file-ids conj file-id)
+                                                             (swap! data* update :files
+                                                                    (util/fn->> (remove #(= (:fileId %) file-id)))))}
+                                                :delete-appeal-file i)]]])
                    old-files)]]))
 
 (rum/defc appeal-form < rum/reactive
@@ -92,7 +95,8 @@
                           :required? (not appeal-id)
                           :align     :full}
                          (if appeal-id
-                           [:span.formatted (path/loc :verdict.muutoksenhaku (path/value :type data*))]
+                           [:span.formatted (common/add-test-id {} :appeal-type)
+                            (path/loc :verdict.muutoksenhaku (path/value :type data*))]
                            (components/dropdown (rum/cursor data* :type)
                                                 {:items     (map (fn [t]
                                                                    {:value t
@@ -185,7 +189,9 @@
                                  [:td.align--half (common/add-test-id {} :appeal i :authors)
                                   author]
                                  [:td.align--right (common/add-test-id {} :appeal i :date) date]
-                                 [:td.align--half (map file-cell files)]
+                                 [:td.align--half (map-indexed (fn [file-i file]
+                                                                 (file-cell [i file-i] file))
+                                                               files)]
                                  [:td.align--right
                                   [:a.pate-appeal-operation (common/add-test-id {:on-click toggle-fn}
                                                                                 :appeal i :toggle)

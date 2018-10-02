@@ -418,6 +418,7 @@
 
 ;; Special options (all optional):
 ;;   callback: on-blur callback
+;;   test-id: Test id for the underlying input.
 ;; The rest of the options are passed to the underlying input.
 ;; Note: date format is always the Finnish format (21.8.2017).
 (rum/defcs date-edit < rum/reactive
@@ -430,7 +431,7 @@
                                :on-blur #(set-selected date*
                                                        (.. % -target -value)
                                                        callback)}
-                              (dissoc options :callback))
+                              (dissoc options :callback :test-id))
                        test-id)])
 
 (rum/defc text-and-link < rum/reactive

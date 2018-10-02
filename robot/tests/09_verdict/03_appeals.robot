@@ -47,18 +47,20 @@ The appeal is visible on the Attachments tab
   Open tab  attachments
   Element should be visible  jquery=tr[data-test-type='muutoksenhaku.oikaisuvaatimus']
   Open tab  verdict
-  debug
 
 Sonja edits appeal
+  Open verdict
   Wait test id visible  appeal-0-toggle
   Click by test id  appeal-0-toggle
-  Check appeal form  0-0-0  appeal  Veijo  01.04.2016  Hello world
-  Edit authors  0-0-0  Liisa
-  Edit date  0-0-0  5.5.2015
-  OK bubble 0-0-0
-  Appeals row check  0-0  0  appeal  Liisa  5.5.2015
+  Check appeal form  Valitus  Veijo  1.4.2016  Hello world
+  Edit authors  Liisa
+  Edit date  5.5.2015
+  debug
+  Save appeal
+  Appeals row check  0  appeal  Liisa  5.5.2015
 
 Invalid date should show warning
+  [Tags]  Fail
   Click by test id  edit-appeal-0-0-0
   Edit date  0-0-0  33.88.99999
   Element should be visible  jquery=div.bubble-dialog .form-cell__message .lupicon-warning
@@ -69,12 +71,12 @@ Invalid date should show warning
   Appeals row check  0-0  0  appeal  Liisa  5.5.2015
 
 Appeal can contain multiple files
-  Click by test id  edit-appeal-0-0-0
-  Add file  0-0-0  ${PNG_TESTFILE_PATH}
-  OK bubble 0-0-0
-  Appeals row file check  0-0  0  ${PNG_TESTFILE_NAME}  1
+  Click by test id  edit-appeal-0-toggle
+  Add file  ${PNG_TESTFILE_PATH}
+  Save appeal
+  Appeals row file check  0  ${PNG_TESTFILE_NAME}  1
   # Originally TXT file was uploaded, but it is converted to PDF/A by Libre Office
-  Appeals row file check  0-0  0  ${PDF_TESTFILE_NAME}  0
+  Appeals row file check  0  ${PDF_TESTFILE_NAME}
 
 Both files are shown in the Attachments tab
   Open tab  attachments
@@ -248,8 +250,8 @@ Edit authors
   Fill test id  appeal-authors  ${authors}
 
 Edit date
-  [Arguments]  ${date}
-  Fill test id  appeal-date  ${date}
+  [Arguments]  ${isodate}
+  Execute javascript  (new Pikaday( {field: $("[data-test-id=appeal-date]")[0]})).setDate( ${isodate} );
 
 Edit extra
   [Arguments]  ${extra}
@@ -269,12 +271,10 @@ Cancel bubble ${postfix}
 Check appeal form
   [Arguments]  ${appealType}  ${authors}  ${date}  ${extra}=${EMPTY}
   Scroll to test id  save-appeal
-  Element should be visible  jquery=span[data-test-id=appeal-type-${postfix}][data-appeal-type=${appealType}]
-  Textfield value should be  jquery=input[data-test-id=appeal-authors-${postfix}]  ${authors}
-  ## Disable date picker
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Textfield value should be  jquery=input[data-test-id=appeal-date-${postfix}]  ${date}
-  Textarea value should be  jquery=textarea[data-test-id=appeal-extra-${postfix}]  ${extra}
+  Test id text is  appeal-type  ${appealType}
+  Test id input is  appeal-authors  ${authors}
+  Test id input is  appeal-date  ${date}
+  Test id input is  appeal-text  ${extra}
 
 Add appeal
   [Arguments]  ${appealType}  ${authors}  ${date}  ${extra}=${EMPTY}
@@ -307,9 +307,8 @@ Appeals row check
   Test id text is  appeal-${index}-date  ${date}
 
 Appeals row file check
-  [Arguments]  ${postfix}  ${row}  ${filename}  ${index}=0
-  Set Row Selector  ${postfix}  ${row}
-  Wait Until  Element should contain  ${selector} li[data-test-id=appeals-files-${index}] a  ${filename}
+  [Arguments]    ${row-index}  ${filename}  ${file-index}=0
+  Test id should contain  appeal-file-${row-index}  ${file-index}
 
 No frontend errors
   Logout

@@ -551,7 +551,8 @@ var util = (function($) {
   // Date is always displayed in the Finnish format.
   var dateFormats = {fi: "D.M.YYYY",
                      sv: "D.M.YYYY",
-                     en: "M/D/YYYY"};
+                     en: "M/D/YYYY",
+                     iso: "YYYY-MM-DD"};
 
   // Converts date to moment. The first argument is considered
   // timestamp (string or int), if it can be converted to positive
