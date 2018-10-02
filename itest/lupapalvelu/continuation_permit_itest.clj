@@ -52,7 +52,10 @@
       ;; It is forbidden to add jatkolupa for a jatkolupa, but already the wrong state blocks the try.
       (:state jatkoaika-application) => "finished"
       (fact "Verdict cannot be given in the finished state"
-        (let [{:keys [verdict-id]} (command apikey :new-legacy-verdict-draft
+        (command apikey :new-legacy-verdict-draft
+                   :id jatkoaika-application-id)
+        => (err :ya-extension-application)
+        #_(let [{:keys [verdict-id]} (command apikey :new-legacy-verdict-draft
                                             :id jatkoaika-application-id)]
           (fill-verdict apikey jatkoaika-application-id verdict-id
                         :kuntalupatunnus "888-10-12"
