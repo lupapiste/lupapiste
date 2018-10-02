@@ -162,23 +162,9 @@
     (map :name)
     (distinct)))
 
-(defn- ->iso-8601-date [date]
-  (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) date))
-
 (defn ts->iso-8601-date [ts]
   (when (number? ts)
-    (->iso-8601-date (c/from-long (long ts)))))
-
-(defn- get-lainvoimainen-date [application]
-  (ts->iso-8601-date (verdict/lainvoimainen-date application)))
-
-(defn get-from-verdict-minutes [{:keys [verdicts]} key]
-  (->> verdicts
-       (map (fn [{:keys [paatokset]}]
-              (map (fn [pt] (map key (:poytakirjat pt))) paatokset)))
-       (flatten)
-       (remove nil?)
-       (first)))
+    (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) (c/from-long (long ts)))))
 
 (defn valid-ya-state? [application]
   (and (= "YA" (:permitType application))
@@ -186,12 +172,6 @@
 
 (defn archiving-project? [application]
   (= :ARK (keyword (:permitType application))))
-
-(defn- get-paatospvm [application]
-  (ts->iso-8601-date (verdict/verdict-date application)))
-
-(defn- get-jattopvm [application]
-  (ts->iso-8601-date (:submitted application)))
 
 (defn- get-usages [{:keys [documents]} op-ids]
   (let [op-docs (remove #(nil? (get-in % [:schema-info :op :id])) documents)
