@@ -131,7 +131,7 @@
       (and valid? (seq authz)) (validated-login req org-id firstName lastName email authz)
       valid-signature? (do
                          (error "User does not have organization authorization")
-                         (response/redirect (format "%s/app/fi/welcome#!/login" (:host (env/get-config)))))
+                         (response/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
       :else (do
               (error "SAML validation failed")
               (response/status 403 (response/content-type "text/plain" "Validation of SAML response failed"))))))
