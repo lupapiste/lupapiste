@@ -24,13 +24,14 @@
   [{:keys [application data] :as command}]
   (let [invoice-request (:invoice data)
         invoice-to-db (invoices/->invoice-db invoice-request application)]
+    (debug "insert-invoice command keys:" (keys command))
     (debug "insert-invoice invoice-request:" invoice-request)
     (debug "insert-invoice invoice-to-db:" invoice-to-db)
     (ok :invoice-id (invoices/create-invoice! (merge invoice-to-db
                                                      {:state "draft"})))))
 
 (defcommand update-invoice
-  {:description      "Updates one invoice to db with state as draft"
+  {:description      "Updates an existing invoice in the db"
    :feature          :invoices
    :user-roles       #{:authority}
    :org-authz-roles  roles/reader-org-authz-roles

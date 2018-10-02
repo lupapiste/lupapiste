@@ -4,7 +4,7 @@
             [lupapalvelu.integrations-api]
             [lupapalvelu.itest-util :refer :all :as itu]
             [lupapalvelu.invoice-api]
-            [lupapalvelu.invoices :refer [validate-invoice] :as invoices]
+            [lupapalvelu.invoices :refer [validate-invoice ->invoice-db] :as invoices]
             [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
@@ -33,9 +33,7 @@
      pena
      :operation "pientalo"
      :x "385770.46" :y "6672188.964"
-     :address "Kaivokatu 1"
-     ;;:propertyId "09143200010023"
-     ))
+     :address "Kaivokatu 1"))
 
     (fact "insert-invoice command"
           (fact "should add an invoice to the db with with all the required fields"
@@ -132,20 +130,22 @@
                       count) => 0))
 
           (fact "should fetch all application invoices"
-                (let [{app-a :id} (dummy-submitted-application)
-                      {app-b :id} (dummy-submitted-application)
-                      invoices [(invoice-with {:application-id app-a :state "draft"})
-                                (invoice-with {:application-id app-a :state "draft"})
-                                (invoice-with {:application-id app-b :state "draft"})
-                                (invoice-with {:application-id app-b :state "draft"})
-                                (invoice-with {:application-id app-b :state "draft"})]]
+                (let [draft-invoice (invoice-with {:state "draft"})
+                      {app-a-id :id :as app-a} (dummy-submitted-application)
+                      {app-b-id :id :as app-b} (dummy-submitted-application)
+                      invoices [(->invoice-db draft-invoice app-a)
+                                (->invoice-db draft-invoice app-a)
+
+                                (->invoice-db draft-invoice app-b)
+                                (->invoice-db draft-invoice app-b)
+                                (->invoice-db draft-invoice app-b)]]
                   (doseq [invoice invoices] (invoices/create-invoice! invoice))
 
-                  (-> (itu/local-query sonja :application-invoices :id app-a)
+                  (-> (itu/local-query sonja :application-invoices :id app-a-id)
                       :invoices
                       count) => 2
 
-                  (-> (itu/local-query sonja :application-invoices :id app-b)
+                  (-> (itu/local-query sonja :application-invoices :id app-b-id)
                       :invoices
                       count) => 3)))
     ))

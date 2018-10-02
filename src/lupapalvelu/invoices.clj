@@ -2,7 +2,8 @@
   "A common interface for accessing invoices, price catalogues and related data"
   (:require [lupapalvelu.mongo :as mongo]
             [schema.core :as sc]
-            [sade.core :refer [ok fail]]
+            [sade.core :refer [ok fail now]]
+            [sade.schemas :refer [Timestamp]]
             [taoensso.timbre :refer [trace tracef debug debugf info infof
                                      warn warnf error errorf fatal fatalf]]))
 
@@ -21,6 +22,7 @@
 
 (sc/defschema Invoice
   {:id sc/Str
+   :created Timestamp
    :state (sc/enum "draft"       ;;created
                    "checked"     ;;checked by decision maker and moved to biller
                    "confirmed"   ;;biller has confirmed the invoice
@@ -63,7 +65,8 @@
   [invoice {:keys [id organization] :as application}]
   (debug "->invoice-db invoice-request: " invoice " app id: " id)
   (merge invoice
-         {:application-id id
+         {:created (now)
+          :application-id id
           :organization-id organization}))
 
 (defn fetch-by-application-id [application-id]
