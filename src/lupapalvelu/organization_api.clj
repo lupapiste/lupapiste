@@ -1263,7 +1263,11 @@
 (defcommand update-ad-login-role-mapping
   {:description "Updates active directory role mapping"
    :parameters [organizationId role-map]
-   :pre-checks [org/check-ad-login-enabled]
+   :pre-checks [org/check-ad-login-enabled
+                (fn [{:keys [data user]}]
+                  (when (ss/not-blank? (:organizationId data))
+                    (when-not (usr/user-has-role-in-organization? user (:organizationId data) #{:authorityAdmin})
+                      sade.core/unauthorized)))]
    :permissions [{:required [:organization/admin]}]
    :input-validators [role-mapping-validator]}
   [{user :user}]
