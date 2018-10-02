@@ -212,7 +212,7 @@
                       valid-category]}
   [command]
   (let [options (template/command->options command)]
-    (when-let [settings (template/settings options)]
+    (let [settings (template/settings options)]
       (ok :settings settings
           :filled (template/settings-filled? (assoc options
                                                     :settings settings))))))

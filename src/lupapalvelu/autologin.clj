@@ -70,7 +70,7 @@
 
         (cond
           (not (:enabled user)) (throw+ {:type ::autologin :text "User not enabled"})
-          (not (some (partial allowed-ip? ip) organization-ids)) (throw+ {:type ::autologin :text "Illegal IP address"})
+          (not-any? (partial allowed-ip? ip) organization-ids) (throw+ {:type ::autologin :text "Illegal IP address"})
           :else (user/session-summary user))))))
 
 (defn catch-autologin-failure [handler]

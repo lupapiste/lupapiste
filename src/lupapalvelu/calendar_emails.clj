@@ -52,9 +52,7 @@
                                          :attendee (if partstat
                                                      (assoc recipient :partstat partstat)
                                                      recipient)
-                                         :unique-id (if (:unique-id reservation)
-                                                      (:unique-id reservation)
-                                                      (generate-unique-id))
+                                         :unique-id (or (:unique-id reservation) (generate-unique-id))
                                          :sequence (if (:sequence reservation)
                                                      (inc (:sequence reservation))
                                                      0)
@@ -62,7 +60,7 @@
       ; ICAL part not sent for reservations pending approval by the applicant,
       ; OR if the reservation is declined unless the ICAL part was previously sent
       (when-not (or (#{"PENDING"} (:reservationStatus reservation))
-                    (and (#{"DECLINED"} (:reservationStatus reservation)) (= 0 (:sequence reservation))))
+                    (and (#{"DECLINED"} (:reservationStatus reservation)) (zero? (:sequence reservation))))
         (cal/update-reservation application
                                 (:reservationId result)
                                 {$set {:reservations.$.unique-id (:unique-id reservation)

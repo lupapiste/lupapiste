@@ -54,14 +54,3 @@
                       states/post-verdict-states
                       (when-not (fail :error.tabs.no-application-summary)))]}
   [_])
-
-(defquery application-verdict-tab-visible
-  {:parameters [id]
-   :states states/all-application-states
-   :user-roles #{:authority :applicant}
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles roles/reader-org-authz-roles
-   :pre-checks [(fn [{:keys [application]}]
-                        (when (yax/ya-extension-app? application)
-                          (fail :error.ya-extension.no-verdict)))]}
-  [_])

@@ -447,6 +447,9 @@ Sipoo logs in
 Sipoo-ya logs in
   Authority-admin logs in  sipoo-ya  sipoo  Simo YA-Suurvisiiri
 
+Kuopio-ya logs in
+  Authority-admin logs in  kuopio-ya  kuopio  Paakayttaja-YA Kuopio
+
 Oulu Ymp logs in
   Authority-admin logs in  ymp-admin@oulu.fi  oulu  Oulu Ymp Admin
 

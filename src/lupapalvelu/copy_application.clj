@@ -52,7 +52,7 @@
 
 (defn- auth-role [auth-entry]
   (or (keyword (-> auth-entry :invite :role))
-      (keyword (-> auth-entry :role))))
+      (keyword (:role auth-entry))))
 
 (defn non-copyable-auth? [auth user]
   (or (contains? non-copyable-roles (auth-role auth))
@@ -198,7 +198,7 @@
                                            plan-name))))
 
 (defn- document-disabled? [document]
-  (boolean (-> document :disabled)))
+  (boolean (:disabled document)))
 
 (defn- handle-copy-action
   "Handle the copy action specified by the document schema"
