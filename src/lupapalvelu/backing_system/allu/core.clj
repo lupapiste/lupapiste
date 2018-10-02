@@ -548,7 +548,7 @@
   (send-allu-request! (final-contract-request command)))
 
 (defn load-contract-document!
-  "Load placement contract proposal or final from ALLU. Returns fileId of the pdf or nil. Bypasses JMS."
+  "Load placement contract proposal or final from ALLU. Returns SavedFileData of the pdf or nil. Bypasses JMS."
   [{:keys [application] :as command}]
   (try+
     (-> (allu-request-handler (case (:state application)

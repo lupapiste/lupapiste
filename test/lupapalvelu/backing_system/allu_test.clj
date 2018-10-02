@@ -110,6 +110,25 @@
                                                               :content-type   :json})
                     (sc/check PlacementContract (:body http-request)) => nil)
 
+                  [:placementcontracts :contract :proposal]
+                  (facts "placementcontracts.contract.proposal request"
+                    http-request => (contains {:uri            (str "/placementcontracts/" allu-id "/contract/proposal")
+                                               :request-method :get
+                                               :headers        headers}))
+
+                  [:placementcontracts :contract :approved]
+                  (facts "placementcontracts.contract.approved request"
+                    http-request => (contains {:uri            (str "/placementcontracts/" allu-id "/contract/approved")
+                                               :request-method :post
+                                               :headers        headers})
+                    (sc/check allu/LoginCredentials (:body http-request)))
+
+                  [:placementcontracts :contract :final]
+                  (facts "placementcontracts.contract.proposal request"
+                    http-request => (contains {:uri            (str "/placementcontracts/" allu-id "/contract/final")
+                                               :request-method :get
+                                               :headers        headers}))
+
                   [:attachments :create]
                   (let [fileId (get-in request [::allu/command :latestAttachmentVersion :fileId])]
                     (facts "attachments.create request"
@@ -146,9 +165,10 @@
   (mount/start #'allu/current-jwt)
 
   (sc/with-fn-validation
-    (let [user (sg/generate (select-keys User [:id :username]))
+    (let [user (sg/generate (select-keys User [:id :username :firstName :lastName]))
           app (sg/generate ValidPlacementApplication)
-          submitted-app (assoc-in app [:integrationKeys :ALLU :id] allu-id)]
+          submitted-app (assoc-in app [:integrationKeys :ALLU :id] allu-id)
+          sent-app (assoc submitted-app :state "sent")]
       (facts "integration message generation"
         (let [request (#'allu/application-creation-request {:application app
                                                             :user        user
@@ -163,7 +183,7 @@
                           :created      5
                           :status       "processing"
                           :application  (select-keys app [:id :organization :state])
-                          :initator     user
+                          :initator     (select-keys user [:id :username])
                           :action       "submit-application"
                           :data         request})
             (provided (now) => 5))
@@ -180,7 +200,7 @@
                             :created      5
                             :status       "done"
                             :application  (select-keys app [:id :organization :state])
-                            :initator     user
+                            :initator     (select-keys user [:id :username])
                             :action       "submit-application"
                             :data         {:endpoint (:uri request)
                                            :response response}})
@@ -231,4 +251,24 @@
               (allu/send-attachments! {:application submitted-app
                                        :user        user
                                        :action      "move-attachments-to-backing-system"}
-                                      [attachment])) => [fileId]))))))
+                                      [attachment])) => [fileId]))
+
+        (facts "load-placementcontract-proposal!"
+          (allu/load-placementcontract-proposal! {:application sent-app
+                                                  :user        user
+                                                  :action      "TODO"}) => nil)
+
+        (facts "approve-placementcontract!"
+          (allu/approve-placementcontract! {:application sent-app
+                                            :user        user
+                                            :action      "TODO"}) => nil)
+
+        (facts "load-placementcontract-final!"
+          (allu/load-placementcontract-final! {:application sent-app
+                                               :user        user
+                                               :action      "TODO"}) => nil)
+
+        (facts "load-contract-document!"
+          (allu/load-contract-document! {:application sent-app
+                                         :user        user
+                                         :action      "check-for-verdict"}) => nil)))))
