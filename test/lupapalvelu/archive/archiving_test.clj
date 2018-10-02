@@ -1,8 +1,10 @@
 (ns lupapalvelu.archive.archiving-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [lupapalvelu.attachment :as at]
             [lupapalvelu.archive.archiving :refer :all]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [schema.core :as sc]))
 
 (testable-privates lupapalvelu.archive.archiving generate-archive-metadata)
 
@@ -58,21 +60,62 @@
                   :drawings []
                   :documents []})
 
-(def attachment {:type {:type-id "karttaote" :type-group "rakennuspaikka"}
-                 :applicationState "open"
+
+(def attachment {:groupType nil
+                 :type {:type-id :karttaote :type-group :rakennuspaikka}
+                 :op nil
+                 :auth [{:id "777777777777777777000023" :username "sonja" :firstName "Sonja" :lastName "Sibbo" :role "uploader"}]
+                 :modified 1538030348972
+                 :sent 1538030378975
+                 :requestedByAuthority true
+                 :applicationState :open
+                 :readOnly false
+                 :locked false
                  :id "5bac7b0df4dfa392c827c396"
-                 :latestVersion {:filename "file.pdf"
+                 :latestVersion {:storageSystem :mongodb
+                                 :created 1538030348972
+                                 :size 130575
+                                 :filename "file.pdf"
+                                 :originalFileId "032db7f0-c220-11e8-bace-28134fe06fa5"
+                                 :autoConversion true
                                  :contentType "application/pdf"
                                  :archivable true
                                  :version {:major 0 :minor 1}
                                  :stamped false
+                                 :user {:id "777777777777777777000023"
+                                        :username "sonja"
+                                        :firstName "Sonja"
+                                        :lastName "Sibbo"
+                                        :role "authority"}
                                  :fileId "09b1cf30-c220-11e8-bace-28134fe06fa5"}
-                 :backendId "BI-123"
-                 :size "A4"
-                 :scale "1:500"
+                 :notNeeded false
+                 :signatures []
+                 :backendId nil
+                 :forPrinting false
                  :contents "Karttaote"
+                 :target nil
+                 :versions [{:storageSystem :mongodb
+                             :created 1538030348972
+                             :size 130575
+                             :filename "file.pdf"
+                             :originalFileId "032db7f0-c220-11e8-bace-28134fe06fa5"
+                             :autoConversion true
+                             :contentType "application/pdf"
+                             :archivable true
+                             :version {:major 0 :minor 1}
+                             :stamped false
+                             :user {:id "777777777777777777000023"
+                                    :username "sonja"
+                                    :firstName "Sonja"
+                                    :lastName "Sibbo"
+                                    :role "authority"}
+                             :fileId "09b1cf30-c220-11e8-bace-28134fe06fa5"}]
                  :ramLink "5acb61e7e7f6046cc2f1991e"
-                 :metadata {:nakyvyys "julkinen" :tila "valmis"}})
+                 :metadata {:nakyvyys "julkinen" :tila "valmis"}
+                 :required false})
+
+(facts "Test data is valid"
+  (sc/check at/Attachment attachment) => nil)
 
 (facts "Archiving metadata"
   (fact "For application with legacy verdict"
@@ -95,36 +138,33 @@
                                {:username "tester" :firstName "Archive" :lastName "Tester"}
                                :metadata
                                attachment)
-    => {:address "Street 12"
-        :applicants ["Applicant 1"]
-        :applicationId "LP-000-2018-00001"
-        :arkistoija {:firstName "Archive" :lastName "Tester" :username "tester"}
-        :buildingIds []
-        :contents "Karttaote"
-        :kayttotarkoitukset []
-        :kieli "fi"
-        :kuntalupatunnukset ["18-0370-R"]
-        :lupapvm "2018-09-28T03:00:00+03:00"
-        :municipality "753"
-        :myyntipalvelu false
-        :nakyvyys "julkinen"
-        :nationalBuildingIds []
-        :operations []
-        :organization "753-R"
-        :paatoksentekija "Viranhaltija"
-        :paatospvm "2018-09-10T03:00:00+03:00"
-        :propertyId "75347800050140"
-        :ramLink "5acb61e7e7f6046cc2f1991e"
-        :scale "1:500"
-        :size "A4"
-        :suunnittelijat []
-        :tiedostonimi "file.pdf"
-        :tila "valmis"
-        :tosFunction {:code "10 03 00 01" :name "Rakennuslupamenettely"}
-        :type "rakennuspaikka.karttaote"
-        :versio "0.1"
-        :jattopvm "2018-09-15T19:52:50+03:00"
-        :closed "2018-10-08T23:26:10+03:00"})
+    => (contains {:address             "Street 12"
+                  :applicants          ["Applicant 1"]
+                  :applicationId       "LP-000-2018-00001"
+                  :arkistoija          {:firstName "Archive" :lastName "Tester" :username "tester"}
+                  :buildingIds         []
+                  :contents            "Karttaote"
+                  :kayttotarkoitukset  []
+                  :kieli               "fi"
+                  :kuntalupatunnukset  ["18-0370-R"]
+                  :lupapvm             "2018-09-28T03:00:00+03:00"
+                  :municipality        "753"
+                  :myyntipalvelu       false
+                  :nakyvyys            "julkinen"
+                  :nationalBuildingIds []
+                  :operations          []
+                  :organization        "753-R"
+                  :paatoksentekija     "Viranhaltija"
+                  :paatospvm           "2018-09-10T03:00:00+03:00"
+                  :propertyId          "75347800050140"
+                  :ramLink             "5acb61e7e7f6046cc2f1991e"
+                  :suunnittelijat      []
+                  :tiedostonimi        "file.pdf"
+                  :tila                "valmis"
+                  :tosFunction         {:code "10 03 00 01" :name "Rakennuslupamenettely"}
+                  :versio              "0.1"
+                  :jattopvm            "2018-09-15T19:52:50+03:00"
+                  :closed              "2018-10-08T23:26:10+03:00"}))
 
   (fact "For application wiht pate verdict"
     (generate-archive-metadata (assoc application :pate-verdicts [{:category "r"
@@ -155,7 +195,7 @@
                                                                           :language "fi"
                                                                           :foremen-included true
                                                                           :deviations ""
-                                                                          :neighbor-states [],
+                                                                          :neighbor-states []
                                                                           :lainvoimainen 1538557200000
                                                                           :handler "Sonja Sibbo"
                                                                           :automatic-verdict-dates true
@@ -163,36 +203,33 @@
                                {:username "tester" :firstName "Archive" :lastName "Tester"}
                                :metadata
                                attachment)
-    => {:address "Street 12"
-        :applicants ["Applicant 1"]
-        :applicationId "LP-000-2018-00001"
-        :arkistoija {:firstName "Archive" :lastName "Tester" :username "tester"}
-        :buildingIds []
-        :contents "Karttaote"
-        :kayttotarkoitukset []
-        :kieli "fi"
-        :kuntalupatunnukset []
-        :lupapvm "2018-10-03T12:00:00+03:00"
-        :municipality "753"
-        :myyntipalvelu false
-        :nakyvyys "julkinen"
-        :nationalBuildingIds []
-        :operations []
-        :organization "753-R"
-        :paatospvm "2018-09-27T12:00:00+03:00"
-        :propertyId "75347800050140"
-        :ramLink "5acb61e7e7f6046cc2f1991e"
-        :scale "1:500"
-        :size "A4"
-        :suunnittelijat []
-        :tiedostonimi "file.pdf"
-        :tila "valmis"
-        :tosFunction {:code "10 03 00 01" :name "Rakennuslupamenettely"}
-        :type "rakennuspaikka.karttaote"
-        :versio "0.1"
-        :jattopvm "2018-09-15T19:52:50+03:00"
-        :paatoksentekija "Sonja Sibbo"
-        :closed "2018-10-08T23:26:10+03:00"})
+    => (contains {:address             "Street 12"
+                  :applicants          ["Applicant 1"]
+                  :applicationId       "LP-000-2018-00001"
+                  :arkistoija          {:firstName "Archive" :lastName "Tester" :username "tester"}
+                  :buildingIds         []
+                  :contents            "Karttaote"
+                  :kayttotarkoitukset  []
+                  :kieli               "fi"
+                  :kuntalupatunnukset  []
+                  :lupapvm             "2018-10-03T12:00:00+03:00"
+                  :municipality        "753"
+                  :myyntipalvelu       false
+                  :nakyvyys            "julkinen"
+                  :nationalBuildingIds []
+                  :operations          []
+                  :organization        "753-R"
+                  :paatospvm           "2018-09-27T12:00:00+03:00"
+                  :propertyId          "75347800050140"
+                  :ramLink             "5acb61e7e7f6046cc2f1991e"
+                  :suunnittelijat      []
+                  :tiedostonimi        "file.pdf"
+                  :tila                "valmis"
+                  :tosFunction         {:code "10 03 00 01" :name "Rakennuslupamenettely"}
+                  :versio              "0.1"
+                  :jattopvm            "2018-09-15T19:52:50+03:00"
+                  :paatoksentekija     "Sonja Sibbo"
+                  :closed              "2018-10-08T23:26:10+03:00"}))
 
   (fact "For digitizing application"
     (let [archive-app (assoc application :verdicts [{:id              "5badf004da40a6b3fd01262f"
@@ -215,34 +252,31 @@
                                  {:username "tester" :firstName "Archive" :lastName "Tester"}
                                  :metadata
                                  attachment)
-    => {:address "Street 12"
-        :applicants ["Applicant 1"]
-        :arkistoija {:firstName "Archive" :lastName "Tester" :username "tester"}
-        :buildingIds []
-        :contents "Karttaote"
-        :kayttotarkoitukset []
-        :kieli "fi"
-        :kuntalupatunnukset ["BI-123" "BI-456" "BI-789"]
-        :lupapvm "2018-09-28T00:00:00+03:00"
-        :municipality "753"
-        :myyntipalvelu false
-        :nakyvyys "julkinen"
-        :nationalBuildingIds []
-        :operations []
-        :organization "753-R"
-        :paatospvm "2018-09-28T00:00:00+03:00"
-        :propertyId "75347800050140"
-        :ramLink "5acb61e7e7f6046cc2f1991e"
-        :scale "1:500"
-        :size "A4"
-        :suunnittelijat []
-        :tiedostonimi "file.pdf"
-        :tila "valmis"
-        :tosFunction {:code "10 03 00 01" :name "Rakennuslupamenettely"}
-        :type "rakennuspaikka.karttaote"
-        :versio "0.1"
-        :jattopvm "2018-09-15T19:52:50+03:00"
-        :closed "2018-10-08T23:26:10+03:00"}
+    => (contains {:address             "Street 12"
+                  :applicants          ["Applicant 1"]
+                  :arkistoija          {:firstName "Archive" :lastName "Tester" :username "tester"}
+                  :buildingIds         []
+                  :contents            "Karttaote"
+                  :kayttotarkoitukset  []
+                  :kieli               "fi"
+                  :kuntalupatunnukset  ["BI-123" "BI-456" "BI-789"]
+                  :lupapvm             "2018-09-28T00:00:00+03:00"
+                  :municipality        "753"
+                  :myyntipalvelu       false
+                  :nakyvyys            "julkinen"
+                  :nationalBuildingIds []
+                  :operations          []
+                  :organization        "753-R"
+                  :paatospvm           "2018-09-28T00:00:00+03:00"
+                  :propertyId          "75347800050140"
+                  :ramLink             "5acb61e7e7f6046cc2f1991e"
+                  :suunnittelijat      []
+                  :tiedostonimi        "file.pdf"
+                  :tila                "valmis"
+                  :tosFunction         {:code "10 03 00 01" :name "Rakennuslupamenettely"}
+                  :versio              "0.1"
+                  :jattopvm            "2018-09-15T19:52:50+03:00"
+                  :closed              "2018-10-08T23:26:10+03:00"})
 
       (fact "BackendIds are sorted based on attachment"
         (generate-archive-metadata archive-app
