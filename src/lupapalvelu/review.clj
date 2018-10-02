@@ -226,7 +226,7 @@
                                               task))]
     (if error
       (do
-        (warnf "Invalid background task data. Attachment not added: %s"
+        (warnf "Invalid backing system task data. Attachment not added: %s"
                (ss/serialize error))
         task)
       (assoc task :attachments (:liitetieto review)))))
@@ -265,9 +265,10 @@
                           vec )
         review-tasks (map #(review->task created buildings-summary %) reviews)]
     {:review-tasks           review-tasks
-     :attachments-by-task-id (apply hash-map
-                                    (remove empty? (mapcat (fn [t]
-                                                             (when (:attachments t) [(:id t) (:attachments t)])) review-tasks)))}))
+     :attachments-by-task-id (->> review-tasks
+                                  (filter (comp not-empty :attachments))
+                                  (map (juxt :id :attachments))
+                                  (into {}))}))
 
 (defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
