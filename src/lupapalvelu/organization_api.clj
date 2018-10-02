@@ -1261,10 +1261,10 @@
       (fail :error.illegal-role))))
 
 (defcommand update-ad-login-role-mapping
- {:description "Updates active directory role mapping"
-  :parameters [role-map]
-  :pre-checks [org/check-ad-login-enabled]
-  :permissions [{:required [:organization/admin]}]
-  :input-validators [role-mapping-validator]}
- [{user :user}]
- (org/update-ad-login-role-mapping role-map user))
+  {:description "Updates active directory role mapping"
+   :parameters [organizationId role-map]
+   :pre-checks [org/check-ad-login-enabled]
+   :permissions [{:required [:organization/admin]}]
+   :input-validators [role-mapping-validator]}
+  [{user :user}]
+  (org/update-ad-login-role-mapping role-map user))

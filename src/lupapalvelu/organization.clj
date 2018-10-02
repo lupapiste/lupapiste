@@ -36,6 +36,7 @@
             [sade.shared-schemas :as sssc]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.validators :refer [valid-email?]]
             [sade.xml :as sxml]
             [schema.core :as sc]
             [taoensso.timbre :refer [trace debug debugf info infof warn error errorf fatal]]
@@ -580,9 +581,6 @@
 
 (defn organizations-with-ad-login-enabled []
   (map :id (mongo/select :organizations {:ad-login.enabled true} {:id 1})))
-
-(defn valid-email? [email]
-  (boolean (re-matches #".+\@.+\..+" email)))
 
 (defn ad-login-data-by-domain
   "Takes a username (= email), checks to which organization its domain belongs to and return the organization id.

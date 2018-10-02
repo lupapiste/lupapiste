@@ -4,7 +4,6 @@
             [noir.response :as response]
             [noir.request :as request]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.user-api :as user-api]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
             [ring.util.response :refer :all]
@@ -52,12 +51,12 @@
                    :orgAuthz  {(keyword org-id) orgAuthz}}        ;; validointi ja virheiden hallinta?
         user (if-let [user-from-db (usr/get-user-by-email email)]
                (let [updated-user-data (util/deep-merge user-from-db user-data)]
-                 (user-api/update-authority user-from-db email updated-user-data)
+                 (usr/update-authority user-from-db email updated-user-data)
                  updated-user-data)
                (usr/create-new-user {:role "admin"} user-data))
         response (ssess/merge-to-session
                    req
-                   (response/redirect (format "%s/app/fi/authority" (:host (env/get-config))))
+                   (response/redirect (format "%s/app/fi/authority" (env/value :host)))
                    {:user (usr/session-summary user)})]
     response))
 

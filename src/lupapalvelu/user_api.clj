@@ -6,7 +6,6 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.calendar :as cal]
-            [lupapalvelu.change-email :as change-email]
             [lupapalvelu.company :as company]
             [lupapalvelu.ident.ident-util :as ident-util]
             [lupapalvelu.foreman :as foreman]
@@ -402,13 +401,6 @@
   (let [organization-id (usr/authority-admins-organization-id caller)
         actual-roles    (org/filter-valid-user-roles-in-organization organization-id roles)]
     (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})))
-
-(defn update-authority [authority email data]
-  (let [new-email (:email data)]
-    (when (not= email new-email)
-      (change-email/update-email-in-application-auth! (:id authority) email new-email)
-      (change-email/update-email-in-invite-auth! (:id authority) email new-email))
-    (usr/update-user-by-email email {$set data})))
 
 (defcommand update-auth-info
   {:parameters       [firstName lastName email new-email]

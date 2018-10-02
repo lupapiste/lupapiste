@@ -5,6 +5,7 @@
             [clj-time.core :as time]
             [clojure.set :as set]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.change-email :as change-email]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permissions :refer [defcontext]]
@@ -883,6 +884,13 @@
      (if (pos? (mongo/update-n :users query updates))
        (ok)
        (fail :error.user-not-found)))))
+
+(defn update-authority [authority email data]
+  (let [new-email (:email data)]
+    (when (not= email new-email)
+      (change-email/update-email-in-application-auth! (:id authority) email new-email)
+      (change-email/update-email-in-invite-auth! (:id authority) email new-email))
+    (update-user-by-email email {$set data})))
 
 ;;
 ;; ==============================================================================

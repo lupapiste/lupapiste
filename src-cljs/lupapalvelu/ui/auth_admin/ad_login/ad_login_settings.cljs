@@ -28,6 +28,7 @@
             :error (fn [call]
                      (reset! state/saving-info? false)
                      (.ajaxError js/notify (clj->js call)))}
+           :organizationId @state/org-id
            :role-map @state/current-role-mapping))
 
 (rum/defc ad-login-settings < rum/reactive
