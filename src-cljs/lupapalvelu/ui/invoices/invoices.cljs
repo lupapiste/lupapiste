@@ -16,25 +16,31 @@
 
 (defonce args (atom {}))
 
-(rum/defc autosaving-input [invoice-row value-key invoice-id]
-  [:input {:class-name "invoice-autosaving-input" :value (value-key invoice-row)}])
+(rum/defc autosaving-input [value on-blur]
+  (let [value-atom (atom value)]
+    [:input {:class-name "invoice-autosaving-input"
+             :value @value-atom
+             :on-change (fn [event] (let [value (.-value (.-target event))]
+                                      (reset! value-atom value)))
+             :on-blur (fn [event] (on-blur @value-atom))}]))
 
-(rum/defc invoice-table-row [invoice-row invoice-id]
+(rum/defc invoice-table-row [invoice-row invoice-row-index operation-id invoice]
   [:tr
    [:td (:text invoice-row)]
-   [:td (autosaving-input invoice-row :units invoice-id)]
+   [:td (autosaving-input (:units invoice-row) (fn [value]
+                                                 (println operation-id value invoice-row)))]
    [:td (str (:unit invoice-row))]
    [:td (:price-per-unit invoice-row)]
-   [:td (autosaving-input {:ale "20"} :ale invoice-id)]
+   [:td (autosaving-input "20" (fn [value]))]
    [:td "0.00"]
    [:td (* (:units invoice-row) (:price-per-unit invoice-row))]])
 
 (rum/defc filterable-select-row []
   [:tr {:style {:border-style "dashed" :border-width "1px" :border-color "#dddddd"}}
-   [:td {:col-span 7} (autocomplete "groo" {:items [{:text "foo" :value "foo value"} {:text "faa" :value "groo"}] })]])
+   [:td {:col-span 7} (autocomplete "groo" {:items [{:text "foo" :value "foo value"} {:text "faa" :value "groo"}  {:text "jokeri" :value :jokeri}] })]])
 
-(rum/defc operations-component [operation invoice-id]
-  (let [invoice-rows (map (fn [row] (invoice-table-row row invoice-id)) (:invoice-rows operation))]
+(rum/defc operations-component [operation invoice]
+  (let [invoice-rows (map-indexed (fn [index row] (invoice-table-row index row (:operation-id operation) invoice)) (:invoice-rows operation))]
     [:table {:class-name "invoice-operations-table"}
      [:thead
       [:tr
@@ -62,21 +68,20 @@
                                  :callback (fn [value]
                                              (reset! is-open? false)
                                              (let [updated-invoice (service/add-operation-to-invoice invoice value)]
-                                               (println updated-invoice)
                                                (service/upsert-invoice! app-id
                                                                updated-invoice
-                                                               (fn [response] (println response)
+                                                               (fn [response]
                                                                  (service/fetch-invoices app-id)))))}))]))
 
 (rum/defc invoice-data
   [invoice]
   [:div {:class-name "invoice-operations-table-wrapper"}
    (map (fn [operation]
-          (operations-component operation (:id invoice))) (:operations invoice))
-   (invoice-add-operation-row invoice @state/application-id)
+          (operations-component operation invoice)) (:operations @invoice))
+   (invoice-add-operation-row @invoice @state/application-id)
    ])
 
-(rum/defc invoice-component
+(rum/defc invoice-component < rum/reactive
   [invoice]
   (let []
     (accordion {:accordion-toggle-component caret-toggle
@@ -85,12 +90,12 @@
 
 (rum/defc invoice-table < rum/reactive
   [invoices]
-  (let [new-invoice  @state/new-invoice]
+  (let [new-invoice  state/new-invoice]
     [:div
-     (if new-invoice
+     (if @new-invoice
        (invoice-component new-invoice))
      (map (fn [invoice]
-            (invoice-component invoice)) invoices)]))
+            (invoice-component (atom invoice))) invoices)]))
 
 (rum/defc new-invoice-button < rum/reactive
   [new-invoice]
@@ -124,22 +129,7 @@
     (state/refresh-verdict-auths app-id)
     (state/refresh-application-auth-model app-id
                                           (fn []
-                                            (service/insert-invoice app-id
-                                                                    {:operations [{:operation-id :linjasaneeraus
-                                                                                   :name "linjasaneeraus"
-                                                                                   :invoice-rows [{:text "Laskurivi1 kpl"
-                                                                                                   :unit :kpl
-                                                                                                   :price-per-unit 10
-                                                                                                   :units 2}
-                                                                                                  {:text "Laskurivi2 m2 "
-                                                                                                   :unit :m2
-                                                                                                   :price-per-unit 20.5
-                                                                                                   :units 15.8}
-                                                                                                  {:text "Laskurivi3 m3 "
-                                                                                                   :unit :m3
-                                                                                                   :price-per-unit 20.5
-                                                                                                   :units 15.8}]}]}
-                                                                    #())
+
                                             (service/fetch-invoices app-id)))    ))
 
 
