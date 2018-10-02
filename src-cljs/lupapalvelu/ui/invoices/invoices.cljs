@@ -50,27 +50,30 @@
       (filterable-select-row)]]))
 
 (rum/defcs invoice-add-operation-row < (rum/local false ::is-open?)
-  [state invoice]
+  [state invoice app-id]
   (let [is-open? (::is-open? state)]
     [:div {:class-name "button-row-left"}
      [:button.secondary {:on-click #(reset! is-open? (not @is-open?))}
       [:i.lupicon-circle-plus]
       [:span "Lisää toimenpide"]]
      (if @is-open?
-       (autocomplete :uusi-talo {:items [{:text "Uusi talo" :value :uusi-talo}
-                                         {:text "Linjasaneeraus" :value :linjasaneeraus}]
+       (autocomplete "" {:items [{:text "Uusi talo" :value "Uusi talo"}
+                                 {:text "Linjasaneeraus" :value "linjasaneeraus"}]
                                  :callback (fn [value]
                                              (reset! is-open? false)
-                                             (println value)
-                                             (service/add-operation-to-invoice (:id invoice) value))}))])
-  )
+                                             (let [updated-invoice (service/add-operation-to-invoice invoice value)]
+                                               (println updated-invoice)
+                                               (service/upsert-invoice! app-id
+                                                               updated-invoice
+                                                               (fn [response] (println response)
+                                                                 (service/fetch-invoices app-id)))))}))]))
 
 (rum/defc invoice-data
   [invoice]
   [:div {:class-name "invoice-operations-table-wrapper"}
    (map (fn [operation]
           (operations-component operation (:id invoice))) (:operations invoice))
-   (invoice-add-operation-row invoice)
+   (invoice-add-operation-row invoice @state/application-id)
    ])
 
 (rum/defc invoice-component
@@ -116,6 +119,7 @@
   (when-let [app-id (js/pageutil.hashApplicationId)]
     (reset! state/price-catalogue dummy-price-catalog)
     (reset! state/invoices [])
+    (reset! state/application-id app-id)
     (reset! state/new-invoice nil)
     (state/refresh-verdict-auths app-id)
     (state/refresh-application-auth-model app-id
@@ -134,7 +138,8 @@
                                                                                                   {:text "Laskurivi3 m3 "
                                                                                                    :unit :m3
                                                                                                    :price-per-unit 20.5
-                                                                                                   :units 15.8}]}]})
+                                                                                                   :units 15.8}]}]}
+                                                                    #())
                                             (service/fetch-invoices app-id)))    ))
 
 
