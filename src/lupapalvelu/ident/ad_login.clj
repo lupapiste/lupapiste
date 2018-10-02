@@ -61,59 +61,52 @@
                    {:user (usr/session-summary user)})]
     response))
 
-(defn make-ad-config [org-id]
+(def ad-config
   (let [c (env/get-config)
         {:keys [keystore key-password]} (:ssl c)
-        key-alias "jetty"
-        ad-login (-> org-id org/get-organization :ad-login)
-        {:keys [enabled idp-cert idp-uri trusted-domains]} ad-login
-        acs-uri (str (:host (env/get-config)) "/api/saml/ad-login/" org-id)
-        mutables (assoc (saml-sp/generate-mutables)
-                        :xml-signer (saml-sp/make-saml-signer keystore
-                                                              key-password
-                                                              key-alias
-                                                              :algorithm :sha256))]
+        key-alias "jetty"]
     {:app-name "Lupapiste"
      :base-uri (:host c)
      :keystore-file keystore
      :keystore-password key-password
      :key-alias key-alias
-     :mutables mutables
+     :secret-key-spec (saml-shared/new-secret-key-spec)
+     :xml-signer (saml-sp/make-saml-signer keystore
+                                           key-password
+                                           key-alias
+                                           :algorithm :sha256)
      :token-timeout 5 ; This is in minutes
      :sp-cert (saml-shared/get-certificate-b64 keystore key-password key-alias)
-     :decrypter (saml-sp/make-saml-decrypter keystore key-password key-alias)
-     :organizational-settings {:enabled enabled
-                               :idp-cert (parse-certificate idp-cert)
-                               :idp-uri idp-uri
-                               :trusted-domains trusted-domains
-                               :saml-req-factory! (saml-sp/create-request-factory
-                                                    mutables
-                                                    idp-uri
-                                                    saml-routes/saml-format
-                                                    "Lupapiste"
-                                                    acs-uri)}}))
+     :decrypter (saml-sp/make-saml-decrypter keystore key-password key-alias)}))
 
 (defpage [:get "/api/saml/ad-login/:org-id"] {org-id :org-id}
-  (let [ad-config (make-ad-config org-id)
-        saml-req-factory! (get-in ad-config [:organizational-settings :saml-req-factory!])
+  (let [{:keys [enabled idp-cert idp-uri trusted-domains]} (-> org-id org/get-organization :ad-login)
+        {:keys [app-name xml-signer mutables]} ad-config
+        acs-uri (str (:host (env/get-config)) "/api/saml/ad-login/" org-id)
+        saml-req-factory! (saml-sp/create-request-factory
+                            (constantly 0) ; :saml-id-timeouts
+                            (constantly 0) ; :saml-last-id
+                            xml-signer
+                            idp-uri
+                            saml-routes/saml-format
+                            app-name
+                            acs-uri)
         saml-request (saml-req-factory!)
-        relay-state-token (saml-routes/create-hmac-relay-state (:secret-key-spec (:mutables ad-config)) "target")]
-    (do
-      (org/add-token-to-org org-id relay-state-token)
-      (saml-sp/get-idp-redirect (get-in ad-config [:organizational-settings :idp-uri])
-                                saml-request
-                                relay-state-token))))
+        relay-state-token (saml-routes/create-hmac-relay-state (:secret-key-spec ad-config) "target")]
+    (when enabled
+      (do
+        (org/add-token-to-org org-id relay-state-token)
+        (saml-sp/get-idp-redirect idp-uri saml-request relay-state-token)))))
 
 (defpage [:post "/api/saml/ad-login/:org-id"] {org-id :org-id}
-  (let [ad-config (make-ad-config org-id)
+  (let [idp-cert (-> org-id org/get-organization :ad-login :idp-cert parse-certificate)
         req (request/ring-request)
         _ (org/purge-time-out-tokens! org-id (:token-timeout ad-config)) ; Accept only tokens that are not older than the amount specified in ad-config
-        sent-tokens (org/get-sent-tokens org-id)
         xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse]))
         saml-resp (saml-sp/xml-string->saml-resp xml-response)
-        idp-cert (get-in ad-config [:organizational-settings :idp-cert])
         relay-state-token (get-in req [:params :RelayState])
         tokens (->> (org/get-sent-tokens org-id) (map :token) set)
+        [valid-relay-state? _] (saml-routes/valid-hmac-relay-state? (:secret-key-spec ad-config) relay-state-token)
         token-found? (contains? tokens relay-state-token)
         valid-signature? (if-not idp-cert
                            false
@@ -123,9 +116,11 @@
                                (do
                                  (error (.getMessage e))
                                  false))))
-        _ (info (str "RelayState parameter was " (if token-found? " found" "not found!")))
+        _ (info (str "RelayState parameter was "
+                     (if token-found? "found" "not found!") " and "
+                     (if valid-relay-state? "valid" "invalid")))
         _ (info (str "SAML message signature was " (if valid-signature? "valid" "invalid")))
-        valid? (and token-found? valid-signature?)
+        valid? (and token-found? valid-signature? valid-relay-state?)
         _ (info (str "SAML login credentials " (if valid? "valid!" "invalid")))
         saml-info (when valid-signature? (saml-sp/saml-resp->assertions saml-resp (:decrypter ad-config)))
         parsed-saml-info (parse-saml-info saml-info)
