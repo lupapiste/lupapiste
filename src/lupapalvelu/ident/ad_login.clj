@@ -1,5 +1,6 @@
 (ns lupapalvelu.ident.ad-login
   (:require [taoensso.timbre :refer [trace debug info warn error fatal]]
+            [clj-uuid :as uuid]
             [noir.core :refer [defpage]]
             [noir.response :as response]
             [noir.request :as request]
@@ -79,12 +80,13 @@
      :decrypter (saml-sp/make-saml-decrypter keystore key-password key-alias)}))
 
 (defpage [:get "/api/saml/ad-login/:org-id"] {org-id :org-id}
-  (let [{:keys [enabled idp-cert idp-uri trusted-domains]} (-> org-id org/get-organization :ad-login)
-        {:keys [app-name xml-signer mutables]} ad-config
-        acs-uri (str (:host (env/get-config)) "/api/saml/ad-login/" org-id)
+  (let [{:keys [enabled idp-uri]} (-> org-id org/get-organization :ad-login)
+        {:keys [app-name xml-signer]} ad-config
+        acs-uri (format "%s/api/saml/ad-login/%s" (env/value :host) org-id)
         saml-req-factory! (saml-sp/create-request-factory
+                            ; (constantly 0) ; :saml-last-id
+                            #(uuid/v1)
                             (constantly 0) ; :saml-id-timeouts
-                            (constantly 0) ; :saml-last-id
                             xml-signer
                             idp-uri
                             saml-routes/saml-format
