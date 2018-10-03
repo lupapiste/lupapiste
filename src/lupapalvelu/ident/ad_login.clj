@@ -63,34 +63,21 @@
     response))
 
 (def ad-config
-  (let [c (env/get-config)
-        {:keys [keystore key-password]} (:ssl c)
-        key-alias "jetty"]
-    {:app-name "Lupapiste"
-     :base-uri (:host c)
-     :keystore-file keystore
-     :keystore-password key-password
-     :key-alias key-alias
-     :secret-key-spec (saml-shared/new-secret-key-spec)
-     :xml-signer (saml-sp/make-saml-signer keystore
-                                           key-password
-                                           key-alias
-                                           :algorithm :sha256)
-     :token-timeout 5 ; This is in minutes
-     :sp-cert (saml-shared/get-certificate-b64 keystore key-password key-alias)
-     :decrypter (saml-sp/make-saml-decrypter keystore key-password key-alias)}))
+  {:app-name "Lupapiste"
+   :base-uri (env/value :host)
+   :secret-key-spec (saml-shared/new-secret-key-spec)
+   :token-timeout 5}) ; In minutes
 
 (defpage [:get "/api/saml/ad-login/:org-id"] {org-id :org-id}
   (let [{:keys [enabled idp-uri]} (-> org-id org/get-organization :ad-login)
-        {:keys [app-name xml-signer]} ad-config
         acs-uri (format "%s/api/saml/ad-login/%s" (env/value :host) org-id)
         saml-req-factory! (saml-sp/create-request-factory
                             uuid/v1
                             (constantly 0) ; :saml-id-timeouts
-                            xml-signer
+                            false
                             idp-uri
                             saml-routes/saml-format
-                            app-name
+                            (:app-name ad-config)
                             acs-uri)
         saml-request (saml-req-factory!)
         relay-state-token (saml-routes/create-hmac-relay-state (:secret-key-spec ad-config) "target")]
@@ -123,7 +110,7 @@
         _ (info (str "SAML message signature was " (if valid-signature? "valid" "invalid")))
         valid? (and token-found? valid-signature? valid-relay-state?)
         _ (info (str "SAML login credentials " (if valid? "valid!" "invalid")))
-        saml-info (when valid-signature? (saml-sp/saml-resp->assertions saml-resp (:decrypter ad-config)))
+        saml-info (when valid-signature? (saml-sp/saml-resp->assertions saml-resp false))
         parsed-saml-info (parse-saml-info saml-info)
         {:keys [email firstName lastName groups]} (get-in parsed-saml-info [:assertions :attrs])
         ad-role-map (-> org-id (org/get-organization) :ad-login :role-mapping)
