@@ -2,8 +2,9 @@
   (:require [taoensso.timbre :refer [trace debug info warn error fatal]]
             [clj-uuid :as uuid]
             [noir.core :refer [defpage]]
-            [noir.response :as response]
+            [noir.response :as resp]
             [noir.request :as request]
+            [lupapalvelu.change-email :as change-email]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
@@ -52,12 +53,12 @@
                    :orgAuthz  {(keyword org-id) orgAuthz}}        ;; validointi ja virheiden hallinta?
         user (if-let [user-from-db (usr/get-user-by-email email)]
                (let [updated-user-data (util/deep-merge user-from-db user-data)]
-                 (usr/update-authority user-from-db email updated-user-data)
+                 (usr/update-user-by-email email updated-user-data)
                  updated-user-data)
                (usr/create-new-user {:role "admin"} user-data))
         response (ssess/merge-to-session
                    req
-                   (response/redirect (format "%s/app/fi/authority" (env/value :host)))
+                   (resp/redirect (format "%s/app/fi/authority" (env/value :host)))
                    {:user (usr/session-summary user)})]
     response))
 
@@ -132,7 +133,7 @@
       (and valid? (seq authz)) (validated-login req org-id firstName lastName email authz)
       valid-signature? (do
                          (error "User does not have organization authorization")
-                         (response/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
+                         (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
       :else (do
               (error "SAML validation failed")
-              (response/status 403 (response/content-type "text/plain" "Validation of SAML response failed"))))))
+              (resp/status 403 (resp/content-type "text/plain" "Validation of SAML response failed"))))))

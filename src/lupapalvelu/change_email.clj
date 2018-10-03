@@ -9,7 +9,6 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.vetuma :as vetuma]))
 
-
 (defn- notify-init-email-change [user new-email]
   (let [token-id (token/make-token :change-email user {:new-email new-email}
                                    :auto-consume false
