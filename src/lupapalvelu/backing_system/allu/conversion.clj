@@ -14,7 +14,7 @@
             [lupapalvelu.i18n :refer [localize]]))
 
 (def lang
-  "The language to use when localizing output to ALLU. ALLU seems to operate in finnish only so it is better to hardcode
+  "The language to use when localizing output to ALLU. ALLU seems to operate in Finnish only so it is better to hardcode
   this here instead of using e.g. the applicant's language setting."
   "fi")
 
