@@ -3,9 +3,18 @@
   (:require [lupapalvelu.mongo :as mongo]
             [schema.core :as sc]
             [sade.core :refer [ok fail now]]
-            [sade.schemas :refer [Timestamp]]
+            [sade.schemas :as ssc]
             [taoensso.timbre :refer [trace tracef debug debugf info infof
-                                     warn warnf error errorf fatal fatalf]]))
+                                     warn warnf error errorf fatal fatalf]]
+            [lupapalvelu.user :as user]))
+
+(sc/defschema User
+  {:id                                        user/Id
+   :firstName                                 (ssc/max-length-string 255)
+   :lastName                                  (ssc/max-length-string 255)
+   :role                                      user/Role
+   :email                                     ssc/Email
+   :username                                  ssc/Username})
 
 (sc/defschema InvoiceRow
   {:text sc/Str
@@ -22,7 +31,8 @@
 
 (sc/defschema Invoice
   {:id sc/Str
-   :created Timestamp
+   :created ssc/Timestamp
+   :created-by User
    :state (sc/enum "draft"       ;;created
                    "checked"     ;;checked by decision maker and moved to biller
                    "confirmed"   ;;biller has confirmed the invoice
@@ -50,6 +60,7 @@
   (debug ">> create-invoice! invoice-request: " invoice)
   (let [id (mongo/create-id)
         invoice-with-id (assoc invoice :id id)]
+    (debug ">> invoice-with-id: " invoice-with-id)
     (validate-invoice invoice-with-id)
     (mongo/insert :invoices invoice-with-id)
     id))
@@ -61,11 +72,16 @@
     (validate-invoice new-invoice)
     (mongo/update-by-id "invoices" id new-invoice)))
 
+(sc/defn ^:always-validate ->invoice-user :- User
+ [user]
+ (select-keys user [:id :firstName :lastName :role :email :username]))
+
 (defn ->invoice-db
-  [invoice {:keys [id organization] :as application}]
-  (debug "->invoice-db invoice-request: " invoice " app id: " id)
+  [invoice {:keys [id organization] :as application} user]
+  (debug "->invoice-db invoice-request: " invoice " app id: " id " user: " user)
   (merge invoice
          {:created (now)
+          :created-by (->invoice-user user)
           :application-id id
           :organization-id organization}))
 

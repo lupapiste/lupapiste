@@ -2,13 +2,20 @@
   (:require [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.integrations-api]
-            [lupapalvelu.itest-util :refer :all :as itu]
+            [lupapalvelu.itest-util :as itu]
             [lupapalvelu.invoice-api]
             [lupapalvelu.invoices :refer [validate-invoice ->invoice-db] :as invoices]
             [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.env :as env]))
+
+(def dummy-user {:id                                        "penan-id"
+                 :firstName                                 "pena"
+                 :lastName                                  "panaani"
+                 :role                                      "authority"
+                 :email                                     "pena@panaani.fi"
+                 :username                                  "pena"})
 
 (defn invoice-with [properties]
   (let [dummy-invoice {:application-id "LP-753-2018-90108"
@@ -133,12 +140,12 @@
                 (let [draft-invoice (invoice-with {:state "draft"})
                       {app-a-id :id :as app-a} (dummy-submitted-application)
                       {app-b-id :id :as app-b} (dummy-submitted-application)
-                      invoices [(->invoice-db draft-invoice app-a)
-                                (->invoice-db draft-invoice app-a)
+                      invoices [(->invoice-db draft-invoice app-a dummy-user)
+                                (->invoice-db draft-invoice app-a dummy-user)
 
-                                (->invoice-db draft-invoice app-b)
-                                (->invoice-db draft-invoice app-b)
-                                (->invoice-db draft-invoice app-b)]]
+                                (->invoice-db draft-invoice app-b dummy-user)
+                                (->invoice-db draft-invoice app-b dummy-user)
+                                (->invoice-db draft-invoice app-b dummy-user)]]
                   (doseq [invoice invoices] (invoices/create-invoice! invoice))
 
                   (-> (itu/local-query sonja :application-invoices :id app-a-id)

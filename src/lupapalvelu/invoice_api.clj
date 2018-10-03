@@ -21,12 +21,10 @@
    :input-validators [(partial action/non-blank-parameters [:id])
                       invoices/validate-insert-invoice-request]
    :states           states/post-submitted-states}
-  [{:keys [application data] :as command}]
+  [{:keys [application data user] :as command}]
   (let [invoice-request (:invoice data)
-        invoice-to-db (invoices/->invoice-db invoice-request application)]
-    (debug "insert-invoice command keys:" (keys command))
+        invoice-to-db (invoices/->invoice-db invoice-request application user)]
     (debug "insert-invoice invoice-request:" invoice-request)
-    (debug "insert-invoice invoice-to-db:" invoice-to-db)
     (ok :invoice-id (invoices/create-invoice! (merge invoice-to-db
                                                      {:state "draft"})))))
 
