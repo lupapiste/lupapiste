@@ -41,7 +41,14 @@ Yhdessä lupatyyppi ja hakemuksen sijaintikunta määrittävät mikä organisaat
 ![](application-content.png)
 
 Hakemuksen keskeisintä tietosisältöä ovat lomakkeet (documents) ja liitteet
-(attachments). Hakemukselle luodaan pohjat vaadittaville tiedoille sen mukaisesti,
+(attachments).
+
+Dokumentti on periaatteessa mielivaltainen rakenteinen tietue, 
+jonka viranomainen on määrittänyt toimitettavaksi tietyn tyyppisten hakemusten yhteydessä. 
+Käytännössä dokumentit kuitenkin usein liittyvät kiinteästi johonkin mallinnettuun domainkäsitteeseen, 
+kuten käyttäjään (osapuolidokumentit) tai toimenpiteeseen .
+
+Hakemukselle luodaan pohjat vaadittaville tiedoille sen mukaisesti,
 mitä toimenpiteitä hakemukseen liittyy.
 
 Organisaatio voi määritellä toimenpidekohtaisesti, mitä liitetyyppejä toimenpiteen
