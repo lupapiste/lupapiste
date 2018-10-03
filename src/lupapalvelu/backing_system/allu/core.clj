@@ -85,14 +85,24 @@
      :uri            (:path route-match)
      :request-method (route-match->request-method route-match)}))
 
-(defn- placement-creation-request [{:keys [application] :as command}]
+(defmulti application-creation-request (fn [{{:keys [permitSubtype]} :application}] permitSubtype))
+
+(defmethod application-creation-request :default [{{:keys [permitSubtype]} :application}]
+  (fail! :error.allu.unsupportedPermitSubtype {:permitSubtype permitSubtype}))
+
+(defmethod application-creation-request "sijoitussopimus" [{:keys [application] :as command}]
   (let [route-match (reitit/match-by-name allu-router [:placementcontracts :create])]
     {::command       (minimize-command command)
      :uri            (:path route-match)
      :request-method (route-match->request-method route-match)
      :body           (application->allu-placement-contract true application)}))
 
-(defn- placement-update-request [pending-on-client {:keys [application] :as command}]
+(defmulti application-update-request (fn [_ {{:keys [permitSubtype]} :application}] permitSubtype))
+
+(defmethod application-update-request :default [{{:keys [permitSubtype]} :application}]
+  (fail! :error.allu.unsupportedPermitSubtype {:permitSubtype permitSubtype}))
+
+(defmethod application-update-request "sijoitussopimus" [pending-on-client {:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
         _ (assert allu-id (str (:id application) " does not contain an ALLU id"))
         params {:path {:id allu-id}
@@ -405,45 +415,27 @@
   [organization-id permit-type]
   (and (env/feature? :allu) (= organization-id "091-YA") (= permit-type "YA")))
 
-(defn- create-placement-contract!
-  "Create placement contract in ALLU."
-  [command]
-  (send-allu-request! (placement-creation-request command)))
-
 (declare update-application!)
 
 (defn submit-application!
   "Submit application to ALLU and save the returned id as application.integrationKeys.ALLU.id. If this is a resubmit
   (after return-to-draft) just does `update-application!` instead."
-  [{{:keys [permitSubtype] :as application} :application :as command}]
-  {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
+  [{:keys [application] :as command}]
   (if-not (get-in application [:integrationKeys :ALLU :id])
-    (create-placement-contract! command)
+    (send-allu-request! (application-creation-request command))
     (update-application! command)))
 
 ;; TODO: If the update message data is the same as the previous one or invalid, don't send/enqueue the message at all:
-(defn- update-placement-contract!
-  "Update placement contract in ALLU (if it had been sent there)."
-  [{:keys [application] :as command}]
-  (when (application/submitted? application)
-    (send-allu-request! (placement-update-request true command))))
-
 (defn update-application!
   "Update application in ALLU (if it had been sent there)."
-  [{{:keys [permitSubtype]} :application :as command}]
-  {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
-  (update-placement-contract! command))
-
-(defn- lock-placement-contract!
-  "Lock placement contract in ALLU for verdict evaluation."
-  [command]
-  (send-allu-request! (placement-update-request false command)))
+  [{:keys [application] :as command}]
+  (when (application/submitted? application)
+    (send-allu-request! (application-update-request true command))))
 
 (defn lock-application!
   "Lock application in ALLU for verdict evaluation."
-  [{{:keys [permitSubtype]} :application :as command}]
-  {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
-  (lock-placement-contract! command))
+  [command]
+  (send-allu-request! (application-update-request false command)))
 
 (defn cancel-application!
   "Cancel application in ALLU (if it had been sent there)."
@@ -458,7 +450,7 @@
   (-> attachment :latestVersion :fileId))
 
 (defn send-attachments!
-  "Send the specified `attachments` of `(:application command)` to ALLU
+  "Send the specified `attachments` of `(:application command)` to ALLU.
   Returns a seq of attachment file IDs that were sent."
   [command attachments]
   (doall (for [attachment attachments]

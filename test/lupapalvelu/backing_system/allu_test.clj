@@ -31,11 +31,6 @@
             [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract FileMetadata]]
             [lupapalvelu.backing-system.allu.conversion :refer [lang]]))
 
-(testable-privates lupapalvelu.backing-system.allu.core
-                   placement-creation-request
-                   request-integration-message response-integration-message
-                   interface-path->string allu-fail!)
-
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
 
@@ -46,7 +41,7 @@
 (defschema ValidPlacementApplication
   {:id               ApplicationId
    :state            (apply sc/enum (map name states/all-states))
-   :permitSubtype    (sc/enum "sijoituslupa" "sijoitussopimus")
+   :permitSubtype    (sc/eq "sijoitussopimus")
    :organization     NonBlankStr
    :propertyId       Kiinteistotunnus
    :municipality     (apply sc/enum municipality-codes)
@@ -158,12 +153,11 @@
           invalid-app (assoc app :address "")
           invalid-submitted-app (assoc submitted-app :address "")]
       (facts "integration message generation"
-        (let [request (placement-creation-request {:application app
-                                                   :user        user
-                                                   :action      "submit-application"})]
+        (let [request (#'allu/application-creation-request {:application app
+                                                            :user        user
+                                                            :action      "submit-application"})]
           (fact "request-integration-message"
-            (request-integration-message (::allu/command request) request
-                                         "placementcontracts.create")
+            (#'allu/request-integration-message (::allu/command request) request "placementcontracts.create")
             => (contains {:direction    "out"
                           :messageType  "placementcontracts.create"
                           :transferType "http"
@@ -179,8 +173,8 @@
 
           (let [response {:status 200, :body allu-id}]
             (fact "response-integration-message"
-              (response-integration-message (::allu/command request) (:uri request)
-                                            response "placementcontracts.create")
+              (#'allu/response-integration-message (::allu/command request) (:uri request)
+                response "placementcontracts.create")
               => (contains {:direction    "in"
                             :messageType  "placementcontracts.create"
                             :transferType "http"

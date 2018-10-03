@@ -309,11 +309,14 @@
               false).
      [disabled?] Is component disabled? (false)
      [required?] Is component required? (false)
+     [placeholder] Placeholder text, visible if initial value is empty string. Note
+                   that you probably have to make sure value empty string as value
+                   will work on calling code
      [test-id] data-test-id attribute for the top-level div."
   [{selected* ::selected
     term*     ::term
     open?*    ::open?
-    :as       local-state} _ {:keys [clear? callback disabled? required? test-id] :as options}]
+    :as       local-state} _ {:keys [clear? callback disabled? required? placeholder test-id] :as options}]
   (let [{:keys [text-edit
                 menu-items
                 items-fn]} (complete-parts local-state
@@ -332,9 +335,11 @@
        :class    (common/css-flags :disabled disabled?
                                    :required (and required?
                                                   (s/blank? selected)))}
-      [:span (:text (util/find-first #(util/=as-kw (:value %)
-                                                   selected)
-                                      (items-fn "")))]
+      [:span (if (and (s/blank? selected) placeholder)
+               placeholder
+               (:text (util/find-first #(util/=as-kw (:value %)
+                                                     selected)
+                                       (items-fn ""))))]
       [:i.primary.ac--chevron
        {:class (common/css-flags :lupicon-chevron-small-down (not open?)
                                  :lupicon-chevron-small-up   open?)}]
