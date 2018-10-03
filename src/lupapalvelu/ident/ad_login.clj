@@ -85,7 +85,7 @@
         {:keys [app-name xml-signer]} ad-config
         acs-uri (format "%s/api/saml/ad-login/%s" (env/value :host) org-id)
         saml-req-factory! (saml-sp/create-request-factory
-                            #(uuid/v1)
+                            uuid/v1
                             (constantly 0) ; :saml-id-timeouts
                             xml-signer
                             idp-uri
