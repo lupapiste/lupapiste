@@ -21,70 +21,12 @@
 
             [midje.sweet :refer [facts fact => contains]]
             [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
+            [lupapalvelu.itest-util.model-based :refer [state-graph->transitions traverse-state-transitions]]
 
             [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract AttachmentMetadata]]
             [lupapalvelu.domain :as domain])
   (:import [java.io InputStream]))
-
-;;;; Nano-framework :P for Model-Based Testing
-;;;; ===================================================================================================================
-
-;;; TODO: Move this to itest-util or sth.
-
-(defn- state-graph->transitions [states]
-  (mapcat (fn [[state succs]] (map #(vector state %) succs)) states))
-
-(defn- transitions-todo [visited-total soured visit-goal]
-  (->> visited-total
-       (filter (fn [[transition visit-count]] (and (not (soured transition)) (< visit-count visit-goal))))
-       (map key)))
-
-(defn- probe-next-transition [states visit-goal visited-total soured current-state]
-  ;; This code is not so great but does the job for now.
-  (letfn [(useful [current visited]
-            (let [[usefuls visited]
-                  (reduce (fn [[transitions visited] succ]
-                            (let [transition [current succ]
-                                  visited* (conj visited transition)]
-                              (cond
-                                (soured transition) [transitions visited*]
-                                (< (get visited-total transition) visit-goal) [(conj transitions transition) visited*]
-                                (not (visited transition)) (let [[transition* visited*] (useful succ visited*)]
-                                                             (if transition*
-                                                               [(conj transitions transition) visited*]
-                                                               [transitions visited*]))
-                                :else [transitions visited*])))
-                          [[] visited] (get states current))]
-              [(if (seq usefuls) (rand-nth usefuls) nil)
-               visited]))]
-    (first (useful current-state #{}))))
-
-(defn- traverse-state-transitions [& {:keys [states initial-state init! transition-adapters visit-goal]}]
-  (let [initial-visited (zipmap (state-graph->transitions states) (repeat 0))]
-    (loop [visited-total initial-visited
-           visited visited-total
-           soured #{}
-           current-state initial-state
-           user-state (init!)]
-      (if-let [[_ next-state :as transition] (probe-next-transition states visit-goal visited-total soured
-                                                                    current-state)]
-        (if-let [transition-adapter (get transition-adapters transition)]
-          (let [next-state* (transition-adapter transition user-state)]
-            (if (or (not= next-state* current-state)        ; Led somewhere else?
-                    (= next-state* next-state))             ; Wasn't supposed to!
-              (recur (update visited-total transition inc) (update visited transition inc) soured
-                     next-state* user-state)
-              (recur (update visited-total transition inc)
-                     (update visited transition inc)
-                     (conj soured transition)               ; Let's not try that again.
-                     next-state*
-                     user-state)))
-          (do (warn "No adapter provided for" transition)
-              (recur (update visited-total transition inc) (update visited transition inc) soured
-                     next-state user-state)))
-        (when (seq (transitions-todo visited-total soured visit-goal))
-          (recur visited-total initial-visited soured initial-state (init!)))))))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
