@@ -11,20 +11,44 @@
                   :id app-id
                   :invoice data))
 
+(def drafts-last-then-time-created
+  (juxt
+   (fn [invoice] (= "draft" (:state invoice)))
+   :created))
+
 (defn fetch-invoices [app-id]
   (common/query :application-invoices
                 (fn [data]
-                  (println data)
-                  (reset! state/invoices (:invoices data)))
+                  (reset! state/invoices (sort-by
+                                          drafts-last-then-time-created
+                                          >
+                                          (:invoices data))))
+                :id app-id))
+
+(defn fetch-invoice [app-id invoice-id callback]
+  (common/query :fetch-invoice
+                (fn [data]
+                  (callback (:invoice data)))
+                :id app-id
+                :invoice-id invoice-id))
+
+(defn fetch-operations [app-id]
+  (common/query :application-operations
+                (fn [data]
+                  (reset! state/operations (:operations data)))
                 :id app-id))
 
 (defn upsert-invoice! [app-id invoice-data callback]
   (if (:is-new invoice-data)
     (insert-invoice app-id {:operations (:operations invoice-data)} (fn [response]
                                                                       (callback response)
+                                                                      (fetch-invoices app-id)
                                                                       (reset! state/new-invoice nil)))
     (common/command :update-invoice
-                    callback
+                    (fn [response]
+                      (fetch-invoice app-id
+                                     (:id invoice-data)
+                                     callback))
                     :id app-id
                     :invoice invoice-data)))
 

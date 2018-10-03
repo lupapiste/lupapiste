@@ -23,16 +23,61 @@
     }
 }
 
+button.invoice-change-state-button {
+    background-color: $positive;
+    color: #ffffff;
+}
+
 .invoice-accordion.rollup {
     border-width: 1px;
     border-color: $gray119;
     border-style: solid;
     width: 100%;
     margin-bottom: $marginL;
-}
 
-.invoice-accordion .roll-up-header {
-    background-color: $gray119;
+    &.onward-from-draft {
+        .roll-up-header {
+            background-color: $positive;
+            button {
+                background-color: $positive;
+            }
+        }
+    }
+    .roll-up-header {
+        background-color: $gray119;
+        &:after {
+            content: "";
+            display: block;
+            height: 0px;
+            clear:both;
+        }
+        button {
+            background-color: $gray119;
+        }
+        .accordion-toggle-container {
+            height: $btn-height;
+        }
+        .invoice-title-component {
+            color: #ffffff;
+            float: right;
+            line-height: $btn-height;
+            vertical-align: middle;
+            padding-right: 12px;
+            div {
+                display: inline;
+                i {
+                    font-size: 16px;
+                    padding: {
+                        right: 0.5em;
+
+                    }
+                }
+                &:first-child {
+                    padding-right: 2em;
+                }
+            }
+        }
+    }
 }
 
 .invoice-operations-table-wrapper {
