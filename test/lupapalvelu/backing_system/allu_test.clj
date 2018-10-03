@@ -28,7 +28,8 @@
             [lupapalvelu.test-util :refer [passing-quick-check]]
 
             [lupapalvelu.backing-system.allu.core :as allu]
-            [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract FileMetadata]]
+            [lupapalvelu.backing-system.allu.schemas
+             :refer [SijoituslupaOperation PlacementContract AttachmentMetadata]]
             [lupapalvelu.backing-system.allu.conversion :refer [lang]]))
 
 ;;;; Refutation Utilities
@@ -38,6 +39,7 @@
 
 (defn- http-error? [http-status] (fn [exn] (= (:status (ex-data exn)) http-status)))
 
+;; TODO: DRY; this is also defined in allu-conversion-test
 (defschema ValidPlacementApplication
   {:id               ApplicationId
    :state            (apply sc/enum (map name states/all-states))
@@ -64,7 +66,9 @@
   "A side channel for providing original attachment data to `test-handler`."
   nil)
 
-(defn- test-router [response]
+(defn- test-router
+  "Make a mock Reitit router that does some test checks and returns `response`."
+  [response]
   (reitit-ring/router
     (#'allu/routes
       true
@@ -125,7 +129,7 @@
                         (dissoc metadata :content) => {:name      "metadata"
                                                        :mime-type "application/json"
                                                        :encoding  "UTF-8"}
-                        (sc/check FileMetadata metadata-content) => nil
+                        (sc/check AttachmentMetadata metadata-content) => nil
                         metadata-content => {:name        (-> sent-attachment :latestVersion :filename)
                                              :description (let [{{:keys [type-group type-id]} :type} sent-attachment
                                                                 type (localize lang :attachmentType type-group type-id)
@@ -206,19 +210,19 @@
         (with-redefs [allu/allu-router router
                       allu/allu-request-handler handler
                       allu/send-allu-request! handler]      ; Since these are unit tests we bypass JMS.
-          (facts "login!" (#'allu/login!) => nil)
+          (facts "login!" (#'allu/login!) => {:status 200, :body (json/encode mock-jwt)})
 
           (facts "submit-application!"
             (allu/submit-application! {:application app
                                        :user        user
-                                       :action      "submit-application"}) => nil
+                                       :action      "submit-application"}) => {:status 200, :body allu-id}
             (allu/submit-application! {:application invalid-app, :user user, :action "submit-application"})
             => (throws schema-error?))
 
           (facts "update-application!"
             (allu/update-application! {:application submitted-app
                                        :user        user
-                                       :action      "update-document"}) => nil
+                                       :action      "update-document"}) => {:status 200, :body allu-id}
             (allu/update-application! {:application invalid-submitted-app
                                        :user        user
                                        :action      "update-document"}) => (throws schema-error?))
@@ -226,7 +230,7 @@
           (facts "lock-application!"
             (allu/lock-application! {:application submitted-app
                                      :user        user
-                                     :action      "approve-application"}) => nil
+                                     :action      "approve-application"}) => {:status 200, :body allu-id}
             (allu/lock-application! {:application invalid-submitted-app
                                      :user        user
                                      :action      "approve-application"}) => (throws schema-error?))
@@ -234,7 +238,7 @@
           (facts "cancel-application!"
             (allu/cancel-application! {:application submitted-app
                                        :user        user
-                                       :action      "cancel-application"}) => nil)
+                                       :action      "cancel-application"}) => {:status 200, :body allu-id})
 
           (facts "send-attachments!"
             (let [fileId (sg/generate sssc/FileId)

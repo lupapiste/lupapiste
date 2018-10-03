@@ -23,12 +23,14 @@
             [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
 
             [lupapalvelu.backing-system.allu.core :as allu]
-            [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract FileMetadata]]
+            [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract AttachmentMetadata]]
             [lupapalvelu.domain :as domain])
   (:import [java.io InputStream]))
 
 ;;;; Nano-framework :P for Model-Based Testing
 ;;;; ===================================================================================================================
+
+;;; TODO: Move this to itest-util or sth.
 
 (defn- state-graph->transitions [states]
   (mapcat (fn [[state succs]] (map #(vector state %) succs)) states))
@@ -103,13 +105,16 @@
     :area     "708280",
     :height   "12"}])
 
-(defn- nullify-doc-ids [doc]
+(defn- nullify-doc-ids
+  "Make some foreign keys nil so that the tests don't try to load nonexistent users with generated id:s."
+  [doc]
   (-> doc
       (assoc-in [:data :henkilo :userId :value] nil)
       (assoc-in [:data :yritys :companyId :value] nil)))
 
-;; HACK: undo-cancellation bypasses the state graph so we add [:cancel *] arcs here:
-(defn- add-canceled->* [state-graph]
+(defn- add-canceled->*
+  "HACK: undo-cancellation bypasses the state graph so we add [:cancel *] arcs to the state graph with this."
+  [state-graph]
   (update state-graph :canceled
           into
           (comp (filter (fn [[_ succs]] (some (partial = :canceled) succs)))
@@ -220,13 +225,17 @@
 ;;;; Mock Handler
 ;;;; ===================================================================================================================
 
-(defn- check-response-ok-middleware [handler]
+(defn- check-response-ok-middleware
+  "MIddleware that tests that the response HTTP status is successful."
+  [handler]
   (fn [request]
     (let [response (handler request)]
       (fact "response is successful" response => (comp #{200 201} :status))
       response)))
 
-(defn- check-imessages-middleware [handler]
+(defn- check-imessages-middleware
+  "Middleware that checks that `integration-messages` is updated with the request and response."
+  [handler]
   (fn [{{:keys [application]} ::allu/command :as request}]
     (let [imsg-query (fn [direction]
                        {:partner        "allu"
@@ -242,7 +251,9 @@
 
 (def- mock-jwt "foo.bar.baz")
 
-(defn- mock-routes [allu-state]
+(defn- mock-routes
+  "Create mock Reitit routes whose handlers use `allu-state` as the ALLU DB."
+  [allu-state]
   [["/login" {:post {:handler (fn [_] {:status 200, :body (json/encode mock-jwt)})}}]
 
    ["/"
@@ -262,7 +273,7 @@
                            (let [metadata-error (sc/check {:name      (sc/eq "metadata")
                                                            :mime-type (sc/eq "application/json")
                                                            :encoding  (sc/eq "UTF-8")
-                                                           :content   FileMetadata}
+                                                           :content   AttachmentMetadata}
                                                           (update (first multipart) :content json/decode true))
                                  file-error (sc/check {:name      (sc/eq "file")
                                                        :mime-type sc/Str
