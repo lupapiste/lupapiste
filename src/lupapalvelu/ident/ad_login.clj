@@ -35,13 +35,14 @@
     :else element))
 
 (defn resolve-roles
-  "Takes a seq of user roles from the SAML, returns a set of corresponding LP roles."
+  "Takes a map of corresponding roles (key = role in Lupis, value is AD-group)
+  and a seq of user roles from the SAML, returns a set of corresponding LP roles."
   [org-roles ad-params]
   (let [ad-roles-set (if (string? ad-params) #{ad-params} (set ad-params))
         orgAuthz     (for [[lp-role ad-role] org-roles]
                        (when (ad-roles-set ad-role)
                          (name lp-role)))]
-    (->> orgAuthz (remove nil?) (set))))
+    (->> orgAuthz (remove nil?) set)))
 
 (defn validated-login [req org-id firstName lastName email orgAuthz]
   (let [user-data {:firstName firstName
