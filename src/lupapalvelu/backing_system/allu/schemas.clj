@@ -1,10 +1,13 @@
 (ns lupapalvelu.backing-system.allu.schemas
   "Schemas for ALLU integration. Mostly adapted from ALLU Swagger docs."
   (:require [schema.core :as sc :refer [defschema optional-key enum]]
+            [sade.municipality :refer [municipality-codes]]
             [sade.schemas :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
                                   ApplicationId ISO-3166-alpha-2 date-string]]
             [lupapalvelu.document.canonical-common :as canonical-common]
-            [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
+            [lupapalvelu.document.data-schema :as dds]
+            [lupapalvelu.integrations.geojson-2008-schemas :as geo]
+            [lupapalvelu.states :as states]))
 
 (defschema LoginCredentials
   "User credentials for ALLU login API."
@@ -151,3 +154,19 @@
   {:name        sc/Str
    :description sc/Str
    :mimeType    (sc/maybe sc/Str)})
+
+(defschema ValidPlacementApplication
+  "A partial schema for a Lupapiste application that can be converted into a `PlacementContract`. For testing."
+  {:id               ApplicationId
+   :state            (apply sc/enum (map name states/all-states))
+   :permitSubtype    (sc/eq "sijoitussopimus")
+   :organization     NonBlankStr
+   :propertyId       Kiinteistotunnus
+   :municipality     (apply sc/enum municipality-codes)
+   :address          NonBlankStr
+   :primaryOperation {:name SijoituslupaOperation}
+   :documents        [(sc/one (dds/doc-data-schema "hakija-ya" true) "applicant")
+                      (sc/one (dds/doc-data-schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" true) "description")
+                      (sc/one (dds/doc-data-schema "yleiset-alueet-maksaja" true) "payee")]
+   :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
+   :drawings         [{:geometry-wgs84 geo/SingleGeometry}]})

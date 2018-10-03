@@ -8,20 +8,14 @@
             [schema.core :as sc :refer [defschema]]
             [sade.core :refer [def- now]]
             [sade.env :as env]
-            [sade.municipality :refer [municipality-codes]]
-            [sade.schemas :refer [NonBlankStr Kiinteistotunnus ApplicationId]]
             [sade.schema-generators :as sg]
             [sade.shared-schemas :as sssc]
             [lupapalvelu.attachment :as attachment :refer [Attachment]]
-            [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.i18n :refer [localize]]
-            [lupapalvelu.integrations.geojson-2008-schemas :as geo]
             [lupapalvelu.organization :refer [PermitType]]
-            [lupapalvelu.states :as states]
             [lupapalvelu.user :refer [User]]
 
             [midje.sweet :refer [facts fact => contains provided throws]]
-            [midje.util :refer [testable-privates]]
             [clojure.test.check :refer [quick-check]]
             [com.gfredericks.test.chuck.properties :refer [for-all]]
             [com.gfredericks.test.chuck.generators :refer [string-from-regex]]
@@ -29,7 +23,7 @@
 
             [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.backing-system.allu.schemas
-             :refer [SijoituslupaOperation PlacementContract AttachmentMetadata]]
+             :refer [ValidPlacementApplication PlacementContract AttachmentMetadata]]
             [lupapalvelu.backing-system.allu.conversion :refer [lang]]))
 
 ;;;; Refutation Utilities
@@ -38,22 +32,6 @@
 (defn- schema-error? [exn] (= (:type (ex-data exn)) :schema.core/error))
 
 (defn- http-error? [http-status] (fn [exn] (= (:status (ex-data exn)) http-status)))
-
-;; TODO: DRY; this is also defined in allu-conversion-test
-(defschema ValidPlacementApplication
-  {:id               ApplicationId
-   :state            (apply sc/enum (map name states/all-states))
-   :permitSubtype    (sc/eq "sijoitussopimus")
-   :organization     NonBlankStr
-   :propertyId       Kiinteistotunnus
-   :municipality     (apply sc/enum municipality-codes)
-   :address          NonBlankStr
-   :primaryOperation {:name SijoituslupaOperation}
-   :documents        [(sc/one (dds/doc-data-schema "hakija-ya" true) "applicant")
-                      (sc/one (dds/doc-data-schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" true) "description")
-                      (sc/one (dds/doc-data-schema "yleiset-alueet-maksaja" true) "payee")]
-   :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
-   :drawings         [{:geometry-wgs84 geo/SingleGeometry}]})
 
 (def- organizations (string-from-regex #"\d{3}-(R|YA|YMP)"))
 
