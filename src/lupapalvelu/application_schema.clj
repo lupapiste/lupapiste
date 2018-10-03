@@ -1,8 +1,9 @@
 (ns lupapalvelu.application-schema
   (:require [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.operations :as op]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.states :as states]))
 
 
 (defschema Operation
@@ -22,13 +23,11 @@
    :address                          sc/Str
    :state                            (apply sc/enum (map name states/all-states))
    :permitType                       (apply sc/enum (map name (keys (permit/permit-types))))
-   :permitSubtype                    (sc/maybe sc/Str)
-   ;; or (sc/maybe (->> (concat
-   ;;                     (->> (permit/permit-types) vals (map :subtypes) flatten distinct)
-   ;;                     (->> (vals op/operations) (map :subtypes) flatten distinct))
-   ;;                    (distinct)
-   ;;                    (apply sc/enum)))
-   ;; but requiring lupapalvelu.operation results in dependency cycle...
+   :permitSubtype                    (sc/maybe (->> (concat
+                                                      (->> (permit/permit-types) vals (map :subtypes) flatten distinct)
+                                                      (->> (vals op/operations) (map :subtypes) flatten distinct))
+                                                    (distinct)
+                                                    (apply sc/enum)))
    :applicant                        (sc/maybe sc/Str)
    :infoRequest                      sc/Bool
    (sc/optional-key :3dMapActivated) (sc/maybe sc/Num)
