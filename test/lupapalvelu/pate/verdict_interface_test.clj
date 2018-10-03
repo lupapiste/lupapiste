@@ -114,3 +114,23 @@
                              :published {:published 1538038700000}}]}) => "Verdict handler"
   (handler nil) => nil
   (handler {}) => nil)
+
+(fact "verdicts by backend id"
+  (verdicts-by-backend-id {:verdicts [{:kuntalupatunnus "123"}
+                                      {:kuntalupatunnus "456"}
+                                      {:kuntalupatunnus "789"}]} "456") => [{:kuntalupatunnus "456"}]
+  (verdicts-by-backend-id {:verdicts [{:kuntalupatunnus "123"}
+                                      {:kuntalupatunnus "456"}
+                                      {:foo :bar}
+                                      {:kuntalupatunnus "789"}
+                                      {:kuntalupatunnus "456"}]} "456") => [{:kuntalupatunnus "456"} {:kuntalupatunnus "456"}]
+  (verdicts-by-backend-id {:pate-verdicts [{:data {:kuntalupatunnus "AAA"}}
+                                           {:data {:kuntalupatunnus "BBB"}}
+                                           {:data {:kuntalupatunnus "CCC"}}]} "BBB") => [{:data {:kuntalupatunnus "BBB"}}]
+  (verdicts-by-backend-id {:pate-verdicts [{:data {:kuntalupatunnus "AAA"}}
+                                           {:data {:kuntalupatunnus "BBB"}}
+                                           {:data {:kuntalupatunnus "CCC"}}
+                                           {:data {:kuntalupatunnus "BBB"}}
+                                           {:data {:foo :bar}}
+                                           {:data {:kuntalupatunnus "AAA"}}]} "BBB") => [{:data {:kuntalupatunnus "BBB"}}{:data {:kuntalupatunnus "BBB"}}]
+  (verdicts-by-backend-id {} "123") => nil)

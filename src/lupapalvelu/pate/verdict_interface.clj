@@ -32,6 +32,15 @@
   [{:keys [verdicts pate-verdicts]}]
   (concat verdicts pate-verdicts))
 
+(defn verdicts-by-backend-id
+  "All verdicts filtered by backend Id."
+  [{:keys [verdicts pate-verdicts]} backendId]
+  (or
+    (some->> verdicts
+             (filter #(= (:kuntalupatunnus %) backendId)))
+    (some->> pate-verdicts
+             (filter #(= (get-in % [:data :kuntalupatunnus]) backendId)))))
+
 (defn published-kuntalupatunnus
   "Search kuntalupatunnus from backing-system and published legacy
   verdicts. Returns the first one found."
@@ -46,7 +55,7 @@
                first)))
 
 (defn kuntalupatunnukset
-  "Search all backendIds form legacy verdicts and pate verdicts."
+  "Search all backendIds from legacy verdicts and pate verdicts."
   [{:keys [verdicts pate-verdicts]}]
   (or (some->> verdicts
                (map :kuntalupatunnus)
