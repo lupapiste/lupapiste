@@ -10,6 +10,9 @@
            [org.opengis.feature.simple SimpleFeature])
 
   (:require [cheshire.core :as json]
+            [clj-time.coerce :as c]
+            [clj-time.core :as t]
+            [clj-time.local :as l]
             [clojure.set :as set]
             [clojure.walk :refer [keywordize-keys]]
             [lupapalvelu.attachment.stamp-schema :as stmp]
@@ -33,6 +36,7 @@
             [sade.shared-schemas :as sssc]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.validators :refer [valid-email?]]
             [sade.xml :as sxml]
             [schema.core :as sc]
             [taoensso.timbre :refer [trace debug debugf info infof warn error errorf fatal]]
@@ -265,8 +269,12 @@
                                              (sc/optional-key :auth-type) sc/Str
                                              (sc/optional-key :basic-auth-password) sc/Str
                                              (sc/optional-key :basic-auth-username) sc/Str
-                                             (sc/optional-key :crypto-iv-s) sc/Str}})
-
+                                             (sc/optional-key :crypto-iv-s) sc/Str}
+   (sc/optional-key :ad-login) {:enabled sc/Bool
+                                :idp-cert sc/Str
+                                :idp-uri sc/Str
+                                :trusted-domains [sc/Str]
+                                :sent-tokens []}})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
@@ -290,7 +298,7 @@
    :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
    :docstore-info :3d-map :default-digitalization-location
    :kopiolaitos-email :kopiolaitos-orderer-address :kopiolaitos-orderer-email :kopiolaitos-orderer-phone
-   :app-required-fields-filling-obligatory :state-change-msg-enabled])
+   :app-required-fields-filling-obligatory :state-change-msg-enabled :ad-login])
 
 (defn get-organizations
   ([]
@@ -321,7 +329,7 @@
   (-> (mongo/by-id :organizations org-id [:allowedAutologinIPs])
       :allowedAutologinIPs))
 
-(defn autogin-ip-mongo-changes [ips]
+(defn autologin-ip-mongo-changes [ips]
   (when (nil? (sc/check [ssc/IpAddress] ips))
     {$set {:allowedAutologinIPs ips}}))
 
@@ -570,6 +578,17 @@
 
 (defn organizations-with-calendars-enabled []
   (map :id (mongo/select :organizations {:calendars-enabled true} {:id 1})))
+
+(defn organizations-with-ad-login-enabled []
+  (map :id (mongo/select :organizations {:ad-login.enabled true} {:id 1})))
+
+(defn ad-login-data-by-domain
+  "Takes a username (= email), checks to which organization its domain belongs to and return the organization id.
+  Returns nil if it's not found in any organizations."
+  [username]
+  {:pre [(valid-email? username)]}
+  (let [domain (last (ss/split username #"@"))]
+    (mongo/select :organizations {:ad-login.trusted-domains domain} {:id 1 :ad-login 1})))
 
 ;;
 ;; Backend server addresses
@@ -1009,3 +1028,56 @@
                 get-docstore-info-for-organization!
                 :docTerminalInUse)
     (fail :error.docterminal-not-enabled)))
+
+(defn set-ad-login-settings [org-id enabled trusted-domains idp-uri idp-cert]
+  (update-organization org-id
+                       {$set {:ad-login.enabled enabled
+                              :ad-login.trusted-domains trusted-domains
+                              :ad-login.idp-uri idp-uri
+                              :ad-login.idp-cert idp-cert}}))
+
+(defn check-ad-login-enabled [{user :user}]
+  (when-not (-> user
+                roles/authority-admins-organization-id
+                (get-organization [:ad-login])
+                :ad-login
+                :enabled)
+    (fail :error.ad-login-not-enabled)))
+
+(defn update-ad-login-role-mapping [role-map user]
+  (let [org-id (-> user :orgAuthz keys first name)
+        org (get-organization org-id)
+        updated-role-map (-> org
+                             :ad-login
+                             :role-mapping
+                             (merge role-map))
+        changes (into {} (for [[k v] updated-role-map]
+                           [(keyword (str "ad-login.role-mapping." (name k))) v]))]
+    (update-organization org-id {$set changes})))
+
+(defn get-sent-tokens [org-id]
+  (if-let [ad-data (get-organization org-id [:ad-login])]
+    (get-in ad-data [:ad-login :sent-tokens])))
+
+(defn add-token-to-org [org-id token]
+  (let [token-entry {:timestamp (c/to-long (l/local-now))
+                     :token token}]
+    (update-organization org-id {$push {:ad-login.sent-tokens token-entry}})))
+
+(defn- newer-than-timeout? [timestamp timeout]
+  (let [parsed-timestamp (c/from-long timestamp)
+        interval (->> (l/local-now) (t/interval parsed-timestamp) t/in-minutes)]
+    (< interval timeout)))
+
+(defn purge-time-out-tokens!
+  "Takes an org-id and a timeout amount (in mins), removes all tokens older than
+  current time - timeout from ad-login.sent-tokens array."
+  [org-id timeout]
+  (if-let [tokens (get-sent-tokens org-id)]
+    (let [valid-tokens (filter #(newer-than-timeout? (:timestamp %) timeout) tokens)]
+      (when (not= (count valid-tokens) (count tokens))
+        (update-organization org-id {$set {:ad-login.sent-tokens valid-tokens}})))))
+
+(defn remove-used-token! [org-id token]
+  (let [unused-tokens (filter #(not= token (:token %)) (get-sent-tokens org-id))]
+    (update-organization org-id {$set {:ad-login.sent-tokens unused-tokens}})))
