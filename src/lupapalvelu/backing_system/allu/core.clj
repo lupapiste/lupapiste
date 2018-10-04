@@ -255,6 +255,8 @@
 ;;;; Custom middlewares
 ;;;; ===================================================================================================================
 
+;;; TODO: Use interceptors instead, the *->middleware fn:s are kind of silly when interceptors exist.
+
 (defn- route-name->string
   "Join a `[Keyword]` into a string with dots and throwing away the keyword semicolons."
   [path] (s/join \. (map name path)))
@@ -264,6 +266,12 @@
   For the ML illiterates, turn a fn from request to request into a middleware function."
   [preprocess]
   (fn [handler] (fn [request] (handler (preprocess request)))))
+
+(defn- post-action->middleware
+  "(Response -> ()) -> ((Request -> Response) -> (Request -> Response))
+  i.e. turn a response-using imperative action into a middleware function."
+  [post-act!]
+  (fn [handler] (fn [request] (let [response (handler request)] (post-act! response) response))))
 
 (defn- body&multipart-as-params
   "Copy the request :body into :body-params or :multipart into :multipart-params when they exist."
@@ -331,28 +339,37 @@
   []
   (allu-request-handler (login-request (env/value :allu :username) (env/value :allu :password))))
 
-(defn- handle-response
-  "Error handling (`allu-fail!` on HTTP errors, re-login on HTTP 401) and a grap-bag of other post-request actions."
-  [disable-io-middlewares?]
-  (fn [handler]
-    (fn [{{{app-id :id} :application} ::command :as request}]
-      (let [route-name (-> request reitit-ring/get-match :data :name)
-            {:keys [status] :as response} (handler request)]
-        (when (and (= status 401)
-                   (not= route-name [:login]))              ; guard against runaway recursion
-          (login!))
+(defn- re-login-on-unauthorized!
+  "Re-login on HTTP 401."
+  [{:keys [status]}]
+  (when (= status 401)
+    (login!)))
 
-        (match response
-          {:status (:or 200 201), :body body}
-          (do (info "ALLU operation" (route-name->string route-name) "succeeded")
-              ;; TODO: Move these ad-hoc conditionals into route-specific middlewares:
-              (when (= route-name [:login])
-                (reset! current-jwt (json/decode body)))    ; for some reason body is a JSON-encoded string
-              (when (and (not disable-io-middlewares?) (= route-name [:placementcontracts :create]))
-                (application/set-integration-key app-id :ALLU {:id body}))
-              response)
+(defn- reset-jwt!
+  "Reset `current-jwt` to the new one from login response."
+  [{:keys [body]}]
+  (reset! current-jwt (json/decode body)))                  ; for some reason (consistency?) body is a JSON-encoded string
 
-          response (allu-fail! :error.allu.http (select-keys response [:status :body])))))))
+(defn- set-allu-integration-key!
+  "If creation was successful, set the ALLU integration key to be the creation response body."
+  [handler]
+  (fn [{{{app-id :id} :application} ::command :as request}]
+    (let [{:keys [body] :as response} (handler request)]
+      (match (handler request)
+        ({:status (:or 200 201), :body body} :as response) (do (application/set-integration-key app-id :ALLU {:id body})
+                                                               response)
+        response response))))
+
+(defn- fail-on-error!
+  "`allu-fail!` on HTTP errors."
+  [handler]
+  (fn [request]
+    (match (handler request)
+      ({:status (:or 200 201), :body body} :as response)
+      (do (info "ALLU operation" (route-name->string (-> request reitit-ring/get-match :data :name)) "succeeded")
+          response)
+
+      response (allu-fail! :error.allu.http (select-keys response [:status :body])))))
 
 ;;;; Router and request handler
 ;;;; ===================================================================================================================
@@ -368,7 +385,8 @@
   ([disable-io-middlewares? handler]
    [["/login" {:middleware [(preprocessor->middleware body&multipart-as-params)
                             reitit.ring.coercion/coerce-request-middleware
-                            (handle-response disable-io-middlewares?)
+                            (post-action->middleware reset-jwt!)
+                            fail-on-error!
                             (preprocessor->middleware content->json)]
                :name       [:login]
                :parameters {:body LoginCredentials}
@@ -378,7 +396,8 @@
     ["/" {:middleware (-> [(preprocessor->middleware body&multipart-as-params)
                            multipart-middleware
                            reitit.ring.coercion/coerce-request-middleware
-                           (handle-response disable-io-middlewares?)]
+                           fail-on-error!
+                           (post-action->middleware re-login-on-unauthorized!)]
                           (into (if disable-io-middlewares? [] [save-messages!]))
                           (conj (preprocessor->middleware (fn-> content->json jwt-authorize))))
           :coercion   reitit.coercion.schema/coercion}
@@ -399,6 +418,7 @@
      ["placementcontracts"
       ["" {:name       [:placementcontracts :create]
            :parameters {:body PlacementContract}
+           :middleware (if disable-io-middlewares? [] [set-allu-integration-key!])
            :post       {:handler handler}}]
 
       ["/:id" {:name       [:placementcontracts :update]
