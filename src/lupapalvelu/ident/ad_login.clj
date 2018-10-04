@@ -24,6 +24,13 @@
   [certstring]
   (ss/replace certstring #"[\n ]|(BEGIN|END) CERTIFICATE|-{5}" ""))
 
+(defn remove-namespaces-from-kws
+  "Convert namespaced map keys like :http://schemas.microsoft.com/identity/claims/tenantid -> :tenantid"
+  [m]
+  (into {} (for [[k v] m]
+             (let [newkey (-> k name (ss/split #"/") last keyword)]
+               [newkey v]))))
+
 (defn- parse-saml-info
   "The saml-info map returned by saml20-clj comes in a wacky format, so its best to
   parse it into a more manageable form (without string keys or single-element lists etc)."
@@ -31,7 +38,7 @@
   (cond
     (and (seq? element) (= (count element) 1)) (parse-saml-info (first element))
     (seq? element) (mapv parse-saml-info element)
-    (map? element) (into {} (for [[k v] element] [(keyword k) (parse-saml-info v)]))
+    (map? element) (into {} (for [[k v] (remove-namespaces-from-kws element)] [(keyword k) (parse-saml-info v)]))
     :else element))
 
 (defn resolve-roles
@@ -42,6 +49,32 @@
                        (when (ad-roles-set ad-role)
                          (name lp-role)))]
     (->> orgAuthz (remove nil?) (set))))
+
+(def resp
+  {:assertions {:attrs {:http://schemas.microsoft.com/claims/authnmethodsreferences ["http://schemas.microsoft.com/ws/2008/06/identity/authenticationmethod/password"
+                                                                                   "http://schemas.microsoft.com/claims/multipleauthn"]
+                      :http://schemas.microsoft.com/identity/claims/identityprovider "https://sts.windows.net/b1ff483b-d9f6-4272-97cc-5a887c10d995/"
+                      :http://schemas.microsoft.com/identity/claims/objectidentifier "cb065813-1f67-4d28-b9c6-8a9ec6e7d8d1"
+                      :http://schemas.microsoft.com/identity/claims/tenantid "b1ff483b-d9f6-4272-97cc-5a887c10d995"
+                      :http://schemas.microsoft.com/ws/2008/06/identity/claims/role "authority"
+                      :http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email "markus.penttila@evolta.fi"
+                      :http://schemas.xmlsoap.org/ws/2005/05/identity/claims/firstName "Markus"
+                      :http://schemas.xmlsoap.org/ws/2005/05/identity/claims/groups "authority"
+                      :http://schemas.xmlsoap.org/ws/2005/05/identity/claims/lastName "Penttilä"
+                      :http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name "markus.penttila@evolta.fi"}
+              :audiences "Lupapiste"
+              :confirmation {:in-response-to "c0060540-c7dd-11e8-89d8-0003c55030ab"
+                             :not-before nil
+                             :not-on-or-after #inst "2018-10-04T14:04:46.916-00:00"
+                             :recipient "https://www-qa.lupapiste.fi/api/saml/ad-login/609-R"}
+              :name-id {:format "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
+                        :value "markus.penttila@evolta.fi"}}
+ :destination "https://www-qa.lupapiste.fi/api/saml/ad-login/609-R"
+ :inResponseTo "c0060540-c7dd-11e8-89d8-0003c55030ab"
+ :issueInstant #inst "2018-10-04T13:59:46.932-00:00"
+ :status "urn:oasis:names:tc:SAML:2.0:status:Success"
+ :success? true
+ :version "2.0"})
 
 (defn validated-login [req org-id firstName lastName email orgAuthz]
   (let [user-data {:firstName firstName
@@ -100,7 +133,9 @@
                                  (error (.getMessage e))
                                  false))))
         _ (info (str "SAML message signature was " (if valid-signature? "valid" "invalid")))
-        {:keys [email firstName lastName groups]} (get-in parsed-saml-info [:assertions :attrs])
+        {:keys [email firstName lastName groups]} (-> parsed-saml-info
+                                                      (get-in [:assertions :attrs])
+                                                      remove-namespaces-from-kws)
         ad-role-map (-> org-id (org/get-organization) :ad-login :role-mapping)
         authz (resolve-roles ad-role-map groups)]
     (cond
