@@ -50,32 +50,6 @@
                          (name lp-role)))]
     (->> orgAuthz (remove nil?) (set))))
 
-(def resp
-  {:assertions {:attrs {:http://schemas.microsoft.com/claims/authnmethodsreferences ["http://schemas.microsoft.com/ws/2008/06/identity/authenticationmethod/password"
-                                                                                   "http://schemas.microsoft.com/claims/multipleauthn"]
-                      :http://schemas.microsoft.com/identity/claims/identityprovider "https://sts.windows.net/b1ff483b-d9f6-4272-97cc-5a887c10d995/"
-                      :http://schemas.microsoft.com/identity/claims/objectidentifier "cb065813-1f67-4d28-b9c6-8a9ec6e7d8d1"
-                      :http://schemas.microsoft.com/identity/claims/tenantid "b1ff483b-d9f6-4272-97cc-5a887c10d995"
-                      :http://schemas.microsoft.com/ws/2008/06/identity/claims/role "authority"
-                      :http://schemas.xmlsoap.org/ws/2005/05/identity/claims/email "markus.penttila@evolta.fi"
-                      :http://schemas.xmlsoap.org/ws/2005/05/identity/claims/firstName "Markus"
-                      :http://schemas.xmlsoap.org/ws/2005/05/identity/claims/groups "authority"
-                      :http://schemas.xmlsoap.org/ws/2005/05/identity/claims/lastName "Penttilä"
-                      :http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name "markus.penttila@evolta.fi"}
-              :audiences "Lupapiste"
-              :confirmation {:in-response-to "c0060540-c7dd-11e8-89d8-0003c55030ab"
-                             :not-before nil
-                             :not-on-or-after #inst "2018-10-04T14:04:46.916-00:00"
-                             :recipient "https://www-qa.lupapiste.fi/api/saml/ad-login/609-R"}
-              :name-id {:format "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
-                        :value "markus.penttila@evolta.fi"}}
- :destination "https://www-qa.lupapiste.fi/api/saml/ad-login/609-R"
- :inResponseTo "c0060540-c7dd-11e8-89d8-0003c55030ab"
- :issueInstant #inst "2018-10-04T13:59:46.932-00:00"
- :status "urn:oasis:names:tc:SAML:2.0:status:Success"
- :success? true
- :version "2.0"})
-
 (defn validated-login [req org-id firstName lastName email orgAuthz]
   (let [user-data {:firstName firstName
                    :lastName  lastName
