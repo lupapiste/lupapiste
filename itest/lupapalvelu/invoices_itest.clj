@@ -28,7 +28,8 @@
                                      :invoice-rows [{:text "Laskurivi1 kpl"
                                                      :unit "kpl"
                                                      :price-per-unit 10
-                                                     :units 2}]}]}]
+                                                     :units 2
+                                                     :discount-percent 0}]}]}]
     (merge dummy-invoice properties)))
 
 (env/with-feature-value :invoices true
@@ -52,15 +53,18 @@
                                              :invoice-rows [{:text "Laskurivi1 kpl"
                                                              :unit "kpl"
                                                              :price-per-unit 10
-                                                             :units 2}
+                                                             :units 2
+                                                             :discount-percent 0}
                                                             {:text "Laskurivi2 m2 "
                                                              :unit "m2"
                                                              :price-per-unit 20.5
-                                                             :units 15.8}
+                                                             :units 15.8
+                                                             :discount-percent 50}
                                                             {:text "Laskurivi3 m3 "
                                                              :unit "m3"
                                                              :price-per-unit 20.5
-                                                             :units 15.8}]}]}
+                                                             :units 15.8
+                                                             :discount-percent 100}]}]}
                       {:keys [invoice-id]} (local-command sonja :insert-invoice
                                                               :id id
                                                               :invoice invoice) => ok?]
@@ -74,11 +78,13 @@
                                              :invoice-rows [{:text "Laskurivi1 kpl"
                                                              :unit "kpl"
                                                              :price-per-unit 10
-                                                             :units 2}
+                                                             :units 2
+                                                             :discount-percent 0}
                                                             {:text "Laskurivi2 m3 "
                                                              :unit "UNKOWN-UNIT"
                                                              :price-per-unit 20.5
-                                                             :units 15.8}]}]}]
+                                                             :units 15.8
+                                                             :discount-percent 0}]}]}]
                   (local-command sonja :insert-invoice :id id :invoice invoice) => fail?)))
 
     (fact "update-invoice command"
@@ -90,7 +96,8 @@
                                                    :invoice-rows [{:text "Laskurivi1 kpl"
                                                                    :unit "kpl"
                                                                    :price-per-unit 10
-                                                                   :units 2}]}]}
+                                                                   :units 2
+                                                                   :discount-percent 0}]}]}
                             {:keys [invoice-id]} (local-command sonja :insert-invoice
                                                                     :id id
                                                                     :invoice invoice) => ok?
@@ -100,8 +107,8 @@
                                                     :invoice-rows [{:text "Laskurivi1 m2"
                                                                     :unit "m2"
                                                                     :price-per-unit 5
-                                                                    :units 10}]}]}
-                            ]
+                                                                    :units 10
+                                                                    :discount-percent 10}]}]}]
                         (local-command sonja :update-invoice :id id :invoice new-data) => ok?
                         (let [updated-invoice (mongo/by-id "invoices" invoice-id)]
                           (:operations updated-invoice) => (:operations new-data))))
@@ -113,7 +120,8 @@
                                                    :invoice-rows [{:text "Laskurivi1 kpl"
                                                                    :unit "kpl"
                                                                    :price-per-unit 10
-                                                                   :units 2}]}]}
+                                                                   :units 2
+                                                                   :discount-percent 0}]}]}
                             {:keys [invoice-id]} (local-command sonja :insert-invoice
                                                                     :id id
                                                                     :invoice invoice) => ok?]
@@ -156,5 +164,4 @@
 
                   (-> (local-query sonja :application-invoices :id app-b-id)
                       :invoices
-                      count) => 3)))
-    ))
+                      count) => 3)))))

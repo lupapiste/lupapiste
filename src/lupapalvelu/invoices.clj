@@ -16,11 +16,15 @@
    :email                                     ssc/Email
    :username                                  ssc/Username})
 
+(sc/defschema DiscountPercent
+  (sc/constrained sc/Num #(and (>= % 0) (<= % 100))))
+
 (sc/defschema InvoiceRow
   {:text sc/Str
    :unit (sc/enum "m2" "m3" "kpl")
    :price-per-unit sc/Num
-   :units sc/Num})
+   :units sc/Num
+   :discount-percent DiscountPercent})
 
 ;;TODO should operation-id and name come from constants in lupapalvelu.operations
 ;;     and/or a schema somewhere else?
@@ -28,6 +32,8 @@
   {:operation-id sc/Str
    :name sc/Str
    :invoice-rows [InvoiceRow]})
+
+
 
 (sc/defschema Invoice
   {:id sc/Str
@@ -47,7 +53,7 @@
   {:operations [InvoiceOperation]})
 
 (defn validate-insert-invoice-request [{{invoice-data :invoice} :data :as command}]
-  (debug ">> validate-invoice data: " invoice-data)
+  (debug ">> validate-insert-invoice request data: " invoice-data)
   (when (sc/check InvoiceInsertRequest invoice-data)
     (fail :error.invalid-invoice)))
 
