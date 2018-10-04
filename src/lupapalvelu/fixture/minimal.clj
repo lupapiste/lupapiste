@@ -1440,8 +1440,7 @@
                                                            "YMEuMA=="
                                                            "-----END CERTIFICATE-----"])
                                   :idp-uri "http://localhost:7000"
-                                  :trusted-domains ["pori.fi"]
-                                  :sent-tokens []}}
+                                  :trusted-domains ["pori.fi"]}}
 
                       ;; Helsinki R
                       {:id "091-R"
