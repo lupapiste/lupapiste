@@ -273,8 +273,7 @@
    (sc/optional-key :ad-login) {:enabled sc/Bool
                                 :idp-cert sc/Str
                                 :idp-uri sc/Str
-                                :trusted-domains [sc/Str]
-                                :sent-tokens []}})
+                                :trusted-domains [sc/Str]}})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
