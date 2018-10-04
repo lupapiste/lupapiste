@@ -115,11 +115,13 @@
 
 (def location-array-to-map (fn [[x y]] {:x x :y y}))
 
+(def nil-as-nil (fn [value] (when-not (nil? value) value)))
+
 (sc/defn ^:always-validate application-data :- ApplicationBaseData [application]
   (-> (select-keys application (keys ApplicationBaseData))
       (update :location-wgs84 location-array-to-map)
       (update :location location-array-to-map)
-      (update :permitSubtype ss/blank-as-nil)
+      (update :permitSubtype nil-as-nil)
       (assoc :operations (build-operations application))
       (assoc :link (i18n/to-lang-map #(make-app-link (:id application) %)))))
 
