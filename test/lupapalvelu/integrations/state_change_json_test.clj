@@ -135,11 +135,11 @@
     (-> (assoc (app-with-docs [new-building-data]) :state "open")
         (mjson/state-change-data "submitted")) => (contains {:permitSubtype nil}))
   (fact "blank as nil"
-    (-> (assoc (app-with-docs [new-building-data]) :state "open" :permitSubtype nil)
+    (-> (assoc (app-with-docs [new-building-data]) :state "open" :permitSubtype "")
         (mjson/state-change-data "submitted")) => (contains {:permitSubtype nil}))
   (fact "ok"
-    (-> (assoc (app-with-docs [new-building-data]) :state "open" :permitSubtype :tyolupa)
-        (mjson/state-change-data "submitted")) => (contains {:permitSubtype :tyolupa})))
+    (-> (assoc (app-with-docs [new-building-data]) :state "open" :permitSubtype "tyolupa")
+        (mjson/state-change-data "submitted")) => (contains {:permitSubtype "tyolupa"})))
 
 (fact "presence of :building and :structure keys"
   (let [state-change-data (assoc (app-with-docs [new-structure-data]) :state "open" :primaryOperation {:name "aita" :id "57603a99edf02d7047774554"})
