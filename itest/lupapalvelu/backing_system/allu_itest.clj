@@ -87,7 +87,7 @@
              {:keys [attachmentId] :as upload-res} (itu/local-command apikey :upload-attachment :id app-id
                                                                       :attachmentId (:id attachment)
                                                                       :attachmentType {:type-group "muut"
-                                                                                       :type-id "muu"}
+                                                                                       :type-id    "muu"}
                                                                       :locked false
                                                                       :group {} :filename filename :tempfile file
                                                                       :size (.length file))
@@ -168,12 +168,16 @@
 ;;;; ===================================================================================================================
 
 (defn- check-response-ok-middleware
-  "MIddleware that tests that the response HTTP status is successful."
+  "Middleware that tests that the response HTTP status is successful or that we should just re-login."
   [handler]
-  (fn [request]
-    (let [response (handler request)]
-      (fact "response is successful" response => (comp #{200 201} :status))
-      response)))
+  (let [unauth-counter (atom 0)]
+    (fn [request]
+      (let [response (handler request)]
+        (if (and (= (:status response) 401))
+          (do (fact "login only needs to happen once" @unauth-counter => 0)
+              (swap! unauth-counter inc))
+          (fact "response is successful" response => (comp #{200 201} :status)))
+        response))))
 
 (defn- check-imessages-middleware
   "Middleware that checks that `integration-messages` is updated with the request and response."
@@ -186,9 +190,10 @@
                         :status         "done"
                         :application.id (:id application)})
           res (handler request)]
-      (fact "integration messages are saved"
-        (mongo/any? :integration-messages (imsg-query "out")) => true
-        (mongo/any? :integration-messages (imsg-query "in")) => true)
+      (when-not (= (:status res) 401)                       ; HACK
+        (fact "integration messages are saved"
+          (mongo/any? :integration-messages (imsg-query "out")) => true
+          (mongo/any? :integration-messages (imsg-query "in")) => true))
       res)))
 
 (def- mock-jwt "foo.bar.baz")

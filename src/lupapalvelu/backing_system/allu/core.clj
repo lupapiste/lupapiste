@@ -354,14 +354,13 @@
   "If creation was successful, set the ALLU integration key to be the creation response body."
   [handler]
   (fn [{{{app-id :id} :application} ::command :as request}]
-    (let [{:keys [body] :as response} (handler request)]
-      (match (handler request)
-        ({:status (:or 200 201), :body body} :as response) (do (application/set-integration-key app-id :ALLU {:id body})
-                                                               response)
-        response response))))
+    (match (handler request)
+      ({:status (:or 200 201), :body body} :as response) (do (application/set-integration-key app-id :ALLU {:id body})
+                                                             response)
+      response response)))
 
-(defn- fail-on-error!
-  "`allu-fail!` on HTTP errors."
+(defn- log-or-fail!
+  "`allu-fail!` on HTTP errors, else do logging."
   [handler]
   (fn [request]
     (match (handler request)
@@ -386,7 +385,7 @@
    [["/login" {:middleware [(preprocessor->middleware body&multipart-as-params)
                             reitit.ring.coercion/coerce-request-middleware
                             (post-action->middleware reset-jwt!)
-                            fail-on-error!
+                            log-or-fail!
                             (preprocessor->middleware content->json)]
                :name       [:login]
                :parameters {:body LoginCredentials}
@@ -396,7 +395,7 @@
     ["/" {:middleware (-> [(preprocessor->middleware body&multipart-as-params)
                            multipart-middleware
                            reitit.ring.coercion/coerce-request-middleware
-                           fail-on-error!
+                           log-or-fail!
                            (post-action->middleware re-login-on-unauthorized!)]
                           (into (if disable-io-middlewares? [] [save-messages!]))
                           (conj (preprocessor->middleware (fn-> content->json jwt-authorize))))
