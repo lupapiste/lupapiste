@@ -24,7 +24,7 @@
   [certstring]
   (ss/replace certstring #"[\n ]|(BEGIN|END) CERTIFICATE|-{5}" ""))
 
-(defn- parse-saml-info
+(defn parse-saml-info
   "The saml-info map returned by saml20-clj comes in a wacky format, so its best to
   parse it into a more manageable form (without string keys or single-element lists etc)."
   [element]
