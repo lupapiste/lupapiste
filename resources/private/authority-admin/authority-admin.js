@@ -791,6 +791,11 @@
       authorization: lupapisteApp.models.globalAuthModel,
       store: docstoreModel
     });
+    $("#ad-login-settings").applyBindings({
+        organization: organizationModel,
+        authorization: lupapisteApp.models.globalAuthModel
+      });
+
 
     // Init the dynamically created dialogs
     LUPAPISTE.ModalDialog.init();

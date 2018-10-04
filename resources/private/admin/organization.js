@@ -21,6 +21,11 @@
     self.allowedAutologinIps = ko.observableArray();
     self.ssoKeys = ko.observableArray();
 
+    self.adLoginEnabled = ko.observable(false);
+    self.adLoginDomains = ko.observable("");
+    self.adLoginIdPUri = ko.observable("");
+    self.adLoginIdPCert = ko.observable("");
+
     self.threeDMapEnabled = ko.observable();
 
     self.threeDMapServerParams = {
@@ -150,6 +155,20 @@
           self.backendSystems(_.map(util.getIn(result, ["data", "krysp"]), function(v,k) { return {permitType: k, backendSystem: v["backend-system"]}; }));
           self.stateChangeMsgEnabled(result.data["state-change-msg-enabled"]);
 
+          if (result.data.hasOwnProperty("ad-login")) {
+            self.adLoginEnabled(result.data["ad-login"].enabled);
+            self.adLoginDomains(result.data["ad-login"]["trusted-domains"].join(", "));
+            self.adLoginIdPUri(result.data["ad-login"]["idp-uri"]);
+            self.adLoginIdPCert(result.data["ad-login"]["idp-cert"]);
+          } else {
+            // If these attributes are not set in the DB, these fields need to be set to be empty.
+            // If not, they can show data from another organization when orgs are switched.
+            self.adLoginEnabled(false);
+            self.adLoginDomains("");
+            self.adLoginIdPUri("");
+            self.adLoginIdPCert("");
+          }
+
           var archiveTs= result.data["earliest-allowed-archiving-date"];
           if (archiveTs && archiveTs > 0) {
             self.earliestArchivingDate(new Date(result.data["earliest-allowed-archiving-date"]));
@@ -246,6 +265,19 @@
                                                    permitTypes:  self.permitTypes(),
                                                    municipalities: self.municipalities()}});
       }
+    };
+
+    self.saveAdLoginSettings = function() {
+      ajax
+        .command("update-ad-login-settings", {
+          "org-id": self.organization().id(),
+          "enabled": self.adLoginEnabled(),
+          "trusted-domains": self.adLoginDomains().split(",").map(uri => uri.trim()),
+          "idp-uri": self.adLoginIdPUri(),
+          "idp-cert": self.adLoginIdPCert()
+        })
+        .success(util.showSavedIndicator)
+        .call();
     };
 
     self.saveAutologinIps = function() {

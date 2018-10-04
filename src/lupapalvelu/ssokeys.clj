@@ -34,7 +34,7 @@
     {:key crypted-key :crypto-iv crypto-iv-s}))
 
 (defn update-sso-key [sso-key ip secret-key comment]
-  (->> {:ip ip 
+  (->> {:ip ip
         :comment comment}
        (merge sso-key (when-not (ss/blank? secret-key) (encode-key secret-key)))
        (remove (comp ss/blank? val))
@@ -42,7 +42,7 @@
        (sc/validate SsoKey)))
 
 (defn create-sso-key [ip secret-key comment]
-  {:pre [(not (ss/blank? ip)) 
+  {:pre [(not (ss/blank? ip))
          (not (ss/blank? secret-key))]}
   (update-sso-key {:id (mongo/create-id)} ip secret-key comment))
 
