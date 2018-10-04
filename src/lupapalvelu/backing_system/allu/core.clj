@@ -23,7 +23,6 @@
             [sade.schemas :as ssc]
             [sade.shared-schemas :as sssc]
             [lupapalvelu.application :as application]
-            [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.backing-system.allu.conversion :refer [lang application->allu-placement-contract]]
             [lupapalvelu.backing-system.allu.schemas :refer [LoginCredentials PlacementContract AttachmentMetadata]]
             [lupapalvelu.i18n :refer [localize]]
@@ -31,9 +30,9 @@
             [lupapalvelu.integrations.messages :as imessages :refer [IntegrationMessage]]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.states :as states])
-  (:import [java.lang AutoCloseable]
-           [java.io InputStream]))
+            [lupapalvelu.states :as states]
+            [lupapalvelu.storage.file-storage :as storage])
+  (:import [java.lang AutoCloseable]))
 
 (defstate ^:private current-jwt
   "The JWT to be used for ALLU API authorization. Occasionally replaced by re-login."
@@ -44,26 +43,18 @@
 
 (defschema ^:private MiniCommand
   "A command that has been abridged for sending through JMS."
-  {:application                               {:id           ssc/ApplicationId
-                                               :organization sc/Str
-                                               :state        (apply sc/enum (map name states/all-states))}
-   :action                                    sc/Str
-   :user                                      {:id       sc/Str
-                                               :username sc/Str}
-   ;; TODO: Refactor `get-attachment-files!`, then remove this:
-   (sc/optional-key :latestAttachmentVersion) {:fileId        sssc/FileId
-                                               :storageSystem sssc/StorageSystem}})
+  {:application {:id           ssc/ApplicationId
+                 :organization sc/Str
+                 :state        (apply sc/enum (map name states/all-states))}
+   :action      sc/Str
+   :user        {:id       sc/Str
+                 :username sc/Str}})
 
 (sc/defn ^{:private true, :always-validate true} minimize-command :- MiniCommand
-  ([{:keys [application action user]}]
-    {:application (select-keys application (keys (:application MiniCommand)))
-     :action      action
-     :user        (select-keys user (keys (:user MiniCommand)))})
-  ([command attachment]
-    (let [mini-attachment (-> (:latestVersion attachment)
-                              (select-keys (keys (get MiniCommand (sc/optional-key :latestAttachmentVersion))))
-                              (update :storageSystem keyword))]
-      (assoc (minimize-command command) :latestAttachmentVersion mini-attachment))))
+  [{:keys [application action user]}]
+  {:application (select-keys application (keys (:application MiniCommand)))
+   :action      action
+   :user        (select-keys user (keys (:user MiniCommand)))})
 
 (declare allu-router)
 
@@ -141,9 +132,9 @@
                                                         type
                                                         (str type ": " description)))
                                        :mimeType    (:contentType latestVersion)}
-                            :file     (:fileId latestVersion)}}
+                            :file     (select-keys latestVersion [:fileId :storageSystem])}}
         route-match (reitit/match-by-name allu-router [:attachments :create] (:path params))]
-    {::command       (minimize-command command attachment)
+    {::command       (minimize-command command)
      :uri            (:path route-match)
      :request-method (route-match->request-method route-match)
      :multipart      [{:name      "metadata"
@@ -151,7 +142,7 @@
                        :encoding  "UTF-8"
                        :content   (-> params :multipart :metadata)}
                       {:name      "file"
-                       :mime-type (:contentType latestVersion)
+                       :mime-type (-> params :multipart :metadata :mimeType)
                        :content   (-> params :multipart :file)}]}))
 
 ;;;; IntegrationMessage construction
@@ -290,26 +281,28 @@
   (assoc-in request [:headers "authorization"] (str "Bearer " @current-jwt)))
 
 (defn- content->json
-  "Convert the request :body or :multipart content into JSON (unless the :multipart part is just a string or an
-  InputStream i.e. attachment file bytes, which is a hacky)."
+  "Convert the request :body or :multipart content into JSON (unless the :multipart part is the attachment file)."
   [request]
   (cond
     (contains? request :body) (-> request (update :body json/encode) (assoc :content-type :json))
     (contains? request :multipart) (update request :multipart
-                                           (partial mapv (fn [{:keys [content] :as part}]
-                                                           (if (or (string? content)
-                                                                   (instance? InputStream content)) ; HACK
+                                           (partial mapv (fn [part]
+                                                           (if (= (:name part) "file")
                                                              part
                                                              (update part :content json/encode)))))
     :else request))
 
+(declare allu-fail!)
+
 (defn- get-attachment-files!
   "Replace the attachment file id in [:multipart 1 :content] with the file contents `InputStream`."
-  [{{:keys [application latestAttachmentVersion]} ::command :as request}]
-  (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
-                                          {:versions [latestAttachmentVersion]})] ; HACK
-    (assoc-in request [:multipart 1 :content] ((:content file-map)))
-    (assert false "unimplemented")))
+  [handler]
+  (fn [{{:keys [application]} ::command :as request}]
+    (let [{:keys [fileId storageSystem]} (get-in request [:multipart 1 :content])]
+      (if-some [file-map (storage/download-from-system (:id application) fileId storageSystem)]
+        (with-open [contents ((:content file-map))]
+          (handler (assoc-in request [:multipart 1 :content] contents)))
+        (allu-fail! :error.file-not-found {:fileId fileId})))))
 
 (defn- save-messages!
   "Save the request and response into the `integration-messages` DB collection."
@@ -399,10 +392,9 @@
       ["/:id/attachments" {:name       [:attachments :create]
                            :parameters {:path      {:id ssc/NatString}
                                         :multipart {:metadata AttachmentMetadata
-                                                    :file     sssc/FileId}}
-                           :middleware (if disable-io-middlewares?
-                                         []
-                                         [(preprocessor->middleware get-attachment-files!)])
+                                                    :file     {:fileId        sssc/FileId
+                                                               :storageSystem sssc/StorageSystem}}}
+                           :middleware (if disable-io-middlewares? [] [get-attachment-files!])
                            :post       {:handler handler}}]]
 
 

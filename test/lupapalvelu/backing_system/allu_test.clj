@@ -96,30 +96,30 @@
                     (sc/check PlacementContract (:body http-request)) => nil)
 
                   [:attachments :create]
-                  (let [fileId (get-in request [::allu/command :latestAttachmentVersion :fileId])]
-                    (facts "attachments.create request"
-                      (dissoc http-request :multipart)
-                      => (contains {:uri            (str "/applications/" allu-id "/attachments")
-                                    :request-method :post
-                                    :headers        headers})
-                      (let [[metadata file] (:multipart http-request)
-                            metadata-content (json/decode (:content metadata) true)]
-                        (dissoc metadata :content) => {:name      "metadata"
-                                                       :mime-type "application/json"
-                                                       :encoding  "UTF-8"}
-                        (sc/check AttachmentMetadata metadata-content) => nil
-                        metadata-content => {:name        (-> sent-attachment :latestVersion :filename)
-                                             :description (let [{{:keys [type-group type-id]} :type} sent-attachment
-                                                                type (localize lang :attachmentType type-group type-id)
-                                                                description (:contents sent-attachment)]
-                                                            (if (or (not description) (= type description))
-                                                              type
-                                                              (str type ": " description)))
-                                             :mimeType    (-> sent-attachment :latestVersion :contentType)}
-                        (dissoc file :mime-type) => {:name    "file"
-                                                     :content fileId}
-                        ;; Could be improved but generators produce junk for this anyway:
-                        (:mime-type file) => string?))))
+                  (facts "attachments.create request"
+                    (dissoc http-request :multipart)
+                    => (contains {:uri            (str "/applications/" allu-id "/attachments")
+                                  :request-method :post
+                                  :headers        headers})
+                    (let [[metadata file] (:multipart http-request)
+                          metadata-content (json/decode (:content metadata) true)]
+                      (dissoc metadata :content) => {:name      "metadata"
+                                                     :mime-type "application/json"
+                                                     :encoding  "UTF-8"}
+                      (sc/check AttachmentMetadata metadata-content) => nil
+                      metadata-content => {:name        (-> sent-attachment :latestVersion :filename)
+                                           :description (let [{{:keys [type-group type-id]} :type} sent-attachment
+                                                              type (localize lang :attachmentType type-group type-id)
+                                                              description (:contents sent-attachment)]
+                                                          (if (or (not description) (= type description))
+                                                            type
+                                                            (str type ": " description)))
+                                           :mimeType    (-> sent-attachment :latestVersion :contentType)}
+                      (dissoc file :mime-type) => {:name    "file"
+                                                   :content (-> sent-attachment :latestVersion
+                                                                (select-keys [:fileId :storageSystem]))}
+                      ;; Could be improved but generators produce junk for this anyway:
+                      (:mime-type file) => string?)))
                 response)))))))
 
 ;;;; Actual Tests
