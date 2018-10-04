@@ -275,9 +275,7 @@
           message-subtype (route-name->string (-> request reitit-ring/get-match :data :name))
           {msg-id :id :as msg} (request-integration-message
                                  command
-                                 (select-keys request [:uri :request-method (if (contains? request :multipart)
-                                                                              :multipart
-                                                                              :body)])
+                                 (select-keys request [:uri :request-method :body :multipart])
                                  message-subtype)
           _ (imessages/save msg)
           response (handler request)]
@@ -309,7 +307,8 @@
               (when (= route-name [:login])
                 (reset! current-jwt (json/decode body)))    ; for some reason body is a JSON-encoded string
               (when (and (not disable-io-middlewares?) (= route-name [:placementcontracts :create]))
-                (application/set-integration-key app-id :ALLU {:id body})))
+                (application/set-integration-key app-id :ALLU {:id body}))
+              response)
 
           response (allu-fail! :error.allu.http (select-keys response [:status :body])))))))
 
@@ -367,7 +366,7 @@
 (def- allu-router (reitit-ring/router (routes false (innermost-handler))))
 
 (def allu-request-handler
-  "ALLU request handler. Returns nil, calls `allu-fail!` on HTTP errors."
+  "ALLU request handler. Returns HTTP response, calls `allu-fail!` on HTTP errors."
   (reitit-ring/ring-handler allu-router))
 
 ;;;; JMS resources

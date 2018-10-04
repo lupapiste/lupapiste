@@ -149,9 +149,11 @@
   (sc/with-fn-validation
     (let [user (sg/generate (select-keys User [:id :username]))
           app (sg/generate ValidPlacementApplication)
-          submitted-app (assoc-in app [:integrationKeys :ALLU :id] allu-id)
+          submitted-app (-> app
+                            (assoc :state "submitted")
+                            (assoc-in [:integrationKeys :ALLU :id] allu-id))
           invalid-app (assoc app :address "")
-          invalid-submitted-app (assoc submitted-app :address "")]
+          invalid-submitted-app (assoc submitted-app :address " ")]
       (facts "integration message generation"
         (let [request (#'allu/application-creation-request {:application app
                                                             :user        user
@@ -206,19 +208,19 @@
         (with-redefs [allu/allu-router router
                       allu/allu-request-handler handler
                       allu/send-allu-request! handler]      ; Since these are unit tests we bypass JMS.
-          (facts "login!" (#'allu/login!) => nil)
+          (facts "login!" (#'allu/login!) => {:status 200, :body (json/encode mock-jwt)})
 
           (facts "submit-application!"
             (allu/submit-application! {:application app
                                        :user        user
-                                       :action      "submit-application"}) => nil
+                                       :action      "submit-application"}) => {:status 200, :body allu-id}
             (allu/submit-application! {:application invalid-app, :user user, :action "submit-application"})
             => (throws schema-error?))
 
           (facts "update-application!"
             (allu/update-application! {:application submitted-app
                                        :user        user
-                                       :action      "update-document"}) => nil
+                                       :action      "update-document"}) => {:status 200, :body allu-id}
             (allu/update-application! {:application invalid-submitted-app
                                        :user        user
                                        :action      "update-document"}) => (throws schema-error?))
@@ -226,7 +228,7 @@
           (facts "lock-application!"
             (allu/lock-application! {:application submitted-app
                                      :user        user
-                                     :action      "approve-application"}) => nil
+                                     :action      "approve-application"}) => {:status 200, :body allu-id}
             (allu/lock-application! {:application invalid-submitted-app
                                      :user        user
                                      :action      "approve-application"}) => (throws schema-error?))
@@ -234,7 +236,7 @@
           (facts "cancel-application!"
             (allu/cancel-application! {:application submitted-app
                                        :user        user
-                                       :action      "cancel-application"}) => nil)
+                                       :action      "cancel-application"}) => {:status 200, :body allu-id})
 
           (facts "send-attachments!"
             (let [fileId (sg/generate sssc/FileId)
