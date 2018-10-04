@@ -1,9 +1,9 @@
 // Footer colors.
 $footer-bg: #333;
 $footer-bi-bg: #111; // bi = build info
-$footer-txt: #fff;
-$footer-link: #f7ac2e;
-$footer-hover: #fff; // Hover and active
+$footer-txt: $gray255;
+$footer-link: $orange;
+$footer-hover: $gray255; // Hover and active
 $footer-bi: #555;
 
 footer {
@@ -68,12 +68,16 @@ footer {
   }
 
   @media (max-width:991px) {
-      .footer-box:nth-child(2n+1) {
+      .footer-box {
           clear: left;
       }
       .footer-box {
           min-width: 49%;
       }
+  }
+
+  p {
+    color: $footer-txt;
   }
 }
 
