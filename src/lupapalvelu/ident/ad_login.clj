@@ -86,6 +86,11 @@
         req (request/ring-request)
         xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse]))
         saml-resp (saml-sp/xml-string->saml-resp xml-response)
+        saml-info (saml-sp/saml-resp->assertions saml-resp false)
+        parsed-saml-info (parse-saml-info saml-info)
+        _ (info (str "Received XML response: " xml-response))
+        _ (info (str "SAML response: " saml-info))
+        _ (info (str "Parsed SAML response: " parsed-saml-info))
         valid-signature? (if-not idp-cert
                            false
                            (try
@@ -95,9 +100,6 @@
                                  (error (.getMessage e))
                                  false))))
         _ (info (str "SAML message signature was " (if valid-signature? "valid" "invalid")))
-        saml-info (when valid-signature? (saml-sp/saml-resp->assertions saml-resp false))
-        parsed-saml-info (parse-saml-info saml-info)
-        _ (info (str "Parsed SAML response: " parsed-saml-info))
         {:keys [email firstName lastName groups]} (get-in parsed-saml-info [:assertions :attrs])
         ad-role-map (-> org-id (org/get-organization) :ad-login :role-mapping)
         authz (resolve-roles ad-role-map groups)]
