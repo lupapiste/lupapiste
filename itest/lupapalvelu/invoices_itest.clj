@@ -26,6 +26,7 @@
                        :operations [{:operation-id "linjasaneeraus"
                                      :name "linjasaneeraus"
                                      :invoice-rows [{:text "Laskurivi1 kpl"
+                                                     :type "from-price-catalogue"
                                                      :unit "kpl"
                                                      :price-per-unit 10
                                                      :units 2
@@ -50,17 +51,20 @@
                 (let [{:keys [id] :as app} (dummy-submitted-application)
                       invoice {:operations [{:operation-id "linjasaneeraus"
                                              :name "linjasaneeraus"
-                                             :invoice-rows [{:text "Laskurivi1 kpl"
+                                             :invoice-rows [{:text "Row 1 kpl"
+                                                             :type "from-price-catalogue"
                                                              :unit "kpl"
                                                              :price-per-unit 10
                                                              :units 2
                                                              :discount-percent 0}
-                                                            {:text "Laskurivi2 m2 "
+                                                            {:text "Row 2 m2"
+                                                             :type "from-price-catalogue"
                                                              :unit "m2"
                                                              :price-per-unit 20.5
                                                              :units 15.8
                                                              :discount-percent 50}
-                                                            {:text "Laskurivi3 m3 "
+                                                            {:text "Custom row m3"
+                                                             :type "custom"
                                                              :unit "m3"
                                                              :price-per-unit 20.5
                                                              :units 15.8
@@ -76,16 +80,20 @@
                       invoice {:operations [{:operation-id "linjasaneeraus"
                                              :name "linjasaneeraus"
                                              :invoice-rows [{:text "Laskurivi1 kpl"
+                                                             :type "from-price-catalogue"
                                                              :unit "kpl"
                                                              :price-per-unit 10
                                                              :units 2
                                                              :discount-percent 0}
                                                             {:text "Laskurivi2 m3 "
+                                                             :type "from-price-catalogue"
                                                              :unit "UNKOWN-UNIT"
                                                              :price-per-unit 20.5
                                                              :units 15.8
                                                              :discount-percent 0}]}]}]
-                  (local-command sonja :insert-invoice :id id :invoice invoice) => fail?)))
+                  (local-command sonja :insert-invoice :id id :invoice invoice) => fail?
+                  ))
+          )
 
     (fact "update-invoice command"
           (fact "with the role authority"
@@ -94,7 +102,7 @@
                             invoice {:operations [{:operation-id "linjasaneeraus"
                                                    :name "linjasaneeraus"
                                                    :invoice-rows [{:text "Laskurivi1 kpl"
-                                                                   :unit "kpl"
+                                                                   :type "from-price-catalogue"                                                                                                                                   :unit "kpl"
                                                                    :price-per-unit 10
                                                                    :units 2
                                                                    :discount-percent 0}]}]}
@@ -105,6 +113,7 @@
                                       :operations [{:operation-id "sisatila-muutos"
                                                     :name "sisatila-muutos"
                                                     :invoice-rows [{:text "Laskurivi1 m2"
+                                                                    :type "custom"
                                                                     :unit "m2"
                                                                     :price-per-unit 5
                                                                     :units 10
@@ -118,6 +127,7 @@
                             invoice {:operations [{:operation-id "linjasaneeraus"
                                                    :name "linjasaneeraus"
                                                    :invoice-rows [{:text "Laskurivi1 kpl"
+                                                                   :type "from-price-catalogue"
                                                                    :unit "kpl"
                                                                    :price-per-unit 10
                                                                    :units 2

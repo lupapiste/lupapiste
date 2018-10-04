@@ -19,9 +19,16 @@
 (sc/defschema DiscountPercent
   (sc/constrained sc/Num #(and (>= % 0) (<= % 100))))
 
+(sc/defschema InvoiceRowType
+  (sc/enum "from-price-catalogue" "custom"))
+
+(sc/defschema InvoiceRowUnit
+  (sc/enum "m2" "m3" "kpl"))
+
 (sc/defschema InvoiceRow
   {:text sc/Str
-   :unit (sc/enum "m2" "m3" "kpl")
+   :type InvoiceRowType
+   :unit InvoiceRowUnit
    :price-per-unit sc/Num
    :units sc/Num
    :discount-percent DiscountPercent})
@@ -32,8 +39,6 @@
   {:operation-id sc/Str
    :name sc/Str
    :invoice-rows [InvoiceRow]})
-
-
 
 (sc/defschema Invoice
   {:id sc/Str
