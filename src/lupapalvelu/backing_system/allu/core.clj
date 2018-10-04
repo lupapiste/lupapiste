@@ -312,9 +312,7 @@
           message-subtype (route-name->string (-> request reitit-ring/get-match :data :name))
           {msg-id :id :as msg} (request-integration-message
                                  command
-                                 (select-keys request [:uri :request-method (if (contains? request :multipart)
-                                                                              :multipart
-                                                                              :body)])
+                                 (select-keys request [:uri :request-method :body :multipart])
                                  message-subtype)
           _ (imessages/save msg)
           response (handler request)]

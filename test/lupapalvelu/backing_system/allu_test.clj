@@ -131,9 +131,11 @@
   (sc/with-fn-validation
     (let [user (sg/generate (select-keys User [:id :username]))
           app (sg/generate ValidPlacementApplication)
-          submitted-app (assoc-in app [:integrationKeys :ALLU :id] allu-id)
+          submitted-app (-> app
+                            (assoc :state "submitted")
+                            (assoc-in [:integrationKeys :ALLU :id] allu-id))
           invalid-app (assoc app :address "")
-          invalid-submitted-app (assoc submitted-app :address "")]
+          invalid-submitted-app (assoc submitted-app :address " ")]
       (facts "integration message generation"
         (let [request (#'allu/application-creation-request {:application app
                                                             :user        user

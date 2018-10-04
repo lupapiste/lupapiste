@@ -27,6 +27,8 @@
                                                       (->> (permit/permit-types) vals (map :subtypes) flatten distinct)
                                                       (->> (vals op/operations) (map :subtypes) flatten distinct))
                                                     (distinct)
+                                                    (remove nil?)
+                                                    (map name)
                                                     (apply sc/enum)))
    :applicant                        (sc/maybe sc/Str)
    :infoRequest                      sc/Bool
