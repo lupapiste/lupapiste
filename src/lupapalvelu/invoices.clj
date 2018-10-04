@@ -52,7 +52,7 @@
     (fail :error.invalid-invoice)))
 
 (defn validate-invoice [invoice]
-  (debug ">>> validate-invoice: " invoice)
+  (debug ">> validate-invoice: " invoice)
   (sc/validate Invoice invoice))
 
 (defn create-invoice!

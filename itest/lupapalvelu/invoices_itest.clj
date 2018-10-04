@@ -2,7 +2,9 @@
   (:require [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.integrations-api]
-            [lupapalvelu.itest-util :as itu]
+            [lupapalvelu.itest-util :refer [local-command local-query
+                                            create-and-submit-local-application
+                                            sonja pena ok? fail?] :as itu]
             [lupapalvelu.invoice-api]
             [lupapalvelu.invoices :refer [validate-invoice ->invoice-db] :as invoices]
             [lupapalvelu.mongo :as mongo]
@@ -36,7 +38,7 @@
     (lupapalvelu.fixture.core/apply-fixture "minimal")
 
   (defn dummy-submitted-application []
-    (itu/create-and-submit-local-application
+    (create-and-submit-local-application
      pena
      :operation "pientalo"
      :x "385770.46" :y "6672188.964"
@@ -59,7 +61,7 @@
                                                              :unit "m3"
                                                              :price-per-unit 20.5
                                                              :units 15.8}]}]}
-                      {:keys [invoice-id]} (itu/local-command sonja :insert-invoice
+                      {:keys [invoice-id]} (local-command sonja :insert-invoice
                                                               :id id
                                                               :invoice invoice) => ok?]
                   invoice-id => string?
@@ -77,7 +79,7 @@
                                                              :unit "UNKOWN-UNIT"
                                                              :price-per-unit 20.5
                                                              :units 15.8}]}]}]
-                  (itu/local-command sonja :insert-invoice :id id :invoice invoice) => fail?)))
+                  (local-command sonja :insert-invoice :id id :invoice invoice) => fail?)))
 
     (fact "update-invoice command"
           (fact "with the role authority"
@@ -89,7 +91,7 @@
                                                                    :unit "kpl"
                                                                    :price-per-unit 10
                                                                    :units 2}]}]}
-                            {:keys [invoice-id]} (itu/local-command sonja :insert-invoice
+                            {:keys [invoice-id]} (local-command sonja :insert-invoice
                                                                     :id id
                                                                     :invoice invoice) => ok?
                             new-data {:id invoice-id
@@ -100,7 +102,7 @@
                                                                     :price-per-unit 5
                                                                     :units 10}]}]}
                             ]
-                        (itu/local-command sonja :update-invoice :id id :invoice new-data) => ok?
+                        (local-command sonja :update-invoice :id id :invoice new-data) => ok?
                         (let [updated-invoice (mongo/by-id "invoices" invoice-id)]
                           (:operations updated-invoice) => (:operations new-data))))
 
@@ -112,18 +114,18 @@
                                                                    :unit "kpl"
                                                                    :price-per-unit 10
                                                                    :units 2}]}]}
-                            {:keys [invoice-id]} (itu/local-command sonja :insert-invoice
+                            {:keys [invoice-id]} (local-command sonja :insert-invoice
                                                                     :id id
                                                                     :invoice invoice) => ok?]
                         (fact "update the state from draft to checked"
-                              (itu/local-command sonja :update-invoice
+                              (local-command sonja :update-invoice
                                                  :id id
                                                  :invoice {:id invoice-id
                                                            :state "checked"}) => ok?
                               (:state (mongo/by-id "invoices" invoice-id)) => "checked")
 
                         (fact "update the state from checked to draft"
-                              (itu/local-command sonja :update-invoice
+                              (local-command sonja :update-invoice
                                                  :id id
                                                  :invoice {:id invoice-id
                                                            :state "draft"}) => ok?
@@ -132,7 +134,7 @@
     (fact "application-invoices query"
           (fact "should return an empty collection of invoices when none found for the application"
                 (let [{app-a :id} (dummy-submitted-application)]
-                  (-> (itu/local-query sonja :application-invoices :id app-a)
+                  (-> (local-query sonja :application-invoices :id app-a)
                       :invoices
                       count) => 0))
 
@@ -148,11 +150,11 @@
                                 (->invoice-db draft-invoice app-b dummy-user)]]
                   (doseq [invoice invoices] (invoices/create-invoice! invoice))
 
-                  (-> (itu/local-query sonja :application-invoices :id app-a-id)
+                  (-> (local-query sonja :application-invoices :id app-a-id)
                       :invoices
                       count) => 2
 
-                  (-> (itu/local-query sonja :application-invoices :id app-b-id)
+                  (-> (local-query sonja :application-invoices :id app-b-id)
                       :invoices
                       count) => 3)))
     ))
