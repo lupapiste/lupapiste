@@ -8,27 +8,22 @@
             [schema.core :as sc :refer [defschema]]
             [sade.core :refer [def- now]]
             [sade.env :as env]
-            [sade.municipality :refer [municipality-codes]]
-            [sade.schemas :refer [NonBlankStr Kiinteistotunnus ApplicationId]]
             [sade.schema-generators :as sg]
             [sade.shared-schemas :as sssc]
             [lupapalvelu.attachment :as attachment :refer [Attachment]]
-            [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.i18n :refer [localize]]
-            [lupapalvelu.integrations.geojson-2008-schemas :as geo]
             [lupapalvelu.organization :refer [PermitType]]
-            [lupapalvelu.states :as states]
             [lupapalvelu.user :refer [User]]
 
             [midje.sweet :refer [facts fact => contains provided throws]]
-            [midje.util :refer [testable-privates]]
             [clojure.test.check :refer [quick-check]]
             [com.gfredericks.test.chuck.properties :refer [for-all]]
             [com.gfredericks.test.chuck.generators :refer [string-from-regex]]
             [lupapalvelu.test-util :refer [passing-quick-check]]
 
             [lupapalvelu.backing-system.allu.core :as allu]
-            [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract FileMetadata]]
+            [lupapalvelu.backing-system.allu.schemas
+             :refer [ValidPlacementApplication PlacementContract AttachmentMetadata]]
             [lupapalvelu.backing-system.allu.conversion :refer [lang]]))
 
 ;;;; Refutation Utilities
@@ -37,21 +32,6 @@
 (defn- schema-error? [exn] (= (:type (ex-data exn)) :schema.core/error))
 
 (defn- http-error? [http-status] (fn [exn] (= (:status (ex-data exn)) http-status)))
-
-(defschema ValidPlacementApplication
-  {:id               ApplicationId
-   :state            (apply sc/enum (map name states/all-states))
-   :permitSubtype    (sc/eq "sijoitussopimus")
-   :organization     NonBlankStr
-   :propertyId       Kiinteistotunnus
-   :municipality     (apply sc/enum municipality-codes)
-   :address          NonBlankStr
-   :primaryOperation {:name SijoituslupaOperation}
-   :documents        [(sc/one (dds/doc-data-schema "hakija-ya" true) "applicant")
-                      (sc/one (dds/doc-data-schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" true) "description")
-                      (sc/one (dds/doc-data-schema "yleiset-alueet-maksaja" true) "payee")]
-   :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
-   :drawings         [{:geometry-wgs84 geo/SingleGeometry}]})
 
 (def- organizations (string-from-regex #"\d{3}-(R|YA|YMP)"))
 
@@ -64,7 +44,9 @@
   "A side channel for providing original attachment data to `test-handler`."
   nil)
 
-(defn- test-router [response]
+(defn- test-router
+  "Make a mock Reitit router that does some test checks and returns `response`."
+  [response]
   (reitit-ring/router
     (#'allu/routes
       true
@@ -114,30 +96,30 @@
                     (sc/check PlacementContract (:body http-request)) => nil)
 
                   [:attachments :create]
-                  (let [fileId (get-in request [::allu/command :latestAttachmentVersion :fileId])]
-                    (facts "attachments.create request"
-                      (dissoc http-request :multipart)
-                      => (contains {:uri            (str "/applications/" allu-id "/attachments")
-                                    :request-method :post
-                                    :headers        headers})
-                      (let [[metadata file] (:multipart http-request)
-                            metadata-content (json/decode (:content metadata) true)]
-                        (dissoc metadata :content) => {:name      "metadata"
-                                                       :mime-type "application/json"
-                                                       :encoding  "UTF-8"}
-                        (sc/check FileMetadata metadata-content) => nil
-                        metadata-content => {:name        (-> sent-attachment :latestVersion :filename)
-                                             :description (let [{{:keys [type-group type-id]} :type} sent-attachment
-                                                                type (localize lang :attachmentType type-group type-id)
-                                                                description (:contents sent-attachment)]
-                                                            (if (or (not description) (= type description))
-                                                              type
-                                                              (str type ": " description)))
-                                             :mimeType    (-> sent-attachment :latestVersion :contentType)}
-                        (dissoc file :mime-type) => {:name    "file"
-                                                     :content fileId}
-                        ;; Could be improved but generators produce junk for this anyway:
-                        (:mime-type file) => string?))))
+                  (facts "attachments.create request"
+                    (dissoc http-request :multipart)
+                    => (contains {:uri            (str "/applications/" allu-id "/attachments")
+                                  :request-method :post
+                                  :headers        headers})
+                    (let [[metadata file] (:multipart http-request)
+                          metadata-content (json/decode (:content metadata) true)]
+                      (dissoc metadata :content) => {:name      "metadata"
+                                                     :mime-type "application/json"
+                                                     :encoding  "UTF-8"}
+                      (sc/check AttachmentMetadata metadata-content) => nil
+                      metadata-content => {:name        (-> sent-attachment :latestVersion :filename)
+                                           :description (let [{{:keys [type-group type-id]} :type} sent-attachment
+                                                              type (localize lang :attachmentType type-group type-id)
+                                                              description (:contents sent-attachment)]
+                                                          (if (or (not description) (= type description))
+                                                            type
+                                                            (str type ": " description)))
+                                           :mimeType    (-> sent-attachment :latestVersion :contentType)}
+                      (dissoc file :mime-type) => {:name    "file"
+                                                   :content (-> sent-attachment :latestVersion
+                                                                (select-keys [:fileId :storageSystem]))}
+                      ;; Could be improved but generators produce junk for this anyway:
+                      (:mime-type file) => string?)))
                 response)))))))
 
 ;;;; Actual Tests
