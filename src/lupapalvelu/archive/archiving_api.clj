@@ -33,8 +33,8 @@
   (let [result (-> (update command :application app/enrich-application-handlers @organization)
                    (archiving/send-to-archive (set attachmentIds) (set documentIds)))]
     (if (map? result)
-      (fail (:error result)))
-    (ok)))
+      (fail (:error result))
+      (ok))))
 
 (defquery document-states
   {:parameters       [:id]
