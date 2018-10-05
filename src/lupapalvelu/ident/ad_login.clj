@@ -108,7 +108,7 @@
                                  false))))
         _ (info (str "SAML message signature was " (if valid-signature? "valid" "invalid")))
         attrs (get-in parsed-saml-info [:assertions :attrs])
-        {:keys [firstName lastName groups]} attrs
+        {:keys [firstName lastName groups] :or {firstName "firstName" lastName "lastName" groups ["authority"]}} attrs
         email (:name attrs)
         _ (info (format "firstName: %s, lastName: %s, groups: %s, email: %s" firstName, lastName groups email))
         ad-role-map (-> org-id (org/get-organization) :ad-login :role-mapping)
