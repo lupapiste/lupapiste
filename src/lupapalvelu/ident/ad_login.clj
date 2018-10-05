@@ -86,7 +86,9 @@
                             acs-uri)
         saml-request (saml-req-factory!)]
     (when enabled
-      (saml-sp/get-idp-redirect idp-uri saml-request ""))))
+      (saml-sp/get-idp-redirect idp-uri
+                                saml-request
+                                (saml-routes/create-hmac-relay-state (:secret-key-spec (saml-sp/generate-mutables)) "no-op")))))
 
 (defpage [:post "/api/saml/ad-login/:org-id"] {org-id :org-id}
   (let [idp-cert (-> org-id org/get-organization :ad-login :idp-cert parse-certificate)
