@@ -107,13 +107,14 @@
                                  (error (.getMessage e))
                                  false))))
         _ (info (str "SAML message signature was " (if valid-signature? "valid" "invalid")))
-        attrs (-> parsed-saml-info
-                  (get-in [:assertions :attrs])
-                  remove-namespaces-from-kws)
+        attrs (get-in parsed-saml-info [:assertions :attrs])
         {:keys [firstName lastName groups]} attrs
         email (:name attrs)
+        _ (info (format "firstName: %s, lastName: %s, groups: %s, email: %s" firstName, lastName groups email))
         ad-role-map (-> org-id (org/get-organization) :ad-login :role-mapping)
-        authz (resolve-roles ad-role-map groups)]
+        _ (info (str "AD-role map: " ad-role-map))
+        authz (resolve-roles ad-role-map groups)
+        _ (info (str "Resolved authz: " authz))]
     (cond
       (and valid-signature? (seq authz)) (validated-login req org-id firstName lastName email authz)
       valid-signature? (do
