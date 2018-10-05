@@ -2,7 +2,7 @@
   "A common interface for accessing invoices, price catalogues and related data"
   (:require [lupapalvelu.mongo :as mongo]
             [schema.core :as sc]
-            [sade.core :refer [ok fail now]]
+            [sade.core :refer [ok fail] :as sade]
             [sade.schemas :as ssc]
             [taoensso.timbre :refer [trace tracef debug debugf info infof
                                      warn warnf error errorf fatal fatalf]]
@@ -91,7 +91,7 @@
   [invoice {:keys [id organization] :as application} user]
   (debug "->invoice-db invoice-request: " invoice " app id: " id " user: " user)
   (merge invoice
-         {:created (now)
+         {:created (sade/now)
           :created-by (->invoice-user user)
           :application-id id
           :organization-id organization}))
