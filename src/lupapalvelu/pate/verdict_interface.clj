@@ -69,15 +69,17 @@
   ([application]
     (verdict-date application nil))
   ([{:keys [verdicts] :as application} post-process]
-   (let [legacy-ts (some->> verdicts
-                            (map (fn [{:keys [paatokset]}]
-                                   (map (fn [pt] (map (fn [pk] (get (second pk) :paatospvm (get pk :paatospvm))) (:poytakirjat pt))) paatokset)))
-                            (flatten)
-                            (remove nil?)
-                            (sort)
-                            (last))
-         pate-ts   (get-in (verdict/latest-published-pate-verdict {:application application}) [:data :verdict-date])
-         ts        (or legacy-ts pate-ts)]
+   (let [legacy-ts    (some->> verdicts
+                               (map (fn [{:keys [paatokset]}]
+                                      (map (fn [pt] (map (fn [pk] (get (second pk) :paatospvm (get pk :paatospvm))) (:poytakirjat pt))) paatokset)))
+                               (flatten)
+                               (remove nil?)
+                               (sort)
+                               (last))
+         pate-verdict (verdict/latest-published-pate-verdict {:application application})
+         pate-ts      (or (get-in pate-verdict [:data :verdict-date])
+                          (get-in pate-verdict [:data :anto]))
+         ts           (or legacy-ts pate-ts)]
      (if post-process
        (post-process ts)
        ts))))
