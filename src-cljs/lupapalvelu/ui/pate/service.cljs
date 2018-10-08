@@ -142,12 +142,12 @@
 
 (defn fetch-custom-application-phrases [app-id]
   (common/query "custom-application-phrase-categories"
-                #(reset! state/custom-phrases-categories (get % :custom-categories []))
+                #(reset! state/custom-phrase-categories (get % :custom-categories []))
                 :id app-id))
 
 (defn fetch-custom-organization-phrases []
   (common/query "custom-organization-phrase-categories"
-                #(reset! state/custom-phrases-categories (get % :custom-categories []))
+                #(reset! state/custom-phrase-categories (get % :custom-categories []))
                 :org-id @state/org-id))
 
 (defn upsert-phrase [phrase-map callback]
