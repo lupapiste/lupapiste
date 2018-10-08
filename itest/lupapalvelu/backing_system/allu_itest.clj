@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [cheshire.core :as json]
             [monger.operators :refer [$set]]
+            [mount.core :as mount]
             [reitit.ring :as reitit-ring]
             [schema.core :as sc]
             [taoensso.timbre :refer [warn]]
@@ -14,6 +15,7 @@
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.tools :refer [doc-name]]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
@@ -24,8 +26,7 @@
             [lupapalvelu.itest-util.model-based :refer [state-graph->transitions traverse-state-transitions]]
 
             [lupapalvelu.backing-system.allu.core :as allu]
-            [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract AttachmentMetadata]]
-            [lupapalvelu.domain :as domain])
+            [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract AttachmentMetadata]])
   (:import [java.io InputStream]))
 
 ;;;; Refutation Utilities
@@ -190,7 +191,7 @@
                         :status         "done"
                         :application.id (:id application)})
           res (handler request)]
-      (when-not (= (:status res) 401)                       ; HACK
+      (when-not (= (:uri request) "/login")                       ; HACK
         (fact "integration messages are saved"
           (mongo/any? :integration-messages (imsg-query "out")) => true
           (mongo/any? :integration-messages (imsg-query "in")) => true))
@@ -291,6 +292,7 @@
 
 (env/with-feature-value :allu true
   (mongo/connect!)
+  (mount/start #'allu/allu-jms-session #'allu/allu-jms-consumer)
 
   (facts "Usage of ALLU integration in commands"
     (mongo/with-db itu/test-db-name
