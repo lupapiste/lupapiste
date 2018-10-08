@@ -121,7 +121,7 @@
                             <li data-bind="if: $root.authorization.ok( 'pate-verdict-tab'),
                                            css: {'active': $parent.selectedTabName() === 'verdict'}">
                               <a  data-bind="click: changeTab"
-                                  href="#" data-target="verdict" data-test-id="pate-verdict-tab"
+                                  href="#" data-target="verdict" data-test-id="application-open-verdict-tab"
                                   class="link-btn">
                                 <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
                                 <span data-bind="if: unseenVerdicts">

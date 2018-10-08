@@ -3,6 +3,7 @@
 Documentation   YA extension applications table
 Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
 
 *** Variables ***
 ${appname}     Roadcrew

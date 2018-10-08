@@ -210,18 +210,25 @@
   [page & suffix]
   (js/pageutil.openPage (name page) (apply array (map name suffix))))
 
+(defn test-id
+  "Concatenates the given arguments into test-id string.
+  hello [world] 3 -> hello-world-3"
+  [& xs]
+  (->> xs
+       flatten
+       (remove nil?)
+       (map (fn [k]
+              (cond-> k (keyword? k) name)))
+       (ss/join "-")))
+
 (defn add-test-id
   "Adds data-test-id attribute. The target can be either the attribute
   map or the encompassing component. Extras parts are concatened with
   - If the test-id is nil (or false), the target is returned unchanged
   regardless of extras."
-  [[x & xs :as target] test-id & extras]
-  (let [test-id (when test-id
-                  (->> (cons test-id extras)
-                       flatten
-                       (remove nil?)
-                       (map name)
-                       (ss/join "-")))]
+  [[x & xs :as target] testid & extras]
+  (let [test-id (when testid
+                  (test-id (cons testid extras)))]
     (cond
       (ss/blank? test-id) target
       (map? target)      (assoc target :data-test-id test-id)
