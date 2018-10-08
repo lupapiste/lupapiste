@@ -120,7 +120,7 @@
      [test-id]: Test ids for input and button are derived from test-id
      by postfixing -input and -button respectively."
   [{text* ::text} _ {:keys [icon button-class callback
-                            disabled? input-type]
+                            disabled? input-type test-id]
                      :as   options}]
   [:span.text-and-button
    (text-edit text* (merge {:disabled  disabled?
@@ -129,14 +129,15 @@
                                                    (= (.-keyCode %) 13))
                                           (callback @text*))}
                            (when test-id
-                             {:test-id (str test-id "-input")})
+                             {:test-id (common/test-id test-id :input)})
                            (dissoc options
                                    :icon :button-class :callback
-                                   :disabled? :input-type)))
+                                   :disabled? :input-type :test-id)))
    [:button
-    {:class    (common/css (or button-class :primary))
-     :disabled (or disabled? (s/blank? (rum/react text*)))
-     :on-click #(callback @text*)}
+    (cond-> {:class    (common/css (or button-class :primary))
+             :disabled (or disabled? (s/blank? (rum/react text*)))
+             :on-click #(callback @text*)}
+      test-id (common/add-test-id test-id :button))
     [:i {:class (common/css (or icon :lupicon-save))}]]])
 
 (defn default-items-fn [items]

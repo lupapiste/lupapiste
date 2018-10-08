@@ -845,6 +845,7 @@ Add empty attachment template
 Expose file input
   [Arguments]  ${jQuerySelector}
   Execute Javascript  $("${jQuerySelector}").css( "display", "block").toggleClass( "hidden", false )
+  Wait until element is visible  jquery=${jQuerySelector}
 
 Hide file input
   [Arguments]  ${jQuerySelector}

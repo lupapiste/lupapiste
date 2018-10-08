@@ -2,7 +2,7 @@
 
 Documentation   Resources for Pate robots
 Resource       ../../common_resource.robot
-
+Variables       ../../common_variables.py
 
 *** Variables ***
 
@@ -193,15 +193,20 @@ Fetch YA verdict
 #   Wait until  Element should be visible  application-verdict-details
 #   Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
 
+Check signature
+  [Arguments]  ${name}  ${index}=1
+  Test id text is  signature-${index}-name  ${name}
+  Test id text is  signature-${index}-date  ${CURRENT_DATE}
+
 Sign contract
-  [Arguments]  ${password}
+  [Arguments]  ${password}  ${ok}=True
   Scroll and click test id  sign-contract
 
-  Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
-  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  ${password}
-  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//div[@data-test-id='verdict-signature-listing']
-
+  Fill test id  password-input  ${password}
+  Click by test id  password-button
+  Run keyword if  ${ok}  No such test id  password-input
+  Run keyword if  ${ok}  No such test id  sign-contract
+  Run keyword unless  ${ok}  Wait until element is visible  jquery=input[type=password].warning
 
 Check verdict row
   [Arguments]  ${index}  ${link}  ${date}  ${giver}

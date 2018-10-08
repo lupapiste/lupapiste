@@ -187,8 +187,12 @@
          [:div.tabby
           (map-indexed (fn [i {:keys [name date]}]
                          [:div.tabby__row {:key i}
-                          [:div.tabby__cell.tabby--100 name]
-                          [:div.tabby__cell.cell--right (js/util.finnishDate date)]])
+                          [:div.tabby__cell.tabby--100
+                           (common/add-test-id {} :signature i :name)
+                           name]
+                          [:div.tabby__cell.cell--right
+                           (common/add-test-id {} :signature i :date)
+                           (js/util.finnishDate date)]])
                        signatures)]]]
        (when (can-sign? verdict-id)
          [:div.col-2.col--right {:key "col-2"}
@@ -200,6 +204,7 @@
                                            {:input-type   :password
                                             :disabled?    @waiting?*
                                             :autoFocus    true
+                                            :test-id      :password
                                             :class        (common/css-flags :warning bad?)
                                             :button-class (when bad? :negative)
                                             :icon         (if @waiting?*
@@ -214,7 +219,9 @@
                                                                                       (reset! waiting?* false)
                                                                                       (reset! bad-password*
                                                                                               password))))}))
-             [:button.secondary.cancel-signing {:on-click click-fn} (common/loc :cancel)]])])]]]
+             [:button.secondary.cancel-signing (common/add-test-id {:on-click click-fn}
+                                                                   :cancel-signing)
+              (common/loc :cancel)]])])]]]
      (if show-sign-button?
        [:td (when (and (can-sign? verdict-id)
                        (not (rum/react signing?*)))

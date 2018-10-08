@@ -36,15 +36,21 @@ Sonja prepares and publishes contract
   Wait until  Application state should be  agreementPrepared
   [Teardown]  Logout
 
-Mikko signs agreement
+Mikko is back
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Wait until  Application state should be  agreementPrepared
   Wait until  Permit subtype is  Sijoitussopimus
   Element should be disabled  permitSubtypeSelect
   Open tab  verdict
-  debug
-  Sign verdict  mikko123
+
+Mikko signs the contract with bad password
+  Sign contract  bad  False
+  Click by test id  cancel-signing
+
+Mikko signs the contract successfully
+  Sign contract  mikko123
+  Check signature  Mikko Intonen
   Wait until  Application state should be  agreementSigned
 
 Frontend errors check
