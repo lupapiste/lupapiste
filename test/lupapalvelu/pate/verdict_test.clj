@@ -1507,56 +1507,62 @@
 
 
 (facts "Verdict summary"
-  (let [section-strings {"v1" "\u00a71" "v2" "\u00a72"}
-        verdict         {:id         "v1"
-                         :category   "r"
-                         :data       {:verdict-code    "ehdollinen"
-                                      :handler         "Foo Bar"
-                                      :verdict-section "1"
-                                      :verdict-date    876543}
-                         :modified   12345
-                         :template   {:inclusions ["verdict-code"
-                                                   "handler"
-                                                   "verdict-date"
-                                                   "verdict-section"]
-                                      :giver      "viranhaltija"}
-                         :references {:boardname "Broad board abroad"}}
-        backend-verdict {:kuntalupatunnus "13-0185-R"
-                         :paatokset       [{:paivamaarat {:aloitettava      1377993600000
-                                                          :lainvoimainen    1378080000000
-                                                          :voimassaHetki    1378166400000
-                                                          :raukeamis        1378252800000
-                                                          :anto             1378339200000
-                                                          :viimeinenValitus 1536192000000
-                                                          :julkipano        1378512000000}
-                                            :poytakirjat [{:paatoskoodi     "myönnetty"
-                                                           :paatospvm       112233
-                                                           :pykala          "1"
-                                                           :paatoksentekija "viranomainen"
-                                                           :paatos          "Päätös 1"
-                                                           :status          "1"
-                                                           :urlHash         "236d9b2cfff88098d4f8ad532820c9fb93393237"}
-                                                          {:paatoskoodi     "ehdollinen"
-                                                           :paatospvm       998877
-                                                           :pykala          "2"
-                                                           :paatoksentekija "Mölli Keinonen"
-                                                           :status          "6"
-                                                           :urlHash         "b55ae9c30533428bd9965a84106fb163611c1a7d"}]
-                                            :id          "5b99044bfb2de0f550b64e44"}
-                                           {:paivamaarat {:anto 1378339200000}
-                                            :poytakirjat [{:paatoskoodi     "myönnetty"
-                                                           :paatospvm       445566
-                                                           :paatoksentekija "johtava viranomainen"
-                                                           :paatos          "Päätös 2"
-                                                           :status          "1"}
-                                                          {:paatospvm nil}
-                                                          {}
-                                                          nil]
-                                            :id          "5b99044cfb2de0f550b64e4f"}]
-                         :id              "backend-id"
-                         :draft           false
-                         :timestamp       12345}
-        ]
+  (let [section-strings    {"v1" "\u00a71" "v2" "\u00a72"}
+        verdict            {:id         "v1"
+                            :category   "r"
+                            :data       {:verdict-code    "ehdollinen"
+                                         :handler         "Foo Bar"
+                                         :verdict-section "1"
+                                         :verdict-date    876543}
+                            :modified   12345
+                            :template   {:inclusions ["verdict-code"
+                                                      "handler"
+                                                      "verdict-date"
+                                                      "verdict-section"]
+                                         :giver      "viranhaltija"}
+                            :references {:boardname "Broad board abroad"}}
+        backend-verdict    {:kuntalupatunnus "13-0185-R"
+                            :paatokset       [{:paivamaarat {:aloitettava      1377993600000
+                                                             :lainvoimainen    1378080000000
+                                                             :voimassaHetki    1378166400000
+                                                             :raukeamis        1378252800000
+                                                             :anto             1378339200000
+                                                             :viimeinenValitus 1536192000000
+                                                             :julkipano        1378512000000}
+                                               :poytakirjat [{:paatoskoodi     "myönnetty"
+                                                              :paatospvm       112233
+                                                              :pykala          "1"
+                                                              :paatoksentekija "viranomainen"
+                                                              :paatos          "Päätös 1"
+                                                              :status          "1"
+                                                              :urlHash         "236d9b2cfff88098d4f8ad532820c9fb93393237"}
+                                                             {:paatoskoodi     "ehdollinen"
+                                                              :paatospvm       998877
+                                                              :pykala          "2"
+                                                              :paatoksentekija "Mölli Keinonen"
+                                                              :status          "6"
+                                                              :urlHash         "b55ae9c30533428bd9965a84106fb163611c1a7d"}]
+                                               :id          "5b99044bfb2de0f550b64e44"}
+                                              {:paivamaarat {:anto 1378339200000}
+                                               :poytakirjat [{:paatoskoodi     "myönnetty"
+                                                              :paatospvm       445566
+                                                              :paatoksentekija "johtava viranomainen"
+                                                              :paatos          "Päätös 2"
+                                                              :status          "1"}
+                                                             {:paatospvm nil}
+                                                             {}
+                                                             nil]
+                                               :id          "5b99044cfb2de0f550b64e4f"}]
+                            :id              "backend-id"
+                            :draft           false
+                            :timestamp       12345}
+        ya-backend-verdict (-> backend-verdict
+                               (assoc :kuntalupatunnus "14-0185-YA")
+                               (update :paatokset (comp vec butlast))
+                               (update-in [:paatokset 0 :poytakirjat] (fn [pks]
+                                                                        (map #(dissoc % :paatospvm) pks)))
+                               (assoc-in [:paatokset 0 :paivamaarat :paatosdokumentinPvm] 220033))]
+
     (fact "Nil"
       (vc/draft? nil) => false
       (vc/published? nil) => false
@@ -1704,6 +1710,18 @@
           :published    12345
           :giver        "Mölli Keinonen"
           :verdict-date 998877
+          :title        "ehdollinen"})
+    (fact "YA backend verdit"
+      (vc/draft? ya-backend-verdict) => false
+      (vc/published? ya-backend-verdict) => true
+      (vc/verdict-summary "fi" section-strings ya-backend-verdict)
+      => {:id           "backend-id"
+          :category     "backing-system"
+          :legacy?      false
+          :modified     12345
+          :published    12345
+          :giver        "Mölli Keinonen"
+          :verdict-date 220033
           :title        "ehdollinen"})
     (facts "YA verdict-type"
       (let [verdict (-> verdict

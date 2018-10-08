@@ -30,7 +30,8 @@
               :confirm-delete-draft [:pate.delete-verdict-draft
                                      :pate.contract.confirm-delete-draft]
               :no-templates         [:pate.no-verdict-templates :pate.no-contract-templates]
-              :template             [:pate-verdict-template :pate.contract.template]})]
+              :template             [:pate-verdict-template :pate.contract.template]
+              :default-title        [:pate-verdict :pate.verdict-table.contract]})]
     (if (:contracts? @args)
       (last v)
       (first v))))
@@ -265,7 +266,7 @@
                   (list [:tr {:key id}
                          [:td {:class (common/css-flags :replaced replaced?)}
                           [:a {:on-click #(open-verdict id)} (if (ss/blank? title)
-                                                               (common/loc :ei-tiedossa)
+                                                               (common/loc (loc-key :default-title))
                                                                title)]]
                          [:td (js/util.finnishDate verdict-date)]
                          [:td giver]
