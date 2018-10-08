@@ -256,7 +256,7 @@
    (sc/optional-key :docstore-info) DocStoreInfo
    (sc/optional-key :verdict-templates) PateSavedVerdictTemplates
    (sc/optional-key :phrases) [Phrase]
-   (sc/optional-key :custom-phrases-categories) CustomPhraseCategory
+   (sc/optional-key :custom-phrase-categories) CustomPhraseCategory
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
    (sc/optional-key :state-change-msg-enabled)      sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
@@ -273,7 +273,10 @@
    (sc/optional-key :ad-login) {:enabled sc/Bool
                                 :idp-cert sc/Str
                                 :idp-uri sc/Str
-                                :trusted-domains [sc/Str]}})
+                                :trusted-domains [sc/Str]
+                                :role-mapping {sc/Keyword sc/Str}
+                                :sent-tokens [{:timestamp ssc/Timestamp
+                                               :token sc/Str}]}})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))

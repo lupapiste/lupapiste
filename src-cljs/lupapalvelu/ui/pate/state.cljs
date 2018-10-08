@@ -32,7 +32,7 @@
 (def allowed-verdict-actions   (state-cursor :allowed-verdict-actions))
 ;; Wait state for verdict publishing. True when waiting.
 (def verdict-wait?             (state-cursor :verdict-wait?))
-(def custom-phrases-categories (state-cursor :custom-phrases-categories))
+(def custom-phrase-categories (state-cursor :custom-phrase-categories))
 (def appeals                   (state-cursor :appeals))
 
 ;; ok function of the currently active authModel.
