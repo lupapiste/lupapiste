@@ -155,8 +155,7 @@
       (update :documents (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs)))))
 
 (defn get-linked-foreman-applications-by-id [id]
-  (let [_ (println "CAlling me....")
-        app-link-resp (mongo/select :app-links {:link {$in [id]}})
+  (let [app-link-resp (mongo/select :app-links {:link {$in [id]}})
         apps-linking-to-us (filter #(= (:type ((keyword id) %)) "linkpermit") app-link-resp)
         foreman-application-links (filter #(= "tyonjohtajan-nimeaminen-v2"
                                               (get-in % [(keyword (first (:link %))) :apptype]))

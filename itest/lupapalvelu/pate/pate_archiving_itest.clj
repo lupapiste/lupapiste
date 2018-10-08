@@ -27,6 +27,13 @@
     (-> (assoc metadata :applicants [applicant])
         (dissoc :applicant)))
 
+(defn- add-mocked-data-from-toj [metadata]
+  (assoc metadata :henkilotiedot :ei-sisalla
+                  :julkisuusluokka :julkinen
+                  :sailytysaika {:arkistointi :ei
+                                 :perustelu "<Arvo puuttuu>"}
+                  :tosFunction {:code "10030001" :name "Rakennuslupamenettely"}))
+
 (facts "Archiving application with PATE verdict"
 
   (fact "Enable permanent archive"
@@ -58,6 +65,7 @@
           archive-metadata (generate-archive-metadata application user :metadata attachment)
           metadata (->> (assoc archive-metadata :arkistointipvm (Date.) :tila :arkistoitu)
                         (add-missing-coordinates)
+                        (add-mocked-data-from-toj)
                         (change-applicant-to-list)
                         schema-utils/remove-blank-keys
                         (schema-utils/coerce-metadata-to-schema ams/full-document-metadata))]
