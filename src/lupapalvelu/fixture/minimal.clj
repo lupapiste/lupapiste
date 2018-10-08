@@ -555,7 +555,7 @@
 
    ;; Pori
 
-   ;; Porin pääkäyttäjä - pori/pori
+   ;; Porin paakayttaja - pori/pori
    {:id "pori"
     :username "pori"
     :role "authority"
@@ -566,7 +566,7 @@
     :lastName "Porilainen"
     :language "fi"
     :phone "0501233210"
-    :street "Vähäuusikatu 1 a 1"
+    :street "V\u00E4h\u00E4uusikatu 1 a 1"
     :zip "28100"
     :city "Pori"
     :private {:password "$2a$10$H3D35GclLgHRUIUfQtEQZe5FlrVR2iYoV8Babw4C8D8ANLvuulEmu"
@@ -1440,8 +1440,7 @@
                                                            "YMEuMA=="
                                                            "-----END CERTIFICATE-----"])
                                   :idp-uri "http://localhost:7000"
-                                  :trusted-domains ["pori.fi"]
-                                  :sent-tokens []}}
+                                  :trusted-domains ["pori.fi"]}}
 
                       ;; Helsinki R
                       {:id "091-R"

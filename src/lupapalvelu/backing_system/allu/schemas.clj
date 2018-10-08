@@ -1,10 +1,18 @@
 (ns lupapalvelu.backing-system.allu.schemas
-  "Schemas for ALLU integration."
+  "Schemas for ALLU integration. Mostly adapted from ALLU Swagger docs."
   (:require [schema.core :as sc :refer [defschema optional-key enum]]
+            [sade.municipality :refer [municipality-codes]]
             [sade.schemas :refer [NonBlankStr Email Zipcode Tel Hetu FinnishY FinnishOVTid Kiinteistotunnus
                                   ApplicationId ISO-3166-alpha-2 date-string]]
             [lupapalvelu.document.canonical-common :as canonical-common]
-            [lupapalvelu.integrations.geojson-2008-schemas :as geo]))
+            [lupapalvelu.document.data-schema :as dds]
+            [lupapalvelu.integrations.geojson-2008-schemas :as geo]
+            [lupapalvelu.states :as states]))
+
+(defschema LoginCredentials
+  "User credentials for ALLU login API."
+  {:password sc/Str
+   :username sc/Str})
 
 (defschema SijoituslupaOperation
   "An application primaryOperation.name that is classified as a :Sijoituslupa."
@@ -19,7 +27,7 @@
 
 ;; TODO: Improve this based on the standard.
 (defschema JHS-106
-  "Katuosoite.
+  "JHS-106 -standardin mukainen katuosoite.
 
   apartmentNumber: huoneiston numero
   divisionLetter: jakokirjainosa (soluasunnot tms.)
@@ -51,11 +59,13 @@
   email: s\u00e4hk\u00f6postiosoite
   id: Allun sis\u00e4inen id, voi j\u00e4tt\u00e4\u00e4 huomiotta, tulee poistumaan
   name: henkil\u00f6n tai yrityksen nimi
+  orderer: onko tämä hakemuksen tilaaja itse?
   phone: puhelinnumero
   postalAddress: postiosoite"
   {(optional-key :email)         Email
    (optional-key :id)            sc/Int
    :name                         NonBlankStr
+   (optional-key :orderer)       sc/Bool                    ; TODO: Emit this in ./conversion.clj (?)
    (optional-key :phone)         Tel
    (optional-key :postalAddress) PostalAddress})
 
@@ -87,6 +97,11 @@
    (optional-key :registryKey)       RegistryKey
    :type                             CustomerType})
 
+(defschema CustomerWithContacts
+  "Customer and their contact infromation(s)."
+  {:contacts [(sc/one Contact "primary contact") Contact]
+   :customer Customer})
+
 (defschema FeaturelessGeoJSON-2008
   "A GeoJSON object that is not a Feature or a FeatureCollection."
   (sc/conditional
@@ -112,12 +127,12 @@
   pendingOnClient: tehd\u00e4\u00e4nk\u00f6 Lupapisteess\u00e4 viel\u00e4 muutoksia
   postalAddress: varattavan alueen postiosoite
   propertyIdentificationNumber: varattavan alueen kiinteist\u00f6tunnus
+  representativeWithContacts: TODO
   startTime: alueen k\u00e4yt\u00f6n alkuaika (ei k\u00e4yt\u00f6ss\u00e4 Lupapisteess\u00e4)
   workDescription: hankkeen (pidempi) kuvaus"
   {:clientApplicationKind                       NonBlankStr
    (optional-key :customerReference)            NonBlankStr
-   :customerWithContacts                        {:contacts [(sc/one Contact "primary contact") Contact]
-                                                 :customer Customer}
+   :customerWithContacts                        CustomerWithContacts
    :endTime                                     (date-string :date-time-no-ms)
    :geometry                                    FeaturelessGeoJSON-2008
    :identificationNumber                        ApplicationId
@@ -126,10 +141,32 @@
    (optional-key :pendingOnClient)              sc/Bool
    (optional-key :postalAddress)                PostalAddress
    (optional-key :propertyIdentificationNumber) Kiinteistotunnus
+   (optional-key :representativeWithContacts)   CustomerWithContacts
    :startTime                                   (date-string :date-time-no-ms)
    (optional-key :workDescription)              NonBlankStr})
 
-(defschema FileMetadata
+(defschema AttachmentMetadata
+  "Metadata for attachments.
+
+  name: attachment file name
+  description: attachment description
+  mimeType: MIME type of the attachment file"
   {:name        sc/Str
    :description sc/Str
    :mimeType    (sc/maybe sc/Str)})
+
+(defschema ValidPlacementApplication
+  "A partial schema for a Lupapiste application that can be converted into a `PlacementContract`. For testing."
+  {:id               ApplicationId
+   :state            (apply sc/enum (map name states/all-states))
+   :permitSubtype    (sc/eq "sijoitussopimus")
+   :organization     NonBlankStr
+   :propertyId       Kiinteistotunnus
+   :municipality     (apply sc/enum municipality-codes)
+   :address          NonBlankStr
+   :primaryOperation {:name SijoituslupaOperation}
+   :documents        [(sc/one (dds/doc-data-schema "hakija-ya" true) "applicant")
+                      (sc/one (dds/doc-data-schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" true) "description")
+                      (sc/one (dds/doc-data-schema "yleiset-alueet-maksaja" true) "payee")]
+   :location-wgs84   [(sc/one sc/Num "longitude") (sc/one sc/Num "latitude")]
+   :drawings         [{:geometry-wgs84 geo/SingleGeometry}]})

@@ -27,6 +27,8 @@
                                                       (->> (permit/permit-types) vals (map :subtypes) flatten distinct)
                                                       (->> (vals op/operations) (map :subtypes) flatten distinct))
                                                     (distinct)
+                                                    (remove nil?)
+                                                    (map name)
                                                     (apply sc/enum)))
    :applicant                        (sc/maybe sc/Str)
    :infoRequest                      sc/Bool
@@ -274,11 +276,11 @@ What is the point of the fields with only one possible values?"
     "rakennuksen paikan tarkastaminen"
     "pohjakatselmus"
     "ei tiedossa"
-    "lämpö-, vesi- ja ilmanvaihtolaitteiden katselmus"
+    "l\u00E4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
     "muu tarkastus"
     "Loppukatselmus"
     "Aloituskatselmus"
-    "Muu valvontakäynti"})
+    "Muu valvontak\u00E4ynti"})
 
 (def task-data-katselmuksenLaji-numeric-values
   #{"0"
@@ -431,7 +433,7 @@ TODO: These need further checking, might not be sufficient."
 (defschema Applicant
   "TODO: 7 applications where applicant is empty string.
 Seems to contain name of applicant, which can be a person's name, a company's
-name or an asunto-osakeyhtiös name."
+name or an asunto-osakeyhti\u00f6s name."
   (sc/named sc/Str 'Applicant))
 
 (defschema ApplicantIndex

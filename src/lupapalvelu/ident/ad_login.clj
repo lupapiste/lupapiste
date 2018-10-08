@@ -24,6 +24,13 @@
   [certstring]
   (ss/replace certstring #"[\n ]|(BEGIN|END) CERTIFICATE|-{5}" ""))
 
+(defn remove-namespaces-from-kws
+  "Convert namespaced map keys like :http://schemas.microsoft.com/identity/claims/tenantid -> :tenantid"
+  [m]
+  (into {} (for [[k v] m]
+             (let [newkey (-> k name (ss/split #"/") last keyword)]
+               [newkey v]))))
+
 (defn parse-saml-info
   "The saml-info map returned by saml20-clj comes in a wacky format, so its best to
   parse it into a more manageable form (without string keys or single-element lists etc)."
@@ -31,7 +38,7 @@
   (cond
     (and (seq? element) (= (count element) 1)) (parse-saml-info (first element))
     (seq? element) (mapv parse-saml-info element)
-    (map? element) (into {} (for [[k v] element] [(keyword k) (parse-saml-info v)]))
+    (map? element) (into {} (for [[k v] (remove-namespaces-from-kws element)] [(keyword k) (parse-saml-info v)]))
     :else element))
 
 (defn resolve-roles
@@ -65,9 +72,7 @@
 
 (def ad-config
   {:app-name "Lupapiste"
-   :base-uri (env/value :host)
-   :secret-key-spec (saml-shared/new-secret-key-spec)
-   :token-timeout 5}) ; In minutes
+   :base-uri (env/value :host)})
 
 (defpage [:get "/api/saml/ad-login/:org-id"] {org-id :org-id}
   (let [{:keys [enabled idp-uri]} (-> org-id org/get-organization :ad-login)
@@ -80,23 +85,22 @@
                             saml-routes/saml-format
                             (:app-name ad-config)
                             acs-uri)
-        saml-request (saml-req-factory!)
-        relay-state-token (saml-routes/create-hmac-relay-state (:secret-key-spec ad-config) "target")]
+        saml-request (saml-req-factory!)]
     (when enabled
-      (do
-        (org/add-token-to-org org-id relay-state-token)
-        (saml-sp/get-idp-redirect idp-uri saml-request relay-state-token)))))
+      (saml-sp/get-idp-redirect idp-uri
+                                saml-request
+                                (saml-routes/create-hmac-relay-state (:secret-key-spec (saml-sp/generate-mutables)) "no-op")))))
 
 (defpage [:post "/api/saml/ad-login/:org-id"] {org-id :org-id}
   (let [idp-cert (-> org-id org/get-organization :ad-login :idp-cert parse-certificate)
         req (request/ring-request)
-        _ (org/purge-time-out-tokens! org-id (:token-timeout ad-config)) ; Accept only tokens that are not older than the amount specified in ad-config
         xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse]))
         saml-resp (saml-sp/xml-string->saml-resp xml-response)
-        relay-state-token (get-in req [:params :RelayState])
-        tokens (->> (org/get-sent-tokens org-id) (map :token) set)
-        [valid-relay-state? _] (saml-routes/valid-hmac-relay-state? (:secret-key-spec ad-config) relay-state-token)
-        token-found? (contains? tokens relay-state-token)
+        saml-info (saml-sp/saml-resp->assertions saml-resp false)
+        parsed-saml-info (parse-saml-info saml-info)
+        _ (info (str "Received XML response: " xml-response))
+        _ (info (str "SAML response: " saml-info))
+        _ (info (str "Parsed SAML response: " parsed-saml-info))
         valid-signature? (if-not idp-cert
                            false
                            (try
@@ -105,20 +109,17 @@
                                (do
                                  (error (.getMessage e))
                                  false))))
-        _ (info (str "RelayState parameter was "
-                     (if token-found? "found" "not found!") " and "
-                     (if valid-relay-state? "valid" "invalid")))
         _ (info (str "SAML message signature was " (if valid-signature? "valid" "invalid")))
-        valid? (and token-found? valid-signature? valid-relay-state?)
-        _ (info (str "SAML login credentials " (if valid? "valid!" "invalid")))
-        saml-info (when valid-signature? (saml-sp/saml-resp->assertions saml-resp false))
-        parsed-saml-info (parse-saml-info saml-info)
-        {:keys [email firstName lastName groups]} (get-in parsed-saml-info [:assertions :attrs])
+        attrs (get-in parsed-saml-info [:assertions :attrs])
+        {:keys [firstName lastName groups] :or {firstName "firstName" lastName "lastName" groups ["authority"]}} attrs
+        email (:name attrs)
+        _ (info (format "firstName: %s, lastName: %s, groups: %s, email: %s" firstName, lastName groups email))
         ad-role-map (-> org-id (org/get-organization) :ad-login :role-mapping)
-        _ (org/remove-used-token! org-id relay-state-token)
-        authz (resolve-roles ad-role-map groups)]
+        _ (info (str "AD-role map: " ad-role-map))
+        authz (resolve-roles ad-role-map groups)
+        _ (info (str "Resolved authz: " authz))]
     (cond
-      (and valid? (seq authz)) (validated-login req org-id firstName lastName email authz)
+      (and valid-signature? (seq authz)) (validated-login req org-id firstName lastName email authz)
       valid-signature? (do
                          (error "User does not have organization authorization")
                          (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))

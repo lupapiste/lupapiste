@@ -100,9 +100,13 @@
 
 ;; Phrases
 
+(defschema PhraseCategory
+  (sc/cond-pre (apply sc/enum (map name shared-schemas/phrase-categories))
+               ssc/ObjectIdStr))
+
 (defschema Phrase
   {:id       ssc/ObjectIdStr
-   :category (apply sc/enum (map name shared-schemas/phrase-categories))
+   :category PhraseCategory
    :tag      sc/Str
    :phrase   sc/Str})
 

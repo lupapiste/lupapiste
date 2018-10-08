@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [cheshire.core :as json]
             [monger.operators :refer [$set]]
+            [mount.core :as mount]
             [reitit.ring :as reitit-ring]
             [schema.core :as sc]
             [taoensso.timbre :refer [warn]]
@@ -14,6 +15,7 @@
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.tools :refer [doc-name]]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
@@ -21,68 +23,11 @@
 
             [midje.sweet :refer [facts fact => contains]]
             [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
+            [lupapalvelu.itest-util.model-based :refer [state-graph->transitions traverse-state-transitions]]
 
             [lupapalvelu.backing-system.allu.core :as allu]
-            [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract FileMetadata]]
-            [lupapalvelu.domain :as domain])
+            [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract AttachmentMetadata]])
   (:import [java.io InputStream]))
-
-;;;; Nano-framework :P for Model-Based Testing
-;;;; ===================================================================================================================
-
-(defn- state-graph->transitions [states]
-  (mapcat (fn [[state succs]] (map #(vector state %) succs)) states))
-
-(defn- transitions-todo [visited-total soured visit-goal]
-  (->> visited-total
-       (filter (fn [[transition visit-count]] (and (not (soured transition)) (< visit-count visit-goal))))
-       (map key)))
-
-(defn- probe-next-transition [states visit-goal visited-total soured current-state]
-  ;; This code is not so great but does the job for now.
-  (letfn [(useful [current visited]
-            (let [[usefuls visited]
-                  (reduce (fn [[transitions visited] succ]
-                            (let [transition [current succ]
-                                  visited* (conj visited transition)]
-                              (cond
-                                (soured transition) [transitions visited*]
-                                (< (get visited-total transition) visit-goal) [(conj transitions transition) visited*]
-                                (not (visited transition)) (let [[transition* visited*] (useful succ visited*)]
-                                                             (if transition*
-                                                               [(conj transitions transition) visited*]
-                                                               [transitions visited*]))
-                                :else [transitions visited*])))
-                          [[] visited] (get states current))]
-              [(if (seq usefuls) (rand-nth usefuls) nil)
-               visited]))]
-    (first (useful current-state #{}))))
-
-(defn- traverse-state-transitions [& {:keys [states initial-state init! transition-adapters visit-goal]}]
-  (let [initial-visited (zipmap (state-graph->transitions states) (repeat 0))]
-    (loop [visited-total initial-visited
-           visited visited-total
-           soured #{}
-           current-state initial-state
-           user-state (init!)]
-      (if-let [[_ next-state :as transition] (probe-next-transition states visit-goal visited-total soured
-                                                                    current-state)]
-        (if-let [transition-adapter (get transition-adapters transition)]
-          (let [next-state* (transition-adapter transition user-state)]
-            (if (or (not= next-state* current-state)        ; Led somewhere else?
-                    (= next-state* next-state))             ; Wasn't supposed to!
-              (recur (update visited-total transition inc) (update visited transition inc) soured
-                     next-state* user-state)
-              (recur (update visited-total transition inc)
-                     (update visited transition inc)
-                     (conj soured transition)               ; Let's not try that again.
-                     next-state*
-                     user-state)))
-          (do (warn "No adapter provided for" transition)
-              (recur (update visited-total transition inc) (update visited transition inc) soured
-                     next-state user-state)))
-        (when (seq (transitions-todo visited-total soured visit-goal))
-          (recur visited-total initial-visited soured initial-state (init!)))))))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -103,13 +48,16 @@
     :area     "708280",
     :height   "12"}])
 
-(defn- nullify-doc-ids [doc]
+(defn- nullify-doc-ids
+  "Make some foreign keys nil so that the tests don't try to load nonexistent users with generated id:s."
+  [doc]
   (-> doc
       (assoc-in [:data :henkilo :userId :value] nil)
       (assoc-in [:data :yritys :companyId :value] nil)))
 
-;; HACK: undo-cancellation bypasses the state graph so we add [:cancel *] arcs here:
-(defn- add-canceled->* [state-graph]
+(defn- add-canceled->*
+  "HACK: undo-cancellation bypasses the state graph so we add [:cancel *] arcs to the state graph with this."
+  [state-graph]
   (update state-graph :canceled
           into
           (comp (filter (fn [[_ succs]] (some (partial = :canceled) succs)))
@@ -140,7 +88,7 @@
              {:keys [attachmentId] :as upload-res} (itu/local-command apikey :upload-attachment :id app-id
                                                                       :attachmentId (:id attachment)
                                                                       :attachmentType {:type-group "muut"
-                                                                                       :type-id "muu"}
+                                                                                       :type-id    "muu"}
                                                                       :locked false
                                                                       :group {} :filename filename :tempfile file
                                                                       :size (.length file))
@@ -220,13 +168,21 @@
 ;;;; Mock Handler
 ;;;; ===================================================================================================================
 
-(defn- check-response-ok-middleware [handler]
-  (fn [request]
-    (let [response (handler request)]
-      (fact "response is successful" response => (comp #{200 201} :status))
-      response)))
+(defn- check-response-ok-middleware
+  "Middleware that tests that the response HTTP status is successful or that we should just re-login."
+  [handler]
+  (let [unauth-counter (atom 0)]
+    (fn [request]
+      (let [response (handler request)]
+        (if (and (= (:status response) 401))
+          (do (fact "login only needs to happen once" @unauth-counter => 0)
+              (swap! unauth-counter inc))
+          (fact "response is successful" response => (comp #{200 201} :status)))
+        response))))
 
-(defn- check-imessages-middleware [handler]
+(defn- check-imessages-middleware
+  "Middleware that checks that `integration-messages` is updated with the request and response."
+  [handler]
   (fn [{{:keys [application]} ::allu/command :as request}]
     (let [imsg-query (fn [direction]
                        {:partner        "allu"
@@ -235,14 +191,17 @@
                         :status         "done"
                         :application.id (:id application)})
           res (handler request)]
-      (fact "integration messages are saved"
-        (mongo/any? :integration-messages (imsg-query "out")) => true
-        (mongo/any? :integration-messages (imsg-query "in")) => true)
+      (when-not (= (:uri request) "/login")                       ; HACK
+        (fact "integration messages are saved"
+          (mongo/any? :integration-messages (imsg-query "out")) => true
+          (mongo/any? :integration-messages (imsg-query "in")) => true))
       res)))
 
 (def- mock-jwt "foo.bar.baz")
 
-(defn- mock-routes [allu-state]
+(defn- mock-routes
+  "Create mock Reitit routes whose handlers use `allu-state` as the ALLU DB."
+  [allu-state]
   [["/login" {:post {:handler (fn [_] {:status 200, :body (json/encode mock-jwt)})}}]
 
    ["/"
@@ -262,7 +221,7 @@
                            (let [metadata-error (sc/check {:name      (sc/eq "metadata")
                                                            :mime-type (sc/eq "application/json")
                                                            :encoding  (sc/eq "UTF-8")
-                                                           :content   FileMetadata}
+                                                           :content   AttachmentMetadata}
                                                           (update (first multipart) :content json/decode true))
                                  file-error (sc/check {:name      (sc/eq "file")
                                                        :mime-type sc/Str
@@ -333,6 +292,7 @@
 
 (env/with-feature-value :allu true
   (mongo/connect!)
+  (mount/start #'allu/allu-jms-session #'allu/allu-jms-consumer)
 
   (facts "Usage of ALLU integration in commands"
     (mongo/with-db itu/test-db-name

@@ -272,7 +272,7 @@
         .command("update-ad-login-settings", {
           "org-id": self.organization().id(),
           "enabled": self.adLoginEnabled(),
-          "trusted-domains": self.adLoginDomains().split(",").map(uri => uri.trim()),
+          "trusted-domains": self.adLoginDomains().split(",").map(function (uri) { return uri.trim(); }),
           "idp-uri": self.adLoginIdPUri(),
           "idp-cert": self.adLoginIdPCert()
         })
