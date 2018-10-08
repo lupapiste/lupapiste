@@ -34,9 +34,8 @@
                                                                      {:appeal-id        id
                                                                       :type             type
                                                                       :author           (ss/trim author)
-                                                                      ;; Appeal timestamps are in seconds. The ISO fallback is needed for robots.
-                                                                      :datestamp        (.unix (or (js/util.toMoment date "fi")
-                                                                                                   (js/util.toMoment date "iso")))
+                                                                      ;; Appeal timestamps are in seconds.
+                                                                      :datestamp        (.unix (js/util.toMoment date "fi"))
                                                                       :text             (ss/trim text)
                                                                       :filedatas        (service/canonize-filedatas @filedatas*)
                                                                       :deleted-file-ids deleted-file-ids}
@@ -194,7 +193,8 @@
                                                                files)]
                                  [:td.align--right
                                   [:a.pate-appeal-operation (common/add-test-id {:on-click toggle-fn}
-                                                                                :appeal i :toggle)
+                                                                                :appeal i
+                                                                                (if can-edit? :edit :show))
                                    (common/loc (if can-edit? :edit :verdict.muutoksenhaku.show-extra))]
                                   (when can-delete?
                                     [:a.pate-appeal-operation
@@ -203,10 +203,11 @@
                                      (common/loc :remove)])]]
                                 (when (rum/react open?*)
                                   [:tr.pate-appeal-row.note-or-form {:key (str "extra-")}
-                                   [:td  (common/add-test-id {:colSpan "7"} :appeal i :opened)
+                                   [:td  {:colSpan "7"}
                                    (if can-edit?
                                      (appeal-form (assoc appeal :date date) toggle-fn)
                                      [:div.pate-appeal-note
+                                      (common/add-test-id {} :appeal i :note)
                                       (if (ss/blank? text)
                                         [:span.empty (common/add-test-id {} :appeal i :empty)
                                          (common/loc :verdict.muutoksenhaku.no-extra)]

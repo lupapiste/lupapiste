@@ -116,7 +116,9 @@
      [button-class:] Default :primary
      callback: Callback function
      [disabled?:] Is component disabled
-     [input-type:] Default text."
+     [input-type:] Default text.
+     [test-id]: Test ids for input and button are derived from test-id
+     by postfixing -input and -button respectively."
   [{text* ::text} _ {:keys [icon button-class callback
                             disabled? input-type]
                      :as   options}]
@@ -126,6 +128,8 @@
                             :on-key-up #(when (and (not (s/blank? @text*))
                                                    (= (.-keyCode %) 13))
                                           (callback @text*))}
+                           (when test-id
+                             {:test-id (str test-id "-input")})
                            (dissoc options
                                    :icon :button-class :callback
                                    :disabled? :input-type)))
@@ -427,7 +431,6 @@
   [{date* ::date} _ {:keys [callback test-id] :as options}]
   [:input.dateinput.dateinput--safe
    (common/add-test-id (merge {:type      "text"
-                               :value     @date*
                                :on-blur #(set-selected date*
                                                        (.. % -target -value)
                                                        callback)}

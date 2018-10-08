@@ -3,6 +3,12 @@
 Documentation   Resources for Pate robots
 Resource       ../../common_resource.robot
 
+
+*** Variables ***
+
+${R-verdict-result}  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
+${YA-verdict-result}  Taustajärjestelmästä haettiin 1 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 2 uutta vaatimusta Rakentaminen-välilehdelle.
+
 *** Keywords ***
 
 Safe kill dev-box
@@ -91,6 +97,13 @@ Input legacy verdict
   Run keyword if  ${check-buttons}  Test id enabled  publish-verdict
   Link button enabled  preview-verdict
 
+Input legacy contract
+  [Arguments]  ${backend-id}  ${giver}  ${date}
+  Input text by test id  kuntalupatunnus  ${backend-id}
+  Input text by test id  handler  ${giver}
+  Input text by test id  contract-text  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ut leo a ipsum sagittis faucibus. Integer ac velit eget odio tincidunt facilisis. Duis eu purus elementum, efficitur eros non, ultrices lectus. Praesent non ipsum id sapien dictum pharetra. Etiam sit amet sodales urna, ultricies pellentesque metus. Aliquam posuere, eros ac volutpat posuere, velit leo sagittis ipsum, nec interdum risus arcu vitae nunc. Cras blandit dignissim nunc, quis dapibus nisl eleifend vitae. Cras sed ornare augue.
+  Input text by test id  verdict-date  ${date}
+
 Publish verdict
   Click enabled by test id  publish-verdict
   Confirm yes no dialog
@@ -100,6 +113,12 @@ Give legacy verdict
   [Arguments]  ${backend-id}  ${giver}  ${term}  ${date}
   Go to give new legacy verdict
   Input legacy verdict  ${backend-id}  ${giver}  ${term}  ${date}
+  Publish verdict
+
+Give legacy contract
+  [Arguments]  ${backend-id}  ${giver}  ${date}
+  Go to give new legacy verdict
+  Input legacy contract  ${backend-id}  ${giver}  ${date}
   Publish verdict
 
 Submit empty verdict
@@ -144,33 +163,44 @@ Add legacy condition
   ${tid}=  Test id for  conditions  ${index}  name
   Input text by test id  ${tid}  ${name}
 
-Do fetch verdict
+Verdict fetched
   [Arguments]  ${fetchConfirmationText}
-  Click enabled by test id  fetch-verdict
-  #Wait for jQuery
   Wait test id visible  ok-dialog  60 s
   Element Text Should Be  jquery=p.dialog-desc:visible  ${fetchConfirmationText}
   Confirm ok dialog
   Wait test id visible  verdict-link-0
 
+R verdict fetched
+  Verdict fetched  ${R-verdict-result}
+
+YA verdict fetched
+  Verdict fetched  ${YA-verdict-result}
+
+Do fetch verdict
+  [Arguments]  ${fetchConfirmationText}
+  Click enabled by test id  fetch-verdict
+  #Wait for jQuery
+  Verdict fetched  ${fetchConfirmationText}
+
 Fetch verdict
-  Do fetch verdict  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
+  Do fetch verdict  ${R-verdict-result}
 
 Fetch YA verdict
-  Do fetch verdict  Taustajärjestelmästä haettiin 1 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 2 uutta vaatimusta Rakentaminen-välilehdelle.
+  Do fetch verdict  ${YA-verdict-result}
 
 # Verdict is given
 #   [Arguments]  ${kuntalupatunnus}  ${i}
 #   Wait until  Element should be visible  application-verdict-details
 #   Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
 
-# Sign verdict
-#   [Arguments]  ${password}  ${idx}=0
-#   Click Element  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//button[@data-test-id='sign-verdict-button']
-#   Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
-#   Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  ${password}
-#   Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
-#   Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//div[@data-test-id='verdict-signature-listing']
+Sign contract
+  [Arguments]  ${password}
+  Scroll and click test id  sign-contract
+
+  Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
+  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  ${password}
+  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//div[@data-test-id='verdict-signature-listing']
 
 
 Check verdict row
@@ -204,4 +234,3 @@ Delete verdict
   [Arguments]  ${index}=0
   Click enabled by test id  verdict-delete-${index}
   Confirm yes no dialog
-  No such test id  verdict-delete-${index}

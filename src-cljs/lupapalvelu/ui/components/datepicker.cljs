@@ -72,6 +72,7 @@
                                    :first-day        1
                                    :position         "bottom left"
                                    :field            dom-node
+                                   :keyboardInput    false
                                    :i18n             (pikaday-i18n)
                                    :on-select        #(reset! date* %)}
                   opts            (opts-transform (merge default-options

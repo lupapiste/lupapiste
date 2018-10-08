@@ -222,7 +222,8 @@
                 {:on-click click-fn
                  :text-loc :verdict.sign
                  :class    :positive
-                 :icon     :lupicon-circle-pen}))]
+                 :icon     :lupicon-circle-pen
+                 :test-id  :sign-contract}))]
        [:td])]))
 
 (rum/defcs request-signature-row < rum/reactive

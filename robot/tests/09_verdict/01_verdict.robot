@@ -146,25 +146,27 @@ Mikko sees that the application has verdicts
   Open tab  verdict
   Verdict count is  3
 
-# Mikko tries to sign the verdict with wrong password
-#   Click Element  xpath=//div[@data-test-id='given-verdict-id-2-content']//button[@data-test-id='sign-verdict-button']
-#   Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
-#   Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  wrong_password
-#   Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
-#   Wait Until  Element should be visible  xpath=//div[@id='dialog-sign-verdict']//div[@data-test-id='verdict-signature-error-message']
-#   Click Element  xpath=//div[@id='dialog-sign-verdict']//p[@data-test-id='verdict-signature-close-dialog']
+Mikko tries to sign the verdict with wrong password
+  [Tags]  Fail
+  Click Element  xpath=//div[@data-test-id='given-verdict-id-2-content']//button[@data-test-id='sign-verdict-button']
+  Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
+  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  wrong_password
+  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
+  Wait Until  Element should be visible  xpath=//div[@id='dialog-sign-verdict']//div[@data-test-id='verdict-signature-error-message']
+  Click Element  xpath=//div[@id='dialog-sign-verdict']//p[@data-test-id='verdict-signature-close-dialog']
 
-# Mikko signs the verdict
-#   Wait until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-ui']
-#   Element should not be visible  xpath=//div[@data-test-id='given-verdict-id-0-content']//div[@data-test-id='verdict-signature-ui']
-#   Click Element  xpath=//div[@data-test-id='given-verdict-id-2-content']//button[@data-test-id='sign-verdict-button']
-#   Wait Until  Element Should Be Visible  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']
-#   Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  mikko123
-#   Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
-#   Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']
-#   Element should not be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-ui']
-#   Element should Contain  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']  Intonen Mikko
-#   Element should Contain  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']  ${CURRENT_DATE}
+Mikko signs the verdict
+  [Tags]  Fail
+  Wait until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-ui']
+  Element should not be visible  xpath=//div[@data-test-id='given-verdict-id-0-content']//div[@data-test-id='verdict-signature-ui']
+  Click Element  xpath=//div[@data-test-id='given-verdict-id-2-content']//button[@data-test-id='sign-verdict-button']
+  Wait Until  Element Should Be Visible  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']
+  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  mikko123
+  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']
+  Element should not be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-ui']
+  Element should Contain  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']  Intonen Mikko
+  Element should Contain  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']  ${CURRENT_DATE}
 
 *** Keywords ***
 
