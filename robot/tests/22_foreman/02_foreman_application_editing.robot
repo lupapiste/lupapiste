@@ -43,7 +43,7 @@ Foreman uploads attachment
 
 Foreman fills personal information
   Toggle visible  also-fill-attachments
-  Test id text is  also-fill-attachments-label  Kopioi omat liitteet hakemukselle
+  Test id text is  also-fill-attachments-label  Kopioi omat liitteesi hakemukselle
   Toggle selected  also-fill-attachments
   Foreman applies personal information to the foreman application
   Foreman personal information has been applied
