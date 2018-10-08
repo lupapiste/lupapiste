@@ -14,20 +14,6 @@
             [lupapalvelu.property-location :as plocation]
             [lupapalvelu.wfs :as wfs]))
 
-;; Should be in util or sumthin...
-
-(defn uniq-by
-  [by coll]
-  (let [step (fn step [xs prev]
-               (lazy-seq
-                 ((fn [[f :as xs] prev]
-                    (when-let [s (seq xs)]
-                      (if (= (by f) prev)
-                        (recur (rest s) prev)
-                          (cons f (step (rest s) (by f))))))
-                   xs prev)))]
-    (step coll nil)))
-
 (defn- set-kind
   ([k]
     (fn [result] (assoc result :kind k)))
