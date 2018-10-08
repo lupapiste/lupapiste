@@ -39,7 +39,7 @@
     (let [verdicts [{:kuntalupatunnus "LX-0001" :paatokset [{:poytakirjat {:0 {:paatospvm 1482530400000}}}]}
                     {:kuntalupatunnus "LX-0002" :paatokset [{:poytakirjat {:0 {:paatospvm 1512597600000}}}]}
                     {:kuntalupatunnus "LX-0003" :paatokset [{:poytakirjat {:0 {:paatospvm 1510057163483}}}]}]]
-      (get-ark-paatospvm verdicts {:backendId "LX-0002"}) => "2017-12-07T00:00:00+02:00")))
+      (get-ark-paatospvm {:verdicts verdicts} {:backendId "LX-0002"}) => "2017-12-07T00:00:00+02:00")))
 
 
 (def application {:id "LP-000-2018-00001"
@@ -118,6 +118,8 @@
   (sc/check at/Attachment attachment) => nil)
 
 (facts "Archiving metadata"
+  (against-background [(lupapalvelu.foreman/get-linked-foreman-applications-by-id anything) => nil
+                       (lupapalvelu.tiedonohjaus/get-from-toj-api anything anything) => nil])
   (fact "For application with legacy verdict"
     (generate-archive-metadata (assoc application :verdicts [{:kuntalupatunnus "18-0370-R"
                                                               :paatokset [{:paivamaarat {:aloitettava 1632787200000
@@ -161,7 +163,6 @@
                   :suunnittelijat      []
                   :tiedostonimi        "file.pdf"
                   :tila                "valmis"
-                  :tosFunction         {:code "10 03 00 01" :name "Rakennuslupamenettely"}
                   :versio              "0.1"
                   :jattopvm            "2018-09-15T19:52:50+03:00"
                   :closed              "2018-10-08T23:26:10+03:00"}))
@@ -225,7 +226,6 @@
                   :suunnittelijat      []
                   :tiedostonimi        "file.pdf"
                   :tila                "valmis"
-                  :tosFunction         {:code "10 03 00 01" :name "Rakennuslupamenettely"}
                   :versio              "0.1"
                   :jattopvm            "2018-09-15T19:52:50+03:00"
                   :paatoksentekija     "Sonja Sibbo"
@@ -273,7 +273,6 @@
                   :suunnittelijat      []
                   :tiedostonimi        "file.pdf"
                   :tila                "valmis"
-                  :tosFunction         {:code "10 03 00 01" :name "Rakennuslupamenettely"}
                   :versio              "0.1"
                   :jattopvm            "2018-09-15T19:52:50+03:00"
                   :closed              "2018-10-08T23:26:10+03:00"})
