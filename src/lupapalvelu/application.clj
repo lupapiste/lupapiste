@@ -845,17 +845,19 @@
                               (:propertyId application))]
           (bsite/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
 
-(defn schema-datas [{:keys [rakennusvalvontaasianKuvaus]} buildings]
-  (map
-    (fn [{:keys [data]}]
-      (remove empty? (conj [[[:valtakunnallinenNumero] (:valtakunnallinenNumero data)]
-                            [[:kaytto :kayttotarkoitus] (get-in data [:kaytto :kayttotarkoitus])]]
-                           (when-not (or (ss/blank? (:rakennusnro data))
-                                         (= "000" (:rakennusnro data)))
-                             [[:tunnus] (:rakennusnro data)])
-                           (when-not (ss/blank? rakennusvalvontaasianKuvaus)
-                             [[:kuvaus] rakennusvalvontaasianKuvaus]))))
-    buildings))
+(defn schema-datas [{:keys [rakennusvalvontaasianKuvaus] :as app-info} buildings]
+  (if (empty? buildings)
+    (schema-datas app-info {:data []})
+    (map
+      (fn [{:keys [data]}]
+        (remove empty? (conj [[[:valtakunnallinenNumero] (:valtakunnallinenNumero data)]
+                              [[:kaytto :kayttotarkoitus] (get-in data [:kaytto :kayttotarkoitus])]]
+                             (when-not (or (ss/blank? (:rakennusnro data))
+                                           (= "000" (:rakennusnro data)))
+                               [[:tunnus] (:rakennusnro data)])
+                             (when-not (ss/blank? rakennusvalvontaasianKuvaus)
+                               [[:kuvaus] rakennusvalvontaasianKuvaus]))))
+      buildings)))
 
 (defn document-data->op-document [{:keys [schema-version] :as application} data]
   (let [op (make-op :archiving-project (now))
