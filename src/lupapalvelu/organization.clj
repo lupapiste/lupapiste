@@ -274,9 +274,7 @@
                                 :idp-cert sc/Str
                                 :idp-uri sc/Str
                                 :trusted-domains [sc/Str]
-                                (sc/optional-key :role-mapping) {sc/Keyword sc/Str}
-                                (sc/optional-key :sent-tokens) [{:timestamp ssc/Timestamp
-                                                                 :token sc/Str}]}})
+                                (sc/optional-key :role-mapping) {sc/Keyword sc/Str}}})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
