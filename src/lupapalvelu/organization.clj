@@ -276,7 +276,8 @@
                                 :trusted-domains [sc/Str]
                                 (sc/optional-key :role-mapping) {sc/Keyword sc/Str}
                                 (sc/optional-key :sent-tokens) [{:timestamp ssc/Timestamp
-                                                                 :token sc/Str}]}})
+                                                                 :token sc/Str}]}
+   (sc/optional-key :ely-uspa-enabled) sc/Bool})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
@@ -300,7 +301,7 @@
    :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
    :docstore-info :3d-map :default-digitalization-location
    :kopiolaitos-email :kopiolaitos-orderer-address :kopiolaitos-orderer-email :kopiolaitos-orderer-phone
-   :app-required-fields-filling-obligatory :state-change-msg-enabled :ad-login])
+   :app-required-fields-filling-obligatory :state-change-msg-enabled :ad-login :ely-uspa-enabled])
 
 (defn get-organizations
   ([]

@@ -14,6 +14,7 @@
     self.earliestArchivingDate = ko.observable();
     self.backendSystems = ko.observableArray();
     self.availableBackendSystems = ko.observableArray();
+    self.elyUspaEnabled = ko.observable(false);
 
     self.permitTypes = ko.observableArray([]);
     self.municipalities = ko.observableArray([]);
@@ -154,6 +155,7 @@
           self.threeDMapServerParams.server(_.get( result, "data.3d-map.server"));
           self.backendSystems(_.map(util.getIn(result, ["data", "krysp"]), function(v,k) { return {permitType: k, backendSystem: v["backend-system"]}; }));
           self.stateChangeMsgEnabled(result.data["state-change-msg-enabled"]);
+          self.elyUspaEnabled(result.data["ely-uspa-enabled"]);
 
           if (result.data.hasOwnProperty("ad-login")) {
             self.adLoginEnabled(result.data["ad-login"].enabled);
@@ -326,6 +328,10 @@
 
     self.stateChangeMsgEnabled.subscribe(function(value) {
       setBooleanAttribute("state-change-msg-enabled", value);
+    });
+
+    self.elyUspaEnabled.subscribe(function(value) {
+      setBooleanAttribute("ely-uspa-enabled", value);
     });
 
     self.calendarsEnabled.subscribe(function(value) {
