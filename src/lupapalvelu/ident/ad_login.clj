@@ -69,14 +69,20 @@
                    {:user (usr/session-summary user)})]
     response))
 
+(defn make-uuid
+  "For some reason Microsoft AD (at least in Azure) does not accept requests where
+  the ID starts with a number. This function generates uuid/v1 identifiers that start
+  with a letter."
+  []
+  (apply str
+         (rand-nth "abcdefghijklmnopqrstuvwxyz")
+         (rest (str (uuid/v1)))))
+
 (defpage [:get "/api/saml/ad-login/:org-id"] {org-id :org-id}
   (let [{:keys [enabled idp-uri]} (-> org-id org/get-organization :ad-login)
         acs-uri (format "%s/api/saml/ad-login/%s" (env/value :host) org-id)
         saml-req-factory! (saml-sp/create-request-factory
-                            ; #(str (uuid/v4))
-                            ; (:saml-last-id (saml-sp/generate-mutables))
-                            uuid/v1
-                            ; (constantly "d7591060-cae5-11e8-9157-5795e0ed89a3")
+                            make-uuid
                             (constantly 0) ; :saml-id-timeouts
                             false
                             idp-uri
