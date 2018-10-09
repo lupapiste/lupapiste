@@ -86,10 +86,16 @@ Go to give new legacy verdict
 
 Input legacy verdict
   [Arguments]  ${backend-id}  ${giver}  ${term}  ${date}  ${check-buttons}=True
+  Wait test id visible  verdict-code
+  ${select}=  Run keyword and return status  Element should be visible  jquery=select[data-test-id=verdict-code]
+  ${input}=  Run keyword and return status  Element should be visible  jquery=input[data-test-id=verdict-code]
+  ${autocomplete}=  Run keyword and return status  Element should be visible  jquery=div.pate-autocomplete[data-test-id=verdict-code]
   Input text by test id  kuntalupatunnus  ${backend-id}
   Input text by test id  handler  ${giver}
   Input text by test id  verdict-section  22
-  Pate autocomplete select  verdict-code  ${term}
+  Run keyword if  ${select}  Select from test id by text  verdict-code  ${term}
+  Run keyword if  ${autocomplete}  Pate autocomplete select  verdict-code  ${term}
+  Run keyword if  ${input}  Input text by test id  verdict-code  ${term}
   Input text by test id  verdict-text  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris ut leo a ipsum sagittis faucibus. Integer ac velit eget odio tincidunt facilisis. Duis eu purus elementum, efficitur eros non, ultrices lectus. Praesent non ipsum id sapien dictum pharetra. Etiam sit amet sodales urna, ultricies pellentesque metus. Aliquam posuere, eros ac volutpat posuere, velit leo sagittis ipsum, nec interdum risus arcu vitae nunc. Cras blandit dignissim nunc, quis dapibus nisl eleifend vitae. Cras sed ornare augue.
   Run keyword if  ${check-buttons}  Link button disabled  preview-verdict
   Run keyword if  ${check-buttons}  Test id disabled  publish-verdict
@@ -107,7 +113,7 @@ Input legacy contract
 Publish verdict
   Click enabled by test id  publish-verdict
   Confirm yes no dialog
-  Wait test id visible  new-appeal  30 s
+  No such test id  publish-verdict
 
 Give legacy verdict
   [Arguments]  ${backend-id}  ${giver}  ${term}  ${date}

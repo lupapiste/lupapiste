@@ -3,6 +3,7 @@
 Documentation   Authority edits summary targets
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Resource        inspection_summary_resources.robot
 
 
@@ -59,4 +60,3 @@ Remove a target
 
 Add new target
   Add a new target on an existing inspection summary  2  Postilaatikko hankittuna
-

@@ -4,6 +4,7 @@ Documentation   Kopiolaitos interaction
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        printout_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Variables      ../06_attachments/variables.py
 
 

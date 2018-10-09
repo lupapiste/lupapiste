@@ -4,6 +4,7 @@ Documentation   Authority marks sent review as faulty
 Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
 Resource        task_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Variables      ../06_attachments/variables.py
 
 *** Variables ***

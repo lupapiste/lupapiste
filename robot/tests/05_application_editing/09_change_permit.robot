@@ -4,6 +4,7 @@ Documentation   On R type of application, applying a change permit
 Suite Setup     Apply submitted-application fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
 
 *** Test Cases ***
 

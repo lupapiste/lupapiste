@@ -3,6 +3,7 @@
 Documentation  Operation description and document identifiers
 Suite Setup    Apply minimal fixture now
 Resource       ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
 
 *** Variables ***
 

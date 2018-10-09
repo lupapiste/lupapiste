@@ -3,6 +3,8 @@ Documentation  Outside authority should not be able to edit reviews.
 Suite setup    Apply minimal fixture now
 Resource        ../../common_resource.robot
 Resource        task_resource.robot
+Resource        ../39_pate/pate_resource.robot
+
 
 *** Variables ***
 

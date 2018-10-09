@@ -4,6 +4,7 @@ Documentation   After verdicts, certain documents can be created and sent to bac
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/approve_helpers.robot
+Resource        ../39_pate/pate_resource.robot
 Variables       ../../common_variables.py
 
 *** Test Cases ***

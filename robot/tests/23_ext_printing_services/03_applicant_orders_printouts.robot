@@ -3,8 +3,8 @@
 Documentation   Applicant orders printouts of application attachments
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Variables      ../06_attachments/variables.py
-
 
 *** Test Cases ***
 
@@ -27,17 +27,17 @@ Sonja logs in
   Open application  ${appname}  753-416-25-30
 
 Sonja creates verdict
-  Go to give new verdict
-  Title Should Be  ${appname} - Lupapiste
-  Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
+  Go to give new legacy verdict
+  Input legacy verdict  123567890  Kaarina Krysp III  Myönnetty  01.05.2018
 
 Sonja adds attachment to verdict
-  Upload verdict or task attachment  ${TXT_TESTFILE_PATH}  Päätösote  Päätösote  Yleisesti hankkeeseen
-  Wait test id visible  targetted-attachments-table
-  Click enabled by test id  verdict-publish
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait for jQuery
-  Logout
+  Pate upload  0  ${TXT_TESTFILE_PATH}  Päätösote  Päätösote
+  Pate batch ready
+
+Sonja publishes verdict
+  Publish verdict
+  Click back
+  [Teardown]  Logout
 
 Mikko goes to order form
   Mikko logs in
