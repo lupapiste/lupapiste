@@ -411,6 +411,8 @@
   (ensure-index :applications {:state 1})                                     ;; For application search
   (ensure-index :applications {:authority.lastName 1 :authority.firstName 1}) ;; For application search
   (ensure-index :applications {:handlers.userId 1} {:sparse true})            ;; For application search
+  (ensure-index :applications {:creator.firstName 1})                         ;; For application search
+  (ensure-index :applications {:creator.lastName 1})                          ;; For application search
   (ensure-index :applications {:documents.data.henkilotiedot.hetu.value 1} {:sparse true}) ;; For application search
   (ensure-index :applications {:location-wgs84 "2dsphere"})
   (ensure-index :applications {:drawings.geometry-wgs84 "2dsphere"})
