@@ -69,19 +69,6 @@
                    {:user (usr/session-summary user)})]
     response))
 
-(def tila
-  (atom {}))
-
-(defn- testlogin []
-  (let [req (saml-sp/get-idp-redirect (:idp-uri @tila)
-                                      (:saml-request @tila)
-                                      (:relay-state @tila))
-        url (-> req
-                :headers
-                clojure.walk/keywordize-keys
-                :Location)]
-    (clojure.java.browse/browse-url url)))
-
 (defpage [:get "/api/saml/ad-login/:org-id"] {org-id :org-id}
   (let [{:keys [enabled idp-uri]} (-> org-id org/get-organization :ad-login)
         acs-uri (format "%s/api/saml/ad-login/%s" (env/value :host) org-id)
@@ -98,8 +85,7 @@
                             acs-uri)
         saml-request (saml-req-factory!)
         relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec (saml-sp/generate-mutables)) "no-op")
-        full-querystring (str idp-uri "?" (saml-shared/uri-query-str {:SAMLRequest (saml-shared/str->deflate->base64 saml-request) :RelayState relay-state}))
-        _ (swap! tila assoc :saml-request saml-request :relay-state relay-state :full-querystring full-querystring :idp-uri idp-uri)]
+        full-querystring (str idp-uri "?" (saml-shared/uri-query-str {:SAMLRequest (saml-shared/str->deflate->base64 saml-request) :RelayState relay-state}))]
     (if enabled
       (do
         (infof "Sent the following SAML-request: %s" saml-request)
@@ -117,10 +103,6 @@
         saml-resp (saml-sp/xml-string->saml-resp xml-response) ; An OpenSAML object
         saml-info (saml-sp/saml-resp->assertions saml-resp false) ; The response as a Clojure map
         parsed-saml-info (parse-saml-info saml-info) ; The response as a "normal" Clojure map
-        _ (swap! tila assoc :saml-resp saml-resp
-                 :saml-info saml-info
-                 :parsed-saml-info parsed-saml-info
-                 :xml-response xml-response)
         _ (infof "Received XML response for organization %s: %s" org-id xml-response)
         _ (infof "SAML response for organization %s: %s" org-id saml-info)
         _ (infof "Parsed SAML response for organization %s: %s" org-id parsed-saml-info)
@@ -137,7 +119,7 @@
         {:keys [firstName lastName groups] :or {firstName "firstName" lastName "lastName" groups ["authority"]}} attrs
         email (:name attrs)
         _ (infof "firstName: %s, lastName: %s, groups: %s, email: %s" firstName, lastName groups email)
-        ad-role-map (-> org-id (org/get-organization) :ad-login :role-mapping)
+        ad-role-map (-> org-id org/get-organization :ad-login :role-mapping)
         _ (infof "AD-role map: %s" ad-role-map)
         authz (resolve-roles ad-role-map groups)
         _ (infof "Resolved authz: %s" authz)]

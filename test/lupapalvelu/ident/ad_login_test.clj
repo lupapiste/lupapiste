@@ -73,4 +73,3 @@
                                         (into {} (mapcat (partial tree-seq (comp map? val) val))))]
       (not-any? list? (vals parsed-and-flattened-map)) => true
       (every? keyword? (keys parsed-and-flattened-map)) => true)))
-
