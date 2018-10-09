@@ -42,6 +42,8 @@
   (let [search-keys [:_applicantIndex
                      :_id
                      :address
+                     :creator.firstName
+                     :creator.lastName
                      :documents.data.henkilo.henkilotiedot.sukunimi.value
                      :documents.data.yritys.yritysnimi.value
                      :foreman
