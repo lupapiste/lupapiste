@@ -4,6 +4,7 @@ Documentation  Check that attachment information is updated into archival summar
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Resource       attachment_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Variables      variables.py
 
 

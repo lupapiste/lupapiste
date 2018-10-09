@@ -17,6 +17,7 @@
   [{wait?* ::wait?} data* filedatas* close-fn]
   [:div (components/icon-button {:icon     :lupicon-save
                                  :class    :positive
+                                 :test-id  :save-appeal
                                  :text-loc :save
                                  :wait?    wait?*
                                  :enabled? (boolean (and
@@ -33,7 +34,7 @@
                                                                      {:appeal-id        id
                                                                       :type             type
                                                                       :author           (ss/trim author)
-                                                                      ;; Appeal timestamps are in seconds
+                                                                      ;; Appeal timestamps are in seconds.
                                                                       :datestamp        (.unix (js/util.toMoment date "fi"))
                                                                       :text             (ss/trim text)
                                                                       :filedatas        (service/canonize-filedatas @filedatas*)
@@ -43,13 +44,15 @@
    (components/icon-button {:icon     :lupicon-remove
                             :class    :secondary.pate-left-space
                             :text-loc :cancel
+                            :test-id  :cancel-appeal
                             :on-click close-fn})])
 
-(defn file-cell [{:keys [contentType filename fileId size]}]
+(defn- file-cell [postfix {:keys [contentType filename fileId size]}]
   [:div
-   [:a {:href   (js/sprintf "/api/raw/download-attachment?view=true&file-id=%s&id=%s"
-                            fileId @state/application-id)
-        :target "_blank"} filename]
+   [:a (common/add-test-id {:href   (js/sprintf "/api/raw/download-attachment?view=true&file-id=%s&id=%s"
+                                                fileId @state/application-id)
+                            :target "_blank"}
+                           :appeal-file postfix) filename]
    [:span.pate-left-space (if (js/loc.hasTerm contentType)
       (common/loc contentType)
       contentType)]
@@ -64,12 +67,13 @@
                      [:tr.pate-appeal-row
                       {::key  (str "file-" i)
                        :class (common/css-flags :odd (odd? i) :even (even? i))}
-                      [:td (file-cell file)]
+                      [:td (file-cell i file)]
                       [:td [:i.primary.lupicon-remove
-                            {:on-click (fn [_]
-                                         (swap! data* update :deleted-file-ids conj file-id)
-                                         (swap! data* update :files
-                                                (util/fn->> (remove #(= (:fileId %) file-id)))))}]]])
+                            (common/add-test-id {:on-click (fn [_]
+                                                             (swap! data* update :deleted-file-ids conj file-id)
+                                                             (swap! data* update :files
+                                                                    (util/fn->> (remove #(= (:fileId %) file-id)))))}
+                                                :delete-appeal-file i)]]])
                    old-files)]]))
 
 (rum/defc appeal-form < rum/reactive
@@ -90,7 +94,8 @@
                           :required? (not appeal-id)
                           :align     :full}
                          (if appeal-id
-                           [:span.formatted (path/loc :verdict.muutoksenhaku (path/value :type data*))]
+                           [:span.formatted (common/add-test-id {} :appeal-type)
+                            (path/loc :verdict.muutoksenhaku (path/value :type data*))]
                            (components/dropdown (rum/cursor data* :type)
                                                 {:items     (map (fn [t]
                                                                    {:value t
@@ -100,6 +105,7 @@
                                                                          @state/appeals) (conj :appealVerdict)))
                                                  :id        (str uid "-type")
                                                  :sort-by   :text
+                                                 :test-id   :appeal-type
                                                  :required? true})))
         (layout/vertical {:label     :verdict.muutoksenhaku.tekijat
                           :col       2
@@ -109,6 +115,7 @@
                          (components/text-edit (rum/cursor data* :author)
                                                {:immediate? true
                                                 :required?  true
+                                                :test-id    :appeal-authors
                                                 :id         (str uid "-author")}))
         (layout/vertical {:label     :verdict.muutoksenhaku.pvm
                           :col       1
@@ -117,6 +124,7 @@
                           :align     :full}
                          (components/date-edit  (rum/cursor data* :date)
                                                 {:required true
+                                                 :test-id  :appeal-date
                                                  :id       (str uid "-date")}))]
        [:div.row
         (layout/vertical {:col       4
@@ -124,7 +132,8 @@
                           :label     :verdict.muutoksenhaku.extra
                           :label-for (str uid "-text")}
                          (components/textarea-edit (rum/cursor data* :text)
-                                                   {:id (str uid "-text")}))]
+                                                   {:id (str uid "-text")
+                                                    :test-id :appeal-text}))]
        [:div.row
         [:div.col-4
          (old-file-list data*)]]
@@ -174,16 +183,23 @@
                           (list [:tr.pate-appeal-row {:class (common/css-flags :odd (odd? i)
                                                                                :even (even? i))
                                                       :key   (str "appeal-" i)}
-                                 [:td (path/loc :verdict.muutoksenhaku type)]
-                                 [:td.align--half author]
-                                 [:td.align--right date]
-                                 [:td.align--half (map file-cell files)]
+                                 [:td (common/add-test-id {} :appeal i type)
+                                  (path/loc :verdict.muutoksenhaku type)]
+                                 [:td.align--half (common/add-test-id {} :appeal i :authors)
+                                  author]
+                                 [:td.align--right (common/add-test-id {} :appeal i :date) date]
+                                 [:td.align--half (map-indexed (fn [file-i file]
+                                                                 (file-cell [i file-i] file))
+                                                               files)]
                                  [:td.align--right
-                                  [:a.pate-appeal-operation {:on-click toggle-fn}
+                                  [:a.pate-appeal-operation (common/add-test-id {:on-click toggle-fn}
+                                                                                :appeal i
+                                                                                (if can-edit? :edit :show))
                                    (common/loc (if can-edit? :edit :verdict.muutoksenhaku.show-extra))]
                                   (when can-delete?
                                     [:a.pate-appeal-operation
-                                     {:on-click #(service/delete-appeal app-id verdict-id id)}
+                                     (common/add-test-id {:on-click #(service/delete-appeal app-id verdict-id id)}
+                                                         :appeal i :delete)
                                      (common/loc :remove)])]]
                                 (when (rum/react open?*)
                                   [:tr.pate-appeal-row.note-or-form {:key (str "extra-")}
@@ -191,8 +207,10 @@
                                    (if can-edit?
                                      (appeal-form (assoc appeal :date date) toggle-fn)
                                      [:div.pate-appeal-note
+                                      (common/add-test-id {} :appeal i :note)
                                       (if (ss/blank? text)
-                                        [:span.empty (common/loc :verdict.muutoksenhaku.no-extra)]
+                                        [:span.empty (common/add-test-id {} :appeal i :empty)
+                                         (common/loc :verdict.muutoksenhaku.no-extra)]
                                         text)])]]))))
                       appeals)]]])))
 
@@ -204,6 +222,7 @@
       (appeal-form {} toggle-fn)
       (components/icon-button {:icon     :lupicon-circle-plus
                                :class    :positive
+                               :test-id  :new-appeal
                                :text-loc :verdict.muutoksenhaku.kirjaa
                                :on-click toggle-fn}))))
 

@@ -5,6 +5,8 @@ Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ./julkipano_common.robot
+Resource        ../39_pate/pate_resource.robot
+
 
 *** Test Cases ***
 
