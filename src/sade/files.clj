@@ -1,12 +1,12 @@
 (ns sade.files
-  (:require [taoensso.timbre :refer [warnf]]
+  (:require [taoensso.timbre :refer [error warnf]]
             [clojure.java.io :as io]
             [sade.strings :as ss]
-            [me.raynes.fs.compression :as fsc]
             [me.raynes.fs :as fs])
-  (:import (java.io ByteArrayOutputStream)))
+  (:import [java.io InputStream ByteArrayInputStream ByteArrayOutputStream PipedInputStream PipedOutputStream]
+           [java.util.zip ZipOutputStream ZipEntry]))
 
-(defn ^java.io.InputStream temp-file-input-stream
+(defn ^InputStream temp-file-input-stream
   "File given as parameter will be deleted after the returned stream is closed."
   [^java.io.File file]
   {:pre [(instance? java.io.File file)]}
@@ -47,16 +47,40 @@
       (io/copy data out)
       (.toByteArray out))))
 
-(defn- zip-files! [file fpaths]
-  (let [filename-content-pairs (map (juxt fs/base-name slurp-bytes) fpaths)]
-    (with-open [zip (fsc/make-zip-stream filename-content-pairs)]
-      (io/copy zip (fs/file file)))
-    file))
+(defn temp-file-zip
+  "Builds a zip into a temporary file with the given `content-fn`. Returns the file handle."
+  [prefix suffix content-fn]
+  (let [temp-file (temp-file prefix suffix)]
+    (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
+      (content-fn zip)
+      (.finish zip))
+    temp-file))
+
+(defn append-stream!
+  "Appends the input stream `in` to the zip output stream `zip` with
+  the name `file-name`"
+  [zip file-name in]
+  (when in
+    (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
+    (io/copy in zip)
+    (.closeEntry zip))
+  zip)
+
+(defn open-and-append!
+  "Calls and opens `content-thunk` and appends its contents to the
+  `zip` output stream with the name `file-name`"
+  [zip file-name content-thunk]
+  (with-open [in (content-thunk)]
+    (append-stream! zip file-name in))
+  ;; Flush after each attachment to ensure data flows into the output pipe
+  (.flush zip)
+  zip)
 
 (defn build-zip! [fpaths]
-  (let [temp-file (temp-file "build-zip-temp-file" ".zip")]
-    (zip-files! temp-file fpaths)
-    temp-file))
+  (temp-file-zip "build-zip-temp-file" ".zip"
+                 (fn [zip]
+                   (doseq [[file-name file-stream] (map (juxt fs/base-name slurp-bytes) fpaths)]
+                     (append-stream! zip file-name file-stream)))))
 
 (defmacro with-zip-file
   "zips given filepaths to temporary zipfile and binds zip path to 'zip-file' symbol
@@ -67,3 +91,24 @@
      (try
        ~@body
        (finally (io/delete-file temp-file#)))))
+
+(defn piped-zip-input-stream
+  "Builds a zip input stream. The zip is built by running `content-fn`
+  on the corresponding output stream in a future. Returns the input stream."
+  [content-fn]
+  (let [pos (PipedOutputStream.)
+        ;; Use 16 MB pipe buffer
+        is (PipedInputStream. pos 16777216)
+        zip (ZipOutputStream. pos)]
+    (future
+      ;; This runs in a separate thread so that the input stream can be returned immediately
+      (try
+        (content-fn zip)
+        (.finish zip)
+        (.flush zip)
+        (catch Throwable t
+          (error t "Error occurred while generating ZIP output stream"))
+        (finally
+          (.close zip)
+          (.close pos))))
+    is))
