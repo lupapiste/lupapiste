@@ -1,10 +1,9 @@
 (ns lupapalvelu.ident.ad-login
-  (:require [taoensso.timbre :refer [trace debug info warn error fatal]]
+  (:require [taoensso.timbre :refer [debug infof warn error errorf]]
             [clj-uuid :as uuid]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [noir.request :as request]
-            [lupapalvelu.change-email :as change-email]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
@@ -70,37 +69,61 @@
                    {:user (usr/session-summary user)})]
     response))
 
-(def ad-config
-  {:app-name "Lupapiste"
-   :base-uri (env/value :host)})
+(def tila
+  (atom {}))
+
+(defn- testlogin []
+  (let [req (saml-sp/get-idp-redirect (:idp-uri @tila)
+                                      (:saml-request @tila)
+                                      (:relay-state @tila))
+        url (-> req
+                :headers
+                clojure.walk/keywordize-keys
+                :Location)]
+    (clojure.java.browse/browse-url url)))
 
 (defpage [:get "/api/saml/ad-login/:org-id"] {org-id :org-id}
   (let [{:keys [enabled idp-uri]} (-> org-id org/get-organization :ad-login)
         acs-uri (format "%s/api/saml/ad-login/%s" (env/value :host) org-id)
         saml-req-factory! (saml-sp/create-request-factory
+                            ; #(str (uuid/v4))
+                            ; (:saml-last-id (saml-sp/generate-mutables))
                             uuid/v1
+                            ; (constantly "d7591060-cae5-11e8-9157-5795e0ed89a3")
                             (constantly 0) ; :saml-id-timeouts
                             false
                             idp-uri
                             saml-routes/saml-format
-                            (:app-name ad-config)
+                            "Lupapiste"
                             acs-uri)
-        saml-request (saml-req-factory!)]
-    (when enabled
-      (saml-sp/get-idp-redirect idp-uri
-                                saml-request
-                                (saml-routes/create-hmac-relay-state (:secret-key-spec (saml-sp/generate-mutables)) "no-op")))))
+        saml-request (saml-req-factory!)
+        relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec (saml-sp/generate-mutables)) "no-op")
+        full-querystring (str idp-uri "?" (saml-shared/uri-query-str {:SAMLRequest (saml-shared/str->deflate->base64 saml-request) :RelayState relay-state}))
+        _ (swap! tila assoc :saml-request saml-request :relay-state relay-state :full-querystring full-querystring :idp-uri idp-uri)]
+    (if enabled
+      (do
+        (infof "Sent the following SAML-request: %s" saml-request)
+        (infof "Complete request string: %s" full-querystring)
+        (saml-sp/get-idp-redirect idp-uri saml-request relay-state))
+      (do
+        (errorf "Organization %s does not have valid AD-login settings or has disabled AD-login" org-id)
+        (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host)))))))
+
 
 (defpage [:post "/api/saml/ad-login/:org-id"] {org-id :org-id}
   (let [idp-cert (-> org-id org/get-organization :ad-login :idp-cert parse-certificate)
         req (request/ring-request)
-        xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse]))
-        saml-resp (saml-sp/xml-string->saml-resp xml-response)
-        saml-info (saml-sp/saml-resp->assertions saml-resp false)
-        parsed-saml-info (parse-saml-info saml-info)
-        _ (info (str "Received XML response: " xml-response))
-        _ (info (str "SAML response: " saml-info))
-        _ (info (str "Parsed SAML response: " parsed-saml-info))
+        xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse])) ; The raw XML string
+        saml-resp (saml-sp/xml-string->saml-resp xml-response) ; An OpenSAML object
+        saml-info (saml-sp/saml-resp->assertions saml-resp false) ; The response as a Clojure map
+        parsed-saml-info (parse-saml-info saml-info) ; The response as a "normal" Clojure map
+        _ (swap! tila assoc :saml-resp saml-resp
+                 :saml-info saml-info
+                 :parsed-saml-info parsed-saml-info
+                 :xml-response xml-response)
+        _ (infof "Received XML response for organization %s: %s" org-id xml-response)
+        _ (infof "SAML response for organization %s: %s" org-id saml-info)
+        _ (infof "Parsed SAML response for organization %s: %s" org-id parsed-saml-info)
         valid-signature? (if-not idp-cert
                            false
                            (try
@@ -109,15 +132,15 @@
                                (do
                                  (error (.getMessage e))
                                  false))))
-        _ (info (str "SAML message signature was " (if valid-signature? "valid" "invalid")))
+        _ (infof "SAML message signature was %s" (if valid-signature? "valid" "invalid"))
         attrs (get-in parsed-saml-info [:assertions :attrs])
         {:keys [firstName lastName groups] :or {firstName "firstName" lastName "lastName" groups ["authority"]}} attrs
         email (:name attrs)
-        _ (info (format "firstName: %s, lastName: %s, groups: %s, email: %s" firstName, lastName groups email))
+        _ (infof "firstName: %s, lastName: %s, groups: %s, email: %s" firstName, lastName groups email)
         ad-role-map (-> org-id (org/get-organization) :ad-login :role-mapping)
-        _ (info (str "AD-role map: " ad-role-map))
+        _ (infof "AD-role map: %s" ad-role-map)
         authz (resolve-roles ad-role-map groups)
-        _ (info (str "Resolved authz: " authz))]
+        _ (infof "Resolved authz: %s" authz)]
     (cond
       (and valid-signature? (seq authz)) (validated-login req org-id firstName lastName email authz)
       valid-signature? (do
