@@ -3,6 +3,8 @@
 Documentation  Authority admin search applications with event filter
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
+
 Suite Setup  Apply minimal fixture now
 
 *** Test Cases ***
@@ -32,7 +34,7 @@ Olli-ya prepares warranty application
   Click enabled by test id  approve-application-summaryTab
   Confirm notification dialog  # taustajärjestelmäsiirto ei ole käytettävissä -dialogi
   Open tab  verdict
-  Submit empty verdict  verdictGiven  1
+  Submit empty verdict  verdictGiven
 
   Open tab  tasks
   Sets date via modal datepicker dialog  application-inform-construction-started-btn  01.01.2018

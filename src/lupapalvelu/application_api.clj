@@ -611,8 +611,7 @@
                                  :title      (ss/trim address)
                                  :modified   created}
                            $unset {:propertyIdSource true}})
-      (try (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
-           (catch Exception _ (warn "KTJ data was not updated after location changed")))
+      (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
       (when (and (permit/archiving-project? application) (true? refreshBuildings))
         (app/fetch-buildings command propertyId refreshBuildings)))
     (fail :error.property-in-other-muinicipality)))

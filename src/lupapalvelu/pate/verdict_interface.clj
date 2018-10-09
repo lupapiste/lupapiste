@@ -8,10 +8,38 @@
             [sade.strings :as ss]
             [sade.util :as util]))
 
+(defn- legacy-date [verdicts key]
+  (->> verdicts
+       (map (fn [{:keys [paatokset]}]
+              (->> (map #(get-in % [:paivamaarat (keyword key)]) paatokset)
+                   (remove nil?)
+                   (first))))
+       (flatten)
+       (remove nil?)
+       (sort)
+       (last)))
+
+(defn- legacy-data [verdicts key]
+  (->> verdicts
+       (map (fn [{:keys [paatokset]}]
+              (map (fn [pt] (map key (:poytakirjat pt))) paatokset)))
+       (flatten)
+       (remove nil?)
+       (first)))
+
 (defn all-verdicts
   "All verdicts regardless of state or origin."
   [{:keys [verdicts pate-verdicts]}]
   (concat verdicts pate-verdicts))
+
+(defn verdicts-by-backend-id
+  "All verdicts filtered by backend Id."
+  [{:keys [verdicts pate-verdicts]} backendId]
+  (or
+    (some->> verdicts
+             (filter #(= (:kuntalupatunnus %) backendId)))
+    (some->> pate-verdicts
+             (filter #(= (get-in % [:data :kuntalupatunnus]) backendId)))))
 
 (defn published-kuntalupatunnus
   "Search kuntalupatunnus from backing-system and published legacy
@@ -25,3 +53,52 @@
                (map (util/fn-> :data :kuntalupatunnus metadata/unwrap))
                (remove ss/blank?)
                first)))
+
+(defn kuntalupatunnukset
+  "Search all backendIds from legacy verdicts and pate verdicts."
+  [{:keys [verdicts pate-verdicts]}]
+  (or (some->> verdicts
+               (map :kuntalupatunnus)
+               (remove nil?))
+      (some->> pate-verdicts
+               (map (util/fn-> :data :kuntalupatunnus metadata/unwrap))
+               (remove ss/blank?))))
+
+(defn verdict-date
+  "Verdict date from latest verdict"
+  ([application]
+    (verdict-date application nil))
+  ([{:keys [verdicts] :as application} post-process]
+   (let [legacy-ts    (some->> verdicts
+                               (map (fn [{:keys [paatokset]}]
+                                      (map (fn [pt] (map (fn [pk] (get (second pk) :paatospvm (get pk :paatospvm))) (:poytakirjat pt))) paatokset)))
+                               (flatten)
+                               (remove nil?)
+                               (sort)
+                               (last))
+         pate-verdict (verdict/latest-published-pate-verdict {:application application})
+         pate-ts      (or (get-in pate-verdict [:data :verdict-date])
+                          (get-in pate-verdict [:data :anto]))
+         ts           (or legacy-ts pate-ts)]
+     (if post-process
+       (post-process ts)
+       ts))))
+
+(defn handler
+  "Get verdict handler."
+  [{:keys [verdicts pate-verdicts] :as application}]
+  (if (some? pate-verdicts)
+    (get-in (verdict/latest-published-pate-verdict {:application application}) [:data :handler])
+    (legacy-data verdicts :paatoksentekija)))
+
+(defn lainvoimainen
+  "Get lainvoimainen date. Takes optional date formatter as parameter."
+  ([application]
+    (lainvoimainen application nil))
+  ([{:keys [verdicts pate-verdicts] :as application} post-process]
+   (let [ts (if (some? pate-verdicts)
+                 (get-in (verdict/latest-published-pate-verdict {:application application}) [:data :lainvoimainen])
+                 (legacy-date verdicts :lainvoimainen))]
+     (if post-process
+       (post-process ts)
+       ts))))

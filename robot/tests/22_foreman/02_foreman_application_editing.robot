@@ -3,6 +3,7 @@
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/approve_helpers.robot
 Resource        keywords.robot
+Resource        ../39_pate/pate_resource.robot
 Variables      ../06_attachments/variables.py
 Suite Setup     Initialize foreman
 
@@ -43,7 +44,7 @@ Foreman uploads attachment
 
 Foreman fills personal information
   Toggle visible  also-fill-attachments
-  Test id text is  also-fill-attachments-label  Kopioi omat liitteet hakemukselle
+  Test id text is  also-fill-attachments-label  Kopioi omat liitteesi hakemukselle
   Toggle selected  also-fill-attachments
   Foreman applies personal information to the foreman application
   Foreman personal information has been applied
@@ -133,7 +134,7 @@ Foreman could add attachment to project application
   Element should be visible by test id  add-attachments-label
   Logout
 
-Sonja logs in and gets verdict for the first foreman application
+Sonja logs in and gives verdict for the first foreman application
   Sonja logs in
   Verdict for foreman application  0
   Logout
@@ -212,14 +213,19 @@ Change subtype back to foreman application
   Positive indicator should be visible
 
 Verdict could be not given in complementNeeded (LPK-2559)
-  Open tab  verdict
-  Wait Until  Element should not be visible  //div[@id="application-verdict-tab"]//button[@data-test-id="give-verdict"]
+  Go to give new legacy verdict
+  Input legacy verdict  foo  Hello  Myönnetty  25.9.2018  False
+  Test id disabled  publish-verdict
+  Test id enabled  preview-verdict
+  Click back
+  Delete verdict  0
 
 Re-send and give verdict
   Open tab  requiredFieldSummary
   Click enabled by test id  approve-application-summaryTab
   Wait until  Application state should be  sent
-  Submit empty verdict  foremanVerdictGiven
+  Give legacy verdict  12345  Sonja Sibbo  Myönnetty  24.9.2018
+  Click back
   Application state should be  foremanVerdictGiven
   [Teardown]  Logout
 
@@ -244,11 +250,7 @@ Deleting the verdict sets application back to previous state
   Open foreman application  1
   Open tab  verdict
   Kill dev-box
-  Wait Until  Element should be visible  //div[@id="application-verdict-tab"]//*[@data-test-id="delete-verdict-from-listing"]
-  # The click below fails if the window has a certain width and the conversation button obscures the delete icon
-  Click element  xpath=//div[@id="application-verdict-tab"]//*[@data-test-id="delete-verdict-from-listing"]
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait Until  Element should not be visible  //div[@id="application-verdict-tab"]//*[@data-test-id="delete-verdict-from-listing"]
+  Delete verdict  0
 
   Application state should be  sent
 
