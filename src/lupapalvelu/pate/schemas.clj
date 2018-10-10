@@ -110,8 +110,8 @@
    :tag      sc/Str
    :phrase   sc/Str})
 
-(defschema CustomPhraseCategory
-  PateVerdictReq)
+(defschema CustomPhraseCategoryMap
+  {ssc/ObjectIdKeyword PateTerm})
 
 (defschema UserRef
   "We have to define our own summary, since requiring the
