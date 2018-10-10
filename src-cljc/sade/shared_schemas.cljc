@@ -13,6 +13,11 @@
 (def ObjectIdStr
   (sc/pred (partial matches? object-id-pattern) "ObjectId hex string"))
 
+(def ObjectIdKeyword
+  (sc/pred #(and (keyword? %)
+                 (matches? object-id-pattern (name %)))
+           "ObjectId hex keyword"))
+
 (def uuid-pattern #"^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$")
 
 (def UUIDStr
