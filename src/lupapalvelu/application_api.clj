@@ -903,7 +903,8 @@
   {:parameters ["id"]
    :permissions [{:required [:application/create-continuation-period-permit]}]
    :states     #{:verdictGiven :constructionStarted}
-   :pre-checks [validate-not-jatkolupa-app]}
+   :pre-checks [validate-not-jatkolupa-app
+                (partial permit/valid-permit-types {:R :all :YA :all})]}
   [{:keys [application] :as command}]
 
   (let [permit-type      (:permitType application)
