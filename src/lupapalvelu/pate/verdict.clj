@@ -1156,15 +1156,25 @@
   [{:keys [command application]}]
   (let [state (sm/verdict-given-state application)]
     ;; History, modified and document updates not needed in the application.
-    {:application (assoc application :state state)
-     :updates     (util/deep-merge (app-state/state-transition-update
-                                    state
-                                    (:created command)
-                                    application
-                                    (:user command))
-                                   (:mongo-updates (not-empty (transformations/get-state-transition-updates
-                                                               (assoc command :application application)
-                                                               state))))}))
+    (merge {:application (assoc application :state state)
+            :updates     (util/deep-merge (app-state/state-transition-update
+                                           state
+                                           (:created command)
+                                           application
+                                           (:user command)))}
+           (let [transition-updates (transformations/get-state-transition-updates
+                                     (assoc command :application application)
+                                     state)]
+             (when (and (not-empty (:mongo-query transition-updates))
+                        (not-empty (:mongo-updates transition-updates)))
+               {:commit-fn (fn [_ & [dry-run?]]
+                             ;; TODO calculate transition updates in the function to avoid invalid indexing in `get-state-transition-updates`
+                             ;; dry-run? flag is used for unit tests
+                             (when-not dry-run?
+                               (mongo/update :applications
+                                             (:mongo-query transition-updates)
+                                             (:mongo-updates transition-updates)))
+                             transition-updates)})))))
 
 (defn finalize--buildings-and-tasks
   [{:keys [command application verdict]}]
