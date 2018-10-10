@@ -42,6 +42,13 @@
 
 ;;; TODO: Sijoituslupa
 
+(defstate ^:private current-jwt
+  :start (atom (env/value :allu :jwt)))
+
+(defschema LoginCredentials
+  {:password sc/Str
+   :username sc/Str})
+
 ;;;; Initial request construction
 ;;;; ===================================================================================================================
 
@@ -71,6 +78,12 @@
 (defn- route-match->request-method [route-match]
   (some #{:get :put :post :delete} (keys (:data route-match))))
 
+(defn- login-request [username password]
+  (let [route-match (reitit/match-by-name allu-router [:login])]
+    {:uri            (:path route-match)
+     :request-method (route-match->request-method route-match)
+     :body           {:username username, :password password}}))
+
 (defn- application-cancel-request [{:keys [application] :as command}]
   (let [allu-id (get-in application [:integrationKeys :ALLU :id])
         _ (assert allu-id (str (:id application) " does not contain an ALLU id"))
@@ -79,14 +92,24 @@
      :uri            (:path route-match)
      :request-method (route-match->request-method route-match)}))
 
-(defn- placement-creation-request [{:keys [application] :as command}]
+(defmulti application-creation-request (fn [{{:keys [permitSubtype]} :application}] permitSubtype))
+
+(defmethod application-creation-request :default [{{:keys [permitSubtype]} :application}]
+  (fail! :error.allu.unsupportedPermitSubtype {:permitSubtype permitSubtype}))
+
+(defmethod application-creation-request "sijoitussopimus" [{:keys [application] :as command}]
   (let [route-match (reitit/match-by-name allu-router [:placementcontracts :create])]
     {::command       (minimize-command command)
      :uri            (:path route-match)
      :request-method (route-match->request-method route-match)
      :body           (application->allu-placement-contract true application)}))
 
-(defn- placement-update-request [pending-on-client {:keys [application] :as command}]
+(defmulti application-update-request (fn [_ {{:keys [permitSubtype]} :application}] permitSubtype))
+
+(defmethod application-update-request :default [{{:keys [permitSubtype]} :application}]
+  (fail! :error.allu.unsupportedPermitSubtype {:permitSubtype permitSubtype}))
+
+(defmethod application-update-request "sijoitussopimus" [pending-on-client {:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
         _ (assert allu-id (str (:id application) " does not contain an ALLU id"))
         params {:path {:id allu-id}
@@ -187,7 +210,7 @@
 (def- http-method-fns {:get http/get, :post http/post, :put http/put})
 
 (defn- perform-http-request! [base-url {:keys [request-method uri] :as request}]
-  ((request-method http-method-fns) (str base-url uri) request))
+  ((request-method http-method-fns) (str base-url uri) (assoc request :throw-exceptions false)))
 
 (defn- make-remote-handler [allu-url]
   (fn [request]
@@ -206,38 +229,50 @@
                                                                    (subs allu-id 7 12))
                                      :data.response.status {$in [200 201]}}))
 
+(defstate ^:private mock-logged-in?
+  :start (atom false))
+
 ;; This approximates the ALLU state with the `imessages` data:
 (defn- imessages-mock-handler [request]
   (let [route-match (reitit-ring/get-match request)]
-    (match (-> route-match :data :name)
-      [:applications :cancel] (let [id (-> route-match :path-params :id)]
-                                (if (creation-response-ok? id)
-                                  {:status 200, :body ""}
-                                  {:status 404, :body (str "Not Found: " id)}))
+    (if (and (not @mock-logged-in?) (not= (-> route-match :data :name) [:login]))
+      {:status 401 :body "Unauthorized"}
+      (match (-> route-match :data :name)
+        [:login] (let [{:keys [username password]} (json/decode (:body request) true)]
+                   (if (and (= username (env/value :allu :username))
+                            (= password (env/value :allu :password)))
+                     (do (reset! mock-logged-in? true)
+                         {:status 200, :body (json/encode password)})
+                     {:status 404, :body "Wrong username and/or password"}))
 
-      [:placementcontracts :create] (let [body (json/decode (:body request) true)]
-                                      (if-let [validation-error (sc/check PlacementContract body)]
-                                        {:status 400, :body validation-error}
-                                        {:status 200
-                                         :body   (.replace (subs (:identificationNumber body) 3) "-" "")}))
+        [:applications :cancel] (let [id (-> route-match :path-params :id)]
+                                  (if (creation-response-ok? id)
+                                    {:status 200, :body ""}
+                                    {:status 404, :body (str "Not Found: " id)}))
 
-      [:placementcontracts :update] (let [id (-> route-match :path-params :id)
-                                          body (json/decode (:body request) true)]
-                                      (if-let [validation-error (sc/check PlacementContract body)]
-                                        {:status 400, :body validation-error}
-                                        (if (creation-response-ok? id)
-                                          {:status 200, :body id}
-                                          {:status 404, :body (str "Not Found: " id)})))
+        [:placementcontracts :create] (let [body (json/decode (:body request) true)]
+                                        (if-let [validation-error (sc/check PlacementContract body)]
+                                          {:status 400, :body validation-error}
+                                          {:status 200
+                                           :body   (.replace (subs (:identificationNumber body) 3) "-" "")}))
 
-      [:placementcontracts :contract (:or :proposal :final)] (let [id (-> route-match :path-params :id)]
-                                                               (if (creation-response-ok? id)
-                                                                 {:status 200, :body " "}
-                                                                 {:status 404, :body (str "Not Found: " id)}))
+        [:placementcontracts :update] (let [id (-> route-match :path-params :id)
+                                            body (json/decode (:body request) true)]
+                                        (if-let [validation-error (sc/check PlacementContract body)]
+                                          {:status 400, :body validation-error}
+                                          (if (creation-response-ok? id)
+                                            {:status 200, :body id}
+                                            {:status 404, :body (str "Not Found: " id)})))
 
-      [:attachments :create] (let [id (-> route-match :path-params :id)]
-                               (if (creation-response-ok? id)
-                                 {:status 200, :body ""}
-                                 {:status 404, :body (str "Not Found: " id)})))))
+        [:placementcontracts :contract (:or :proposal :final)] (let [id (-> route-match :path-params :id)]
+                                                                 (if (creation-response-ok? id)
+                                                                   {:status 200, :body " "}
+                                                                   {:status 404, :body (str "Not Found: " id)}))
+
+        [:attachments :create] (let [id (-> route-match :path-params :id)]
+                                 (if (creation-response-ok? id)
+                                   {:status 200, :body ""}
+                                   {:status 404, :body (str "Not Found: " id)}))))))
 
 ;;;; Custom middlewares
 ;;;; ===================================================================================================================
@@ -257,8 +292,8 @@
                                      (assoc request :multipart-params (reduce params+part {} (:multipart request))))
     :else request))
 
-(defn- jwt-authorize [request jwt]
-  (assoc-in request [:headers "authorization"] (str "Bearer " jwt)))
+(defn- jwt-authorize [request]
+  (assoc-in request [:headers "authorization"] (str "Bearer " @current-jwt)))
 
 (defn- content->json [request]
   (cond
@@ -316,14 +351,26 @@
   "A hook for testing error cases. Calls `sade.core/fail!` by default."
   (fn [text info-map] (fail! text info-map)))
 
+(declare allu-request-handler)
+
+(defn- login! []
+  (allu-request-handler (login-request (env/value :allu :username) (env/value :allu :password))))
+
 ;; TODO: Link the files of [:placementcontracts :contract *] to the application appropriately.
 (defn- handle-response [disable-io-middlewares?]
   (fn [handler]
     (fn [{{{app-id :id} :application} ::command :as request}]
-      (let [route-name (-> request reitit-ring/get-match :data :name)]
-        (match (handler request)
-          ({:status (:or 200 201), :body body} :as response)
+      (let [route-name (-> request reitit-ring/get-match :data :name)
+            {:keys [status] :as response} (handler request)]
+        (when (and (= status 401)
+                   (not= route-name [:login]))              ; guard against runaway recursion
+          (login!))
+
+        (match response
+          {:status (:or 200 201), :body body}
           (do (info "ALLU operation" (route-name->string route-name) "succeeded")
+              (when (= route-name [:login])
+                (reset! current-jwt (json/decode body)))    ; for some reason body is a JSON-encoded string
               (when (and (not disable-io-middlewares?) (= route-name [:placementcontracts :create]))
                 (application/set-integration-key app-id :ALLU {:id body}))
               response)
@@ -341,50 +388,58 @@
   ([handler] (routes (env/dev-mode?) handler))
   ([disable-io-middlewares? handler]
    (let [file-middleware (if disable-io-middlewares? [] [delimit-file-contents!])]
-     ["/" {:middleware (-> [(preprocessor->middleware body&multipart-as-params)
-                            multipart-middleware
-                            reitit.ring.coercion/coerce-request-middleware
-                            (handle-response disable-io-middlewares?)]
-                           (into (if disable-io-middlewares? [] [save-messages!]))
-                           (conj (preprocessor->middleware (fn-> content->json
-                                                                 (jwt-authorize (env/value :allu :jwt))))))
-           :coercion   reitit.coercion.schema/coercion}
-      ["applications"
-       ["/:id/cancelled" {:name       [:applications :cancel]
-                          :parameters {:path {:id ssc/NatString}}
-                          :put        {:handler handler}}]
-
-       ["/:id/attachments" {:name       [:attachments :create]
-                            :parameters {:path      {:id ssc/NatString}
-                                         :multipart {:metadata FileMetadata
-                                                     :file     sssc/FileId}}
-                            :middleware file-middleware
-                            :post       {:handler handler}}]]
+     [["/login" {:middleware [(preprocessor->middleware body&multipart-as-params)
+                              reitit.ring.coercion/coerce-request-middleware
+                              (handle-response disable-io-middlewares?)
+                              (preprocessor->middleware content->json)]
+                 :name       [:login]
+                 :parameters {:body LoginCredentials}
+                 :post       {:handler handler}}]
 
 
-      ["placementcontracts"
-       ["" {:name       [:placementcontracts :create]
-            :parameters {:body PlacementContract}
-            :post       {:handler handler}}]
+      ["/" {:middleware (-> [(preprocessor->middleware body&multipart-as-params)
+                             multipart-middleware
+                             reitit.ring.coercion/coerce-request-middleware
+                             (handle-response disable-io-middlewares?)]
+                            (into (if disable-io-middlewares? [] [save-messages!]))
+                            (conj (preprocessor->middleware (fn-> content->json jwt-authorize))))
+            :coercion   reitit.coercion.schema/coercion}
+       ["applications"
+        ["/:id/cancelled" {:name       [:applications :cancel]
+                           :parameters {:path {:id ssc/NatString}}
+                           :put        {:handler handler}}]
 
-       ["/:id" {:parameters {:path {:id ssc/NatString}}}
-        ["" {:name       [:placementcontracts :update]
+        ["/:id/attachments" {:name       [:attachments :create]
+                             :parameters {:path      {:id ssc/NatString}
+                                          :multipart {:metadata FileMetadata
+                                                      :file     sssc/FileId}}
+                             :middleware file-middleware
+                             :post       {:handler handler}}]]
+
+
+       ["placementcontracts"
+        ["" {:name       [:placementcontracts :create]
              :parameters {:body PlacementContract}
-             :put        {:handler handler}}]
+             :post       {:handler handler}}]
 
-        ["/contract"
-         ["/proposal" {:name       [:placementcontracts :contract :proposal]
-                       :middleware file-middleware
-                       :get        {:handler handler}}]
+        ["/:id" {:parameters {:path {:id ssc/NatString}}}
+         ["" {:name       [:placementcontracts :update]
+              :parameters {:body PlacementContract}
+              :put        {:handler handler}}]
 
-         ["/approved" {:name       [:placementcontracts :contract :approved]
-                       :parameters {:body {:signer      NonBlankStr
-                                           :signingTime (date-string :date-time-no-ms)}}
-                       :post       {:handler handler}}]
+         ["/contract"
+          ["/proposal" {:name       [:placementcontracts :contract :proposal]
+                        :middleware file-middleware
+                        :get        {:handler handler}}]
 
-         ["/final" {:name       [:placementcontracts :contract :final]
-                    :middleware file-middleware
-                    :get        {:handler handler}}]]]]])))
+          ["/approved" {:name       [:placementcontracts :contract :approved]
+                        :parameters {:body {:signer      NonBlankStr
+                                            :signingTime (date-string :date-time-no-ms)}}
+                        :post       {:handler handler}}]
+
+          ["/final" {:name       [:placementcontracts :contract :final]
+                     :middleware file-middleware
+                     :get        {:handler handler}}]]]]]])))
 
 (def- allu-router (reitit-ring/router (routes false (innermost-handler))))
 
@@ -437,48 +492,27 @@
   [organization-id permit-type]
   (allu-application/allu-application? organization-id permit-type))
 
-(defn- create-placement-contract!
-  "Create placement contract in ALLU."
-  [command]
-  (send-allu-request! (placement-creation-request command)))
-
 (declare update-application!)
 
-;; TODO: Non-placement-contract ALLU applications
 (defn submit-application!
   "Submit application to ALLU and save the returned id as application.integrationKeys.ALLU.id. If this is a resubmit
   (after return-to-draft) just does `update-application!` instead."
-  [{{:keys [permitSubtype] :as application} :application :as command}]
-  {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
+  [{:keys [application] :as command}]
   (if-not (get-in application [:integrationKeys :ALLU :id])
-    (create-placement-contract! command)
+    (send-allu-request! (application-creation-request command))
     (update-application! command)))
 
 ;; TODO: Will error if user changes the application to contain invalid data, is that what we want?
-(defn- update-placement-contract!
-  "Update placement contract in ALLU (if it had been sent there)."
-  [{:keys [application] :as command}]
-  (when (application/submitted? application)
-    (send-allu-request! (placement-update-request true command))))
-
-;; TODO: Non-placement-contract ALLU applications
 (defn update-application!
   "Update application in ALLU (if it had been sent there)."
-  [{{:keys [permitSubtype]} :application :as command}]
-  {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
-  (update-placement-contract! command))
+  [{:keys [application] :as command}]
+  (when (application/submitted? application)
+    (send-allu-request! (application-update-request true command))))
 
-(defn- lock-placement-contract!
-  "Lock placement contract in ALLU for verdict evaluation."
-  [command]
-  (send-allu-request! (placement-update-request false command)))
-
-;; TODO: Non-placement-contract ALLU applications
 (defn lock-application!
   "Lock application in ALLU for verdict evaluation."
-  [{{:keys [permitSubtype]} :application :as command}]
-  {:pre [(or (= permitSubtype "sijoituslupa") (= permitSubtype "sijoitussopimus"))]}
-  (lock-placement-contract! command))
+  [command]
+  (send-allu-request! (application-update-request false command)))
 
 (defn cancel-application!
   "Cancel application in ALLU (if it had been sent there)."
@@ -493,7 +527,7 @@
   (-> attachment :latestVersion :fileId))
 
 (defn send-attachments!
-  "Send the specified `attachments` of `(:application command)` to ALLU
+  "Send the specified `attachments` of `(:application command)` to ALLU.
   Returns a seq of attachment file IDs that were sent."
   [command attachments]
   (doall (for [attachment attachments]
@@ -517,7 +551,7 @@
   (send-allu-request! (final-contract-request command)))
 
 (defn load-contract-document!
-  "Load placement contract proposal or final from ALLU. Returns fileId of the pdf or nil. Bypasses JMS."
+  "Load placement contract proposal or final from ALLU. Returns SavedFileData of the pdf or nil. Bypasses JMS."
   [{:keys [application] :as command}]
   (try+
     (-> (allu-request-handler (case (:state application)

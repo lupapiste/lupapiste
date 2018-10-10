@@ -741,7 +741,7 @@
                               results)
         ;; sort the results
         same-property-id-fn #(= propertyId (:propertyId %))
-        with-same-property-id (vec (filter same-property-id-fn enriched-results))
+        with-same-property-id (filterv same-property-id-fn enriched-results)
         without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
         organized-results (flatten (conj with-same-property-id without-same-property-id))
         final-results (map #(select-keys % [:id :address :propertyId :primaryOperation]) organized-results)]
@@ -1003,7 +1003,7 @@
                                             (not (ss/blank? backend-id-url)))
                                      [backend-id-url vendor-backend-id]
                                      [lp-id-url id])
-        redirect-url               (apply str url-parts)]
+        redirect-url               (ss/join url-parts)]
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
 

@@ -3,6 +3,7 @@
   (:require [clojure.core.match :refer [match]]
             [clojure.walk :refer [postwalk]]
             [cheshire.core :as json]
+            [mount.core :as mount]
             [reitit.ring :as reitit-ring]
             [schema.core :as sc :refer [defschema]]
             [sade.core :refer [def- now]]
@@ -30,18 +31,13 @@
             [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract FileMetadata]]
             [lupapalvelu.backing-system.allu.conversion :refer [lang]]))
 
-(testable-privates lupapalvelu.backing-system.allu.core
-                   placement-creation-request
-                   request-integration-message response-integration-message
-                   interface-path->string allu-fail!)
-
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
 
 (defschema ValidPlacementApplication
   {:id               ApplicationId
    :state            (apply sc/enum (map name states/all-states))
-   :permitSubtype    (sc/enum "sijoituslupa" "sijoitussopimus")
+   :permitSubtype    (sc/eq "sijoitussopimus")
    :organization     NonBlankStr
    :propertyId       Kiinteistotunnus
    :municipality     (apply sc/enum municipality-codes)
@@ -58,6 +54,7 @@
 (def- invalid-placement-application? (comp not nil? (partial sc/check ValidPlacementApplication)))
 
 (def- allu-id "23")
+(def- mock-jwt "foo.bar.baz")
 
 (def- ^:dynamic sent-attachment
   "A side channel for providing original attachment data to `test-handler`."
@@ -80,58 +77,84 @@
                                                                                    "-Infinity" ##-Inf
                                                                                    v))))
                                                  (vector? body) (update-in body [0 :content] json/decode true)))))
-              headers {"authorization" (str "Bearer " (env/value :allu :jwt))}]
-          (match interface-path
-            [:applications :cancel] (facts "applications.cancel request"
-                                      http-request
-                                      => (contains {:uri            (str "/applications/" allu-id "/cancelled")
-                                                    :request-method :put
-                                                    :headers        headers
-                                                    :body           nil}))
-
-            [:placementcontracts :create] (facts "placementcontracts.create request"
-                                            (dissoc http-request :body)
-                                            => (contains {:uri            "/placementcontracts"
-                                                          :request-method :post
+              headers {"authorization" (str "Bearer " mock-jwt)}]
+          (if (= interface-path [:login])
+            (do (facts "login request"
+                  http-request => (contains {:uri            "/login"
+                                             :request-method :post
+                                             :content-type   :json
+                                             :body           {:username (env/value :allu :username)
+                                                              :password (env/value :allu :password)}}))
+                {:status 200 :body (json/encode mock-jwt)})
+            (do (match interface-path
+                  [:applications :cancel] (facts "applications.cancel request"
+                                            http-request
+                                            => (contains {:uri            (str "/applications/" allu-id "/cancelled")
+                                                          :request-method :put
                                                           :headers        headers
-                                                          :content-type   :json})
-                                            (sc/check PlacementContract (:body http-request)) => nil)
+                                                          :body           nil}))
 
-            [:placementcontracts :update]
-            (facts "placementcontracts.update request"
-              (dissoc http-request :body) => (contains {:uri            (str "/placementcontracts/" allu-id)
-                                                        :request-method :put
-                                                        :headers        headers
-                                                        :content-type   :json})
-              (sc/check PlacementContract (:body http-request)) => nil)
+                  [:placementcontracts :create] (facts "placementcontracts.create request"
+                                                  (dissoc http-request :body)
+                                                  => (contains {:uri            "/placementcontracts"
+                                                                :request-method :post
+                                                                :headers        headers
+                                                                :content-type   :json})
+                                                  (sc/check PlacementContract (:body http-request)) => nil)
 
-            [:attachments :create]
-            (let [fileId (get-in request [::allu/command :latestAttachmentVersion :fileId])]
-              (facts "attachments.create request"
-                (dissoc http-request :multipart)
-                => (contains {:uri            (str "/applications/" allu-id "/attachments")
-                              :request-method :post
-                              :headers        headers})
-                (let [[metadata file] (:multipart http-request)
-                      metadata-content (json/decode (:content metadata) true)]
-                  (dissoc metadata :content) => {:name      "metadata"
-                                                 :mime-type "application/json"
-                                                 :encoding  "UTF-8"}
-                  (sc/check FileMetadata metadata-content) => nil
-                  metadata-content => {:name        (-> sent-attachment :latestVersion :filename)
-                                       :description (let [{{:keys [type-group type-id]} :type} sent-attachment
-                                                          type (localize lang :attachmentType type-group type-id)
-                                                          description (:contents sent-attachment)]
-                                                      (if (or (not description) (= type description))
-                                                        type
-                                                        (str type ": " description)))
-                                       :mimeType    (-> sent-attachment :latestVersion :contentType)}
-                  (dissoc file :mime-type) => {:name    "file"
-                                               :content fileId}
-                  ;; Could be improved but generators produce junk for this anyway:
-                  (:mime-type file) => string?))))
+                  [:placementcontracts :update]
+                  (facts "placementcontracts.update request"
+                    (dissoc http-request :body) => (contains {:uri            (str "/placementcontracts/" allu-id)
+                                                              :request-method :put
+                                                              :headers        headers
+                                                              :content-type   :json})
+                    (sc/check PlacementContract (:body http-request)) => nil)
 
-          {:status 200, :body allu-id})))))
+                  [:placementcontracts :contract :proposal]
+                  (facts "placementcontracts.contract.proposal request"
+                    http-request => (contains {:uri            (str "/placementcontracts/" allu-id "/contract/proposal")
+                                               :request-method :get
+                                               :headers        headers}))
+
+                  [:placementcontracts :contract :approved]
+                  (facts "placementcontracts.contract.approved request"
+                    http-request => (contains {:uri            (str "/placementcontracts/" allu-id "/contract/approved")
+                                               :request-method :post
+                                               :headers        headers})
+                    (sc/check allu/LoginCredentials (:body http-request)))
+
+                  [:placementcontracts :contract :final]
+                  (facts "placementcontracts.contract.proposal request"
+                    http-request => (contains {:uri            (str "/placementcontracts/" allu-id "/contract/final")
+                                               :request-method :get
+                                               :headers        headers}))
+
+                  [:attachments :create]
+                  (let [fileId (get-in request [::allu/command :latestAttachmentVersion :fileId])]
+                    (facts "attachments.create request"
+                      (dissoc http-request :multipart)
+                      => (contains {:uri            (str "/applications/" allu-id "/attachments")
+                                    :request-method :post
+                                    :headers        headers})
+                      (let [[metadata file] (:multipart http-request)
+                            metadata-content (json/decode (:content metadata) true)]
+                        (dissoc metadata :content) => {:name      "metadata"
+                                                       :mime-type "application/json"
+                                                       :encoding  "UTF-8"}
+                        (sc/check FileMetadata metadata-content) => nil
+                        metadata-content => {:name        (-> sent-attachment :latestVersion :filename)
+                                             :description (let [{{:keys [type-group type-id]} :type} sent-attachment
+                                                                type (localize lang :attachmentType type-group type-id)
+                                                                description (:contents sent-attachment)]
+                                                            (if (or (not description) (= type description))
+                                                              type
+                                                              (str type ": " description)))
+                                             :mimeType    (-> sent-attachment :latestVersion :contentType)}
+                        (dissoc file :mime-type) => {:name    "file"
+                                                     :content fileId}
+                        ;; Could be improved but generators produce junk for this anyway:
+                        (:mime-type file) => string?))))
+                {:status 200, :body allu-id})))))))
 
 (def- test-handler (reitit-ring/ring-handler test-router))
 
@@ -139,17 +162,19 @@
 ;;;; ==================================================================================================================
 
 (env/with-feature-value :allu true
+  (mount/start #'allu/current-jwt)
+
   (sc/with-fn-validation
-    (let [user (sg/generate (select-keys User [:id :username]))
+    (let [user (sg/generate (select-keys User [:id :username :firstName :lastName]))
           app (sg/generate ValidPlacementApplication)
-          submitted-app (assoc-in app [:integrationKeys :ALLU :id] allu-id)]
+          submitted-app (assoc-in app [:integrationKeys :ALLU :id] allu-id)
+          sent-app (assoc submitted-app :state "sent")]
       (facts "integration message generation"
-        (let [request (placement-creation-request {:application app
-                                                   :user        user
-                                                   :action      "submit-application"})]
+        (let [request (#'allu/application-creation-request {:application app
+                                                            :user        user
+                                                            :action      "submit-application"})]
           (fact "request-integration-message"
-            (request-integration-message (::allu/command request) request
-                                         "placementcontracts.create")
+            (#'allu/request-integration-message (::allu/command request) request "placementcontracts.create")
             => (contains {:direction    "out"
                           :messageType  "placementcontracts.create"
                           :transferType "http"
@@ -158,15 +183,15 @@
                           :created      5
                           :status       "processing"
                           :application  (select-keys app [:id :organization :state])
-                          :initator     user
+                          :initator     (select-keys user [:id :username])
                           :action       "submit-application"
                           :data         request})
             (provided (now) => 5))
 
           (let [response {:status 200, :body allu-id}]
             (fact "response-integration-message"
-              (response-integration-message (::allu/command request) (:uri request)
-                                            response "placementcontracts.create")
+              (#'allu/response-integration-message (::allu/command request) (:uri request)
+                response "placementcontracts.create")
               => (contains {:direction    "in"
                             :messageType  "placementcontracts.create"
                             :transferType "http"
@@ -175,7 +200,7 @@
                             :created      5
                             :status       "done"
                             :application  (select-keys app [:id :organization :state])
-                            :initator     user
+                            :initator     (select-keys user [:id :username])
                             :action       "submit-application"
                             :data         {:endpoint (:uri request)
                                            :response response}})
@@ -196,6 +221,8 @@
       (with-redefs [allu/allu-router test-router
                     allu/allu-request-handler test-handler
                     allu/send-allu-request! test-handler]   ; Since these are unit tests we bypass JMS.
+        (facts "login!" (#'allu/login!) => nil)
+
         (facts "submit-application!"
           (allu/submit-application! {:application app
                                      :user        user
@@ -224,4 +251,24 @@
               (allu/send-attachments! {:application submitted-app
                                        :user        user
                                        :action      "move-attachments-to-backing-system"}
-                                      [attachment])) => [fileId]))))))
+                                      [attachment])) => [fileId]))
+
+        (facts "load-placementcontract-proposal!"
+          (allu/load-placementcontract-proposal! {:application sent-app
+                                                  :user        user
+                                                  :action      "TODO"}) => nil)
+
+        (facts "approve-placementcontract!"
+          (allu/approve-placementcontract! {:application sent-app
+                                            :user        user
+                                            :action      "TODO"}) => nil)
+
+        (facts "load-placementcontract-final!"
+          (allu/load-placementcontract-final! {:application sent-app
+                                               :user        user
+                                               :action      "TODO"}) => nil)
+
+        (facts "load-contract-document!"
+          (allu/load-contract-document! {:application sent-app
+                                         :user        user
+                                         :action      "check-for-verdict"}) => nil)))))

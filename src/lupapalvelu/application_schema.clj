@@ -12,25 +12,27 @@
    (sc/optional-key :description) (sc/maybe sc/Str)})
 
 (defschema Application                                      ; WIP, used initially in state-change JSON
-  {:id             ssc/ApplicationId
-   :operations     [Operation]
-   :propertyId     sc/Str
-   :municipality   sc/Str
-   :location       [sc/Num sc/Num]
-   :location-wgs84 [sc/Num sc/Num]
-   :address        sc/Str
-   :state          (apply sc/enum (map name states/all-states))
-   :permitType     (apply sc/enum (map name (keys (permit/permit-types))))
-   :permitSubtype  (sc/maybe sc/Str)
+  {:id                               ssc/ApplicationId
+   :primaryOperation                 Operation
+   :secondaryOperations              [Operation]
+   :propertyId                       sc/Str
+   :municipality                     sc/Str
+   :location                         [(sc/one sc/Num "X") (sc/one sc/Num "Y")]
+   :location-wgs84                   [(sc/one sc/Num "X") (sc/one sc/Num "Y")]
+   :address                          sc/Str
+   :state                            (apply sc/enum (map name states/all-states))
+   :permitType                       (apply sc/enum (map name (keys (permit/permit-types))))
+   :permitSubtype                    (sc/maybe sc/Str)
    ;; or (sc/maybe (->> (concat
    ;;                     (->> (permit/permit-types) vals (map :subtypes) flatten distinct)
    ;;                     (->> (vals op/operations) (map :subtypes) flatten distinct))
    ;;                    (distinct)
    ;;                    (apply sc/enum)))
    ;; but requiring lupapalvelu.operation results in dependency cycle...
-   :applicant      (sc/maybe sc/Str)
-   :infoRequest    sc/Bool
-   (sc/optional-key :3dMapActivated) (sc/maybe sc/Num)})
+   :applicant                        (sc/maybe sc/Str)
+   :infoRequest                      sc/Bool
+   (sc/optional-key :3dMapActivated) (sc/maybe sc/Num)
+   })
 
 (def permitSubtypes
   ["tyonjohtaja-ilmoitus"
@@ -197,10 +199,10 @@ when/why."
 
 (defschema Authority
   "TODO: document. Username and role either both exist or neither does."
-  {:firstName sc/Str
-   :lastName sc/Str
-   :id (sc/maybe ssc/ObjectIdStr)
-   (sc/optional-key :role) (sc/eq "authority")
+  {:firstName                  sc/Str
+   :lastName                   sc/Str
+   :id                         (sc/maybe ssc/ObjectIdStr)
+   (sc/optional-key :role)     (sc/eq "authority")
    (sc/optional-key :username) ssc/Username})
 
 (defschema AuthorityNotice
@@ -228,15 +230,15 @@ when/why."
 (defschema TaskSchemaInfo
   "TODO: document.
 What is the point of the fields with only one possible values?"
-  {:type (sc/eq "task")
-   :name (apply sc/enum task-schema-info-names)
-   :order long
-   :version (sc/eq 1)
-   (sc/optional-key :subtype) (apply sc/enum task-schema-info-subtypes) ;;why is this optional?
-   (sc/optional-key :i18name) (sc/eq "task-katselmus")
-   (sc/optional-key :section-help) (sc/eq "authority-fills")
-   (sc/optional-key :i18nprefix) (sc/eq "task-katselmus.katselmuksenLaji")
-   (sc/optional-key :user-authz-roles) (sc/eq []) ;; what is the point of this?
+  {:type                               (sc/eq "task")
+   :name                               (apply sc/enum task-schema-info-names)
+   :order                              long
+   :version                            (sc/eq 1)
+   (sc/optional-key :subtype)          (apply sc/enum task-schema-info-subtypes) ;;why is this optional?
+   (sc/optional-key :i18name)          (sc/eq "task-katselmus")
+   (sc/optional-key :section-help)     (sc/eq "authority-fills")
+   (sc/optional-key :i18nprefix)       (sc/eq "task-katselmus.katselmuksenLaji")
+   (sc/optional-key :user-authz-roles) (sc/eq [])           ;; what is the point of this?
    })
 
 (defschema BackgroundTaskSource
@@ -247,20 +249,20 @@ What is the point of the fields with only one possible values?"
 
 (defschema NormalTaskSource
   {:type (apply sc/enum normal-task-source-types)
-   :id ssc/ObjectIdStr})
+   :id   ssc/ObjectIdStr})
 
 (defschema TaskSource
   (sc/conditional (fn [x] (= "background"
-                            (:type x)))
+                             (:type x)))
                   BackgroundTaskSource
                   (fn [x] true)
                   NormalTaskSource))
 
 (defschema TaskAssignee
   "TODO: check if the keys either all appear or none? Can there be other fields?"
-  {(sc/optional-key :id) ssc/ObjectIdStr
+  {(sc/optional-key :id)        ssc/ObjectIdStr
    (sc/optional-key :firstName) ssc/NonBlankStr
-   (sc/optional-key :lastName) ssc/NonBlankStr})
+   (sc/optional-key :lastName)  ssc/NonBlankStr})
 
 (def task-data-katselmuksenLaji-values
   #{""
@@ -329,29 +331,29 @@ Many of these have null modified timestamps.
 Only 5 of the cases with value '' have a non null modified timestamp.
 24 applications have task data where katselmuksenLaji.value is empty string ''.
 All 24 of those with value '' have non null modified timestamp."
-  {:value (sc/maybe
-            (apply sc/enum
-                   (clojure.set/union
-                     task-data-katselmuksenLaji-values
-                     task-data-katselmuksenLaji-numeric-values)))
+  {:value                      (sc/maybe
+                                 (apply sc/enum
+                                        (clojure.set/union
+                                          task-data-katselmuksenLaji-values
+                                          task-data-katselmuksenLaji-numeric-values)))
    ;; TODO:remove nulls, "" and numeric values?
    (sc/optional-key :modified) (sc/maybe ssc/Timestamp)
    ;;why both optional and nullable?
    })
 
 (defschema TaskDataVaadittuLupaehtona
-  {:value sc/Bool
-   (sc/optional-key :modified) (sc/maybe ssc/Timestamp) ;;why both optional and nullable?
+  {:value                      sc/Bool
+   (sc/optional-key :modified) (sc/maybe ssc/Timestamp)     ;;why both optional and nullable?
    })
 
 (defschema NatString
   (sc/pred (fn [s] (re-matches #"^0|[1-9]\d*$" s)) 'NatStringRegex))
 
 (defschema TaskDataRakennusRakennus
-  {:jarjestysnumero {:value NatString}
-   :kiinttun {:value ssc/ObjectIdStr} ;; is this always ObjectIdStr?
-   :rakennusnro {:value (sc/pred (partial re-matches #"^\d{3}$") 'TaskDataRakennusNro)}
-   :valtakunnallinenNumero {:value (sc/maybe NatString)}
+  {:jarjestysnumero                    {:value NatString}
+   :kiinttun                           {:value ssc/ObjectIdStr} ;; is this always ObjectIdStr?
+   :rakennusnro                        {:value (sc/pred (partial re-matches #"^\d{3}$") 'TaskDataRakennusNro)}
+   :valtakunnallinenNumero             {:value (sc/maybe NatString)}
    :kunnanSisainenPysyvaRakennusnumero {:value NatString}
    })
 
@@ -359,35 +361,35 @@ All 24 of those with value '' have non null modified timestamp."
   ["lopullinen" "osittainen" ""])
 
 (defschema TaskDataRakennusTila
-  {:tila {:value (sc/maybe
-                   (apply sc/enum task-data-rakennus-tila-tila-values))
-          ;;allows nulls and empty string, are "lopullinen" and "osittainen" the only other possible values?
-          }
+  {:tila                             {:value (sc/maybe
+                                               (apply sc/enum task-data-rakennus-tila-tila-values))
+                                      ;;allows nulls and empty string, are "lopullinen" and "osittainen" the only other possible values?
+                                      }
    (sc/optional-key :kayttoonottava) {:value sc/Bool}})
 
 (defschema TaskDataRakennus
   {NatString
    {:rakennus TaskDataRakennusRakennus
-    :tila TaskDataRakennusTila}})
+    :tila     TaskDataRakennusTila}})
 
 (defschema TaskDataType1
   "TODO: this needs a better name"
-  {:katselmuksenLaji TaskDataKatselmuksenLaji
-   :vaadittuLupaehtona TaskDataVaadittuLupaehtona
-   :rakennus TaskDataRakennus
-   (sc/optional-key :katselmus) sc/Any ;;FIXME
-   (sc/optional-key :muuTunnus) sc/Any ;; FIXME
+  {:katselmuksenLaji            TaskDataKatselmuksenLaji
+   :vaadittuLupaehtona          TaskDataVaadittuLupaehtona
+   :rakennus                    TaskDataRakennus
+   (sc/optional-key :katselmus) sc/Any                      ;;FIXME
+   (sc/optional-key :muuTunnus) sc/Any                      ;; FIXME
    })
 
 (defschema TaskDataType2
   "TODO: write subschemas, document and name"
-  {:maarays sc/Any
-   (sc/optional-key :kuvaus) sc/Any
+  {:maarays                                       sc/Any
+   (sc/optional-key :kuvaus)                      sc/Any
    (sc/optional-key :vaaditutErityissuunnitelmat) sc/Any})
 
 (defschema TaskDataType3
   "TODO: write subschemas, document and name"
-  {:asiointitunnus sc/Any
+  {:asiointitunnus               sc/Any
    (sc/optional-key :osapuolena) sc/Any})
 
 (defschema TaskData
@@ -406,16 +408,16 @@ TODO: These need further checking, might not be sufficient."
 
 (defschema Task
   "TODO: document"
-  {:id ssc/ObjectIdStr
-   :taskname (sc/maybe sc/Str) ;;only 2 tasks have taskname null, only 1 with taskname ""
-   :state (apply sc/enum task-states)
-   :created (sc/maybe ssc/Timestamp)
-   :closed (sc/eq nil) ;; always null, why ???
-   :duedate (sc/eq nil) ;;always null, why ???
+  {:id          ssc/ObjectIdStr
+   :taskname    (sc/maybe sc/Str)                           ;;only 2 tasks have taskname null, only 1 with taskname ""
+   :state       (apply sc/enum task-states)
+   :created     (sc/maybe ssc/Timestamp)
+   :closed      (sc/eq nil)                                 ;; always null, why ???
+   :duedate     (sc/eq nil)                                 ;;always null, why ???
    :schema-info TaskSchemaInfo
-   :data TaskData
-   :source TaskSource
-   :assignee TaskAssignee
+   :data        TaskData
+   :source      TaskSource
+   :assignee    TaskAssignee
    }
   )
 
@@ -480,12 +482,12 @@ Is this always a map?"
 (defschema StartedBy
   "TODO: "
   {:firstName sc/Str
-   :lastName sc/Str
-   :id sc/Str})
+   :lastName  sc/Str
+   :id        sc/Str})
 
 (defschema BaseNeighborStatus
   {:created ssc/Timestamp
-   :state sc/Str})
+   :state   sc/Str})
 
 (defschema NeighborStatusOpen
   (merge BaseNeighborStatus
@@ -495,8 +497,8 @@ Is this always a map?"
   (merge BaseNeighborStatus
          {:state "email-sent"
           :email ssc/Email
-          :token sc/Str ;;TODO: is there a better schema for tokens?
-          :user (sc/maybe {sc/Any sc/Any}) ;;TODO: use a User schema here
+          :token sc/Str                                     ;;TODO: is there a better schema for tokens?
+          :user  (sc/maybe {sc/Any sc/Any})                 ;;TODO: use a User schema here
           ;; when is this null?
           }))
 
@@ -510,11 +512,11 @@ Is this always a map?"
 
 (defschema NeighborStatusResponseGiven
   (merge BaseNeighborStatus
-         {:state "response-given"
-          :user (sc/maybe {sc/Any sc/Any}) ;;TODO: use a User schema here
+         {:state   "response-given"
+          :user    (sc/maybe {sc/Any sc/Any})               ;;TODO: use a User schema here
           ;; Need documentation on when this can be null
           :message ssc/NonBlankStr
-          :vetuma {sc/Any sc/Any} ;; TODO: need a Vetuma schema here
+          :vetuma  {sc/Any sc/Any}                          ;; TODO: need a Vetuma schema here
           }))
 
 (defn state= [val]
@@ -544,24 +546,24 @@ Is this always a map?"
 
 (defschema NeighborOwner
   "TODO: Document"
-  {:type (sc/maybe NeighborOwnerType) ;;TODO: when is this null?
+  {:type           (sc/maybe NeighborOwnerType)             ;;TODO: when is this null?
    ;; 1337 applications where at least one neighbor's owner's type is null
-   :name ssc/NonBlankStr
-   :businessID (sc/maybe ssc/FinnishY)
+   :name           ssc/NonBlankStr
+   :businessID     (sc/maybe ssc/FinnishY)
    ;; businessID can be null even when type is "juridinen"
    ;; 1745 applications with a neighbor whose owner has type "juridinen" and
    ;; businessID null
-   :nameOfDeceased sc/Any ;;TODO: schema needed
-   :address {sc/Any sc/Any} ;;TODO: need schema for address maps
-   :email (sc/maybe ssc/Email)
+   :nameOfDeceased sc/Any                                   ;;TODO: schema needed
+   :address        {sc/Any sc/Any}                          ;;TODO: need schema for address maps
+   :email          (sc/maybe ssc/Email)
    })
 
 (defschema Neighbor
   "TODO: document"
-  {:id ssc/ObjectIdStr
+  {:id         ssc/ObjectIdStr
    :propertyId ssc/ObjectIdStr
-   :owner NeighborOwner
-   :status [NeighborStatus]})
+   :owner      NeighborOwner
+   :status     [NeighborStatus]})
 
 (defschema Neighbors
   "TODO: Document and give schema."
@@ -584,11 +586,11 @@ Is this always a map?"
 
 (defschema AuthInviterMap
   "TODO: this schema is likely a duplicate"
-  {:role (apply sc/enum auth-inviter-roles)
-   :lastName ssc/NonBlankStr ;;verify existence, nonBlankness and nonNullness
-   :firstName ssc/NonBlankStr ;;verify existence, nonNullness and nonBlankness
-   :username ssc/Username ;; verify existence and nonNullness
-   :id ssc/ObjectIdStr ;; verify existence, and nonNullness
+  {:role      (apply sc/enum auth-inviter-roles)
+   :lastName  ssc/NonBlankStr                               ;;verify existence, nonBlankness and nonNullness
+   :firstName ssc/NonBlankStr                               ;;verify existence, nonNullness and nonBlankness
+   :username  ssc/Username                                  ;; verify existence and nonNullness
+   :id        ssc/ObjectIdStr                               ;; verify existence, and nonNullness
    })
 
 (defschema AuthInviterId
@@ -611,42 +613,42 @@ AuthInviter is represented by an id string or or an AuthInviterMap"
 
 (defschema AuthInviteInviter
   "TODO: similar to other schemas describing people"
-  {:id ssc/ObjectIdStr
-   :username ssc/Username
-   :firstName sc/Str ;; NonBlank? Allways exist?
-   :lastName sc/Str ;; NonBlank? Allways exist?
-   :role (apply sc/enum auth-invite-inviter-roles)
+  {:id        ssc/ObjectIdStr
+   :username  ssc/Username
+   :firstName sc/Str                                        ;; NonBlank? Allways exist?
+   :lastName  sc/Str                                        ;; NonBlank? Allways exist?
+   :role      (apply sc/enum auth-invite-inviter-roles)
    })
 
 (defschema AuthInvite
   "TODO: document"
-  {:text ssc/NonBlankStr
-   :user {sc/Any sc/Any} ;;TODO: give schema
-   :inviter {sc/Any sc/Any} ;;TODO: give schema
+  {:text    ssc/NonBlankStr
+   :user    {sc/Any sc/Any}                                 ;;TODO: give schema
+   :inviter {sc/Any sc/Any}                                 ;;TODO: give schema
    :created ssc/Timestamp
-   :email ssc/Email
-   :path sc/Str ;; what is this? Can be empty
-   :role (sc/enum ["writer" "foreman" "reader"])
+   :email   ssc/Email
+   :path    sc/Str                                          ;; what is this? Can be empty
+   :role    (sc/enum ["writer" "foreman" "reader"])
    })
 
 (defschema BaseAuthElement
   "firstName and lastName can be empty, even for type owner
 TODO: are there other possible fields?"
-  {:username ssc/Username
-   :firstName sc/Str
-   :lastName sc/Str
-   :role AuthRole
-   :id sc/Str ;; 22 applications where an auth has empty string as id
-   (sc/optional-key :type) AuthType
-   (sc/optional-key :inviter) AuthInviter
-   (sc/optional-key :invite) AuthInvite
+  {:username                         ssc/Username
+   :firstName                        sc/Str
+   :lastName                         sc/Str
+   :role                             AuthRole
+   :id                               sc/Str                 ;; 22 applications where an auth has empty string as id
+   (sc/optional-key :type)           AuthType
+   (sc/optional-key :inviter)        AuthInviter
+   (sc/optional-key :invite)         AuthInvite
    ;; if :type is "owner", then :inviter and :invite never exist
    ;; this should be encoded in the schema
    ;;
    ;; it is possible for both inviter and invite to exist on the same AuthElement
    ;; TODO: is the inviter of the invite always equal to the inviter?
-   (sc/optional-key :unsubscribed) sc/Bool ;; document
-   (sc/optional-key :statementId) ssc/ObjectIdStr ;; document
+   (sc/optional-key :unsubscribed)   sc/Bool                ;; document
+   (sc/optional-key :statementId)    ssc/ObjectIdStr        ;; document
    (sc/optional-key :inviteAccepted) ssc/Timestamp
    ;; inviteAccepted can exists even when there is no inviter or invite
    })
@@ -659,9 +661,9 @@ TODO: are there other possible fields?"
   "A Company always has a name, y-tunnus and its type is company. The name is always
 exactly the same as firstName."
   (merge BaseAuthElement
-         {:name CompanyAuthName ;;TODO: add the constraint that this equals :firstName?
+         {:name CompanyAuthName                             ;;TODO: add the constraint that this equals :firstName?
           :type (sc/eq "company")
-          :y ssc/FinnishY}))
+          :y    ssc/FinnishY}))
 
 (defschema OwnerAuthElement
   "Owner never has an inviter or an invite.
@@ -673,10 +675,10 @@ TODO: add better documentation."
 (defschema AuthElement
   "TODO: document"
   (sc/conditional (fn [x] (= "company"
-                            (:type x)))
+                             (:type x)))
                   CompanyAuthElement
                   (fn [x] (= "owner"
-                            (:type x)))
+                             (:type x)))
                   OwnerAuthElement
                   (fn [x] true)
                   BaseAuthElement))
@@ -699,20 +701,20 @@ Should these be parsed and represented as something other than strings?"
 
 (defschema GeometryWgs84
   "TODO: document"
-  {:type (apply sc/enum geometry-wgs84-types)
+  {:type        (apply sc/enum geometry-wgs84-types)
    :coordinates [GeometryWgs84Coordinate]})
 
 (defschema Drawing
   "TODO: document.
 There are 357 applications where 'drawings' does not exist."
-  {:id sc/Int
-   :geometry GeometryString
+  {:id             sc/Int
+   :geometry       GeometryString
    :geometry-wgs84 GeometryWgs84
-   :category (sc/eq "123") ;;TODO: what is this and why is it always "123"
-   :desc sc/Str
-   :name sc/Str
-   :area sc/Str ;;this seems to be numeric, perhaps integer
-   :height sc/Str ;;this seems to be a decimal number string
+   :category       (sc/eq "123")                            ;;TODO: what is this and why is it always "123"
+   :desc           sc/Str
+   :name           sc/Str
+   :area           sc/Str                                   ;;this seems to be numeric, perhaps integer
+   :height         sc/Str                                   ;;this seems to be a decimal number string
    })
 
 (defschema Drawings

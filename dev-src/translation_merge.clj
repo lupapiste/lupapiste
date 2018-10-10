@@ -26,7 +26,7 @@
       (loop []
         (when-let [l (.readLine orig)]
           (let [[k lang] (s/split l #"\s")]
-            (when (not (@writed-keys [k lang]))
+            (when-not (@writed-keys [k lang])
               (swap! writed-keys conj [k lang])
               (.write out (str l \newline))
               (when (and (translations k) (= lang "\"fi\""))

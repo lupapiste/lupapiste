@@ -1167,7 +1167,7 @@
               file-options {:filename (format "%s-%s.pdf" (:id application) (i18n/localize lang :conversation.title))
                             :content  content
                             :size     (.available content)}
-              created (if created created (now))
+              created (or created (now))
               attachment-options {:attachment-type {:type-id    :keskustelu
                                                     :type-group :muut}
                                   :attachment-id   (when existing-keskustelu (:id existing-keskustelu))
@@ -1192,7 +1192,7 @@
                  :id
                  (usr/get-user-by-id [:language])
                  :language)]
-    (if lang lang "fi")))
+    (or lang "fi")))
 
 (defn maybe-generate-comments-attachment [user application state]
   (when (comments-saved-as-attachment? application state)

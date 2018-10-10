@@ -12,12 +12,15 @@ LUPAPISTE.LinkPermitSelectorModel = function(params) {
   var allLinkPermits = lupapisteApp.models.application.linkPermitData;
 
   var validOperations = ko.observableArray();
-  ajax.query("all-operations-in", {id: ko.unwrap(params.applicationId),
-                                   path: self.schema.operationsPath.join(".")})
-    .success(function(res) {
-      validOperations(res.operations);
-    })
-    .call();
+  if( self.authModel.ok( "all-operations-in" )) {
+    ajax.query("all-operations-in", {id: ko.unwrap(params.applicationId),
+                                     path: self.schema.operationsPath.join(".")})
+      .success(function(res) {
+        validOperations(res.operations);
+      })
+      .call();
+  }
+
 
   self.validLinkPermits = self.disposedComputed(function() {
     return _.filter(allLinkPermits(), function(lp) {
