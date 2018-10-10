@@ -17,7 +17,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase CustomPhraseCategory]]
+            [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase CustomPhraseCategoryMap]]
             [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.roles :as roles]
@@ -252,7 +252,7 @@
    (sc/optional-key :docstore-info) DocStoreInfo
    (sc/optional-key :verdict-templates) PateSavedVerdictTemplates
    (sc/optional-key :phrases) [Phrase]
-   (sc/optional-key :custom-phrases-categories) CustomPhraseCategory
+   (sc/optional-key :custom-phrase-categories) CustomPhraseCategoryMap
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
    (sc/optional-key :state-change-msg-enabled)      sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
@@ -265,8 +265,14 @@
                                              (sc/optional-key :auth-type) sc/Str
                                              (sc/optional-key :basic-auth-password) sc/Str
                                              (sc/optional-key :basic-auth-username) sc/Str
-                                             (sc/optional-key :crypto-iv-s) sc/Str}})
-
+                                             (sc/optional-key :crypto-iv-s) sc/Str}
+   (sc/optional-key :ad-login) {:enabled sc/Bool
+                                :idp-cert sc/Str
+                                :idp-uri sc/Str
+                                :trusted-domains [sc/Str]
+                                (sc/optional-key :role-mapping) {sc/Keyword sc/Str}
+                                (sc/optional-key :sent-tokens) [{:timestamp ssc/Timestamp
+                                                                 :token sc/Str}]}})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
