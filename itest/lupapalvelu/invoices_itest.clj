@@ -174,4 +174,16 @@
 
                   (-> (local-query sonja :application-invoices :id app-b-id)
                       :invoices
-                      count) => 3)))))
+                      count) => 3)))
+
+    (fact "application-operations-query"
+          (fact "should return vector containing primary operation"
+                (let [{:keys [id] :as app} (dummy-submitted-application)]
+                  (-> (local-query sonja :application-operations :id id)
+                      :operations
+                      count) => 1
+
+                  (-> (local-query sonja :application-operations :id id)
+                      :operations
+                      first
+                      :name) => "pientalo")))))

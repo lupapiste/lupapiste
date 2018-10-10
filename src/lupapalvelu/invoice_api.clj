@@ -5,7 +5,8 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [sade.core :refer [ok fail]]
-            [schema.core :as sc]))
+            [schema.core :as sc]
+            [lupapalvelu.application-schema :refer [Operation]]))
 
 ;; ------------------------------------------
 ;; Invoice API
@@ -58,3 +59,17 @@
   (let [invoices (invoices/fetch-by-application-id (:id application))]
     (sc/validate [Invoice] invoices)
     (ok :invoices invoices)))
+
+(defquery application-operations
+  {:description      "Returns operations for application"
+   :feature          :invoices
+   :user-roles       #{:authority}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :states           states/post-submitted-states}
+  [{:keys [application] :as command}]
+  (let [operations (invoices/fetch-application-operations (:id application))]
+    (sc/validate [Operation] operations)
+    (ok :operations operations)))

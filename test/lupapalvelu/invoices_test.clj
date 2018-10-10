@@ -1,5 +1,5 @@
 (ns lupapalvelu.invoices-test
-  (:require [lupapalvelu.invoices :refer [->invoice-user ->invoice-db]]
+  (:require [lupapalvelu.invoices :refer [->invoice-user ->invoice-db get-operations-from-application]]
             [midje.sweet :refer :all]
             [schema.core :as sc]
             [sade.core]))
@@ -63,3 +63,28 @@
                                                                                                           :price-per-unit 10
                                                                                                           :units 2
                                                                                                           :discount-percent 0}]}]}))))
+(facts "get-operations-from-application"
+       (let [primary-operation {:id "5bbc76b0b170d541a3c488ec"
+                                :name "kerrostalo-rivitalo"
+                                :description nil
+                                :created 12344566}
+             secondary-operation {:id "6bbc76b0b170d541a3c488ec"
+                                  :name "purkaminen"
+                                  :description nil
+                                  :created 12344566}
+             mock-application-with-primary-operation-only {:primaryOperation primary-operation}
+             mock-application-with-primary-operation-and-secondary-operations {:primaryOperation primary-operation :secondaryOperations [secondary-operation secondary-operation]}
+             mock-application-with-primary-operation-and-empty-secondary-operations {:primaryOperation primary-operation :secondaryOperations []}
+             mock-application-with-primary-operation-and-nil-secondary-operations {:primaryOperation primary-operation :secondaryOperations nil}]
+
+         (fact "returns vector contaning primary operation when only primary operation is in application"
+               (get-operations-from-application mock-application-with-primary-operation-only) => [primary-operation])
+
+         (fact "returns vector contaning primary operation and secondary operations when we have primary operation and secondary operation"
+               (get-operations-from-application mock-application-with-primary-operation-and-secondary-operations) => [primary-operation secondary-operation secondary-operation])
+
+         (fact "returns vector contaning only primary operation when we have primary operation and secondary operation is empty vec"
+               (get-operations-from-application mock-application-with-primary-operation-and-empty-secondary-operations) => [primary-operation])
+
+         (fact "returns vector contaning only primary operation when we have primary operation and secondary operation is nil"
+               (get-operations-from-application mock-application-with-primary-operation-and-nil-secondary-operations) => [primary-operation])))

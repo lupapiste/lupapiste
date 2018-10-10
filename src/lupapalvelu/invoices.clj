@@ -6,7 +6,9 @@
             [sade.schemas :as ssc]
             [taoensso.timbre :refer [trace tracef debug debugf info infof
                                      warn warnf error errorf fatal fatalf]]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.user :as user]
+            [lupapalvelu.domain :refer [get-application-no-access-checking]]
+            [lupapalvelu.application-schema :refer [Operation]]))
 
 (sc/defschema User
   {:id                                        user/Id
@@ -98,3 +100,14 @@
 
 (defn fetch-by-application-id [application-id]
   (mongo/select "invoices" {:application-id application-id}))
+
+(sc/defn ^:always-validate  get-operations-from-application :- [Operation]
+  "Returns a vector (primaryOperation being first) of operations from application, by combining primary and secondary operations to one seq"
+  [application]
+  (let [primary-operation (:primaryOperation application)
+        secondary-operations (:secondaryOperations application)]
+    (concat [primary-operation] secondary-operations)))
+
+(defn fetch-application-operations [application-id]
+  (let [application (get-application-no-access-checking application-id)]
+    (get-operations-from-application application)))
