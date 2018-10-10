@@ -17,7 +17,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase CustomPhraseCategory]]
+            [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase CustomPhraseCategoryMap]]
             [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.roles :as roles]
@@ -252,7 +252,7 @@
    (sc/optional-key :docstore-info) DocStoreInfo
    (sc/optional-key :verdict-templates) PateSavedVerdictTemplates
    (sc/optional-key :phrases) [Phrase]
-   (sc/optional-key :custom-phrase-categories) CustomPhraseCategory
+   (sc/optional-key :custom-phrase-categories) CustomPhraseCategoryMap
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
    (sc/optional-key :state-change-msg-enabled)      sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
