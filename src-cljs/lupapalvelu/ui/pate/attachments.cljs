@@ -516,7 +516,7 @@
   "Static view of attachments information with view links. Not
   specific to Pate."
   [attachment-ids]
-  (let [attachments (filter (util/fn->> :id (util/includes-as-kw? attachment-ids))
+  (let [attachments (filter #(->> % :id (util/includes-as-kw? attachment-ids))
                             (service/attachments))]
     [:table.pate-attachments
      [:tbody

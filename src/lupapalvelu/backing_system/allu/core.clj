@@ -29,15 +29,14 @@
             [lupapalvelu.backing-system.allu.conversion :refer [lang application->allu-placement-contract
                                                                 format-date-time]]
             [lupapalvelu.backing-system.allu.schemas :refer [PlacementContract FileMetadata]]
-            [lupapalvelu.backing-system.allu.allu-application :as allu-application]
             [lupapalvelu.file-upload :refer [save-file]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.messages :as imessages :refer [IntegrationMessage]]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
-
-            [lupapalvelu.states :as states])
+            [lupapalvelu.states :as states]
+            [lupapalvelu.allu.allu-application :as allu-application])
   (:import [java.lang AutoCloseable]
            [java.io InputStream ByteArrayInputStream]))
 
@@ -282,9 +281,10 @@
                  (assert false "unimplemented")))
 
       [:placementcontracts :contract (:or :proposal :final)]
-      (let [response (handler request)]
+      (let [request (assoc request :as :byte-array)
+            response (handler request)]
         (if (= (:status response) 200)
-          (let [content-bytes (.getBytes (:body response) "UTF-8")
+          (let [content-bytes (:body response)
                 file-data {:filename     "sopimusehdotus.pdf"
                            :content      (ByteArrayInputStream. content-bytes)
                            :content-type (get-in response [:headers "Content-Type"])

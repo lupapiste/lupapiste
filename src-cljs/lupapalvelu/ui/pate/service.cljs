@@ -226,11 +226,12 @@
 (defn fetch-appeals [app-id verdict-id]
   (when (state/auth? :appeals)
     (common/query :appeals
-                  (util/fn->> :data
-                              ((keyword verdict-id))
-                              (map (fn [{:keys [giver appellant] :as a}]
-                                     (assoc a :author (or giver appellant))))
-                              (reset! state/appeals))
+                  #(->> %
+                        :data
+                        ((keyword verdict-id))
+                        (map (fn [{:keys [giver appellant] :as a}]
+                               (assoc a :author (or giver appellant))))
+                        (reset! state/appeals))
                   :id app-id)))
 
 (declare batch-job)
