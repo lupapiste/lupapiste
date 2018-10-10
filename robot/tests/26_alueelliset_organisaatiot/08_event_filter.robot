@@ -125,6 +125,7 @@ Sets date via modal datepicker dialog
   Wait until  element should be visible  modal-datepicker-date
   Element Should Be Enabled  modal-datepicker-date
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Execute JavaScript  $("#ui-datepicker-div:visible").css("display", "none");
   Input text by test id  modal-datepicker-date  ${date}
   Click enabled by test id  modal-datepicker-continue
   Confirm  dynamic-yes-no-confirm-dialog

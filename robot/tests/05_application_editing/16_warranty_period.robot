@@ -117,7 +117,8 @@ Open date dialog
   Click enabled by test id  ${openDialogButtonId}
   Wait until  element should be visible  modal-datepicker-date
   Element Should Be Enabled  modal-datepicker-date
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Execute JavaScript  $(".hasDatepicker").css("focus");
+  Execute JavaScript  $("#ui-datepicker-div:visible").css("display", "none");
 
 Sets construction started/ready via modal datepicker dialog
   [Arguments]  ${openDialogButtonId}  ${date}

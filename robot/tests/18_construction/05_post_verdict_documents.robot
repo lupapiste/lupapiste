@@ -32,13 +32,9 @@ Sonja logs in and sends app to backing system
 Sonja fetches verdict from municipality KRYSP service
   Open tab  verdict
   Fetch verdict
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
-  No such test id  verdict-requirements-0
-  Wait test id visible  verdict-requirements-1
   Logout
 
-Mikko can add new suunnitelija docs
+Mikko can add new designer docs
   As Mikko
   Open application  ${appname}  753-416-25-30
   Open tab  parties

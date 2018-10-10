@@ -15,6 +15,8 @@ Sonja creates submitted sijoitussopimus
   Create application  ${ss_app}  753  753-416-45-3  YA-sijoituslupa
   Select from list by value  permitSubtypeSelect  sijoitussopimus
   Submit application
+  Positive indicator should be visible
+  Positive indicator should not be visible
   ${linkPermitAppId} =  Get Text  xpath=//span[@data-test-id='application-id']
   Set Suite Variable  ${linkPermitAppId}
 
@@ -53,7 +55,7 @@ Sonja signs sijoitussopimus agreement
   Go to page  applications
   Open application  ${ss_app}  753-416-45-3
   Open tab  verdict
-  Sign verdict  sonja
+  Sign contract  sonja
   Wait until  Application state should be  agreementSigned
 
 Tyolupa should be submittable now

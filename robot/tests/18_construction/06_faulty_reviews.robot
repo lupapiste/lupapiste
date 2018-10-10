@@ -25,8 +25,6 @@ Sonja logs in and fetches verdict
   Open application  ${appname}  ${propertyId}
   Open tab  verdict
   Fetch verdict
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
 
 Sonja starts having Aloituskokous
   Open tab  tasks
