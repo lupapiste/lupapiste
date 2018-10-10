@@ -92,9 +92,8 @@
         (errorf "Organization %s does not have valid AD-login settings or has disabled AD-login" org-id)
         (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host)))))))
 
-
 (defpage [:post "/api/saml/ad-login/:org-id"] {org-id :org-id}
-  (let [idp-cert (-> org-id org/get-organization :ad-login :idp-cert parse-certificate)
+  (let [idp-cert (some-> org-id org/get-organization :ad-login :idp-cert parse-certificate)
         req (request/ring-request)
         xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse])) ; The raw XML string
         saml-resp (saml-sp/xml-string->saml-resp xml-response) ; An OpenSAML object
