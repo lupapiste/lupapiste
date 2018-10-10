@@ -29,6 +29,7 @@
                  [metosin/reitit-ring "0.2.2"]
                  [metosin/reitit-middleware "0.2.2"]
                  [metosin/spec-tools "0.7.1"]               ; for reitit-middleware
+                 [metosin/reitit "0.2.2"]
 
                  ; Namespace finder library
                  [bultitude "0.2.8"] ; noir requires 0.2.0

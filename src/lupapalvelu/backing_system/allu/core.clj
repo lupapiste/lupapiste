@@ -29,12 +29,14 @@
             [lupapalvelu.backing-system.allu.conversion :refer [lang application->allu-placement-contract
                                                                 format-date-time]]
             [lupapalvelu.backing-system.allu.schemas :refer [PlacementContract FileMetadata]]
+            [lupapalvelu.backing-system.allu.allu-application :as allu-application]
             [lupapalvelu.file-upload :refer [save-file]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.integrations.jms :as jms]
             [lupapalvelu.integrations.messages :as imessages :refer [IntegrationMessage]]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
+
             [lupapalvelu.states :as states])
   (:import [java.lang AutoCloseable]
            [java.io InputStream ByteArrayInputStream]))
@@ -320,10 +322,11 @@
     (fn [{{{app-id :id} :application} ::command :as request}]
       (let [route-name (-> request reitit-ring/get-match :data :name)]
         (match (handler request)
-          {:status (:or 200 201), :body body}
+          ({:status (:or 200 201), :body body} :as response)
           (do (info "ALLU operation" (route-name->string route-name) "succeeded")
               (when (and (not disable-io-middlewares?) (= route-name [:placementcontracts :create]))
-                (application/set-integration-key app-id :ALLU {:id body})))
+                (application/set-integration-key app-id :ALLU {:id body}))
+              response)
 
           response (allu-fail! :error.allu.http (select-keys response [:status :body])))))))
 
@@ -432,7 +435,7 @@
 (defn allu-application?
   "Should ALLU integration be used?"
   [organization-id permit-type]
-  (and (env/feature? :allu) (= organization-id "091-YA") (= permit-type "YA")))
+  (allu-application/allu-application? organization-id permit-type))
 
 (defn- create-placement-contract!
   "Create placement contract in ALLU."

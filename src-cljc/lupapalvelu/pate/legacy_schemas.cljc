@@ -359,4 +359,5 @@
     :tj                 tj-legacy-verdict
     :migration-contract migration-contract
     :migration-verdict  migration-verdict
+    :allu-contract      contract-legacy-verdict
     (schema-util/pate-assert false "Unsupported legacy category:" category)))

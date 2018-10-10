@@ -54,7 +54,8 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [warnf warn errorf error]]))
+            [taoensso.timbre :refer [warnf warn errorf error]]
+            [lupapalvelu.backing-system.allu.core :as allu]))
 
 ;; ------------------------------------------
 ;; Pre-checks
@@ -78,12 +79,14 @@
     :legacy? fails if the verdict is a 'modern' Pate verdict
     :modern? fails if the verdict is a legacy verdict
     :contract? fails if the verdict is not a contract
+    :allu-contract? fails if the verdict is not an allu-contract
     :verdict? fails for contracts
     :not-replaced? Fails if the verdict has been OR is being replaced. "
   [& conditions]
   (let [{:keys [draft? published?
                 legacy? modern?
-                contract? verdict?
+                contract? allu-contract?
+                verdict?
                 html? not-replaced?]} (zipmap conditions
                                               (repeat true))]
     (fn [{:keys [data application]}]
@@ -112,6 +115,9 @@
 
                           (and contract? (not (vc/contract? verdict)))
                           :error.verdict.not-contract
+
+                          (and allu-contract? (util/not=as-kw (:category verdict) :allu-contract))
+                          :error.verdict.not-allu-contract
 
                           (and verdict? (vc/contract? verdict))
                           :error.verdict.contract
@@ -1581,6 +1587,23 @@
                      (when (sign-requested? command)
                        {$pull {(util/kw-path :pate-verdicts.$.signature-requests) {:user-id (:id user)}}})))
     (send-command ::signatures command)))
+
+(defn sign-allu-contract
+  "Sign the contract
+   - Update verdict signatures
+   - Change application state to agreementSigned if needed"
+  [{:keys [user created application] :as command}]
+  (let [signature (create-signature command)
+        verdict (command->verdict command)]
+    (verdict-update command
+                    (util/deep-merge
+                      {$push {(util/kw-path :pate-verdicts.$.signatures) signature}}
+                      (when (transition-to-assignmentSigned-state? application)
+                        (app-state/state-transition-update :agreementSigned
+                                                           created
+                                                           application
+                                                           user))))
+    (allu/approve-placementcontract! command)))
 
 (defn- signer-ids [data]
   (->> data

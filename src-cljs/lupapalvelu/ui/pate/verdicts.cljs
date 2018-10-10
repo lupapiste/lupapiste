@@ -44,7 +44,8 @@
   (state/verdict-auth? verdict-id :replace-pate-verdict))
 
 (defn- can-sign? [verdict-id]
-  (state/react-verdict-auth? verdict-id :sign-pate-contract))
+  (or (state/react-verdict-auth? verdict-id :sign-pate-contract)
+      (state/react-verdict-auth? verdict-id :sign-allu-contract)))
 
 (defn- can-send-signature-request? [verdict-id]
   (state/verdict-auth? verdict-id :send-signature-request))
@@ -168,7 +169,8 @@
   [{password*     ::password
     signing?*     ::signing?
     waiting?*     ::waiting?
-    bad-password* ::bad-password} app-id verdict-id signatures title show-sign-button?]
+    bad-password* ::bad-password} app-id verdict-id signatures category title show-sign-button?]
+
   (let [click-fn (fn []
                    (swap! signing?* not)
                    (reset! password* "")
@@ -208,6 +210,7 @@
                                                             (service/sign-contract app-id
                                                                                    verdict-id
                                                                                    password
+                                                                                   category
                                                                                    #(do
                                                                                       (reset! waiting?* false)
                                                                                       (reset! bad-password*
@@ -297,10 +300,10 @@
                                 :class    (common/css :secondary)
                                 :on-click #(confirm-and-replace-verdict verdict id)}))])]
                         (when (seq signatures)
-                          (rum/with-key (verdict-signatures-row app-id id signatures :verdict.signatures true)
+                          (rum/with-key (verdict-signatures-row app-id id signatures category :verdict.signatures true)
                                         (str id "-signatures")))
                         (when (seq signature-requests)
-                          (rum/with-key (verdict-signatures-row app-id id signature-requests :verdict.signature-requests false)
+                          (rum/with-key (verdict-signatures-row app-id id signature-requests category :verdict.signature-requests false)
                                         (str id "-signature-request")))
                         (when (and published
                                    (can-send-signature-request? id)

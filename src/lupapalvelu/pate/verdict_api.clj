@@ -48,8 +48,9 @@
 (defn- contractual-application
   "Precheck that fails if the application category IS NOT :contract."
   [command]
-  (when-not (= (verdict/command->category command) :contract)
-    (fail :error.verdict.not-contract)))
+  (let [category (verdict/command->category command)]
+    (when-not (or (= category :contract) (= category :allu-contract))
+      (fail :error.verdict.not-contract))))
 
 (defn- state-in
   "Precheck that fails if the application state is not included in the
@@ -273,6 +274,21 @@
    :user-authz-roles roles/writer-roles-with-foreman}
   [command]
   (verdict/sign-contract command)
+  (ok))
+
+(defcommand sign-allu-contract
+  {:description "Add this"
+   :categories       #{:pate-verdicts}
+   :parameters       [:id :verdict-id :password]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id :password])]
+   :pre-checks       [(verdict-exists :allu-contract?)
+                      can-sign
+                      password-matches]
+   :states           states/post-verdict-states
+   :user-roles       #{:applicant}
+   :user-authz-roles roles/default-authz-writer-roles}
+  [command]
+  (verdict/sign-allu-contract command)
   (ok))
 
 (defraw verdict-pdf
