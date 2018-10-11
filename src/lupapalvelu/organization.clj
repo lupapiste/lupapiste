@@ -20,7 +20,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase CustomPhraseCategory]]
+            [lupapalvelu.pate.schemas :refer [PateSavedVerdictTemplates Phrase CustomPhraseCategoryMap]]
             [lupapalvelu.permissions :refer [defcontext]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.roles :as roles]
@@ -256,7 +256,7 @@
    (sc/optional-key :docstore-info) DocStoreInfo
    (sc/optional-key :verdict-templates) PateSavedVerdictTemplates
    (sc/optional-key :phrases) [Phrase]
-   (sc/optional-key :custom-phrase-categories) CustomPhraseCategory
+   (sc/optional-key :custom-phrase-categories) CustomPhraseCategoryMap
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
    (sc/optional-key :state-change-msg-enabled)      sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool
@@ -274,9 +274,7 @@
                                 :idp-cert sc/Str
                                 :idp-uri sc/Str
                                 :trusted-domains [sc/Str]
-                                (sc/optional-key :role-mapping) {sc/Keyword sc/Str}
-                                (sc/optional-key :sent-tokens) [{:timestamp ssc/Timestamp
-                                                                 :token sc/Str}]}
+                                (sc/optional-key :role-mapping) {sc/Keyword sc/Str}}
    (sc/optional-key :ely-uspa-enabled) sc/Bool})
 
 (sc/defschema SimpleOrg
@@ -903,7 +901,7 @@
 
 (defn toggle-handler-role! [org-id role-id enabled?]
   (mongo/update :organizations
-                {:_id org-id :handler-roles.id role-id}
+                {:_id org-id :handler-roles {$elemMatch {:id role-id}}}
                 {$set {:handler-roles.$.disabled (not enabled?)}}))
 
 (defn get-duplicate-scopes [municipality permit-types]

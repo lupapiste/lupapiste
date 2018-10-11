@@ -9,7 +9,7 @@
 (facts add-missing-person-data-to-statement
   (fact "no person"
     (-> (gen/generate statement/Statement)
-        (dissoc :person (sc/optional-key :metadata))
+        (dissoc :person :metadata)
         (add-missing-person-data-to-statement)
         :person)
     => {:email "" :userId "" :name "" :text ""}
@@ -17,7 +17,7 @@
 
   (fact "everything is fine"
     (let [statement (-> (gen/generate statement/Statement)
-                        (dissoc (sc/optional-key :metadata))
+                        (dissoc :metadata)
                         (assoc-in [:person :email] ..email..))]
       (add-missing-person-data-to-statement statement)
       => statement
@@ -25,7 +25,7 @@
 
   (fact "only missing fields are updated - no name"
     (-> (gen/generate statement/Statement)
-        (dissoc (sc/optional-key :metadata))
+        (dissoc :metadata)
         (update :person dissoc :name)
         (update :person assoc :userId ..userId.. :email ..email.. :text ..text..)
         (add-missing-person-data-to-statement)
@@ -35,7 +35,7 @@
 
   (fact "no user id"
     (-> (gen/generate statement/Statement)
-        (dissoc (sc/optional-key :metadata))
+        (dissoc :metadata)
         (update :person dissoc :userId)
         (update :person assoc :email ..email..)
         (add-missing-person-data-to-statement)
@@ -45,12 +45,10 @@
 
   (fact "do not update if user id already set"
     (-> (gen/generate statement/Statement)
-        (dissoc (sc/optional-key :metadata))
+        (dissoc :metadata)
         (update :person assoc :userId ..originalUserId..)
         (update :person assoc :email ..email..)
         (add-missing-person-data-to-statement)
         :person)
     => (contains {:userId ..originalUserId..})
     (provided (user/get-user-by-email ..email..) => {:id ..anotherUserId..})))
-
-

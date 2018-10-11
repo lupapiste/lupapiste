@@ -131,12 +131,14 @@
   (components/icon-button {:icon     :lupicon-envelope
                            :text-loc :verdict.orderAttachmentPrints.button
                            :class    :positive.pate-right-space
+                           :test-id  :test-order-attachment-prints
                            :on-click #(hub/send "order-attachment-prints")}))
 
 (rum/defc print-order-history []
   (components/icon-button {:icon     :lupicon-documents
                            :text-loc :application.printsOrderHistory
                            :class    :positive.pate-right-space
+                           :test-id  :test-open-prints-order-history
                            :on-click #(hub/send "show-attachment-prints-order-history")}))
 
 (defn- confirm-and-delete-verdict [app-id {:keys [legacy? published] :as verdict}]

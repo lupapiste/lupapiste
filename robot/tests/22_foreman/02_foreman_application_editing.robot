@@ -251,8 +251,7 @@ Deleting the verdict sets application back to previous state
   Open tab  verdict
   Kill dev-box
   Delete verdict  0
-
-  Application state should be  sent
+  Wait until  Application state should be  sent
 
 Foreman state has reset again on base app
   Go back to project application

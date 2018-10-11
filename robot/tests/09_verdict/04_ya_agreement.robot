@@ -5,7 +5,6 @@ Resource        ../../common_resource.robot
 Resource        ../39_pate/pate_resource.robot
 Variables       ../../common_variables.py
 Variables       ../06_attachments/variables.py
-Library         DateTime
 
 *** Test Cases ***
 
@@ -29,10 +28,7 @@ Sonja sets permit subtype
   Select from list  permitSubtypeSelect  sijoitussopimus
 
 Sonja prepares and publishes contract
-  ${TODAY_DD_MM_YYYY} =  Convert Date  ${CURRENT_DATETIME}  %d.%m.%Y
-  ${TOMORROW} =     Add time to date  ${CURRENT_DATETIME}  1 days  %d.%m.%Y
-
-  Give legacy contract  321  Sopija-Sonja  ${TODAY_DD_MM_YYYY}
+  Give legacy contract  321  Sopija-Sonja  ${CURRENT_DATE}
   Wait until  Application state should be  agreementPrepared
   [Teardown]  Logout
 

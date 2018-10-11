@@ -175,7 +175,13 @@
       (fact "OK if date same or greater than appealPeriodEndsAt"
         (command olli :move-to-final
                  :id app-id
-                 :officialAt (util/get-timestamp-from-now :day 2)) => ok?))))
+                 :officialAt (util/get-timestamp-from-now :day 2)) => ok?))
+    (facts "No continuation permit for environmental application"
+      (fact "Change state to constructionStarted"
+        (command olli :change-application-state :id app-id :state "constructionStarted") => ok?)
+      (fact "Continuation permit creation not allowed"
+        (command olli :create-continuation-period-permit :id app-id)
+        => (err :error.unsupported-permit-type)))))
 
 (facts "Add comment for published bulletin"
   (let [store        (atom {})
