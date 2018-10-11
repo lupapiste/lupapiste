@@ -1161,11 +1161,11 @@
                             (assoc command :application application)
                             (sm/verdict-given-state application))]
     (when (and (not dry-run?)
-               (not-empty (:mongo-query transition-updates))
                (not-empty (:mongo-updates transition-updates)))
-      (mongo/update :applications
-                    (:mongo-query transition-updates)
-                    (:mongo-updates transition-updates)))
+      (action/update-application (assoc command :application application)
+                                 (or (:mongo-query transition-updates)
+                                     {:_id (:id application)})
+                                 (:mongo-updates transition-updates)))
     transition-updates))
 
 (defn finalize--application-state
