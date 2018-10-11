@@ -85,6 +85,7 @@ Pena visits attachment
   Return to application
 
 Guest table should be visible
+  Scroll to top
   Open tab  parties
   Guest table contains  ${random}
 
