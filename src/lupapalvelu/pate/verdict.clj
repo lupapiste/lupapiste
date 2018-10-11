@@ -1152,9 +1152,11 @@
                           :template.inclusions)))))
 
 (defn update-waste-documents
-  "Updates or adds a waste report document if a waste plan document already exists"
+  "Updates or adds a waste report document if a waste plan document
+  already exists. If the function is called with the optional
+  `dry-run?` argument having a truthy value, the function only returns
+  the mongo updates that would be executed. This is used for testing."
   [{:keys [application command]} & [dry-run?]]
-  ;; dry-run? flag is used for unit tests
   (let [transition-updates (transformations/get-state-transition-updates
                             (assoc command :application application)
                             (sm/verdict-given-state application))]

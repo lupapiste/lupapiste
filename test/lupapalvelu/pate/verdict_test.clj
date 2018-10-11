@@ -1827,8 +1827,7 @@
                  :section-help "rakennusjate.help"
                  :blacklist ["neighbor"]
                  :version 1}
-   :data {:rakennusJaPurkujate {:suunniteltuJate {:0 {:jatetyyppi {
-                                                                   :value "puu"
+   :data {:rakennusJaPurkujate {:suunniteltuJate {:0 {:jatetyyppi {:value "puu"
                                                                    :modified nil}
                                                       :suunniteltuMaara {:value "2"
                                                                          :modified nil}
@@ -1836,8 +1835,7 @@
                                                                 :modified nil}
                                                       :painoT {:value "05"
                                                                :modified nil}}
-                                                  :1 {:jatetyyppi {
-                                                                   :value "betoni"
+                                                  :1 {:jatetyyppi {:value "betoni"
                                                                    :modified nil}
                                                       :painoT {:value "02"
                                                                :modified nil}
