@@ -1537,18 +1537,23 @@
 
 (defn- update-signature-section
   "Updates the signatures section with a new signature. Other sections
-  are untouched."
+  are untouched. If the signatures section does not exist (e.g.,
+  migration-contract) it is added."
   [sections verdict signature]
   (let [verdict (update verdict :signatures concat [signature])
         entry   (cols/entry-row (:left-width (layouts/pdf-layout verdict))
                                 {:lang       (cols/language verdict)
                                  :signatures (pdf/signatures {:verdict verdict})}
                                 (first layouts/entry--contract-signatures))]
-    (map (fn [[_ attr & _ :as section]]
-           (if (util/=as-kw (:id attr) :signatures)
-             entry
-             section))
-         sections)))
+
+    (if (some (util/fn->> second :id (util/=as-kw :signatures))
+              sections)
+        (map (fn [[_ attr & _ :as section]]
+            (if (util/=as-kw (:id attr) :signatures)
+              entry
+              section))
+             sections)
+        (concat sections [entry]))))
 
 (defn- pdf--signatures [command verdict]
   (pdf/create-verdict-attachment-version command verdict)

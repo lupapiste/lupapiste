@@ -185,7 +185,8 @@
       [:div.row
        [:div.col-1
         [:div
-         [:div  [:strong (common/loc title)]]
+         (when (seq signatures)
+           [:div  [:strong (common/loc title)]])
          [:div.tabby
           (map-indexed (fn [i {:keys [name date]}]
                          [:div.tabby__row {:key i}
@@ -314,7 +315,7 @@
                                         :icon     :lupicon-refresh-section-sign
                                         :class    (common/css :secondary)
                                         :on-click #(confirm-and-replace-verdict verdict id)}))])]
-                                (when (seq signatures)
+                                (when (or (seq signatures) (can-sign? id))
                                   (rum/with-key (verdict-signatures-row app-id id signatures
                                                                         :verdict.signatures true)
                                     (str id "-signatures")))
