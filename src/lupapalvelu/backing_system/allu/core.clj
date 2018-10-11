@@ -286,7 +286,7 @@
 
         [:placementcontracts :contract (:or :proposal :final)] (let [id (-> route-match :path-params :id)]
                                                                  (if (creation-response-ok? id)
-                                                                   {:status 200, :body " "}
+                                                                   {:status 200, :body (byte-array 1)}
                                                                    {:status 404, :body (str "Not Found: " id)}))
 
         [:attachments :create] (let [id (-> route-match :path-params :id)]
@@ -624,7 +624,7 @@
   [{:keys [application] :as command}]
   (try+
     (-> (allu-request-handler (case (:state application)
-                                "sent" (contract-proposal-request command)
+                                ("sent" "submitted") (contract-proposal-request command)
                                 "agreementPrepared" (final-contract-request command)))
         :body)
     (catch [:text "error.allu.http"] _ nil)))

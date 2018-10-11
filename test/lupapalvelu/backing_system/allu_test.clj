@@ -23,7 +23,7 @@
 
             [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.backing-system.allu.schemas
-             :refer [ValidPlacementApplication PlacementContract AttachmentMetadata]]
+             :refer [ValidPlacementApplication PlacementContract AttachmentMetadata LoginCredentials]]
             [lupapalvelu.backing-system.allu.conversion :refer [lang]]))
 
 ;;;; Refutation Utilities
@@ -106,7 +106,7 @@
                     http-request => (contains {:uri            (str "/placementcontracts/" allu-id "/contract/approved")
                                                :request-method :post
                                                :headers        headers})
-                    (sc/check allu/LoginCredentials (:body http-request)))
+                    (sc/check LoginCredentials (:body http-request)))
 
                   [:placementcontracts :contract :final]
                   (facts "placementcontracts.contract.proposal request"
@@ -243,22 +243,22 @@
           (facts "load-placementcontract-proposal!"
             (allu/load-placementcontract-proposal! {:application sent-app
                                                     :user user
-                                                    :action "TODO"}) => nil)
+                                                    :action "TODO"}) => {:status 200, :body allu-id})
 
           (facts "approve-placementcontract!"
             (allu/approve-placementcontract! {:application sent-app
                                               :user user
-                                              :action "TODO"}) => nil)
+                                              :action "TODO"}) => {:status 200, :body allu-id})
 
           (facts "load-placementcontract-final!"
             (allu/load-placementcontract-final! {:application sent-app
                                                  :user user
-                                                 :action "TODO"}) => nil)
+                                                 :action "TODO"}) => {:status 200, :body allu-id})
 
           (facts "load-contract-document!"
             (allu/load-contract-document! {:application sent-app
                                            :user user
-                                           :action "check-for-verdict"}) => nil)
+                                           :action "check-for-verdict"}) => allu-id)
 
 
           (facts "send-attachments!"

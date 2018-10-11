@@ -8,7 +8,7 @@
             [reitit.ring :as reitit-ring]
             [schema.core :as sc]
             [taoensso.timbre :refer [warn]]
-            [sade.core :refer [def- ok?]]
+            [sade.core :refer [def- ok? fail?]]
             [sade.env :as env]
             [sade.files :refer [with-temp-file]]
             [sade.schema-generators :as ssg]
@@ -90,7 +90,8 @@
                                                                       :attachmentType {:type-group "muut"
                                                                                        :type-id    "muu"}
                                                                       :locked false
-                                                                      :group {} :filename filename :tempfile file
+                                                                      :group {:groupType :general}
+                                                                      :filename filename :tempfile file
                                                                       :size (.length file))
              _ (fact "upload attachment" upload-res => ok?)
              _ (fact "set-attachment-meta"
@@ -164,6 +165,17 @@
     => (contains {:ok     false
                   :text   "error.integration.unsupported-action"
                   :action "undo-cancellation"})))
+
+(defn- fetch-contract [apikey app-id]
+  (itu/local-command apikey :check-for-verdict :id app-id))
+
+(defn- sign-contract [apikey app-id]
+  (fact "sign contract"
+    (let [verdict-id (-> (lupapalvelu.domain/get-application-no-access-checking app-id)
+                         :pate-verdicts
+                         first
+                         :id)]
+      (itu/local-command apikey :sign-allu-contract :id app-id :verdict-id verdict-id :password "pena") => ok?)))
 
 ;;;; Mock Handler
 ;;;; ===================================================================================================================
@@ -254,18 +266,52 @@
                            {:status 401, :body "Unauthorized"}))}}]
 
      ["/:id"
-      {:put {:handler (fn [{{:keys [id]} :path-params :keys [headers body]}]
-                        (if (= (get headers "authorization") (str "Bearer " mock-jwt))
-                          (let [placement-contract (json/decode body true)]
-                            (if-let [validation-error (sc/check PlacementContract placement-contract)]
-                              {:status 400, :body validation-error}
-                              (if (contains? (:applications @allu-state) id)
-                                (if (get-in @allu-state [:applications id :pendingOnClient])
-                                  (do (swap! allu-state assoc-in [:applications id] placement-contract)
-                                      {:status 200, :body id})
-                                  {:status 403, :body (str id " is not pendingOnClient")})
-                                {:status 404, :body (str "Not Found: " id)})))
-                          {:status 401, :body "Unauthorized"}))}}]]]])
+      ["" {:put {:handler (fn [{{:keys [id]} :path-params :keys [headers body]}]
+                            (if (= (get headers "authorization") (str "Bearer " mock-jwt))
+                              (let [placement-contract (json/decode body true)]
+                                (if-let [validation-error (sc/check PlacementContract placement-contract)]
+                                  {:status 400, :body validation-error}
+                                  (if (contains? (:applications @allu-state) id)
+                                    (if (get-in @allu-state [:applications id :pendingOnClient])
+                                      (do (swap! allu-state assoc-in [:applications id] placement-contract)
+                                          {:status 200, :body id})
+                                      {:status 403, :body (str id " is not pendingOnClient")})
+                                    {:status 404, :body (str "Not Found: " id)})))
+                              {:status 401, :body "Unauthorized"}))}}]
+      ["/contract"
+       ["/proposal"
+        {:get {:handler (fn [{{:keys [id]} :path-params :keys [headers]}]
+                          (if (= (get headers "authorization") (str "Bearer " mock-jwt))
+                            (if (contains? (:applications @allu-state) id)
+                              (if-not (get-in @allu-state [:applications id :pendingOnClient])
+                                {:status 200, :body (byte-array 1)}
+                                {:status 403, :body (str id " is not pendingOnClient")})
+                              {:status 404, :body (str "Not Found: " id)})
+                            {:status 401, :body "Unauthorized"}))}}]
+       ["/approved"
+        {:post {:handler (fn [{{:keys [id]} :path-params :keys [headers]}]
+                           (if (= (get headers "authorization") (str "Bearer " mock-jwt))
+                             (if (contains? (:applications @allu-state) id)
+                               (if-not (get-in @allu-state [:applications id :pendingOnClient])
+                                 (if-not (get-in @allu-state [:application id :approved])
+                                   (do
+                                     (swap! allu-state assoc-in [:application id :approved] true)
+                                     {:status 200, :body ""})
+                                   {:status 400, :body "Already signed"})
+                                 {:status 403, :body (str id " is not pendingOnClient")})
+                               {:status 404, :body (str "Not Found: " id)})
+                             {:status 401, :body "Unauthorized"}))}}]
+       ["/final"
+        {:get {:handler (fn [{{:keys [id]} :path-params :keys [headers]}]
+                          (if (= (get headers "authorization") (str "Bearer " mock-jwt))
+                            (if (contains? (:applications @allu-state) id)
+                              (if-not (get-in @allu-state [:applications id :pendingOnClient])
+                                (if (get-in @allu-state [:application id :approved])
+                                  {:status 200, :body (byte-array 1)}
+                                  {:status 400, :body "Not signed"})
+                                {:status 403, :body (str id " is not pendingOnClient")})
+                              {:status 404, :body (str "Not Found: " id)})
+                            {:status 401, :body "Unauthorized"}))}}]]]]]])
 
 (defn- mock-router [allu-id]
   (reitit-ring/router (mock-routes allu-id)))
@@ -312,35 +358,43 @@
               :states full-sijoitussopimus-state-graph
               :initial-state :draft
               :init! (fn [] (create-and-fill-placement-app pena "sijoitussopimus"))
-              :transition-adapters (into {} (map (fn [[src dest :as transition]]
-                                                   [transition
-                                                    (if (= src :canceled)
-                                                      (fn [[current _] id]
-                                                        (undo-cancellation raktark-helsinki id)
-                                                        current)
-                                                      (case dest
-                                                        :draft (fn [[_ dest] id]
-                                                                 (return-to-draft raktark-helsinki id "Nolo!")
-                                                                 dest)
-                                                        :open (fn [[_ dest] id] (open pena id "YOLO") dest)
-                                                        :submitted (fn [[_ dest] id]
-                                                                     (fill pena id)
-                                                                     (submit pena id)
-                                                                     dest)
-                                                        :sent (fn [[_ dest] id] (approve raktark-helsinki id) dest)
-                                                        :canceled (fn [[current dest] id]
-                                                                    (if (contains? #{:draft :open} current)
-                                                                      (cancel pena id "Alkoi nolottaa.")
-                                                                      (cancel raktark-helsinki id "Nolo!"))
-                                                                    dest)
-                                                        :complementNeeded (fn [[current _] id]
-                                                                            (request-for-complement raktark-helsinki id)
-                                                                            current)
-                                                        (:agreementPrepared :agreementSigned) ; TODO
-                                                        (fn [[_ dest :as transition] _]
-                                                          (warn "TODO:" transition)
-                                                          dest)))]))
-                                         (state-graph->transitions full-sijoitussopimus-state-graph))
+              :transition-adapters
+              (into {} (map (fn [[src dest :as transition]]
+                              [transition
+                               (if (= src :canceled)
+                                 (fn [[current _] id]
+                                   (undo-cancellation raktark-helsinki id)
+                                   current)
+                                 (case dest
+                                   :draft (fn [[_ dest] id]
+                                            (return-to-draft raktark-helsinki id "Nolo!")
+                                            dest)
+                                   :open (fn [[_ dest] id] (open pena id "YOLO") dest)
+                                   :submitted (fn [[_ dest] id]
+                                                (fill pena id)
+                                                (submit pena id)
+                                                dest)
+                                   :sent (fn [[_ dest] id] (approve raktark-helsinki id) dest)
+                                   :canceled (fn [[current dest] id]
+                                               (if (contains? #{:draft :open} current)
+                                                 (cancel pena id "Alkoi nolottaa.")
+                                                 (cancel raktark-helsinki id "Nolo!"))
+                                               dest)
+                                   :complementNeeded (fn [[current _] id]
+                                                       (request-for-complement raktark-helsinki id)
+                                                       current)
+                                   :agreementPrepared (fn [[current dest] id]
+                                                        (if (= current :submitted)
+                                                          (do (fact "fetch contract"
+                                                                (fetch-contract raktark-helsinki id) => fail?)
+                                                              current)
+                                                          (do (fact "fetch contract"
+                                                                (fetch-contract raktark-helsinki id) => ok?)
+                                                              dest)))
+                                   :agreementSigned (fn [[_ dest] id]
+                                                      (sign-contract pena id)
+                                                      dest)))]))
+                    (state-graph->transitions full-sijoitussopimus-state-graph))
               :visit-goal 1))
 
           (let [old-id-counter (:id-counter @allu-state)]
