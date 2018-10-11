@@ -4,6 +4,7 @@ Documentation   On application, construction is set started and ready
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/construction_time_helpers.robot
+Resource        ../39_pate/pate_resource.robot
 
 *** Test Cases ***
 
@@ -26,7 +27,7 @@ Sonja submits the application, approves it and gives it a verdict
   Click enabled by test id  approve-application-summaryTab
   Wait until  Application state should be  sent
   Open tab  verdict
-  Submit empty verdict  verdictGiven  1
+  Submit empty verdict  verdictGiven
 
 Sonja goes to the Rakentaminen tab and sets construction started via a dialog
   Open tab  tasks

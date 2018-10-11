@@ -101,7 +101,7 @@
 
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
 
-        state-changes (-> xml krysp-reader/get-sorted-tilamuutos-entries)
+        state-changes (krysp-reader/get-sorted-tilamuutos-entries xml)
 
         history-array (conv-util/generate-history-array xml)
 

@@ -4,6 +4,7 @@ Documentation   Kopiolaitos interaction
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        printout_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Variables      ../06_attachments/variables.py
 
 
@@ -148,7 +149,7 @@ Sonja checks that email was sent
   [Teardown]  Go Back
 
 Sonja opens the kopiolaitos order history dialog
-  Wait until  Element should be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
+  Wait test id visible  test-open-prints-order-history
   Scroll and click test id  test-open-prints-order-history
   Wait Until  Element should be visible  dialog-verdict-attachment-prints-order-history
   Element should be visible  //div[@id='dialog-verdict-attachment-prints-order-history']//button[@data-test-id='verdict-attachment-prints-history-ok']

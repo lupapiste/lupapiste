@@ -3,6 +3,7 @@
 Documentation   User's own attachments
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Variables      ../06_attachments/variables.py
 
 *** Test Cases ***

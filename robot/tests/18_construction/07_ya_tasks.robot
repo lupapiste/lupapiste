@@ -5,6 +5,7 @@ Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        task_resource.robot
 Resource        keywords.robot
+Resource        ../39_pate/pate_resource.robot
 Variables      ../06_attachments/variables.py
 
 *** Test Cases ***

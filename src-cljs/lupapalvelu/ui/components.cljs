@@ -116,9 +116,11 @@
      [button-class:] Default :primary
      callback: Callback function
      [disabled?:] Is component disabled
-     [input-type:] Default text."
+     [input-type:] Default text.
+     [test-id]: Test ids for input and button are derived from test-id
+     by postfixing -input and -button respectively."
   [{text* ::text} _ {:keys [icon button-class callback
-                            disabled? input-type]
+                            disabled? input-type test-id]
                      :as   options}]
   [:span.text-and-button
    (text-edit text* (merge {:disabled  disabled?
@@ -126,13 +128,16 @@
                             :on-key-up #(when (and (not (s/blank? @text*))
                                                    (= (.-keyCode %) 13))
                                           (callback @text*))}
+                           (when test-id
+                             {:test-id (common/test-id test-id :input)})
                            (dissoc options
                                    :icon :button-class :callback
-                                   :disabled? :input-type)))
+                                   :disabled? :input-type :test-id)))
    [:button
-    {:class    (common/css (or button-class :primary))
-     :disabled (or disabled? (s/blank? (rum/react text*)))
-     :on-click #(callback @text*)}
+    (cond-> {:class    (common/css (or button-class :primary))
+             :disabled (or disabled? (s/blank? (rum/react text*)))
+             :on-click #(callback @text*)}
+      test-id (common/add-test-id test-id :button))
     [:i {:class (common/css (or icon :lupicon-save))}]]])
 
 (defn default-items-fn [items]
@@ -266,11 +271,12 @@
             and optional :group key.
      [callback] change callback that is called when after list selection or blur.
      [disabled?] Is component disabled? (false)
-     [required?] Is component required? (false)"
-  [{open?*   ::open?
-    term*    ::term
-    latest*  ::latest
-    :as      local-state} _ {:keys [callback required? disabled?] :as options}]
+     [required?] Is component required? (false)
+     [test-id] Test id"
+  [{open?*  ::open?
+    term*   ::term
+    latest* ::latest
+    :as     local-state} _ {:keys [callback required? disabled? test-id] :as options}]
   (let [{:keys [text-edit
                 menu-items
                 items-fn]} (complete-parts local-state
@@ -280,9 +286,10 @@
                                                                  (reset! latest* %)
                                                                  (callback %)))
                                                   :combobox? true)
-                                           {:on-focus  #(common/reset-if-needed! open?* true)
-                                            :required? required?
-                                            :disabled  disabled?})]
+                                           (merge {:on-focus  #(common/reset-if-needed! open?* true)
+                                                   :required? required?
+                                                   :disabled  disabled?
+                                                   :test-id   test-id}))]
     [:div.pate-autocomplete
      [:div.ac--combobox text-edit]
      (let [items (items-fn @term*)]
@@ -416,19 +423,20 @@
 
 ;; Special options (all optional):
 ;;   callback: on-blur callback
+;;   test-id: Test id for the underlying input.
 ;; The rest of the options are passed to the underlying input.
 ;; Note: date format is always the Finnish format (21.8.2017).
 (rum/defcs date-edit < rum/reactive
   (initial-value-mixin ::date)
   (datepicker/date-state-mixin ::date {:format "D.M.YYYY"})
-  [{date* ::date} _ {:keys [callback] :as options}]
+  [{date* ::date} _ {:keys [callback test-id] :as options}]
   [:input.dateinput.dateinput--safe
-   (merge {:type      "text"
-           :value     @date*
-           :on-blur #(set-selected date*
-                                   (.. % -target -value)
-                                   callback)}
-          (dissoc options :callback))])
+   (common/add-test-id (merge {:type      "text"
+                               :on-blur #(set-selected date*
+                                                       (.. % -target -value)
+                                                       callback)}
+                              (dissoc options :callback :test-id))
+                       test-id)])
 
 (rum/defc text-and-link < rum/reactive
 "Renders text with included link
@@ -499,16 +507,19 @@
    Options:
      url: Link url
 
-   In addition, text, text-loc, enabled? and disabled? options are
+   In addition, text, text-loc, test-id, enabled? and disabled? options are
    supported."
-  [{:keys [url] :as options}]
+  [{:keys [url test-id] :as options}]
   (let [disabled? (common/resolve-disabled options)
-        text      (common/resolve-text options)]
+        text      (common/resolve-text options)
+        tid       (cond-> {}
+                    test-id (common/add-test-id test-id))]
     (if disabled?
-      [:span.btn.primary.outline.disabled text]
+      [:span.btn.primary.outline.disabled tid text]
       [:a.btn.primary.outline
-       {:href   url
-        :target :_blank}
+       (merge tid
+              {:href   url
+               :target :_blank})
        text])))
 
 (rum/defcs toggle < rum/reactive

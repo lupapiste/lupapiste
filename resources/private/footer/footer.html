@@ -6,37 +6,22 @@
     <div class="informations">
       <div class="footer-box">
         <h3 data-bind="ltext: 'footer.conversation.title'"></h3>
-        <ul>
-          <li>
-            <span data-bind="ltext: 'footer.conversation.desc'"></span><br />
+        <p>
+            <span data-bind="lhtml: 'footer.conversation.desc'"></span><br />
           <!-- ko if: _.includes(sidePanelPages, lupapisteApp.models.rootVMO && lupapisteApp.models.rootVMO.currentPage()) -->
             <a onclick="window.parent.hub.send('side-panel::show-conversation');return false;" href="#" data-bind="ltext: 'footer.open.conversation'"></a>
           <!-- /ko -->
-        </li>
-      </ul>
+      </p>
       </div>
       <div class="footer-box">
-        <ul>
-          <li></li>
-        </ul>
-      </div>      
-      <div class="footer-box">
-        <h3 data-bind="ltext: 'footer.contact'"></h3>
-        <ul>
-          <!-- ko if: /^\//.exec(loc('footer.current-issues.href')) -->
-          <li><a target="_blank" data-bind="ltext: 'footer.current-issues.text',
-                                            attr: {href: loc('footer.current-issues.href')}"></a></li>
+        <h3 data-bind="ltext: 'footer.report-issue.title'"></h3>
+        <p>
+          <span data-bind="ltext: 'footer.report-issue.desc'"></span>
+          <!-- ko if: /^\//.exec(loc('footer.report-issue.link-href')) -->
+          <span><a target="_blank" data-bind="ltext: 'footer.report-issue.link-text',
+                                            attr: {href: loc('footer.report-issue.link-href')}"></a></span>
           <!-- /ko -->
-        <!-- ko if: lupapisteApp.models.currentUser && (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.isCompanyUser()) -->
-          <li><a data-bind="attr: {href: loc('footer.email.authority.href')}, text: loc('footer.email.authority.text')"></a></li>
-          <li><span data-bind="ltext: 'footer.tel'"></span><br /><span data-bind="ltext: 'footer.tel.price'"></span><br />
-          <span data-bind="ltext: 'footer.phoneservice.time.authority'"></span></li>
-        <!-- /ko -->
-        <!-- ko if: lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.isApplicant() && !lupapisteApp.models.currentUser.isCompanyUser() -->
-          <li><span data-bind="ltext: 'footer.tel'"></span><br /><span data-bind="ltext: 'footer.tel.price'"></span><br />
-          <span data-bind="ltext: 'footer.phoneservice.time.applicant'"></span></li>
-        <!-- /ko -->
-        </ul>
+        </p>
       </div>
       <div class="footer-box">
         <ul>
@@ -44,6 +29,9 @@
           <li><a href="/kayttoehdot" data-bind="ltext: 'footer.terms'"></a></li>
           <li><a href="/lisenssit" data-bind="ltext: 'footer.license'"></a></li>
         </ul>
+      </div>
+      <div class="footer-box">
+        <p>&nbsp;</p>
       </div>
     </div>
     <span id="buildinfo"></span>

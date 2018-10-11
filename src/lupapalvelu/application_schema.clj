@@ -1,8 +1,9 @@
 (ns lupapalvelu.application-schema
   (:require [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.operations :as op]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.states :as states]))
 
 
 (defschema Operation
@@ -22,13 +23,13 @@
    :address                          sc/Str
    :state                            (apply sc/enum (map name states/all-states))
    :permitType                       (apply sc/enum (map name (keys (permit/permit-types))))
-   :permitSubtype                    (sc/maybe sc/Str)
-   ;; or (sc/maybe (->> (concat
-   ;;                     (->> (permit/permit-types) vals (map :subtypes) flatten distinct)
-   ;;                     (->> (vals op/operations) (map :subtypes) flatten distinct))
-   ;;                    (distinct)
-   ;;                    (apply sc/enum)))
-   ;; but requiring lupapalvelu.operation results in dependency cycle...
+   :permitSubtype                    (sc/maybe (->> (concat
+                                                      (->> (permit/permit-types) vals (map :subtypes) flatten distinct)
+                                                      (->> (vals op/operations) (map :subtypes) flatten distinct))
+                                                    (distinct)
+                                                    (remove nil?)
+                                                    (map name)
+                                                    (apply sc/enum)))
    :applicant                        (sc/maybe sc/Str)
    :infoRequest                      sc/Bool
    (sc/optional-key :3dMapActivated) (sc/maybe sc/Num)
@@ -275,11 +276,11 @@ What is the point of the fields with only one possible values?"
     "rakennuksen paikan tarkastaminen"
     "pohjakatselmus"
     "ei tiedossa"
-    "lämpö-, vesi- ja ilmanvaihtolaitteiden katselmus"
+    "l\u00E4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
     "muu tarkastus"
     "Loppukatselmus"
     "Aloituskatselmus"
-    "Muu valvontakäynti"})
+    "Muu valvontak\u00E4ynti"})
 
 (def task-data-katselmuksenLaji-numeric-values
   #{"0"
@@ -432,7 +433,7 @@ TODO: These need further checking, might not be sufficient."
 (defschema Applicant
   "TODO: 7 applications where applicant is empty string.
 Seems to contain name of applicant, which can be a person's name, a company's
-name or an asunto-osakeyhtiös name."
+name or an asunto-osakeyhti\u00f6s name."
   (sc/named sc/Str 'Applicant))
 
 (defschema ApplicantIndex

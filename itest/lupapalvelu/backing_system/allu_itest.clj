@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [cheshire.core :as json]
             [monger.operators :refer [$set]]
+            [mount.core :as mount]
             [reitit.ring :as reitit-ring]
             [schema.core :as sc]
             [taoensso.timbre :refer [warn]]
@@ -14,6 +15,7 @@
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.tools :refer [doc-name]]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
@@ -21,70 +23,11 @@
 
             [midje.sweet :refer [facts fact => contains]]
             [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
+            [lupapalvelu.itest-util.model-based :refer [state-graph->transitions traverse-state-transitions]]
 
             [lupapalvelu.backing-system.allu.core :as allu]
-            [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract FileMetadata]]
-            [lupapalvelu.domain :as domain])
+            [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract AttachmentMetadata]])
   (:import [java.io InputStream]))
-
-;;; TODO: Sijoituslupa
-
-;;;; Nano-framework :P for Model-Based Testing
-;;;; ===================================================================================================================
-
-(defn- state-graph->transitions [states]
-  (mapcat (fn [[state succs]] (map #(vector state %) succs)) states))
-
-(defn- transitions-todo [visited-total soured visit-goal]
-  (->> visited-total
-       (filter (fn [[transition visit-count]] (and (not (soured transition)) (< visit-count visit-goal))))
-       (map key)))
-
-(defn- probe-next-transition [states visit-goal visited-total soured current-state]
-  ;; This code is not so great but does the job for now.
-  (letfn [(useful [current visited]
-            (let [[usefuls visited]
-                  (reduce (fn [[transitions visited] succ]
-                            (let [transition [current succ]
-                                  visited* (conj visited transition)]
-                              (cond
-                                (soured transition) [transitions visited*]
-                                (< (get visited-total transition) visit-goal) [(conj transitions transition) visited*]
-                                (not (visited transition)) (let [[transition* visited*] (useful succ visited*)]
-                                                             (if transition*
-                                                               [(conj transitions transition) visited*]
-                                                               [transitions visited*]))
-                                :else [transitions visited*])))
-                          [[] visited] (get states current))]
-              [(if (seq usefuls) (rand-nth usefuls) nil)
-               visited]))]
-    (first (useful current-state #{}))))
-
-(defn- traverse-state-transitions [& {:keys [states initial-state init! transition-adapters visit-goal]}]
-  (let [initial-visited (zipmap (state-graph->transitions states) (repeat 0))]
-    (loop [visited-total initial-visited
-           visited visited-total
-           soured #{}
-           current-state initial-state
-           user-state (init!)]
-      (if-let [[_ next-state :as transition] (probe-next-transition states visit-goal visited-total soured
-                                                                    current-state)]
-        (if-let [transition-adapter (get transition-adapters transition)]
-          (let [next-state* (transition-adapter transition user-state)]
-            (if (or (not= next-state* current-state)        ; Led somewhere else?
-                    (= next-state* next-state))             ; Wasn't supposed to!
-              (recur (update visited-total transition inc) (update visited transition inc) soured
-                     next-state* user-state)
-              (recur (update visited-total transition inc)
-                     (update visited transition inc)
-                     (conj soured transition)               ; Let's not try that again.
-                     next-state*
-                     user-state)))
-          (do (warn "No adapter provided for" transition)
-              (recur (update visited-total transition inc) (update visited transition inc) soured
-                     next-state user-state)))
-        (when (seq (transitions-todo visited-total soured visit-goal))
-          (recur visited-total initial-visited soured initial-state (init!)))))))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -105,13 +48,16 @@
     :area     "708280",
     :height   "12"}])
 
-(defn- nullify-doc-ids [doc]
+(defn- nullify-doc-ids
+  "Make some foreign keys nil so that the tests don't try to load nonexistent users with generated id:s."
+  [doc]
   (-> doc
       (assoc-in [:data :henkilo :userId :value] nil)
       (assoc-in [:data :yritys :companyId :value] nil)))
 
-;; HACK: undo-cancellation bypasses the state graph so we add [:cancel *] arcs here:
-(defn- add-canceled->* [state-graph]
+(defn- add-canceled->*
+  "HACK: undo-cancellation bypasses the state graph so we add [:cancel *] arcs to the state graph with this."
+  [state-graph]
   (update state-graph :canceled
           into
           (comp (filter (fn [[_ succs]] (some (partial = :canceled) succs)))
@@ -130,6 +76,30 @@
                    (ssg/generate (dds/doc-data-schema "yleiset-alueet-maksaja" true))]]
     (mongo/update-by-id :applications id {$set {:permitSubtype permitSubtype, :documents documents}})
     id))
+
+(defn- upload-attachment
+  ([apikey app-id] (upload-attachment apikey app-id nil))
+  ([apikey app-id attachment]
+   (let [filename "dev-resources/test-attachment.txt"]
+     ;; HACK: Have to use a temp file as :upload-attachment expects to get one and deletes it in the end.
+     (with-temp-file file
+       (io/copy (io/file filename) file)
+       (let [description "Test file"
+             {:keys [attachmentId] :as upload-res} (itu/local-command apikey :upload-attachment :id app-id
+                                                                      :attachmentId (:id attachment)
+                                                                      :attachmentType {:type-group "muut"
+                                                                                       :type-id    "muu"}
+                                                                      :locked false
+                                                                      :group {} :filename filename :tempfile file
+                                                                      :size (.length file))
+             _ (fact "upload attachment" upload-res => ok?)
+             _ (fact "set-attachment-meta"
+                 (itu/local-command apikey :set-attachment-meta :id app-id :attachmentId attachmentId
+                                    :meta {:contents description}) => ok?)]
+         (fact "add-comment"
+           (itu/local-command apikey :add-comment :id app-id :text "Added my test text file."
+                              :target {:type "application"} :roles ["applicant" "authority"]) => ok?)
+         attachmentId)))))
 
 (defn- open [apikey app-id msg]
   (fact ":draft -> :open"
@@ -163,23 +133,15 @@
                                      ["yritys.yhteyshenkilo.yhteystiedot.email" (:email user)]
                                      ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]])))
 
-    (fact "upload attachments"
-      (let [filename "dev-resources/test-attachment.txt"]
-        ;; HACK: Have to use a temp file as :upload-attachment expects to get one and deletes it in the end.
-        (with-temp-file file
-          (io/copy (io/file filename) file)
-          (let [description "Test file"
-                _ (itu/local-command apikey :upload-attachment :id app-id :attachmentId (:id attachment)
-                                     :attachmentType {:type-group "muut", :type-id "muu"} :group {}
-                                     :filename filename :tempfile file :size (.length file)) => ok?
-                _ (itu/local-command apikey :set-attachment-meta :id app-id :attachmentId (:id attachment)
-                                     :meta {:contents description}) => ok?]
-            (itu/local-command apikey :add-comment :id app-id :text "Added my test text file."
-                               :target {:type "application"} :roles ["applicant" "authority"]) => ok?))))))
+    (upload-attachment apikey app-id attachment)))
 
 (defn- approve [apikey app-id]
   (fact "approve application"
-    (itu/local-command apikey :approve-application :id app-id :lang "fi")) => ok?)
+    (itu/local-command apikey :approve-application :id app-id :lang "fi") => ok?
+
+    ;; HACK: Testing move-attachments-to-backing-system here for lack of a better place:
+    (itu/local-command apikey :move-attachments-to-backing-system :id app-id :lang "fi"
+                       :attachmentIds [(upload-attachment apikey app-id)]) => ok?))
 
 (defn- return-to-draft [apikey app-id msg]
   (fact "return to draft"
@@ -206,13 +168,21 @@
 ;;;; Mock Handler
 ;;;; ===================================================================================================================
 
-(defn- check-response-ok-middleware [handler]
-  (fn [request]
-    (let [response (handler request)]
-      (fact "response is successful" response => (comp #{200 201} :status))
-      response)))
+(defn- check-response-ok-middleware
+  "Middleware that tests that the response HTTP status is successful or that we should just re-login."
+  [handler]
+  (let [unauth-counter (atom 0)]
+    (fn [request]
+      (let [response (handler request)]
+        (if (and (= (:status response) 401))
+          (do (fact "login only needs to happen once" @unauth-counter => 0)
+              (swap! unauth-counter inc))
+          (fact "response is successful" response => (comp #{200 201} :status)))
+        response))))
 
-(defn- check-imessages-middleware [handler]
+(defn- check-imessages-middleware
+  "Middleware that checks that `integration-messages` is updated with the request and response."
+  [handler]
   (fn [{{:keys [application]} ::allu/command :as request}]
     (let [imsg-query (fn [direction]
                        {:partner        "allu"
@@ -221,14 +191,17 @@
                         :status         "done"
                         :application.id (:id application)})
           res (handler request)]
-      (fact "integration messages are saved"
-        (mongo/any? :integration-messages (imsg-query "out")) => true
-        (mongo/any? :integration-messages (imsg-query "in")) => true)
+      (when-not (= (:uri request) "/login")                       ; HACK
+        (fact "integration messages are saved"
+          (mongo/any? :integration-messages (imsg-query "out")) => true
+          (mongo/any? :integration-messages (imsg-query "in")) => true))
       res)))
 
 (def- mock-jwt "foo.bar.baz")
 
-(defn- mock-routes [allu-state]
+(defn- mock-routes
+  "Create mock Reitit routes whose handlers use `allu-state` as the ALLU DB."
+  [allu-state]
   [["/login" {:post {:handler (fn [_] {:status 200, :body (json/encode mock-jwt)})}}]
 
    ["/"
@@ -248,7 +221,7 @@
                            (let [metadata-error (sc/check {:name      (sc/eq "metadata")
                                                            :mime-type (sc/eq "application/json")
                                                            :encoding  (sc/eq "UTF-8")
-                                                           :content   FileMetadata}
+                                                           :content   AttachmentMetadata}
                                                           (update (first multipart) :content json/decode true))
                                  file-error (sc/check {:name      (sc/eq "file")
                                                        :mime-type sc/Str
@@ -312,15 +285,6 @@
                                                           (into middlewares)
                                                           (conj check-response-ok-middleware)))}))
 
-;(deftype ConstALLU [cancel-response attach-response creation-response update-response]
-;  ALLUApplications
-;  (-cancel-application! [_ _ _] cancel-response)
-;  ALLUPlacementContracts
-;  (-create-placement-contract! [_ _ _] creation-response)
-;  (-update-placement-contract! [_ _ _ ] update-response)
-;  ALLUAttachments
-;  (-send-attachment! [_ _ _] attach-response))
-
 ;;;; Actual Tests
 ;;;; ===================================================================================================================
 
@@ -328,6 +292,7 @@
 
 (env/with-feature-value :allu true
   (mongo/connect!)
+  (mount/start #'allu/allu-jms-session #'allu/allu-jms-consumer)
 
   (facts "Usage of ALLU integration in commands"
     (mongo/with-db itu/test-db-name
@@ -371,15 +336,12 @@
                                                         :complementNeeded (fn [[current _] id]
                                                                             (request-for-complement raktark-helsinki id)
                                                                             current)
+                                                        (:agreementPrepared :agreementSigned) ; TODO
                                                         (fn [[_ dest :as transition] _]
                                                           (warn "TODO:" transition)
                                                           dest)))]))
                                          (state-graph->transitions full-sijoitussopimus-state-graph))
               :visit-goal 1))
-
-          ;;; TODO: move-attachments-to-backing-system
-          ;;; TODO: agreementPrepared/Signed
-          ;;; TODO: Ensure that errors from ALLU don't break the application process
 
           (let [old-id-counter (:id-counter @allu-state)]
             (fact "ALLU integration disabled for"
@@ -396,71 +358,4 @@
                   (itu/local-command pena :submit-application :id id) => ok?
                   (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?))
 
-              (:id-counter @allu-state) => (partial = old-id-counter)))))
-
-      #_(let [initial-allu-state {:id-counter 0, :applications {}}
-              allu-state (atom initial-allu-state)
-              failure-counter (atom 0)]
-          (mount/start-with {#'allu/allu-instance
-                             (->CheckingALLU (->MessageSavingALLU (->GetAttachmentFiles (->AtomMockALLU allu-state))))})
-
-          (binding [allu-fail! (fn [text info-map]
-                                 (fact "error text" text => :error.allu.http)
-                                 (fact "response is 4**" info-map => http/client-error?)
-                                 (swap! failure-counter inc))]
-            (fact "enabled and sending correctly to ALLU for Helsinki YA sijoituslupa and sijoitussopimus."
-              (let [{:keys [id]} (create-and-fill-placement-app apikey "sijoituslupa") => ok?
-                    {[attachment] :attachments :keys [documents]} (domain/get-application-no-access-checking id)
-                    {descr-id :id} (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa")
-                                                  documents))
-                    {applicant-id :id} (first (filter #(= (doc-name %) "hakija-ya") documents))]
-                (let [filename "dev-resources/test-attachment.txt"]
-                  ;; HACK: Have to use a temp file as :upload-attachment expects to get one and deletes it in the end.
-                  (with-temp-file file
-                    (io/copy (io/file filename) file)
-                    (let [description "Test file"
-                          description* "The best file"
-                          {[attachment] :attachments} (domain/get-application-no-access-checking id)
-                          expected-attachments [{:metadata {:name        description
-                                                            :description (localize "fi" :attachmentType
-                                                                                   (-> attachment :type :type-group)
-                                                                                   (-> attachment :type :type-id))
-                                                            :mimeType    (-> attachment :latestVersion :contentType)}}
-                                                {:metadata {:name        ""
-                                                            :description (localize "fi" :attachmentType :muut
-                                                                                   :keskustelu)
-                                                            :mimeType    "application/pdf"}}]
-                          expected-attachments* (conj expected-attachments
-                                                      (assoc-in (first expected-attachments)
-                                                                [:metadata :name] description*))]
-
-                      (io/copy (io/file filename) file)
-                      ;; Upload another attachment for :move-attachments-to-backing-system to send:
-                      (itu/local-command raktark-helsinki :upload-attachment :id id :attachmentId (:id attachment)
-                                         :attachmentType {:type-group "muut", :type-id "muu"} :group {}
-                                         :filename filename :tempfile file :size (.length file)) => ok?
-                      (itu/local-command raktark-helsinki :set-attachment-meta :id id :attachmentId (:id attachment)
-                                         :meta {:contents description*}) => ok?
-                      (itu/local-command raktark-helsinki :move-attachments-to-backing-system :id id :lang "fi"
-                                         :attachmentIds [(:id attachment)]) => ok?
-
-                      (-> (:applications @allu-state) first val :attachments) => expected-attachments*)))))
-
-            (fact "error responses from ALLU produce `fail!`ures"
-              (mount/start-with {#'allu/allu-instance
-                                 (->MessageSavingALLU (->GetAttachmentFiles
-                                                        (->ConstALLU {:status 200} {:status 200}
-                                                                     {:status 400, :body "Your data was bad."} nil)))})
-              (let [{:keys [id]} (create-and-fill-placement-app apikey "sijoituslupa") => ok?]
-                (itu/local-command apikey :submit-application :id id)
-                @failure-counter => 1)
-
-              (reset! failure-counter 0)
-
-              (mount/start-with {#'allu/allu-instance
-                                 (->MessageSavingALLU (->GetAttachmentFiles
-                                                        (->ConstALLU {:status 200} {:status 200}
-                                                                     {:status 401, :body "You are unauthorized."} nil)))})
-              (let [{:keys [id]} (create-and-fill-placement-app apikey "sijoitussopimus") => ok?]
-                (itu/local-command apikey :submit-application :id id)
-                @failure-counter => 1)))))))
+              (:id-counter @allu-state) => (partial = old-id-counter))))))))

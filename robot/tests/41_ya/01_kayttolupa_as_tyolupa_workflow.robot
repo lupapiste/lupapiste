@@ -4,6 +4,7 @@ Documentation   YA kayttolupa uses tyolupa workflow, thus constructionStarted is
 Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/construction_time_helpers.robot
+Resource        ../39_pate/pate_resource.robot
 Variables       ../../common_variables.py
 Library         DateTime
 
@@ -35,11 +36,8 @@ Sonja moves YA to verdictGiven state
   Wait until  Permit subtype is  Käyttölupa
   Element should be visible by test id  permit-subtype-text
 
-  Go to give new verdict
-  Input verdict  321  1  ${today}  ${TOMORROW}  Sopija-Sonja  False
-  Checkbox should not be selected  verdict-agreement
-  Click enabled by test id  verdict-publish
-  Confirm  dynamic-yes-no-confirm-dialog
+  Give legacy verdict  321  Sopija-Sonja  Myönnetty  ${today}
+  Click back
   Wait until  Application state should be  verdictGiven
   Wait until  Permit subtype is  Käyttölupa
   Logout
@@ -72,4 +70,3 @@ Sonja puts consturction finalized
 
 Frontend errors check
   There are no frontend errors
-

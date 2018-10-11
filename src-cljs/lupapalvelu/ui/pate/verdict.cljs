@@ -96,14 +96,15 @@
           open-sections (filter #(get meta-map (util/kw-path % :editing?))
                                 all-editable-sections)]
       [:a.pate-left-space
-       {:on-click #(swap! _meta (fn [m]
-                                  (->> (or (not-empty open-sections)
-                                           all-editable-sections)
-                                       (map (fn [id]
-                                              [(util/kw-path id :editing?)
-                                               (empty? open-sections)]))
-                                       (into {})
-                                       (merge m))))}
+       (common/add-test-id {:on-click #(swap! _meta (fn [m]
+                                                      (->> (or (not-empty open-sections)
+                                                               all-editable-sections)
+                                                           (map (fn [id]
+                                                                  [(util/kw-path id :editing?)
+                                                                   (empty? open-sections)]))
+                                                           (into {})
+                                                           (merge m))))}
+                           :toggle-all)
        (common/loc (if (seq open-sections)
                      :pate.close-all
                      :pate.open-all))])))
@@ -125,6 +126,7 @@
                                               :pate.contract.publish
                                               :verdict.submit)
                                   :class    (common/css :primary :pate-left-space)
+                                  :test-id  :publish-verdict
                                   :icon     (if contract?
                                               :lupicon-undersign
                                               :lupicon-document-section-sign)
@@ -143,6 +145,7 @@
                                                         @state/application-id
                                                         id)
                                   :enabled? (can-preview?)
+                                  :test-id  :preview-verdict
                                   :text-loc :pdf.preview})]])
      (if published
        [:div.row
@@ -188,16 +191,17 @@
 (rum/defc pate-verdict < rum/reactive
   []
   [:div.container
-  [:div.pate-verdict-page {:id "pate-verdict-page"}
+   [:div.pate-verdict-page {:id "pate-verdict-page"}
    (lupapalvelu.ui.attachment.components/dropzone)
    [:div.operation-button-row
-    [:button.secondary
-     {:on-click (fn [_]
-                  ;; In case we have just published a verdict
-                  (service/refresh-attachments)
-                  (common/open-page :application @state/application-id :verdict))}
-     [:i.lupicon-chevron-left]
-     [:span (common/loc :back)]]]
+    (components/icon-button {:class    :secondary
+                             :icon     :lupicon-chevron-left
+                             :text-loc :back
+                             :test-id  :back
+                             :on-click (fn [_]
+                                         ;; In case we have just published a verdict
+                                         (service/refresh-attachments)
+                                         (common/open-page :application @state/application-id :verdict))})]
    (if (and (rum/react state/current-verdict-id)
             (rum/react state/auth-fn))
      (if (rum/react state/verdict-tags)
@@ -209,7 +213,8 @@
                          :dictionary dictionary
                          :references state/references))))
 
-     [:div.pate-spin [:i.lupicon-refresh]])]])
+     [:div.pate-spin {:data-test-id :pate-spin}
+      [:i.lupicon-refresh]])]])
 
 (defn bootstrap-verdict []
   (let [[app-id verdict-id] (js/pageutil.getPagePath)]

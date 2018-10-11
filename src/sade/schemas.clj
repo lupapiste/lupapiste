@@ -164,6 +164,7 @@
   (sc/pred validators/valid-hetu? "Not valid hetu"))
 
 (def ObjectIdStr sssc/ObjectIdStr)
+(def ObjectIdKeyword sssc/ObjectIdKeyword)
 
 (defschema IpAddress
   (sc/pred validators/ip-address? "IP address"))

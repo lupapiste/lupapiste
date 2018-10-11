@@ -198,6 +198,9 @@
 (defn- poytakirja-with-paatos-data [poytakirjat]
   (some #(when (and (:paatoskoodi %) (:paatoksentekija %) (:paatospvm %)) %) poytakirjat))
 
+(defn- poytakirja-with-paatos-data-for-ark [poytakirjat]
+  (some #(when (and (:paatoskoodi %) (:paatospvm %)) %) poytakirjat))
+
 (defn- valid-paatospvm? [paatos-pvm]
   (> (util/get-timestamp-ago :day 1) paatos-pvm))
 
@@ -216,11 +219,12 @@
       (and validate-verdict-given-date
         (not-any? #(valid-antopvm? (:anto %)) paivamaarat)) (fail :info.paatos-future-date))))
 
-(defn- ->standard-verdicts [xml-without-ns & [organization _]]
+(defn- ->standard-verdicts [xml-without-ns & [organization paatos-data-fn _]]
   (let [{validate-verdict-given-date :validate-verdict-given-date} organization]
     (map (fn [paatos-xml-without-ns]
-           (let [poytakirjat      (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
-                 poytakirja       (poytakirja-with-paatos-data poytakirjat)
+           (let [paatos-data-fn   (or paatos-data-fn poytakirja-with-paatos-data)
+                 poytakirjat      (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
+                 poytakirja       (paatos-data-fn poytakirjat)
                  paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])]
              (when (and poytakirja (valid-paatospvm? (:paatospvm poytakirja)) (or (not validate-verdict-given-date)
                                                                                   (valid-antopvm? (:anto paivamaarat))))
@@ -228,6 +232,9 @@
                 :paivamaarat    paivamaarat
                 :poytakirjat    (seq poytakirjat)})))
          (select xml-without-ns [:paatostieto :Paatos]))))
+
+(defn- ->standard-ark-verdicts [xml-without-ns & [organization _]]
+  (->standard-verdicts xml-without-ns organization poytakirja-with-paatos-data-for-ark))
 
 ;; TJ/Suunnittelija verdict
 
@@ -449,7 +456,7 @@
 (defmethod permit/read-verdict-xml :MAL  [_ xml-without-ns & _]    (->simple-verdicts xml-without-ns))
 (defmethod permit/read-verdict-xml :VVVL [_ xml-without-ns & _]    (->simple-verdicts xml-without-ns))
 (defmethod permit/read-verdict-xml :KT   [_ xml-without-ns & _]    (->outlier-verdicts xml-without-ns))
-(defmethod permit/read-verdict-xml :ARK  [_ xml-without-ns & args] (apply ->standard-verdicts xml-without-ns args))
+(defmethod permit/read-verdict-xml :ARK  [_ xml-without-ns & args] (apply ->standard-ark-verdicts xml-without-ns args))
 
 (defmethod permit/read-tj-suunnittelija-verdict-xml :R [_ xml-without-ns & args]
   (apply ->tj-suunnittelija-verdicts xml-without-ns args))

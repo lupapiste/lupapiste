@@ -28,7 +28,7 @@
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.backing-system.allu.conversion :refer [lang application->allu-placement-contract
                                                                 format-date-time]]
-            [lupapalvelu.backing-system.allu.schemas :refer [PlacementContract FileMetadata]]
+            [lupapalvelu.backing-system.allu.schemas :refer [LoginCredentials PlacementContract AttachmentMetadata]]
             [lupapalvelu.file-upload :refer [save-file]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.integrations.jms :as jms]
@@ -36,55 +36,53 @@
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
+            [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.allu.allu-application :as allu-application])
   (:import [java.lang AutoCloseable]
            [java.io InputStream ByteArrayInputStream]))
 
-;;; TODO: Sijoituslupa
-
 (defstate ^:private current-jwt
+  "The JWT to be used for ALLU API authorization. Occasionally replaced by re-login."
   :start (atom (env/value :allu :jwt)))
-
-(defschema LoginCredentials
-  {:password sc/Str
-   :username sc/Str})
 
 ;;;; Initial request construction
 ;;;; ===================================================================================================================
 
 (defschema ^:private MiniCommand
-  {:application                               {:id           ssc/ApplicationId
-                                               :organization sc/Str
-                                               :state        (apply sc/enum (map name states/all-states))}
-   :action                                    sc/Str
-   :user                                      {:id       sc/Str
-                                               :username sc/Str}
-   (sc/optional-key :latestAttachmentVersion) {:fileId        sssc/FileId
-                                               :storageSystem sssc/StorageSystem}})
+  "A command that has been abridged for sending through JMS."
+  {:application {:id           ssc/ApplicationId
+                 :organization sc/Str
+                 :state        (apply sc/enum (map name states/all-states))}
+   :action      sc/Str
+   :user        {:id       sc/Str
+                 :username sc/Str}})
 
 (sc/defn ^{:private true, :always-validate true} minimize-command :- MiniCommand
-  ([{:keys [application action user]}]
-    {:application (select-keys application (keys (:application MiniCommand)))
-     :action      action
-     :user        (select-keys user (keys (:user MiniCommand)))})
-  ([command attachment]
-    (let [mini-attachment (-> (:latestVersion attachment)
-                              (select-keys (keys (get MiniCommand (sc/optional-key :latestAttachmentVersion))))
-                              (update :storageSystem keyword))]
-      (assoc (minimize-command command) :latestAttachmentVersion mini-attachment))))
+  [{:keys [application action user]}]
+  {:application (select-keys application (keys (:application MiniCommand)))
+   :action      action
+   :user        (select-keys user (keys (:user MiniCommand)))})
 
 (declare allu-router)
 
-(defn- route-match->request-method [route-match]
+(defn- route-match->request-method
+  "Get the HTTP method from a Reitit route match."
+  [route-match]
   (some #{:get :put :post :delete} (keys (:data route-match))))
 
-(defn- login-request [username password]
+(defn- login-request
+  "Construct an ALLU login request for `send-allu-request!` based on reverse routing on `allu-router`, `username`
+  and `password`."
+  [username password]
   (let [route-match (reitit/match-by-name allu-router [:login])]
     {:uri            (:path route-match)
      :request-method (route-match->request-method route-match)
      :body           {:username username, :password password}}))
 
-(defn- application-cancel-request [{:keys [application] :as command}]
+(defn- application-cancel-request
+  "Construct an ALLU application cancel request for `send-allu-request!` based on reverse routing on `allu-router`
+  and `command`."
+  [{:keys [application] :as command}]
   (let [allu-id (get-in application [:integrationKeys :ALLU :id])
         _ (assert allu-id (str (:id application) " does not contain an ALLU id"))
         route-match (reitit/match-by-name allu-router [:applications :cancel] {:id allu-id})]
@@ -92,7 +90,10 @@
      :uri            (:path route-match)
      :request-method (route-match->request-method route-match)}))
 
-(defmulti application-creation-request (fn [{{:keys [permitSubtype]} :application}] permitSubtype))
+(defmulti application-creation-request
+          "Construct an ALLU application creation request for `send-allu-request!` based on reverse routing on
+          `allu-router` and `command`. Dispatches on the command :application :permitSubtype."
+          (fn [command] (-> command :application :permitSubtype)))
 
 (defmethod application-creation-request :default [{{:keys [permitSubtype]} :application}]
   (fail! :error.allu.unsupportedPermitSubtype {:permitSubtype permitSubtype}))
@@ -104,9 +105,12 @@
      :request-method (route-match->request-method route-match)
      :body           (application->allu-placement-contract true application)}))
 
-(defmulti application-update-request (fn [_ {{:keys [permitSubtype]} :application}] permitSubtype))
+(defmulti application-update-request
+          "Construct an ALLU application update request for `send-allu-request!` based on reverse routing on
+          `allu-router`, `_pending-on-client` and `command`. Dispatches on the command :application :permitSubtype."
+          (fn [_pending-on-client command] (-> command :application :permitSubtype)))
 
-(defmethod application-update-request :default [{{:keys [permitSubtype]} :application}]
+(defmethod application-update-request :default [_pending-on-client {{:keys [permitSubtype]} :application}]
   (fail! :error.allu.unsupportedPermitSubtype {:permitSubtype permitSubtype}))
 
 (defmethod application-update-request "sijoitussopimus" [pending-on-client {:keys [application] :as command}]
@@ -121,8 +125,10 @@
      :request-method (route-match->request-method route-match)
      :body           (:body params)}))
 
-(defn- attachment-send [{:keys [application] :as command}
-                        {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment}]
+(defn- attachment-send
+  "Construct an ALLU attachment upload request for `send-allu-request!` based on reverse routing on `allu-router`,
+  `command` and `attachment` (one of `(-> command :application :attachments)`)."
+  [{:keys [application] :as command} {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
         _ (assert allu-id (str (:id application) " does not contain an ALLU id"))
         params {:path      {:id allu-id}
@@ -133,9 +139,9 @@
                                                         type
                                                         (str type ": " description)))
                                        :mimeType    (:contentType latestVersion)}
-                            :file     (:fileId latestVersion)}}
+                            :file     (select-keys latestVersion [:fileId :storageSystem])}}
         route-match (reitit/match-by-name allu-router [:attachments :create] (:path params))]
-    {::command       (minimize-command command attachment)
+    {::command       (minimize-command command)
      :uri            (:path route-match)
      :request-method (route-match->request-method route-match)
      :multipart      [{:name      "metadata"
@@ -143,7 +149,7 @@
                        :encoding  "UTF-8"
                        :content   (-> params :multipart :metadata)}
                       {:name      "file"
-                       :mime-type (:contentType latestVersion)
+                       :mime-type (-> params :multipart :metadata :mimeType)
                        :content   (-> params :multipart :file)}]}))
 
 (defn- contract-proposal-request [{:keys [application] :as command}]
@@ -180,6 +186,7 @@
 ;;;; ===================================================================================================================
 
 (sc/defn ^{:private true :always-validate true} base-integration-message :- IntegrationMessage
+  "Construct an ALLU integration specific `IntegrationMessage` for the `integration-messages` DB collection."
   [{:keys [application user action]} :- MiniCommand message-subtype direction status data]
   {:id           (mongo/create-id)
    :direction    direction
@@ -194,11 +201,14 @@
    :action       action
    :data         data})
 
-;; TODO: :attachment-files and :attachmentsCount for attachment messages
-(defn- request-integration-message [command http-request message-subtype]
+(defn- request-integration-message
+  "Construct an `IntegrationMessage` for an ALLU API request."
+  [command http-request message-subtype]
   (base-integration-message command message-subtype "out" "processing" http-request))
 
-(defn- response-integration-message [command endpoint http-response message-subtype]
+(defn- response-integration-message
+  "Construct an `IntegrationMessage` for an ALLU API response."
+  [command endpoint http-response message-subtype]
   (base-integration-message command message-subtype "in" "done"
                             {:endpoint endpoint
                              :response (select-keys http-response [:status :body])}))
@@ -209,17 +219,24 @@
 ;; TODO: Use clj-http directly so that this isn't needed:
 (def- http-method-fns {:get http/get, :post http/post, :put http/put})
 
-(defn- perform-http-request! [base-url {:keys [request-method uri] :as request}]
+(defn- perform-http-request!
+  "Send a HTTP `request` to `(str base-url uri)`."
+  [base-url {:keys [request-method uri] :as request}]
   ((request-method http-method-fns) (str base-url uri) (assoc request :throw-exceptions false)))
 
-(defn- make-remote-handler [allu-url]
+(defn- make-remote-handler
+  "Curried version of `perform-http-request!`."
+  [allu-url]
   (fn [request]
     (perform-http-request! allu-url request)))
 
 ;;;; Mock for interactive development
 ;;;; ===================================================================================================================
 
-(defn- creation-response-ok? [allu-id]
+(defn- creation-response-ok?
+  "Does the `integration-messages DB collection contain a successful creation response of the application with
+  `allu-id`."
+  [allu-id]
   (mongo/any? :integration-messages {:direction            "in" ; i.e. the response
                                      :messageType          "placementcontracts.create"
                                      :status               "done"
@@ -230,10 +247,13 @@
                                      :data.response.status {$in [200 201]}}))
 
 (defstate ^:private mock-logged-in?
+  "Are we logged in to the dev mock ALLU?"
   :start (atom false))
 
 ;; This approximates the ALLU state with the `imessages` data:
-(defn- imessages-mock-handler [request]
+(defn- imessages-mock-handler
+  "Mock for the ALLU API, can be called instead of `perform-http-request!`:ing to the actual remote ALLU API."
+  [request]
   (let [route-match (reitit-ring/get-match request)]
     (if (and (not @mock-logged-in?) (not= (-> route-match :data :name) [:login]))
       {:status 401 :body "Unauthorized"}
@@ -277,14 +297,27 @@
 ;;;; Custom middlewares
 ;;;; ===================================================================================================================
 
-(defn- route-name->string [path] (s/join \. (map name path)))
+;;; TODO: Use interceptors instead, the *->middleware fn:s are kind of silly when interceptors exist.
+
+(defn- route-name->string
+  "Join a `[Keyword]` into a string with dots and throwing away the keyword semicolons."
+  [path] (s/join \. (map name path)))
 
 (defn- preprocessor->middleware
-  "(Request -> Request) -> ((Request -> Response) -> (Request -> Response))"
+  "(Request -> Request) -> ((Request -> Response) -> (Request -> Response))
+  For the ML illiterates, turn a fn from request to request into a middleware function."
   [preprocess]
   (fn [handler] (fn [request] (handler (preprocess request)))))
 
-(defn- body&multipart-as-params [request]
+(defn- post-action->middleware
+  "(Response -> ()) -> ((Request -> Response) -> (Request -> Response))
+  i.e. turn a response-using imperative action into a middleware function."
+  [post-act!]
+  (fn [handler] (fn [request] (let [response (handler request)] (post-act! response) response))))
+
+(defn- body&multipart-as-params
+  "Copy the request :body into :body-params or :multipart into :multipart-params when they exist."
+  [request]
   (cond
     (contains? request :body) (assoc request :body-params (:body request))
     (contains? request :multipart) (letfn [(params+part [multipart-params part]
@@ -292,28 +325,37 @@
                                      (assoc request :multipart-params (reduce params+part {} (:multipart request))))
     :else request))
 
-(defn- jwt-authorize [request]
+(defn- jwt-authorize
+  "Add the authorization header for `current-jwt` to `request`."
+  [request]
   (assoc-in request [:headers "authorization"] (str "Bearer " @current-jwt)))
 
-(defn- content->json [request]
+(defn- content->json
+  "Convert the request :body or :multipart content into JSON (unless the :multipart part is the attachment file)."
+  [request]
   (cond
     (contains? request :body) (-> request (update :body json/encode) (assoc :content-type :json))
     (contains? request :multipart) (update request :multipart
-                                           (partial mapv (fn [{:keys [content] :as part}]
-                                                           (if (or (string? content)
-                                                                   (instance? InputStream content)) ; HACK
+                                           (partial mapv (fn [part]
+                                                           (if (= (:name part) "file")
                                                              part
                                                              (update part :content json/encode)))))
     :else request))
 
-(defn- delimit-file-contents! [handler]
+(declare allu-fail!)
+
+(defn- delimit-file-contents!
+  "Replace the attachment file id in [:multipart 1 :content] with the file contents `InputStream` when sending
+  attachment. Store pdf file to file storage when downloading contract."
+  [handler]
   (fn [{{:keys [application latestAttachmentVersion]} ::command :as request}]
     (match (-> request reitit-ring/get-match :data :name)
       [:attachments :create]
-      (handler (if-let [file-map (get-attachment-file! (:id application) (:fileId latestAttachmentVersion)
-                                                       {:versions [latestAttachmentVersion]})] ; HACK
-                 (assoc-in request [:multipart 1 :content] ((:content file-map)))
-                 (assert false "unimplemented")))
+      (let [{:keys [fileId storageSystem]} (get-in request [:multipart 1 :content])]
+        (if-some [file-map (storage/download-from-system (:id application) fileId storageSystem)]
+          (with-open [contents ((:content file-map))]
+            (handler (assoc-in request [:multipart 1 :content] contents)))
+          (allu-fail! :error.file-not-found {:fileId fileId})))
 
       [:placementcontracts :contract (:or :proposal :final)]
       (let [request (assoc request :as :byte-array)
@@ -331,15 +373,15 @@
 
       _ (handler request))))
 
-(defn- save-messages! [handler]
+(defn- save-messages!
+  "Save the request and response into the `integration-messages` DB collection."
+  [handler]
   (fn [{command ::command :as request}]
     (let [endpoint (-> request :uri)
           message-subtype (route-name->string (-> request reitit-ring/get-match :data :name))
           {msg-id :id :as msg} (request-integration-message
                                  command
-                                 (select-keys request [:uri :request-method (if (contains? request :multipart)
-                                                                              :multipart
-                                                                              :body)])
+                                 (select-keys request [:uri :request-method :body :multipart])
                                  message-subtype)
           _ (imessages/save msg)
           response (handler request)]
@@ -353,98 +395,119 @@
 
 (declare allu-request-handler)
 
-(defn- login! []
+(defn- login!
+  "Log in to ALLU, `reset!`:ing `current-jwt`."
+  []
   (allu-request-handler (login-request (env/value :allu :username) (env/value :allu :password))))
 
-;; TODO: Link the files of [:placementcontracts :contract *] to the application appropriately.
-(defn- handle-response [disable-io-middlewares?]
-  (fn [handler]
-    (fn [{{{app-id :id} :application} ::command :as request}]
-      (let [route-name (-> request reitit-ring/get-match :data :name)
-            {:keys [status] :as response} (handler request)]
-        (when (and (= status 401)
-                   (not= route-name [:login]))              ; guard against runaway recursion
-          (login!))
 
-        (match response
-          {:status (:or 200 201), :body body}
-          (do (info "ALLU operation" (route-name->string route-name) "succeeded")
-              (when (= route-name [:login])
-                (reset! current-jwt (json/decode body)))    ; for some reason body is a JSON-encoded string
-              (when (and (not disable-io-middlewares?) (= route-name [:placementcontracts :create]))
-                (application/set-integration-key app-id :ALLU {:id body}))
-              response)
+(defn- re-login-on-unauthorized!
+  "Re-login on HTTP 401."
+  [{:keys [status]}]
+  (when (= status 401)
+    (login!)))
 
-          response (allu-fail! :error.allu.http (select-keys response [:status :body])))))))
+(defn- reset-jwt!
+  "Reset `current-jwt` to the new one from login response."
+  [{:keys [body]}]
+  (reset! current-jwt (json/decode body)))                  ; for some reason (consistency?) body is a JSON-encoded string
+
+(defn- set-allu-integration-key!
+  "If creation was successful, set the ALLU integration key to be the creation response body."
+  [handler]
+  (fn [{{{app-id :id} :application} ::command :as request}]
+    (match (handler request)
+      ({:status (:or 200 201), :body body} :as response) (do (application/set-integration-key app-id :ALLU {:id body})
+                                                             response)
+      response response)))
+
+(defn- log-or-fail!
+  "`allu-fail!` on HTTP errors, else do logging."
+  [handler]
+  (fn [request]
+    (match (handler request)
+      ({:status (:or 200 201), :body body} :as response)
+      (do (info "ALLU operation" (route-name->string (-> request reitit-ring/get-match :data :name)) "succeeded")
+          response)
+
+      response (allu-fail! :error.allu.http (select-keys response [:status :body])))))
 
 ;;;; Router and request handler
 ;;;; ===================================================================================================================
 
 (defn- innermost-handler
+  "Make the innermost handler that either is an ALLU-specific HTTP client function or a mockery thereof."
   ([] (innermost-handler (env/dev-mode?)))
   ([dev-mode?] (if dev-mode? imessages-mock-handler (make-remote-handler (env/value :allu :url)))))
 
 (defn- routes
+  "Compute the Reitit routes that call `handler` at their core."
   ([handler] (routes (env/dev-mode?) handler))
   ([disable-io-middlewares? handler]
    (let [file-middleware (if disable-io-middlewares? [] [delimit-file-contents!])]
      [["/login" {:middleware [(preprocessor->middleware body&multipart-as-params)
                               reitit.ring.coercion/coerce-request-middleware
-                              (handle-response disable-io-middlewares?)
+                              (post-action->middleware reset-jwt!)
+                              log-or-fail!
                               (preprocessor->middleware content->json)]
-                 :name       [:login]
+                 :name [:login]
                  :parameters {:body LoginCredentials}
-                 :post       {:handler handler}}]
+                 :post {:handler handler}}]
 
 
       ["/" {:middleware (-> [(preprocessor->middleware body&multipart-as-params)
                              multipart-middleware
                              reitit.ring.coercion/coerce-request-middleware
-                             (handle-response disable-io-middlewares?)]
+                             log-or-fail!
+                             (post-action->middleware re-login-on-unauthorized!)]
                             (into (if disable-io-middlewares? [] [save-messages!]))
                             (conj (preprocessor->middleware (fn-> content->json jwt-authorize))))
-            :coercion   reitit.coercion.schema/coercion}
+            :coercion reitit.coercion.schema/coercion}
        ["applications"
-        ["/:id/cancelled" {:name       [:applications :cancel]
+        ["/:id/cancelled" {:name [:applications :cancel]
                            :parameters {:path {:id ssc/NatString}}
-                           :put        {:handler handler}}]
+                           :put {:handler handler}}]
 
-        ["/:id/attachments" {:name       [:attachments :create]
-                             :parameters {:path      {:id ssc/NatString}
-                                          :multipart {:metadata FileMetadata
-                                                      :file     sssc/FileId}}
+        ["/:id/attachments" {:name [:attachments :create]
+                             :parameters {:path {:id ssc/NatString}
+                                          :multipart {:metadata AttachmentMetadata
+                                                      :file {:fileId sssc/FileId
+                                                             :storageSystem sssc/StorageSystem}}}
                              :middleware file-middleware
-                             :post       {:handler handler}}]]
+                             :post {:handler handler}}]]
 
 
        ["placementcontracts"
-        ["" {:name       [:placementcontracts :create]
+        ["" {:name [:placementcontracts :create]
              :parameters {:body PlacementContract}
-             :post       {:handler handler}}]
+             :middleware (if disable-io-middlewares? [] [set-allu-integration-key!])
+             :post {:handler handler}}]
 
         ["/:id" {:parameters {:path {:id ssc/NatString}}}
-         ["" {:name       [:placementcontracts :update]
+         ["" {:name [:placementcontracts :update]
               :parameters {:body PlacementContract}
-              :put        {:handler handler}}]
+              :put {:handler handler}}]
 
          ["/contract"
-          ["/proposal" {:name       [:placementcontracts :contract :proposal]
+          ["/proposal" {:name [:placementcontracts :contract :proposal]
                         :middleware file-middleware
-                        :get        {:handler handler}}]
+                        :get {:handler handler}}]
 
-          ["/approved" {:name       [:placementcontracts :contract :approved]
-                        :parameters {:body {:signer      NonBlankStr
+          ["/approved" {:name [:placementcontracts :contract :approved]
+                        :parameters {:body {:signer NonBlankStr
                                             :signingTime (date-string :date-time-no-ms)}}
-                        :post       {:handler handler}}]
+                        :post {:handler handler}}]
 
-          ["/final" {:name       [:placementcontracts :contract :final]
+          ["/final" {:name [:placementcontracts :contract :final]
                      :middleware file-middleware
-                     :get        {:handler handler}}]]]]]])))
+                     :get {:handler handler}}]]]]]])))
 
-(def- allu-router (reitit-ring/router (routes false (innermost-handler))))
+(def- allu-router
+  "The Reitit router for ALLU requests."
+  (reitit-ring/router (routes false (innermost-handler))))
 
 (def allu-request-handler
-  "ALLU request handler. Returns nil, calls `allu-fail!` on HTTP errors."
+  "ALLU request handler. Returns HTTP response, calls `allu-fail!` on HTTP errors."
   (reitit-ring/ring-handler allu-router))
 
 ;;;; JMS resources
@@ -455,7 +518,10 @@
 (when (env/feature? :jms)
   ;; FIXME: HTTP timeout handling
   ;; FIXME: Error handling is very crude
-  (defn- allu-jms-msg-handler [session]
+  (defn- allu-jms-msg-handler
+    "Make a JMS message handler in JMS `session`. The handler will call `allu-request-handler` and do a JMS rollback on
+    any exceptions."
+    [session]
     (fn [{{{app-id :id} :application {user-id :user} :user} ::command uri :uri :as msg}]
       (logging/with-logging-context {:userId user-id :applicationId app-id}
         (try
@@ -479,7 +545,10 @@
                               (jms/message-listener (jms/nippy-callbacker (allu-jms-msg-handler allu-jms-session))))
     :stop (.close allu-jms-consumer)))
 
-(defn- send-allu-request! [request]
+(defn- send-allu-request!
+  "Send an ALLU request. Will put the request in the `allu-jms-queue-name` queue if JMS is enabled, otherwise calls
+  `allu-request-handler` directly."
+  [request]
   (if (env/feature? :jms)
     (jms/produce-with-context allu-jms-queue-name (nippy/freeze request))
     (allu-request-handler request)))
@@ -502,7 +571,7 @@
     (send-allu-request! (application-creation-request command))
     (update-application! command)))
 
-;; TODO: Will error if user changes the application to contain invalid data, is that what we want?
+;; TODO: If the update message data is the same as the previous one or invalid, don't send/enqueue the message at all:
 (defn update-application!
   "Update application in ALLU (if it had been sent there)."
   [{:keys [application] :as command}]

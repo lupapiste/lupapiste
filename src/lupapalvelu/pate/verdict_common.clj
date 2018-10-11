@@ -90,7 +90,8 @@
     (-> verdict :data :verdict-date)
 
     :else
-    (:paatospvm (latest-pk verdict))))
+    (or (:paatospvm (latest-pk verdict))
+        (some-> verdict :paatokset first :paivamaarat :paatosdokumentinPvm))))
 
 (defn verdict-id [verdict]
   (:id verdict))

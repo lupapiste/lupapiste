@@ -182,7 +182,7 @@
 "application.attachmentsAddList" "fi" "Lisää liitetiedosto"
 "application.attachmentsAddList" "sv" "Lägg till bilaga"
 "application.attachmentsCopyOwn" "en" "Copy your own attachments to the application"
-"application.attachmentsCopyOwn" "fi" "Kopioi omat liitteet hakemukselle"
+"application.attachmentsCopyOwn" "fi" "Kopioi omat liitteesi hakemukselle"
 "application.attachmentsCopyOwn" "sv" "Kopiera egna bilagor till ansökan"
 "application.attachmentsCopyOwn.confirmationMessage" "en" "Do you want to copy your attachments to the application?"
 "application.attachmentsCopyOwn.confirmationMessage" "fi" "Haluatko kopioida liitteesi hakemukselle?"

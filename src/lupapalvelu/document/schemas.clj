@@ -610,7 +610,7 @@
                  (henkilo-yritys-select-group :default "yritys"
                   :yritys-body yritys-with-verkkolaskutustieto
                   :henkilo-body henkilo-maksaja)
-                 {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
+                 {:name "laskuviite" :type :string :max-len 500 :layout :full-width}))
 
 (def muutostapa {:name "muutostapa" :type :select :sortBy :displayname
                  :size :s :label false :i18nkey "huoneistot.muutostapa"

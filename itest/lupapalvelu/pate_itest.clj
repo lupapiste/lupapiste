@@ -11,7 +11,6 @@
             [sade.coordinate :as coord]
             [sade.core :refer [now]]
             [sade.env :as env]
-            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.xml :as xml]))

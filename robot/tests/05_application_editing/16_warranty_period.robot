@@ -3,6 +3,8 @@
 Documentation   On application, construction is set started and ready
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
+
 
 *** Test Cases ***
 
@@ -18,7 +20,7 @@ Olli-ya submits the application, approves it and gives it a verdict
   Click enabled by test id  approve-application-summaryTab
   Confirm notification dialog
   Open tab  verdict
-  Submit empty verdict  verdictGiven  1
+  Submit empty verdict  verdictGiven
 
 Olli-ya goes to the Rakentaminen
   Open tab  tasks
@@ -115,7 +117,8 @@ Open date dialog
   Click enabled by test id  ${openDialogButtonId}
   Wait until  element should be visible  modal-datepicker-date
   Element Should Be Enabled  modal-datepicker-date
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Execute JavaScript  $(".hasDatepicker").css("focus");
+  Execute JavaScript  $("#ui-datepicker-div:visible").css("display", "none");
 
 Sets construction started/ready via modal datepicker dialog
   [Arguments]  ${openDialogButtonId}  ${date}
