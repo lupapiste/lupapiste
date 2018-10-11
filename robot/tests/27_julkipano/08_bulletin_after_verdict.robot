@@ -14,10 +14,17 @@ Mikko opens new application
   Create sent application  Vaalantie 540  564-404-26-102
   Logout
 
-Olli gives verdict without proclaiming bulletin
+Olli logs in to give verdict
   As Olli
   Open application  Vaalantie 540  564-404-26-102
-  Submit empty verdict
+
+Fetch verdicts button not visible
+  Open tab  verdict
+  Wait test id visible  new-legacy-verdict
+  No such test id  fetch-verdict
+
+Olli gives verdict without proclaiming bulletin
+    Submit empty verdict
 
 No bulletins yet, can be sent as verdict given
   Bulletin not proclaimed but can be moved to verdict given
