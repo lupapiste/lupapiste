@@ -81,3 +81,37 @@
     (mongo/max-1-elem-match? {:subcoll0 {:id 0}
                        :subcoll1 {"$elemMatch" {:id 1}}
                        :subcoll2 {"$elemMatch" {:id 2}}}) => false))
+
+(facts "update-with-$-has-corresponding-elem-match-in-query?"
+  (facts "Empty input"
+    (mongo/update-with-$-has-corresponding-elem-match-in-query? nil nil) => true
+    (mongo/update-with-$-has-corresponding-elem-match-in-query? {} {}) => true)
+
+  (facts "$elemMatch, no $"
+    (mongo/update-with-$-has-corresponding-elem-match-in-query? {:subcoll {"$elemMatch" nil}} {}) => true
+    (mongo/update-with-$-has-corresponding-elem-match-in-query? {:subcoll {"$elemMatch" nil}} {}) => true
+    (mongo/update-with-$-has-corresponding-elem-match-in-query? {:subcoll {"$elemMatch" nil}}
+                                                                {"$set" {:subcoll.0.val 1}}) => true)
+
+  (facts "no $elemMatch, $"
+    (mongo/update-with-$-has-corresponding-elem-match-in-query? {} {"$set" {:subcoll.$.val 1}}) => false
+    (mongo/update-with-$-has-corresponding-elem-match-in-query? {:subcoll {"$ne" nil}}
+                                                                {"$set" {"subcoll.$.val" 1}}) => false)
+
+  (facts "subcollection mismatch"
+    (mongo/update-with-$-has-corresponding-elem-match-in-query? {:subcoll {"$elemMatch" nil}}
+                                                                {"$set" {"other-subcoll.$.val" 1}}) => false
+    (mongo/update-with-$-has-corresponding-elem-match-in-query? {:subcoll {"$elemMatch" nil}}
+                                                                {"$set" {:subcoll.$.val 1
+                                                                         "other-subcoll.$.val" 1}}) => false
+    ;; The query would also fail max-1-elem-match?
+    (mongo/update-with-$-has-corresponding-elem-match-in-query? {:subcoll {"$elemMatch" nil}
+                                                                 :other-subcoll {"$elemMatch" nil}}
+                                                                {"$set" {:subcoll.$.val 1
+                                                                         "other-subcoll.$.val" 1}}) => false)
+  (facts "correct use of $"
+    (mongo/update-with-$-has-corresponding-elem-match-in-query? {:subcoll {"$elemMatch" nil}}
+                                                                {"$set" {:subcoll.$.val 1
+                                                                         "subcoll.$.other-val" 2}}) => true
+    (mongo/update-with-$-has-corresponding-elem-match-in-query? {:subcoll {"$elemMatch" nil}}
+                                                                {"$set" {:subcoll.$ 1}}) => true))

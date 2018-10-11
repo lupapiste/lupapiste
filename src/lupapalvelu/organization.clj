@@ -887,7 +887,7 @@
 
 (defn toggle-handler-role! [org-id role-id enabled?]
   (mongo/update :organizations
-                {:_id org-id :handler-roles.id role-id}
+                {:_id org-id :handler-roles {$elemMatch {:id role-id}}}
                 {$set {:handler-roles.$.disabled (not enabled?)}}))
 
 (defn get-duplicate-scopes [municipality permit-types]

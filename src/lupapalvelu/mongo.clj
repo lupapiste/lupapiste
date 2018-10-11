@@ -113,6 +113,34 @@
                                   x)) m)]
     (<= (clojure.core/count walked) 1)))
 
+(defn dollar-path [s]
+  (let [[_ path] (re-find #"(^[^\.]+)\.\$" s)]
+       path))
+
+(defn ^{:perfmon-exclude true} update-with-$-has-corresponding-elem-match-in-query?
+  [q u]
+  (boolean
+   (let [[dollar-field :as dollar-fields] (some->> (get u $set)
+                                                   keys
+                                                   (map (comp dollar-path name))
+                                                   (clojure.core/remove nil?)
+                                                   clojure.core/distinct)]
+     (cond
+       ;; Can't misuse $ operator if you don't use it at all
+       (= (clojure.core/count dollar-fields) 0) true
+
+       ;; There should be a distinct field preceding the $ operator
+       ;; with a corresponding $elemMatch in query
+       (= (clojure.core/count dollar-fields) 1)
+       (when-let [query-field-value  (or (get q dollar-field)
+                                         (get q (keyword dollar-field)))]
+         (and (map? query-field-value)
+              (contains? query-field-value $elemMatch)))
+
+       ;; There should never be more than one field updated at a time
+       ;; with the $ operator
+       :else false))))
+
 (defn ^{:perfmon-exclude true} generate-array-updates
   "Returns a map of mongodb array update paths to be used as a value for $set or $unset operation.
    E.g., (generate-array-updates :attachments [true nil nil true nil] true? \"k\" \"v\")
@@ -146,14 +174,16 @@
 (defn update-n
   "Updates data into collection by query, returns a number of updated documents."
   [collection query data & {:as opts}]
-  {:pre [(max-1-elem-match? query)]}
+  {:pre [(max-1-elem-match? query)
+         (update-with-$-has-corresponding-elem-match-in-query? query data)]}
   (let [options (-> (merge {:write-concern default-write-concern} opts) seq flatten)]
     (.getN (mc/update (get-db) collection query (remove-null-chars data) options))))
 
 (defn update
   "Updates data into collection by query. Always returns nil."
   [collection query data & opts]
-  {:pre [(max-1-elem-match? query)]}
+  {:pre [(max-1-elem-match? query)
+         (update-with-$-has-corresponding-elem-match-in-query? query data)]}
   (mc/update (get-db) collection (remove-null-chars query) (remove-null-chars data) opts)
   nil)
 
@@ -167,13 +197,15 @@
 (defn update-by-query
   "Updates data into collection with 'multi' set to true. Returns the number of documents updated"
   [collection query data & opts]
-  {:pre [(max-1-elem-match? query)]}
+  {:pre [(max-1-elem-match? query)
+         (update-with-$-has-corresponding-elem-match-in-query? query data)]}
   (.getN (mc/update (get-db) collection query (remove-null-chars data) (apply hash-map :multi true opts))))
 
 (defn update-one-and-return
   "Updates first document in collection matching conditions. Returns updated document or nil."
   [collection query document & {:keys [fields sort remove upsert] :or {fields nil sort nil remove false upsert false}}]
-  {:pre [(max-1-elem-match? query)]}
+  {:pre [(max-1-elem-match? query)
+         (update-with-$-has-corresponding-elem-match-in-query? query document)]}
   (mc/find-and-modify (get-db) collection (remove-null-chars query) (remove-null-chars document)
     {:return-new true :upsert upsert :remove remove :sort sort :fields fields}))
 

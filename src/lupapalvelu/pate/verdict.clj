@@ -1151,6 +1151,23 @@
                           :data.verdict-section
                           :template.inclusions)))))
 
+(defn update-waste-documents
+  "Updates or adds a waste report document if a waste plan document
+  already exists. If the function is called with the optional
+  `dry-run?` argument having a truthy value, the function only returns
+  the mongo updates that would be executed. This is used for testing."
+  [{:keys [application command]} & [dry-run?]]
+  (let [transition-updates (transformations/get-state-transition-updates
+                            (assoc command :application application)
+                            (sm/verdict-given-state application))]
+    (when (and (not dry-run?)
+               (not-empty (:mongo-updates transition-updates)))
+      (action/update-application (assoc command :application application)
+                                 (or (:mongo-query transition-updates)
+                                     {:_id (:id application)})
+                                 (:mongo-updates transition-updates)))
+    transition-updates))
+
 (defn finalize--application-state
   "Updates for application state, history and affected documents."
   [{:keys [command application]}]
@@ -1161,10 +1178,8 @@
                                     state
                                     (:created command)
                                     application
-                                    (:user command))
-                                   (:mongo-updates (not-empty (transformations/get-state-transition-updates
-                                                               (assoc command :application application)
-                                                               state))))}))
+                                    (:user command)))
+     :commit-fn update-waste-documents}))
 
 (defn finalize--buildings-and-tasks
   [{:keys [command application verdict]}]
