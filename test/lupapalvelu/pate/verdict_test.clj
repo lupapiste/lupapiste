@@ -2427,8 +2427,7 @@
                                                                 :_user     "user-email"
                                                                 :_modified 12345}}}})
 
-    (fact "finalize--application-state: waste plan"
-      ;; If there is a waste plan but a waste report does not exist, it is added to documents
+    (fact "finalize--application-state: waste plan - If there is a waste plan but a waste report does not exist, it is added to documents"
       (-> application :documents count) => 3
       (let [{:keys [application updates commit-fn]} (finalize--application-state c-v-a)]
         application => (merge application {:state :verdictGiven})
@@ -2440,6 +2439,8 @@
                                                             :username  "user-email"}}}
                                    $set  {:modified     12345
                                           :state        :verdictGiven}}
+        ;; assoc-in is used just to avoid using provided, which did
+        ;; not like having facts inside the let binding
         (assoc-in (commit-fn (assoc c-v-a :application application) :dry-run)
                   [:mongo-updates $set "documents.3" :id]  "static-id")
         => {:mongo-updates
@@ -2508,13 +2509,12 @@
                                                  :section-help       "rakennusjate.help"
                                                  :version            1}}}}}))
 
-    (fact "finalize--application-state: waste report"
-      ;; If a waste report document exists, it is updated
+    (fact "finalize--application-state: waste report - If a waste report document exists, it is updated"
       (let [c-v-a (update-in c-v-a [:application :documents]
                              #(conj % rakennusjateselvitys))
             {:keys [application updates commit-fn]} (finalize--application-state c-v-a)
             waste-report-id (:id rakennusjateselvitys)]
-        (commit-fn (assoc c-v-a :application application))
+        (commit-fn (assoc c-v-a :application application) :dry-run)
         => {:mongo-query {:documents {$elemMatch {:id waste-report-id}}}
             :mongo-updates {$set {"documents.$.data.rakennusJaPurkujate.suunniteltuJate.0.jatetyyppi.modified" 12345
                                   "documents.$.data.rakennusJaPurkujate.suunniteltuJate.0.jatetyyppi.value" "kipsi"
@@ -2545,20 +2545,20 @@
                                     "documents.$.meta.rakennusJaPurkujate.suunniteltuJate.2" ""}}
  :post-results []}))
 
-    (fact "finalize--application-state: no waste plan"
-      ;; If there is no waste plan, waste report document is not added or updated
-      (let [application (update application :documents drop-last)]
-        (finalize--application-state (assoc c-v-a :application application) )
-        => {:application (merge application
-                                {:state :verdictGiven})
-            :updates     {$push {:history {:state :verdictGiven
-                                           :ts    12345
-                                           :user  {:firstName "Hello"
-                                                   :id        "user-id"
-                                                   :lastName  "World"
-                                                   :username  "user-email"}}}
-                          $set  {:modified 12345
-                                 :state    :verdictGiven}}}))
+    (fact "finalize--application-state: no waste plan - If there is no waste plan, waste report document is not added or updated"
+      (let [application (update application :documents drop-last)
+            {:keys [application updates commit-fn]} (finalize--application-state (assoc c-v-a :application application))]
+        application => (merge application
+                              {:state :verdictGiven})
+        updates => {$push {:history {:state :verdictGiven
+                                     :ts    12345
+                                     :user  {:firstName "Hello"
+                                             :id        "user-id"
+                                             :lastName  "World"
+                                             :username  "user-email"}}}
+                    $set  {:modified 12345
+                           :state    :verdictGiven}}
+        (commit-fn (assoc c-v-a :application application) :dry-run) => nil))
 
     (let [verdict (-> verdict
                       (assoc-in [:data :reviews] ["5a156dd40e40adc8ee064463"
