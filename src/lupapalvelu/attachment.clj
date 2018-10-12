@@ -450,13 +450,13 @@
            (let [version-path (str "attachments.$.versions." idx)]
              (update-application
                (application->command application)
-               {:attachments.id id}
+               {:attachments {$elemMatch {:id id}}}
                {$set {(str version-path ".fileId") nil
                       (str version-path ".originalFileId") nil}}))))
        dorun)
   (update-application
     (application->command application)
-    {:attachments.id id}
+    {:attachments {$elemMatch {:id id}}}
     {$set {:attachments.$.latestVersion.fileId nil
            :attachments.$.latestVersion.originalFileId nil}}))
 
@@ -723,7 +723,7 @@
   "Returns the file for the latest attachment version if user has access to application and the attachment, otherwise nil.
    Optionally uses the provided application to save on db overhead."
   ([user attachment-id preview?]
-    (->> (get-application-as {:attachments.id attachment-id} user :include-canceled-apps? true)
+   (->> (get-application-as {:attachments {$elemMatch {:id attachment-id}}} user :include-canceled-apps? true)
          (get-attachment-latest-version-file user attachment-id preview?)))
   ([user attachment-id preview? application]
    (let [{:keys [latestVersion] :as attachment} (->> (:attachments application)
@@ -944,7 +944,7 @@
                                                     :autoConversion :conversionLog :filename])))]
     (update-application
       (application->command application)
-      {:attachments.id id}
+      {:attachments {$elemMatch {:id id}}}
       {$set mongo-updates})))
 
 (defn convert-existing-to-pdfa!
