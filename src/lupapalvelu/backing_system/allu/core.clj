@@ -18,7 +18,7 @@
             [slingshot.slingshot :refer [try+]]
             [taoensso.timbre :refer [info error]]
             [taoensso.nippy :as nippy]
-            [sade.util :refer [dissoc-in assoc-when fn->]]
+            [sade.util :refer [dissoc-in assoc-when fn-> file->byte-array]]
             [sade.core :refer [def- fail! now]]
             [sade.env :as env]
             [sade.http :as http]
@@ -284,15 +284,19 @@
                                             {:status 200, :body id}
                                             {:status 404, :body (str "Not Found: " id)})))
 
-        [:placementcontracts :contract :proposal] (let [id (-> route-match :path-params :id)]
-                                                                 (if (response-ok? id "placementcontracts.create")
-                                                                   {:status 200, :body (byte-array 1)}
-                                                                   {:status 404, :body (str "Not Found: " id)}))
+        [:placementcontracts :contract :proposal]
+        (let [id (-> route-match :path-params :id)]
+          (if (response-ok? id "placementcontracts.create")
+            {:status 200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
+             :headers {"Content-Type" "application/pdf"}}
+            {:status 404, :body (str "Not Found: " id)}))
 
-        [:placementcontracts :contract :final] (let [id (-> route-match :path-params :id)]
-                                                    (if (response-ok? id "placementcontracts.contract.approved")
-                                                      {:status 200, :body (byte-array 1)}
-                                                      {:status 404, :body (str "Not Found: " id)}))
+        [:placementcontracts :contract :final]
+        (let [id (-> route-match :path-params :id)]
+          (if (response-ok? id "placementcontracts.contract.approved")
+            {:status 200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
+             :headers {"Content-Type" "application/pdf"}}
+            {:status 404, :body (str "Not Found: " id)}))
 
         [:placementcontracts :contract :approved] (let [id (-> route-match :path-params :id)]
                                                     (if (response-ok? id "placementcontracts.create")
@@ -633,8 +637,7 @@
   "Load placement contract proposal or final from ALLU. Returns SavedFileData of the pdf or nil. Bypasses JMS."
   [{:keys [application] :as command}]
   (try+
-    (-> (allu-request-handler (case (:state application)
-                                ("sent" "submitted") (contract-proposal-request command)
-                                "agreementPrepared" (final-contract-request command)))
-        :body)
+    (:body (allu-request-handler (case (:state application)
+                                   ("sent" "submitted") (contract-proposal-request command)
+                                   "agreementPrepared" (final-contract-request command))))
     (catch [:text "error.allu.http"] _ nil)))

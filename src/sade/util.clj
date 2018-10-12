@@ -688,3 +688,10 @@
   [config]
   (doseq [[k v] config]
     (when (nil? v) (errorf "missing key '%s' value from property file" (name k)))))
+
+(defn file->byte-array [file]
+  (let [file (io/file file)
+        b-array (byte-array (.length file))]
+    (with-open [is (io/input-stream file)]
+      (.read is b-array)
+      b-array)))

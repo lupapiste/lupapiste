@@ -12,6 +12,7 @@
             [sade.env :as env]
             [sade.files :refer [with-temp-file]]
             [sade.schema-generators :as ssg]
+            [sade.util :refer [file->byte-array]]
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.tools :refer [doc-name]]
@@ -27,7 +28,7 @@
 
             [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract AttachmentMetadata]])
-  (:import [java.io InputStream]))
+  (:import [java.io InputStream FileInputStream]))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -134,14 +135,14 @@
                                      ["yritys.yhteyshenkilo.yhteystiedot.email" (:email user)]
                                      ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]])))
 
-    (upload-attachment apikey app-id attachment)))
+    #_(upload-attachment apikey app-id attachment)))
 
 (defn- approve [apikey app-id]
   (fact "approve application"
     (itu/local-command apikey :approve-application :id app-id :lang "fi") => ok?
 
     ;; HACK: Testing move-attachments-to-backing-system here for lack of a better place:
-    (itu/local-command apikey :move-attachments-to-backing-system :id app-id :lang "fi"
+    #_(itu/local-command apikey :move-attachments-to-backing-system :id app-id :lang "fi"
                        :attachmentIds [(upload-attachment apikey app-id)]) => ok?))
 
 (defn- return-to-draft [apikey app-id msg]
@@ -186,10 +187,13 @@
   (let [unauth-counter (atom 0)]
     (fn [request]
       (let [response (handler request)]
-        (if (and (= (:status response) 401))
-          (do (fact "login only needs to happen once" @unauth-counter => 0)
-              (swap! unauth-counter inc))
-          (fact "response is successful" response => (comp #{200 201} :status)))
+        (cond
+          (and (= (:status response) 401)) (do (fact "login only needs to happen once" @unauth-counter => 0)
+                                               (swap! unauth-counter inc))
+          (= (-> request reitit-ring/get-match :data :name) [:placementcontracts :contract :proposal])
+          (fact "proposal exists" response => (comp #{403 200 201} :status))
+
+          :else (fact "response is successful" response => (comp #{200 201} :status)))
         response))))
 
 (defn- check-imessages-middleware
@@ -284,8 +288,9 @@
                           (if (= (get headers "authorization") (str "Bearer " mock-jwt))
                             (if (contains? (:applications @allu-state) id)
                               (if-not (get-in @allu-state [:applications id :pendingOnClient])
-                                {:status 200, :body (byte-array 1)}
-                                {:status 403, :body (str id " is not pendingOnClient")})
+                                {:status 200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
+                                 :headers {"Content-Type" "application/pdf"}}
+                                {:status 403, :body (str id " is pendingOnClient")})
                               {:status 404, :body (str "Not Found: " id)})
                             {:status 401, :body "Unauthorized"}))}}]
        ["/approved"
@@ -307,7 +312,8 @@
                             (if (contains? (:applications @allu-state) id)
                               (if-not (get-in @allu-state [:applications id :pendingOnClient])
                                 (if (get-in @allu-state [:application id :approved])
-                                  {:status 200, :body (byte-array 1)}
+                                  {:status 200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
+                                   :headers {"Content-Type" "application/pdf"}}
                                   {:status 400, :body "Not signed"})
                                 {:status 403, :body (str id " is not pendingOnClient")})
                               {:status 404, :body (str "Not Found: " id)})
@@ -350,9 +356,10 @@
                                                   add-canceled->*
                                                   ;; :complementNeeded should be unreachable:
                                                   (into {} (remove (fn [[src _]] (= src :complementNeeded)))))
-            router (make-test-router allu-state)]
+            router (make-test-router allu-state)
+            handler (reitit-ring/ring-handler router)]
         (with-redefs [allu/allu-router router
-                      allu/allu-request-handler (reitit-ring/ring-handler router)]
+                      allu/allu-request-handler handler]
           (facts "state transitions"
             (traverse-state-transitions
               :states full-sijoitussopimus-state-graph
@@ -384,10 +391,16 @@
                                                        (request-for-complement raktark-helsinki id)
                                                        current)
                                    :agreementPrepared (fn [[current dest] id]
-                                                        (if (= current :submitted)
+                                                        (cond
+                                                          (= current dest)
+                                                          dest
+
+                                                          (= current :submitted)
                                                           (do (fact "fetch contract"
                                                                 (fetch-contract raktark-helsinki id) => fail?)
                                                               current)
+
+                                                          :else
                                                           (do (fact "fetch contract"
                                                                 (fetch-contract raktark-helsinki id) => ok?)
                                                               dest)))
