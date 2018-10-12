@@ -684,7 +684,9 @@
                    {:name "kerrosluku" :type :string :size :s :subtype :number :min 0 :max 50}
                    {:name "kellarinpinta-ala" :type :string :size :s :unit :m2 :subtype :number :min 1 :max 9999999}]})
 
-(def mitat-muutos (merge mitat
+(def mitat-muutos (merge (assoc mitat :body
+                                      (conj (:body mitat)
+                                            {:name "muutosala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}))
                     {:group-help "mitat-muutos.help"
                      :whitelist {:roles [:authority] :otherwise :disabled}}))
 
