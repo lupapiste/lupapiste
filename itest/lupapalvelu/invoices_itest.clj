@@ -91,9 +91,7 @@
                                                              :price-per-unit 20.5
                                                              :units 15.8
                                                              :discount-percent 0}]}]}]
-                  (local-command sonja :insert-invoice :id id :invoice invoice) => fail?
-                  ))
-          )
+                  (local-command sonja :insert-invoice :id id :invoice invoice) => fail?)))
 
     (fact "update-invoice command"
           (fact "with the role authority"
@@ -102,7 +100,8 @@
                             invoice {:operations [{:operation-id "linjasaneeraus"
                                                    :name "linjasaneeraus"
                                                    :invoice-rows [{:text "Laskurivi1 kpl"
-                                                                   :type "from-price-catalogue"                                                                                                                                   :unit "kpl"
+                                                                   :type "from-price-catalogue"
+                                                                   :unit "kpl"
                                                                    :price-per-unit 10
                                                                    :units 2
                                                                    :discount-percent 0}]}]}
@@ -175,6 +174,14 @@
                   (-> (local-query sonja :application-invoices :id app-b-id)
                       :invoices
                       count) => 3)))
+
+    (fact "fetch-invoice query"
+          (fact "sould return invoice when invoice is inserted"
+                (let [draft-invoice (invoice-with {:state "draft"})
+                      {app-a-id :id :as app-a} (dummy-submitted-application)
+                      inserted-invoice-id (invoices/create-invoice! (->invoice-db draft-invoice app-a dummy-user))
+                      {invoice-from-query :invoice} (local-query sonja :fetch-invoice :id app-a-id :invoice-id inserted-invoice-id)]
+                  (:application-id invoice-from-query) => app-a-id)))
 
     (fact "application-operations-query"
           (fact "should return vector containing primary operation"

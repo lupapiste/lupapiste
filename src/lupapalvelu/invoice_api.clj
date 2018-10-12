@@ -45,6 +45,20 @@
       (invoices/update-invoice! (:invoice data))
       (ok)))
 
+(defquery fetch-invoice
+  {:description      "Fetch invoice from db"
+   :feature          :invoices
+   :user-roles       #{:authority}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :parameters       [id invoice-id]
+   :input-validators [(partial action/non-blank-parameters [:id :invoice-id])]
+   :states           states/post-submitted-states}
+  [{:keys [application] :as command}]
+  (let [invoice (invoices/fetch-invoice invoice-id)]
+    (sc/validate Invoice invoice)
+    (ok :invoice invoice)))
+
 (defquery application-invoices
   {:description      "Returns all invoices for an application"
    :feature          :invoices

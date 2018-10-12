@@ -59,6 +59,9 @@
 (sc/defschema InvoiceInsertRequest
   {:operations [InvoiceOperation]})
 
+(defn fetch-invoice [invoice-id]
+  (mongo/by-id :invoices invoice-id))
+
 (defn validate-insert-invoice-request [{{invoice-data :invoice} :data :as command}]
   (debug ">> validate-insert-invoice request data: " invoice-data)
   (when (sc/check InvoiceInsertRequest invoice-data)
