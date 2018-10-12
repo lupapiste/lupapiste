@@ -233,12 +233,12 @@
 ;;;; Mock for interactive development
 ;;;; ===================================================================================================================
 
-(defn- creation-response-ok?
-  "Does the `integration-messages DB collection contain a successful creation response of the application with
-  `allu-id`."
-  [allu-id]
+(defn- response-ok?
+  "Does the `integration-messages DB collection contain a successful response (for the message type) of the
+  application with `allu-id`."
+  [allu-id message-type]
   (mongo/any? :integration-messages {:direction            "in" ; i.e. the response
-                                     :messageType          "placementcontracts.create"
+                                     :messageType          message-type
                                      :status               "done"
                                      :application.id       (format "LP-%s-%s-%s"
                                                                    (subs allu-id 0 3)
@@ -266,7 +266,7 @@
                      {:status 404, :body "Wrong username and/or password"}))
 
         [:applications :cancel] (let [id (-> route-match :path-params :id)]
-                                  (if (creation-response-ok? id)
+                                  (if (response-ok? id "placementcontracts.create")
                                     {:status 200, :body ""}
                                     {:status 404, :body (str "Not Found: " id)}))
 
@@ -280,17 +280,27 @@
                                             body (json/decode (:body request) true)]
                                         (if-let [validation-error (sc/check PlacementContract body)]
                                           {:status 400, :body validation-error}
-                                          (if (creation-response-ok? id)
+                                          (if (response-ok? id "placementcontracts.create")
                                             {:status 200, :body id}
                                             {:status 404, :body (str "Not Found: " id)})))
 
-        [:placementcontracts :contract (:or :proposal :final)] (let [id (-> route-match :path-params :id)]
-                                                                 (if (creation-response-ok? id)
+        [:placementcontracts :contract :proposal] (let [id (-> route-match :path-params :id)]
+                                                                 (if (response-ok? id "placementcontracts.create")
                                                                    {:status 200, :body (byte-array 1)}
                                                                    {:status 404, :body (str "Not Found: " id)}))
 
+        [:placementcontracts :contract :final] (let [id (-> route-match :path-params :id)]
+                                                    (if (response-ok? id "placementcontracts.contract.approved")
+                                                      {:status 200, :body (byte-array 1)}
+                                                      {:status 404, :body (str "Not Found: " id)}))
+
+        [:placementcontracts :contract :approved] (let [id (-> route-match :path-params :id)]
+                                                    (if (response-ok? id "placementcontracts.create")
+                                                      {:status 200, :body ""}
+                                                      {:status 404, :body (str "Not Found: " id)}))
+
         [:attachments :create] (let [id (-> route-match :path-params :id)]
-                                 (if (creation-response-ok? id)
+                                 (if (response-ok? id "placementcontracts.create")
                                    {:status 200, :body ""}
                                    {:status 404, :body (str "Not Found: " id)}))))))
 
