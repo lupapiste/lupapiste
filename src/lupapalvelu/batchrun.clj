@@ -888,7 +888,7 @@
         (let [last-idx (dec (count versions))]
           (mongo/update :applications
                         {:_id id
-                         :attachments.id (:id att)}
+                         :attachments {$elemMatch {:id (:id att)}}}
                         {$set {:attachments.$.latestVersion.archivable false
                                :attachments.$.latestVersion.fileId (:originalFileId latestVersion)
                                (str "attachments.$.versions." last-idx ".archivable") false
