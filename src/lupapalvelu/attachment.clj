@@ -877,7 +877,7 @@
       (ByteArrayInputStream. (.toByteArray out)))))
 
 ;; TODO: DRY
-(sc/defn ^:always-validate convert-and-attach! :- SetAttachmentVersionResult
+(sc/defn convert-and-attach! :- SetAttachmentVersionResult
   "1) Validates and converts for archivability, uploads converted file to GridFS/S3 if applicable
    2) Creates and saves attachment model for application, or fetches it if attachment-id is given
    3) Creates preview image in separate thread
@@ -898,7 +898,7 @@
     (.close content)
     attached-version))
 
-(sc/defn ^:always-validate upload-and-attach! :- SetAttachmentVersionResult
+(sc/defn upload-and-attach! :- SetAttachmentVersionResult
   "1) Uploads original file to GridFS/S3
    2) Validates and converts for archivability, uploads converted file to GridFS/S3 if applicable
    3) Creates and saves attachment model for application, or fetches it if attachment-id is given
