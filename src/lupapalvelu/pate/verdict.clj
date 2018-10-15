@@ -1591,18 +1591,14 @@
 (defn sign-allu-contract
   "Sign the contract
    - Update verdict signatures
-   - Change application state to agreementSigned if needed"
+   - Change application state to agreementSigned if needed
+   - Don't move to the :agreementSigned state yet (still requires a verdict from ALLU)"
   [{:keys [user created application] :as command}]
   (let [signature (create-signature command)
         verdict (command->verdict command)]
     (verdict-update command
                     (util/deep-merge
-                      {$push {(util/kw-path :pate-verdicts.$.signatures) signature}}
-                      (when (transition-to-assignmentSigned-state? application)
-                        (app-state/state-transition-update :agreementSigned
-                                                           created
-                                                           application
-                                                           user))))
+                      {$push {(util/kw-path :pate-verdicts.$.signatures) signature}}))
     (allu/approve-placementcontract! command)))
 
 (defn- signer-ids [data]
