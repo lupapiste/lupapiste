@@ -8,6 +8,9 @@
             [sade.core :refer [now]]
             [sade.util :refer [fn->] :as util]))
 
+(defn vetuma-stamp! []
+  (:stamp (vetuma! {:userid "123", :firstname "Pekka", :lastname "Banaani"})))
+
 (apply-remote-minimal)
 
 (defn invalid-token? [resp] (= resp {:ok false, :text "error.token-not-found"}))

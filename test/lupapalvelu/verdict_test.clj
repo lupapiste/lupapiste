@@ -2,7 +2,7 @@
   (:require [lupapalvelu.action :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.itest-util :refer [expected-failure? ->xml]]
+            [lupapalvelu.itest-util :refer [expected-failure?]]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.verdict :refer :all]
@@ -12,7 +12,7 @@
             [sade.common-reader :as cr]
             [sade.core :refer [now]]
             [sade.util :as util]
-            [sade.xml :as xml]))
+            [sade.xml :as xml :refer [map->xml]]))
 
 (testable-privates lupapalvelu.verdict get-verdicts-with-attachments verdict-in-application-without-attachment? matching-poytakirja verdict-party-finder)
 
@@ -222,17 +222,17 @@
        (let [org        {:section {:operations ["pool" "house"]
                                    :enabled    true}}
              pool       {:primaryOperation {:name "pool"}}
-             no-xml1    (->xml {:root {:foo {:bar "nope"}}})
-             no-xml2    (->xml {:root {:foo {:bar "nope"}
+             no-xml1    (map->xml {:root {:foo {:bar "nope"}}})
+             no-xml2    (map->xml {:root {:foo      {:bar "nope"}
                                        :paatostieto {:hii "hoo"}}})
-             blank-xml1 (->xml {:root {:foo {:bar "nope"}
+             blank-xml1 (map->xml {:root {:foo      {:bar "nope"}
                                        :paatostieto {:pykala ""}}})
-             blank-xml2 (->xml {:root {:foo         {:bar "nope"}
+             blank-xml2 (map->xml {:root {:foo      {:bar "nope"}
                                        :paatostieto {:doh {:pykala ""}}}})
-             wrong-path (->xml {:root {:pykala 22}})
-             good1      (->xml {:root {:paatostieto {:pykala 22}}})
-             good2      (->xml {:root {:another {:paatostieto {:pykala "33"}}}})
-             good3      (->xml {:root {:paatostieto {:between {:pykala "33"}}}})
+             wrong-path (map->xml {:root {:pykala 22}})
+             good1      (map->xml {:root {:paatostieto {:pykala 22}}})
+             good2      (map->xml {:root {:another {:paatostieto {:pykala "33"}}}})
+             good3      (map->xml {:root {:paatostieto {:between {:pykala "33"}}}})
              fail-check (partial expected-failure? :info.section-required-in-verdict)]
          (fact "No paatostieto element"
                (validate-section-requirement pool no-xml1 org) => fail-check)

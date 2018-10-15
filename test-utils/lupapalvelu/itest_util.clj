@@ -1,4 +1,5 @@
 (ns lupapalvelu.itest-util
+  "Utilities for writing integration tests."
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.string :as s]
@@ -8,9 +9,10 @@
             [midje.util.exceptions :refer :all]
             [noir.request :refer [*request*]]
             [ring.util.codec :as codec]
+            [schema.core :as sc]
             [swiss.arrows :refer [-<>>]]
-            [taoensso.timbre :as timbre :refer [trace info error]]
-            [sade.core :refer [fail! unauthorized not-accessible now]]
+            [taoensso.timbre :as timbre :refer [info error]]
+            [sade.core :refer [def- fail! unauthorized not-accessible now]]
             [sade.dummy-email-server]
             [sade.env :as env]
             [sade.http :as http]
@@ -30,12 +32,21 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as u]
             [lupapalvelu.server]
-            [lupapalvelu.user :as usr])
+            [lupapalvelu.user :as usr]
+            [sade.schemas :as ssc])
   (:import [clojure.lang IExceptionInfo]
            [com.jcraft.jsch JSchException ChannelSftp$LsEntry]
            [java.io FileNotFoundException File]
            [org.apache.http.client CookieStore]
            [org.apache.http.cookie Cookie]))
+
+;;;; General Constants
+;;;; ===================================================================================================================
+
+(def- dev-password "Lupapiste")
+
+;;;; Minimal Fixture Shortcuts
+;;;; ===================================================================================================================
 
 (defn find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
 (defn find-user-from-minimal-by-apikey [apikey]
@@ -108,7 +119,10 @@
 (def jarvenpaa-general-handler-id "abba11111111111111111186")
 (def sipoo-ya-general-handler-id "abba1111111111111111b753")
 
-(defn server-address [] (env/server-address))
+;;;; Environment Inspection
+;;;; ===================================================================================================================
+
+(def server-address env/server-address)
 
 ;; use in place of server-address to use loopback interface over configured hostname in testing, eg autologin
 (defn target-server-or-localhost-address [] (System/getProperty "target_server" "http://localhost:8000"))
@@ -117,17 +131,17 @@
 
 (def get-files-from-sftp-server? dev-env?)
 
+;;;; HTTP Response JSON Decoding
+;;;; ===================================================================================================================
+
 (defn decode-response [resp]
   (update-in resp [:body] #(json/decode % true)))
 
 (defn decode-body [resp]
   (:body (decode-response resp)))
 
-(defn printed [x] (println x) x)
-
-;;
-;; HTTP Client cookie store
-;;
+;;;; HTTP Client Cookie Store
+;;;; ===================================================================================================================
 
 (defonce test-db-name (str "test_" (now)))
 
@@ -143,6 +157,9 @@
 (defn get-anti-csrf [store-atom]
   (let [^Cookie cookie (get @store-atom "anti-csrf-token")]
     (-> cookie .getValue codec/url-decode)))
+
+;;;; HTTP Client Wrappers
+;;;; ===================================================================================================================
 
 (defn http [verb url options]
   (let [store (atom {})
@@ -223,11 +240,20 @@
     (when (= status 200)
       body)))
 
+;;;; Applying Remote Fixtures
+;;;; ===================================================================================================================
+
 (defn apply-remote-fixture [fixture-name]
   (let [resp (decode-response (http-get (str (server-address) "/dev/fixture/" fixture-name) {}))]
     (assert (-> resp :body :ok) (str "Response not ok: fixture: \"" fixture-name "\": response: " (pr-str resp)))))
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
+
+;;;; Using Dev HTTP APIs
+;;;; ===================================================================================================================
+
+(defn feature? [& features]
+  (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name features)))))
 
 (defn get-by-id [collection id & args]
   (decode-response (http-get (str (server-address) "/dev/by-id/" (name collection) "/" id) (apply hash-map args))))
@@ -246,6 +272,18 @@
   (let [resp (decode-response (http-get (str (server-address) "/dev/ajanvaraus/clear") {}))]
     (assert (-> resp :body :ok) (str "Response not ok: clearing ajanvaraus-db" (pr-str resp)))))
 
+;;;; Use Action Prechecks
+;;;; ===================================================================================================================
+
+(defn allowed? [action & args]
+  (fn [apikey]
+    (let [{:keys [ok actions]} (apply query apikey :allowed-actions args)
+          allowed? (-> actions action :ok)]
+      (and ok allowed?))))
+
+;;;; Creating Applications
+;;;; ===================================================================================================================
+
 (def create-app-default-args {:operation  "kerrostalo-rivitalo"
                               :propertyId "75312312341234"
                               :x          444444 :y 6666666
@@ -263,10 +301,8 @@
   [apikey & args]
   (apply create-app-with-fn command apikey args))
 
-
-;;
-;; Test predicates
-;;
+;;;; Test predicates
+;;;; ===================================================================================================================
 
 (defn success [resp]
   (fact (:text resp) => nil)
@@ -343,9 +379,8 @@
 (defn redirects-to [to {headers :headers :as resp}]
   (and (http302? resp) (ss/ends-with (headers "location") to)))
 
-;;
-;; DSLs
-;;
+;;;; DSLs
+;;;; ===================================================================================================================
 
 (defn remove-krysp-xml-overrides [apikey org-id permit-type & provided-args]
   (let [org (organization-from-minimal-by-id org-id)
@@ -363,41 +398,28 @@
     (command apikey :set-krysp-endpoint
              (merge args (->arg-map provided-args)))))
 
+;;;; Anti-CSRF
+;;;; ===================================================================================================================
+
 (defn set-anti-csrf! [value]
   (fact (command pena :set-feature :feature "disable-anti-csrf" :value (not value)) => ok?))
-
-(defn feature? [& feature]
-  (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name feature)))))
 
 (defmacro with-anti-csrf [& body]
   `(let [old-value# (feature? :disable-anti-csrf)]
      (set-anti-csrf! true)
      (try
-       (do ~@body)
-       (finally
-         (set-anti-csrf! (not old-value#))))))
+       ~@body
+       (finally (set-anti-csrf! (not old-value#))))))
 
-(defn comment-application
-  ([apikey id]
-   (comment-application apikey id false nil))
-  ([apikey id open?]
-   {:pre [(instance? Boolean open?)]}
-   (comment-application apikey id open? nil))
+;;;; Application Utils
+;;;; ===================================================================================================================
+
+(sc/defn comment-application
+  ([apikey id] (comment-application apikey id false nil))
+  ([apikey id open? :- sc/Bool] (comment-application apikey id open? nil))
   ([apikey id open? to]
-   (command apikey :add-comment :id id :text "hello" :to to :target {:type "application"} :openApplication open?
-            :roles [])))
-
-(defn change-application-urgency
-  ([apikey id urgency]
-   (command apikey :change-urgency :id id :urgency urgency)))
-
-(defn add-authority-notice
-  ([apikey id notice]
-   (command apikey :add-authority-notice :id id :authorityNotice notice)))
-
-(defn print-and-return [tag v]
-  (println tag v)
-  v)
+    (command apikey :add-comment :id id :text "hello" :to to :target {:type "application"} :openApplication open?
+             :roles [])))
 
 (defn query-application
   "Fetch application from server.
@@ -501,11 +523,8 @@
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
-(defn allowed? [action & args]
-  (fn [apikey]
-    (let [{:keys [ok actions]} (apply query apikey :allowed-actions args)
-          allowed? (-> actions action :ok)]
-      (and ok allowed?))))
+;;;; Email Mock Usage
+;;;; ===================================================================================================================
 
 (defn last-email
   "Returns the last email (or nil) and clears the inbox"
@@ -537,16 +556,17 @@
     (and (= role r) (= application-id a-id) (= tab a-tab))))
 
 
-;; API for local operations
+;;;; Using Actions Locally
+;;;; ===================================================================================================================
 
-(defn make-local-request [apikey]
+(defn- make-local-request [apikey]
   {:scheme "http", :user (usr/session-summary (find-user-from-minimal-by-apikey apikey))})
 
 (defn- execute-local [apikey web-fn action & args]
   (let [params (->arg-map args)]
     (i18n/with-lang (:lang params)
-                    (binding [*request* (make-local-request apikey)]
-                      (web-fn (name action) params *request*)))))
+      (binding [*request* (make-local-request apikey)]
+        (web-fn (name action) params *request*)))))
 
 (defn local-command [apikey command-name & args]
   (apply execute-local apikey api-common/execute-command command-name args))
@@ -557,6 +577,9 @@
 (defn local-query-with-timestamp [ts apikey query-name & args]
   (binding [*created-timestamp-for-test-actions* ts]
     (apply execute-local apikey api-common/execute-query query-name args)))
+
+;;;; Local Application Utils
+;;;; ===================================================================================================================
 
 (defn create-local-app
   "Runs the create-application command locally, returns reply map. Use ok? to check it."
@@ -570,6 +593,9 @@
         resp (local-command apikey :submit-application :id id)]
     resp => ok?
     (query-application local-query apikey id)))
+
+;;;; Foreman Applications
+;;;; ===================================================================================================================
 
 (defn create-foreman-application [project-app-id apikey userId role difficulty]
   (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role
@@ -591,62 +617,56 @@
       (command authority :check-for-verdict :id foreman-app-id)
       (command authority :approve-application :lang :fi :id foreman-app-id)) => ok?))
 
+;;;; Invitation Tokens
+;;;; ===================================================================================================================
+
 (defn invite-company-and-accept-invitation [apikey app-id company-id company-admin-apikey]
   (command apikey :company-invite :id app-id :company-id company-id) => ok?
   (command company-admin-apikey :approve-invite :id app-id :invite-type :company))
 
 (defn http-token-call
-  ([token body]
-   (let [url (str (server-address) "/api/token/" token)]
-     (http-post url {:follow-redirects false
-                     :throw-exceptions false
-                     :content-type     :json
-                     :body             (json/encode body)})))
-  ([token]
-   (fact "Call api/token"
-     (http-token-call token {:ok true}) => (contains {:status 200}))))
+  ([token body] (let [url (str (server-address) "/api/token/" token)]
+                  (http-post url {:follow-redirects false
+                                  :throw-exceptions false
+                                  :content-type     :json
+                                  :body             (json/encode body)})))
+  ([token] (fact "Call api/token"
+             (http-token-call token {:ok true}) => (contains {:status 200}))))
 
-(defn token-from-email
-  ([email]
-   (token-from-email email (last-email)))
-  ([email email-data]
-   {:pre [(ss/not-blank? email)]}
-   (fact {:midje/description (str "Read email for " email)}
-     (s/index-of (:to email-data) email) => (complement neg?))
-   (last (re-find #"http.+/app/fi/welcome#!/.+/([A-Za-z0-9-]+)"
-                  (:plain (:body email-data))))))
+(sc/defn token-from-email
+  ([email] (token-from-email email (last-email)))
+  ([email :- ssc/NonBlankStr email-data]
+    (fact {:midje/description (str "Read email for " email)}
+      (s/index-of (:to email-data) email) => (complement neg?))
+    (->> email-data :body :plain (re-find #"http.+/app/fi/welcome#!/.+/([A-Za-z0-9-]+)") last)))
 
-(defn activation-email->token [email-address email]
-  {:pre [(ss/not-blank? email-address)]}
+(sc/defn activation-email->token [email-address :- ssc/NonBlankStr email]
   (fact {:midje/description (str "Read email for " email-address)}
     (s/index-of (:to email) email-address) => (complement neg?))
-  (last (re-find #"http.+/app/security/activate/([A-Za-z0-9-]+)"
-                 (:plain (:body email)))))
+  (->> email :body :plain (re-find #"http.+/app/security/activate/([A-Za-z0-9-]+)") last))
+
+;;;; Login
+;;;; ===================================================================================================================
 
 (defn login
-  ([u p]
-   (login u p {}))
-  ([u p params]
-   (get (decode-response
-          (http-post (str (server-address) "/api/login")
-                     (merge
-                       {:follow-redirects false
-                        :throw-exceptions false
-                        :form-params      {:username u :password p}}
-                       params)))
-        :body)))
+  ([u p] (login u p {}))
+  ([u p params] (-> (http-post (str (server-address) "/api/login")
+                               (merge
+                                 {:follow-redirects false
+                                  :throw-exceptions false
+                                  :form-params      {:username u :password p}}
+                                 params))
+                    decode-body)))
 
-;;
-;; Stuffin' data in
-;;
-
-;; VTJ-PRT
+;;;; VTJ-PRT
+;;;; ===================================================================================================================
 
 (defn api-update-building-data-call [application-id params]
   (http-post (format "%s/rest/application/%s/update-building-data" (server-address) application-id)
-             (merge params {:throw-exceptions false})))
+             (assoc params :throw-exceptions false)))
 
-;; attachments
+;;;; Attachments
+;;;; ===================================================================================================================
 
 (defn sign-attachment [apikey id attachmentId password]
   (let [uri (str (server-address) "/api/command/sign-attachments")
@@ -784,7 +804,8 @@
     (fact "set attachment as construction time"
       (command sonja :set-attachment-as-construction-time :id id :attachmentId attachment-id :value true))) => ok?)
 
-;; File upload
+;;;; File Upload
+;;;; ===================================================================================================================
 
 (defn upload-file
   "Upload file to raw upload-file endpoint."
@@ -801,11 +822,9 @@
                     :throw-exceptions false
                     :cookie-store     cookie-store})))))
 
-(defn- job-done? [resp]
-  (= (get-in resp [:job :status]) "done"))
+(defn- job-done? [resp] (= (get-in resp [:job :status]) "done"))
 
-(defn- timeout? [resp]
-  (= (get-in resp [:result]) "timeout"))
+(defn- timeout? [resp] (= (get-in resp [:result]) "timeout"))
 
 (defn poll-job [apikey command id version limit]
   (loop [version version retries 0]
@@ -859,85 +878,17 @@
       (poll-job apikey :bind-attachments-job (:id job) (:version job) 25) => ok?)
     file-id))
 
-;; statements
+(defn upload-area [apikey & [filename]]
+  (let [filename (or filename "dev-resources/sipoon_alueet.zip")
+        uploadfile (io/file filename)
+        uri (str (server-address) "/api/raw/organization-area")]
+    (http-post uri
+               {:oauth-token      apikey
+                :multipart        [{:name "files[]" :content uploadfile}]
+                :throw-exceptions false})))
 
-(defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
-  (upload-file-and-bind apikey
-                        application-id
-                        {:target {:type "statement" :id statement-id}
-                         :type   {:type-group :ennakkoluvat_ja_lausunnot
-                                  :type-id    :lausunto}}
-                        :attachment-id attachment-id
-                        :fails (not expect-to-succeed)))
-
-(defn get-statement-by-user-id [application user-id]
-  (some #(when (= user-id (get-in % [:person :userId])) %) (:statements application)))
-
-;; This has a side effect which generates a attachement to appliction
-(defn generate-statement [application-id apikey]
-  (let [resp (query sipoo :get-organizations-statement-givers) => ok?
-        statement-giver (->> resp :data (some #(when (= (email-for-key apikey) (:email %)) %))) => truthy
-        _ (command apikey :request-for-statement
-                   :functionCode nil
-                   :id application-id
-                   :selectedPersons [statement-giver]
-                   :saateText "saate"
-                   :dueDate 1450994400000) => ok?
-        updated-application (query-application apikey application-id)
-        statement-id (:id (get-statement-by-user-id updated-application (id-for-key apikey)))
-        _ (upload-attachment-for-statement apikey application-id "" true statement-id)
-        _ (command apikey :give-statement
-                   :id application-id
-                   :statementId statement-id
-                   :status "puollettu"
-                   :lang "fi"
-                   :text "Annanpa luvan urakalle.")]
-    (query-application apikey application-id)))
-
-(defn generate-documents [application apikey & [local?]]
-  (doseq [document (:documents application)]
-    (let [data (tools/create-document-data (model/get-document-schema document)
-                                           (partial tools/dummy-values (id-for-key apikey)))
-          updates (tools/path-vals data)
-          updates (map (fn [[p v]] [(butlast p) v]) updates)
-          updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)
-          user-role (:role (find-user-from-minimal-by-apikey apikey))
-          updates (filterv (fn [[path _]]
-                             (try
-                               (let [splitted-path (ss/split path #"\.")]
-                                 (doc-persistence/validate-against-whitelist! document [splitted-path] user-role
-                                                                              application)
-                                 (doc-persistence/validate-readonly-updates! document [splitted-path]))
-                               true
-                               (catch Exception _
-                                 false)))
-                           updates)
-          f (if local? local-command command)]
-      (fact "Document is updated"
-        (f apikey :update-doc
-           :id (:id application)
-           :doc (:id document)
-           :updates updates) => ok?))))
-
-;;
-;; Vetuma
-;;
-
-(defn vetuma! [data]
-  (-> (http-get (str (server-address) "/dev/api/vetuma")
-                {:query-params (select-keys data [:userid :firstname :lastname])})
-      decode-response
-      :body))
-
-(defn vetuma-stamp! []                                      ; Used by neighbor_itest
-  (-> {:userid    "123"
-       :firstname "Pekka"
-       :lastname  "Banaani"}
-      vetuma!
-      :stamp))
-
-;; File actions
-
+;;;; File actions
+;;;; ===================================================================================================================
 
 (defn get-local-filename [directory file-prefix-or-pred]
   (let [pred (if (fn? file-prefix-or-pred)
@@ -951,8 +902,6 @@
                                ((fn [^File file] (.getName file))))]
       (str directory filename)
       (throw (AssertionError. (str "File not found: " directory file-prefix-or-pred ".xml"))))))
-
-(def dev-password "Lupapiste")
 
 (defn file-name-accessor [file]
   (if get-files-from-sftp-server?
@@ -990,34 +939,91 @@
      (catch JSchException e
        (error e (str "SSH connection " user "@" server))))))
 
-(defn upload-area [apikey & [filename]]
-  (let [filename (or filename "dev-resources/sipoon_alueet.zip")
-        uploadfile (io/file filename)
-        uri (str (server-address) "/api/raw/organization-area")]
-    (http-post uri
-               {:oauth-token      apikey
-                :multipart        [{:name "files[]" :content uploadfile}]
-                :throw-exceptions false})))
+;;;; Statements
+;;;; ===================================================================================================================
+
+(defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
+  (upload-file-and-bind apikey
+                        application-id
+                        {:target {:type "statement" :id statement-id}
+                         :type   {:type-group :ennakkoluvat_ja_lausunnot
+                                  :type-id    :lausunto}}
+                        :attachment-id attachment-id
+                        :fails (not expect-to-succeed)))
+
+(defn get-statement-by-user-id [application user-id]
+  (some #(when (= user-id (get-in % [:person :userId])) %) (:statements application)))
+
+;; This has a side effect which generates an attachment to appliction
+(defn generate-statement [application-id apikey]
+  (let [resp (query sipoo :get-organizations-statement-givers) => ok?
+        statement-giver (->> resp :data (some #(when (= (email-for-key apikey) (:email %)) %))) => truthy
+        _ (command apikey :request-for-statement
+                   :functionCode nil
+                   :id application-id
+                   :selectedPersons [statement-giver]
+                   :saateText "saate"
+                   :dueDate 1450994400000) => ok?
+        updated-application (query-application apikey application-id)
+        statement-id (:id (get-statement-by-user-id updated-application (id-for-key apikey)))
+        _ (upload-attachment-for-statement apikey application-id "" true statement-id)
+        _ (command apikey :give-statement
+                   :id application-id
+                   :statementId statement-id
+                   :status "puollettu"
+                   :lang "fi"
+                   :text "Annanpa luvan urakalle.")]
+    (query-application apikey application-id)))
+
+;;;; Document Data Generation
+;;;; ===================================================================================================================
+
+(defn generate-documents [application apikey & [local?]]
+  (doseq [document (:documents application)]
+    (let [data (tools/create-document-data (model/get-document-schema document)
+                                           (partial tools/dummy-values (id-for-key apikey)))
+          updates (tools/path-vals data)
+          updates (map (fn [[p v]] [(butlast p) v]) updates)
+          updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)
+          user-role (:role (find-user-from-minimal-by-apikey apikey))
+          updates (filterv (fn [[path _]]
+                             (try
+                               (let [splitted-path (ss/split path #"\.")]
+                                 (doc-persistence/validate-against-whitelist! document [splitted-path] user-role
+                                                                              application)
+                                 (doc-persistence/validate-readonly-updates! document [splitted-path]))
+                               true
+                               (catch Exception _
+                                 false)))
+                           updates)
+          f (if local? local-command command)]
+      (fact "Document is updated"
+        (f apikey :update-doc
+           :id (:id application)
+           :doc (:id document)
+           :updates updates) => ok?))))
+
+;;;; Vetuma
+;;;; ===================================================================================================================
+
+(defn vetuma! [data]
+  (decode-body (http-get (str (server-address) "/dev/api/vetuma")
+                         {:query-params (select-keys data [:userid :firstname :lastname])})))
+
+;;;; Verdicts
+;;;; ===================================================================================================================
+
+(defn fetch-verdicts [& [{:keys [jms? wait-ms] :or {jms? false wait-ms 2000}}]]
+  (let [resp (batchrun/fetch-verdicts-default {:jms? jms?})]
+    (when jms?
+      (Thread/sleep wait-ms))
+    resp))
 
 (defn appeals-for-verdict [apikey app-id verdict-id]
-  (-> (query apikey :appeals :id app-id)
-      :data
-      (get (keyword verdict-id))))
+  (-> (query apikey :appeals :id app-id) :data (get (keyword verdict-id))))
 
-(defn ->xml
-  "Transforms map into XML structure."
-  [m]
-  (for [[k v] m]
-    {:tag     (keyword k)
-     :attrs   nil
-     :content (cond
-                (map? v) (->xml v)
-                (sequential? v) (mapcat ->xml v)
-                :default [(str v)])}))
-
-;;
-;; Assignments
-;;
+;;;; Assignments
+;;;; ===================================================================================================================
 
 (defn create-assignment [from to application-id targets desc]
   (command from :create-assignment
@@ -1040,9 +1046,3 @@
     (fact "assignments query ok"
       resp => ok?)
     (:assignments resp)))
-
-(defn fetch-verdicts [& [{:keys [jms? wait-ms] :or {jms? false wait-ms 2000}}]]
-  (let [resp (batchrun/fetch-verdicts-default {:jms? jms?})]
-    (when jms?
-      (Thread/sleep wait-ms))
-    resp))

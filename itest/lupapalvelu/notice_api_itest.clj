@@ -13,25 +13,25 @@
   (let [{id :id} (create-and-submit-application pena)]
     (fact "user can't set application urgency"
       pena =not=> (allowed? :change-urgency :id id :urgency "urgent")
-      (change-application-urgency pena id "urgent") =not=> ok?)
+      (command pena :change-urgency :id id :urgency "urgent") =not=> ok?)
 
     (fact "authority can set application urgency"
       sonja => (allowed? :change-urgency :id id :urgency "urgent")
-      (change-application-urgency sonja id "urgent") => ok?
+      (command sonja :change-urgency :id id :urgency "urgent") => ok?
       (:urgency (query-application sonja id)) => "urgent")
 
     (fact "user can't set notice message"
       pena =not=> (allowed? :add-authority-notice :id id :authorityNotice "foobar")
-      (add-authority-notice pena id "foobar") =not=> ok?)
+      (command pena :add-authority-notice :id id :authorityNotice "foobar") =not=> ok?)
 
     (fact "read-only authority can't set notice message"
       luukas =not=> (allowed? :add-authority-notice :id id :authorityNotice "foobar")
-      (add-authority-notice luukas id "foobar") =not=> ok?)
+      (command luukas :add-authority-notice :id id :authorityNotice "foobar") =not=> ok?)
 
     (fact "authority can set notice message"
       sonja => (allowed? :add-authority-notice :id id :authorityNotice "respect my authority")
-      (add-authority-notice sonja id "respect my athority") => ok?
-      (:authorityNotice (query-application sonja id)) => "respect my athority")
+      (command sonja :add-authority-notice :id id :authorityNotice "respect my authority") => ok?
+      (:authorityNotice (query-application sonja id)) => "respect my authority")
 
     (facts "Application tags" ; tags are in minimal fixture
       (fact "user can't set application tags"
@@ -82,16 +82,16 @@
           (query jussi :authority-notice :id id) => ok?
           (query teppo :authority-notice :id id) => unauthorized?)
         (facts "Change urgency"
-          (change-application-urgency jussi id "normal") => ok?
-          (change-application-urgency teppo id "pending") => unauthorized?)
+          (command jussi :change-urgency :id id :urgency "normal") => ok?
+          (command teppo :change-urgency :id id :urgency "pending") => unauthorized?)
         (facts "Add tags"
           (command jussi :add-application-tags :id id
                    :tags ["123000000000000000000000"])=> ok?
           (command teppo :add-application-tags :id id
                    :tags ["321000000000000000000000"]) => unauthorized?)
         (facts "Add authority notice"
-          (add-authority-notice jussi id "Hello world!") => ok?
-          (add-authority-notice teppo id "Foo bar") => unauthorized?)
+          (command jussi :add-authority-notice :id id :authorityNotice "Hello world!") => ok?
+          (command teppo :add-authority-notice :id id :authorityNotice "Foo bar") => unauthorized?)
         (facts "Read authority notice"
           (application-notice "sonja" id "Hello world!")
           (application-notice "jussi" id "Hello world!")
