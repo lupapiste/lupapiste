@@ -26,8 +26,8 @@
            [java.util Base64]))
 
 (def ad-config
-  {:sp-cert (System/getenv "AD_CERT")
-   :private-key (System/getenv "AD_KEY")
+  {:sp-cert (env/value :sso :cert)
+   :private-key (env/value :sso :private-key)
    :acs-uri (format "%s/api/saml/ad-login/%s" (env/value :host) "609-R")
    :app-name "Lupapiste"})
 
