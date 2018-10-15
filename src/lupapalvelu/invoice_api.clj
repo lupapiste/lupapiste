@@ -16,7 +16,7 @@
   {:description      "Inserts one invoice to db with state as draft"
    :feature          :invoices
    :user-roles       #{:authority}
-   :org-authz-roles  roles/reader-org-authz-roles
+   :org-authz-roles  roles/default-org-authz-roles
    :user-authz-roles roles/all-authz-roles
    :parameters       [id invoice]
    :input-validators [(partial action/non-blank-parameters [:id])
@@ -33,7 +33,7 @@
   {:description      "Updates an existing invoice in the db"
    :feature          :invoices
    :user-roles       #{:authority}
-   :org-authz-roles  roles/reader-org-authz-roles
+   :org-authz-roles  roles/default-org-authz-roles
    :user-authz-roles roles/all-authz-roles
    :parameters       [id invoice]
    :input-validators [(partial action/non-blank-parameters [:id])
