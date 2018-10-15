@@ -74,5 +74,6 @@
 (defn ely-uspa-enabled
   "Pre-checker that fails if Ely statements is not enabled in the application organization scope."
   [{:keys [organization]}]
-  (when-not (:ely-uspa-enabled @organization)
+  (when-not (and organization
+                 (:ely-uspa-enabled @organization))
     (fail :error.ely-statement-not-enabled)))
