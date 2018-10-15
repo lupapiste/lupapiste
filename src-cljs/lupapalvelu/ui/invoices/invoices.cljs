@@ -5,7 +5,6 @@
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.components.accordion :refer [accordion caret-toggle]]
             [lupapalvelu.ui.hub :as hub]
-            [lupapalvelu.ui.invoices.layout :as layout]
             [lupapalvelu.ui.invoices.service :as service]
             [lupapalvelu.ui.invoices.state :as state]
             [rum.core :as rum]
