@@ -40,6 +40,9 @@
 (defn execute-query [name params request]
   (execute (enriched (action/make-query name params) request)))
 
+(defn execute-raw [name params request]
+  (execute (enriched (action/make-raw name params) request)))
+
 (defn execute-export [name params request]
   (execute (enriched (action/make-export name params) request)))
 

@@ -172,6 +172,18 @@
 (def http-get (partial http http/get))
 (def http-post (partial http http/post))
 
+;;;; Using Actions
+;;;; ===================================================================================================================
+
+(defprotocol LupisClient
+  (-query [self apikey query-name args])
+  (-command [self apikey command-name args])
+  (-raw [self apikey action-name args])
+  (-upload-file [self apikey action-name file cookie-store]))
+
+;;;; Remotely
+;;;; -------------------------------------------------------------------------------------------------------------------
+
 (defn raw [apikey action & args]
   (let [params (apply hash-map args)
         options (util/assoc-when {:oauth-token      apikey
@@ -191,11 +203,6 @@
        :query-params     (apply hash-map args)
        :follow-redirects false
        :throw-exceptions false})))
-
-(defn query [apikey query-name & args]
-  (let [{status :status body :body} (apply raw-query apikey query-name args)]
-    (when (= status 200)
-      body)))
 
 (defn decoded-get [url params]
   (decode-response (http-get url params)))
@@ -225,20 +232,88 @@
            :throw-exceptions false}
           :oauth-token apikey)))))
 
-
 (defn raw-command [apikey command-name & args]
   (apply decode-post :command apikey command-name args))
-
-(defn command [apikey command-name & args]
-  (let [{status :status body :body} (apply raw-command apikey command-name args)]
-    (if (= status 200)
-      body
-      (error status body))))
 
 (defn datatables [apikey query-name & args]
   (let [{status :status body :body} (apply decode-post :datatables apikey query-name args)]
     (when (= status 200)
       body)))
+
+(deftype RemoteLupisClient []
+  LupisClient
+  (-query [_ apikey query-name args]
+    (let [{status :status body :body} (apply raw-query apikey query-name args)]
+      (when (= status 200)
+        body)))
+
+  (-command [_ apikey command-name args]
+    (let [{status :status body :body} (apply raw-command apikey command-name args)]
+      (if (= status 200)
+        body
+        (error status body))))
+
+  (-raw [_ apikey action-name args]
+    (let [{status :status body :body} (apply raw apikey action-name args)]
+      (if (= status 200)
+        body
+        (error status body))))
+
+  (-upload-file [_ apikey action-name file cookie-store]
+    (http-post (str (server-address) "/api/raw/" (name action-name))
+               {:oauth-token      apikey
+                :multipart        [{:name "files[]" :content file}]
+                :throw-exceptions false
+                :cookie-store     cookie-store})))
+
+(def- remote-client-instance (->RemoteLupisClient))
+
+;;;; Locally
+;;;; -------------------------------------------------------------------------------------------------------------------
+
+(defn- make-local-request [apikey]
+  {:scheme "http", :user (usr/session-summary (find-user-from-minimal-by-apikey apikey))})
+
+(defn- execute-local [apikey web-fn action & args]
+  (let [params (->arg-map args)]
+    (i18n/with-lang (:lang params)
+      (binding [*request* (make-local-request apikey)]
+        (web-fn (name action) params *request*)))))
+
+(defn local-query-with-timestamp [ts apikey query-name & args]
+  (binding [*created-timestamp-for-test-actions* ts]
+    (apply execute-local apikey api-common/execute-query query-name args)))
+
+(deftype LocalLupisClient []
+  LupisClient
+  (-query [_ apikey query-name args] (apply execute-local apikey api-common/execute-query query-name args))
+  (-command [_ apikey command-name args] (apply execute-local apikey api-common/execute-command command-name args))
+  (-raw [_ apikey action-name args] (apply execute-local apikey api-common/execute-raw action-name args))
+  (-upload-file [_ apikey action-name file cookie-store]
+    (execute-local apikey api-common/execute-raw action-name :files [file] :cookie-store cookie-store)))
+
+(def- local-client-instance (->LocalLupisClient))
+
+;;;; High-level Action Usage
+;;;; -------------------------------------------------------------------------------------------------------------------
+
+(def- ^:dynamic *lupis-client* remote-client-instance)
+
+(defmacro with-local-actions [& body]
+  `(binding [*lupis-client* @#'local-client-instance]
+     ~@body))
+
+(defn query [apikey query-name & args]
+  (-query *lupis-client* apikey query-name args))
+
+(defn local-query [apikey query-name & args]
+  (-query local-client-instance apikey query-name args))
+
+(defn command [apikey command-name & args]
+  (-command *lupis-client* apikey command-name args))
+
+(defn local-command [apikey command-name & args]
+  (-command local-client-instance apikey command-name args))
 
 ;;;; Applying Remote Fixtures
 ;;;; ===================================================================================================================
@@ -280,26 +355,6 @@
     (let [{:keys [ok actions]} (apply query apikey :allowed-actions args)
           allowed? (-> actions action :ok)]
       (and ok allowed?))))
-
-;;;; Creating Applications
-;;;; ===================================================================================================================
-
-(def create-app-default-args {:operation  "kerrostalo-rivitalo"
-                              :propertyId "75312312341234"
-                              :x          444444 :y 6666666
-                              :address    "foo 42, bar"})
-
-(defn create-app-with-fn [f apikey & args]
-  (let [args (apply hash-map args)
-        params (->> args
-                    (merge create-app-default-args)
-                    (mapcat seq))]
-    (apply f apikey :create-application params)))
-
-(defn create-app
-  "Runs the create-application command, returns reply map. Use ok? to check it."
-  [apikey & args]
-  (apply create-app-with-fn command apikey args))
 
 ;;;; Test predicates
 ;;;; ===================================================================================================================
@@ -411,6 +466,20 @@
        ~@body
        (finally (set-anti-csrf! (not old-value#))))))
 
+;;;; Creating Applications
+;;;; ===================================================================================================================
+
+(def create-app-default-args {:operation  "kerrostalo-rivitalo"
+                              :propertyId "75312312341234"
+                              :x          444444 :y 6666666
+                              :address    "foo 42, bar"})
+
+(defn create-app-with-fn [f apikey & args]
+  (let [params (->> (apply hash-map args)
+                    (merge create-app-default-args)
+                    (mapcat seq))]
+    (apply f apikey :create-application params)))
+
 ;;;; Application Utils
 ;;;; ===================================================================================================================
 
@@ -483,6 +552,11 @@
     resp => ok?
     app-id => truthy))
 
+(defn create-app
+  "Runs the create-application command, returns reply map. Use ok? to check it."
+  [apikey & args]
+  (apply create-app-with-fn command apikey args))
+
 (defn create-app-id
   "Verifies that an application was created and returns it's ID"
   [apikey & args]
@@ -523,6 +597,22 @@
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
+;;;; Local Application Utils
+;;;; ===================================================================================================================
+
+(defn create-local-app
+  "Runs the create-application command locally, returns reply map. Use ok? to check it."
+  [apikey & args]
+  (apply create-app-with-fn local-command apikey args))
+
+(defn create-and-submit-local-application
+  "Returns the application map"
+  [apikey & args]
+  (let [id (:id (apply create-local-app apikey args))
+        resp (local-command apikey :submit-application :id id)]
+    (fact "Submit OK" resp => ok?)
+    (query-application local-query apikey id)))
+
 ;;;; Email Mock Usage
 ;;;; ===================================================================================================================
 
@@ -554,45 +644,6 @@
   (let [[_ r a-id a-tab] (re-find #"(?sm)http.+/app/fi/(applicant|authority)#!/application/([A-Za-z0-9-]+)/([a-z]+)"
                                   (:plain body))]
     (and (= role r) (= application-id a-id) (= tab a-tab))))
-
-
-;;;; Using Actions Locally
-;;;; ===================================================================================================================
-
-(defn- make-local-request [apikey]
-  {:scheme "http", :user (usr/session-summary (find-user-from-minimal-by-apikey apikey))})
-
-(defn- execute-local [apikey web-fn action & args]
-  (let [params (->arg-map args)]
-    (i18n/with-lang (:lang params)
-      (binding [*request* (make-local-request apikey)]
-        (web-fn (name action) params *request*)))))
-
-(defn local-command [apikey command-name & args]
-  (apply execute-local apikey api-common/execute-command command-name args))
-
-(defn local-query [apikey query-name & args]
-  (apply execute-local apikey api-common/execute-query query-name args))
-
-(defn local-query-with-timestamp [ts apikey query-name & args]
-  (binding [*created-timestamp-for-test-actions* ts]
-    (apply execute-local apikey api-common/execute-query query-name args)))
-
-;;;; Local Application Utils
-;;;; ===================================================================================================================
-
-(defn create-local-app
-  "Runs the create-application command locally, returns reply map. Use ok? to check it."
-  [apikey & args]
-  (apply create-app-with-fn local-command apikey args))
-
-(defn create-and-submit-local-application
-  "Returns the application map"
-  [apikey & args]
-  (let [id (:id (apply create-local-app apikey args))
-        resp (local-command apikey :submit-application :id id)]
-    resp => ok?
-    (query-application local-query apikey id)))
 
 ;;;; Foreman Applications
 ;;;; ===================================================================================================================
@@ -810,17 +861,8 @@
 (defn upload-file
   "Upload file to raw upload-file endpoint."
   [apikey filename & {:keys [cookie-store]}]
-  (let [uploadfile (io/file filename)
-        uri (str (server-address) (if apikey
-                                    "/api/raw/upload-file-authenticated"
-                                    "/api/raw/upload-file"))]
-    (:body
-      (decode-response
-        (http-post uri
-                   {:oauth-token      apikey
-                    :multipart        [{:name "files[]" :content uploadfile}]
-                    :throw-exceptions false
-                    :cookie-store     cookie-store})))))
+  (decode-body (-upload-file *lupis-client* apikey (if apikey :upload-file-authenticated :upload-file)
+                             (io/file filename) cookie-store)))
 
 (defn- job-done? [resp] (= (get-in resp [:job :status]) "done"))
 

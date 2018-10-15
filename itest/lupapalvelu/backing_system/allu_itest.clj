@@ -79,29 +79,23 @@
     id))
 
 (defn- upload-attachment
-  ([apikey app-id] (upload-attachment apikey app-id nil))
+  ([apikey app-id]
+    ;; FIXME: need to create attachment instead
+   (upload-attachment apikey app-id nil))
   ([apikey app-id attachment]
-   (let [filename "dev-resources/test-attachment.txt"]
-     ;; HACK: Have to use a temp file as :upload-attachment expects to get one and deletes it in the end.
-     (with-temp-file file
-       (io/copy (io/file filename) file)
-       (let [description "Test file"
-             {:keys [attachmentId] :as upload-res} (itu/local-command apikey :upload-attachment :id app-id
-                                                                      :attachmentId (:id attachment)
-                                                                      :attachmentType {:type-group "muut"
-                                                                                       :type-id    "muu"}
-                                                                      :locked false
-                                                                      :group {:groupType :general}
-                                                                      :filename filename :tempfile file
-                                                                      :size (.length file))
-             _ (fact "upload attachment" upload-res => ok?)
-             _ (fact "set-attachment-meta"
-                 (itu/local-command apikey :set-attachment-meta :id app-id :attachmentId attachmentId
-                                    :meta {:contents description}) => ok?)]
-         (fact "add-comment"
-           (itu/local-command apikey :add-comment :id app-id :text "Added my test text file."
-                              :target {:type "application"} :roles ["applicant" "authority"]) => ok?)
-         attachmentId)))))
+   (let [attachmentId (:id attachment)
+         description "Test file"
+         filename "dev-resources/test-attachment.txt"
+         filedata {:filename filename, :content (io/file filename)}]
+     (fact "upload attachment file and bind"
+       (itu/upload-file-and-bind apikey app-id filedata :attachment-id attachmentId) => ok?)
+     (fact "set-attachment-meta"
+       (itu/local-command apikey :set-attachment-meta :id app-id :attachmentId attachmentId
+                          :meta {:contents description}) => ok?)
+     (fact "add-comment"
+       (itu/local-command apikey :add-comment :id app-id :text "Added my test text file."
+                          :target {:type "application"} :roles ["applicant" "authority"]) => ok?)
+     attachmentId)))
 
 (defn- open [apikey app-id msg]
   (fact ":draft -> :open"
@@ -135,7 +129,7 @@
                                      ["yritys.yhteyshenkilo.yhteystiedot.email" (:email user)]
                                      ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]])))
 
-    #_(upload-attachment apikey app-id attachment)))
+    (upload-attachment apikey app-id attachment)))
 
 (defn- approve [apikey app-id]
   (fact "approve application"
@@ -143,7 +137,7 @@
 
     ;; HACK: Testing move-attachments-to-backing-system here for lack of a better place:
     #_(itu/local-command apikey :move-attachments-to-backing-system :id app-id :lang "fi"
-                       :attachmentIds [(upload-attachment apikey app-id)]) => ok?))
+                         :attachmentIds [(upload-attachment apikey app-id)]) => ok?))
 
 (defn- return-to-draft [apikey app-id msg]
   (fact "return to draft"
@@ -207,7 +201,7 @@
                         :status         "done"
                         :application.id (:id application)})
           res (handler request)]
-      (when-not (= (:uri request) "/login")                       ; HACK
+      (when-not (= (:uri request) "/login")                 ; HACK
         (fact "integration messages are saved"
           (mongo/any? :integration-messages (imsg-query "out")) => true
           (mongo/any? :integration-messages (imsg-query "in")) => true))
@@ -288,7 +282,7 @@
                           (if (= (get headers "authorization") (str "Bearer " mock-jwt))
                             (if (contains? (:applications @allu-state) id)
                               (if-not (get-in @allu-state [:applications id :pendingOnClient])
-                                {:status 200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
+                                {:status  200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
                                  :headers {"Content-Type" "application/pdf"}}
                                 {:status 403, :body (str id " is pendingOnClient")})
                               {:status 404, :body (str "Not Found: " id)})
@@ -312,7 +306,7 @@
                             (if (contains? (:applications @allu-state) id)
                               (if-not (get-in @allu-state [:applications id :pendingOnClient])
                                 (if (get-in @allu-state [:application id :approved])
-                                  {:status 200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
+                                  {:status  200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
                                    :headers {"Content-Type" "application/pdf"}}
                                   {:status 400, :body "Not signed"})
                                 {:status 403, :body (str id " is not pendingOnClient")})
@@ -343,86 +337,87 @@
 ;;; TODO: (sc/with-fn-validation ...)
 
 (env/with-feature-value :allu true
-  (mongo/connect!)
-  (mount/start #'allu/allu-jms-session #'allu/allu-jms-consumer)
+  (itu/with-local-actions
+    (mongo/connect!)
+    (mount/start #'allu/allu-jms-session #'allu/allu-jms-consumer)
 
-  (facts "Usage of ALLU integration in commands"
-    (mongo/with-db itu/test-db-name
-      (lupapalvelu.fixture.core/apply-fixture "minimal")
+    (facts "Usage of ALLU integration in commands"
+      (mongo/with-db itu/test-db-name
+        (lupapalvelu.fixture.core/apply-fixture "minimal")
 
-      (let [initial-allu-state {:id-counter 0, :applications {}}
-            allu-state (atom initial-allu-state)
-            full-sijoitussopimus-state-graph (->> states/ya-sijoitussopimus-state-graph
-                                                  add-canceled->*
-                                                  ;; :complementNeeded should be unreachable:
-                                                  (into {} (remove (fn [[src _]] (= src :complementNeeded)))))
-            router (make-test-router allu-state)
-            handler (reitit-ring/ring-handler router)]
-        (with-redefs [allu/allu-router router
-                      allu/allu-request-handler handler]
-          (facts "state transitions"
-            (traverse-state-transitions
-              :states full-sijoitussopimus-state-graph
-              :initial-state :draft
-              :init! (fn [] (create-and-fill-placement-app pena "sijoitussopimus"))
-              :transition-adapters
-              (into {} (map (fn [[src dest :as transition]]
-                              [transition
-                               (if (= src :canceled)
-                                 (fn [[current _] id]
-                                   (undo-cancellation raktark-helsinki id)
-                                   current)
-                                 (case dest
-                                   :draft (fn [[_ dest] id]
-                                            (return-to-draft raktark-helsinki id "Nolo!")
-                                            dest)
-                                   :open (fn [[_ dest] id] (open pena id "YOLO") dest)
-                                   :submitted (fn [[_ dest] id]
-                                                (fill pena id)
-                                                (submit pena id)
-                                                dest)
-                                   :sent (fn [[_ dest] id] (approve raktark-helsinki id) dest)
-                                   :canceled (fn [[current dest] id]
-                                               (if (contains? #{:draft :open} current)
-                                                 (cancel pena id "Alkoi nolottaa.")
-                                                 (cancel raktark-helsinki id "Nolo!"))
-                                               dest)
-                                   :complementNeeded (fn [[current _] id]
-                                                       (request-for-complement raktark-helsinki id)
-                                                       current)
-                                   :agreementPrepared (fn [[current dest] id]
-                                                        (cond
-                                                          (= current dest)
-                                                          dest
+        (let [initial-allu-state {:id-counter 0, :applications {}}
+              allu-state (atom initial-allu-state)
+              full-sijoitussopimus-state-graph (->> states/ya-sijoitussopimus-state-graph
+                                                    add-canceled->*
+                                                    ;; :complementNeeded should be unreachable:
+                                                    (into {} (remove (fn [[src _]] (= src :complementNeeded)))))
+              router (make-test-router allu-state)
+              handler (reitit-ring/ring-handler router)]
+          (with-redefs [allu/allu-router router
+                        allu/allu-request-handler handler]
+            (facts "state transitions"
+              (traverse-state-transitions
+                :states full-sijoitussopimus-state-graph
+                :initial-state :draft
+                :init! (fn [] (create-and-fill-placement-app pena "sijoitussopimus"))
+                :transition-adapters
+                (into {} (map (fn [[src dest :as transition]]
+                                [transition
+                                 (if (= src :canceled)
+                                   (fn [[current _] id]
+                                     (undo-cancellation raktark-helsinki id)
+                                     current)
+                                   (case dest
+                                     :draft (fn [[_ dest] id]
+                                              (return-to-draft raktark-helsinki id "Nolo!")
+                                              dest)
+                                     :open (fn [[_ dest] id] (open pena id "YOLO") dest)
+                                     :submitted (fn [[_ dest] id]
+                                                  (fill pena id)
+                                                  (submit pena id)
+                                                  dest)
+                                     :sent (fn [[_ dest] id] (approve raktark-helsinki id) dest)
+                                     :canceled (fn [[current dest] id]
+                                                 (if (contains? #{:draft :open} current)
+                                                   (cancel pena id "Alkoi nolottaa.")
+                                                   (cancel raktark-helsinki id "Nolo!"))
+                                                 dest)
+                                     :complementNeeded (fn [[current _] id]
+                                                         (request-for-complement raktark-helsinki id)
+                                                         current)
+                                     :agreementPrepared (fn [[current dest] id]
+                                                          (cond
+                                                            (= current dest)
+                                                            dest
 
-                                                          (= current :submitted)
-                                                          (do (fact "fetch contract"
-                                                                (fetch-contract raktark-helsinki id) => fail?)
-                                                              current)
+                                                            (= current :submitted)
+                                                            (do (fact "fetch contract"
+                                                                  (fetch-contract raktark-helsinki id) => fail?)
+                                                                current)
 
-                                                          :else
-                                                          (do (fact "fetch contract"
-                                                                (fetch-contract raktark-helsinki id) => ok?)
-                                                              dest)))
-                                   :agreementSigned (fn [[_ dest] id]
-                                                      (sign-contract pena id)
-                                                      dest)))]))
-                    (state-graph->transitions full-sijoitussopimus-state-graph))
-              :visit-goal 1))
+                                                            :else
+                                                            (do (fact "fetch contract"
+                                                                  (fetch-contract raktark-helsinki id) => ok?)
+                                                                dest)))
+                                     :agreementSigned (fn [[_ dest] id]
+                                                        (sign-contract pena id)
+                                                        dest)))]))
+                      (state-graph->transitions full-sijoitussopimus-state-graph))
+                :visit-goal 1))
 
-          (let [old-id-counter (:id-counter @allu-state)]
-            (fact "ALLU integration disabled for"
-              (fact "Non-Helsinki sijoituslupa"
-                (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate SijoituslupaOperation)) => ok?]
-                  (itu/local-command pena :submit-application :id id) => ok?))
+            (let [old-id-counter (:id-counter @allu-state)]
+              (fact "ALLU integration disabled for"
+                (fact "Non-Helsinki sijoituslupa"
+                  (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate SijoituslupaOperation)) => ok?]
+                    (itu/local-command pena :submit-application :id id) => ok?))
 
-              (fact "Helsinki non-sijoituslupa"
-                (let [{:keys [id]} (itu/create-local-app pena
-                                                         :operation "pientalo"
-                                                         :x "385770.46" :y "6672188.964"
-                                                         :address "Kaivokatu 1"
-                                                         :propertyId "09143200010023") => ok?]
-                  (itu/local-command pena :submit-application :id id) => ok?
-                  (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?))
+                (fact "Helsinki non-sijoituslupa"
+                  (let [{:keys [id]} (itu/create-local-app pena
+                                                           :operation "pientalo"
+                                                           :x "385770.46" :y "6672188.964"
+                                                           :address "Kaivokatu 1"
+                                                           :propertyId "09143200010023") => ok?]
+                    (itu/local-command pena :submit-application :id id) => ok?
+                    (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?))
 
-              (:id-counter @allu-state) => (partial = old-id-counter))))))))
+                (:id-counter @allu-state) => (partial = old-id-counter)))))))))
