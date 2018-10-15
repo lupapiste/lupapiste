@@ -27,7 +27,7 @@
 
 (def ad-config
   {:sp-cert (env/value :sso :cert)
-   :private-key (env/value :sso :private-key)
+   :private-key (env/value :sso :privatekey)
    :acs-uri (format "%s/api/saml/ad-login/%s" (env/value :host) "609-R")
    :app-name "Lupapiste"})
 
@@ -52,7 +52,7 @@
 
 (defpage [:get "/api/saml/metadata"] []
   (let [{:keys [app-name sp-cert acs-uri]} ad-config]
-    (resp/status 200 (saml-sp/metadata app-name acs-uri sp-cert))))
+    (resp/status 200 (saml-sp/metadata app-name acs-uri (ad-util/parse-certificate sp-cert)))))
 
 (defpage [:get "/api/saml/ad-login/:org-id"] {org-id :org-id}
   (let [{:keys [enabled idp-uri]} (-> org-id org/get-organization :ad-login)
