@@ -1,17 +1,18 @@
 (ns lupapalvelu.backing-system.krysp.parties-krysp-itest
-  (:require [midje.sweet :refer :all]
+  (:require [clojure.data.xml :refer [parse]]
             [clojure.java.io :as io]
-            [clojure.data.xml :refer [parse]]
-            [sade.core :refer [now]]
-            [sade.env :as env]
-            [sade.util :as util]
-            [sade.xml :as xml]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.domain :as domain]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.validator :refer [validate]]
-            [sade.strings :as ss]))
+            [midje.sweet :refer :all]
+            [sade.core :refer [now]]
+            [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [sade.xml :as xml]))
 
 (apply-remote-minimal)
 
@@ -91,7 +92,7 @@
           xml (get-valid-krysp-xml application (:id application))]
       (check-pre-verdict-parties application xml))
 
-    (give-verdict sonja application-id) => ok?
+    (give-legacy-verdict sonja application-id)
 
     (let [post-verdict-suunnittelija1 (command pena :create-doc :id application-id :schemaName "suunnittelija") => ok?
           post-verdict-suunnittelija2 (command pena :create-doc :id application-id :schemaName "suunnittelija") => ok?

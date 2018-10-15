@@ -3,6 +3,7 @@
 Documentation   Digging permits can obly be created from sijoituslupa or sijoitussopimus applications in post verdict states
 Resource        ../../common_resource.robot
 Resource        ../25_company/company_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 

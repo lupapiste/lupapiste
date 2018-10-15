@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.ui-components
   (:require [lupapalvelu.ui.components]
             [lupapalvelu.ui.inspection-summaries :as inspection-summaries]
+            [lupapalvelu.ui.auth-admin.ad-login.ad-login-settings :as ad-login]
             [lupapalvelu.ui.auth-admin.stamp.editor :as stamp-editor]
             [lupapalvelu.ui.auth-admin.edit-authority.edit-view :as edit-authority-view]
             [lupapalvelu.ui.pate.verdict-templates :as verdict-templates]
@@ -25,7 +26,8 @@
         local-bulletins/mount-component
         bulletin-preamble/mount-component
         company-reports/mount-component
-        edit-authority-view/mount-component]
+        edit-authority-view/mount-component
+        ad-login/mount-component]
 
        (run! (fn [mount-fn]
                (try (mount-fn)

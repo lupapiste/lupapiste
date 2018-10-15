@@ -162,7 +162,7 @@
    :allow-state-change               :all
    :sftp-directory                   ""
    :allowed-task-schemas             #{}
-   :multiple-parties-allowed         false
+   :multiple-parties-allowed         true
    :extra-statement-selection-values false
    :ely-statement-types              []})
 

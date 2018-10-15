@@ -26,12 +26,33 @@ Sonja sets up application by filling person details and submitting
   Sleep  0.5s
   Open accordions  parties
   Input text with jQuery  section[data-doc-type='maksaja'] input[data-docgen-path='henkilo.henkilotiedot.hetu']  250876-8620
+  Sleep  0.5s
   Submit application
 
+ELY statements aren't visible when not enabled
+  Open tab  statement
+  Element should not be visible by test id  add-ely-statement
+  [Teardown]  Logout
 
-Sonja statement to ELY
+Admin enables ELY statements
+  SolitaAdmin logs in
+  Go to page  organizations
+  Wait test id visible  organization-search-term
+  Fill test id  organization-search-term  753-R
+  Scroll and Click test id  edit-organization-753-R
+  Wait until  Element should be visible  xpath=//section[@id="organization"]//input[@id="docstore-enabled"]
+  Select Checkbox  xpath=//section[@id="organization"]//input[@id="elyUspaEnabled"]
+  Wait Until  Positive indicator should be visible
+  Go back
+  Click link  xpath=//a[@title="Kirjaudu ulos"]
+
+ELY statements are visible
+  Sonja logs in  False
+  Open application  ely-statements  753-416-25-22
   Open tab  statement
   Wait until  Element should be visible by test id  add-ely-statement
+
+Sonja statement to ELY
   Click by test id  add-ely-statement
   Wait until  Element should be visible by test id  ely-statement-bubble
   Element should be disabled  xpath=//button[@data-test-id='bubble-dialog-ok']

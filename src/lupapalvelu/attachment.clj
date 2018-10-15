@@ -42,8 +42,7 @@
             [sade.env :as env]
             [sade.shared-schemas :as sssc]
             [lupapalvelu.vetuma :as vetuma])
-  (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream]))
+  (:import [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream PipedInputStream PipedOutputStream]))
 
 
 ;;
@@ -316,9 +315,9 @@
   [created application-state attachment-types-with-metadata group locked? required? requested-by-authority?]
   (map #(make-attachment created nil required? requested-by-authority? locked? (keyword application-state) group (:type %) (:metadata %)) attachment-types-with-metadata))
 
-(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts primaryOperation submitted]} myyntipalvelu-disabled?]
+(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction pate-verdicts verdicts primaryOperation submitted]} myyntipalvelu-disabled?]
   (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
-                     (tos/update-end-dates verdicts primaryOperation submitted))]
+                     (tos/update-end-dates (concat verdicts pate-verdicts) primaryOperation submitted))]
     (if (seq metadata)
       ; Myyntipalvelu can be only negatively overridden, it can't be forced on if TOS says otherwise
       (if (and myyntipalvelu-disabled? (:myyntipalvelu metadata))
@@ -451,13 +450,13 @@
            (let [version-path (str "attachments.$.versions." idx)]
              (update-application
                (application->command application)
-               {:attachments.id id}
+               {:attachments {$elemMatch {:id id}}}
                {$set {(str version-path ".fileId") nil
                       (str version-path ".originalFileId") nil}}))))
        dorun)
   (update-application
     (application->command application)
-    {:attachments.id id}
+    {:attachments {$elemMatch {:id id}}}
     {$set {:attachments.$.latestVersion.fileId nil
            :attachments.$.latestVersion.originalFileId nil}}))
 
@@ -654,7 +653,7 @@
    Non-atomic operation: first deletes files, then updates document."
   [application attachment-ids]
   (when (seq attachment-ids)
-    (let [ids-str (pr-str attachment-ids)]
+    (let [ids-str (ss/serialize attachment-ids)]
       (info "1/4 deleting assignments regarding attachments" ids-str)
       (run! (partial assignment/remove-target-from-assignments (:id application)) attachment-ids)
       (info "2/4 deleting files of attachments" ids-str)
@@ -724,7 +723,7 @@
   "Returns the file for the latest attachment version if user has access to application and the attachment, otherwise nil.
    Optionally uses the provided application to save on db overhead."
   ([user attachment-id preview?]
-    (->> (get-application-as {:attachments.id attachment-id} user :include-canceled-apps? true)
+   (->> (get-application-as {:attachments {$elemMatch {:id attachment-id}}} user :include-canceled-apps? true)
          (get-attachment-latest-version-file user attachment-id preview?)))
   ([user attachment-id preview? application]
    (let [{:keys [latestVersion] :as attachment} (->> (:attachments application)
@@ -841,17 +840,22 @@
         conversion-data   (conversion user-id session-id application (assoc original-filedata :content content))]
     (attach! command session-id attachment-options original-filedata conversion-data)))
 
-(defn- append-stream [zip file-name in]
-  (when in
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
-    (io/copy in zip)
-    (.closeEntry zip)))
-
 (defn- append-attachments-to-zip! [zip user attachments application filename-prefix]
   (doseq [{:keys [id]} attachments]
     (when-let [{:keys [content filename]} (get-attachment-latest-version-file user id false application)]
-      (with-open [in (content)]
-        (append-stream zip (str filename-prefix id "_" filename) in)))))
+      (files/open-and-append! zip (str filename-prefix id "_" filename) content))))
+
+(defn- append-application-pdfs-to-zip! [zip application user application-pdf-lang]
+  (when application-pdf-lang
+    ; Add submitted PDF, if exists:
+    (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
+      (->> (-> (app-utils/with-masked-person-ids submitted-application user)
+               (pdf-export/generate application-pdf-lang))
+           (files/append-stream! zip (i18n/loc "attachment.zip.pdf.filename.submitted"))))
+    ; Add current PDF:
+    (->> (-> (app-utils/with-masked-person-ids application user)
+             (pdf-export/generate application-pdf-lang))
+         (files/append-stream! zip (i18n/loc "attachment.zip.pdf.filename.current")))))
 
 (defn ^java.io.File get-all-attachments!
   "Returns attachments as zip file.
@@ -860,35 +864,39 @@
   ([attachments application user]
     (get-all-attachments! attachments application user nil))
   ([attachments application user application-pdf-lang]
-   (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; Must be deleted by caller!
+   (let [temp-file (files/temp-file-zip "lupapiste.attachments." ".zip.tmp"
+                      (fn [zip]
+                       (append-attachments-to-zip! zip user attachments application nil)
+                       (append-application-pdfs-to-zip! zip application user application-pdf-lang)))]
      (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
-     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
-       ; Add all attachments:
-       (append-attachments-to-zip! zip user attachments application nil)
-       (when application-pdf-lang
-         ; Add submitted PDF, if exists:
-         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-           (->> (-> (app-utils/with-masked-person-ids submitted-application user)
-                    (pdf-export/generate application-pdf-lang))
-                (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted"))))
-         ; Add current PDF:
-         (->> (-> (app-utils/with-masked-person-ids application user)
-                  (pdf-export/generate application-pdf-lang))
-              (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current"))))
-       (.finish zip))
      (debugf "Size of the temporary zip file: %d" (.length temp-file))
      temp-file)))
 
+(defn ^java.io.InputStream get-all-attachments-as-input-stream!
+  "Returns attachments as zip file.
+   If application-pdf-lang is provided, application and submitted application PDFs are included.
+   Callers responsibility is to close the returned input stream."
+  ([attachments application user]
+   (get-all-attachments-as-input-stream! attachments application user nil))
+  ([attachments application user application-pdf-lang]
+   (debugf "Streaming zip file for %d attachments" (count attachments))
+   (files/piped-zip-input-stream
+     (fn [zip]
+       (append-attachments-to-zip! zip user attachments application nil)
+       (append-application-pdfs-to-zip! zip application user application-pdf-lang)))))
+
 (defn ^java.io.InputStream get-attachments-for-user!
-  "Returns the latest corresponding attachment files readable by the user as an input stream of a self-destructing ZIP file"
-  [user application attachments]
-  (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; deleted via temp-file-input-stream
-    (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
-    (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
-      (append-attachments-to-zip! zip user attachments application (str (:id application) "_"))
-      (.finish zip))
-    (debugf "Size of the temporary zip file: %d" (.length temp-file))
-    (files/temp-file-input-stream temp-file)))
+  "Returns the latest corresponding attachment files readable by the user as an input stream"
+  [user application attachments piped?]
+  (if piped?
+    (files/piped-zip-input-stream
+      (fn [zip]
+        (debugf "Streaming zip file for %d attachments" (count attachments))
+        (append-attachments-to-zip! zip user attachments application (str (:id application) "_"))))
+    (files/temp-file-input-stream
+     (files/temp-file-zip "lupapiste.attachments." ".zip.tmp"
+        (fn [zip]
+          (append-attachments-to-zip! zip user attachments application (str (:id application) "_")))))))
 
 (defn- post-process-attachment [attachment]
   (assoc attachment :isPublic (metadata/public-attachment? attachment)))
@@ -936,7 +944,7 @@
                                                     :autoConversion :conversionLog :filename])))]
     (update-application
       (application->command application)
-      {:attachments.id id}
+      {:attachments {$elemMatch {:id id}}}
       {$set mongo-updates})))
 
 (defn convert-existing-to-pdfa!
@@ -1043,7 +1051,7 @@
               file-options {:filename (format "%s-%s.pdf" (:id application) (i18n/localize lang :conversation.title))
                             :content  content
                             :size     (.available content)}
-              created (if created created (now))
+              created (or created (now))
               attachment-options {:attachment-type {:type-id    :keskustelu
                                                     :type-group :muut}
                                   :attachment-id   (when existing-keskustelu (:id existing-keskustelu))
@@ -1068,7 +1076,7 @@
                  :id
                  (usr/get-user-by-id [:language])
                  :language)]
-    (if lang lang "fi")))
+    (or lang "fi")))
 
 (defn maybe-generate-comments-attachment [user application state]
   (when (comments-saved-as-attachment? application state)

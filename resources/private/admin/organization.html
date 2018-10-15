@@ -102,6 +102,11 @@
             </div>
           </div>
 
+          <div data-bind="if: organization">
+            <label data-bind="ltext: 'admin.ely-uspa.enabled'" for="elyUspaEnabled"></label>
+            <input data-bind="checked: elyUspaEnabled" id="elyUspaEnabled" type="checkbox" />
+          </div>
+
           <div class="calendars-setting" data-bind="if: util.getIn($data, ['organization', 'id']) && features.enabled('ajanvaraus')">
             <label data-bind="ltext: 'organization.calendars.enabled'" for="calendarsEnabled"></label>
             <input type="checkbox" data-bind="checked: calendarsEnabled" class="form-input" id="calendarsEnabled">
@@ -159,6 +164,7 @@
           </div>
         </div>
 
+
           <button data-bind="click: newScope" class="btn positive">Lis&auml;&auml; lupatyyppi</button>
 
           <button data-bind="visible: !openInfoRequests(), click: convertOpenInforequests" class="btn positive">Muuta avoimet neuvontapyynn&ouml;t tavallisiksi</button>
@@ -199,13 +205,45 @@
               <tbody data-bind="foreach: $data.ssoKeys">
                 <tr>
                   <td><input type="checkbox" data-bind="checked: $data.selected, attr: {'data-test-id': 'org-sso-selected-' + $data.id}" class="form-input"></td>
-                  <td><span data-bind="text: $data.ip, attr: {'data-test-id': 'org-sso-ip-' + $data.id}" class="form-input"></td>
-                  <td><span data-bind="text: $data.comment, attr: {'data-test-id': 'org-sso-comment-' + $data.id}" class="form-input"></td>
+                  <td><span data-bind="text: $data.ip, attr: {'data-test-id': 'org-sso-ip-' + $data.id}" class="form-input"></span></td>
+                  <td><span data-bind="text: $data.comment, attr: {'data-test-id': 'org-sso-comment-' + $data.id}" class="form-input"></span></td>
                 </tr>
                 <button data-bind="click: saveAutologinIps" class="btn positive">Tallenna</button>
               </tbody>
             </table>
           </div>
+
+        <div>
+          <h2 data-bind="ltext: 'organization.adlogin.header'"></h2>
+          <table data-test-id="ad-table">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'organization.adlogin.enabled'"></th>
+                <th data-bind="ltext: 'organization.adlogin.trustedDomains'"></th>
+                <th data-bind="ltext: 'organization.adlogin.idpUri'"></th>
+                <th data-bind="ltext: 'organization.adlogin.idpCert'"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <input data-bind="checked: adLoginEnabled" id="adlogin-enabled" type="checkbox"/>
+                </td>
+                <td>
+                  <input type="text" data-bind="value: adLoginDomains" class="form-input">
+                </td>
+                <td>
+                  <input type="text" data-bind="value: adLoginIdPUri" class="form-input">
+                </td>
+                <td>
+                  <input type="textarea" data-bind="value: adLoginIdPCert" class="form-input">
+                </td>
+              </tr>
+              <button data-bind="click: saveAdLoginSettings" class="btn positive">Tallenna</button>
+            </tbody>
+          </table>
+        </div>
+
         </div>
       </div>
     </section>

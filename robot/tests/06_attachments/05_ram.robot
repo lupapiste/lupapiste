@@ -6,6 +6,7 @@ Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Resource       attachment_resource.robot
 Resource       ../common_keywords/approve_helpers.robot
+Resource        ../39_pate/pate_resource.robot
 Variables      variables.py
 
 *** Variables ***

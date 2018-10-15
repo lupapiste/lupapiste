@@ -11,7 +11,6 @@
             [sade.coordinate :as coord]
             [sade.core :refer [now]]
             [sade.env :as env]
-            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.xml :as xml]))
@@ -84,7 +83,9 @@
   (fact "No settings"
     (query sipoo :verdict-template-settings
            :org-id org-id
-           :category "r")=> (just {:ok true}))
+           :category "r")=> (just {:ok true
+                                   :filled false
+                                   :settings nil}))
   (fact "Save to bad path"
     (command sipoo :save-verdict-template-settings-value
              :org-id org-id
@@ -788,9 +789,6 @@
                                              {}
                                              changes))))}))
 
-
-
-
 (facts "Verdicts"
   (let [{:keys [good-condition other-condition template-id app-id]} space-saving-definitions]
     (facts "Pena fills and submits application"
@@ -1259,7 +1257,8 @@
                                                         :id app-id
                                                         :template-id template-id)
                       {:keys [attachment-id
-                              file-id]}        (add-verdict-attachment app-id
+                              file-id]}        (add-verdict-attachment sonja
+                                                                       app-id
                                                                        verdict-id
                                                                        "Hello world!")]
                   (check-file app-id file-id true)
@@ -1351,7 +1350,8 @@
                         [["muutoksenhaku"] (timestamp "22.1.2018")]
                         [["voimassa"] (timestamp "28.1.2021")]])))
     (facts "Add attachment to verdict draft"
-      (let [{:keys [attachment-id]} (add-verdict-attachment app-id
+      (let [{:keys [attachment-id]} (add-verdict-attachment sonja
+                                                            app-id
                                                             verdict-id
                                                             "Paatosote")]
         (fact "Attachment can be deleted"
@@ -1363,10 +1363,10 @@
     (fact "Add required verdict date"
       (edit-verdict "verdict-date" verdict-date) => no-errors?)
     (facts "Add attachment to verdict draft again. Add regular attachment to the application, too. Add pseudo verdict attachment"
-      (let [{:keys [attachment-id]}     (add-verdict-attachment app-id verdict-id "Otepaatos")
-            {regular-id :attachment-id} (add-attachment app-id "Lupa lausua"
+      (let [{:keys [attachment-id]}     (add-verdict-attachment sonja app-id verdict-id "Otepaatos")
+            {regular-id :attachment-id} (add-attachment sonja app-id "Lupa lausua"
                                                         "ennakkoluvat_ja_lausunnot" "suunnittelutarveratkaisu")
-            {pseudo-id :attachment-id}  (add-attachment app-id "sotaaP"
+            {pseudo-id :attachment-id}  (add-attachment sonja app-id "sotaaP"
                                                         "paatoksenteko" "paatos")]
         (check-draft-attachment app-id attachment-id verdict-id)
         (fact "Regular, pseudo and bogus-ids as application attachments"

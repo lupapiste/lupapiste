@@ -1,8 +1,9 @@
 (ns lupapalvelu.inspection-summary-itest
-  (:require [midje.sweet :refer :all]
-            [clojure.set :refer [difference]]
+  (:require [clojure.set :refer [difference]]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
+            [midje.sweet :refer :all]
             [sade.util :as util]))
 
 (apply-remote-minimal)
@@ -50,7 +51,7 @@
       (fact "Feature not enabled in Sipoo"
         (get-in (query sipoo :organization-by-user) [:organization :inspection-summaries-enabled]) => false)
       (fact "Default template created upon verdict given"
-        (give-verdict raktark-jarvenpaa (:id app-jarvenpaa) :verdictId "3323") => ok?
+        (give-legacy-verdict raktark-jarvenpaa (:id app-jarvenpaa))
         (let [{summaries :summaries} (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa))
               {summaryId1 :id summaryName :name targets :targets} (first summaries)
               test-target (second targets)
@@ -122,13 +123,12 @@
 
   (facts "Marking inspection target DONE"
     (let [{id1 :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Jarvikatu 29")
-          verdict (give-verdict raktark-jarvenpaa id1 :verdictId "1111")
+          _ (give-legacy-verdict raktark-jarvenpaa id1)
           {summaries :summaries} (query pena :inspection-summaries-for-application :id id1)
           {summaryId1 :id targets :targets} (first summaries)
           test-target (second targets)
           test-target-attachment-pred (fn [{{:keys [id type]} :target}] (and (= type "inspection-summary-item")
                                                                              (= id (:id test-target))))]
-      verdict => ok?
       (fact "Three targets in above default template" (count targets) => 3)
       (fact "Pena sees summaries" (count summaries) => 1)
       (upload-file-and-bind pena id1 {:type {:type-group "katselmukset_ja_tarkastukset"
@@ -172,13 +172,12 @@
                    :attachmentId (:id summary-attachment))
           => (partial expected-failure? :error.inspection-summary-target.finished)))))
 
-  (facts "Seting isnpection date"
+  (facts "Setting inspection date"
     (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Jarvikatu 27")
-          verdict (give-verdict raktark-jarvenpaa app-id :verdictId "2222")
+          _ (give-legacy-verdict raktark-jarvenpaa app-id)
           {summaries :summaries} (query pena :inspection-summaries-for-application :id app-id)
           {summary-id :id targets :targets} (first summaries)
           target (first targets)]
-      verdict => ok?
       (fact "Inspection date can be set"
         (command pena :set-inspection-date :id app-id :summaryId summary-id :targetId (:id target) :date 1500000000000) => ok?
         (let [modified-target (->> (query pena :inspection-summaries-for-application :id app-id)
@@ -201,7 +200,7 @@
         _                 (command sipoo :set-organization-inspection-summaries :enabled true) => ok?
         {template-id :id} (command sipoo :create-inspection-summary-template :name "foo" :templateText "bar\nbar2\nbar3") => ok?
         _                 (command sipoo :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId template-id) => ok?
-        _                 (give-verdict sonja (:id app) :verdictId "3323") => ok?
+        _                 (give-legacy-verdict sonja (:id app))
         {summaries :summaries} (query sonja :inspection-summaries-for-application :id (:id app))
         {attachments :attachments} (query sonja :attachments :id (:id app))
         {summary-id :id}  (first summaries)

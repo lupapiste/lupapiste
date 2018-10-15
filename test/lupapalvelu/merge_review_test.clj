@@ -4,10 +4,18 @@
              [clojure.data :refer [diff]]
              [lupapalvelu.review :refer :all]
              [lupapalvelu.tasks :as tasks]
+             [sade.strings :as ss]
+             [sade.common-reader :as cr]
+             [sade.xml :as xml]
              [sade.util :as util]))
 
 
-(testable-privates lupapalvelu.review merge-review-tasks matching-task)
+(testable-privates lupapalvelu.review
+                   merge-review-tasks matching-task
+                   remove-repeating-background-ids
+                   lupapiste-review?
+                   process-reviews
+                   review->task)
 
 (def rakennustieto-fixture [{:KatselmuksenRakennus {:kiinttun "54300601900001",
                                                     :rakennusnro "001",
@@ -218,3 +226,134 @@
         (matching-task mongo-task [held-review-task
                                    {:data {:muuTunnus {:value "ID"}}}])
         => {:data {:muuTunnus {:value "ID"}}})))))
+
+(fact "Remove repeating background ids"
+  (let [reviews [{:pitaja "One"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "foo"}}]}
+                 {:pitaja "Two"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "bar"
+                                                :sovellus "Bar"}}]}
+                 {:pitaja "Three"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "hello"}}]}
+                 {:pitaja "Four"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "foo"
+                                                :sovellus "Foobar"}}]}
+                 {:pitaja "Five"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "foo"}}]}
+                 {:pitaja "Six"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
+                 {:pitaja "Seven"}
+                 {:pitaja "Eight"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "bar"}}]}
+                 {:pitaja "Nine"
+                  :muuTunnustieto [{:MuuTunnus {:tunnus "world"}}]}]]
+    (remove-repeating-background-ids reviews)
+    => [{:pitaja "One"}
+        {:pitaja "Two"
+         :muuTunnustieto [{:MuuTunnus {:sovellus "Bar"}}]}
+        {:pitaja "Three"
+         :muuTunnustieto [{:MuuTunnus {:tunnus "hello"}}]}
+        {:pitaja "Four"
+         :muuTunnustieto [{:MuuTunnus {:sovellus "Foobar"}}]}
+        {:pitaja "Five"}
+        {:pitaja "Six"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
+        {:pitaja "Seven"}
+        {:pitaja "Eight"}
+        {:pitaja "Nine"
+         :muuTunnustieto [{:MuuTunnus {:tunnus "world"}}]}]))
+
+(defn generate-kuntagml
+  [reviews]
+  (->> reviews
+       (map (fn [{:keys [date other-id person note type attachment]}]
+              (format "<rakval:katselmustieto>
+            <rakval:Katselmus>
+              <rakval:muuTunnustieto>
+                <rakval:MuuTunnus>
+                  <yht:sovellus>%s</yht:sovellus>
+                </rakval:MuuTunnus>
+              </rakval:muuTunnustieto>
+              <rakval:pitoPvm>%s</rakval:pitoPvm>
+              <rakval:osittainen>osittainen</rakval:osittainen>
+              <rakval:pitaja>%s</rakval:pitaja>
+              <rakval:katselmuksenLaji>%s</rakval:katselmuksenLaji>
+              <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+              <rakval:huomautukset>
+                <rakval:huomautus>
+                  <rakval:kuvaus>%s</rakval:kuvaus>
+                </rakval:huomautus>
+              </rakval:huomautukset>
+              %s
+              <rakval:tarkastuksenTaiKatselmuksenNimi>rakennekatselmus</rakval:tarkastuksenTaiKatselmuksenNimi>
+            </rakval:Katselmus>
+          </rakval:katselmustieto>"
+                      other-id date person
+                      (or type "rakennekatselmus")
+                      note
+                      (if attachment
+                        (format "<rakval:liitetieto>
+            <rakval:Liite>
+              <yht:kuvaus>Katselmuksen pöytäkirja: Rakennekatselmus</yht:kuvaus>
+              <yht:linkkiliitteeseen>%s</yht:linkkiliitteeseen>
+              <yht:muokkausHetki>%s</yht:muokkausHetki>
+              <yht:tyyppi>katselmuksen_tai_tarkastuksen_poytakirja</yht:tyyppi>
+            </rakval:Liite>
+          </rakval:liitetieto>"
+                                attachment date)
+                        ""))))
+       (ss/join "\n")
+       (format "<rakval:RakennusvalvontaAsia>%s</rakval:RakennusvalvontaAsia>")))
+
+(defn task-id-for-person [tasks person]
+  (:id (util/find-first #(= person (get-in % [:data :katselmus :pitaja :value]))
+                        tasks)))
+
+(fact "Read reviews from xml"
+  (let [app-xml          (-> [{:date "2017-10-01Z" :other-id "Hello" :person "Person One" :note "Note One"}
+                              {:date       "2017-10-02Z" :other-id "Lupapiste" :person "Person Two" :note "Note Two"
+                               :attachment "two.pdf"}
+                              {:date       "2017-10-03Z" :other-id "Hello" :person "Person Three" :note "Note Three"
+                               :attachment "three.pdf"}
+                              {:date       "2017-10-04Z" :other-id "Lupapiste" :person "Person Four" :note "Note Four"
+                               :attachment "four.pdf"}
+                              {:date       "2017-10-05Z" :other-id "World" :person "Person Five" :note "Note Five"
+                               :attachment "five.pdf"    :type     "bad type"}]
+                             generate-kuntagml
+                             (xml/parse-string "UTF-8")
+                             (cr/strip-xml-namespaces ))
+        three-attachment [{:liite {:kuvaus            "Katselmuksen pöytäkirja: Rakennekatselmus"
+                                   :linkkiliitteeseen "three.pdf"
+                                   :muokkausHetki     "2017-10-03Z"
+                                   :tyyppi            "katselmuksen_tai_tarkastuksen_poytakirja"}}]
+        reviews          (reviews-preprocessed app-xml)]
+    (fact "Preprocessed reviews"
+      (count reviews) => 5
+      (map lupapiste-review? reviews) => [false true false true false])
+    (fact "No attachment for invalid task"
+      (:attachments (review->task 12345 {} (nth reviews 2))) => truthy
+      (:attachments (review->task 12345 {} (last reviews))) => nil)
+    (fact "Process reviews"
+      (let [{:keys [review-tasks
+                    attachments-by-task-id]} (process-reviews app-xml 12345 {})
+            one-id                           (task-id-for-person review-tasks "Person One")
+            three-id                         (task-id-for-person review-tasks "Person Three")
+            five-id                          (task-id-for-person review-tasks "Person Five")]
+        (count review-tasks) => 3
+        (fact "Only Three has attachment (one: no attachment, five: invalid data)"
+          attachments-by-task-id => {three-id three-attachment})))
+
+    (fact "Tasks and attachments"
+      (let [{tasks        :added-tasks-with-updated-buildings
+             att-by-ids   :attachments-by-task-id
+             updated-ids  :updated-tasks
+             review-count :review-count} (read-reviews-from-xml {:username "Foo"} 12345 {} app-xml)
+            one-id                       (task-id-for-person tasks "Person One")
+            three-id                     (task-id-for-person tasks "Person Three")
+            five-id                      (task-id-for-person tasks "Person Five")]
+        (fact "Review count"
+          review-count => 3)
+        (fact "Three new tasks"
+          updated-ids => (just [one-id three-id five-id] :in-any-order))
+        (fact "Three has the correct attachment, and Five does not (invalid)"
+          att-by-ids => {three-id three-attachment})))))

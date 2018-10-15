@@ -21,13 +21,18 @@
                  ; Web frameworks
                  [ring "1.6.2" :exclusions [commons-fileupload org.clojure/tools.reader]]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
-                 [compojure "1.1.9" :exclusions [org.clojure/tools.macro ring]]
-                 [metosin/ring-swagger "0.22.12"]
-                 [metosin/ring-swagger-ui "2.2.5-0"]
+                 [compojure "1.1.9" :exclusions [org.clojure/tools.macro ring]] ; force noir to use newer version
+                 [metosin/ring-swagger "0.26.1"]
+                 [metosin/ring-swagger-ui "3.17.2"]
+                 [metosin/reitit-core "0.2.2"]
+                 [metosin/reitit-schema "0.2.2"]
+                 [metosin/reitit-ring "0.2.2"]
+                 [metosin/reitit-middleware "0.2.2"]
+                 [metosin/spec-tools "0.7.1"] ; for reitit-middleware
 
                  ; Namespace finder library
                  [bultitude "0.2.8"] ; noir requires 0.2.0
-                 [org.tcrawley/dynapath "1.0.0"]            ; bultitudes requires 0.2.3, but midje needs 1.0.0, should be compatible
+                 [org.tcrawley/dynapath "1.0.0"] ; bultitudes requires 0.2.3, but midje needs 1.0.0, should be compatible
 
                  ; MongoDB driver
                  [com.novemberain/monger "3.1.0" :exclusions [[com.google.guava/guava]]]
@@ -50,6 +55,7 @@
                  [cljstache "2.0.1"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [org.freemarker/freemarker "2.3.23"]
+
                  ; CSS
                  [garden "1.3.3"]
 
@@ -109,16 +115,16 @@
                  ; Image processing
                  [com.github.jai-imageio/jai-imageio-core "1.3.1"]
                  [com.github.jai-imageio/jai-imageio-jpeg2000 "1.3.0"]
-                 [com.google.zxing/javase "2.2"] ; QR codes
+                 [com.google.zxing/javase "2.2"]            ; QR codes
                  [com.twelvemonkeys.imageio/imageio-jpeg "3.2.1"]
 
                  ; MS Office document processing
                  [ontodev/excel "0.2.4" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
                  [org.apache.poi/poi-ooxml "3.15"]
                  [dk.ative/docjure "1.11.0"] ; this also depends on Apache POI v3.14
-                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf  "1.0.6"]
-                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension  "1.0.6" :exclusions [com.lowagie/itext]]
-                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx  "1.0.6"]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf "1.0.6"]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension "1.0.6" :exclusions [com.lowagie/itext]]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx "1.0.6"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.6" :exclusions [org.freemarker/freemarker]]
 
                  ; Apache pdfbox for PDF/A wrapper
@@ -147,7 +153,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "1.47.1.3"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.9.25"]
+                 [lupapiste/commons "0.9.26"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -159,6 +165,9 @@
 
                  ;; Used in the markup support.
                  [instaparse "1.4.8"]
+
+                 ;; SAML 2.0 -support
+                 [kirasystems/saml20-clj "0.1.12"]
 
                  [org.clojure/clojurescript "1.9.946"]
                  [rum "0.10.8"]
@@ -173,7 +182,7 @@
             [lein-midje "3.2.1"]
             [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
             [lupapiste/lein-buildid "0.4.2"]
-            [lupapiste/lein-nitpicker "0.5.1"]
+            [lupapiste/lein-nitpicker "0.6.0"]
             [lein-figwheel "0.5.16"]]
   :hooks [leiningen.cljsbuild]
 
@@ -186,7 +195,7 @@
   :cljsbuild {:builds {:rum {:source-paths ^:replace ["src-cljs" "src-cljc"]}}}
   :profiles {:dev      {:dependencies   [[cljsbuild "1.1.7"] ; workaround for lein-cljsbuild issue #204
                                          [midje "1.9.1"]
-                                         [com.cemerick/pomegranate "1.0.0"]                                             ; midje.repl needs this
+                                         [com.cemerick/pomegranate "1.0.0"] ; midje.repl needs this
                                          [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                          [com.raspasov/clj-ssh "0.5.12"]
                                          [org.apache.activemq/artemis-jms-server "2.6.0"]
@@ -198,7 +207,7 @@
                                          [binaryage/devtools "0.9.4"]]
                         :resource-paths ["dev-resources"]
                         :source-paths   ["dev-src" "test-utils"]
-                        :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
+                        :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8" "-Xverify:none"]
                         :eastwood       {:continue-on-exception true
                                          :source-paths          ["src"]
                                          :test-paths            []}
@@ -264,7 +273,7 @@
                             ["figwheel"]]]}
   :aot [lupapalvelu.main clj-time.core]
   :main ^:skip-aot lupapalvelu.server
-  :repl-options {:init-ns lupapalvelu.server}
+  :repl-options {:init-ns user}
   :pom-plugins [[org.fusesource.mvnplugins/maven-graph-plugin "1.4"]
                 [com.googlecode.maven-overview-plugin/maven-overview-plugin "1.6"]]
   :min-lein-version "2.5.0")

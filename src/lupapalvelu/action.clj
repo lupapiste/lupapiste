@@ -307,7 +307,8 @@
           ; Inforequest state chenges don't require logging
           (states/all-inforequest-states new-state)
           ; delete-verdict commands sets state back, but no logging is required (LPK-917)
-          (seq (get-in changes [$pull :verdicts])))
+          (seq (get-in changes [$pull :verdicts]))
+          (seq (get-in changes [$pull :pate-verdicts])))
         "event must be pushed to history array when state is set")
       (if (env/dev-mode?)
         (when-not (map? (:user command))
@@ -322,7 +323,7 @@
             (when (and (env/feature? :pate-json) organization (org/pate-scope? (:application command)))
               (util/future*
                 (state-change/trigger-state-change command new-state))))
-          (if return-count? n nil))))))
+          (when return-count? n))))))
 
 (defn application->command
   "Creates a command data structure that is suitable for update-application and with-application functions.
@@ -702,7 +703,7 @@
     validator
     (let [checker       (sc/checker validator)
           error-message (str "input does not match schema " (or (-> validator meta :name)
-                                                                (-> validator pr-str)))]
+                                                                (pr-str validator)))]
       (fn [command]
         (when-let [schema-errors (-> command :data checker)]
           (error error-message (pr-str schema-errors))

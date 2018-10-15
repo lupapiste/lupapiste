@@ -45,6 +45,7 @@
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ident.suomifi]
+            [lupapalvelu.ident.ad-login]
             [lupapalvelu.idf.idf-api :as idf-api]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.mongo :as mongo]

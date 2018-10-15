@@ -352,10 +352,6 @@
                   :js ["statement-service.js" "statement.js"]
                   :html ["statement.html"]}
 
-   :verdict      {:depends [:common-html :repository :attachment]
-                  :js ["verdict.js"]
-                  :html ["verdict.html"]}
-
    :neighbors    {:depends [:common-html :repository]
                   :js ["neighbors.js"]
                   :html ["neighbors.html"]}
@@ -464,7 +460,7 @@
    :authority-app {:depends [] :js ["authority.js"]}
    :authority     {:depends [:pate :authority-app :common-html :external-api :authenticated :map :applications
                              :integration-message-monitor :application
-                             :statement :verdict :neighbors :docgen :create :copy :digitizer :mypage :header :debug
+                             :statement :neighbors :docgen :create :copy :digitizer :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer :mycalendar :ui-components
                              ]}
 
@@ -486,7 +482,7 @@
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
                                 "organization-reports.html" "organization-calendars.html" "calendar-admin.html" "assignments.html" "stamp-editor.html"
                                 "pate-verdict-templates.html" "archiving.html" "organization-bulletins.html"
-                                "organization-store.html" "organization-terminal.html" "edit-authority.html"]}
+                                "organization-store.html" "organization-terminal.html" "edit-authority.html" "ad-login-settings.html"]}
 
    :admin-app {:depends []
                :js ["admin.js"]}

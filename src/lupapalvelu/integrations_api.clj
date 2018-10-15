@@ -1,46 +1,47 @@
 (ns lupapalvelu.integrations-api
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
-  (:require [taoensso.timbre :refer [infof info error errorf]]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.set :as set]
-            [noir.response :as resp]
-            [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
             [lupapalvelu.action :refer [defcommand defquery defraw update-application] :as action]
             [lupapalvelu.application :as app]
-            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.autologin :as autologin]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.backing-system.core :as bs]
-            [lupapalvelu.backing-system.allu :as allu]
+            [lupapalvelu.autologin :as autologin]
+            [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.backing-system.asianhallinta.core :as ah]
+            [lupapalvelu.backing-system.core :as bs]
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.document.document :as doc]
-            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.pate.verdict :as pate-verdict]
+            [lupapalvelu.pate.verdict-interface :as vif]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.rest.config :as config]
             [lupapalvelu.roles :as roles]
-            [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [lupapalvelu.ya-extension :as yax]
+            [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
+            [noir.response :as resp]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as validators]
-            [lupapalvelu.foreman :as foreman]))
+            [taoensso.timbre :refer [infof info error errorf]]))
 
 (defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
@@ -280,14 +281,11 @@
 ;; Asianhallinta
 ;;
 
-(defn- fetch-linked-kuntalupatunnus
-  "Fetch kuntalupatunnus from application's link permit's verdicts"
-  [application]
-  (when-let [link-permit-app (first (app/get-link-permit-apps application))]
-    (-> link-permit-app :verdicts first :kuntalupatunnus)))
-
 (defn- update-kuntalupatunnus [application]
-  (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
+  (if-let [kuntalupatunnus (some-> application
+                                   app/get-link-permit-apps
+                                   first
+                                   vif/published-kuntalupatunnus)]
     (update-in application
                [:linkPermitData]
                conj {:id kuntalupatunnus
@@ -524,4 +522,3 @@
                                                       (assoc :usage "RH-tietojen muutos"))))
   (doc-persistence/set-sent-timestamp command docId)
   (ok))
-

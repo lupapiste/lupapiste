@@ -48,14 +48,35 @@
 (facts "count-unseen-verdicts"
   (count-unseen-verdicts nil nil) => 0
   (count-unseen-verdicts {} {}) => 0
-  (count-unseen-verdicts {} {:verdict [{}]}) => 0
+  (count-unseen-verdicts {} {:verdicts [{}]}) => 0
   (count-unseen-verdicts {:role "applicant"} {:verdicts [{}]}) => 0
   (count-unseen-verdicts {:role "applicant"} {:verdicts [{:timestamp 1}]}) => 1
   (count-unseen-verdicts {:role "applicant"} {:verdicts [{:timestamp 1} {:timestamp 2}]}) => 2
   (count-unseen-verdicts {:role "applicant"} {:verdicts [{:timestamp 0}]}) => 0
   (count-unseen-verdicts {:role "authority"} {:verdicts [{:timestamp 0}]}) => 0
   (count-unseen-verdicts {:role "authority"} {:verdicts [{:timestamp 1}]}) => 0
-  (count-unseen-verdicts {:id "user1" :role "applicant"} {:verdicts [{:timestamp 1}] :_verdicts-seen-by {:user1 1}}) => 0)
+  (count-unseen-verdicts {:id "user1" :role "applicant"} {:verdicts [{:timestamp 1}] :_verdicts-seen-by {:user1 1}}) => 0
+  (count-unseen-verdicts {} {:verdicts [{}] :pate-verdicts [{}]}) => 0
+  (count-unseen-verdicts {:role "applicant"} {:verdicts [{}]
+                                              :pate-verdicts [{}]}) => 0
+  (count-unseen-verdicts {:role "applicant"} {:verdicts [{:timestamp 1}]
+                                              :pate-verdicts [{}]}) => 1
+  (count-unseen-verdicts {:role "applicant"} {:verdicts [{:timestamp 1}]
+                                              :pate-verdicts [{:modified 2}]}) => 2
+  (count-unseen-verdicts {:role "applicant"} {:verdicts [{:timestamp 0}]
+                                              :pate-verdicts [{:modified 2}]}) => 1
+  (count-unseen-verdicts {:role "applicant"} {:verdicts [{:timestamp 1} {:timestamp 2}]
+                                              :pate-verdicts [{:modified 1} {:modified 2}]}) => 4
+  (count-unseen-verdicts {:role "authority"} {:verdicts [{:timestamp 1}]
+                                              :pate-verdicts [{:modified 2}]}) => 0
+  (count-unseen-verdicts {:id "user1" :role "applicant"}
+                         {:verdicts [{:timestamp 1}]
+                          :pate-verdicts [{:modified 1}]
+                          :_verdicts-seen-by {:user1 1}}) => 0
+  (count-unseen-verdicts {:id "user1" :role "applicant"}
+                         {:verdicts [{:timestamp 1} {:timestamp 2}]
+                          :pate-verdicts [{:modified 1} {:modified 3}]
+                          :_verdicts-seen-by {:user1 1}}) => 2)
 
 (defn- mock-attachments [state & [created user]]
   (let [v (merge {:originalFileId "fileid"}

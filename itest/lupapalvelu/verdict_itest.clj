@@ -4,6 +4,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.pate-itest-util :refer :all]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libreclient]
             [midje.sweet :refer :all]
             [sade.core :refer [now]]
@@ -11,45 +12,52 @@
 
 (apply-remote-minimal)
 
+;; Old verdict itest use cases converted to Pate legacy itests.
+
 (fact* "Give verdict"
   (last-email) ; Inbox zero
 
   (let [application    (create-and-submit-application pena :propertyId sipoo-property-id :address "Paatoskuja 9")
         application-id (:id application)
-        email           (last-email) => truthy]
+        email          (last-email) => truthy]
     (:state application) => "submitted"
     (:to email) => (contains (email-for-key pena))
     (:subject email) => "Lupapiste: Paatoskuja 9, Sipoo - hankkeen tila on nyt Hakemus j\u00e4tetty"
     (get-in email [:body :plain]) => (contains "Hakemus j\u00e4tetty")
     email => (partial contains-application-link? application-id "applicant")
 
-    (let [new-verdict-resp (command sonja :new-verdict-draft :id application-id) => ok?
-          verdict-id (:verdictId new-verdict-resp) => truthy
-          _           (command sonja :save-verdict-draft :id application-id :verdictId verdict-id :backendId "aaa"
-                               :status 42 :name "Paatoksen antaja" :given 123 :official 124 :text "" :agreement false
-                               :section "") => ok?
-          application (query-application sonja application-id)
-          verdict     (first (:verdicts application))
-          paatos      (first (:paatokset verdict))
-          poytakirja  (first (:poytakirjat paatos))]
+    (let [new-verdict-resp (command sonja :new-legacy-verdict-draft :id application-id) => ok?
+          verdict-id       (:verdict-id new-verdict-resp)                               => truthy
+          _                (fill-verdict sonja application-id verdict-id
+                                         :kuntalupatunnus "aaa"
+                                         :verdict-code "42"
+                                         :handler "Paatoksen antaja"
+                                         :anto 123
+                                         :lainvoimainen 124
+                                         :verdict-text ""
+                                         :verdict-section "")
+          application      (query-application sonja application-id)
+          verdict          (query sonja :pate-verdict :id application-id
+                                  :verdict-id verdict-id)]
       (:permitSubtype application) => falsey
-      (count (:verdicts application)) => 1
-      (count (:paatokset verdict)) => 1
-      (count (:poytakirjat paatos)) => 1
+      (count (:pate-verdicts application)) => 1
 
-      (:sopimus verdict) => false
-      (:kuntalupatunnus verdict) => "aaa"
-      (:status poytakirja) => 42
-      (:paatoksentekija poytakirja) => "Paatoksen antaja"
-      (get-in paatos [:paivamaarat :anto]) => 123
-      (get-in paatos [:paivamaarat :lainvoimainen]) => 124
+      (-> verdict :verdict :data) => {:kuntalupatunnus "aaa"
+                                      :verdict-code    "42"
+                                      :handler         "Paatoksen antaja"
+                                      :anto            123
+                                      :lainvoimainen   124
+                                      :verdict-text    ""
+                                      :verdict-section ""}
+      (:filled verdict) => true
 
+      ;; TODO: Comments are not yet visible for Pate verdicts.
       (fact "Comment verdict"
         (command sonja :add-comment :id application-id :text "hello" :to nil :target {:type "verdict" :id verdict-id} :openApplication false :roles [:authority]) => ok?
         (fact "Nobody got mail" (last-email) => nil))
 
       (fact "Upload attachment to draft"
-        (upload-attachment-to-target sonja application-id nil true verdict-id "verdict")
+        (add-verdict-attachment sonja application-id verdict-id "Draft" )
         (fact "Nobody got mail" (last-email) => nil))
 
       (fact "Pena does not see comment or attachment"
@@ -59,7 +67,7 @@
 
       (fact "Sonja sees comment and attachment"
         (let [{:keys [comments attachments]} (query-application sonja application-id)
-              attachments-with-versions (filter (comp seq :latestVersion) attachments)]
+              attachments-with-versions      (filter (comp seq :latestVersion) attachments)]
           (count comments) => 2 ; comment and new attachment auto-comment
           (count attachments-with-versions) => 1
 
@@ -77,21 +85,26 @@
               a-id => application-id
               v-id => verdict-id))))
 
-      (fact "Publish verdict" (command sonja :publish-verdict :id application-id :verdictId verdict-id :lang :fi) => ok?)
+      (fact "Publish verdict"
+        (command sonja :publish-legacy-verdict
+                 :id application-id :verdict-id verdict-id) => ok?)
+      (verdict-pdf-queue-test sonja {:app-id     application-id
+                                     :verdict-id verdict-id})
 
-      (let [application (query-application sonja application-id)
-            verdict     (first (:verdicts application))
+      (let [application      (query-application sonja application-id)
+            {:keys [verdict]} (query sonja :pate-verdict :id application-id
+                                     :verdict-id (-> application :pate-verdicts
+                                                     first :id))
             first-attachment (get-in application [:attachments 0])]
         (fact "verdict data"
-          (:draft verdict) => false
-          (:sopimus verdict) => false)
+          (-> verdict :state) => "published")
         (fact "verdict is given"
           (:state application) => "verdictGiven"
           (-> application :history last :state) => "verdictGiven")
 
         (fact "Email was sent"
           (let [email (last-email)
-                body (get-in email [:body :plain])]
+                body  (get-in email [:body :plain])]
             (:to email) => (contains (email-for-key pena))
             (:subject email) => "Lupapiste: Paatoskuja 9, Sipoo - hankkeen tila on nyt P\u00e4\u00e4t\u00f6s annettu"
             email => (partial contains-application-link-with-tab? application-id "verdict" "applicant")
@@ -198,15 +211,19 @@
       (-> app-with-verdict :tasks count) => 9)
 
     (facts "Delete verdicts"
-      (command sonja :delete-verdict :id application-id :verdictId verdict-id1) => ok?
+      (fact "Delete first backing system verdict"
+        (command sonja :delete-verdict :id application-id :verdict-id verdict-id1) => ok?)
       (fact "No step back since there still is a verdict"
         (:state (query-application mikko application-id)) => "verdictGiven")
-      (let [draft-id (:verdictId (command sonja :new-verdict-draft :id application-id))]
+      (let [{draft-id :verdict-id} (command sonja :new-legacy-verdict-draft :id application-id)]
         (fact "No step back: draft deleted"
-          (command sonja :delete-verdict :id application-id :verdictId draft-id) => ok?
+          (command sonja :delete-legacy-verdict :id application-id :verdict-id draft-id) => ok?
           (:state (query-application mikko application-id)) => "verdictGiven"))
-      (command sonja :new-verdict-draft :id application-id) => ok?
-      (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
+      (fact "Create one more draft"
+        (command sonja :new-legacy-verdict-draft :id application-id) => ok?)
+      (fact "Delete second backing system verdict"
+        (command sonja :delete-verdict :id application-id :verdict-id verdict-id2)
+        => ok?)
       (let [app-without-verdict (query-application mikko application-id)]
         (fact "State stepped back"
           (:state app-without-verdict) => "submitted")

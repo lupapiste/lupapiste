@@ -1,25 +1,26 @@
 (ns lupapalvelu.tiedonohjaus
-  (:require [sade.http :as http]
-            [sade.env :as env]
-            [clojure.core.memoize :as memo]
-            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf]]
-            [lupapalvelu.organization :as o]
-            [lupapalvelu.action :as action]
-            [monger.operators :refer :all]
-            [clj-time.coerce :as c]
+  (:require [clj-time.coerce :as c]
             [clj-time.core :as t]
-            [sade.util :as util]
+            [clojure.core.memoize :as memo]
+            [clojure.string :as s]
+            [lupapalvelu.action :as action]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [clojure.string :as s]
-            [lupapalvelu.user :as usr])
-  (:import (lupapalvelu.tiedonohjaus CaseFile RestrictionType PublicityClassType PersonalDataType
-                                     ProtectionLevelType SecurityClassType AccessRightType ActionType
-                                     RecordType AgentType ActionEvent Custom ClassificationScheme)
+            [lupapalvelu.organization :as o]
+            [lupapalvelu.pate.verdict-common :as vc]
+            [lupapalvelu.user :as usr]
+            [monger.operators :refer :all]
+            [sade.env :as env]
+            [sade.http :as http]
+            [sade.util :as util]
+            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf]])
+  (:import (java.io StringWriter StringReader)
+           [java.util GregorianCalendar Date]
            (javax.xml.bind JAXB JAXBContext)
-           (java.io StringWriter StringReader)
            [javax.xml.datatype DatatypeFactory]
-           [java.util GregorianCalendar Date]))
+           (lupapalvelu.tiedonohjaus CaseFile RestrictionType PublicityClassType PersonalDataType
+                                     ProtectionLevelType SecurityClassType AccessRightType ActionType
+                                     RecordType AgentType ActionEvent Custom ClassificationScheme)))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
@@ -68,12 +69,9 @@
 
 (defn- paatospvm-plus-years [verdicts years]
   (when-let [paatos-ts (->> verdicts
-                            (map (fn [{:keys [paatokset]}]
-                                   (map (fn [pt] (map :paatospvm (:poytakirjat pt))) paatokset)))
-                            (flatten)
-                            (remove nil?)
-                            (sort)
-                            (last))]
+                            (map vc/verdict-date)
+                            (filter integer?)
+                            (apply max))]
     (-> (c/from-long (long paatos-ts))
         (t/plus (t/years years))
         (.toDate))))
@@ -113,9 +111,10 @@
           existing-tila (:tila metadata)
           existing-nakyvyys (:nakyvyys metadata)
           new-metadata (metadata-for-document organization tos-function document-type)
+          {:keys [verdicts pate-verdicts]} application
           processed-metadata (cond-> new-metadata
                                      existing-tila (assoc :tila (keyword existing-tila))
-                                     true (update-end-dates (:verdicts application))
+                                     true (update-end-dates (concat verdicts pate-verdicts))
                                      (and (not (:nakyvyys new-metadata)) existing-nakyvyys) (assoc :nakyvyys existing-nakyvyys))]
       (assoc document :metadata processed-metadata))))
 
@@ -295,7 +294,7 @@
         (when-not (= metadata new-metadata)
           (action/update-application
             (action/application->command application)
-            {:attachments.id id}
+            {:attachments {$elemMatch {:id id}}}
             {$set {:modified               now
                    :attachments.$.metadata new-metadata}}))))))
 
@@ -353,7 +352,7 @@
         (when-not (= metadata new-metadata)
           (action/update-application
             (action/application->command application)
-            {:attachments.id id}
+            {:attachments {$elemMatch {:id id}}}
             {$set {:modified               now
                    :attachments.$.metadata new-metadata}}
             :return-count? true))))))

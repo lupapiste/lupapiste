@@ -4,6 +4,7 @@ Documentation   Applicant fills inspection summary
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        inspection_summary_resources.robot
+Resource        ../39_pate/pate_resource.robot
 Variables      ../06_attachments/variables.py
 
 

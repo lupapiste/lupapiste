@@ -1,20 +1,21 @@
 (ns lupapalvelu.review
-  (:require [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
-            [monger.operators :refer :all]
-            [sade.core :refer :all]
-            [sade.util :as util]
+  (:require [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.tasks :as tasks]
-            [lupapalvelu.action :refer [update-application application->command]]
-            [lupapalvelu.building :as building]
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.review-reader :as review-reader]
-            [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.building :as building]
             [lupapalvelu.document.tools :as tools]
-            [sade.strings :as ss]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.verdict :as verdict]
             [lupapalvelu.verdict-review-util :as verdict-review-util]
-            [lupapalvelu.organization :as organization]))
+            [monger.operators :refer :all]
+            [sade.core :refer :all]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [swiss.arrows :refer :all]
+            [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]))
 
 (defn- empty-review-task? [t]
   (let [katselmus-data (-> t :data :katselmus)
@@ -44,7 +45,8 @@
 (defn- non-empty-review-task? [task]
   (and (tasks/task-is-review? task) (not (empty-review-task? task))))
 
-(defn- task-with-matching-background-id [mongo-task tasks]
+(defn- task-with-matching-background-id
+  [mongo-task tasks]
   (let [mongo-task-bg-id (background-id mongo-task)]
     (when-not (ss/empty? mongo-task-bg-id)
       (util/find-first #(= mongo-task-bg-id
@@ -212,29 +214,70 @@
                                :liitetieto (when (seq liitetiedot)
                                              (map #(apply hash-map [:liite %]) liitetiedot))})))))
 
-(defn reviews->tasks [meta source buildings-summary reviews]
-  (letfn [(review-to-task [review] (tasks/katselmus->task meta source {:buildings buildings-summary} review))
-          (drop-reviews-with-lupapiste-muuTunnus [rs] (filter (util/fn-> :data :muuTunnusSovellus :value ss/lower-case (not= "lupapiste")) rs))]
-    (->> reviews
-         (map review-to-task)
-         drop-reviews-with-lupapiste-muuTunnus)))
+(defn- review->task
+  "Task definition for the given review. If the task passes validation,
+  the review attachments are also stored under :attachments."
+  [created buildings-summary review]
+  (let [task  (tasks/katselmus->task {:state :sent :created created}
+                                     {:type "background"}
+                                     {:buildings buildings-summary}
+                                     review)
+        error (seq (tasks/task-doc-validation (get-in task [:schema-info :name])
+                                              task))]
+    (if error
+      (do
+        (warnf "Invalid backing system task data. Attachment not added: %s"
+               (ss/serialize error))
+        task)
+      (assoc task :attachments (:liitetieto review)))))
+
+(defn- remove-repeating-background-ids
+  "Remove repeating background ids from preprocessed review tasks."
+  [reviews]
+  (let [id-path       [:muuTunnustieto 0 :MuuTunnus :tunnus]
+        get-id        #(get-in % id-path)
+        repeating-ids (-<>> (map get-id reviews)
+                            (remove nil?)
+                            (group-by identity)
+                            (filter (fn [[id xs]]
+                                      (> (count xs) 1)))
+                            (map first)
+                            set)]
+    (map (fn [review]
+           (if (contains? repeating-ids (get-id review))
+             (util/dissoc-in review id-path)
+             review))
+         reviews)))
+
+(defn- lupapiste-review?
+  "True if the review has originated from Lupapiste (according
+  to :muuTunnus.sovellus)."
+  [review]
+  (ss/=trim-i (some-> review :muuTunnustieto first :MuuTunnus :sovellus)
+              "Lupapiste"))
+
+(defn- process-reviews
+  "Return map with :review-tasks and :attachments-by-task-id keys."
+  [app-xml created buildings-summary]
+  (let [reviews      (->> (reviews-preprocessed app-xml)
+                          remove-repeating-background-ids
+                          (remove lupapiste-review?)
+                          vec )
+        review-tasks (map #(review->task created buildings-summary %) reviews)]
+    {:review-tasks           review-tasks
+     :attachments-by-task-id (->> review-tasks
+                                  (filter (comp not-empty :attachments))
+                                  (map (juxt :id :attachments))
+                                  (into {}))}))
 
 (defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
   [user created application app-xml & [overwrite-background-reviews? do-not-include-state-updates?]]
-  (let [reviews (vec (reviews-preprocessed app-xml))
-        buildings-summary (building-reader/->buildings-summary app-xml)
+  (let [buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
-        source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
-        review-tasks (reviews->tasks {:state :sent :created created} source buildings-summary reviews)
-        validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) review-tasks))
-        review-tasks (keep-indexed (fn [idx item]
-                                     (if (empty? (get validation-errors idx))
-                                       (assoc item :attachments (-> (get reviews idx) :liitetieto)))) review-tasks)
-        attachments-by-task-id (apply hash-map
-                                      (remove empty? (mapcat (fn [t]
-                                                               (when (:attachments t) [(:id t) (:attachments t)])) review-tasks)))
+        {:keys [review-tasks
+                attachments-by-task-id]} (process-reviews app-xml created buildings-summary)
         [unchanged-tasks
          added-and-updated-tasks
          new-faulty-tasks] (merge-review-tasks (map #(dissoc % :attachments) review-tasks)
@@ -266,9 +309,6 @@
     (assert (>= (count updated-tasks) (count (:tasks application))) "have fewer tasks after merge than before")
     ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks-with-updated-buildings))
-    (when (some seq validation-errors)
-      (doseq [error (remove empty? validation-errors)]
-        (warnf "Backend task validation error, this was skipped: %s" (pr-str error))))
     (ok :review-count (count review-tasks)
         :updated-tasks (map :id updated-tasks)
         :updates (util/deep-merge task-updates building-updates (when-not do-not-include-state-updates? state-updates))
@@ -279,7 +319,8 @@
 (defn save-review-updates [{user :user application :application :as command} updates added-tasks-with-updated-buildings attachments-by-task-id]
   (let [update-result (pos? (update-application command {:modified (:modified application)} updates :return-count? true))
         updated-application (domain/get-application-no-access-checking (:id application)) ;; TODO: mongo projection
-        organization (organization/get-organization (:organization application))]
+        organization (organization/get-organization (:organization application))
+        state-changed (not= (keyword (:state application)) (keyword (:state updated-application)))]
     (when update-result
       (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
         (let [attachments (get attachments-by-task-id id)]
@@ -294,6 +335,7 @@
                           (.getMessage e)))))
             (when-not (true? (:only-use-inspection-from-backend organization))
               (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))
-      (attachment/maybe-generate-comments-attachment user updated-application (:state updated-application)))
+      (when state-changed
+        (attachment/maybe-generate-comments-attachment user updated-application (:state updated-application))))
     (cond-> {:ok update-result}
             (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))

@@ -610,7 +610,7 @@
                  (henkilo-yritys-select-group :default "yritys"
                   :yritys-body yritys-with-verkkolaskutustieto
                   :henkilo-body henkilo-maksaja)
-                 {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
+                 {:name "laskuviite" :type :string :max-len 500 :layout :full-width}))
 
 (def muutostapa {:name "muutostapa" :type :select :sortBy :displayname
                  :size :s :label false :i18nkey "huoneistot.muutostapa"
@@ -684,7 +684,9 @@
                    {:name "kerrosluku" :type :string :size :s :subtype :number :min 0 :max 50}
                    {:name "kellarinpinta-ala" :type :string :size :s :unit :m2 :subtype :number :min 1 :max 9999999}]})
 
-(def mitat-muutos (merge mitat
+(def mitat-muutos (merge (assoc mitat :body
+                                      (conj (:body mitat)
+                                            {:name "muutosala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}))
                     {:group-help "mitat-muutos.help"
                      :whitelist {:roles [:authority] :otherwise :disabled}}))
 

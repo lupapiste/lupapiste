@@ -164,9 +164,9 @@
    :optional-parameters [functionCode lang dueDate saateText]
    :user-roles          #{:authority}
    :states              #{:open :submitted :complementNeeded :sent}
-   :pre-checks          [statement/statement-in-sent-state-allowed]
+   :pre-checks          [statement/statement-in-sent-state-allowed
+                         ely/ely-uspa-enabled]
    :input-validators    [ely/subtype-input-validator]
-   :feature             :ely-uspa
    :description         "Sends request for statement to ELY-keskus via integration"}
   [{:keys [created user organization] :as command}]
   (let [org                   @organization

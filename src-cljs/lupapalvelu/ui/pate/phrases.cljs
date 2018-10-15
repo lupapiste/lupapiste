@@ -30,11 +30,11 @@
 
 (defn- category-text [category]
   (if (custom-category? category)
-    (:fi ((keyword category) @state/custom-phrases-categories))
+    (:fi ((keyword category) @state/custom-phrase-categories))
     (path/loc [:phrase.category category])))
 
 (defn- add-custom-categories [items]
-  (concat items (map (fn [category] {:value (name (key category)) :text (:fi (val category))}) @state/custom-phrases-categories)))
+  (concat items (map (fn [category] {:value (name (key category)) :text (:fi (val category))}) @state/custom-phrase-categories)))
 
 (rum/defcs phrase-category-select < rum/reactive
   (components/initial-value-mixin ::selected)

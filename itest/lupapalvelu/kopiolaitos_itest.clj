@@ -62,6 +62,10 @@
     (command sonja :check-for-verdict :id app-id) => ok?
     (last-email)  ;; Inbox reset
 
+    (fact "No order history yet"
+      (query sonja :attachment-print-order-history :id app-id)
+      => (partial expected-failure? :not-found))
+
     (fact "Order prints"
       (let [app (query-application sonja app-id)
             attachments-with-amount (map #(assoc % :amount 2) (:attachments app))
@@ -137,6 +141,9 @@
                      (count result) => 2)
                    (fact "filenames end with 'test-gif-attachment.gif'"
                      (every? #(.endsWith (:name %) "test-gif-attachment.gif") result) => true)))))))
+
+        (fact "Order history exists"
+          (query sonja :attachment-print-order-history :id app-id) => ok?)
 
         (fact "without attachment versions order fails"
           (let [for-printing (filter :forPrinting attachments-with-amount)

@@ -2173,7 +2173,7 @@ footer {
   padding-top: 24px;
   position: absolute;
   clear: both;
-  color: #fff;
+  color: white;
   background-color: #333;
   height: auto;
   bottom: 0;
@@ -2210,7 +2210,7 @@ footer .informations .footer-box a:link, footer .informations .footer-box a:visi
 }
 
 footer .informations .footer-box a:link:hover, footer .informations .footer-box a:link:active, footer .informations .footer-box a:visited:hover, footer .informations .footer-box a:visited:active {
-  color: #fff;
+  color: white;
 }
 
 footer .lupapiste-brand .footer-box {
@@ -2282,12 +2282,16 @@ footer .lupapiste-brand .footer-align-right ul {
 }
 
 @media (max-width: 991px) {
-  footer .footer-box:nth-child(2n+1) {
+  footer .footer-box {
     clear: left;
   }
   footer .footer-box {
     min-width: 49%;
   }
+}
+
+footer p {
+  color: white;
 }
 
 @media (max-width: 991px) {
@@ -30662,6 +30666,10 @@ h3.pate-published-title {
 
 .pate-right-space {
   margin-right: 12px;
+}
+
+.pate-bottom-space {
+  margin-bottom: 12px;
 }
 
 .pate-sandwich {

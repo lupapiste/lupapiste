@@ -28,7 +28,7 @@
                :text "foo"
                :filedatas []) => (partial expected-failure? :error.command-illegal-state))
 
-    (let [{vid :verdict-id} (give-verdict sonja app-id :verdictId "321-2016")]
+    (let [vid (give-legacy-verdict sonja app-id)]
       vid => string?
       (fact "wrong verdict ID"
         (command sonja :upsert-pate-appeal
@@ -149,7 +149,7 @@
                :text "foo"
                :filedatas []) => (partial expected-failure? :error.command-illegal-state))
 
-    (let [{vid :verdict-id} (give-verdict sonja app-id :verdictId "321-2016")]
+    (let [vid (give-legacy-verdict sonja app-id)]
       vid => string?
       (fact "wrong verdict ID"
         (command sonja :upsert-pate-appeal
@@ -313,18 +313,16 @@
       (poll-job raktark-jarvenpaa :bind-attachments-job id version 10))))
 
 (facts "appeals with attachments"
-  (let [{app-id :id}                (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
-        {:keys [attachments]}       (query-application pena app-id)
-        created                     (now)
-        {vid :verdict-id :as resp0} (give-verdict raktark-jarvenpaa app-id :verdictId "321-2016")
-        expected-att-cnt            1
-        resp1                       (upload-file raktark-jarvenpaa "dev-resources/test-attachment.txt")
-        file-id-1                   (get-in resp1 [:files 0 :fileId])
-        resp2                       (upload-file raktark-jarvenpaa "dev-resources/invalid-pdfa.pdf")
-        file-id-2                   (get-in resp2 [:files 0 :fileId])
-        pdfa-conversion?            (and (string? (env/value :pdf2pdf :license-key)) (pdfa-conversion/pdf2pdf-executable))]
-    (fact "give verdict"
-      resp0 => ok?)
+  (let [{app-id :id}          (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
+        {:keys [attachments]} (query-application pena app-id)
+        created               (now)
+        vid                   (give-legacy-verdict raktark-jarvenpaa app-id)
+        expected-att-cnt      1
+        resp1                 (upload-file raktark-jarvenpaa "dev-resources/test-attachment.txt")
+        file-id-1             (get-in resp1 [:files 0 :fileId])
+        resp2                 (upload-file raktark-jarvenpaa "dev-resources/invalid-pdfa.pdf")
+        file-id-2             (get-in resp2 [:files 0 :fileId])
+        pdfa-conversion?      (and (string? (env/value :pdf2pdf :license-key)) (pdfa-conversion/pdf2pdf-executable))]
     (fact "uplaod txt attachment"
       resp1 => ok?)
     (fact "upload invalid pdfa attachment"
@@ -438,7 +436,7 @@
       (fact "removing second attachment from appeal"
         (let [assignment               (first (get-user-assignments raktark-jarvenpaa))
               assignment-attachment-id (get-in assignment [:targets 0 :id])
-              attachment (-> (query-application raktark-jarvenpaa app-id) :attachments last)]
+              attachment               (-> (query-application raktark-jarvenpaa app-id) :attachments last)]
           (get-in assignment [:targets 0 :group]) => "attachments"
           (fact "assignment has correct attachment target"
             (:target (get-attachment-by-id raktark-jarvenpaa app-id assignment-attachment-id)) => {:type "appeal"
@@ -475,7 +473,7 @@
   (let [{app-id :id}          (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
         {:keys [attachments]} (query-application pena app-id)
         created               (now)
-        vid                   (give-legacy-r-verdict raktark-jarvenpaa app-id)
+        vid                   (give-legacy-verdict raktark-jarvenpaa app-id)
         expected-att-cnt      1
         resp1                 (upload-file raktark-jarvenpaa "dev-resources/test-attachment.txt")
         file-id-1             (get-in resp1 [:files 0 :fileId])

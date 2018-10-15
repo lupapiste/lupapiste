@@ -374,13 +374,13 @@
         calendar    (cal/get-calendar-for-resource (:resourceId slot))
         authorityId (:externalRef calendar)]
     ; validation
-    (when (and (usr/applicant? user) (not (= clientId userId)))
+    (when (and (usr/applicant? user) (not= clientId userId))
       (error "applicant trying to impersonate as " clientId " , failing reservation")
       (fail! :error.unauthorized))
     (when (and (usr/authority? user) (not (domain/write-access? application clientId)))
       (error "authority trying to invite " clientId "  not satisfying the owner-or-write-access rule, failing reservation")
       (fail! :error.unauthorized))
-    (when (not (= (:organizationCode slot) organization))
+    (when (not= (:organizationCode slot) organization)
       (fail! :error.illegal-organization))
 
     (let [reservationId (cal/new-reservation

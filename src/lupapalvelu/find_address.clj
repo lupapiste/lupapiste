@@ -14,20 +14,6 @@
             [lupapalvelu.property-location :as plocation]
             [lupapalvelu.wfs :as wfs]))
 
-;; Should be in util or sumthin...
-
-(defn uniq-by
-  [by coll]
-  (let [step (fn step [xs prev]
-               (lazy-seq
-                 ((fn [[f :as xs] prev]
-                    (when-let [s (seq xs)]
-                      (if (= (by f) prev)
-                        (recur (rest s) prev)
-                          (cons f (step (rest s) (by f))))))
-                   xs prev)))]
-    (step coll nil)))
-
 (defn- set-kind
   ([k]
     (fn [result] (assoc result :kind k)))
@@ -46,10 +32,9 @@
 (defn municipality-codes [municipality-name-starts]
   (let [index (apply concat (vals @municipality-index))
         n (ss/lower-case (ss/trim municipality-name-starts))]
-    (when (not (ss/blank? n))
+    (when-not (ss/blank? n)
       (->> (filter #(ss/starts-with (first %) n) index)
-           (map second)
-           set))))
+           (map second) set))))
 
 ;;;
 ;;; All search-... functions return a sequence of items, where each item is a map

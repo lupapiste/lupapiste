@@ -89,7 +89,7 @@
       (fact "Verdict code"
         (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id
                  :path [:verdict-code] :value "hyvaksytty") => no-errors?)
-      (add-verdict-attachment app-id verdict-id "Hello"))
+      (add-verdict-attachment sonja app-id verdict-id "Hello"))
 
     (fact "Only Aloituskokous and Loppukatselmus are used in verdict"
       (command sonja :edit-pate-verdict :id app-id :verdict-id verdict-id ; removes 'Katselmus'
@@ -246,10 +246,10 @@
           (let [{:keys [verdicts]} (query-application sonja app-id)]
             (command sonja :delete-verdict
                      :id app-id
-                     :verdictId (-> verdicts first :id)) => ok?
+                     :verdict-id (-> verdicts first :id)) => ok?
             (command sonja :delete-verdict
                      :id app-id
-                     :verdictId (-> verdicts last :id)) => ok?))
+                     :verdict-id (-> verdicts last :id)) => ok?))
         (fact "Check status"
           (let [{:keys [tasks attachments appeals appealVerdicts
                       pate-verdicts verdicts state]} (query-application sonja app-id)]

@@ -67,7 +67,7 @@ Ronja can see urgent application
 Ronja can click notice icon -> application page is opened with notice panel open
   Click element  xpath=//td[@data-test-col-name='urgent']/div
   Wait until  Element should be visible  notice-panel
-  Check status  urgent
+  Check status  urgent  true
   Check notice  ylämaa  urgent  ${notice}
   Logout
 
