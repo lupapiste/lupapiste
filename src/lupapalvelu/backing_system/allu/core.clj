@@ -376,7 +376,7 @@
             response (handler request)]
         (if (= (:status response) 200)
           (let [content-bytes (:body response)
-                file-data {:filename     "sopimusehdotus.pdf"
+                file-data {:filename     (str (:id application) "-sopimusehdotus.pdf")
                            :content      (ByteArrayInputStream. content-bytes)
                            :content-type (get-in response [:headers "Content-Type"])
                            :size         (alength content-bytes)}

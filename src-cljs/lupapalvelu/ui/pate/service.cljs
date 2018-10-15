@@ -320,7 +320,7 @@
                   :verdict-id verdict-id))
 
 (defn sign-contract [app-id verdict-id password category error-callback]
-  (let [command (if (= :allu-contract (keyword category))
+  (let [command (if (util/=as-kw :allu-contract category)
                   :sign-allu-contract
                   :sign-pate-contract)]
     (common/command {:command command

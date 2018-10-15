@@ -54,7 +54,7 @@
       (fail :pate.required-fields))))
 
 (defn- contractual-application
-  "Precheck that fails if the application category IS NOT :contract."
+  "Precheck that fails if the application category IS NOT :contract or :allu-contract."
   [command]
   (let [category (verdict/command->category command)]
     (when-not (or (= category :contract) (= category :allu-contract))
@@ -289,7 +289,7 @@
   (ok))
 
 (defcommand sign-allu-contract
-  {:description "Add this"
+  {:description "Adds the user as a signatory to a published Pate contract"
    :categories       #{:pate-verdicts}
    :parameters       [:id :verdict-id :password]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id :password])]
