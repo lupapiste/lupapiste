@@ -44,18 +44,12 @@
 (defn make-saml-signer
   "Ported from kirasystems/saml20-clj, changed the API - we want to use this without storing
   the private key in a keystore."
-  [certstring keystring & {:keys [algorithm] :or {algorithm :sha1}}]
+  [certstring keystring]
   (Init/init)
   (ElementProxy/setDefaultPrefix Constants/SignatureSpecNS "")
   (let [private-key (string->private-key keystring)
         cert (string->certificate certstring)
-        sig-algo (case (.getAlgorithm private-key)
-                   "DSA" (case algorithm
-                           :sha256 org.apache.xml.security.signature.XMLSignature/ALGO_ID_SIGNATURE_DSA_SHA256
-                           org.apache.xml.security.signature.XMLSignature/ALGO_ID_SIGNATURE_DSA)
-                   (case algorithm
-                     :sha256 org.apache.xml.security.signature.XMLSignature/ALGO_ID_SIGNATURE_RSA_SHA256
-                     org.apache.xml.security.signature.XMLSignature/ALGO_ID_SIGNATURE_RSA))]
+        sig-algo org.apache.xml.security.signature.XMLSignature/ALGO_ID_SIGNATURE_RSA_SHA256]
     ;; https://svn.apache.org/repos/asf/santuario/xml-security-java/trunk/samples/org/apache/xml/security/samples/signature/CreateSignature.java
     ;; http://stackoverflow.com/questions/2052251/is-there-an-easier-way-to-sign-an-xml-document-in-java
     ;; Also useful: http://www.di-mgt.com.au/xmldsig2.html

@@ -1,6 +1,6 @@
-(ns lupapalvelu.ident.ad-login_test
+(ns lupapalvelu.ident.ad-login-util_test
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.ident.ad-login :refer :all]))
+            [lupapalvelu.ident.ad-login-util :refer :all]))
 
 (def saml-info
   {:before {:assertions (list {:attrs {"displayName" (list "Iina Tuttifrutti")
