@@ -38,6 +38,8 @@
                                      :callback (fn [event] (on-blur @value-atom))})))
 
 (rum/defc fully-editable-invoice-row < rum/reactive
+  < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
+               (str operation-index "-" invoice-row-index))}
   [invoice-row invoice-row-index operation-index invoice]
   (let [discounted-price (calc-with-discount (:discount-percent invoice-row) (* (:units invoice-row) (:price-per-unit invoice-row)))
         alv (calc-alv discounted-price)]
@@ -74,7 +76,10 @@
      [:td alv]
      [:td discounted-price]]))
 
-(rum/defc invoice-table-row [invoice-row invoice-row-index operation-index invoice]
+(rum/defc invoice-table-row
+  < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
+               (str operation-index "-" invoice-row-index))}
+  [invoice-row invoice-row-index operation-index invoice]
   (let [discounted-price (calc-with-discount (:discount-percent invoice-row) (* (:units invoice-row) (:price-per-unit invoice-row)))
        alv (calc-alv discounted-price)]
     [:tr
@@ -95,7 +100,11 @@
      [:td alv]
      [:td discounted-price]]))
 
-(rum/defc invoice-table-row-static [invoice-row]
+(rum/defc invoice-table-row-static
+  < {:key-fn (fn [invoice-row invoice-row-index operations-row-index]
+               (str operations-row-index "-" invoice-row-index))}
+  [invoice-row invoice-row-index operations-row-index]
+
   (let [discounted-price (calc-with-discount (:discount-percent invoice-row) (* (:units invoice-row) (:price-per-unit invoice-row)))
         alv (calc-alv discounted-price)]
     [:tr
@@ -125,10 +134,13 @@
 
 (defmethod create-invoice-row-element {:state :not-draft}
   [row index operation-index invoice]
-  (invoice-table-row-static row))
+  (invoice-table-row-static row index operation-index))
 
 
-(rum/defc operations-component < rum/reactive [operation operation-index invoice]
+(rum/defc operations-component < rum/reactive
+  < {:key-fn (fn [operation operation-index invoice]
+               operation-index)}
+  [operation operation-index invoice]
   (let [invoice-rows (map-indexed (fn [index row]
                                     (create-invoice-row-element row index operation-index invoice))
                                   (:invoice-rows operation))
@@ -240,13 +252,14 @@
   (let [invoice-state (keyword (:state @invoice))
         state-entry (invoice-state @state/invoice-states)
         state (:text state-entry)
-        icon (:icon state-entry)
-        foo (println icon)]
+        icon (:icon state-entry)]
     [:div.invoice-title-component
      [:div "Laskun tila: "]
      [:div [:i {:class-name (:name icon) :style (:style icon)}] state]]))
 
 (rum/defc invoice-component < rum/reactive
+  < {:key-fn (fn [invoice]
+               (:id @invoice))}
   [invoice]
   (let [invoice-state-class (if (= "draft" (:state @invoice)) "" "onward-from-draft")]
     (accordion (if (= :draft (keyword (:state @invoice))) true false)
