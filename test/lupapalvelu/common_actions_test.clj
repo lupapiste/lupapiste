@@ -176,7 +176,14 @@
                           :published-pate-verdict
                           :pate-verdict-tab
                           :pate-contract-tab
-                          :pate-verdicts}
+                          :pate-verdicts
+                          ;; Invoices
+                          :application-invoices
+                          :insert-invoice
+                          :invoices-tab
+                          :application-operations
+                          :update-invoice
+                          :fetch-invoice}
         user {:id "user123"
               :role "authority"}
         application {:organization "999-R"
@@ -235,6 +242,8 @@
                            :application-organization-archive-enabled
                            ;; pate
                            :pate-verdicts :pate-verdict :pate-verdict-tab :pate-contract-tab :published-pate-verdict
+                           ;; invoices
+                           :fetch-invoice :application-invoices :invoices-tab :application-operations
                            ;; raw
                            :download-all-attachments :download-attachments
                            :pdf-export
