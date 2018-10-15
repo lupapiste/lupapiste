@@ -135,7 +135,7 @@
                               </a>
                             </li>
 
-                            <li>
+                            <li data-bind="if: $root.authorization.ok( 'invoices-tab')">
                               <a  data-bind="click: changeTab,
                                              feature: 'invoices'"
                                   href="#" data-target="invoice" data-test-id="invoice-tab"

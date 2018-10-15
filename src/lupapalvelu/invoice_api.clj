@@ -87,3 +87,14 @@
   (let [operations (invoices/fetch-application-operations (:id application))]
     (sc/validate [Operation] operations)
     (ok :operations operations)))
+
+(defquery invoices-tab
+  {:description      "Pseudo-query that fails if the invoices tab
+  should not be shown on the UI."
+   :feature          :invoices
+   :parameters       [:id]
+   :user-roles       #{:authority}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :states           states/post-submitted-states}
+  [_])
