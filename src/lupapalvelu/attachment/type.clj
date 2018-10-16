@@ -21,19 +21,6 @@
 
 (def osapuolet attachment-types/osapuolet-v2)
 
-(def- attachment-types-by-permit-type-unevaluated
-  {:R    'attachment-types/Rakennusluvat-v2
-   :P    'attachment-types/Rakennusluvat-v2
-   :YA   'attachment-types/YleistenAlueidenLuvat-v2
-   :YI   'attachment-types/Ymparistoilmoitukset
-   :YL   'attachment-types/Ymparistolupa
-   :YM   'attachment-types/MuutYmparistoluvat
-   :VVVL 'attachment-types/Ymparistoilmoitukset
-   :MAL  'attachment-types/Maa-ainesluvat
-   :MM   'attachment-types/Kiinteistotoimitus
-   :KT   'attachment-types/Kiinteistotoimitus
-   :ARK  'attachment-types/Rakennusluvat-v2})
-
 (defn equals? [& types]
   (boolean (and (:type-id (first types))
                 (:type-group (first types))
@@ -109,7 +96,17 @@
        (mapcat #(map (partial attachment-type permit-type (first %)) (second %)))))
 
 (def attachment-types-by-permit-type
-  (->> (eval attachment-types-by-permit-type-unevaluated)
+  (->> {:R    attachment-types/Rakennusluvat-v2
+        :P    attachment-types/Rakennusluvat-v2
+        :YA   attachment-types/YleistenAlueidenLuvat-v2
+        :YI   attachment-types/Ymparistoilmoitukset
+        :YL   attachment-types/Ymparistolupa
+        :YM   attachment-types/MuutYmparistoluvat
+        :VVVL attachment-types/Ymparistoilmoitukset
+        :MAL  attachment-types/Maa-ainesluvat
+        :MM   attachment-types/Kiinteistotoimitus
+        :KT   attachment-types/Kiinteistotoimitus
+        :ARK  attachment-types/Rakennusluvat-v2}
        (map (juxt key ->attachment-type-array))
        (into {})))
 

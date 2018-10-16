@@ -541,10 +541,7 @@
 (defn this-jar
   "utility function to get the name of jar in which this function is invoked"
   [& [ns]]
-  (-> (if (symbol? ns)
-        (eval ns)
-        (or ns (class *ns*)))
-      .getProtectionDomain .getCodeSource .getLocation .getPath))
+  (-> (or ns (class *ns*)) .getProtectionDomain .getCodeSource .getLocation .getPath))
 
 (defn list-jar [jar-path inner-dir]
   (if-let [jar         (JarFile. jar-path)]
