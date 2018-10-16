@@ -21,6 +21,12 @@
         statement-subtype "Lausuntopyynt\u00f6 poikkeamishakemuksesta"]
     (generate-documents app mikko)                          ; generate documents so generated XML is valid
 
+    (fact "Admin enables ELY statements sending"
+      (command admin :set-organization-boolean-attribute
+               :attribute "ely-uspa-enabled"
+               :enabled true
+               :organizationId "753-R") => ok?)
+
     (fact "request XML is created"
       (command sonja :ely-statement-request :id (:id app) :subtype statement-subtype :saateText "moro") => ok?
       (let [output-dir (str (:output-dir ah/ely-config) "/")

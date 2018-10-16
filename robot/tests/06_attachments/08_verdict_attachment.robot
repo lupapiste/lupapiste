@@ -3,6 +3,7 @@
 Documentation    Mikko adds an attachment to application verdict
 Suite Teardown   Logout
 Resource         ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Variables        variables.py
 
 *** Test Cases ***
@@ -24,19 +25,17 @@ Sonja logs in
   Sonja logs in
   Open application  ${appname}  753-416-25-30
 
-Sonja creates verdict with adds comment
-  Go to give new verdict
-  Title Should Be  ${appname} - Lupapiste
-  Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
+Sonja creates verdict with comment and attachment
+  Go to give new legacy verdict
+  Input legacy verdict  123567890  Kaarina Krysp III  Myönnetty  01.05.2018
   Comment verdict  Myönnetään...
+  Pate upload  0  ${TXT_TESTFILE_PATH}  Päätösote  Päätösote
+  Pate batch ready
 
-Sonja adds attachment to verdict
-  Upload verdict or task attachment  ${TXT_TESTFILE_PATH}  Päätösote  Päätösote  Yleisesti hankkeeseen
-  Wait test id visible  targetted-attachments-table
-  Click enabled by test id  verdict-publish
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait for jQuery
-  Logout
+Sonja publishes the verdict and logs out
+  Publish verdict
+  Click back
+  [Teardown]  Logout
 
 Mikko can not delete attachment
   Mikko logs in

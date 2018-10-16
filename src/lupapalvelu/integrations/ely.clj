@@ -70,3 +70,10 @@
   (fn [{{:keys [subtype]} :data}]
     (when-not (contains? all-statement-types subtype)
       (fail :error.illegal-key :source ::subtype-input-validator))))
+
+(defn ely-uspa-enabled
+  "Pre-checker that fails if Ely statements is not enabled in the application organization scope."
+  [{:keys [organization]}]
+  (when-not (and organization
+                 (:ely-uspa-enabled @organization))
+    (fail :error.ely-statement-not-enabled)))

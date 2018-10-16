@@ -84,8 +84,7 @@
   (let [{:keys [draft? published?
                 legacy? modern?
                 contract? verdict?
-                html? not-replaced?]} (zipmap conditions
-                                              (repeat true))]
+                not-replaced?]} (zipmap conditions (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
@@ -1278,27 +1277,35 @@
 
 (declare pdf--signatures)
 
-(defn create-verdict-pdf [{command ::command mode ::mode}]
+(defn create-verdict-pdf
+  "Creates verdict PDF base on the data received from the Pate message
+  queue."
+  [{command ::command mode ::mode}]
   (let [{app-id     :id
-         verdict-id :verdict-id} (:data command)]
-    (try+
-     (let [command (assoc command
-                          :application (domain/get-application-no-access-checking app-id))
-           verdict (command->verdict command)
-           fun     (case mode
-                     ::verdict    pdf--verdict
-                     ::signatures pdf--signatures)]
-       (if (fun command verdict)
-         (.commit pate-session)
-         (.rollback pate-session)))
-     (catch [:error :pdf/pdf-error] _
-       (errorf "%s: PDF generation for verdict %s failed."
-               app-id verdict-id)
-       (.rollback pate-session))
-     (catch Object _
-       (errorf "%s: Could not create verdict attachment for verdict %s."
-               app-id verdict-id)
-       (.rollback pate-session)))))
+         verdict-id :verdict-id} (:data command)
+        command                  (assoc command
+                                        :application (domain/get-application-no-access-checking app-id))
+        {error :text}            ((verdict-exists :published) command)]
+    (if error
+      (do
+        (warn "Skipping bad message. Cannot create verdict PDF." error)
+        (.commit pate-session))
+      (try+
+       (let [verdict (command->verdict command)
+             fun     (case mode
+                       ::verdict    pdf--verdict
+                       ::signatures pdf--signatures)]
+         (if (fun command verdict)
+           (.commit pate-session)
+           (.rollback pate-session)))
+       (catch [:error :pdf/pdf-error] _
+         (errorf "%s: PDF generation for verdict %s failed."
+                 app-id verdict-id)
+         (.rollback pate-session))
+       (catch Object _
+         (errorf "%s: Could not create verdict attachment for verdict %s."
+                 app-id verdict-id)
+         (.rollback pate-session))))))
 
 (defonce pate-consumer (when pate-session
                          (jms/create-consumer pate-session

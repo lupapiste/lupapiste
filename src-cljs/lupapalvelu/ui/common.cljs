@@ -51,13 +51,16 @@
   [{:keys [command  show-saved-indicator? success error waiting?]} & kvs]
   (letfn [(waiting [flag] (when waiting? (reset! waiting? flag)))
           (with-error-handler-if-given [call]
-            (if (or error waiting? show-saved-indicator?)
+            (waiting false)
+            (if (or error show-saved-indicator?)
               (.error call (fn [js-result]
-                             (waiting false)
-                             (when show-saved-indicator?
-                               (js/util.showSavedIndicator js-result))
-                             (when error
-                               (error (js->clj js-result :keywordize-keys true)))))
+                             (cond
+                               error
+                               (error (js->clj js-result
+                                               :keywordize-keys true))
+
+                               show-saved-indicator?
+                               (js/util.showSavedIndicator js-result))))
               call))]
     (waiting true)
     (-> (js/ajax.command (clj->js command) (-> (apply hash-map kvs) clj->js))
@@ -210,18 +213,25 @@
   [page & suffix]
   (js/pageutil.openPage (name page) (apply array (map name suffix))))
 
+(defn test-id
+  "Concatenates the given arguments into test-id string.
+  hello [world] 3 -> hello-world-3"
+  [& xs]
+  (->> xs
+       flatten
+       (remove nil?)
+       (map (fn [k]
+              (cond-> k (keyword? k) name)))
+       (ss/join "-")))
+
 (defn add-test-id
   "Adds data-test-id attribute. The target can be either the attribute
   map or the encompassing component. Extras parts are concatened with
   - If the test-id is nil (or false), the target is returned unchanged
   regardless of extras."
-  [[x & xs :as target] test-id & extras]
-  (let [test-id (when test-id
-                  (->> (cons test-id extras)
-                       flatten
-                       (remove nil?)
-                       (map name)
-                       (ss/join "-")))]
+  [[x & xs :as target] testid & extras]
+  (let [test-id (when testid
+                  (test-id (cons testid extras)))]
     (cond
       (ss/blank? test-id) target
       (map? target)      (assoc target :data-test-id test-id)

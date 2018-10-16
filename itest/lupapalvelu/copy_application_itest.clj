@@ -117,8 +117,15 @@
             (get-in (first op-docs) [:schema-info :op :id]) => (get-in copy-app [:primaryOperation :id]))))
 
       (fact "documents are copied, apart from ids"
-        (walk-dissoc-keys (:documents copy-app) :id :created :allowedActions)
-        => (just (walk-dissoc-keys (:documents app) :id :created  :allowedActions) :in-any-order))
+        (let [copied-docs (walk-dissoc-keys (:documents copy-app) :id :created :allowedActions :modified)
+              docs (walk-dissoc-keys (:documents app) :id :created  :allowedActions :modified)]
+          (fact "Document count matches"
+            (count copied-docs) => (count docs))
+          (doseq [i (range (count docs))
+                  :let [doc (nth docs i)
+                        copy (nth copied-docs i)]]
+            (fact {:midje/description (str "Document: " (-> doc :schema-info :name))}
+              doc => copy))))
 
       (fact "the copied app has the provided location and property id"
         (:location copy-app) => {:x x :y y}

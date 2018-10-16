@@ -6,7 +6,7 @@
   (:import [com.vividsolutions.jts.geom Polygon Geometry GeometryCollection Point]))
 
 (defn- get-pos [coordinates]
-  (mapv (fn [c] [(-> c .x) (-> c .y)]) coordinates))
+  (mapv (fn [c] [(.x c) (.y c)]) coordinates))
 
 (defn- coordinates-to-close?
   "Check for coordinates that have same x or y and really close x' or y'"

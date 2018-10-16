@@ -59,11 +59,16 @@
          (sort-by (util/fn-> :schema-info :op :id (util/position-by-id operations))))))
 
 (defn resolve-valid-subtypes
-  "Returns a set of valid permit and operation subtypes for the application."
-  [{permit-type :permitType op :primaryOperation}]
+  "Returns a list with no duplicates (~= set) of valid permit and operation subtypes for the application."
+  [{permit-type :permitType op :primaryOperation org :organization}]
   (let [op-subtypes (op/get-primary-operation-metadata {:primaryOperation op} :subtypes)
-        permit-subtypes (permit/permit-subtypes permit-type)]
-    (distinct (concat op-subtypes permit-subtypes))))
+        permit-subtypes (permit/permit-subtypes permit-type)
+        all-subtypes (distinct (concat op-subtypes permit-subtypes))]
+    ;; If organization is 091-YA (= Helsinki yleiset alueet) and the user is requesting sijoituslupa or sijoitussopimus,
+    ;; return a list where :sijoitussopimus comes before :sijoituslupa so it acts as a default value
+    (if (and (= "091-YA" org) (= (set all-subtypes) #{:sijoitussopimus :sijoituslupa}))
+      (reverse all-subtypes)
+      all-subtypes)))
 
 (defn handler-history-entry [handler timestamp user]
   {:handler handler
@@ -488,12 +493,12 @@
     {:history (cond->> [(app-state/history-entry state created user)]
                 tos-function-map (concat [(tos/tos-history-entry tos-function-map created user)]))}))
 
-(defn permit-type-and-operation-map [operation-name created]
+(defn permit-type-and-operation-map [operation-name organization created]
   (let [op (make-op operation-name created)
         classification {:permitType       (op/permit-type-of-operation operation-name)
                         :primaryOperation op}]
     (merge classification
-           {:permitSubtype (first (resolve-valid-subtypes classification))})))
+           {:permitSubtype (first (resolve-valid-subtypes (assoc classification :organization organization)))})))
 
 (defn application-auth [user operation-name]
   (let [user-auth    (usr/user-in-role user :writer)
@@ -561,7 +566,7 @@
   {:pre [user created]}
   (let [application (merge domain/application-skeleton
                            (dissoc application-info :propertyIdSource)
-                           (permit-type-and-operation-map (:operation-name application-info) created)
+                           (permit-type-and-operation-map (:operation-name application-info) (:id organization) created)
                            (location-map (:location application-info))
                            {:auth            (application-auth user operation-name)
                             :comments        (application-comments user messages (:openInfoRequest application-info) created)
@@ -831,7 +836,7 @@
      $push {:history (handler-history-entry (util/assoc-when handler :new-entry (nil? ind)) created user)}}))
 
 (defn autofill-rakennuspaikka [application time & [force?]]
-  (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
+  (when (and (not= "Y" (:permitType application)) (not (:infoRequest application)))
     (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]
       (doseq [rakennuspaikka rakennuspaikka-docs
               :when (seq rakennuspaikka)]
@@ -840,17 +845,19 @@
                               (:propertyId application))]
           (bsite/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
 
-(defn schema-datas [{:keys [rakennusvalvontaasianKuvaus]} buildings]
-  (map
-    (fn [{:keys [data]}]
-      (remove empty? (conj [[[:valtakunnallinenNumero] (:valtakunnallinenNumero data)]
-                            [[:kaytto :kayttotarkoitus] (get-in data [:kaytto :kayttotarkoitus])]]
-                           (when-not (or (ss/blank? (:rakennusnro data))
-                                         (= "000" (:rakennusnro data)))
-                             [[:tunnus] (:rakennusnro data)])
-                           (when-not (ss/blank? rakennusvalvontaasianKuvaus)
-                             [[:kuvaus] rakennusvalvontaasianKuvaus]))))
-    buildings))
+(defn schema-datas [{:keys [rakennusvalvontaasianKuvaus] :as app-info} buildings]
+  (if (empty? buildings)
+    (schema-datas app-info {:data []})
+    (map
+      (fn [{:keys [data]}]
+        (remove empty? (conj [[[:valtakunnallinenNumero] (:valtakunnallinenNumero data)]
+                              [[:kaytto :kayttotarkoitus] (get-in data [:kaytto :kayttotarkoitus])]]
+                             (when-not (or (ss/blank? (:rakennusnro data))
+                                           (= "000" (:rakennusnro data)))
+                               [[:tunnus] (:rakennusnro data)])
+                             (when-not (ss/blank? rakennusvalvontaasianKuvaus)
+                               [[:kuvaus] rakennusvalvontaasianKuvaus]))))
+      buildings)))
 
 (defn document-data->op-document [{:keys [schema-version] :as application} data]
   (let [op (make-op :archiving-project (now))

@@ -6,6 +6,7 @@
             [lupapalvelu.i18n :as i18n]
             [sade.core :refer :all]
             [sade.env :as env]
+            [sade.strings :as ss]
             [clj-time.coerce :as tc]
             [clj-time.core :as t]))
 
@@ -551,6 +552,25 @@
     :username "helsinki"
     :private {:password "$2a$10$/bi569g4ijAitS82ES9MO.TDqGZrNlBrBPC1rE6N8v7uqTJbiHTNW"
               :apikey "50ac788ec2e6c2ea6e73f665"}}
+
+   ;; Pori
+
+   ;; Porin paakayttaja - pori/pori
+   {:id "pori"
+    :username "pori"
+    :role "authority"
+    :enabled true
+    :email "pertteli.porilainen@pori.fi"
+    :orgAuthz {:609-R #{:authorityAdmin}}
+    :firstName "Pertteli"
+    :lastName "Porilainen"
+    :language "fi"
+    :phone "0501233210"
+    :street "V\u00E4h\u00E4uusikatu 1 a 1"
+    :zip "28100"
+    :city "Pori"
+    :private {:password "$2a$10$H3D35GclLgHRUIUfQtEQZe5FlrVR2iYoV8Babw4C8D8ANLvuulEmu"
+              :apikey "asHn33JQbGBvhABZfjxP1jnHcvfWM4ZUzRDO0Enp"}}
 
    ;; Hakijat
 
@@ -1366,6 +1386,61 @@
                        :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported false}
+
+                      ;; Pori R, has ad-login settings and only-use-inspection-from-backend set to true
+                      {:id "609-R"
+                       :name (names {:fi "Pori - Rakennusvalvonta"
+                                     :sv "Bj\u00f6rneborg - Byggnadstilsyn"})
+                       :scope [{:open-inforequest-email nil
+                                :open-inforequest false
+                                :new-application-enabled true
+                                :inforequest-enabled true
+                                :municipality "609"
+                                :permitType "R"}
+                               {:open-inforequest-email nil
+                                :open-inforequest false
+                                :new-application-enabled true
+                                :inforequest-enabled true
+                                :municipality "609"
+                                :permitType "P"}]
+                       :handler-roles [{:id "abba1111111111111111b297"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
+                       :operations-attachments {:poikkeamis [[:paapiirustus :asemapiirros]]}
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
+                       :automatic-review-fetch-enabled true
+                       :automatic-ok-for-attachments-enabled true
+                       :multiple-operations-supported false
+                       :only-use-inspection-from-backend true
+                       :ad-login {:enabled true
+                                  :idp-cert (ss/join "\n" ["-----BEGIN CERTIFICATE-----" ;; A certicate generated for mock-saml
+                                                           "MIIDkDCCAngCCQDPO1LUkvgKbTANBgkqhkiG9w0BAQsFADCBiTELMAkGA1UEBhMC"
+                                                           "RkkxGTAXBgNVBAMMEFNpbW8gU3V1cnZpc2lpcmkxGTAXBgNVBAsMEFJha2VubnVz"
+                                                           "dmFsdm9udGExEDAOBgNVBAgMB1V1c2ltYWExDjAMBgNVBAcMBVNpcG9vMQ4wDAYD"
+                                                           "VQQKDAVTaXBvbzESMBAGA1UEAwwJTG9jYWwgSURQMB4XDTE4MDgwMjE0MDYzN1oX"
+                                                           "DTM4MDcyODE0MDYzN1owgYkxCzAJBgNVBAYTAkZJMRkwFwYDVQQDDBBTaW1vIFN1"
+                                                           "dXJ2aXNpaXJpMRkwFwYDVQQLDBBSYWtlbm51c3ZhbHZvbnRhMRAwDgYDVQQIDAdV"
+                                                           "dXNpbWFhMQ4wDAYDVQQHDAVTaXBvbzEOMAwGA1UECgwFU2lwb28xEjAQBgNVBAMM"
+                                                           "CUxvY2FsIElEUDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJ15PMS7"
+                                                           "dYmOaZGlkv1SEQdVa1SCPrvdi8ty/JniZGIb+M8osjqJbo6WIlO6NNq0DAQPt0qD"
+                                                           "zSCxVQDC5t6R60mb49JRQvq+l1xV74liDF+8uKBtaER3MQrmCMu7MWadOTzVOfxf"
+                                                           "NMMla60N/pKHXDhokJsucs993oLL24fPuHfWW7KC5YDwHdOk3OrPv+Z3bF6zORvu"
+                                                           "gyZMiK3J2kBViIBxUt/qtWKZxukPQjnOO2Q4jnj4WfMHwAjzFyw+uTS/B0p+FYtg"
+                                                           "jqjCjiMVywRbdQCwtRWRl0kelGG0o7jviCuoppj+qIQhY36qubY5Jz51uZyWfQOi"
+                                                           "h/e2txQZWzx8T7MCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEATNvnLh2dqpfExbbR"
+                                                           "n8toVlsyqaKy7gRW218mwsCr+d0Z7abi4T1Z+dApezEgvBIOw1QHgzvccjciKfOk"
+                                                           "hH/iEekufOSK16xl2+EPQwsZ/6KsncRWnMf2QUnnvzV8FU/xlEZJhON1zNOz3/Ys"
+                                                           "DNzV8ZS+diElsZsL7sDna8QhVnUWh0VyfAohgqBRd6ATp5pSYZXWqOF8JLEFKvBt"
+                                                           "EyTTDnXS7kJrWqSQh2Iq8XRtgCyz7PhJKjU2cC7TVenI3mq4upzoCgwmt0RRPrKu"
+                                                           "78SQySo46M/dqDZNqjO/7nAyUjdBkHRsyoZF2IVOkCGDQEHXMYa8QxeKFIZzM6IZ"
+                                                           "YMEuMA=="
+                                                           "-----END CERTIFICATE-----"])
+                                  :idp-uri "http://localhost:7000"
+                                  :trusted-domains ["pori.fi"]}}
 
                       ;; Helsinki R
                       {:id "091-R"

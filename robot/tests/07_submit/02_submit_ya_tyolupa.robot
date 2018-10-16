@@ -3,8 +3,8 @@
 Documentation   Can't submit tyolupa application when linked agreement not finished or not signed
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Variables       ../06_attachments/variables.py
-
 
 *** Test Cases ***
 
@@ -15,6 +15,7 @@ Sonja creates submitted sijoitussopimus
   Create application  ${ss_app}  753  753-416-45-3  YA-sijoituslupa
   Select from list by value  permitSubtypeSelect  sijoitussopimus
   Submit application
+  Positive indicator should not be visible
   ${linkPermitAppId} =  Get Text  xpath=//span[@data-test-id='application-id']
   Set Suite Variable  ${linkPermitAppId}
 
@@ -37,10 +38,7 @@ Tyolupa cant be submitted because linked agreement is not post verdict state
 Sonja moves linked sijoitussopimus post verdict state
   Go to page  applications
   Open application  ${ss_app}  753-416-45-3
-  Go to give new verdict
-  Input verdict  123567890  1  01.05.2018  01.06.2018  Decission maker
-  Click enabled by test id  verdict-publish
-  Confirm  dynamic-yes-no-confirm-dialog
+  Give legacy contract  123567890  Decision maker  01.05.2018
   Wait until  Application state should be  agreementPrepared
 
 Tyolupa still cant be submitted because linked agreement is not signed
@@ -56,7 +54,7 @@ Sonja signs sijoitussopimus agreement
   Go to page  applications
   Open application  ${ss_app}  753-416-45-3
   Open tab  verdict
-  Sign verdict  sonja
+  Sign contract  sonja
   Wait until  Application state should be  agreementSigned
 
 Tyolupa should be submittable now

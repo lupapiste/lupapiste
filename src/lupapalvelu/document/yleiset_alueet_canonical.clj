@@ -222,15 +222,12 @@
         tyomaasta-vastaava (when (:tyomaasta-vastaava config)
                              (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data)))
         ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter out the resulting nil.
-        osapuolitieto (vec (filter :Osapuoli [hakija
-                                              tyomaasta-vastaava]))
+        osapuolitieto (filterv :Osapuoli [hakija tyomaasta-vastaava])
         ;; If tyomaasta-vastaava does not have :vastuuhenkilotieto, we filter the resulting nil out.
         vastuuhenkilotieto (when (or (:tyomaasta-vastaava config) (not (:dummy-maksaja config)))
-                             (vec (filter :Vastuuhenkilo [tyomaasta-vastaava
-                                                          maksaja])))
+                             (filterv :Vastuuhenkilo [tyomaasta-vastaava maksaja]))
         johtoselvitysviitetieto (when (:johtoselvitysviitetieto config)
-                                  {:Johtoselvitysviite {:vaadittuKytkin false}})
-        ]
+                                  {:Johtoselvitysviite {:vaadittuKytkin false}})]
     {:kasittelytietotieto (get-kasittelytieto application)
      :luvanTunnisteTiedot (get-luvan-tunniste-tiedot application)
      :alkuPvm alku-pvm

@@ -8,7 +8,7 @@
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.autologin :as autologin]
-            [lupapalvelu.backing-system.allu :as allu]
+            [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.backing-system.asianhallinta.core :as ah]
             [lupapalvelu.backing-system.core :as bs]
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]

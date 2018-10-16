@@ -58,7 +58,7 @@
       (not (.canEncode (latin1-encoder) v)) [:warn "illegal-value:not-latin1-string"]
       (> (.length v) (or max-len default-max-len)) [:err "illegal-value:too-long"]
       (and
-        (> (.length v) 0)
+        (pos? (.length v))
         (< (.length v) (or min-len 0))) [:warn "illegal-value:too-short"]
       :else (subtype/subtype-validation elem v))))
 
@@ -67,8 +67,9 @@
     (not (string? v)) [:err "illegal-value:not-a-string"]
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
     (and
-(> (.length v) 0)
-(< (.length v) (or (:min-len elem) 0))) [:warn "illegal-value:too-short"]))
+      (pos? (.length v))
+      (< (.length v)
+         (or (:min-len elem) 0))) [:warn "illegal-value:too-short"]))
 
 (defmethod validate-field :hetu [_ _ v]
   (cond
@@ -164,12 +165,11 @@
 ;;
 
 (defn- resolve-element-loc-key [info element path]
-  (if (:i18nkey element)
-    (:i18nkey element)
-    (-> (str (ss/join "." (cons (-> info :document :locKey) (map name path)))
-             (when (= :select (:type element)) "._group_label"))
-        (ss/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
-        (ss/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
+  (or (:i18nkey element)
+      (-> (str (ss/join "." (cons (-> info :document :locKey) (map name path)))
+               (when (= :select (:type element)) "._group_label"))
+          (ss/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
+          (ss/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
 
 (declare find-by-name)
 
@@ -336,7 +336,7 @@
                       value (get-in data (conj current-path :value))
                       validation-error (when required
                                          (if (instance? Long value)
-                                           (when (not (some? value))
+                                           (when-not (some? value)
                                              (->validation-result info nil current-path element [:tip "illegal-value:required"]))
                                            (when (ss/blank? value)
                                              (->validation-result info nil current-path element [:tip "illegal-value:required"]))))

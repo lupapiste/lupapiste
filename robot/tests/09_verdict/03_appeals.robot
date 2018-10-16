@@ -3,6 +3,7 @@
 Documentation   Appeals management
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Variables       ../../common_variables.py
 Variables       ../06_attachments/variables.py
 
@@ -30,35 +31,36 @@ Sonja logs in
 Sonja fetches verdict from municipality KRYSP service
   Open tab  verdict
   Fetch verdict
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
-  No such test id  verdict-requirements-0
-  Wait test id visible  verdict-requirements-1
+  Open verdict
 
 There are no appeals yet
-  Element should not be visible  jquery=table.appeals-table
-  jQuery should match X times  h2[data-test-id=verdict-appeal-title]  3
+  No appeals
+  Wait test id visible  new-appeal
 
 Sonja adds appeal to the first verdict
-  Add to verdict  0-0  appeal  Veijo  1.4.2016  Hello world
-  Appeals row check  0-0  0  appeal  Veijo  1.4.2016
+  Add appeal  appeal  Veijo  1.4.2016  Hello world
+  Appeals row check  0  appeal  Veijo  1.4.2016
 
 The appeal is visible on the Attachments tab
   Sleep  1.0s
+  Click back
   Open tab  attachments
-  Element should be visible  jquery=tr[data-test-type='muutoksenhaku.valitus']
+  # TODO: Change this after the attachments types have been restricted
+  Element should be visible  jquery=tr[data-test-type='paatoksenteko.valitusosoitus']
   Open tab  verdict
 
 Sonja edits appeal
-  Wait test id visible  edit-appeal-0-0-0
-  Click by test id  edit-appeal-0-0-0
-  Check appeal bubble  0-0-0  appeal  Veijo  01.04.2016  Hello world
-  Edit authors  0-0-0  Liisa
-  Edit date  0-0-0  5.5.2015
-  OK bubble 0-0-0
-  Appeals row check  0-0  0  appeal  Liisa  5.5.2015
+  Open verdict
+  Wait test id visible  appeal-0-edit
+  Click by test id  appeal-0-edit
+  Check appeal form  Valitus  Veijo  1.4.2016  Hello world
+  Edit authors  Liisa
+  Edit date  5.5.2015
+  Save appeal
+  Appeals row check  0  appeal  Liisa  5.5.2015
 
 Invalid date should show warning
+  [Tags]  Fail
   Click by test id  edit-appeal-0-0-0
   Edit date  0-0-0  33.88.99999
   Element should be visible  jquery=div.bubble-dialog .form-cell__message .lupicon-warning
@@ -69,34 +71,40 @@ Invalid date should show warning
   Appeals row check  0-0  0  appeal  Liisa  5.5.2015
 
 Appeal can contain multiple files
-  Click by test id  edit-appeal-0-0-0
-  Add file  0-0-0  ${PNG_TESTFILE_PATH}
-  OK bubble 0-0-0
-  Appeals row file check  0-0  0  ${PNG_TESTFILE_NAME}  1
+  Click by test id  appeal-0-edit
+  Add file   appeal  ${PNG_TESTFILE_PATH}
+  Save appeal
+  Appeals row file check  0  ${PNG_TESTFILE_NAME}  1
   # Originally TXT file was uploaded, but it is converted to PDF/A by Libre Office
-  Appeals row file check  0-0  0  ${PDF_TESTFILE_NAME}  0
+  Appeals row file check  0  ${PDF_TESTFILE_NAME}
 
 Both files are shown in the Attachments tab
+  Click back
   Open tab  attachments
   Page should contain  ${PNG_TESTFILE_NAME}
   Page should contain  ${PDF_TESTFILE_NAME}
   Open tab  verdict
 
 Sonja removes the image file from appeal
-  Click by test id  edit-appeal-0-0-0
-  Click by test id  remove-appeal-file-1
-  OK bubble 0-0-0
-  Wait Until  Page should not contain  ${PNG_TESTFILE_NAME}
+  Open verdict
+  Click by test id  appeal-0-edit
+  Click by test id  delete-appeal-file-1
+  Save appeal
+  No such test id  appeal-file-0-1
 
 The image file has also been removed from the Attachments tab
+  Click back
   Open tab  attachments
   Page should not contain  ${PNG_TESTFILE_NAME}
   Page should contain  ${PDF_TESTFILE_NAME}
   Open tab  verdict
 
 Sonja deletes appeal
-  Click by test id  delete-appeal-0-0-0
-  Wait Until  Element should not be visible  jquery=table.appeals-table
+  Open verdict
+  Click by test id  appeal-0-delete
+  Wait indicators
+  No appeals
+  Click back
 
 No appeal attachments
   Open tab  attachments
@@ -105,59 +113,64 @@ No appeal attachments
   Open tab  verdict
 
 Sonja adds appeal and rectification
-  Add to verdict  0-0  appeal  Bob  1.4.2016  I am unhappy!
-  Add to verdict  0-0  rectification  Dot  1.5.2016
-  Wait test id visible  edit-appeal-0-0-0
-  Wait test id visible  edit-appeal-0-0-1
+  Open verdict
+  Add appeal  appeal  Bob  1.4.2016  I am unhappy!
+  Add appeal  rectification  Dot  1.5.2016
+  Wait test id visible  appeal-0-edit
+  Wait test id visible  appeal-0-edit
 
 Sonja adds appealVerdict thus locking appeals
-  Add to verdict  0-0  appealVerdict  Phong  1.6.2016
-  Scroll to test id  add-appeal-0-0
-  Sleep  1.0s
-  No such test id  edit-appeal-0-0-0
-  No such test id  edit-appeal-0-0-1
-  Wait test id visible  show-appeal-0-0-0
-  Wait test id visible  show-appeal-0-0-1
+  Add appeal  appealVerdict  Phong  1.6.2016
+  No such test id  appeal-0-edit
+  No such test id  appeal-1-edit
+  Wait test id visible  appeal-0-show
+  Wait test id visible  appeal-1-show
 
 Every appeal type is shown in the Attachments tab
+  Click back
   Open tab  attachments
-  Element should be visible  jquery=tr[data-test-type='muutoksenhaku.valitus']
+  # TODO: attachment types (see above)
+  Element should be visible  jquery=tr[data-test-type='paatoksenteko.valitusosoitus']
   Element should be visible  jquery=tr[data-test-type='muutoksenhaku.oikaisuvaatimus']
+  Element should be visible  jquery=tr[data-test-type='ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos']
   # There is a verdict and an appealVerdict
-  Xpath should match X times  //tr[@data-test-type='paatoksenteko.paatos']  3
+  Xpath should match X times  //tr[@data-test-type='paatoksenteko.paatos']  2
 
 Show info buttons show correct data
   Open tab  verdict
-  Scroll to test id  add-appeal-0-0
-  Click by test id  show-appeal-0-0-0
-  Test id should contain  info-appeal-0-0-0  I am unhappy!
-  Click by test id  show-appeal-0-0-1
-  Test id should contain  info-appeal-0-0-1  Ei lisätietoja.
+  Open verdict
+  Scroll to test id  new-appeal
+  Click by test id  appeal-0-show
+  Test id should contain  appeal-0-note  I am unhappy!
+  Click by test id  appeal-1-show
+  Wait test id visible  appeal-1-empty
 
 Adding appeal locks appealVerdict
-  Add to verdict  0-0  appeal  Frisket  1.7.2016
-  Scroll to test id  add-appeal-0-0
-  No such test id  edit-appeal-0-0-2
-  Wait test id visible  show-appeal-0-0-2
+  Add appeal  appeal  Frisket  1.7.2016
+  No such test id  appeal-2-edit
+  Wait test id visible  appeal-2-show
 
 Making appeal date earlier than appealVerdict makes the latter editable
-  Click by test id  edit-appeal-0-0-3
-  Scroll to test id  appeal-0-0-3-bubble-dialog-ok
-  Edit date  0-0-3  1.1.2010
-  OK bubble 0-0-3
-  Wait test id visible  edit-appeal-0-0-3
-  Appeals row check  0-0  3  appealVerdict  Phong  1.6.2016
+  Click by test id  appeal-3-edit
+  Edit date  1.1.2010
+  Save appeal
+  Wait test id visible  appeal-3-edit
+  Appeals row check  3  appealVerdict  Phong  1.6.2016
   [Teardown]  Logout
 
 # ---------------------
 # Mikko
 # ---------------------
 
-Mikko logs in and sees only one appeal title
+Mikko logs in and sees that only the first verdict has appeals
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
-  jQuery should match X times  h2[data-test-id=verdict-appeal-title]  1
+  Open verdict  0
+  Yes appeals
+  Click back
+  Open verdict  1
+  No appeals
   [Teardown]  Logout
 
 # ---------------------
@@ -168,22 +181,25 @@ Sonja logs in and adds more appeals
   Sonja logs in  False
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
-  jQuery should match X times  h2[data-test-id=verdict-appeal-title]  3
 
 The first appeal cannot be appealVerdict
-  Add to verdict  1-0  appealVerdict  Megabyte  29.3.2016
-  Wait test id visible  appeal-1-0-bubble-dialog-error
-  Cancel bubble 1-0
+  Open verdict  1
+  Scroll and click test id  new-appeal
+  Test id select values are  appeal-type  ${EMPTY}  rectification  appeal
+  Cancel appeal
+  Click back
 
 Appeals in different verdicts do not affect each other
-  Add to verdict  1-0  appeal  Megabyte  7.7.2016
-  Wait test id visible  edit-appeal-1-0-0
-  Wait test id visible  edit-appeal-0-0-3
+  Open verdict  1
+  Add appeal  appeal  Megabyte  7.7.2016
+  Wait test id visible  appeal-0-edit
+  No such test id  appeal-1-edit
+  No such test id  appeal-1-show
+  Click back
 
 Verdict fetch now shows confirmation dialog
   Scroll and click test id  fetch-verdict
-  Deny  dynamic-yes-no-confirm-dialog
-  Wait test id visible  edit-appeal-0-0-3
+  Deny yes no dialog
 
 Sonja creates and submits application for building Meishuguan
   ${secs} =  Get Time  epoch
@@ -204,39 +220,36 @@ Mikko logs in. He can see the appeals but not edit them.
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
-  jQuery should match X times  h2[data-test-id=verdict-appeal-title]  3
-  Scroll to test id  show-appeal-0-0-3
-  No such test id  add-appeal-0-0
-  Wait test id visible  show-appeal-0-0-3
-  Appeals row check  0-0  3  appealVerdict  Phong  1.6.2016
+  Open verdict
+  Yes appeals
+  Appeals row check  3  appealVerdict  Phong  1.6.2016
   [Teardown]  Logout
 
 Sonja logs in and deletes the first verdict.
   Sonja logs in  False
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
-  Click element  jquery=[data-test-id=delete-verdict-from-listing]:first
-  Confirm  dynamic-yes-no-confirm-dialog
-  Appeals row check  0-0  0  appeal  Megabyte  7.7.2016
+  Delete verdict  0
 
 There is only one appeal in the Attachments tab
   Open tab  attachments
-  Xpath should match X times  //tr[@data-test-type='muutoksenhaku.valitus']  1
+  # TODO: attachment types
+  Xpath should match X times  //tr[@data-test-type='paatoksenteko.valitusosoitus']  1
   Xpath should match X times  //tr[@data-test-type='muutoksenhaku.oikaisuvaatimus']  0
-  Xpath should match X times  //tr[@data-test-type='paatoksenteko.paatos']  2
+  Xpath should match X times  //tr[@data-test-type='ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos']  0
   Open tab  verdict
 
 Fetching new verdicts will nuke appeals
   Scroll and click test id  fetch-verdict
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait Until  Element should be visible  dynamic-ok-confirm-dialog
-  Confirm  dynamic-ok-confirm-dialog
-  Wait Until  Element should not be visible  jquery=table.appeals-table
+  Confirm yes no dialog
+  R verdict fetched
 
 There are no appeals attachments in the Attachments tab
   Open tab  attachments
-  Element should not be visible  jquery=tr[data-test-type='muutoksenhaku.valitus']
-  Element should not be visible  jquery=tr[data-test-type='muutoksenhaku.oikaisuvaatimus']
+# TODO: attachment types
+  Wait until  Element should not be visible  jquery=tr[data-test-type='paatoksenteko.valitusosoitus']
+  Wait until  Element should not be visible  jquery=tr[data-test-type='muutoksenhaku.oikaisuvaatimus']
+  Wait until  Element should not be visible  jquery=tr[data-test-type='ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos']
   Xpath should match X times  //tr[@data-test-type='paatoksenteko.paatos']  2
   [Teardown]  Logout
 
@@ -244,81 +257,83 @@ There are no appeals attachments in the Attachments tab
 *** Keywords ***
 
 Edit authors
-  [Arguments]  ${postfix}  ${authors}
-  Fill test id  appeal-authors-${postfix}  ${authors}
+  [Arguments]  ${authors}
+  Fill test id  appeal-authors  ${authors}
 
 Edit date
-  [Arguments]  ${postfix}  ${date}
-  ## Disable date picker
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Fill test id  appeal-date-${postfix}  ${date}
+  [Arguments]  ${date}
+  Fill test id  appeal-date  ${date}
 
 Edit extra
-  [Arguments]  ${postfix}  ${extra}
-  Fill test id  appeal-extra-${postfix}  ${extra}
+  [Arguments]  ${extra}
+  Fill test id  appeal-text  ${extra}
 
 Add file
-  [Arguments]  ${postfix}  ${path}=${TXT_TESTFILE_PATH}
-  Execute JavaScript  $('div[data-test-id=appeal-files-${postfix}] input[type=file]').attr("class", "")
-  Choose File  jquery=div[data-test-id=appeal-files-${postfix}] input[type=file]  ${path}
-  Sleep  1s
+  [Arguments]  ${appealType}  ${path}=${TXT_TESTFILE_PATH}
+  Run keyword if  "${appealType}" == "appeal"  Pate upload  0  ${path}  Valitus  Complaint  pate-upload-input
+  Run keyword if  "${appealType}" == "rectification"  Pate upload  0  ${path}  Oikaisuvaatimus  Complaint  pate-upload-input
+  Run keyword if  "${appealType}" == "appealVerdict"  Pate upload  0  ${path}  Päätös  Complaint  pate-upload-input
 
-OK bubble ${postfix}
-  Wait until  Test id enabled  appeal-${postfix}-bubble-dialog-ok
-  Scroll and click test id  appeal-${postfix}-bubble-dialog-ok
-  # DOM changes after OK, so let's wait a bit.
-  Sleep  4s
+Wait indicators
+  Positive indicator should be visible
+  Positive indicator should not be visible
 
-Cancel bubble ${postfix}
-  Scroll and click test id  appeal-${postfix}-bubble-dialog-cancel
+Save appeal
+  Wait until  Test id enabled  save-appeal
+  Scroll and click test id  save-appeal
+  Wait indicators
 
-Check appeal bubble
-  [Arguments]  ${postfix}  ${appealType}  ${authors}  ${date}  ${extra}=${EMPTY}
-  Scroll to test id  appeal-${postfix}-bubble-dialog-ok
-  Element should be visible  jquery=span[data-test-id=appeal-type-${postfix}][data-appeal-type=${appealType}]
-  Textfield value should be  jquery=input[data-test-id=appeal-authors-${postfix}]  ${authors}
-  ## Disable date picker
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Textfield value should be  jquery=input[data-test-id=appeal-date-${postfix}]  ${date}
-  Textarea value should be  jquery=textarea[data-test-id=appeal-extra-${postfix}]  ${extra}
+Cancel appeal
+  Scroll and click test id  cancel-appeal
 
-Add to verdict
-  [Arguments]  ${postfix}  ${appealType}  ${authors}  ${date}  ${extra}=${EMPTY}
-  Scroll and click test id  add-appeal-${postfix}
-  Scroll to test id  appeal-${postfix}-bubble-dialog-ok
-  Test id disabled  appeal-${postfix}-bubble-dialog-ok
-  List selection should be  jquery=select[data-test-id=appeal-type-${postfix}]  ${EMPTY}
-  Select From List By Value  jquery=select[data-test-id=appeal-type-${postfix}]  ${appealType}
-  Test id disabled  appeal-${postfix}-bubble-dialog-ok
-  Textfield value should be  jquery=input[data-test-id=appeal-authors-${postfix}]  ${EMPTY}
-  Edit authors  ${postfix}  ${authors}
-  Test id disabled  appeal-${postfix}-bubble-dialog-ok
-  Textfield value should be  jquery=input[data-test-id=appeal-date-${postfix}]  ${EMPTY}
-  Edit date  ${postfix}  ${date}
-  Test id disabled  appeal-${postfix}-bubble-dialog-ok
-  Textarea value should be  jquery=textarea[data-test-id=appeal-extra-${postfix}]  ${EMPTY}
-  Edit extra  ${postfix}  ${extra}
-  Test id disabled  appeal-${postfix}-bubble-dialog-ok
-  Add file  ${postfix}
-  Ok bubble ${postfix}
+Check appeal form
+  [Arguments]  ${appealType}  ${authors}  ${date}  ${extra}=${EMPTY}
+  Scroll to test id  save-appeal
+  Test id text is  appeal-type  ${appealType}
+  Test id input is  appeal-authors  ${authors}
+  Test id input is  appeal-date  ${date}
+  Test id input is  appeal-text  ${extra}
+
+Add appeal
+  [Arguments]  ${appealType}  ${authors}  ${date}  ${extra}=${EMPTY}
+  Scroll and click test id  new-appeal
+  Scroll to test id  save-appeal
+  Test id disabled  save-appeal
+  List selection should be  jquery=select[data-test-id=appeal-type]  ${EMPTY}
+  Select From List By Value  jquery=select[data-test-id=appeal-type]  ${appealType}
+  Test id disabled  save-appeal
+  Textfield value should be  jquery=input[data-test-id=appeal-authors]  ${EMPTY}
+  Edit authors  ${authors}
+  Test id disabled  save-appeal
+  Textfield value should be  jquery=input[data-test-id=appeal-date]  ${EMPTY}
+  Edit date  ${date}
+  Test id disabled  save-appeal
+  Textarea value should be  jquery=textarea[data-test-id=appeal-text]  ${EMPTY}
+  Edit extra  ${extra}
+  Test id disabled  save-appeal
+  Add file  ${appealType}
+  Save appeal
 
 Set Row Selector
   [Arguments]  ${postfix}  ${row}
   Set Suite Variable  ${selector}  jquery=table[data-test-id=appeals-table-${postfix}] tr[data-test-id=appeals-table-row-${row}]
 
 Appeals row check
-  [Arguments]  ${postfix}  ${row}  ${appealType}  ${authors}  ${date}
-  Set Row Selector  ${postfix}  ${row}
-  Wait Until  Element Should Be Visible  ${selector} td[data-appeal-type=${appealType}]
-  Wait Until  Element should contain  ${selector}  ${authors}
-  Wait Until  Element should contain  ${selector}  ${date}
+  [Arguments]  ${index}  ${appealType}  ${authors}  ${date}
+  Wait test id visible  appeal-${index}-${appealType}
+  Test id text is  appeal-${index}-authors  ${authors}
+  Test id text is  appeal-${index}-date  ${date}
 
 Appeals row file check
-  [Arguments]  ${postfix}  ${row}  ${filename}  ${index}=0
-  Set Row Selector  ${postfix}  ${row}
-  Wait Until  Element should contain  ${selector} li[data-test-id=appeals-files-${index}] a  ${filename}
+  [Arguments]    ${row-index}  ${filename}  ${file-index}=0
+  Wait test id visible  appeal-file-${row-index}-${file-index}
 
 No frontend errors
   Logout
   There are no frontend errors
 
+No appeals
+    Wait Until  Element should not be visible  jquery=table.pate-appeals
+
+Yes appeals
+    Wait Until  Element should be visible  jquery=table.pate-appeals

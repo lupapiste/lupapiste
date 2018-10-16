@@ -2,15 +2,21 @@
   "Backing system verdicts. The API for manually created verdicts
   resides in `pate/verdict_api.clj`."
   (:require [lupapalvelu.action :refer [defcommand  notify] :as action]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.verdict :refer [backing-system-verdict command->backing-system-verdict]]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.pate.verdict :refer [backing-system-verdict command->backing-system-verdict]]
             [sade.core :refer [ok fail fail! ok?]]))
 
 (defn application-has-verdict-given-state [{:keys [application]}]
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
+
+(defn- backing-system-is-defined [{:keys [application organization]}]
+  (when-let [permit-type  (:permitType application)]
+    (when-not (org/resolve-krysp-wfs @organization permit-type)
+      (fail :error.no-legacy-available))))
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.
@@ -23,7 +29,8 @@
    :user-roles  #{:authority}
    :notified    true
    :pre-checks  [application-has-verdict-given-state
-                 verdict/no-sent-backing-system-verdict-tasks]
+                 verdict/no-sent-backing-system-verdict-tasks
+                 backing-system-is-defined]
    :on-success  (notify :application-state-change)}
   [command]
   (let [result (verdict/do-check-for-verdict command)]

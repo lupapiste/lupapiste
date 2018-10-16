@@ -1,6 +1,7 @@
 *** Settings ***
 
 Library        Collections
+Resource        ../39_pate/pate_resource.robot
 
 *** Keywords ***
 
@@ -71,7 +72,8 @@ Foreman disables attachment import checkbox
   Toggle toggle  also-fill-attachments
 
 Foreman applies personal information to the foreman application
-  Wait until  Click by test id  fill-info-button
+  Wait test id visible  fill-info-button
+  Scroll and click test id  fill-info-button
 
 Foreman personal information has been applied
   Wait until  Textfield value should be  xpath=//section[@data-doc-type='tyonjohtaja-v2']//input[@data-docgen-path='henkilotiedot.etunimi']  Teppo

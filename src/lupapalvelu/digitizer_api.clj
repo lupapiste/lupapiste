@@ -39,7 +39,7 @@
              :input-validators [(partial action/non-blank-parameters [:lang :organizationId]) ;; no :address included
                                 ;; the propertyId parameter can be nil
                                 (fn [{{propertyId :propertyId} :data :as command}]
-                                  (when (not (ss/blank? propertyId))
+                                  (when-not (ss/blank? propertyId)
                                     (action/property-id-parameters [:propertyId] command)))]
              :pre-checks       [user-is-allowed-to-digitize
                                 default-digitalization-location-set-if-used]}
