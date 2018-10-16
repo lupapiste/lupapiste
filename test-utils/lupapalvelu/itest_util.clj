@@ -260,11 +260,11 @@
         (error status body))))
 
   (-upload-file [_ apikey action-name file cookie-store]
-    (http-post (str (server-address) "/api/raw/" (name action-name))
-               {:oauth-token      apikey
-                :multipart        [{:name "files[]" :content file}]
-                :throw-exceptions false
-                :cookie-store     cookie-store})))
+    (decode-body (http-post (str (server-address) "/api/raw/" (name action-name))
+                            {:oauth-token      apikey
+                             :multipart        [{:name "files[]" :content file}]
+                             :throw-exceptions false
+                             :cookie-store     cookie-store}))))
 
 (def- remote-client-instance (->RemoteLupisClient))
 
@@ -290,7 +290,12 @@
   (-command [_ apikey command-name args] (apply execute-local apikey api-common/execute-command command-name args))
   (-raw [_ apikey action-name args] (apply execute-local apikey api-common/execute-raw action-name args))
   (-upload-file [_ apikey action-name file cookie-store]
-    (execute-local apikey api-common/execute-raw action-name :files [file] :cookie-store cookie-store)))
+    (execute-local apikey api-common/execute-raw action-name
+                   :files [{:filename (.getName file)
+                            :content-type "application/octet-stream"
+                            :tempfile file
+                            :size (.length file)}]
+                   :cookie-store cookie-store)))
 
 (def- local-client-instance (->LocalLupisClient))
 
@@ -861,8 +866,8 @@
 (defn upload-file
   "Upload file to raw upload-file endpoint."
   [apikey filename & {:keys [cookie-store]}]
-  (decode-body (-upload-file *lupis-client* apikey (if apikey :upload-file-authenticated :upload-file)
-                             (io/file filename) cookie-store)))
+  (-upload-file *lupis-client* apikey (if apikey :upload-file-authenticated :upload-file) (io/file filename)
+                cookie-store))
 
 (defn- job-done? [resp] (= (get-in resp [:job :status]) "done"))
 
