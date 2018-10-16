@@ -114,3 +114,6 @@
 (defn fetch-application-operations [application-id]
   (let [application (get-application-no-access-checking application-id)]
     (get-operations-from-application application)))
+
+(defn fetch-invoices-for-organization [organization-id]
+  (mongo/select :invoices {:organization-id organization-id}))

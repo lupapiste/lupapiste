@@ -193,4 +193,20 @@
                   (-> (local-query sonja :application-operations :id id)
                       :operations
                       first
-                      :name) => "pientalo")))))
+                      :name) => "pientalo")))
+
+    (fact "organization-invoices-query"
+          (fact "should return empty seq when there's no invoices for organization"
+                (let [organization-id_ "test-invoices-org-id-should-be-none" ;;Just to explain what data we need
+                      result (local-query sonja :organization-invoices :organizationId organization-id_)]
+                  (count (:invoices result)) => 0
+                  (seq? (:invoices result)) => true))
+
+          (fact "should return two invoices when two invoice are inserted with organization id organization-id"
+                (let [organization-id_ "test-foo-org-id-invoices-should-be-two"
+                      app-a-id "foo-app-id"
+                      invoices [(invoice-with {:organization-id organization-id_}) (invoice-with {:organization-id organization-id_})]]
+                  (doseq [invoice invoices]
+                    (invoices/create-invoice! (->invoice-db invoice {:id app-a-id :organization organization-id_} dummy-user)))
+                  (let [result (local-query sonja :organization-invoices :organizationId organization-id_)]
+                    (count (:invoices result)) => 2))))))

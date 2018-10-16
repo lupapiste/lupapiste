@@ -98,3 +98,13 @@
    :user-authz-roles roles/all-authz-roles
    :states           states/post-submitted-states}
   [_])
+
+(defquery organization-invoices
+  {:description "Query that returns invoices for organizations"
+   :feature          :invoices
+   :user-roles       #{:authority}
+   :states           states/post-submitted-states
+   :input-validators [(partial action/non-blank-parameters [:organizationId])]
+   :parameters       [organizationId]}
+  [{:keys [application] :as command}]
+  (ok {:invoices (invoices/fetch-invoices-for-organization organizationId)}))
