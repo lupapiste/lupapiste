@@ -3,10 +3,12 @@
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.string :as s]
+            [clj-http.conn-mgr]
             [clj-ssh.cli :as ssh-cli]
             [clj-ssh.ssh :as ssh]
             [midje.sweet :refer :all]
             [midje.util.exceptions :refer :all]
+            [mount.core :as mount :refer [defstate]]
             [noir.request :refer [*request*]]
             [ring.util.codec :as codec]
             [schema.core :as sc]
@@ -184,13 +186,22 @@
 ;;;; Remotely
 ;;;; -------------------------------------------------------------------------------------------------------------------
 
+(defstate ^:private itest-conn-mgr
+  :start (clj-http.conn-mgr/make-reusable-conn-manager {:timeout 60, :threads 4, :default-per-route 4})
+  :stop (clj-http.conn-mgr/shutdown-manager itest-conn-mgr))
+
+;; HACK: There doesn't seem to be a better place to do setup and teardown for `lein integration` etc.
+(mount/start #'itest-conn-mgr)
+(.addShutdownHook (Runtime/getRuntime) (Thread. mount/stop))
+
 (defn raw [apikey action & args]
   (let [params (apply hash-map args)
-        options (util/assoc-when {:oauth-token      apikey
-                                  :query-params     (dissoc params :as :cookie-store)
-                                  :throw-exceptions false
-                                  :follow-redirects false
-                                  :cookie-store     (:cookie-store params)}
+        options (util/assoc-when {:oauth-token        apikey
+                                  :query-params       (dissoc params :as :cookie-store)
+                                  :throw-exceptions   false
+                                  :follow-redirects   false
+                                  :cookie-store       (:cookie-store params)
+                                  :connection-manager itest-conn-mgr}
                                  :as (:as params))]
     (http-get (str (server-address) "/api/raw/" (name action)) options)))
 
@@ -202,13 +213,14 @@
        :oauth-token      apikey
        :query-params     (apply hash-map args)
        :follow-redirects false
-       :throw-exceptions false})))
+       :throw-exceptions false
+       :connection-manager itest-conn-mgr})))
 
 (defn decoded-get [url params]
-  (decode-response (http-get url params)))
+  (decode-response (http-get url (assoc params :connection-manager itest-conn-mgr))))
 
 (defn decoded-simple-post [url params]
-  (decode-response (http-post url params)))
+  (decode-response (http-post url (assoc params :connection-manager itest-conn-mgr))))
 
 (defn ->arg-map [args]
   (if (map? (first args))
@@ -229,7 +241,8 @@
            :follow-redirects false
            :cookie-store     cookie-store
            :test-db-name     test-db-name
-           :throw-exceptions false}
+           :throw-exceptions false
+           :connection-manager itest-conn-mgr}
           :oauth-token apikey)))))
 
 (defn raw-command [apikey command-name & args]
@@ -291,10 +304,10 @@
   (-raw [_ apikey action-name args] (apply execute-local apikey api-common/execute-raw action-name args))
   (-upload-file [_ apikey action-name file cookie-store]
     (execute-local apikey api-common/execute-raw action-name
-                   :files [{:filename (.getName file)
+                   :files [{:filename     (.getName file)
                             :content-type "application/octet-stream"
-                            :tempfile file
-                            :size (.length file)}]
+                            :tempfile     file
+                            :size         (.length file)}]
                    :cookie-store cookie-store)))
 
 (def- local-client-instance (->LocalLupisClient))
