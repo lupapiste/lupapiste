@@ -5,13 +5,12 @@
 (apply-remote-minimal)
 
 (facts "Create R application"
-  (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
+  (let [application-id (create-app-id pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
         {:keys [attachments]} (query-application pena application-id)
         cv-type {:type-group "osapuolet"
                  :type-id "cv"}
         tutkintotodistus-type {:type-group "osapuolet"
                                :type-id "tutkintotodistus"}]
-    response => ok?
     (count attachments) => 4
 
     (fact "Pena is not architect"
@@ -119,14 +118,13 @@
           => (partial expected-failure? :error.illegal-state))))))
 
 (facts "YA application"
-  (let [{application-id :id :as response} (create-app mikko :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
+  (let [application-id (create-app-id mikko :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
         {:keys [attachments]} (query-application mikko application-id)
         cv-type {:type-group "osapuolet"
                  :type-id "cv"}
         ;; TODO: Use or remove:
         tutkintotodistus-type {:type-group "osapuolet"
                                :type-id "tutkintotodistus"}]
-    response => ok?
     (count attachments) => 1
 
     (fact "No user attachments"

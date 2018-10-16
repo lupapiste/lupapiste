@@ -247,13 +247,13 @@
     (:opened app2) => number?))
 
 (facts* "authority cannot submit application for applicant before it has been opened"
-  (let [{:keys [id]} (create-application pena)
+  (let [id (create-app-id pena)
         resp (command sonja :submit-application :id id)]
     (:state (query-application sonja id)) => "draft"
     resp => fail?))
 
 (facts* "Authority can submit application for applicant after it has been opened"
-  (let [{:keys [id]} (create-application pena)
+  (let [id (create-app-id pena)
         _ (comment-application pena id true)
         resp (command sonja :submit-application :id id)]
     (:state (query-application sonja id)) => "submitted"

@@ -60,11 +60,10 @@
         _                               (command apikey :approve-application :id sijoitussopimus-application-id :lang "fi")
 
         ;; YA Tyolupa application that gets link permit
-        tyolupa-application             (create-application apikey
-                                          :propertyId property-id
-                                          :address "Sopimuskuja 1"
-                                          :operation "ya-katulupa-kaapelityot") => truthy
-        tyolupa-application-id          (:id tyolupa-application)]
+        tyolupa-application-id             (create-app-id apikey
+                                                          :propertyId property-id
+                                                          :address "Sopimuskuja 1"
+                                                          :operation "ya-katulupa-kaapelityot") => truthy]
 
     (fact "New ya-jatkoaika requires link permit"
       (let [new-application-id (create-app-id apikey :operation "ya-jatkoaika" :propertyId property-id) ]

@@ -47,6 +47,8 @@
 
 (def- dev-password "Lupapiste")
 
+(defonce test-db-name (str "test_" (now)))
+
 ;;;; Minimal Fixture Shortcuts
 ;;;; ===================================================================================================================
 
@@ -137,15 +139,13 @@
 ;;;; ===================================================================================================================
 
 (defn decode-response [resp]
-  (update-in resp [:body] #(json/decode % true)))
+  (update resp :body json/decode true))
 
 (defn decode-body [resp]
-  (:body (decode-response resp)))
+  (json/decode (:body resp)))
 
 ;;;; HTTP Client Cookie Store
 ;;;; ===================================================================================================================
-
-(defonce test-db-name (str "test_" (now)))
 
 (defn ->cookie-store [store]
   (proxy [CookieStore] []
@@ -209,11 +209,11 @@
   (decode-response
     (http-get
       (str (server-address) "/api/query/" (name query-name))
-      {:headers          {"accepts" "application/json;charset=utf-8"}
-       :oauth-token      apikey
-       :query-params     (apply hash-map args)
-       :follow-redirects false
-       :throw-exceptions false
+      {:headers            {"accepts" "application/json;charset=utf-8"}
+       :oauth-token        apikey
+       :query-params       (apply hash-map args)
+       :follow-redirects   false
+       :throw-exceptions   false
        :connection-manager itest-conn-mgr})))
 
 (defn decoded-get [url params]
@@ -236,12 +236,12 @@
             test-db-name (:test-db-name args)
             args (dissoc args :cookie-store :test-db-name)]
         (util/assoc-when
-          {:headers          {"content-type" "application/json;charset=utf-8"}
-           :body             (json/encode args)
-           :follow-redirects false
-           :cookie-store     cookie-store
-           :test-db-name     test-db-name
-           :throw-exceptions false
+          {:headers            {"content-type" "application/json;charset=utf-8"}
+           :body               (json/encode args)
+           :follow-redirects   false
+           :cookie-store       cookie-store
+           :test-db-name       test-db-name
+           :throw-exceptions   false
            :connection-manager itest-conn-mgr}
           :oauth-token apikey)))))
 

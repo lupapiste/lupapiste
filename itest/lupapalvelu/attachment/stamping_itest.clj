@@ -177,7 +177,7 @@
 
 (facts "Stamping copies all signings"
   (apply-remote-minimal)
-  (let [{application-id :id} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
+  (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
         application (query-application pena application-id)
         attachment-id (:id (first (:attachments application)))
         _ (upload-attachment pena application-id {:id attachment-id :type {:type-group "paapiirustus" :type-id "asemapiirros"}} true) => ok?

@@ -11,10 +11,7 @@
 (apply-remote-minimal)
 
 (facts "attachments"
-  (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")]
-
-         response => ok?
-
+  (let [application-id (create-app-id pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")]
          (comment-application pena application-id true) => ok?
 
          (fact "Signing not possible"
@@ -297,7 +294,7 @@
                      => (contains {:removed true})))))))))
 
 (facts* "Signing signs corrrect attachments"
-  (let [{application-id :id} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
+  (let [application-id (create-app-id pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
         _ (comment-application pena application-id true) => ok? ; visible to Veikko
         application (query-application pena application-id)
         old-attachment (-> application :attachments last)
@@ -337,7 +334,7 @@
           (count (:signatures old)) => 1)))))
 
 (facts* "Post-verdict attachments"
-  (let [{application-id :id} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
+  (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
         application (query-application pena application-id)
         _ (upload-attachment-to-all-placeholders pena application)
         _ (command pena :submit-application :id application-id)
@@ -425,9 +422,8 @@
           count) => 6)))
 
 (fact "pdf works with YA-lupa"
-  (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
+  (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
         application (query-application pena application-id)]
-    response => ok?
     (:organization application) => "753-YA"
     pena => (allowed? :pdf-export :id application-id)
     (raw pena "pdf-export" :id application-id) => http200?))
@@ -667,7 +663,7 @@
           (get-in attachment [:latestVersion :version :minor]) => 0)))))
 
 (facts* "Attachments visibility"
-  (let [{application-id :id} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
+  (let [application-id (create-app-id pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
         {attachments :attachments :as application} (query-application pena application-id)
         _ (command pena :set-attachment-visibility
                    :id application-id
@@ -927,8 +923,7 @@
             (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => (partial expected-failure? :error.command-illegal-state)))))))
 
 (facts "Not needed..."
-  (let [application (create-application pena :propertyId sipoo-property-id)
-        application-id (:id application)
+  (let [application-id (create-app-id pena :propertyId sipoo-property-id)
         {attachments :attachments} (query-application pena application-id)
         att1 (first attachments)]
     (fact "Initially not needed can be toggled"
