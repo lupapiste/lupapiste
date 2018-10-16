@@ -12,18 +12,10 @@
             [sade.core :refer [def-]]
             [sade.env :as env]
             [sade.session :as ssess]
-            [sade.strings :as ss]
             [sade.util :as util]
             [saml20-clj.sp :as saml-sp]
             [saml20-clj.routes :as saml-routes]
-            [saml20-clj.shared :as saml-shared]
-            [saml20-clj.xml :as saml-xml])
-  (:import [org.apache.xml.security Init]
-           [org.apache.xml.security.utils Constants ElementProxy]
-           [org.apache.xml.security.transforms Transforms]
-           [org.apache.xml.security.c14n Canonicalizer]
-           [java.io ByteArrayInputStream]
-           [java.util Base64]))
+            [saml20-clj.shared :as saml-shared]))
 
 (def ad-config
   {:sp-cert (env/value :sso :cert)
