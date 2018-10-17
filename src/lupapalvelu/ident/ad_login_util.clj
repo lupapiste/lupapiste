@@ -1,5 +1,6 @@
 (ns lupapalvelu.ident.ad-login-util
   (:require [taoensso.timbre :refer [debug infof warn error errorf]]
+            [hiccup.core :as hiccup]
             [noir.core :refer [defpage]]
             [monger.operators :refer [$set]]
             [ring.util.response :refer :all]
@@ -72,6 +73,35 @@
                        (new org.opensaml.xml.security.keyinfo.StaticKeyInfoCredentialResolver decryption-cred)
                        (new org.opensaml.xml.encryption.InlineEncryptedKeyResolver))]
     decrypter))
+
+(defn metadata
+  "Ported from kirasystems/saml20-clj, removed 'http://example.com/SingleLogout' endpoint"
+  ([app-name acs-uri certificate-str sign-request?]
+   (str
+     (hiccup.page/xml-declaration "UTF-8")
+     (hiccup/html
+       [:md:EntityDescriptor {:xmlns:md  "urn:oasis:names:tc:SAML:2.0:metadata",
+                              :ID  (ss/replace acs-uri #"[:/]" "_") ,
+                              :entityID  app-name}
+        [:md:SPSSODescriptor
+         (cond-> {:AuthnRequestsSigned "true",
+                  :WantAssertionsSigned "true",
+                  :protocolSupportEnumeration "urn:oasis:names:tc:SAML:2.0:protocol"}
+                 (not sign-request?) (dissoc :AuthnRequestsSigned))
+         [:md:KeyDescriptor  {:use  "signing"}
+          [:ds:KeyInfo  {:xmlns:ds  "http://www.w3.org/2000/09/xmldsig#"}
+           [:ds:X509Data
+            [:ds:X509Certificate certificate-str]]]]
+         [:md:KeyDescriptor  {:use  "encryption"}
+          [:ds:KeyInfo  {:xmlns:ds  "http://www.w3.org/2000/09/xmldsig#"}
+           [:ds:X509Data
+            [:ds:X509Certificate certificate-str]]]]
+         [:md:NameIDFormat  "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"]
+         [:md:NameIDFormat  "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"]
+         [:md:NameIDFormat  "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"]
+         [:md:NameIDFormat  "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"]
+         [:md:NameIDFormat  "urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName"]
+         [:md:AssertionConsumerService  {:Binding  "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", :Location acs-uri, :index  "0", :isDefault  "true"}]]]))))
 
 (defn remove-namespaces-from-kws
   "Convert namespaced map keys like :http://schemas.microsoft.com/identity/claims/tenantid -> :tenantid"

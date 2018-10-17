@@ -42,9 +42,13 @@
                    {:user (usr/session-summary user)})]
     response))
 
-(defpage [:get "/api/saml/metadata"] []
+#_(defpage [:get "/api/saml/metadata"] []
   (let [{:keys [app-name sp-cert acs-uri]} ad-config]
     (resp/status 200 (saml-sp/metadata app-name acs-uri (ad-util/parse-certificate sp-cert)))))
+
+(defpage [:get "/api/saml/metadata"] []
+  (let [{:keys [app-name sp-cert acs-uri]} ad-config]
+    (resp/status 200 (ad-util/metadata app-name acs-uri (ad-util/parse-certificate sp-cert) true))))
 
 (defpage [:get "/api/saml/ad-login/:org-id"] {org-id :org-id}
   (let [{:keys [enabled idp-uri]} (-> org-id org/get-organization :ad-login)

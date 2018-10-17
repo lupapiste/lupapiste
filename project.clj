@@ -55,6 +55,7 @@
                  [cljstache "2.0.1"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [org.freemarker/freemarker "2.3.23"]
+                 [hiccup "1.0.5"]
 
                  ; CSS
                  [garden "1.3.3"]
