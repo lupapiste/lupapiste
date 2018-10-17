@@ -1073,8 +1073,8 @@
 ;;;; ===================================================================================================================
 
 (defn vetuma! [data]
-  (stream-decoding-response http-get (str (server-address) "/dev/api/vetuma")
-                            {:query-params (select-keys data [:userid :firstname :lastname])}))
+  (stream-decoding-body http-get (str (server-address) "/dev/api/vetuma")
+                        {:query-params (select-keys data [:userid :firstname :lastname])}))
 
 ;;;; Verdicts
 ;;;; ===================================================================================================================
