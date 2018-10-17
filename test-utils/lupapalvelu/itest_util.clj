@@ -147,7 +147,7 @@
                                  (json/decode-stream body true))))))
 
 (defn decode-body [resp]
-  (json/decode (:body resp)))
+  (json/decode (:body resp) true))
 
 (defn stream-decoding-body [http-fn uri request]
   (let [{:keys [body]} (http-fn uri (assoc request :as :stream))]
