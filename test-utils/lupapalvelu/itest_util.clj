@@ -141,8 +141,18 @@
 (defn decode-response [resp]
   (update resp :body json/decode true))
 
+(defn stream-decoding-response [http-fn uri request]
+  (-> (http-fn uri (assoc request :as :stream))
+      (update :body (fn [body] (with-open [body (io/reader body)]
+                                 (json/decode-stream body true))))))
+
 (defn decode-body [resp]
   (json/decode (:body resp)))
+
+(defn stream-decoding-body [http-fn uri request]
+  (let [{:keys [body]} (http-fn uri (assoc request :as :stream))]
+    (with-open [body (io/reader body)]
+      (json/decode-stream body true))))
 
 ;;;; HTTP Client Cookie Store
 ;;;; ===================================================================================================================
@@ -206,21 +216,20 @@
     (http-get (str (server-address) "/api/raw/" (name action)) options)))
 
 (defn raw-query [apikey query-name & args]
-  (decode-response
-    (http-get
-      (str (server-address) "/api/query/" (name query-name))
-      {:headers            {"accepts" "application/json;charset=utf-8"}
-       :oauth-token        apikey
-       :query-params       (apply hash-map args)
-       :follow-redirects   false
-       :throw-exceptions   false
-       :connection-manager itest-conn-mgr})))
+  (stream-decoding-response http-get
+                            (str (server-address) "/api/query/" (name query-name))
+                            {:headers            {"accepts" "application/json;charset=utf-8"}
+                             :oauth-token        apikey
+                             :query-params       (apply hash-map args)
+                             :follow-redirects   false
+                             :throw-exceptions   false
+                             :connection-manager itest-conn-mgr}))
 
 (defn decoded-get [url params]
-  (decode-response (http-get url (assoc params :connection-manager itest-conn-mgr))))
+  (stream-decoding-response http-get url (assoc params :connection-manager itest-conn-mgr)))
 
 (defn decoded-simple-post [url params]
-  (decode-response (http-post url (assoc params :connection-manager itest-conn-mgr))))
+  (stream-decoding-response http-post url (assoc params :connection-manager itest-conn-mgr)))
 
 (defn ->arg-map [args]
   (if (map? (first args))
@@ -228,22 +237,20 @@
     (apply hash-map args)))
 
 (defn decode-post [action-type apikey command-name & args]
-  (decode-response
-    (http-post
-      (str (server-address) "/api/" (name action-type) "/" (name command-name))
-      (let [args (->arg-map args)
-            cookie-store (:cookie-store args)
-            test-db-name (:test-db-name args)
-            args (dissoc args :cookie-store :test-db-name)]
-        (util/assoc-when
-          {:headers            {"content-type" "application/json;charset=utf-8"}
-           :body               (json/encode args)
-           :follow-redirects   false
-           :cookie-store       cookie-store
-           :test-db-name       test-db-name
-           :throw-exceptions   false
-           :connection-manager itest-conn-mgr}
-          :oauth-token apikey)))))
+  (stream-decoding-response http-post (str (server-address) "/api/" (name action-type) "/" (name command-name))
+                            (let [args (->arg-map args)
+                                  cookie-store (:cookie-store args)
+                                  test-db-name (:test-db-name args)
+                                  args (dissoc args :cookie-store :test-db-name)]
+                              (util/assoc-when
+                                {:headers            {"content-type" "application/json;charset=utf-8"}
+                                 :body               (json/encode args)
+                                 :follow-redirects   false
+                                 :cookie-store       cookie-store
+                                 :test-db-name       test-db-name
+                                 :throw-exceptions   false
+                                 :connection-manager itest-conn-mgr}
+                                :oauth-token apikey))))
 
 (defn raw-command [apikey command-name & args]
   (apply decode-post :command apikey command-name args))
@@ -273,11 +280,11 @@
         (error status body))))
 
   (-upload-file [_ apikey action-name file cookie-store]
-    (decode-body (http-post (str (server-address) "/api/raw/" (name action-name))
-                            {:oauth-token      apikey
-                             :multipart        [{:name "files[]" :content file}]
-                             :throw-exceptions false
-                             :cookie-store     cookie-store}))))
+    (stream-decoding-response http-post (str (server-address) "/api/raw/" (name action-name))
+                              {:oauth-token      apikey
+                               :multipart        [{:name "files[]" :content file}]
+                               :throw-exceptions false
+                               :cookie-store     cookie-store})))
 
 (def- remote-client-instance (->RemoteLupisClient))
 
@@ -337,7 +344,7 @@
 ;;;; ===================================================================================================================
 
 (defn apply-remote-fixture [fixture-name]
-  (let [resp (decode-response (http-get (str (server-address) "/dev/fixture/" fixture-name) {}))]
+  (let [resp (stream-decoding-response http-get (str (server-address) "/dev/fixture/" fixture-name) {})]
     (assert (-> resp :body :ok) (str "Response not ok: fixture: \"" fixture-name "\": response: " (pr-str resp)))))
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
@@ -349,20 +356,20 @@
   (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name features)))))
 
 (defn get-by-id [collection id & args]
-  (decode-response (http-get (str (server-address) "/dev/by-id/" (name collection) "/" id) (apply hash-map args))))
+  (stream-decoding-response http-get (str (server-address) "/dev/by-id/" (name collection) "/" id)
+                            (apply hash-map args)))
 
 (defn integration-messages [app-id & args]
-  (-> (http-get (str (server-address) "/dev/integration-messages/" app-id) (apply hash-map args))
-      (decode-response)
-      (get-in [:body :data])))
+  (:data (stream-decoding-body http-get (str (server-address) "/dev/integration-messages/" app-id)
+                               (apply hash-map args))))
 
 (defn clear-collection [collection]
-  (let [resp (decode-response (http-get (str (server-address) "/dev/clear/" collection) {}))]
+  (let [resp (stream-decoding-response http-get (str (server-address) "/dev/clear/" collection) {})]
     (assert (-> resp :body :ok) (str "Response not ok: clearing collection: \"" collection
                                      "\": response: " (pr-str resp)))))
 
 (defn clear-ajanvaraus-db []
-  (let [resp (decode-response (http-get (str (server-address) "/dev/ajanvaraus/clear") {}))]
+  (let [resp (stream-decoding-response http-get (str (server-address) "/dev/ajanvaraus/clear") {})]
     (assert (-> resp :body :ok) (str "Response not ok: clearing ajanvaraus-db" (pr-str resp)))))
 
 ;;;; Use Action Prechecks
@@ -719,13 +726,12 @@
 
 (defn login
   ([u p] (login u p {}))
-  ([u p params] (-> (http-post (str (server-address) "/api/login")
-                               (merge
-                                 {:follow-redirects false
-                                  :throw-exceptions false
-                                  :form-params      {:username u :password p}}
-                                 params))
-                    decode-body)))
+  ([u p params] (stream-decoding-body http-post (str (server-address) "/api/login")
+                                      (merge
+                                        {:follow-redirects false
+                                         :throw-exceptions false
+                                         :form-params      {:username u :password p}}
+                                        params))))
 
 ;;;; VTJ-PRT
 ;;;; ===================================================================================================================
@@ -827,11 +833,11 @@
   (let [filename (or filename "dev-resources/test-attachment.txt")
         uploadfile (io/file filename)
         uri (str (server-address) "/api/upload/user-attachment")
-        resp (http-post uri
-                        {:oauth-token apikey
-                         :multipart   [{:name "attachmentType" :content attachment-type}
-                                       {:name "files[]" :content uploadfile}]})
-        body (:body (decode-response resp))]
+        resp (stream-decoding-response http-post uri
+                                       {:oauth-token apikey
+                                        :multipart   [{:name "attachmentType" :content attachment-type}
+                                                      {:name "files[]" :content uploadfile}]})
+        body (:body resp)]
     (if expect-to-succeed
       (facts "successful"
         resp => http200?
@@ -1067,8 +1073,8 @@
 ;;;; ===================================================================================================================
 
 (defn vetuma! [data]
-  (decode-body (http-get (str (server-address) "/dev/api/vetuma")
-                         {:query-params (select-keys data [:userid :firstname :lastname])})))
+  (stream-decoding-response http-get (str (server-address) "/dev/api/vetuma")
+                            {:query-params (select-keys data [:userid :firstname :lastname])}))
 
 ;;;; Verdicts
 ;;;; ===================================================================================================================
