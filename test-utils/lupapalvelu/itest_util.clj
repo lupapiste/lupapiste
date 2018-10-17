@@ -885,8 +885,8 @@
 (defn upload-file
   "Upload file to raw upload-file endpoint."
   [apikey filename & {:keys [cookie-store]}]
-  (-upload-file *lupis-client* apikey (if apikey :upload-file-authenticated :upload-file) (io/file filename)
-                cookie-store))
+  (:body (-upload-file *lupis-client* apikey (if apikey :upload-file-authenticated :upload-file) (io/file filename)
+                       cookie-store)))
 
 (defn- job-done? [resp] (= (get-in resp [:job :status]) "done"))
 
