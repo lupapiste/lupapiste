@@ -105,7 +105,7 @@
             (upload-file-and-bind pena application-id
                                   {:type  {:type-group "muut", :type-id    "muu"}
                                    :group {:groupType  "operation"
-                                           :operations [{:id (-> application :primaryOperation:id)}]}})
+                                           :operations [{:id (-> application :primaryOperation :id)}]}})
             (->> (query-application pena application-id) :attachments last :op (map :name)) => ["kerrostalo-rivitalo"])))
 
       (fact "Pena submits the application"

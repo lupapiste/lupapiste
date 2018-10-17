@@ -633,9 +633,8 @@
 (defn create-and-submit-local-application
   "Returns the application map"
   [apikey & args]
-  (let [id (:id (apply create-local-app apikey args))
-        resp (local-command apikey :submit-application :id id)]
-    (fact "Submit OK" resp => ok?)
+  (let [id (:id (apply create-local-app apikey args))]
+    (fact "Submit OK" (local-command apikey :submit-application :id id) => ok?)
     (query-application local-query apikey id)))
 
 ;;;; Email Mock Usage
