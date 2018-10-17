@@ -90,16 +90,17 @@
                                  (error (.getMessage e))
                                  false))))
         _ (infof "SAML message signature was %s" (if valid-signature? "valid" "invalid"))
-        attrs (get-in parsed-saml-info [:assertions :attrs])
-        {:keys [firstName lastName groups] :or {firstName "firstName" lastName "lastName" groups ["authority"]}} attrs
-        email (:name attrs)
-        _ (infof "firstName: %s, lastName: %s, groups: %s, email: %s" firstName, lastName groups email)
+        {:keys [Group emailaddress givenname name surname]} (get-in parsed-saml-info [:assertions :attrs])
+        _ (infof "firstName: %s, lastName: %s, groups: %s, email: %s" givenname surname Group emailaddress)
         ad-role-map (-> org-id org/get-organization :ad-login :role-mapping)
         _ (infof "AD-role map: %s" ad-role-map)
-        authz (ad-util/resolve-roles ad-role-map groups)
+        authz (ad-util/resolve-roles ad-role-map Group)
         _ (infof "Resolved authz: %s" authz)]
     (cond
-      (and valid-signature? (seq authz)) (validated-login req org-id firstName lastName email authz)
+      (false? (:success? parsed-saml-info)) (do
+                                              (error "Login was not valid")
+                                              (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
+      (and valid-signature? (seq authz)) (validated-login req org-id givenname surname emailaddress authz)
       valid-signature? (do
                          (error "User does not have organization authorization")
                          (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
