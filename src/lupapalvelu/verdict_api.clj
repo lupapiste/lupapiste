@@ -21,8 +21,9 @@
     (fail :error.command-illegal-state)))
 
 (defn- backing-system-is-defined [{:keys [application organization]}]
-  (when-let [permit-type  (:permitType application)]
-    (when-not (org/resolve-krysp-wfs @organization permit-type)
+  (when-let [permit-type (:permitType application)]
+    (when-not (or (org/resolve-krysp-wfs @organization permit-type)
+                  (allu/allu-application? (:organization application) permit-type))
       (fail :error.no-legacy-available))))
 
 (defcommand check-for-verdict
