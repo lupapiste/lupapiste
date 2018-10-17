@@ -15,7 +15,6 @@ Sonja creates submitted sijoitussopimus
   Create application  ${ss_app}  753  753-416-45-3  YA-sijoituslupa
   Select from list by value  permitSubtypeSelect  sijoitussopimus
   Submit application
-  Positive indicator should be visible
   Positive indicator should not be visible
   ${linkPermitAppId} =  Get Text  xpath=//span[@data-test-id='application-id']
   Set Suite Variable  ${linkPermitAppId}

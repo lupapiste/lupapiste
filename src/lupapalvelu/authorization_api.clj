@@ -260,7 +260,7 @@
              (-> auths first :username), roles))
 
     (update-application command
-      {:auth {:$elemMatch {:id userId, :role {$in changeable-roles}}}}
+      {:auth {$elemMatch {:id userId, :role {$in changeable-roles}}}}
       {$set {:auth.$.role role}})))
 
 (defcommand toggle-submit-restriction-for-other-auths

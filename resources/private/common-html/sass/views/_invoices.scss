@@ -1,0 +1,102 @@
+.invoice-list-wrapper {
+    .operation-button-row {
+        div {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        div:first-child {
+            float: left;
+
+
+        }
+        div.new-invoice-button-container {
+            float: right;
+            button {
+
+            }
+
+        }
+        div.clear {
+            clear: both;
+            width: 100%;
+        }
+    }
+}
+
+button.invoice-change-state-button {
+    background-color: $positive;
+    color: #ffffff;
+}
+
+.invoice-accordion.rollup {
+    border-width: 1px;
+    border-color: $gray119;
+    border-style: solid;
+    width: 100%;
+    margin-bottom: $marginL;
+
+    &.onward-from-draft {
+        .roll-up-header {
+            background-color: $positive;
+            button {
+                background-color: $positive;
+            }
+        }
+    }
+    .roll-up-header {
+        background-color: $gray119;
+        &:after {
+            content: "";
+            display: block;
+            height: 0px;
+            clear:both;
+        }
+        button {
+            background-color: $gray119;
+        }
+        .accordion-toggle-container {
+            height: $btn-height;
+        }
+        .invoice-title-component {
+            color: #ffffff;
+            float: right;
+            line-height: $btn-height;
+            vertical-align: middle;
+            padding-right: 12px;
+            div {
+                display: inline;
+                i {
+                    font-size: 16px;
+                    padding: {
+                        right: 0.5em;
+
+                    }
+                }
+                &:first-child {
+                    padding-right: 2em;
+                }
+            }
+        }
+    }
+}
+
+.invoice-operations-table-wrapper {
+    margin: {
+        top: $marginL;
+        right: $marginM;
+        left: $marginM;
+        bottom: $marginL;
+    }
+}
+
+.invoice-operations-table {
+    box-sizing: border-box;
+    border-width: 1px;
+    border-color: $gray221;
+    border-style: solid;
+
+    > thead {
+        background-color: $gray221;
+    }
+
+}

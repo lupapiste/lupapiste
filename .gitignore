@@ -73,6 +73,7 @@ user.properties
 node_modules
 /.ctags
 src/lupapalvelu/conversion/test-data
+*.pem
 
 resources/public/lp-static/css/*.css.map
 resources/public/lp-static/js/*

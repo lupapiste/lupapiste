@@ -294,7 +294,7 @@
         (when-not (= metadata new-metadata)
           (action/update-application
             (action/application->command application)
-            {:attachments.id id}
+            {:attachments {$elemMatch {:id id}}}
             {$set {:modified               now
                    :attachments.$.metadata new-metadata}}))))))
 
@@ -352,7 +352,7 @@
         (when-not (= metadata new-metadata)
           (action/update-application
             (action/application->command application)
-            {:attachments.id id}
+            {:attachments {$elemMatch {:id id}}}
             {$set {:modified               now
                    :attachments.$.metadata new-metadata}}
             :return-count? true))))))

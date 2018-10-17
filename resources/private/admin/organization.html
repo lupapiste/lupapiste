@@ -102,6 +102,11 @@
             </div>
           </div>
 
+          <div data-bind="if: organization">
+            <label data-bind="ltext: 'admin.ely-uspa.enabled'" for="elyUspaEnabled"></label>
+            <input data-bind="checked: elyUspaEnabled" id="elyUspaEnabled" type="checkbox" />
+          </div>
+
           <div class="calendars-setting" data-bind="if: util.getIn($data, ['organization', 'id']) && features.enabled('ajanvaraus')">
             <label data-bind="ltext: 'organization.calendars.enabled'" for="calendarsEnabled"></label>
             <input type="checkbox" data-bind="checked: calendarsEnabled" class="form-input" id="calendarsEnabled">

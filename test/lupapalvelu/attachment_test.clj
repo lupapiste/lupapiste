@@ -629,17 +629,17 @@
          (storage/delete app2 (str original-file-id-2 "-preview")) => true
          (action/update-application
            (action/application->command app2)
-           {:attachments.id id}
+           {:attachments {$elemMatch {:id id}}}
            {$set {"attachments.$.versions.0.fileId" nil
                   "attachments.$.versions.0.originalFileId" nil}}) => nil
          (action/update-application
            (action/application->command app2)
-           {:attachments.id id}
+           {:attachments {$elemMatch {:id id}}}
            {$set {"attachments.$.versions.1.fileId" nil
                   "attachments.$.versions.1.originalFileId" nil}}) => nil
          (action/update-application
            (action/application->command app2)
-           {:attachments.id id}
+           {:attachments {$elemMatch {:id id}}}
            {$set {:attachments.$.latestVersion.fileId nil
                   :attachments.$.latestVersion.originalFileId nil}}) => :application-updated]
 
@@ -666,7 +666,7 @@
       (provided
         (action/update-application
           (action/application->command {})
-          {:attachments.id id}
+          {:attachments {$elemMatch {:id id}}}
           {$set {"attachments.$.versions.1.fileId" "foo"
                  "attachments.$.latestVersion.fileId" "foo"
                  "attachments.$.versions.1.contentType" "bar"
