@@ -42,7 +42,7 @@
             [sade.env :as env]
             [sade.shared-schemas :as sssc]
             [lupapalvelu.vetuma :as vetuma])
-  (:import [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream PipedInputStream PipedOutputStream]))
+  (:import [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream]))
 
 
 ;;
@@ -924,15 +924,6 @@
     (cleanup-temp-file (:result conversion-data))
     attached-version))
 
-<<<<<<< HEAD
-(defn- append-stream [zip file-name in]
-  (when in
-    (.putNextEntry zip (ZipEntry. ^String (ss/encode-filename file-name)))
-    (io/copy in zip)
-    (.closeEntry zip)))
-
-=======
->>>>>>> develop
 (defn- append-attachments-to-zip! [zip user attachments application filename-prefix]
   (doseq [{:keys [id]} attachments]
     (when-let [{:keys [content filename]} (get-attachment-latest-version-file user id false application)]
