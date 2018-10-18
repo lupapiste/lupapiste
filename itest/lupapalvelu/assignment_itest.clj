@@ -38,7 +38,7 @@
     (query veikko :assignments) => assignments-not-enabled?)
 
   (fact "authorities can only see assignments belonging to their organizations"
-    (let [{id :id} (create-app sonja :propertyId sipoo-property-id)
+    (let [id (create-app-id sonja :propertyId sipoo-property-id)
           doc-id (-> (query-application sonja id) :documents first :id)
           {assignment-id :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Valmistuva")]
       (-> (query sonja :assignments) :assignments count)  => pos?
@@ -78,7 +78,8 @@
       (create-assignment sonja "does_not_exist_id" id [{:group "group" :id doc-id}] "Desc") => invalid-receiver?)
 
     (fact "assignments cannot be created if not enabled in organization"
-      (create-assignment veikko veikko-id (:id (create-app veikko :propertyId tampere-property-id)) [{:group "group" :id doc-id}] "Ei onnistu")
+      (create-assignment veikko veikko-id (create-app-id veikko :propertyId tampere-property-id)
+                         [{:group "group" :id doc-id}] "Ei onnistu")
       => assignments-not-enabled?)
 
     (fact "authorities can only create assignments for applications in their organizations"

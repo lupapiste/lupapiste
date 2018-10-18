@@ -197,7 +197,7 @@
         new-verdicts (filter #(nil? (:id %)) verdicts)]
     (doseq [{:keys [id kuntalupatunnus verdictDate]} modified-verdicts]
       (action/update-application command
-                                 {:verdicts.id id}
+                                 {:verdicts {$elemMatch {:id id}}}
                                  {$set {:verdicts.$.kuntalupatunnus kuntalupatunnus
                                         :verdicts.$.paatokset.0.poytakirjat.0.paatospvm verdictDate}}))
     (doseq [{:keys [id]} removed-verdicts]

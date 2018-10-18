@@ -425,6 +425,10 @@
           :html ["pate-verdict.html"]
           :js ["pate-verdict.js"]}
 
+   :invoices {:depends [:common-html]
+              :html ["invoices.html"]
+              :js ["invoices.js"]}
+
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 

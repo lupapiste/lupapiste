@@ -5,9 +5,7 @@
 (apply-remote-minimal)
 
 (facts "printing order itests"
-  (let [{application-id :id :as response}
-          (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")]
-    response => ok?
+  (let [application-id (create-app-id pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")]
     (comment-application pena application-id true) => ok?
 
     (let [resp (command veikko

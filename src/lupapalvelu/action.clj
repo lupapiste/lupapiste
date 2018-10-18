@@ -780,7 +780,7 @@
         args        (if meta-data (rest args) args)
         bindings    (when (vector? (first args)) (first args))
         body        (if bindings (rest args) args)
-        bindings    (or bindings ['_])
+        binding     (if bindings (first bindings) '_)
         letkeys     (->> (util/select-values meta-data [:parameters :optional-parameters])
                          (apply concat)
                          (filter symbol?))
@@ -789,16 +789,14 @@
                                      :optional-parameters (mapv keywordize (:optional-parameters meta-data)))
         line-number (:line form-meta)
         ns-str      (str *ns*)
-        defname     (symbol (str (name action-type) "-" action-name))
-        handler     (eval
-                      `(fn [request#]
-                         (let [{{:keys ~(vec letkeys)} :data} request#]
-                           ((fn ~bindings (do ~@body)) request#))))]
+        defname     (symbol (str (name action-type) "-" action-name))]
     `(do
-       (register-action ~action-type ~(str action-name) ~meta-data ~line-number ~ns-str ~handler)
        (defn ~defname
          ([] (~defname {}))
-         ([request#] (~handler request#))))))
+         ([{{:keys ~(vec letkeys)} :data :as request#}]
+           (let [~binding request#]
+             ~@body)))
+       (register-action ~action-type ~(str action-name) ~meta-data ~line-number ~ns-str ~defname))))
 
 (defmacro defcommand [& args] `(defaction ~(meta &form) :command ~@args))
 (defmacro defquery [& args] `(defaction ~(meta &form) :query ~@args))

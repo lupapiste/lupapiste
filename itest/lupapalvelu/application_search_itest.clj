@@ -154,13 +154,13 @@
   (let [search-inforequest #(search % :applicationType "inforequest")
         search-inforequest-total #(search-total % :applicationType "inforequest")
         property-id (str sonja-muni "-123-0000-1234")
-        inforequest (create-application mikko
-                                        :propertyId sipoo-property-id
-                                        :address "Hakukuja 123"
-                                        :propertyId (p/to-property-id property-id)
-                                        :operation "muu-uusi-rakentaminen"
-                                        :infoRequest true) => truthy
-        id-matches? (id-matcher (:id inforequest))]
+        inforequest-id (create-app-id mikko
+                                      :propertyId sipoo-property-id
+                                      :address "Hakukuja 123"
+                                      :propertyId (p/to-property-id property-id)
+                                      :operation "muu-uusi-rakentaminen"
+                                      :infoRequest true) => truthy
+        id-matches? (id-matcher inforequest-id)]
     (facts "for inforequest"
       (facts "by creator"                                   ; LPK-3911
         (fact "no matches for Pena" (search-inforequest "Pena") => no-results?)

@@ -223,9 +223,13 @@
     (or (loc-key (first buildings)) (loc-key application))
     (loc-key application)))
 
-(defn- project-description [{:keys [_projectDescriptionIndex]} documents]
+(defn- prev-permit-application? [application]
+  (= (:operation-name application) "aiemmalla-luvalla-hakeminen"))
+
+(defn- project-description [{:keys [_projectDescriptionIndex] :as application} documents]
   (let [doc-desc (some #(get-in % [:data :kuvaus :value]) documents)]
-    (if (and (= 1 (count documents)) doc-desc)
+    (if (or (and (= 1 (count documents)) doc-desc)
+            (prev-permit-application? application))
       doc-desc
       _projectDescriptionIndex)))
 

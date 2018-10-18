@@ -15959,6 +15959,20 @@ div.search i {
 /*   width: 100%; */
 /*   display: block; */
 /* } */
+.rollup {
+  box-sizing: border-box;
+}
+
+.rollup .roll-up-header {
+  width: 100%;
+  height: 40px;
+  background-color: #777777;
+}
+
+.rollup .roll-up-header .accordion-toggle-container {
+  float: left;
+}
+
 .rollup--closed > .rollup__open {
   display: none;
 }
@@ -39096,6 +39110,103 @@ div.summary-button-bar {
 
 .oauth .buttons form.accept {
   margin-right: 1em;
+}
+
+.invoice-list-wrapper .operation-button-row div {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.invoice-list-wrapper .operation-button-row div:first-child {
+  float: left;
+}
+
+.invoice-list-wrapper .operation-button-row div.new-invoice-button-container {
+  float: right;
+}
+
+.invoice-list-wrapper .operation-button-row div.clear {
+  clear: both;
+  width: 100%;
+}
+
+button.invoice-change-state-button {
+  background-color: #2ca92c;
+  color: #ffffff;
+}
+
+.invoice-accordion.rollup {
+  border-width: 1px;
+  border-color: #777777;
+  border-style: solid;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.invoice-accordion.rollup.onward-from-draft .roll-up-header {
+  background-color: #2ca92c;
+}
+
+.invoice-accordion.rollup.onward-from-draft .roll-up-header button {
+  background-color: #2ca92c;
+}
+
+.invoice-accordion.rollup .roll-up-header {
+  background-color: #777777;
+}
+
+.invoice-accordion.rollup .roll-up-header:after {
+  content: "";
+  display: block;
+  height: 0px;
+  clear: both;
+}
+
+.invoice-accordion.rollup .roll-up-header button {
+  background-color: #777777;
+}
+
+.invoice-accordion.rollup .roll-up-header .accordion-toggle-container {
+  height: 40px;
+}
+
+.invoice-accordion.rollup .roll-up-header .invoice-title-component {
+  color: #ffffff;
+  float: right;
+  line-height: 40px;
+  vertical-align: middle;
+  padding-right: 12px;
+}
+
+.invoice-accordion.rollup .roll-up-header .invoice-title-component div {
+  display: inline;
+}
+
+.invoice-accordion.rollup .roll-up-header .invoice-title-component div i {
+  font-size: 16px;
+  padding-right: 0.5em;
+}
+
+.invoice-accordion.rollup .roll-up-header .invoice-title-component div:first-child {
+  padding-right: 2em;
+}
+
+.invoice-operations-table-wrapper {
+  margin-top: 24px;
+  margin-right: 12px;
+  margin-left: 12px;
+  margin-bottom: 24px;
+}
+
+.invoice-operations-table {
+  box-sizing: border-box;
+  border-width: 1px;
+  border-color: #dddddd;
+  border-style: solid;
+}
+
+.invoice-operations-table > thead {
+  background-color: #dddddd;
 }
 
 #bulletins, #local-bulletins {

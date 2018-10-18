@@ -12,6 +12,7 @@
             [sade.env :as env]
             [sade.files :refer [with-temp-file]]
             [sade.schema-generators :as ssg]
+            [sade.shared-schemas :as sssc]
             [sade.util :refer [file->byte-array]]
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.document.data-schema :as dds]
@@ -28,7 +29,7 @@
 
             [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.backing-system.allu.schemas :refer [SijoituslupaOperation PlacementContract AttachmentMetadata]])
-  (:import [java.io InputStream FileInputStream]))
+  (:import [java.io InputStream]))
 
 ;;;; Refutation Utilities
 ;;;; ===================================================================================================================
@@ -79,90 +80,87 @@
     id))
 
 (defn- upload-attachment
-  ([apikey app-id]
-    ;; FIXME: need to create attachment instead
-   (upload-attachment apikey app-id nil))
+  ([apikey app-id] (upload-attachment apikey app-id nil))
   ([apikey app-id attachment]
    (let [attachmentId (:id attachment)
          description "Test file"
-         filename "dev-resources/test-attachment.txt"
-         filedata {:filename filename, :content (io/file filename)}]
+         filedata {:type     {:type-group "muut", :type-id "muu"}
+                   :contents description}]
      (fact "upload attachment file and bind"
-       (itu/upload-file-and-bind apikey app-id filedata :attachment-id attachmentId) => ok?)
-     (fact "set-attachment-meta"
-       (itu/local-command apikey :set-attachment-meta :id app-id :attachmentId attachmentId
-                          :meta {:contents description}) => ok?)
+       (itu/upload-file-and-bind apikey app-id filedata :attachment-id attachmentId)
+       => (comp nil? (partial sc/check sssc/FileId)))
      (fact "add-comment"
-       (itu/local-command apikey :add-comment :id app-id :text "Added my test text file."
-                          :target {:type "application"} :roles ["applicant" "authority"]) => ok?)
+       (itu/command apikey :add-comment :id app-id :text "Added my test text file." :target {:type "application"}
+                    :roles ["applicant" "authority"]) => ok?)
      attachmentId)))
 
 (defn- open [apikey app-id msg]
   (fact ":draft -> :open"
-    (itu/local-command apikey :add-comment :id app-id :text msg
-                       :target {:type "application"} :roles ["applicant" "authority"]) => ok?))
+    (itu/command apikey :add-comment :id app-id :text msg :target {:type "application"}
+                 :roles ["applicant" "authority"]) => ok?))
 
 (defn- submit [apikey app-id]
   (fact "submit application"
-    (itu/local-command apikey :submit-application :id app-id) => ok?))
+    (itu/command apikey :submit-application :id app-id) => ok?))
 
 (defn- fill [apikey app-id]
   (let [{[attachment] :attachments :keys [documents]} (domain/get-application-no-access-checking app-id)
-        {descr-id :id} (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa")
-                                      documents))
+        {descr-id :id} (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa") documents))
         {applicant-id :id} (first (filter #(= (doc-name %) "hakija-ya") documents))]
     (fact "fill application"
-      (itu/local-command apikey :update-doc :id app-id :doc descr-id :updates [["kayttotarkoitus" "tuijottelu"]]) => ok?
-      (itu/local-command apikey :save-application-drawings :id app-id :drawings drawings) => ok?
+      (itu/command apikey :update-doc :id app-id :doc descr-id :updates [["kayttotarkoitus" "tuijottelu"]]) => ok?
+      (itu/command apikey :save-application-drawings :id app-id :drawings drawings) => ok?
 
-      (itu/local-command apikey :set-user-to-document :id app-id :documentId applicant-id
-                         :userId pena-id :path "henkilo") => ok?
+      (itu/command apikey :set-user-to-document :id app-id :documentId applicant-id :userId pena-id :path "henkilo")
+      => ok?
 
-      (itu/local-command apikey :set-current-user-to-document :id app-id :documentId applicant-id :path "henkilo") => ok?
+      (itu/command apikey :set-current-user-to-document :id app-id :documentId applicant-id :path "henkilo") => ok?
 
-      (itu/local-command apikey :set-company-to-document :id app-id :documentId applicant-id
-                         :companyId "esimerkki" :path "yritys") => ok?
+      (itu/command apikey :set-company-to-document :id app-id :documentId applicant-id :companyId "esimerkki"
+                   :path "yritys") => ok?
       (let [user (usr/get-user-by-id pena-id)]
-        (itu/local-command apikey :update-doc :id app-id :doc applicant-id
-                           :updates [["yritys.yhteyshenkilo.henkilotiedot.etunimi" (:firstName user)]
-                                     ["yritys.yhteyshenkilo.henkilotiedot.sukunimi" (:lastName user)]
-                                     ["yritys.yhteyshenkilo.yhteystiedot.email" (:email user)]
-                                     ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]])))
+        (itu/command apikey :update-doc :id app-id :doc applicant-id
+                     :updates [["yritys.yhteyshenkilo.henkilotiedot.etunimi" (:firstName user)]
+                               ["yritys.yhteyshenkilo.henkilotiedot.sukunimi" (:lastName user)]
+                               ["yritys.yhteyshenkilo.yhteystiedot.email" (:email user)]
+                               ["yritys.yhteyshenkilo.yhteystiedot.puhelin" (:phone user)]])))
 
-    (upload-attachment apikey app-id attachment)))
+    #_(upload-attachment apikey app-id attachment)))
 
 (defn- approve [apikey app-id]
   (fact "approve application"
-    (itu/local-command apikey :approve-application :id app-id :lang "fi") => ok?
+    (itu/command apikey :approve-application :id app-id :lang "fi") => ok?
 
     ;; HACK: Testing move-attachments-to-backing-system here for lack of a better place:
-    #_(itu/local-command apikey :move-attachments-to-backing-system :id app-id :lang "fi"
-                         :attachmentIds [(upload-attachment apikey app-id)]) => ok?))
+    #_(upload-attachment apikey app-id)
+    #_(let [{[{attachment-id :id}] :attachments} (domain/get-application-no-access-checking app-id {:attachments true})]
+        (itu/command apikey :move-attachments-to-backing-system :id app-id :lang "fi" :attachmentIds [attachment-id])
+        => ok?)))
 
 (defn- return-to-draft [apikey app-id msg]
   (fact "return to draft"
-    (itu/local-command apikey :return-to-draft :id app-id :text msg :lang "fi") => ok?))
+    (itu/command apikey :return-to-draft :id app-id :text msg :lang "fi") => ok?))
 
 (defn- request-for-complement [apikey id]
   (fact "request for complement"
-    (itu/local-command apikey :request-for-complement :id id)
+    (itu/command apikey :request-for-complement :id id)
     => (contains {:ok     false
                   :text   "error.integration.unsupported-action"
                   :action "request-for-complement"})))
 
 (defn- cancel [apikey app-id msg]
   (fact "cancel application"
-    (itu/local-command apikey :cancel-application :id app-id :text msg :lang "fi") => ok?))
+    (itu/command apikey :cancel-application :id app-id :text msg :lang "fi") => ok?))
 
 (defn- undo-cancellation [apikey app-id]
   (fact "undo cancellation"
-    (itu/local-command apikey :undo-cancellation :id app-id)
+    (itu/command apikey :undo-cancellation :id app-id)
     => (contains {:ok     false
                   :text   "error.integration.unsupported-action"
                   :action "undo-cancellation"})))
 
 (defn- fetch-contract [apikey app-id]
-  (itu/local-command apikey :check-for-verdict :id app-id))
+  (itu/command apikey :check-for-verdict :id app-id))
 
 (defn- sign-contract [apikey app-id]
   (fact "sign contract"
@@ -170,7 +168,7 @@
                          :pate-verdicts
                          first
                          :id)]
-      (itu/local-command apikey :sign-allu-contract :id app-id :verdict-id verdict-id :password "pena") => ok?)))
+      (itu/command apikey :sign-allu-contract :id app-id :verdict-id verdict-id :password "pena") => ok?)))
 
 ;;;; Mock Handler
 ;;;; ===================================================================================================================
@@ -409,7 +407,7 @@
               (fact "ALLU integration disabled for"
                 (fact "Non-Helsinki sijoituslupa"
                   (let [{:keys [id]} (itu/create-local-app pena :operation (ssg/generate SijoituslupaOperation)) => ok?]
-                    (itu/local-command pena :submit-application :id id) => ok?))
+                    (itu/command pena :submit-application :id id) => ok?))
 
                 (fact "Helsinki non-sijoituslupa"
                   (let [{:keys [id]} (itu/create-local-app pena
@@ -417,7 +415,7 @@
                                                            :x "385770.46" :y "6672188.964"
                                                            :address "Kaivokatu 1"
                                                            :propertyId "09143200010023") => ok?]
-                    (itu/local-command pena :submit-application :id id) => ok?
-                    (itu/local-command raktark-helsinki :approve-application :id id :lang "fi") => ok?))
+                    (itu/command pena :submit-application :id id) => ok?
+                    (itu/command raktark-helsinki :approve-application :id id :lang "fi") => ok?))
 
                 (:id-counter @allu-state) => (partial = old-id-counter)))))))))

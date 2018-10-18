@@ -3,10 +3,12 @@
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.string :as s]
+            [clj-http.conn-mgr]
             [clj-ssh.cli :as ssh-cli]
             [clj-ssh.ssh :as ssh]
             [midje.sweet :refer :all]
             [midje.util.exceptions :refer :all]
+            [mount.core :as mount :refer [defstate]]
             [noir.request :refer [*request*]]
             [ring.util.codec :as codec]
             [schema.core :as sc]
@@ -44,6 +46,8 @@
 ;;;; ===================================================================================================================
 
 (def- dev-password "Lupapiste")
+
+(defonce test-db-name (str "test_" (now)))
 
 ;;;; Minimal Fixture Shortcuts
 ;;;; ===================================================================================================================
@@ -135,15 +139,23 @@
 ;;;; ===================================================================================================================
 
 (defn decode-response [resp]
-  (update-in resp [:body] #(json/decode % true)))
+  (update resp :body json/decode true))
+
+(defn stream-decoding-response [http-fn uri request]
+  (-> (http-fn uri (assoc request :as :stream))
+      (update :body (fn [body] (with-open [body (io/reader body)]
+                                 (json/decode-stream body true))))))
 
 (defn decode-body [resp]
-  (:body (decode-response resp)))
+  (json/decode (:body resp) true))
+
+(defn stream-decoding-body [http-fn uri request]
+  (let [{:keys [body]} (http-fn uri (assoc request :as :stream))]
+    (with-open [body (io/reader body)]
+      (json/decode-stream body true))))
 
 ;;;; HTTP Client Cookie Store
 ;;;; ===================================================================================================================
-
-(defonce test-db-name (str "test_" (now)))
 
 (defn ->cookie-store [store]
   (proxy [CookieStore] []
@@ -184,31 +196,40 @@
 ;;;; Remotely
 ;;;; -------------------------------------------------------------------------------------------------------------------
 
+(defstate ^:private itest-conn-mgr
+  :start (clj-http.conn-mgr/make-reusable-conn-manager {:timeout 60, :threads 4, :default-per-route 4})
+  :stop (clj-http.conn-mgr/shutdown-manager itest-conn-mgr))
+
+;; HACK: There doesn't seem to be a better place to do setup and teardown for `lein integration` etc.
+(mount/start #'itest-conn-mgr)
+(.addShutdownHook (Runtime/getRuntime) (Thread. mount/stop))
+
 (defn raw [apikey action & args]
   (let [params (apply hash-map args)
-        options (util/assoc-when {:oauth-token      apikey
-                                  :query-params     (dissoc params :as :cookie-store)
-                                  :throw-exceptions false
-                                  :follow-redirects false
-                                  :cookie-store     (:cookie-store params)}
+        options (util/assoc-when {:oauth-token        apikey
+                                  :query-params       (dissoc params :as :cookie-store)
+                                  :throw-exceptions   false
+                                  :follow-redirects   false
+                                  :cookie-store       (:cookie-store params)
+                                  :connection-manager itest-conn-mgr}
                                  :as (:as params))]
     (http-get (str (server-address) "/api/raw/" (name action)) options)))
 
 (defn raw-query [apikey query-name & args]
-  (decode-response
-    (http-get
-      (str (server-address) "/api/query/" (name query-name))
-      {:headers          {"accepts" "application/json;charset=utf-8"}
-       :oauth-token      apikey
-       :query-params     (apply hash-map args)
-       :follow-redirects false
-       :throw-exceptions false})))
+  (stream-decoding-response http-get
+                            (str (server-address) "/api/query/" (name query-name))
+                            {:headers            {"accepts" "application/json;charset=utf-8"}
+                             :oauth-token        apikey
+                             :query-params       (apply hash-map args)
+                             :follow-redirects   false
+                             :throw-exceptions   false
+                             :connection-manager itest-conn-mgr}))
 
 (defn decoded-get [url params]
-  (decode-response (http-get url params)))
+  (stream-decoding-response http-get url (assoc params :connection-manager itest-conn-mgr)))
 
 (defn decoded-simple-post [url params]
-  (decode-response (http-post url params)))
+  (stream-decoding-response http-post url (assoc params :connection-manager itest-conn-mgr)))
 
 (defn ->arg-map [args]
   (if (map? (first args))
@@ -216,21 +237,20 @@
     (apply hash-map args)))
 
 (defn decode-post [action-type apikey command-name & args]
-  (decode-response
-    (http-post
-      (str (server-address) "/api/" (name action-type) "/" (name command-name))
-      (let [args (->arg-map args)
-            cookie-store (:cookie-store args)
-            test-db-name (:test-db-name args)
-            args (dissoc args :cookie-store :test-db-name)]
-        (util/assoc-when
-          {:headers          {"content-type" "application/json;charset=utf-8"}
-           :body             (json/encode args)
-           :follow-redirects false
-           :cookie-store     cookie-store
-           :test-db-name     test-db-name
-           :throw-exceptions false}
-          :oauth-token apikey)))))
+  (stream-decoding-response http-post (str (server-address) "/api/" (name action-type) "/" (name command-name))
+                            (let [args (->arg-map args)
+                                  cookie-store (:cookie-store args)
+                                  test-db-name (:test-db-name args)
+                                  args (dissoc args :cookie-store :test-db-name)]
+                              (util/assoc-when
+                                {:headers            {"content-type" "application/json;charset=utf-8"}
+                                 :body               (json/encode args)
+                                 :follow-redirects   false
+                                 :cookie-store       cookie-store
+                                 :test-db-name       test-db-name
+                                 :throw-exceptions   false
+                                 :connection-manager itest-conn-mgr}
+                                :oauth-token apikey))))
 
 (defn raw-command [apikey command-name & args]
   (apply decode-post :command apikey command-name args))
@@ -260,11 +280,11 @@
         (error status body))))
 
   (-upload-file [_ apikey action-name file cookie-store]
-    (http-post (str (server-address) "/api/raw/" (name action-name))
-               {:oauth-token      apikey
-                :multipart        [{:name "files[]" :content file}]
-                :throw-exceptions false
-                :cookie-store     cookie-store})))
+    (stream-decoding-response http-post (str (server-address) "/api/raw/" (name action-name))
+                              {:oauth-token      apikey
+                               :multipart        [{:name "files[]" :content file}]
+                               :throw-exceptions false
+                               :cookie-store     cookie-store})))
 
 (def- remote-client-instance (->RemoteLupisClient))
 
@@ -290,7 +310,12 @@
   (-command [_ apikey command-name args] (apply execute-local apikey api-common/execute-command command-name args))
   (-raw [_ apikey action-name args] (apply execute-local apikey api-common/execute-raw action-name args))
   (-upload-file [_ apikey action-name file cookie-store]
-    (execute-local apikey api-common/execute-raw action-name :files [file] :cookie-store cookie-store)))
+    (execute-local apikey api-common/execute-raw action-name
+                   :files [{:filename     (.getName file)
+                            :content-type "application/octet-stream"
+                            :tempfile     file
+                            :size         (.length file)}]
+                   :cookie-store cookie-store)))
 
 (def- local-client-instance (->LocalLupisClient))
 
@@ -319,7 +344,7 @@
 ;;;; ===================================================================================================================
 
 (defn apply-remote-fixture [fixture-name]
-  (let [resp (decode-response (http-get (str (server-address) "/dev/fixture/" fixture-name) {}))]
+  (let [resp (stream-decoding-response http-get (str (server-address) "/dev/fixture/" fixture-name) {})]
     (assert (-> resp :body :ok) (str "Response not ok: fixture: \"" fixture-name "\": response: " (pr-str resp)))))
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
@@ -331,20 +356,20 @@
   (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name features)))))
 
 (defn get-by-id [collection id & args]
-  (decode-response (http-get (str (server-address) "/dev/by-id/" (name collection) "/" id) (apply hash-map args))))
+  (stream-decoding-response http-get (str (server-address) "/dev/by-id/" (name collection) "/" id)
+                            (apply hash-map args)))
 
 (defn integration-messages [app-id & args]
-  (-> (http-get (str (server-address) "/dev/integration-messages/" app-id) (apply hash-map args))
-      (decode-response)
-      (get-in [:body :data])))
+  (:data (stream-decoding-body http-get (str (server-address) "/dev/integration-messages/" app-id)
+                               (apply hash-map args))))
 
 (defn clear-collection [collection]
-  (let [resp (decode-response (http-get (str (server-address) "/dev/clear/" collection) {}))]
+  (let [resp (stream-decoding-response http-get (str (server-address) "/dev/clear/" collection) {})]
     (assert (-> resp :body :ok) (str "Response not ok: clearing collection: \"" collection
                                      "\": response: " (pr-str resp)))))
 
 (defn clear-ajanvaraus-db []
-  (let [resp (decode-response (http-get (str (server-address) "/dev/ajanvaraus/clear") {}))]
+  (let [resp (stream-decoding-response http-get (str (server-address) "/dev/ajanvaraus/clear") {})]
     (assert (-> resp :body :ok) (str "Response not ok: clearing ajanvaraus-db" (pr-str resp)))))
 
 ;;;; Use Action Prechecks
@@ -608,9 +633,8 @@
 (defn create-and-submit-local-application
   "Returns the application map"
   [apikey & args]
-  (let [id (:id (apply create-local-app apikey args))
-        resp (local-command apikey :submit-application :id id)]
-    (fact "Submit OK" resp => ok?)
+  (let [id (:id (apply create-local-app apikey args))]
+    (fact "Submit OK" (local-command apikey :submit-application :id id) => ok?)
     (query-application local-query apikey id)))
 
 ;;;; Email Mock Usage
@@ -701,13 +725,12 @@
 
 (defn login
   ([u p] (login u p {}))
-  ([u p params] (-> (http-post (str (server-address) "/api/login")
-                               (merge
-                                 {:follow-redirects false
-                                  :throw-exceptions false
-                                  :form-params      {:username u :password p}}
-                                 params))
-                    decode-body)))
+  ([u p params] (stream-decoding-body http-post (str (server-address) "/api/login")
+                                      (merge
+                                        {:follow-redirects false
+                                         :throw-exceptions false
+                                         :form-params      {:username u :password p}}
+                                        params))))
 
 ;;;; VTJ-PRT
 ;;;; ===================================================================================================================
@@ -809,11 +832,11 @@
   (let [filename (or filename "dev-resources/test-attachment.txt")
         uploadfile (io/file filename)
         uri (str (server-address) "/api/upload/user-attachment")
-        resp (http-post uri
-                        {:oauth-token apikey
-                         :multipart   [{:name "attachmentType" :content attachment-type}
-                                       {:name "files[]" :content uploadfile}]})
-        body (:body (decode-response resp))]
+        resp (stream-decoding-response http-post uri
+                                       {:oauth-token apikey
+                                        :multipart   [{:name "attachmentType" :content attachment-type}
+                                                      {:name "files[]" :content uploadfile}]})
+        body (:body resp)]
     (if expect-to-succeed
       (facts "successful"
         resp => http200?
@@ -861,8 +884,8 @@
 (defn upload-file
   "Upload file to raw upload-file endpoint."
   [apikey filename & {:keys [cookie-store]}]
-  (decode-body (-upload-file *lupis-client* apikey (if apikey :upload-file-authenticated :upload-file)
-                             (io/file filename) cookie-store)))
+  (:body (-upload-file *lupis-client* apikey (if apikey :upload-file-authenticated :upload-file) (io/file filename)
+                       cookie-store)))
 
 (defn- job-done? [resp] (= (get-in resp [:job :status]) "done"))
 
@@ -1049,8 +1072,8 @@
 ;;;; ===================================================================================================================
 
 (defn vetuma! [data]
-  (decode-body (http-get (str (server-address) "/dev/api/vetuma")
-                         {:query-params (select-keys data [:userid :firstname :lastname])})))
+  (stream-decoding-body http-get (str (server-address) "/dev/api/vetuma")
+                        {:query-params (select-keys data [:userid :firstname :lastname])}))
 
 ;;;; Verdicts
 ;;;; ===================================================================================================================

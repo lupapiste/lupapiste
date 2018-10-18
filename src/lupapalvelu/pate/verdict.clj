@@ -87,8 +87,7 @@
                 legacy? modern?
                 contract? allu-contract?
                 verdict?
-                html? not-replaced?]} (zipmap conditions
-                                              (repeat true))]
+                not-replaced?]} (zipmap conditions (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
@@ -1170,6 +1169,23 @@
                           :data.verdict-section
                           :template.inclusions)))))
 
+(defn update-waste-documents
+  "Updates or adds a waste report document if a waste plan document
+  already exists. If the function is called with the optional
+  `dry-run?` argument having a truthy value, the function only returns
+  the mongo updates that would be executed. This is used for testing."
+  [{:keys [application command]} & [dry-run?]]
+  (let [transition-updates (transformations/get-state-transition-updates
+                            (assoc command :application application)
+                            (sm/verdict-given-state application))]
+    (when (and (not dry-run?)
+               (not-empty (:mongo-updates transition-updates)))
+      (action/update-application (assoc command :application application)
+                                 (or (:mongo-query transition-updates)
+                                     {:_id (:id application)})
+                                 (:mongo-updates transition-updates)))
+    transition-updates))
+
 (defn finalize--application-state
   "Updates for application state, history and affected documents."
   [{:keys [command application]}]
@@ -1180,10 +1196,8 @@
                                     state
                                     (:created command)
                                     application
-                                    (:user command))
-                                   (:mongo-updates (not-empty (transformations/get-state-transition-updates
-                                                               (assoc command :application application)
-                                                               state))))}))
+                                    (:user command)))
+     :commit-fn update-waste-documents}))
 
 (defn finalize--buildings-and-tasks
   [{:keys [command application verdict]}]
@@ -1282,27 +1296,35 @@
 
 (declare pdf--signatures)
 
-(defn create-verdict-pdf [{command ::command mode ::mode}]
+(defn create-verdict-pdf
+  "Creates verdict PDF base on the data received from the Pate message
+  queue."
+  [{command ::command mode ::mode}]
   (let [{app-id     :id
-         verdict-id :verdict-id} (:data command)]
-    (try+
-     (let [command (assoc command
-                          :application (domain/get-application-no-access-checking app-id))
-           verdict (command->verdict command)
-           fun     (case mode
-                     ::verdict    pdf--verdict
-                     ::signatures pdf--signatures)]
-       (if (fun command verdict)
-         (.commit pate-session)
-         (.rollback pate-session)))
-     (catch [:error :pdf/pdf-error] _
-       (errorf "%s: PDF generation for verdict %s failed."
-               app-id verdict-id)
-       (.rollback pate-session))
-     (catch Object _
-       (errorf "%s: Could not create verdict attachment for verdict %s."
-               app-id verdict-id)
-       (.rollback pate-session)))))
+         verdict-id :verdict-id} (:data command)
+        command                  (assoc command
+                                        :application (domain/get-application-no-access-checking app-id))
+        {error :text}            ((verdict-exists :published) command)]
+    (if error
+      (do
+        (warn "Skipping bad message. Cannot create verdict PDF." error)
+        (.commit pate-session))
+      (try+
+       (let [verdict (command->verdict command)
+             fun     (case mode
+                       ::verdict    pdf--verdict
+                       ::signatures pdf--signatures)]
+         (if (fun command verdict)
+           (.commit pate-session)
+           (.rollback pate-session)))
+       (catch [:error :pdf/pdf-error] _
+         (errorf "%s: PDF generation for verdict %s failed."
+                 app-id verdict-id)
+         (.rollback pate-session))
+       (catch Object _
+         (errorf "%s: Could not create verdict attachment for verdict %s."
+                 app-id verdict-id)
+         (.rollback pate-session))))))
 
 (defonce pate-consumer (when pate-session
                          (jms/create-consumer pate-session
@@ -1534,18 +1556,23 @@
 
 (defn- update-signature-section
   "Updates the signatures section with a new signature. Other sections
-  are untouched."
+  are untouched. If the signatures section does not exist (e.g.,
+  migration-contract) it is added."
   [sections verdict signature]
   (let [verdict (update verdict :signatures concat [signature])
         entry   (cols/entry-row (:left-width (layouts/pdf-layout verdict))
                                 {:lang       (cols/language verdict)
                                  :signatures (pdf/signatures {:verdict verdict})}
                                 (first layouts/entry--contract-signatures))]
-    (map (fn [[_ attr & _ :as section]]
-           (if (util/=as-kw (:id attr) :signatures)
-             entry
-             section))
-         sections)))
+
+    (if (some (util/fn->> second :id (util/=as-kw :signatures))
+              sections)
+        (map (fn [[_ attr & _ :as section]]
+            (if (util/=as-kw (:id attr) :signatures)
+              entry
+              section))
+             sections)
+        (concat sections [entry]))))
 
 (defn- pdf--signatures [command verdict]
   (pdf/create-verdict-attachment-version command verdict)
