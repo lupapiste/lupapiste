@@ -152,3 +152,12 @@
                                  ".xlsx")]
     (excel-response resulting-file-name
                     (store-billing/billing-entries user startTs endTs lang))))
+
+(defraw authorities-report
+  {:description "Excel report of organizations auhorities"
+   :permissions [{:required [:organization/admin]}]}
+  [{user :user {lang :lang} :data}]
+  (let [org-id (usr/authority-admins-organization-id user)
+        resulting-file-name (str (i18n/localize lang "authorities.report.filename") ".xlsx")]
+    (excel-response resulting-file-name
+                    (app-reports/authorities org-id lang))))
