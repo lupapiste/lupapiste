@@ -6,7 +6,7 @@
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clj-time.format :as f]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [monger.operators :refer :all]
             [schema.core :as sc]
             [sade.env :as env]

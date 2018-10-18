@@ -3,7 +3,7 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-bulletins-itest-util :as bulletin-util]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [lupapalvelu.vetuma-itest-util :as vetuma-util]))
 
 (apply-remote-minimal)

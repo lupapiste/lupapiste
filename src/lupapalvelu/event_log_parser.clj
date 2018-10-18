@@ -1,6 +1,6 @@
 (ns lupapalvelu.event-log-parser
   (:require [clojure.java.io :as io]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [sade.strings :as ss]))
 
 (defn parse-events

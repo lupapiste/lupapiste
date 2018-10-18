@@ -17,7 +17,12 @@
 
 (defn encode [v] (json/write-value-as-string v (mapper true)))
 
-(defn decode [v decode-key-fn]
-  (json/read-value v (mapper decode-key-fn)))
+(defn encode-stream [v to]
+  (json/write-value to v (mapper true))
+  to)
+
+(defn decode
+  ([v] (decode v false))
+  ([v decode-key-fn] (json/read-value v (mapper decode-key-fn))))
 
 (def decode-stream decode)

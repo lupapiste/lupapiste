@@ -5,7 +5,7 @@
             [sade.env :as env]
             [clojure.string :as s]
             [sade.strings :as ss]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [noir.response :as resp]
             [clojure.java.io :as io]
             [noir.core :refer [defpage]]

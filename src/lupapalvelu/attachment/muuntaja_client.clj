@@ -3,7 +3,7 @@
             [sade.env :as env]
             [taoensso.timbre :as timbre]
             [sade.strings :as str]
-            [cheshire.core :as json])
+            [lupapalvelu.json :as json])
   (:import [java.io File]))
 
 (def unzip-attachments-path "/api/unzip-attachments")

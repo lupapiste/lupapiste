@@ -1,6 +1,6 @@
 (ns lupapalvelu.backing-system.krysp.reader
   "Read the Krysp from municipality Web Feature Service"
-  (:require [cheshire.core :as json]
+  (:require [lupapalvelu.json :as json]
             [clojure.set :refer [rename-keys]]
             [lupapalvelu.document.schemas]
             [lupapalvelu.drawing :as drawing]
@@ -13,7 +13,7 @@
             [lupapalvelu.backing-system.krysp.common-reader :as common]
             [lupapalvelu.find-address :as find-address]
             [lupapalvelu.proxy-services :as proxy-services]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [net.cgrand.enlive-html :as enlive]
             [plumbing.core :refer [?>>]]
             [sade.common-reader :as cr]

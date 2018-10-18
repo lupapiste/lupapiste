@@ -3,7 +3,7 @@
             [lupapalvelu.itest-util :refer :all]
             [sade.strings :as str]
             [sade.http :as http]
-            [cheshire.core :as json]))
+            [lupapalvelu.json :as json]))
 
 
 (apply-remote-minimal)

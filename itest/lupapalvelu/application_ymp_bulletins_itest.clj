@@ -1,5 +1,5 @@
 (ns lupapalvelu.application-ymp-bulletins-itest
-  (:require [cheshire.core :as json]
+  (:require [lupapalvelu.json :as json]
             [lupapalvelu.application-bulletins-itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.fixture.core :as fixture]

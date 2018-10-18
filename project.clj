@@ -68,7 +68,6 @@
                  [pandect "0.6.1"]
 
                  ; JSON
-                 [cheshire "5.7.0"]
                  [metosin/jsonista "0.2.2"]
 
                  ; HTTP client

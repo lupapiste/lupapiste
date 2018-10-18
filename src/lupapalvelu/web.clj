@@ -5,7 +5,7 @@
             [clojure.string :as s]
             [clj-time.core :as time]
             [clj-time.local :as local]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [me.raynes.fs :as fs]
             [ring.util.response :refer [resource-response]]
             [ring.util.io :as ring-io]

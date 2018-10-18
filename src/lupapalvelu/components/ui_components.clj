@@ -6,7 +6,7 @@
             [me.raynes.fs :as fs]
             [sade.env :as env]
             [sade.util :as util]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-scales, attachment-sizes]]
             [lupapalvelu.attachment.type :as att-type]

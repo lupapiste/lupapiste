@@ -9,7 +9,7 @@
             [lupapalvelu.dummy-ident-itest-util :refer :all]
             [lupapalvelu.ident.dummy :as dummy]
             [lupapalvelu.factlet :refer :all]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [clojure.string :refer [index-of]]
             [ring.util.codec :as codec]))
 

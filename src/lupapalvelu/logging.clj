@@ -5,7 +5,7 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [clojure.java.io :as io])
   (:import [org.joda.time.format DateTimeFormat DateTimeFormatter]))
 

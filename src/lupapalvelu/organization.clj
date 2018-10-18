@@ -9,7 +9,7 @@
            [org.geotools.referencing.crs DefaultGeographicCRS]
            [org.opengis.feature.simple SimpleFeature])
 
-  (:require [cheshire.core :as json]
+  (:require [lupapalvelu.json :as json]
             [clojure.set :as set]
             [clojure.walk :refer [keywordize-keys]]
             [lupapalvelu.attachment.stamp-schema :as stmp]

@@ -1,6 +1,6 @@
 (ns lupapalvelu.itest-util
   "Utilities for writing integration tests."
-  (:require [cheshire.core :as json]
+  (:require [lupapalvelu.json :as json]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [clj-http.conn-mgr]
