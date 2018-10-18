@@ -290,11 +290,6 @@
                                      "digitizer.report.excel.header.date"
                                      "digitizer.report.excel.header.attachmentCount"]))
 
-(defn- authorities-report-headers [lang]
-  (map (partial i18n/localize lang) ["authorities.report.excel.header.name"
-                                     "authorities.report.excel.header.email"
-                                     "authorities.report.excel.header.roles"]))
-
 
 (defn- usage [application]
   (when-let [documents (:documents application)]
@@ -398,26 +393,4 @@
                           :row-fn      (juxt :date :attachments)
                           :data        sum-data}])
         _       (excel/add-sum-row! sum-sheet wb [(i18n/localize lang "digitizer.excel.sum") (apply + (map :attachments sum-data))])]
-    (excel/xlsx-stream wb)))
-
-(defn roles [roles org-id lang]
-  (->> ((keyword org-id) roles)
-       (map #(i18n/localize lang (str "authorityrole." %)))
-       (ss/join ", ")))
-
-(defn authorities-for-organization [org-id lang]
-  (->> (usr/find-users
-         {:role "authority" :enabled true (str "orgAuthz." (name org-id)) {$exists true}}
-         {:lastName 1 :firstName 1})
-       (map (fn [authority] {:name  (ss/trim (str (:firstName authority) \space (:lastName authority)))
-                             :email (:email authority)
-                             :roles (roles (:orgAuthz authority) org-id lang)}))))
-
-(defn ^OutputStream authorities [org-id lang]
-  (let [authorities (authorities-for-organization org-id lang)
-        wb          (excel/create-workbook
-                      [{:sheet-name (i18n/localize lang "authorities.report.excel.sheet.name")
-                        :header     (authorities-report-headers lang)
-                        :row-fn     (juxt :name :email :roles)
-                        :data       authorities}])]
     (excel/xlsx-stream wb)))
