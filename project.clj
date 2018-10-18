@@ -69,6 +69,7 @@
 
                  ; JSON
                  [cheshire "5.7.0"]
+                 [metosin/jsonista "0.2.2"]
 
                  ; HTTP client
                  [clj-http "3.4.1" :exclusions [commons-codec]]
