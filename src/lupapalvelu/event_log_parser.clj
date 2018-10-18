@@ -12,7 +12,7 @@
             :let [i (.indexOf line "{")
                   event (subs line i (.length line))]
             :when (not (ss/blank? event))]
-        (json/parse-string event)))))
+        (json/decode event)))))
 
 (defn write [filename lines]
   (with-open [w (io/writer filename :append false)]

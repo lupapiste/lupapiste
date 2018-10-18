@@ -75,7 +75,7 @@
                                        :code code}
                         :throw-exceptions false}
           token-res (http-post token-endpoint token-params)
-          access-token (-> (json/parse-string (:body token-res) keyword)
+          access-token (-> (json/decode (:body token-res) keyword)
                            :access_token)]
       (fact "Authorization leads to redirection with a code"
         (:status res) => 307
@@ -93,7 +93,7 @@
         (let [user-res (http-get (str (server-address) "/rest/user") {:headers {"authorization" (str "Bearer " access-token)}
                                                                       :throw-exceptions false})]
           user-res => http200?
-          (json/parse-string (:body user-res) keyword) => kaino-data))))
+          (json/decode (:body user-res) keyword) => kaino-data))))
 
   (fact "Implicit flow provides the token straight away"
     (let [res (authorize-req http/post {:form-params (merge base-params
@@ -105,7 +105,7 @@
           user-res (http-get (str (server-address) "/rest/user") {:headers {"authorization" (str "Bearer " token)}
                                                                   :throw-exceptions false})]
       user-res => http200?
-      (json/parse-string (:body user-res) keyword) => kaino-data))
+      (json/decode (:body user-res) keyword) => kaino-data))
 
   (fact "Token cannot be used to access \"normal\" REST endpoints"
     (reset! cookie-store {})
@@ -122,7 +122,7 @@
                                        :code code}
                         :throw-exceptions false}
           token-res (http-post token-endpoint token-params)
-          access-token (-> (json/parse-string (:body token-res) keyword)
+          access-token (-> (json/decode (:body token-res) keyword)
                            :access_token)
           rest-res (http-get (str (server-address) "/rest/docstore/organizations") {:headers {"authorization" (str "Bearer " access-token)}
                                                                                    :throw-exceptions false})]

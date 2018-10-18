@@ -771,7 +771,7 @@
                                .getFeatures
                                ((partial transform-crs-to-wgs84 org-id nil)))
         precision      13 ; FeatureJSON shows only 4 decimals by default
-        areas (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection)))
+        areas (keywordize-keys (json/decode (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection)))
         ensured-areas (geo/ensure-features areas)
 
         new-collection-wgs84 (some-> data-store
@@ -779,7 +779,7 @@
                                      .getFeatures
                                      transform-coordinates-to-wgs84
                                      ((partial transform-crs-to-wgs84 org-id ensured-areas)))
-        areas-wgs84 (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection-wgs84)))
+        areas-wgs84 (keywordize-keys (json/decode (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection-wgs84)))
         ensured-areas-wgs84 (geo/ensure-features areas-wgs84)]
     (when (geo/validate-features (:features ensured-areas))
       (fail! :error.coordinates-not-epsg3067))

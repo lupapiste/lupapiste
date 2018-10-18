@@ -130,4 +130,4 @@
                         :description ""}))))
 
 (defmethod waste-ads :json [org-id & _]
-  (json/generate-string (waste-ads org-id)))
+  (json/encode (waste-ads org-id)))

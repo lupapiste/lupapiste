@@ -52,7 +52,7 @@
                                 :multipart  [{:name      "metadata"
                                               :mime-type "application/json"
                                               :encoding  "UTF-8"
-                                              :content   (json/generate-string metadata)}
+                                              :content   (json/encode metadata)}
                                              {:name      "file"
                                               :content   is-or-file
                                               :mime-type content-type}]})]

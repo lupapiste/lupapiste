@@ -89,7 +89,7 @@
                     (if body
                       (-> body
                         (io/reader :encoding (or character-encoding "utf-8"))
-                        (json/parse-stream (comp keyword ss/strip-non-printables)))
+                        (json/decode-stream (comp keyword ss/strip-non-printables)))
                       {}))]
     (if json-body
       (assoc request :json json-body :params json-body)
@@ -170,7 +170,7 @@
 
 (defn json-data-as-stream [data]
   (ring-io/piped-input-stream
-    #(json/generate-stream data (BufferedWriter. (OutputStreamWriter. % "utf-8")))))
+    #(json/encode-stream data (BufferedWriter. (OutputStreamWriter. % "utf-8")))))
 
 (defn json-stream-response [data]
   (resp/content-type
@@ -766,14 +766,14 @@
         (Thread/sleep (* 1000 (Integer/parseInt seconds))))
       (case (keyword (or sub-id id))
        :bad   (resp/status 501 "Bad Suti request.")
-       :empty (json/generate-string {})
+       :empty (json/encode {})
        :auth (let [[username password] (http/decode-basic-auth (request/ring-request))]
                (if (and (= username "suti") (= password "secret"))
-                 (json/generate-string {:productlist [{:name "Four" :expired true :expirydate "\\/Date(1467883327899)\\/" :downloaded "\\/Date(1467019327022)\\/" }
+                 (json/encode {:productlist [{:name "Four" :expired true :expirydate "\\/Date(1467883327899)\\/" :downloaded "\\/Date(1467019327022)\\/" }
                                                       {:name "Five" :expired true :expirydate "\\/Date(1468056127124)\\/" :downloaded nil}
                                                       {:name "Six" :expired false :expirydate nil :downloaded nil}]})
                  (resp/status 401 "Unauthorized")))
-       (json/generate-string {:productlist [{:name "One" :expired false :expirydate nil :downloaded nil}
+       (json/encode {:productlist [{:name "One" :expired false :expirydate nil :downloaded nil}
                                             {:name "Two" :expired true :expirydate "\\/Date(1467710527123)\\/"
                                              :downloaded "\\/Date(1467364927456)\\/"}
                                             {:name "Three" :expired false :expirydate nil :downloaded nil}]}))))

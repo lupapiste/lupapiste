@@ -110,7 +110,7 @@
                  :basic-auth [(env/value :store-billing :basic-auth :username)
                               (env/value :store-billing :basic-auth :password)]})
       :body
-      (json/parse-string true)
+      (json/decode true)
       vec))
 
 (defn billing-entries [user startTs endTs lang]

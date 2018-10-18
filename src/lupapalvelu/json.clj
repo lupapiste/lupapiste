@@ -19,3 +19,5 @@
 
 (defn decode [v decode-key-fn]
   (json/read-value v (mapper decode-key-fn)))
+
+(def decode-stream decode)

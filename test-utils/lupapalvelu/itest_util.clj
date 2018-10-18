@@ -472,7 +472,7 @@
 (defn override-krysp-xml [apikey org-id permit-type overrides & provided-args]
   (let [org (organization-from-minimal-by-id org-id)
         current-url (get-in org [:krysp permit-type :url])
-        new-url (str current-url "?overrides=" (json/generate-string overrides))
+        new-url (str current-url "?overrides=" (json/encode overrides))
         args (select-keys (get-in org [:krysp permit-type]) [:version])
         args (assoc args :permitType permit-type :url new-url :username "" :password "")]
     (command apikey :set-krysp-endpoint

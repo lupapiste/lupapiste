@@ -610,7 +610,7 @@
                  :body)
         {:keys [street number]} (when (string? resp)
                                   (try
-                                    (json/parse-string resp true)
+                                    (json/decode resp true)
                                     (catch Exception _
                                       (warnf "Failed to resolve address for point x: %s y: %s" x y))))]
     (when street
@@ -640,7 +640,7 @@
         response (-> {:params {:x x :y y}}
                      proxy-services/property-id-by-point-proxy)]
     (if-not (#{400 503} (:status response))
-      (json/parse-string (:body response) true))))
+      (json/decode (:body response) true))))
 
 (defn resolve-coordinate-type [xml]
   (cond
