@@ -20,7 +20,6 @@
 (def ad-config
   {:sp-cert (env/value :sso :cert)
    :private-key (env/value :sso :privatekey)
-   :acs-uri (format "%s/api/saml/ad-login/%s" (env/value :host) "pori.fi")
    :app-name "Lupapiste"})
 
 (defn validated-login [req firstName lastName email orgAuthz]
@@ -43,13 +42,19 @@
     response))
 
 (defpage [:get "/api/saml/metadata"] []
-  (let [{:keys [app-name sp-cert acs-uri]} ad-config]
-    (resp/status 200 (ad-util/metadata app-name acs-uri (ad-util/parse-certificate sp-cert) true))))
+  (resp/redirect (format "%s/app/fi/authority" (env/value :host))))
+
+(defpage [:get "/api/saml/metadata/:domain"] {domain :domain}
+  (let [{:keys [app-name sp-cert]} ad-config]
+    (resp/status 200 (ad-util/metadata
+                       app-name
+                       (ad-util/make-acs-uri domain)
+                       (ad-util/parse-certificate sp-cert)
+                       true))))
 
 (defpage [:get "/api/saml/ad-login/:domain"] {domain :domain}
   (let [{:keys [enabled idp-uri]} (-> domain org/get-organizations-by-ad-domain first :ad-login) ; This function returns a sequence
         {:keys [sp-cert private-key]} ad-config
-        acs-uri (format "%s/api/saml/ad-login/%s" (env/value :host) domain)
         saml-req-factory! (saml-sp/create-request-factory
                             #(str "_" (uuid/v1))
                             (constantly 0) ; :saml-id-timeouts, not relevant here but required by the library
@@ -57,7 +62,7 @@
                             idp-uri
                             saml-routes/saml-format
                             "Lupapiste"
-                            acs-uri)
+                            (ad-util/make-acs-uri domain))
         saml-request (saml-req-factory!)
         relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec (saml-sp/generate-mutables)) "no-op")
         full-querystring (str idp-uri "?" (saml-shared/uri-query-str {:SAMLRequest (saml-shared/str->deflate->base64 saml-request) :RelayState relay-state}))]

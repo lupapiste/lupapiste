@@ -5,6 +5,7 @@
             [monger.operators :refer [$set]]
             [ring.util.response :refer :all]
             [sade.core :refer [def-]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [saml20-clj.xml :as saml-xml])
   (:import [org.apache.xml.security Init]
@@ -119,6 +120,9 @@
     (seq? element) (mapv parse-saml-info element)
     (map? element) (into {} (for [[k v] (remove-namespaces-from-kws element)] [(keyword k) (parse-saml-info v)]))
     :else element))
+
+(defn make-acs-uri [domain]
+  (format "%s/api/saml/ad-login/%s" (env/value :host) domain))
 
 (defn resolve-roles
   "Takes a map of corresponding roles (key = role in Lupis, value is AD-group)
