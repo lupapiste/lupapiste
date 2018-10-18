@@ -17,7 +17,7 @@
        (ss/join ", ")))
 
 (defn- authorities-for-organization [org-id lang]
-  (->> (usr/find-users
+  (->> (usr/get-users
          {:role "authority" :enabled true (str "orgAuthz." (name org-id)) {$exists true}}
          {:lastName 1 :firstName 1})
        (map (fn [authority] {:name  (ss/trim (str (:firstName authority) \space (:lastName authority)))
