@@ -104,7 +104,7 @@
    :feature          :invoices
    :user-roles       #{:authority}
    :states           states/post-submitted-states
-   :input-validators [(partial action/non-blank-parameters [:organizationId])]
-   :parameters       [organizationId]}
+   :input-validators [(partial action/vector-parameter-of :organizationIds string?)]
+   :parameters       [organizationIds]}
   [{:keys [application] :as command}]
-  (ok {:invoices (invoices/fetch-invoices-for-organization organizationId)}))
+  (ok {:invoices (invoices/fetch-invoices-for-organizations organizationIds)}))

@@ -196,17 +196,37 @@
                       :name) => "pientalo")))
 
     (fact "organization-invoices-query"
-          (fact "should return empty seq when there's no invoices for organization"
-                (let [organization-id_ "test-invoices-org-id-should-be-none" ;;Just to explain what data we need
-                      result (local-query sonja :organization-invoices :organizationId organization-id_)]
+          (fact "should return empty seq when there's no invoices for any organization"
+                (let [org-id-1 "I-should-have-none"
+                      org-id-2 "nor-should-I"
+                      result (local-query sonja :organization-invoices :organizationIds [org-id-1 org-id-2])]
                   (count (:invoices result)) => 0
                   (seq? (:invoices result)) => true))
 
-          (fact "should return two invoices when two invoice are inserted with organization id organization-id"
-                (let [organization-id_ "test-foo-org-id-invoices-should-be-two"
-                      app-a-id "foo-app-id"
-                      invoices [(invoice-with {:organization-id organization-id_}) (invoice-with {:organization-id organization-id_})]]
-                  (doseq [invoice invoices]
-                    (invoices/create-invoice! (->invoice-db invoice {:id app-a-id :organization organization-id_} dummy-user)))
-                  (let [result (local-query sonja :organization-invoices :organizationId organization-id_)]
-                    (count (:invoices result)) => 2))))))
+          (fact "should return one invoice when query includes two org-ids but only one has an invoice in the db"
+                (let [org-id-1 "i-have-one-invoice-org-A"
+                      org-id-2 "i-have-no-invoices-org"
+                      invoices [(invoice-with {:organization-id org-id-1})]]
+
+                  (doseq [{:keys [organization-id] :as invoice} invoices
+                          :let [application {:id "foo-app-id" :organization organization-id}]]
+                    (invoices/create-invoice! (->invoice-db invoice application dummy-user)))
+
+                  (let [result (local-query sonja :organization-invoices :organizationIds [org-id-1 org-id-2])]
+                    (println "result: " result)
+                    (count (:invoices result)) => 1)))
+
+          (fact "should return three invoices when query includes two org-ids and one org has 1 invoice and the other has 2"
+                (let [org-id-1 "i-have-one-invoice-org-B"
+                      org-id-2 "i-have-two-invoices"
+                      invoices [(invoice-with {:organization-id org-id-1})
+                                (invoice-with {:organization-id org-id-1})
+                                (invoice-with {:organization-id org-id-2})]]
+
+                  (doseq [{:keys [organization-id] :as invoice} invoices
+                          :let [application {:id "foo-app-id" :organization organization-id}]]
+                    (invoices/create-invoice! (->invoice-db invoice application dummy-user)))
+
+                  (let [result (local-query sonja :organization-invoices :organizationIds [org-id-1 org-id-2])]
+                    (println "result: " result)
+                    (count (:invoices result)) => 3))))))
