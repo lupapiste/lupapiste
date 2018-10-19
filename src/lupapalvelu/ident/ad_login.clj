@@ -9,7 +9,6 @@
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
             [ring.util.response :refer :all]
-            [sade.core :refer [def-]]
             [sade.env :as env]
             [sade.session :as ssess]
             [sade.util :as util]
@@ -95,14 +94,16 @@
                                (do
                                  (error (.getMessage e))
                                  false))))
-        _ (infof "SAML message signature was %s" (if valid-signature? "valid" "invalid"))
+        _ (infof "SAML message signature was %s" (if valid-signature? "valid!" "invalid"))
         {:keys [Group emailaddress givenname name surname]} (get-in parsed-saml-info [:assertions :attrs])
         _ (infof "firstName: %s, lastName: %s, groups: %s, email: %s" givenname surname Group emailaddress)
         ; The result is formatted like: {:609-R #{"commenter"} :609-YMP #("commenter" "reader")
         authz (into {} (for [org-setting ad-settings
-                             :let [{:keys [id ad-login]} org-setting]
-                             :when (true? (:enabled ad-login))]
-                         [(keyword (:id org-setting)) (ad-util/resolve-roles (:role-mapping ad-login) Group)]))
+                             :let [{:keys [id ad-login]} org-setting
+                                   resolved-roles (ad-util/resolve-roles (:role-mapping ad-login) Group)]
+                             :when (and (true? (:enabled ad-login))
+                                        (false? (empty? resolved-roles)))]
+                         [(keyword (:id org-setting)) resolved-roles]))
         _ (infof "Resolved authz: %s" authz)]
     (cond
       (false? (:success? parsed-saml-info)) (do

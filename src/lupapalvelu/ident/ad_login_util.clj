@@ -1,7 +1,6 @@
 (ns lupapalvelu.ident.ad-login-util
-  (:require [taoensso.timbre :refer [debug infof warn error errorf]]
+  (:require [taoensso.timbre :refer [debug warn error errorf]]
             [hiccup.core :as hiccup]
-            [noir.core :refer [defpage]]
             [monger.operators :refer [$set]]
             [ring.util.response :refer :all]
             [sade.core :refer [def-]]
@@ -88,7 +87,7 @@
          (cond-> {:AuthnRequestsSigned "true",
                   :WantAssertionsSigned "true",
                   :protocolSupportEnumeration "urn:oasis:names:tc:SAML:2.0:protocol"}
-                 (not sign-request?) (dissoc :AuthnRequestsSigned))
+           (not sign-request?) (dissoc :AuthnRequestsSigned))
          [:md:KeyDescriptor  {:use  "signing"}
           [:ds:KeyInfo  {:xmlns:ds  "http://www.w3.org/2000/09/xmldsig#"}
            [:ds:X509Data
