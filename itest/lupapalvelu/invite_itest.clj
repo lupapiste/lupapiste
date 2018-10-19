@@ -206,8 +206,7 @@
    (let [resp (query user-key :invites) => ok?]
      (count (:invites resp)) => 0))
 
- (let [resp  (create-app sonja :propertyId sipoo-property-id) => ok?
-       id    (:id resp) => truthy
+ (let [id  (create-app-id sonja :propertyId sipoo-property-id)
        app    (query-application sonja id)
        suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija"))]
 
@@ -243,8 +242,7 @@
     (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
 
-  (let [resp  (create-app sonja :propertyId sipoo-property-id) => ok?
-        id    (:id resp) => truthy
+  (let [id  (create-app-id sonja :propertyId sipoo-property-id)
         app    (query-application sonja id)
         suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija"))]
 

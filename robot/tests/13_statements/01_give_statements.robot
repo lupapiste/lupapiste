@@ -7,6 +7,7 @@ Resource        ../../common_resource.robot
 Resource        statement_resource.robot
 Resource        ../20_side_panel/notice_resource.robot
 Variables       ../06_attachments/variables.py
+Variables       ../../common_variables.py
 
 *** Test Cases ***
 
@@ -128,13 +129,21 @@ Sonja types in draft
   Reload page and kill dev-box
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
 
-Sonja changes draft's due date
+Sonja cannot change draft's due date to past
   Wait Until  Element should be enabled  due-date-input
   Input Text  due-date-input  18.08.2018
   Press Key  due-date-input  \\13
   Press Key  due-date-input  \\13
+  Negative indicator should be visible
+  Close sticky indicator
+
+Sonja changes draft's due date to tomorrow
+  Wait Until  Element should be enabled  due-date-input
+  Input Text  due-date-input  ${TOMORROW}
+  Press Key  due-date-input  \\13
+  Press Key  due-date-input  \\13
   Reload page and kill dev-box
-  Wait Until  Element should contain  due-date-span  18.8.2018
+  Wait Until  Element should contain  due-date-span  ${TOMORROW}
 
 Sonja adds attachment to statement draft
   Upload attachment with default type  ${PDF_TESTFILE_PATH}
@@ -188,6 +197,8 @@ Return to application
   Scroll and click test id  back-to-application-from-attachment
 
 Statement status is visible for given statement in summary table
+  Wait test id visible  application-open-statement-tab
+  Scroll to top
   Open tab  statement
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-4']  Puollettu
 

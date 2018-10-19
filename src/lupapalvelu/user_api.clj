@@ -8,6 +8,7 @@
             [lupapalvelu.calendar :as cal]
             [lupapalvelu.change-email :as change-email]
             [lupapalvelu.company :as company]
+            [lupapalvelu.ident.ident-util :as ident-util]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.idf.idf-client :as idf]
             [lupapalvelu.logging :as logging]
@@ -548,6 +549,14 @@
 ;; ==============================================================================
 ;;
 
+
+(defquery pre-login
+  {:parameters [parameter]
+   :input-validators [(partial action/non-blank-parameters [:parameter])]
+   :user-roles roles/all-user-roles}
+  [command]
+  (println command)
+  (ok :message (ident-util/resolve-redirect command)))
 
 (defcommand login
   {:parameters          [username password]

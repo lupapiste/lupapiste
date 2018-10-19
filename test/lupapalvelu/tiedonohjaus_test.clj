@@ -326,7 +326,7 @@
                                                                     :salassapitoaika     5
                                                                     :security-period-end #inst "2021-02-28T22:00:00.000-00:00"}}}) => nil
         (action/update-application command
-                                   {:attachments.id 1}
+                                   {:attachments {$elemMatch {:id 1}}}
                                    {$set {:modified               12345678
                                           :attachments.$.metadata {:tila                :valmis
                                                                    :salassapitoaika     5
@@ -346,7 +346,7 @@
                                                                    :julkisuusluokka     :salainen
                                                                    :kayttajaryhmakuvaus :muokkausoikeus}}}) => nil
         (action/update-application command
-                                   {:attachments.id 2}
+                                   {:attachments {$elemMatch {:id 2}}}
                                    {$set {:modified               12345678
                                           :attachments.$.metadata {:tila                :valmis
                                                                    :salassapitoaika     5
@@ -392,7 +392,7 @@
       (mark-attachment-final! application now attachment-id) => nil
       (provided
         (action/update-application (action/application->command application)
-                                   {:attachments.id attachment-id}
+                                   {:attachments {$elemMatch {:id attachment-id}}}
                                    {$set {:modified               now
                                           :attachments.$.metadata {:tila                :valmis
                                                                    :salassapitoaika     5

@@ -28,3 +28,18 @@
    :pre-checks [any-attachment-is-printable]}
   [command]
   (kopiolaitos/do-order-verdict-attachment-prints command))
+
+
+(defquery attachment-print-order-history
+  {:description      "Pseudo-query that succeeds if there are sent orders
+  and the user is allowed to view them."
+   :parameters       [:id]
+   :states           states/all-but-draft-or-terminal
+   :user-roles       #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :pre-checks       [(fn [{:keys [application]}]
+                        (when-not (some #(util/=as-kw (:type %)
+                                                      :verdict-attachment-print-order)
+                                        (:transfers application))
+                          (fail :not-found)))]}
+  [_])

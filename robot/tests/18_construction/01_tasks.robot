@@ -5,6 +5,7 @@ Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        task_resource.robot
 Resource        keywords.robot
+Resource        ../39_pate/pate_resource.robot
 Variables      ../06_attachments/variables.py
 
 *** Test Cases ***
@@ -19,13 +20,11 @@ Mikko prepares the application
   Submit application
   [Teardown]  Logout
 
-Sonja gives verdict
+Sonja fetches verdict
   Sonja logs in  False
   Open application  ${appname}  ${propertyId}
   Open tab  verdict
   Fetch verdict
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
-  Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
 
 Rakentaminen tab opens
   Open tab  tasks
@@ -237,9 +236,7 @@ Deleting R verdict does not delete its done reviews
   Sonja logs in  False
   Open application  ${appname}  ${propertyId}
   Open tab  verdict
-  Scroll to  h2 span[data-test-id=given-verdict-id-1] ~ i
-  Click element  jquery=h2 span[data-test-id=given-verdict-id-1] ~ i
-  Confirm  dynamic-yes-no-confirm-dialog
+  Delete verdict  1
   Wait until  Open tab  tasks
   Javascript?  $("[data-test-type=task-katselmus]").length === 5
   Review row check  0  Aloituskokous  1.5.2016  Sonja Sibbo  Lopullinen  Kyllä

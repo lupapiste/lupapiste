@@ -142,12 +142,12 @@
 
 (defn fetch-custom-application-phrases [app-id]
   (common/query "custom-application-phrase-categories"
-                #(reset! state/custom-phrases-categories (get % :custom-categories []))
+                #(reset! state/custom-phrase-categories (get % :custom-categories []))
                 :id app-id))
 
 (defn fetch-custom-organization-phrases []
   (common/query "custom-organization-phrase-categories"
-                #(reset! state/custom-phrases-categories (get % :custom-categories []))
+                #(reset! state/custom-phrase-categories (get % :custom-categories []))
                 :org-id @state/org-id))
 
 (defn upsert-phrase [phrase-map callback]
@@ -226,11 +226,12 @@
 (defn fetch-appeals [app-id verdict-id]
   (when (state/auth? :appeals)
     (common/query :appeals
-                  (util/fn->> :data
-                              ((keyword verdict-id))
-                              (map (fn [{:keys [giver appellant] :as a}]
-                                     (assoc a :author (or giver appellant))))
-                              (reset! state/appeals))
+                  #(->> %
+                        :data
+                        ((keyword verdict-id))
+                        (map (fn [{:keys [giver appellant] :as a}]
+                               (assoc a :author (or giver appellant))))
+                        (reset! state/appeals))
                   :id app-id)))
 
 (declare batch-job)
@@ -289,6 +290,7 @@
                               (fetch-verdict-list app-id)
                               (js/repository.load app-id)
                               (state/refresh-application-auth-model app-id)
+                              (state/refresh-verdict-auths app-id)
                               (js/lupapisteApp.services.attachmentsService.queryAll)
                               (callback response))}
                   :id app-id))
@@ -317,17 +319,20 @@
                   :id app-id
                   :verdict-id verdict-id))
 
-(defn sign-contract [app-id verdict-id password error-callback]
-  (common/command {:command :sign-pate-contract
-                   :success (fn []
-                              (state/refresh-verdict-auths app-id
-                                                           {:verdict-id verdict-id})
-                              (fetch-verdict-list app-id)
-                              (js/repository.load app-id))
-                   :error   error-callback}
-                  :id app-id
-                  :verdict-id verdict-id
-                  :password password))
+(defn sign-contract [app-id verdict-id password category error-callback]
+  (let [command (if (util/=as-kw :allu-contract category)
+                  :sign-allu-contract
+                  :sign-pate-contract)]
+    (common/command {:command command
+                     :success (fn []
+                                (state/refresh-verdict-auths app-id
+                                                             {:verdict-id verdict-id})
+                                (fetch-verdict-list app-id)
+                                (js/repository.load app-id))
+                     :error error-callback}
+                    :id app-id
+                    :verdict-id verdict-id
+                    :password password)))
 
 (declare refresh-attachments)
 

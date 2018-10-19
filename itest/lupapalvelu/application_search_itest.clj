@@ -11,41 +11,39 @@
             [sade.util :as util]))
 
 (defn- num-of-results? [n response]
-  (and
-    (ok? response)
-    (= n (count (get-in response [:data :applications])))))
+  (and (ok? response)
+       (= n (count (get-in response [:data :applications])))))
 
 (defn- total-count-is-n? [n response]
-  (and
-    (ok? response)
-    (= n (get-in response [:data :totalCount]))))
+  (and (ok? response)
+       (= n (get-in response [:data :totalCount]))))
 
 (def no-results? (partial num-of-results? 0))
 (def one-result? (partial num-of-results? 1))
 (def zero-total? (partial total-count-is-n? 0))
 (def one-total? (partial total-count-is-n? 1))
+(defn id-matcher [id]
+  (fn [response]
+    (and (one-result? response)
+         (= (get-in response [:data :applications 0 :id]) id))))
 
-(defn- search [query-s]
-  (datatables mikko :applications-search :searchText query-s))
+(defn- search [query-s & args]
+  (apply datatables mikko :applications-search :searchText query-s args))
 
-(defn- search-total [query-s]
-  (datatables mikko :applications-search-total-count :searchText query-s))
+(defn- search-total [query-s & args]
+  (apply datatables mikko :applications-search-total-count :searchText query-s args))
 
 (facts* "Search"
   (apply-remote-minimal)
 
   (let [property-id (str sonja-muni "-123-0000-1234")
         application (create-and-submit-application mikko
-                      :propertyId sipoo-property-id
-                      :address "Hakukuja 123"
-                      :propertyId (p/to-property-id property-id)
-                      :operation "muu-uusi-rakentaminen") => truthy
+                                                   :propertyId sipoo-property-id
+                                                   :address "Hakukuja 123"
+                                                   :propertyId (p/to-property-id property-id)
+                                                   :operation "muu-uusi-rakentaminen") => truthy
         application-id (:id application)
-        id-matches? (fn [response]
-                      (and
-                        (one-result? response)
-                        (= (get-in response [:data :applications 0 :id]) application-id)))
-
+        id-matches? (id-matcher application-id)
         hakija-doc (first (domain/get-documents-by-subtype (:documents application) "hakija"))]
 
     (command mikko :set-current-user-to-document :id application-id :documentId (:id hakija-doc) :path "henkilo") => ok?
@@ -56,7 +54,6 @@
       (keys (get-in (search "") [:data :applications 0])) => (contains [:id :location
                                                                         :address :municipality
                                                                         :applicant :permitType] :gaps-ok :in-any-order))
-
     (facts "by applicant"
       (fact "no matches" (search "Pena") => no-results?)
       (fact "total count shows 0" (search-total "Pena") => zero-total?)
@@ -73,7 +70,7 @@
       (fact "no matches" (search (str "LP-" sonja-muni "-2010-00001")) => no-results?)
       (fact "one match" (search application-id) => id-matches?)
       (fact "one match - lower case query" (search (s/lower-case application-id)) => id-matches?)
-      (fact "one fuzzy match" (search (subs application-id 3 7) ) => id-matches?))
+      (fact "one fuzzy match" (search (subs application-id 3 7)) => id-matches?))
 
     (facts "by property ID"
       (fact "no matches" (search (str sonja-muni "-123-0000-1230")) => no-results?)
@@ -95,7 +92,8 @@
       (fact "no matches" (search "vaihtolavan sijoittaminen") => no-results?)
       (fact "total count shows 0" (search-total "vaihtolavan sijoittaminen") => zero-total?)
       (fact "one match" (search "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen") => id-matches?)
-      (fact "total count shows 1" (search-total "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen") => one-total?))
+      (fact "total count shows 1" (search-total "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen")
+                                  => one-total?))
 
     (fact "by a very very long search term"
       (search (ss/join (repeat 50 "1234567890"))) => ok?
@@ -127,7 +125,6 @@
             application (util/find-by-id application-id (:applications resp))
             {primary :primaryOperation secondaries :secondaryOperations} application
             {state-fi :stateNameFi state-sv :stateNameSv} application]
-
         (fact "Primary operation is localized"
           (:displayNameFi primary) => "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, p\u00e4iv\u00e4koti-, palvelu-, hoitolaitos- tai muu rakennus)"
           (:displayNameSv primary) => seq)
@@ -146,28 +143,49 @@
           (count secondaries) => 1
           (-> secondaries first :name) => "pientalo"
           (-> secondaries first :displayNameFi) =>
-            "Asuinpientalon rakentaminen (enint\u00e4\u00e4n kaksiasuntoinen erillispientalo)"
+          "Asuinpientalon rakentaminen (enint\u00e4\u00e4n kaksiasuntoinen erillispientalo)"
           (-> secondaries first :displayNameSv) =>
-            "Byggande av sm\u00e5hus (h\u00f6gst ett frist\u00e5ende sm\u00e5hus f\u00f6r tv\u00e5 bost\u00e4der)")
+          "Byggande av sm\u00e5hus (h\u00f6gst ett frist\u00e5ende sm\u00e5hus f\u00f6r tv\u00e5 bost\u00e4der)")
 
         (fact "Sonja gave verdict"
           state-fi => "P\u00e4\u00e4t\u00f6s annettu"
           state-sv => "Beslut givet"))))
 
+  (let [search-inforequest #(search % :applicationType "inforequest")
+        search-inforequest-total #(search-total % :applicationType "inforequest")
+        property-id (str sonja-muni "-123-0000-1234")
+        inforequest-id (create-app-id mikko
+                                      :propertyId sipoo-property-id
+                                      :address "Hakukuja 123"
+                                      :propertyId (p/to-property-id property-id)
+                                      :operation "muu-uusi-rakentaminen"
+                                      :infoRequest true) => truthy
+        id-matches? (id-matcher inforequest-id)]
+    (facts "for inforequest"
+      (facts "by creator"                                   ; LPK-3911
+        (fact "no matches for Pena" (search-inforequest "Pena") => no-results?)
+        (fact "total count for Pena shows 0" (search-inforequest-total "Pena") => zero-total?)
+
+        (fact "one match for Mikko" (search-inforequest "Mikko") => id-matches?)
+        (fact "total count for Mikko shows 1" (search-inforequest-total "Mikko") => one-total?)
+        (fact "one match for Intonen" (search-inforequest "Intonen") => id-matches?)
+        (fact "total count for Intonen shows 1" (search-inforequest-total "Intonen") => one-total?))))
+
   (let [property-id (str sonja-muni "-123-0000-1234")
         application (create-and-submit-application sonja
-                      :address "Latokuja"
-                      :propertyId "75341600550007"
-                      :x 404369.304 :y 6693806.957
-                      :operation "muu-uusi-rakentaminen") => truthy
+                                                   :address "Latokuja"
+                                                   :propertyId "75341600550007"
+                                                   :x 404369.304 :y 6693806.957
+                                                   :operation "muu-uusi-rakentaminen") => truthy
         application-id (:id application)
 
-        foreman-app (command sonja :create-foreman-application :id application-id :taskId "" :foremanRole "ei tiedossa" :foremanEmail "")
+        foreman-app (command sonja :create-foreman-application :id application-id :taskId "" :foremanRole "ei tiedossa"
+                             :foremanEmail "")
 
         application2 (create-and-submit-application sonja
-                       :address "Hakukuja 10"
-                       :propertyId (p/to-property-id property-id)
-                       :operation "purkaminen")
+                                                    :address "Hakukuja 10"
+                                                    :propertyId (p/to-property-id property-id)
+                                                    :operation "purkaminen")
         application-id2 (:id application2)
         modified (:modified application2)]
 
@@ -183,15 +201,16 @@
 
     (count (get-in (datatables sonja :applications-search :handlers [sonja-id]) [:data :applications])) => 2
 
-    (let [{handler-id :id :as resp} (command sonja :upsert-application-handler :id application-id :roleId sipoo-general-handler-id :userId ronja-id)]
-
+    (let [{handler-id :id :as resp} (command sonja :upsert-application-handler :id application-id
+                                             :roleId sipoo-general-handler-id :userId ronja-id)]
       (fact "Set handler"
         resp => ok?)
 
       (fact "Handler ID filter"
         (let [resp (datatables sonja :applications-search :handlers [ronja-id])]
           (count (get-in resp [:data :applications])) => 1
-          (get-in (datatables sonja :applications-search :handlers [ronja-id]) [:data :applications 0 :id]) => application-id))
+          (get-in (datatables sonja :applications-search :handlers [ronja-id]) [:data :applications 0 :id])
+          => application-id))
 
       (fact "Handler email filter"
         (let [resp (datatables sonja :applications-search :handlers [(email-for "ronja")])]
@@ -200,16 +219,19 @@
 
       (command sonja :add-application-tags :id application-id :tags ["222222222222222222222222"]) => ok?
       (fact "$and query returns 1"
-        (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222222222222222222222222"]) [:data :applications])) => 1)
+        (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222222222222222222222222"])
+                       [:data :applications])) => 1)
 
       (fact "Remove handler"
         (command sonja :remove-application-handler :id application-id :handlerId handler-id) => ok?)
 
       (fact "$and query returns 0 when handler is returning 0 matches"
-        (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222222222222222222222222"]) [:data :applications])) => 0))
+        (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222222222222222222222222"])
+                       [:data :applications])) => 0))
 
     (fact "Tags filter"
-      (get-in (datatables sonja :applications-search :tags ["222222222222222222222222"]) [:data :applications 0 :id]) => application-id)
+      (get-in (datatables sonja :applications-search :tags ["222222222222222222222222"]) [:data :applications 0 :id])
+      => application-id)
     (facts "Organization areas"
       (let [body (:body (decode-response (upload-area sipoo)))
             features (get-in body [:areas :features])
@@ -235,30 +257,30 @@
             (get-in res [:data :applications 0 :id]) => application-id))))
 
     (fact "canceled application and foreman application"
-
       (command sonja :cancel-application :id application-id :text "test" :lang "fi") => ok?
 
-      (let [{default-res :applications}   (datatables sonja :applications)
+      (let [{default-res :applications} (datatables sonja :applications)
             {unlimited-res :applications} (datatables sonja :applications :applicationType "unlimited")
             default-ids (map :id default-res)
             all-ids (map :id unlimited-res)]
         (fact "are NOT returned with default search"
-          (count default-res) => 2
+          (count default-res) => 3
           default-ids =not=> (contains application-id)
           default-ids =not=> (contains (:id foreman-app)))
 
         (fact "are returned with unlimited search"
-          (count unlimited-res) => 4
+          (count unlimited-res) => 5
           all-ids => (contains application-id)
           all-ids => (contains (:id foreman-app)))))
 
     (facts "limit, skip, sort"
       (let [limit 2
             {results :applications} (datatables sonja :applications :applicationType "unlimited"
-                                      ; latest first, skip the absolute latest and return 2
-                                       :sort {:field :id, :asc false} :skip 1 :limit limit)]
+                                                ; latest first, skip the absolute latest and return 2
+                                                :sort {:field :id, :asc false} :skip 1 :limit limit)]
 
         (count results) => limit
-        (fact "Application 2 was the last to be creaded, not in results" (map :id results) =not=> (contains application-id2))
+        (fact "Application 2 was the last to be creaded, not in results"
+          (map :id results) =not=> (contains application-id2))
         (fact "Foreman app was the second to last to be creaded" (-> results first :id) => (:id foreman-app))
         (fact "Application 1 was the third to last to be creaded" (-> results second :id) => application-id)))))

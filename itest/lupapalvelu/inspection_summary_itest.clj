@@ -172,7 +172,7 @@
                    :attachmentId (:id summary-attachment))
           => (partial expected-failure? :error.inspection-summary-target.finished)))))
 
-  (facts "Seting isnpection date"
+  (facts "Setting inspection date"
     (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Jarvikatu 27")
           _ (give-legacy-verdict raktark-jarvenpaa app-id)
           {summaries :summaries} (query pena :inspection-summaries-for-application :id app-id)

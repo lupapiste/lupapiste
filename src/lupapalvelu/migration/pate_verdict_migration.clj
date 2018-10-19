@@ -8,6 +8,8 @@
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.data-skeleton :as ds]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.legacy-schemas :as legacy-schemas]
@@ -15,16 +17,8 @@
             [lupapalvelu.pate.schema-helper :as schema-helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict :as verdict]
-            [lupapalvelu.pate.verdict-common :as vc]))
-
-;;
-;; Helpers for operating on the verdict skeleton
-;;
-
-(defn- access [accessor-key]
-  {::access accessor-key})
-
-(def- accessor-key? (comp boolean ::access))
+            [lupapalvelu.pate.verdict-common :as vc]
+            [lupapalvelu.verdict :refer [backend-id->verdict]]))
 
 (defn- wrap
   "Wraps accessor function with metadata/wrap"
@@ -33,69 +27,13 @@
 
 (def- wrap? (comp boolean ::wrap))
 
-(defn- id-map-from [collection-key element-skeleton]
-  {::id-map-from {::collection collection-key
-                      ::element element-skeleton}})
-
-(defn- build-id-map? [x]
-  (boolean (::id-map-from x)))
-
-
-(defn- array-from [collection-key element-skeleton]
-  {::array-from {::collection collection-key
-                  ::element element-skeleton}})
-
-(defn- build-array? [x]
-  (boolean (::array-from x)))
-
-(defn- assoc-context [element context]
-  (postwalk (fn [x]
-              (if (accessor-key? x)
-                (assoc x ::context context)
-                x))
-            element))
-
-(defn- build-id-map
-  "Builds a collection skeleton dynamically based on the data present in the
-   `application` and `verdict`."
-  [context accessor-functions
-   {{collection ::collection
-     element    ::element} ::id-map-from}]
-  (->> ((get accessor-functions collection) context)
-       (group-by :id)
-       (util/map-values (comp (partial assoc-context element) first))
-       not-empty))
-
-(defn- build-array
-  [context accessor-functions
-   {{collection ::collection
-     element    ::element} ::array-from}]
-  (->> ((get accessor-functions collection) context)
-       (mapv (partial assoc-context element))))
-
-(defn- fetch-with-accessor
-  "Given the `application` under migration, the source `verdict` and
-  current `timestamp`, returns a function for accessing desired data
-  from the `application` and `verdict`. Used with `prewalk`."
-  [context accessor-functions]
-  (fn [x]
-    (cond (accessor-key? x)
-          (if-let [accessor-fn (get accessor-functions (::access x))]
-            (accessor-fn (assoc context :context (::context x)))
-            (throw (ex-info "Missing accessor" x)))
-
-          (build-id-map? x)
-          (build-id-map context accessor-functions x)
-
-          (build-array? x)
-          (build-array context accessor-functions x)
-
-          :else x)))
+(defn wrap-metadata [x timestamp]
+  (metadata/wrap "Verdict draft Pate migration" timestamp x))
 
 (defn- post-process [timestamp]
   (fn [x]
     (if (wrap? x)
-      (metadata/wrap "Verdict draft Pate migration" timestamp (::wrap x))
+      (wrap-metadata (::wrap x) timestamp)
       x)))
 
 ;;
@@ -144,6 +82,28 @@
 (defn- verdict-template [context]
   {:inclusions (-> (verdict-category context)
                    verdict/legacy-verdict-inclusions)})
+
+(defn- verdict-code-is-free-text? [category]
+  (-> category
+      legacy-schemas/legacy-verdict-schema
+      :dictionary :verdict-code
+      (contains? :text)))
+
+(defn- verdict-code-for-category
+  "If verdict code should be free text, attempt to localize the
+  numeric 'status', falling back to 'code', which can be
+  eg. 'hyv\u00e4ksytty'. If it should be numeric, use 'status' as string."
+  [context category]
+  (if (verdict-code-is-free-text? category)
+    (i18n/try-localize (fn [& args]
+                         ((get-in-poytakirja :code) context))
+                       "fi"
+                       ["verdict" "status" (str ((get-in-poytakirja :status) context))])
+    (str ((get-in-poytakirja :status) context))))
+
+(defn verdict-code [context]
+  (verdict-code-for-category context
+                             (verdict-category context)))
 
 (defn- get-when [p getter-fn]
   (fn [context]
@@ -224,37 +184,37 @@
 
 (def verdict-migration-skeleton
   "This map describes the shape of the migrated verdict. When building the
-   migrated verdict, `(access :x)` will be replaced by calling the accessor
+   migrated verdict, `(ds/access :x)` will be replaced by calling the accessor
    function found under the key :x in the accessor function map. See `accessors`."
-  {:id        (access :id)
-   :modified  (access :modified)
-   :category  (access :category)
-   :published {:published     (access :published)
-               :attachment-id (access :published-attachment-id)}
-   :state (wrap (access :state))
-   :data {:handler         (wrap (access :handler))
-          :kuntalupatunnus (wrap (access :kuntalupatunnus))
-          :verdict-section (wrap (access :verdict-section))
-          :verdict-code    (wrap (access :verdict-code))
-          :verdict-text    (wrap (access :verdict-text))
-          :contract-text   (wrap (access :contract-text))
-          :anto            (wrap (access :anto))
-          :lainvoimainen   (wrap (access :lainvoimainen))
-          :reviews         (id-map-from :reviews
-                                        {:name (wrap (access :review-name))
-                                         :type (wrap (access :review-type))})
-          :foremen         (id-map-from :foremen
-                                        {:role (wrap (access :foreman-role))})
-          :conditions      (id-map-from :conditions
-                                        {:name (wrap (access :condition-name))})
-          :attachments     (array-from :attachment-summaries
-                                       (access :context))}
-   :signatures (array-from :signatures
-                           {:date (access :signature-date)
-                            :name (access :signature-name)
-                            :user-id (access :signature-user-id)})
-   :template (access :template)
-   :archive (access :archive)
+  {:id        (ds/access :id)
+   :modified  (ds/access :modified)
+   :category  (ds/access :category)
+   :published {:published     (ds/access :published)
+               :attachment-id (ds/access :published-attachment-id)}
+   :state (wrap (ds/access :state))
+   :data {:handler         (wrap (ds/access :handler))
+          :kuntalupatunnus (wrap (ds/access :kuntalupatunnus))
+          :verdict-section (wrap (ds/access :verdict-section))
+          :verdict-code    (wrap (ds/access :verdict-code))
+          :verdict-text    (wrap (ds/access :verdict-text))
+          :contract-text   (wrap (ds/access :contract-text))
+          :anto            (wrap (ds/access :anto))
+          :lainvoimainen   (wrap (ds/access :lainvoimainen))
+          :reviews         (ds/id-map-from :reviews
+                                           {:name (wrap (ds/access :review-name))
+                                            :type (wrap (ds/access :review-type))})
+          :foremen         (ds/id-map-from :foremen
+                                           {:role (wrap (ds/access :foreman-role))})
+          :conditions      (ds/id-map-from :conditions
+                                           {:name (wrap (ds/access :condition-name))})
+          :attachments     (ds/array-from :attachment-summaries
+                                          (ds/access :context))}
+   :signatures (ds/array-from :signatures
+                              {:date (ds/access :signature-date)
+                               :name (ds/access :signature-name)
+                               :user-id (ds/access :signature-user-id)})
+   :template (ds/access :template)
+   :archive (ds/access :archive)
    :legacy? true})
 
 (defn- accessor-functions [defaults]
@@ -287,7 +247,7 @@
    :signatures        (get-in-verdict [:signatures])
    :state             verdict-state
    :template          verdict-template
-   :verdict-code      (comp str (get-in-poytakirja :status))
+   :verdict-code      verdict-code
    :verdict-section   (get-in-poytakirja :pykala)
    :verdict-text      (get-when (complement contract?) (get-in-poytakirja :paatos))})
 
@@ -331,18 +291,25 @@
   (assoc verdict :template (verdict-template {:application app
                                               :verdict verdict})))
 
-(defn change-category [app verdict new-category]
+(defn- update-verdict-code [verdict original-verdict new-category timestamp]
+  (assoc-in verdict [:data :verdict-code ]
+            (wrap-metadata (verdict-code-for-category {:verdict original-verdict}
+                                                      new-category)
+                           timestamp)))
+
+(defn change-category [app verdict original-verdict new-category timestamp]
   (add-tags app
             (-> verdict
                 (assoc :category new-category)
+                (update-verdict-code original-verdict new-category timestamp)
                 (update-template app))))
 
-(defn ensure-valid-category [app verdict]
+(defn ensure-valid-category [app original-verdict timestamp verdict]
   (if-let [errors (check-verdict verdict)]
     (let [new-category (if (contract-category? (:category verdict)) "migration-contract" "migration-verdict")]
       (warnf "Verdict %s did not conform to category %s: %s" (:id verdict) (:category verdict) (str errors))
       (infof "Changing category of verdict %s to %s" (:id verdict) new-category)
-      (change-category app verdict new-category))
+      (change-category app verdict original-verdict new-category timestamp))
     verdict))
 
 (defn validate-verdict
@@ -358,10 +325,10 @@
   "Builds a Pate legacy verdict from the old one"
   [application verdict timestamp]
        ;; Build a new verdict by fetching the necessary data from the old one
-  (->> (prewalk (fetch-with-accessor {:application application
-                                      :verdict     verdict}
-                                     (accessor-functions (defaults timestamp)))
-                verdict-migration-skeleton)
+  (->> (ds/build-with-skeleton verdict-migration-skeleton
+                               {:application application
+                                :verdict     verdict}
+                               (accessor-functions (defaults timestamp)))
        ;; Add metadata to fields marked for wrapping in the verdict skeleton
        (postwalk (post-process timestamp))
        ;; Cleanup
@@ -371,7 +338,7 @@
        (add-tags application)
        ;; If the verdict doesn't validate for the intended category, use more
        ;; permissive migration-verdict or migration-contract
-       (ensure-valid-category application)
+       (ensure-valid-category application verdict timestamp)
        ;; Finally, validate the verdict again
        validate-verdict))
 
@@ -413,3 +380,57 @@
             $pull (merge (when (not-empty draft-ids)
                            {:tasks {:source.id {$in draft-ids}}})
                          {:verdicts {:id {$in (mapv :id lupapiste-verdicts)}}})})))
+
+
+;;
+;; Hotfix PATE-171
+;;
+(def- dummy-verdict
+  {:id              {$type "string"}
+   :kuntalupatunnus {$type "string"}
+   :timestamp       nil
+   :paatokset       []
+   :draft           true})
+
+(def PATE-171-hotfix-query
+  {:pre-pate-verdicts {$elemMatch dummy-verdict}})
+
+(defn dummy-verdict? [verdict]
+  (= (-> verdict
+         (dissoc :id))
+     (-> (backend-id->verdict (:kuntalupatunnus verdict))
+         (dissoc :id))))
+
+(defn original-dummy-verdicts
+  "Returns the verdicts that contain no information besides `id` and
+  `kuntalupatunnus` from `pre-pate-verdicts`."
+  [{:keys [pre-pate-verdicts]}]
+  (some->> pre-pate-verdicts
+           (filter dummy-verdict?)
+           seq
+           (into [])))
+
+(defn- dummies-without-matching-kuntalupatunnus-in-verdicts
+  "Returns from `dummies` the verdicts whose `kuntalupatunnus` is not
+  present in the verdicts in `verdicts` array. This is because if the
+  `kuntalupatunnus` is present, the dummy should have been
+  overwritten."
+  [dummies application]
+  (let [kuntalupatunnus-in-verdicts? (->> application
+                                          :verdicts
+                                          (map :kuntalupatunnus)
+                                          set)]
+    (some->> dummies
+             (remove (comp kuntalupatunnus-in-verdicts? :kuntalupatunnus))
+             seq
+             (into []))))
+
+(defn return-dummies-to-verdicts-array [application]
+  (if-let [dummies (original-dummy-verdicts application)]
+    (merge {$pull {:pate-verdicts {:id {$in (mapv :id dummies)}}}}
+           (if-let [dummies-to-verdict (dummies-without-matching-kuntalupatunnus-in-verdicts dummies
+                                                                                             application)]
+             {$push {:verdicts {$each dummies-to-verdict}}}))
+    (throw (ex-info (str "Attempted dummy verdict migration without dummy verdicts:"
+                         (:id application))
+                    application))))

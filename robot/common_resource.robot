@@ -447,6 +447,9 @@ Sipoo logs in
 Sipoo-ya logs in
   Authority-admin logs in  sipoo-ya  sipoo  Simo YA-Suurvisiiri
 
+Kuopio-ya logs in
+  Authority-admin logs in  kuopio-ya  kuopio  Paakayttaja-YA Kuopio
+
 Oulu Ymp logs in
   Authority-admin logs in  ymp-admin@oulu.fi  oulu  Oulu Ymp Admin
 
@@ -842,6 +845,7 @@ Add empty attachment template
 Expose file input
   [Arguments]  ${jQuerySelector}
   Execute Javascript  $("${jQuerySelector}").css( "display", "block").toggleClass( "hidden", false )
+  Wait until element is visible  jquery=${jQuerySelector}
 
 Hide file input
   [Arguments]  ${jQuerySelector}
@@ -1434,74 +1438,6 @@ Add neighbor
   Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
   Wait Until  Page Should Contain  ${email}
 
-#
-# Verdict
-#
-
-Go to give new verdict
-  Open tab  verdict
-  Click enabled by test id  give-verdict
-  Wait Until  Element Should Be Visible  backend-id
-  Wait Until  Element Should Be Enabled  backend-id
-
-Input verdict
-  [Arguments]  ${backend-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}  ${agreement}=True
-  ## Disable date picker
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Input text  backend-id  ${backend-id}
-  Select From List By Value  verdict-type-select  ${verdict-type-select-value}
-  Input text  verdict-given  ${verdict-given-date}
-  Input text  verdict-official  ${verdict-official-date}
-  Input text  verdict-name  ${verdict-giver-name}
-  Run keyword if  ${agreement}  Select Checkbox  verdict-agreement
-  ## Trigger change manually
-  Execute JavaScript  $("#backend-id").change();
-  Execute JavaScript  $("#verdict-type-select").change();
-  Execute JavaScript  $("#verdict-given").change();
-  Execute JavaScript  $("#verdict-official").change();
-  Execute JavaScript  $("#verdict-name").change();
-
-Submit empty verdict
-  [Arguments]  ${targetState}=verdictGiven  ${targetStatus}=6
-  Go to give new verdict
-  Input verdict  -  ${targetStatus}  01.05.2018  01.06.2018  -
-  Click enabled by test id  verdict-publish
-  Sleep  1s
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait for jQuery
-  Wait until  Application state should be  ${targetState}
-
-Do fetch verdict
-  [Arguments]  ${fetchConfirmationText}
-  Click enabled by test id  fetch-verdict
-  Wait for jQuery
-  Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
-  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[contains(@class, 'dialog-user-content')]/p  ${fetchConfirmationText}
-  Confirm  dynamic-ok-confirm-dialog
-
-Fetch verdict
-  Do fetch verdict  Taustajärjestelmästä haettiin 2 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 9 uutta vaatimusta Rakentaminen-välilehdelle.
-  Verdict is given  2013-01  0
-
-Fetch YA verdict
-  Do fetch verdict  Taustajärjestelmästä haettiin 1 kuntalupatunnukseen liittyvät tiedot. Tiedoista muodostettiin 2 uutta vaatimusta Rakentaminen-välilehdelle.
-  Verdict is given  523  0
-
-Verdict is given
-  [Arguments]  ${kuntalupatunnus}  ${i}
-  Wait until  Element should be visible  application-verdict-details
-  Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
-
-Sign verdict
-  [Arguments]  ${password}  ${idx}=0
-  Click Element  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//button[@data-test-id='sign-verdict-button']
-  Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
-  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  ${password}
-  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//div[@data-test-id='verdict-signature-listing']
-
-
-
 # User management
 
 Fill in new password
@@ -1646,10 +1582,10 @@ Scroll to and click xpath results
   Execute javascript  var result = ${xfn}; var node = result.iterateNext(); while (node) { node.scrollIntoView(false); node.click(); try {node = result.iterateNext();} catch(e){node = null;}}
 
 Wait test id visible
-  [Arguments]  ${id}
+  [Arguments]  ${id}  ${timeout}=None
   Scroll to test id  ${id}
   ${q}=  Quote  ${id}
-  Wait Until  Element should be visible  xpath=//*[@data-test-id=${q}]
+  Wait Until Element is visible  xpath=//*[@data-test-id=${q}]  ${timeout}
 
 Wait test id hidden
   [Arguments]  ${id}

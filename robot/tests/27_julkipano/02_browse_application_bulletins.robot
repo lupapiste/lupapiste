@@ -5,6 +5,7 @@ Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Library         Screenshot
 Resource        ../../common_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Resource        ./julkipano_common.robot
 
 *** Test Cases ***
@@ -28,7 +29,7 @@ Bulletins should be searchable
   Search bulletins by text  Mixintie 15
   Wait Until  Bulletin list should have rows and text  1  Mixintie 15
 
-Velho adds some bulletins
+Olli adds some bulletins
   As Olli
   Create application and publish bulletin  Vaalantie 540  564-404-26-102
   Go to bulletins page
@@ -45,18 +46,17 @@ Bulletins should be filterable by municipality
   Select From Autocomplete By Test Id  municipalities-filter-component  Sipoo
   Wait Until  Bulletin list should have rows and text  1  Mixintie 15
 
-Velho gives a verdict
+Olli gives a verdict
   As Olli
   Create application and publish bulletin  Raitotie 2  564-403-4-17
-  Go to give new verdict
-  Title Should Be  Raitotie 2 - Lupapiste
-  Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
-  Upload verdict or task attachment  ${TXT_TESTFILE_PATH}  Päätös  Päätösote  Yleisesti hankkeeseen
-  Wait test id visible  targetted-attachments-table
+  Go to give new legacy verdict
+  Input legacy verdict  123567890  Kaarina Krysp III  Myönnetty  01.05.2018
+  Pate upload  0  ${TXT_TESTFILE_PATH}  Päätösote  Päätösote
+  Pate batch ready
 
-Velho publishes the verdict and creates a new verdict bulletin
-  Click enabled by test id  verdict-publish
-  Confirm  dynamic-yes-no-confirm-dialog
+Olli publishes the verdict and creates a new verdict bulletin
+  Publish verdict
+  Click back
   Wait until  Application state should be  verdictGiven
   Bulletin shows as proclaimed and can be moved to verdict given
   Move bulletin to verdict given with appeal period starting today

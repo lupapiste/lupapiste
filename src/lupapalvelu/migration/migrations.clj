@@ -4011,17 +4011,61 @@
                          (pate-verdict-migration/migration-updates application
                                                                    timestamp))
      (catch Exception e
-       (clojure.pprint/pprint (ex-data e))
        (throw (ex-info (str "Migration failed for application " (:id application))
                        {}
                        e))))))
+
+(defn update-application-verdicts-to-pate-legacy-verdicts-dry-run [timestamp application]
+  (logging/with-logging-context {:applicationId (:id application)}
+    (try
+      (pate-verdict-migration/migration-updates application
+                                                timestamp)
+      (catch Exception e
+        (throw (ex-info (str "Migration dry run failed for application " (:id application))
+                        {}
+                        e))))))
 
 (defmigration pate-verdicts
   {:apply-when (pos? (mongo/count :applications pate-verdict-migration/migration-query))}
   (let [ts (now)]
     (->> (mongo/select :applications
                        pate-verdict-migration/migration-query)
+         (run! (partial update-application-verdicts-to-pate-legacy-verdicts-dry-run ts)))
+    (->> (mongo/select :applications
+                       pate-verdict-migration/migration-query)
          (run! (partial update-application-verdicts-to-pate-legacy-verdicts ts)))))
+
+(defn PATE-171-hotfix-update [application]
+  (logging/with-logging-context {:applicationId (:id application)}
+    (try
+      (mongo/update-by-id :applications (:id application)
+                          (pate-verdict-migration/return-dummies-to-verdicts-array application))
+      (catch Exception e
+        (throw (ex-info (str "PATE-171 hotfix migration failed for" (:id application))
+                        application
+                        e))))))
+
+(defn- dummy-verdicts-in-pate-verdicts? [app]
+  (let [dummy-ids (->> (pate-verdict-migration/original-dummy-verdicts app)
+                       (map :id)
+                       set)]
+    (boolean (some dummy-ids (map :id (:pate-verdicts app))))))
+
+(defn- pre-migration-dummy-verdicts-in-pate-verdicts?
+  "For apply-when. After the migration there should be no verdicts in `pate-verdicts`
+  that are dummy verdicts in `pre-pate-verdicts`."
+  []
+  (boolean (some dummy-verdicts-in-pate-verdicts?
+                 (mongo/select :applications
+                               pate-verdict-migration/PATE-171-hotfix-query
+                               [:pre-pate-verdicts :pate-verdicts :verdicts]))))
+
+(defmigration PATE-171-hotfix
+  {:apply-when (pre-migration-dummy-verdicts-in-pate-verdicts?)}
+  (->> (mongo/select :applications
+                     pate-verdict-migration/PATE-171-hotfix-query
+                     [:pre-pate-verdicts :pate-verdicts :verdicts])
+       (run! PATE-171-hotfix-update)))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

@@ -2,7 +2,10 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
-            [lupapalvelu.application-bulletins :refer :all]))
+            [lupapalvelu.application-bulletins :refer :all]
+            [lupapalvelu.mongo :refer [create-id]]
+            [lupapalvelu.pate.metadata :as metadata]
+            [sade.util :as util]))
 
 (def example-app {:documents [{:schema-info {:type :party} :data {:name "party 1"}}
                               {:schema-info {:type "party"} :data {:name "party 2"}}
@@ -44,3 +47,128 @@
   (fact "default is 'proclaimed'"
     (bulletin-state :foo) => (throws IllegalArgumentException "No matching clause: :foo")))
 
+
+(def timestamp 1503003635780)
+(def verdict-id (create-id))
+(def kuntalupatunnus "lupatunnus")
+(def anto 1503003635781)
+(def signed1 1503003635782)
+(def signed2 1503003635783)
+(def signer-id1 (create-id))
+(def signer-id2 (create-id))
+(def lainvoimainen 1503003635784)
+(def paatospvm 1503003635785)
+(def handler "handler")
+(def verdict-text "Decisions were made.")
+(def section "1")
+(def status 2)
+(def code "hyväksytty")
+(def signatures
+  [{:created signed1
+    :user {:id signer-id1
+           :firstName "First"
+           :lastName "Name"}}
+   {:created signed2
+    :user {:id signer-id2
+           :firstName "Second"
+           :lastName "Name"}}])
+(def test-verdict {:id verdict-id
+                   :kuntalupatunnus kuntalupatunnus
+                   :draft true
+                   :timestamp timestamp
+                   :sopimus false
+                   :metadata nil
+                   :paatokset [{:id "5b7e5772e7d8a1a88e669357"
+                                :paivamaarat {:anto anto
+                                              :lainvoimainen lainvoimainen}
+                                :poytakirjat [{:paatoksentekija handler
+                                               :urlHash "5b7e5772e7d8a1a88e669356"
+                                               :status status
+                                               :paatos verdict-text
+                                               :paatospvm paatospvm
+                                               :pykala section
+                                               :paatoskoodi code}]}]})
+
+(def migrated-signatures
+  [{:date    signed1
+    :user-id signer-id1
+    :name "First Name"}
+   {:date    signed2
+    :user-id signer-id2
+    :name "Second Name"}])
+
+(defn wrap [x]
+  (metadata/wrap "Verdict draft Pate migration" timestamp x))
+
+(def pate-test-verdict {:id verdict-id
+                        :modified timestamp
+                        :category "r"
+                        :state (wrap "draft")
+                        :data {:handler (wrap handler)
+                               :kuntalupatunnus (wrap kuntalupatunnus)
+                               :verdict-section (wrap section)
+                               :verdict-code    (wrap (str status))
+                               :verdict-text    (wrap verdict-text)
+                               :anto            (wrap anto)
+                               :lainvoimainen   (wrap lainvoimainen)
+                               :reviews         {"katselmus-id" {:name (wrap "Tarkastus")
+                                                                 :type (wrap "muu-tarkastus")}}
+                               :foremen         {"foreman-id" {:role (wrap "Supervising supervisor")}}
+                               :conditions      {"condition-id1" {:name (wrap "Muu 1")}
+                                                 "condition-id2" {:name (wrap "Muu 2")}}
+                               :attachments     [{:type-group "paatoksenteko"
+                                                  :type-id     "paatos"
+                                                  :amount 1}
+                                                 {:type-group "muut"
+                                                  :type-id    "paatosote"
+                                                  :amount 1}]}
+                        :template {:inclusions [:foreman-label :conditions-title :foremen-title :kuntalupatunnus :verdict-section :verdict-text :anto :attachments :foremen.role :foremen.remove :verdict-code :conditions.name :conditions.remove :reviews-title :type-label :reviews.name :reviews.type :reviews.remove :add-review :name-label :condition-label :lainvoimainen :handler :add-foreman :upload :add-condition]}
+                            :legacy? true})
+
+(fact "verdict-data-for-bulletin-snapshot"
+      (verdict-data-for-bulletin-snapshot test-verdict) => (verdict-data-for-bulletin-snapshot pate-test-verdict))
+
+(defn- ignore-some-data [verdict]
+  (-> verdict
+      (util/dissoc-in [:paatokset 0 :poytakirjat 0 :paatospvm]) ; No place for this in Pate, replaced by :anto
+      (util/dissoc-in [:paatokset 0 :poytakirjat 0 :urlHash])   ; Not available, assume not needed
+      (util/dissoc-in [:paatokset 0 :id])                       ; Not available, assume not needed, use verdict id
+      (dissoc :metadata)))                                      ; Not needed
+
+(fact "->backing-system-verdict"
+  (let [backing-system-verdict (->backing-system-verdict pate-test-verdict)]
+    (ignore-some-data backing-system-verdict)
+    => (ignore-some-data test-verdict)
+
+    (get-in backing-system-verdict [:paatokset 0 :poytakirjat 0 :paatospvm])
+    => (-> pate-test-verdict :data :anto :_value)
+    (get-in backing-system-verdict [:paatokset 0 :paivamaarat :anto])
+    => (-> pate-test-verdict :data :anto :_value))
+
+  (let [backing-system-verdict (->backing-system-verdict (assoc pate-test-verdict
+                                                                :category "ymp"))]
+    (get-in backing-system-verdict [:paatokset 0 :poytakirjat 0 :status])
+    => nil   ;; Since for Pate legacy YMP verdicts the verdict code is interpreted as free text
+    (get-in backing-system-verdict [:paatokset 0 :poytakirjat 0 :paatoskoodi])
+    => "2")) ;; Since for Pate legacy YMP verdicts the verdict code is interpreted as free text
+
+
+(def example-app-with-verdict (assoc example-app :verdicts [test-verdict]))
+(def example-app-with-pate-verdict (assoc example-app :pate-verdicts [pate-test-verdict]))
+(def example-app-with-both-verdicts (assoc example-app
+                                           :verdicts [test-verdict]
+                                           :pate-verdicts [pate-test-verdict]))
+
+(facts "further create-bulletin-snapshot tests"
+  (let [verdict-snapshot (create-bulletin-snapshot example-app-with-verdict)
+        pate-verdict-snapshot (create-bulletin-snapshot example-app-with-pate-verdict)
+        both-snapshot (create-bulletin-snapshot example-app-with-both-verdicts)]
+    (fact "apart from :verdicts and :id, the two snapshots are the same"
+          (dissoc verdict-snapshot :verdicts :id) => (dissoc pate-verdict-snapshot :verdicts :id))
+    (fact "the verdicts differ only within the constraints of ->backing-system-verdict"
+          (mapv ignore-some-data (:verdicts verdict-snapshot))
+          => (mapv ignore-some-data (:verdicts pate-verdict-snapshot)))
+    (fact "if both backing system and Pate verdicts are present, Pate takes precedence"
+      ;; Feel free to disagree, just spelling out the existing implementation
+      (:verdicts both-snapshot) => [(->backing-system-verdict pate-test-verdict) test-verdict]
+      (:verdictData both-snapshot) => (verdict-data-for-bulletin-snapshot pate-test-verdict))))

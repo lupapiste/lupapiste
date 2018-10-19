@@ -165,7 +165,6 @@
                           :tasks-tab-visible
                           :application-info-tab-visible
                           :application-summary-tab-visible
-                          :application-verdict-tab-visible
                           :application-statement-tab-visible
                           :application-handlers
                           :application-organization-archive-enabled
@@ -177,7 +176,14 @@
                           :published-pate-verdict
                           :pate-verdict-tab
                           :pate-contract-tab
-                          :pate-verdicts}
+                          :pate-verdicts
+                          ;; Invoices
+                          :application-invoices
+                          :insert-invoice
+                          :invoices-tab
+                          :application-operations
+                          :update-invoice
+                          :fetch-invoice}
         user {:id "user123"
               :role "authority"}
         application {:organization "999-R"
@@ -236,13 +242,14 @@
                            :application-organization-archive-enabled
                            ;; pate
                            :pate-verdicts :pate-verdict :pate-verdict-tab :pate-contract-tab :published-pate-verdict
+                           ;; invoices
+                           :fetch-invoice :application-invoices :invoices-tab :application-operations
                            ;; raw
                            :download-all-attachments :download-attachments
                            :pdf-export
                            :application-guests :submitted-application-pdf-export
                            ;; tab visibility
-                           :tasks-tab-visible :application-info-tab-visible :application-summary-tab-visible
-                           :application-verdict-tab-visible}]
+                           :tasks-tab-visible :application-info-tab-visible :application-summary-tab-visible}]
     (doseq [command (foreach-action {:web {} :user user :application application :data {}})
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]

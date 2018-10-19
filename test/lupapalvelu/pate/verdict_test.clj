@@ -1507,56 +1507,62 @@
 
 
 (facts "Verdict summary"
-  (let [section-strings {"v1" "\u00a71" "v2" "\u00a72"}
-        verdict         {:id         "v1"
-                         :category   "r"
-                         :data       {:verdict-code    "ehdollinen"
-                                      :handler         "Foo Bar"
-                                      :verdict-section "1"
-                                      :verdict-date    876543}
-                         :modified   12345
-                         :template   {:inclusions ["verdict-code"
-                                                   "handler"
-                                                   "verdict-date"
-                                                   "verdict-section"]
-                                      :giver      "viranhaltija"}
-                         :references {:boardname "Broad board abroad"}}
-        backend-verdict {:kuntalupatunnus "13-0185-R"
-                         :paatokset       [{:paivamaarat {:aloitettava      1377993600000
-                                                          :lainvoimainen    1378080000000
-                                                          :voimassaHetki    1378166400000
-                                                          :raukeamis        1378252800000
-                                                          :anto             1378339200000
-                                                          :viimeinenValitus 1536192000000
-                                                          :julkipano        1378512000000}
-                                            :poytakirjat [{:paatoskoodi     "myönnetty"
-                                                           :paatospvm       112233
-                                                           :pykala          "1"
-                                                           :paatoksentekija "viranomainen"
-                                                           :paatos          "Päätös 1"
-                                                           :status          "1"
-                                                           :urlHash         "236d9b2cfff88098d4f8ad532820c9fb93393237"}
-                                                          {:paatoskoodi     "ehdollinen"
-                                                           :paatospvm       998877
-                                                           :pykala          "2"
-                                                           :paatoksentekija "Mölli Keinonen"
-                                                           :status          "6"
-                                                           :urlHash         "b55ae9c30533428bd9965a84106fb163611c1a7d"}]
-                                            :id          "5b99044bfb2de0f550b64e44"}
-                                           {:paivamaarat {:anto 1378339200000}
-                                            :poytakirjat [{:paatoskoodi     "myönnetty"
-                                                           :paatospvm       445566
-                                                           :paatoksentekija "johtava viranomainen"
-                                                           :paatos          "Päätös 2"
-                                                           :status          "1"}
-                                                          {:paatospvm nil}
-                                                          {}
-                                                          nil]
-                                            :id          "5b99044cfb2de0f550b64e4f"}]
-                         :id              "backend-id"
-                         :draft           false
-                         :timestamp       12345}
-        ]
+  (let [section-strings    {"v1" "\u00a71" "v2" "\u00a72"}
+        verdict            {:id         "v1"
+                            :category   "r"
+                            :data       {:verdict-code    "ehdollinen"
+                                         :handler         "Foo Bar"
+                                         :verdict-section "1"
+                                         :verdict-date    876543}
+                            :modified   12345
+                            :template   {:inclusions ["verdict-code"
+                                                      "handler"
+                                                      "verdict-date"
+                                                      "verdict-section"]
+                                         :giver      "viranhaltija"}
+                            :references {:boardname "Broad board abroad"}}
+        backend-verdict    {:kuntalupatunnus "13-0185-R"
+                            :paatokset       [{:paivamaarat {:aloitettava      1377993600000
+                                                             :lainvoimainen    1378080000000
+                                                             :voimassaHetki    1378166400000
+                                                             :raukeamis        1378252800000
+                                                             :anto             1378339200000
+                                                             :viimeinenValitus 1536192000000
+                                                             :julkipano        1378512000000}
+                                               :poytakirjat [{:paatoskoodi     "myönnetty"
+                                                              :paatospvm       112233
+                                                              :pykala          "1"
+                                                              :paatoksentekija "viranomainen"
+                                                              :paatos          "Päätös 1"
+                                                              :status          "1"
+                                                              :urlHash         "236d9b2cfff88098d4f8ad532820c9fb93393237"}
+                                                             {:paatoskoodi     "ehdollinen"
+                                                              :paatospvm       998877
+                                                              :pykala          "2"
+                                                              :paatoksentekija "Mölli Keinonen"
+                                                              :status          "6"
+                                                              :urlHash         "b55ae9c30533428bd9965a84106fb163611c1a7d"}]
+                                               :id          "5b99044bfb2de0f550b64e44"}
+                                              {:paivamaarat {:anto 1378339200000}
+                                               :poytakirjat [{:paatoskoodi     "myönnetty"
+                                                              :paatospvm       445566
+                                                              :paatoksentekija "johtava viranomainen"
+                                                              :paatos          "Päätös 2"
+                                                              :status          "1"}
+                                                             {:paatospvm nil}
+                                                             {}
+                                                             nil]
+                                               :id          "5b99044cfb2de0f550b64e4f"}]
+                            :id              "backend-id"
+                            :draft           false
+                            :timestamp       12345}
+        ya-backend-verdict (-> backend-verdict
+                               (assoc :kuntalupatunnus "14-0185-YA")
+                               (update :paatokset (comp vec butlast))
+                               (update-in [:paatokset 0 :poytakirjat] (fn [pks]
+                                                                        (map #(dissoc % :paatospvm) pks)))
+                               (assoc-in [:paatokset 0 :paivamaarat :paatosdokumentinPvm] 220033))]
+
     (fact "Nil"
       (vc/draft? nil) => false
       (vc/published? nil) => false
@@ -1705,6 +1711,18 @@
           :giver        "Mölli Keinonen"
           :verdict-date 998877
           :title        "ehdollinen"})
+    (fact "YA backend verdit"
+      (vc/draft? ya-backend-verdict) => false
+      (vc/published? ya-backend-verdict) => true
+      (vc/verdict-summary "fi" section-strings ya-backend-verdict)
+      => {:id           "backend-id"
+          :category     "backing-system"
+          :legacy?      false
+          :modified     12345
+          :published    12345
+          :giver        "Mölli Keinonen"
+          :verdict-date 220033
+          :title        "ehdollinen"})
     (facts "YA verdict-type"
       (let [verdict (-> verdict
                         (assoc :category "ya")
@@ -1786,6 +1804,72 @@
               (contains {:id       "v4"
                          :modified 25
                          :title    "\u00a744 Ei puollettu"})])))
+
+(def rakennusjateselvitys
+  {:id "12345bb8e7f60415804219af"
+   :created 1514376120409
+   :schema-info {:name "rakennusjateselvitys"
+                 :order 201
+                 :editable-in-states ["archived"
+                                      "closed"
+                                      "foremanVerdictGiven"
+                                      "constructionStarted"
+                                      "agreementPrepared"
+                                      "appealed"
+                                      "extinct"
+                                      "inUse"
+                                      "final"
+                                      "finished"
+                                      "agreementSigned"
+                                      "acknowledged"
+                                      "verdictGiven"
+                                      "onHold"]
+                 :section-help "rakennusjate.help"
+                 :blacklist ["neighbor"]
+                 :version 1}
+   :data {:rakennusJaPurkujate {:suunniteltuJate {:0 {:jatetyyppi {:value "puu"
+                                                                   :modified nil}
+                                                      :suunniteltuMaara {:value "2"
+                                                                         :modified nil}
+                                                      :yksikko {:value "m3"
+                                                                :modified nil}
+                                                      :painoT {:value "05"
+                                                               :modified nil}}
+                                                  :1 {:jatetyyppi {:value "betoni"
+                                                                   :modified nil}
+                                                      :painoT {:value "02"
+                                                               :modified nil}
+                                                      :yksikko {:value "m3"
+                                                                :modified nil}
+                                                      :suunniteltuMaara {:value "005"
+                                                                         :modified nil}}
+                                                   :2 {:jatetyyppi {:value "muovi"
+                                                                    :modified nil}
+                                                       :painoT {:value "005"
+                                                                :modified nil}
+                                                       :suunniteltuMaara {:value "001"
+                                                                          :modified nil}
+                                                       :yksikko {:value "m3"
+                                                                 :modified nil}}}
+                                :suunnittelematonJate {:0 {:jatetyyppi {:value nil}
+                                                           :toteutunutMaara {:value ""}
+                                                           :yksikko {:value nil}
+                                                           :painoT {:value ""}
+                                                           :jatteenToimituspaikka {:value ""}}}}
+          :vaarallisetAineet {:suunniteltuJate {}
+                              :suunnittelematonJate {:0 {:vaarallinenainetyyppi {:value nil}
+                                                         :toteutunutMaara {:value ""}
+                                                         :yksikko {:value nil}
+                                                         :painoT {:value ""}
+                                                         :jatteenToimituspaikka {:value ""}}}}
+          :contact {:name {:value ""}
+                    :phone {:value ""}
+                    :email {:value ""}}
+          :availableMaterials {:0 {:aines {:value ""}
+                                   :maara {:value ""}
+                                   :yksikko {:value nil}
+                                   :saatavilla {:value nil}
+                                   :kuvaus {:value ""}}}}})
 
 (def application
   {:address "Latokuja 3",
@@ -2341,98 +2425,138 @@
                                                                 :_user     "user-email"
                                                                 :_modified 12345}}}})
 
-    (fact "finalize--application-state: waste plan"
+    (fact "finalize--application-state: waste plan - If there is a waste plan but a waste report does not exist, it is added to documents"
       (-> application :documents count) => 3
-      (finalize--application-state c-v-a)
-      => {:application (merge application
-                              {:state :verdictGiven})
-          :updates     {$push {:history {:state :verdictGiven
-                                         :ts    12345
-                                         :user  {:firstName "Hello"
-                                                 :id        "user-id"
-                                                 :lastName  "World"
-                                                 :username  "user-email"}}}
-                        $set  {:modified     12345
-                               :state        :verdictGiven
-                               "documents.3" {:id          "abdef12345"
-                                              :created     12345
-                                              :data        {:availableMaterials  {:0 {:aines      {:value ""}
-                                                                                      :kuvaus     {:value ""}
-                                                                                      :maara      {:value ""}
-                                                                                      :saatavilla {:value nil}
-                                                                                      :yksikko    {:value nil}}}
-                                                            :contact             {:email {:value ""}
-                                                                                  :name  {:value ""}
-                                                                                  :phone {:value ""}}
-                                                            :rakennusJaPurkujate {:suunniteltuJate      {:0 {:jatetyyppi       {:modified nil
-                                                                                                                                :value    "kipsi"}
-                                                                                                             :painoT           {:modified nil
-                                                                                                                                :value    "1"}
-                                                                                                             :suunniteltuMaara {:modified nil
-                                                                                                                                :value    "1"}
-                                                                                                             :yksikko          {:modified nil
-                                                                                                                                :value    "tonni"}}
-                                                                                                         :1 {:jatetyyppi       {:modified nil
-                                                                                                                                :value    "lasi"}
-                                                                                                             :painoT           {:modified nil
-                                                                                                                                :value    "0"}
-                                                                                                             :suunniteltuMaara {:modified nil
-                                                                                                                                :value    "20"}
-                                                                                                             :yksikko          {:modified nil
-                                                                                                                                :value    "kg"}}}
-                                                                                  :suunnittelematonJate {:0 {:jatetyyppi            {:value nil}
-                                                                                                             :jatteenToimituspaikka {:value ""}
-                                                                                                             :painoT                {:value ""}
-                                                                                                             :toteutunutMaara       {:value ""}
-                                                                                                             :yksikko               {:value nil}}}}
-                                                            :vaarallisetAineet   {:suunniteltuJate      {:0 {:painoT                {:modified nil
-                                                                                                                                     :value    "0"}
-                                                                                                             :suunniteltuMaara      {:modified nil
-                                                                                                                                     :value    "10"}
-                                                                                                             :vaarallinenainetyyppi {:modified nil
-                                                                                                                                     :value    "aerosolipullot"}
-                                                                                                             :yksikko               {:modified nil
-                                                                                                                                     :value    "kg"}}}
-                                                                                  :suunnittelematonJate {:0 {:jatteenToimituspaikka {:value ""}
-                                                                                                             :painoT                {:value ""}
-                                                                                                             :toteutunutMaara       {:value ""}
-                                                                                                             :vaarallinenainetyyppi {:value nil}
-                                                                                                             :yksikko               {:value nil}}}}}
-                                              :schema-info {:blacklist          [:neighbor]
-                                                            :editable-in-states #{:acknowledged
-                                                                                  :agreementPrepared
-                                                                                  :agreementSigned
-                                                                                  :appealed
-                                                                                  :archived
-                                                                                  :closed
-                                                                                  :constructionStarted
-                                                                                  :extinct
-                                                                                  :final
-                                                                                  :finished
-                                                                                  :foremanVerdictGiven
-                                                                                  :inUse
-                                                                                  :onHold
-                                                                                  :ready
-                                                                                  :verdictGiven}
-                                                            :name               "rakennusjateselvitys"
-                                                            :order              201
-                                                            :section-help       "rakennusjate.help"
-                                                            :version            1}}}}}
-      (provided (lupapalvelu.mongo/create-id) => "abdef12345"))
+      (let [{:keys [application updates commit-fn]} (finalize--application-state c-v-a)]
+        application => (merge application {:state :verdictGiven})
+        updates => {$push {:history {:state :verdictGiven
+                                                    :ts    12345
+                                                    :user  {:firstName "Hello"
+                                                            :id        "user-id"
+                                                            :lastName  "World"
+                                                            :username  "user-email"}}}
+                                   $set  {:modified     12345
+                                          :state        :verdictGiven}}
+        ;; assoc-in is used just to avoid using provided, which did
+        ;; not like having facts inside the let binding
+        (assoc-in (commit-fn (assoc c-v-a :application application) :dry-run)
+                  [:mongo-updates $set "documents.3" :id]  "static-id")
+        => {:mongo-updates
+            {$set  {"documents.3" {:id          "static-id"
+                                   :created     12345
+                                   :data        {:availableMaterials  {:0 {:aines      {:value ""}
+                                                                           :kuvaus     {:value ""}
+                                                                           :maara      {:value ""}
+                                                                           :saatavilla {:value nil}
+                                                                           :yksikko    {:value nil}}}
+                                                 :contact             {:email {:value ""}
+                                                                       :name  {:value ""}
+                                                                       :phone {:value ""}}
+                                                 :rakennusJaPurkujate {:suunniteltuJate      {:0 {:jatetyyppi       {:modified nil
+                                                                                                                     :value    "kipsi"}
+                                                                                                  :painoT           {:modified nil
+                                                                                                                     :value    "1"}
+                                                                                                  :suunniteltuMaara {:modified nil
+                                                                                                                     :value    "1"}
+                                                                                                  :yksikko          {:modified nil
+                                                                                                                     :value    "tonni"}}
+                                                                                              :1 {:jatetyyppi       {:modified nil
+                                                                                                                     :value    "lasi"}
+                                                                                                  :painoT           {:modified nil
+                                                                                                                     :value    "0"}
+                                                                                                  :suunniteltuMaara {:modified nil
+                                                                                                                     :value    "20"}
+                                                                                                  :yksikko          {:modified nil
+                                                                                                                     :value    "kg"}}}
+                                                                       :suunnittelematonJate {:0 {:jatetyyppi            {:value nil}
+                                                                                                  :jatteenToimituspaikka {:value ""}
+                                                                                                  :painoT                {:value ""}
+                                                                                                  :toteutunutMaara       {:value ""}
+                                                                                                  :yksikko               {:value nil}}}}
+                                                 :vaarallisetAineet   {:suunniteltuJate      {:0 {:painoT                {:modified nil
+                                                                                                                          :value    "0"}
+                                                                                                  :suunniteltuMaara      {:modified nil
+                                                                                                                          :value    "10"}
+                                                                                                  :vaarallinenainetyyppi {:modified nil
+                                                                                                                          :value    "aerosolipullot"}
+                                                                                                  :yksikko               {:modified nil
+                                                                                                                          :value    "kg"}}}
+                                                                       :suunnittelematonJate {:0 {:jatteenToimituspaikka {:value ""}
+                                                                                                  :painoT                {:value ""}
+                                                                                                  :toteutunutMaara       {:value ""}
+                                                                                                  :vaarallinenainetyyppi {:value nil}
+                                                                                                  :yksikko               {:value nil}}}}}
+                                   :schema-info {:blacklist          [:neighbor]
+                                                 :editable-in-states #{:acknowledged
+                                                                       :agreementPrepared
+                                                                       :agreementSigned
+                                                                       :appealed
+                                                                       :archived
+                                                                       :closed
+                                                                       :constructionStarted
+                                                                       :extinct
+                                                                       :final
+                                                                       :finished
+                                                                       :foremanVerdictGiven
+                                                                       :inUse
+                                                                       :onHold
+                                                                       :ready
+                                                                       :verdictGiven}
+                                                 :name               "rakennusjateselvitys"
+                                                 :order              201
+                                                 :section-help       "rakennusjate.help"
+                                                 :version            1}}}}}))
 
-    (fact "finalize--application-state: no waste plan"
-      (let [application (update application :documents drop-last)]
-        (finalize--application-state (assoc c-v-a :application application) )
-        => {:application (merge application
-                                {:state :verdictGiven})
-            :updates     {$push {:history {:state :verdictGiven
-                                           :ts    12345
-                                           :user  {:firstName "Hello"
-                                                   :id        "user-id"
-                                                   :lastName  "World"
-                                                   :username  "user-email"}}}
-                          $set  {:modified 12345
-                                 :state    :verdictGiven}}}))
+    (fact "finalize--application-state: waste report - If a waste report document exists, it is updated"
+      (let [c-v-a (update-in c-v-a [:application :documents]
+                             #(conj % rakennusjateselvitys))
+            {:keys [application updates commit-fn]} (finalize--application-state c-v-a)
+            waste-report-id (:id rakennusjateselvitys)]
+        (commit-fn (assoc c-v-a :application application) :dry-run)
+        => {:mongo-query {:documents {$elemMatch {:id waste-report-id}}}
+            :mongo-updates {$set {"documents.$.data.rakennusJaPurkujate.suunniteltuJate.0.jatetyyppi.modified" 12345
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.0.jatetyyppi.value" "kipsi"
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.0.painoT.modified" 12345
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.0.painoT.value" "1"
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.0.suunniteltuMaara.modified" 12345
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.0.suunniteltuMaara.value" "1"
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.0.yksikko.modified" 12345
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.0.yksikko.value" "tonni"
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.1.jatetyyppi.modified" 12345
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.1.jatetyyppi.value" "lasi"
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.1.painoT.modified" 12345
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.1.painoT.value" "0"
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.1.suunniteltuMaara.modified" 12345
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.1.suunniteltuMaara.value" "20"
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.1.yksikko.modified" 12345
+                                  "documents.$.data.rakennusJaPurkujate.suunniteltuJate.1.yksikko.value" "kg"
+                                  "documents.$.data.vaarallisetAineet.suunniteltuJate.0.painoT.modified" 12345
+                                  "documents.$.data.vaarallisetAineet.suunniteltuJate.0.painoT.value" "0"
+                                  "documents.$.data.vaarallisetAineet.suunniteltuJate.0.suunniteltuMaara.modified" 12345
+                                  "documents.$.data.vaarallisetAineet.suunniteltuJate.0.suunniteltuMaara.value" "10"
+                                  "documents.$.data.vaarallisetAineet.suunniteltuJate.0.vaarallinenainetyyppi.modified" 12345
+                                  "documents.$.data.vaarallisetAineet.suunniteltuJate.0.vaarallinenainetyyppi.value" "aerosolipullot"
+                                  "documents.$.data.vaarallisetAineet.suunniteltuJate.0.yksikko.modified" 12345
+                                  "documents.$.data.vaarallisetAineet.suunniteltuJate.0.yksikko.value" "kg"
+                                  :modified 12345}
+                            $unset {"documents.$.data.rakennusJaPurkujate.suunniteltuJate.2" ""
+                                    "documents.$.meta.rakennusJaPurkujate.suunniteltuJate.2" ""}}
+ :post-results []}))
+
+    (fact "finalize--application-state: no waste plan - If there is no waste plan, waste report document is not added or updated"
+      (let [application (update application :documents drop-last)
+            {:keys [application updates commit-fn]} (finalize--application-state (assoc c-v-a :application application))]
+        application => (merge application
+                              {:state :verdictGiven})
+        updates => {$push {:history {:state :verdictGiven
+                                     :ts    12345
+                                     :user  {:firstName "Hello"
+                                             :id        "user-id"
+                                             :lastName  "World"
+                                             :username  "user-email"}}}
+                    $set  {:modified 12345
+                           :state    :verdictGiven}}
+        (commit-fn (assoc c-v-a :application application) :dry-run) => nil))
 
     (let [verdict (-> verdict
                       (assoc-in [:data :reviews] ["5a156dd40e40adc8ee064463"

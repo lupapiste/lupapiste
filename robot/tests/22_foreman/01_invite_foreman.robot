@@ -5,6 +5,7 @@ Resource        ../../common_resource.robot
 Resource        ../common_keywords/approve_helpers.robot
 Resource        keywords.robot
 Resource        ../25_company/company_resource.robot
+Resource        ../39_pate/pate_resource.robot
 Suite Setup     Initialize foreman
 
 *** Test Cases ***
@@ -157,7 +158,7 @@ Original application is approved and given a verdict
   Click by test id  test-application-link-permit-lupapistetunnus
   Project application is open
   Approve application
-  Open tab  verdict
+  Kill dev-box
   Submit empty verdict
 
 All foremen table is shown on the Construction tab

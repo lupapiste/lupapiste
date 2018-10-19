@@ -116,8 +116,8 @@
                                           :name "files[]"
                                           :id input-id}
                                          (when test-id
-                                           {:data-test-id (str test-id
-                                                               "-input")})
+                                           {:data-test-id (common/test-id test-id
+                                                                          :input)})
                                          (when multiple?
                                            {:multiple true}))]
                           :input-id input-id))

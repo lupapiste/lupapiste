@@ -3,13 +3,26 @@
 /*   display: block; */
 /* } */
 
+.rollup {
+    box-sizing: border-box;
+    .roll-up-header {
+        width: 100%;
+        height: $btn-height;
+        background-color: $gray119;
+
+        .accordion-toggle-container {
+            float: left;
+        }
+    }
+}
+
 .rollup--closed > .rollup__open {
   display: none;
 }
 
 .rollup--open > .rollup__closed {
   display: none;
-} 
+}
 
 button.rollup-button {
   width: 100%;

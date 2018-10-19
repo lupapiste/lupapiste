@@ -26,7 +26,7 @@
             [lupapalvelu.attachment.util :as att-util]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
-            [lupapalvelu.file-upload :as file-upload]
+            [lupapalvelu.file-upload :as file-upload :refer [SavedFileData]]
             [lupapalvelu.states :as states]
             [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.comment :as comment]
@@ -42,8 +42,7 @@
             [sade.env :as env]
             [sade.shared-schemas :as sssc]
             [lupapalvelu.vetuma :as vetuma])
-  (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream PipedInputStream PipedOutputStream]))
+  (:import [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream]))
 
 
 ;;
@@ -173,6 +172,55 @@
    (sc/optional-key :backendId)          (sc/maybe sc/Str)})
 
 (def attachment-required-keys (filter sc/required-key? (keys Attachment)))
+
+(defschema AttachmentOptionsAttachmentType
+  {:type-id    (apply sc/enum (concat att-type/all-attachment-type-ids
+                                      (map name att-type/all-attachment-type-ids)))
+   :type-group (apply sc/enum (concat att-type/all-attachment-type-groups
+                                      (map name att-type/all-attachment-type-groups)))})
+
+(defschema AttachmentOptionsAttachmentTarget
+  {:id                             ssc/ObjectIdStr
+   :type                           (sc/cond-pre sc/Keyword sc/Str)
+   (sc/optional-key :poytakirjaId) sc/Str
+   (sc/optional-key :urlHash)      sc/Str})
+
+(defschema AttachmentOptionsApproval
+  (assoc Approval :state (apply sc/enum (concat attachment-states
+                                                (map name attachment-states)))))
+
+(defschema AttachmentOptions
+  {:created                                         ssc/Timestamp
+   (sc/optional-key :attachment-id)                 (sc/maybe ssc/AttachmentId)
+   (sc/optional-key :attachment-type)               AttachmentOptionsAttachmentType
+   (sc/optional-key :group)                         (sc/maybe {:groupType sc/Any}) ; FIXME
+   (sc/optional-key :target)                        (sc/maybe AttachmentOptionsAttachmentTarget)
+   (sc/optional-key :comment-text)                  (sc/maybe sc/Str)
+   (sc/optional-key :original-file-id)              sssc/FileId
+   (sc/optional-key :replaceable-original-file-id)  (sc/maybe sssc/FileId)
+   (sc/optional-key :modified)                      ssc/Timestamp
+   (sc/optional-key :user)                          (dissoc usr/User :email :enabled)
+   (sc/optional-key :state)                         (apply sc/enum attachment-states)
+   (sc/optional-key :contents)                      (sc/maybe sc/Str)
+   (sc/optional-key :signatures)                    [Signature]
+   (sc/optional-key :approval)                      (sc/maybe AttachmentOptionsApproval)
+   (sc/optional-key :locked)                        sc/Bool
+   (sc/optional-key :required)                      sc/Bool
+   (sc/optional-key :original-file-already-linked?) sc/Bool
+   (sc/optional-key :autoConversion)                sc/Bool
+   (sc/optional-key :set-app-modified?)             sc/Bool
+   (sc/optional-key :read-only)                     sc/Bool
+   (sc/optional-key :stamped)                       sc/Bool
+   (sc/optional-key :comment?)                      sc/Bool})
+
+(defschema FileOptions
+  {:filename sc/Str
+   :size     sc/Int
+   :content  (sc/cond-pre File InputStream)
+   (sc/optional-key :content-type) sc/Str})
+
+(defschema SetAttachmentVersionResult
+  (assoc Version :id ssc/AttachmentId))
 
 ;;
 ;; Utils
@@ -451,13 +499,13 @@
            (let [version-path (str "attachments.$.versions." idx)]
              (update-application
                (application->command application)
-               {:attachments.id id}
+               {:attachments {$elemMatch {:id id}}}
                {$set {(str version-path ".fileId") nil
                       (str version-path ".originalFileId") nil}}))))
        dorun)
   (update-application
     (application->command application)
-    {:attachments.id id}
+    {:attachments {$elemMatch {:id id}}}
     {$set {:attachments.$.latestVersion.fileId nil
            :attachments.$.latestVersion.originalFileId nil}}))
 
@@ -654,7 +702,7 @@
    Non-atomic operation: first deletes files, then updates document."
   [application attachment-ids]
   (when (seq attachment-ids)
-    (let [ids-str (pr-str attachment-ids)]
+    (let [ids-str (ss/serialize attachment-ids)]
       (info "1/4 deleting assignments regarding attachments" ids-str)
       (run! (partial assignment/remove-target-from-assignments (:id application)) attachment-ids)
       (info "2/4 deleting files of attachments" ids-str)
@@ -724,7 +772,7 @@
   "Returns the file for the latest attachment version if user has access to application and the attachment, otherwise nil.
    Optionally uses the provided application to save on db overhead."
   ([user attachment-id preview?]
-    (->> (get-application-as {:attachments.id attachment-id} user :include-canceled-apps? true)
+   (->> (get-application-as {:attachments {$elemMatch {:id attachment-id}}} user :include-canceled-apps? true)
          (get-attachment-latest-version-file user attachment-id preview?)))
   ([user attachment-id preview? application]
    (let [{:keys [latestVersion] :as attachment} (->> (:attachments application)
@@ -766,8 +814,10 @@
             http/no-cache-headers)
     not-found))
 
-(defn cleanup-temp-file [conversion-result]
-  (if (and (:content conversion-result) (not (instance? InputStream (:content conversion-result))))
+(defn cleanup-temp-file
+  "If `(:content conversion-result)` is a File, delete it."
+  [conversion-result]
+  (when (and (:content conversion-result) (not (instance? InputStream (:content conversion-result))))
     (io/delete-file (:content conversion-result) :silently)))
 
 (defn conversion
@@ -786,7 +836,13 @@
      :file converted-filedata}))
 
 (defn- attach!
-  [{:keys [application user]} session-id {attachment-id :attachment-id :as attachment-options} original-filedata conversion-data]
+  "1) Creates and saves attachment model for application, or fetches it if attachment-id is given
+   2) Creates preview image in separate thread
+   3) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to
+      original file)
+   Returns attached version."
+  [{:keys [application user]} session-id {attachment-id :attachment-id :as attachment-options} original-filedata
+   conversion-data]
   (let [options            (merge attachment-options
                                   original-filedata
                                   (:result conversion-data)
@@ -800,60 +856,78 @@
                                                      (auth/application-authority? application user))))
         linked-version     (set-attachment-version! application user attachment options)
         {:keys [fileId originalFileId]} linked-version]
-    (storage/link-files-to-application (or (:id user) session-id)
-                                       (:id application)
-                                       (cond-> []
-                                               (not (:original-file-already-linked? attachment-options)) (conj originalFileId)
-                                               (not= fileId originalFileId) (conj fileId)))
+    (storage/link-files-to-application
+      (or (:id user) session-id)
+      (:id application)
+      (cond-> []
+              (not (:original-file-already-linked? attachment-options)) (conj originalFileId)
+              (not= fileId originalFileId) (conj fileId)))
     (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
-    (cleanup-temp-file (:result conversion-data))
     linked-version))
 
-(defn- reusable-content [is-or-file]
+(defn- reusable-content
+  "Given a File, return the file. Given an InputStream, convert it into a ByteArrayInputStream."
+  [is-or-file]
   (if (instance? File is-or-file)
-    ; File is reusable as is
-    is-or-file
+    is-or-file ; File is reusable as is
     (with-open [is is-or-file
                 out (ByteArrayOutputStream.)]
       (io/copy is out)
       (ByteArrayInputStream. (.toByteArray out)))))
 
-(defn upload-and-attach!
-  "1) Uploads original file to GridFS
-   2) Validates and converts for archivability, uploads converted file to GridFS if applicable
+;; TODO: DRY
+(sc/defn convert-and-attach! :- SetAttachmentVersionResult
+  "1) Validates and converts for archivability, uploads converted file to GridFS/S3 if applicable
+   2) Creates and saves attachment model for application, or fetches it if attachment-id is given
+   3) Creates preview image in separate thread
+   4) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to
+      original file)
+   Returns attached version."
+  [{:keys [application] {user-id :id} :user {session-id :id} :session :as command}
+   attachment-options :- AttachmentOptions
+   original-filedata :- SavedFileData]
+  (let [session-id (when-not user-id
+                     (or session-id
+                         (vetuma/session-id)
+                         "system-process"))
+        content ((:content (storage/download (:fileId original-filedata))))
+        conversion-data (conversion user-id session-id application (assoc original-filedata :content content))
+        attached-version (attach! command session-id attachment-options original-filedata conversion-data)]
+    (cleanup-temp-file (:result conversion-data))
+    (.close content)
+    attached-version))
+
+(sc/defn upload-and-attach! :- SetAttachmentVersionResult
+  "1) Uploads original file to GridFS/S3
+   2) Validates and converts for archivability, uploads converted file to GridFS/S3 if applicable
    3) Creates and saves attachment model for application, or fetches it if attachment-id is given
    4) Creates preview image in separate thread
-   5) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to original file)
+   5) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to
+      original file)
    Returns attached version."
-  [{:keys [application user session] :as command} attachment-options file-options]
-  (let [user-id           (:id user)
-        session-id        (when-not user-id
-                            (or (:id session)
-                                (vetuma/session-id)
-                                "system-process"))
-        content           (reusable-content (:content file-options))
+  [{:keys [application] {user-id :id} :user {session-id :id} :session :as command}
+   attachment-options :- AttachmentOptions
+   file-options :- FileOptions]
+  (let [session-id (when-not user-id
+                     (or session-id
+                         (vetuma/session-id)
+                         "system-process"))
+        content (reusable-content (:content file-options))
         original-filedata (file-upload/save-file (assoc file-options :content content)
-                                                 {:linked false
+                                                 {:linked           false
                                                   :uploader-user-id user-id
-                                                  :sessionId session-id})
-        _                 (when (instance? ByteArrayInputStream content)
-                            (.reset content))
-        conversion-data   (conversion user-id session-id application (assoc original-filedata :content content))]
-    (attach! command session-id attachment-options original-filedata conversion-data)))
-
-(defn- append-stream [zip file-name in]
-  (when in
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
-    (io/copy in zip)
-    (.closeEntry zip)))
+                                                  :sessionId        session-id})
+        _ (when (instance? ByteArrayInputStream content)
+            (.reset content))
+        conversion-data (conversion user-id session-id application (assoc original-filedata :content content))
+        attached-version (attach! command session-id attachment-options original-filedata conversion-data)]
+    (cleanup-temp-file (:result conversion-data))
+    attached-version))
 
 (defn- append-attachments-to-zip! [zip user attachments application filename-prefix]
   (doseq [{:keys [id]} attachments]
     (when-let [{:keys [content filename]} (get-attachment-latest-version-file user id false application)]
-      (with-open [in (content)]
-        (append-stream zip (str filename-prefix id "_" filename) in))
-      ; Flush after each attachment to ensure data flows into the output pipe
-      (.flush zip))))
+      (files/open-and-append! zip (str filename-prefix id "_" filename) content))))
 
 (defn- append-application-pdfs-to-zip! [zip application user application-pdf-lang]
   (when application-pdf-lang
@@ -861,48 +935,28 @@
     (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
       (->> (-> (app-utils/with-masked-person-ids submitted-application user)
                (pdf-export/generate application-pdf-lang))
-           (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted"))))
+           (files/append-stream! zip (i18n/loc "attachment.zip.pdf.filename.submitted"))))
     ; Add current PDF:
     (->> (-> (app-utils/with-masked-person-ids application user)
              (pdf-export/generate application-pdf-lang))
-         (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current")))))
+         (files/append-stream! zip (i18n/loc "attachment.zip.pdf.filename.current")))))
 
-(defn ^java.io.File get-all-attachments!
+(defn ^File get-all-attachments!
   "Returns attachments as zip file.
    If application-pdf-lang is provided, application and submitted application PDFs are included.
    Callers responsibility is to delete the returned file when done with it!"
   ([attachments application user]
     (get-all-attachments! attachments application user nil))
   ([attachments application user application-pdf-lang]
-   (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; Must be deleted by caller!
+   (let [temp-file (files/temp-file-zip "lupapiste.attachments." ".zip.tmp"
+                      (fn [zip]
+                       (append-attachments-to-zip! zip user attachments application nil)
+                       (append-application-pdfs-to-zip! zip application user application-pdf-lang)))]
      (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
-     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
-       ; Add all attachments:
-       (append-attachments-to-zip! zip user attachments application nil)
-       (append-application-pdfs-to-zip! zip application user application-pdf-lang)
-       (.finish zip))
      (debugf "Size of the temporary zip file: %d" (.length temp-file))
      temp-file)))
 
-(defn- piped-zip-input-stream [content-fn]
-  (let [pos (PipedOutputStream.)
-        ; Use 16 MB pipe buffer
-        is (PipedInputStream. pos 16777216)
-        zip (ZipOutputStream. pos)]
-    (future
-      ; This runs in a separate thread so that the input stream can be returned immediately
-      (try
-        (content-fn zip)
-        (.finish zip)
-        (.flush zip)
-        (catch Throwable t
-          (error t "Error occurred while generating ZIP output stream"))
-        (finally
-          (.close zip)
-          (.close pos))))
-    is))
-
-(defn ^java.io.InputStream get-all-attachments-as-input-stream!
+(defn ^InputStream get-all-attachments-as-input-stream!
   "Returns attachments as zip file.
    If application-pdf-lang is provided, application and submitted application PDFs are included.
    Callers responsibility is to close the returned input stream."
@@ -910,25 +964,23 @@
    (get-all-attachments-as-input-stream! attachments application user nil))
   ([attachments application user application-pdf-lang]
    (debugf "Streaming zip file for %d attachments" (count attachments))
-   (piped-zip-input-stream
+   (files/piped-zip-input-stream
      (fn [zip]
        (append-attachments-to-zip! zip user attachments application nil)
        (append-application-pdfs-to-zip! zip application user application-pdf-lang)))))
 
-(defn ^java.io.InputStream get-attachments-for-user!
-  "Returns the latest corresponding attachment files readable by the user as an input stream"
+(defn ^InputStream get-attachments-for-user!
+  "Returns the latest corresponding attachment files readable by the user as an input stream of a self-destructing ZIP file"
   [user application attachments piped?]
   (if piped?
-    (piped-zip-input-stream
+    (files/piped-zip-input-stream
       (fn [zip]
         (debugf "Streaming zip file for %d attachments" (count attachments))
         (append-attachments-to-zip! zip user attachments application (str (:id application) "_"))))
-    (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")]
-      (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
-      (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
-        (append-attachments-to-zip! zip user attachments application (str (:id application) "_"))
-        (.finish zip))
-      (files/temp-file-input-stream temp-file))))
+    (files/temp-file-input-stream
+     (files/temp-file-zip "lupapiste.attachments." ".zip.tmp"
+        (fn [zip]
+          (append-attachments-to-zip! zip user attachments application (str (:id application) "_")))))))
 
 (defn- post-process-attachment [attachment]
   (assoc attachment :isPublic (metadata/public-attachment? attachment)))
@@ -976,7 +1028,7 @@
                                                     :autoConversion :conversionLog :filename])))]
     (update-application
       (application->command application)
-      {:attachments.id id}
+      {:attachments {$elemMatch {:id id}}}
       {$set mongo-updates})))
 
 (defn convert-existing-to-pdfa!
@@ -1083,7 +1135,7 @@
               file-options {:filename (format "%s-%s.pdf" (:id application) (i18n/localize lang :conversation.title))
                             :content  content
                             :size     (.available content)}
-              created (if created created (now))
+              created (or created (now))
               attachment-options {:attachment-type {:type-id    :keskustelu
                                                     :type-group :muut}
                                   :attachment-id   (when existing-keskustelu (:id existing-keskustelu))

@@ -63,6 +63,19 @@
 
 (defn xml->edn [xml] (hash-map (:tag xml) (-> xml parts lift-text-nodes)))
 
+;; Map to XML
+
+(defn map->xml
+  "Transforms map into XML structure."
+  [m]
+  (for [[k v] m]
+    {:tag     (keyword k)
+     :attrs   nil
+     :content (cond
+                (map? v) (map->xml v)
+                (sequential? v) (mapcat map->xml v)
+                :default [(str v)])}))
+
 ;;
 ;; get attribute value
 ;;

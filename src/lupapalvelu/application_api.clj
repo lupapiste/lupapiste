@@ -611,8 +611,7 @@
                                  :title      (ss/trim address)
                                  :modified   created}
                            $unset {:propertyIdSource true}})
-      (try (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
-           (catch Exception _ (warn "KTJ data was not updated after location changed")))
+      (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
       (when (and (permit/archiving-project? application) (true? refreshBuildings))
         (app/fetch-buildings command propertyId refreshBuildings)))
     (fail :error.property-in-other-muinicipality)))
@@ -741,7 +740,7 @@
                               results)
         ;; sort the results
         same-property-id-fn #(= propertyId (:propertyId %))
-        with-same-property-id (vec (filter same-property-id-fn enriched-results))
+        with-same-property-id (filterv same-property-id-fn enriched-results)
         without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
         organized-results (flatten (conj with-same-property-id without-same-property-id))
         final-results (map #(select-keys % [:id :address :propertyId :primaryOperation]) organized-results)]
@@ -904,7 +903,8 @@
   {:parameters ["id"]
    :permissions [{:required [:application/create-continuation-period-permit]}]
    :states     #{:verdictGiven :constructionStarted}
-   :pre-checks [validate-not-jatkolupa-app]}
+   :pre-checks [validate-not-jatkolupa-app
+                (partial permit/valid-permit-types {:R :all :YA :all})]}
   [{:keys [application] :as command}]
 
   (let [permit-type      (:permitType application)
@@ -1003,7 +1003,7 @@
                                             (not (ss/blank? backend-id-url)))
                                      [backend-id-url vendor-backend-id]
                                      [lp-id-url id])
-        redirect-url               (apply str url-parts)]
+        redirect-url               (ss/join url-parts)]
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
 

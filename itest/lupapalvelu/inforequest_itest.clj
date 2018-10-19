@@ -6,10 +6,7 @@
 (last-email)
 
 (facts "inforequest workflow"
-  (let [{id :id :as resp} (create-app pena :messages ["hello"] :infoRequest true :propertyId sipoo-property-id)]
-
-    resp => ok?
-
+  (let [id (create-app-id pena :messages ["hello"] :infoRequest true :propertyId sipoo-property-id)]
     (fact "no emails were sent, because organization doesn't have notification emails in use"
       (last-email) => nil?)
 
@@ -56,8 +53,7 @@
     (:text resp) => "error.inforequests-disabled"))
 
   (fact "Pena can cancel inforequest he created"
-    (let [{application-id :id :as resp} (create-app pena :infoRequest true :propertyId sipoo-property-id)]
-      resp => ok?
+    (let [application-id (create-app-id pena :infoRequest true :propertyId sipoo-property-id)]
       (command pena :cancel-inforequest :id application-id) => ok?
       (fact "Sonja is also allowed to cancel inforequest"
         (allowed? :cancel-inforequest :id application-id)))))
@@ -136,6 +132,4 @@
     (fact "Application is no longer oir"
       (let [application (query-application pena application-id)]
         (:infoRequest application) => true
-        (:openInfoRequest application) => false))
-    )
-  )
+        (:openInfoRequest application) => false))))

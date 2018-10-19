@@ -11,7 +11,6 @@
             [sade.coordinate :as coord]
             [sade.core :refer [now]]
             [sade.env :as env]
-            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.xml :as xml]))
@@ -84,7 +83,9 @@
   (fact "No settings"
     (query sipoo :verdict-template-settings
            :org-id org-id
-           :category "r")=> (just {:ok true}))
+           :category "r")=> (just {:ok true
+                                   :filled false
+                                   :settings nil}))
   (fact "Save to bad path"
     (command sipoo :save-verdict-template-settings-value
              :org-id org-id

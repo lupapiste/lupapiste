@@ -42,7 +42,7 @@
    :states     states/all-application-states
    :user-roles #{:applicant}
    :pre-checks [pricing-available?
-                (partial permit/valid-permit-types {:R [] :P :all})]}
+                (partial permit/valid-permit-types {:R ["muutoslupa" :empty] :P :all})]}
   [command]
   (ok :attachments (->> (att/sorted-attachments command)
                     (map att/enrich-attachment)

@@ -3,10 +3,11 @@
 Documentation   Financial users action
 Suite Setup     Apply minimal fixture now
 Resource       ../../common_resource.robot
+Resource       ../39_pate/pate_resource.robot
 
 *** Test Cases ***
 
-Sonja creates bunch of application with ARA funding
+Sonja creates bunch of applications with ARA funding
   Sonja logs in  False
   Create application the fast way  sipoo-funding-app-1  753-416-25-31  kerrostalo-rivitalo
   Create application the fast way  sipoo-funding-app-2  753-416-25-32  kerrostalo-rivitalo
@@ -151,11 +152,7 @@ Add ARA funding
   Go to page  applications
 
 Give verdict
-  Go to give new verdict
-  Input verdict  321  1   01.05.2020  01.06.2020  Sopija-Sonja  False
-  Click enabled by test id  verdict-publish
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Application state should be  verdictGiven
+  Give legacy verdict  321  Sonja Sibbo  Myönnetty  1.5.2020
 
 Visible accordion count is
   [Arguments]  ${amount}

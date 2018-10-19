@@ -454,11 +454,17 @@
       (application-state ..user.. ..organization-id.. false "aiemmalla-luvalla-hakeminen") => :verdictGiven)
 
     (fact permit-type-and-operation-map
-      (permit-type-and-operation-map "poikkeamis" created)
+      (permit-type-and-operation-map "poikkeamis" "753-R" created)
       => {:permitSubtype :poikkeamislupa, :permitType "P", :primaryOperation {:created created, :description nil, :id "mongo-id", :name "poikkeamis"}}
 
-      (permit-type-and-operation-map "kerrostalo-rivitalo" created)
-      => {:permitSubtype nil, :permitType "R", :primaryOperation {:created created, :description nil, :id "mongo-id", :name "kerrostalo-rivitalo"}})
+      (permit-type-and-operation-map "kerrostalo-rivitalo" "753-R" created)
+      => {:permitSubtype nil, :permitType "R", :primaryOperation {:created created, :description nil, :id "mongo-id", :name "kerrostalo-rivitalo"}}
+
+      (permit-type-and-operation-map "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen" "091-YA" created)
+      => {:permitSubtype :sijoitussopimus, :permitType "YA", :primaryOperation {:created created, :description nil, :id "mongo-id", :name "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen"}}
+
+      (permit-type-and-operation-map "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen" "753-R" created)
+      => {:permitSubtype :sijoituslupa, :permitType "YA", :primaryOperation {:created created, :description nil, :id "mongo-id", :name "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen"}})
 
     (fact application-timestamp-map
       (application-timestamp-map {:state :open, :created created})  => {:opened created, :modified created}

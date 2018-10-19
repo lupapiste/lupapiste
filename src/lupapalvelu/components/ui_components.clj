@@ -425,6 +425,10 @@
           :html ["pate-verdict.html"]
           :js ["pate-verdict.js"]}
 
+   :invoices {:depends [:common-html]
+              :html ["invoices.html"]
+              :js ["invoices.js"]}
+
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
@@ -478,7 +482,7 @@
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
                                 "organization-reports.html" "organization-calendars.html" "calendar-admin.html" "assignments.html" "stamp-editor.html"
                                 "pate-verdict-templates.html" "archiving.html" "organization-bulletins.html"
-                                "organization-store.html" "organization-terminal.html" "edit-authority.html"]}
+                                "organization-store.html" "organization-terminal.html" "edit-authority.html" "ad-login-settings.html"]}
 
    :admin-app {:depends []
                :js ["admin.js"]}

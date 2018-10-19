@@ -48,6 +48,13 @@
     (contains? verdict :draft) (not (:draft verdict))
     :else false))
 
+;; Maybe not the most useful predicate, maybe clean up later?
+(defn verdict-code-is-free-text? [verdict]
+  (-> (:category verdict)
+      legacy/legacy-verdict-schema
+      :dictionary :verdict-code
+      (contains? :text)))
+
 ;;
 ;; Accessors
 ;;
@@ -63,6 +70,9 @@
        (mapcat :poytakirjat)
        (sort-by :paatospvm)
        last))
+
+(defn last-pk [verdict]
+  (-> verdict :paatokset first :poytakirjat last))
 
 (defn replaced-verdict-id
   "Returns the id of the verdict replaced by the given verdict, if any"
@@ -80,7 +90,8 @@
     (-> verdict :data :verdict-date)
 
     :else
-    (:paatospvm (latest-pk verdict))))
+    (or (:paatospvm (latest-pk verdict))
+        (some-> verdict :paatokset first :paivamaarat :paatosdokumentinPvm))))
 
 (defn verdict-id [verdict]
   (:id verdict))
@@ -134,6 +145,18 @@
   (if (lupapiste-verdict? verdict)
     (-> verdict :data :verdict-section)
     (-> verdict latest-pk :pykala)))
+
+(defn verdict-text [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (contract? verdict)
+      (-> verdict :data :contract-text)
+      (-> verdict :data :verdict-text))
+    (-> verdict last-pk :paatos))) ;; Notice last-pk, this came from bulletins verdict data
+
+(defn verdict-code [verdict]
+  (if (lupapiste-verdict? verdict)
+    (-> verdict :data :verdict-code)
+    (some-> verdict first-pk :status str)))
 
 ;;
 ;; Verdict schema

@@ -17,6 +17,7 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.ya-extension :refer [ya-extension-app?]]
             [sade.core :refer :all]
             [sade.util :as util]))
 
@@ -27,6 +28,13 @@
 
 ;; TODO: Make sure that the functionality (including notifications)
 ;; and constraints are in sync with the legacy verdict API.
+
+(defn- verdicts-supported
+  "Precheck that fails if the verdict functionality is not supported for
+  the application"
+  [{:keys [application]}]
+  (when (ya-extension-app? application)
+    (fail :ya-extension-application)))
 
 (defn- replacement-check
   "Fails if the target verdict is a) already replaced, b) already being
@@ -46,10 +54,11 @@
       (fail :pate.required-fields))))
 
 (defn- contractual-application
-  "Precheck that fails if the application category IS NOT :contract."
+  "Precheck that fails if the application category IS NOT :contract or :allu-contract."
   [command]
-  (when-not (= (verdict/command->category command) :contract)
-    (fail :error.verdict.not-contract)))
+  (let [category (verdict/command->category command)]
+    (when-not (or (= category :contract) (= category :allu-contract))
+      (fail :error.verdict.not-contract))))
 
 (defn- state-in
   "Precheck that fails if the application state is not included in the
@@ -114,7 +123,8 @@
    :user-roles #{:authority}
    :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks [pate-enabled]
+   :pre-checks [pate-enabled
+                verdicts-supported]
    :states states/post-submitted-states}
   [{:keys [application] :as command}]
   (ok :templates (template/application-verdict-templates (template/command->options command)
@@ -149,6 +159,7 @@
    :user-authz-roles roles/all-authz-roles
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
+   :pre-checks       [verdicts-supported]
    :states           states/post-submitted-states}
   [command]
   (ok :verdicts (vc/verdict-list command)))
@@ -242,6 +253,7 @@
    :user-roles       #{:applicant :authority}
    :org-authz-roles  roles/reader-org-authz-roles
    :user-authz-roles roles/all-authz-roles
+   :pre-checks       [verdicts-supported]
    :states           states/post-submitted-states}
   [_])
 
@@ -253,7 +265,8 @@
    :user-roles       #{:applicant :authority}
    :org-authz-roles  roles/reader-org-authz-roles
    :user-authz-roles roles/all-authz-roles
-   :pre-checks       [contractual-application]
+   :pre-checks       [contractual-application
+                      verdicts-supported]
    :states           states/post-submitted-states}
   [_])
 
@@ -273,6 +286,21 @@
    :user-authz-roles roles/writer-roles-with-foreman}
   [command]
   (verdict/sign-contract command)
+  (ok))
+
+(defcommand sign-allu-contract
+  {:description "Adds the user as a signatory to a published Pate contract"
+   :categories       #{:pate-verdicts}
+   :parameters       [:id :verdict-id :password]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id :password])]
+   :pre-checks       [(verdict-exists :allu-contract?)
+                      can-sign
+                      password-matches]
+   :states           states/post-verdict-states
+   :user-roles       #{:applicant}
+   :user-authz-roles roles/default-authz-writer-roles}
+  [command]
+  (verdict/sign-allu-contract command)
   (ok))
 
 (defraw verdict-pdf
@@ -310,6 +338,7 @@
    :optional-parameters [:replacement-id]
    :input-validators    [(partial action/non-blank-parameters [:id])]
    :pre-checks          [pate-enabled
+                         verdicts-supported
                          (action/not-pre-check legacy-category)
                          (template/verdict-template-check :application :published)
                          (replacement-check :replacement-id)]
@@ -379,7 +408,8 @@
    :user-roles       #{:authority}
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [(action/some-pre-check (action/not-pre-check pate-enabled)
+   :pre-checks       [verdicts-supported
+                      (action/some-pre-check (action/not-pre-check pate-enabled)
                                              legacy-category)]
    :states           states/post-submitted-states}
   [command]
@@ -409,50 +439,8 @@
    :pre-checks       [(verdict-exists :draft? :legacy?)
                       verdict-filled]
    :states           (set/difference states/post-submitted-states
-                                     #{:finished})
+                                     #{:finished :complementNeeded})
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]
   (ok (verdict/publish-verdict command)))
-
-;; ------------------------------------------
-;; Bulletin related actions
-;; ------------------------------------------
-
-(defn- get-search-fields [fields app]
-  (into {} (map #(hash-map % (% app)) fields)))
-
-(defn- create-bulletin [application created verdict-id & [updates]]
-  (let [verdict (util/find-by-id verdict-id (:pate-verdicts application))
-        app-snapshot (-> (bulletins/create-bulletin-snapshot application)
-                         (dissoc :verdicts :pate-verdicts)
-                         (merge
-                           updates
-                           {:application-id (:id application)
-                            :pate-verdict verdict
-                            :bulletin-op-description (-> verdict :data :bulletin-op-description)}))
-        search-fields [:municipality :address :pate-verdict :_applicantIndex
-                       :application-id
-                       :bulletinState :applicant :organization :bulletin-op-description]
-        search-updates (get-search-fields search-fields app-snapshot)]
-    (bulletins/snapshot-updates app-snapshot search-updates created)))
-
-(defcommand upsert-pate-verdict-bulletin
-  {:description      ""
-   :user-roles       #{:authority}
-   :parameters       [id verdict-id]
-   :categories       #{:pate-verdicts}
-   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [pate-enabled
-                      (verdict-exists :draft? :verdict?)]
-   :states           states/post-submitted-states}
-  [{application :application created :created}]
-  (let [today-long (tc/to-long (t/today-at-midnight))
-        updates (create-bulletin application created verdict-id
-                                 {:bulletinState :verdictGiven
-                                  :verdictGivenAt today-long
-                                  :appealPeriodStartsAt today-long
-                                  :appealPeriodEndsAt (tc/to-long (t/plus (t/today-at-midnight) (t/days 14))) ;; TODO!!!
-                                  :verdictGivenText ""})]
-    (bulletins/upsert-bulletin-by-id (str id "_" verdict-id) updates)
-    (ok)))

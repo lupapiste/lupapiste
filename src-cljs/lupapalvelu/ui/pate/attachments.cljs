@@ -80,7 +80,7 @@
 
 (rum/defcs type-selector < rum/reactive
   (rum/local nil ::types)
-  [{types* ::types} {:keys [schema fields* binding?*]} filedata]
+  [{types* ::types} {:keys [schema fields* binding?* test-id]} filedata]
   (attachment-types types*)
   (let [att-types (some->> (rum/react types*)
                            (filter (fn [{:keys [type-group]}]
@@ -104,6 +104,7 @@
           (set-field fields* filedata :type value))
         (components/autocomplete value
                                  {:items     att-types
+                                  :test-id   test-id
                                   :callback  set-type-fn
                                   :disabled? (or (rum/react binding?*)
                                                  (not= (:state filedata)
@@ -111,8 +112,10 @@
 
 (rum/defcs contents-editor < rum/reactive
   (rum/local [] ::types)
-  [{types* ::types} {:keys [fields* binding?*]} {filename :filename
-                                                 :as filedata}]
+  [{types* ::types}
+   {:keys [fields* binding?* test-id]}
+   {filename :filename
+    :as      filedata}]
   (attachment-types types*)
   (let [{:keys [type contents]} (field-info fields* filedata)
         att-types               (rum/react types*)
@@ -137,15 +140,19 @@
                              {:items     items
                               :callback  set-fn
                               :required? true
+                              :test-id   test-id
                               :disabled? (or (rum/react binding?*)
                                              (not= (:state filedata)
                                                    :success))})))))
 
-(defn- td-error [msg]
-  [:td.batch--error {:colSpan 2} msg])
+(defn- td-error [index msg]
+  [:td.batch--error (common/add-test-id { :colSpan 2}
+                                        :batch index :error)
+   msg])
 
-(defn- td-progress [percentage]
-  [:td.batch--progress {:colSpan 2}
+(defn- td-progress [index percentage]
+  [:td.batch--progress (common/add-test-id {:colSpan 2}
+                                           :batch index :progress)
    [:div [:span {:style {:width (str percentage "%")}} " "]]])
 
 (defn- remove-file [{:keys [files* fields*]} {:keys [filename file-id]}]
@@ -195,22 +202,23 @@
      [:tr
       [:td {:colSpan 4}
        [:button.primary.outline
-        {:on-click #(do (doseq [filedata @files*]
-                          (remove-file options filedata))
-                        (reset! fields* {}))
-         :disabled binding?}
+        (common/add-test-id {:on-click #(do (doseq [filedata @files*]
+                                              (remove-file options filedata))
+                                            (reset! fields* {}))
+                             :disabled binding?}
+                            :batch-cancel)
         (path/loc :cancel)]
-       [:button.positive
-        {:disabled (or binding?
-                       (some #(-> % :contents ss/blank?)
-                             (vals (rum/react fields*)))
-                       (not-every? #(-> % :state #{:bad :success :failed})
-                                   (rum/react files*)))
-         :on-click #(bind-batch options)}
-        (if binding?
-          [:i.lupicon-refresh.icon-spin]
-          [:i.lupicon-check])
-        [:span (path/loc :attachment.batch-ready)]]]]]))
+       (components/icon-button {:disabled? (or binding?
+                                               (some #(-> % :contents ss/blank?)
+                                                     (vals (rum/react fields*)))
+                                               (not-every? #(-> % :state #{:bad :success :failed})
+                                                           (rum/react files*)))
+                                :on-click  #(bind-batch options)
+                                :test-id   :batch-ready
+                                :class     :positive
+                                :icon      :lupicon-check
+                                :wait?     binding?*
+                                :text-loc  :attachment.batch-ready})]]]))
 
 (rum/defc attachments-batch < rum/reactive
   "Metadata editor for file upload. The name is a hat-tip to the
@@ -228,38 +236,46 @@
           [:th [:span.batch-required (path/loc :application.attachmentContents)]]
           [:th.td-center (path/loc :remove)]]]
         [:tbody
-         (for [{:keys [state] :as filedata} @files*]
-           [:tr
-            [:td.batch--file (batch-file-link filedata)]
-            (case state
-              :bad      (td-error (:message filedata))
-              :failed   (td-error (path/loc :file.upload.failed))
-              :progress (td-progress (:progress filedata))
-              [
-               [:td.batch--type
-                {:key (common/unique-id "batch-type")}
-                (type-selector options filedata)]
-               [:td.batch--contents
-                {:key (common/unique-id "batch-contents")}
-                (contents-editor options filedata)]])
-            [:td.td-center
-             (when-not binding?
-               [:i.lupicon-remove.primary
-                {:on-click #(remove-file options filedata)}])]])]
+         (map-indexed (fn [i {:keys [state] :as filedata}]
+                        [:tr
+                         [:td.batch--file (common/add-test-id {} :batch i :file-link)
+                          (batch-file-link filedata)]
+                         (case state
+                           :bad      (td-error i (:message filedata))
+                           :failed   (td-error i (path/loc :file.upload.failed))
+                           :progress (td-progress i (:progress filedata))
+                           [
+                            [:td.batch--type
+                             {:key (common/test-id :batch i :type)}
+                             (type-selector (assoc options
+                                                   :test-id (common/test-id :batch i :type))
+                                            filedata)]
+                            [:td.batch--contents
+                             {:key (common/test-id :batch i :contents)}
+                             (contents-editor (assoc options
+                                                     :test-id (common/test-id :batch i :contents))
+                                              filedata)]])
+                         [:td.td-center
+                          (when-not binding?
+                            [:i.lupicon-remove.primary
+                             (common/add-test-id {:on-click #(remove-file options filedata)}
+                                                 :batch i :remove)])]])
+                      @files*)]
         (when bind?
           (batch-buttons options))]])))
 
 (rum/defc add-file-label < rum/reactive
   "Add file label button as a separate component for binding?* atom's
   benefit."
-  [binding?* input-id]
+  [binding?* input-id & [test-id]]
   (let [binding? (rum/react binding?*)]
     (hub/send "fileuploadService::toggle-enabled"
               {:input   input-id
                :enabled (not binding?)})
     [:label.btn.positive.batch--add-file
-     {:for   input-id
-      :class (common/css-flags :disabled binding?)}
+     (common/add-test-id {:for   input-id
+                          :class (common/css-flags :disabled binding?)}
+                         (or test-id :pate-upload) :label)
      [:i.lupicon-circle-plus]
      [:span (path/loc :attachment.addFile)]]))
 
@@ -301,7 +317,8 @@
   [{:keys [schema] :as options}]
   (let [files*    (atom [])
         fields*   (atom {})
-        binding?* (atom false)]
+        binding?* (atom false)
+        test-id   (pate-components/test-id options)]
     [:div
      (attachments-list (assoc options :files* files*))
      (attachments-batch (assoc options
@@ -313,11 +330,13 @@
        (att/upload-wrapper {:callback  (upload/file-monitors files*)
                             :dropzone  (:dropzone schema)
                             :multiple? (:multiple? schema)
+                            :test-id   test-id
                             :component (fn [{:keys [input input-id]}]
                                          [:div.add-file-div
                                           input
                                           (add-file-label binding?*
-                                                          input-id)])}))]))
+                                                          input-id
+                                                          test-id)])}))]))
 
 
 
@@ -359,6 +378,7 @@
        (att/upload-wrapper {:callback  (upload/file-monitors files*)
                             :dropzone  dropzone
                             :multiple? multiple?
+                            :test-id   :pate-upload
                             :component (fn [{:keys [input input-id]}]
                                          [:div.add-file-div
                                           input
@@ -516,14 +536,17 @@
   "Static view of attachments information with view links. Not
   specific to Pate."
   [attachment-ids]
-  (let [attachments (filter (util/fn->> :id (util/includes-as-kw? attachment-ids))
+  (let [attachments (filter #(->> % :id (util/includes-as-kw? attachment-ids))
                             (service/attachments))]
     [:table.pate-attachments
      [:tbody
-      (for [{:keys [id type contents latestVersion]
-             :as   attachment} attachments]
-        [:tr {:key id}
-         [:td (attachment-file-link attachment
-                                    ". " (-> type kw-type type-loc)
-                                    ": " contents)]
-         [:td (uploader-info latestVersion)]])]]))
+      (map-indexed (fn [i {:keys [id type contents latestVersion]
+                           :as   attachment}]
+                     [:tr {:key id}
+                      [:td (common/add-test-id {} :file-link i)
+                       (attachment-file-link attachment
+                                             ". " (-> type kw-type type-loc)
+                                             ": " contents)]
+                      [:td (common/add-test-id {} :info i)
+                       (uploader-info latestVersion)]])
+                   attachments)]]))

@@ -5,20 +5,12 @@
             [noir.request :as request]
             [sade.strings :as str]
             [lupapalvelu.ident.session :as ident-session]
+            [lupapalvelu.ident.ident-util :refer [session-initiator-by-lang default-session-initiator session-id] :as ident-util]
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer [$set]]
             [lupapalvelu.security :as security]
             [sade.util :as util]
             [sade.env :as env]))
-
-(def session-initiator-by-lang
-  {"fi" "/Shibboleth.sso/Login"
-   "sv" "/Shibboleth.sso/LoginSV"
-   "en" "/Shibboleth.sso/LoginEN"})
-
-(def default-session-initiator "/Shibboleth.sso/Login")
-
-(defn session-id [] (get-in (request/ring-request) [:session :id]))
 
 (def header-translations
   {:suomifi-nationalidentificationnumber                      :userid
