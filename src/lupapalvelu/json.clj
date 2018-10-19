@@ -12,6 +12,7 @@
 (def- mapper
   (memoize
     (fn [decode-key-fn]
+      ;; Onnistuu.fi integration claimed to need this byte array encoder:
       (json/object-mapper {:encoders      {(Class/forName "[B") encode-byte-array}
                            :decode-key-fn decode-key-fn}))))
 
