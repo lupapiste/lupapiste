@@ -23,7 +23,7 @@
         _ (vetuma-util/authenticate-to-vetuma! cookie-store)
         upload-resp   (-> (bulletin-util/send-file cookie-store)
                           :body
-                          (json/decode keyword))
+                          (json/decode true))
         uploaded-file (first (:files upload-resp))]
 
     (fact "Uploaded file is ok"
@@ -41,7 +41,7 @@
         (let [bulletin (bulletin-util/create-application-and-bulletin :cookie-store cookie-store)
               upload-resp   (-> (bulletin-util/send-file cookie-store)
                                 :body
-                                (json/decode keyword))
+                                (json/decode true))
               uploaded-file (-> (first (:files upload-resp))
                                 (select-keys (keys bulletins/CommentFile)))]
 
