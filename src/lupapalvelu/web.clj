@@ -1,11 +1,9 @@
 (ns lupapalvelu.web
-  (:require [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
-            [clojure.walk :refer [keywordize-keys]]
+  (:require [taoensso.timbre :refer [trace info infof warn warnf error spy]]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [clj-time.core :as time]
             [clj-time.local :as local]
-            [lupapalvelu.json :as json]
             [me.raynes.fs :as fs]
             [ring.util.response :refer [resource-response]]
             [ring.util.io :as ring-io]
@@ -47,6 +45,7 @@
             [lupapalvelu.ident.suomifi]
             [lupapalvelu.ident.ad-login]
             [lupapalvelu.idf.idf-api :as idf-api]
+            [lupapalvelu.json :as json]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.persistence :as doc-persistence]
@@ -65,6 +64,10 @@
 ;; Helpers
 ;;
 
+(defn- json-response [content]
+  (resp/content-type "application/json; charset=utf-8"
+                     (json/encode content)))
+
 (defonce apis (atom #{}))
 
 (defmacro defjson [path params & content]
@@ -77,7 +80,7 @@
          (resp/set-headers
            http/no-cache-headers
            (-> (dissoc response-data# :session :cookies)
-               resp/json
+               json-response
                (util/assoc-when :session response-session#
                                 :cookies response-cookies#)))))))
 
