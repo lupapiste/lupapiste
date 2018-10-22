@@ -40,16 +40,15 @@
                    {:user (usr/session-summary user)})]
     response))
 
-(defpage [:get "/api/saml/metadata"] []
-  (resp/redirect (format "%s/app/fi/authority" (env/value :host))))
-
 (defpage [:get "/api/saml/metadata/:domain"] {domain :domain}
   (let [{:keys [app-name sp-cert]} ad-config]
-    (resp/status 200 (ad-util/metadata
-                       app-name
-                       (ad-util/make-acs-uri domain)
-                       (ad-util/parse-certificate sp-cert)
-                       true))))
+    (resp/status 200
+                 (resp/xml
+                   (ad-util/metadata
+                     app-name
+                     (ad-util/make-acs-uri domain)
+                     (ad-util/parse-certificate sp-cert)
+                     true)))))
 
 (defpage [:get "/api/saml/ad-login/:domain"] {domain :domain}
   (let [{:keys [enabled idp-uri]} (-> domain org/get-organizations-by-ad-domain first :ad-login) ; This function returns a sequence
