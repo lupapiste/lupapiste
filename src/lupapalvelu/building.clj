@@ -6,6 +6,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [sade.coordinate :as coord]
+            [sade.core :as core]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]))
@@ -125,4 +126,5 @@
   (action/update-application (action/application->command application)
                              {$push {:document-buildings {:id          (mongo/create-id)
                                                           :document-id document-id
-                                                          :building    building-data}}}))
+                                                          :building    building-data
+                                                          :created     (core/now)}}}))
