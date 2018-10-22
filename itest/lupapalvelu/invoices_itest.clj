@@ -10,7 +10,8 @@
             [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]))
 
 (def dummy-user {:id                                        "penan-id"
                  :firstName                                 "pena"
@@ -213,7 +214,6 @@
                     (invoices/create-invoice! (->invoice-db invoice application dummy-user)))
 
                   (let [result (local-query sonja :organization-invoices :organizationIds [org-id-1 org-id-2])]
-                    (println "result: " result)
                     (count (:invoices result)) => 1)))
 
           (fact "should return three invoices when query includes two org-ids and one org has 1 invoice and the other has 2"
@@ -228,5 +228,4 @@
                     (invoices/create-invoice! (->invoice-db invoice application dummy-user)))
 
                   (let [result (local-query sonja :organization-invoices :organizationIds [org-id-1 org-id-2])]
-                    (println "result: " result)
                     (count (:invoices result)) => 3))))))
