@@ -43,6 +43,13 @@ LUPAPISTE.BuildingService = function() {
     return infoView;
   };
 
+  self.removeDocumentBuilding = function( documentId ) {
+    ajax.command("remove-document-building",
+                 {id: appId(),
+                 documentId: documentId})
+      .call();
+  };
+
   // Options [optional]
   // documentId: Document id
   // buildingId: Building id

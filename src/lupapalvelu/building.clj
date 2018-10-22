@@ -2,6 +2,7 @@
   (:require [monger.operators :refer :all]
             [taoensso.timbre :refer [info warnf]]
             [schema.core :as sc]
+            [lupapalvelu.action :as action]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [sade.coordinate :as coord]
@@ -110,3 +111,18 @@
       (when-not (empty? op-documents-array-updates)
         (info "operation building updates from verdict" (pr-str op-documents-array-updates)))
       {$set (apply merge (conj op-documents-array-updates {:buildings buildings}))})))
+
+(defn remove-document-building
+  "Removes vrk building data from given document"
+  [application document-id]
+  (action/update-application (action/application->command application)
+                             {$pull {:document-buildings {:document-id document-id}}}))
+
+(defn upsert-document-buildings
+  "Update or insert vrk building data to application"
+  [application building-data document-id]
+  (remove-document-building application document-id)
+  (action/update-application (action/application->command application)
+                             {$push {:document-buildings {:id          (mongo/create-id)
+                                                          :document-id document-id
+                                                          :building    building-data}}}))

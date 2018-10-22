@@ -71,6 +71,7 @@ LUPAPISTE.DocgenBuildingSelectModel = function( params ) {
         var accordionFields = _.get(documentDataService.findDocumentById(params.documentId), "schema.accordion-fields");
         var updates = _.map(accordionFields, function(field) { return [_.get(field, "paths", field), ""]; });
         documentDataService.updateDoc(params.documentId, updates, emitAccordionUpdates(updates));
+        service.removeDocumentBuilding(params.documentId);
       } else {
         LUPAPISTE.ModalDialog.showDynamicYesNo(
           loc("overwrite.confirm"),
