@@ -6,6 +6,7 @@
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as usr]
             [clj-http.client :as client]
             [clojure.walk :refer [keywordize-keys]]
             [noir.response :as resp]
@@ -29,7 +30,24 @@
       (fact "Pori-R has ad-login enabled"
         (-> (org/get-organizations-by-ad-domain "pori.fi") first (get-in [:ad-login :enabled])) => true)
 
-      (facts "The metadata route works when ad-login is enabled"
+      (fact "update-or-create-user! can create or update users"
+        (let [user (update-or-create-user! "Terttu" "Panaani" "terttu@panaani.fi" {})]
+          (fact "User creation works as expected"
+            (= user (usr/get-user-by-email "terttu@panaani.fi")) => true)
+          (facts "Updating users should work as well"
+            (let [updated-user (update-or-create-user! "Terttu" "Panaani" "terttu@panaani.fi" {:609-R #{"reader"}})]
+              (= {:609-R ["reader"]} (:orgAuthz (usr/get-user-by-email "terttu@panaani.fi"))) => true))))
+
+      (fact "log-user-in! should... Log user in"
+        (let [user (usr/get-user-by-email "terttu@panaani.fi")
+              {:keys [headers session status]} (log-user-in! {} user)]
+          (facts "User is redirected to authority page"
+            (= 302 status) => true
+            (= (str (env/value :host) "/app/fi/authority") (get headers "Location")) => true)
+          (fact "User is inserted into the session"
+            (= "terttu@panaani.fi" (get-in session [:user :email])) => true)))
+
+      (fact "The metadata route works"
         (let [res (client/get (metadata-route "pori.fi"))
               body (-> res :body sxml/parse sxml/xml->edn)
               cert (-> body
@@ -42,9 +60,9 @@
             (-> res :headers keywordize-keys :Content-Type) => "text/xml; charset=UTF-8")
           (facts "The response contains the Service Provider certificate"
             (string? cert) => true
-              (count cert) => 1224
-              (= cert (env/value :sso :cert)) => false
-              (= cert (parse-certificate (env/value :sso :cert))) => true)))))))
+            (count cert) => 1224
+            (= cert (env/value :sso :cert)) => false
+            (= cert (parse-certificate (env/value :sso :cert))) => true)))))))
 
 ;; Test the domain-specific routes (metadata route, login route with GET and POST)
 ;; The minimal fixture contains the organization 609-R ("Pori rakennusvalvonta") that has
