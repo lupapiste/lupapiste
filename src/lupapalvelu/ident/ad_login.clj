@@ -80,9 +80,9 @@
         (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host)))))))
 
 (defpage [:post "/api/saml/ad-login/:domain"] {domain :domain}
-  (let [ad-settings (org/get-organizations-by-ad-domain domain) ; The result is a sequence of maps that contain keys :id and :ad-login
+  (let [req (request/ring-request)
+        ad-settings (org/get-organizations-by-ad-domain domain) ; The result is a sequence of maps that contain keys :id and :ad-login
         idp-cert (some-> ad-settings first :ad-login :idp-cert)
-        req (request/ring-request)
         decrypter (ad-util/make-saml-decrypter (:private-key ad-config))
         xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse])) ; The raw XML string
         saml-resp (saml-sp/xml-string->saml-resp xml-response) ; An OpenSAML object
@@ -100,7 +100,6 @@
                                  (error (.getMessage e))
                                  false))))
         _ (infof "SAML message signature was %s" (if valid-signature? "valid!" "invalid"))
-
         {:keys [Group emailaddress givenname name surname]} (get-in parsed-saml-info [:assertions :attrs])
         _ (infof "firstName: %s, lastName: %s, groups: %s, email: %s" givenname surname Group emailaddress)
         ; Resolve authz. Received AD-groups are mapped the corresponding Lupis roles the organization has/organizations have.
