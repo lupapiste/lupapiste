@@ -161,7 +161,6 @@
                                :kantavaRakennusaine kantava-rakennus-aine-map
                                :lammonlahde lammonlahde-map
                                :julkisivu julkisivu-map))]
-
     (util/assoc-when-pred {:yksilointitieto (-> info :op :id)
                            :alkuHetki (util/to-xml-datetime  created)
                            :sijaintitieto {:Sijainti {:tyhja empty-tag}}
@@ -171,7 +170,12 @@
       :omistajatieto (remove nil? (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))))))
 
 (defn- get-rakennus-data [application doc]
-  {:Rakennus (get-rakennus application doc)})
+  (let [document-building (->> (filter #(= (:document-id %) (:id doc)) (:document-buildings application)) first :building)
+        building (util/deep-merge-with
+                   (fn [first-val second-val] (if-not (nil? second-val) second-val first-val))
+                   (get-rakennus application {:schema-info (:schema-info doc) :data document-building})
+                   (get-rakennus application doc))]
+    {:Rakennus building}))
 
 (defn- get-toimenpiteen-kuvaus [doc]
   ;Uses fi as default since krysp uses finnish in enumeration values

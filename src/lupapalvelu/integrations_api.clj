@@ -269,7 +269,7 @@
 (defcommand remove-document-building
   {:parameters       [id documentId]
    :input-validators [(partial action/non-blank-parameters [:documentId])]
-   :user-roles       #{:applicant :authority}
+   :permissions      [{:required [:application/edit]}]
    :states           krysp-enrichment-states}
   [{:keys [application]}]
   (building/remove-document-building application documentId)

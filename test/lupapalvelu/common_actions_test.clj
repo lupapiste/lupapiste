@@ -213,7 +213,7 @@
                                :suti-update-id :suti-update-added
                                :cancel-application :info-links :organization-links
                                :update-application-company-notes
-                               :redirect-to-3d-map}]
+                               :redirect-to-3d-map :remove-document-building}]
     (doseq [[action data] (get-actions)
             :when (and
                     (= :command (keyword (:type data)))

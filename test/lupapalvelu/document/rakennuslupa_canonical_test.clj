@@ -355,6 +355,125 @@
                     :saunaKytkin {:value true}
                     :lamminvesiKytkin {:value true}}}})
 
+(def document-building
+  {:id "5bcdb8eaf70b0924847661f2"
+   :document-id "5bc9b7e1f70b0924847661c3"
+   :building {:kiinttun "75300301050006"
+              :rakennuksenOmistajat {:0 {:_selected "yritys"
+                                         :henkilo {:userId nil
+                                                   :henkilotiedot {:etunimi ""
+                                                                   :sukunimi ""
+                                                                   :hetu nil
+                                                                   :turvakieltoKytkin false}
+                                                   :osoite {:katu ""
+                                                            :postinumero ""
+                                                            :postitoimipaikannimi ""
+                                                            :maa "FIN"}
+                                                   :yhteystiedot {:puhelin "" :email ""}
+                                                   :kytkimet {:suoramarkkinointilupa false}}
+                                         :yritys {:companyId nil
+                                                  :yritysnimi "Testiyritys 9242"
+                                                  :liikeJaYhteisoTunnus "1234567-1"
+                                                  :osoite {:katu "Testikatu 1 A 9242"
+                                                           :postinumero "00380"
+                                                           :postitoimipaikannimi "HELSINKI"
+                                                           :maa "FIN"}
+                                                  :yhteyshenkilo {:henkilotiedot {:etunimi ""
+                                                                                  :sukunimi ""
+                                                                                  :turvakieltoKytkin false}
+                                                                  :yhteystiedot {:puhelin "" :email ""}}}
+                                         :omistajalaji nil
+                                         :muu-omistajalaji ""}
+                                     :1 {:_selected "yritys"
+                                         :yritys {:liikeJaYhteisoTunnus "1234567-1"
+                                                  :osoite {:katu "Testikatu 1 A 9240"
+                                                           :postinumero "00380"
+                                                           :postitoimipaikannimi "HELSINKI"}
+                                                  :yritysnimi "Testiyritys 9240"}}
+                                     :2 {:_selected "yritys"
+                                         :yritys {:liikeJaYhteisoTunnus "1234567-1"
+                                                  :osoite {:katu "Testikatu 1 A 9241"
+                                                           :postinumero "00380"
+                                                           :postitoimipaikannimi "HELSINKI"}
+                                                  :yritysnimi "Testiyritys 9241"}}
+                                     :3 {:_selected "yritys"
+                                         :yritys {:liikeJaYhteisoTunnus "1234567-1"
+                                                  :osoite {:katu "Testikatu 1 A 9239"
+                                                           :postinumero "00380"
+                                                           :postitoimipaikannimi "HELSINKI"}
+                                                  :yritysnimi "Testiyritys 9239"}}}
+              :varusteet {:viemariKytkin true
+                          :saunoja ""
+                          :vesijohtoKytkin true
+                          :hissiKytkin false
+                          :vaestonsuoja ""
+                          :kaasuKytkin false
+                          :aurinkopaneeliKytkin false
+                          :liitettyJatevesijarjestelmaanKytkin false
+                          :koneellinenilmastointiKytkin true
+                          :sahkoKytkin true
+                          :lamminvesiKytkin true}
+              :rakennusnro "002"
+              :verkostoliittymat {:viemariKytkin true
+                                  :vesijohtoKytkin true
+                                  :sahkoKytkin true
+                                  :maakaasuKytkin false
+                                  :kaapeliKytkin false}
+              :kaytto {:rakentajaTyyppi nil :kayttotarkoitus "021 rivitalot"}
+              :huoneistot {:0 {:WCKytkin true
+                               :huoneistoTyyppi "asuinhuoneisto"
+                               :keittionTyyppi "keittio"
+                               :huoneistoala "108"
+                               :huoneluku "4"
+                               :jakokirjain ""
+                               :ammeTaiSuihkuKytkin true
+                               :saunaKytkin true
+                               :huoneistonumero "001"
+                               :porras "A"
+                               :lamminvesiKytkin true
+                               :parvekeTaiTerassiKytkin true}
+                           :1 {:WCKytkin true
+                               :huoneistoTyyppi "asuinhuoneisto"
+                               :keittionTyyppi "keittio"
+                               :huoneistoala "106"
+                               :huoneluku "4"
+                               :ammeTaiSuihkuKytkin true
+                               :saunaKytkin true
+                               :huoneistonumero "002"
+                               :porras "A"
+                               :lamminvesiKytkin true
+                               :parvekeTaiTerassiKytkin true}}
+              :lammitys {:lammitystapa "vesikeskus" :lammonlahde "kevyt polttoöljy" :muu-lammonlahde ""}
+              :kunnanSisainenPysyvaRakennusnumero ""
+              :rakenne {:rakentamistapa "paikalla"
+                        :kantavaRakennusaine "tiili"
+                        :muuRakennusaine ""
+                        :julkisivu "puu"
+                        :muuMateriaali ""}
+              :osoite {:osoitenumero2 "5"
+                       :huoneisto ""
+                       :jakokirjain ""
+                       :kunta "245"
+                       :jakokirjain2 ""
+                       :postinumero "04200"
+                       :porras ""
+                       :osoitenumero "3"
+                       :postitoimipaikannimi "KERAVA"
+                       :maa "FIN"
+                       :lahiosoite "Kyllikintie"}
+              :mitat {:tilavuus "837"
+                      :kerrosala "281"
+                      :rakennusoikeudellinenKerrosala ""
+                      :kokonaisala "281"
+                      :kerrosluku "2"
+                      :kellarinpinta-ala ""}
+              :manuaalinen_rakennusnro ""
+              :luokitus {:energialuokka nil
+                         :energiatehokkuusluku ""
+                         :energiatehokkuusluvunYksikko "kWh/m2"
+                         :paloluokka "P1"}
+              :valtakunnallinenNumero "199887766E"}})
+
 (def- uusi-rakennus
   {:id "uusi-rakennus"
    :created 2
@@ -1135,6 +1254,53 @@
                                        :maakaasuKytkin false
                                        :kaapeliKytkin false
                                        :vesijohtoKytkin false})))
+
+(testable-privates lupapalvelu.document.rakennuslupa-canonical get-rakennus-data)
+
+(facts "Rakennustiedot - merged data with building data from WFS"
+  (against-background
+    (org/pate-scope? irrelevant) => true)
+  (let [doc (tools/unwrapped {:schema-info {:name "rakennuksen-muuttaminen"}
+                              :id          "5bc9b7e1f70b0924847661c3"
+                              :data        {:kaytto  {:rakentajaTyyppi {:value "muu"}
+                                                      :kayttotarkoitus {:value "012 kahden asunnon talot"}}
+                                            :mitat   {:tilavuus  "800"
+                                                      :kerrosala "200"
+                                                      :muutosala "50"}
+                                            :rakenne {:rakentamistapa "paikalla"
+                                                      :julkisivu      "tiili"}}})
+        {rakennus :Rakennus} (get-rakennus-data (assoc application-rakennuslupa :document-buildings [document-building]) doc)
+        building-data        (:rakennuksenTiedot rakennus)]
+
+    (fact "There is all data from document"
+      (:kayttotarkoitus building-data) => "012 kahden asunnon talot"
+      (:tilavuus building-data) => "800"
+      (:kerrosala building-data) => "200"
+      (:muutosala building-data) => nil                     ;; There's no muutosala in kuntaGML
+      (:rakentamistapa building-data) => "paikalla"
+      (:julkisivu building-data) => {:julkisivumateriaali "tiili"})
+
+    (fact "And also data from WFS building data"
+      (:lammitystapa building-data) => "vesikeskus"
+      (:kerrosluku building-data) => "2"
+      (:kokonaisala building-data) => "281"
+      (:paloluokka building-data) => "P1"
+      (:lammonlahde building-data) => {:polttoaine "kevyt polttoöljy"}
+      (:verkostoliittymat building-data) => {:sahkoKytkin true
+                                             :maakaasuKytkin false
+                                             :viemariKytkin true
+                                             :vesijohtoKytkin true
+                                             :kaapeliKytkin false}
+      (:varusteet building-data) => {:viemariKytkin true
+                                     :saunoja nil
+                                     :vesijohtoKytkin true
+                                     :hissiKytkin false
+                                     :vaestonsuoja nil
+                                     :kaasuKytkin false
+                                     :aurinkopaneeliKytkin false
+                                     :koneellinenilmastointiKytkin true
+                                     :sahkoKytkin true
+                                     :lamminvesiKytkin true})))
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
   (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]
