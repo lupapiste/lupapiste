@@ -150,6 +150,23 @@
               </div>
             </form>
           </section>
+
+          <section>
+            <h2 data-bind="ltext: 'authorityAdmin.authoritiesReport.title'"></h2>
+            <span data-bind="ltext: 'authorityAdmin.authoritiesReport.caption'"></span>
+            <form action="/api/raw/authorities-report" method="get">
+              <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+              <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
+              <div class="labeled-input cell">
+                <button type="submit"
+                        class="primary outline ">
+                  <i class="lupicon-download"></i>
+                  <span data-bind="ltext: 'authorityAdmin.authoritiesReport.buttonText'"></span>
+                </button>
+              </div>
+            </form>
+          </section>
+
         </section>
       </div>
     </section>
