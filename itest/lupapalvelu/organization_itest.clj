@@ -506,7 +506,21 @@
 
       (fact "when tag is not used in applications, ok is returned"
         (command sonja :add-application-tags :id id :tags []) => ok?
-        (query sipoo :remove-tag-ok :tagId tag-id) => ok?))))
+        (query sipoo :remove-tag-ok :tagId tag-id) => ok?)))
+
+  (facts "Reader and commenter can query tags areas"
+    (let [tags (query ronja :get-organization-tags)
+          areas (query ronja :get-organization-areas)]
+      tags => ok?
+      (:tags tags) => not-empty
+      areas => ok?
+      (:areas areas) => not-empty
+      (fact "Reader"
+        (query luukas :get-organization-tags) => tags
+        (query luukas :get-organization-areas) => areas)
+      (fact "Commenter"
+        (query kosti :get-organization-tags) => tags
+        (query kosti :get-organization-areas) => areas))))
 
 (facts "Organization areas zip file upload"
   (fact "only authorityAdmin can upload"

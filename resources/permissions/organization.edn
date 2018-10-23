@@ -3,6 +3,12 @@
  :organization {:authority          #{:organization/check-permanent-archive-enabled
                                       :organization/tags
                                       :organization/areas}
+                :reader             #{:organization/check-permanent-archive-enabled
+                                      :organization/tags
+                                      :organization/areas}
+                :commenter          #{:organization/check-permanent-archive-enabled
+                                      :organization/tags
+                                      :organization/areas}
                 :authorityAdmin     #{:organization/admin
                                       :organization/update-name
                                       :organization/tags
