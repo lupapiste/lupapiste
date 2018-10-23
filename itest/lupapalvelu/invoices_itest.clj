@@ -20,8 +20,7 @@
                  :email                                     "pena@panaani.fi"
                  :username                                  "pena"})
 
-(defn invoice-with [properties]
-  (let [dummy-invoice {:application-id "LP-753-2018-90108"
+(def dummy-invoice {:application-id "LP-753-2018-90108"
                        :organization-id "753-R"
                        :state "draft"
                        :operations [{:operation-id "linjasaneeraus"
@@ -31,8 +30,16 @@
                                                      :unit "kpl"
                                                      :price-per-unit 10
                                                      :units 2
-                                                     :discount-percent 0}]}]}]
-    (merge dummy-invoice properties)))
+                                                     :discount-percent 0}]}]})
+
+(defn invoice-with [properties]
+  (merge dummy-invoice properties))
+
+(defn application-with [properties]
+  (let [dummy-application {:id "APP-ID-1"
+                           :organization-id "HC_ORG"
+                           :state "draft"}]
+    (merge dummy-application properties)))
 
 (env/with-feature-value :invoices true
   (mongo/connect!)
@@ -196,36 +203,24 @@
                       first
                       :name) => "pientalo")))
 
-    (fact "organization-invoices-query"
+
+    (fact "user-orgnizations-invoices"
           (fact "should return empty seq when there's no invoices for any organization"
-                (let [org-id-1 "I-should-have-none"
-                      org-id-2 "nor-should-I"
-                      result (local-query sonja :organization-invoices :organizationIds [org-id-1 org-id-2])]
-                  (count (:invoices result)) => 0
-                  (seq? (:invoices result)) => true))
+                (with-redefs [invoices/get-user-orgs-having-role (fn [user role] [])]
+                  (let [result (local-query sonja :user-organizations-invoices)]
+                    (:invoices result) => [])))
 
-          (fact "should return one invoice when query includes two org-ids but only one has an invoice in the db"
-                (let [org-id-1 "i-have-one-invoice-org-A"
-                      org-id-2 "i-have-no-invoices-org"
-                      invoices [(invoice-with {:organization-id org-id-1})]]
+          (fact "should the invoices for orgs user has the role in"
 
-                  (doseq [{:keys [organization-id] :as invoice} invoices
-                          :let [application {:id "foo-app-id" :organization organization-id}]]
-                    (invoices/create-invoice! (->invoice-db invoice application dummy-user)))
 
-                  (let [result (local-query sonja :organization-invoices :organizationIds [org-id-1 org-id-2])]
-                    (count (:invoices result)) => 1)))
+                (with-redefs [invoices/get-user-orgs-having-role (fn [user role] ["USER-ORG-1" "USER-ORG-2"])]
 
-          (fact "should return three invoices when query includes two org-ids and one org has 1 invoice and the other has 2"
-                (let [org-id-1 "i-have-one-invoice-org-B"
-                      org-id-2 "i-have-two-invoices"
-                      invoices [(invoice-with {:organization-id org-id-1})
-                                (invoice-with {:organization-id org-id-1})
-                                (invoice-with {:organization-id org-id-2})]]
+                  (invoices/create-invoice! (->invoice-db dummy-invoice (application-with {:organization "USER-ORG-1"}) dummy-user))
+                  (invoices/create-invoice! (->invoice-db dummy-invoice (application-with {:organization "FOO-ORG"}) dummy-user))
+                  (invoices/create-invoice! (->invoice-db dummy-invoice (application-with {:organization "USER-ORG-2"}) dummy-user))
+                  (invoices/create-invoice! (->invoice-db dummy-invoice (application-with {:organization "BAR-ORG"}) dummy-user))
 
-                  (doseq [{:keys [organization-id] :as invoice} invoices
-                          :let [application {:id "foo-app-id" :organization organization-id}]]
-                    (invoices/create-invoice! (->invoice-db invoice application dummy-user)))
-
-                  (let [result (local-query sonja :organization-invoices :organizationIds [org-id-1 org-id-2])]
-                    (count (:invoices result)) => 3))))))
+                  (let [invoices (:invoices (local-query sonja :user-organizations-invoices))
+                        invoice-orgs (set (map :organization-id invoices))]
+                    (count invoices) => 2
+                    invoice-orgs => #{"USER-ORG-1" "USER-ORG-2"}))))))

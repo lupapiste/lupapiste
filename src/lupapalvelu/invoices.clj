@@ -118,3 +118,9 @@
 
 (defn fetch-invoices-for-organizations [organization-ids]
   (mongo/select :invoices {:organization-id {$in organization-ids}}))
+
+(defn get-user-orgs-having-role [user role]
+  (->> (:orgAuthz user)
+       (filter (fn [[org-id roles]]
+                 (roles (keyword role))))
+       (map (comp name first))))
