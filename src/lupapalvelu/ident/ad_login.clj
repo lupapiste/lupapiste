@@ -21,24 +21,30 @@
    :private-key (env/value :sso :privatekey)
    :app-name "Lupapiste"})
 
-(defn validated-login [req firstName lastName email orgAuthz]
+(defn update-or-create-user!
+  "Takes the user creds received from SAML, updates the user info in the DB if necessary.
+  If the user doesn't exist already, it's created. Returns the updated/created user."
+  [firstName lastName email orgAuthz]
   (let [user-data {:firstName firstName
                    :lastName  lastName
                    :role      "authority"
                    :email     email
                    :username  email
                    :enabled   true
-                   :orgAuthz  orgAuthz}
-        user (if-let [user-from-db (usr/get-user-by-email email)]
-               (let [updated-user-data (util/deep-merge user-from-db user-data)]
-                 (usr/update-user-by-email email updated-user-data)
-                 updated-user-data)
-               (usr/create-new-user {:role "admin"} user-data))
-        response (ssess/merge-to-session
-                   req
-                   (resp/redirect (format "%s/app/fi/authority" (env/value :host)))
-                   {:user (usr/session-summary user)})]
-    response))
+                   :orgAuthz  orgAuthz}]
+    (if-let [user-from-db (usr/get-user-by-email email)]
+      (let [updated-user-data (util/deep-merge user-from-db user-data)]
+        (usr/update-user-by-email email updated-user-data)
+        updated-user-data)
+      (usr/create-new-user {:role "admin"} user-data))))
+
+(defn log-user-in!
+  "Logs the user in and redirects him/her to the main authority page."
+  [req user]
+  (ssess/merge-to-session
+    req
+    (resp/redirect (format "%s/app/fi/authority" (env/value :host)))
+    {:user (usr/session-summary user)}))
 
 (defpage [:get "/api/saml/metadata/:domain"] {domain :domain}
   (let [{:keys [app-name sp-cert]} ad-config]
@@ -94,8 +100,10 @@
                                  (error (.getMessage e))
                                  false))))
         _ (infof "SAML message signature was %s" (if valid-signature? "valid!" "invalid"))
+
         {:keys [Group emailaddress givenname name surname]} (get-in parsed-saml-info [:assertions :attrs])
         _ (infof "firstName: %s, lastName: %s, groups: %s, email: %s" givenname surname Group emailaddress)
+        ; Resolve authz. Received AD-groups are mapped the corresponding Lupis roles the organization has/organizations have.
         ; The result is formatted like: {:609-R #{"commenter"} :609-YMP #("commenter" "reader")
         authz (into {} (for [org-setting ad-settings
                              :let [{:keys [id ad-login]} org-setting
@@ -103,12 +111,13 @@
                              :when (and (true? (:enabled ad-login))
                                         (false? (empty? resolved-roles)))]
                          [(keyword (:id org-setting)) resolved-roles]))
-        _ (infof "Resolved authz: %s" authz)]
+        _ (infof "Resolved authz for user %s (domain: %s): %s" name domain authz)]
     (cond
       (false? (:success? parsed-saml-info)) (do
                                               (error "Login was not valid")
                                               (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
-      (and valid-signature? (seq authz)) (validated-login req givenname surname emailaddress authz)
+      (and valid-signature? (seq authz)) (->> (update-or-create-user! givenname surname emailaddress authz)
+                                              (log-user-in! req))
       valid-signature? (do
                          (error "User does not have organization authorization")
                          (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))

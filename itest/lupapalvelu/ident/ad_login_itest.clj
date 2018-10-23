@@ -46,15 +46,8 @@
               (= cert (env/value :sso :cert)) => false
               (= cert (parse-certificate (env/value :sso :cert))) => true)))))))
 
-
-
-;; Enter a test organization into the DB, with ad-login activated
-
-
 ;; Test the domain-specific routes (metadata route, login route with GET and POST)
 ;; The minimal fixture contains the organization 609-R ("Pori rakennusvalvonta") that has
 ;; the ad-login settings enabled.
-
-
 
 ;; Ensure that the signature validation fails if the cert is tampered with
