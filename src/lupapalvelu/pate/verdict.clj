@@ -1568,9 +1568,9 @@
     (if (some (util/fn->> second :id (util/=as-kw :signatures))
               sections)
         (map (fn [[_ attr & _ :as section]]
-            (if (util/=as-kw (:id attr) :signatures)
-              entry
-              section))
+               (if (util/=as-kw (:id attr) :signatures)
+                 entry
+                 section))
              sections)
         (concat sections [entry]))))
 

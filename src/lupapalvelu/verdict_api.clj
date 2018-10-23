@@ -53,7 +53,8 @@
                          signatures (if (= :final (allu/agreement-state application))
                                       (conj signatures {:name (str (:firstName creator) " " (:lastName creator))
                                                         :user-id (:id (:creator application))
-                                                        :date created}))
+                                                        :date created})
+                                      signatures)
                          verdict (pate-verdict/new-allu-verdict command)
                          verdict (assoc verdict
                                    :published {:published created
