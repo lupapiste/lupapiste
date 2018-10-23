@@ -50,6 +50,7 @@
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.tasks :as tasks]
@@ -356,10 +357,11 @@
     (select-keys response [:ok :text :session :applicationpage :lang :cookies])))
 
 (defpage [:get "/api/login-sso-uri"] {username :username}
-  (let [request (request/ring-request)]
-    ; TODO: Resolve SSO URL from db
-    (if false
-      (resp/json (ok {:uri "https://evolta.fi"}))
+  (let [request (request/ring-request)
+        domain (last (ss/split username #"@"))
+        enabled (-> domain org/get-organizations-by-ad-domain first (get-in [:ad-login :enabled]))]
+    (if enabled
+      (resp/json (ok {:uri (str (env/value :host) "/api/saml/ad-login/" domain)}))
       (resp/json (fail :error.unauthorized)))))
 
 ;; Reset password via separate URL outside anti-csrf
