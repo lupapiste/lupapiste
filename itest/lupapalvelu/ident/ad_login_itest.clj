@@ -41,7 +41,7 @@
       (fact "log-user-in! should... Log user in"
         (let [user (usr/get-user-by-email "terttu@panaani.fi")
               {:keys [headers session status]} (log-user-in! {} user)]
-          (facts "User is redirected to authority page"
+          (facts "User is redirected to authority landing page"
             (= 302 status) => true
             (= (str (env/value :host) "/app/fi/authority") (get headers "Location")) => true)
           (fact "User is inserted into the session"
@@ -62,10 +62,14 @@
             (string? cert) => true
             (count cert) => 1224
             (= cert (env/value :sso :cert)) => false
-            (= cert (parse-certificate (env/value :sso :cert))) => true)))))))
+            (= cert (parse-certificate (env/value :sso :cert))) => true))))
 
-;; Test the domain-specific routes (metadata route, login route with GET and POST)
-;; The minimal fixture contains the organization 609-R ("Pori rakennusvalvonta") that has
-;; the ad-login settings enabled.
+      (fact "Testing the main login route"
+        (fact "If the endpoint receives POST request without :SAMLResponse map, it returns 400"
+          (let [{:keys [status body]} (client/post (saml-route "pori.fi") {:throw-exceptions false})]
+            (facts "Server answers with 400 and an error message in the response body"
+              status => 400
+              body => "No SAML data found in request")))))))
 
-;; Ensure that the signature validation fails if the cert is tampered with
+;; TODO: Set up a mock SAML IdP that can receive, validate and handle a SAML authentication request
+;; as well as send a valid response back. Ensure that the signature validation fails if the cert is tampered with.
