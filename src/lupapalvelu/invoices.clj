@@ -124,3 +124,21 @@
        (filter (fn [[org-id roles]]
                  (roles (keyword role))))
        (map (comp name first))))
+
+(defn- fetch-organization [id]
+  (mongo/by-id :organizations id))
+
+(defn enrich-org-data [{:keys [organization-id] :as invoice}]
+  (let [organization (fetch-organization organization-id)
+        localized-names (:name organization)]
+    (assoc-in invoice [:enriched-data :organization :name] localized-names)))
+
+(defn- fetch-application [id]
+  (mongo/by-id :applications id))
+
+(defn enrich-application-data [{:keys [application-id] :as invoice}]
+  (debug ">> enrich-application-data invoice: " invoice)
+  (let [application (fetch-application application-id)
+        address (:address application)]
+
+    (assoc-in invoice [:enriched-data :application :address] address)))

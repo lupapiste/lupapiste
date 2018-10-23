@@ -3,6 +3,7 @@
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.integrations-api]
             [lupapalvelu.itest-util :refer [local-command local-query
+                                            create-and-submit-application
                                             create-and-submit-local-application
                                             sonja pena ok? fail?] :as itu]
             [lupapalvelu.invoice-api]
@@ -210,8 +211,7 @@
                   (let [result (local-query sonja :user-organizations-invoices)]
                     (:invoices result) => [])))
 
-          (fact "should the invoices for orgs user has the role in"
-
+          (fact "should return invoices for orgs user has the role in"
 
                 (with-redefs [invoices/get-user-orgs-having-role (fn [user role] ["USER-ORG-1" "USER-ORG-2"])]
 
@@ -223,4 +223,28 @@
                   (let [invoices (:invoices (local-query sonja :user-organizations-invoices))
                         invoice-orgs (set (map :organization-id invoices))]
                     (count invoices) => 2
-                    invoice-orgs => #{"USER-ORG-1" "USER-ORG-2"}))))))
+                    invoice-orgs => #{"USER-ORG-1" "USER-ORG-2"})))
+
+          (fact "should return invoice with"
+                (let [ {org-id :organization app-id :id :as application} (create-and-submit-local-application pena)
+
+                      invoice (invoice-with {:organization-id org-id
+                                             :application-id app-id})]
+
+                  (with-redefs [invoices/get-user-orgs-having-role (fn [user role] [org-id])
+                                invoices/fetch-organization (fn [org-id] {:name {:fi "Sipoon yleisten alueiden rakentaminen"
+                                                                                :en "Sipoon yleisten alueiden rakentaminen"
+                                                                                :sv "Sipoon yleisten alueiden rakentaminen"}})
+                                invoices/fetch-application (fn [org-id] {:address "Testikuja 99"})]
+
+                    (invoices/create-invoice! (->invoice-db invoice application dummy-user))
+
+                    (let [result (local-query sonja :user-organizations-invoices)
+                          invoice (first (:invoices result))]
+
+                      (fact "organisation data enriched to it"
+                            (get-in invoice [:enriched-data :organization]) => {:name {:fi "Sipoon yleisten alueiden rakentaminen"
+                                                                                       :en "Sipoon yleisten alueiden rakentaminen"
+                                                                                       :sv "Sipoon yleisten alueiden rakentaminen"}})
+                      (fact "application data enriched to it"
+                            (get-in invoice [:enriched-data :application]) => {:address "Testikuja 99"}))))))))

@@ -107,5 +107,9 @@
   [{:keys [user] :as command}]
   (debug ">> user-organizations-invoices")
   (let [required-role-in-orgs "authority" ;;Will be changed to laskuttaja role
-        user-orgs (invoices/get-user-orgs-having-role user required-role-in-orgs)]
-    (ok {:invoices (invoices/fetch-invoices-for-organizations user-orgs)})))
+        user-orgs (invoices/get-user-orgs-having-role user required-role-in-orgs)
+        invoices (invoices/fetch-invoices-for-organizations user-orgs)
+        invoices-with-extra-data (->> invoices
+                                      (map invoices/enrich-org-data)
+                                      (map invoices/enrich-application-data))]
+    (ok {:invoices invoices-with-extra-data})))
