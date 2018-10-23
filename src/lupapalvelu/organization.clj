@@ -349,6 +349,12 @@
 (defn allowed-ip? [ip organization-id]
   (pos? (mongo/count :organizations {:_id organization-id, $and [{:allowedAutologinIPs {$exists true}} {:allowedAutologinIPs ip}]})))
 
+(defn get-organizations-by-ad-domain
+  "Return the organization id and ad-settings for organizations, where the :ad-login.trusted-domains array
+  contains the provided domain (e.g. 'pori.fi')"
+  [domain]
+  (mongo/select :organizations {:ad-login.trusted-domains domain} {:_id 1 :ad-login 1}))
+
 (defn krysp-urls-not-set?
   "Takes organization as parameter.
   Returns true if organization has 0 non-blank krysp urls set."

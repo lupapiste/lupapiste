@@ -9,7 +9,6 @@
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
             [ring.util.response :refer :all]
-            [sade.core :refer [def-]]
             [sade.env :as env]
             [sade.session :as ssess]
             [sade.util :as util]
@@ -20,44 +19,54 @@
 (def ad-config
   {:sp-cert (env/value :sso :cert)
    :private-key (env/value :sso :privatekey)
-   :acs-uri (format "%s/api/saml/ad-login/%s" (env/value :host) "609-R")
    :app-name "Lupapiste"})
 
-(defn validated-login [req org-id firstName lastName email orgAuthz]
+(defn update-or-create-user!
+  "Takes the user creds received from SAML, updates the user info in the DB if necessary.
+  If the user doesn't exist already, it's created. Returns the updated/created user."
+  [firstName lastName email orgAuthz]
   (let [user-data {:firstName firstName
                    :lastName  lastName
                    :role      "authority"
                    :email     email
                    :username  email
                    :enabled   true
-                   :orgAuthz  {(keyword org-id) orgAuthz}}        ;; validointi ja virheiden hallinta?
-        user (if-let [user-from-db (usr/get-user-by-email email)]
-               (let [updated-user-data (util/deep-merge user-from-db user-data)]
-                 (usr/update-user-by-email email updated-user-data)
-                 updated-user-data)
-               (usr/create-new-user {:role "admin"} user-data))
-        response (ssess/merge-to-session
-                   req
-                   (resp/redirect (format "%s/app/fi/authority" (env/value :host)))
-                   {:user (usr/session-summary user)})]
-    response))
+                   :orgAuthz  orgAuthz}]
+    (if-let [user-from-db (usr/get-user-by-email email)]
+      (let [updated-user-data (util/deep-merge user-from-db user-data)]
+        (usr/update-user-by-email email updated-user-data)
+        updated-user-data)
+      (usr/create-new-user {:role "admin"} user-data))))
 
-(defpage [:get "/api/saml/metadata"] []
-  (let [{:keys [app-name sp-cert acs-uri]} ad-config]
-    (resp/status 200 (saml-sp/metadata app-name acs-uri (ad-util/parse-certificate sp-cert)))))
+(defn log-user-in!
+  "Logs the user in and redirects him/her to the main authority page."
+  [req user]
+  (ssess/merge-to-session
+    req
+    (resp/redirect (format "%s/app/fi/authority" (env/value :host)))
+    {:user (usr/session-summary user)}))
 
-(defpage [:get "/api/saml/ad-login/:org-id"] {org-id :org-id}
-  (let [{:keys [enabled idp-uri]} (-> org-id org/get-organization :ad-login)
+(defpage [:get "/api/saml/metadata/:domain"] {domain :domain}
+  (let [{:keys [app-name sp-cert]} ad-config]
+    (resp/status 200
+                 (resp/xml
+                   (ad-util/metadata
+                     app-name
+                     (ad-util/make-acs-uri domain)
+                     (ad-util/parse-certificate sp-cert)
+                     true)))))
+
+(defpage [:get "/api/saml/ad-login/:domain"] {domain :domain}
+  (let [{:keys [enabled idp-uri]} (-> domain org/get-organizations-by-ad-domain first :ad-login) ; This function returns a sequence
         {:keys [sp-cert private-key]} ad-config
-        acs-uri (format "%s/api/saml/ad-login/%s" (env/value :host) org-id)
         saml-req-factory! (saml-sp/create-request-factory
                             #(str "_" (uuid/v1))
-                            (constantly 0) ; :saml-id-timeouts
+                            (constantly 0) ; :saml-id-timeouts, not relevant here but required by the library
                             (ad-util/make-saml-signer sp-cert private-key)
                             idp-uri
                             saml-routes/saml-format
                             "Lupapiste"
-                            acs-uri)
+                            (ad-util/make-acs-uri domain))
         saml-request (saml-req-factory!)
         relay-state (saml-routes/create-hmac-relay-state (:secret-key-spec (saml-sp/generate-mutables)) "no-op")
         full-querystring (str idp-uri "?" (saml-shared/uri-query-str {:SAMLRequest (saml-shared/str->deflate->base64 saml-request) :RelayState relay-state}))]
@@ -67,20 +76,21 @@
         (infof "Complete request string: %s" full-querystring)
         (saml-sp/get-idp-redirect idp-uri saml-request relay-state))
       (do
-        (errorf "Organization %s does not have valid AD-login settings or has AD-login disabled" org-id)
+        (errorf "Domain %s does not have valid AD-login settings or has AD-login disabled" domain)
         (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host)))))))
 
-(defpage [:post "/api/saml/ad-login/:org-id"] {org-id :org-id}
-  (let [idp-cert (some-> org-id org/get-organization :ad-login :idp-cert ad-util/parse-certificate)
-        req (request/ring-request)
+(defpage [:post "/api/saml/ad-login/:domain"] {domain :domain}
+  (let [req (request/ring-request)
+        ad-settings (org/get-organizations-by-ad-domain domain) ; The result is a sequence of maps that contain keys :id and :ad-login
+        idp-cert (some-> ad-settings first :ad-login :idp-cert)
         decrypter (ad-util/make-saml-decrypter (:private-key ad-config))
         xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse])) ; The raw XML string
         saml-resp (saml-sp/xml-string->saml-resp xml-response) ; An OpenSAML object
         saml-info (saml-sp/saml-resp->assertions saml-resp decrypter) ; The response as a Clojure map
         parsed-saml-info (ad-util/parse-saml-info saml-info) ; The response as a "normal" Clojure map
-        _ (infof "Received XML response for organization %s: %s" org-id xml-response)
-        _ (infof "SAML response for organization %s: %s" org-id saml-info)
-        _ (infof "Parsed SAML response for organization %s: %s" org-id parsed-saml-info)
+        _ (infof "Received XML response for domain %s: %s" domain xml-response)
+        _ (infof "SAML response for domain %s: %s" domain saml-info)
+        _ (infof "Parsed SAML response for domain %s: %s" domain parsed-saml-info)
         valid-signature? (if-not idp-cert
                            false
                            (try
@@ -89,18 +99,24 @@
                                (do
                                  (error (.getMessage e))
                                  false))))
-        _ (infof "SAML message signature was %s" (if valid-signature? "valid" "invalid"))
+        _ (infof "SAML message signature was %s" (if valid-signature? "valid!" "invalid"))
         {:keys [Group emailaddress givenname name surname]} (get-in parsed-saml-info [:assertions :attrs])
         _ (infof "firstName: %s, lastName: %s, groups: %s, email: %s" givenname surname Group emailaddress)
-        ad-role-map (-> org-id org/get-organization :ad-login :role-mapping)
-        _ (infof "AD-role map: %s" ad-role-map)
-        authz (ad-util/resolve-roles ad-role-map Group)
-        _ (infof "Resolved authz: %s" authz)]
+        ; Resolve authz. Received AD-groups are mapped the corresponding Lupis roles the organization has/organizations have.
+        ; The result is formatted like: {:609-R #{"commenter"} :609-YMP #("commenter" "reader")
+        authz (into {} (for [org-setting ad-settings
+                             :let [{:keys [id ad-login]} org-setting
+                                   resolved-roles (ad-util/resolve-roles (:role-mapping ad-login) Group)]
+                             :when (and (true? (:enabled ad-login))
+                                        (false? (empty? resolved-roles)))]
+                         [(keyword (:id org-setting)) resolved-roles]))
+        _ (infof "Resolved authz for user %s (domain: %s): %s" name domain authz)]
     (cond
       (false? (:success? parsed-saml-info)) (do
                                               (error "Login was not valid")
                                               (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
-      (and valid-signature? (seq authz)) (validated-login req org-id givenname surname emailaddress authz)
+      (and valid-signature? (seq authz)) (->> (update-or-create-user! givenname surname emailaddress authz)
+                                              (log-user-in! req))
       valid-signature? (do
                          (error "User does not have organization authorization")
                          (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))

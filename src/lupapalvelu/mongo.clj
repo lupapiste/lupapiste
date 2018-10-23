@@ -453,7 +453,8 @@
   (ensure-index :vetuma {:user.stamp 1})
   (ensure-index :vetuma {:sessionid 1})
   (ensure-index :vetuma {:trid 1} {:unique true})
-  (ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
+  (ensure-index :organizations {:scope.municipality 1 :scope.permitType 1})
+  (ensure-index :organizations {:ad-login.trusted-domains 1})
   (try
     (ensure-index :fs.chunks {:files_id 1 :n 1 })
     (catch Exception e
