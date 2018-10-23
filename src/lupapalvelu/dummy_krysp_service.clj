@@ -5,7 +5,7 @@
             [sade.env :as env]
             [clojure.string :as s]
             [sade.strings :as ss]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [noir.response :as resp]
             [clojure.java.io :as io]
             [noir.core :refer [defpage]]
@@ -72,8 +72,7 @@
                                 "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus" :asiointitunnus
                                 nil)
                    typeName (if (ss/starts-with typeName "kiito:") "kiito:every-type" typeName)
-                   overrides (-> (json/decode overrides)
-                                 (clojure.walk/keywordize-keys))]
+                   overrides (json/decode overrides true)]
                (cond
                  (not-empty overrides) (resp/content-type "application/xml; charset=utf-8" (override-xml (io/resource (verdict-xml typeName)) overrides))
                  (and (#{:kuntalupatunnus :asiointitunnus} search-key) search-literal)

@@ -20,4 +20,4 @@
 (facts "/api/query/current-configuration"
   (let [resp (query pena :current-configuration)]
     resp => ok?
-    (keys resp) => (contains #{:municipalities :permitTypes :operations :states})))
+    (keys (dissoc resp :ok)) => (contains #{:municipalities :operations :permitTypes :states})))

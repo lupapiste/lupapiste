@@ -1,5 +1,5 @@
 (ns lupapalvelu.reports.store-billing
-  (:require [cheshire.core :as json]
+  (:require [lupapalvelu.json :as json]
             [clj-http.client :as http]
             [clj-time.coerce :as tc]
             [sade.core :refer [def- now]]
@@ -110,7 +110,7 @@
                  :basic-auth [(env/value :store-billing :basic-auth :username)
                               (env/value :store-billing :basic-auth :password)]})
       :body
-      (json/parse-string true)
+      (json/decode true)
       vec))
 
 (defn billing-entries [user startTs endTs lang]

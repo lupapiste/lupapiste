@@ -1,18 +1,19 @@
 (ns lupapalvelu.printing-order.mylly-client
   (:require [cljstache.core :as clostache]
+            [clj-time.core :as t]
+            [clojure.data.codec.base64 :as base64]
             [clojure.walk :as walk]
             [plumbing.core :refer [for-map]]
-            [sade.common-reader :as cr]
-            [sade.http :as http]
+            [schema.core :as sc]
             [slingshot.slingshot :refer [throw+ try+]]
             [slingshot.support :refer [rethrow]]
-            [clojure.data.codec.base64 :as base64]
-            [sade.xml :as xml]
             [taoensso.timbre :as timbre]
+            [sade.common-reader :as cr]
             [sade.env :as env]
-            [schema.core :as sc]
-            [lupapalvelu.printing-order.domain :as domain]
-            [clj-time.core :as t])
+            [sade.http :as http]
+            [sade.xml :as xml]
+            [lupapalvelu.json :as json]
+            [lupapalvelu.printing-order.domain :as domain])
   (:import (java.io ByteArrayOutputStream)))
 
 (defn parse-soap [response]
@@ -59,12 +60,10 @@
         {:keys [body status]} (post url action-ns action request)
         total-time (- (System/currentTimeMillis) time)]
     (when-not (= status 200)
-      (timbre/error (pr-str (cheshire.core/generate-string
-                              {:action action, :time total-time, :status status, :body body})))
+      (timbre/error (pr-str (json/encode {:action action, :time total-time, :status status, :body body})))
       (throw+ {:type ::error :error-path [:mylly :unknown]} (str "SOAP status " status) body))
     (let [result (parse-soap body)]
-      (timbre/info (pr-str (cheshire.core/generate-string
-                             {:action action, :time total-time})))
+      (timbre/info (pr-str (json/encode {:action action, :time total-time})))
       (-> result :Body vals first))))
 
 (defn encode-file-from-stream [orig]

@@ -6,7 +6,7 @@
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clj-time.format :as f]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [monger.operators :refer :all]
             [schema.core :as sc]
             [sade.env :as env]
@@ -52,7 +52,7 @@
                                 :multipart  [{:name      "metadata"
                                               :mime-type "application/json"
                                               :encoding  "UTF-8"
-                                              :content   (json/generate-string metadata)}
+                                              :content   (json/encode metadata)}
                                              {:name      "file"
                                               :content   is-or-file
                                               :mime-type content-type}]})]

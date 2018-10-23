@@ -8,7 +8,7 @@
             [sade.util :as util]
             [sade.xml :as xml]
             [lupapalvelu.vetuma :as vetuma]
-            [cheshire.core :as json]))
+            [lupapalvelu.json :as json]))
 
 (testable-privates lupapalvelu.vetuma mac-of keys-as-keywords)
 

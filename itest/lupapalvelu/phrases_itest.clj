@@ -23,9 +23,9 @@
 
 (facts "One phrase listed"
   (let [phrases (:phrases (query sipoo :organization-phrases :org-id org-id))]
-    phrases => (just [(contains {:tag "Tag"
+    phrases => (just [(contains {:tag      "Tag"
                                  :category "paatosteksti"
-                                 :phrase "Hello"})])
+                                 :phrase   "Hello"})])
     (fact "Update phrase"
       (let [phrase-id (-> phrases first :id)]
         (command sipoo :upsert-phrase
@@ -33,7 +33,7 @@
                  :phrase-id phrase-id
                  :category "kaava"
                  :tag "Gat"
-                 :phrase "World")=> ok?
+                 :phrase "World") => ok?
         (fact "Phrase updated"
           (:phrases (query sipoo :organization-phrases :org-id org-id))
           => [{:id       phrase-id
@@ -53,8 +53,8 @@
         (fact "Check the phrases"
           (:phrases (query sipoo :organization-phrases :org-id org-id))
           => (just [(contains {:category "yleinen"
-                               :tag "Bah"
-                               :phrase "Humbug"})]))))))
+                               :tag      "Bah"
+                               :phrase   "Humbug"})]))))))
 
 (facts "Application phrases"
   (fact "Phrases for 753-R application"
@@ -97,31 +97,31 @@
   (query sipoo :organization-phrases :org-id "bad")
   => (err :error.invalid-organization)
 
-(facts "Phrase categories"
+  (facts "Phrase categories"
 
-  (fact "New custom phrase categories"
-    (command sipoo :save-phrase-category
-             :category {:fi "category1" :en "category1" :sv "category1"}
-             :org-id org-id) => ok?
-    (command sipoo :save-phrase-category
-             :category {:fi "category2" :en "category2" :sv "category2"}
-             :org-id org-id) => ok?)
+    (fact "New custom phrase categories"
+      (command sipoo :save-phrase-category
+               :category {:fi "category1" :en "category1" :sv "category1"}
+               :org-id org-id) => ok?
+      (command sipoo :save-phrase-category
+               :category {:fi "category2" :en "category2" :sv "category2"}
+               :org-id org-id) => ok?)
 
-  (fact "Newly added phrase categories can be fetched"
-    (let [categories (:custom-categories (query sipoo :custom-organization-phrase-categories
-                                                :org-id org-id))
-          first-id (->> categories first key name)]
-      (vals categories) => [{:en "category1" :fi "category1" :sv "category1"}
-                            {:en "category2" :fi "category2" :sv "category2"}]
+    (fact "Newly added phrase categories can be fetched"
+      (let [categories (:custom-categories (query sipoo :custom-organization-phrase-categories
+                                                  :org-id org-id))
+            first-id (->> categories first key name)]
+        (sort-by :fi (vals categories)) => [{:en "category1" :fi "category1" :sv "category1"}
+                                            {:en "category2" :fi "category2" :sv "category2"}]
 
-      (fact "Custom category can be deleted"
-        (command sipoo :delete-phrase-category
-                 :org-id org-id
-                 :category first-id) => ok?)
+        (fact "Custom category can be deleted"
+          (command sipoo :delete-phrase-category
+                   :org-id org-id
+                   :category first-id) => ok?)
 
-      (fact "After delete one category there is only one left"
-        (->> (query sipoo :custom-organization-phrase-categories
+        (fact "After delete one category there is only one left"
+          (->> (query sipoo :custom-organization-phrase-categories
                       :org-id org-id)
-             :custom-categories
-             keys
-             count) => 1)))))
+               :custom-categories
+               keys
+               count) => 1)))))

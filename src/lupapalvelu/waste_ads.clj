@@ -1,6 +1,6 @@
 (ns lupapalvelu.waste-ads
   (:require [monger.operators :refer :all]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [hiccup.core :as hiccup]
             [clj-rss.core :as rss]
             [sade.strings :as ss]
@@ -130,4 +130,4 @@
                         :description ""}))))
 
 (defmethod waste-ads :json [org-id & _]
-  (json/generate-string (waste-ads org-id)))
+  (json/encode (waste-ads org-id)))
