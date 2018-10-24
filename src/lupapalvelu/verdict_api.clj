@@ -46,7 +46,16 @@
                  ;;       dependency cycles:
                  (when-let [filedata (allu/load-contract-document! command)]
                    ;; FIXME: Some times should be dates, not timestamps:
-                   (let [verdict (pate-verdict/new-allu-verdict command)
+                   (let [creator (:creator application)
+                         signatures [{:name (:username user)
+                                      :user-id (:id user)
+                                      :date created}]
+                         signatures (if (= :final (allu/agreement-state application))
+                                      (conj signatures {:name (str (:firstName creator) " " (:lastName creator))
+                                                        :user-id (:id (:creator application))
+                                                        :date created})
+                                      signatures)
+                         verdict (pate-verdict/new-allu-verdict command)
                          verdict (assoc verdict
                                    :published {:published created
                                                :tags      (pr-str {:body (pate-verdict/backing-system--tags
@@ -54,9 +63,7 @@
                                    ;; FIXME: Should be general-handler fullname instead of current username:
                                    :archive {:verdict-giver (:username user)}
                                    ;; FIXME: Should be general-handler fullname instead of current username:
-                                   :signatures [{:name (:username user)
-                                                 :user-id (:id user)
-                                                 :date created}]) ; HACK
+                                   :signatures signatures) ; HACK
                          transition-update (app-state/state-transition-update (sm/next-state application)
                                                                               created application user)]
                      (attachment/convert-and-attach! command
@@ -69,10 +76,8 @@
                                                       :locked true
                                                       :read-only true}
                                                      filedata)
-                     (action/update-application command (if (seq (:pate-verdicts application))
-                                                          transition-update
-                                                          (util/deep-merge transition-update
-                                                                           {$push {:pate-verdicts verdict}})))
+                     (action/update-application command (util/deep-merge transition-update
+                                                                         {$push {:pate-verdicts verdict}}))
                      (ok :verdicts [verdict])))
                  (verdict/do-check-for-verdict command))]
     (cond
