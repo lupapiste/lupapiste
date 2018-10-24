@@ -308,7 +308,7 @@
     (-> base-metadata
         (merge (op-specific-data-for-attachment application attachment))
         su/remove-blank-keys
-        (merge s2-metadata))))
+        (merge (dissoc s2-metadata :draftTarget)))))
 
 (defn send-to-archive
   "Prepares metadata for selected attachments/documents
