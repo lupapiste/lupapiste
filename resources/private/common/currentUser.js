@@ -90,6 +90,14 @@ LUPAPISTE.CurrentUser = function() {
       && !_.get( self.orgAuthz(), app.organization());
   }
 
+  self.orgAuthRoles = ko.pureComputed(function () {
+    var formatAuthz = function (orgId, authz) {
+      return _.map(_.uniq(_.map(authz, function (auth) { return auth === "authorityAdmin" ? auth : "authority"; })),
+                   function (auth) { return orgId + " " + auth });
+    };
+    return _.map(self.orgAuthz(), function (authz, orgId) { return formatAuthz(orgId, authz()); });
+  });
+
   self.organizationAdminOrgs = ko.pureComputed(function () {
     if (self.role() === "authority") {
       var orgAuthz = ko.mapping.toJS(self.orgAuthz);

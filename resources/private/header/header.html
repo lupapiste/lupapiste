@@ -64,6 +64,11 @@
                               data-bind="text: lupapisteApp.models.currentUser.displayName, attr: {'data-test-role' : lupapisteApp.models.currentUser.role}"></span>
                     </a>
                 </div>
+                <div class="header-box">
+                    <select id="auth-role-selector" data-bind="foreach: $root.orgAuthRoles()">
+                        <option data-bind="text: $data"></option>
+                    </select>
+                </div>
                 <div id="logout-header-box" class="header-box">
                     <a data-bind="attr: {href: '/app/' + $root.currentLanguage + '/logout', 'title': loc('logout')}" >
                         <span class="lupicon-log-out"></span>

@@ -307,6 +307,7 @@ var LUPAPISTE = LUPAPISTE || {};
         showArchiveMenuOptions: self.showArchiveMenuOptions,
         showCalendarMenuOptions: self.showCalendarMenuOptions,
         calendarMenubarVisible: self.calendarMenubarVisible,
+        orgAuthRoles: lupapisteApp.models.currentUser.orgAuthRoles,
         // TODO: sync with side-panel.js sidePanelPages
         sidePanelPages: ["application","attachment","statement","neighbors","verdict"]
       };
