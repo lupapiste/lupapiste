@@ -114,6 +114,7 @@
          :as   info} @info
         published  (:published published)
         contract?  (util/=as-kw category :contract)
+        board?     true
         yes-fn     (fn []
                      (reset! state/verdict-wait? true)
                      (reset! (rum/cursor-in _meta [:enabled?]) false)
@@ -141,6 +142,23 @@
                                                                                     "pate.contract.confirm-publish"
                                                                                     "verdict.confirmpublish")
                                                                            :yesFn yes-fn}}))})
+         (when board?
+           (components/icon-button {:text-loc :verdict.proposal
+                                    :class    (common/css :primary :pate-left-space)
+                                    :test-id  :verdict-proposal
+                                    :icon     :lupicon-document-section-sign
+                                    :wait?    state/verdict-wait?
+                                    :visible? false
+                                    :enabled? (can-publish?)
+                                    :on-click (fn []
+                                                (hub/send "show-dialog"
+                                                          {:ltitle          "areyousure"
+                                                           :size            "medium"
+                                                           :component       "yes-no-dialog"
+                                                           :componentParams {:ltext (if contract?
+                                                                                      "pate.contract.confirm-publish"
+                                                                                      "verdict.confirmpublish")
+                                                                             :yesFn yes-fn}}))}))
          (components/link-button {:url      (js/sprintf "/api/raw/preview-pate-verdict?id=%s&verdict-id=%s"
                                                         @state/application-id
                                                         id)
@@ -177,6 +195,7 @@
 (rum/defc verdict < rum/reactive
   [options]
   [:div.pate-verdict
+   (println options)
    (verdict-toolbar options)
    (sections/sections options :verdict)])
 
