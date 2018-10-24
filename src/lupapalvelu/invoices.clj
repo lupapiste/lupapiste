@@ -1,6 +1,7 @@
 (ns lupapalvelu.invoices
   "A common interface for accessing invoices, price catalogues and related data"
   (:require [lupapalvelu.mongo :as mongo]
+            [monger.operators :refer [$in]]
             [schema.core :as sc]
             [sade.core :refer [ok fail] :as sade]
             [sade.schemas :as ssc]
@@ -114,3 +115,12 @@
 (defn fetch-application-operations [application-id]
   (let [application (get-application-no-access-checking application-id)]
     (get-operations-from-application application)))
+
+(defn fetch-invoices-for-organizations [organization-ids]
+  (mongo/select :invoices {:organization-id {$in organization-ids}}))
+
+(defn get-user-orgs-having-role [user role]
+  (->> (:orgAuthz user)
+       (filter (fn [[org-id roles]]
+                 (roles (keyword role))))
+       (map (comp name first))))

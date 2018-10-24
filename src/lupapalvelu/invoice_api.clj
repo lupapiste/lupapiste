@@ -98,3 +98,14 @@
    :user-authz-roles roles/all-authz-roles
    :states           states/post-submitted-states}
   [_])
+
+(defquery user-organizations-invoices
+  {:description "Query that returns invoices for users' organizations"
+   :feature          :invoices
+   :user-roles       #{:authority} ;;will be changed to laskuttaja role
+   :parameters       []}
+  [{:keys [user] :as command}]
+  (debug ">> user-organizations-invoices")
+  (let [required-role-in-orgs "authority" ;;Will be changed to laskuttaja role
+        user-orgs (invoices/get-user-orgs-having-role user required-role-in-orgs)]
+    (ok {:invoices (invoices/fetch-invoices-for-organizations user-orgs)})))

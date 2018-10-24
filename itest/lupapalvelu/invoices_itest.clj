@@ -10,7 +10,8 @@
             [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]))
 
 (def dummy-user {:id                                        "penan-id"
                  :firstName                                 "pena"
@@ -19,8 +20,7 @@
                  :email                                     "pena@panaani.fi"
                  :username                                  "pena"})
 
-(defn invoice-with [properties]
-  (let [dummy-invoice {:application-id "LP-753-2018-90108"
+(def dummy-invoice {:application-id "LP-753-2018-90108"
                        :organization-id "753-R"
                        :state "draft"
                        :operations [{:operation-id "linjasaneeraus"
@@ -30,8 +30,16 @@
                                                      :unit "kpl"
                                                      :price-per-unit 10
                                                      :units 2
-                                                     :discount-percent 0}]}]}]
-    (merge dummy-invoice properties)))
+                                                     :discount-percent 0}]}]})
+
+(defn invoice-with [properties]
+  (merge dummy-invoice properties))
+
+(defn application-with [properties]
+  (let [dummy-application {:id "APP-ID-1"
+                           :organization-id "HC_ORG"
+                           :state "draft"}]
+    (merge dummy-application properties)))
 
 (env/with-feature-value :invoices true
   (mongo/connect!)
@@ -193,4 +201,26 @@
                   (-> (local-query sonja :application-operations :id id)
                       :operations
                       first
-                      :name) => "pientalo")))))
+                      :name) => "pientalo")))
+
+
+    (fact "user-organizations-invoices"
+          (fact "should return empty seq when there's no invoices for any organization"
+                (with-redefs [invoices/get-user-orgs-having-role (fn [user role] [])]
+                  (let [result (local-query sonja :user-organizations-invoices)]
+                    (:invoices result) => [])))
+
+          (fact "should the invoices for orgs user has the role in"
+
+
+                (with-redefs [invoices/get-user-orgs-having-role (fn [user role] ["USER-ORG-1" "USER-ORG-2"])]
+
+                  (invoices/create-invoice! (->invoice-db dummy-invoice (application-with {:organization "USER-ORG-1"}) dummy-user))
+                  (invoices/create-invoice! (->invoice-db dummy-invoice (application-with {:organization "FOO-ORG"}) dummy-user))
+                  (invoices/create-invoice! (->invoice-db dummy-invoice (application-with {:organization "USER-ORG-2"}) dummy-user))
+                  (invoices/create-invoice! (->invoice-db dummy-invoice (application-with {:organization "BAR-ORG"}) dummy-user))
+
+                  (let [invoices (:invoices (local-query sonja :user-organizations-invoices))
+                        invoice-orgs (set (map :organization-id invoices))]
+                    (count invoices) => 2
+                    invoice-orgs => #{"USER-ORG-1" "USER-ORG-2"}))))))

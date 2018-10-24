@@ -1,8 +1,9 @@
 (ns lupapalvelu.invoices-test
-  (:require [lupapalvelu.invoices :refer [->invoice-user ->invoice-db get-operations-from-application]]
+  (:require [lupapalvelu.invoices :refer [->invoice-user ->invoice-db get-operations-from-application] :as invoices]
             [midje.sweet :refer :all]
             [schema.core :as sc]
-            [sade.core]))
+            [sade.core]
+            [lupapalvelu.invoices :as invoices]))
 
 (facts "->invoice-user"
        (fact "throws (validation) error when user map given as argument lack require fields for constructing an (invoice) User"
@@ -88,3 +89,28 @@
 
          (fact "returns vector contaning only primary operation when we have primary operation and secondary operation is nil"
                (get-operations-from-application mock-application-with-primary-operation-and-nil-secondary-operations) => [primary-operation])))
+
+(defn user-with [user-props]
+  (merge {:id "777777777777777777000023"
+          :username "sonja"
+          :firstName "Sonja"
+          :lastName "Sibbo"
+          :role "authority"
+          :email "sonja.sibbo@sipoo.fi"
+          :orgAuthz {:753-R #{:authority :approver} :753-YA #{:authority :approver}}
+          :language "fi"}
+         user-props))
+
+(facts "get-user-orgs-having-role"
+       (fact "returns empty coll when user has not orgs"
+             (invoices/get-user-orgs-having-role (user-with {:orgAuthz []}) "any-role") => [])
+
+       (fact "returns empty coll when user does not have the given role in any org"
+             (invoices/get-user-orgs-having-role  (user-with {:orgAuthz {:753-R #{:authority :approver}
+                                                                         :753-YA #{:authority :approver}}}) "NON-EXISTING-ROLE") => [])
+
+       (fact "returns org ids for orgs where user has the given role"
+             (invoices/get-user-orgs-having-role (user-with {:orgAuthz {:753-R #{:authority :approver}
+                                                                        :NO-AUTH-1 #{:approver}
+                                                                        :753-YA #{:authority :approver}
+                                                                        :NO-AUTH-2 #{:foobar}}})  "authority") => ["753-R" "753-YA"]))
