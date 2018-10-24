@@ -204,7 +204,7 @@
                       :name) => "pientalo")))
 
 
-    (fact "user-orgnizations-invoices"
+    (fact "user-organizations-invoices"
           (fact "should return empty seq when there's no invoices for any organization"
                 (with-redefs [invoices/get-user-orgs-having-role (fn [user role] [])]
                   (let [result (local-query sonja :user-organizations-invoices)]
