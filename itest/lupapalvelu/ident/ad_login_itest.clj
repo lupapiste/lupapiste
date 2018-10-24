@@ -68,8 +68,14 @@
         (fact "If the endpoint receives POST request without :SAMLResponse map, it returns 400"
           (let [{:keys [status body]} (client/post (saml-route "pori.fi") {:throw-exceptions false})]
             (facts "Server answers with 400 and an error message in the response body"
-              status => 400
-              body => "No SAML data found in request")))))))
+                   status => 400
+              body => "No SAML data found in request"))))
+
+      (with-redefs [log-user-in! (constantly {:success? true})
+                    resp/redirect (constantly {:success? false})]
+        (fact "Login attempt with invalid SAMLResponse fails"
+          (let [res (client/post (saml-route "pori.fi") {:form-params {:SAMLResponse {:kikka "kukka"}} :throw-exceptions false})]
+            (:body res) => "Parsing SAML response failed"))))))
 
 ;; TODO: Set up a mock SAML IdP that can receive, validate and handle a SAML authentication request
 ;; as well as send a valid response back. Ensure that the signature validation fails if the cert is tampered with.

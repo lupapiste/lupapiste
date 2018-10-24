@@ -1,5 +1,5 @@
 (ns lupapalvelu.ident.ad-login
-  (:require [taoensso.timbre :refer [debug infof warn error errorf]]
+  (:require [taoensso.timbre :refer [debug info infof warn error errorf]]
             [clj-uuid :as uuid]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
@@ -79,50 +79,61 @@
         (errorf "Domain %s does not have valid AD-login settings or has AD-login disabled" domain)
         (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host)))))))
 
+(def tila
+  (atom {}))
+
 (defpage [:post "/api/saml/ad-login/:domain"] {domain :domain}
   (let [req (request/ring-request)]
     (if-not (get-in req [:params :SAMLResponse])
       {:status 400
        :body "No SAML data found in request"}
-      (let [ad-settings (org/get-organizations-by-ad-domain domain) ; The result is a sequence of maps that contain keys :id and :ad-login
-            idp-cert (some-> ad-settings first :ad-login :idp-cert)
-            decrypter (ad-util/make-saml-decrypter (:private-key ad-config))
-            xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse])) ; The raw XML string
-            saml-resp (saml-sp/xml-string->saml-resp xml-response) ; An OpenSAML object
-            saml-info (saml-sp/saml-resp->assertions saml-resp decrypter) ; The response as a Clojure map
-            parsed-saml-info (ad-util/parse-saml-info saml-info) ; The response as a "normal" Clojure map
-            _ (infof "Received XML response for domain %s: %s" domain xml-response)
-            _ (infof "SAML response for domain %s: %s" domain saml-info)
-            _ (infof "Parsed SAML response for domain %s: %s" domain parsed-saml-info)
-            valid-signature? (if-not idp-cert
-                               false
-                               (try
-                                 (saml-sp/validate-saml-response-signature saml-resp idp-cert)
-                                 (catch java.security.cert.CertificateException e
-                                   (do
-                                     (error (.getMessage e))
-                                     false))))
-            _ (infof "SAML message signature was %s" (if valid-signature? "valid!" "invalid"))
-            {:keys [Group emailaddress givenname name surname]} (get-in parsed-saml-info [:assertions :attrs])
-            _ (infof "firstName: %s, lastName: %s, groups: %s, email: %s" givenname surname Group emailaddress)
-            ; Resolve authz. Received AD-groups are mapped the corresponding Lupis roles the organization has/organizations have.
-            ; The result is formatted like: {:609-R #{"commenter"} :609-YMP #("commenter" "reader")
-            authz (into {} (for [org-setting ad-settings
-                                 :let [{:keys [id ad-login]} org-setting
-                                       resolved-roles (ad-util/resolve-roles (:role-mapping ad-login) Group)]
-                                 :when (and (true? (:enabled ad-login))
-                                            (false? (empty? resolved-roles)))]
-                             [(keyword (:id org-setting)) resolved-roles]))
-            _ (infof "Resolved authz for user %s (domain: %s): %s" name domain authz)]
-        (cond
-          (false? (:success? parsed-saml-info)) (do
-                                                  (error "Login was not valid")
-                                                  (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
-          (and valid-signature? (seq authz)) (->> (update-or-create-user! givenname surname emailaddress authz)
-                                                  (log-user-in! req))
-          valid-signature? (do
-                             (error "User does not have organization authorization")
-                             (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
-          :else (do
-                  (error "SAML validation failed")
-                  (resp/status 403 (resp/content-type "text/plain" "Validation of SAML response failed"))))))))
+      (try
+        (let [ad-settings (org/get-organizations-by-ad-domain domain) ; The result is a sequence of maps that contain keys :id and :ad-login
+              idp-cert (some-> ad-settings first :ad-login :idp-cert)
+              decrypter (ad-util/make-saml-decrypter (:private-key ad-config))
+              xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse])) ; The raw XML string
+              _ (swap! tila assoc :xml xml-response)
+              saml-resp (saml-sp/xml-string->saml-resp xml-response) ; An OpenSAML object
+              saml-info (saml-sp/saml-resp->assertions saml-resp decrypter) ; The response as a Clojure map
+              _ (swap! tila assoc :saml saml-info)
+              parsed-saml-info (ad-util/parse-saml-info saml-info) ; The response as a "normal" Clojure map
+              _ (infof "Received XML response for domain %s: %s" domain xml-response)
+              _ (infof "SAML response for domain %s: %s" domain saml-info)
+              _ (infof "Parsed SAML response for domain %s: %s" domain parsed-saml-info)
+              valid-signature? (if-not idp-cert
+                                 false
+                                 (try
+                                   (saml-sp/validate-saml-response-signature saml-resp idp-cert)
+                                   (catch java.security.cert.CertificateException e
+                                     (do
+                                       (error (.getMessage e))
+                                       false))))
+              _ (infof "SAML message signature was %s" (if valid-signature? "valid!" "invalid"))
+              {:keys [Group emailaddress givenname name surname]} (get-in parsed-saml-info [:assertions :attrs])
+              _ (infof "firstName: %s, lastName: %s, groups: %s, email: %s" givenname surname Group emailaddress)
+              ; Resolve authz. Received AD-groups are mapped the corresponding Lupis roles the organization has/organizations have.
+              ; The result is formatted like: {:609-R #{"commenter"} :609-YMP #("commenter" "reader")
+              authz (into {} (for [org-setting ad-settings
+                                   :let [{:keys [id ad-login]} org-setting
+                                         resolved-roles (ad-util/resolve-roles (:role-mapping ad-login) Group)]
+                                   :when (and (true? (:enabled ad-login))
+                                              (false? (empty? resolved-roles)))]
+                               [(keyword (:id org-setting)) resolved-roles]))
+              _ (infof "Resolved authz for user %s (domain: %s): %s" name domain authz)]
+          (cond
+            (false? (:success? parsed-saml-info)) (do
+                                                    (error "Login was not valid")
+                                                    (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
+            (and valid-signature? (seq authz)) (->> (update-or-create-user! givenname surname emailaddress authz)
+                                                    (log-user-in! req))
+            valid-signature? (do
+                               (error "User does not have organization authorization")
+                               (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
+            :else (do
+                    (error "SAML validation failed")
+                    (resp/status 403 (resp/content-type "text/plain" "Validation of SAML response failed")))))
+        (catch Exception e
+          (do
+            (info (.getMessage e))
+            {:status 400
+             :body "Parsing SAML response failed"}))))))
