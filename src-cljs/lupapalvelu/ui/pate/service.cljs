@@ -306,10 +306,11 @@
                   :path path
                   :value value))
 
-(defn publish-and-reopen-verdict [app-id {verdict-id :id legacy? :legacy?} callback]
-  (common/command {:command (if legacy?
-                              :publish-legacy-verdict
-                              :publish-pate-verdict)
+(defn publish-and-reopen-verdict [app-id {verdict-id :id legacy? :legacy?} proposal? callback]
+  (common/command {:command (cond
+                              legacy?   :publish-legacy-verdict
+                              proposal? :publish-verdict-proposal
+                              :else     :publish-pate-verdict)
                    :success (fn []
                               (state/refresh-verdict-auths app-id
                                                            {:verdict-id verdict-id})

@@ -65,6 +65,7 @@
                        :upload.include?     (fn [_ {:keys [target]}]
                                               (= (:id target) (:id verdict)))}})))
   (reset! state/references references)
+  (common/reset-if-needed! state/proposal? false)
   (common/reset-if-needed! state/verdict-wait? false))
 
 (rum/defc verdict-section-header < rum/reactive
@@ -114,11 +115,11 @@
          :as   info} @info
         published  (:published published)
         contract?  (util/=as-kw category :contract)
-        board?     true
+        board?     (util/=as-kw (:giver info) :lautakunta)
         yes-fn     (fn []
                      (reset! state/verdict-wait? true)
                      (reset! (rum/cursor-in _meta [:enabled?]) false)
-                     (service/publish-and-reopen-verdict @state/application-id info reset-verdict))]
+                     (service/publish-and-reopen-verdict @state/application-id info state/proposal? reset-verdict))]
     [:div.pate-grid-2
      (when-not published
        [:div.row
@@ -148,17 +149,16 @@
                                     :test-id  :verdict-proposal
                                     :icon     :lupicon-document-section-sign
                                     :wait?    state/verdict-wait?
-                                    :visible? false
                                     :enabled? (can-publish?)
                                     :on-click (fn []
                                                 (hub/send "show-dialog"
                                                           {:ltitle          "areyousure"
                                                            :size            "medium"
                                                            :component       "yes-no-dialog"
-                                                           :componentParams {:ltext (if contract?
-                                                                                      "pate.contract.confirm-publish"
-                                                                                      "verdict.confirmpublish")
-                                                                             :yesFn yes-fn}}))}))
+                                                           :componentParams {:ltext "verdict.confirmproposal"
+                                                                             :yesFn #(do
+                                                                                       (reset! state/proposal? true)
+                                                                                       (yes-fn))}}))}))
          (components/link-button {:url      (js/sprintf "/api/raw/preview-pate-verdict?id=%s&verdict-id=%s"
                                                         @state/application-id
                                                         id)
@@ -195,7 +195,6 @@
 (rum/defc verdict < rum/reactive
   [options]
   [:div.pate-verdict
-   (println options)
    (verdict-toolbar options)
    (sections/sections options :verdict)])
 
