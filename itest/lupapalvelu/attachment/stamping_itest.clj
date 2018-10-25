@@ -289,23 +289,27 @@
                                         ; Wait that stamping job is done
           (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
 
-          (let [[ver1 ver2] (-> (query-application sonja application-id) :attachments last :versions)]
+          (let [[ver1 ver2] (-> (query-application sonja application-id) :attachments last :versions)
+                delete-cmd  (fn [apikey ver success?]
+                              (fact {:midje/description (str "delete attachment version should "
+                                                             (if success? "succeed" "fail"))}
+                                (command apikey :delete-attachment-version
+                                         :id application-id
+                                         :attachmentId attachment-id
+                                         :fileId (:fileId ver)
+                                         :originalFileId (:originalFileId ver))
+                                => #(if success?
+                                      (ok? %)
+                                      (expected-failure? :error.unauthorized %))))]
+            (fact "Pena cannot delete either version"
+              (delete-cmd pena ver1 false)
+              (delete-cmd pena ver2 false))
             (fact "Sonja cannot delete the non-stamped version"
               (:stamped ver1) => falsey
-              (command sonja :delete-attachment-version
-                       :id application-id
-                       :attachmentId attachment-id
-                       :fileId (:fileId ver1)
-                       :originalFileId (:originalFileId ver1))
-              => (partial expected-failure? :error.unauthorized))
+              (delete-cmd sonja ver1 false))
             (fact "Sonja can delete the stamped version"
               (:stamped ver2) => true
-              (command sonja :delete-attachment-version
-                       :id application-id
-                       :attachmentId attachment-id
-                       :fileId (:fileId ver2)
-                       :originalFileId (:originalFileId ver2))
-              => ok?)))))))
+              (delete-cmd sonja ver2 true))))))))
 
 (facts stamp-templates
   (let [result (query sipoo :stamp-templates)
