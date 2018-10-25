@@ -204,7 +204,7 @@
                :targetType nil
                :skip   0
                :limit  100
-               :sort   {:asc true :field "created"}
+               :sort   {:asc true :field "modified"}
                :trigger nil})))
 
 (defn- make-query
