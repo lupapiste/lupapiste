@@ -1,6 +1,8 @@
 (ns lupapalvelu.ident.ad-login
   (:require [taoensso.timbre :refer [debug info infof warn error errorf]]
             [clj-uuid :as uuid]
+            [clojure.data.xml :as xml]
+            [hiccup.core :as hiccup]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [noir.request :as request]
@@ -8,6 +10,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
+            [ring.util.codec :refer [form-encode form-decode-str url-encode base64-encode]]
             [ring.util.response :refer :all]
             [sade.env :as env]
             [sade.session :as ssess]
@@ -90,13 +93,16 @@
       (try
         (let [ad-settings (org/get-organizations-by-ad-domain domain) ; The result is a sequence of maps that contain keys :id and :ad-login
               idp-cert (some-> ad-settings first :ad-login :idp-cert)
+              _ (swap! tila assoc :idp-cert idp-cert)
               decrypter (ad-util/make-saml-decrypter (:private-key ad-config))
               xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse])) ; The raw XML string
-              _ (swap! tila assoc :xml xml-response)
+              _ (swap! tila assoc :xml-response xml-response)
               saml-resp (saml-sp/xml-string->saml-resp xml-response) ; An OpenSAML object
+              _ (swap! tila assoc :saml-resp saml-resp)
               saml-info (saml-sp/saml-resp->assertions saml-resp decrypter) ; The response as a Clojure map
-              _ (swap! tila assoc :saml saml-info)
+              _ (swap! tila assoc :saml-info saml-info)
               parsed-saml-info (ad-util/parse-saml-info saml-info) ; The response as a "normal" Clojure map
+              _ (swap! tila assoc :parsed-saml-info parsed-saml-info)
               _ (infof "Received XML response for domain %s: %s" domain xml-response)
               _ (infof "SAML response for domain %s: %s" domain saml-info)
               _ (infof "Parsed SAML response for domain %s: %s" domain parsed-saml-info)
@@ -133,7 +139,5 @@
                     (error "SAML validation failed")
                     (resp/status 403 (resp/content-type "text/plain" "Validation of SAML response failed")))))
         (catch Exception e
-          (do
-            (info (.getMessage e))
-            {:status 400
-             :body "Parsing SAML response failed"}))))))
+          {:status 400
+           :body "Parsing SAML response failed"})))))

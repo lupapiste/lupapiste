@@ -9,21 +9,25 @@
             [lupapalvelu.user :as usr]
             [clj-http.client :as client]
             [clojure.walk :refer [keywordize-keys]]
+            [hiccup.core :as hiccup]
             [noir.response :as resp]
+            [monger.operators :refer :all]
             [reitit.ring :as reitit-ring]
+            [ring.util.codec :refer [form-encode url-encode base64-encode]]
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.xml :as sxml]
+            [saml20-clj.shared :as saml-shared]
             [midje.sweet :refer :all]))
 
-(defn metadata-route [domain]
-  (format "%s/api/saml/metadata/%s" (env/value :host) domain))
-
-(defn saml-route [domain]
-  (format "%s/api/saml/ad-login/%s" (env/value :host) domain))
+(defn parse-route [domain & [metadata?]]
+  (format "%s/api/saml/%s/%s" (env/value :host)
+          (if metadata? "metadata" "ad-login")
+          domain))
 
 (when (env/feature? :ad-login)
-  (let [test-db (format "test_ad_login_itest_%s" (now))]
+  (let [test-db (format "test_ad_login_itest_%s" (now))
+        pori-route (parse-route "pori.fi")]
     (mongo/with-db test-db
       (fixture/apply-fixture "minimal")
 
@@ -48,7 +52,7 @@
             (= "terttu@panaani.fi" (get-in session [:user :email])) => true)))
 
       (fact "The metadata route works"
-        (let [res (client/get (metadata-route "pori.fi"))
+        (let [res (client/get (parse-route "pori.fi" true))
               body (-> res :body sxml/parse sxml/xml->edn)
               cert (-> body
                        (get-in [:md:EntityDescriptor :md:SPSSODescriptor :md:KeyDescriptor])
@@ -66,16 +70,38 @@
 
       (fact "Testing the main login route"
         (fact "If the endpoint receives POST request without :SAMLResponse map, it returns 400"
-          (let [{:keys [status body]} (client/post (saml-route "pori.fi") {:throw-exceptions false})]
+          (let [{:keys [status body]} (client/post pori-route {:throw-exceptions false})]
             (facts "Server answers with 400 and an error message in the response body"
                    status => 400
               body => "No SAML data found in request"))))
 
-      (with-redefs [log-user-in! (constantly {:success? true})
-                    resp/redirect (constantly {:success? false})]
+      (with-redefs [saml20-clj.sp/get-idp-redirect (constantly {:status 302 :body "Redirect succeeded"})
+                    resp/redirect (constantly {:status 302 :body "No AD-settings active"})]
+        (fact "GET requests to SAML paths of organizations with ad-login activated result to a successful redirect"
+          (let [res (client/get pori-route)]
+            (-> pori-route client/get :body) => "Redirect succeeded"))
+
+        (fact "GET requests to SAML paths of organizations with ad-login activated result to a successful redirect"
+          (let [res (client/get (parse-route "torttu paikka"))]
+            (:body res) => "No AD-settings active"))
+
         (fact "Login attempt with invalid SAMLResponse fails"
-          (let [res (client/post (saml-route "pori.fi") {:form-params {:SAMLResponse {:kikka "kukka"}} :throw-exceptions false})]
-            (:body res) => "Parsing SAML response failed"))))))
+          (let [res (client/post pori-route {:form-params {:SAMLResponse {:kikka "kukka"}} :throw-exceptions false})]
+            (:body res) => "Parsing SAML response failed")))))
+
+  (with-redefs [resp/redirect (constantly {:status 302 :body "No AD-settings active"})]
+    (fact "Ad login as Pori will not work if we disable their ad-login"
+      (do
+        (org/update-organization "609-R" {$set {:ad-login.enabled false}})
+        (-> (parse-route "pori.fi") client/get :body) => "No AD-settings active"
+        (org/update-organization "609-R" {$set {:ad-login.enabled true}})))))
+
+        ; #_(fact "Login attempt with valid response works"
+        ;   (let [resp (client/post pori-route {:form-params {:SAMLResponse jou}})]
+        ;     (= 1 1) => resp))))
+
+
 
 ;; TODO: Set up a mock SAML IdP that can receive, validate and handle a SAML authentication request
 ;; as well as send a valid response back. Ensure that the signature validation fails if the cert is tampered with.
+
