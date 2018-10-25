@@ -77,6 +77,7 @@
                  :sign-attachments ; allow signing attachments always
                  :set-attachment-meta ; Allowed for archivist
                  :set-attachment-type ; Allowed for archivist
+                 :delete-attachment-version ; readonly pre-check part of `some-pre-check`
                  })
 
 (facts "only authority may edit attachments in terminal state"
