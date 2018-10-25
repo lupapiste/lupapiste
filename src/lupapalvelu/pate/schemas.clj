@@ -144,7 +144,8 @@
                                                  (sc/optional-key :attachment-id) ssc/AttachmentId}
           :state                                (wrapped (sc/enum "draft"
                                                                   "publishing"
-                                                                  "published")
+                                                                  "published"
+                                                                  "proposal")
                                                          true)
           :modified                             ssc/Timestamp
           :data                                 sc/Any

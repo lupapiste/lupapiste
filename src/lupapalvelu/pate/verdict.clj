@@ -965,6 +965,7 @@
                                 (:data (enrich-verdict command
                                                        verdict))
                                 data)
+                        :giver (:giver template)
                         :inclusions (:inclusions template))
      :references (:references verdict)}))
 
@@ -1129,6 +1130,15 @@
            (concat data-kws
                    [:template.inclusions :state
                     :published.published :archive]))))
+
+(defn finalize--proposal [{:keys [command verdict]}]
+  (let [verdict           (assoc (enrich-verdict command verdict true)
+                            :state (wrapped-state command :proposal))
+        data-kws          (map #(util/kw-path :data %)
+                               (-> verdict :data keys))]
+    (apply verdict->updates verdict
+           (concat data-kws
+                   [:template.inclusions :state]))))
 
 (defn finalize--signatures
   [{:keys [command verdict]}]
@@ -1358,7 +1368,8 @@
                                       :verdict     verdict
                                       :updates     {}
                                       :commit-fns  []}
-                                     finalize--fns)]
+                                     finalize--fns)
+        _ (clojure.pprint/pprint (update verdict :category name))]
     (sc/validate schemas/PateVerdict (update verdict :category name))
     (verdict-update command updates)
     (doseq [fun (remove nil? commit-fns)]
@@ -1656,3 +1667,16 @@
   (let [signer        (get-user-by-id (:signer-id data))
         request       (create-signature {:application application :user signer :created created})]
     (verdict-update command {$push {:pate-verdicts.$.signature-requests request}})))
+
+;; ----------------------------
+;; Signatures
+;; ----------------------------
+
+(defn publish-verdict-proposal
+  "Publishing verdict proposal does the following:
+    1. Generates PDF/A for vedict proposal
+    2. Updates verdict state to proposal"
+  [{:keys [application] :as command}]
+  (process-finalize-pipeline command application (command->verdict command)
+                             finalize--proposal
+                             finalize--pdf))

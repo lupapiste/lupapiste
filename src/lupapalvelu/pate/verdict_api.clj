@@ -444,3 +444,21 @@
    :on-success       (notify :application-state-change)}
   [command]
   (ok (verdict/publish-verdict command)))
+
+;; ------------------------------------------
+;; Verdict proposal
+;; ------------------------------------------
+
+(defcommand publish-verdict-proposal
+  {:description      "Publishes verdict proposal."
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :categories       #{:pate-verdicts}
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :states           (set/difference states/post-submitted-states
+                                     #{:finished})
+   :pre-checks       [pate-enabled
+                      (verdict-exists :draft? :modern?)
+                      verdict-filled]}
+  [command]
+  (ok (verdict/publish-verdict-proposal command)))
