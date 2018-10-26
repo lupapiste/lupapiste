@@ -544,7 +544,6 @@
 
           (catch Exception exn
             (let [operation-name (route-name->string (-> (reitit/match-by-path allu-router uri) :data :name))]
-              (.printStackTrace exn *err*)                  ;;FIXME: Remove this
               (error operation-name "failed:" (type exn) (.getMessage exn))
               (error "Rolling back" operation-name))
             (jms/rollback session))))))
