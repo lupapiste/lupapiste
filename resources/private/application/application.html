@@ -381,7 +381,7 @@
                     <!-- /ko -->
 
                     <!-- Pate invoice tab -->
-                    <!-- ko if: $root.authorization.ok( 'invoices-tab') -->
+                    <!-- ko if: selectedTabName() == 'invoice' && $root.authorization.ok( 'invoices-tab') -->
                     <div id="application-invoice-tab"
                          class="tab-content feature--no-border" data-bind="feature: 'invoices'">
                       <cljs-invoices_invoices></cljs-invoices_invoices>
