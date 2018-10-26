@@ -84,7 +84,7 @@
       (fact "when an AD-group has been mapped to an LP role, it's resolved"
         (resolve-authz valid-settings ["comment" "heavy metal samurai"]) => {:609-R #{"commenter"}})
       (fact "when not, the result is empty"
-        (resolve-authz valid-settings ["jee jee moi äiti"]))
+        (resolve-authz valid-settings ["jee jee moi äiti"]) => {})
       (fact "when multiple organizations have roles found in the received group list, all are resolved"
             (let [multiple-settings (conj valid-settings (make-settings "123-YMP" {:commenter "comment"
                                                                                    :nytnykii "tero on best"}))]
