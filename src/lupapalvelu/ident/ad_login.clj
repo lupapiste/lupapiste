@@ -1,8 +1,6 @@
 (ns lupapalvelu.ident.ad-login
   (:require [taoensso.timbre :refer [debug info infof warn error errorf]]
             [clj-uuid :as uuid]
-            [clojure.data.xml :as xml]
-            [hiccup.core :as hiccup]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [noir.request :as request]
@@ -99,8 +97,7 @@
               _ (swap! tila assoc :xml-response xml-response)
               saml-resp (saml-sp/xml-string->saml-resp xml-response) ; An OpenSAML object
               _ (swap! tila assoc :saml-resp saml-resp)
-              saml-info (saml-sp/saml-resp->assertions saml-resp decrypter) ; The response as a Clojure map
-              _ (swap! tila assoc :saml-info saml-info)
+              saml-info (saml-sp/saml-resp->assertions saml-resp decrypter) ; The response as a Clojure map _ (swap! tila assoc :saml-info saml-info)
               parsed-saml-info (ad-util/parse-saml-info saml-info) ; The response as a "normal" Clojure map
               _ (swap! tila assoc :parsed-saml-info parsed-saml-info)
               _ (infof "Received XML response for domain %s: %s" domain xml-response)
@@ -119,12 +116,7 @@
               _ (infof "firstName: %s, lastName: %s, groups: %s, email: %s" givenname surname Group emailaddress)
               ; Resolve authz. Received AD-groups are mapped the corresponding Lupis roles the organization has/organizations have.
               ; The result is formatted like: {:609-R #{"commenter"} :609-YMP #("commenter" "reader")
-              authz (into {} (for [org-setting ad-settings
-                                   :let [{:keys [id ad-login]} org-setting
-                                         resolved-roles (ad-util/resolve-roles (:role-mapping ad-login) Group)]
-                                   :when (and (true? (:enabled ad-login))
-                                              (false? (empty? resolved-roles)))]
-                               [(keyword (:id org-setting)) resolved-roles]))
+              authz (ad-util/resolve-authz ad-settings Group)
               _ (infof "Resolved authz for user %s (domain: %s): %s" name domain authz)]
           (cond
             (false? (:success? parsed-saml-info)) (do

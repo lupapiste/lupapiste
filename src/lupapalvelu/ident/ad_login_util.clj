@@ -20,12 +20,12 @@
   [certstring]
   (ss/replace certstring #"[\n ]|(BEGIN|END) CERTIFICATE|(BEGIN|END) PRIVATE KEY|-{5}" ""))
 
-(defn string->certificate [certstring]
+(defn- string->certificate [certstring]
   (let [cf (java.security.cert.CertificateFactory/getInstance "X.509")
         bytestream (ByteArrayInputStream. (.getBytes certstring))]
     (.generateCertificate cf bytestream)))
 
-(defn string->private-key [keystring]
+(defn- string->private-key [keystring]
   (let [kf (java.security.KeyFactory/getInstance "RSA")
         pksc8EncodedBytes (.decode (Base64/getDecoder) (parse-certificate keystring))
         keySpec (java.security.spec.PKCS8EncodedKeySpec. pksc8EncodedBytes)]
@@ -40,9 +40,6 @@
   (let [private-key (string->private-key keystring)
         cert (string->certificate certstring)
         sig-algo org.apache.xml.security.signature.XMLSignature/ALGO_ID_SIGNATURE_RSA_SHA256]
-    ;; https://svn.apache.org/repos/asf/santuario/xml-security-java/trunk/samples/org/apache/xml/security/samples/signature/CreateSignature.java
-    ;; http://stackoverflow.com/questions/2052251/is-there-an-easier-way-to-sign-an-xml-document-in-java
-    ;; Also useful: http://www.di-mgt.com.au/xmldsig2.html
     (fn sign-xml-doc [xml-string]
       (let [xmldoc (saml-xml/str->xmldoc xml-string)
             transforms (doto (new Transforms xmldoc)
@@ -132,3 +129,14 @@
                        (when (ad-roles-set ad-role)
                          (name lp-role)))]
     (->> orgAuthz (remove nil?) set)))
+
+(defn resolve-authz
+  "Takes a sequence of ad-settings (as returned by 'lupapalvelu.organization/get-organizations-by-ad-domain')
+  and a sequence of ad-groups received in the SAML response, returns a parsed orgAuthz element."
+  [ad-settings Group]
+  (into {} (for [org-setting ad-settings
+                 :let [{:keys [id ad-login]} org-setting
+                       resolved-roles (resolve-roles (:role-mapping ad-login) Group)]
+                 :when (and (true? (:enabled ad-login))
+                            (false? (empty? resolved-roles)))]
+             [(keyword (:id org-setting)) resolved-roles])))

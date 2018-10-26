@@ -72,7 +72,7 @@
         (fact "If the endpoint receives POST request without :SAMLResponse map, it returns 400"
           (let [{:keys [status body]} (client/post pori-route {:throw-exceptions false})]
             (facts "Server answers with 400 and an error message in the response body"
-                   status => 400
+              status => 400
               body => "No SAML data found in request"))))
 
       (with-redefs [saml20-clj.sp/get-idp-redirect (constantly {:status 302 :body "Redirect succeeded"})
@@ -87,7 +87,12 @@
 
         (fact "Login attempt with invalid SAMLResponse fails"
           (let [res (client/post pori-route {:form-params {:SAMLResponse {:kikka "kukka"}} :throw-exceptions false})]
-            (:body res) => "Parsing SAML response failed")))))
+            (:body res) => "Parsing SAML response failed")))
+
+      (with-redefs [log-user-in! (constantly {:status 302 :body "Login successful!"})]
+        (fact "Login attempt with valid response works"
+          (let [resp (client/post pori-route {:form-params {:SAMLResponse "tuttifrutti"} :throw-exceptions false})]
+            "jou" => resp)))))
 
   (with-redefs [resp/redirect (constantly {:status 302 :body "No AD-settings active"})]
     (fact "Ad login as Pori will not work if we disable their ad-login"
@@ -96,9 +101,6 @@
         (-> (parse-route "pori.fi") client/get :body) => "No AD-settings active"
         (org/update-organization "609-R" {$set {:ad-login.enabled true}})))))
 
-        ; #_(fact "Login attempt with valid response works"
-        ;   (let [resp (client/post pori-route {:form-params {:SAMLResponse jou}})]
-        ;     (= 1 1) => resp))))
 
 
 
