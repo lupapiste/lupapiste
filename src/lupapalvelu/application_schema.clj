@@ -6,33 +6,121 @@
             [lupapalvelu.states :as states]))
 
 
+(defschema Verkostoliittymat
+  {(sc/optional-key :viemariKytkin)   sc/Bool
+   (sc/optional-key :vesijohtoKytkin) sc/Bool
+   (sc/optional-key :sahkoKytkin)     sc/Bool
+   (sc/optional-key :maakaasuKytkin)  sc/Bool
+   (sc/optional-key :kaapeliKytkin)   sc/Bool})
+
+(defschema Osoite
+  {(sc/optional-key :kunta)                         sc/Str
+   (sc/optional-key :lahiosoite)                    sc/Str
+   (sc/optional-key :osoitenumero)                  sc/Str
+   (sc/optional-key :osoitenumero2)                 sc/Str
+   (sc/optional-key :jakokirjain)                   sc/Str
+   (sc/optional-key :jakokirjain2)                  sc/Str
+   (sc/optional-key :porras)                        sc/Str
+   (sc/optional-key :huoneisto)                     sc/Str
+   (sc/optional-key :postinumero)                   sc/Str
+   (sc/optional-key :postitoimipaikannimi)          sc/Str})
+
+(defschema Mitat
+  {(sc/optional-key :tilavuus)                       sc/Str
+   (sc/optional-key :kokonaisala)                    sc/Str
+   (sc/optional-key :kellarinpinta-ala)              sc/Str
+   (sc/optional-key :kerrosluku)                     sc/Str
+   (sc/optional-key :kerrosala)                      sc/Str
+   (sc/optional-key :rakennusoikeudellinenKerrosala) sc/Str})
+
+(defschema Varusteet
+  {(sc/optional-key :sahkoKytkin)                  sc/Bool
+   (sc/optional-key :kaasuKytkin)                  sc/Bool
+   (sc/optional-key :viemariKytkin)                sc/Bool
+   (sc/optional-key :vesijohtoKytkin)              sc/Bool
+   (sc/optional-key :lamminvesiKytkin)             sc/Bool
+   (sc/optional-key :aurinkopaneeliKytkin)         sc/Bool
+   (sc/optional-key :hissiKytkin)                  sc/Bool
+   (sc/optional-key :koneellinenilmastointiKytkin) sc/Bool
+   (sc/optional-key :saunoja)                      sc/Int
+   (sc/optional-key :uima-altaita)                 sc/Int
+   (sc/optional-key :vaestonsuoja)                 sc/Int})
+
+(defschema Huoneisto
+  {(sc/optional-key :huoneistonumero)         sc/Str
+   (sc/optional-key :jakokirjain)             sc/Str
+   (sc/optional-key :porras)                  sc/Str
+   (sc/optional-key :huoneistoTyyppi)         sc/Str
+   (sc/optional-key :huoneistoala)            sc/Str
+   (sc/optional-key :huoneluku)               sc/Str
+   (sc/optional-key :keittionTyyppi)          sc/Str
+   (sc/optional-key :WCKytkin)                sc/Bool
+   (sc/optional-key :ammeTaiSuihkuKytkin)     sc/Bool
+   (sc/optional-key :lamminvesiKytkin)        sc/Bool
+   (sc/optional-key :parvekeTaiTerassiKytkin) sc/Bool
+   (sc/optional-key :saunaKytkin)             sc/Bool
+   (sc/optional-key :muutostapa)              sc/Str})
+
+(defschema WFS-building
+  {(sc/optional-key :muutostyolaji)                      sc/Any ;;TODO: Find out correct type
+   (sc/optional-key :valtakunnallinenNumero)             sc/Str
+   (sc/optional-key :kunnanSisainenPysyvaRakennusnumero) sc/Str
+   (sc/optional-key :rakennusnro)                        sc/Str
+   (sc/optional-key :manuaalinen_rakennusnro)            sc/Str
+   (sc/optional-key :jarjestysnumero)                    sc/Str
+   (sc/optional-key :kiinttun)                           sc/Str
+   (sc/optional-key :verkostoliittymat)                  Verkostoliittymat
+   (sc/optional-key :osoite)                             Osoite
+   (sc/optional-key :kaytto)                             {(sc/optional-key :kayttotarkoitus)              sc/Str  ;;TODO: Enumeration or just String?
+                                                          (sc/optional-key :rakentajaTyyppi)              sc/Str}
+   (sc/optional-key :luokitus)                           {(sc/optional-key :energialuokka)                sc/Str
+                                                          (sc/optional-key :energiatehokkuusluku)         sc/Str
+                                                          (sc/optional-key :energiatehokkuusluvunYksikko) sc/Str
+                                                          (sc/optional-key :paloluokka)                   sc/Str}
+   (sc/optional-key :mitat)                              Mitat
+   (sc/optional-key :rakenne)                            {(sc/optional-key :julkisivu)                    sc/Str
+                                                          (sc/optional-key :kantavaRakennusaine)          sc/Str  ;;TODO: Enumeration or just String?
+                                                          (sc/optional-key :rakentamistapa)               sc/Str}
+   (sc/optional-key :lammitys)                           {(sc/optional-key :lammitystapa)                 sc/Str  ;;TODO: Enumeration or just String?
+                                                          (sc/optional-key :lammonlahde)                  sc/Str} ;;TODO: Enumeration or just String?
+   (sc/optional-key :varusteet)                          Varusteet
+   (sc/optional-key :rakennuksenOmistajat)               [sc/Any] ;;TODO: Find out correct type
+   (sc/optional-key :huoneistot)                         [Huoneisto]})
+
 (defschema Operation
   {:id                            ssc/ObjectIdStr
    :name                          sc/Str
    :created                       ssc/Timestamp
    (sc/optional-key :description) (sc/maybe sc/Str)})
 
+(defschema Document-building
+  {:id       ssc/ObjectIdStr
+   :vtj-prt  sc/Str
+   :building WFS-building
+   :created  ssc/Timestamp})
+
 (defschema Application                                      ; WIP, used initially in state-change JSON
-  {:id                               ssc/ApplicationId
-   :primaryOperation                 Operation
-   :secondaryOperations              [Operation]
-   :propertyId                       sc/Str
-   :municipality                     sc/Str
-   :location                         [(sc/one sc/Num "X") (sc/one sc/Num "Y")]
-   :location-wgs84                   [(sc/one sc/Num "X") (sc/one sc/Num "Y")]
-   :address                          sc/Str
-   :state                            (apply sc/enum (map name states/all-states))
-   :permitType                       (apply sc/enum (map name (keys (permit/permit-types))))
-   :permitSubtype                    (sc/maybe (->> (concat
-                                                      (->> (permit/permit-types) vals (map :subtypes) flatten distinct)
-                                                      (->> (vals op/operations) (map :subtypes) flatten distinct))
-                                                    (distinct)
-                                                    (remove nil?)
-                                                    (map name)
-                                                    (apply sc/enum)))
-   :applicant                        (sc/maybe sc/Str)
-   :infoRequest                      sc/Bool
-   (sc/optional-key :3dMapActivated) (sc/maybe sc/Num)
+  {:id                                   ssc/ApplicationId
+   :primaryOperation                     Operation
+   :secondaryOperations                  [Operation]
+   :propertyId                           sc/Str
+   :municipality                         sc/Str
+   :location                             [(sc/one sc/Num "X") (sc/one sc/Num "Y")]
+   :location-wgs84                       [(sc/one sc/Num "X") (sc/one sc/Num "Y")]
+   :address                              sc/Str
+   :state                                (apply sc/enum (map name states/all-states))
+   :permitType                           (apply sc/enum (map name (keys (permit/permit-types))))
+   :permitSubtype                        (sc/maybe (->> (concat
+                                                          (->> (permit/permit-types) vals (map :subtypes) flatten distinct)
+                                                          (->> (vals op/operations) (map :subtypes) flatten distinct))
+                                                        (distinct)
+                                                        (remove nil?)
+                                                        (map name)
+                                                        (apply sc/enum)))
+   :applicant                            (sc/maybe sc/Str)
+   :infoRequest                          sc/Bool
+   (sc/optional-key :3dMapActivated)     (sc/maybe sc/Num)
+   (sc/optional-key :document-buildings) [Document-building]
    })
 
 (def permitSubtypes

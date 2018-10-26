@@ -170,7 +170,11 @@
       :omistajatieto (remove nil? (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))))))
 
 (defn- get-rakennus-data [application doc]
-  (let [document-building (->> (filter #(= (:document-id %) (:id doc)) (:document-buildings application)) first :building)
+  (let [doc-vtj-prt (get-in doc [:data :valtakunnallinenNumero :value])
+        document-building (->> (filter #(and (= (:vtj-prt %) doc-vtj-prt)
+                                             (not (nil? (:vtj-prt %)))) (:document-buildings application))
+                               first
+                               :building)
         building (util/deep-merge-with
                    (fn [first-val second-val] (if-not (nil? second-val) second-val first-val))
                    (get-rakennus application {:schema-info (:schema-info doc) :data document-building})

@@ -207,10 +207,10 @@
 (defn add-value-metadata [m meta-data]
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
-(defn- load-building-data [url credentials property-id building-id overwrite-all? application document-id]
+(defn- load-building-data [url credentials property-id building-id overwrite-all? application]
   (let [all-data (building-reader/->rakennuksen-tiedot (building-reader/building-xml url credentials property-id) building-id)]
     (when all-data
-      (building/upsert-document-buildings application all-data document-id))
+      (building/upsert-document-buildings application all-data))
     (if overwrite-all?
       all-data
       (select-keys all-data (keys building-reader/empty-building-ids)))))
@@ -252,10 +252,8 @@
                             (fn [[path _]] (model/find-by-name (:body schema) path))
                             (tools/path-vals
                               (if clear-ids?
-                                (do
-                                  (building/remove-document-building application documentId)
-                                  building-reader/empty-building-ids)
-                                (load-building-data url credentials propertyId buildingId overwrite application documentId))))
+                                building-reader/empty-building-ids
+                                (load-building-data url credentials propertyId buildingId overwrite application))))
             krysp-update-map (doc-persistence/validated-model-updates application collection document krysp-updates created :source "krysp")
 
             {:keys [mongo-query mongo-updates]} (util/deep-merge
@@ -265,15 +263,6 @@
         (update-application command mongo-query mongo-updates)
         (ok))
       (fail :error.no-legacy-available))))
-
-(defcommand remove-document-building
-  {:parameters       [id documentId]
-   :input-validators [(partial action/non-blank-parameters [:documentId])]
-   :permissions      [{:required [:application/edit]}]
-   :states           krysp-enrichment-states}
-  [{:keys [application]}]
-  (building/remove-document-building application documentId)
-  (ok))
 
 ;;
 ;; Building info

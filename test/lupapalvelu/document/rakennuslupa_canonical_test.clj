@@ -357,7 +357,7 @@
 
 (def document-building
   {:id "5bcdb8eaf70b0924847661f2"
-   :document-id "5bc9b7e1f70b0924847661c3"
+   :vtj-prt "199887766E"
    :building {:kiinttun "75300301050006"
               :rakennuksenOmistajat {:0 {:_selected "yritys"
                                          :henkilo {:userId nil
@@ -1260,17 +1260,18 @@
 (facts "Rakennustiedot - merged data with building data from WFS"
   (against-background
     (org/pate-scope? irrelevant) => true)
-  (let [doc (tools/unwrapped {:schema-info {:name "rakennuksen-muuttaminen"}
-                              :id          "5bc9b7e1f70b0924847661c3"
-                              :data        {:kaytto  {:rakentajaTyyppi {:value "muu"}
-                                                      :kayttotarkoitus {:value "012 kahden asunnon talot"}}
-                                            :mitat   {:tilavuus  "800"
-                                                      :kerrosala "200"
-                                                      :muutosala "50"}
-                                            :rakenne {:rakentamistapa "paikalla"
-                                                      :julkisivu      "tiili"}}})
+  (let [doc {:schema-info {:name "rakennuksen-muuttaminen"}
+                           :id   "5bc9b7e1f70b0924847661c3"
+                           :data {:kaytto  {:rakentajaTyyppi {:value "muu"}
+                                            :kayttotarkoitus {:value "012 kahden asunnon talot"}}
+                                  :mitat   {:tilavuus  "800"
+                                            :kerrosala "200"
+                                            :muutosala "50"}
+                                  :rakenne {:rakentamistapa "paikalla"
+                                            :julkisivu      "tiili"}
+                                  :valtakunnallinenNumero {:value "199887766E"}}}
         {rakennus :Rakennus} (get-rakennus-data (assoc application-rakennuslupa :document-buildings [document-building]) doc)
-        building-data        (:rakennuksenTiedot rakennus)]
+        building-data (tools/unwrapped (:rakennuksenTiedot rakennus))]
 
     (fact "There is all data from document"
       (:kayttotarkoitus building-data) => "012 kahden asunnon talot"
@@ -1300,7 +1301,25 @@
                                      :aurinkopaneeliKytkin false
                                      :koneellinenilmastointiKytkin true
                                      :sahkoKytkin true
-                                     :lamminvesiKytkin true})))
+                                     :lamminvesiKytkin true})
+
+    (fact "Missing shouldnt match when missing vtj-prt"
+      (let [doc {:schema-info {:name "rakennuksen-muuttaminen"}
+                 :id          "5bc9b7e1f70b0924847661c3"}
+            {rakennus :Rakennus} (get-rakennus-data
+                                   (assoc application-rakennuslupa :document-buildings [(dissoc document-building :vtj-prt)])
+                                   doc)]
+        (:rakennuksenTiedot rakennus) => {:kayttotarkoitus nil
+                                          :lammitystapa nil
+                                          :liitettyJatevesijarjestelmaanKytkin false
+                                          :rakennustunnus {:jarjestysnumero nil
+                                                           :kiinttun "21111111111111"
+                                                           :muuTunnustieto [{:MuuTunnus {:sovellus "toimenpideId" :tunnus nil}}
+                                                                            {:MuuTunnus {:sovellus "Lupapiste" :tunnus nil}}]}
+                                          :rakentamistapa nil
+                                          :varusteet {}
+                                          :verkostoliittymat {}}))))
+
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
   (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]
