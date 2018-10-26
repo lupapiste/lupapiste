@@ -14,6 +14,7 @@ LUPAPISTE.CurrentUser = function() {
     phone:          "",
     username:       "",
     language:       "",
+    orgNames:       undefined,
     orgAuthz:       undefined,
     company: {
       id:   undefined,
@@ -53,7 +54,11 @@ LUPAPISTE.CurrentUser = function() {
     if (user.firstLogin) {
       hub.send("first-login", {user: user});
     }
+
     ko.mapping.fromJS(_.defaults(user, defaults), {}, self);
+    ajax.query("organization-names-by-user", {})
+      .success(function (res) { self.orgNames(res.orgNames); })
+      .call();
   }
 
   constructor({});
@@ -90,12 +95,19 @@ LUPAPISTE.CurrentUser = function() {
       && !_.get( self.orgAuthz(), app.organization());
   }
 
-  self.orgAuthRoles = ko.pureComputed(function () {
-    var formatAuthz = function (orgId, authz) {
-      return _.map(_.uniq(_.map(authz, function (auth) { return auth === "authorityAdmin" ? auth : "authority"; })),
-                   function (auth) { return orgId + " " + auth });
+  self.usagePurposes = ko.pureComputed(function () {
+    var authPurpose = function (auth) { return auth === "authorityAdmin" ? "orgAdminstration" : "permitting"; };
+    var formatPurpose = function (orgId, purpose) {
+      if (purpose === "orgAdminstration") {
+        return self.orgNames()[orgId][self.language()] + " " + purpose;
+      } else {
+        return purpose;
+      }
     };
-    return _.map(self.orgAuthz(), function (authz, orgId) { return formatAuthz(orgId, authz()); });
+    var orgPurposes = function (orgId, authz) {
+      return _.map(_.map(authz, authPurpose), _.bind(formatPurpose, self, orgId));
+    };
+    return _.uniq(_.flatten(_.map(self.orgAuthz(), function (authz, orgId) { return orgPurposes(orgId, authz()); })));
   });
 
   self.organizationAdminOrgs = ko.pureComputed(function () {

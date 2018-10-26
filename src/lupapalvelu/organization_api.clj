@@ -14,6 +14,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.schema-util :as pate-schema]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]
@@ -144,8 +145,15 @@
         distinct
         (ok :attachmentTypes)))
 
+(defquery organization-names-by-user
+  {:description "User organization names for all languages."
+   :user-roles  roles/all-authenticated-user-roles}
+  [{:keys [user]}]
+  (let [orgs (->> user :orgAuthz (map (util/fn-> key name org/get-organization)))]
+    (ok :orgNames (into {} (map (juxt :id :name)) orgs))))
+
 (defquery organization-name-by-user
-  {:description "Lists organization names for all languages."
+  {:description "authorityAdmin organization name for all languages."
    :permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (ok (-> (usr/authority-admins-organization-id user)
