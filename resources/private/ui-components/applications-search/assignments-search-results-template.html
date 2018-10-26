@@ -41,7 +41,7 @@
               </td>
               <td data-bind="text: $data.description"            data-test-col-name="description"></td>
               <td data-bind="fullName: $data.createdState.user"  data-test-col-name="creator"></td>
-              <td data-bind="dateTimeString: $data.createdState.timestamp" data-test-col-name="created"></td>
+              <td data-bind="dateTimeString: $data.modified" data-test-col-name="modified"></td>
               <td data-test-col-name="complete">
                 <!-- ko if: $parent.completeEnabled && $data.incomplete -->
                 <button data-bind="click: $parent.markComplete($data.id),

@@ -28,6 +28,11 @@
 (def ^:private invalid-assignment?
   (partial expected-failure? "error.invalid-assignment-id"))
 
+(def ely-trigger-id "dead1111111111111111beef")
+(def general-role-id "abba1111111111111111acdc")
+(def aita-trigger-id "dead1111111111111112beef")
+(def kvv-role-id "abba1111111111111112acdc")
+
 (facts "Querying assignments"
 
   (fact "only authorities can see assignments"
@@ -198,7 +203,7 @@
           assignment-id1 (:id (create-assignment sonja sonja-id app-id [{:group "parties" :id (:id designer-doc)}] "Tarkista!"))
           assignment-id2 (:id (create-assignment sonja sonja-id app-id [{:group "parties" :id (:id designer-doc)}
                                                                         {:group "parties" :id (:id maksaja-doc)}] "Kaksi kohdetta"))
-          assignments         (get-user-assignments sonja)
+          assignments         (sort-by :modified (get-user-assignments sonja))
           designer-assignment (util/find-first #(= "parties" (get-in % [:targets 0 :group])) assignments)]
       (fact "assignment has designer target"
         (:id designer-assignment) => assignment-id1)
@@ -308,7 +313,7 @@
       (-> (query sonja :assignments-search :searchText "uva eks" :state "all")
           :data :assignments) => empty?)
 
-    (fact "get results again when cancalation is reverted"
+    (fact "get results again when cancelation is reverted"
       (command sonja :undo-cancellation :id id1) => ok?
       (-> (query sonja :assignments-search :searchText "uva eks" :state "all")
           :data :assignments count) => 1)
@@ -352,31 +357,70 @@
        (map :recipient)
        (filter #(= (:roleId %) role-id))))
 
+(defn prepare-application-and-assignments
+  "1. Creates and submits application
+   2. Adds assignment to Sonja
+   3. Makes Sonja general handler
+   4. Adds aitapiirustus and thus implicitly also a triggered assignment.
+   Returns app-id, handler-id, attachment-id map."
+  []
+  (let [{app-id :id
+         docs   :documents} (create-and-submit-application pena
+                                                           :propertyId sipoo-property-id
+                                                           :operation "pientalo")
+        doc-id              (-> docs first :id)]
+    (create-assignment ronja sonja-id app-id [{:group "group" :id doc-id}] "Todo!")
+    (let [{handler-id :id} (command ronja :upsert-application-handler
+                                    :id app-id
+                                    :roleId general-role-id
+                                    :userId (id-for-key sonja))
+          attachment-id    (upload-file-and-bind pena
+                                                 app-id
+                                                 {:type     {:type-group "paapiirustus"
+                                                             :type-id    "aitapiirustus"}
+                                                  :contents "Aitaa kaatuu!"})]
+      handler-id => truthy
+      attachment-id => truthy
+      (fact "The applicattion now has two assignments"
+        (:assignments (query ronja :assignments-for-application :id app-id))
+        => (just [(contains {:trigger     "user-created"
+                             :status      "active"
+                             :description "Todo!"
+                             :recipient   (contains {:firstName "Sonja"})})
+                  (contains {:trigger     aita-trigger-id
+                             :status      "active"
+                             :description "Aita ja asema"
+                             :recipient   (contains {:firstName "Sonja"
+                                                     :handlerId handler-id
+                                                     :roleId    general-role-id})})]
+                 :in-any-order))
+      {:app-id app-id :handler-id handler-id :attachment-id attachment-id})))
+
 (facts "automatic assignments"
   (let [trigger-resp   (command sipoo :upsert-assignment-trigger
                                 :description "Paapiirustuksia"
                                 :targets ["paapiirustus.asemapiirros" "paapiirustus.pohjapiirustus" "hakija.valtakirja"
                                           "pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma"]
-                                :handler {:id "abba1111111111111112acdc" :name {:fi "KVV-K\u00e4sittelij\u00e4"
-                                                                                :sv "KVV-Handl\u00e4ggare"
-                                                                                :en "KVV-Handler"}})
+                                :handler {:id kvv-role-id :name {:fi "KVV-K\u00e4sittelij\u00e4"
+                                                                 :sv "KVV-Handl\u00e4ggare"
+                                                                 :en "KVV-Handler"}})
         trigger        (-> trigger-resp :trigger)
         application    (create-and-submit-application pena :propertyId sipoo-property-id)
         operation      (:primaryOperation application)
         application-id (:id application)
         handler-resp   (command sonja :upsert-application-handler
                                 :id application-id
-                                :roleId "abba1111111111111112acdc"
+                                :roleId kvv-role-id
                                 :userId (id-for-key sonja))
         attachments    (:attachments application)
-        resp1 (upload-file pena "dev-resources/test-attachment.txt")
-        file-id-1 (get-in resp1 [:files 0 :fileId])
-        resp2 (upload-file pena "dev-resources/test-attachment.txt")
-        file-id-2 (get-in resp2 [:files 0 :fileId])
-        resp3 (upload-file pena "dev-resources/test-attachment.txt")
-        file-id-3 (get-in resp3 [:files 0 :fileId])
-        resp4 (upload-file pena "dev-resources/test-attachment.txt")
-        file-id-4 (get-in resp4 [:files 0 :fileId])]
+        resp1          (upload-file pena "dev-resources/test-attachment.txt")
+        file-id-1      (get-in resp1 [:files 0 :fileId])
+        resp2          (upload-file pena "dev-resources/test-attachment.txt")
+        file-id-2      (get-in resp2 [:files 0 :fileId])
+        resp3          (upload-file pena "dev-resources/test-attachment.txt")
+        file-id-3      (get-in resp3 [:files 0 :fileId])
+        resp4          (upload-file pena "dev-resources/test-attachment.txt")
+        file-id-4      (get-in resp4 [:files 0 :fileId])]
     (fact "preliminary checks"
       trigger-resp =>     ok?
       application  =not=> nil?
@@ -385,18 +429,19 @@
       resp3        =>     ok?
       handler-resp =>     ok?)
     (fact "automatic assignment is created from a trigger"
-      (let [{:keys [job]} (command pena
-                                   :bind-attachments
-                                   :id application-id
-                                   :filedatas [{:fileId file-id-1 :type (:type (first attachments))
-                                                :group {:groupType "operation"
-                                                        :operations [operation]
-                                                        :title "Osapuolet"}
-                                                :contents "eka"}
-                                               {:fileId file-id-2 :type (:type (second attachments))
-                                                :group {:groupType nil}
-                                                :contents "toka"}]) => ok?
-            _ (poll-attachment-job pena job)
+      (let [{:keys [job]}       (command pena
+                                         :bind-attachments
+                                         :id application-id
+                                         :filedatas [{:fileId   file-id-1 :type (:type (first attachments))
+                                                      :group    {:groupType  "operation"
+                                                                 :operations [operation]
+                                                                 :title      "Osapuolet"}
+                                                      :contents "eka"}
+                                                     {:fileId   file-id-2 :type (:type (second attachments))
+                                                      :group    {:groupType nil}
+                                                      :contents "toka"}])
+            =>                  ok?
+            _                   (poll-attachment-job pena job)
             trigger-assignments (query-trigger-assignments sonja (:id trigger))]
         (count trigger-assignments) => 1
         (-> trigger-assignments first :description)        => (:description trigger)
@@ -405,41 +450,42 @@
                                                                     :in-any-order)))
     (fact "automatic assignment have recipient when application have handler with corresponding role"
       (let [trigger-assignment (first (query-trigger-assignments sonja (:id trigger)))]
-        (:recipient trigger-assignment) => {:id "777777777777777777000023",
-                                            :username "sonja",
+        (:recipient trigger-assignment) => {:id        "777777777777777777000023",
+                                            :username  "sonja",
                                             :firstName "Sonja",
-                                            :lastName "Sibbo",
-                                            :roleId "abba1111111111111112acdc",
-                                            :role "authority",
+                                            :lastName  "Sibbo",
+                                            :roleId    kvv-role-id,
+                                            :role      "authority",
                                             :handlerId (:id handler-resp)}))
-    (fact "automatic assignment havent recipient when application havent handler with corresponding role"
-      (let [trigger-assignment (first (query-trigger-assignments sonja "dead1111111111111112beef"))]
-        (:recipient trigger-assignment) => nil))
+    (fact "automatic assignment havent recipient when application doesn't have a handler with corresponding role"
+      (let [trigger-assignment (first (query-trigger-assignments sonja aita-trigger-id))]
+        (:recipient trigger-assignment) => {:roleId general-role-id}))
     (fact "new attachment is added as targets to existing trigger assignments"
-      (let [{:keys [job]} (command pena
-                                   :bind-attachments
-                                   :id application-id
-                                   :filedatas [{:fileId file-id-3 :type (:type (get attachments 2))
-                                                :group {:groupType "parties"}
-                                                :contents "hakija"}]) => ok?
-            _ (poll-attachment-job pena job)
+      (let [{:keys [job]}       (command pena
+                                         :bind-attachments
+                                         :id application-id
+                                         :filedatas [{:fileId   file-id-3 :type (:type (get attachments 2))
+                                                      :group    {:groupType "parties"}
+                                                      :contents "hakija"}])
+            =>                  ok?
+            _                   (poll-attachment-job pena job)
             trigger-assignments (query-trigger-assignments sonja (:id trigger))]
         (count trigger-assignments) => 1
         (->> trigger-assignments first :targets (map :id)) => (->> attachments
                                                                    (take 3)
                                                                    (map :id))))
     (fact "if the automatic assignment is completed, a new one is created when a new assignment is added for the corresponding trigger"
-      (let [old-trigger-assignments (->> (query sonja :assignments-search :recipient [])
-                                         :data :assignments (filter #(= (:trigger %) (:id trigger))))
-            old-trigger-assignment-id (-> old-trigger-assignments first :id)
-            complete-resp (complete-assignment sonja old-trigger-assignment-id)
-            {:keys [job]} (command pena
-                                   :bind-attachments
-                                   :id application-id
-                                   :filedatas [{:fileId file-id-4 :type (:type (get attachments 3))
-                                                :contents "suunnitelma"}])
-            _ (poll-attachment-job pena job)
-            trigger-assignments (query-trigger-assignments sonja (:id trigger))
+      (let [old-trigger-assignments           (->> (query sonja :assignments-search :recipient [])
+                                                   :data :assignments (filter #(= (:trigger %) (:id trigger))))
+            old-trigger-assignment-id         (-> old-trigger-assignments first :id)
+            complete-resp                     (complete-assignment sonja old-trigger-assignment-id)
+            {:keys [job]}                     (command pena
+                                                       :bind-attachments
+                                                       :id application-id
+                                                       :filedatas [{:fileId   file-id-4 :type (:type (get attachments 3))
+                                                                    :contents "suunnitelma"}])
+            _                                 (poll-attachment-job pena job)
+            trigger-assignments               (query-trigger-assignments sonja (:id trigger))
             non-completed-trigger-assignments (filter #(not ((set (map :type (:states %))) "completed"))
                                                       trigger-assignments)]
         complete-resp => ok?
@@ -447,23 +493,74 @@
         (count non-completed-trigger-assignments) => 1
         (-> non-completed-trigger-assignments first :id) =not=> old-trigger-assignment-id))
     (fact "When handler with assignment is changed, assignments handler should be changed"
-      (let [upsert-handler-resp   (command sonja :upsert-application-handler
-                                    :id application-id
-                                    :roleId "abba1111111111111112acdc"
-                                    :userId (id-for-key ronja)
-                                    :handlerId (:id handler-resp))
-            recipients (query-recipients-by-role sonja "abba1111111111111112acdc")]
+      (let [upsert-handler-resp (command sonja :upsert-application-handler
+                                         :id application-id
+                                         :roleId kvv-role-id
+                                         :userId (id-for-key ronja)
+                                         :handlerId (:id handler-resp))
+            recipients          (query-recipients-by-role sonja kvv-role-id)]
         upsert-handler-resp => ok?
-        (second recipients) => {:id (id-for-key ronja)
-                                :username "ronja"
+        (second recipients) => {:id        (id-for-key ronja)
+                                :username  "ronja"
                                 :firstName "Ronja"
-                                :lastName "Sibbo"
-                                :role "authority"
-                                :roleId "abba1111111111111112acdc"
+                                :lastName  "Sibbo"
+                                :role      "authority"
+                                :roleId    kvv-role-id
                                 :handlerId (:id handler-resp)}))
-    (fact "When handler is removed from application, assignment is also removed"
-      (let [remove-handler-resp  (command sonja :remove-application-handler
-                                          :id application-id
-                                          :handlerId (:id handler-resp))]
-        remove-handler-resp => ok?
-        (count (query-trigger-assignments sonja (:id trigger))) => 0))))
+    (fact "When handler role is changed, the assignments with old role no longer have recipients"
+      (let [upsert-handler-resp (command sonja :upsert-application-handler
+                                         :id application-id
+                                         :roleId general-role-id
+                                         :userId (id-for-key ronja)
+                                         :handlerId (:id handler-resp))
+            recipients          (query-recipients-by-role sonja kvv-role-id)]
+        upsert-handler-resp => ok?
+        (second recipients) => {:roleId kvv-role-id}))
+
+    (facts "New applications"
+      (let [{:keys [app-id handler-id]} (prepare-application-and-assignments)
+            app2                        (prepare-application-and-assignments)]
+        (fact "When handler is removed from application, its trigger assignment is cleared"
+          (command sonja :remove-application-handler
+                   :id app-id
+                   :handlerId handler-id) => ok?
+          (:assignments (query ronja :assignments-for-application :id app-id))
+          => (just [(contains {:trigger     "user-created"
+                               :status      "active"
+                               :description "Todo!"
+                               :recipient   (contains {:firstName "Sonja"})})
+                    (contains {:trigger     aita-trigger-id
+                               :status      "active"
+                               :description "Aita ja asema"
+                               :recipient   {:roleId general-role-id}})]
+                   :in-any-order))
+        (fact "The other application assignments are unchanged"
+          (:assignments (query ronja :assignments-for-application :id (:app-id app2)))
+          => (just [(contains {:trigger     "user-created"
+                               :status      "active"
+                               :description "Todo!"
+                               :recipient   (contains {:firstName "Sonja"})})
+                    (contains {:trigger     aita-trigger-id
+                               :status      "active"
+                               :description "Aita ja asema"
+                               :recipient   (contains {:firstName "Sonja"
+                                                       :handlerId (:handler-id app2)
+                                                       :roleId    general-role-id})})]
+                   :in-any-order))
+        (fact "Ronja into general handler: assignment updated"
+          (let [{handler-id :id} (command ronja :upsert-application-handler
+                                          :id app-id
+                                          :roleId general-role-id
+                                          :userId (id-for-key ronja))]
+            (:assignments (query ronja :assignments-for-application :id app-id))
+          => (just [(contains {:trigger     "user-created"
+                               :status      "active"
+                               :description "Todo!"
+                               :recipient   (contains {:firstName "Sonja"})})
+                    (contains {:trigger     aita-trigger-id
+                               :status      "active"
+                               :description "Aita ja asema"
+                               :recipient   (contains {:firstName "Ronja"
+                                                       :handlerId handler-id
+                                                       :roleId    general-role-id})})]
+                   :in-any-order)))))))
