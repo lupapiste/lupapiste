@@ -57,17 +57,21 @@
                         <span class="narrow-hide" data-bind="ltext: 'help'"></span>
                     </a>
                 </div>
-                <div class="header-box">
+                <div class="header-box" style="overflow: visible">
                     <a href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
                         <span class="lupicon-user"></span>
                         <span class="narrow-hide" id="user-name"
                               data-bind="text: lupapisteApp.models.currentUser.displayName, attr: {'data-test-role' : lupapisteApp.models.currentUser.role}"></span>
                     </a>
-                </div>
-                <div class="header-box">
-                    <select id="auth-role-selector" data-bind="foreach: $root.usagePurposes()">
-                        <option data-bind="text: $data"></option>
-                    </select>
+                    <!-- ko if: ($root.usagePurposes().length > 1) -->
+                    <ul id="auth-role-selector" style="position: fixed; background-color: white;
+                                                       border: 1px solid black; list-style-type: none"
+                        data-bind="foreach: $root.usagePurposes()">
+                        <li>
+                            <a data-bind="attr: {href: $data.href}, text: $data.name"></a>
+                        </li>
+                    </ul>
+                    <!-- /ko -->
                 </div>
                 <div id="logout-header-box" class="header-box">
                     <a data-bind="attr: {href: '/app/' + $root.currentLanguage + '/logout', 'title': loc('logout')}" >
