@@ -1440,7 +1440,7 @@
                                                            "YMEuMA=="
                                                            "-----END CERTIFICATE-----"])
                                   :idp-uri "http://localhost:7000"
-                                  :role-mapping {:commenter "comment"}
+                                  :role-mapping {:reader "GG_Lupapiste_RAVA_read"}
                                   :trusted-domains ["pori.fi"]}}
 
                       ;; Helsinki R

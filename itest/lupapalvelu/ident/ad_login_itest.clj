@@ -17,6 +17,7 @@
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.xml :as sxml]
+            [sade.strings :as ss]
             [saml20-clj.shared :as saml-shared]
             [midje.sweet :refer :all]))
 
@@ -25,9 +26,21 @@
           (if metadata? "metadata" "ad-login")
           domain))
 
+(def test-ad-config
+  {:app-name "Lupapiste"
+   :private-key (slurp "./dev-resources/test-private-key.pem")
+   :sp-cert (slurp "./dev-resources/test-public-cert.pem")})
+
+(def response
+  (ss/trim (slurp "./dev-resources/test-saml-response.txt")))
+
+(defn break-string [s]
+  (->> s seq shuffle (apply str)))
+
 (when (env/feature? :ad-login)
   (let [test-db (format "test_ad_login_itest_%s" (now))
-        pori-route (parse-route "pori.fi")]
+        pori-route (parse-route "pori.fi")
+        {:keys [private-key sp-cert]} test-ad-config]
     (mongo/with-db test-db
       (fixture/apply-fixture "minimal")
 
@@ -91,19 +104,33 @@
 
       (with-redefs [log-user-in! (constantly {:status 302 :body "Login successful!"})]
         (fact "Login attempt with valid response works"
-          (let [resp (client/post pori-route {:form-params {:SAMLResponse "tuttifrutti"} :throw-exceptions false})]
-            "jou" => resp)))))
+          (let [resp (client/post pori-route {:form-params {:SAMLResponse response} :content-type :json})]
+            (:body resp) => "Login successful!"))
+        (fact "Login attempt with broken response will not work"
+          (let [resp (client/post pori-route {:form-params {:SAMLResponse (->> response drop-last (apply str))}
+                                              :content-type :json
+                                              :throw-exceptions false})]
+            (:body resp) => "Parsing SAML response failed")))
+
+      (with-redefs [ad-config (assoc test-ad-config :private-key (break-string private-key))]
+        (fact "Deciphering the response fails if the key is invalid"
+          (let [resp (client/post pori-route {:form-params {:SAMLResponse response} :throw-exceptions false})]
+            (:body resp) => "Parsing SAML response failed")))
+
+      (let [ad-settings (-> (org/get-organizations-by-ad-domain "pori.fi") first)
+            idp-cert (get-in ad-settings [:ad-login :idp-cert])
+            broken-ad-settings (-> ad-settings
+                                   (assoc-in [:ad-login :idp-cert] (break-string idp-cert))
+                                   list)]
+        (with-redefs [org/get-organizations-by-ad-domain (constantly broken-ad-settings)
+                      resp/redirect (constantly {:body "Login failed"})]
+          (fact "Response parsing fails if the IdP certificate has been messed up"
+            (let [resp (client/post pori-route {:form-params {:SAMLResponse response} :throw-exceptions false})]
+              (:body resp) => "Login failed"))))))
 
   (with-redefs [resp/redirect (constantly {:status 302 :body "No AD-settings active"})]
-    (fact "Ad login as Pori will not work if we disable their ad-login"
+    (fact "Ad-login as Pori will not work if we disable their ad-login"
       (do
         (org/update-organization "609-R" {$set {:ad-login.enabled false}})
         (-> (parse-route "pori.fi") client/get :body) => "No AD-settings active"
         (org/update-organization "609-R" {$set {:ad-login.enabled true}})))))
-
-
-
-
-;; TODO: Set up a mock SAML IdP that can receive, validate and handle a SAML authentication request
-;; as well as send a valid response back. Ensure that the signature validation fails if the cert is tampered with.
-

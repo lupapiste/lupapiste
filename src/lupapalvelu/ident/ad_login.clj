@@ -80,9 +80,6 @@
         (errorf "Domain %s does not have valid AD-login settings or has AD-login disabled" domain)
         (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host)))))))
 
-(def tila
-  (atom {}))
-
 (defpage [:post "/api/saml/ad-login/:domain"] {domain :domain}
   (let [req (request/ring-request)]
     (if-not (get-in req [:params :SAMLResponse])
@@ -91,15 +88,11 @@
       (try
         (let [ad-settings (org/get-organizations-by-ad-domain domain) ; The result is a sequence of maps that contain keys :id and :ad-login
               idp-cert (some-> ad-settings first :ad-login :idp-cert)
-              _ (swap! tila assoc :idp-cert idp-cert)
               decrypter (ad-util/make-saml-decrypter (:private-key ad-config))
               xml-response (saml-shared/base64->inflate->str (get-in req [:params :SAMLResponse])) ; The raw XML string
-              _ (swap! tila assoc :xml-response xml-response)
               saml-resp (saml-sp/xml-string->saml-resp xml-response) ; An OpenSAML object
-              _ (swap! tila assoc :saml-resp saml-resp)
-              saml-info (saml-sp/saml-resp->assertions saml-resp decrypter) ; The response as a Clojure map _ (swap! tila assoc :saml-info saml-info)
+              saml-info (saml-sp/saml-resp->assertions saml-resp decrypter) ; The response as a Clojure map
               parsed-saml-info (ad-util/parse-saml-info saml-info) ; The response as a "normal" Clojure map
-              _ (swap! tila assoc :parsed-saml-info parsed-saml-info)
               _ (infof "Received XML response for domain %s: %s" domain xml-response)
               _ (infof "SAML response for domain %s: %s" domain saml-info)
               _ (infof "Parsed SAML response for domain %s: %s" domain parsed-saml-info)
