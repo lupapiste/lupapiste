@@ -139,7 +139,7 @@
   (merge PateCategory
          {(sc/optional-key :published)          {:tags                            sc/Str
                                                  ;; The same as :state._modified
-                                                 :published                       sc/Int
+                                                 (sc/optional-key :published)     sc/Int
                                                  ;; Id for the attachment that is a PDF version of tags.
                                                  (sc/optional-key :attachment-id) ssc/AttachmentId}
           :state                                (wrapped (sc/enum "draft"
