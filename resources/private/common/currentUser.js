@@ -99,7 +99,8 @@ LUPAPISTE.CurrentUser = function() {
     var authPurpose = function (auth) { return auth === "authorityAdmin" ? "orgAdminstration" : "permitting"; };
     var formatPurpose = function (orgId, purpose) {
       if (purpose === "orgAdminstration") {
-        return self.orgNames()[orgId][self.language()] + " " + purpose;
+        var orgNames = self.orgNames();
+        return (orgNames ? orgNames[orgId][self.language()] : orgId) + " " + purpose;
       } else {
         return purpose;
       }
