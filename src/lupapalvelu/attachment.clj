@@ -1238,6 +1238,21 @@
     (fail :error.unauthorized
           :desc "Attachment is archived.")))
 
+(defn stamped-removable-version
+  "Stamped version can be removed by authority if the attachment has
+  not been archived."
+  [{:keys [data application user] :as command}]
+  (when (:fileId data)
+    (or (attachment-not-archived command)
+        (usr/validate-authority command)
+        (let [{att-id  :attachmentId
+               file-id :fileId}   data]
+          (when-not (some->> (get-attachment-info application att-id)
+                             :versions
+                             (util/find-by-key :fileId file-id)
+                             :stamped)
+            (fail :error.unauthorized))))))
+
 (defn attachment-matches-application
   ([{{:keys [attachmentId]} :data :as command}]
    (attachment-matches-application command attachmentId))

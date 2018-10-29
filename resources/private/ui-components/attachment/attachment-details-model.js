@@ -133,13 +133,18 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
         var authority = lupapisteApp.models.currentUser.isAuthority();
         var rejected = approval.state === service.REJECTED;
         var approved = approval.state === service.APPROVED;
+        var readOnly = self.attachment().readOnly;
         // Authority sees every version note, applicant only the rejected.
         return _.merge( {note: (authority || rejected) && approval.note,
                          approved: approved,
                          rejected: rejected,
-                         // Applicant can only delete version without approval status.
                          canDelete: authModel.ok( "delete-attachment-version")
-                         && (authority || !(approved || rejected))},
+                         // Applicant can only delete version without approval status.
+                         && ((!readOnly && (authority || !(approved || rejected)))
+                             // Authority can delete stamped version of
+                             // readOnly attachments in stamping states.
+                             || (authority && v.stamped && readOnly && authModel.ok( "stamp-attachments")))
+                        },
                         v);
       })
       .reverse()

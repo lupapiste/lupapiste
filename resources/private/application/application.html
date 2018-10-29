@@ -138,16 +138,6 @@
                               </a>
                             </li>
 
-
-                            <!-- <li data-bind="if: $root.authorization.ok( 'pate-invoice-tab')"> -->
-                            <!--   <a  data-bind="click: changeTab" -->
-                            <!--       href="#" data-target="pate-invoice" data-test-id="pate-invoice-tab" -->
-                            <!--       class="link-btn"> -->
-                            <!--     <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span> -->
-                            <!--     <\!-- <span data-bind="ltext: 'application.tabInvoice' + $root.application.InvoicePostfix()"></span> -\-> -->
-                            <!--   </a> -->
-                            <!-- </li> -->
-
                             <!-- In post-verdict states plus 'canceled' -->
                             <li data-bind="if: $root.authorization.ok('application-summary-tab-visible'), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab"
@@ -391,7 +381,7 @@
                     <!-- /ko -->
 
                     <!-- Pate invoice tab -->
-                    <!-- ko -->
+                    <!-- ko if: selectedTabName() == 'invoice' && $root.authorization.ok( 'invoices-tab') -->
                     <div id="application-invoice-tab"
                          class="tab-content feature--no-border" data-bind="feature: 'invoices'">
                       <cljs-invoices_invoices></cljs-invoices_invoices>
