@@ -40,7 +40,10 @@
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
             [ring.util.codec :as codec]
-            [cheshire.core :as json])
+            [cheshire.core :as json]
+            [lupapalvelu.backing-system.allu.core :as allu]
+            [lupapalvelu.allu.allu-application :as allu-application]
+            [lupapalvelu.pate.verdict :as pate-verdict])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -307,6 +310,20 @@
     (jms/produce-with-context (fetch-verdict/queue-for-organization organization)
                               (fetch-verdict/fetch-verdict-message id))
     (fetch-verdict/fetch-verdict batchrun-name batchrun-user app)))
+
+(defn fetch-allu-verdicts []
+  (infof "Starting fetch-allu-verdicts")
+  (let [batchrun-user (user/batchrun-user ["091-YA"])
+        apps-sent (filter #(allu-application/allu-application? (:organization %) (:permitType %))
+                          (mongo/select :applications {:state "sent"}))
+        _ (println "apps count:" (count apps-sent))
+        _ (println "batchrun user:" batchrun-user)
+
+        command (for [app apps-sent
+                      :let [command (assoc (application->command app) :user batchrun-user
+                                                                      :created (now)
+                                                                      :action "fetch-verdicts")]]
+                  (pate-verdict/fetch-allu-verdicts command))]))
 
 (defn- organization-has-krysp-url-function
   "Takes map of organization id as key and organization data as values.

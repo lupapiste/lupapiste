@@ -115,7 +115,7 @@
 
 (defmethod application-update-request "sijoitussopimus" [pending-on-client {:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
-        _ (assert allu-id (str (:id application) " does not contain an ALLU id"))
+        _ (assert allu-id (str (:id application) " does not contain an ALLU id")) ;;FIXME: change asserts to fail!s
         params {:path {:id allu-id}
                 :body (application->allu-placement-contract pending-on-client
                                                             application)}

@@ -41,11 +41,11 @@
                  backing-system-is-defined]
    :on-success  (notify :application-state-change)}
   [{:keys [application created user] :as command}]
-  (let [_ (debugf (str "[ALLU-debug]" "Command:" command))
-        result (if (allu/allu-application? (:organization application) (permit/permit-type application))
+  (let [result (if (allu/allu-application? (:organization application) (permit/permit-type application))
+                 (pate-verdict/fetch-allu-verdicts command)
                  ;; HACK: This is here instead of e.g. do-check-for-verdict to avoid verdict/allu/pate-verdict
                  ;;       dependency cycles:
-                 (when-let [filedata (allu/load-contract-document! command)]
+                 #_(when-let [filedata (allu/load-contract-document! command)]
                    ;; FIXME: Some times should be dates, not timestamps:
                    (let [creator (:creator application)
                          signatures [{:name (:username user)

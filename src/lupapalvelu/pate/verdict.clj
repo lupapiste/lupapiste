@@ -55,7 +55,8 @@
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
             [taoensso.timbre :refer [warnf warn errorf error]]
-            [lupapalvelu.backing-system.allu.core :as allu]))
+            [lupapalvelu.backing-system.allu.core :as allu]
+            [lupapalvelu.attachment :as attachment]))
 
 ;; ------------------------------------------
 ;; Pre-checks
@@ -1622,11 +1623,54 @@
    - Don't move to the :agreementSigned state yet (still requires a verdict from ALLU)"
   [{:keys [user created application] :as command}]
   (let [signature (create-signature command)
-        verdict (command->verdict command)]
+        verdict (command->verdict command)
+
+        _ (println "PateVerdicts: " (-> application :pate-verdicts))]
     (verdict-update command
                     (util/deep-merge
                       {$push {(util/kw-path :pate-verdicts.$.signatures) signature}}))
     (allu/approve-placementcontract! command)))
+
+(defn fetch-allu-verdicts
+  [{:keys [application created user] :as command}]
+  ;; HACK: This is here instead of e.g. do-check-for-verdict to avoid verdict/allu/pate-verdict
+  ;;       dependency cycles:
+  (when-let [filedata (allu/load-contract-document! command)]
+    ;; FIXME: Some times should be dates, not timestamps:
+    (let [creator (:creator application)
+          _ (println "pate-verdicts" (:pate-verdicts application))
+          signatures [{:name (:username user)
+                       :user-id (:id user)
+                       :date created}]
+          signatures (if (= :final (allu/agreement-state application))
+                       (conj signatures {:name (str (:firstName creator) " " (:lastName creator))
+                                         :user-id (:id (:creator application))
+                                         :date created})
+                       signatures)
+          verdict (new-allu-verdict command)
+          verdict (assoc verdict
+                    :published {:published created
+                                :tags      (pr-str {:body (backing-system--tags
+                                                            application verdict)})}
+                    ;; FIXME: Should be general-handler fullname instead of current username:
+                    :archive {:verdict-giver (:username user)}
+                    ;; FIXME: Should be general-handler fullname instead of current username:
+                    :signatures signatures) ; HACK
+          transition-update (app-state/state-transition-update (sm/next-state application)
+                                                               created application user)]
+      (attachment/convert-and-attach! command
+                                      {:created created
+                                       :attachment-type {:type-group :muut
+                                                         :type-id :sopimus}
+                                       :target {:id (:id verdict)
+                                                :type :verdict}
+                                       :modified created
+                                       :locked true
+                                       :read-only true}
+                                      filedata)
+      (action/update-application command (util/deep-merge transition-update
+                                                          {$push {:pate-verdicts verdict}}))
+      (ok :verdicts [verdict]))))
 
 (defn- signer-ids [data]
   (->> data
