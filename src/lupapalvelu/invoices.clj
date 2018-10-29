@@ -125,11 +125,14 @@
                  (roles (keyword role))))
        (map (comp name first))))
 
-(defn- fetch-organization [id]
-  (mongo/by-id :organizations id))
+(defn get-org [organizations organization-id]
+  (some (fn [{:keys [id] :as org}]
+          (if (= id organization-id)
+            org))
+        organizations))
 
-(defn enrich-org-data [{:keys [organization-id] :as invoice}]
-  (let [organization (fetch-organization organization-id)
+(defn enrich-org-data [user-orgs {:keys [organization-id] :as invoice}]
+  (let [organization (get-org user-orgs organization-id)
         localized-names (:name organization)]
     (assoc-in invoice [:enriched-data :organization :name] localized-names)))
 

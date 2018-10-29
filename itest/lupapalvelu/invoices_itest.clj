@@ -231,11 +231,7 @@
                       invoice (invoice-with {:organization-id org-id
                                              :application-id app-id})]
 
-                  (with-redefs [invoices/get-user-orgs-having-role (fn [user role] [org-id])
-                                invoices/fetch-organization (fn [org-id] {:name {:fi "Sipoon yleisten alueiden rakentaminen"
-                                                                                :en "Sipoon yleisten alueiden rakentaminen"
-                                                                                :sv "Sipoon yleisten alueiden rakentaminen"}})
-                                invoices/fetch-application (fn [org-id] {:address "Testikuja 99"})]
+                  (with-redefs [invoices/fetch-application (fn [org-id] {:address "Testikuja 99"})]
 
                     (invoices/create-invoice! (->invoice-db invoice application dummy-user))
 
@@ -243,8 +239,9 @@
                           invoice (first (:invoices result))]
 
                       (fact "organisation data enriched to it"
-                            (get-in invoice [:enriched-data :organization]) => {:name {:fi "Sipoon yleisten alueiden rakentaminen"
-                                                                                       :en "Sipoon yleisten alueiden rakentaminen"
-                                                                                       :sv "Sipoon yleisten alueiden rakentaminen"}})
+                            (get-in invoice [:enriched-data :organization]) => {:name {:fi "Sipoon rakennusvalvonta"
+                                                                                       :en "Sipoon rakennusvalvonta"
+                                                                                       :sv "Sipoon rakennusvalvonta"}})
                       (fact "application data enriched to it"
-                            (get-in invoice [:enriched-data :application]) => {:address "Testikuja 99"}))))))))
+                            (get-in invoice [:enriched-data :application]) => {:address "Testikuja 99"})))))
+          )))
