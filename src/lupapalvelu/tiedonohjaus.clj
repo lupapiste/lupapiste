@@ -7,7 +7,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.pate.verdict-common :as vc]
+            [lupapalvelu.pate.verdict-interface :as vif]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
             [sade.env :as env]
@@ -68,13 +68,11 @@
             :ttl/threshold 20000))
 
 (defn- paatospvm-plus-years [verdicts years]
-  (when-let [paatos-ts (->> verdicts
-                            (map vc/verdict-date)
-                            (filter integer?)
-                            (apply max))]
-    (-> (c/from-long (long paatos-ts))
-        (t/plus (t/years years))
-        (.toDate))))
+  (some-> (vif/verdict-date verdicts)
+          long
+          c/from-long
+          (t/plus (t/years years))
+          (.toDate)))
 
 (defn- submitted-plus-years [submitted years]
   (-> (c/from-long (long submitted))

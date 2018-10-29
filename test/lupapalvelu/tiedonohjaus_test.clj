@@ -417,9 +417,11 @@
                        :organization  "753-R"
                        :verdicts      [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]
                        :pate-verdicts [{:category "r"
+                                        :published {:published 10}
                                         :data     {:verdict-date 12345}}
                                        {:category "ya"
                                         :legacy?  true
+                                        :published {:published 10}
                                         :data     {:anto 54321}}]
                        :metadata      {:tila     "valmis"
                                        :nakyvyys "julkinen"}}
@@ -427,9 +429,11 @@
                        :organization  "753-R"
                        :verdicts      [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]
                        :pate-verdicts [{:category "r"
+                                        :published {:published 10}
                                         :data     {:verdict-date 12345}}
                                        {:category "ya"
                                         :legacy?  true
+                                        :published {:published 10}
                                         :data     {:anto 54321}}]
                        :metadata      {:tila                :valmis
                                        :salassapitoaika     5
@@ -450,14 +454,18 @@
                                        :kayttajaryhmakuvaus :muokkausoikeus}}
           nil-dates   {:verdicts      [{:paatokset [{:poytakirjat [{}]}]}]
                        :pate-verdicts [{:category "r"
+                                        :published {:published 10}
                                         :data     {:verdict-date 1456696800000}}
                                        {:category "ya"
                                         :legacy?  true
+                                        :published {:published 10}
                                         :data     {}}]}
           anto-high   {:verdicts      [{:paatokset [{:poytakirjat [{:paatospvm 12334}]}]}]
                        :pate-verdicts [{:category "r"
+                                        :published {:published 10}
                                         :data     {:verdict-date 223344}}
                                        {:category "ya"
+                                        :published {:published 10}
                                         :legacy?  true
                                         :data     {:anto 1456696800000}}]}]
       (document-with-updated-metadata application "753-R" "10" application "hakemus")

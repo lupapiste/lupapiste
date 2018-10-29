@@ -28,9 +28,9 @@
        (first)))
 
 (defn all-verdicts
-  "All verdicts regardless of state or origin."
+  "All verdicts regardless of state or origin. Unwraps all metadata."
   [{:keys [verdicts pate-verdicts]}]
-  (concat verdicts pate-verdicts))
+  (concat verdicts (metadata/unwrap-all pate-verdicts)))
 
 (defn verdicts-by-backend-id
   "All verdicts filtered by backend Id."
@@ -65,30 +65,39 @@
                (remove ss/blank?))))
 
 (defn verdict-date
-  "Verdict date from latest verdict"
-  ([application]
-    (verdict-date application nil))
-  ([{:keys [verdicts] :as application} post-process]
-   (let [legacy-ts    (some->> verdicts
-                               (map (fn [{:keys [paatokset]}]
-                                      (map (fn [pt] (map (fn [pk] (get (second pk) :paatospvm (get pk :paatospvm))) (:poytakirjat pt))) paatokset)))
-                               (flatten)
-                               (remove nil?)
-                               (sort)
-                               (last))
-         pate-verdict (verdict/latest-published-pate-verdict {:application application})
-         pate-ts      (or (get-in pate-verdict [:data :verdict-date])
-                          (get-in pate-verdict [:data :anto]))
-         ts           (or legacy-ts pate-ts)]
-     (if post-process
-       (post-process ts)
-       ts))))
+  "The latest verdict date (timestamp) of the published application
+  verdicts. The first argument is either an application or a list
+  of (any kind of) verdicts."
+  ([application-or-verdicts]
+   (verdict-date application-or-verdicts identity))
+  ([application-or-verdicts post-process]
+   (let [verdicts (if (map? application-or-verdicts)
+                    (all-verdicts application-or-verdicts)
+                    (metadata/unwrap-all application-or-verdicts))]
+     (some->> verdicts
+              (filter vc/published?)
+              (map vc/verdict-date)
+              (filter integer?)
+              seq
+              (apply max)
+              post-process))))
+
+(defn latest-published-pate-verdict
+  "Returns unwrapped published Pate verdict (or nil). If there are
+  multiple Pate verdicts, the one with the latest published timestamp
+  is returned."
+  [{:keys [application]}]
+  (some->> (:pate-verdicts application)
+           (filter :published)
+           (sort-by (comp :published :published))
+           last
+           metadata/unwrap-all))
 
 (defn handler
   "Get verdict handler."
   [{:keys [verdicts pate-verdicts] :as application}]
   (if (some? pate-verdicts)
-    (get-in (verdict/latest-published-pate-verdict {:application application}) [:data :handler])
+    (get-in (latest-published-pate-verdict {:application application}) [:data :handler])
     (legacy-data verdicts :paatoksentekija)))
 
 (defn lainvoimainen
@@ -97,8 +106,9 @@
     (lainvoimainen application nil))
   ([{:keys [verdicts pate-verdicts] :as application} post-process]
    (let [ts (if (some? pate-verdicts)
-                 (get-in (verdict/latest-published-pate-verdict {:application application}) [:data :lainvoimainen])
-                 (legacy-date verdicts :lainvoimainen))]
+              (get-in (verdict/latest-published-pate-verdict {:application application})
+                      [:data :lainvoimainen])
+              (legacy-date verdicts :lainvoimainen))]
      (if post-process
        (post-process ts)
        ts))))
