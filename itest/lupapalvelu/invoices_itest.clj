@@ -22,16 +22,16 @@
                  :username                                  "pena"})
 
 (def dummy-invoice {:application-id "LP-753-2018-90108"
-                       :organization-id "753-R"
-                       :state "draft"
-                       :operations [{:operation-id "linjasaneeraus"
-                                     :name "linjasaneeraus"
-                                     :invoice-rows [{:text "Laskurivi1 kpl"
-                                                     :type "from-price-catalogue"
-                                                     :unit "kpl"
-                                                     :price-per-unit 10
-                                                     :units 2
-                                                     :discount-percent 0}]}]})
+                    :organization-id "753-R"
+                    :state "draft"
+                    :operations [{:operation-id "linjasaneeraus"
+                                  :name "linjasaneeraus"
+                                  :invoice-rows [{:text "Laskurivi1 kpl"
+                                                  :type "from-price-catalogue"
+                                                  :unit "kpl"
+                                                  :price-per-unit 10
+                                                  :units 2
+                                                  :discount-percent 0}]}]})
 
 (defn invoice-with [properties]
   (merge dummy-invoice properties))
@@ -48,12 +48,12 @@
   (mongo/with-db itu/test-db-name
     (lupapalvelu.fixture.core/apply-fixture "minimal")
 
-  (defn dummy-submitted-application []
-    (create-and-submit-local-application
-     pena
-     :operation "pientalo"
-     :x "385770.46" :y "6672188.964"
-     :address "Kaivokatu 1"))
+    (defn dummy-submitted-application []
+      (create-and-submit-local-application
+       pena
+       :operation "pientalo"
+       :x "385770.46" :y "6672188.964"
+       :address "Kaivokatu 1"))
 
     (fact "insert-invoice command"
           (fact "should add an invoice to the db with with all the required fields"
@@ -226,22 +226,19 @@
                     invoice-orgs => #{"USER-ORG-1" "USER-ORG-2"})))
 
           (fact "should return invoice with"
-                (let [ {org-id :organization app-id :id :as application} (create-and-submit-local-application pena)
-
+                (let [{org-id :organization app-id :id :as application} (create-and-submit-local-application pena
+                                                                                                             :address "Kukkuja 7")
                       invoice (invoice-with {:organization-id org-id
-                                             :application-id app-id})]
+                                             :application-id app-id})
+                      invoice-id (invoices/create-invoice! (->invoice-db invoice application dummy-user))]
 
-                  (with-redefs [invoices/fetch-application (fn [org-id] {:address "Testikuja 99"})]
+                  (let [result (local-query sonja :user-organizations-invoices)
+                        invoices (:invoices result)
+                        invoice (invoices/get-doc invoice-id invoices)]
 
-                    (invoices/create-invoice! (->invoice-db invoice application dummy-user))
-
-                    (let [result (local-query sonja :user-organizations-invoices)
-                          invoice (first (:invoices result))]
-
-                      (fact "organisation data enriched to it"
-                            (get-in invoice [:enriched-data :organization]) => {:name {:fi "Sipoon rakennusvalvonta"
-                                                                                       :en "Sipoon rakennusvalvonta"
-                                                                                       :sv "Sipoon rakennusvalvonta"}})
-                      (fact "application data enriched to it"
-                            (get-in invoice [:enriched-data :application]) => {:address "Testikuja 99"})))))
-          )))
+                    (fact "organisation data enriched to it"
+                          (get-in invoice [:enriched-data :organization]) => {:name {:fi "Sipoon rakennusvalvonta"
+                                                                                     :en "Sipoon rakennusvalvonta"
+                                                                                     :sv "Sipoon rakennusvalvonta"}})
+                    (fact "application data enriched to it"
+                          (get-in invoice [:enriched-data :application]) => {:address "Kukkuja 7"})))))))

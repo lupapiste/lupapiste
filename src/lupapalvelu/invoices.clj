@@ -125,23 +125,21 @@
                  (roles (keyword role))))
        (map (comp name first))))
 
-(defn get-org [organizations organization-id]
-  (some (fn [{:keys [id] :as org}]
-          (if (= id organization-id)
-            org))
-        organizations))
+(defn get-doc [doc-id docs]
+  (some (fn [{:keys [id] :as doc}]
+          (if (= id doc-id)
+            doc))
+        docs))
 
 (defn enrich-org-data [user-orgs {:keys [organization-id] :as invoice}]
-  (let [organization (get-org user-orgs organization-id)
+  (let [organization (get-doc organization-id user-orgs)
         localized-names (:name organization)]
     (assoc-in invoice [:enriched-data :organization :name] localized-names)))
 
-(defn- fetch-application [id]
-  (mongo/by-id :applications id))
+(defn fetch-application-data [application-ids projection]
+  (mongo/select :applications {:_id {$in application-ids}} projection))
 
-(defn enrich-application-data [{:keys [application-id] :as invoice}]
-  (debug ">> enrich-application-data invoice: " invoice)
-  (let [application (fetch-application application-id)
+(defn enrich-application-data [applications {:keys [application-id] :as invoice}]
+  (let [application (get-doc application-id applications)
         address (:address application)]
-
     (assoc-in invoice [:enriched-data :application :address] address)))
