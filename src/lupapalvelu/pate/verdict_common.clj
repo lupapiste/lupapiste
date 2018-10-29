@@ -15,6 +15,15 @@
 ;; Predicates
 ;;
 
+(defn verdict-state
+  "If no state key, the verdict is from backend system and thus
+  published."
+  [{state :state :as verdict}]
+  (when verdict
+    (if state
+      (keyword (metadata/unwrap state))
+      :published)))
+
 (defn lupapiste-verdict?
   "Is the verdict created in Lupapiste, either through Pate or legacy interface"
   [verdict]
@@ -47,6 +56,11 @@
     (lupapiste-verdict? verdict) (boolean (:published verdict))
     (contains? verdict :draft) (not (:draft verdict))
     :else false))
+
+(defn proposal? [verdict]
+  (if (lupapiste-verdict? verdict)
+    (util/=as-kw (verdict-state verdict) :proposal)
+    false))
 
 ;; Maybe not the most useful predicate, maybe clean up later?
 (defn verdict-code-is-free-text? [verdict]
@@ -95,15 +109,6 @@
 
 (defn verdict-id [verdict]
   (:id verdict))
-
-(defn verdict-state
-  "If no state key, the verdict is from backend system and thus
-  published."
-  [{state :state :as verdict}]
-  (when verdict
-    (if state
-      (keyword (metadata/unwrap state))
-      :published)))
 
 (defn verdict-modified [verdict]
   (if (lupapiste-verdict? verdict)
@@ -236,6 +241,7 @@
   (let [id (verdict-id verdict)
         published (verdict-published verdict)
         replaces (replaced-verdict-id verdict)
+        proposal? (util/=as-kw (verdict-state verdict) :proposal)
         rep-string (title-fn replaces
                              (fn [vid]
                                (let [section (get section-strings vid)]
@@ -255,6 +261,10 @@
               (util/pcond-> (verdict-string lang verdict :verdict-type)
                             ss/not-blank? (str " -")))
             (verdict-string lang verdict :verdict-code)
+            rep-string]
+
+           proposal?
+           [(i18n/localize lang :pate-verdict-proposal)
             rep-string]
 
            :else

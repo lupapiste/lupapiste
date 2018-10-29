@@ -25,7 +25,8 @@
 
 (defn can-publish? []
   (or (can? :publish-pate-verdict)
-      (can? :publish-legacy-verdict)))
+      (can? :publish-legacy-verdict)
+      (can? :publish-verdict-proposal)))
 
 (def can-generate? (partial can? :generate-pate-pdf))
 
