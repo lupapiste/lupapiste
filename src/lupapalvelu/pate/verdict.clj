@@ -90,7 +90,7 @@
   (let [{:keys [draft? published?
                 legacy? modern?
                 contract? allu-contract?
-                verdict?
+                verdict? proposal?
                 not-replaced?]} (zipmap conditions (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
@@ -128,7 +128,10 @@
                           (and not-replaced? (or (get-in verdict [:replacement :replaced-by])
                                                  (some #(some-> % :replacement :replaces (= verdict-id))
                                                        (:pate-verdicts application))))
-                          :error.verdict-replaced)
+                          :error.verdict-replaced
+
+                          (and proposal? (not= state :proposal))
+                          :error.verdict.not-proposal)
                         identity fail))))))
 
 (declare command->backing-system-verdict)
@@ -1061,6 +1064,7 @@
     (and published
          (not legacy?)
          (not (vc/contract? verdict))
+         (not (vc/proposal? verdict))
          (not (some-> replacement :replaced-by))
          (not (util/find-first #(= (get-in % [:replacement :replaces])
                                    verdict-id)

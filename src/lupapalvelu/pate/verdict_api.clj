@@ -5,7 +5,7 @@
   (:require [clj-time.coerce :as tc]
             [clj-time.core :as t]
             [clojure.set :as set]
-            [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw notify some-pre-check] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.metadata :as metadata]
@@ -178,7 +178,7 @@
   (ok (assoc (verdict/open-verdict command)
              :filled (verdict/verdict-filled? command))))
 
-(defquery published-pate-verdict
+(defquery send-doc-updates
   {:description      "Published tags for the verdict. The response includes
   id, published (timestamp), tags and attachment-ids (of both source
   and target relations)."
@@ -189,6 +189,7 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(action/some-pre-check (verdict-exists :published?)
+                                             (verdict-exists :proposal?)
                                              backing-system-verdict)]
    :states           states/post-verdict-states}
   [command]
@@ -219,14 +220,15 @@
   (ok))
 
 (defcommand edit-pate-verdict
-  {:description "Updates verdict data. Returns changes and errors
+  {:description      "Updates verdict data. Returns changes and errors
   lists (items are path-vector value pairs)"
    :user-roles       #{:authority}
    :parameters       [id verdict-id path value]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])
                       (partial action/vector-parameters [:path])]
-   :pre-checks       [(verdict-exists :draft?)]
+   :pre-checks       [(some-pre-check (verdict-exists :draft?)
+                                      (verdict-exists :proposal?))]
    :states           states/post-submitted-states}
   [command]
   (let [result (verdict/edit-verdict command)]
@@ -241,7 +243,8 @@
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :draft?)
+   :pre-checks       [(some-pre-check (verdict-exists :draft?)
+                                      (verdict-exists :proposal?))
                       verdict-filled]
    :states           states/post-submitted-states}
   [command]
@@ -459,7 +462,7 @@
    :states           (set/difference states/post-submitted-states
                                      #{:finished})
    :pre-checks       [pate-enabled
-                      (verdict-exists :draft? :modern?)
+                      (verdict-exists )
                       verdict-filled]}
   [command]
   (ok (verdict/publish-verdict-proposal command)))
