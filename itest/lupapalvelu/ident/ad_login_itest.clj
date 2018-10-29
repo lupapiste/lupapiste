@@ -9,28 +9,28 @@
             [lupapalvelu.user :as usr]
             [clj-http.client :as client]
             [clojure.walk :refer [keywordize-keys]]
+            [monger.operators :refer [$set]]
             [noir.response :as resp]
-            [sade.core :refer [now]]
+            [sade.core :refer [def- now]]
             [sade.env :as env]
             [sade.xml :as sxml]
             [sade.strings :as ss]
-            [saml20-clj.shared :as saml-shared]
             [midje.sweet :refer :all]))
 
-(defn parse-route [domain & [metadata?]]
+(defn- parse-route [domain & [metadata?]]
   (format "%s/api/saml/%s/%s" (env/value :host)
           (if metadata? "metadata" "ad-login")
           domain))
 
-(def test-ad-config
+(def- test-ad-config
   {:app-name "Lupapiste"
    :private-key (slurp "./dev-resources/test-private-key.pem")
    :sp-cert (slurp "./dev-resources/test-public-cert.pem")})
 
-(def response
-  (ss/trim (slurp "./dev-resources/test-saml-response.txt")))
+(def- response
+  (-> "./dev-resources/mock-saml-response.edn" slurp read-string :encrypted-base64))
 
-(defn break-string [s]
+(defn- break-string [s]
   (->> s seq shuffle (apply str)))
 
 (when (env/feature? :ad-login)

@@ -124,5 +124,7 @@
                     (error "SAML validation failed")
                     (resp/status 403 (resp/content-type "text/plain" "Validation of SAML response failed")))))
         (catch Exception e
-          {:status 400
-           :body "Parsing SAML response failed"})))))
+          (do
+            (error (.getMessage e))
+            {:status 400
+             :body "Parsing SAML response failed"}))))))
