@@ -317,8 +317,9 @@
 (sc/defn ^:always-validate get-assignments-for-application :- [Assignment]
   [user           :- usr/SessionSummaryUser
    application-id :- sc/Str]
-  (get-assignments user {:application.id application-id
-                         :status {$ne "canceled"}}))
+  (sort-by :modified
+           (get-assignments user {:application.id application-id
+                                  :status {$ne "canceled"}})))
 
 (sc/defn ^:always-validate assignments-search :- AssignmentsSearchResponse
   [user  :- usr/SessionSummaryUser
