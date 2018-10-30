@@ -596,7 +596,7 @@
 "error.non-authority-viewing-application-in-verdictgiven-state" "en" "New attachments cannot be added, because the application is being processed."
 "error.non-authority-viewing-application-in-verdictgiven-state" "fi" "Uusia liitteitä ei voida lisätä, koska hakemus on käsittelyssä."
 "error.non-authority-viewing-application-in-verdictgiven-state" "sv" "Nya bilagor kan inte infogas eftersom ansökan är under handläggning."
-"error.non-boolean-parameters" "en" "The parameters are Boolean type"
+"error.non-boolean-parameters" "en" "The parameters are not Boolean type"
 "error.non-boolean-parameters" "fi" "Parametrit eivät ole Boolean-tyyppiä"
 "error.non-boolean-parameters" "sv" "Parametrarna är inte av boolesk typ"
 "error.non-repeating-schema" "en" "The form may be added to the application only once"
