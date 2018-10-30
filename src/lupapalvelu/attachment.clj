@@ -1280,15 +1280,10 @@
 (def mass-download-authorized-roles
   #{:authority :reader})
 
-(defn get-organizations [{:keys [orgAuthz]}]
-  (set (map key (filter (fn [[_ roles]]
-                          (not-empty (set/intersection mass-download-authorized-roles roles)))
-                        orgAuthz))))
-
 (defn- mass-download-auths?
   "Returns true if all `documents` belong to given `organizations`."
   [documents orgazinations]
-  (let [allowed-org? (fn [result] (or (contains? orgazinations (keyword (:org-id result)))
+  (let [allowed-org? (fn [result] (or (contains? orgazinations (:org-id result))
                                       (error "User not authorized for document"
                                              (:doc-id result) "," (:filename result)
                                              "with file-id"
@@ -1297,14 +1292,14 @@
                                              (:org-id result))))]
     (every? allowed-org? documents)))
 
-
 (defn- authorize-user [user documents]
   ;; `documents` comes from frontend, but since the user, given that
   ;; they have the right role, can access all the documents within an
   ;; organization, they cannot tamper the data in a way that would
   ;; provide them access to unauthorized documents.
   (if (mass-download-auths? documents
-                            (get-organizations user))
+                            (roles/organization-ids-by-roles user
+                                                             mass-download-authorized-roles))
     documents
     (fail! :error.unauthorized)))
 
@@ -1314,7 +1309,8 @@
      (doseq [{:keys [filename content]} doc-files]
        (files/open-and-append! zip filename content)))))
 
-(defn mass-download [user docs-transit]
+(defn mass-download
+  [user docs-transit]
   (->> (read-documents-from-transit docs-transit)
        (authorize-user user)
        (pmap (partial get-document-for-mass-download user))
