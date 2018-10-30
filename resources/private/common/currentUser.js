@@ -16,6 +16,7 @@ LUPAPISTE.CurrentUser = function() {
     language:       "",
     orgNames:       undefined,
     orgAuthz:       undefined,
+    usagePurposes:  [],
     company: {
       id:   undefined,
       role: undefined
@@ -40,6 +41,17 @@ LUPAPISTE.CurrentUser = function() {
     };
   }
 
+  function formatPurpose(purpose) {
+    if (purpose.type === "authority-admin") {
+      var orgNames = self.orgNames();
+      return (orgNames ? orgNames[purpose.orgId][self.language()] : purpose.orgId) + " " + purpose.type;
+    } else {
+      return purpose.type;
+    }
+  }
+
+  function purposeLink(purpose) { return "/app/" + self.language() + "/" + purpose.type; }
+
   function constructor(user) {
     if( !_.isEmpty(user) && !user.language && !user.virtual ) {
       user.language = loc.getCurrentLanguage();
@@ -57,8 +69,15 @@ LUPAPISTE.CurrentUser = function() {
 
     ko.mapping.fromJS(_.defaults(user, defaults), {}, self);
     ajax.query("organization-names-by-user", {})
-      .success(function (res) { self.orgNames(res.orgNames); })
-      .call();
+      .success(function (res) {
+        self.orgNames(res.orgNames);
+        ajax.query("usage-purposes", {})
+          .success(function (res) { self.usagePurposes(_.map(res.usagePurposes, function (purpose) {
+            return {name: formatPurpose(purpose), href: purposeLink(purpose)};
+          })); })
+          .call();
+      })
+      .call()
   }
 
   constructor({});
@@ -94,33 +113,6 @@ LUPAPISTE.CurrentUser = function() {
       && app && _.includes( hash(), app.id())
       && !_.get( self.orgAuthz(), app.organization());
   }
-
-  var authPurpose = function (auth) { return auth === "authorityAdmin" ? "orgAdminstration" : "permitting"; };
-
-  var formatPurpose = function (purpose) {
-    if (purpose.name === "orgAdminstration") {
-      var orgNames = self.orgNames();
-      return (orgNames ? orgNames[purpose.orgId][self.language()] : purpose.orgId) + " " + purpose.name;
-    } else {
-      return purpose.name;
-    }
-  };
-
-  var purposeLink = function (name) {
-    return "/app/" + self.language() + "/" + (name === "orgAdminstration" ? "authority-admin" : self.role());
-  };
-
-  self.usagePurposes = ko.pureComputed(function () {
-    var purposes = [];
-    _.forEach(self.orgAuthz(), function (authz, orgId) {
-      _.forEach(authz, function (auth) {
-        purposes.push({orgId: orgId, name: authPurpose(auth)});
-      });
-    });
-    purposes = _.uniqBy(purposes, function (purpose) { return purpose.name; });
-    return _.map(purposes, function (purpose) { return { name: formatPurpose(purpose)
-                                                       , href: purposeLink(purpose.name)}; });
-  });
 
   self.organizationAdminOrgs = ko.pureComputed(function () {
     if (self.role() === "authority") {
