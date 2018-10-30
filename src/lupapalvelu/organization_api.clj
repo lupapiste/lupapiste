@@ -145,6 +145,17 @@
         distinct
         (ok :attachmentTypes)))
 
+(defquery usage-purposes
+  {:description "Lupapiste usage purposes for user based on orgAuthz."
+   :user-roles  roles/all-user-roles}
+  [{:keys [user]}]
+  (let [applicationpage (usr/applicationpage-for user)]
+    (ok :usagePurposes (into (if (= applicationpage "authority-admin") [] [{:type applicationpage}])
+                             (for [[org-id authz] (:orgAuthz user)
+                                   auth authz
+                                   :when (= auth :authorityAdmin)]
+                               {:type "authority-admin", :orgId org-id})))))
+
 (defquery organization-names-by-user
   {:description "User organization names for all languages."
    :user-roles  roles/all-authenticated-user-roles}

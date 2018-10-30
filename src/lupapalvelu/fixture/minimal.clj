@@ -221,7 +221,7 @@
     :role "authority"
     :enabled true
     :email "sonja.sibbo@sipoo.fi"
-    :orgAuthz {:753-R #{:authority :approver}
+    :orgAuthz {:753-R #{:authorityAdmin :authority :approver}
                :753-YA #{:authority :approver}
                :998-R-TESTI-2 #{:authority :approver}}
     :firstName "Sonja"
