@@ -59,21 +59,21 @@
 
 (def wrap (partial metadata/wrap "user" 12345))
 
-(fact "verdict-date"
-  (verdict-date {}) => nil
-  (verdict-date []) => nil
-  (verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}]}) => 1
-  (verdict-date {:pate-verdicts [{:category  "r"
+(fact "latest-published-verdict-date"
+  (latest-published-verdict-date {}) => nil
+  (latest-published-verdict-date []) => nil
+  (latest-published-verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}]}) => 1
+  (latest-published-verdict-date {:pate-verdicts [{:category  "r"
                                   :data      {:verdict-date 2}
                                   :published {:published 1}}]}) => 2
-  (verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}
+  (latest-published-verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}
                             {:paatokset [{:poytakirjat [{:paatospvm 3}]}]}
                             {:paatokset [{:poytakirjat [{:paatospvm 2}]}]}]}) => 3
-  (verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}
+  (latest-published-verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}
                             {:draft     true
                              :paatokset [{:poytakirjat [{:paatospvm 3}]}]}
                             {:paatokset [{:poytakirjat [{:paatospvm 2}]}]}]}) => 2
-  (verdict-date {:pate-verdicts [{:category  "r"
+  (latest-published-verdict-date {:pate-verdicts [{:category  "r"
                                   :data      {:verdict-date 1}
                                   :published {:published 11}}
                                  {:category  "r"
@@ -82,7 +82,7 @@
                                  {:category  "r"
                                   :data      {:verdict-date 2}
                                   :published {:published 22}}]})=> 3
-  (verdict-date {:pate-verdicts [{:category  "r"
+  (latest-published-verdict-date {:pate-verdicts [{:category  "r"
                                   :data      {:verdict-date (wrap 1)}
                                   :published {:published 11}}
                                  {:category  "r"
@@ -91,7 +91,7 @@
                                  {:category  "r"
                                   :data      {:verdict-date (wrap 2)}
                                   :published {:published 22}}]}) => 3
-  (verdict-date {:pate-verdicts [{:category  "r"
+  (latest-published-verdict-date {:pate-verdicts [{:category  "r"
                                   :data      {:verdict-date (wrap 1)}
                                   :published {:published 11}}
                                  {:category "r"
@@ -99,7 +99,7 @@
                                  {:category  "r"
                                   :data      {:verdict-date (wrap 2)}
                                   :published {:published 22}}]}) => 2
-  (verdict-date [{:category  "r"
+  (latest-published-verdict-date [{:category  "r"
                   :data      {:verdict-date (wrap 1)}
                   :published {:published 11}}
                  {:category "r"
@@ -107,7 +107,7 @@
                  {:category  "r"
                   :data      {:verdict-date (wrap 2)}
                   :published {:published 22}}]) => 2
-  (verdict-date {:verdicts      [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}
+  (latest-published-verdict-date {:verdicts      [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}
                                  {:paatokset [{:poytakirjat [{:paatospvm 3}]}]}
                                  {:paatokset [{:poytakirjat [{:paatospvm 2}]}]}]
                  :pate-verdicts [{:category  "r"
@@ -119,7 +119,7 @@
                                  {:category  "r"
                                   :data      {:verdict-date 2}
                                   :published {:published 22}}]}) => 4
-  (verdict-date {:verdicts      [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}
+  (latest-published-verdict-date {:verdicts      [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}
                                  {:paatokset [{:poytakirjat [{:paatospvm 3}]}]}
                                  {:paatokset [{:poytakirjat [{:paatospvm 6}]}]}]
                  :pate-verdicts [{:category  "r"
@@ -131,7 +131,7 @@
                                  {:category  "r"
                                   :data      {:verdict-date 2}
                                   :published {:published 22}}]}) => 6
-  (verdict-date [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}
+  (latest-published-verdict-date [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}
                  {:paatokset [{:poytakirjat [{:paatospvm 3}]}]}
                  {:paatokset [{:poytakirjat [{:paatospvm 2}]}]}
                  {:category  "r"
@@ -142,7 +142,7 @@
                  {:category  "r"
                   :data      {:verdict-date 2}
                   :published {:published 22}}]) => 3
-  (verdict-date [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}
+  (latest-published-verdict-date [{:paatokset [{:poytakirjat [{:paatospvm 1}]}]}
                  {:paatokset [{:poytakirjat [{:paatospvm 3}]}]}
                  {:paatokset [{:poytakirjat [{:paatospvm 2}]}]}
                  {:category  "r"
@@ -153,19 +153,19 @@
                  {:category  "r"
                   :data      {:verdict-date 2}
                   :published {:published 22}}]) => 5
-  (verdict-date {:pate-verdicts [{:category "r"
+  (latest-published-verdict-date {:pate-verdicts [{:category "r"
                                   :data     {:foo :bar}}]}) => nil
-  (verdict-date {:verdicts [{:paatokset nil}]}) => nil
-  (verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1536537600000}]}]}]}
+  (latest-published-verdict-date {:verdicts [{:paatokset nil}]}) => nil
+  (latest-published-verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1536537600000}]}]}]}
                 ->iso-8601-date) => (contains "2018-09-10")
-  (verdict-date {:pate-verdicts [{:category  "r"
+  (latest-published-verdict-date {:pate-verdicts [{:category  "r"
                                   :data      {:verdict-date 1538038800000}
                                   :published {:published 1538038700000}}]}
                 ->iso-8601-date) => (contains "2018-09-27"))
 
 (fact "arkistointi-date"
-  (verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1538082000000}]}]}]}) => 1538082000000
-  (verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm nil}]}]}]}) => nil)
+  (latest-published-verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1538082000000}]}]}]}) => 1538082000000
+  (latest-published-verdict-date {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm nil}]}]}]}) => nil)
 
 (fact "lainvoimainen-date"
   (lainvoimainen

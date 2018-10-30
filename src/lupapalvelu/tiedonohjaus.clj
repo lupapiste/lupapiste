@@ -68,7 +68,7 @@
             :ttl/threshold 20000))
 
 (defn- paatospvm-plus-years [verdicts years]
-  (some-> (vif/verdict-date verdicts)
+  (some-> (vif/latest-published-verdict-date verdicts)
           long
           c/from-long
           (t/plus (t/years years))

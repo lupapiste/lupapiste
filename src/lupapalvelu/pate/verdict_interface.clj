@@ -3,12 +3,14 @@
   used (and extended) instead of directly accessing application or
   mongo."
   (:require [lupapalvelu.pate.metadata :as metadata]
-            [lupapalvelu.pate.verdict :as verdict]
             [lupapalvelu.pate.verdict-common :as vc]
             [sade.strings :as ss]
             [sade.util :as util]))
 
-(defn- legacy-date [verdicts key]
+(defn- bs-verdict-date
+  "Backing system verdict date (from :paivamaarat map). Note that
+  backing system verdicts are always published."
+  [verdicts key]
   (->> verdicts
        (map (fn [{:keys [paatokset]}]
               (->> (map #(get-in % [:paivamaarat (keyword key)]) paatokset)
@@ -19,7 +21,10 @@
        (sort)
        (last)))
 
-(defn- legacy-data [verdicts key]
+(defn- bs-verdict-data
+  "Backing system verdict accessor. If there are multiple verdicts,
+  returns the first non-nil value for the given key."
+  [verdicts key]
   (->> verdicts
        (map (fn [{:keys [paatokset]}]
               (map (fn [pt] (map key (:poytakirjat pt))) paatokset)))
@@ -39,6 +44,7 @@
     (some->> verdicts
              (filter #(= (:kuntalupatunnus %) backendId)))
     (some->> pate-verdicts
+             metadata/unwrap-all
              (filter #(= (get-in % [:data :kuntalupatunnus]) backendId)))))
 
 (defn published-kuntalupatunnus
@@ -64,12 +70,12 @@
                (map (util/fn-> :data :kuntalupatunnus metadata/unwrap))
                (remove ss/blank?))))
 
-(defn verdict-date
+(defn latest-published-verdict-date
   "The latest verdict date (timestamp) of the published application
   verdicts. The first argument is either an application or a list
   of (any kind of) verdicts."
   ([application-or-verdicts]
-   (verdict-date application-or-verdicts identity))
+   (latest-published-verdict-date application-or-verdicts identity))
   ([application-or-verdicts post-process]
    (let [verdicts (if (map? application-or-verdicts)
                     (all-verdicts application-or-verdicts)
@@ -98,7 +104,7 @@
   [{:keys [verdicts pate-verdicts] :as application}]
   (if (some? pate-verdicts)
     (get-in (latest-published-pate-verdict {:application application}) [:data :handler])
-    (legacy-data verdicts :paatoksentekija)))
+    (bs-verdict-data verdicts :paatoksentekija)))
 
 (defn lainvoimainen
   "Get lainvoimainen date. Takes optional date formatter as parameter."
@@ -106,9 +112,9 @@
     (lainvoimainen application nil))
   ([{:keys [verdicts pate-verdicts] :as application} post-process]
    (let [ts (if (some? pate-verdicts)
-              (get-in (verdict/latest-published-pate-verdict {:application application})
+              (get-in (latest-published-pate-verdict {:application application})
                       [:data :lainvoimainen])
-              (legacy-date verdicts :lainvoimainen))]
+              (bs-verdict-date verdicts :lainvoimainen))]
      (if post-process
        (post-process ts)
        ts))))
