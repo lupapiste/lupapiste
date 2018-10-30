@@ -1306,8 +1306,10 @@
 (defn- zip-files [doc-files]
   (files/piped-zip-input-stream
    (fn [zip]
-     (doseq [{:keys [filename content]} doc-files]
-       (files/open-and-append! zip filename content)))))
+     (doseq [[idx {:keys [filename content]}] (map-indexed vector doc-files)]
+       (files/open-and-append! zip
+                               (str idx "_" filename)
+                               content)))))
 
 (defn mass-download
   [user docs-transit]
