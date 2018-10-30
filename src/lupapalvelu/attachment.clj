@@ -1277,7 +1277,7 @@
         :else nil))
 
 
-(def mass-download-authorized-roles
+(def- mass-download-authorized-roles
   #{:authority :reader})
 
 (defn- mass-download-auths?
