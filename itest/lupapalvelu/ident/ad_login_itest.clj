@@ -23,6 +23,7 @@
   (format "%s/api/saml/ad-login/%s" (env/value :host) domain))
 
 (when (env/feature? :ad-login)
+  (mongo/connect!)
   (let [test-db (format "test_ad_login_itest_%s" (now))]
     (mongo/with-db test-db
       (fixture/apply-fixture "minimal")
@@ -47,7 +48,7 @@
           (fact "User is inserted into the session"
             (= "terttu@panaani.fi" (get-in session [:user :email])) => true)))
 
-      (fact "The metadata route works"
+      #_(fact "The metadata route works"
         (let [res (client/get (metadata-route "pori.fi"))
               body (-> res :body sxml/parse sxml/xml->edn)
               cert (-> body
