@@ -97,12 +97,12 @@ LUPAPISTE.CurrentUser = function() {
 
   var authPurpose = function (auth) { return auth === "authorityAdmin" ? "orgAdminstration" : "permitting"; };
 
-  var formatPurpose = function (orgId, purpose) {
-    if (purpose === "orgAdminstration") {
+  var formatPurpose = function (purpose) {
+    if (purpose.name === "orgAdminstration") {
       var orgNames = self.orgNames();
-      return (orgNames ? orgNames[orgId][self.language()] : orgId) + " " + purpose;
+      return (orgNames ? orgNames[purpose.orgId][self.language()] : purpose.orgId) + " " + purpose.name;
     } else {
-      return purpose;
+      return purpose.name;
     }
   };
 
@@ -111,14 +111,15 @@ LUPAPISTE.CurrentUser = function() {
   };
 
   self.usagePurposes = ko.pureComputed(function () {
-    var purposeNames = [];
+    var purposes = [];
     _.forEach(self.orgAuthz(), function (authz, orgId) {
       _.forEach(authz, function (auth) {
-        purposeNames.push(formatPurpose(orgId, authPurpose(auth)));
+        purposes.push({orgId: orgId, name: authPurpose(auth)});
       });
     });
-    purposeNames = _.uniq(purposeNames);
-    return _.map(purposeNames, function (name) { return {name: name, href: purposeLink(name)}; });
+    purposes = _.uniqBy(purposes, function (purpose) { return purpose.name; });
+    return _.map(purposes, function (purpose) { return { name: formatPurpose(purpose)
+                                                       , href: purposeLink(purpose.name)}; });
   });
 
   self.organizationAdminOrgs = ko.pureComputed(function () {
