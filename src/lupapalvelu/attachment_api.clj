@@ -463,7 +463,7 @@
    :input-validators [(partial action/non-blank-parameters [:docs])]}
   [{{:keys [docs]} :data user :user}]
   {:status  200
-   :headers {"Content-Type" "text/plain"}
+   :headers {"Content-Type" "application/zip"}
    :body (att/mass-download user docs)})
 
 (defraw "download-bulletin-attachment"
