@@ -888,7 +888,7 @@
    Returns attached version."
   [{:keys [application] {user-id :id} :user {session-id :id} :session :as command}
    attachment-options :- AttachmentOptions
-   original-filedata :- SavedFileData]
+   original-filedata :- file-upload/SavedFileData]
   (let [session-id (when-not user-id
                      (or session-id
                          (vetuma/session-id)
