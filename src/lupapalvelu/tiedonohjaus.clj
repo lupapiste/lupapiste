@@ -283,12 +283,12 @@
     (-> (assoc metadata :tila :valmis)
         (update-end-dates verdicts))))
 
-(defn mark-attachment-final! [{:keys [attachments verdicts] :as application} now attachment-or-id]
+(defn mark-attachment-final! [{:keys [attachments] :as application} now attachment-or-id]
   (let [{:keys [id metadata]} (if (map? attachment-or-id)
                                 attachment-or-id
                                 (first (filter #(= (:id %) attachment-or-id) attachments)))]
     (when (seq metadata)
-      (let [new-metadata (document-metadata-final-state metadata verdicts)]
+      (let [new-metadata (document-metadata-final-state metadata (vif/all-verdicts application))]
         (when-not (= metadata new-metadata)
           (action/update-application
             (action/application->command application)
@@ -297,15 +297,16 @@
                    :attachments.$.metadata new-metadata}}))))))
 
 (defn mark-app-and-attachments-final! [app-id modified-ts]
-  (let [{:keys [metadata attachments verdicts processMetadata] :as application} (domain/get-application-no-access-checking app-id)]
+  (let [{:keys [metadata attachments processMetadata] :as application} (domain/get-application-no-access-checking app-id)]
     (when (seq metadata)
-      (let [new-metadata (document-metadata-final-state metadata verdicts)
+      (let [verdicts             (vif/all-verdicts application)
+            new-metadata         (document-metadata-final-state metadata verdicts)
             new-process-metadata (update-end-dates processMetadata verdicts)]
         (when-not (and (= metadata new-metadata) (= processMetadata new-process-metadata))
           (action/update-application
             (action/application->command application)
-            {$set {:modified modified-ts
-                   :metadata new-metadata
+            {$set {:modified        modified-ts
+                   :metadata        new-metadata
                    :processMetadata new-process-metadata}}))
         (doseq [attachment attachments]
           (mark-attachment-final! application modified-ts attachment))))))
