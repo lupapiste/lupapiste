@@ -1257,7 +1257,7 @@
   (try (with-open [is (IOUtils/toInputStream ^String docs-transit StandardCharsets/UTF_8)]
          (transit/read (transit/reader is :json)))
        (catch Exception e
-         (fail! :error.invalid-param))))
+         (fail! :error.validator))))
 
 (defn- get-document-for-mass-download
   "Get document from either Lupapiste or
