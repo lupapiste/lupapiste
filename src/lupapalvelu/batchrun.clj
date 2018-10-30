@@ -312,18 +312,15 @@
     (fetch-verdict/fetch-verdict batchrun-name batchrun-user app)))
 
 (defn fetch-allu-verdicts []
-  (infof "Starting fetch-allu-verdicts")
+  (infof "Starting fetch-allu-verdicts for 091-YA")
   (let [batchrun-user (user/batchrun-user ["091-YA"])
-        apps-sent (filter #(allu-application/allu-application? (:organization %) (:permitType %))
-                          (mongo/select :applications {:state "sent"}))
-        _ (println "apps count:" (count apps-sent))
-        _ (println "batchrun user:" batchrun-user)
-
-        command (for [app apps-sent
-                      :let [command (assoc (application->command app) :user batchrun-user
-                                                                      :created (now)
-                                                                      :action "fetch-verdicts")]]
-                  (pate-verdict/fetch-allu-verdicts command))]))
+        apps (filter #(allu-application/allu-application? (:organization %) (:permitType %))
+                     (mongo/select :applications {$or [{:state "sent"} {:state "agreementPrepared"}]}))]
+    (for [app apps
+          :let [command (assoc (application->command app) :user batchrun-user
+                                                          :created (now)
+                                                          :action "fetch-verdicts")]]
+      (pate-verdict/fetch-allu-verdicts command))))
 
 (defn- organization-has-krysp-url-function
   "Takes map of organization id as key and organization data as values.

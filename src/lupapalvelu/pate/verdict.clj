@@ -1623,9 +1623,7 @@
    - Don't move to the :agreementSigned state yet (still requires a verdict from ALLU)"
   [{:keys [user created application] :as command}]
   (let [signature (create-signature command)
-        verdict (command->verdict command)
-
-        _ (println "PateVerdicts: " (-> application :pate-verdicts))]
+        verdict (command->verdict command)]
     (verdict-update command
                     (util/deep-merge
                       {$push {(util/kw-path :pate-verdicts.$.signatures) signature}}))
@@ -1638,7 +1636,6 @@
   (when-let [filedata (allu/load-contract-document! command)]
     ;; FIXME: Some times should be dates, not timestamps:
     (let [creator (:creator application)
-          _ (println "pate-verdicts" (:pate-verdicts application))
           signatures [{:name (:username user)
                        :user-id (:id user)
                        :date created}]
