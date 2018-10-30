@@ -57,18 +57,30 @@
                         <span class="narrow-hide" data-bind="ltext: 'help'"></span>
                     </a>
                 </div>
-                <div class="header-box" style="overflow: visible">
-                    <a href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
+                <div id="user-submenu" class="header-box" style="overflow: visible">
+                    <a>
                         <span class="lupicon-user"></span>
                         <span class="narrow-hide" id="user-name"
                               data-bind="text: lupapisteApp.models.currentUser.displayName, attr: {'data-test-role' : lupapisteApp.models.currentUser.role}"></span>
                     </a>
                     <!-- ko if: ($root.usagePurposes().length > 1) -->
-                    <ul id="auth-role-selector" style="position: fixed; background-color: white;
-                                                       border: 1px solid black; list-style-type: none"
-                        data-bind="foreach: $root.usagePurposes()">
+                    <ul>
+                        <!-- ko foreach: $root.usagePurposes() -->
                         <li>
                             <a data-bind="attr: {href: $data.href}, text: $data.name"></a>
+                        </li>
+                        <!-- /ko -->
+                        <li>
+                            <a href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
+                                <span class="lupicon-user"></span>
+                                <span data-bind="text: 'Omat tiedot'"></span> <!-- TODO: localize -->
+                            </a>
+                        </li>
+                        <li>
+                            <a data-bind="attr: {href: '/app/' + $root.currentLanguage + '/logout', 'title': loc('logout')}" >
+                                <span class="lupicon-log-out"></span>
+                                <span class="narrow-hide" data-bind="ltext: 'logout'"></span>
+                            </a>
                         </li>
                     </ul>
                     <!-- /ko -->

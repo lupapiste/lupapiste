@@ -150,6 +150,20 @@ nav {
   }
 }
 
+#user-submenu {
+  > ul {
+    display: none;
+    position: fixed;
+    background-color: white;
+    border: 1px solid black;
+    list-style-type: none;
+  }
+
+  &:hover > ul {
+    display: block;
+  }
+}
+
 .nav-bottom {
   @include nav-row( $language-bg );
   .language-menu {
