@@ -1,37 +1,37 @@
 (ns lupapalvelu.archive.archiving
-  (:require [clojure.string :as string]
-            [clojure.java.io :as io]
-            [taoensso.timbre :refer [info error warn]]
-            [ring.util.codec :as codec]
+  (:require [cheshire.core :as json]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clj-time.format :as f]
-            [cheshire.core :as json]
+            [clojure.java.io :as io]
+            [clojure.string :as string]
+            [lupapalvelu.action :as action]
+            [lupapalvelu.application-meta-fields :as amf]
+            [lupapalvelu.archive.archiving-util :refer [metadata-query mark-application-archived-if-done]]
+            [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment.util :as att-util]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.pate.verdict-interface :as vif]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.storage.file-storage :as storage]
+            [lupapalvelu.tiedonohjaus :as tiedonohjaus]
+            [lupapiste-commons.schema-utils :as su]
+            [lupapiste-commons.threads :as threads]
             [monger.operators :refer :all]
-            [schema.core :as sc]
+            [ring.util.codec :as codec]
             [sade.env :as env]
             [sade.files :as files]
             [sade.http :as http]
-            [sade.schemas :as ssc]
             [sade.schema-utils :as ssu]
+            [sade.schemas :as ssc]
             [sade.strings :as ss]
-            [lupapiste-commons.threads :as threads]
             [sade.util :as util]
-            [lupapalvelu.tiedonohjaus :as tiedonohjaus]
-            [lupapalvelu.pdf.pdf-export :as pdf-export]
-            [lupapalvelu.attachment.util :as att-util]
-            [lupapalvelu.attachment :as att]
-            [lupapalvelu.action :as action]
-            [lupapalvelu.archive.archiving-util :refer [metadata-query mark-application-archived-if-done]]
-            [lupapalvelu.application-meta-fields :as amf]
-            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
-            [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.domain :as domain]
-            [lupapiste-commons.schema-utils :as su]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.pate.verdict-interface :as verdict]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.storage.file-storage :as storage])
+            [schema.core :as sc]
+            [taoensso.timbre :refer [info error warn]])
   (:import [java.io InputStream]))
 
 (defonce upload-threadpool (threads/threadpool 10 "archive-upload-worker"))
@@ -250,14 +250,14 @@
      :projectDescription    (project-description application op-filtered-docs)}))
 
 (defn permit-ids-for-archiving [application attachment permitType]
-  (let [backend-ids (verdict/kuntalupatunnukset application)]
+  (let [backend-ids (vif/kuntalupatunnukset application)]
     (if (not= permitType permit/ARK)
       backend-ids
       (conj (remove (fn [id] (= id (:backendId attachment))) backend-ids) (:backendId attachment)))))
 
 (defn get-ark-paatospvm [application attachment]
-  (->> {:verdicts (verdict/verdicts-by-backend-id application (:backendId attachment))}
-       (verdict/verdict-date)
+  (->> {:verdicts (vif/verdicts-by-backend-id application (:backendId attachment))}
+       (vif/latest-published-verdict-date)
        ts->iso-8601-date))
 
 (defn- generate-archive-metadata
@@ -280,14 +280,14 @@
                        :organization          organization
                        :municipality          municipality
                        :kuntalupatunnukset    permit-ids
-                       :lupapvm               (or (verdict/lainvoimainen application ts->iso-8601-date)
-                                                  (verdict/verdict-date application ts->iso-8601-date))
+                       :lupapvm               (or (vif/lainvoimainen application ts->iso-8601-date)
+                                                  (vif/latest-published-verdict-date application ts->iso-8601-date))
                        :paatospvm             (if (not= permitType permit/ARK)
-                                                (verdict/verdict-date application ts->iso-8601-date)
+                                                (vif/latest-published-verdict-date application ts->iso-8601-date)
                                                 (or (get-ark-paatospvm application attachment)
-                                                    (verdict/verdict-date application ts->iso-8601-date)))
+                                                    (vif/latest-published-verdict-date application ts->iso-8601-date)))
                        :jattopvm              (ts->iso-8601-date (:submitted application))
-                       :paatoksentekija       (verdict/handler application)
+                       :paatoksentekija       (vif/handler application)
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
                        :kasittelija           (select-keys (util/find-first :general handlers) [:userId :firstName :lastName])
                        :arkistoija            (select-keys user [:username :firstName :lastName])
@@ -314,7 +314,7 @@
   "Prepares metadata for selected attachments/documents
    and sends them to Onkalo archive in a separate thread"
   [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
-  (if (or (verdict/verdict-date application)
+  (if (or (vif/latest-published-verdict-date application)
           (foreman/foreman-app? application)
           (valid-ya-state? application)
           (archiving-project? application))

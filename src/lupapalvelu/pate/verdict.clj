@@ -1449,12 +1449,6 @@
                  "Content-Disposition" (format "filename=\"%s\"" filename)}
        :body    pdf-file-stream})))
 
-(defn latest-published-pate-verdict [{:keys [application]}]
-  (->> (:pate-verdicts application)
-       (filter :published)
-       (sort-by (comp :published :published))
-       last))
-
 ;; ---------------------------------
 ;; Backing system verdicts
 ;; The backing system verdicts reside in the verdicts array and never

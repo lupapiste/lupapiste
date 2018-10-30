@@ -25,7 +25,6 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.pate.verdict :as pate-verdict]
             [lupapalvelu.pate.verdict-interface :as vif]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.rest.config :as config]
@@ -521,7 +520,7 @@
                       doc/validate-created-after-verdict]}
   [{:keys [organization application] :as command}]
   (when (org/krysp-integration? @organization (:permitType application))
-    (mapping-to-krysp/verdict-as-kuntagml command (-> (pate-verdict/latest-published-pate-verdict command)
+    (mapping-to-krysp/verdict-as-kuntagml command (-> (vif/latest-published-pate-verdict command)
                                                       (assoc :usage "RH-tietojen muutos"))))
   (doc-persistence/set-sent-timestamp command docId)
   (ok))
