@@ -1,20 +1,21 @@
 (ns lupapalvelu.verdict-api
   "Backing system verdicts. The API for manually created verdicts
   resides in `pate/verdict_api.clj`."
-  (:require[taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
-           [monger.operators :refer :all]
-           [sade.core :refer [ok fail fail! ok?]]
-           [sade.util :as util]
-           [lupapalvelu.action :refer [defcommand notify] :as action]
-           [lupapalvelu.application-state :as app-state]
-           [lupapalvelu.attachment :as attachment]
-           [lupapalvelu.backing-system.allu.core :as allu]
-           [lupapalvelu.organization :as org]
-           [lupapalvelu.pate.verdict :as pate-verdict :refer [backing-system-verdict command->backing-system-verdict]]
-           [lupapalvelu.permit :as permit]
-           [lupapalvelu.state-machine :as sm]
-           [lupapalvelu.states :as states]
-           [lupapalvelu.verdict :as verdict]))
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
+            [monger.operators :refer :all]
+            [sade.core :refer [ok fail fail! ok?]]
+            [sade.util :as util]
+            [lupapalvelu.action :refer [defcommand notify] :as action]
+            [lupapalvelu.application-state :as app-state]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.backing-system.allu.core :as allu]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.verdict :as pate-verdict :refer [backing-system-verdict command->backing-system-verdict]]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.backing-system.allu.contract :as allu-contract]))
 
 (defn application-has-verdict-given-state [{:keys [application]}]
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
@@ -42,7 +43,7 @@
    :on-success  (notify :application-state-change)}
   [{:keys [application created user] :as command}]
   (let [result (if (allu/allu-application? (:organization application) (permit/permit-type application))
-                 (pate-verdict/fetch-allu-verdicts command)
+                 (allu-contract/fetch-allu-contract command)
                  (verdict/do-check-for-verdict command))]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)

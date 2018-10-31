@@ -150,7 +150,10 @@
                                             status))})
        neighbors))
 
-(defn- general-handler [{handlers :handlers}]
+(defn general-handler
+  "Returns handler's first and last names if a handler is found. Returns empty
+  string if handler is not found."
+  [{handlers :handlers}]
   (if-let [{:keys [firstName
                    lastName]} (util/find-first :general handlers)]
     (str firstName " " lastName)
@@ -605,19 +608,6 @@
                                                      :legacy?  true})}})
     verdict-id))
 
-(sc/defn ^:always-validate new-allu-verdict :- schemas/PateVerdict [{:keys [application created] :as command}]
-  (let [category (schema-util/application->category application)]
-    {:id       (mongo/create-id)
-     :modified created
-     :state    (wrapped-state command :published)
-     :category (name category)
-     :data     {:handler (general-handler application)}
-     :template {:inclusions (-> category
-                                legacy/legacy-verdict-schema
-                                :dictionary
-                                dicts->kw-paths)}
-     :legacy?  true}))
-
 (declare verdict-schema)
 
 (defn mask-verdict-data [{:keys [user application]} verdict]
@@ -721,7 +711,7 @@
 (defn- wrap [command value]
   ((metadata/wrapper command) value))
 
-(defn- verdict-update
+(defn verdict-update
   "Updates application, using $elemMatch query for given verdict."
   [{:keys [data created] :as command} update]
   (let [{verdict-id :verdict-id} data]
@@ -1534,7 +1524,7 @@
                          (= com-id company-id))))
               sigs)))
 
-(defn- create-signature
+(defn create-signature
   [{:keys [application user created]}]
   (let [person           (user-person-name user)
         {company-id :id} (auth/auth-via-company application
@@ -1609,59 +1599,6 @@
                      (when (sign-requested? command)
                        {$pull {(util/kw-path :pate-verdicts.$.signature-requests) {:user-id (:id user)}}})))
     (send-command ::signatures command)))
-
-(defn sign-allu-contract
-  "Sign the contract
-   - Update verdict signatures
-   - Change application state to agreementSigned if needed
-   - Don't move to the :agreementSigned state yet (still requires a verdict from ALLU)"
-  [{:keys [user created application] :as command}]
-  (let [signature (create-signature command)
-        verdict (command->verdict command)]
-    (verdict-update command
-                    (util/deep-merge
-                      {$push {(util/kw-path :pate-verdicts.$.signatures) signature}}))
-    (allu/approve-placementcontract! command)))
-
-(defn fetch-allu-verdicts
-  [{:keys [application created user] :as command}]
-  ;; HACK: This is here instead of e.g. do-check-for-verdict to avoid verdict/allu/pate-verdict
-  ;;       dependency cycles:
-  (when-let [filedata (allu/load-contract-document! command)]
-    ;; FIXME: Some times should be dates, not timestamps:
-    (let [creator (:creator application)
-          signatures [{:name (:username user)
-                       :user-id (:id user)
-                       :date created}]
-          signatures (if (= :final (allu/agreement-state application))
-                       (conj signatures {:name (str (:firstName creator) " " (:lastName creator))
-                                         :user-id (:id (:creator application))
-                                         :date created})
-                       signatures)
-          verdict (new-allu-verdict command)
-          verdict (assoc verdict
-                    :published {:published created
-                                :tags      (pr-str {:body (backing-system--tags
-                                                            application verdict)})}
-                    ;; FIXME: Should be general-handler fullname instead of current username:
-                    :archive {:verdict-giver (:username user)}
-                    ;; FIXME: Should be general-handler fullname instead of current username:
-                    :signatures signatures) ; HACK
-          transition-update (app-state/state-transition-update (sm/next-state application)
-                                                               created application user)]
-      (attachment/convert-and-attach! command
-                                      {:created created
-                                       :attachment-type {:type-group :muut
-                                                         :type-id :sopimus}
-                                       :target {:id (:id verdict)
-                                                :type :verdict}
-                                       :modified created
-                                       :locked true
-                                       :read-only true}
-                                      filedata)
-      (action/update-application command (util/deep-merge transition-update
-                                                          {$push {:pate-verdicts verdict}}))
-      (ok :verdicts [verdict]))))
 
 (defn- signer-ids [data]
   (->> data
