@@ -286,26 +286,32 @@
                           edn/read-string verdict-tags-html)]
     (let [pdf       (html-pdf/html->pdf application
                                         "pate-verdict"
-                                        html)]
+                                        html)
+          proposal? (vc/proposal? verdict)
+          contract? (vc/contract? verdict)]
      (when-not (:ok pdf)
        (fail! :pate.pdf-verdict-error))
      (with-open [stream (:pdf-file-stream pdf)]
        (:id (att/upload-and-attach!
              command
              {:created         created
-              :attachment-type (resolve-verdict-attachment-type application)
+              :attachment-type (if proposal?
+                                 (resolve-verdict-attachment-type application :paatosehdotus)
+                                 (resolve-verdict-attachment-type application))
               :source          {:type "verdicts"
                                 :id   (:id verdict)}
               :locked          true
               :read-only       true
               :contents        (i18n/localize (cols/language verdict)
-                                              (if (vc/contract? verdict)
-                                                :pate.verdict-table.contract
-                                                :pate-verdict))}
+                                              (cond
+                                                proposal? :pate-verdict-proposal
+                                                contract? :pate.verdict-table.contract
+                                                :else     :pate-verdict))}
              {:filename (i18n/localize-and-fill (cols/language verdict)
-                                                (if (vc/contract? verdict)
-                                                  :pdf.contract.filename
-                                                  :pdf.filename)
+                                                (cond
+                                                  proposal? :pdf.proposal.filename
+                                                  contract? :pdf.contract.filename
+                                                  :else     :pdf.filename)
                                                 (:id application)
                                                 (util/to-local-datetime (some-> verdict
                                                                                 :published
@@ -318,10 +324,14 @@
   "Creates a verdict attachments as a new version to previously created
   verdict attachment. Used when a contract is signed."
   [{:keys [application created] :as command} verdict]
-  (let [{:keys [tags attachment-id]} (:published verdict)
-        pdf                          (html-pdf/html->pdf application
-                                                         "pate-verdict"
-                                                         (verdict-tags-html (edn/read-string tags)))]
+  (let [{:keys [tags attachment-id
+                proposal-attachment-id]} (:published verdict)
+        attachment-id                    (or attachment-id proposal-attachment-id)
+        pdf                              (html-pdf/html->pdf application
+                                                             "pate-verdict"
+                                                             (verdict-tags-html (edn/read-string tags)))
+        proposal? (vc/proposal? verdict)
+        contract? (vc/contract? verdict)]
     (when-not (:ok pdf)
       (fail! :pate.pdf-verdict-error))
     (with-open [stream (:pdf-file-stream pdf)]
@@ -329,9 +339,10 @@
                               {:created       created
                                :attachment-id attachment-id}
                               {:filename (i18n/localize-and-fill (cols/language verdict)
-                                                                 (if (vc/contract? verdict)
-                                                                   :pdf.contract.filename
-                                                                   :pdf.filename)
+                                                                 (cond
+                                                                   proposal? :pdf.proposal.filename
+                                                                   contract? :pdf.contract.filename
+                                                                   :else     :pdf.filename)
                                                                  (:id application)
                                                                  (util/to-local-datetime created))
                                :content  stream}))))

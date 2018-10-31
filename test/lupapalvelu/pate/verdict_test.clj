@@ -56,7 +56,9 @@
   (schemas/resolve-verdict-attachment-type {:permitType "BAD"})
   => {}
   (schemas/resolve-verdict-attachment-type {:permitType "YA"})
-  => {:type-group "muut" :type-id "paatos"})
+  => {:type-group "muut" :type-id "paatos"}
+  (schemas/resolve-verdict-attachment-type {:permitType "R"} :paatosehdotus)
+  => {:type-group "paatoksenteko" :type-id "paatosehdotus"})
 
 (facts next-section
   (fact "all arguments given"

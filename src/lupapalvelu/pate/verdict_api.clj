@@ -177,7 +177,7 @@
   (ok (assoc (verdict/open-verdict command)
              :filled (verdict/verdict-filled? command))))
 
-(defquery send-doc-updates
+(defquery published-pate-verdict
   {:description      "Published tags for the verdict. The response includes
   id, published (timestamp), tags and attachment-ids (of both source
   and target relations)."
@@ -188,7 +188,6 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(action/some-pre-check (verdict-exists :published?)
-                                             (verdict-exists :proposal?)
                                              backing-system-verdict)]
    :states           states/post-verdict-states}
   [command]
@@ -371,7 +370,9 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :draft? :modern?)]
+                      (some-pre-check
+                        (verdict-exists :draft? :modern?)
+                        (verdict-exists :proposal?))]
    :states           states/post-submitted-states}
   [command]
   (verdict/delete-verdict verdict-id command)
@@ -386,15 +387,17 @@
    :states           (set/difference states/post-submitted-states
                                      #{:finished})
    :pre-checks       [pate-enabled
-                      (verdict-exists :draft? :modern?)
+                      (action/some-pre-check
+                        (verdict-exists :draft? :modern?)
+                        (verdict-exists :proposal?))
                       verdict-filled
                       (action/some-pre-check
-                       (action/and-pre-check (verdict-exists :contract?)
-                                             (state-in states/post-submitted-states))
-                       ;; As KuntaGML message is generated the
-                       ;; application state must be at least :sent
-                       (state-in (set/difference states/post-submitted-states
-                                                 #{:complementNeeded})))]
+                        (action/and-pre-check (verdict-exists :contract?)
+                                              (state-in states/post-submitted-states))
+                        ;; As KuntaGML message is generated the
+                        ;; application state must be at least :sent
+                        (state-in (set/difference states/post-submitted-states
+                                                  #{:complementNeeded})))]
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]
