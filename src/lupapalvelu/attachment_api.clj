@@ -458,7 +458,8 @@
 
 
 (defraw "mass-download"
-  {:parameters [:docs]
+  {:description "A document mass download endpoint for Lupadoku. Note that this is not used by Lupapiste front end. The `docs` parameter is Transit JSON encoded."
+   :parameters [:docs]
    :user-roles #{:authority} ; TODO
    :input-validators [(partial action/non-blank-parameters [:docs])]}
   [{{:keys [docs]} :data user :user}]
