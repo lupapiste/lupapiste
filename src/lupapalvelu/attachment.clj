@@ -1,6 +1,11 @@
 (ns lupapalvelu.attachment
   (:require [clojure.java.io :as io]
             [clojure.set :refer [rename-keys]]
+            [cognitect.transit :as transit]
+            [me.raynes.fs :as fs]
+            [monger.operators :refer :all]
+            [schema.core :refer [defschema] :as sc]
+            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.application-bulletin-utils :as bulletin-utils]
             [lupapalvelu.application-utils :as app-utils]
@@ -25,14 +30,14 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.verdict-interface :as vif]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.state-machine :as state-machine]
             [lupapalvelu.states :as states]
             [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
             [lupapalvelu.vetuma :as vetuma]
-            [me.raynes.fs :as fs]
-            [monger.operators :refer :all]
+            [lupapalvelu.vetuma :as vetuma]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.files :as files]
@@ -40,10 +45,10 @@
             [sade.schemas :as ssc]
             [sade.shared-schemas :as sssc]
             [sade.strings :as ss]
-            [sade.util :refer [=as-kw not=as-kw fn-> fn->>] :as util]
-            [schema.core :refer [defschema] :as sc]
-            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]])
-  (:import [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream]))
+            [sade.util :refer [=as-kw not=as-kw fn-> fn->>] :as util])
+  (:import [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream PipedInputStream PipedOutputStream]
+           [org.apache.commons.io IOUtils]
+           [java.nio.charset StandardCharsets]))
 
 
 ;;
@@ -776,7 +781,7 @@
    Optionally uses the provided application to save on db overhead."
   ([user attachment-id preview?]
    (->> (get-application-as {:attachments {$elemMatch {:id attachment-id}}} user :include-canceled-apps? true)
-         (get-attachment-latest-version-file user attachment-id preview?)))
+        (get-attachment-latest-version-file user attachment-id preview?)))
   ([user attachment-id preview? application]
    (let [{:keys [latestVersion] :as attachment} (->> (:attachments application)
                                                      (filter #(= attachment-id (:id %)))
@@ -1345,3 +1350,78 @@
                    (util/find-by-id attachmentId)
                    :metadata :draftTarget)
       (fail :error.attachment-target-is-draft))))
+
+
+;;
+;; Mass download for Lupadoku
+;;
+
+(defn- read-documents-from-transit [docs-transit]
+  (try (with-open [is (IOUtils/toInputStream ^String docs-transit StandardCharsets/UTF_8)]
+         (transit/read (transit/reader is :json)))
+       (catch Exception e
+         (fail! :error.validator))))
+
+(defn- mass-download-filename [{:keys [doc-id filename org-id source]}]
+  (str org-id "_" doc-id "_" filename))
+
+(defn- get-document-for-mass-download
+  "Get document from either Lupapiste or
+  Onkalo. `get-attachment-latest-version-file` cannot be used to
+  handle Onkalo since it assumes that the document is attached to an
+  application. Assumes that user is authorized to obtain the given
+  documents with `onkalo` as source. Documents fetched from Lupapiste
+  will be authorized in any case."
+  [user {:keys [doc-id filename org-id source] :as doc}]
+  (cond (= source "lupapiste")
+        (assoc (get-attachment-latest-version-file user doc-id false)
+               :filename (mass-download-filename doc))
+
+        (= source "onkalo")
+        (assoc (oc/get-file org-id doc-id)
+               :filename (mass-download-filename doc))
+
+        :else nil))
+
+
+(def- mass-download-authorized-roles
+  #{:authority :reader})
+
+(defn- mass-download-auths?
+  "Returns true if all `documents` belong to given `organizations`."
+  [documents organizations]
+  (let [allowed-org? (fn [result] (or (contains? organizations (:org-id result))
+                                      (error "User not authorized for document"
+                                             (:doc-id result) "," (:filename result)
+                                             "with file-id"
+                                             (:file-id result)
+                                             "in organization"
+                                             (:org-id result))))]
+    (every? allowed-org? documents)))
+
+(defn- authorize-user [user documents]
+  ;; `documents` comes from frontend, but since the user, given that
+  ;; they have the right role, can access all the documents within an
+  ;; organization, they cannot tamper the data in a way that would
+  ;; provide them access to unauthorized documents.
+  (if (mass-download-auths? documents
+                            (roles/organization-ids-by-roles user
+                                                             mass-download-authorized-roles))
+    documents
+    (fail! :error.unauthorized)))
+
+(defn- zip-files [doc-files]
+  (files/piped-zip-input-stream
+   (fn [zip]
+     (doseq [{:keys [filename content]} doc-files]
+       (files/open-and-append! zip
+                               filename
+                               content)))))
+
+(defn mass-download
+  [user docs-transit]
+  (->> (read-documents-from-transit docs-transit)
+       (authorize-user user)
+       (pmap (partial get-document-for-mass-download user))
+       (remove nil?)
+       zip-files))
