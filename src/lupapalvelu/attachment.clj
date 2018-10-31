@@ -1259,6 +1259,9 @@
        (catch Exception e
          (fail! :error.validator))))
 
+(defn- mass-download-filename [{:keys [doc-id filename org-id source]}]
+  (str org-id "_" doc-id "_" filename))
+
 (defn- get-document-for-mass-download
   "Get document from either Lupapiste or
   Onkalo. `get-attachment-latest-version-file` cannot be used to
@@ -1266,13 +1269,14 @@
   application. Assumes that user is authorized to obtain the given
   documents with `onkalo` as source. Documents fetched from Lupapiste
   will be authorized in any case."
-  [user {:keys [doc-id filename org-id source]}]
+  [user {:keys [doc-id filename org-id source] :as doc}]
   (cond (= source "lupapiste")
-        (get-attachment-latest-version-file user doc-id false)
+        (assoc (get-attachment-latest-version-file user doc-id false)
+               :filename (mass-download-filename doc))
 
         (= source "onkalo")
         (assoc (oc/get-file org-id doc-id)
-               :filename filename)
+               :filename (mass-download-filename doc))
 
         :else nil))
 
@@ -1306,9 +1310,9 @@
 (defn- zip-files [doc-files]
   (files/piped-zip-input-stream
    (fn [zip]
-     (doseq [[idx {:keys [filename content]}] (map-indexed vector doc-files)]
+     (doseq [{:keys [filename content]} doc-files]
        (files/open-and-append! zip
-                               (str idx "_" filename)
+                               filename
                                content)))))
 
 (defn mass-download

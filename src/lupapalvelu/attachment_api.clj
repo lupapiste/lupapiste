@@ -463,7 +463,8 @@
    :input-validators [(partial action/non-blank-parameters [:docs])]}
   [{{:keys [docs]} :data user :user}]
   {:status  200
-   :headers {"Content-Type" "application/zip"}
+   :headers {"Content-Type" "application/octet-stream"
+             "Content-Disposition" (str "attachment; filename=\"LP-dokumentit-" (now) ".zip\"")}
    :body (att/mass-download user docs)})
 
 (defraw "download-bulletin-attachment"
