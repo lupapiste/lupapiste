@@ -66,7 +66,7 @@
    and value is map of loc-key - loc-value pairs"
   []
   (let [;; HACK: `(eval '` is a workaround for cljsbuild in uberjar:
-        this-path (util/this-jar (eval 'lupapalvelu.i18n))
+        this-path (util/this-jar (eval 'lupapalvelu.main))
         i18n-files (if (ss/ends-with this-path ".jar")      ; are we inside jar
                      (filter #(ss/ends-with % ".txt") (util/list-jar this-path "i18n/"))
                      (util/get-files-by-regex "resources/i18n/" #".+\.txt$")) ; dev
