@@ -18,9 +18,9 @@
             [saml20-clj.shared :as saml-shared]))
 
 (def ad-config
-  {:sp-cert (env/value :sso :cert)
-   :private-key (env/value :sso :privatekey)
-   :app-name "Lupapiste"})
+  {:app-name "Lupapiste"
+   :sp-cert (env/value :sso :cert)
+   :private-key (env/value :sso :privatekey)})
 
 (defn update-or-create-user!
   "Takes the user creds received from SAML, updates the user info in the DB if necessary.
