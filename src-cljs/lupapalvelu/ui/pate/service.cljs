@@ -311,12 +311,17 @@
                               legacy?   :publish-legacy-verdict
                               proposal? :publish-verdict-proposal
                               :else     :publish-pate-verdict)
-                   :success (fn []
-                              (state/refresh-verdict-auths app-id
-                                                           {:verdict-id verdict-id})
-                              (fetch-verdict-list app-id)
-                              (open-published-verdict app-id verdict-id callback)
-                              (js/repository.load app-id))}
+                   :success (cond
+                              proposal? (fn []
+                                          (fetch-verdict-list app-id)
+                                          (open-verdict app-id verdict-id callback)
+                                          (js/repository.load app-id))
+                              :else     (fn []
+                                          (state/refresh-verdict-auths app-id
+                                                                       {:verdict-id verdict-id})
+                                          (fetch-verdict-list app-id)
+                                          (open-published-verdict app-id verdict-id callback)
+                                          (js/repository.load app-id)))}
                   :id app-id
                   :verdict-id verdict-id))
 

@@ -281,7 +281,8 @@
         :verdict-date       (verdict-date verdict)
         :title              (verdict-summary-title verdict lang section-strings)
         :signatures         (verdict-summary-signatures verdict)
-        :signature-requests (verdict-summary-signature-requests verdict)}
+        :signature-requests (verdict-summary-signature-requests verdict)
+        :proposal?          (proposal? verdict)}
        (util/filter-map-by-val some?)))
 
 (defn- section-strings-by-id [verdicts]
@@ -323,7 +324,8 @@
    (sc/optional-key :signatures)           [{:name sc/Str
                                              :date ssc/Timestamp}]
    (sc/optional-key :signature-requests)   [{:name sc/Str
-                                             :date ssc/Timestamp}]})
+                                             :date ssc/Timestamp}]
+   (sc/optional-key :proposal?)            sc/Bool})
 
 (defn allowed-category-for-application? [verdict application]
   (or (has-category? verdict (schema-util/application->category application))

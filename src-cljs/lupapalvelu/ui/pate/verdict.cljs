@@ -117,10 +117,11 @@
         published  (:published published)
         contract?  (util/=as-kw category :contract)
         board?     (util/=as-kw (:giver info) :lautakunta)
+        proposal?  (util/=as-kw (:state info) :proposal)
         yes-fn     (fn []
                      (reset! state/verdict-wait? true)
                      (reset! (rum/cursor-in _meta [:enabled?]) false)
-                     (service/publish-and-reopen-verdict @state/application-id info state/proposal? reset-verdict))]
+                     (service/publish-and-reopen-verdict @state/application-id info @state/proposal? reset-verdict))]
     [:div.pate-grid-2
      (when-not published
        [:div.row
@@ -145,7 +146,7 @@
                                                                                     "verdict.confirmpublish")
                                                                            :yesFn yes-fn}}))})
          (when board?
-           (components/icon-button {:text-loc :verdict.proposal
+           (components/icon-button {:text-loc (if proposal? :verdict.update.proposal :verdict.proposal)
                                     :class    (common/css :primary :pate-left-space)
                                     :test-id  :verdict-proposal
                                     :icon     :lupicon-document-section-sign
@@ -156,7 +157,9 @@
                                                           {:ltitle          "areyousure"
                                                            :size            "medium"
                                                            :component       "yes-no-dialog"
-                                                           :componentParams {:ltext "verdict.confirmproposal"
+                                                           :componentParams {:ltext (if proposal?
+                                                                                      "verdict.confirm.proposal.update"
+                                                                                      "verdict.confirm.proposal")
                                                                              :yesFn #(do
                                                                                        (reset! state/proposal? true)
                                                                                        (yes-fn))}}))}))

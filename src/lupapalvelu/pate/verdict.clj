@@ -1129,15 +1129,6 @@
                    [:template.inclusions :state
                     :published.published :archive]))))
 
-(defn finalize--proposal [{:keys [command verdict]}]
-  (let [verdict           (assoc (enrich-verdict command verdict true)
-                            :state (wrapped-state command :proposal))
-        data-kws          (map #(util/kw-path :data %)
-                               (-> verdict :data keys))]
-    (apply verdict->updates verdict
-           (concat data-kws
-                   [:template.inclusions :state]))))
-
 (defn finalize--signatures
   [{:keys [command verdict]}]
   (when (vc/contract? verdict)
@@ -1302,6 +1293,14 @@
                         {$set {:pate-verdicts.$.published.attachment-id attachment-id}})
         true)))
 
+(defn- pdf--proposal [command verdict]
+  (if (some-> verdict :published :proposal-attachment-id)
+    (pdf/create-verdict-attachment-version command verdict)
+    (when-let [attachment-id (pdf/create-verdict-attachment command verdict)]
+      (verdict-update command
+                      {$set {:pate-verdicts.$.published.proposal-attachment-id attachment-id}})
+      true)))
+
 (declare pdf--signatures)
 
 (defn create-verdict-pdf
@@ -1321,7 +1320,8 @@
        (let [verdict (command->verdict command)
              fun     (case mode
                        ::verdict    pdf--verdict
-                       ::signatures pdf--signatures)]
+                       ::signatures pdf--signatures
+                       ::proposal   pdf--proposal)]
          (if (fun command verdict)
            (.commit pate-session)
            (.rollback pate-session)))
@@ -1366,8 +1366,7 @@
                                       :verdict     verdict
                                       :updates     {}
                                       :commit-fns  []}
-                                     finalize--fns)
-        _ (clojure.pprint/pprint (update verdict :category name))]
+                                     finalize--fns)]
     (sc/validate schemas/PateVerdict (update verdict :category name))
     (verdict-update command updates)
     (doseq [fun (remove nil? commit-fns)]
@@ -1648,14 +1647,30 @@
     (verdict-update command {$push {:pate-verdicts.$.signature-requests request}})))
 
 ;; ----------------------------
-;; Signatures
+;; Proposal
 ;; ----------------------------
+
+(defn finalize--proposal [{:keys [command verdict]}]
+  (let [verdict           (assoc (enrich-verdict command verdict true)
+                            :state (wrapped-state command :proposal))
+        data-kws          (map #(util/kw-path :data %)
+                               (-> verdict :data keys))]
+    (apply verdict->updates verdict
+           (concat data-kws
+                   [:template.inclusions :state]))))
+
+(defn finalize--proposal-pdf [{:keys [application verdict]}]
+  (let [tags    (pdf/verdict-tags application verdict)]
+    (-> verdict
+        (assoc-in [:published :tags] (ss/serialize tags))
+        (verdict->updates :published.tags)
+        (assoc :commit-fn (util/fn->> :command (send-command ::proposal))))))
 
 (defn publish-verdict-proposal
   "Publishing verdict proposal does the following:
-    1. Generates PDF/A for vedict proposal
-    2. Updates verdict state to proposal"
+    1. Updates verdict state to proposal
+    2. Generates PDF/A for vedict proposal"
   [{:keys [application] :as command}]
   (process-finalize-pipeline command application (command->verdict command)
                              finalize--proposal
-                             finalize--pdf))
+                             finalize--proposal-pdf))

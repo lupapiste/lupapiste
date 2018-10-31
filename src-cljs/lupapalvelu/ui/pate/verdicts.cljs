@@ -16,23 +16,24 @@
 
 (defn loc-key [k]
   ;; Each value is [verdict-key contract-key]
-  (let [v (k {:title                [:application.tabVerdict :application.tabVerdict.sijoitussopimus]
-              :th-verdict           [:pate.verdict-table.verdict :pate.verdict-table.contract]
-              :th-date              [:pate.verdict-table.verdict-date :verdict.contract.date]
-              :th-giver             [:pate.verdict-table.verdict-giver :verdict.name.sijoitussopimus]
-              :add                  [:application.verdict.add :pate.contract.add]
-              :new                  [:pate.verdict-new :pate.verdict-new]
-              :fetch                [:verdict.fetch.button :contract.fetch.button]
-              :copy                 [:pate.verdict-copy :pate.verdict-copy]
-              :description          [:application.verdictDesc :pate.contract.description
-                                     :help.YA.verdictDesc.sijoitussopimus]
-              :confirm-delete       [:verdict.confirmdelete :pate.contract.confirm-delete]
-              :confirm-delete-draft [:pate.delete-verdict-draft
-                                     :pate.contract.confirm-delete-draft]
-              :no-templates         [:pate.no-verdict-templates :pate.no-contract-templates]
-              :template             [:pate-verdict-template :pate.contract.template]
-              :fetch-confirm        [:pate.check-for-verdict.confirm :pate.check-for-contract.confirm]
-              :default-title        [:pate-verdict :pate.verdict-table.contract]})]
+  (let [v (k {:title                   [:application.tabVerdict :application.tabVerdict.sijoitussopimus]
+              :th-verdict              [:pate.verdict-table.verdict :pate.verdict-table.contract]
+              :th-date                 [:pate.verdict-table.verdict-date :verdict.contract.date]
+              :th-giver                [:pate.verdict-table.verdict-giver :verdict.name.sijoitussopimus]
+              :add                     [:application.verdict.add :pate.contract.add]
+              :new                     [:pate.verdict-new :pate.verdict-new]
+              :fetch                   [:verdict.fetch.button :contract.fetch.button]
+              :copy                    [:pate.verdict-copy :pate.verdict-copy]
+              :description             [:application.verdictDesc :pate.contract.description
+                                        :help.YA.verdictDesc.sijoitussopimus]
+              :confirm-delete          [:verdict.confirmdelete :pate.contract.confirm-delete]
+              :confirm-delete-draft    [:pate.delete-verdict-draft
+                                        :pate.contract.confirm-delete-draft]
+              :confirm-delete-proposal [:pate.delete-proposal]
+              :no-templates            [:pate.no-verdict-templates :pate.no-contract-templates]
+              :template                [:pate-verdict-template :pate.contract.template]
+              :fetch-confirm           [:pate.check-for-verdict.confirm :pate.check-for-contract.confirm]
+              :default-title           [:pate-verdict :pate.verdict-table.contract]})]
     (if (:contracts? @args)
       (last v)
       (first v))))
@@ -142,11 +143,12 @@
                            :test-id  :test-open-prints-order-history
                            :on-click #(hub/send "show-attachment-prints-order-history")}))
 
-(defn- confirm-and-delete-verdict [app-id {:keys [legacy? published] :as verdict}]
+(defn- confirm-and-delete-verdict [app-id {:keys [legacy? published proposal?] :as verdict}]
   (common/show-dialog {:type     :yes-no
-                       :ltext    (if published
-                                   (loc-key :confirm-delete)
-                                   (loc-key :confirm-delete-draft))
+                       :ltext    (cond
+                                   published (loc-key :confirm-delete)
+                                   proposal? (loc-key :confirm-delete-proposal)
+                                   :else     (loc-key :confirm-delete-draft))
                        :callback #(service/delete-verdict app-id verdict)}))
 
 (defn- confirm-and-replace-verdict [verdict verdict-id]
@@ -276,7 +278,8 @@
    [:thead [:tr (map (fn [header] [:th (common/loc header)]) headers)]]
    [:tbody (map-indexed (fn [i {:keys [id title published modified
                                        verdict-date giver replaced?
-                                       category signatures signature-requests]
+                                       category signatures signature-requests
+                                       proposal?]
                                 :as   verdict}]
                           (list [:tr {:key id}
                                  [:td {:class (common/css-flags :replaced replaced?)}
@@ -286,7 +289,7 @@
                                      (common/loc (loc-key :default-title))
                                      title)]]
                                  [:td (common/add-test-id {} :verdict-date i)
-                                  (js/util.finnishDate verdict-date)]
+                                  (if (not proposal?) (js/util.finnishDate verdict-date))]
                                  [:td (common/add-test-id {} :verdict-giver i) giver]
                                  [:td (common/add-test-id {} :verdict-published i)
                                   (if published
@@ -304,6 +307,9 @@
 
                                                     published
                                                     :pate.verdict-table.remove-verdict
+
+                                                    proposal?
+                                                    :pate.verdict-table.remove-proposal
 
                                                     :else
                                                     :pate.verdict-table.remove-draft)
