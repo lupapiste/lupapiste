@@ -131,7 +131,7 @@
     (->> orgAuthz (remove nil?) set)))
 
 (defn resolve-authz
-  "Takes a sequence of ad-settings (as returned by 'lupapalvelu.organization/get-organizations-by-ad-domain')
+  "Takes a sequence of ad-settings (as returned by `lupapalvelu.organization/get-organizations-by-ad-domain`)
   and a sequence of ad-groups received in the SAML response, returns a parsed orgAuthz element."
   [ad-settings Group]
   (into {} (for [org-setting ad-settings
