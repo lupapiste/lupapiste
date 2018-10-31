@@ -1286,8 +1286,8 @@
 
 (defn- mass-download-auths?
   "Returns true if all `documents` belong to given `organizations`."
-  [documents orgazinations]
-  (let [allowed-org? (fn [result] (or (contains? orgazinations (:org-id result))
+  [documents organizations]
+  (let [allowed-org? (fn [result] (or (contains? organizations (:org-id result))
                                       (error "User not authorized for document"
                                              (:doc-id result) "," (:filename result)
                                              "with file-id"
