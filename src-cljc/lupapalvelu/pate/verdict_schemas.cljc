@@ -175,7 +175,10 @@
                                                                               :template-dict  :verdict-code})
                                      :verdict-text     (schema-util/required {:phrase-text   {:category :paatosteksti}
                                                                               :template-dict :paatosteksti})
-                                     :verdict-text-ref (schema-util/required {:reference {:path :verdict-text}})}
+                                     :verdict-text-ref (schema-util/required {:reference {:path :verdict-text}})
+                                     :proposal-text    (schema-util/required {:phrase-text   {:category :proposaltext}
+                                                                              :template-dict :proposaltext})
+                                     :proposal-text-ref (schema-util/required {:reference {:path :proposal-text}})}
                                     (when collateral? {:collateral      {:text {:loc-prefix :pate.collateral
                                                                                 :after :eur}}
                                                        :collateral-flag {:toggle {:loc-prefix :pate-collateral.flag}}
@@ -200,7 +203,13 @@
                                                 {:col   5
                                                  :hide? :_meta.editing?
                                                  :dict  :verdict-text-ref}]
-                                               ]}}}]
+                                               [{:col   5
+                                                 ;;:id    "proposaltext"
+                                                 :show? :_meta.editing?
+                                                 :dict  :proposal-text}
+                                                {:col   5
+                                                 :hide? :_meta.editing?
+                                                 :dict  :proposal-text-ref}]]}}}]
     (cond-> verdict
       collateral? (update-in [:section :grid :rows]
                              concat
