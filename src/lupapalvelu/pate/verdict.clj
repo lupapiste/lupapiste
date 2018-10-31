@@ -54,7 +54,8 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [warnf warn  errorf error]]))
+            [taoensso.timbre :refer [warnf warn errorf error]]
+            [lupapalvelu.backing-system.allu.core :as allu]))
 
 ;; ------------------------------------------
 ;; Pre-checks
@@ -78,12 +79,14 @@
     :legacy? fails if the verdict is a 'modern' Pate verdict
     :modern? fails if the verdict is a legacy verdict
     :contract? fails if the verdict is not a contract
+    :allu-contract? fails if the verdict is not an allu-contract
     :verdict? fails for contracts
     :not-replaced? Fails if the verdict has been OR is being replaced. "
   [& conditions]
   (let [{:keys [draft? published?
                 legacy? modern?
-                contract? verdict?
+                contract? allu-contract?
+                verdict?
                 not-replaced?]} (zipmap conditions (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
@@ -111,6 +114,9 @@
 
                           (and contract? (not (vc/contract? verdict)))
                           :error.verdict.not-contract
+
+                          (and allu-contract? (util/not=as-kw (:category verdict) :allu-contract))
+                          :error.verdict.not-allu-contract
 
                           (and verdict? (vc/contract? verdict))
                           :error.verdict.contract
@@ -597,6 +603,19 @@
                                                      :template {:inclusions (legacy-verdict-inclusions category)}
                                                      :legacy?  true})}})
     verdict-id))
+
+(sc/defn ^:always-validate new-allu-verdict :- schemas/PateVerdict [{:keys [application created] :as command}]
+  (let [category (schema-util/application->category application)]
+    {:id       (mongo/create-id)
+     :modified created
+     :state    (wrapped-state command :published)
+     :category (name category)
+     :data     {:handler (general-handler application)}
+     :template {:inclusions (-> category
+                                legacy/legacy-verdict-schema
+                                :dictionary
+                                dicts->kw-paths)}
+     :legacy?  true}))
 
 (declare verdict-schema)
 
@@ -1430,12 +1449,6 @@
                  "Content-Disposition" (format "filename=\"%s\"" filename)}
        :body    pdf-file-stream})))
 
-(defn latest-published-pate-verdict [{:keys [application]}]
-  (->> (:pate-verdicts application)
-       (filter :published)
-       (sort-by (comp :published :published))
-       last))
-
 ;; ---------------------------------
 ;; Backing system verdicts
 ;; The backing system verdicts reside in the verdicts array and never
@@ -1549,9 +1562,9 @@
     (if (some (util/fn->> second :id (util/=as-kw :signatures))
               sections)
         (map (fn [[_ attr & _ :as section]]
-            (if (util/=as-kw (:id attr) :signatures)
-              entry
-              section))
+               (if (util/=as-kw (:id attr) :signatures)
+                 entry
+                 section))
              sections)
         (concat sections [entry]))))
 
@@ -1595,6 +1608,19 @@
                      (when (sign-requested? command)
                        {$pull {(util/kw-path :pate-verdicts.$.signature-requests) {:user-id (:id user)}}})))
     (send-command ::signatures command)))
+
+(defn sign-allu-contract
+  "Sign the contract
+   - Update verdict signatures
+   - Change application state to agreementSigned if needed
+   - Don't move to the :agreementSigned state yet (still requires a verdict from ALLU)"
+  [{:keys [user created application] :as command}]
+  (let [signature (create-signature command)
+        verdict (command->verdict command)]
+    (verdict-update command
+                    (util/deep-merge
+                      {$push {(util/kw-path :pate-verdicts.$.signatures) signature}}))
+    (allu/approve-placementcontract! command)))
 
 (defn- signer-ids [data]
   (->> data

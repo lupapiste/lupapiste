@@ -3,7 +3,7 @@
             [sade.env :as env]
             [taoensso.timbre :as timbre]
             [sade.strings :as str]
-            [cheshire.core :as json])
+            [lupapalvelu.json :as json])
   (:import [java.io File]))
 
 (def unzip-attachments-path "/api/unzip-attachments")
@@ -37,7 +37,7 @@
                                                                   {:name      "columns"
                                                                    :mime-type "application/json"
                                                                    :encoding  "UTF-8"
-                                                                   :content   (json/generate-string column-keyword-map)}]}
+                                                                   :content   (json/encode column-keyword-map)}]}
           {{:keys [status attachments error]} :body} (http/post (str (env/value :muuntaja :url) unzip-attachments-path)
                                                                 request-opts)]
       (timbre/debug attachments)

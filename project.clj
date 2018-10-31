@@ -14,6 +14,7 @@
                  [org.clojure/test.check "0.9.0"]
                  [com.gfredericks/test.chuck "0.2.9"]
                  [prismatic/plumbing "0.5.5"]
+                 [com.cognitect/transit-clj "0.8.313"]
 
                  ; State management
                  [mount "0.1.12"]
@@ -29,6 +30,7 @@
                  [metosin/reitit-ring "0.2.2"]
                  [metosin/reitit-middleware "0.2.2"]
                  [metosin/spec-tools "0.7.1"] ; for reitit-middleware
+                 [metosin/reitit "0.2.2"]
 
                  ; Namespace finder library
                  [bultitude "0.2.8"] ; noir requires 0.2.0
@@ -68,7 +70,8 @@
                  [pandect "0.6.1"]
 
                  ; JSON
-                 [cheshire "5.7.0"]
+                 [metosin/jsonista "0.2.2"]
+                 [cheshire "5.8.1"]                         ; not used directly, but omitting seems to break everything
 
                  ; HTTP client
                  [clj-http "3.4.1" :exclusions [commons-codec]]

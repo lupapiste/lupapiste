@@ -8,7 +8,7 @@
             [noir.response :as resp]))
 
 (defn from-query [request]
-  (keywordize-keys (:query-params request)))
+  (keywordize-keys (:params request)))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
@@ -39,6 +39,9 @@
 
 (defn execute-query [name params request]
   (execute (enriched (action/make-query name params) request)))
+
+(defn execute-raw [name params request]
+  (execute (enriched (action/make-raw name params) request)))
 
 (defn execute-export [name params request]
   (execute (enriched (action/make-export name params) request)))

@@ -40,7 +40,7 @@
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
             [ring.util.codec :as codec]
-            [cheshire.core :as json])
+            [lupapalvelu.json :as json])
   (:import [org.xml.sax SAXParseException]))
 
 

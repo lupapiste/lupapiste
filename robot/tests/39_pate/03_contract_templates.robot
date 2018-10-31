@@ -28,7 +28,7 @@ Initial template status
 
 
 Template cannot be published without filling required information
-  Test id text is  template-state  Sopimuspohjaa ei olla vielä julkaistu.
+  Test id text is  template-state  Sopimuspohjaa ei ole vielä julkaistu.
   Test id disabled  publish-template
 
 Fills required information
@@ -53,4 +53,4 @@ No templates
 
 Template not published
   Test id disabled  publish-template
-  Test id text is  template-state  Sopimuspohjaa ei olla vielä julkaistu.
+  Test id text is  template-state  Sopimuspohjaa ei ole vielä julkaistu.

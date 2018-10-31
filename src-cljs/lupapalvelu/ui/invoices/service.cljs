@@ -5,7 +5,6 @@
             [sade.shared-util :as util]))
 
 (defn insert-invoice [app-id data callback]
-  (println ">> insert-invoice app-id: " app-id " data: " data)
   (common/command "insert-invoice"
                   callback
                   :id app-id

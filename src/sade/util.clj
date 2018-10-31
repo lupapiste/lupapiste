@@ -541,10 +541,7 @@
 (defn this-jar
   "utility function to get the name of jar in which this function is invoked"
   [& [ns]]
-  (-> (if (symbol? ns)
-        (eval ns)
-        (or ns (class *ns*)))
-      .getProtectionDomain .getCodeSource .getLocation .getPath))
+  (-> (or ns (class *ns*)) .getProtectionDomain .getCodeSource .getLocation .getPath))
 
 (defn list-jar [jar-path inner-dir]
   (if-let [jar         (JarFile. jar-path)]
@@ -688,3 +685,10 @@
   [config]
   (doseq [[k v] config]
     (when (nil? v) (errorf "missing key '%s' value from property file" (name k)))))
+
+(defn file->byte-array [file]
+  (let [file (io/file file)
+        b-array (byte-array (.length file))]
+    (with-open [is (io/input-stream file)]
+      (.read is b-array)
+      b-array)))

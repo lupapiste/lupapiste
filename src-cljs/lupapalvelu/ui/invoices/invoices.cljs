@@ -304,7 +304,6 @@
    (invoice-list (rum/react state/invoices))])
 
 (defn bootstrap-invoices []
-  (println ">> bootstrap-invoices")
   (when-let [app-id (js/pageutil.hashApplicationId)]
     (reset! state/price-catalogue dummy-price-catalog)
     (reset! state/invoices [])
@@ -333,7 +332,6 @@
                (.getElementById js/document (:dom-id @args)))))
 
 (defn ^:export start [domId params]
-  (println "invoices.cljs start  domId:" domId " params: " params)
   (when (common/feature? :invoices)
     (swap! args assoc
            :contracts? (common/oget params :contracts)

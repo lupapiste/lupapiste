@@ -30,8 +30,7 @@
 
 (when (env/feature? :ad-login)
   (mongo/connect!)
-  (let [test-db (format "test_ad_login_itest_%s" (now))
-        pori-route (parse-route "pori.fi")]
+  (let [pori-route (parse-route "pori.fi")]
 
         (fact "Pori-R has ad-login enabled"
           (-> (org/get-organizations-by-ad-domain "pori.fi") first (get-in [:ad-login :enabled])) => true)

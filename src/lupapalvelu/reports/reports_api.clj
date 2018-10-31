@@ -10,6 +10,7 @@
             [lupapalvelu.reports.applications :as app-reports]
             [lupapalvelu.reports.store-billing :as store-billing]
             [lupapalvelu.reports.excel :as excel]
+            [lupapalvelu.reports.users :as user-reports]
             [lupapalvelu.company :as com]))
 
 (defn excel-response [filename body]
@@ -152,3 +153,12 @@
                                  ".xlsx")]
     (excel-response resulting-file-name
                     (store-billing/billing-entries user startTs endTs lang))))
+
+(defraw authorities-report
+  {:description "Excel report of organizations auhorities"
+   :permissions [{:required [:organization/admin]}]}
+  [{user :user {lang :lang} :data}]
+  (let [org-id (usr/authority-admins-organization-id user)
+        resulting-file-name (str (i18n/localize lang "authorities.report.filename") ".xlsx")]
+    (excel-response resulting-file-name
+                    (user-reports/authorities org-id lang))))

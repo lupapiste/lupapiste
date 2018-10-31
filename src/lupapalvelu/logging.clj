@@ -5,7 +5,7 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [clojure.java.io :as io])
   (:import [org.joda.time.format DateTimeFormat DateTimeFormatter]))
 
@@ -71,7 +71,7 @@
                                                              %))) ; data in multipart/form-data w/ POST
                    (update :data (fn [m] (if-not (seq (:files m)) (dissoc m :files) m))) ; strip empty data.files
                    (util/strip-empty-maps))
-        jsoned   (json/generate-string stripped)]
+        jsoned   (json/encode stripped)]
     (try
       (unsecure-log-event level jsoned {:ns (str (:ns event))})
       (catch Exception e

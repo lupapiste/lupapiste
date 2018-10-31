@@ -4,8 +4,7 @@
             [pandect.core :as pandect]
             [monger.operators :refer :all]
             [schema.core :as sc]
-            [cheshire.core :as json]
-            [cheshire.generate :as cheshire]
+            [lupapalvelu.json :as json]
             [slingshot.slingshot :refer [throw+]]
             [sade.env :as env]
             [sade.schemas :refer [max-length-string]]
@@ -27,13 +26,6 @@
 ;;
 ;; Onnistuu.fi integration: Process handling
 ;;
-
-;
-; Setup:
-;
-
-; Encode Java arrays to JSON just like any sequence.
-(cheshire/add-encoder (Class/forName "[B") cheshire/encode-seq)
 
 ;
 ; Process FSM:

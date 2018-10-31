@@ -274,9 +274,7 @@
     (:created building3) => "2013"))
 
 (facts "Kiinteistotoimitus verdicts"
-       (let [{app-id :id} (create-app pena
-                                      :propertyId sipoo-property-id
-                                      :operation "kiinteistonmuodostus")
+       (let [app-id (create-app-id pena :propertyId sipoo-property-id :operation "kiinteistonmuodostus")
              app          (query-application pena app-id)
              {doc-id :id} (domain/get-document-by-name app "kiinteistonmuodostus")
              _            (command pena :update-doc

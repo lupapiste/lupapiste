@@ -1,5 +1,5 @@
 (ns lupapalvelu.user-api-itest
-  (:require [cheshire.core :as json]
+  (:require [lupapalvelu.json :as json]
             [monger.operators :refer :all]
             [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]

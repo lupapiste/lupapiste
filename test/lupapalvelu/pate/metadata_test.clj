@@ -48,4 +48,8 @@
             :baz [:one :two]
             :m {:dum nil}}}
   (unwrap-all {:_value [1 2 {:hii 99}] :_modified 8765 :_user "hi"})
-  => [1 2 {:hii 99}])
+  => [1 2 {:hii 99}]
+  (unwrap-all [{:bar {:_value 8 :_modified 8765 :_user "hi"}}
+               {:baz {:_value [:one :two] :_modified 8765 :_user "hi"}}
+               {:dum {:_value nil :_modified 8765 :_user "hi"}}])
+  => [{:bar 8} {:baz [:one :two]} {:dum nil}])
