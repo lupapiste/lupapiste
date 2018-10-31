@@ -3,7 +3,7 @@
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [noir.request :as request]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [hiccup.core :refer [html]]
             [hiccup.page :refer [html5]]
             [clj-http.client :as http]

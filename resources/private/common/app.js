@@ -103,7 +103,7 @@ var LUPAPISTE = LUPAPISTE || {};
                                        override: true});
       self.previousHash = self.currentHash;
 
-      self.currentHash = (location.hash || "").substr(3);
+      self.currentHash = (location.hash ? decodeURIComponent( location.hash) : "").substr(3);
 
       var q = self.currentHash.indexOf("?");
       if (q > -1) {

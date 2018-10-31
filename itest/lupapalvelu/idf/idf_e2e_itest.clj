@@ -8,7 +8,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :refer [get-user-by-id]]
             [lupapalvelu.idf.idf-api :refer :all]

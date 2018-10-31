@@ -3,7 +3,7 @@
             [sade.crypt :as crypt]
             [sade.util :as util]
             [sade.env :as env]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [lupapalvelu.itest-util :refer :all]))
 
 (apply-remote-minimal)

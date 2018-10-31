@@ -6,7 +6,7 @@
             [me.raynes.fs :as fs]
             [sade.env :as env]
             [sade.util :as util]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-scales, attachment-sizes]]
             [lupapalvelu.attachment.type :as att-type]
@@ -40,7 +40,7 @@
   (loop [kvs m, line-length (.length sb)]
     (if (seq kvs)
       (let [[k v] (first kvs)
-            map-entry (str (json/generate-string k) ":" (json/generate-string v))
+            map-entry (str (json/encode k) ":" (json/encode v))
             new-length (+ line-length (.length map-entry) 1) ; +1 for the comma or ending brace
             tail  (rest kvs)]
         (when (> new-length break-at) (.append sb \newline))
@@ -100,7 +100,7 @@
                                                {:logoutUrl (str (env/value :host) "/dev/saml-logout")})]))
                  :convertableTypes      conversion/all-convertable-mime-types
                  :footerLinkPrefix      (env/value :host)}]
-    (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
+    (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/encode js-conf) ";")))
 
 (defn- loc->js []
   (-> (breaked-json-map (i18n/get-terms i18n/*lang*) (StringBuilder. ";loc.setTerms(") 32000)
@@ -108,7 +108,7 @@
     (.toString)))
 
 (defn- schema-versions-by-permit-type []
-  (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
+  (str ";LUPAPISTE.config.kryspVersions = " (json/encode validator/supported-krysp-versions-by-permit-type) ";"))
 
 (defn- read-component-list-from-fs [path pattern]
   (let [files (fs/find-files path (re-pattern pattern))

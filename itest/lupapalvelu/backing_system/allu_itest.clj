@@ -2,7 +2,7 @@
   "Integration tests for ALLU integration. Using local (i.e. not over HTTP) testing style."
   (:require [clojure.string :as s]
             [clojure.java.io :as io]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [monger.operators :refer [$set]]
             [mount.core :as mount]
             [reitit.ring :as reitit-ring]

@@ -1,11 +1,9 @@
 (ns lupapalvelu.web
-  (:require [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
-            [clojure.walk :refer [keywordize-keys]]
+  (:require [taoensso.timbre :refer [trace info infof warn warnf error spy]]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [clj-time.core :as time]
             [clj-time.local :as local]
-            [cheshire.core :as json]
             [me.raynes.fs :as fs]
             [ring.util.response :refer [resource-response]]
             [ring.util.io :as ring-io]
@@ -47,9 +45,11 @@
             [lupapalvelu.ident.suomifi]
             [lupapalvelu.ident.ad-login]
             [lupapalvelu.idf.idf-api :as idf-api]
+            [lupapalvelu.json :as json]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.tasks :as tasks]
@@ -65,6 +65,10 @@
 ;; Helpers
 ;;
 
+(defn- json-response [content]
+  (resp/content-type "application/json; charset=utf-8"
+                     (json/encode content)))
+
 (defonce apis (atom #{}))
 
 (defmacro defjson [path params & content]
@@ -77,11 +81,13 @@
          (resp/set-headers
            http/no-cache-headers
            (-> (dissoc response-data# :session :cookies)
-               resp/json
+               json-response
                (util/assoc-when :session response-session#
                                 :cookies response-cookies#)))))))
 
 (defjson "/system/apis" [] @apis)
+
+(def- keyword-no-non-printables (comp keyword ss/strip-non-printables))
 
 (defn parse-json-body [{:keys [content-type character-encoding body] :as request}]
   (let [json-body (if (or (ss/starts-with content-type "application/json")
@@ -89,7 +95,7 @@
                     (if body
                       (-> body
                         (io/reader :encoding (or character-encoding "utf-8"))
-                        (json/parse-stream (comp keyword ss/strip-non-printables)))
+                        (json/decode-stream keyword-no-non-printables))
                       {}))]
     (if json-body
       (assoc request :json json-body :params json-body)
@@ -170,7 +176,7 @@
 
 (defn json-data-as-stream [data]
   (ring-io/piped-input-stream
-    #(json/generate-stream data (BufferedWriter. (OutputStreamWriter. % "utf-8")))))
+    #(json/encode-stream data (BufferedWriter. (OutputStreamWriter. % "utf-8")))))
 
 (defn json-stream-response [data]
   (resp/content-type
@@ -356,10 +362,11 @@
     (select-keys response [:ok :text :session :applicationpage :lang :cookies])))
 
 (defpage [:get "/api/login-sso-uri"] {username :username}
-  (let [request (request/ring-request)]
-    ; TODO: Resolve SSO URL from db
-    (if false
-      (resp/json (ok {:uri "https://evolta.fi"}))
+  (let [request (request/ring-request)
+        domain (last (ss/split username #"@"))
+        enabled (-> domain org/get-organizations-by-ad-domain first (get-in [:ad-login :enabled]))]
+    (if enabled
+      (resp/json (ok {:uri (str (env/value :host) "/api/saml/ad-login/" domain)}))
       (resp/json (fail :error.unauthorized)))))
 
 ;; Reset password via separate URL outside anti-csrf
@@ -766,14 +773,14 @@
         (Thread/sleep (* 1000 (Integer/parseInt seconds))))
       (case (keyword (or sub-id id))
        :bad   (resp/status 501 "Bad Suti request.")
-       :empty (json/generate-string {})
+       :empty (json/encode {})
        :auth (let [[username password] (http/decode-basic-auth (request/ring-request))]
                (if (and (= username "suti") (= password "secret"))
-                 (json/generate-string {:productlist [{:name "Four" :expired true :expirydate "\\/Date(1467883327899)\\/" :downloaded "\\/Date(1467019327022)\\/" }
+                 (json/encode {:productlist [{:name "Four" :expired true :expirydate "\\/Date(1467883327899)\\/" :downloaded "\\/Date(1467019327022)\\/" }
                                                       {:name "Five" :expired true :expirydate "\\/Date(1468056127124)\\/" :downloaded nil}
                                                       {:name "Six" :expired false :expirydate nil :downloaded nil}]})
                  (resp/status 401 "Unauthorized")))
-       (json/generate-string {:productlist [{:name "One" :expired false :expirydate nil :downloaded nil}
+       (json/encode {:productlist [{:name "One" :expired false :expirydate nil :downloaded nil}
                                             {:name "Two" :expired true :expirydate "\\/Date(1467710527123)\\/"
                                              :downloaded "\\/Date(1467364927456)\\/"}
                                             {:name "Three" :expired false :expirydate nil :downloaded nil}]}))))
