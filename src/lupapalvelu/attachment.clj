@@ -37,7 +37,6 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
             [lupapalvelu.vetuma :as vetuma]
-            [lupapalvelu.vetuma :as vetuma]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.files :as files]
@@ -49,7 +48,6 @@
   (:import [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream PipedInputStream PipedOutputStream]
            [org.apache.commons.io IOUtils]
            [java.nio.charset StandardCharsets]))
-
 
 ;;
 ;; Metadata
