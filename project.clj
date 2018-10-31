@@ -14,6 +14,7 @@
                  [org.clojure/test.check "0.9.0"]
                  [com.gfredericks/test.chuck "0.2.9"]
                  [prismatic/plumbing "0.5.5"]
+                 [com.cognitect/transit-clj "0.8.313"]
 
                  ; State management
                  [mount "0.1.12"]
@@ -56,6 +57,7 @@
                  [cljstache "2.0.1"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [org.freemarker/freemarker "2.3.23"]
+                 [hiccup "1.0.5"]
 
                  ; CSS
                  [garden "1.3.3"]

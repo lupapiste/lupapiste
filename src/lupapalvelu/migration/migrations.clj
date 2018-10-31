@@ -2725,10 +2725,12 @@
        (map #(select-keys % [:id :name]))
        (hash-map :attachments.$.groupType "operation" :attachments.$.op)
        (hash-map $set)
-       (vector {:_id (:id application) :attachments.type.type-id "asemapiirros"})))
+       (vector {:_id (:id application)
+                :attachments {$elemMatch {:type.type-id "asemapiirros"}}})))
 
 (defmigration update-asemapiirros-grouping-as-multioperation
-  (let [query      {:permitType {$in ["R" "P"]} :attachments.type.type-id "asemapiirros"}
+  (let [query      {:permitType {$in ["R" "P"]}
+                    :attachments {$elemMatch {:type.type-id "asemapiirros"}}}
         projection [:primaryOperation :secondaryOperations]]
     (->> (mongo/select :applications query projection)
          (map get-asemapiirros-multioperation-updates-for-application)

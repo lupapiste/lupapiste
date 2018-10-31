@@ -8,7 +8,7 @@
             [noir.response :as resp]))
 
 (defn from-query [request]
-  (keywordize-keys (:query-params request)))
+  (keywordize-keys (:params request)))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))

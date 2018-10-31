@@ -616,6 +616,15 @@
   (doall (for [attachment attachments]
            (send-attachment! command attachment))))
 
+(defn agreement-state
+  "Returns :proposal when application is still in the state where agreement proposal should be fetched.
+   Returns :final when the final verdict should be fetched."
+  [application]
+  (case (:state application)
+    ("sent" "submitted") :proposal
+    "agreementPrepared"  :final
+    :else nil))
+
 ;; TODO: Add this to batchrunner
 (defn load-placementcontract-proposal!
   "GET placement contract proposal pdf from ALLU. Saves the proposal pdf using `lupapalvelu.file-upload/save-file`."
@@ -637,7 +646,7 @@
   "Load placement contract proposal or final from ALLU. Returns SavedFileData of the pdf or nil. Bypasses JMS."
   [{:keys [application] :as command}]
   (try+
-    (:body (allu-request-handler (case (:state application)
-                                   ("sent" "submitted") (contract-proposal-request command)
-                                   "agreementPrepared" (final-contract-request command))))
+    (:body (allu-request-handler (case (agreement-state application)
+                                   :proposal (contract-proposal-request command)
+                                   :final (final-contract-request command))))
     (catch [:text "error.allu.http"] _ nil)))

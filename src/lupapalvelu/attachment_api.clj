@@ -406,7 +406,8 @@
    :pre-checks       [app/validate-authority-in-drafts
                       att/foreman-must-be-uploader
                       att/attachment-matches-application
-                      att/attachment-not-readOnly
+                      (action/some-pre-check att/attachment-not-readOnly
+                                             att/stamped-removable-version)
                       att/attachment-editable-by-application-state
                       att/delete-allowed-by-target
                       att/edit-allowed-by-target
@@ -454,6 +455,19 @@
    :user-authz-roles    roles/all-authz-roles}
   [{{:keys [attachment-id download preview]} :data user :user}]
   (att/output-attachment (att/get-attachment-latest-version-file user attachment-id (= preview "true")) (= download "true")))
+
+
+
+(defraw "mass-download"
+  {:description "A document mass download endpoint for Lupadoku. Note that this is not used by Lupapiste front end. The `docs` parameter is Transit JSON encoded."
+   :parameters [:docs]
+   :user-roles #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:docs])]}
+  [{{:keys [docs]} :data user :user}]
+  {:status  200
+   :headers {"Content-Type" "application/octet-stream"
+             "Content-Disposition" (str "attachment; filename=\"LP-dokumentit-" (now) ".zip\"")}
+   :body (att/mass-download user docs)})
 
 (defraw "download-bulletin-attachment"
   {:parameters       [bulletin-id attachment-id]  ; Note that this is actually file id
