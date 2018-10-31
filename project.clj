@@ -14,6 +14,7 @@
                  [org.clojure/test.check "0.9.0"]
                  [com.gfredericks/test.chuck "0.2.9"]
                  [prismatic/plumbing "0.5.5"]
+                 [com.cognitect/transit-clj "0.8.313"]
 
                  ; State management
                  [mount "0.1.12"]
