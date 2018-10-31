@@ -8,6 +8,7 @@
             [lupapalvelu.pate.shared-schemas :as shared-schemas]
             [lupapalvelu.pate.verdict :refer :all]
             [lupapalvelu.pate.verdict-common :as vc]
+            [lupapalvelu.pate.verdict-interface :as vif]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.pate.verdict-template-schemas :as template-schemas]
             [midje.sweet :refer :all]
@@ -1455,19 +1456,19 @@
 
 (facts "Verdict handling helpers"
   (fact "Find latest published pate verdict"
-    (latest-published-pate-verdict {:application {}})
+    (vif/latest-published-pate-verdict {:application {}})
     => nil
-    (latest-published-pate-verdict {:application
-                                    {:pate-verdicts
-                                     [(publish test-verdict 1525336290167)]}})
-    => (publish test-verdict 1525336290167)
-    (latest-published-pate-verdict {:application
-                                    {:pate-verdicts
-                                     [test-verdict
-                                      (publish test-verdict 1525336290167)
-                                      (publish test-verdict 1425330000000)
-                                      (publish test-verdict 1525336290000)]}})
-    => (publish test-verdict 1525336290167)))
+    (vif/latest-published-pate-verdict {:application
+                                        {:pate-verdicts
+                                         [(publish test-verdict 1525336290167)]}})
+    => (metadata/unwrap-all (publish test-verdict 1525336290167))
+    (vif/latest-published-pate-verdict {:application
+                                        {:pate-verdicts
+                                         [test-verdict
+                                          (publish test-verdict 1525336290167)
+                                          (publish test-verdict 1425330000000)
+                                          (publish test-verdict 1525336290000)]}})
+    => (metadata/unwrap-all (publish test-verdict 1525336290167))))
 
 (fact "title-fn"
   (let [fun (partial format "(%s)")]
@@ -1567,7 +1568,7 @@
       (vc/draft? nil) => false
       (vc/published? nil) => false
       (vc/draft? {}) => false
-      (vc/published? {}) => false
+      (vc/published? {}) => true
       (vc/verdict-summary "fi" nil nil)
       => {:category "backing-system"
           :legacy?  false
@@ -1713,6 +1714,7 @@
           :title        "ehdollinen"})
     (fact "YA backend verdit"
       (vc/draft? ya-backend-verdict) => false
+      (vc/draft? (assoc ya-backend-verdict :draft true)) => true
       (vc/published? ya-backend-verdict) => true
       (vc/verdict-summary "fi" section-strings ya-backend-verdict)
       => {:id           "backend-id"

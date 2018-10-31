@@ -1,15 +1,6 @@
 (ns lupapalvelu.attachment
-  (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.set :refer [rename-keys]]
-            [monger.operators :refer :all]
-            [schema.core :refer [defschema] :as sc]
-            [sade.core :refer :all]
-            [sade.files :as files]
-            [sade.http :as http]
-            [sade.schemas :as ssc]
-            [sade.strings :as ss]
-            [sade.util :refer [=as-kw not=as-kw fn-> fn->>] :as util]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.application-bulletin-utils :as bulletin-utils]
             [lupapalvelu.application-utils :as app-utils]
@@ -20,28 +11,38 @@
             [lupapalvelu.attachment.metadata :as metadata]
             [lupapalvelu.attachment.onkalo-client :as oc]
             [lupapalvelu.attachment.preview :as preview]
-            [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.tag-groups :as att-tag-groups]
+            [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.util :as att-util]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
-            [lupapalvelu.file-upload :as file-upload :refer [SavedFileData]]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.comment :as comment]
+            [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
+            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.verdict-interface :as vif]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.state-machine :as state-machine]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.storage.file-storage :as storage]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.vetuma :as vetuma]
             [me.raynes.fs :as fs]
+            [monger.operators :refer :all]
+            [sade.core :refer :all]
             [sade.env :as env]
+            [sade.files :as files]
+            [sade.http :as http]
+            [sade.schemas :as ssc]
             [sade.shared-schemas :as sssc]
-            [lupapalvelu.vetuma :as vetuma])
+            [sade.strings :as ss]
+            [sade.util :refer [=as-kw not=as-kw fn-> fn->>] :as util]
+            [schema.core :refer [defschema] :as sc]
+            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]])
   (:import [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream]))
 
 
@@ -364,9 +365,11 @@
   [created application-state attachment-types-with-metadata group locked? required? requested-by-authority?]
   (map #(make-attachment created nil required? requested-by-authority? locked? (keyword application-state) group (:type %) (:metadata %)) attachment-types-with-metadata))
 
-(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction pate-verdicts verdicts primaryOperation submitted]} myyntipalvelu-disabled?]
+(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction
+                                                              primaryOperation submitted] :as application}
+                                                 myyntipalvelu-disabled?]
   (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
-                     (tos/update-end-dates (concat verdicts pate-verdicts) primaryOperation submitted))]
+                     (tos/update-end-dates (vif/all-verdicts application) primaryOperation submitted))]
     (if (seq metadata)
       ; Myyntipalvelu can be only negatively overridden, it can't be forced on if TOS says otherwise
       (if (and myyntipalvelu-disabled? (:myyntipalvelu metadata))
@@ -885,7 +888,7 @@
    Returns attached version."
   [{:keys [application] {user-id :id} :user {session-id :id} :session :as command}
    attachment-options :- AttachmentOptions
-   original-filedata :- SavedFileData]
+   original-filedata :- file-upload/SavedFileData]
   (let [session-id (when-not user-id
                      (or session-id
                          (vetuma/session-id)

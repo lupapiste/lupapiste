@@ -104,8 +104,12 @@
    :feature          :invoices
    :user-roles       #{:authority} ;;will be changed to laskuttaja role
    :parameters       []}
-  [{:keys [user] :as command}]
-  (debug ">> user-organizations-invoices")
+  [{:keys [user user-organizations] :as command}]
   (let [required-role-in-orgs "authority" ;;Will be changed to laskuttaja role
-        user-orgs (invoices/get-user-orgs-having-role user required-role-in-orgs)]
-    (ok {:invoices (invoices/fetch-invoices-for-organizations user-orgs)})))
+        user-org-ids (invoices/get-user-orgs-having-role user required-role-in-orgs)
+        invoices (invoices/fetch-invoices-for-organizations user-org-ids)
+        applications (invoices/fetch-application-data (map :application-id invoices) [:address])
+        invoices-with-extra-data (->> invoices
+                                      (map (partial invoices/enrich-org-data user-organizations))
+                                      (map (partial invoices/enrich-application-data applications)))]
+    (ok {:invoices invoices-with-extra-data})))

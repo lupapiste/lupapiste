@@ -39,14 +39,11 @@
 (defn draft? [verdict]
   (cond
     (lupapiste-verdict? verdict) (not (:published verdict))
-    (contains? verdict draft?) (boolean (:draft verdict))
+    (contains? verdict :draft) (boolean (:draft verdict))
     :else false))
 
 (defn published? [verdict]
-  (cond
-    (lupapiste-verdict? verdict) (boolean (:published verdict))
-    (contains? verdict :draft) (not (:draft verdict))
-    :else false))
+  (boolean (and verdict (not (draft? verdict)))))
 
 ;; Maybe not the most useful predicate, maybe clean up later?
 (defn verdict-code-is-free-text? [verdict]
@@ -84,10 +81,10 @@
 (defn verdict-date [verdict]
   (cond
     (legacy? verdict)
-    (-> verdict :data :anto)
+    (-> verdict :data :anto metadata/unwrap)
 
     (lupapiste-verdict? verdict)
-    (-> verdict :data :verdict-date)
+    (-> verdict :data :verdict-date metadata/unwrap)
 
     :else
     (or (:paatospvm (latest-pk verdict))
