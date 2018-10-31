@@ -65,8 +65,8 @@
    Returns them as collection of translation maps, where key is language
    and value is map of loc-key - loc-value pairs"
   []
-  (let [;; HACK: `(namespace '` is a workaround for cljsbuild in uberjar:
-        this-path (util/this-jar (namespace 'lupapalvelu.i18n))
+  (let [;; HACK: `(eval '` is a workaround for cljsbuild in uberjar:
+        this-path (util/this-jar (eval 'lupapalvelu.i18n))
         i18n-files (if (ss/ends-with this-path ".jar")      ; are we inside jar
                      (filter #(ss/ends-with % ".txt") (util/list-jar this-path "i18n/"))
                      (util/get-files-by-regex "resources/i18n/" #".+\.txt$")) ; dev
