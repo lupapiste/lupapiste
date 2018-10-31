@@ -1269,7 +1269,7 @@
                                             :muutosala "50"}
                                   :rakenne {:rakentamistapa "paikalla"
                                             :julkisivu      "tiili"}
-                                  :valtakunnallinenNumero {:value "199887766E"}}}
+                                  :valtakunnallinenNumero "199887766E"}}
         {rakennus :Rakennus} (get-rakennus-data (assoc application-rakennuslupa :document-buildings [document-building]) doc)
         building-data (tools/unwrapped (:rakennuksenTiedot rakennus))]
 
