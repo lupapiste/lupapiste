@@ -112,7 +112,7 @@
   [tasks-from-update tasks-from-mongo & [overwrite-background-reviews?]]
 
   ;; As a postcondition, check that for every new faulty task there is
-  ;; an matching updated task
+  ;; a matching updated task
   {:post [(let [[_ new-and-updated new-faulty] %]
             (every? #(matching-task % new-and-updated) new-faulty))]}
 
@@ -232,12 +232,14 @@
       (assoc task :attachments (:liitetieto review)))))
 
 (defn- remove-repeating-background-ids
-  "Remove repeating background ids from preprocessed review tasks."
-  [reviews]
+  "Remove repeating background ids from preprocessed review tasks. If a
+  background id is the application id, it is removed, too."
+  [app-id reviews]
   (let [id-path       [:muuTunnustieto 0 :MuuTunnus :tunnus]
         get-id        #(get-in % id-path)
         repeating-ids (-<>> (map get-id reviews)
                             (remove nil?)
+                            (cons app-id)
                             (group-by identity)
                             (filter (fn [[id xs]]
                                       (> (count xs) 1)))
@@ -258,9 +260,9 @@
 
 (defn- process-reviews
   "Return map with :review-tasks and :attachments-by-task-id keys."
-  [app-xml created buildings-summary]
+  [app-id app-xml created buildings-summary]
   (let [reviews      (->> (reviews-preprocessed app-xml)
-                          remove-repeating-background-ids
+                          (remove-repeating-background-ids app-id)
                           (remove lupapiste-review?)
                           vec )
         review-tasks (map #(review->task created buildings-summary %) reviews)]
@@ -270,6 +272,15 @@
                                   (map (juxt :id :attachments))
                                   (into {}))}))
 
+(defn- preprocess-tasks
+  "Tasks for the application after processing. The processing removes
+  muuTunnus values that are application ids."
+  [{app-id :id tasks :tasks}]
+  (map (fn [task]
+         (cond-> task
+           (= (background-id task) app-id) (util/dissoc-in [:data :muuTunnus :value])))
+       tasks))
+
 (defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
@@ -277,11 +288,11 @@
   (let [buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         {:keys [review-tasks
-                attachments-by-task-id]} (process-reviews app-xml created buildings-summary)
+                attachments-by-task-id]} (process-reviews (:id application) app-xml created buildings-summary)
         [unchanged-tasks
          added-and-updated-tasks
          new-faulty-tasks] (merge-review-tasks (map #(dissoc % :attachments) review-tasks)
-                                               (:tasks application)
+                                               (preprocess-tasks application)
                                                overwrite-background-reviews?)
         updated-tasks (concat unchanged-tasks
                               new-faulty-tasks
