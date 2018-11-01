@@ -170,7 +170,7 @@
       :omistajatieto (remove nil? (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))))))
 
 (defn- get-rakennus-data [application doc]
-  (let [doc-vtj-prt (get-in doc [:data :valtakunnallinenNumero :value])
+  (let [doc-vtj-prt (get-in doc [:data :valtakunnallinenNumero])
         document-building (->> (filter #(and (= (:vtj-prt %) doc-vtj-prt)
                                              (not (nil? (:vtj-prt %)))) (:document-buildings application))
                                first

@@ -1,7 +1,7 @@
 (ns lupapalvelu.onnistuu.process-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [sade.crypt :as c]
             [lupapalvelu.onnistuu.process :refer :all]))
 
@@ -9,7 +9,7 @@
 ; Setup:
 ;
 
-(fact "cheshire knows how to encode byte arrays"
+(fact "we know how to JSON-encode byte arrays"
   (json/encode {:foo (byte-array (map byte (range 3)))})
   => "{\"foo\":[0,1,2]}")
 

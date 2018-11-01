@@ -301,7 +301,7 @@
 "verdict.sign-dialog.verifyPassword" "en" "Confirm contract with your Lupapiste password:"
 "verdict.sign-dialog.verifyPassword" "fi" "Vahvista sopimus Lupapisteen salasanallasi:"
 "verdict.sign-dialog.verifyPassword" "sv" "Bekräfta avtalet med ditt Lupapiste-lösenord:"
-"verdict.signature-requests" "en" ""
+"verdict.signature-requests" "en" "Sent requests for signature"
 "verdict.signature-requests" "fi" "Lähetetyt allekirjoituspyynnöt"
 "verdict.signature-requests" "sv" "Skickade begäran om underteckning"
 "verdict.signature.description" "en" "The decision or the contract requires the applicant's signature"

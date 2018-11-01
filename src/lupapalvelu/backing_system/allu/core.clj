@@ -6,7 +6,7 @@
             [clojure.walk :refer [postwalk]]
             [clj-time.core :as t]
             [monger.operators :refer [$set $in]]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [lupapiste-jms.client :as jms-client]
             [mount.core :refer [defstate]]
             [schema.core :as sc :refer [defschema optional-key enum]]

@@ -40,6 +40,7 @@
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
             [ring.util.codec :as codec]
+            [lupapalvelu.json :as json]
             [cheshire.core :as json]
             [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.allu.allu-application :as allu-application]

@@ -2,7 +2,7 @@
   "Unit tests for lupapalvelu.backing-system.allu. No side-effects."
   (:require [clojure.core.match :refer [match]]
             [clojure.walk :refer [postwalk]]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [mount.core :as mount]
             [reitit.ring :as reitit-ring]
             [schema.core :as sc :refer [defschema]]
