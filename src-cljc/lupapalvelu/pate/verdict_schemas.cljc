@@ -161,6 +161,29 @@
                                  [{:show? :_meta.editing?
                                    :dict  :add-property-id}]]}}})
 
+(def versub-proposal
+  {:dictionary {:proposal-bn       {:reference {:loc-prefix :pate-verdict.giver
+                                                :path       :*ref.boardname}}
+                :proposal-code     (schema-util/required {:reference-list {:path       :proposal-code
+                                                                          :type       :select
+                                                                          :loc-prefix :pate-r.verdict-code}
+                                                         :template-dict  :proposal-code})
+                :proposal-text     (schema-util/required {:phrase-text   {:category :proposaltext}
+                                                          :template-dict :proposaltext})
+                :proposal-text-ref (schema-util/required {:reference {:path :proposal-text}})}
+   :section    {:id :pate-verdict-proposal
+                :grid {:columns 7
+                       :rows [[{:col   2
+                                :align :full
+                                :dict  :proposal-code}]
+                              [{:col   5
+                                ;;:id    "proposaltext"
+                                :show? :_meta.editing?
+                                :dict  :proposal-text}
+                               {:col   5
+                                :hide? :_meta.editing?
+                                :dict  :proposal-text-ref}]]}}})
+
 (defn versub-verdict
   "Collateral part (toggle, amount, type, date) included only when
   collateral? is true."
@@ -175,10 +198,7 @@
                                                                               :template-dict  :verdict-code})
                                      :verdict-text     (schema-util/required {:phrase-text   {:category :paatosteksti}
                                                                               :template-dict :paatosteksti})
-                                     :verdict-text-ref (schema-util/required {:reference {:path :verdict-text}})
-                                     :proposal-text    (schema-util/required {:phrase-text   {:category :proposaltext}
-                                                                              :template-dict :proposaltext})
-                                     :proposal-text-ref (schema-util/required {:reference {:path :proposal-text}})}
+                                     :verdict-text-ref (schema-util/required {:reference {:path :verdict-text}})}
                                     (when collateral? {:collateral      {:text {:loc-prefix :pate.collateral
                                                                                 :after :eur}}
                                                        :collateral-flag {:toggle {:loc-prefix :pate-collateral.flag}}
@@ -202,14 +222,7 @@
                                                  :dict  :verdict-text}
                                                 {:col   5
                                                  :hide? :_meta.editing?
-                                                 :dict  :verdict-text-ref}]
-                                               [{:col   5
-                                                 ;;:id    "proposaltext"
-                                                 :show? :_meta.editing?
-                                                 :dict  :proposal-text}
-                                                {:col   5
-                                                 :hide? :_meta.editing?
-                                                 :dict  :proposal-text-ref}]]}}}]
+                                                 :dict  :verdict-text-ref}]]}}}]
     (cond-> verdict
       collateral? (update-in [:section :grid :rows]
                              concat
@@ -477,6 +490,7 @@
 (def r-verdict-schema-1 (build-verdict-schema :r 1
                                               (versub-dates :r helper/verdict-dates)
                                               (versub-verdict true)
+                                              versub-proposal
                                               versub-bulletin
                                               versub-operation
                                               (versub-requirements :foremen :plans :reviews)
