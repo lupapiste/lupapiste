@@ -78,5 +78,4 @@
                                       filedata)
       (action/update-application command (util/deep-merge transition-update
                                                           {$push {:pate-verdicts verdict}}))
-      (ok :verdicts [verdict]))))
-
+      verdict)))

@@ -43,7 +43,7 @@
    :on-success  (notify :application-state-change)}
   [{:keys [application created user] :as command}]
   (let [result (if (allu/allu-application? (:organization application) (permit/permit-type application))
-                 (allu-contract/fetch-allu-contract command)
+                 (ok :verdicts [(allu-contract/fetch-allu-contract command)])
                  (verdict/do-check-for-verdict command))]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)
