@@ -254,7 +254,7 @@
                                                       :loc-prefix :pate-r.verdict-code}}
                 :proposal-code-link (settings-link :loc-prefix :pate-r.verdict-code)
                 :proposaltext       {:phrase-text {:loc-prefix :pate-verdict-proposal
-                                                   :category   :paatosteksti}}}
+                                                   :category   :proposaltext}}}
    :section    {:id         :proposal
                 :loc-prefix :pate-verdict-proposal
                 :grid       {:columns 12
