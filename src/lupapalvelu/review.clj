@@ -350,3 +350,38 @@
         (attachment/maybe-generate-comments-attachment user updated-application (:state updated-application))))
     (cond-> {:ok update-result}
             (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))
+
+;; For migration
+
+(defn reviews-attachment-ids
+  [task-ids attachments]
+  (when (seq task-ids)
+    (->> attachments
+         (filter (fn [{:keys [source target]}]
+                   (and (= (:id source) (:id target))
+                        (= (util/=as-kw (:type source) :tasks))
+                        (= (util/=as-kw (:type target) :task))
+                        (util/includes-as-kw? task-ids (:id source)))))
+         (map :id))))
+
+(defn duplicate-backend-reviews
+  "Return :task-ids, :attachment-ids map. When two tasks are
+  identical (as per `find-duplicate-review`) the duplicate task-id
+  refers to a task created later. Attachment-ids refer to attachments
+  belonging to the duplicate tasks. muuTunnus and timestamps are
+  ignored in comparisons."
+  [{:keys [tasks attachments]}]
+  (loop [[review & others] (->> tasks
+                              (filter #(some-> % :schema-info :subtype (util/=as-kw :review-backend)))
+                              (map tools/unwrapped)
+                              (sort-by (comp - :created))
+                              (map #(util/dissoc-in % [:data :muuTunnus]))
+                              (map #(dissoc % :created)))
+         duplicate-ids []]
+    (if (empty? others)
+      {:task-ids duplicate-ids
+       :attachment-ids (reviews-attachment-ids duplicate-ids attachments)}
+      (recur others (cond-> duplicate-ids
+                      (some #(= (dissoc % :id) (dissoc review :id))
+                            others)
+                      (conj (:id review)))))))
