@@ -40,7 +40,6 @@
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
             [ring.util.codec :as codec]
-            [lupapalvelu.json :as json]
             [cheshire.core :as json]
             [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.allu.allu-application :as allu-application]
@@ -317,10 +316,10 @@
   (let [batchrun-user (user/batchrun-user ["091-YA"])
         apps (filter #(allu-application/allu-application? (:organization %) (:permitType %))
                      (mongo/select :applications {$or [{:state "sent"} {:state "agreementPrepared"}]}))]
-    (for [app apps
-          :let [command (assoc (application->command app) :user batchrun-user
-                                                          :created (now)
-                                                          :action "fetch-verdicts")]]
+    (doseq [app apps
+            :let [command (assoc (application->command app) :user batchrun-user
+                                                            :created (now)
+                                                            :action "fetch-verdicts")]]
       (allu-contract/fetch-allu-contract command))))
 
 (defn- organization-has-krysp-url-function
