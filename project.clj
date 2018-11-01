@@ -183,7 +183,7 @@
             [lein-shell "0.5.0"]
             [deraen/lein-sass4clj "0.3.1"]
             [lein-pdo "0.1.1"]
-            [lein-midje "3.2.1"]
+            [lupapiste/lein-midje "3.2.2"]
             [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
             [lupapiste/lein-buildid "0.4.2"]
             [lupapiste/lein-nitpicker "0.6.0"]
