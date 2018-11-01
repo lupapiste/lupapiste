@@ -263,10 +263,9 @@
   :nitpicker {:exts     ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug" #"lp-static/js/"]}
   :repositories [["osgeo" {:url "https://download.osgeo.org/webdav/geotools"}]]
-  :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
-            "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
+  :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "stest"       ["with-profile" "dev,stest" "midje"]
-            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," ["midje" ":filter" "-ajanvaraus"]]
+            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]
             "sass"        ["do"
                            ["sass4clj" "once"]
                            ["shell" "blessc" "--force" "resources/public/lp-static/css/main.css"]]

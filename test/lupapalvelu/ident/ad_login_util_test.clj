@@ -1,4 +1,4 @@
-(ns lupapalvelu.ident.ad-login-util_test
+(ns lupapalvelu.ident.ad-login-util-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.ident.ad-login-util :refer :all]))
 
@@ -73,3 +73,21 @@
                                         (into {} (mapcat (partial tree-seq (comp map? val) val))))]
       (not-any? list? (vals parsed-and-flattened-map)) => true
       (every? keyword? (keys parsed-and-flattened-map)) => true)))
+
+(defrecord Ad-setting [enabled idp-cert idp-uri role-mapping trusted-domains])
+
+(facts "orgAuthz are resolved as one would expect"
+  (letfn [(make-settings [org-id roles]
+            {:id org-id
+             :ad-login (Ad-setting. true "somecert" "http://www.panaani.fi" roles ["pori.fi"])})]
+    (let [valid-settings (list (make-settings "609-R" {:commenter "comment" :reader "read"}))]
+      (fact "when an AD-group has been mapped to an LP role, it's resolved"
+        (resolve-authz valid-settings ["comment" "heavy metal samurai"]) => {:609-R #{"commenter"}})
+      (fact "when not, the result is empty"
+        (resolve-authz valid-settings ["jee jee moi äiti"]) => {})
+      (fact "when multiple organizations have roles found in the received group list, all are resolved"
+            (let [multiple-settings (conj valid-settings (make-settings "123-YMP" {:commenter "comment"
+                                                                                   :nytnykii "tero on best"}))]
+          (resolve-authz multiple-settings ["comment" "read"]) => {:609-R #{"commenter" "reader"}
+                                                                   :123-YMP #{"commenter"}})))))
+
