@@ -58,7 +58,9 @@
                                                      :loc-prefix :pate-r.verdict-code}}
                 :verdict-code-link (settings-link :loc-prefix :pate-r.verdict-code)
                 :paatosteksti      {:phrase-text {:loc-prefix :pate-verdict
-                                                  :category   :paatosteksti}}}
+                                                  :category   :paatosteksti}}
+                :proposaltext      {:phrase-text {:loc-prefix :pate-verdict-proposal
+                                                  :category   :proposaltext}}}
    :section    {:id         :verdict
                 :loc-prefix :pate-verdict-template.verdict-info
                 :grid       {:columns 12
@@ -77,7 +79,9 @@
                                          :show? :*ref.settings.verdict-code
                                          :dict  :verdict-code}]
                                        [{:col  12
-                                         :dict :paatosteksti}]]}}})
+                                         :dict :paatosteksti}]
+                                       [{:col  12
+                                         :dict :proposaltext}]]}}})
 
 (def temsub-bulletin
   {:dictionary {:bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
@@ -248,31 +252,8 @@
                                                          :items   [{:dict :upload}]}}]]}}
    :removable? true})
 
-(def temsub-proposal
-  {:dictionary {:proposal-code      {:reference-list {:path       :settings.verdict-code
-                                                      :type       :select
-                                                      :loc-prefix :pate-r.verdict-code}}
-                :proposal-code-link (settings-link :loc-prefix :pate-r.verdict-code)
-                :proposaltext       {:phrase-text {:loc-prefix :pate-verdict-proposal
-                                                   :category   :proposaltext}}}
-   :section    {:id         :proposal
-                :loc-prefix :pate-verdict-proposal
-                :grid       {:columns 12
-                             :rows    [[{:align :full
-                                         :col   3
-                                         :hide? :*ref.settings.verdict-code
-                                         :dict  :proposal-code-link}
-                                        {:align :full
-                                         :col   3
-                                         :show? :*ref.settings.verdict-code
-                                         :dict  :proposal-code}]
-                                       [{:col  12
-                                         :dict :proposaltext}]]}}})
-
-
 (def r-verdict-template-schema
   (build-verdict-template-schema (temsub-verdict helper/verdict-dates)
-                                 temsub-proposal
                                  temsub-bulletin
                                  temsub-foremen
                                  temsub-reviews
