@@ -353,7 +353,10 @@
 ;;;; ===================================================================================================================
 
 (defn feature? [feature]
-  (boolean (-<>> :features (query pena) :features (get <> feature))))
+  (->> (query pena :features)
+       :features
+       (get feature)
+       boolean))
 
 (defn get-by-id [collection id & args]
   (stream-decoding-response http-get (str (server-address) "/dev/by-id/" (name collection) "/" id)
