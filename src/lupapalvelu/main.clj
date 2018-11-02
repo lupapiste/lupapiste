@@ -8,6 +8,7 @@
                "update-poi"                 'lupapalvelu.mml.update-poi/-main
                "smoketest"                  'lupapalvelu.smoketest.lupamonster/-main
                "reminders"                  'lupapalvelu.batchrun/send-reminder-emails
+               "fetch-allu-contracts"       'lupapalvelu.batchrun/fetch-allu-contracts
                "check-verdicts"             'lupapalvelu.batchrun/check-for-verdicts
                "check-verdict-attachments"  'lupapalvelu.batchrun/check-for-verdict-attachments
                "check-ah-verdicts"          'lupapalvelu.batchrun/check-for-asianhallinta-messages
