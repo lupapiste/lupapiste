@@ -25,9 +25,6 @@
 (def- response
   (-> "./dev-resources/mock-saml-response.edn" slurp read-string :encrypted-base64))
 
-(defn- break-string [s]
-  (->> s seq shuffle (apply str)))
-
 (when (env/feature? :ad-login)
   (mongo/connect!)
   (let [pori-route (parse-route "pori.fi")]
@@ -74,7 +71,7 @@
             (let [{:keys [status body]} (client/post pori-route {:throw-exceptions false})]
               (facts "Server answers with 400 and an error message in the response body"
                 status => 400
-                body => "No SAML data found in request"))
+                body => "No SAML data found in request")))
 
           (fact "Login attempt with valid response works"
             (let [resp (client/post pori-route {:form-params {:SAMLResponse response}
@@ -86,4 +83,4 @@
             (let [resp (client/post pori-route {:form-params {:SAMLResponse (apply str (drop-last response))}
                                                 :content-type :json
                                                 :throw-exceptions false})]
-              (:status resp) => 400))))))
+              (:status resp) => 400)))))

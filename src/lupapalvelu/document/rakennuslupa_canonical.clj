@@ -152,7 +152,11 @@
                                                :kerrosluku :kerrosala :rakennusoikeudellinenKerrosala])
                                  (filter #(-> % last (ss/replace "," ".") util/->double pos?) <>)
                                  (into {} <>))
-                             (select-keys luokitus [:energialuokka :energiatehokkuusluku :paloluokka])
+                            (-<> luokitus
+                                 (select-keys [:energialuokka :energiatehokkuusluku :paloluokka])
+                                 (filter #(-> % last ss/blank? not) <>)
+                                 (map (fn [v] [(first v) (ss/replace (last v) " " "")]) <>)
+                                 (into {} <>))
                              (when-not (ss/blank? (:energiatehokkuusluku luokitus))
                                (select-keys luokitus [:energiatehokkuusluvunYksikko]))
                              (when (util/not-empty-or-nil? (:huoneisto huoneistot))

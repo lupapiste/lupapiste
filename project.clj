@@ -183,7 +183,7 @@
             [lein-shell "0.5.0"]
             [deraen/lein-sass4clj "0.3.1"]
             [lein-pdo "0.1.1"]
-            [lein-midje "3.2.1"]
+            [lupapiste/lein-midje "3.2.2"]
             [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
             [lupapiste/lein-buildid "0.4.2"]
             [lupapiste/lein-nitpicker "0.6.0"]
@@ -263,10 +263,9 @@
   :nitpicker {:exts     ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug" #"lp-static/js/"]}
   :repositories [["osgeo" {:url "https://download.osgeo.org/webdav/geotools"}]]
-  :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
-            "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
+  :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "stest"       ["with-profile" "dev,stest" "midje"]
-            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," ["midje" ":filter" "-ajanvaraus"]]
+            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]
             "sass"        ["do"
                            ["sass4clj" "once"]
                            ["shell" "blessc" "--force" "resources/public/lp-static/css/main.css"]]

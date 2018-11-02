@@ -17,6 +17,13 @@
             [saml20-clj.routes :as saml-routes]
             [saml20-clj.shared :as saml-shared]))
 
+;; OpenSAML needs to be bootstrapped when loading the namespace. `saml-sp/create-request-factory`
+;; does this under the hood, but we need to do this explicitly here as well so that
+;; we won't run into problems if the return route (with POST) is served by an another app than
+;; the GET route. Having state here is inelegant and sucky, but this seems to be how
+;; OpenSAML does things.
+(org.opensaml.DefaultBootstrap/bootstrap)
+
 (def ad-config
   {:app-name "Lupapiste"
    :sp-cert (env/value :sso :cert)
