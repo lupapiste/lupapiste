@@ -21,12 +21,17 @@
        (state/react-verdict-auth? (rum/react state/current-verdict-id)
                                   action)))
 (def can-edit? (partial can? :edit-pate-verdict))
-(def can-preview? (partial can? :preview-pate-verdict))
+
+(defn can-preview? []
+  (or (can? :preview-pate-verdict)
+      (can? :publish-verdict-proposal)))
 
 (defn can-publish? []
   (or (can? :publish-pate-verdict)
-      (can? :publish-legacy-verdict)
-      (can? :publish-verdict-proposal)))
+      (can? :publish-legacy-verdict)))
+
+(defn can-propose? []
+  (can? :publish-verdict-proposal))
 
 (def can-generate? (partial can? :generate-pate-pdf))
 
@@ -151,7 +156,7 @@
                                     :test-id  :verdict-proposal
                                     :icon     :lupicon-document-section-sign
                                     :wait?    state/verdict-wait?
-                                    :enabled? (can-publish?)
+                                    :enabled? (can-propose?)
                                     :on-click (fn []
                                                 (hub/send "show-dialog"
                                                           {:ltitle          "areyousure"

@@ -54,6 +54,13 @@
     (when-not (verdict/verdict-filled? command)
       (fail :pate.required-fields))))
 
+(defn- proposal-filled
+  "Precheck that fails if any of the required fields for proposal is empty."
+  [{data :data :as command}]
+  (when (:verdict-id data)
+    (when-not (verdict/proposal-filled? command)
+      (fail :pate.required-fields))))
+
 (defn- contractual-application
   "Precheck that fails if the application category IS NOT :contract or :allu-contract."
   [command]
@@ -244,7 +251,9 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(some-pre-check (verdict-exists :draft?)
                                       (verdict-exists :proposal?))
-                      verdict-filled]
+                      (some-pre-check
+                        verdict-filled
+                        proposal-filled)]
    :states           states/post-submitted-states}
   [command]
   (verdict/preview-verdict command))
@@ -465,7 +474,7 @@
    :states           (set/difference states/post-submitted-states
                                      #{:finished})
    :pre-checks       [pate-enabled
-                      (verdict-exists )
-                      verdict-filled]}
+                      (verdict-exists)
+                      proposal-filled]}
   [command]
   (ok (verdict/publish-verdict-proposal command)))
