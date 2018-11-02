@@ -302,4 +302,5 @@
           (query pena :neighbor-application
             :applicationId application-id
             :neighborId (name neighborId)
-            :token token) => invalid-token?))))))
+            :token token) => invalid-token?))
+      (set-anti-csrf! true)))))
