@@ -12,7 +12,6 @@
             [noir.request :refer [*request*]]
             [ring.util.codec :as codec]
             [schema.core :as sc]
-            [swiss.arrows :refer [-<>>]]
             [taoensso.timbre :as timbre :refer [info error]]
             [sade.core :refer [def- fail! unauthorized not-accessible now]]
             [sade.dummy-email-server]
