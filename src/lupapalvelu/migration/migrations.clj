@@ -5,6 +5,7 @@
             [clojure.stacktrace :refer [print-stack-trace]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application :as application]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.application-replace-operation :as replace-operation]
@@ -16,17 +17,20 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.migration.attachment-type-mapping :as attachment-type-mapping]
             [lupapalvelu.migration.core :refer [defmigration]]
+            [lupapalvelu.migration.pate-verdict-migration :as pate-verdict-migration]
+            [lupapalvelu.migration.review-migration :as review-migration]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.migration.pate-verdict-migration :as pate-verdict-migration]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.tasks :refer [task-doc-validation] :as tasks]
@@ -42,10 +46,7 @@
             [sade.strings :as str]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
             [sade.validators :as v]
-            [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]
-            [lupapalvelu.application :as application]
-            [lupapalvelu.document.waste-schemas :as waste-schemas]
-            [lupapalvelu.organization :as org])
+            [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]])
   (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
@@ -4066,6 +4067,28 @@
                      pate-verdict-migration/PATE-171-hotfix-query
                      [:pre-pate-verdicts :pate-verdicts :verdicts])
        (run! PATE-171-hotfix-update)))
+
+(defn- LPK-3986-target-applications []
+  (mongo/select :applications
+                {:permitType "R"
+                 :tasks      {$elemMatch {:schema-info.subtype  "review-backend"
+                                          :data.muuTunnus.value #"LP-"}}}
+                [:tasks :attachments]))
+
+(defmigration LPK-3986-duplicate-background-review-removal
+  {:apply-when (seq (LPK-3986-target-applications))}
+  (reduce (fn [counter app]
+            (let [{:keys [task-ids
+                          attachment-ids]} (review-migration/duplicate-backend-reviews app)]
+              (when (seq task-ids)
+                (remove-tasks-by-ids! app task-ids)
+                (when attachment-ids
+                  (att/delete-attachments! app attachment-ids)))
+              (cond-> counter
+                (seq task-ids) inc)))
+          0
+          (LPK-3986-target-applications)))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
