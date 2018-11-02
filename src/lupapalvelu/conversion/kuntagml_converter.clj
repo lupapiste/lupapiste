@@ -89,14 +89,17 @@
                                                   (:created command)
                                                   manual-schema-datas)
 
-        _ (swap! tila assoc :xml xml)
+        _ (swap! tila assoc
+                 :xml xml
+                 :buildings-and-structures buildings-and-structures
+                 :kuntalupatunnus kuntalupatunnus
+                 :document-datas document-datas)
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))))
         structure-descriptions (map :description buildings-and-structures)
         ; TODO: create operations from app-info, see above.
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
-
         ; TODO: create secondaryoperations from app-info, see above.
         ;; make secondaryOperations for buildings other than the first one in case there are many
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
@@ -105,6 +108,12 @@
         structures (->> xml krysp-reader/->rakennelmatiedot (map conv-util/rakennelmatieto->kaupunkikuvatoimenpide))
 
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
+
+        _ (swap! tila assoc
+                 :application created-application
+                 :structures structures
+                 :other other-building-docs
+                 :structure-desc structure-descriptions)
 
         state-changes (krysp-reader/get-sorted-tilamuutos-entries xml)
 
@@ -129,7 +138,7 @@
                                 (assoc :statements given-statements
                                        :opened (:created command)
                                        :history history-array
-                                       :state :closed ;; Asetetaan hanke "p\u00e4\u00e4t\u00f6s annettu"-tilaan
+                                       :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
                                        :facta-imported true))
 
         ;; attaches the new application, and its id to path [:data :id], into the command

@@ -176,7 +176,7 @@
   (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
         btype (get-building-type xml)
-        asiantiedot (building-reader/->asian-tiedot xml)
+        asiantiedot (ss/lower-case (building-reader/->asian-tiedot xml))
         {:keys [description usage]} (-> xml building-reader/->buildings-summary first)]
     (cond
       (= "TJO" suffix) "tyonjohtajan-nimeaminen-v2"
@@ -197,17 +197,17 @@
       (and (= "C" suffix)
            (re-find #"mainos" asiantiedot)) "mainoslaite"
       (and (= "C" suffix)
-           (re-find #"maalämpökaivo" (ss/lower-case asiantiedot))) "maalampokaivo"
+           (re-find #"maalämpökaivo" asiantiedot)) "maalampokaivo"
       (and (= "C" suffix)
-           (re-find #"pysäköintialue" (ss/lower-case asiantiedot))) "muu-rakentaminen"
+           (re-find #"pysäköintialue" asiantiedot)) "muu-rakentaminen"
       (and (= "D" suffix)
-           (re-find #"yhdistäminen" (ss/lower-case asiantiedot))) "jakaminen-tai-yhdistaminen"
+           (re-find #"yhdistäminen" asiantiedot)) "jakaminen-tai-yhdistaminen"
       (and (= "D" suffix)
-           (re-find #"johtojen uusiminen" (ss/lower-case asiantiedot))) "linjasaneeraus"
+           (re-find #"johtojen uusiminen|lvi|putki" asiantiedot)) "linjasaneeraus"
       (and (= "D" suffix)
-           (re-find #"käyttötarkoituksen muutos" (ss/lower-case asiantiedot))) "kayttotark-muutos"
+           (re-find #"käyttötarkoituksen muutos|muuttaminen" asiantiedot)) "kayttotark-muutos"
       (and (= "D" suffix)
-           (re-find #"muuttaminen .*huoneeksi" (ss/lower-case asiantiedot))) "sisatila-muutos"
+           (re-find #"muuttaminen .*huoneeksi|sis.* muutoks|kalustemuut" asiantiedot)) "sisatila-muutos"
       :else "aiemmalla-luvalla-hakeminen")))
 
 (defn get-operation-types-for-testset
@@ -228,3 +228,8 @@
     (map #(assoc {}
                  :type (some-> % deduce-operation-type)
                  :tunnus (krysp-reader/xml->kuntalupatunnus %)) data)))
+
+(defn get-asian-kuvaus [kuntalupatunnus]
+  (-> kuntalupatunnus
+      get-xml-for-kuntalupatunnus
+      building-reader/->asian-tiedot))
