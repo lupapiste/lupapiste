@@ -177,11 +177,11 @@
                                      :verdict-text      (schema-util/required {:phrase-text   {:category :paatosteksti}
                                                                                :template-dict :paatosteksti})
                                      :verdict-text-ref  (schema-util/required {:reference {:path :verdict-text}})
-                                     :proposal-text     (schema-util/required {:phrase-text   {:category   :proposaltext
-                                                                                               :loc-prefix :pate-verdict-proposal}
-                                                                               :template-dict :proposaltext})
-                                     :proposal-text-ref (schema-util/required {:reference {:path       :proposal-text
-                                                                                           :loc-prefix :pate-verdict-proposal}})}
+                                     :proposal-text     {:phrase-text   {:category   :proposaltext
+                                                                         :loc-prefix :pate-verdict-proposal}
+                                                         :template-dict :proposaltext}
+                                     :proposal-text-ref  {:reference {:path  :proposal-text
+                                                                      :loc-prefix :pate-verdict-proposal}}}
                                     (when collateral? {:collateral      {:text {:loc-prefix :pate.collateral
                                                                                 :after      :eur}}
                                                        :collateral-flag {:toggle {:loc-prefix :pate-collateral.flag}}

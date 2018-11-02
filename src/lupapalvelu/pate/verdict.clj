@@ -795,6 +795,12 @@
   ([command]
    (verdict-filled? command false)))
 
+(defn proposal-filled?
+  [command]
+  (let [{:keys [data] :as verdict} (command->verdict command)
+        schema (vc/verdict-schema verdict)]
+    (schemas/required-filled? schema data [:verdict-text])))
+
 (defn- app-documents-having-buildings [application]
   (->> application
        app/get-sorted-operation-documents

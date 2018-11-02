@@ -443,22 +443,30 @@
   ([schema path value old-data]
    (validate-and-process-value schema path value old-data nil)))
 
+(defn printter [value]
+  (println value)
+  value)
+
 (defn required-filled?
   "True if every required dict item has a proper value."
-  [schema data]
-  (->> schema
-       :dictionary
-       (filter (fn [[_ v]]
-                 (or (:required? v)
-                     (:repeating v))))
-       (every? (fn [[k v]]
-                 (cond
-                   (:multi-select v) (not-empty (k data))
-                   (:reference v)    true ;; Required only for highlighting purposes
-                   (:date v)         (integer? (k data))
-                   (:repeating v)    (every? #(required-filled? {:dictionary (:repeating v)} %)
-                                             (some-> data k vals))
-                   :else (ss/not-blank? (k data)))))))
+  ([schema data excludes]
+   (->> schema
+        :dictionary
+        (filter (fn [[_ v]]
+                  (or (:required? v)
+                      (:repeating v))))
+        (remove (fn [[k _]] ((set excludes) k)))
+        (printter)
+        (every? (fn [[k v]]
+                  (cond
+                    (:multi-select v) (not-empty (k data))
+                    (:reference v)    true ;; Required only for highlighting purposes
+                    (:date v)         (integer? (k data))
+                    (:repeating v)    (every? #(required-filled? {:dictionary (:repeating v)} %)
+                                              (some-> data k vals))
+                    :else (ss/not-blank? (k data)))))))
+  ([schema data]
+    (required-filled? schema data [])))
 
 (defn section-dicts
   "Set of :dict and :repeating keys in the given
