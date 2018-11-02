@@ -20,7 +20,7 @@
 
 (testable-privates lupapalvelu.pate.verdict
                    next-section verdict->updates
-                   general-handler application-deviations
+                   application-deviations
                    archive-info application-operation
                    verdict-attachment-items)
 
