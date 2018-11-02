@@ -8,7 +8,6 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
-            [ring.util.codec :refer [form-encode form-decode-str url-encode base64-encode]]
             [ring.util.response :refer :all]
             [sade.env :as env]
             [sade.session :as ssess]

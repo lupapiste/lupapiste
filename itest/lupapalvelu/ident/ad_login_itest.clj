@@ -27,6 +27,7 @@
 
 (when (env/feature? :ad-login)
   (mongo/connect!)
+  (fixture/apply-fixture "minimal")
   (let [pori-route (parse-route "pori.fi")]
 
         (fact "Pori-R has ad-login enabled"
