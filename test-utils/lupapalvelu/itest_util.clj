@@ -352,8 +352,8 @@
 ;;;; Using Dev HTTP APIs
 ;;;; ===================================================================================================================
 
-(defn feature? [& features]
-  (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name features)))))
+(defn feature? [feature]
+  (boolean (-<>> :features (query pena) :features (get <> feature))))
 
 (defn get-by-id [collection id & args]
   (stream-decoding-response http-get (str (server-address) "/dev/by-id/" (name collection) "/" id)
@@ -487,6 +487,13 @@
 (defmacro with-anti-csrf [& body]
   `(let [old-value# (feature? :disable-anti-csrf)]
      (set-anti-csrf! true)
+     (try
+       ~@body
+       (finally (set-anti-csrf! (not old-value#))))))
+
+(defmacro without-anti-csrf [& body]
+  `(let [old-value# (feature? :disable-anti-csrf)]
+     (set-anti-csrf! false)
      (try
        ~@body
        (finally (set-anti-csrf! (not old-value#))))))
