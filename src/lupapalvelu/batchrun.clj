@@ -313,6 +313,7 @@
 
 (defn fetch-allu-contracts []
   (infof "Starting fetch-allu-verdicts for 091-YA")
+  (mongo/connect!)
   (let [batchrun-user (user/batchrun-user ["091-YA"])
         apps (filter #(allu-application/allu-application? (:organization %) (:permitType %))
                      (mongo/select :applications {$or [{:state "sent"} {:state "agreementPrepared"}]}))]
@@ -320,7 +321,8 @@
             :let [command (assoc (application->command app) :user batchrun-user
                                                             :created (now)
                                                             :action "fetch-verdicts")]]
-      (allu-contract/fetch-allu-contract command))))
+      (allu-contract/fetch-allu-contract command)))
+  (mongo/disconnect!))
 
 (defn- organization-has-krysp-url-function
   "Takes map of organization id as key and organization data as values.
