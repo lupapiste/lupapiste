@@ -245,62 +245,60 @@
 
     (fact "with vetuma"
       (let [stamp (vetuma-stamp!)]
-        (set-anti-csrf! false)
+        (without-anti-csrf
+          (fact "neighbor cant give ill response"
+            (command nil :neighbor-response
+              :applicationId application-id
+              :neighborId (name neighborId)
+              :stamp stamp
+              :token token
+              :response "ime parsaa!"
+              :message "kehno suunta") => invalid-response?)
 
-        (fact "neighbor cant give ill response"
-          (command nil :neighbor-response
-            :applicationId application-id
-            :neighborId (name neighborId)
-            :stamp stamp
-            :token token
-            :response "ime parsaa!"
-            :message "kehno suunta") => invalid-response?)
+          (fact "neighbor can give response"
+            (command nil :neighbor-response
+              :applicationId application-id
+              :neighborId (name neighborId)
+              :stamp stamp
+              :token token
+              :response "comments"
+              :message "kehno suunta") => ok?)
 
-        (fact "neighbor can give response"
-          (command nil :neighbor-response
-            :applicationId application-id
-            :neighborId (name neighborId)
-            :stamp stamp
-            :token token
-            :response "comments"
-            :message "kehno suunta") => ok?)
+          (fact "new invite can not be sent after response"
+            (command pena :neighbor-send-invite
+              :id application-id
+              :neighborId neighborId
+              :email neighborEmail) => neighbor-marked-done?)
 
-        (fact "new invite can not be sent after response"
-          (command pena :neighbor-send-invite
-                   :id application-id
-                   :neighborId neighborId
-                   :email neighborEmail) => neighbor-marked-done?)
+          (fact "applicant can not see neighbor's person id"
+            (let [application (query-application pena application-id)
+                  userids (->> application
+                               :neighbors
+                               (map :status)
+                               flatten
+                               (map (comp :userid :vetuma)))]
+              userids => (partial every? nil?)))
 
-        (fact "applicant can not see neighbor's person id"
-          (let [application (query-application pena application-id)
-                userids (->> application
-                          :neighbors
-                          (map :status)
-                          flatten
-                          (map (comp :userid :vetuma)))]
-            userids => (partial every? nil?)))
+          (fact "neighbor can't re-give response 'cos vetuma has expired"
+            (command pena :neighbor-response
+              :applicationId application-id
+              :neighborId (name neighborId)
+              :stamp stamp
+              :token token
+              :response "comments"
+              :message "kehno suunta") => invalid-vetuma?)
 
-        (fact "neighbor can't re-give response 'cos vetuma has expired"
-          (command pena :neighbor-response
-            :applicationId application-id
-            :neighborId (name neighborId)
-            :stamp stamp
-            :token token
-            :response "comments"
-            :message "kehno suunta") => invalid-vetuma?)
+          (fact "neighbor can't re-give response with new tupas 'cos token has expired"
+            (command pena :neighbor-response
+              :applicationId application-id
+              :neighborId (name neighborId)
+              :stamp (vetuma-stamp!)
+              :token token
+              :response "comments"
+              :message "kehno suunta") => invalid-token?)
 
-        (fact "neighbor can't re-give response with new tupas 'cos token has expired"
-          (command pena :neighbor-response
-            :applicationId application-id
-            :neighborId (name neighborId)
-            :stamp (vetuma-stamp!)
-            :token token
-            :response "comments"
-            :message "kehno suunta") => invalid-token?)
-
-        (fact "neighbor cant see application anymore"
-          (query pena :neighbor-application
-            :applicationId application-id
-            :neighborId (name neighborId)
-            :token token) => invalid-token?))
-      (set-anti-csrf! true)))))
+          (fact "neighbor cant see application anymore"
+            (query pena :neighbor-application
+              :applicationId application-id
+              :neighborId (name neighborId)
+              :token token) => invalid-token?)))))))
