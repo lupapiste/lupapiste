@@ -1,6 +1,7 @@
 (ns lupapalvelu.migration.review-migration
   "Utilities for review-related migrations."
-  (:require [lupapalvelu.document.tools :as tools]
+  (:require [clojure.set :as set]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [sade.strings :as ss]
@@ -55,11 +56,35 @@
                 [:tasks :attachments]))
 
 (defn dry-run
-  "Returns list of :app-id, :taks-ids and :attachment-ids maps."
+  "Returns a map where keys are application ids values maps
+  with :task-ids, attachment-ids, :all-task-ids, all-attachment-ids
+  maps. The result is used with `check-aftermath`."
   []
-  (->> (duplicate-review-target-applications)
-       (map (fn [{id :id :as application}]
-              (assoc (duplicate-backend-reviews application)
-                     :app-id id)))
-       (filter (comp seq :task-ids))
-       doall))
+  (reduce (fn [acc {:keys [id tasks attachments] :as application}]
+            (assoc acc
+                   id
+                   (merge (duplicate-backend-reviews application)
+                          {:all-task-ids       (map :id tasks)
+                           :all-attachment-ids (map :id attachments)})))
+          {}
+          (duplicate-review-target-applications)))
+
+(defn check-aftermath [dry-run-result]
+  (let [apps (duplicate-review-target-applications)]
+    (assert (= (count dry-run-result) (count apps)))
+    (doseq [{:keys [id tasks attachments]} apps
+            :let [latest-task-ids (map :id tasks)
+                  latest-att-ids (map :id attachments)
+                  {:keys [task-ids attachment-ids all-task-ids
+                          all-attachment-ids]} (get dry-run-result id)]]
+      (if (seq task-ids)
+        (assert (= (set/difference (set all-task-ids) (set latest-task-ids))
+                   (set task-ids)) (str id ": removed tasks"))
+        (assert (= (set latest-task-ids) (set all-task-ids))
+                (str id ": tasks unchanged")))
+      (if attachment-ids
+        (assert (= (set/difference (set all-attachment-ids) (set latest-att-ids))
+                   (set attachment-ids))
+                (str id ": removed attachments"))
+        (assert (= (set all-attachment-ids) (set latest-att-ids))
+                (str id ": attachments unchanged"))))))
