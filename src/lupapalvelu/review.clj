@@ -14,7 +14,6 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
-            [swiss.arrows :refer :all]
             [taoensso.timbre :refer [debug debugf info infof warn warnf error errorf]]))
 
 (defn- empty-review-task? [t]
@@ -237,14 +236,14 @@
   [app-id reviews]
   (let [id-path       [:muuTunnustieto 0 :MuuTunnus :tunnus]
         get-id        #(get-in % id-path)
-        repeating-ids (-<>> (map get-id reviews)
-                            (remove nil?)
-                            (cons app-id)
-                            (group-by identity)
-                            (filter (fn [[id xs]]
-                                      (> (count xs) 1)))
-                            (map first)
-                            set)]
+        repeating-ids (->> (map get-id reviews)
+                           (remove nil?)
+                           (cons app-id)
+                           (group-by identity)
+                           (filter (fn [[id xs]]
+                                     (> (count xs) 1)))
+                           (map first)
+                           set)]
     (map (fn [review]
            (if (contains? repeating-ids (get-id review))
              (util/dissoc-in review id-path)
