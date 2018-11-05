@@ -84,6 +84,9 @@
     :verdict? fails for contracts
     :not-replaced? Fails if the verdict has been OR is being replaced. "
   [& conditions]
+  {:pre [(set/superset? #{:draft? :published? :legacy? :modern? :contract?
+                          :allu-contract? :verdict? :not-replaced?}
+                        (set conditions))]}
   (let [{:keys [draft? published?
                 legacy? modern?
                 contract? allu-contract?
@@ -1295,7 +1298,7 @@
          verdict-id :verdict-id} (:data command)
         command                  (assoc command
                                         :application (domain/get-application-no-access-checking app-id))
-        {error :text}            ((verdict-exists :published) command)]
+        {error :text}            ((verdict-exists :published?) command)]
     (if error
       (do
         (warn "Skipping bad message. Cannot create verdict PDF." error)
