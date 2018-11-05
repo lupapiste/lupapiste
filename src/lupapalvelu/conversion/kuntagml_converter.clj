@@ -19,6 +19,10 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
+
+(def config
+  {:resource-path (format "/Users/%s/Desktop/test-data" (System/getenv "USER"))})
+
 (def tila
   (atom {}))
 
@@ -83,20 +87,23 @@
                        :propertyId      (:propertyId location-info)
                        :address         (:address location-info)
                        :municipality    municipality}
+
+        _ (swap! tila assoc :app-info app-info)
+
         created-application (app/make-application make-app-info
                                                   []            ; messages
                                                   (:user command)
                                                   (:created command)
                                                   manual-schema-datas)
 
-        _ (swap! tila assoc
-                 :xml xml
-                 :buildings-and-structures buildings-and-structures
-                 :kuntalupatunnus kuntalupatunnus
-                 :document-datas document-datas)
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
-                                    (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))))
+                                    (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))
+                                    (when (clojure.string/includes? kuntalupatunnus "TJO")
+                                      (map prev-permit/tyonjohtaja->tj-document (:tyonjohtajat app-info)))))
+
+        _ (swap! tila assoc :new-parties new-parties)
+
         structure-descriptions (map :description buildings-and-structures)
         ; TODO: create operations from app-info, see above.
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
@@ -108,12 +115,6 @@
         structures (->> xml krysp-reader/->rakennelmatiedot (map conv-util/rakennelmatieto->kaupunkikuvatoimenpide))
 
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
-
-        _ (swap! tila assoc
-                 :application created-application
-                 :structures structures
-                 :other other-building-docs
-                 :structure-desc structure-descriptions)
 
         state-changes (krysp-reader/get-sorted-tilamuutos-entries xml)
 
@@ -200,8 +201,7 @@
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
         destructured-permit-id (conv-util/destructure-permit-id kuntalupatunnus)
         operation             "aiemmalla-luvalla-hakeminen"
-        path                  "../../Desktop/test-data/"
-        filename              (str path kuntalupatunnus ".xml")
+        filename              (format "%s/%s.xml" (:resource-path config) kuntalupatunnus ".xml")
         permit-type           "R"
         xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
