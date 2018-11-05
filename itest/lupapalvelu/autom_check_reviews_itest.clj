@@ -352,8 +352,13 @@
                                     (:added-tasks-with-updated-buildings read-result)
                                     {})
         (let [updated-application (domain/get-application-no-access-checking application-id)
-              last-attachment-id (last (get-attachment-ids updated-application))
-              last-attachment-file-id (att/attachment-latest-file-id updated-application last-attachment-id)]
+              last-attachment (last (:attachments updated-application))
+              last-attachment-file-id (att/attachment-latest-file-id updated-application (:id last-attachment))]
+          (fact "source is tasks"
+            (get-in last-attachment [:source :type]) => "tasks")
+          (fact "type"
+            (:type last-attachment ) => {:type-group "katselmukset_ja_tarkastukset"
+                                         :type-id "aloituskokouksen_poytakirja"})
           (files/with-temp-file temp-pdf-path
             (with-open [content-fios ((:content (storage/download updated-application last-attachment-file-id)))]
               (pdftk/uncompress-pdf content-fios (.getAbsolutePath temp-pdf-path)))
