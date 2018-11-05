@@ -107,7 +107,7 @@
             (let [{:keys [attachments]}  (query-application veikko application-id)
                   {approvals :approvals} (first attachments)]
               (count approvals) => 2
-              (map :note (vals approvals)) => ["Bu hao!" "Mei wenti."]))
+              (->> approvals vals (map :note) set) => #{"Mei wenti." "Bu hao!"}))
 
       (fact "Veikko re-approves"
             (approve-attachment application-id (first attachments)))
