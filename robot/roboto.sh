@@ -363,7 +363,7 @@ run_test() {
 
    for ROUND in $(seq 0 $RETRIES)
    do
-      DISPLAY=:$MYSCREEN timeout $TIMEOUT pybot \
+      DISPLAY=:$MYSCREEN timeout $TIMEOUT robot \
          $INCLUDES $EXCLUDES \
          --RunEmptySuite \
          --variable BROWSER:$BROWSER \
