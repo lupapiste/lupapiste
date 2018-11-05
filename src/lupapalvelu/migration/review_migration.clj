@@ -69,6 +69,10 @@
           {}
           (duplicate-review-target-applications)))
 
+(defn subset-ok? [super s diff]
+  (and (set/subset? (set s) (set super))
+       (= (set/difference (set super) (set s)) (set diff))))
+
 (defn check-aftermath [dry-run-result]
   (let [apps (duplicate-review-target-applications)]
     (assert (= (count dry-run-result) (count apps)))
@@ -78,13 +82,12 @@
                   {:keys [task-ids attachment-ids all-task-ids
                           all-attachment-ids]} (get dry-run-result id)]]
       (if (seq task-ids)
-        (assert (= (set/difference (set all-task-ids) (set latest-task-ids))
-                   (set task-ids)) (str id ": removed tasks"))
+        (assert (subset-ok? all-task-ids latest-task-ids task-ids)
+                (str id ": removed tasks"))
         (assert (= (set latest-task-ids) (set all-task-ids))
                 (str id ": tasks unchanged")))
       (if attachment-ids
-        (assert (= (set/difference (set all-attachment-ids) (set latest-att-ids))
-                   (set attachment-ids))
+        (assert (subset-ok? all-attachment-ids latest-att-ids attachment-ids)
                 (str id ": removed attachments"))
         (assert (= (set all-attachment-ids) (set latest-att-ids))
                 (str id ": attachments unchanged"))))))
