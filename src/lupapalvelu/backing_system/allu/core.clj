@@ -380,8 +380,7 @@
                            :content      (ByteArrayInputStream. content-bytes)
                            :content-type (get-in response [:headers "Content-Type"])
                            :size         (alength content-bytes)}
-                metadata {:application (:id application)
-                          :linked      false}]
+                metadata {:linked      false}]
             (assoc response :body (save-file file-data metadata)))
           response))
 
