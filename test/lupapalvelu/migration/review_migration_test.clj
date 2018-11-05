@@ -81,6 +81,11 @@
                     :source {:id   ""
                              :type "tasks"}
                     :target {:id   ""
+                             :type "task"}}
+                   {:id     "att12"
+                    :source {:id   "old-six"
+                             :type "tasks"}
+                    :target {:id   "old-six"
                              :type "task"}}]
       t1          (make-task "one" "review-backend" "One" "" 2000)
       t1-old      (make-task "old-one" "review-backend" "One" "LP-foo-bar" 1500)
@@ -93,10 +98,12 @@
       t5          (make-task "five" "review-backend" "Five" "not-empty" 5000)
       t5-old      (make-task "old-five" "review-backend" "Five" "" 2000)
       t6          (make-task "six" "review-backend" "Six" "" 6000)
-      t6-old      (make-task "old-six" "review-backend" "Six" "LP-foo-bar" 5000)
+      t6-old      (make-task "old-six" "review-backend" "Six" "" 5000)
+      t6-older    (make-task "older-six" "review-backend" "Six" "LP-foo-bar" 4000)
       t7          (make-task "seven" "review-backend" "Seven" "" 7000)
       application {:tasks       (shuffle [t1 t1-old t2 t2-old t3 t3-old
-                                          t4 t4-old t5 t5-old t6 t6-old t7])
+                                          t4 t4-old t5 t5-old
+                                          t6 t6-old t6-older t7])
                    :attachments attachments}]
 
   (fact "reviews-attachment-ids"
@@ -118,9 +125,21 @@
 
   (fact "duplicate-backend-reviews"
     (duplicate-backend-reviews application)
-    => {:task-ids       ["six" "two" "one"]
-        :attachment-ids ["att2" "att6" "att9"]}
+    => {:task-ids       ["six" "old-six" "two" "one"]
+        :attachment-ids ["att2" "att6" "att9" "att12"]}
+    (duplicate-backend-reviews {:attachments attachments
+                                :tasks       [t6]})
+    => {:task-ids       []
+        :attachment-ids nil}
     (duplicate-backend-reviews {:attachments attachments
                                 :tasks       [t6-old t6]})
     => {:task-ids       ["six"]
-        :attachment-ids nil}))
+        :attachment-ids nil}
+    (duplicate-backend-reviews {:attachments attachments
+                                :tasks       [t6-older t6-old t6]})
+    => {:task-ids       ["six" "old-six"]
+        :attachment-ids ["att12"]}
+    (duplicate-backend-reviews {:attachments attachments
+                                :tasks       [t6-older t6-old]})
+    => {:task-ids       ["old-six"]
+        :attachment-ids ["att12"]}))
