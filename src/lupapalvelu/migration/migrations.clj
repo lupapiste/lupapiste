@@ -4068,15 +4068,7 @@
                      [:pre-pate-verdicts :pate-verdicts :verdicts])
        (run! PATE-171-hotfix-update)))
 
-(defn- LPK-3986-target-applications []
-  (mongo/select :applications
-                {:permitType "R"
-                 :tasks      {$elemMatch {:schema-info.subtype  "review-backend"
-                                          :data.muuTunnus.value #"LP-"}}}
-                [:tasks :attachments]))
-
 (defmigration LPK-3986-duplicate-background-review-removal
-  {:apply-when (seq (LPK-3986-target-applications))}
   (reduce (fn [counter app]
             (let [{:keys [task-ids
                           attachment-ids]} (review-migration/duplicate-backend-reviews app)]
@@ -4087,7 +4079,7 @@
               (cond-> counter
                 (seq task-ids) inc)))
           0
-          (LPK-3986-target-applications)))
+          (review-migration/duplicate-review-target-applications)))
 
 ;;
 ;; ****** NOTE! ******

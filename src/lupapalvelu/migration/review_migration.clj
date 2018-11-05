@@ -1,6 +1,7 @@
 (ns lupapalvelu.migration.review-migration
   "Utilities for review-related migrations."
   (:require [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))
@@ -44,3 +45,21 @@
                       (some (partial duplicate? review)
                             others)
                       (conj (:id review)))))))
+
+
+(defn duplicate-review-target-applications []
+  (mongo/select :applications
+                {:permitType "R"
+                 :tasks      {$elemMatch {:schema-info.subtype  "review-backend"
+                                          :data.muuTunnus.value #"LP-"}}}
+                [:tasks :attachments]))
+
+(defn dry-run
+  "Returns list of :app-id, :taks-ids and :attachment-ids maps."
+  []
+  (->> (duplicate-review-target-applications)
+       (map (fn [{id :id :as application}]
+              (assoc (duplicate-backend-reviews application)
+                     :app-id id)))
+       (filter (comp seq :task-ids))
+       doall))
