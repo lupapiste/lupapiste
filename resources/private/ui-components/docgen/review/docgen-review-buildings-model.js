@@ -16,9 +16,19 @@ LUPAPISTE.DocgenReviewBuildingsModel = function( params ) {
     var appData = lupapisteApp.models.application._js;
     var description = "";
     var build = null;
+    // Matching order:
+    // 1. nationalId and index
+    // 2. nationalId
+    // 3. index
     if( nationalId || index ) {
-      build = _.find(appData.buildings,
-                     nationalId ? {nationalId: nationalId } : {index: index });
+      if( nationalId && index ) {
+        build = _.find( appData.buildings, {nationalId: nationalId,
+                                            index: index});
+      }
+      if( !build ) {
+        build = _.find(appData.buildings,
+                       nationalId ? {nationalId: nationalId } : {index: index });
+      }
     }
     if( build ) {
       description = build.description || "";
