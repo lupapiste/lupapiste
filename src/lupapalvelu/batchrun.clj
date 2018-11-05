@@ -320,9 +320,10 @@
             :let [command (assoc (application->command app) :user batchrun-user
                                                             :created (now)
                                                             :action "fetch-verdicts")]]
-      (if (:integrationKeys app)
-        (allu-contract/fetch-allu-contract command)
-        (errorf "Application %s does not contain ALLU-id under integrationKeys." (:_id app)))))
+      (logging/with-logging-context {:applicationId (:id app) :userId (:id batchrun-user)}
+        (if (-> app :integrationKeys :ALLU :id)
+          (allu-contract/fetch-allu-contract command)
+          (warn "Application does not contain ALLU-id under integrationKeys.")))))
   (mongo/disconnect!))
 
 (defn- organization-has-krysp-url-function
