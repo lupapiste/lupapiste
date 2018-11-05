@@ -362,7 +362,7 @@
   "Replace the attachment file id in [:multipart 1 :content] with the file contents `InputStream` when sending
   attachment. Store pdf file to file storage when downloading contract."
   [handler]
-  (fn [{{:keys [application latestAttachmentVersion]} ::command :as request}]
+  (fn [{{:keys [application user]} ::command :as request}]
     (match (-> request reitit-ring/get-match :data :name)
       [:attachments :create]
       (let [{:keys [fileId storageSystem]} (get-in request [:multipart 1 :content])]
@@ -380,7 +380,8 @@
                            :content      (ByteArrayInputStream. content-bytes)
                            :content-type (get-in response [:headers "Content-Type"])
                            :size         (alength content-bytes)}
-                metadata {:linked      false}]
+                metadata {:linked      false
+                          :uploader-user-id (:id user)}]
             (assoc response :body (save-file file-data metadata)))
           response))
 
