@@ -547,7 +547,7 @@
                                                        :handlerId (:handler-id app2)
                                                        :roleId    general-role-id})})]
                    :in-any-order))
-        (fact "Ronja into general handler: assignment updated"
+        (fact "Ronja into general handler: general handler's automatic assignments are assigned to Ronja"
           (let [{handler-id :id} (command ronja :upsert-application-handler
                                           :id app-id
                                           :roleId general-role-id
