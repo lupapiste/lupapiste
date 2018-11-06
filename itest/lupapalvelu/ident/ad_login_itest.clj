@@ -17,17 +17,17 @@
             [sade.strings :as ss]
             [midje.sweet :refer :all]))
 
-(defn- parse-route [domain & [metadata?]]
-  (format "%s/api/saml/%s/%s" (env/value :host)
-          (if metadata? "metadata" "ad-login")
-          domain))
-
 (def- response
   (-> "./dev-resources/mock-saml-response.edn" slurp read-string :encrypted-base64))
 
+(defn- parse-route [domain & [metadata?]]
+  (format "%s/api/saml/%s/%s" (server-address)
+          (if metadata? "metadata" "ad-login")
+          domain))
+
 (when (env/feature? :ad-login)
+  (apply-remote-minimal)
   (mongo/connect!)
-  (fixture/apply-fixture "minimal")
   (let [pori-route (parse-route "pori.fi")]
 
         (fact "Pori-R has ad-login enabled"
