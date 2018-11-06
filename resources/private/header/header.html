@@ -70,10 +70,12 @@
                                                'lupicon-chevron-small-up': $data.open()}"></span>
                     </a>
                     <ul data-bind="visible: $data.open()">
-                        <!-- ko foreach: $data.usagePurposes() -->
-                        <li>
-                            <a data-bind="attr: {href: $data.href}, text: $data.name"></a>
-                        </li>
+                        <!-- ko if: $data.usagePurposes().length > 1 -->
+                            <!-- ko foreach: $data.usagePurposes() -->
+                            <li>
+                                <a data-bind="attr: {href: $data.href}, text: $data.name"></a>
+                            </li>
+                            <!-- /ko -->
                         <!-- /ko -->
                         <li>
                             <a href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
