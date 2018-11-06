@@ -1596,15 +1596,56 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   line-height: 60px;
 }
 
-#user-submenu > ul {
+nav .header-menu .header-dropdown {
+  display: inline-block;
+}
+
+nav .header-menu .header-dropdown > .header-dropdown-button {
+  padding-left: 12px;
+  padding-right: 12px;
+  display: inline-block;
+  height: 60px;
+  line-height: 60px;
+  text-decoration: none;
+}
+
+nav .header-menu .header-dropdown > .header-dropdown-button > span {
+  vertical-align: middle;
+}
+
+nav .header-menu .header-dropdown > ul {
   display: none;
   position: fixed;
+  padding: 0;
   background-color: white;
   border: 1px solid black;
   list-style-type: none;
 }
 
-#user-submenu:hover > ul {
+nav .header-menu .header-dropdown > ul > li {
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+nav .header-menu .header-dropdown > ul > li > a {
+  color: black;
+}
+
+nav .header-menu .header-dropdown > ul > li:first-child {
+  padding-top: 1em;
+}
+
+nav .header-menu .header-dropdown > ul > li:last-child {
+  padding-bottom: 1em;
+}
+
+nav .header-menu .header-dropdown:hover .header-dropdown-button {
+  background-color: #555555;
+}
+
+nav .header-menu .header-dropdown:hover > ul {
   display: block;
 }
 

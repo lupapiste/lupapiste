@@ -57,13 +57,14 @@
                         <span class="narrow-hide" data-bind="ltext: 'help'"></span>
                     </a>
                 </div>
-                <div id="user-submenu" class="header-box" style="overflow: visible">
-                    <a>
+                <div class="header-dropdown" style="overflow: visible">
+                    <a class="header-dropdown-button">
                         <span class="lupicon-user"></span>
                         <span class="narrow-hide" id="user-name"
-                              data-bind="text: lupapisteApp.models.currentUser.displayName, attr: {'data-test-role' : lupapisteApp.models.currentUser.role}"></span>
+                              data-bind="text: lupapisteApp.models.currentUser.displayName,
+                                         attr: {'data-test-role' : lupapisteApp.models.currentUser.role}"></span>
+                        <span class="lupicon-chevron-small-down"></span>
                     </a>
-                    <!-- ko if: ($root.usagePurposes().length > 1) -->
                     <ul>
                         <!-- ko foreach: $root.usagePurposes() -->
                         <li>
@@ -83,13 +84,6 @@
                             </a>
                         </li>
                     </ul>
-                    <!-- /ko -->
-                </div>
-                <div id="logout-header-box" class="header-box">
-                    <a data-bind="attr: {href: '/app/' + $root.currentLanguage + '/logout', 'title': loc('logout')}" >
-                        <span class="lupicon-log-out"></span>
-                        <span class="narrow-hide" data-bind="ltext: 'logout'"></span>
-                    </a>
                 </div>
             </div>
         </div>
