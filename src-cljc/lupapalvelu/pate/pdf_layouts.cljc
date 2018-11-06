@@ -286,6 +286,9 @@
                         :styles [:bold :border-top]}
                        {:loc-prefix :pate-r.verdict-code}]
                       [{:loc    :empty
+                        :source {:dict :proposal-text}
+                        :styles :pad-before}]
+                      [{:loc    :empty
                         :source {:dict :verdict-text}
                         :styles :pad-before}]))
 
