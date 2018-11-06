@@ -443,10 +443,6 @@
   ([schema path value old-data]
    (validate-and-process-value schema path value old-data nil)))
 
-(defn printter [value]
-  (println value)
-  value)
-
 (defn required-filled?
   "True if every required dict item has a proper value."
   ([schema data excludes]
@@ -456,7 +452,6 @@
                   (or (:required? v)
                       (:repeating v))))
         (remove (fn [[k _]] ((set excludes) k)))
-        (printter)
         (every? (fn [[k v]]
                   (cond
                     (:multi-select v) (not-empty (k data))

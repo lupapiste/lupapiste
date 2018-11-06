@@ -59,11 +59,6 @@
     (util/=as-kw (verdict-state verdict) :proposal)
     false))
 
-(defn proposal? [verdict]
-  (if (lupapiste-verdict? verdict)
-    (util/=as-kw (verdict-state verdict) :proposal)
-    false))
-
 ;; Maybe not the most useful predicate, maybe clean up later?
 (defn verdict-code-is-free-text? [verdict]
   (-> (:category verdict)

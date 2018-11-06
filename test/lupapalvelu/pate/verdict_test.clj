@@ -1572,9 +1572,10 @@
       (vc/draft? {}) => false
       (vc/published? {}) => true
       (vc/verdict-summary "fi" nil nil)
-      => {:category "backing-system"
-          :legacy?  false
-          :title    "Luonnos"})
+      => {:category  "backing-system"
+          :legacy?   false
+          :proposal? false
+          :title     "Luonnos"})
     (fact "Draft"
       (vc/draft? verdict) => true
       (vc/published? verdict) => false
@@ -1583,6 +1584,7 @@
           :category     "r"
           :legacy?      false
           :modified     12345
+          :proposal?    false
           :giver        "Foo Bar"
           :verdict-date 876543
           :title        "Luonnos"})
@@ -1593,9 +1595,23 @@
           :category     "r"
           :legacy?      false
           :modified     12345
+          :proposal?    false
           :giver        "Broad board abroad"
           :verdict-date 876543
           :title        "Luonnos"})
+    (fact "Verdict proposal"
+      (vc/verdict-summary "fi" section-strings
+                          (-> verdict
+                              (assoc-in [:template :giver] "lautakunta")
+                              (assoc :state "proposal")))
+      => {:id           "v1"
+          :category     "r"
+          :legacy?      false
+          :modified     12345
+          :proposal?    true
+          :giver        "Broad board abroad"
+          :verdict-date 876543
+          :title        "P\u00e4\u00e4t\u00f6sehdotus"})
     (fact "Replacement draft"
       (vc/verdict-summary "fi" section-strings
                           (assoc-in verdict [:replacement :replaces] "v2"))
@@ -1603,6 +1619,7 @@
           :category     "r"
           :legacy?      false
           :modified     12345
+          :proposal?    false
           :giver        "Foo Bar"
           :verdict-date 876543
           :replaces     "v2"
@@ -1616,6 +1633,7 @@
           :category     "r"
           :legacy?      false
           :modified     12345
+          :proposal?    false
           :published    121212
           :giver        "Foo Bar"
           :verdict-date 876543
@@ -1631,6 +1649,7 @@
           :category     "r"
           :legacy?      false
           :modified     12345
+          :proposal?    false
           :published    121212
           :giver        "Foo Bar"
           :verdict-date 876543
@@ -1644,6 +1663,7 @@
           :category     "r"
           :legacy?      false
           :modified     12345
+          :proposal?    false
           :published    121212
           :giver        "Foo Bar"
           :verdict-date 876543
@@ -1658,6 +1678,7 @@
           :category     "r"
           :legacy?      false
           :modified     12345
+          :proposal?    false
           :published    121212
           :giver        "Foo Bar"
           :verdict-date 876543
@@ -1674,6 +1695,7 @@
           :category     "r"
           :legacy?      true
           :modified     12345
+          :proposal?    false
           :giver        "Foo Bar"
           :verdict-date 98765
           :title        "Luonnos"})
@@ -1690,6 +1712,7 @@
           :category     "r"
           :legacy?      true
           :modified     12345
+          :proposal?    false
           :published    676767
           :giver        "Foo Bar"
           :verdict-date 98765
@@ -1710,6 +1733,7 @@
           :category     "backing-system"
           :legacy?      false
           :modified     12345
+          :proposal?    false
           :published    12345
           :giver        "Mölli Keinonen"
           :verdict-date 998877
@@ -1723,6 +1747,7 @@
           :category     "backing-system"
           :legacy?      false
           :modified     12345
+          :proposal?    false
           :published    12345
           :giver        "Mölli Keinonen"
           :verdict-date 220033
@@ -1739,6 +1764,7 @@
               :category     "ya"
               :legacy?      false
               :modified     12345
+              :proposal?    false
               :giver        "Foo Bar"
               :verdict-date 876543
               :title        "Luonnos"})
@@ -1749,6 +1775,7 @@
               :category     "ya"
               :legacy?      false
               :modified     12345
+              :proposal?    false
               :published    656565
               :giver        "Foo Bar"
               :verdict-date 876543
@@ -1761,6 +1788,7 @@
               :category     "ya"
               :legacy?      false
               :modified     12345
+              :proposal?    false
               :published    656565
               :giver        "Foo Bar"
               :verdict-date 876543
@@ -1782,7 +1810,8 @@
      :template    {:inclusions ["verdict-code"
                                 "handler"
                                 "verdict-date"
-                                "verdict-section"]
+                                "verdict-section"
+                                "verdict-text"]
                    :giver      "viranhaltija"}
      :references  {:boardname "Broad board abroad"}}))
 
@@ -3727,3 +3756,61 @@
     (parties {:application application :data {:verdict-id verdictId}})) => [{:text "signer two" :value "456"}
                                                                             {:text "signer three" :value "789"}
                                                                             {:text "signer five" :value "222"}])
+
+(facts "Verdict proposal"
+  (let [proposal-verdict (-> (make-verdict :id "proposal-1" :code "myonnetty" :section "1")
+                             (assoc-in [:template :giver] "lautakunta")
+                             (assoc :state "proposal"))
+        c-v-a            (hash-map :command {:user        {:id        "user-id" :username "user-email"
+                                                           :firstName "Hello"   :lastName "World"}
+                                             :created     12345
+                                             :application application}
+                                   :verdict proposal-verdict
+                                   :application application)]
+    (fact "proposal?"
+      (vc/proposal? proposal-verdict) => true
+      (vc/proposal? (dissoc proposal-verdict :category)) => false
+      (vc/proposal? (assoc proposal-verdict :state "draft")) => false)
+
+    (fact "proposal-filled? - verdict not"
+      (proposal-filled? {:data        {:verdict-id "proposal-1"}
+                         :application {:pate-verdicts [proposal-verdict]}}) => true
+      (verdict-filled? {:data        {:verdict-id "proposal-1"}
+                        :application {:pate-verdicts [proposal-verdict]}}) => false)
+
+    (fact "finalize--proposal"
+      (finalize--proposal c-v-a) => {:updates {"$set" {:pate-verdicts.$.data.handler "Foo Bar"
+                                                       :pate-verdicts.$.data.verdict-code "myonnetty"
+                                                       :pate-verdicts.$.data.verdict-date 876543
+                                                       :pate-verdicts.$.data.verdict-section "1"
+                                                       :pate-verdicts.$.state {:_modified 12345
+                                                                               :_user "user-email"
+                                                                               :_value "proposal"}
+                                                       :pate-verdicts.$.template.inclusions ["verdict-code"
+                                                                                             "handler"
+                                                                                             "verdict-date"
+                                                                                             "verdict-section"
+                                                                                             "verdict-text"]}}
+                                     :verdict {:category "r"
+                                               :data {:handler "Foo Bar"
+                                                      :verdict-code "myonnetty"
+                                                      :verdict-date 876543
+                                                      :verdict-section "1"}
+                                               :id "proposal-1"
+                                               :modified 1
+                                               :published nil
+                                               :references {:boardname "Broad board abroad"}
+                                               :replacement nil
+                                               :schema-version 1
+                                               :state {:_modified 12345 :_user "user-email" :_value "proposal"}
+                                               :template {:giver "lautakunta"
+                                                          :inclusions ["verdict-code"
+                                                                       "handler"
+                                                                       "verdict-date"
+                                                                       "verdict-section"
+                                                                       "verdict-text"]}}})
+
+    (fact "finalize--proposal-pdf"
+      (get-in (finalize--proposal-pdf c-v-a) [:updates $set :pate-verdicts.$.published.tags])
+      => string?
+      (provided (lupapalvelu.organization/get-organization-name "753-R" nil) => "Sipoon rakennusvalvonta"))))

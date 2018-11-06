@@ -82,10 +82,11 @@
     :contract? fails if the verdict is not a contract
     :allu-contract? fails if the verdict is not an allu-contract
     :verdict? fails for contracts
-    :not-replaced? Fails if the verdict has been OR is being replaced. "
+    :not-replaced? Fails if the verdict has been OR is being replaced
+    :proposal? Fails if the verdict state is not proposal."
   [& conditions]
   {:pre [(set/superset? #{:draft? :published? :legacy? :modern? :contract?
-                          :allu-contract? :verdict? :not-replaced?}
+                          :allu-contract? :verdict? :not-replaced? :proposal?}
                         (set conditions))]}
   (let [{:keys [draft? published?
                 legacy? modern?
