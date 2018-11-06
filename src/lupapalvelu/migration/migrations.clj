@@ -4081,6 +4081,20 @@
           0
           (review-migration/duplicate-review-target-applications)))
 
+(def nonexisting-muuTunnus-value-in-tasks?
+  {:tasks {$elemMatch {$and [{:data.muuTunnus {$exists true}}
+                             {:data.muuTunnus.value {$exists false}}]}}})
+
+(defmigration LPK-3989-set-muuTunnus-to-empty-string
+  {:apply-when (pos? (mongo/count :applications nonexisting-muuTunnus-value-in-tasks?))}
+  (update-applications-array
+    :tasks
+    (fn [task]
+      (if (and (contains? (:data task) :muuTunnus)
+               (not (-> task :data :muuTunnus :value)))
+        (assoc-in task [:data :muuTunnus :value] "")
+        task))
+    nonexisting-muuTunnus-value-in-tasks?))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
