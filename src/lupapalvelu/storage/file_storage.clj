@@ -59,6 +59,13 @@
     #(find-by-file-id id %)
     attachments))
 
+(defn download-with-user-id
+  "Downloads file from Mongo GridFS or S3 with user-id prefix"
+  [file-id user-id]
+  (if (env/feature? :s3)
+    (s3/download nil (s3-id user-id file-id))
+    (gfs/download-find {:_id file-id})))
+
 (defn ^{:perfmon-exclude true} download
   "Downloads file from Mongo GridFS or S3
    When the backing system is S3, make sure to always close the content input stream even if you do not use it."
