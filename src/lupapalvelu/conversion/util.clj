@@ -16,6 +16,9 @@
             [sade.env :as env]
             [sade.strings :as ss]))
 
+(def config
+  {:resource-path (format "/Users/%s/Desktop/test-data" (System/getenv "USER"))})
+
 (def general-permit-id-regex
   "So-called 'general' format, e.g. 63-0447-12-A"
   #"\d{2}-\d{4}-\d{2}-[A-Z]{1,3}")
@@ -127,7 +130,7 @@
            history-array))))
 
 (defn read-all-test-files
-  ([] (read-all-test-files "/Users/tuomo.virolainen/Desktop/test-data"))
+  ([] (read-all-test-files (:resource-path config)))
   ([path]
    (let [files (->> (clojure.java.io/file path)
                     file-seq
@@ -170,10 +173,15 @@
        (filter #(= kuntalupatunnus (krysp-reader/xml->kuntalupatunnus %)))
        first))
 
+(def tila
+  (atom {})) ;; TODO: Remove me
+
 (defn deduce-operation-type
   "Figure out the right primaryOperation for the application."
   [xml]
   (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
+        app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
+        _ (swap! tila assoc :info app-info)
         suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
         btype (get-building-type xml)
         asiantiedot (ss/lower-case (building-reader/->asian-tiedot xml))

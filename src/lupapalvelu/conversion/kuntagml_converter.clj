@@ -19,10 +19,6 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
-
-(def config
-  {:resource-path (format "/Users/%s/Desktop/test-data" (System/getenv "USER"))})
-
 (def tila
   (atom {}))
 
@@ -200,7 +196,7 @@
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
         destructured-permit-id (conv-util/destructure-permit-id kuntalupatunnus)
         operation             "aiemmalla-luvalla-hakeminen"
-        filename              (format "%s/%s.xml" (:resource-path config) kuntalupatunnus ".xml")
+        filename              (format "%s/%s.xml" (:resource-path conv-util/config) kuntalupatunnus ".xml")
         permit-type           "R"
         xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
