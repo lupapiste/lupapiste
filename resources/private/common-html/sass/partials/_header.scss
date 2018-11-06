@@ -59,9 +59,17 @@ $language-padding: 20px;
     line-height: $header-height;
     text-decoration: none;
 
-    > span {
-      vertical-align: middle;
+    &.active {
+      background-color: $hover-bg;
+      color: $hover;
     }
+
+    > span { vertical-align: middle; }
+  }
+  &:hover > .header-dropdown-button {
+    color: $hover;
+
+    &.active { color: $link; }
   }
 
   > ul {
@@ -69,20 +77,30 @@ $language-padding: 20px;
     position: fixed;
     padding: 0;
     background-color: white;
-    border: 1px solid black;
+    border: 1px solid $link;
     list-style-type: none;
 
     > li {
-      @include header-padding;
-      padding-top: 0.5em;
-      padding-bottom: 0.5em;
+      display: table;
+      width: 100%;
 
       > a {
+        display: table-cell;
+        width: auto;
+        @include header-padding;
+        padding-top: 0.5em;
+        padding-bottom: 0.5em;
         color: black;
       }
 
-      &:first-child { padding-top: 1em; }
-      &:last-child { padding-bottom: 1em; }
+      &:hover {
+        background-color: $link;
+
+        > a {
+          color: $hover;
+          text-decoration: none;
+        }
+      }
     }
   }
 }

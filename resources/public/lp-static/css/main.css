@@ -1609,8 +1609,21 @@ nav .header-menu .header-dropdown > .header-dropdown-button {
   text-decoration: none;
 }
 
+nav .header-menu .header-dropdown > .header-dropdown-button.active {
+  background-color: #555555;
+  color: white;
+}
+
 nav .header-menu .header-dropdown > .header-dropdown-button > span {
   vertical-align: middle;
+}
+
+nav .header-menu .header-dropdown:hover > .header-dropdown-button {
+  color: white;
+}
+
+nav .header-menu .header-dropdown:hover > .header-dropdown-button.active {
+  color: #f7ac2e;
 }
 
 nav .header-menu .header-dropdown > ul {
@@ -1618,27 +1631,32 @@ nav .header-menu .header-dropdown > ul {
   position: fixed;
   padding: 0;
   background-color: white;
-  border: 1px solid black;
+  border: 1px solid #f7ac2e;
   list-style-type: none;
 }
 
 nav .header-menu .header-dropdown > ul > li {
+  display: table;
+  width: 100%;
+}
+
+nav .header-menu .header-dropdown > ul > li > a {
+  display: table-cell;
+  width: auto;
   padding-left: 12px;
   padding-right: 12px;
   padding-top: 0.5em;
   padding-bottom: 0.5em;
-}
-
-nav .header-menu .header-dropdown > ul > li > a {
   color: black;
 }
 
-nav .header-menu .header-dropdown > ul > li:first-child {
-  padding-top: 1em;
+nav .header-menu .header-dropdown > ul > li:hover {
+  background-color: #f7ac2e;
 }
 
-nav .header-menu .header-dropdown > ul > li:last-child {
-  padding-bottom: 1em;
+nav .header-menu .header-dropdown > ul > li:hover > a {
+  color: white;
+  text-decoration: none;
 }
 
 .nav-bottom {
