@@ -896,7 +896,7 @@
                      (or session-id
                          (vetuma/session-id)
                          "system-process"))
-        content ((:content (storage/download (:fileId original-filedata))))
+        content ((:content (storage/download-with-user-id user-id (:fileId original-filedata))))
         conversion-data (conversion user-id session-id application (assoc original-filedata :content content))
         attached-version (attach! command session-id attachment-options original-filedata conversion-data)]
     (cleanup-temp-file (:result conversion-data))
