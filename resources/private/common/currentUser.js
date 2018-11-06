@@ -14,9 +14,7 @@ LUPAPISTE.CurrentUser = function() {
     phone:          "",
     username:       "",
     language:       "",
-    orgNames:       undefined,
     orgAuthz:       undefined,
-    usagePurposes:  [],
     company: {
       id:   undefined,
       role: undefined
@@ -41,17 +39,6 @@ LUPAPISTE.CurrentUser = function() {
     };
   }
 
-  function formatPurpose(purpose) {
-    if (purpose.type === "authority-admin") {
-      var orgNames = self.orgNames();
-      return (orgNames ? orgNames[purpose.orgId][self.language()] : purpose.orgId) + " " + purpose.type;
-    } else {
-      return purpose.type;
-    }
-  }
-
-  function purposeLink(purpose) { return "/app/" + self.language() + "/" + purpose.type; }
-
   function constructor(user) {
     if( !_.isEmpty(user) && !user.language && !user.virtual ) {
       user.language = loc.getCurrentLanguage();
@@ -66,18 +53,7 @@ LUPAPISTE.CurrentUser = function() {
     if (user.firstLogin) {
       hub.send("first-login", {user: user});
     }
-
     ko.mapping.fromJS(_.defaults(user, defaults), {}, self);
-    ajax.query("organization-names-by-user", {})
-      .success(function (res) {
-        self.orgNames(res.orgNames);
-        ajax.query("usage-purposes", {})
-          .success(function (res) { self.usagePurposes(_.map(res.usagePurposes, function (purpose) {
-            return {name: formatPurpose(purpose), href: purposeLink(purpose)};
-          })); })
-          .call();
-      })
-      .call()
   }
 
   constructor({});

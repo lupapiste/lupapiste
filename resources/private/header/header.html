@@ -57,16 +57,19 @@
                         <span class="narrow-hide" data-bind="ltext: 'help'"></span>
                     </a>
                 </div>
-                <div class="header-dropdown" style="overflow: visible">
-                    <a class="header-dropdown-button">
+                <div id="header-user-dropdown" class="header-dropdown" style="overflow: visible"
+                     data-bind="with: $root.userMenu">
+                    <a class="header-dropdown-button"
+                       data-bind="click: $data.toggleOpen(), clickBubble: false">
                         <span class="lupicon-user"></span>
                         <span class="narrow-hide" id="user-name"
                               data-bind="text: lupapisteApp.models.currentUser.displayName,
                                          attr: {'data-test-role' : lupapisteApp.models.currentUser.role}"></span>
-                        <span class="lupicon-chevron-small-down"></span>
+                        <span data-bind="css: {'lupicon-chevron-small-down': !$data.open(),
+                                               'lupicon-chevron-small-up': $data.open()}"></span>
                     </a>
-                    <ul>
-                        <!-- ko foreach: $root.usagePurposes() -->
+                    <ul data-bind="visible: $data.open()">
+                        <!-- ko foreach: $data.usagePurposes() -->
                         <li>
                             <a data-bind="attr: {href: $data.href}, text: $data.name"></a>
                         </li>

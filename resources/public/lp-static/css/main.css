@@ -1614,7 +1614,7 @@ nav .header-menu .header-dropdown > .header-dropdown-button > span {
 }
 
 nav .header-menu .header-dropdown > ul {
-  display: none;
+  display: block;
   position: fixed;
   padding: 0;
   background-color: white;
@@ -1639,14 +1639,6 @@ nav .header-menu .header-dropdown > ul > li:first-child {
 
 nav .header-menu .header-dropdown > ul > li:last-child {
   padding-bottom: 1em;
-}
-
-nav .header-menu .header-dropdown:hover .header-dropdown-button {
-  background-color: #555555;
-}
-
-nav .header-menu .header-dropdown:hover > ul {
-  display: block;
 }
 
 .nav-bottom {

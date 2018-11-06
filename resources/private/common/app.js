@@ -198,6 +198,41 @@ var LUPAPISTE = LUPAPISTE || {};
       }
     }
 
+    function UserMenu() {
+      var self = this;
+      self.open = ko.observable(true);
+      self.orgNames = ko.observable(undefined);
+      self.usagePurposes = ko.observableArray();
+
+      function formatPurpose(purpose) {
+        if (purpose.type === "authority-admin") {
+          var orgNames = self.orgNames();
+          var language = lupapisteApp.models.currentUser.language();
+          return (orgNames ? orgNames[purpose.orgId][language] : purpose.orgId) + " " + purpose.type;
+        } else {
+          return purpose.type;
+        }
+      }
+
+      function purposeLink(purpose) {
+        var language = lupapisteApp.models.currentUser.language();
+        return "/app/" + language + "/" + purpose.type;
+      }
+
+      self.toggleOpen = function () { self.open(!self.open()); }
+
+      ajax.query("organization-names-by-user", {})
+        .success(function (res) {
+          self.orgNames(res.orgNames);
+          ajax.query("usage-purposes", {})
+            .success(function (res) { self.usagePurposes(_.map(res.usagePurposes, function (purpose) {
+              return {name: formatPurpose(purpose), href: purposeLink(purpose)};
+            })); })
+            .call();
+        })
+        .call();
+    }
+
     hub.subscribe("login", function() { wasLoggedIn = true; });
 
     hub.subscribe({eventType: "connection", status: "online"}, function () {
@@ -304,10 +339,10 @@ var LUPAPISTE = LUPAPISTE || {};
         currentLanguage: loc.getCurrentLanguage(),
         openStartPage: openStartPage,
         showUserMenu: self.showUserMenu,
+        userMenu: new UserMenu(),
         showArchiveMenuOptions: self.showArchiveMenuOptions,
         showCalendarMenuOptions: self.showCalendarMenuOptions,
         calendarMenubarVisible: self.calendarMenubarVisible,
-        usagePurposes: lupapisteApp.models.currentUser.usagePurposes,
         // TODO: sync with side-panel.js sidePanelPages
         sidePanelPages: ["application","attachment","statement","neighbors","verdict"]
       };
