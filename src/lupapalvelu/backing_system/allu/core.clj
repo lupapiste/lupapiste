@@ -115,7 +115,7 @@
 
 (defmethod application-update-request "sijoitussopimus" [pending-on-client {:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
-        _ (assert allu-id (str (:id application) " does not contain an ALLU id"))
+        _ (assert allu-id (str (:id application) " does not contain an ALLU id")) ;;FIXME: change asserts to fail!s
         params {:path {:id allu-id}
                 :body (application->allu-placement-contract pending-on-client
                                                             application)}
@@ -362,7 +362,7 @@
   "Replace the attachment file id in [:multipart 1 :content] with the file contents `InputStream` when sending
   attachment. Store pdf file to file storage when downloading contract."
   [handler]
-  (fn [{{:keys [application latestAttachmentVersion]} ::command :as request}]
+  (fn [{{:keys [application user]} ::command :as request}]
     (match (-> request reitit-ring/get-match :data :name)
       [:attachments :create]
       (let [{:keys [fileId storageSystem]} (get-in request [:multipart 1 :content])]
@@ -380,8 +380,8 @@
                            :content      (ByteArrayInputStream. content-bytes)
                            :content-type (get-in response [:headers "Content-Type"])
                            :size         (alength content-bytes)}
-                metadata {:application (:id application)
-                          :linked      false}]
+                metadata {:linked      false
+                          :uploader-user-id (:id user)}]
             (assoc response :body (save-file file-data metadata)))
           response))
 
@@ -616,6 +616,15 @@
   (doall (for [attachment attachments]
            (send-attachment! command attachment))))
 
+(defn agreement-state
+  "Returns :proposal when application is still in the state where agreement proposal should be fetched.
+   Returns :final when the final verdict should be fetched."
+  [application]
+  (case (:state application)
+    ("sent" "submitted") :proposal
+    "agreementPrepared"  :final
+    :else nil))
+
 ;; TODO: Add this to batchrunner
 (defn load-placementcontract-proposal!
   "GET placement contract proposal pdf from ALLU. Saves the proposal pdf using `lupapalvelu.file-upload/save-file`."
@@ -637,7 +646,7 @@
   "Load placement contract proposal or final from ALLU. Returns SavedFileData of the pdf or nil. Bypasses JMS."
   [{:keys [application] :as command}]
   (try+
-    (:body (allu-request-handler (case (:state application)
-                                   ("sent" "submitted") (contract-proposal-request command)
-                                   "agreementPrepared" (final-contract-request command))))
+    (:body (allu-request-handler (case (agreement-state application)
+                                   :proposal (contract-proposal-request command)
+                                   :final (final-contract-request command))))
     (catch [:text "error.allu.http"] _ nil)))

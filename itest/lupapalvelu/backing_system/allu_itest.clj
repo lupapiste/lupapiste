@@ -390,7 +390,7 @@
 
                                                             (= current :submitted)
                                                             (do (fact "fetch contract"
-                                                                  (fetch-contract raktark-helsinki id) => fail?)
+                                                                  (fetch-contract raktark-helsinki id) => ok?)
                                                                 current)
 
                                                             :else

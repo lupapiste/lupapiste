@@ -16,7 +16,7 @@ NICENESS=+15
 STARTUPTIMEOUT=300
 PERFECT=
 BLACKLIST=
-RETRIES=3
+RETRIES=2
 UPDATE=15
 EXCLUDES="--exclude fail --exclude non-roboto-proof"
 INCLUDE_TAGS=
@@ -363,7 +363,7 @@ run_test() {
 
    for ROUND in $(seq 0 $RETRIES)
    do
-      DISPLAY=:$MYSCREEN timeout $TIMEOUT pybot \
+      DISPLAY=:$MYSCREEN timeout $TIMEOUT robot \
          $INCLUDES $EXCLUDES \
          --RunEmptySuite \
          --variable BROWSER:$BROWSER \

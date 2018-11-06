@@ -14,6 +14,7 @@
                  [org.clojure/test.check "0.9.0"]
                  [com.gfredericks/test.chuck "0.2.9"]
                  [prismatic/plumbing "0.5.5"]
+                 [com.cognitect/transit-clj "0.8.313"]
 
                  ; State management
                  [mount "0.1.12"]
@@ -56,6 +57,7 @@
                  [cljstache "2.0.1"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [org.freemarker/freemarker "2.3.23"]
+                 [hiccup "1.0.5"]
 
                  ; CSS
                  [garden "1.3.3"]
@@ -69,6 +71,7 @@
 
                  ; JSON
                  [metosin/jsonista "0.2.2"]
+                 [cheshire "5.8.1"]                         ; not used directly, but omitting seems to break everything
 
                  ; HTTP client
                  [clj-http "3.4.1" :exclusions [commons-codec]]
@@ -180,7 +183,7 @@
             [lein-shell "0.5.0"]
             [deraen/lein-sass4clj "0.3.1"]
             [lein-pdo "0.1.1"]
-            [lein-midje "3.2.1"]
+            [lupapiste/lein-midje "3.2.2"]
             [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
             [lupapiste/lein-buildid "0.4.2"]
             [lupapiste/lein-nitpicker "0.6.0"]
@@ -260,10 +263,9 @@
   :nitpicker {:exts     ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug" #"lp-static/js/"]}
   :repositories [["osgeo" {:url "https://download.osgeo.org/webdav/geotools"}]]
-  :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
-            "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
+  :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "stest"       ["with-profile" "dev,stest" "midje"]
-            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," ["midje" ":filter" "-ajanvaraus"]]
+            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]
             "sass"        ["do"
                            ["sass4clj" "once"]
                            ["shell" "blessc" "--force" "resources/public/lp-static/css/main.css"]]

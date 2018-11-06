@@ -36,9 +36,9 @@
       (permit-ids-for-archiving {:verdicts verdicts} {:backendId "LX-0002"} permit/ARK) => ["LX-0002" "LX-0001" "LX-0003"]
       (permit-ids-for-archiving {:verdicts verdicts} {:backendId "LX-0002"} permit/R) => ["LX-0001" "LX-0002" "LX-0003"]))
   (fact "Should use attachment specific verdict for verdict date"
-    (let [verdicts [{:kuntalupatunnus "LX-0001" :paatokset [{:poytakirjat {:0 {:paatospvm 1482530400000}}}]}
-                    {:kuntalupatunnus "LX-0002" :paatokset [{:poytakirjat {:0 {:paatospvm 1512597600000}}}]}
-                    {:kuntalupatunnus "LX-0003" :paatokset [{:poytakirjat {:0 {:paatospvm 1510057163483}}}]}]]
+    (let [verdicts [{:kuntalupatunnus "LX-0001" :paatokset [{:poytakirjat [{:paatospvm 1482530400000}]}]}
+                    {:kuntalupatunnus "LX-0002" :paatokset [{:poytakirjat [{:paatospvm 1512597600000}]}]}
+                    {:kuntalupatunnus "LX-0003" :paatokset [{:poytakirjat [{:paatospvm 1510057163483}]}]}]]
       (get-ark-paatospvm {:verdicts verdicts} {:backendId "LX-0002"}) => "2017-12-07T00:00:00+02:00")))
 
 
@@ -235,18 +235,18 @@
     (let [archive-app (assoc application :verdicts [{:id              "5badf004da40a6b3fd01262f"
                                                      :kuntalupatunnus "BI-123"
                                                      :timestamp       nil
-                                                     :paatokset       [{:poytakirjat {:0 {:paatospvm 1538082000000}}}]
-                                                     :draft           true}
+                                                     :paatokset       [{:poytakirjat [{:paatospvm 1538082000000}]}]
+                                                     :draft           false}
                                                     {:id              "5badf013da40a6b3fd012630"
                                                      :kuntalupatunnus "BI-456"
                                                      :timestamp       nil
-                                                     :paatokset       [{:poytakirjat {:0 {:paatospvm 1537995600000}}}]
+                                                     :paatokset       [{:poytakirjat [{:paatospvm 1539995600000}]}]
                                                      :draft           true}
                                                     {:id              "5badf01eda40a6b3fd012631"
                                                      :kuntalupatunnus "BI-789"
                                                      :timestamp       nil
-                                                     :paatokset       [{:poytakirjat {:0 {:paatospvm 1536872400000}}}]
-                                                     :draft           true}]
+                                                     :paatokset       [{:poytakirjat [{:paatospvm 1536872400000}]}]
+                                                     :draft           false}]
                                          :permitType "ARK")]
       (generate-archive-metadata archive-app
                                  {:username "tester" :firstName "Archive" :lastName "Tester"}

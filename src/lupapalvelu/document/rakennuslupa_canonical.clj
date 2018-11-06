@@ -152,7 +152,11 @@
                                                :kerrosluku :kerrosala :rakennusoikeudellinenKerrosala])
                                  (filter #(-> % last (ss/replace "," ".") util/->double pos?) <>)
                                  (into {} <>))
-                             (select-keys luokitus [:energialuokka :energiatehokkuusluku :paloluokka])
+                            (-<> luokitus
+                                 (select-keys [:energialuokka :energiatehokkuusluku :paloluokka])
+                                 (filter #(-> % last ss/blank? not) <>)
+                                 (map (fn [v] [(first v) (ss/replace (last v) " " "")]) <>)
+                                 (into {} <>))
                              (when-not (ss/blank? (:energiatehokkuusluku luokitus))
                                (select-keys luokitus [:energiatehokkuusluvunYksikko]))
                              (when (util/not-empty-or-nil? (:huoneisto huoneistot))
@@ -161,7 +165,6 @@
                                :kantavaRakennusaine kantava-rakennus-aine-map
                                :lammonlahde lammonlahde-map
                                :julkisivu julkisivu-map))]
-
     (util/assoc-when-pred {:yksilointitieto (-> info :op :id)
                            :alkuHetki (util/to-xml-datetime  created)
                            :sijaintitieto {:Sijainti {:tyhja empty-tag}}
@@ -171,7 +174,16 @@
       :omistajatieto (remove nil? (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))))))
 
 (defn- get-rakennus-data [application doc]
-  {:Rakennus (get-rakennus application doc)})
+  (let [doc-vtj-prt (get-in doc [:data :valtakunnallinenNumero])
+        document-building (->> (filter #(and (= (:vtj-prt %) doc-vtj-prt)
+                                             (not (nil? (:vtj-prt %)))) (:document-buildings application))
+                               first
+                               :building)
+        building (util/deep-merge-with
+                   (fn [first-val second-val] (if-not (nil? second-val) second-val first-val))
+                   (get-rakennus application {:schema-info (:schema-info doc) :data document-building})
+                   (get-rakennus application doc))]
+    {:Rakennus building}))
 
 (defn- get-toimenpiteen-kuvaus [doc]
   ;Uses fi as default since krysp uses finnish in enumeration values

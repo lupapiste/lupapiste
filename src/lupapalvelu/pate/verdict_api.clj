@@ -11,7 +11,7 @@
             [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict :refer [pate-enabled verdict-exists
-                                              backing-system-verdict]:as verdict]
+                                              backing-system-verdict] :as verdict]
             [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.roles :as roles]
@@ -19,7 +19,8 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.ya-extension :refer [ya-extension-app?]]
             [sade.core :refer :all]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.backing-system.allu.contract :as allu-contract]))
 
 
 ;; ------------------------------------------
@@ -300,7 +301,7 @@
    :user-roles       #{:applicant}
    :user-authz-roles roles/default-authz-writer-roles}
   [command]
-  (verdict/sign-allu-contract command)
+  (allu-contract/sign-allu-contract command)
   (ok))
 
 (defraw verdict-pdf

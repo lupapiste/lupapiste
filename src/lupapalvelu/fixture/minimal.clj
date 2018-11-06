@@ -1440,6 +1440,7 @@
                                                            "YMEuMA=="
                                                            "-----END CERTIFICATE-----"])
                                   :idp-uri "http://localhost:7000"
+                                  :role-mapping {:reader "GG_Lupapiste_RAVA_read"}
                                   :trusted-domains ["pori.fi"]}}
 
                       ;; Helsinki R
@@ -1530,7 +1531,8 @@
                        :digitizer-tools-enabled false
                        :automatic-review-fetch-enabled true
                        :automatic-ok-for-attachments-enabled true
-                       :multiple-operations-supported true}
+                       :multiple-operations-supported true
+                       :ely-uspa-enabled true}
 
                       ;;
                       ;; Testeissa kaytettavia organisaatioita

@@ -383,7 +383,7 @@ No templates
 
 Template not published
   Test id disabled  publish-template
-  Test id text is  template-state  Päätöspohjaa ei olla vielä julkaistu.
+  Test id text is  template-state  Päätöspohjaa ei ole vielä julkaistu.
 
 Follow link to settings
   [Arguments]  ${tid}

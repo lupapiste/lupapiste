@@ -55,7 +55,8 @@
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
             [taoensso.timbre :refer [warnf warn errorf error]]
-            [lupapalvelu.backing-system.allu.core :as allu]))
+            [lupapalvelu.backing-system.allu.core :as allu]
+            [lupapalvelu.attachment :as attachment]))
 
 ;; ------------------------------------------
 ;; Pre-checks
@@ -83,6 +84,9 @@
     :verdict? fails for contracts
     :not-replaced? Fails if the verdict has been OR is being replaced. "
   [& conditions]
+  {:pre [(set/superset? #{:draft? :published? :legacy? :modern? :contract?
+                          :allu-contract? :verdict? :not-replaced?}
+                        (set conditions))]}
   (let [{:keys [draft? published?
                 legacy? modern?
                 contract? allu-contract?
@@ -149,7 +153,10 @@
                                             status))})
        neighbors))
 
-(defn- general-handler [{handlers :handlers}]
+(defn general-handler
+  "Returns handler's first and last names if a handler is found. Returns empty
+  string if handler is not found."
+  [{handlers :handlers}]
   (if-let [{:keys [firstName
                    lastName]} (util/find-first :general handlers)]
     (str firstName " " lastName)
@@ -604,19 +611,6 @@
                                                      :legacy?  true})}})
     verdict-id))
 
-(sc/defn ^:always-validate new-allu-verdict :- schemas/PateVerdict [{:keys [application created] :as command}]
-  (let [category (schema-util/application->category application)]
-    {:id       (mongo/create-id)
-     :modified created
-     :state    (wrapped-state command :published)
-     :category (name category)
-     :data     {:handler (general-handler application)}
-     :template {:inclusions (-> category
-                                legacy/legacy-verdict-schema
-                                :dictionary
-                                dicts->kw-paths)}
-     :legacy?  true}))
-
 (declare verdict-schema)
 
 (defn mask-verdict-data [{:keys [user application]} verdict]
@@ -720,7 +714,7 @@
 (defn- wrap [command value]
   ((metadata/wrapper command) value))
 
-(defn- verdict-update
+(defn verdict-update
   "Updates application, using $elemMatch query for given verdict."
   [{:keys [data created] :as command} update]
   (let [{verdict-id :verdict-id} data]
@@ -1304,7 +1298,7 @@
          verdict-id :verdict-id} (:data command)
         command                  (assoc command
                                         :application (domain/get-application-no-access-checking app-id))
-        {error :text}            ((verdict-exists :published) command)]
+        {error :text}            ((verdict-exists :published?) command)]
     (if error
       (do
         (warn "Skipping bad message. Cannot create verdict PDF." error)
@@ -1449,12 +1443,6 @@
                  "Content-Disposition" (format "filename=\"%s\"" filename)}
        :body    pdf-file-stream})))
 
-(defn latest-published-pate-verdict [{:keys [application]}]
-  (->> (:pate-verdicts application)
-       (filter :published)
-       (sort-by (comp :published :published))
-       last))
-
 ;; ---------------------------------
 ;; Backing system verdicts
 ;; The backing system verdicts reside in the verdicts array and never
@@ -1539,7 +1527,7 @@
                          (= com-id company-id))))
               sigs)))
 
-(defn- create-signature
+(defn create-signature
   [{:keys [application user created]}]
   (let [person           (user-person-name user)
         {company-id :id} (auth/auth-via-company application
@@ -1568,9 +1556,9 @@
     (if (some (util/fn->> second :id (util/=as-kw :signatures))
               sections)
         (map (fn [[_ attr & _ :as section]]
-            (if (util/=as-kw (:id attr) :signatures)
-              entry
-              section))
+               (if (util/=as-kw (:id attr) :signatures)
+                 entry
+                 section))
              sections)
         (concat sections [entry]))))
 
@@ -1614,19 +1602,6 @@
                      (when (sign-requested? command)
                        {$pull {(util/kw-path :pate-verdicts.$.signature-requests) {:user-id (:id user)}}})))
     (send-command ::signatures command)))
-
-(defn sign-allu-contract
-  "Sign the contract
-   - Update verdict signatures
-   - Change application state to agreementSigned if needed
-   - Don't move to the :agreementSigned state yet (still requires a verdict from ALLU)"
-  [{:keys [user created application] :as command}]
-  (let [signature (create-signature command)
-        verdict (command->verdict command)]
-    (verdict-update command
-                    (util/deep-merge
-                      {$push {(util/kw-path :pate-verdicts.$.signatures) signature}}))
-    (allu/approve-placementcontract! command)))
 
 (defn- signer-ids [data]
   (->> data
