@@ -352,10 +352,10 @@
 ;;;; ===================================================================================================================
 
 (defn feature? [feature]
-  (->> (query pena :features)
-       :features
-       (get feature)
-       boolean))
+  (-> (query pena :features)
+      :features
+      (get feature)
+      boolean))
 
 (defn get-by-id [collection id & args]
   (stream-decoding-response http-get (str (server-address) "/dev/by-id/" (name collection) "/" id)
@@ -482,6 +482,9 @@
 
 ;;;; Anti-CSRF
 ;;;; ===================================================================================================================
+
+(defn anti-csrf? []
+  (not (feature? :disable-anti-csrf)))
 
 (defn set-anti-csrf! [value]
   (fact (command pena :set-feature :feature "disable-anti-csrf" :value (not value)) => ok?))
