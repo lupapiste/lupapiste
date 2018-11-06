@@ -61,7 +61,7 @@
 
 (defn download-with-user-id
   "Downloads file from Mongo GridFS or S3 with user-id prefix"
-  [file-id user-id]
+  [user-id file-id]
   (if (env/feature? :s3)
     (s3/download nil (s3-id user-id file-id))
     (gfs/download-find {:_id file-id})))
