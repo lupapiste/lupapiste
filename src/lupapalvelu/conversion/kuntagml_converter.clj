@@ -47,7 +47,7 @@
   ;;    - linked permitIDs might be in funny order, check that it's normalised ('lupapalvelu.conversion.util/normalize-permit-id')
   ;;    - we need to generate LP id for conversion cases (do not use do-create-application)
   ;;
-  ;;  Types that need special handling: VAK (not own thing, but adds data to linked application)
+  ;;  Types that need special handling: VAK (not own thing, but adds data to linked application) - EDIT: Not possible, we can't export these.
   ;;
   (let [{:keys [hakijat]} app-info
         municipality "092"
@@ -74,8 +74,7 @@
         ;     After we have identified how many operations, and what kind of operations we need to create to application,
         ;     we can create those operations to primaryOperation/secondaryOperations AND create their document data using
         ;     `lupapalvelu.application/make-document` for example. And then save to db :)
-        ;
-        ;
+
         kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         id (conv-util/make-converted-application-id kuntalupatunnus)
         make-app-info {:id              id
