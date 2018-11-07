@@ -220,6 +220,7 @@ var LUPAPISTE = LUPAPISTE || {};
         return "/app/" + lupapisteApp.models.currentUser.language() + "/" + purpose.type;
       }
 
+      self.cancel = _.partial(self.open, false);
       self.toggleOpen = function () { self.open(!self.open()); }
 
       ajax.query("organization-names-by-user", {})
@@ -239,6 +240,10 @@ var LUPAPISTE = LUPAPISTE || {};
             .call();
         })
         .call();
+
+      hub.subscribe("dialog-close", self.cancel);
+      $(document).on("click", self.cancel);
+      $(document).on("click", "#header-user-dropdown", function(e) { e.stopPropagation(); });
     }
 
     hub.subscribe("login", function() { wasLoggedIn = true; });
