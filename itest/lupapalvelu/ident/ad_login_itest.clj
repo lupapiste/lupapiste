@@ -86,6 +86,9 @@
               resp => ok?
               (count (:users resp)) => 1))
 
+          (fact "Now erase Terttu's account"
+            (command admin :erase-user :email "terttu@panaani.fi") => ok?)
+
           (fact "Login attempt with an invalid response fails"
             (let [resp (client/post pori-route {:form-params {:SAMLResponse (apply str (drop-last response))}
                                                 :content-type :json
