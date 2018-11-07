@@ -33,6 +33,9 @@
 (def aita-trigger-id "dead1111111111111112beef")
 (def kvv-role-id "abba1111111111111112acdc")
 
+(defn get-assignment [apikey assignment-id]
+  (:assignment (query apikey :assignment :assignmentId assignment-id)))
+
 (facts "Querying assignments"
 
   (fact "only authorities can see assignments"
@@ -91,7 +94,7 @@
       (create-assignment veikko sonja-id id [{:group "group" :id doc-id}] "Ei onnistu") => application-not-accessible?)
     (fact "after calling create-assignment, the assignment is created"
       (let [assignment-id (:id (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Luotu?"))
-            assignment    (:assignment (query sonja :assignment :assignmentId assignment-id))]
+            assignment    (get-assignment sonja assignment-id)]
         assignment => truthy
         (sc/check Assignment assignment) => nil?
         (-> assignment :states first :type)   => "created"
@@ -119,27 +122,28 @@
            (map :status)) => ["active", "active"])
     (fact "recipient is not necessary"
       (let [assignment-id (:id (create-assignment sonja nil id {:group "group" :id doc-id} "No recipient")) => ok?
-            assignment    (:assignment (query sonja :assignment :assignmentId assignment-id))]
+            assignment    (get-assignment sonja assignment-id)]
         (-> assignment :recipient) => nil?))))
 
 (facts "Editing assignments"
-  (let [id (:id (create-and-submit-application pena :propertyId sipoo-property-id))
-        doc-id (-> (query-application sonja id) :documents first :id)
-        {assignment-id :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Edit1")]
+  (let [id                   (:id (create-and-submit-application pena :propertyId sipoo-property-id))
+        doc-id               (-> (query-application sonja id) :documents first :id)
+        {assignment-id :id}  (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Edit1")
+        {modified :modified} (get-assignment sonja assignment-id)]
+    (fact "modified on creation"
+      modified => pos?)
     (fact "can change text"
       (update-assignment sonja id assignment-id ronja-id "foo") => ok?
-      (-> (query ronja :assignment :assignmentId assignment-id)
-          :assignment
-          :description) => "foo")
+      (let [updated (get-assignment ronja assignment-id)]
+        (> (:modified updated) modified) => true
+        (:description updated) => "foo"))
     (fact "also ronja can change text"
       (update-assignment ronja id assignment-id ronja-id "faa") => ok?
-      (-> (query ronja :assignment :assignmentId assignment-id)
-          :assignment
+      (-> (get-assignment ronja assignment-id)
           :description) => "faa")
     (fact "Ronja can change recipient to sonja"
       (update-assignment ronja id assignment-id sonja-id "Ota koppi") => ok?
-      (-> (query ronja :assignment :assignmentId assignment-id)
-          :assignment
+      (-> (get-assignment ronja assignment-id)
           :recipient :username) => "sonja")
     (fact "inputs are validated"
       (update-assignment ronja id "foo" sonja-id "Ota koppi") => fail?
@@ -147,30 +151,33 @@
       (update-assignment ronja id assignment-id "foo" "Ota koppi") => invalid-receiver?)
     (fact "recipient can be removed and added again"
       (update-assignment ronja id assignment-id nil "Ei vastaanottajaa") => ok?
-      (-> (query ronja :assignment :assignmentId assignment-id)
-          :assignment :recipient) => nil
+      (-> (get-assignment ronja  assignment-id)
+          :recipient) => nil
       (update-assignment ronja id assignment-id sonja-id "Ei vastaanottajaa") => ok?
-      (-> (query ronja :assignment :assignmentId assignment-id)
-          :assignment
+      (-> (get-assignment ronja assignment-id)
           :recipient :username) => "sonja")))
 
 (facts "Completing assignments"
   (let [id (create-app-id sonja :propertyId sipoo-property-id)
         doc-id (-> (query-application sonja id) :documents first :id)
         {assignment-id1 :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Valmistuva")
+        {modified1 :modified} (get-assignment sonja assignment-id1)
         {assignment-id2 :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Valmistuva")
         {assignment-id3 :id} (create-assignment sonja nil id [{:group "group" :id doc-id}] "Valmistuva")]
     (fact "Only authorities within the same organization can complete assignment"
+      modified1 => pos?
       (complete-assignment pena assignment-id1)   => unauthorized?
       (complete-assignment veikko assignment-id1) => assignments-not-enabled?
       (complete-assignment ronja assignment-id1)  => ok?
+      (> (:modified (get-assignment ronja assignment-id1))
+         modified1) => true
       (complete-assignment ronja assignment-id1)  => not-completed?)
 
     (fact "Authorities CAN complete other authorities' assignments within their organizations"
       (complete-assignment sonja assignment-id2) => ok?)
 
     (fact "After calling complete-assignment, the assignment is completed"
-      (-> (query sonja :assignment :assignmentId assignment-id1) :assignment :states last :type) => "completed")
+      (-> (get-assignment sonja  assignment-id1) :states last :type) => "completed")
     (fact "Assignments with no recipient can be completed"
       (complete-assignment ronja assignment-id3)  => ok?)))
 
@@ -267,8 +274,10 @@
       (let [_ (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Kuvaava teksti")
             _ (create-assignment ronja sonja-id id2 [{:group "group" :id doc-id2}] "Kuvaava teksti")]
         (fact "uva eks - all"
-          (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
-               :data :assignments (map :description)) => (contains "Kuvaava teksti"))
+          (let [assignments (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
+                                 :data :assignments)]
+            (:modified (first assignments)) => pos?
+            (map :description assignments) => (contains "Kuvaava teksti")))
         (fact "uva eks - created"
           (->> (query sonja :assignments-search :searchText "uva eks" :state "created")
                :data :assignments (map :description)) => (contains "Kuvaava teksti"))

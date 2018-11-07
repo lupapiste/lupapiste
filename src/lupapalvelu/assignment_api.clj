@@ -1,13 +1,14 @@
 (ns lupapalvelu.assignment-api
   (:require [lupapalvelu.action :as action :refer [defcommand defquery disallow-impersonation parameters-matching-schema]]
             [lupapalvelu.assignment :as assignment]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
-            [sade.schemas :as ssc]
             [sade.env :as env]
+            [sade.schemas :as ssc]
             [sade.strings :as ss]
-            [lupapalvelu.roles :as roles]))
+            [sade.util :as util]))
 
 ;; Helpers and validators
 
@@ -97,7 +98,7 @@
      :pre-checks [assignments-enabled]
      :input-validators [(partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]}
     [{user :user}]
-    (ok :assignment (assignment/get-assignment user assignmentId))))
+    (ok :assignment (util/find-by-id assignmentId (assignment/get-assignments user)))))
 
 ;;
 ;; Commands
