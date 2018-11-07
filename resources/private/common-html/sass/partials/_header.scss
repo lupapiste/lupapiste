@@ -104,6 +104,11 @@ $language-padding: 20px;
           text-decoration: none;
         }
       }
+
+      &.spacer {
+        height: 1px;
+        background-color: $link;
+      }
     }
   }
   &.active > ul {

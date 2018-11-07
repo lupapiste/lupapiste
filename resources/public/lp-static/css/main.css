@@ -1672,6 +1672,11 @@ nav .header-menu .header-dropdown > ul > li:hover > a {
   text-decoration: none;
 }
 
+nav .header-menu .header-dropdown > ul > li.spacer {
+  height: 1px;
+  background-color: #f7ac2e;
+}
+
 nav .header-menu .header-dropdown.active > ul {
   display: block;
 }
