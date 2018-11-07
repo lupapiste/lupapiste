@@ -5,6 +5,7 @@
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.components.accordion :refer [accordion caret-toggle]]
             [lupapalvelu.ui.hub :as hub]
+            [lupapiste-invoice-commons.states :as invoice-states]
             [lupapalvelu.ui.invoices.service :as service]
             [lupapalvelu.ui.invoices.state :as state]
             [rum.core :as rum]
@@ -15,10 +16,27 @@
 
 (defonce args (atom {}))
 
+(defn translate-state [state]
+  (common/loc (str "invoices.state." state)))
+
+(defn translate-next-state [state]
+  (common/loc (str "invoices.state." state ".next")))
+
+(defn translate-previous-state [state]
+  (common/loc (str "invoices.state." state ".previous")))
+
+(defn translate-operation [operation]
+  (common/loc (str "operations." operation)))
+
+
 (defn calc-with-discount [discount-int price]
   (*  (/  (- 100 discount-int) 100) price))
 (defn calc-alv [price]
   (* 0.24 price))
+
+
+(def state-icons {"draft" "lupicon-eye primary"
+                  "checked" "lupicon-check"})
 
 (defn update-invoice! [invoice cb!]
   (cb! invoice)
@@ -144,10 +162,10 @@
                                     (create-invoice-row-element row index operation-index invoice))
                                   (:invoice-rows operation))
         invoice-state (keyword (:state @invoice))]
-    [:table {:class-name "invoice-operations-table"}
+    [:table {:class "invoice-operations-table"}
      [:thead
       [:tr
-       [:th (:name operation)]
+       [:th (translate-operation (:name operation))]
        [:th (common/loc :invoices.rows.amount)]
        [:th (common/loc :invoices.rows.unit)]
        [:th (common/loc :invoices.rows.unit-price)]
@@ -176,8 +194,8 @@
   (let [is-open? (::is-open? state)
         operations_ (rum/react state/operations)
         operations(map (fn [operation]
-                              {:text (:name operation) :value (:name operation)}) operations_)]
-    [:div {:class-name "button-row-left"}
+                         {:text (translate-operation (:name operation)) :value (:name operation)}) operations_)]
+    [:div {:class "button-row-left"}
      [:button.secondary {:on-click #(reset! is-open? (not @is-open?))}
       [:i.lupicon-circle-plus]
       [:span (common/loc :invoices.operations.add-operation)]]
@@ -192,18 +210,37 @@
                                                                (fn [response]
                                                                  (reset! invoice updated-invoice)))))}))]))
 
-(rum/defc change-state-button [invoice-atom]
+(rum/defc change-next-state-button [invoice-atom]
   (let [current-state (:state @invoice-atom)
-        next-state (:next-state ((keyword current-state) @state/invoice-states))
-        state-text (if next-state (:action-text (next-state @state/invoice-states)))
+        next-state (invoice-states/next-state current-state :admin)
+        state-text (if next-state (translate-next-state next-state) "")
         app-id @state/application-id]
-    (if next-state [:button {:class-name (str "invoice-change-state-button " current-state)
+    (if next-state [:button {:class (str "invoice-change-state-button " current-state)
                              :on-click (fn [event]
-                                         (let [updated-invoice (assoc @invoice-atom :state next-state)]
-                                           (reset! invoice-atom updated-invoice)
-                                           (service/upsert-invoice! app-id updated-invoice
+                                         (let [move-invoice-result (invoice-states/move-to-state [:state] @invoice-atom next-state :next :admin)
+                                               updated-invoice (:value move-invoice-result)]
+                                           (if (:ok move-invoice-result)
+                                             (do
+                                               (reset! invoice-atom updated-invoice)
+                                               (service/upsert-invoice! app-id updated-invoice
                                                                     (fn [response]
-                                                                      (service/fetch-invoices app-id)))))} state-text])))
+                                                                      (service/fetch-invoices app-id)))))))} state-text])))
+
+(rum/defc change-previous-state-button [invoice-atom]
+  (let [current-state (:state @invoice-atom)
+        previous-state (invoice-states/previous-state current-state :admin)
+        state-text (if previous-state (translate-previous-state previous-state) "")
+        app-id @state/application-id]
+    (if previous-state [:button {:class (str "invoice-change-state-button " current-state)
+                             :on-click (fn [event]
+                                         (let [move-invoice-result (invoice-states/move-to-state [:state] @invoice-atom previous-state :previous :admin)
+                                               updated-invoice (:value move-invoice-result)]
+                                           (if (:ok move-invoice-result)
+                                             (do
+                                               (reset! invoice-atom updated-invoice)
+                                               (service/upsert-invoice! app-id updated-invoice
+                                                                    (fn [response]
+                                                                      (service/fetch-invoices app-id)))))))} state-text])))
 
 (rum/defc invoice-summary-row [invoice-atom]
   (let [operations (:operations @invoice-atom)
@@ -224,16 +261,17 @@
     [:div {:style {:text-align "right"}}
      [:div {:style {:display "inline-block"}}
       [:div
-       [:div {:style {:text-align "left" :display "inline" :padding "5em"}} "Veroton"]
+       [:div {:style {:text-align "left" :display "inline" :padding "5em"}} (common/loc :invoices.wo-taxes)]
        [:div {:style {:text-align "right" :display "inline"}} (:sum-zero sums)]]]
      [:div
-       [:div {:style {:text-align "left" :display "inline" :padding "5em"}} "Alv 24%"]
+       [:div {:style {:text-align "left" :display "inline" :padding "5em"}} (common/loc :invoices.vat24)]
       [:div {:style {:text-align "right" :display "inline"}} (:sum-alv sums)]]
      [:div
-       [:div {:style {:text-align "left" :display "inline" :padding "5em"}} "Yhteensä"]
+       [:div {:style {:text-align "left" :display "inline" :padding "5em"}} (common/loc :invoices.rows.total)]
        [:div {:style {:text-align "right" :display "inline"}} (:sum-total sums)]]
      [:div {:style {:display "inline-block"}}
-      (change-state-button invoice-atom)]]))
+      (change-next-state-button invoice-atom)
+      (change-previous-state-button invoice-atom)]]))
 
 (rum/defc invoice-data < rum/reactive
   [invoice]
@@ -248,13 +286,12 @@
      ]))
 
 (rum/defc invoice-title-component < rum/reactive [invoice]
-  (let [invoice-state (keyword (:state @invoice))
-        state-entry (invoice-state @state/invoice-states)
-        state (:text state-entry)
-        icon (:icon state-entry)]
+  (let [invoice-state (:state @invoice)
+        state (translate-state (:state @invoice))
+        icon (get state-icons invoice-state)]
     [:div.invoice-title-component
-     [:div "Laskun tila: "]
-     [:div [:i {:class-name (:name icon) :style (:style icon)}] state]]))
+     [:div (common/loc :invoices.state-of-invoice)]
+     [:div [:i {:class icon}] state]]))
 
 (rum/defc invoice-component < rum/reactive
   < {:key-fn (fn [invoice]
@@ -281,22 +318,19 @@
   [:button.primary {:disabled (not (nil? new-invoice))
                     :on-click #(service/create-invoice)}
       [:i.lupicon-circle-plus]
-      [:span "Uusi lasku"]])
+      [:span (common/loc :invoices.new-invoice)]])
 
 (rum/defc invoice-list < rum/reactive
   [invoices]
-  [:div {:class-name "invoice-list-wrapper"}
+  [:div {:class "invoice-list-wrapper"}
    [:div.operation-button-row
     [:div
      [:h2 (common/loc :invoices.title)]]
-    [:div {:class-name "new-invoice-button-container"}
+    [:div {:class "new-invoice-button-container"}
      (new-invoice-button (rum/react state/new-invoice))]
-    [:div {:class-name "clear"}]]
+    [:div {:class "clear"}]]
    [:div
      (invoice-table invoices)]])
-
-(def dummy-price-catalog {:rows [{:id "id1" :text "price row 1" :unit :m2 :price-per-unit 30}
-                                 {:id "id2" :text "price row 2" :unit :m2 :price-per-unit 30}]})
 
 (rum/defc invoices < rum/reactive
   []
@@ -305,22 +339,10 @@
 
 (defn bootstrap-invoices []
   (when-let [app-id (js/pageutil.hashApplicationId)]
-    (reset! state/price-catalogue dummy-price-catalog)
     (reset! state/invoices [])
     (reset! state/valid-units [{:value "kpl" :text (common/loc :unit.kpl) :price 10}
                                {:value "m2" :text (common/loc :unit.m2)  :price 20}
                                {:value "m3" :text (common/loc :unit.m3) :price 30}])
-    (reset! state/invoice-states {:draft
-                                  {:next-state :checked
-                                   :action-text (common/loc :invoices.state.draft.action-text)
-                                   :text (common/loc :invoices.state.draft.action-text)
-                                   :icon {:name "lupicon-eye primary" :style {}}}
-                                  :checked
-                                  {:previous-state
-                                   :draft
-                                   :action-text (common/loc :invoices.state.checked.action-text)
-                                   :text (common/loc :invoices.state.checked.text)
-                                   :icon {:name "lupicon-check" :style {}} }})
     (reset! state/application-id app-id)
     (reset! state/new-invoice nil)
     (service/fetch-invoices app-id)
