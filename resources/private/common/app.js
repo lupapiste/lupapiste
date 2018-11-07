@@ -204,6 +204,10 @@ var LUPAPISTE = LUPAPISTE || {};
       self.orgNames = ko.observable(undefined);
       self.usagePurposes = ko.observableArray();
 
+      function purposeName(purpose) {
+        return purpose.type === "authority-admin" ? "authorityAdmin.settings" : "permit.service";
+      }
+
       function purposeOrgName(purpose) {
         if (purpose.type === "authority-admin") {
           var orgNames = self.orgNames();
@@ -229,7 +233,7 @@ var LUPAPISTE = LUPAPISTE || {};
           ajax.query("usage-purposes", {})
             .success(function (res) { self.usagePurposes(_.map(res.usagePurposes, function (purpose) {
               var purposeModel = {
-                type: purpose.type,
+                name: purposeName(purpose),
                 orgName: purposeOrgName(purpose),
                 iconClasses: {},
                 href: purposeLink(purpose)

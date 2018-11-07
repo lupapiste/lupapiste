@@ -76,11 +76,11 @@
                                     <span data-bind="css: $data.iconClasses"></span>
 
                                     <!-- ko if: !$data.orgName -->
-                                    <span data-bind="text: $data.type"></span>
+                                    <span data-bind="ltext: $data.name"></span>
                                     <!-- /ko -->
 
                                     <span data-bind="if: $data.orgName">
-                                        <span data-bind="text: $data.type"></span>
+                                        <span data-bind="ltext: $data.name"></span>
                                         <span class="usage-purpose-org-name" data-bind="text: $data.orgName"></span>
                                     </span>
                                 </a>
@@ -91,7 +91,7 @@
                         <li>
                             <a href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
                                 <span class="lupicon-user"></span>
-                                <span data-bind="text: 'Omat tiedot'"></span> <!-- TODO: localize -->
+                                <span data-bind="ltext: 'mypage.title'"></span>
                             </a>
                         </li>
                         <li>
