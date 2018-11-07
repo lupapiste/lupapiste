@@ -1,17 +1,23 @@
 (ns lupapalvelu.ui.auth-admin.prices.catalogue
   (:require [rum.core :as rum]
-            [lupapalvelu.ui.components :as uc]
+
+            [lupapalvelu.ui.auth-admin.prices.service :as service]
+
             [lupapalvelu.ui.authorization :as auth]
-            [lupapalvelu.ui.auth-admin.stamp.state :refer [component-state empty-component-state update-stamp-view] :as state]
             [lupapalvelu.ui.common :refer [loc]]
             [lupapalvelu.ui.components :as uc]
+
+            [schema.core :as sc]
+
+            ;;STAMP IMPORTS. REMOVE THESE ONCE PRICE CATALOGUE HAS ITS OWN STRUCTURE AND CONTENT
+            [lupapalvelu.ui.auth-admin.stamp.state :refer [component-state empty-component-state update-stamp-view] :as state]
             [lupapalvelu.ui.auth-admin.stamp.metadata :refer [header-component metadata-component control-buttons]]
             [lupapalvelu.ui.auth-admin.stamp.preview :refer [preview-component]]
             [lupapalvelu.ui.auth-admin.stamp.field-types :refer [field-types-component]]
             [lupapalvelu.ui.auth-admin.stamp.stamp-row :refer [stamp-row]]
             [lupapalvelu.ui.auth-admin.stamp.util :as stamp-util]
-            [schema.core :as sc]
-            [lupapalvelu.attachment.stamp-schema :as sts]))
+            [lupapalvelu.attachment.stamp-schema :as sts]
+            ))
 
 (defn init
   [init-state props]
@@ -93,7 +99,7 @@
         editor-state (rum/cursor component-state :editor)
         selected-stamp-id (rum/cursor component-state :selected-stamp-id)]
     [:div
-     [:h2 "TAKSA"]
+     [:h2 "TAKSA 2"]
      ;; [:h2 (loc "price-catalogue.title")]
      ;; [:h2 (loc "stamp-editor.tab.title")]
      [:div.stamp-selection
@@ -112,4 +118,5 @@
 
 (defn ^:export start [domId componentParams]
   (swap! args assoc :auth-model (aget componentParams "authModel") :dom-id (name domId))
+  (service/fetch-price-catalogues)
   (mount-component))
