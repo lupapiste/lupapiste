@@ -1627,7 +1627,7 @@ nav .header-menu .header-dropdown:hover > .header-dropdown-button.active {
 }
 
 nav .header-menu .header-dropdown > ul {
-  display: block;
+  display: none;
   position: fixed;
   padding: 0;
   background-color: white;
@@ -1657,6 +1657,10 @@ nav .header-menu .header-dropdown > ul > li:hover {
 nav .header-menu .header-dropdown > ul > li:hover > a {
   color: white;
   text-decoration: none;
+}
+
+nav .header-menu .header-dropdown.active > ul {
+  display: block;
 }
 
 .nav-bottom {

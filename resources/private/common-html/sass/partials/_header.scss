@@ -73,7 +73,7 @@ $language-padding: 20px;
   }
 
   > ul {
-    display: block;
+    display: none;
     position: fixed;
     padding: 0;
     background-color: white;
@@ -102,6 +102,10 @@ $language-padding: 20px;
         }
       }
     }
+  }
+
+  &.active > ul {
+    display: block;
   }
 }
 

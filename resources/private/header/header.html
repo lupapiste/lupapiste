@@ -57,11 +57,10 @@
                         <span class="narrow-hide" data-bind="ltext: 'help'"></span>
                     </a>
                 </div>
-                <div id="header-user-dropdown" class="header-dropdown" style="overflow: visible"
-                     data-bind="with: $root.userMenu">
+                <div id="header-user-dropdown" class="header-dropdown"
+                     data-bind="with: $root.userMenu, css: {active: $root.userMenu.open()}">
                     <a class="header-dropdown-button"
-                       data-bind="click: $data.toggleOpen(), clickBubble: false,
-                                  css: {active: $data.open()}">
+                       data-bind="click: $data.toggleOpen(), clickBubble: false">
                         <span class="lupicon-user"></span>
                         <span class="narrow-hide" id="user-name"
                               data-bind="text: lupapisteApp.models.currentUser.displayName,
@@ -69,7 +68,7 @@
                         <span data-bind="css: {'lupicon-chevron-small-down': !$data.open(),
                                                'lupicon-chevron-small-up': $data.open()}"></span>
                     </a>
-                    <ul data-bind="visible: $data.open()">
+                    <ul>
                         <!-- ko if: $data.usagePurposes().length > 1 -->
                             <!-- ko foreach: $data.usagePurposes() -->
                             <li>
