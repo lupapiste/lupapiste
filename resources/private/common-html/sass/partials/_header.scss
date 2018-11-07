@@ -111,6 +111,12 @@ $language-padding: 20px;
   }
 }
 
+.usage-purpose-org-name {
+  display: block;
+  margin-left: 27px;
+  font-size: smaller;
+}
+
 @mixin language-select( $link: $orange, $hover: white, $bg: inherit, $hover-bg: $language-bg ) {
   @include nav-link( $link: $link, $hover: $hover, $hover-bg: $hover-bg );
   background-color: $bg;

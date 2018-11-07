@@ -204,21 +204,20 @@ var LUPAPISTE = LUPAPISTE || {};
       self.orgNames = ko.observable(undefined);
       self.usagePurposes = ko.observableArray();
 
-      function formatPurpose(purpose) {
+      function purposeOrgName(purpose) {
         if (purpose.type === "authority-admin") {
           var orgNames = self.orgNames();
           var language = lupapisteApp.models.currentUser.language();
-          return (orgNames ? orgNames[purpose.orgId][language] : purpose.orgId) + " " + purpose.type;
+          return orgNames ? orgNames[purpose.orgId][language] : purpose.orgId;
         } else {
-          return purpose.type;
+          return undefined;
         }
       }
 
       function purposeIcon(purpose) { return purpose.type === "authority-admin" ? "lupicon-gear" : "lupicon-house"; }
 
       function purposeLink(purpose) {
-        var language = lupapisteApp.models.currentUser.language();
-        return "/app/" + language + "/" + purpose.type;
+        return "/app/" + lupapisteApp.models.currentUser.language() + "/" + purpose.type;
       }
 
       self.toggleOpen = function () { self.open(!self.open()); }
@@ -228,13 +227,14 @@ var LUPAPISTE = LUPAPISTE || {};
           self.orgNames(res.orgNames);
           ajax.query("usage-purposes", {})
             .success(function (res) { self.usagePurposes(_.map(res.usagePurposes, function (purpose) {
-              var iconClasses = {};
-              iconClasses[purposeIcon(purpose)] = true;
-              return {
-                name: formatPurpose(purpose),
-                iconClasses: iconClasses,
+              var purposeModel = {
+                type: purpose.type,
+                orgName: purposeOrgName(purpose),
+                iconClasses: {},
                 href: purposeLink(purpose)
-              };
+              }
+              purposeModel.iconClasses[purposeIcon(purpose)] = true;
+              return purposeModel;
             })); })
             .call();
         })

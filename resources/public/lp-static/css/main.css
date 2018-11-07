@@ -1354,6 +1354,12 @@ h1 .icon {
 
 /* NAV
 ----------------------------------------------------------------------------- */
+.usage-purpose-org-name {
+  display: block;
+  margin-left: 27px;
+  font-size: smaller;
+}
+
 .nav-wrapper {
   width: 100%;
 }

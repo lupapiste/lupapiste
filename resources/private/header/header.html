@@ -74,7 +74,15 @@
                             <li>
                                 <a data-bind="attr: {href: $data.href}">
                                     <span data-bind="css: $data.iconClasses"></span>
-                                    <span data-bind="text: $data.name"></span>
+
+                                    <!-- ko if: !$data.orgName -->
+                                    <span data-bind="text: $data.type"></span>
+                                    <!-- /ko -->
+
+                                    <span data-bind="if: $data.orgName">
+                                        <span data-bind="text: $data.type"></span>
+                                        <span class="usage-purpose-org-name" data-bind="text: $data.orgName"></span>
+                                    </span>
                                 </a>
                             </li>
                             <!-- /ko -->
