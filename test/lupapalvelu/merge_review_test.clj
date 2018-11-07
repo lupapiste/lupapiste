@@ -291,18 +291,21 @@
     (preprocess-tasks {:id "app-id" :tasks tasks})
     => tasks
     (preprocess-tasks {:id "foo" :tasks tasks})
-    => [{:data     {:katselmuksenLaji {:value "one"}}
+    => [{:data     {:muuTunnus        {:value ""}
+                    :katselmuksenLaji {:value "one"}}
          :taskname "First"}
         {:data     {:muuTunnus        {:value "bar"}
                     :katselmuksenLaji {:value "two"}}
          :taskname "Second"}
-        {:data     {:katselmuksenLaji {:value "three"}}
+        {:data     {:muuTunnus        {:value ""}
+                    :katselmuksenLaji {:value "three"}}
          :taskname "Third"}]
     (preprocess-tasks {:id "bar" :tasks tasks})
     => [{:data     {:muuTunnus        {:value "foo"}
                     :katselmuksenLaji {:value "one"}}
          :taskname "First"}
-        {:data     {:katselmuksenLaji {:value "two"}}
+        {:data     {:muuTunnus        {:value ""}
+                    :katselmuksenLaji {:value "two"}}
          :taskname "Second"}
         {:data     {:muuTunnus        {:value "foo"}
                     :katselmuksenLaji {:value "three"}}

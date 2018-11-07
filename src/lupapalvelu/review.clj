@@ -277,7 +277,7 @@
   [{app-id :id tasks :tasks}]
   (map (fn [task]
          (cond-> task
-           (= (background-id task) app-id) (util/dissoc-in [:data :muuTunnus :value])))
+           (= (background-id task) app-id) (assoc-in [:data :muuTunnus :value] "")))
        tasks))
 
 (defn read-reviews-from-xml
