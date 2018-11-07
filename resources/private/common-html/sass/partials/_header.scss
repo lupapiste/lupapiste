@@ -92,6 +92,8 @@ $language-padding: 20px;
         padding-top: 0.5em;
         padding-bottom: 0.5em;
         color: black;
+
+        > span { vertical-align: middle; }
       }
 
       &:hover {

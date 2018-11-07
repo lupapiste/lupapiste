@@ -1653,6 +1653,10 @@ nav .header-menu .header-dropdown > ul > li > a {
   color: black;
 }
 
+nav .header-menu .header-dropdown > ul > li > a > span {
+  vertical-align: middle;
+}
+
 nav .header-menu .header-dropdown > ul > li:hover {
   background-color: #f7ac2e;
 }
