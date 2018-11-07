@@ -177,7 +177,7 @@
                                      :verdict-text      (schema-util/required {:phrase-text   {:category :paatosteksti}
                                                                                :template-dict :paatosteksti})
                                      :verdict-text-ref  (schema-util/required {:reference {:path :verdict-text}})
-                                     :proposal-text     {:phrase-text   {:category   :proposaltext
+                                     :proposal-text     {:phrase-text   {:category   :paatosteksti
                                                                          :loc-prefix :pate-verdict-proposal}
                                                          :template-dict :proposaltext}
                                      :proposal-text-ref  {:reference {:path  :proposal-text

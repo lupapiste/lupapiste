@@ -6,7 +6,7 @@
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit
                                  :muutoksenhaku :vaativuus :rakennusoikeus
                                  :kaava :toimenpide-julkipanoon :yleinen
-                                 :sopimus :proposaltext})
+                                 :sopimus})
 
 (def phrase-categories-ya #{:paatosteksti :lupaehdot :muutoksenhaku
                             :toimenpide-julkipanoon :yleinen :sopimus})

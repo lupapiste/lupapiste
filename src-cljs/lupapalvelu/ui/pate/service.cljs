@@ -306,24 +306,24 @@
                   :path path
                   :value value))
 
-(defn publish-and-reopen-verdict [app-id {verdict-id :id legacy? :legacy?} proposal? callback]
-  (common/command {:command (cond
-                              legacy?   :publish-legacy-verdict
-                              proposal? :publish-verdict-proposal
-                              :else     :publish-pate-verdict)
-                   :success (cond
-                              proposal? (fn []
-                                          (fetch-verdict-list app-id)
-                                          (open-verdict app-id verdict-id callback)
-                                          (js/repository.load app-id))
-                              :else     (fn []
-                                          (state/refresh-verdict-auths app-id
-                                                                       {:verdict-id verdict-id})
-                                          (fetch-verdict-list app-id)
-                                          (open-published-verdict app-id verdict-id callback)
-                                          (js/repository.load app-id)))}
-                  :id app-id
-                  :verdict-id verdict-id))
+(defn publish-and-reopen-verdict
+  ([app-id {verdict-id :id legacy? :legacy?} proposal? callback]
+   (common/command {:command (cond
+                               legacy? :publish-legacy-verdict
+                               proposal? :publish-verdict-proposal
+                               :else :publish-pate-verdict)
+                    :success (fn []
+                               (fetch-verdict-list app-id)
+                               (if proposal?
+                                 (open-verdict app-id verdict-id callback)
+                                 (do
+                                   (state/refresh-verdict-auths app-id {:verdict-id verdict-id})
+                                   (open-published-verdict app-id verdict-id callback)
+                                   (js/repository.load app-id))))}
+                   :id app-id
+                   :verdict-id verdict-id))
+  ([app-id info callback]
+    (publish-and-reopen-verdict app-id info false callback)))
 
 (defn sign-contract [app-id verdict-id password category error-callback]
   (let [command (if (util/=as-kw :allu-contract category)

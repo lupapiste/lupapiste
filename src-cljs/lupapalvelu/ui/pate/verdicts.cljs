@@ -29,7 +29,6 @@
               :confirm-delete          [:verdict.confirmdelete :pate.contract.confirm-delete]
               :confirm-delete-draft    [:pate.delete-verdict-draft
                                         :pate.contract.confirm-delete-draft]
-              :confirm-delete-proposal [:pate.delete-proposal]
               :no-templates            [:pate.no-verdict-templates :pate.no-contract-templates]
               :template                [:pate-verdict-template :pate.contract.template]
               :fetch-confirm           [:pate.check-for-verdict.confirm :pate.check-for-contract.confirm]
@@ -147,7 +146,7 @@
   (common/show-dialog {:type     :yes-no
                        :ltext    (cond
                                    published (loc-key :confirm-delete)
-                                   proposal? (loc-key :confirm-delete-proposal)
+                                   proposal? :pate.delete-proposal
                                    :else     (loc-key :confirm-delete-draft))
                        :callback #(service/delete-verdict app-id verdict)}))
 

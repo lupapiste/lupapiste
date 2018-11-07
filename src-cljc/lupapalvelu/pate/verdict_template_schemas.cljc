@@ -60,7 +60,7 @@
                 :paatosteksti      {:phrase-text {:loc-prefix :pate-verdict
                                                   :category   :paatosteksti}}
                 :proposaltext      {:phrase-text {:loc-prefix :pate-verdict-proposal
-                                                  :category   :proposaltext}}}
+                                                  :category   :paatosteksti}}}
    :section    {:id         :verdict
                 :loc-prefix :pate-verdict-template.verdict-info
                 :grid       {:columns 12

@@ -3785,12 +3785,7 @@
                                                        :pate-verdicts.$.data.verdict-section "1"
                                                        :pate-verdicts.$.state {:_modified 12345
                                                                                :_user "user-email"
-                                                                               :_value "proposal"}
-                                                       :pate-verdicts.$.template.inclusions ["verdict-code"
-                                                                                             "handler"
-                                                                                             "verdict-date"
-                                                                                             "verdict-section"
-                                                                                             "verdict-text"]}}
+                                                                               :_value "proposal"}}}
                                      :verdict {:category "r"
                                                :data {:handler "Foo Bar"
                                                       :verdict-code "myonnetty"

@@ -332,7 +332,9 @@
 ;; signatures must be replaced.
 (defn create-verdict-attachment-version
   "Creates a verdict attachments as a new version to previously created
-  verdict attachment. Used when a contract is signed."
+  verdict attachment. Used when a contract is signed.
+  For verdict proposals, creates a new version of verdict proposal attachment.
+  Used when a verdict proposal is updated."
   [{:keys [application created] :as command} verdict]
   (let [{:keys [tags attachment-id
                 proposal-attachment-id]} (:published verdict)

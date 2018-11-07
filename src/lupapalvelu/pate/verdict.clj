@@ -75,24 +75,22 @@
 (defn verdict-exists
   "Returns pre-checker that fails if the verdict does not exist.
   Additional conditions:
-    :draft? fails if the verdict state is NOT draft
+    :editable? fails if the verdict state is NOT draft or proposal
     :published? fails if the verdict has NOT been published
     :legacy? fails if the verdict is a 'modern' Pate verdict
     :modern? fails if the verdict is a legacy verdict
     :contract? fails if the verdict is not a contract
     :allu-contract? fails if the verdict is not an allu-contract
     :verdict? fails for contracts
-    :not-replaced? Fails if the verdict has been OR is being replaced
-    :proposal? Fails if the verdict state is not proposal."
+    :not-replaced? Fails if the verdict has been OR is being replaced"
   [& conditions]
-  {:pre [(set/superset? #{:draft? :published? :legacy? :modern? :contract?
-                          :allu-contract? :verdict? :not-replaced? :proposal?}
+  {:pre [(set/superset? #{:editable? :published? :legacy? :modern? :contract?
+                          :allu-contract? :verdict? :not-replaced?}
                         (set conditions))]}
-  (let [{:keys [draft? published?
+  (let [{:keys [editable? published?
                 legacy? modern?
                 contract? allu-contract?
-                verdict? proposal?
-                not-replaced?]} (zipmap conditions (repeat true))]
+                verdict? not-replaced?]} (zipmap conditions (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
@@ -105,8 +103,9 @@
                           (not (vc/allowed-category-for-application? verdict application))
                           :error.invalid-category
 
-                          (and draft? (not= state :draft))
-                          :error.verdict.not-draft
+                          (and editable? (and (not= state :draft)
+                                              (not= state :proposal)))
+                          :error.verdict.not-editable
 
                           (and published? (not= state :published))
                           :error.verdict.not-published
@@ -129,10 +128,7 @@
                           (and not-replaced? (or (get-in verdict [:replacement :replaced-by])
                                                  (some #(some-> % :replacement :replaces (= verdict-id))
                                                        (:pate-verdicts application))))
-                          :error.verdict-replaced
-
-                          (and proposal? (not= state :proposal))
-                          :error.verdict.not-proposal)
+                          :error.verdict-replaced)
                         identity fail))))))
 
 (declare command->backing-system-verdict)
@@ -1671,9 +1667,7 @@
                             :state (wrapped-state command :proposal))
         data-kws          (map #(util/kw-path :data %)
                                (-> verdict :data keys))]
-    (apply verdict->updates verdict
-           (concat data-kws
-                   [:template.inclusions :state]))))
+    (apply verdict->updates verdict (concat data-kws [:state]))))
 
 (defn finalize--proposal-pdf [{:keys [application verdict]}]
   (let [tags    (pdf/verdict-tags application verdict)]

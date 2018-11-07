@@ -34,7 +34,6 @@
 (def verdict-wait?             (state-cursor :verdict-wait?))
 (def custom-phrase-categories  (state-cursor :custom-phrase-categories))
 (def appeals                   (state-cursor :appeals))
-(def proposal?                 (state-cursor :proposal?))
 
 ;; ok function of the currently active authModel.
 (defonce auth-fn (atom nil))
