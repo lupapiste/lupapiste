@@ -61,3 +61,6 @@
 "application.assignment.modified" "en" "Modified"
 "application.assignment.modified" "fi" "Muokattu"
 "application.assignment.modified" "sv" "Redigerad"
+"application.filter.search.placeholder.type-filter" "fi" "Etsi tyyppiä..."
+"application.filter.search.placeholder.type-filter" "sv" "Sök typ..."
+"application.filter.search.placeholder.type-filter" "en" "Find type..."
