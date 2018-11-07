@@ -230,25 +230,37 @@
         task)
       (assoc task :attachments (:liitetieto review)))))
 
+(def- muuTunnustieto-path [:muuTunnustieto 0 :MuuTunnus :tunnus])
+
+(defn- get-muuTunnustieto-from-review [review]
+  (get-in review muuTunnustieto-path))
+
+(defn- repeating-review-ids
+  "Returns a set of those `muuTunnustieto` ids that occur in more than
+  one review. Application id is included if it's the id of even one
+  review."
+  [reviews app-id]
+  (->> reviews
+       (map get-muuTunnustieto-from-review)
+       (remove (comp nil? not-empty))
+       (cons app-id)
+       (group-by identity)
+       (filter (fn [[id xs]]
+                 (> (count xs) 1)))
+       (map first)
+       set))
+
 (defn- remove-repeating-background-ids
-  "Remove repeating background ids from preprocessed review tasks. If a
-  background id is the application id, it is removed, too."
+  "Remove (or rather set to `\"\"`)repeating background ids from
+  preprocessed review tasks. If a background id is the application id,
+  it is removed, too."
   [app-id reviews]
-  (let [id-path       [:muuTunnustieto 0 :MuuTunnus :tunnus]
-        get-id        #(get-in % id-path)
-        repeating-ids (->> (map get-id reviews)
-                           (remove nil?)
-                           (cons app-id)
-                           (group-by identity)
-                           (filter (fn [[id xs]]
-                                     (> (count xs) 1)))
-                           (map first)
-                           set)]
-    (map (fn [review]
-           (if (contains? repeating-ids (get-id review))
-             (util/dissoc-in review id-path)
-             review))
-         reviews)))
+  (map (fn [review]
+         (if (contains? (repeating-review-ids reviews app-id)
+                        (get-muuTunnustieto-from-review review))
+           (assoc-in review muuTunnustieto-path "")
+           review))
+       reviews))
 
 (defn- lupapiste-review?
   "True if the review has originated from Lupapiste (according
