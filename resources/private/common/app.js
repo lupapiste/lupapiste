@@ -214,6 +214,8 @@ var LUPAPISTE = LUPAPISTE || {};
         }
       }
 
+      function purposeIcon(purpose) { return purpose.type === "authority-admin" ? "lupicon-gear" : "lupicon-house"; }
+
       function purposeLink(purpose) {
         var language = lupapisteApp.models.currentUser.language();
         return "/app/" + language + "/" + purpose.type;
@@ -226,7 +228,13 @@ var LUPAPISTE = LUPAPISTE || {};
           self.orgNames(res.orgNames);
           ajax.query("usage-purposes", {})
             .success(function (res) { self.usagePurposes(_.map(res.usagePurposes, function (purpose) {
-              return {name: formatPurpose(purpose), href: purposeLink(purpose)};
+              var iconClasses = {};
+              iconClasses[purposeIcon(purpose)] = true;
+              return {
+                name: formatPurpose(purpose),
+                iconClasses: iconClasses,
+                href: purposeLink(purpose)
+              };
             })); })
             .call();
         })
