@@ -1,15 +1,8 @@
 <section class="page" id="price-catalogue">
   <navi-sidebar></navi-sidebar>
-
-  <!-- TODO find out why adding if: organization.organizationId would make the component not render -->
-  <!-- TODO the example is from the stamp editor -->
-
-    <!-- <div class="container container--authority-admin" -->
-    <!--        data-bind="css: lupapisteApp.services.naviSidebarService.containerCss, -->
-    <!--                   if: organization.organizationId"> -->
-
   <div class="container container--authority-admin"
-           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss,
+                      if: organization.organizationId">
     <cljs-auth-admin_prices_catalogue params="{ authModel: authorization }"></cljs-auth-admin_prices_catalogue>
   </div>
 </section>
