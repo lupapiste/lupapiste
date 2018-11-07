@@ -249,32 +249,39 @@
                  {:pitaja "Nine"
                   :muuTunnustieto [{:MuuTunnus {:tunnus "world"}}]}]]
     (remove-repeating-background-ids  "app-id" reviews)
-    => [{:pitaja "One"}
+    => [{:pitaja "One"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Two"
-         :muuTunnustieto [{:MuuTunnus {:sovellus "Bar"}}]}
+         :muuTunnustieto [{:MuuTunnus {:sovellus "Bar" :tunnus ""}}]}
         {:pitaja "Three"
          :muuTunnustieto [{:MuuTunnus {:tunnus "hello"}}]}
         {:pitaja "Four"
-         :muuTunnustieto [{:MuuTunnus {:sovellus "Foobar"}}]}
-        {:pitaja "Five"}
+         :muuTunnustieto [{:MuuTunnus {:sovellus "Foobar" :tunnus ""}}]}
+        {:pitaja "Five"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Six"
          :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Seven"}
-        {:pitaja "Eight"}
+        {:pitaja "Eight"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Nine"
          :muuTunnustieto [{:MuuTunnus {:tunnus "world"}}]}]
     (remove-repeating-background-ids  "hello" reviews)
-    => [{:pitaja "One"}
+    => [{:pitaja "One"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Two"
-         :muuTunnustieto [{:MuuTunnus {:sovellus "Bar"}}]}
-        {:pitaja "Three"}
+         :muuTunnustieto [{:MuuTunnus {:sovellus "Bar" :tunnus ""}}]}
+        {:pitaja "Three"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Four"
-         :muuTunnustieto [{:MuuTunnus {:sovellus "Foobar"}}]}
-        {:pitaja "Five"}
+         :muuTunnustieto [{:MuuTunnus {:sovellus "Foobar" :tunnus ""}}]}
+        {:pitaja "Five"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Six"
          :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Seven"}
-        {:pitaja "Eight"}
+        {:pitaja "Eight"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Nine"
          :muuTunnustieto [{:MuuTunnus {:tunnus "world"}}]}]))
 
@@ -291,18 +298,21 @@
     (preprocess-tasks {:id "app-id" :tasks tasks})
     => tasks
     (preprocess-tasks {:id "foo" :tasks tasks})
-    => [{:data     {:katselmuksenLaji {:value "one"}}
+    => [{:data     {:muuTunnus        {:value ""}
+                    :katselmuksenLaji {:value "one"}}
          :taskname "First"}
         {:data     {:muuTunnus        {:value "bar"}
                     :katselmuksenLaji {:value "two"}}
          :taskname "Second"}
-        {:data     {:katselmuksenLaji {:value "three"}}
+        {:data     {:muuTunnus        {:value ""}
+                    :katselmuksenLaji {:value "three"}}
          :taskname "Third"}]
     (preprocess-tasks {:id "bar" :tasks tasks})
     => [{:data     {:muuTunnus        {:value "foo"}
                     :katselmuksenLaji {:value "one"}}
          :taskname "First"}
-        {:data     {:katselmuksenLaji {:value "two"}}
+        {:data     {:muuTunnus        {:value ""}
+                    :katselmuksenLaji {:value "two"}}
          :taskname "Second"}
         {:data     {:muuTunnus        {:value "foo"}
                     :katselmuksenLaji {:value "three"}}
