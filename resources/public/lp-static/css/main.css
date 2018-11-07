@@ -1601,11 +1601,14 @@ nav .header-menu .header-dropdown {
 }
 
 nav .header-menu .header-dropdown > .header-dropdown-button {
+  display: inline-block;
   padding-left: 12px;
   padding-right: 12px;
-  display: inline-block;
+  padding-top: 1px;
+  padding-bottom: 1px;
   height: 60px;
   line-height: 60px;
+  color: #f7ac2e;
   text-decoration: none;
 }
 

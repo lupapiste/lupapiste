@@ -53,10 +53,13 @@ $language-padding: 20px;
   display: inline-block;
 
   > .header-dropdown-button {
-    @include header-padding;
     display: inline-block;
+    @include header-padding;
+    padding-top: 1px;
+    padding-bottom: 1px;
     height: $header-height;
     line-height: $header-height;
+    color: $link;
     text-decoration: none;
 
     > span { vertical-align: middle; }
