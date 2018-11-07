@@ -255,12 +255,13 @@
   preprocessed review tasks. If a background id is the application id,
   it is removed, too."
   [app-id reviews]
-  (map (fn [review]
-         (if (contains? (repeating-review-ids reviews app-id)
+  (let [repeating-ids (repeating-review-ids reviews app-id)]
+    (map (fn [review]
+           (cond-> review
+             (contains? repeating-ids
                         (get-muuTunnustieto-from-review review))
-           (assoc-in review muuTunnustieto-path "")
-           review))
-       reviews))
+             (assoc-in  muuTunnustieto-path "")))
+        reviews)))
 
 (defn- lupapiste-review?
   "True if the review has originated from Lupapiste (according
