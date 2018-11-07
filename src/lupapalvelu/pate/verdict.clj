@@ -85,12 +85,13 @@
     :not-replaced? Fails if the verdict has been OR is being replaced"
   [& conditions]
   {:pre [(set/superset? #{:editable? :published? :legacy? :modern? :contract?
-                          :allu-contract? :verdict? :not-replaced?}
+                          :allu-contract? :verdict? :not-replaced? :proposal?}
                         (set conditions))]}
   (let [{:keys [editable? published?
                 legacy? modern?
                 contract? allu-contract?
-                verdict? not-replaced?]} (zipmap conditions (repeat true))]
+                verdict? not-replaced?
+                proposal?]} (zipmap conditions (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
@@ -128,7 +129,10 @@
                           (and not-replaced? (or (get-in verdict [:replacement :replaced-by])
                                                  (some #(some-> % :replacement :replaces (= verdict-id))
                                                        (:pate-verdicts application))))
-                          :error.verdict-replaced)
+                          :error.verdict-replaced
+
+                          (and proposal? (not= state :proposal))
+                          :error.verdict.not-proposal)
                         identity fail))))))
 
 (declare command->backing-system-verdict)
@@ -1319,11 +1323,13 @@
     (cond
       (ss/blank? app-id)                     (error-fn "No application id.")
       (ss/blank? verdict-id)                 (error-fn "No verdict id.")
-      (not (#{::verdict ::signatures} mode)) (error-fn (str "Bad mode: " mode))
+      (not (#{::verdict ::signatures
+              ::proposal} mode))             (error-fn (str "Bad mode: " mode))
       :else
       (when-let [command (let [application   (domain/get-application-no-access-checking app-id)
                                command       (assoc command :application application)
-                               {error :text} ((verdict-exists :published?) command)]
+                               {error :text} (and ((verdict-exists :published?) command)
+                                                  ((verdict-exists :proposal?) command))]
                            (cond
                              (nil? application) (error-fn (str "Bad application id: " app-id))
                              error              (error-fn error)

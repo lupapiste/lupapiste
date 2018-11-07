@@ -1448,7 +1448,40 @@
 
     (fact "Editing no longer allowed"
       (edit-verdict :verdict-text "New verdict text")
-      => (err :error.verdict.not-draft))
+      => (err :error.verdict.not-editable))
     (fact "Published verdict cannot be deleted"
       (command sonja :delete-pate-verdict :id app-id
                :verdict-id verdict-id) => fail?)))
+
+(facts "Verdict proposal"
+  (let  [{:keys [app-id template-id]} space-saving-definitions]
+  (fact "Board verdict template"
+    (command sipoo :save-verdict-template-draft-value :org-id org-id
+             :template-id template-id :path ["giver"] :value :lautakunta) => ok?)
+  (let [{verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
+                                          :id app-id
+                                          :template-id template-id)
+        {open-verdict  :open
+         edit-verdict  :edit
+         check-changes :check-changes} (verdict-fn-factory app-id verdict-id)]
+
+    (fact "Verdict proposal can't published if not filled"
+      (command sonja :publish-verdict-proposal :id app-id :verdict-id verdict-id) => (err :pate.required-fields))
+
+    (fact "Edit verdict draft"
+      (edit-verdict :verdict-date (timestamp "6.10.2017")) => ok?
+      (edit-verdict :automatic-verdict-dates true) => ok?
+      (edit-verdict :verdict-section "12") => ok?)
+
+    (fact "Verdict proposal can be published"
+      (command sonja :publish-verdict-proposal :id app-id :verdict-id verdict-id) => ok?)
+
+    (let [updated-app (query-application sonja app-id)
+          proposal    (first (filter #(= (:id %) verdict-id) (:pate-verdicts updated-app)))]
+
+      (fact "State is proposal"
+        (get-in proposal [:state :_value]) => "proposal")
+
+      (fact "There are verdict proposal attachment"
+        (map :type (:attachments updated-app)) => (contains {:type-group "paatoksenteko"
+                                                             :type-id    "paatosehdotus"}))))))
