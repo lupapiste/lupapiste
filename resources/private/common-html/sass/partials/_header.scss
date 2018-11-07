@@ -59,17 +59,15 @@ $language-padding: 20px;
     line-height: $header-height;
     text-decoration: none;
 
-    &.active {
-      background-color: $hover-bg;
-      color: $hover;
-    }
-
     > span { vertical-align: middle; }
+
+    &:hover { color: $hover; }
   }
-  &:hover > .header-dropdown-button {
+  &.active > .header-dropdown-button {
+    background-color: $hover-bg;
     color: $hover;
 
-    &.active { color: $link; }
+    &:hover { color: $link; }
   }
 
   > ul {
@@ -103,7 +101,6 @@ $language-padding: 20px;
       }
     }
   }
-
   &.active > ul {
     display: block;
   }
