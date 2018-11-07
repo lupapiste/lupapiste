@@ -30,9 +30,6 @@
   (mongo/connect!)
   (let [pori-route (parse-route "pori.fi")]
 
-        (fact "Pori-R has ad-login enabled"
-          (-> (org/get-organizations-by-ad-domain "pori.fi") first (get-in [:ad-login :enabled])) => true)
-
         (fact "update-or-create-user! can create or update users"
           (let [user (ad-login/update-or-create-user! "Terttu" "Panaani" "terttu@panaani.fi" {})]
             (fact "User creation works as expected"
@@ -74,7 +71,17 @@
                 status => 400
                 body => "No SAML data found in request")))
 
-          (fact "Login attempt with valid response works"
+          (fact "Login attempt with valid response fails, if the user (Terttu Panaani) is not found in the database"
+            (let [resp (client/post pori-route {:form-params {:SAMLResponse response}
+                                                :content-type :json
+                                                :throw-exceptions false})]
+              (:status resp) => 403))
+
+          (fact "Login attempt with valid response works after the user has been created"
+            (command admin :create-user
+                     :email "terttu@panaani.fi"
+                     :role "authority"
+                     :orgAuthz {:609-R ["reader"]}) => ok?
             (let [resp (client/post pori-route {:form-params {:SAMLResponse response}
                                                 :content-type :json
                                                 :throw-exceptions false})]
