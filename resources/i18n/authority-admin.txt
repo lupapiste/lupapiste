@@ -554,7 +554,7 @@
 "navi-sidebar.minify" "en" "Collapse"
 "navi-sidebar.minify" "fi" "Pienennä"
 "navi-sidebar.minify" "sv" "Förminska"
-"price-catalogue.title" "fi "Taksa"
+"price-catalogue.tab.title" "fi" "Taksa"
 "stamp-editor.tab.title" "en" "Stamp editor"
 "stamp-editor.tab.title" "fi" "Leimaeditori"
 "stamp-editor.tab.title" "sv" "Stämpelredigerare"

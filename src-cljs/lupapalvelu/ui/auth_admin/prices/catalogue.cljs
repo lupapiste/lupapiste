@@ -99,9 +99,7 @@
         editor-state (rum/cursor component-state :editor)
         selected-stamp-id (rum/cursor component-state :selected-stamp-id)]
     [:div
-     [:h2 "TAKSA 2"]
-     ;; [:h2 (loc "price-catalogue.title")]
-     ;; [:h2 (loc "stamp-editor.tab.title")]
+     [:h2 (loc "price-catalogue.tab.title")]
      [:div.stamp-selection
       (stamp-select stamps selected-stamp-id)
       (new-stamp-button selected-stamp-id editor-state)]
