@@ -8221,6 +8221,10 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
   margin-bottom: 6px;
 }
 
+toggle.no-border > div {
+  border: none;
+}
+
 label.filter-label {
   width: 100%;
   display: inline-block;

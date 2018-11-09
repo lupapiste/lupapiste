@@ -186,6 +186,9 @@
 
 }
 
+toggle.no-border > div {
+  border: none;
+}
 
 // Attachment filters related
 @include toggle-helper ( filter, "e604", "e603", $wrapper-display: inline-block, $input-display: block ) {}
