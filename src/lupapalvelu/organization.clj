@@ -272,7 +272,10 @@
                                 :idp-uri sc/Str
                                 :trusted-domains [sc/Str]
                                 (sc/optional-key :role-mapping) {sc/Keyword sc/Str}}
-   (sc/optional-key :ely-uspa-enabled) sc/Bool})
+   (sc/optional-key :ely-uspa-enabled) sc/Bool
+   ;; List of operations for which the Not needed selection is not
+   ;; available for the default attachments.
+   (sc/optional-key :default-attachments-mandatory) [sc/Str]})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
