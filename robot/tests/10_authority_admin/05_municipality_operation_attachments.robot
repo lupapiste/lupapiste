@@ -14,7 +14,11 @@ New applications have Asemapiirros, Pohjapiirustus and no Rasitustodistus
   Attachment template is visible  paapiirustus.asemapiirros
   Attachment template is visible  paapiirustus.pohjapiirustus
   Attachment template is not visible  rakennuspaikan_hallinta.rasitustodistus
-  Logout
+
+Mikko can set Asemapiirros not needed
+  Wait test id visible  not-needed-label
+  Click not needed  paapiirustus.asemapiirros
+  [Teardown]  Logout
 
 Admin removes Pohjapiirustus template and adds Rasitustodistus template
   Sipoo logs in
@@ -36,7 +40,10 @@ Admin removes Pohjapiirustus template and adds Rasitustodistus template
   # Save
   Click element  jquery=div#dialog-edit-attachments button[data-loc='selectm.ok']
   Wait until  Element should not be visible  jquery=div#dialog-edit-attachments
-  Logout
+
+Admin makes the default attachments mandatory
+  Toggle toggle  mandatory-attachments-kerrostalo-rivitalo
+  [Teardown]  Logout
 
 Now new applications have Asemapiirros and Rasitustodistus, but no Pohjapiirustus
   Mikko logs in
@@ -46,6 +53,9 @@ Now new applications have Asemapiirros and Rasitustodistus, but no Pohjapiirustu
   Attachment template is not visible  paapiirustus.pohjapiirustus
   Attachment template is visible  rakennuspaikan_hallinta.rasitustodistus
 
+Attachments cannot be marked not needed
+  No such test id  not-needed-label
+  [Teardown]  Logout
 
 *** Keywords ***
 
