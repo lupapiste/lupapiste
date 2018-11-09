@@ -36,7 +36,8 @@
                 <td><toggle class="no-border"
                             params="value: $root.organization.damForOperation([$data.id]),
                                     callback: _.partial( $root.organization.toggleDamForOperation, $data.id),
-                                    testId: 'mandatory-attachments-' + $data.id"></toggle></td>
+                                    testId: 'mandatory-attachments-' + $data.id,
+                                    enable: lupapisteApp.models.globalAuthModel.ok('toggle-default-attachments-mandatory-operation')"></toggle></td>
                 <td>
                   <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('organization-operations-attachments')">
                     [<a href="#" data-bind="click: $root.editAttachments.open, ltext: 'edit'" data-test-id="add-operations-attachments" class="modal"></a>]
