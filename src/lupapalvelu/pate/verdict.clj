@@ -800,9 +800,11 @@
   (->> application
        app/get-sorted-operation-documents
        tools/unwrapped
-       (filter (util/fn-> :data (contains? :valtakunnallinenNumero)))
+       (filter #(util/intersection-as-kw [:valtakunnallinenNumero
+                                          :manuaalinen_rakennusnro]
+                                         (keys %)))
        (map (partial app/populate-operation-info
-                     (app/get-operations application)))))
+                     (app/id-to-operation-map application)))))
 
 (defn- op-description [{primary     :primaryOperation
                         secondaries :secondaryOperations} op]

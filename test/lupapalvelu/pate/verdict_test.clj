@@ -3811,3 +3811,61 @@
       (get-in (finalize--proposal-pdf c-v-a) [:updates $set :pate-verdicts.$.proposal.tags])
       => string?
       (provided (lupapalvelu.organization/get-organization-name "753-R" nil) => "Sipoon rakennusvalvonta"))))
+
+(facts "buildings"
+  (let [op1  {:id "op1" :name "op-one" :description "desc-one"}
+        op2  {:id "op2" :name "op-two" :description "desc-two"}
+        op3  {:id "op3" :name "op-three" :description "desc-three"}
+        doc1 {:id          "doc1"
+              :schema-info {:op {:id "op1"}}
+              :data        {:valtakunnallinenNumero {:value "national1"}
+                            :tunnus                 {:value "tag1"}}}
+        doc2 {:id          "doc2"
+              :schema-info {:op {:id "op2"}}
+              :data        {:valtakunnallinenNumero  " "
+                            :manuaalinen_rakennusnro "manual2"
+                            :tunnus                  "tag2"}}
+        doc3 {:id          "doc3"
+              :schema-info {:op {:id          "op3"
+                                 :description "doc3-description"}}
+              :data        {}}
+        doc4 {:id          "doc4"
+              :schema-info {}
+              :data        {:valtakunnallinenNumero  "national4"
+                            :manuaalinen_rakennusnro "manual4"}}]
+    (fact "Primary operation only"
+      (buildings {:primaryOperation op1 :documents [doc1 doc2 doc3 doc4]})
+      => {:op1 {:operation   "op-one"
+                :description "desc-one"
+                :building-id "national1"
+                :tag         "tag1"
+                :order       "0"}})
+    (fact "Primary and secondary operations"
+      (buildings {:primaryOperation    op2
+                  :secondaryOperations [op1 op3]
+                  :documents           [doc1 doc2 doc3 doc4]})
+      => {:op1 {:operation   "op-one"
+                :description "desc-one"
+                :building-id "national1"
+                :tag         "tag1"
+                :order       "1"}
+          :op2 {:operation   "op-two"
+                :description "desc-two"
+                :building-id "manual2"
+                :tag         "tag2"
+                :order       "0"}
+          :op3 {:operation   "op-three"
+                :description "desc-three"
+                :building-id ""
+                :tag         ""
+                :order       "1"}})
+    (fact "Both building numbers"
+      (buildings {:primaryOperation op1
+                  :documents        [(assoc-in doc4
+                                               [:schema-info :op :id]
+                                               "op1")]})
+      => {:op1 {:operation   "op-one"
+                :description "desc-one"
+                :building-id "national4"
+                :tag         ""
+                :order       "0"}})))
