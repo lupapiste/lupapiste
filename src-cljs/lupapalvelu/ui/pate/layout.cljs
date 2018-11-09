@@ -164,7 +164,7 @@
     (when-not (s/blank? value)
       (pate-components/sandwich (assoc schema
                                        :class :sandwich__view)
-                                [:span value]))))
+                                [:span.formatted value]))))
 
 (defmethod view-component :date [_ {:keys [schema state path]}]
   (pate-components/sandwich (assoc schema
