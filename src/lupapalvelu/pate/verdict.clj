@@ -1301,11 +1301,11 @@
         true)))
 
 (defn- pdf--proposal [command verdict]
-  (if (some-> verdict :published :proposal-attachment-id)
+  (if (some-> verdict :proposal :attachment-id)
     (pdf/create-verdict-attachment-version command verdict)
     (when-let [attachment-id (pdf/create-verdict-attachment command verdict)]
       (verdict-update command
-                      {$set {:pate-verdicts.$.published.proposal-attachment-id attachment-id}})
+                      {$set {:pate-verdicts.$.proposal.attachment-id attachment-id}})
       true)))
 
 (declare pdf--signatures)
@@ -1442,19 +1442,28 @@
                                      (codec/form-encode data))}
                    (i18n/localize lang :pate.try-again)]]]]))})
 
-(defn download-verdict
-  "PDF verdict. Shows error page if the PDF is not yet ready"
-  [{:keys [user] :as command}]
+(defn- download-pdf
+  "Downloads pdf from given path. Shows error page if the PDF is not yet ready"
+  [{:keys [user] :as command} path re-call]
   (if-let [attachment-id (some-> (command->verdict command)
-                                 :published
-                                 :attachment-id)]
+                                 (get-in path))]
     (att/output-attachment (att/get-attachment-latest-version-file user
                                                                    attachment-id
                                                                    false)
                            true)
     (try-again-page command  {:status 202 ;; Accepted
                               :error  :pate.verdict.download-not-ready
-                              :raw    :verdict-pdf})))
+                              :raw    re-call})))
+
+(defn download-verdict
+  "Download verdict PDF."
+  [command]
+  (download-pdf command [:published :attachment-id] :verdict-pdf))
+
+(defn download-proposal
+  "Download verdict proposal PDF."
+  [command]
+  (download-pdf command [:proposal :attachment-id] :proposal-pdf))
 
 (defn preview-verdict
   "Preview version of the verdict.
@@ -1670,16 +1679,18 @@
 
 (defn finalize--proposal [{:keys [command verdict]}]
   (let [verdict           (assoc (enrich-verdict command verdict true)
-                            :state (wrapped-state command :proposal))
+                            :state (wrapped-state command :proposal)
+                            :proposal {:proposed (:created command)})
         data-kws          (map #(util/kw-path :data %)
                                (-> verdict :data keys))]
-    (apply verdict->updates verdict (concat data-kws [:state]))))
+    (apply verdict->updates verdict
+           (concat data-kws [:state :proposal.proposed]))))
 
 (defn finalize--proposal-pdf [{:keys [application verdict]}]
   (let [tags    (pdf/verdict-tags application verdict)]
     (-> verdict
-        (assoc-in [:published :tags] (ss/serialize tags))
-        (verdict->updates :published.tags)
+        (assoc-in [:proposal :tags] (ss/serialize tags))
+        (verdict->updates :proposal.tags)
         (assoc :commit-fn (util/fn->> :command (send-command ::proposal))))))
 
 (defn publish-verdict-proposal

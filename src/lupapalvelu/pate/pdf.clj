@@ -284,49 +284,50 @@
   "Creates PDF for the verdict and uploads it as an attachment. Returns
   the attachment-id."
   [{:keys [application created] :as command} verdict]
-  (when-let [html (some-> verdict :published :tags
-                          edn/read-string verdict-tags-html)]
-    (let [pdf            (html-pdf/html->pdf application
-                                             "pate-verdict"
-                                             html)
-          published (some-> (mongo/select-one :applications
-                                              {:_id (:id application)}
-                                              {:verdicts      1
-                                               :pate-verdicts 1})
-                            (vif/find-verdict (:id verdict))
-                            :published)
-          proposal?      (vc/proposal? verdict)
-          contract?      (vc/contract? verdict)]
-     (when-not (:ok pdf)
-       (fail! :pate.pdf-verdict-error))
-     ;; Make sure that the verdict attachment has not yet been created
-     (when (and published (not (:attachment-id published)))
-       (with-open [stream (:pdf-file-stream pdf)]
-        (:id (att/upload-and-attach!
-              command
-              {:created         created
-              :attachment-type  (if proposal?
-                                  (resolve-verdict-attachment-type application :paatosehdotus)
-                                  (resolve-verdict-attachment-type application))
-               :source          {:type "verdicts"
-                                 :id   (:id verdict)}
-               :locked          true
-               :read-only       true
-              :contents         (i18n/localize (cols/language verdict)
-                                               (cond
-                                                 proposal? :pate-verdict-proposal
-                                                 contract? :pate.verdict-table.contract
-                                                 :else     :pate-verdict))}
-              {:filename (i18n/localize-and-fill (cols/language verdict)
-                                                 (cond
-                                                   proposal? :pdf.proposal.filename
-                                                   contract? :pdf.contract.filename
-                                                   :else     :pdf.filename)
-                                                 (:id application)
-                                                 (util/to-local-datetime (some-> verdict
-                                                                                 :published
-                                                                                 :published)))
-               :content  stream})))))))
+  (let [proposal?     (vc/proposal? verdict)
+        contract?     (vc/contract? verdict)
+        content-path  (if proposal? :proposal :published)]
+    (when-let [html (some-> verdict content-path :tags
+                            edn/read-string verdict-tags-html)]
+      (let [pdf (html-pdf/html->pdf application
+                                    "pate-verdict"
+                                    html)
+            published (some-> (mongo/select-one :applications
+                                                {:_id (:id application)}
+                                                {:verdicts      1
+                                                 :pate-verdicts 1})
+                              (vif/find-verdict (:id verdict))
+                              content-path)]
+        (when-not (:ok pdf)
+          (fail! :pate.pdf-verdict-error))
+        ;; Make sure that the verdict attachment has not yet been created
+        (when (and published (not (:attachment-id published)))
+          (with-open [stream (:pdf-file-stream pdf)]
+            (:id (att/upload-and-attach!
+                   command
+                   {:created         created
+                    :attachment-type (if proposal?
+                                       (resolve-verdict-attachment-type application :paatosehdotus)
+                                       (resolve-verdict-attachment-type application))
+                    :source          {:type "verdicts"
+                                      :id   (:id verdict)}
+                    :locked          true
+                    :read-only       (if proposal? false true)
+                    :contents        (i18n/localize (cols/language verdict)
+                                                    (cond
+                                                      proposal? :pate-verdict-proposal
+                                                      contract? :pate.verdict-table.contract
+                                                      :else :pate-verdict))}
+                   {:filename (i18n/localize-and-fill (cols/language verdict)
+                                                      (cond
+                                                        proposal? :pdf.proposal.filename
+                                                        contract? :pdf.contract.filename
+                                                        :else :pdf.filename)
+                                                      (:id application)
+                                                      (util/to-local-datetime
+                                                        (or (some-> verdict :published :published)
+                                                            (some-> verdict :proposal :proposed))))
+                    :content  stream}))))))))
 
 ;; TODO: Verdict details MUST NOT change in the new version. Only the
 ;; signatures must be replaced.
@@ -336,9 +337,7 @@
   For verdict proposals, creates a new version of verdict proposal attachment.
   Used when a verdict proposal is updated."
   [{:keys [application created] :as command} verdict]
-  (let [{:keys [tags attachment-id
-                proposal-attachment-id]} (:published verdict)
-        attachment-id                    (or attachment-id proposal-attachment-id)
+  (let [{:keys [tags attachment-id]}     (or (:published verdict) (:proposal verdict))
         pdf                              (html-pdf/html->pdf application
                                                              "pate-verdict"
                                                              (verdict-tags-html (edn/read-string tags)))

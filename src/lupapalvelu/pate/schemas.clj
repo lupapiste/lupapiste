@@ -137,12 +137,14 @@
 
 (defschema PateBaseVerdict
   (merge PateCategory
-         {(sc/optional-key :published)          {:tags                                     sc/Str
+         {(sc/optional-key :published)          {:tags                            sc/Str
                                                  ;; The same as :state._modified
-                                                 (sc/optional-key :published)              sc/Int
+                                                 :published                       sc/Int
                                                  ;; Id for the attachment that is a PDF version of tags.
-                                                 (sc/optional-key :attachment-id)          ssc/AttachmentId
-                                                 (sc/optional-key :proposal-attachment-id) ssc/AttachmentId}
+                                                 (sc/optional-key :attachment-id) ssc/AttachmentId}
+          (sc/optional-key :proposal)           {:tags                            sc/Str
+                                                 :proposed                        sc/Int
+                                                 (sc/optional-key :attachment-id) ssc/AttachmentId}
           :state                                (wrapped (sc/enum "draft"
                                                                   "publishing"
                                                                   "published"

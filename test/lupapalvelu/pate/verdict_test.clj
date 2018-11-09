@@ -3783,6 +3783,7 @@
                                                        :pate-verdicts.$.data.verdict-code "myonnetty"
                                                        :pate-verdicts.$.data.verdict-date 876543
                                                        :pate-verdicts.$.data.verdict-section "1"
+                                                       :pate-verdicts.$.proposal.proposed 12345
                                                        :pate-verdicts.$.state {:_modified 12345
                                                                                :_user "user-email"
                                                                                :_value "proposal"}}}
@@ -3793,6 +3794,7 @@
                                                       :verdict-section "1"}
                                                :id "proposal-1"
                                                :modified 1
+                                               :proposal {:proposed 12345}
                                                :published nil
                                                :references {:boardname "Broad board abroad"}
                                                :replacement nil
@@ -3806,6 +3808,6 @@
                                                                        "verdict-text"]}}})
 
     (fact "finalize--proposal-pdf"
-      (get-in (finalize--proposal-pdf c-v-a) [:updates $set :pate-verdicts.$.published.tags])
+      (get-in (finalize--proposal-pdf c-v-a) [:updates $set :pate-verdicts.$.proposal.tags])
       => string?
       (provided (lupapalvelu.organization/get-organization-name "753-R" nil) => "Sipoon rakennusvalvonta"))))

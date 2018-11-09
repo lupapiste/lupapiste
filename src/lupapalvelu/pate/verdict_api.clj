@@ -325,6 +325,19 @@
   [command]
   (verdict/download-verdict command))
 
+(defraw proposal-pdf
+  {:description      "Endpoint for downloading the verdict attachment."
+   :parameters       [:id :verdict-id]
+   :categories       #{:pate-verdicts}
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
+   :user-authz-roles roles/all-authz-roles
+   :pre-checks       [(some-pre-check
+                        (verdict-exists :published?)
+                        (verdict-exists :proposal?))]}
+  [command]
+  (verdict/download-proposal command))
+
 ;; ------------------------------------------
 ;; Modern actions
 ;; ------------------------------------------
