@@ -10,6 +10,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.columns :as cols]
             [lupapalvelu.pate.date :as date]
             [lupapalvelu.pate.markup :as markup]
@@ -17,6 +18,7 @@
             [lupapalvelu.pate.pdf-layouts :as layouts]
             [lupapalvelu.pate.schemas :refer [resolve-verdict-attachment-type]]
             [lupapalvelu.pate.verdict-common :as vc]
+            [lupapalvelu.pate.verdict-interface :as vif]
             [lupapalvelu.pdf.html-template :as html-pdf]
             [sade.core :refer :all]
             [sade.property :as property]
@@ -284,33 +286,41 @@
   [{:keys [application created] :as command} verdict]
   (when-let [html (some-> verdict :published :tags
                           edn/read-string verdict-tags-html)]
-    (let [pdf       (html-pdf/html->pdf application
-                                        "pate-verdict"
-                                        html)]
+    (let [pdf            (html-pdf/html->pdf application
+                                             "pate-verdict"
+                                             html)
+          published (some-> (mongo/select-one :applications
+                                              {:_id (:id application)}
+                                              {:verdicts      1
+                                               :pate-verdicts 1})
+                            (vif/find-verdict (:id verdict))
+                            :published)]
      (when-not (:ok pdf)
        (fail! :pate.pdf-verdict-error))
-     (with-open [stream (:pdf-file-stream pdf)]
-       (:id (att/upload-and-attach!
-             command
-             {:created         created
-              :attachment-type (resolve-verdict-attachment-type application)
-              :source          {:type "verdicts"
-                                :id   (:id verdict)}
-              :locked          true
-              :read-only       true
-              :contents        (i18n/localize (cols/language verdict)
-                                              (if (vc/contract? verdict)
-                                                :pate.verdict-table.contract
-                                                :pate-verdict))}
-             {:filename (i18n/localize-and-fill (cols/language verdict)
-                                                (if (vc/contract? verdict)
-                                                  :pdf.contract.filename
-                                                  :pdf.filename)
-                                                (:id application)
-                                                (util/to-local-datetime (some-> verdict
-                                                                                :published
-                                                                                :published)))
-              :content  stream}))))))
+     ;; Make sure that the verdict attachment has not yet been created
+     (when (and published (not (:attachment-id published)))
+       (with-open [stream (:pdf-file-stream pdf)]
+        (:id (att/upload-and-attach!
+              command
+              {:created         created
+               :attachment-type (resolve-verdict-attachment-type application)
+               :source          {:type "verdicts"
+                                 :id   (:id verdict)}
+               :locked          true
+               :read-only       true
+               :contents        (i18n/localize (cols/language verdict)
+                                               (if (vc/contract? verdict)
+                                                 :pate.verdict-table.contract
+                                                 :pate-verdict))}
+              {:filename (i18n/localize-and-fill (cols/language verdict)
+                                                 (if (vc/contract? verdict)
+                                                   :pdf.contract.filename
+                                                   :pdf.filename)
+                                                 (:id application)
+                                                 (util/to-local-datetime (some-> verdict
+                                                                                 :published
+                                                                                 :published)))
+               :content  stream})))))))
 
 ;; TODO: Verdict details MUST NOT change in the new version. Only the
 ;; signatures must be replaced.

@@ -1,7 +1,6 @@
 (ns lupapalvelu.backing-system.allu-itest
   "Integration tests for ALLU integration. Using local (i.e. not over HTTP) testing style."
   (:require [clojure.string :as s]
-            [clojure.java.io :as io]
             [lupapalvelu.json :as json]
             [monger.operators :refer [$set]]
             [mount.core :as mount]
@@ -104,7 +103,7 @@
     (itu/command apikey :submit-application :id app-id) => ok?))
 
 (defn- fill [apikey app-id]
-  (let [{[attachment] :attachments :keys [documents]} (domain/get-application-no-access-checking app-id)
+  (let [{:keys [documents]} (domain/get-application-no-access-checking app-id)
         {descr-id :id} (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa") documents))
         {applicant-id :id} (first (filter #(= (doc-name %) "hakija-ya") documents))]
     (fact "fill application"
@@ -350,7 +349,7 @@
                                                     ;; :complementNeeded should be unreachable:
                                                     (into {} (remove (fn [[src _]] (= src :complementNeeded)))))
               router (make-test-router allu-state)
-              handler (reitit-ring/ring-handler router)]
+              handler (comp (reitit-ring/ring-handler router) @#'allu/try-reload-allu-id)]
           (with-redefs [allu/allu-router router
                         allu/allu-request-handler handler]
             (facts "state transitions"
