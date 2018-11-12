@@ -234,9 +234,9 @@ Sonja logs in and deletes the first verdict.
 There is only one appeal in the Attachments tab
   Open tab  attachments
   # TODO: attachment types
-  Xpath should match X times  //tr[@data-test-type='paatoksenteko.valitusosoitus']  1
-  Xpath should match X times  //tr[@data-test-type='muutoksenhaku.oikaisuvaatimus']  0
-  Xpath should match X times  //tr[@data-test-type='ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos']  0
+  jQuery should match X times  tr[data-test-type='paatoksenteko.valitusosoitus']  1
+  jQuery should match X times  tr[data-test-type='muutoksenhaku.oikaisuvaatimus']  0
+  jQuery should match X times  tr[data-test-type='ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos']  0
   Open tab  verdict
 
 Fetching new verdicts will nuke appeals
@@ -270,9 +270,9 @@ Edit extra
 
 Add file
   [Arguments]  ${appealType}  ${path}=${TXT_TESTFILE_PATH}
-  Run keyword if  "${appealType}" == "appeal"  Pate upload  0  ${path}  Valitus  Complaint  pate-upload-input
-  Run keyword if  "${appealType}" == "rectification"  Pate upload  0  ${path}  Oikaisuvaatimus  Complaint  pate-upload-input
-  Run keyword if  "${appealType}" == "appealVerdict"  Pate upload  0  ${path}  Päätös  Complaint  pate-upload-input
+  Run keyword if  "${appealType}" == "appeal"  Pate upload  0  ${path}  Valitus  Complaint  pate-upload
+  Run keyword if  "${appealType}" == "rectification"  Pate upload  0  ${path}  Oikaisuvaatimus  Complaint  pate-upload
+  Run keyword if  "${appealType}" == "appealVerdict"  Pate upload  0  ${path}  Päätös  Complaint  pate-upload
 
 Wait indicators
   Positive indicator should be visible
