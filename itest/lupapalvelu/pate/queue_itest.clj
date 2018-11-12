@@ -71,6 +71,9 @@
 
       (let [application (query-application local-query sonja app-id)
             verdict     (vif/find-verdict application verdict-id)]
+        (fact "Verdict is published"
+          (:published verdict) => (contains {:published     pos?
+                                             :attachment-id string?}))
         (fact "Cannot generate another verdict attachment"
           (pdf/create-verdict-attachment {:application application} verdict) => nil)
         (fact "Cannot generate verdict attachment if the verdict no longer exists"
