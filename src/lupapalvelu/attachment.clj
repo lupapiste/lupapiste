@@ -47,7 +47,8 @@
             [sade.util :refer [=as-kw not=as-kw fn-> fn->>] :as util])
   (:import [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream PipedInputStream PipedOutputStream]
            [org.apache.commons.io IOUtils]
-           [java.nio.charset StandardCharsets]))
+           [java.nio.charset StandardCharsets]
+           (com.fasterxml.jackson.databind.jsontype SubtypeResolver)))
 
 ;;
 ;; Metadata
@@ -173,7 +174,8 @@
    :auth                                 [AttachmentAuthUser]
    (sc/optional-key :metadata)           {sc/Keyword sc/Any}
    (sc/optional-key :approvals)          VersionApprovals
-   (sc/optional-key :backendId)          (sc/maybe sc/Str)})
+   (sc/optional-key :backendId)          (sc/maybe sc/Str)
+   (sc/optional-key :application-as-attachment?) sc/Bool})  ;; For ALLU: If true, convert application to pdf and send it to ALLU as an attachment
 
 (def attachment-required-keys (filter sc/required-key? (keys Attachment)))
 
