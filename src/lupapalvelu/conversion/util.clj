@@ -177,16 +177,79 @@
   (atom {})) ;; TODO: Remove me
 
 (defn deduce-operation-type
-  "Figure out the right primaryOperation for the application."
+  "Takes a kuntalupatunnus and a 'toimenpide'-element from app-info, returns the operation type"
+  ([kuntalupatunnus]
+   (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
+         _ (swap! tila assoc :kuntalupatunnus kuntalupatunnus)]
+     (condp = suffix
+       "TJO" "tyonjohtajan-nimeaminen-v2"
+       "P" "purkaminen"
+       "PI" "purkaminen"
+       "aiemmalla-luvalla-hakeminen")))
+  ([kuntalupatunnus toimenpide]
+   (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
+        uusi? (contains? toimenpide :uusi)
+        rakennustieto (get-in toimenpide [:rakennustieto :Rakennus :rakennuksenTiedot])
+        {:keys [kayttotarkoitus rakennustunnus]} rakennustieto
+        rakennuksen-selite (:rakennuksenSelite rakennustunnus)
+        laajentaminen? (or (contains? toimenpide :laajentaminen)
+                           (= rakennuksen-selite "Laajennus")
+                           (= "B" suffix))
+        rakennelman-kuvaus (get-in toimenpide [:rakennelmatieto :Rakennelma :kuvaus :kuvaus])
+        rakennelman-selite (get-in toimenpide [:rakennelmatieto :Rakennelma :tunnus :rakennuksenSelite])
+        ; _ (println toimenpide)
+        ; _ (println rakennuksen-selite)
+        ; _ (println kayttotarkoitus)
+         _ (swap! tila assoc :kuntalupatunnus kuntalupatunnus :toimenpide toimenpide)]
+    (cond
+      (contains? #{"P" "PI"} suffix) "purkaminen"
+      (and uusi?
+           (= "Omakotitalo" rakennuksen-selite)) "pientalo"
+      (and uusi?
+           (contains? #{"Kerrostalo" "Asuinkerrostalo" "Rivitalo"} rakennuksen-selite)) "kerrostalo-rivitalo"
+      (and uusi?
+           (= "Talousrakennus" rakennuksen-selite)) "pientalo"
+      (and uusi?
+           (or (= "Katos" rakennelman-kuvaus)
+               (= "Autokatos" rakennelman-selite))) "auto-katos"
+      (and laajentaminen?
+           (re-find #"toimisto" kayttotarkoitus)) "talousrakennus-laaj"
+      (and laajentaminen?
+           (re-find #"teollisuuden tuotantorak" kayttotarkoitus)) "teollisuusrakennus-laaj"
+      (and laajentaminen?
+           (or (re-find #"yhden asunnon talot" kayttotarkoitus)
+               (= "omakotitalo" rakennuksen-selite))) "pientalo-laaj"
+      (and laajentaminen?
+           (or (re-find #"rivital|kerrostal" kayttotarkoitus)
+               (= "omakotitalo" rakennuksen-selite))) "kerrostalo-rt-laaj"
+      :else "aiemmalla-luvalla-hakeminen"))))
+
+(defn read-xml [kuntalupatunnus]
+  (let [filename (str (:resource-path config) "/" kuntalupatunnus ".xml")]
+    (krysp-fetch/get-local-application-xml-by-filename filename "R")))
+
+(defn get-operations-debug [kuntalupatunnus]
+  (let [xml (read-xml kuntalupatunnus)
+        app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
+        {:keys [toimenpiteet]} app-info]
+    (if-not (empty? toimenpiteet)
+      (map (partial deduce-operation-type kuntalupatunnus) toimenpiteet)
+      (deduce-operation-type kuntalupatunnus))))
+
+#_(defn deduce-operations
+  "Figure out the right primaryOperation for the application. EDIT: This is garbage, delete and re-think"
   [xml]
   (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        _ (swap! tila assoc :info app-info)
+        toimenpiteet (:toimenpiteet app-info)
+        uusi? (contains? (first toimenpiteet) :uusi)
+        _ (swap! tila assoc :app-info app-info)
         suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
         btype (get-building-type xml)
         asiantiedot (ss/lower-case (building-reader/->asian-tiedot xml))
         {:keys [description usage]} (-> xml building-reader/->buildings-summary first)]
-    (cond
+    (-> app-info :toimenpiteet first deduce-operation-type)
+    #_(cond
       (= "TJO" suffix) "tyonjohtajan-nimeaminen-v2"
       (contains? #{"P" "PI"} suffix) "purkaminen"
       (and (= "A" suffix)
@@ -225,6 +288,7 @@
   the operation types for A-type permits only."
   [& [suffix]]
   (let [rawdata (read-all-test-files)
+        _ (println (str "Read all " (count rawdata) " files."))
         data (if suffix
                (filter #(= suffix (some->
                                    %
@@ -233,11 +297,26 @@
                                    :tyyppi))
                        rawdata)
                rawdata)]
-    (map #(assoc {}
-                 :type (some-> % deduce-operation-type)
-                 :tunnus (krysp-reader/xml->kuntalupatunnus %)) data)))
+    (map (fn [xml]
+            (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
+                  {:keys [toimenpiteet]} (krysp-reader/get-app-info-from-message xml kuntalupatunnus)]
+               (assoc {}
+                      :types (if toimenpiteet
+                               (map (partial deduce-operation-type kuntalupatunnus) toimenpiteet)
+                               (deduce-operation-type kuntalupatunnus))
+                      :tunnus (krysp-reader/xml->kuntalupatunnus xml)))) data)))
 
 (defn get-asian-kuvaus [kuntalupatunnus]
-  (-> kuntalupatunnus
-      get-xml-for-kuntalupatunnus
-      building-reader/->asian-tiedot))
+  (-> kuntalupatunnus get-xml-for-kuntalupatunnus building-reader/->asian-tiedot))
+
+(defn is-empty-osapuoli? [doc]
+  (let [sukunimi (->> (tree-seq map? vals doc)
+                      (filter map?)
+                      (keep :sukunimi)
+                      first)]
+    (boolean
+      (when sukunimi
+        (= "" (:value sukunimi))))))
+
+; (defn operation->operation-document
+;   [operation-name manual-schema-datas schema])

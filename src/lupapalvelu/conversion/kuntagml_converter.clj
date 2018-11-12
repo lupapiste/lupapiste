@@ -12,6 +12,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.review :as review]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict :as verdict]
@@ -33,17 +34,17 @@
   ;;   - buildings and structures
   ;;   - parties
   ;;      - hakijat, maksajat, asiamiehet, tyonjohtajat (vain TJO), suunnittelijat
-  ;;   - statements
-  ;;   - verdicts
-  ;;   - reviews
-  ;;   - app-links to :app-links collection (viitelupatieto)
-  ;;   - :history array for the application (kasittelynTilatieto / tilamuutos) (get-sorted-tilamuutos-entries)
+  ;;   X statements
+  ;;   X verdicts
+  ;;   X reviews
+  ;;   X app-links to :app-links collection (viitelupatieto)
+  ;;   X :history array for the application (kasittelynTilatieto / tilamuutos) (get-sorted-tilamuutos-entries)
   ;;
   ;;  Other things to note:
-  ;;    - linked permitIDs might be in funny order, check that it's normalised ('lupapalvelu.conversion.util/normalize-permit-id')
-  ;;    - we need to generate LP id for conversion cases (do not use do-create-application)
+  ;;    X linked permitIDs might be in funny order, check that it's normalised (`lupapalvelu.conversion.util/normalize-permit-id')
+  ;;    X we need to generate LP id for conversion cases (do not use do-create-application)
   ;;
-  ;;  Types that need special handling: VAK (not own thing, but adds data to linked application) - EDIT: Not possible, we can't export these.
+  ;;    X Types that need special handling: VAK (not own thing, but adds data to linked application) - EDIT: Not possible, we can't export these.
   ;;
   (let [{:keys [hakijat]} app-info
         municipality "092"
@@ -71,12 +72,25 @@
         ;     we can create those operations to primaryOperation/secondaryOperations AND create their document data using
         ;     `lupapalvelu.application/make-document` for example. And then save to db :)
 
+        operations (:toimenpiteet app-info)
         kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         id (conv-util/make-converted-application-id kuntalupatunnus)
+        primary-op-name (if (seq operations)
+                          (conv-util/deduce-operation-type kuntalupatunnus (first operations))
+                          (conv-util/deduce-operation-type kuntalupatunnus))
+
+        primary-op-doc (app/make-document primary-op-name
+                                          (now)
+                                          manual-schema-datas
+                                          (schemas/get-schema 1 "uusiRakennus")) ;; Test
+        secondary-op-names (when (seq (rest operations))
+                             (map (partial conv-util/deduce-operation-type kuntalupatunnus) (rest operations)))
+        _ (swap! tila assoc :secondary-op-names secondary-op-names)
         make-app-info {:id              id
                        :organization    organization
                        ; :operation-name  "aiemmalla-luvalla-hakeminen" ; FIXME: no fixed operation in conversion, see above
-                       :operation-name  (conv-util/deduce-operation-type xml)
+                       ; :operation-name  (conv-util/deduce-operation-type xml)
+                       :operation-name  primary-op-name
                        ; or maybe something like:               :operation-name  "conversion"
                        :location        (app/->location (:x location-info) (:y location-info))
                        :propertyId      (:propertyId location-info)
@@ -105,7 +119,8 @@
         ; TODO: create secondaryoperations from app-info, see above.
         ;; make secondaryOperations for buildings other than the first one in case there are many
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
-        secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
+        secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2 :name %3) other-building-docs (rest structure-descriptions) secondary-op-names)
+        _ (swap! tila assoc :secondary-ops secondary-ops :other-building-docs other-building-docs)
 
         structures (->> xml krysp-reader/->rakennelmatiedot (map conv-util/rakennelmatieto->kaupunkikuvatoimenpide))
 
@@ -136,6 +151,16 @@
                                        :history history-array
                                        :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
                                        :facta-imported true))
+
+        _ (swap! tila assoc :app created-application)
+
+        ;; Poistetaan tyhjät osapuoli-dokumentit
+        ; non-empty-osapuoli (filterv (complement conv-util/is-empty-osapuoli?) (:documents created-application))
+
+        ; _ (swap! tila assoc :osap non-empty-osapuoli)
+
+        ; created-application (assoc created-application :documents non-empty-osapuoli)
+        ; _ (swap! tila assoc :updatedapp created-application)
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
