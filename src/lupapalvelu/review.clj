@@ -87,7 +87,7 @@
 (defn- matching-task
   "For a given mongo-task, return a matching task from the XML update"
   [mongo-task update-tasks]
-  (or ;; 1. task with matching id, or
+  (or ;; 1. task with matching non-empty id, or
       (task-with-matching-background-id mongo-task update-tasks)
 
       ;; 2. task with same name and type WHEN mongo task is empty, or
