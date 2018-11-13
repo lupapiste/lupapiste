@@ -11,7 +11,7 @@
 (defn check-fn [fetch-fn]
   (loop [retries 6
          msgs (fetch-fn)]
-    (if (or (pos? (count msgs)) (zero? retries))
+    (if (or (= 2 (count msgs)) (zero? retries))
       msgs
       (do
         (Thread/sleep 500)
