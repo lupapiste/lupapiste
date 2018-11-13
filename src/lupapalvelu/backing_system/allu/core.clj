@@ -563,7 +563,7 @@
 
   (defstate ^AutoCloseable allu-jms-consumer
     "JMS consumer for the ALLU request JMS queue"
-    :start (jms-client/listen allu-jms-session (jms/queue allu-jms-queue-name)
+    :start (jms-client/listen allu-jms-session (jms/queue allu-jms-session allu-jms-queue-name)
                               (jms/message-listener (jms/nippy-callbacker (allu-jms-msg-handler allu-jms-session))))
     :stop (.close allu-jms-consumer)))
 

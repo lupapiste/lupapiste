@@ -6,11 +6,10 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util])
-  (:import (javax.jms ExceptionListener Connection Session Queue Message
+  (:import [javax.jms ExceptionListener Connection Session Message
                       MessageListener BytesMessage ObjectMessage TextMessage
-                      MessageConsumer MessageProducer JMSException JMSContext)
-           (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection)
-           (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
+                      MessageConsumer MessageProducer JMSException JMSContext]
+           [org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection]))
 
 ; If external broker is not defined, we start a embedded broker inside the JVM for testing.
 (when (and (env/dev-mode?) (ss/blank? (env/value :jms :broker-url)))
@@ -59,9 +58,6 @@
         (error e "JMS exception, maybe it was a reconnect?" (.getMessage e))
         (info "After exception, is connection started:" (.isStarted ^ActiveMQConnection (:conn @state))))))
 
-  (defn queue ^Queue [name]
-    (ActiveMQJMSClient/createQueue name))
-
   (def create-session jms/create-session)
 
   (defn create-transacted-session [conn]
@@ -79,6 +75,8 @@
       (when (env/dev-mode?)
         (.setStringProperty message jms-test-db-property mongo/*db-name*))
       message))
+
+  (def queue jms/create-queue)
 
   ;;
   ;; Connection
@@ -167,7 +165,7 @@
     ([queue-name]
      (create-producer (producer-session) queue-name #(create-jms-message % (producer-session))))
     ([session queue-name message-fn]
-     (-> (jms/create-producer session (queue queue-name))
+     (-> (jms/create-producer session (queue session queue-name))
          (register-producer)
          (jms/producer-fn message-fn))))
 
@@ -181,7 +179,7 @@
   (defn produce-with-context [destination-name data]
     (jms/send-with-context
       default-connection-factory
-      (queue destination-name)
+      (queue (producer-session) destination-name)
       data
       (merge (select-keys connection-properties [:username :password])
              {:session-mode JMSContext/AUTO_ACKNOWLEDGE
@@ -206,7 +204,7 @@
     ([endpoint-name callback-fn]
      (create-consumer (consumer-session) endpoint-name callback-fn))
     ([session endpoint-name callback-fn]
-     (-> (jms/listen session (queue endpoint-name) (message-listener callback-fn))
+     (-> (jms/listen session (queue session endpoint-name) (message-listener callback-fn))
          (register-consumer))))
 
   (defn nippy-callbacker [callback]
