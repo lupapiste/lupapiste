@@ -75,6 +75,7 @@
   (merge GenInput
          {:type               (sc/eq :string)
           (opt :default)      sc/Str
+          (opt :placeholder)  sc/Str
           (opt :min-len)      sc/Int
           (opt :max-len)      sc/Int
           (opt :dummy-test)   sc/Keyword}))
@@ -339,7 +340,8 @@
    (opt :pdf-options)           {;; Select name that contains :muu option
                                  ;; The group must have :muu string field as well.
                                  (opt :other-select) sc/Keyword}
-   (opt :address-type)           (sc/enum :contact)})
+   (opt :address-type)           (sc/enum :contact)
+   (opt :css)                    [sc/Keyword]})
 
 (defschema Element
   "Any doc element."

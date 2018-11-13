@@ -47,6 +47,20 @@
   @return unquote("\"") + unquote(str-insert($str, "\\", 1)) + unquote("\"")
 }
 
+@mixin placeholder( $color ) {
+  input::placeholder {
+    color: $color
+  }
+  input::-ms-input-placeholder {
+    color: $color
+  }
+  textarea::placeholder {
+    color: $color
+  }
+  input::-ms-input-placeholder {
+    teextarea: $color
+  }
+}
 
 // Defines the following classes:
 // .cls-label

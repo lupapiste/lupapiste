@@ -1,0 +1,8 @@
+"A" "fi" "Allu"
+"promootio._group_label" "fi" "Promootion kuvaus"
+"promootio.promootio.help" "fi" "Tämä on promootion ohjeteksti."
+"promootio.promootio._group_label" "fi" ""
+"promootio.promootio.promootio-name" "fi" "Promootion nimi (Tämä julkinen nimi näkyy myös karttapalveluissa)"
+"promootio.promootio.promootio-description" "fi" "Promootion kuvaus"
+"promootio.name.placeholder" "fi" "Kirjoita promootion nimi"
+"promootio.description.placeholder" "fi" "Kirjoita promootion tarkempi kuvaus"

@@ -11543,6 +11543,10 @@ div.review-done {
   margin-bottom: 0;
 }
 
+.layout--full-width {
+  width: 100%;
+}
+
 table {
   width: 100%;
   margin-bottom: 24px;
@@ -34361,6 +34365,45 @@ div.printing-order-footer div.pricelist-panel .arrow:after {
   display: block;
   position: absolute;
   top: 22%;
+}
+
+div.form-grid.allu-group {
+  border-top: none;
+}
+
+div.form-grid.allu-group span.group-help-text {
+  display: block;
+  padding: 1em;
+  border-left: 8px solid #f39129;
+  background-color: #eeeeee;
+}
+
+div.form-grid.allu-group label.form-label {
+  line-height: 40px;
+}
+
+div.form-grid.allu-group label.form-label.tip {
+  color: initial;
+}
+
+div.form-grid.allu-group label.form-label.tip::after {
+  color: #df3215;
+}
+
+div.form-grid.allu-group input::placeholder {
+  color: #dddddd;
+}
+
+div.form-grid.allu-group input::-ms-input-placeholder {
+  color: #dddddd;
+}
+
+div.form-grid.allu-group textarea::placeholder {
+  color: #dddddd;
+}
+
+div.form-grid.allu-group input::-ms-input-placeholder {
+  teextarea: #dddddd;
 }
 
 /* VIEWS

@@ -166,6 +166,16 @@
    :extra-statement-selection-values false
    :ely-statement-types              []})
 
+(defpermit A "ALLU"
+  {:subtypes                         []
+   :state-graph                      states/allu-state-graph
+   :allow-state-change               :all
+   :sftp-directory                   ""
+   :allowed-task-schemas             #{}
+   :multiple-parties-allowed         true
+   :extra-statement-selection-values false
+   :ely-statement-types              []})
+
 ;;
 ;; Helpers
 ;;

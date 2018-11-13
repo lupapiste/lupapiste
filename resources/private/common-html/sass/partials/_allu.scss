@@ -1,0 +1,21 @@
+
+div.form-grid.allu-group {
+  border-top: none;
+  span.group-help-text {
+    display: block;
+    padding: 1em;
+    border-left: 8px solid $primary;
+    background-color: $gray238;
+  }
+  label.form-label {
+    line-height: 40px;
+  }
+  label.form-label.tip {
+    color: initial;
+    &::after {
+      color: $negative;
+    }
+  }
+  @include placeholder( $gray221 );
+
+}

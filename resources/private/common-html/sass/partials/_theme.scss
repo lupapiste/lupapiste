@@ -56,21 +56,16 @@ $turqo-link:     $turqo-dark;
 $turqo-hover:    $turqo;
 $turqo-active:   $turqo-light;
 
-// Grays from the darkest to the lightest (white);
-@function make-gray( $n ) {
-	@return rgb( $n, $n, $n );
-}
-
-$gray17:  make-gray( 17 );
-$gray51:  make-gray( 51 );
-$gray85:  make-gray( 85 );
-$gray119: make-gray( 119 );
-$gray153: make-gray( 153 );
-$gray187: make-gray( 187 );
-$gray221: make-gray( 221 );
-$gray238: make-gray( 238 );
-$gray246: make-gray( 246 );
-$gray255: make-gray( 255 );
+$gray17:  rgb(17, 17, 17);
+$gray51:  rgb(51, 51, 51);
+$gray85:  rgb(85, 85, 85);
+$gray119: rgb(119, 119, 119);
+$gray153: rgb(153, 153, 153);
+$gray187: rgb(187, 187, 187);
+$gray221: rgb(221, 221, 221);
+$gray238: rgb(238, 238, 238);
+$gray246: rgb(246, 246, 246);
+$gray255: rgb(255, 255, 255);
 
 $grid-min-height: 40px;
 
@@ -125,4 +120,3 @@ $lp-dark-grey: $gray85;
 $lp-light-grey: $gray246;
 $lp-orange: $orange-dark;
 $color-text: $gray51;
-

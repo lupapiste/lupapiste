@@ -17,7 +17,9 @@ LUPAPISTE.DocgenInputModel = function(params) {
   self.documentId = params.documentId || params.schema.documentId;
   self.model = service.getInDocument(self.documentId, params.path);
   self.value = self.model.model;
-  self.schemaCss = self.schema.css && self.schema.css.join( " ");
+  self.schemaCss = _.compact( _.concat(self.schema.css,
+                                       self.schema.layout === "full-width"
+                                       ? "layout--full-width" : null)).join( " " );
 
   self.i18npath = params.schema.i18nkey ? [params.schema.i18nkey] : params.schema.i18npath;
   if (!self.i18npath) {
@@ -95,7 +97,8 @@ LUPAPISTE.DocgenInputModel = function(params) {
   });
   self.inputOptions = {maxLength: params.schema["max-len"] || LUPAPISTE.config.inputMaxLength,
                        max: params.schema.max,
-                       min: params.schema.min};
+                       min: params.schema.min,
+                       placeholder: loc( params.schema.placeholder || "empty")};
 
   function authState( state ) {
     var commands = _.get( self.schema.auth, state );
