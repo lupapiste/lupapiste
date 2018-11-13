@@ -218,18 +218,20 @@
                                              :dict :collateral-type}]}]))))
 
 (def versub-bulletin
-  {:dictionary
-   {:bulletinOpDescription
-    {:phrase-text {:category :toimenpide-julkipanoon
-                   :i18nkey  :phrase.category.toimenpide-julkipanoon}
-     :template-dict :bulletinOpDescription}}
-   :section {:id         :bulletin
-             :loc-prefix :bulletin
-             :show?      :?.bulletin-op-description
-             :grid       {:columns 1
-                          :rows    [[{:col  1
-                                      :id   "toimenpide-julkipanoon"
-                                      :dict :bulletinOpDescription}]]}}})
+  {:dictionary {:bulletin-op-description    {:phrase-text   {:category :toimenpide-julkipanoon
+                                                             :i18nkey  :phrase.category.toimenpide-julkipanoon}
+                                             :template-dict :bulletinOpDescription}
+                :bulletin-desc-as-operation {:toggle        {:loc-prefix :pate-bulletin-as-operation.flag}}}
+   :section    {:id         :bulletin
+                :loc-prefix :bulletin
+                :show?      :?.bulletin-op-description
+                :grid       {:columns 1
+                             :rows    [[{:col  1
+                                         :id   "toimenpide-julkipanoon"
+                                         :dict :bulletin-op-description}]
+                                       [{:col 1
+                                         :show? :_meta.editing?
+                                         :dict :bulletin-desc-as-operation}]]}}})
 
 (defn versub-requirements
   "Supported arguments: :foremen, :plans and :reviews."
