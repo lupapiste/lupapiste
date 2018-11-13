@@ -1,120 +1,93 @@
 (ns lupapalvelu.ui.auth-admin.prices.catalogue
   (:require [rum.core :as rum]
-
             [lupapalvelu.ui.auth-admin.prices.service :as service]
-
+            [lupapalvelu.ui.auth-admin.prices.state :as state]
             [lupapalvelu.ui.authorization :as auth]
-            [lupapalvelu.ui.common :refer [loc]]
+            [lupapalvelu.ui.common :as common :refer [loc]]
             [lupapalvelu.ui.components :as uc]
+            [schema.core :as sc]))
 
-            [schema.core :as sc]
-
-            ;;STAMP IMPORTS. REMOVE THESE ONCE PRICE CATALOGUE HAS ITS OWN STRUCTURE AND CONTENT
-            [lupapalvelu.ui.auth-admin.stamp.state :refer [component-state empty-component-state update-stamp-view] :as state]
-            [lupapalvelu.ui.auth-admin.stamp.metadata :refer [header-component metadata-component control-buttons]]
-            [lupapalvelu.ui.auth-admin.stamp.preview :refer [preview-component]]
-            [lupapalvelu.ui.auth-admin.stamp.field-types :refer [field-types-component]]
-            [lupapalvelu.ui.auth-admin.stamp.stamp-row :refer [stamp-row]]
-            [lupapalvelu.ui.auth-admin.stamp.util :as stamp-util]
-            [lupapalvelu.attachment.stamp-schema :as sts]
-            ))
-
-(defn init
-  [init-state props]
-  (let [[auth-model] (-> (aget props ":rum/initial-state") :rum/args)]
-    (swap! component-state assoc :auth-models {:global-auth-model auth-model})
-    (when (auth/ok? auth-model :stamp-templates) (state/refresh))
-    init-state))
-
-(rum/defc new-stamp-button [selected-stamp-id editor-state]
-  [:button.positive
-   {:on-click     (fn []
-                    (reset! selected-stamp-id nil)
-                    (swap! editor-state assoc :stamp state/empty-stamp))
-    :data-test-id "open-create-stamp-bubble"}
-   [:i.lupicon-circle-plus]
-   [:span (loc "stamp-editor.new-stamp.button")]])
-
-(rum/defc stamp-select < rum/reactive
-  [stamps selection]
-  (uc/select state/update-stamp-view
-             "stamp-select"
-             (rum/react selection)
+(rum/defc catalogue-select < rum/reactive
+  [catalogues selected-catalogue-id]
+  ;;(println "catalogue-select selected-id: " @selected-catalogue-id)
+  (uc/select state/set-selected-catalogue-id ;;update-stamp-view
+             "catalogue-select"
+             (rum/react selected-catalogue-id)
              (cons ["" (loc "choose")]
-                   (map (juxt :id :name) (rum/react stamps)))
+                   (map (juxt :id :id) (rum/react catalogues)))
              "dropdown"))
 
-(defn valid-stamp? [stamp-data]
-  (try (sc/validate sts/StampTemplate stamp-data)
-       true
-       (catch :default _
-         false)))
+(rum/defc RowOperation
+  < {:key-fn (fn [operation] (str "operation-" operation))}
+  [operation]
+  [:span (str operation " ")])
 
-(rum/defc edit-stamp-bubble < rum/reactive
-  [stamp-id editor-state]
-  (let [drag-element (rum/cursor editor-state :drag-element)
-        stamp-in-editor (rum/cursor editor-state :stamp)
-        rows (rum/cursor-in editor-state [:stamp :rows])
-        qr-code (rum/cursor-in editor-state [:stamp :qrCode])]
-    (when-not (empty? (rum/react stamp-in-editor))
-      [:div.edit-stamp-bubble
-       (header-component stamp-id stamp-in-editor)
-       [:div.form-grid.metadata-and-preview
-        [:div.row.subheaders
-         [:div.col-2
-          [:h4 (loc "stamp.margin")]]
-         [:div.col-2
-          [:h4 (loc "stamp.preview")]]]
-        [:div.row
-         (metadata-component)
-         (preview-component rows)]
-        [:div.row
-         [:h4 (loc "stamp.information")]]
-        [:div.row
-         (field-types-component)
-         [:div.stamp-editor-drag-guide (loc "stamp-editor.drag.guide")]
-         [:div
-          (for [[idx _] (stamp-util/indexed (conj (rum/react rows) []))]
-            (rum/with-key
-              (stamp-row {:index       idx
-                          :rows-cursor rows
-                          :drag-source drag-element})
-              idx))]]
-        [:div.row
-         [:div.checkbox-wrapper
-          [:input#qr-code-checkbox
-           {:type      "checkbox"
-            :checked   (rum/react qr-code)
-            :on-change #(reset! qr-code (-> % .-target .-checked))}]
-          [:label.blockbox-label
-           {:for "qr-code-checkbox"}
-           (loc "stamp-editor.qrCode")]]]]
-       (control-buttons stamp-id stamp-in-editor (valid-stamp? (rum/react stamp-in-editor)))])))
+(rum/defc RowOperations [operations]
 
-(rum/defc stamp-editor < rum/reactive
-                         {:init         init
-                          :will-unmount (fn [& _] (reset! component-state empty-component-state))}
+
+  [:div
+   (map (fn [operation]
+          (RowOperation operation))
+        operations)])
+
+(rum/defc CatalogueRow
+  < {:key-fn (fn [row] (str (:code row) "-" (:text row)))}
+  [{:keys [code text price-per-unit discount-percent min-total-price max-total-price unit operations]
+                         :as row}]
+  [:tr
+   [:td code]
+   [:td text]
+   [:td price-per-unit]
+   [:td discount-percent]
+   [:td min-total-price]
+   [:td max-total-price]
+   [:td unit]
+   [:td (RowOperations operations)]])
+
+(rum/defc CatalogueByRows [selected-catalogue]
+  [:div
+   [:table {:class-name "invoice-operations-table"}
+     [:thead
+      [:tr
+       [:th "Koodi"]
+       [:th "Tuote"]
+       [:th "A-hinta"]
+       [:th "%"]
+       [:th "Vähintään"]
+       [:th "Enintään"]
+       [:th "Yksikkö"]
+       [:th "Kuuluu toimenpiteisiin"]]]
+    [:tbody
+     (map CatalogueRow (:rows selected-catalogue))]]])
+
+(rum/defc Catalogue < rum/reactive
   [_]
-  (let [stamps (rum/cursor component-state :stamps)
-        editor-state (rum/cursor component-state :editor)
-        selected-stamp-id (rum/cursor component-state :selected-stamp-id)]
+  (let [selected-catalogue (state/get-catalogue (rum/react state/selected-catalogue-id))]
     [:div
-     [:h2 (loc "price-catalogue.tab.title")]
-     [:div.stamp-selection
-      (stamp-select stamps selected-stamp-id)
-      (new-stamp-button selected-stamp-id editor-state)]
-     [:div.edit-stamp
-      (edit-stamp-bubble selected-stamp-id editor-state)]]))
+     ;; [:div (str "selected-catalogue: " selected-catalogue)]
+     ;; [:div (str "selected-catalogue-id: " (rum/react state/selected-catalogue-id))]
+     ;;[:h2 (loc "price-catalogue.tab.title")]
+     [:div {:style {:margin-bottom "2em"}}
+      (catalogue-select state/catalogues
+                        state/selected-catalogue-id)
+      ;;TAHAN EHKA PVM
+      ;;TAHAN UUSI taksa nappi oikeaan laitaan
+      ]
+     [:div
+      (CatalogueByRows selected-catalogue)
+      ]]))
 
 (defonce args (atom {}))
 
 (def log (.-log js/console))
 
 (defn mount-component []
-  (rum/mount (stamp-editor (:auth-model @args))
+  (rum/mount (Catalogue)
              (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId componentParams]
+  (println "catalogue start")
   (swap! args assoc :auth-model (aget componentParams "authModel") :dom-id (name domId))
+  (reset! state/org-id (js/ko.unwrap (common/oget componentParams "orgId")))
   (service/fetch-price-catalogues)
   (mount-component))
