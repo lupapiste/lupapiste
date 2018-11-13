@@ -358,7 +358,7 @@
   (infof "Bulletins for removed verdict %s need to be cleaned up" verdictId)
   (mongo/remove :application-bulletins (str applicationId "_" verdictId)))
 
-(defn- fallback-appeal-end-from-appeal-start
+(defn fallback-appeal-end-from-appeal-start
   "If appeal period end date is not available, use 14 days from appeal period start"
   [appeal-period-start]
   (-> appeal-period-start tc/from-long (t/plus (t/days 14)) tc/to-long))

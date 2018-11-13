@@ -1349,6 +1349,20 @@
         (verdict->updates :published.tags)
         (assoc :commit-fn (util/fn->> :command (send-command ::verdict))))))
 
+(defn finalize--bulletin [{:keys [verdict]}]
+  (when-let [julkipano (-> verdict :data :julkipano)]
+    {:commit-fn (fn [{:keys [command application verdict]}]
+                  (bulletins/upsert-bulletin-by-id
+                    (str (:id application) "_" (:id verdict))
+                    (bulletins/create-bulletin
+                      (util/assoc-when-pred application util/not-empty-or-nil?
+                                            :pate-verdicts [verdict])
+                      (:created command)
+                      {:verdictGivenAt (-> verdict :data :anto)
+                       :bulletinOpDescription (-> verdict :data :bulletin-op-description)
+                       :appealPeriodStartsAt julkipano
+                       :appealPeriodEndsAt (bulletins/fallback-appeal-end-from-appeal-start julkipano)})))}))
+
 (defn process-finalize-pipeline [command application verdict & finalize--fns]
   (let [{:keys [updates commit-fns verdict]
          :as result} (reduce (fn [acc fun]
@@ -1401,6 +1415,7 @@
                              ;; Point of no return (section sequence update)
                              finalize--section
                              finalize--pdf
+                             finalize--bulletin
                              finalize--kuntagml))
 
 (defn try-again-page [{:keys [lang data]} {:keys [raw status error]}]
