@@ -9,6 +9,7 @@
 (def org-id                (state-cursor :org-id))
 (def selected-catalogue-id (state-cursor :selected-catalogue-id))
 (def catalogues            (state-cursor :catalogues))
+(def view                  (state-cursor :view))
 
 (defn set-selected-catalogue-id [catalogue-id]
   (println "setting catalogue-id to " catalogue-id)
@@ -19,3 +20,6 @@
           (if (= id catalogue-id)
             catalogue))
         @catalogues))
+
+(defn set-view [new-view]
+  (reset! view new-view))

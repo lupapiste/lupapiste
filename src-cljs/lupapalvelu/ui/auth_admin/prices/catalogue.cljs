@@ -7,7 +7,7 @@
             [lupapalvelu.ui.components :as uc]
             [schema.core :as sc]))
 
-(rum/defc catalogue-select < rum/reactive
+(rum/defc CatalogueSelect < rum/reactive
   [catalogues selected-catalogue-id]
   ;;(println "catalogue-select selected-id: " @selected-catalogue-id)
   (uc/select state/set-selected-catalogue-id ;;update-stamp-view
@@ -44,6 +44,10 @@
    [:td unit]
    [:td (RowOperations operations)]])
 
+(rum/defc CatalogueByOperations [selected-catalogue]
+  [:div
+   "Operaatioittain"])
+
 (rum/defc CatalogueByRows [selected-catalogue]
   [:div
    [:table {:class-name "invoice-operations-table"}
@@ -60,22 +64,47 @@
     [:tbody
      (map CatalogueRow (:rows selected-catalogue))]]])
 
+(rum/defc ViewSwitch  < rum/reactive
+  [_]
+  (let [view (rum/react state/view)
+        selected-style {:background-color "#f39129"
+                        :color "white"
+                        :border "1px solid #f39129"}
+        unselected-style {:background-color "white"
+                          :color "#f39129"
+                          :border "1px solid #f39129"}
+        row-button-style (if  (= view :by-rows) selected-style unselected-style)
+        operation-button-style (if  (= view :by-operations) selected-style unselected-style)]
+    [:div {:style {:margin-bottom "2em"}}
+     [:span {:style {:padding-right "1em"}} "Näytä:"]
+     [:button  {:style row-button-style
+                :on-click (fn [] (state/set-view :by-rows))}
+      [:span "Tuoteriveittäin"]]
+
+     [:button {:style operation-button-style
+               :on-click (fn [] (state/set-view :by-operations))}
+      [:span "Toimenpiteittäin"]]]))
+
 (rum/defc Catalogue < rum/reactive
   [_]
-  (let [selected-catalogue (state/get-catalogue (rum/react state/selected-catalogue-id))]
+  (let [selected-catalogue (state/get-catalogue (rum/react state/selected-catalogue-id))
+        view (rum/react state/view)]
     [:div
      ;; [:div (str "selected-catalogue: " selected-catalogue)]
      ;; [:div (str "selected-catalogue-id: " (rum/react state/selected-catalogue-id))]
      ;;[:h2 (loc "price-catalogue.tab.title")]
      [:div {:style {:margin-bottom "2em"}}
-      (catalogue-select state/catalogues
+      (CatalogueSelect state/catalogues
                         state/selected-catalogue-id)
       ;;TAHAN EHKA PVM
       ;;TAHAN UUSI taksa nappi oikeaan laitaan
       ]
+     [:div (ViewSwitch)]
+
      [:div
-      (CatalogueByRows selected-catalogue)
-      ]]))
+      (if (= view :by-rows)
+        (CatalogueByRows selected-catalogue)
+        (CatalogueByOperations selected-catalogue))]]))
 
 (defonce args (atom {}))
 
@@ -90,4 +119,5 @@
   (swap! args assoc :auth-model (aget componentParams "authModel") :dom-id (name domId))
   (reset! state/org-id (js/ko.unwrap (common/oget componentParams "orgId")))
   (service/fetch-price-catalogues)
+  (state/set-view :by-rows)
   (mount-component))
