@@ -114,20 +114,17 @@
                                       (map (partial invoices/enrich-application-data applications)))]
     (ok {:invoices invoices-with-extra-data})))
 
-(defquery user-organization-price-catalogues
-  {:description "Query that returns price catalogues for users' organizations"
-   :feature          :invoices
+(defquery organization-price-catalogues
+  {:description "Query that returns price catalogues for an organization"
+   :permissions      [{:required [:organization/admin]}]
    :user-roles       #{:authority}
-   :parameters       []}
-  [{:keys [user user-organizations] :as command}]
+   :feature          :invoices
+   :parameters       [org-id]
+   :input-validators [(partial action/non-blank-parameters [:org-id])]}
+  [{:keys [data user user-organizations] :as command}]
   (info "user-organization-price-catalogues user: " user)
-  (let [required-role-in-orgs "authority" ;;Will be changed to laskuttaja role
-        user-org-ids (invoices/get-user-orgs-having-role user required-role-in-orgs)
-        price-catalogues {:huhhahhei "ja rommia pullo"}
-        ;; invoices (invoices/fetch-invoices-for-organizations user-org-ids)
-        ;; applications (invoices/fetch-application-data (map :application-id invoices) [:address])
-        ;; invoices-with-extra-data (->> invoices
-        ;;                               (map (partial invoices/enrich-org-data user-organizations))
-    ;;                               (map (partial invoices/enrich-application-data applications)))
-        ]
+  (info "user-organization-price-catalogues org-id: " (:org-id data))
+  (info "user-organization-price-catalogues bound variable org-id: " org-id)
+  (let [price-catalogues (invoices/fetch-price-catalogues org-id)]
+    (invoices/validate-price-catalogues price-catalogues)
     (ok {:price-catalogues price-catalogues})))
