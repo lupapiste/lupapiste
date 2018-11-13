@@ -306,6 +306,9 @@
                                (deduce-operation-type kuntalupatunnus))
                       :tunnus (krysp-reader/xml->kuntalupatunnus xml)))) data)))
 
+(def tilat
+  (memoize get-operation-types-for-testset))
+
 (defn get-asian-kuvaus [kuntalupatunnus]
   (-> kuntalupatunnus get-xml-for-kuntalupatunnus building-reader/->asian-tiedot))
 

@@ -44,7 +44,7 @@
   ;;    X linked permitIDs might be in funny order, check that it's normalised (`lupapalvelu.conversion.util/normalize-permit-id')
   ;;    X we need to generate LP id for conversion cases (do not use do-create-application)
   ;;
-  ;;    X Types that need special handling: VAK (not own thing, but adds data to linked application) - EDIT: Not possible, we can't export these.
+  ;;    - Types that need special handling: VAK (not own thing, but adds data to linked application)
   ;;
   (let [{:keys [hakijat]} app-info
         municipality "092"
@@ -79,25 +79,17 @@
                           (conv-util/deduce-operation-type kuntalupatunnus (first operations))
                           (conv-util/deduce-operation-type kuntalupatunnus))
 
-        primary-op-doc (app/make-document primary-op-name
-                                          (now)
-                                          manual-schema-datas
-                                          (schemas/get-schema 1 "uusiRakennus")) ;; Test
-        secondary-op-names (when (seq (rest operations))
-                             (map (partial conv-util/deduce-operation-type kuntalupatunnus) (rest operations)))
-        _ (swap! tila assoc :secondary-op-names secondary-op-names)
+        secondary-op-names (map (partial conv-util/deduce-operation-type kuntalupatunnus) (rest operations))
+
         make-app-info {:id              id
                        :organization    organization
                        ; :operation-name  "aiemmalla-luvalla-hakeminen" ; FIXME: no fixed operation in conversion, see above
-                       ; :operation-name  (conv-util/deduce-operation-type xml)
                        :operation-name  primary-op-name
                        ; or maybe something like:               :operation-name  "conversion"
                        :location        (app/->location (:x location-info) (:y location-info))
                        :propertyId      (:propertyId location-info)
                        :address         (:address location-info)
                        :municipality    municipality}
-
-        _ (swap! tila assoc :app-info app-info)
 
         created-application (app/make-application make-app-info
                                                   []            ; messages
@@ -111,8 +103,6 @@
                                     (when (clojure.string/includes? kuntalupatunnus "TJO")
                                       (map prev-permit/tyonjohtaja->tj-document (:tyonjohtajat app-info)))))
 
-        _ (swap! tila assoc :new-parties new-parties)
-
         structure-descriptions (map :description buildings-and-structures)
         ; TODO: create operations from app-info, see above.
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
@@ -120,7 +110,14 @@
         ;; make secondaryOperations for buildings other than the first one in case there are many
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2 :name %3) other-building-docs (rest structure-descriptions) secondary-op-names)
-        _ (swap! tila assoc :secondary-ops secondary-ops :other-building-docs other-building-docs)
+
+        _ (swap! tila assoc
+                 :secondary-op-names secondary-op-names
+                 :app1 created-application
+                 :new-parties new-parties
+                 :secondary-ops secondary-ops
+                 :document-datas document-datas
+                 :other-building-docs other-building-docs)
 
         structures (->> xml krysp-reader/->rakennelmatiedot (map conv-util/rakennelmatieto->kaupunkikuvatoimenpide))
 
@@ -152,15 +149,7 @@
                                        :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
                                        :facta-imported true))
 
-        _ (swap! tila assoc :app created-application)
-
-        ;; Poistetaan tyhjät osapuoli-dokumentit
-        ; non-empty-osapuoli (filterv (complement conv-util/is-empty-osapuoli?) (:documents created-application))
-
-        ; _ (swap! tila assoc :osap non-empty-osapuoli)
-
-        ; created-application (assoc created-application :documents non-empty-osapuoli)
-        ; _ (swap! tila assoc :updatedapp created-application)
+        _ (swap! tila assoc :app2 created-application)
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
