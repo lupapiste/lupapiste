@@ -63,8 +63,7 @@
   [application]
   (->> (all-verdicts application)
        (map vc/verdict-municipality-permit-id)
-       (filter not-empty)
-       not-empty))
+       (filterv not-empty)))
 
 (defn published-municipality-permit-ids
   "Return the municipality permit ids (aka backend ids, backing system
@@ -72,8 +71,7 @@
   [application]
   (->> (all-verdicts application)
        (filter vc/published?)
-       (map vc/verdict-municipality-permit-id)
-       not-empty))
+       (mapv vc/verdict-municipality-permit-id)))
 
 (defn latest-published-verdict-date
   "The latest verdict date (timestamp) of the published application

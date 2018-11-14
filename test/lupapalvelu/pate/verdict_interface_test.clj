@@ -54,14 +54,14 @@
     (kuntalupatunnukset {:pate-verdicts [draft modern blank wrapped unwrapped]
                          :verdicts backends})
     => ["first" "second" "one" "two" "three" "four"]
-    (kuntalupatunnukset nil) => nil
-    (kuntalupatunnukset {}) => nil)))
+    (kuntalupatunnukset nil) => []
+    (kuntalupatunnukset {}) => [])))
 
 (fact "published-municipality-permit-ids"
       (published-municipality-permit-ids {:pate-verdicts [{:category "r"
                                                            :legacy?  true
                                                            :data     {:kuntalupatunnus "one"}}]})
-      => nil
+      => []
       (published-municipality-permit-ids {:pate-verdicts [{:category  "r"
                                                            :legacy?   true
                                                            :published {}
@@ -81,8 +81,8 @@
                                                            :legacy?  true
                                                            :data     {:kuntalupatunnus "one"}}]
                                           :verdicts [{:kuntalupatunnus "first"}]})
-      => ["fist" "three"]
-      (published-municipality-permit-ids {}) => nil)
+      => ["first" "three"]
+      (published-municipality-permit-ids {}) => [])
 
 (defn- ->iso-8601-date [ts]
   (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) (c/from-long (long ts))))
