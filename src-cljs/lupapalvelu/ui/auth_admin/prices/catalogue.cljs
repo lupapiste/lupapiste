@@ -5,17 +5,52 @@
             [lupapalvelu.ui.authorization :as auth]
             [lupapalvelu.ui.common :as common :refer [loc]]
             [lupapalvelu.ui.components :as uc]
+            [lupapalvelu.invoices.shared.util :as util]
             [schema.core :as sc]))
 
 (rum/defc CatalogueSelect < rum/reactive
   [catalogues selected-catalogue-id]
-  ;;(println "catalogue-select selected-id: " @selected-catalogue-id)
-  (uc/select state/set-selected-catalogue-id ;;update-stamp-view
+  (uc/select state/set-selected-catalogue-id
              "catalogue-select"
              (rum/react selected-catalogue-id)
              (cons ["" (loc "choose")]
                    (map (juxt :id :id) (rum/react catalogues)))
              "dropdown"))
+
+(rum/defc OperationCatalogueRow
+  < {:key-fn (fn [operation row] (str operation))}
+  [operation {:keys [text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
+  [:tr
+   [:td text]
+   [:td price-per-unit]
+   [:td discount-percent]
+   [:td min-total-price]
+   [:td max-total-price]
+   [:td unit]])
+
+(rum/defc OperationTable
+  < {:key-fn (fn [operation rows] (str operation))}
+  [operation rows]
+  [:div operation " no of rows " (count rows)]
+  [:div
+   [:table {:class-name "invoice-operations-table"}
+     [:thead
+      [:tr
+       [:th operation]
+       [:th "A-hinta"]
+       [:th "Ale %"]
+       [:th "Vähintään"]
+       [:th "Enintään"]
+       [:th "Yksikkö"]]]
+    [:tbody
+     (map OperationCatalogueRow operation rows)]]])
+
+(rum/defc CatalogueByOperations [selected-catalogue]
+  (let [rows-by-operation (util/rows-by-operation selected-catalogue)]
+    [:div
+     (println "rows-by-operation: " )
+     (for [[operation rows] rows-by-operation]
+       (OperationTable operation rows))]))
 
 (rum/defc RowOperation
   < {:key-fn (fn [operation] (str "operation-" operation))}
@@ -23,8 +58,6 @@
   [:span (str operation " ")])
 
 (rum/defc RowOperations [operations]
-
-
   [:div
    (map (fn [operation]
           (RowOperation operation))
@@ -32,8 +65,7 @@
 
 (rum/defc CatalogueRow
   < {:key-fn (fn [row] (str (:code row) "-" (:text row)))}
-  [{:keys [code text price-per-unit discount-percent min-total-price max-total-price unit operations]
-                         :as row}]
+  [{:keys [code text price-per-unit discount-percent min-total-price max-total-price unit operations] :as row}]
   [:tr
    [:td code]
    [:td text]
@@ -44,13 +76,9 @@
    [:td unit]
    [:td (RowOperations operations)]])
 
-(rum/defc CatalogueByOperations [selected-catalogue]
-  [:div
-   "Operaatioittain"])
-
 (rum/defc CatalogueByRows [selected-catalogue]
   [:div
-   [:table {:class-name "invoice-operations-table"}
+   [:table
      [:thead
       [:tr
        [:th "Koodi"]
@@ -67,10 +95,10 @@
 (rum/defc ViewSwitch  < rum/reactive
   [_]
   (let [view (rum/react state/view)
-        selected-style {:background-color "#f39129"
+        selected-style {:backgroundColor "#f39129"
                         :color "white"
                         :border "1px solid #f39129"}
-        unselected-style {:background-color "white"
+        unselected-style {:backgroundColor "white"
                           :color "#f39129"
                           :border "1px solid #f39129"}
         row-button-style (if  (= view :by-rows) selected-style unselected-style)
