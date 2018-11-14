@@ -220,9 +220,9 @@ nav {
         line-height: $header-height;
       }
     }
-
-    .header-dropdown { @include header-dropdown; }
   }
+
+  .header-dropdown { @include header-dropdown; }
 }
 
 .nav-bottom {

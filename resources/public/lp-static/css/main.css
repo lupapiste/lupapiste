@@ -1602,11 +1602,11 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   line-height: 60px;
 }
 
-nav .header-menu .header-dropdown {
+nav .header-dropdown {
   display: inline-block;
 }
 
-nav .header-menu .header-dropdown > .header-dropdown-button {
+nav .header-dropdown > .header-dropdown-button {
   display: inline-block;
   padding-left: 12px;
   padding-right: 12px;
@@ -1618,24 +1618,24 @@ nav .header-menu .header-dropdown > .header-dropdown-button {
   text-decoration: none;
 }
 
-nav .header-menu .header-dropdown > .header-dropdown-button > span {
+nav .header-dropdown > .header-dropdown-button > span {
   vertical-align: middle;
 }
 
-nav .header-menu .header-dropdown > .header-dropdown-button:hover {
+nav .header-dropdown > .header-dropdown-button:hover {
   color: white;
 }
 
-nav .header-menu .header-dropdown.active > .header-dropdown-button {
+nav .header-dropdown.active > .header-dropdown-button {
   background-color: #555555;
   color: white;
 }
 
-nav .header-menu .header-dropdown.active > .header-dropdown-button:hover {
+nav .header-dropdown.active > .header-dropdown-button:hover {
   color: #f7ac2e;
 }
 
-nav .header-menu .header-dropdown > ul {
+nav .header-dropdown > ul {
   display: none;
   position: fixed;
   padding: 0;
@@ -1644,12 +1644,12 @@ nav .header-menu .header-dropdown > ul {
   list-style-type: none;
 }
 
-nav .header-menu .header-dropdown > ul > li {
+nav .header-dropdown > ul > li {
   display: table;
   width: 100%;
 }
 
-nav .header-menu .header-dropdown > ul > li > a {
+nav .header-dropdown > ul > li > a {
   display: table-cell;
   width: auto;
   padding-left: 12px;
@@ -1659,25 +1659,25 @@ nav .header-menu .header-dropdown > ul > li > a {
   color: black;
 }
 
-nav .header-menu .header-dropdown > ul > li > a > span {
+nav .header-dropdown > ul > li > a > span {
   vertical-align: middle;
 }
 
-nav .header-menu .header-dropdown > ul > li:hover {
+nav .header-dropdown > ul > li:hover {
   background-color: #f7ac2e;
 }
 
-nav .header-menu .header-dropdown > ul > li:hover > a {
+nav .header-dropdown > ul > li:hover > a {
   color: white;
   text-decoration: none;
 }
 
-nav .header-menu .header-dropdown > ul > li.spacer {
+nav .header-dropdown > ul > li.spacer {
   height: 1px;
   background-color: #f7ac2e;
 }
 
-nav .header-menu .header-dropdown.active > ul {
+nav .header-dropdown.active > ul {
   display: block;
 }
 

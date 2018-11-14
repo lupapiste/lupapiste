@@ -33,5 +33,6 @@
   $(function() {
     $( "#language-select").applyBindings( langs );
     $( ".language-menu").applyBindings( langs );
+    $("#language-menu").applyBindings(langs);
   });
 })();

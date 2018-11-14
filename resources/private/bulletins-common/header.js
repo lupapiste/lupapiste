@@ -47,6 +47,7 @@
   $(function() {
     $("#language-select").applyBindings( langs );
     $(".language-menu").applyBindings( langs );
+    $("#language-menu").applyBindings(langs);
     hub.subscribe("vetumaService::serviceCreated", function(vetumaService) {
       $("#header-user-menu").applyBindings(new UserMenu(vetumaService));
     });
