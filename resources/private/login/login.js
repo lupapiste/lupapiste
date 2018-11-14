@@ -95,16 +95,13 @@
       .call();
   };
 
+  // This can be called from the WP main page or the login page of the app.
   var handleLoginSubmit = function() {
     if (document.getElementById("login-password").offsetParent !== null) {
       passwordVisible(true);
     }
     var username = typeof($("#login-username").val()) === "string" ? _.trim($("#login-username").val()) : username();
-    if (passwordVisible()) {
-      checkForSso(username, login);
-    } else {
-      checkForSso(username, showPassword);
-    }
+    checkForSso(username, passwordVisible() ? login : showPassword);
   };
 
   $(function() {
