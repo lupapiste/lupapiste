@@ -34,7 +34,7 @@
    (opt :labelclass)  sc/Str         ;; Special label style class
    (opt :i18nkey)     sc/Str         ;; Absolute localization key
    (opt :locPrefix)   sc/Str         ;;
-   (opt :layout)      (sc/enum :full-width)
+   (opt :layout)      (sc/enum :full-width :initial-width)
    (opt :hidden)      sc/Bool        ;; Element is hidden (default false)
    (opt :label)       sc/Bool        ;; Label is shown? (default true)
    (opt :size)        (apply sc/enum input-sizes) ;; Element size (default ?)

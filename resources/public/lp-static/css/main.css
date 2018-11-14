@@ -11543,8 +11543,16 @@ div.review-done {
   margin-bottom: 0;
 }
 
-.layout--full-width {
+input.form-input.layout--full-width, input.layout--full-width.form-input--inline,
+textarea.form-input.layout--full-width,
+textarea.layout--full-width.form-input--inline {
   width: 100%;
+}
+
+input.form-input.layout--initial-width, input.layout--initial-width.form-input--inline,
+textarea.form-input.layout--initial-width,
+textarea.layout--initial-width.form-input--inline {
+  width: initial;
 }
 
 table {

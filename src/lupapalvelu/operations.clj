@@ -109,6 +109,8 @@
       ["vesistoluvat" :ya-kayttolupa-vesistoluvat]
       ["terassit" :ya-kayttolupa-terassit]
       ["kioskit" :ya-kayttolupa-kioskit]
+      ["promootio" :promootio]
+      ["lyhytaikainen-maanvuokraus" :lyhytaikainen-maanvuokraus]
       ["muu-kayttolupa" :ya-kayttolupa-muu-kayttolupa]]]
     ["jatkoaika" :ya-jatkoaika]]])
 
@@ -181,10 +183,7 @@
     ["yleiskaava" :yleiskaava]
     ]])
 
-(def operation-tree-for-A
-  ["allu"
-   [["promootio" :promootio]
-    ["lyhytaikainen-maanvuokraus" :lyhytaikainen-maanvuokraus]]])
+
 
 
 (def operation-tree
@@ -195,8 +194,7 @@
          operation-tree-for-Y
          operation-tree-for-YA]
       ~@[operation-tree-for-KT
-         operation-tree-for-MM]
-      ~@[operation-tree-for-A]]))
+         operation-tree-for-MM]]))
 
 
 ; Operations must be the same as in the tree structure above.
@@ -1310,13 +1308,13 @@
                        :asianhallinta false
                        :unsubscribe-notifications true}})
 
-(def- common-allu-schemas ["maksaja"])
 
+;; Allu operations (permit type A). Located within YA in the operations tree.
 (def- a-operations
   {:promootio                  {:schema                    "promootio"
                                 :permit-type               permit/A
                                 :applicant-doc-schema      applicant-doc-schema-name-hakija
-                                :required                  common-allu-schemas
+                                :required                  ["maksaja" "promootio-time"]
                                 :attachments               []
                                 :add-operation-allowed     false
                                 :copying-allowed           true
@@ -1325,7 +1323,7 @@
    :lyhytaikainen-maanvuokraus {:schema                    "lyhytaikainen-maanvuokraus"
                                 :permit-type               permit/A
                                 :applicant-doc-schema      applicant-doc-schema-name-hakija
-                                :required                  common-allu-schemas
+                                :required                  ["maksaja"]
                                 :attachments               []
                                 :add-operation-allowed     false
                                 :copying-allowed           true

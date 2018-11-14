@@ -1725,6 +1725,12 @@ div.review-done {
   margin-bottom: 0;
 }
 
-.layout--full-width {
+input.form-input.layout--full-width,
+textarea.form-input.layout--full-width {
   width: 100%;
+}
+
+input.form-input.layout--initial-width,
+textarea.form-input.layout--initial-width{
+  width: initial;
 }

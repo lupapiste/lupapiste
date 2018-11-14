@@ -559,10 +559,12 @@
 (defcommand replace-operation
   {:parameters       [id opId operation]
    :states           states/pre-sent-application-states
-   :permissions      [{:context  {:application {:state #{:draft}}}
+   :permissions      [{:context  {:application {:state #{:draft}
+                                                :permitType (partial util/not=as-kw :A)}}
                        :required [:application/edit-draft :application/edit-operation]}
 
-                      {:required [:application/edit-operation]}]
+                      {:context  {:application {:permitType (partial util/not=as-kw :A)}}
+                       :required [:application/edit-operation]}]
    :input-validators [operation-validator
                       (partial action/non-blank-parameters [:id :opId :operation])]
    :pre-checks       [replace-operation-allowed-pre-check

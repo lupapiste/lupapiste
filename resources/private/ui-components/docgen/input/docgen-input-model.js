@@ -17,9 +17,8 @@ LUPAPISTE.DocgenInputModel = function(params) {
   self.documentId = params.documentId || params.schema.documentId;
   self.model = service.getInDocument(self.documentId, params.path);
   self.value = self.model.model;
-  self.schemaCss = _.compact( _.concat(self.schema.css,
-                                       self.schema.layout === "full-width"
-                                       ? "layout--full-width" : null)).join( " " );
+
+  self.schemaCss = self.schema.css && self.schema.css.join( " ");
 
   self.i18npath = params.schema.i18nkey ? [params.schema.i18nkey] : params.schema.i18npath;
   if (!self.i18npath) {
@@ -58,6 +57,8 @@ LUPAPISTE.DocgenInputModel = function(params) {
     self.helpMessage(loc(helpLocKey));
   }
 
+  var layoutClass =  self.schema.layout ? "layout--" + self.schema.layout : "";
+
   function defaultInputClasses() {
     var typeDefaults = {select: "form-input combobox",
                         string: "form-input",
@@ -87,7 +88,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
   });
 
   self.inputClasses = self.disposedComputed(function() {
-    return (self.schemaCss || defaultInputClasses()) + " " + self.signalClasses();
+    return (self.schemaCss || defaultInputClasses()) + " " + self.signalClasses() + layoutClass;
   });
 
   self.readonly = self.disposedPureComputed(function () {

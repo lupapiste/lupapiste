@@ -22,8 +22,28 @@
                                            :required    true
                                            :layout      :full-width}]
                             :rows        [["promootio-name::3"]
-                                          ["promootio-description::3"]]
-                            })
+                                          ["promootio-description::3"]]})
+
+(def promootio-time {:name        "promootio-time"
+                     :type        :group
+                     :approvable  false
+                     :group-help  "help"
+                     :uicomponent :docgenGroup
+                     :css         [:allu-group]
+                     :template    "form-grid-docgen-group-template"
+                     :body        [{:name     "start-date"
+                                    :type     :date
+                                    :layout   :initial-width
+                                    ;;:placeholder "promootio.date.placeholder"
+                                    :required true}
+                                   {:name     "end-date"
+                                    :type     :date
+                                    :layout   :initial-width
+                                    ;;:placeholder "promootio.date.placeholder"
+                                    :required true}
+                                   ]
+                     :rows        [["start-date"]
+                                   ["end-date"]]})
 
 (def lmv-description {:name       "lyhytaikainen-maanvuokraus"
                       :type       :group
@@ -45,6 +65,10 @@
            :approvable true
            :order 1}
     :body [promootio-description]}
+   {:info {:name "promootio-time"
+           :approvable true
+           :order 2}
+    :body [promootio-time]}
    {:info {:name "lyhytaikainen-maanvuokraus"
            :approvable true
            :order 1}
