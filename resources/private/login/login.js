@@ -74,23 +74,24 @@
 
   hub.onPageLoad("login", recallMe);
 
-  var checkForSso = function() {
-    clearError();
+  var showPassword = function() {
     var passwordElement = document.getElementById("login-password");
+    passwordVisible(true);
+    passwordElement.focus();
+  };
+
+  var checkForSso = function(username, cb) {
+    clearError();
     ajax.get("/api/login-sso-uri")
-      .param("username", _.trim(username()))
+      .param("username", _.trim(username))
       .success(function(data) {
         if (data.uri) {
           window.location = data.uri;
         } else {
-          passwordVisible(true);
-          passwordElement.focus();
+          cb();
         }
       })
-      .error(function() {
-        passwordVisible(true);
-        passwordElement.focus();
-      })
+      .error(cb)
       .call();
   };
 
@@ -98,10 +99,11 @@
     if (document.getElementById("login-password").offsetParent !== null) {
       passwordVisible(true);
     }
+    var username = typeof($("#login-username").val()) === "string" ? _.trim($("#login-username").val()) : username();
     if (passwordVisible()) {
-      login();
+      checkForSso(username, login);
     } else {
-      checkForSso();
+      checkForSso(username, showPassword);
     }
   };
 
