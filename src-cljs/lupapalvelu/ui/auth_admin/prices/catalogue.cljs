@@ -23,7 +23,7 @@
    (->date-str (:valid-from catalogue))
    " - "
    (->date-str (:valid-until catalogue))
-   (if (= "draft" (:state catalogue)) "Luonnos")))
+   (if (= "draft" (:state catalogue)) (loc "price-catalogue.draft"))))
 
 (rum/defc CatalogueSelect < rum/reactive
   [catalogues selected-catalogue-id]
@@ -49,17 +49,16 @@
 (rum/defc OperationTable
   < {:key-fn (fn [operation rows] (str operation))}
   [operation rows]
-  [:div operation " no of rows " (count rows)]
   [:div
    [:table {:class-name "invoice-operations-table"}
      [:thead
       [:tr
        [:th operation]
-       [:th "A-hinta"]
-       [:th "Ale %"]
-       [:th "Vähintään"]
-       [:th "Enintään"]
-       [:th "Yksikkö"]]]
+       [:th (loc "price-catalogue.unit-price")]
+       [:th (loc "price-catalogue.discount-percent")]
+       [:th (loc "price-catalogue.minimum")]
+       [:th (loc "price-catalogue.maximum")]
+       [:th (loc "price-catalogue.unit")]]]
     [:tbody
      (map OperationCatalogueRow operation rows)]]])
 
@@ -105,14 +104,14 @@
    [:table
      [:thead
       [:tr
-       [:th "Koodi"]
-       [:th "Tuote"]
-       [:th "A-hinta"]
-       [:th "%"]
-       [:th "Vähintään"]
-       [:th "Enintään"]
-       [:th "Yksikkö"]
-       [:th "Kuuluu toimenpiteisiin"]]]
+       [:th (loc "price-catalogue.code")]
+       [:th (loc "price-catalogue.product")]
+       [:th (loc "price-catalogue.unit-price")]
+       [:th (loc "price-catalogue.discount-percent")]
+       [:th (loc "price-catalogue.minimum")]
+       [:th (loc "price-catalogue.maximum")]
+       [:th (loc "price-catalogue.unit")]
+       [:th (loc "price-catalogue.row-operations")]]]
     [:tbody
      (map CatalogueRow (:rows selected-catalogue))]]])
 
@@ -128,14 +127,14 @@
         row-button-style (if  (= view :by-rows) selected-style unselected-style)
         operation-button-style (if  (= view :by-operations) selected-style unselected-style)]
     [:div {:style {:margin-bottom "2em"}}
-     [:span {:style {:padding-right "1em"}} "Näytä:"]
+     [:span {:style {:padding-right "1em"}} (loc "price-catalogue.show")]
      [:button  {:style row-button-style
                 :on-click (fn [] (state/set-view :by-rows))}
-      [:span "Tuoteriveittäin"]]
+      [:span (loc "price-catalogue.by-product-rows")]]
 
      [:button {:style operation-button-style
                :on-click (fn [] (state/set-view :by-operations))}
-      [:span "Toimenpiteittäin"]]]))
+      [:span (loc "price-catalogue.by-operations")]]]))
 
 (rum/defc Catalogue < rum/reactive
   [_]
