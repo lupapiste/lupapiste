@@ -1,0 +1,22 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-time-template">
+  <div class="inline" data-bind="template: componentTemplate"></div>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="default-docgen-time-template">
+
+  <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
+  <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
+  <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
+  <span>
+    <input type="text"
+           data-bind="timepicker: value,
+                      value: value,
+                      timepickerOptions: timepickerOptions,
+                      css: inputClasses,
+                      event: events,
+                      disable: disabled() || readonly(),
+                      testId: path.join('.')">
+
+  </span>
+  <span data-bind="saveIndicator: indicator, label: false"></span>
+</script>

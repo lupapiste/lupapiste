@@ -331,6 +331,40 @@ input.tip.dateinput.dateinput--small {
   }
 }
 
+input.ui-timepicker-input {
+  @include input-fields;
+  background-image: url("/lp-static/img/clock-orange-dark.png");
+  background-position: right 4px center;
+  background-repeat: no-repeat;
+  padding-right: 34px;
+  width: initial;
+  &:focus {
+    background-image: url("/lp-static/img/clock-orange-light.png");
+  }
+  &:disabled {
+    background-image: url("/lp-static/img/clock-gray187.png");
+    color: $input-select-disabled-icon;
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+    padding-right: 34px;
+  }
+}
+
+.form-grid input.tip.ui-timepicker-input,
+input.tip.ui-timepicker-input {
+  background-image: url("/lp-static/img/clock-orange.png");
+  border-color: $orange-dark;
+  &:focus {
+    border-color: $input-focus-border-color;
+    background-image: url("/lp-static/img/clock-orange-light.png");
+  }
+  &:disabled {
+    border-color: $input-disabled-border-color;
+    background-image: url("/lp-static/img/clock-gray187.png");
+    color: $input-select-disabled-icon
+  }
+}
+
 
 
 input.grid-style-input {

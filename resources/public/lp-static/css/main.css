@@ -8489,6 +8489,74 @@ input.tip.dateinput.dateinput--small:disabled {
   background-image: url("/lp-static/img/calendar-12-gray187.png");
 }
 
+input.ui-timepicker-input {
+  padding: 0 12px;
+  box-sizing: border-box;
+  min-height: 40px;
+  height: 40px;
+  font-size: 16px;
+  color: #333333;
+  border: 1px solid #bbbbbb;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+  -moz-appearance: none;
+  background-image: url("/lp-static/img/clock-orange-dark.png");
+  background-position: right 4px center;
+  background-repeat: no-repeat;
+  padding-right: 34px;
+  width: initial;
+}
+
+input.ui-timepicker-input:focus {
+  color: #333333;
+  border-color: #fbc732;
+}
+
+input.ui-timepicker-input:disabled {
+  border-color: #dddddd;
+  background-color: #f6f6f6;
+  cursor: not-allowed;
+}
+
+input.ui-timepicker-input.warning {
+  border-color: #df3215;
+}
+
+input.ui-timepicker-input.required {
+  border-color: #f39129;
+}
+
+input.ui-timepicker-input:focus {
+  background-image: url("/lp-static/img/clock-orange-light.png");
+}
+
+input.ui-timepicker-input:disabled {
+  background-image: url("/lp-static/img/clock-gray187.png");
+  color: #bbbbbb;
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  padding-right: 34px;
+}
+
+.form-grid input.tip.ui-timepicker-input,
+input.tip.ui-timepicker-input {
+  background-image: url("/lp-static/img/clock-orange.png");
+  border-color: #f39129;
+}
+
+.form-grid input.tip.ui-timepicker-input:focus,
+input.tip.ui-timepicker-input:focus {
+  border-color: #fbc732;
+  background-image: url("/lp-static/img/clock-orange-light.png");
+}
+
+.form-grid input.tip.ui-timepicker-input:disabled,
+input.tip.ui-timepicker-input:disabled {
+  border-color: #dddddd;
+  background-image: url("/lp-static/img/clock-gray187.png");
+  color: #bbbbbb;
+}
+
 input.grid-style-input {
   padding: 0 12px;
   box-sizing: border-box;

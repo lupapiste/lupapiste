@@ -41,8 +41,11 @@
                                     :layout   :initial-width
                                     ;;:placeholder "promootio.date.placeholder"
                                     :required true}
+                                   {:name   "start-time"
+                                    :type   :time
+                                    :layout :initial-width}
                                    ]
-                     :rows        [["start-date"]
+                     :rows        [["start-date" "start-time"]
                                    ["end-date"]]})
 
 (def lmv-description {:name       "lyhytaikainen-maanvuokraus"
