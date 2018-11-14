@@ -48,7 +48,7 @@
 (rum/defc CatalogueByOperations [selected-catalogue]
   (let [rows-by-operation (util/rows-by-operation selected-catalogue)]
     [:div
-     (println "rows-by-operation: " )
+     (println "rows-by-operation: ")
      (for [[operation rows] rows-by-operation]
        (OperationTable operation rows))]))
 
@@ -118,21 +118,17 @@
   (let [selected-catalogue (state/get-catalogue (rum/react state/selected-catalogue-id))
         view (rum/react state/view)]
     [:div
-     ;; [:div (str "selected-catalogue: " selected-catalogue)]
-     ;; [:div (str "selected-catalogue-id: " (rum/react state/selected-catalogue-id))]
-     ;;[:h2 (loc "price-catalogue.tab.title")]
      [:div {:style {:margin-bottom "2em"}}
       (CatalogueSelect state/catalogues
-                        state/selected-catalogue-id)
-      ;;TAHAN EHKA PVM
-      ;;TAHAN UUSI taksa nappi oikeaan laitaan
+                       state/selected-catalogue-id)
+      ;;TODO add new taksa button here to the right side
       ]
-     [:div (ViewSwitch)]
-
+     [:div (if selected-catalogue (ViewSwitch))]
      [:div
-      (if (= view :by-rows)
-        (CatalogueByRows selected-catalogue)
-        (CatalogueByOperations selected-catalogue))]]))
+      (cond
+        (not selected-catalogue) nil
+        (= view :by-rows) (CatalogueByRows selected-catalogue)
+        (= view :by-operations) (CatalogueByOperations selected-catalogue))]]))
 
 (defonce args (atom {}))
 
