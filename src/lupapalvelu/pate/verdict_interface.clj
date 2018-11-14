@@ -66,6 +66,15 @@
        (filter not-empty)
        not-empty))
 
+(defn published-municipality-permit-ids
+  "Return the municipality permit ids (aka backend ids, backing system
+  ids, kuntalupatunnukset) from all published verdicts."
+  [application]
+  (->> (all-verdicts application)
+       (filter vc/published?)
+       (map vc/verdict-municipality-permit-id)
+       not-empty))
+
 (defn latest-published-verdict-date
   "The latest verdict date (timestamp) of the published application
   verdicts. The first argument is either an application or a list

@@ -57,6 +57,33 @@
     (kuntalupatunnukset nil) => nil
     (kuntalupatunnukset {}) => nil)))
 
+(fact "published-municipality-permit-ids"
+      (published-municipality-permit-ids {:pate-verdicts [{:category "r"
+                                                           :legacy?  true
+                                                           :data     {:kuntalupatunnus "one"}}]})
+      => nil
+      (published-municipality-permit-ids {:pate-verdicts [{:category  "r"
+                                                           :legacy?   true
+                                                           :published {}
+                                                           :data      {:kuntalupatunnus {:_value    "three"
+                                                                                         :_user     "hello"
+                                                                                         :_modified 12345}}}]})
+      => ["three"]
+      (published-municipality-permit-ids {:verdicts [{:kuntalupatunnus "first"}]})
+      => ["first"]
+      (published-municipality-permit-ids {:pate-verdicts [{:category  "r"
+                                                           :legacy?   true
+                                                           :published {}
+                                                           :data      {:kuntalupatunnus {:_value    "three"
+                                                                                         :_user     "hello"
+                                                                                         :_modified 12345}}}
+                                                          {:category "r"
+                                                           :legacy?  true
+                                                           :data     {:kuntalupatunnus "one"}}]
+                                          :verdicts [{:kuntalupatunnus "first"}]})
+      => ["fist" "three"]
+      (published-municipality-permit-ids {}) => nil)
+
 (defn- ->iso-8601-date [ts]
   (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) (c/from-long (long ts))))
 
