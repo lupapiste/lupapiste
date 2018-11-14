@@ -136,6 +136,11 @@
        (metadata/unwrap (:handler data))))
     (-> verdict latest-pk :paatoksentekija)))
 
+(defn verdict-municipality-permit-id [verdict]
+  (if (lupapiste-verdict? verdict)
+    (get-data verdict :kuntalupatunnus)
+    (:kuntalupatunnus verdict)))
+
 (defn verdict-signatures [{:keys [signatures] :as verdict}]
   (if (lupapiste-verdict? verdict)
     (some->> signatures
