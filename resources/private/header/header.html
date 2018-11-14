@@ -20,12 +20,12 @@
             </div>
             -->
             <div id="language-menu" class="header-dropdown"
-                 data-bind="css: {active: $root.languageMenuVisible},
-                            click: $root.toggleLanguageMenu, clickBubble: false">
-                <a class="header-dropdown-button">
+                 data-bind="css: {active: $root.languageMenuVisible}">
+                <a class="header-dropdown-button" href="#" data-test-id="language-link"
+                   data-bind="click: $root.toggleLanguageMenu, clickBubble: false">
                     <span data-bind="text: $root.currentLanguage" style="text-transform: uppercase"></span>
                     <span data-bind="css: {'lupicon-chevron-small-down': $root.languageMenuVisible() == false,
-                                     'lupicon-chevron-small-up': $root.languageMenuVisible}"></span>
+                                           'lupicon-chevron-small-up': $root.languageMenuVisible}"></span>
                 </a>
                 <ul data-bind="foreach: $root.languages">
                     <li>
@@ -76,7 +76,7 @@
                 </div>
                 <div id="header-user-dropdown" class="header-dropdown"
                      data-bind="with: $root.userMenu, css: {active: $root.userMenu.open()}">
-                    <a class="header-dropdown-button"
+                    <a class="header-dropdown-button" href="#"
                        data-bind="click: $data.toggleOpen(), clickBubble: false">
                         <span class="lupicon-user"></span>
                         <span class="narrow-hide" id="user-name"
