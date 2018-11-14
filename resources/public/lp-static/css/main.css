@@ -37099,6 +37099,10 @@ body.authority-admin .nav-box .brand > a {
   margin-left: 0;
 }
 
+nav .header-menu {
+  margin-right: 80px;
+}
+
 .navi-sidebar {
   position: fixed;
   height: 100%;
