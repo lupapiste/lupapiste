@@ -15,6 +15,15 @@
             [sade.util :refer [to-millis-from-local-date-string]]
             [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]))
 
+(defn catalogues-belong-to-org?
+  ([org-id catalogues]
+   (->> catalogues
+        (map :organization-id)
+        (every? (fn [catalogue-org-id] (= org-id catalogue-org-id))))))
+
+(defn belong-to-org? [org-id]
+  (partial catalogues-belong-to-org? org-id))
+
 (defn ensure-exists! [collection {:keys [id] :as doc}]
   (cond
     (not id) :fail
@@ -280,6 +289,7 @@
                                         :organization-id "753-R"
                                         :state "draft"
                                         :valid-from (to-millis-from-local-date-string "01.01.2019")
+                                        :valid-until (to-millis-from-local-date-string "01.02.2019")
                                         :rows [{:code "12345"
                                                 :text "Taksarivi 1"
                                                 :unit "kpl"
@@ -288,15 +298,9 @@
                                                 :operations ["toimenpide1" "toimenpide2"]
                                                 }]
                                         :meta {:created (to-millis-from-local-date-string "01.10.2018")
-                                               :created-by dummy-user}
-                                        }]
+                                               :created-by dummy-user}}]
               (ensure-exists! "price-catalogues" test-price-catalogue) => :ok
               (let [response (local-query sipoo :organization-price-catalogues
                                           :org-id "753-R")]
                 response => ok?
-                ;; (count (:price-catalogues response)) => 1
-                ;; (first (:price-catalogues response)) => test-price-catalogue
-                )
-              ))
-      )
-    ))
+                (:price-catalogues response) => (belong-to-org? "753-R")))))))
