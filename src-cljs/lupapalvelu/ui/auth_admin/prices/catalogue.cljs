@@ -1,12 +1,29 @@
 (ns lupapalvelu.ui.auth-admin.prices.catalogue
-  (:require [rum.core :as rum]
+  (:require [cljs-time.format :as tformat]
+            [cljs-time.coerce :as tcoerce]
             [lupapalvelu.ui.auth-admin.prices.service :as service]
             [lupapalvelu.ui.auth-admin.prices.state :as state]
             [lupapalvelu.ui.authorization :as auth]
             [lupapalvelu.ui.common :as common :refer [loc]]
             [lupapalvelu.ui.components :as uc]
             [lupapalvelu.invoices.shared.util :as util]
+            [rum.core :as rum]
             [schema.core :as sc]))
+
+(def invoice-date-formatter (tformat/formatter "dd.MM.yyyy"))
+
+(defn ->date-str [timestamp]
+  (when timestamp
+    (->> timestamp
+         tcoerce/from-long
+         (tformat/unparse invoice-date-formatter))))
+
+(defn format-catalogue-name-in-select [catalogue]
+  (str
+   (->date-str (:valid-from catalogue))
+   " - "
+   (->date-str (:valid-until catalogue))
+   (if (= "draft" (:state catalogue)) "Luonnos")))
 
 (rum/defc CatalogueSelect < rum/reactive
   [catalogues selected-catalogue-id]
@@ -14,7 +31,8 @@
              "catalogue-select"
              (rum/react selected-catalogue-id)
              (cons ["" (loc "choose")]
-                   (map (juxt :id :id) (rum/react catalogues)))
+                   (map (juxt :id format-catalogue-name-in-select)
+                        (rum/react catalogues)))
              "dropdown"))
 
 (rum/defc OperationCatalogueRow
@@ -55,7 +73,13 @@
 (rum/defc RowOperation
   < {:key-fn (fn [operation] (str "operation-" operation))}
   [operation]
-  [:span (str operation " ")])
+  [:span {:style {:backgroundColor "#f39129"
+                  :box-sizing "border-box"
+                  :color "white"
+                  :display "inline-block"
+                  :margin-right "0.5em"
+                  :padding-right "0.5em"
+                  :padding-left "1em"}} (str operation " ")])
 
 (rum/defc RowOperations [operations]
   [:div
