@@ -8489,7 +8489,7 @@ input.tip.dateinput.dateinput--small:disabled {
   background-image: url("/lp-static/img/calendar-12-gray187.png");
 }
 
-input.ui-timepicker-input {
+input.timepicker {
   padding: 0 12px;
   box-sizing: border-box;
   min-height: 40px;
@@ -8507,30 +8507,30 @@ input.ui-timepicker-input {
   width: initial;
 }
 
-input.ui-timepicker-input:focus {
+input.timepicker:focus {
   color: #333333;
   border-color: #fbc732;
 }
 
-input.ui-timepicker-input:disabled {
+input.timepicker:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
   cursor: not-allowed;
 }
 
-input.ui-timepicker-input.warning {
+input.timepicker.warning {
   border-color: #df3215;
 }
 
-input.ui-timepicker-input.required {
+input.timepicker.required {
   border-color: #f39129;
 }
 
-input.ui-timepicker-input:focus {
+input.timepicker:focus {
   background-image: url("/lp-static/img/clock-orange-light.png");
 }
 
-input.ui-timepicker-input:disabled {
+input.timepicker:disabled {
   background-image: url("/lp-static/img/clock-gray187.png");
   color: #bbbbbb;
   background-repeat: no-repeat;
@@ -8538,23 +8538,73 @@ input.ui-timepicker-input:disabled {
   padding-right: 34px;
 }
 
-.form-grid input.tip.ui-timepicker-input,
-input.tip.ui-timepicker-input {
+.form-grid input.tip.timepicker,
+input.tip.timepicker {
   background-image: url("/lp-static/img/clock-orange.png");
   border-color: #f39129;
 }
 
-.form-grid input.tip.ui-timepicker-input:focus,
-input.tip.ui-timepicker-input:focus {
+.form-grid input.tip.timepicker:focus,
+input.tip.timepicker:focus {
   border-color: #fbc732;
   background-image: url("/lp-static/img/clock-orange-light.png");
 }
 
-.form-grid input.tip.ui-timepicker-input:disabled,
-input.tip.ui-timepicker-input:disabled {
+.form-grid input.tip.timepicker:disabled,
+input.tip.timepicker:disabled {
   border-color: #dddddd;
   background-image: url("/lp-static/img/clock-gray187.png");
   color: #bbbbbb;
+}
+
+div.timepicker-container {
+  width: 50%;
+  position: relative;
+}
+
+div.timepicker-container input.timepicker-input {
+  width: 100%;
+}
+
+div.timepicker-container .timepicker-picker {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 888;
+  min-width: 100%;
+  width: 100%;
+  padding: 4px;
+  margin: 0 0;
+  border-left: 1px solid #333333;
+  border-right: 1px solid #333333;
+  border-bottom: 1px solid #333333;
+}
+
+div.timepicker-container .timepicker-picker .timepicker--cell {
+  padding: 0 0;
+  text-align: center;
+}
+
+div.timepicker-container .timepicker-picker .timepicker--hour {
+  width: 16%;
+}
+
+div.timepicker-container .timepicker-picker .timepicker--minute {
+  width: 20%;
+  border-left: 1px solid #333333;
+}
+
+div.timepicker-container .timepicker-picker .timepicker--selectable {
+  cursor: pointer;
+}
+
+div.timepicker-container .timepicker-picker .timepicker--selectable:hover {
+  background-color: #fbc732;
+}
+
+div.timepicker-container .timepicker-picker .timepicker--selected {
+  color: white;
+  background-color: #f39129;
 }
 
 input.grid-style-input {

@@ -1,0 +1,26 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="timepicker-template">
+  <div class="timepicker-container"
+       data-bind="click: _.noop,
+                  clickBubble: false">
+    <input type="text"
+           class="timepicker"
+           data-bind="value: value,
+                      disable: isDisabled,
+                      hasFocus: hasFocus,
+                      testId: testId">
+    <div class="tabby timepicker-picker"
+         data-bind="visible: showPicker">
+      <!-- ko foreach: rows -->
+        <div class="tabby__row">
+          <!-- ko foreach: $data.cells -->
+          <div class="tabby__cell timepicker--cell"
+               data-bind="css: $data.css,
+                          click: $data.click,
+                          text: $data.text">
+          </div>
+          <!-- /ko -->
+        </div>
+        <!-- /ko -->
+    </div>
+  </div>
+</script>

@@ -8,14 +8,9 @@
   <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
   <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
   <span>
-    <input type="text"
-           data-bind="timepicker: value,
-                      value: value,
-                      timepickerOptions: timepickerOptions,
-                      css: inputClasses,
-                      event: events,
-                      disable: disabled() || readonly(),
-                      testId: path.join('.')">
+    <timepicker params="value: value,
+                        disable: disabled() || readonly(),
+                        testId: path.join('.')"></timepicker>
 
   </span>
   <span data-bind="saveIndicator: indicator, label: false"></span>

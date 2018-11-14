@@ -139,7 +139,6 @@
    :cdn-fallback      {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery            {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload     {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
-   :jquery-timepicker {:js ["jquery.timepicker.min.js"]}
    :knockout          {:js ["knockout-3.4.2.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "knockout.dragdrop.js""register-lupapiste-components.js"]}
    :lo-dash           {:js ["lodash.min.js"]}
    :underscore        {:depends [:lo-dash]
@@ -176,7 +175,7 @@
                       :js      ["expanded-content.js"]}
 
    :common
-   {:depends [:init :jquery :jquery-upload :jquery-timepicker :knockout :underscore :sprintf :moment :i18n :selectm
+   {:depends [:init :jquery :jquery-upload :knockout :underscore :sprintf :moment :i18n :selectm
               :expanded-content :mockjax :open-layers :stickyfill :waypoints]
             :js      ["register-components.js" "util.js" "event.js" "pageutil.js" "app.js" "nav.js" "window.js"
                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
@@ -185,7 +184,7 @@
    :cljs-component {:js ["cljs-component.js" "cljs-loader.js"]}
 
    :common-html {:depends [:selectm-html :cljs-component]
-                 :css     ["jquery-ui.css" "jquery.timepicker.css"]
+                 :css     ["jquery-ui.css"]
                  :html    ["404.html"]}
 
    ;; Components to be included in a SPA

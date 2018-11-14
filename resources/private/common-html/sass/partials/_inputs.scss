@@ -331,7 +331,7 @@ input.tip.dateinput.dateinput--small {
   }
 }
 
-input.ui-timepicker-input {
+input.timepicker {
   @include input-fields;
   background-image: url("/lp-static/img/clock-orange-dark.png");
   background-position: right 4px center;
@@ -350,8 +350,8 @@ input.ui-timepicker-input {
   }
 }
 
-.form-grid input.tip.ui-timepicker-input,
-input.tip.ui-timepicker-input {
+.form-grid input.tip.timepicker,
+input.tip.timepicker {
   background-image: url("/lp-static/img/clock-orange.png");
   border-color: $orange-dark;
   &:focus {
@@ -362,6 +362,48 @@ input.tip.ui-timepicker-input {
     border-color: $input-disabled-border-color;
     background-image: url("/lp-static/img/clock-gray187.png");
     color: $input-select-disabled-icon
+  }
+}
+
+div.timepicker-container {
+  width: 50%;
+  position: relative;
+  input.timepicker-input  {
+    width: 100%
+  }
+  .timepicker-picker {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 888;
+    min-width: 100%;
+    width: 100%;
+    padding: 4px;
+    margin: 0 0;
+    border-left: 1px solid $gray51;
+    border-right: 1px solid $gray51;
+    border-bottom: 1px solid $gray51;
+    .timepicker--cell {
+      padding: 0 0;
+      text-align: center;
+    }
+    .timepicker--hour {
+      width: 16%;
+    }
+    .timepicker--minute {
+      width: 20%;
+      border-left: 1px solid $gray51;
+    }
+    .timepicker--selectable {
+      cursor: pointer;
+      &:hover {
+        background-color: $input-focus-border-color;
+      }
+    }
+    .timepicker--selected {
+      color: white;
+      background-color: $primary;
+    }
   }
 }
 

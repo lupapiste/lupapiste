@@ -451,31 +451,6 @@
     }
   };
 
-    ko.bindingHandlers.timepicker = {
-    init: function(element, valueAccessor, allBindingsAccessor) {
-      //initialize datepicker with some optional options
-      var options = allBindingsAccessor().timepickerOptions || {};
-      $(element).timepicker(options);
-
-      //handle the field changing
-      ko.utils.registerEventHandler(element, "change", function () {
-        var observable = valueAccessor();
-        observable($(element).val());
-      });
-
-      //handle disposal (if KO removes by the template binding)
-      ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
-        $(element).timepicker("remove");
-      });
-      ko.bindingHandlers.validationCore.init(element, valueAccessor, allBindingsAccessor);
-    },
-    update: function(element, valueAccessor) {
-      var value = ko.utils.unwrapObservable(valueAccessor());
-      $(element).val(value);
-    }
-  };
-
-
   // Binding value is an object or string observable.
   // Properties: [optional]
   // [cls]: Invalid value CSS class (default date-validator--invalid).

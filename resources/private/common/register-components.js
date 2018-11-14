@@ -211,7 +211,8 @@ jQuery(document).ready(function() {
     {name: "generic-bulletin-tab"},
     {name: "add-link-permit"},
     {name: "premises-upload", template: "premises-upload-template"},
-    {name: "authorize-person-dialog"}
+    {name: "authorize-person-dialog"},
+    {name: "timepicker"}
 ];
 
   ko.registerLupapisteComponents(components);

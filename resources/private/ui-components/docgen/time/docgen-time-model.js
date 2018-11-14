@@ -30,7 +30,4 @@ LUPAPISTE.DocgenTimeModel = function( params ) {
     }
   });
 
-  self.timepickerOptions = {step: 15,
-                            timeFormat: "G:i"};
-
 };
