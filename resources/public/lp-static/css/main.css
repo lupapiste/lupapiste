@@ -8459,36 +8459,6 @@ input.tip.dateinput:disabled {
   color: #bbbbbb;
 }
 
-input.dateinput.dateinput--small {
-  height: 26px;
-  background-image: url("/lp-static/img/calendar-12-orange-dark.png");
-  min-height: initial;
-  font-size: 0.875em;
-}
-
-input.dateinput.dateinput--small:focus {
-  background-image: url("/lp-static/img/calendar-12-orange-light.png");
-}
-
-input.dateinput.dateinput--small:disabled {
-  background-image: url("/lp-static/img/calendar-12-gray187.png");
-}
-
-.form-grid input.tip.dateinput.dateinput--small,
-input.tip.dateinput.dateinput--small {
-  background-image: url("/lp-static/img/calendar-12-orange.png");
-}
-
-.form-grid input.tip.dateinput.dateinput--small:focus,
-input.tip.dateinput.dateinput--small:focus {
-  background-image: url("/lp-static/img/calendar-12-orange-light.png");
-}
-
-.form-grid input.tip.dateinput.dateinput--small:disabled,
-input.tip.dateinput.dateinput--small:disabled {
-  background-image: url("/lp-static/img/calendar-12-gray187.png");
-}
-
 input.timepicker {
   padding: 0 12px;
   box-sizing: border-box;
@@ -8504,7 +8474,6 @@ input.timepicker {
   background-position: right 4px center;
   background-repeat: no-repeat;
   padding-right: 34px;
-  width: initial;
 }
 
 input.timepicker:focus {
@@ -8558,15 +8527,22 @@ input.tip.timepicker:disabled {
 }
 
 div.timepicker-container {
-  width: 50%;
+  min-width: 120px;
   position: relative;
 }
 
-div.timepicker-container input.timepicker-input {
+div.timepicker-container input.timepicker {
   width: 100%;
 }
 
+div.timepicker-container input.timepicker-input--error {
+  border-color: #df3215;
+  color: #df3215;
+  font-weight: bold;
+}
+
 div.timepicker-container .timepicker-picker {
+  background-color: white;
   position: absolute;
   left: 0;
   top: 100%;

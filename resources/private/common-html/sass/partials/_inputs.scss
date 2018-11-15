@@ -307,37 +307,12 @@ input.tip.dateinput {
   }
 }
 
-input.dateinput.dateinput--small {
-  height: 26px;
-  background-image: url("/lp-static/img/calendar-12-orange-dark.png");
-  min-height: initial;
-  font-size: 0.875em;
-  &:focus {
-    background-image: url("/lp-static/img/calendar-12-orange-light.png");
-  }
-  &:disabled {
-    background-image: url("/lp-static/img/calendar-12-gray187.png");
-  }
-}
-
-.form-grid input.tip.dateinput.dateinput--small,
-input.tip.dateinput.dateinput--small {
-  background-image: url("/lp-static/img/calendar-12-orange.png");
-  &:focus {
-    background-image: url("/lp-static/img/calendar-12-orange-light.png");
-  }
-  &:disabled {
-    background-image: url("/lp-static/img/calendar-12-gray187.png");
-  }
-}
-
 input.timepicker {
   @include input-fields;
   background-image: url("/lp-static/img/clock-orange-dark.png");
   background-position: right 4px center;
   background-repeat: no-repeat;
   padding-right: 34px;
-  width: initial;
   &:focus {
     background-image: url("/lp-static/img/clock-orange-light.png");
   }
@@ -366,12 +341,18 @@ input.tip.timepicker {
 }
 
 div.timepicker-container {
-  width: 50%;
+  min-width: 120px;
   position: relative;
-  input.timepicker-input  {
-    width: 100%
+  input.timepicker  {
+    width: 100%;
+  }
+  input.timepicker-input--error {
+    border-color: $negative;
+    color: $negative;
+    font-weight: bold;
   }
   .timepicker-picker {
+    background-color: white;
     position: absolute;
     left: 0;
     top: 100%;
