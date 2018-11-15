@@ -28,9 +28,12 @@
 (defn translate-operation [operation]
   (common/loc (str "operations." operation)))
 
+(defn MoneyResponse->text [money]
+  (:text money))
 
-(defn calc-with-discount [discount-int price]
-  (*  (/  (- 100 discount-int) 100) price))
+(defn discounted-price-from-invoice-row [row]
+  (MoneyResponse->text (:with-discount (:sums row))))
+
 (defn calc-alv [price]
   (* 0.24 price))
 
@@ -58,7 +61,7 @@
   < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
                (str operation-index "-" invoice-row-index))}
   [invoice-row invoice-row-index operation-index invoice]
-  (let [discounted-price (calc-with-discount (:discount-percent invoice-row) (* (:units invoice-row) (:price-per-unit invoice-row)))
+  (let [discounted-price (discounted-price-from-invoice-row invoice-row)
         alv (calc-alv discounted-price)]
     [:tr
      [:td (autosaving-input (:text invoice-row) (fn [value]
@@ -97,7 +100,7 @@
   < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
                (str operation-index "-" invoice-row-index))}
   [invoice-row invoice-row-index operation-index invoice]
-  (let [discounted-price (calc-with-discount (:discount-percent invoice-row) (* (:units invoice-row) (:price-per-unit invoice-row)))
+  (let [discounted-price (discounted-price-from-invoice-row invoice-row)
        alv (calc-alv discounted-price)]
     [:tr
      [:td (:text invoice-row)]
@@ -122,7 +125,7 @@
                (str operations-row-index "-" invoice-row-index))}
   [invoice-row invoice-row-index operations-row-index]
 
-  (let [discounted-price (calc-with-discount (:discount-percent invoice-row) (* (:units invoice-row) (:price-per-unit invoice-row)))
+  (let [discounted-price (discounted-price-from-invoice-row invoice-row)
         alv (calc-alv discounted-price)]
     [:tr
      [:td (:text invoice-row)]
@@ -245,27 +248,18 @@
 (rum/defc invoice-summary-row [invoice-atom]
   (let [operations (:operations @invoice-atom)
         invoice-rows-all (mapcat :invoice-rows operations)
-        sums (reduce (fn [memo row]
-                       (let [with-discount-price (calc-with-discount
-                                                  (:discount-percent row)
-                                                  (* (:units row)
-                                                     (:price-per-unit row)))
-                             alv (calc-alv with-discount-price)]
-                         (-> memo
-                             (assoc :sum-zero
-                                    (+ (:sum-zero memo)
-                                       with-discount-price))
-                             (assoc :sum-alv (+ (:sum-alv memo) alv))
-                             (assoc :sum-total (+ (:sum-total memo) (+ with-discount-price alv))))))
-                     {:sum-zero 0 :sum-alv 0 :sum-total 0} invoice-rows-all)]
+
+        sums {:sum-zero-vat (MoneyResponse->text (:sum @invoice-atom))
+              :sum-vat "not counted yet"
+              :sum-total (MoneyResponse->text (:sum @invoice-atom))}]
     [:div {:style {:text-align "right"}}
      [:div {:style {:display "inline-block"}}
       [:div
        [:div {:style {:text-align "left" :display "inline" :padding "5em"}} (common/loc :invoices.wo-taxes)]
-       [:div {:style {:text-align "right" :display "inline"}} (:sum-zero sums)]]]
+       [:div {:style {:text-align "right" :display "inline"}} (:sum-zero-vat sums)]]]
      [:div
        [:div {:style {:text-align "left" :display "inline" :padding "5em"}} (common/loc :invoices.vat24)]
-      [:div {:style {:text-align "right" :display "inline"}} (:sum-alv sums)]]
+      [:div {:style {:text-align "right" :display "inline"}} (:sum-vat sums)]]
      [:div
        [:div {:style {:text-align "left" :display "inline" :padding "5em"}} (common/loc :invoices.rows.total)]
        [:div {:style {:text-align "right" :display "inline"}} (:sum-total sums)]]

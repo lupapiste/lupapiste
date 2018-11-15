@@ -125,7 +125,15 @@
                                                                     :unit "m2"
                                                                     :price-per-unit 5
                                                                     :units 10
-                                                                    :discount-percent 10}]}]}]
+                                                                    :discount-percent 10
+                                                                    :sums {:with-discount {:currency "EUR"
+                                                                                           :major 45
+                                                                                           :minor 4500
+                                                                                           :text "EUR45.00"}
+                                                                           :without-discount {:currency "EUR"
+                                                                                              :major 50
+                                                                                              :minor 5000
+                                                                                              :text "EUR50.00"}}}]}]}]
                         (local-command sonja :update-invoice :id id :invoice new-data) => ok?
                         (let [updated-invoice (mongo/by-id "invoices" invoice-id)]
                           (:operations updated-invoice) => (:operations new-data))))
