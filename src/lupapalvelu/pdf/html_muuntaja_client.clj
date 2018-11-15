@@ -1,5 +1,5 @@
 (ns lupapalvelu.pdf.html-muuntaja-client
-  (:require [cheshire.core :as json]
+  (:require [lupapalvelu.json :as json]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.http :as http]

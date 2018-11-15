@@ -1,21 +1,30 @@
 (ns lupapalvelu.verdict-api
   "Backing system verdicts. The API for manually created verdicts
   resides in `pate/verdict_api.clj`."
-  (:require [lupapalvelu.action :refer [defcommand  notify] :as action]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
+            [monger.operators :refer :all]
+            [sade.core :refer [ok fail fail! ok?]]
+            [sade.util :as util]
+            [lupapalvelu.action :refer [defcommand notify] :as action]
+            [lupapalvelu.application-state :as app-state]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.pate.verdict :refer [backing-system-verdict command->backing-system-verdict]]
+            [lupapalvelu.pate.verdict :as pate-verdict :refer [backing-system-verdict command->backing-system-verdict]]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.verdict :as verdict]
-            [sade.core :refer [ok fail fail! ok?]]))
+            [lupapalvelu.backing-system.allu.contract :as allu-contract]))
 
 (defn application-has-verdict-given-state [{:keys [application]}]
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
 (defn- backing-system-is-defined [{:keys [application organization]}]
-  (when-let [permit-type  (:permitType application)]
-    (when-not (org/resolve-krysp-wfs @organization permit-type)
+  (when-let [permit-type (:permitType application)]
+    (when-not (or (org/resolve-krysp-wfs @organization permit-type)
+                  (allu/allu-application? (:organization application) permit-type))
       (fail :error.no-legacy-available))))
 
 (defcommand check-for-verdict
@@ -32,8 +41,10 @@
                  verdict/no-sent-backing-system-verdict-tasks
                  backing-system-is-defined]
    :on-success  (notify :application-state-change)}
-  [command]
-  (let [result (verdict/do-check-for-verdict command)]
+  [{:keys [application created user] :as command}]
+  (let [result (if (allu/allu-application? (:organization application) (permit/permit-type application))
+                 (ok :verdicts [(allu-contract/fetch-allu-contract command)])
+                 (verdict/do-check-for-verdict command))]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)
       (ok? result)  (ok :verdictCount (count (:verdicts result))

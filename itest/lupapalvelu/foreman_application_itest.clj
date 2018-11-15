@@ -315,8 +315,8 @@
   (apply-remote-minimal) ; clean mikko before history tests
   (let [{history-base-app-id :id} (create-and-submit-application mikko :operation "kerrostalo-rivitalo")
         _                    (give-legacy-verdict sonja history-base-app-id)
-        {other-r-app-id :id} (create-app mikko :operation "kerrostalo-rivitalo")
-        {ya-app-id :id}      (create-app mikko :operation "ya-kayttolupa-muu-tyomaakaytto")
+        other-r-app-id       (create-app-id mikko :operation "kerrostalo-rivitalo")
+        ya-app-id            (create-app-id mikko :operation "ya-kayttolupa-muu-tyomaakaytto")
         foreman-app-id1      (create-foreman-application history-base-app-id mikko mikko-id "KVV-ty\u00F6njohtaja" "B"); -> should be visible
         foreman-app-id2      (create-foreman-application history-base-app-id mikko mikko-id "KVV-ty\u00F6njohtaja" "A") ; -> should be visible
         foreman-app-id3      (create-foreman-application history-base-app-id mikko mikko-id "vastaava ty\u00F6njohtaja" "B") ; -> should be visible
@@ -408,7 +408,7 @@
 
 (facts* "Auths and invites"
   (let [apikey pena
-        {application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
+        application-id         (create-app-id apikey :operation "kerrostalo-rivitalo")
         _ (add-invites apikey application-id)
         _ (command apikey :submit-application :id application-id)
         _ (give-legacy-verdict sonja application-id)

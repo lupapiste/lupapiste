@@ -406,7 +406,8 @@
    :pre-checks       [app/validate-authority-in-drafts
                       att/foreman-must-be-uploader
                       att/attachment-matches-application
-                      att/attachment-not-readOnly
+                      (action/some-pre-check att/attachment-not-readOnly
+                                             att/stamped-removable-version)
                       att/attachment-editable-by-application-state
                       att/delete-allowed-by-target
                       att/edit-allowed-by-target

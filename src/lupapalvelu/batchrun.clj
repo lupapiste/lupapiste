@@ -40,7 +40,10 @@
             [sade.util :refer [fn-> pcond->] :as util]
             [sade.validators :as v]
             [ring.util.codec :as codec]
-            [cheshire.core :as json])
+            [cheshire.core :as json]
+            [lupapalvelu.backing-system.allu.core :as allu]
+            [lupapalvelu.allu.allu-application :as allu-application]
+            [lupapalvelu.backing-system.allu.contract :as allu-contract])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -307,6 +310,21 @@
     (jms/produce-with-context (fetch-verdict/queue-for-organization organization)
                               (fetch-verdict/fetch-verdict-message id))
     (fetch-verdict/fetch-verdict batchrun-name batchrun-user app)))
+
+(defn fetch-allu-contracts []
+  (infof "Starting fetch-allu-verdicts for 091-YA")
+  (mongo/connect!)
+  (let [batchrun-user (user/batchrun-user ["091-YA"])
+        apps (mongo/select :applications {:state {$in ["sent" "agreementPrepared"]} :organization "091-YA"})]
+    (doseq [app apps
+            :let [command (assoc (application->command app) :user batchrun-user
+                                                            :created (now)
+                                                            :action "fetch-verdicts")]]
+      (logging/with-logging-context {:applicationId (:id app) :userId (:id batchrun-user)}
+        (if (-> app :integrationKeys :ALLU :id)
+          (allu-contract/fetch-allu-contract command)
+          (warn "Application does not contain ALLU-id under integrationKeys.")))))
+  (mongo/disconnect!))
 
 (defn- organization-has-krysp-url-function
   "Takes map of organization id as key and organization data as values.

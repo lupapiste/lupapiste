@@ -11,7 +11,7 @@
             [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict :refer [pate-enabled verdict-exists
-                                              backing-system-verdict]:as verdict]
+                                              backing-system-verdict] :as verdict]
             [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.roles :as roles]
@@ -19,7 +19,8 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.ya-extension :refer [ya-extension-app?]]
             [sade.core :refer :all]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.backing-system.allu.contract :as allu-contract]))
 
 
 ;; ------------------------------------------
@@ -54,10 +55,11 @@
       (fail :pate.required-fields))))
 
 (defn- contractual-application
-  "Precheck that fails if the application category IS NOT :contract."
+  "Precheck that fails if the application category IS NOT :contract or :allu-contract."
   [command]
-  (when-not (= (verdict/command->category command) :contract)
-    (fail :error.verdict.not-contract)))
+  (let [category (verdict/command->category command)]
+    (when-not (or (= category :contract) (= category :allu-contract))
+      (fail :error.verdict.not-contract))))
 
 (defn- state-in
   "Precheck that fails if the application state is not included in the
@@ -285,6 +287,21 @@
    :user-authz-roles roles/writer-roles-with-foreman}
   [command]
   (verdict/sign-contract command)
+  (ok))
+
+(defcommand sign-allu-contract
+  {:description "Adds the user as a signatory to a published Pate contract"
+   :categories       #{:pate-verdicts}
+   :parameters       [:id :verdict-id :password]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id :password])]
+   :pre-checks       [(verdict-exists :allu-contract?)
+                      can-sign
+                      password-matches]
+   :states           states/post-verdict-states
+   :user-roles       #{:applicant}
+   :user-authz-roles roles/default-authz-writer-roles}
+  [command]
+  (allu-contract/sign-allu-contract command)
   (ok))
 
 (defraw verdict-pdf

@@ -11,7 +11,8 @@
             [lupapalvelu.backing-system.allu.schemas :refer [PlacementContract]]
             [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.document.tools :refer [doc-name]]
-            [lupapalvelu.i18n :refer [localize]]))
+            [lupapalvelu.i18n :refer [localize]]
+            [sade.util :as util]))
 
 (def lang
   "The language to use when localizing output to ALLU. ALLU seems to operate in Finnish only so it is better to hardcode
@@ -74,9 +75,13 @@
                   :country       (address-country osoite)
                   :postalAddress (convert-address osoite)}]
     (if payee?
-      (assoc customer :invoicingOperator valittajaTunnus
-                      ;; TODO: Why do we even have both ovtTunnus and verkkolaskuTunnus?
-                      :ovt (if (seq ovtTunnus) ovtTunnus verkkolaskuTunnus))
+      (let [customer (util/assoc-when-pred customer
+                                           (fn [customer] (not (nil? (:value customer))))
+                                           :invoicingOperator valittajaTunnus)]
+        (if (or (and (seq ovtTunnus) (not-empty ovtTunnus))
+                (and (seq verkkolaskuTunnus) (not-empty verkkolaskuTunnus)))
+          (assoc customer :ovt (if (and (seq ovtTunnus) (not-empty ovtTunnus)) ovtTunnus verkkolaskuTunnus))
+          customer))
       customer)))
 
 (defn- doc->customer
@@ -128,7 +133,7 @@
   {:city          (localize lang :municipality municipality)
    :streetAddress {:streetName address}})
 
-(def- format-date-time
+(def format-date-time
   "Format a clj-time date-time into the string format expected by ALLU."
   (partial tf/unparse (tf/formatters :date-time-no-ms)))
 

@@ -30,6 +30,7 @@
                  [metosin/reitit-ring "0.2.2"]
                  [metosin/reitit-middleware "0.2.2"]
                  [metosin/spec-tools "0.7.1"] ; for reitit-middleware
+                 [metosin/reitit "0.2.2"]
 
                  ; Namespace finder library
                  [bultitude "0.2.8"] ; noir requires 0.2.0
@@ -56,6 +57,7 @@
                  [cljstache "2.0.1"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [org.freemarker/freemarker "2.3.23"]
+                 [hiccup "1.0.5"]
 
                  ; CSS
                  [garden "1.3.3"]
@@ -68,7 +70,8 @@
                  [pandect "0.6.1"]
 
                  ; JSON
-                 [cheshire "5.7.0"]
+                 [metosin/jsonista "0.2.2"]
+                 [cheshire "5.8.1"]                         ; not used directly, but omitting seems to break everything
 
                  ; HTTP client
                  [clj-http "3.4.1" :exclusions [commons-codec]]
@@ -113,6 +116,9 @@
                  ; RSS
                  [clj-rss "0.2.3"]
 
+                 ;Money, handling and keeping things clean
+                 [clojurewerkz/money "1.10.0"]
+
                  ; Image processing
                  [com.github.jai-imageio/jai-imageio-core "1.3.1"]
                  [com.github.jai-imageio/jai-imageio-jpeg2000 "1.3.0"]
@@ -147,14 +153,15 @@
 
                  ; Message Queue
                  [org.apache.activemq/artemis-jms-client "2.6.2"]
-                 [lupapiste/jms-client "0.2.1"]
+                 [lupapiste/jms-client "0.4.1"]
                  [com.taoensso/nippy "2.14.0"]
 
                  ;; Lupapiste libraries
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "1.47.1.3"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.9.26"]
+                 [lupapiste/commons "0.9.27"]
+                 [lupapiste/invoice-commons "0.1.0-SNAPSHOT"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -180,7 +187,7 @@
             [lein-shell "0.5.0"]
             [deraen/lein-sass4clj "0.3.1"]
             [lein-pdo "0.1.1"]
-            [lein-midje "3.2.1"]
+            [lupapiste/lein-midje "3.2.2"]
             [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
             [lupapiste/lein-buildid "0.4.2"]
             [lupapiste/lein-nitpicker "0.6.0"]
@@ -260,10 +267,9 @@
   :nitpicker {:exts     ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug" #"lp-static/js/"]}
   :repositories [["osgeo" {:url "https://download.osgeo.org/webdav/geotools"}]]
-  :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
-            "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
+  :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "stest"       ["with-profile" "dev,stest" "midje"]
-            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," ["midje" ":filter" "-ajanvaraus"]]
+            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]
             "sass"        ["do"
                            ["sass4clj" "once"]
                            ["shell" "blessc" "--force" "resources/public/lp-static/css/main.css"]]

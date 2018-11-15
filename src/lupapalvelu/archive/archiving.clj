@@ -1,6 +1,5 @@
 (ns lupapalvelu.archive.archiving
-  (:require [cheshire.core :as json]
-            [clj-time.coerce :as c]
+  (:require [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clj-time.format :as f]
             [clojure.java.io :as io]
@@ -12,6 +11,7 @@
             [lupapalvelu.attachment.util :as att-util]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.json :as json]
             [lupapalvelu.pate.verdict-interface :as vif]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
@@ -52,7 +52,7 @@
                                 :multipart  [{:name      "metadata"
                                               :mime-type "application/json"
                                               :encoding  "UTF-8"
-                                              :content   (json/generate-string metadata)}
+                                              :content   (json/encode metadata)}
                                              {:name      "file"
                                               :content   is-or-file
                                               :mime-type content-type}]})]

@@ -54,7 +54,9 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [warnf warn  errorf error]]))
+            [taoensso.timbre :refer [warnf warn errorf error]]
+            [lupapalvelu.backing-system.allu.core :as allu]
+            [lupapalvelu.attachment :as attachment]))
 
 ;; ------------------------------------------
 ;; Pre-checks
@@ -78,12 +80,17 @@
     :legacy? fails if the verdict is a 'modern' Pate verdict
     :modern? fails if the verdict is a legacy verdict
     :contract? fails if the verdict is not a contract
+    :allu-contract? fails if the verdict is not an allu-contract
     :verdict? fails for contracts
     :not-replaced? Fails if the verdict has been OR is being replaced. "
   [& conditions]
+  {:pre [(set/superset? #{:draft? :published? :legacy? :modern? :contract?
+                          :allu-contract? :verdict? :not-replaced?}
+                        (set conditions))]}
   (let [{:keys [draft? published?
                 legacy? modern?
-                contract? verdict?
+                contract? allu-contract?
+                verdict?
                 not-replaced?]} (zipmap conditions (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
@@ -111,6 +118,9 @@
 
                           (and contract? (not (vc/contract? verdict)))
                           :error.verdict.not-contract
+
+                          (and allu-contract? (util/not=as-kw (:category verdict) :allu-contract))
+                          :error.verdict.not-allu-contract
 
                           (and verdict? (vc/contract? verdict))
                           :error.verdict.contract
@@ -143,7 +153,10 @@
                                             status))})
        neighbors))
 
-(defn- general-handler [{handlers :handlers}]
+(defn general-handler
+  "Returns handler's first and last names if a handler is found. Returns empty
+  string if handler is not found."
+  [{handlers :handlers}]
   (if-let [{:keys [firstName
                    lastName]} (util/find-first :general handlers)]
     (str firstName " " lastName)
@@ -701,7 +714,7 @@
 (defn- wrap [command value]
   ((metadata/wrapper command) value))
 
-(defn- verdict-update
+(defn verdict-update
   "Updates application, using $elemMatch query for given verdict."
   [{:keys [data created] :as command} update]
   (let [{verdict-id :verdict-id} data]
@@ -777,9 +790,11 @@
   (->> application
        app/get-sorted-operation-documents
        tools/unwrapped
-       (filter (util/fn-> :data (contains? :valtakunnallinenNumero)))
+       (filter #(util/intersection-as-kw [:valtakunnallinenNumero
+                                          :manuaalinen_rakennusnro]
+                                         (keys %)))
        (map (partial app/populate-operation-info
-                     (app/get-operations application)))))
+                     (app/id-to-operation-map application)))))
 
 (defn- op-description [{primary     :primaryOperation
                         secondaries :secondaryOperations} op]
@@ -1281,31 +1296,40 @@
   "Creates verdict PDF base on the data received from the Pate message
   queue."
   [{command ::command mode ::mode}]
-  (let [{app-id     :id
-         verdict-id :verdict-id} (:data command)
-        command                  (assoc command
-                                        :application (domain/get-application-no-access-checking app-id))
-        {error :text}            ((verdict-exists :published) command)]
-    (if error
-      (do
-        (warn "Skipping bad message. Cannot create verdict PDF." error)
-        (.commit pate-session))
-      (try+
-       (let [verdict (command->verdict command)
-             fun     (case mode
-                       ::verdict    pdf--verdict
-                       ::signatures pdf--signatures)]
-         (if (fun command verdict)
-           (.commit pate-session)
-           (.rollback pate-session)))
-       (catch [:error :pdf/pdf-error] _
-         (errorf "%s: PDF generation for verdict %s failed."
-                 app-id verdict-id)
-         (.rollback pate-session))
-       (catch Object _
-         (errorf "%s: Could not create verdict attachment for verdict %s."
-                 app-id verdict-id)
-         (.rollback pate-session))))))
+  (let [error-fn                 (fn [err]
+                                   (do
+                                     (warn "Skipping bad message. Cannot create verdict PDF." err)
+                                     (.commit pate-session)))
+        {app-id     :id
+         verdict-id :verdict-id} (:data command)]
+    (cond
+      (ss/blank? app-id)                     (error-fn "No application id.")
+      (ss/blank? verdict-id)                 (error-fn "No verdict id.")
+      (not (#{::verdict ::signatures} mode)) (error-fn (str "Bad mode: " mode))
+      :else
+      (when-let [command (let [application   (domain/get-application-no-access-checking app-id)
+                               command       (assoc command :application application)
+                               {error :text} ((verdict-exists :published?) command)]
+                           (cond
+                             (nil? application) (error-fn (str "Bad application id: " app-id))
+                             error              (error-fn error)
+                             :else              command))]
+        (try+
+         (let [verdict (command->verdict command)
+               fun     (case mode
+                         ::verdict    pdf--verdict
+                         ::signatures pdf--signatures)]
+           (if (fun command verdict)
+             (.commit pate-session)
+             (.rollback pate-session)))
+         (catch [:error :pdf/pdf-error] _
+           (errorf "%s: PDF generation for verdict %s failed."
+                   app-id verdict-id)
+           (.rollback pate-session))
+         (catch Object _
+           (errorf "%s: Could not create verdict attachment for verdict %s."
+                   app-id verdict-id)
+           (.rollback pate-session)))))))
 
 (defonce pate-consumer (when pate-session
                          (jms/create-consumer pate-session
@@ -1315,7 +1339,7 @@
 (defn send-command [mode command]
   (->> {::command (select-keys command [:data :user :created])
         ::mode    mode}
-       pr-str
+       ss/serialize
        (jms/produce-with-context pate-queue)))
 
 (defn finalize--pdf [{:keys [application verdict]}]
@@ -1514,7 +1538,7 @@
                          (= com-id company-id))))
               sigs)))
 
-(defn- create-signature
+(defn create-signature
   [{:keys [application user created]}]
   (let [person           (user-person-name user)
         {company-id :id} (auth/auth-via-company application
@@ -1543,9 +1567,9 @@
     (if (some (util/fn->> second :id (util/=as-kw :signatures))
               sections)
         (map (fn [[_ attr & _ :as section]]
-            (if (util/=as-kw (:id attr) :signatures)
-              entry
-              section))
+               (if (util/=as-kw (:id attr) :signatures)
+                 entry
+                 section))
              sections)
         (concat sections [entry]))))
 

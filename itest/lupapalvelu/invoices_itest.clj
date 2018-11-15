@@ -3,6 +3,7 @@
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.integrations-api]
             [lupapalvelu.itest-util :refer [local-command local-query
+                                            create-and-submit-application
                                             create-and-submit-local-application
                                             sonja pena ok? fail?] :as itu]
             [lupapalvelu.invoice-api]
@@ -10,7 +11,8 @@
             [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]))
 
 (def dummy-user {:id                                        "penan-id"
                  :firstName                                 "pena"
@@ -19,19 +21,26 @@
                  :email                                     "pena@panaani.fi"
                  :username                                  "pena"})
 
+(def dummy-invoice {:application-id "LP-753-2018-90108"
+                    :organization-id "753-R"
+                    :state "draft"
+                    :operations [{:operation-id "linjasaneeraus"
+                                  :name "linjasaneeraus"
+                                  :invoice-rows [{:text "Laskurivi1 kpl"
+                                                  :type "from-price-catalogue"
+                                                  :unit "kpl"
+                                                  :price-per-unit 10
+                                                  :units 2
+                                                  :discount-percent 0}]}]})
+
 (defn invoice-with [properties]
-  (let [dummy-invoice {:application-id "LP-753-2018-90108"
-                       :organization-id "753-R"
-                       :state "draft"
-                       :operations [{:operation-id "linjasaneeraus"
-                                     :name "linjasaneeraus"
-                                     :invoice-rows [{:text "Laskurivi1 kpl"
-                                                     :type "from-price-catalogue"
-                                                     :unit "kpl"
-                                                     :price-per-unit 10
-                                                     :units 2
-                                                     :discount-percent 0}]}]}]
-    (merge dummy-invoice properties)))
+  (merge dummy-invoice properties))
+
+(defn application-with [properties]
+  (let [dummy-application {:id "APP-ID-1"
+                           :organization-id "HC_ORG"
+                           :state "draft"}]
+    (merge dummy-application properties)))
 
 (env/with-feature-value :invoices true
   (mongo/connect!)
@@ -39,12 +48,12 @@
   (mongo/with-db itu/test-db-name
     (lupapalvelu.fixture.core/apply-fixture "minimal")
 
-  (defn dummy-submitted-application []
-    (create-and-submit-local-application
-     pena
-     :operation "pientalo"
-     :x "385770.46" :y "6672188.964"
-     :address "Kaivokatu 1"))
+    (defn dummy-submitted-application []
+      (create-and-submit-local-application
+       pena
+       :operation "pientalo"
+       :x "385770.46" :y "6672188.964"
+       :address "Kaivokatu 1"))
 
     (fact "insert-invoice command"
           (fact "should add an invoice to the db with with all the required fields"
@@ -193,4 +202,43 @@
                   (-> (local-query sonja :application-operations :id id)
                       :operations
                       first
-                      :name) => "pientalo")))))
+                      :name) => "pientalo")))
+
+
+    (fact "user-organizations-invoices"
+          (fact "should return empty seq when there's no invoices for any organization"
+                (with-redefs [invoices/get-user-orgs-having-role (fn [user role] [])]
+                  (let [result (local-query sonja :user-organizations-invoices)]
+                    (:invoices result) => [])))
+
+          (fact "should return invoices for orgs user has the role in"
+
+                (with-redefs [invoices/get-user-orgs-having-role (fn [user role] ["USER-ORG-1" "USER-ORG-2"])]
+
+                  (invoices/create-invoice! (->invoice-db dummy-invoice (application-with {:organization "USER-ORG-1"}) dummy-user))
+                  (invoices/create-invoice! (->invoice-db dummy-invoice (application-with {:organization "FOO-ORG"}) dummy-user))
+                  (invoices/create-invoice! (->invoice-db dummy-invoice (application-with {:organization "USER-ORG-2"}) dummy-user))
+                  (invoices/create-invoice! (->invoice-db dummy-invoice (application-with {:organization "BAR-ORG"}) dummy-user))
+
+                  (let [invoices (:invoices (local-query sonja :user-organizations-invoices))
+                        invoice-orgs (set (map :organization-id invoices))]
+                    (count invoices) => 2
+                    invoice-orgs => #{"USER-ORG-1" "USER-ORG-2"})))
+
+          (fact "should return invoice with"
+                (let [{org-id :organization app-id :id :as application} (create-and-submit-local-application pena
+                                                                                                             :address "Kukkuja 7")
+                      invoice (invoice-with {:organization-id org-id
+                                             :application-id app-id})
+                      invoice-id (invoices/create-invoice! (->invoice-db invoice application dummy-user))]
+
+                  (let [result (local-query sonja :user-organizations-invoices)
+                        invoices (:invoices result)
+                        invoice (invoices/get-doc invoice-id invoices)]
+
+                    (fact "organisation data enriched to it"
+                          (get-in invoice [:enriched-data :organization]) => {:name {:fi "Sipoon rakennusvalvonta"
+                                                                                     :en "Sipoon rakennusvalvonta"
+                                                                                     :sv "Sipoon rakennusvalvonta"}})
+                    (fact "application data enriched to it"
+                          (get-in invoice [:enriched-data :application]) => {:address "Kukkuja 7"})))))))

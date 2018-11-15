@@ -13,6 +13,7 @@
             [lupapalvelu.backing-system.core :as bs]
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.building :as building]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
@@ -32,7 +33,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [lupapalvelu.ya-extension :as yax]
-            [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
+            [monger.operators :refer [$in $set $unset $push $each $elemMatch $pull]]
             [noir.response :as resp]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -205,8 +206,10 @@
 (defn add-value-metadata [m meta-data]
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
-(defn- load-building-data [url credentials property-id building-id overwrite-all?]
+(defn- load-building-data [url credentials property-id building-id overwrite-all? application]
   (let [all-data (building-reader/->rakennuksen-tiedot (building-reader/building-xml url credentials property-id) building-id)]
+    (when all-data
+      (building/upsert-document-buildings application all-data))
     (if overwrite-all?
       all-data
       (select-keys all-data (keys building-reader/empty-building-ids)))))
@@ -249,7 +252,7 @@
                             (tools/path-vals
                               (if clear-ids?
                                 building-reader/empty-building-ids
-                                (load-building-data url credentials propertyId buildingId overwrite))))
+                                (load-building-data url credentials propertyId buildingId overwrite application))))
             krysp-update-map (doc-persistence/validated-model-updates application collection document krysp-updates created :source "krysp")
 
             {:keys [mongo-query mongo-updates]} (util/deep-merge

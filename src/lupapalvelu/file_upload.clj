@@ -1,7 +1,7 @@
 (ns lupapalvelu.file-upload
   (:require [monger.operators :refer :all]
             [sade.util :as util]
-            [schema.core :as sc]
+            [schema.core :as sc :refer [defschema]]
             [lupapalvelu.mime :as mime]
             [clojure.set :refer [rename-keys]]
             [lupapalvelu.attachment.muuntaja-client :as muuntaja]
@@ -16,24 +16,30 @@
             [clj-uuid :as uuid])
   (:import (java.io File InputStream)))
 
-(def FileData
+(defschema FileData
   {:filename                        sc/Str
    :content                         (sc/cond-pre File InputStream)
    (sc/optional-key :content-type)  sc/Str
    (sc/optional-key :size)          sc/Num
    (sc/optional-key :fileId)        sc/Str})
 
+(defschema SavedFileData
+  {:fileId sc/Str
+   :filename sc/Str
+   :size sc/Num
+   :contentType sc/Str
+   :metadata {sc/Any sc/Any}})
+
 (defn file-size-legal [{{files :files} :data {role :role} :user}]
   (let [max-size (env/value :file-upload :max-size (if (contains? roles/all-authenticated-user-roles (keyword role)) :logged-in :anonymous))]
     (when-not (every? #(<= % max-size) (map :size files))
       (fail :error.file-upload.illegal-upload-size :errorParams (/ max-size 1000 1000)))))
 
-(defn save-file
+(sc/defn ^:always-validate save-file :- SavedFileData
   "Saves file or input stream to mongo GridFS, with metadata (map or kvs). If input stream, caller must close stream.
    Filedata is map (see FileData schema).
    Map of file specific data (fileId, metadata, contentType...) is returned."
-  [filedata & metadata]
-  {:pre [(sc/validate FileData filedata)]}
+  [filedata :- FileData & metadata]
   (let [metadata (if (map? (first metadata))
                    (first metadata)
                    (apply hash-map metadata))

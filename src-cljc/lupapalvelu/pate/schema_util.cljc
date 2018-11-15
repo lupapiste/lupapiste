@@ -3,7 +3,8 @@
   (:require [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :as walk]
-            [lupapalvelu.pate.schema-helper :as helper]))
+            [lupapalvelu.pate.schema-helper :as helper]
+            [lupapalvelu.allu.allu-application :as allu-application]))
 
 (defn pate-assert [pred & msg]
   (let [div "\n-------------------------------------------------------\n"]
@@ -73,7 +74,7 @@
     schema))
 
 ;; Categories that are supported by the verdict template mechanism.
-(def pate-categories   #{:r :tj :p :ya :contract})
+(def pate-categories   #{:r :tj :p :ya :contract :allu-contract})
 ;; Categories that are only supported by the legacy mechanism.
 (def legacy-categories #{:kt :ymp})
 ;; Categories that are only used with migrated legacy verdicts.
@@ -124,9 +125,11 @@
 (defn category-by-operation [operation]
   (get operation-categories (lowkeyword operation)))
 
-(defn application->category [{:keys [permitType permitSubtype]}]
-  (or (permit-subtype->category permitSubtype)
-      (first (permit-type->categories permitType))))
+(defn application->category [{:keys [permitType permitSubtype organization]}]
+  (if (allu-application/allu-application? organization permitType)
+    :allu-contract
+    (or (permit-subtype->category permitSubtype)
+        (first (permit-type->categories permitType)))))
 
 (defn dict-resolve
   "Path format: [repeating index repeating index ... value-dict].

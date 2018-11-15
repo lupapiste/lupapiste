@@ -9,7 +9,7 @@
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.coordinate :as coord]
-            [cheshire.core :as json]))
+            [lupapalvelu.json :as json]))
 
 ; make sure proxies are enabled:
 (http-post (str (server-address) "/api/proxy-ctrl/on") {})

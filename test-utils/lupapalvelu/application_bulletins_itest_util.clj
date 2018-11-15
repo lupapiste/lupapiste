@@ -5,16 +5,15 @@
             [sade.util :as util]))
 
 (defn send-file [cookie-store & [filename]]
-  (set-anti-csrf! false)
-  (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
-        uploadfile  (io/file filename)
-        uri         (str (server-address) "/api/raw/upload-file")
-        resp        (http-post uri
-                               {:multipart [{:name "files[]" :content uploadfile}]
-                                :throw-exceptions false
-                                :cookie-store cookie-store})]
-    (set-anti-csrf! true)
-    resp))
+  (without-anti-csrf
+    (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
+          uploadfile  (io/file filename)
+          uri         (str (server-address) "/api/raw/upload-file")
+          resp        (http-post uri
+                                 {:multipart [{:name "files[]" :content uploadfile}]
+                                  :throw-exceptions false
+                                  :cookie-store cookie-store})]
+      resp)))
 
 (defn create-application-and-bulletin [& args]
   (let [args         (if (map? args)

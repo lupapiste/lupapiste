@@ -1,6 +1,6 @@
 (ns lupapalvelu.backing-system.krysp.reader
   "Read the Krysp from municipality Web Feature Service"
-  (:require [cheshire.core :as json]
+  (:require [lupapalvelu.json :as json]
             [clojure.set :refer [rename-keys]]
             [lupapalvelu.document.schemas]
             [lupapalvelu.drawing :as drawing]
@@ -13,7 +13,7 @@
             [lupapalvelu.backing-system.krysp.common-reader :as common]
             [lupapalvelu.find-address :as find-address]
             [lupapalvelu.proxy-services :as proxy-services]
-            [cheshire.core :as json]
+            [lupapalvelu.json :as json]
             [net.cgrand.enlive-html :as enlive]
             [plumbing.core :refer [?>>]]
             [sade.common-reader :as cr]
@@ -610,7 +610,7 @@
                  :body)
         {:keys [street number]} (when (string? resp)
                                   (try
-                                    (json/parse-string resp true)
+                                    (json/decode resp true)
                                     (catch Exception _
                                       (warnf "Failed to resolve address for point x: %s y: %s" x y))))]
     (when street
@@ -640,7 +640,7 @@
         response (-> {:params {:x x :y y}}
                      proxy-services/property-id-by-point-proxy)]
     (if-not (#{400 503} (:status response))
-      (json/parse-string (:body response) true))))
+      (json/decode (:body response) true))))
 
 (defn resolve-coordinate-type [xml]
   (cond

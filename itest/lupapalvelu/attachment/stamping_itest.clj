@@ -177,7 +177,7 @@
 
 (facts "Stamping copies all signings"
   (apply-remote-minimal)
-  (let [{application-id :id} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
+  (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
         application (query-application pena application-id)
         attachment-id (:id (first (:attachments application)))
         _ (upload-attachment pena application-id {:id attachment-id :type {:type-group "paapiirustus" :type-id "asemapiirros"}} true) => ok?
@@ -261,6 +261,55 @@
                 fileId (-> attachment :latestVersion :originalFileId (keyword))
                 approval (-> attachment :approvals (get fileId))]
             (-> approval :user :firstName) => "Sonja"))))))
+
+(facts "Authority can remove stamped version from a readonly attachment"
+  (let [application    (create-and-submit-application pena :propertyId sipoo-property-id)
+        application-id (:id application)
+        stamp          {:id         "123456789012345678901234"
+                        :name       "Oletusleima"
+                        :position   {:x 10 :y 200}
+                        :background 0
+                        :page       :first
+                        :qrCode     true
+                        :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
+                                     [{:type :backend-id :value "17-0753-R"}]
+                                     [{:type :organization :value "Sipoon rakennusvalvonta"}]]}]
+
+    (fact "Sonja fetches verdict"
+      (command sonja :check-for-verdict :id application-id) => ok?)
+
+    (let [{attachment-id :id
+           :as           attachment} (-> (query-application sonja application-id) :attachments last)]
+      (fact "Verdict attachment is locked and readonly"
+        (:readOnly attachment) => true
+        (:locked attachment) => true)
+
+      (fact "Ronja stamps attachment"
+        (let [{job :job} (command ronja :stamp-attachments :id application-id :timestamp (sade.core/now) :files [attachment-id] :lang :fi :stamp stamp) => ok?]
+                                        ; Wait that stamping job is done
+          (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
+
+          (let [[ver1 ver2] (-> (query-application sonja application-id) :attachments last :versions)
+                delete-cmd  (fn [apikey ver success?]
+                              (fact {:midje/description (str "delete attachment version should "
+                                                             (if success? "succeed" "fail"))}
+                                (command apikey :delete-attachment-version
+                                         :id application-id
+                                         :attachmentId attachment-id
+                                         :fileId (:fileId ver)
+                                         :originalFileId (:originalFileId ver))
+                                => #(if success?
+                                      (ok? %)
+                                      (expected-failure? :error.unauthorized %))))]
+            (fact "Pena cannot delete either version"
+              (delete-cmd pena ver1 false)
+              (delete-cmd pena ver2 false))
+            (fact "Sonja cannot delete the non-stamped version"
+              (:stamped ver1) => falsey
+              (delete-cmd sonja ver1 false))
+            (fact "Sonja can delete the stamped version"
+              (:stamped ver2) => true
+              (delete-cmd sonja ver2 true))))))))
 
 (facts stamp-templates
   (let [result (query sipoo :stamp-templates)

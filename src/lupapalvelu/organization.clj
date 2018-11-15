@@ -9,7 +9,7 @@
            [org.geotools.referencing.crs DefaultGeographicCRS]
            [org.opengis.feature.simple SimpleFeature])
 
-  (:require [cheshire.core :as json]
+  (:require [lupapalvelu.json :as json]
             [clojure.set :as set]
             [clojure.walk :refer [keywordize-keys]]
             [lupapalvelu.attachment.stamp-schema :as stmp]
@@ -348,6 +348,12 @@
 
 (defn allowed-ip? [ip organization-id]
   (pos? (mongo/count :organizations {:_id organization-id, $and [{:allowedAutologinIPs {$exists true}} {:allowedAutologinIPs ip}]})))
+
+(defn get-organizations-by-ad-domain
+  "Return the organization id and ad-settings for organizations, where the :ad-login.trusted-domains array
+  contains the provided domain (e.g. 'pori.fi')"
+  [domain]
+  (mongo/select :organizations {:ad-login.trusted-domains domain} {:_id 1 :ad-login 1}))
 
 (defn krysp-urls-not-set?
   "Takes organization as parameter.
@@ -771,7 +777,7 @@
                                .getFeatures
                                ((partial transform-crs-to-wgs84 org-id nil)))
         precision      13 ; FeatureJSON shows only 4 decimals by default
-        areas (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection)))
+        areas (json/decode (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection) true)
         ensured-areas (geo/ensure-features areas)
 
         new-collection-wgs84 (some-> data-store
@@ -779,7 +785,7 @@
                                      .getFeatures
                                      transform-coordinates-to-wgs84
                                      ((partial transform-crs-to-wgs84 org-id ensured-areas)))
-        areas-wgs84 (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection-wgs84)))
+        areas-wgs84 (json/decode (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection-wgs84) true)
         ensured-areas-wgs84 (geo/ensure-features areas-wgs84)]
     (when (geo/validate-features (:features ensured-areas))
       (fail! :error.coordinates-not-epsg3067))

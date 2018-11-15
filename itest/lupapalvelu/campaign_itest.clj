@@ -1,5 +1,5 @@
 (ns lupapalvelu.campaign-itest
-  (:require [cheshire.core :as json]
+  (:require [lupapalvelu.json :as json]
             [lupapalvelu.itest-util :refer :all]
             [midje.sweet :refer :all]
             [sade.crypt :as crypt]

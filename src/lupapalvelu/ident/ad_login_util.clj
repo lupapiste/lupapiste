@@ -1,21 +1,11 @@
 (ns lupapalvelu.ident.ad-login-util
-  (:require [taoensso.timbre :refer [debug infof warn error errorf]]
-            [clj-uuid :as uuid]
-            [noir.core :refer [defpage]]
-            [noir.response :as resp]
-            [noir.request :as request]
-            [lupapalvelu.organization :as org]
-            [lupapalvelu.user :as usr]
+  (:require [taoensso.timbre :refer [debug warn error errorf]]
+            [hiccup.core :as hiccup]
             [monger.operators :refer [$set]]
             [ring.util.response :refer :all]
             [sade.core :refer [def-]]
             [sade.env :as env]
-            [sade.session :as ssess]
             [sade.strings :as ss]
-            [sade.util :as util]
-            [saml20-clj.sp :as saml-sp]
-            [saml20-clj.routes :as saml-routes]
-            [saml20-clj.shared :as saml-shared]
             [saml20-clj.xml :as saml-xml])
   (:import [org.apache.xml.security Init]
            [org.apache.xml.security.utils Constants ElementProxy]
@@ -30,12 +20,12 @@
   [certstring]
   (ss/replace certstring #"[\n ]|(BEGIN|END) CERTIFICATE|(BEGIN|END) PRIVATE KEY|-{5}" ""))
 
-(defn string->certificate [certstring]
+(defn- string->certificate [certstring]
   (let [cf (java.security.cert.CertificateFactory/getInstance "X.509")
         bytestream (ByteArrayInputStream. (.getBytes certstring))]
     (.generateCertificate cf bytestream)))
 
-(defn string->private-key [keystring]
+(defn- string->private-key [keystring]
   (let [kf (java.security.KeyFactory/getInstance "RSA")
         pksc8EncodedBytes (.decode (Base64/getDecoder) (parse-certificate keystring))
         keySpec (java.security.spec.PKCS8EncodedKeySpec. pksc8EncodedBytes)]
@@ -50,9 +40,6 @@
   (let [private-key (string->private-key keystring)
         cert (string->certificate certstring)
         sig-algo org.apache.xml.security.signature.XMLSignature/ALGO_ID_SIGNATURE_RSA_SHA256]
-    ;; https://svn.apache.org/repos/asf/santuario/xml-security-java/trunk/samples/org/apache/xml/security/samples/signature/CreateSignature.java
-    ;; http://stackoverflow.com/questions/2052251/is-there-an-easier-way-to-sign-an-xml-document-in-java
-    ;; Also useful: http://www.di-mgt.com.au/xmldsig2.html
     (fn sign-xml-doc [xml-string]
       (let [xmldoc (saml-xml/str->xmldoc xml-string)
             transforms (doto (new Transforms xmldoc)
@@ -84,6 +71,35 @@
                        (new org.opensaml.xml.encryption.InlineEncryptedKeyResolver))]
     decrypter))
 
+(defn metadata
+  "Ported from kirasystems/saml20-clj, removed 'http://example.com/SingleLogout' endpoint"
+  ([app-name acs-uri certificate-str sign-request?]
+   (str
+     (hiccup.page/xml-declaration "UTF-8")
+     (hiccup/html
+       [:md:EntityDescriptor {:xmlns:md  "urn:oasis:names:tc:SAML:2.0:metadata",
+                              :ID  (ss/replace acs-uri #"[:/]" "_") ,
+                              :entityID  app-name}
+        [:md:SPSSODescriptor
+         (cond-> {:AuthnRequestsSigned "true",
+                  :WantAssertionsSigned "true",
+                  :protocolSupportEnumeration "urn:oasis:names:tc:SAML:2.0:protocol"}
+           (not sign-request?) (dissoc :AuthnRequestsSigned))
+         [:md:KeyDescriptor  {:use  "signing"}
+          [:ds:KeyInfo  {:xmlns:ds  "http://www.w3.org/2000/09/xmldsig#"}
+           [:ds:X509Data
+            [:ds:X509Certificate certificate-str]]]]
+         [:md:KeyDescriptor  {:use  "encryption"}
+          [:ds:KeyInfo  {:xmlns:ds  "http://www.w3.org/2000/09/xmldsig#"}
+           [:ds:X509Data
+            [:ds:X509Certificate certificate-str]]]]
+         [:md:NameIDFormat  "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"]
+         [:md:NameIDFormat  "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"]
+         [:md:NameIDFormat  "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"]
+         [:md:NameIDFormat  "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"]
+         [:md:NameIDFormat  "urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName"]
+         [:md:AssertionConsumerService  {:Binding  "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST", :Location acs-uri, :index  "0", :isDefault  "true"}]]]))))
+
 (defn remove-namespaces-from-kws
   "Convert namespaced map keys like :http://schemas.microsoft.com/identity/claims/tenantid -> :tenantid"
   [m]
@@ -101,6 +117,9 @@
     (map? element) (into {} (for [[k v] (remove-namespaces-from-kws element)] [(keyword k) (parse-saml-info v)]))
     :else element))
 
+(defn make-acs-uri [domain]
+  (format "%s/api/saml/ad-login/%s" (env/value :host) domain))
+
 (defn resolve-roles
   "Takes a map of corresponding roles (key = role in Lupis, value is AD-group)
   and a seq of user roles from the SAML, returns a set of corresponding LP roles."
@@ -110,3 +129,14 @@
                        (when (ad-roles-set ad-role)
                          (name lp-role)))]
     (->> orgAuthz (remove nil?) set)))
+
+(defn resolve-authz
+  "Takes a sequence of ad-settings (as returned by `lupapalvelu.organization/get-organizations-by-ad-domain`)
+  and a sequence of ad-groups received in the SAML response, returns a parsed orgAuthz element."
+  [ad-settings Group]
+  (into {} (for [org-setting ad-settings
+                 :let [{:keys [id ad-login]} org-setting
+                       resolved-roles (resolve-roles (:role-mapping ad-login) Group)]
+                 :when (and (true? (:enabled ad-login))
+                            (false? (empty? resolved-roles)))]
+             [(keyword (:id org-setting)) resolved-roles])))

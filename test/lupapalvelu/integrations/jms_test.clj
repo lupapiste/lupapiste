@@ -16,7 +16,7 @@
         (.isStarted broker) => true
         (str broker) => #"ActiveMQServerImpl"))
     (fact "Connection started" (.isStarted ^ActiveMQConnection (:conn @jms/state)) => true)
-    (fact "Queue" (queue "tester") => (partial instance? Queue))
+    (fact "Queue" (queue (consumer-session) "tester") => (partial instance? Queue))
     (facts "Consumers"
       (fact "own fn"
         (let [consumer (create-consumer "tester" #(reset! test-atom %))]

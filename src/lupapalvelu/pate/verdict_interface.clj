@@ -37,6 +37,11 @@
   [{:keys [verdicts pate-verdicts]}]
   (concat verdicts (metadata/unwrap-all pate-verdicts)))
 
+(defn find-verdict
+  "Find a verdict by id."
+  [application verdict-id]
+  (util/find-by-id verdict-id (all-verdicts application)))
+
 (defn verdicts-by-backend-id
   "All verdicts filtered by backend Id."
   [application backendId]
