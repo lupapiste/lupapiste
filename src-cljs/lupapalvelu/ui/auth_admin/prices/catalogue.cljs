@@ -25,7 +25,7 @@
    (->date-str (:valid-until catalogue))
    (if (= "draft" (:state catalogue)) (loc "price-catalogue.draft"))))
 
-(rum/defc CatalogueSelect < rum/reactive
+(rum/defc catalogue-select < rum/reactive
   [catalogues selected-catalogue-id]
   (uc/select state/set-selected-catalogue-id
              "catalogue-select"
@@ -35,7 +35,7 @@
                         (rum/react catalogues)))
              "dropdown"))
 
-(rum/defc OperationCatalogueRow
+(rum/defc operation-catalogue-row
   < {:key-fn (fn [operation row] (str operation))}
   [operation {:keys [text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
   [:tr
@@ -46,7 +46,7 @@
    [:td max-total-price]
    [:td unit]])
 
-(rum/defc OperationTable
+(rum/defc operation-table
   < {:key-fn (fn [operation rows] (str operation))}
   [operation rows]
   [:div
@@ -60,25 +60,25 @@
        [:th (loc "price-catalogue.maximum")]
        [:th (loc "price-catalogue.unit")]]]
     [:tbody
-     (map OperationCatalogueRow operation rows)]]])
+     (map operation-catalogue-row operation rows)]]])
 
-(rum/defc CatalogueByOperations [selected-catalogue]
+(rum/defc catalogue-by-operations [selected-catalogue]
   (let [rows-by-operation (util/rows-by-operation selected-catalogue)]
     [:div
      (for [[operation rows] rows-by-operation]
-       (OperationTable operation rows))]))
+       (operation-table operation rows))]))
 
-(rum/defc RowOperation
+(rum/defc row-operation
   < {:key-fn (fn [operation] (str "operation-" operation))}
   [operation]
   [:span.row-operation
    (str operation " ")])
 
-(rum/defc RowOperations [operations]
+(rum/defc row-operations [operations]
   [:div
-   (map RowOperation operations)])
+   (map row-operation operations)])
 
-(rum/defc CatalogueRow
+(rum/defc catalogue-row
   < {:key-fn (fn [row] (str (:code row) "-" (:text row)))}
   [{:keys [code text price-per-unit discount-percent min-total-price max-total-price unit operations] :as row}]
   [:tr
@@ -89,9 +89,9 @@
    [:td min-total-price]
    [:td max-total-price]
    [:td unit]
-   [:td (RowOperations operations)]])
+   [:td (row-operations operations)]])
 
-(rum/defc CatalogueByRows [selected-catalogue]
+(rum/defc catalogue-by-rows [selected-catalogue]
   [:div
    [:table
      [:thead
@@ -105,9 +105,9 @@
        [:th (loc "price-catalogue.unit")]
        [:th (loc "price-catalogue.row-operations")]]]
     [:tbody
-     (map CatalogueRow (:rows selected-catalogue))]]])
+     (map catalogue-row (:rows selected-catalogue))]]])
 
-(rum/defc ViewSwitch  < rum/reactive
+(rum/defc view-switch  < rum/reactive
   [_]
   (let [view (rum/react state/view)]
     [:div.view-switch
@@ -125,29 +125,28 @@
                :on-click (fn [] (state/set-view :by-operations))}
       [:span (loc "price-catalogue.by-operations")]]]))
 
-(rum/defc Catalogue < rum/reactive
+(rum/defc catalogue < rum/reactive
   [_]
   (let [selected-catalogue (state/get-catalogue (rum/react state/selected-catalogue-id))
         view (rum/react state/view)]
     [:div.price-catalogue
      [:div.catalogue-select-wrapper
-      (CatalogueSelect state/catalogues
-                       state/selected-catalogue-id)
+      (catalogue-select state/catalogues state/selected-catalogue-id)
       ;;TODO add new taksa button here to the right side
       ]
-     [:div (if selected-catalogue (ViewSwitch))]
+     [:div (if selected-catalogue (view-switch))]
      [:div
       (cond
         (not selected-catalogue) nil
-        (= view :by-rows) (CatalogueByRows selected-catalogue)
-        (= view :by-operations) (CatalogueByOperations selected-catalogue))]]))
+        (= view :by-rows) (catalogue-by-rows selected-catalogue)
+        (= view :by-operations) (catalogue-by-operations selected-catalogue))]]))
 
 (defonce args (atom {}))
 
 (def log (.-log js/console))
 
 (defn mount-component []
-  (rum/mount (Catalogue)
+  (rum/mount (catalogue)
              (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId componentParams]
