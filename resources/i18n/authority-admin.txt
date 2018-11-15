@@ -586,3 +586,4 @@
 "triggers.title" "en" "Automated task"
 "triggers.title" "fi" "Automaattitehtävät"
 "triggers.title" "sv" "Automatuppgifter"
+"auth-admin.default-attachments-mandatory" "fi" "Oletusliitteet pakollisia"

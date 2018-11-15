@@ -100,6 +100,14 @@
              :path [:verdict-code]
              :value [:bad-code])
     => invalid-value?)
+  (fact "No authority-admin auths"
+    (command sipoo-ya :save-verdict-template-settings-value
+             :org-id org-id
+             :category "r"
+             :path [:verdict-code]
+             :value [:ehdollinen :ei-puollettu
+                     :evatty :hyvaksytty])
+    => (err :error.invalid-organization))
   (fact "Save settings draft"
     (let [{modified :modified}
           (command sipoo :save-verdict-template-settings-value
