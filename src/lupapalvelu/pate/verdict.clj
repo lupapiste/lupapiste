@@ -933,7 +933,7 @@
   "Augments verdict data, but MUST NOT update mongo (this is called from
   query actions, too).  If final? is truthy then the enrichment is
   part of publishing."
-  ([{:keys [application]} {:keys [data template category]
+  ([{:keys [application]} {:keys [data template]
                            :as   verdict} final?]
    (let [inc-set (->> template
                       :inclusions
@@ -946,7 +946,9 @@
                   (when (:neighbors inc-set)
                     {:neighbor-states (neighbor-states application)})
                   (when (:statements inc-set)
-                    {:statements (statements application final?)}))]
+                    {:statements (statements application final?)})
+                  (when (:bulletin-desc-as-operation data)
+                    {:operation (:bulletin-op-description data)}))]
      (assoc verdict :data (merge data addons))))
   ([command verdict]
    (enrich-verdict command verdict false)))

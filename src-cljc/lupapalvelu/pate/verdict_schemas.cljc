@@ -119,16 +119,6 @@
                                                :dict      kw})
                                             dates)}]}}})
 
-(def versub-operation
-  {:dictionary {:operation {:text {:loc-prefix :pate.operation}}
-                :address   {:text {:loc-prefix :pate.address}}}
-   :section    {:id   :pate-operation
-                :grid {:columns 2
-                       :rows    [[{:dict  :operation
-                                   :align :full}]
-                                 [{:dict  :address
-                                   :align :full}]]}}})
-
 (def versub-operation-ya
   {:dictionary {:operation       {:text {:loc-prefix :pate.operation}}
                 :address         {:text {:loc-prefix :pate.location}}
@@ -232,6 +222,22 @@
                                        [{:col 1
                                          :show? :_meta.editing?
                                          :dict :bulletin-desc-as-operation}]]}}})
+
+(def versub-operation
+  {:dictionary {:operation    {:text {:loc-prefix :pate.operation}}
+                :bulletin-ref {:reference {:loc-prefix :pate.operation
+                                           :path :bulletin-op-description}}
+                :address      {:text {:loc-prefix :pate.address}}}
+   :section    {:id   :pate-operation
+                :grid {:columns 2
+                       :rows    [[{:dict  :operation
+                                   :align :full
+                                   :hide? :bulletin-desc-as-operation}
+                                  {:dict  :bulletin-ref
+                                   :align :full
+                                   :show? :bulletin-desc-as-operation}]
+                                 [{:dict  :address
+                                   :align :full}]]}}})
 
 (defn versub-requirements
   "Supported arguments: :foremen, :plans and :reviews."
