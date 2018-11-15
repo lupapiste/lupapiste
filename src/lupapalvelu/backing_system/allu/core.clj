@@ -381,10 +381,14 @@
 
       [:placementcontracts :contract (:or :proposal :final)]
       (let [request (assoc request :as :byte-array)
-            response (handler request)]
+            response (handler request)
+            file-name-suffix (case (last (-> request reitit-ring/get-match :data :name))
+                               :proposal "-sopimusehdotus.pdf"
+                               :final    "-sopimus.pdf"
+                               ".pdf")]
         (if (= (:status response) 200)
           (let [content-bytes (:body response)
-                file-data {:filename     (str (:id application) "-sopimusehdotus.pdf")
+                file-data {:filename     (str (:id application) file-name-suffix)
                            :content      (ByteArrayInputStream. content-bytes)
                            :content-type (get-in response [:headers "Content-Type"])
                            :size         (alength content-bytes)}
