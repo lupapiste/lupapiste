@@ -79,7 +79,7 @@ var repository = (function() {
           application.allowedAttachmentTypes = sortedAttachmentTypes;
 
           application.tosFunction = application.tosFunction === undefined ? null : application.tosFunction;
-          application.kuntalupatunnukset = application.publishedMunicipalityPermitIds;
+          application.kuntalupatunnukset = application.municipalityPermitIds;
 
           application.propertyIdSource = application.propertyIdSource || "";
 

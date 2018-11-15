@@ -349,10 +349,16 @@
                           not-empty))
       application)))
 
-(defn- with-published-municipality-permit-ids [application]
+(defn with-municipality-permit-ids
+  "Assocs municipality permit ids found in published verdicts to
+  `:municipalityVerdictIds`, or all verdicts if the application is an
+  archiving project."
+  [application]
   (assoc application
-         :publishedMunicipalityPermitIds
-         (vif/published-municipality-permit-ids application)))
+         :municipalityPermitIds
+         (if (permit/archiving-project? application)
+           (vif/kuntalupatunnukset application)
+           (vif/published-municipality-permit-ids application))))
 
 (defn post-process-app [{:keys [user] :as command}]
   (->> (with-auth-models command)
@@ -365,7 +371,7 @@
        (meta-fields/with-meta-fields user)
        action/without-system-keys
        (process-documents-and-tasks user)
-       with-published-municipality-permit-ids
+       with-municipality-permit-ids
        location->object))
 
 (defn post-process-app-for-krysp [application organization]
