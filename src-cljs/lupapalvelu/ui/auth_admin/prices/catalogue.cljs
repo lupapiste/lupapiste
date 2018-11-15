@@ -65,7 +65,6 @@
 (rum/defc CatalogueByOperations [selected-catalogue]
   (let [rows-by-operation (util/rows-by-operation selected-catalogue)]
     [:div
-     (println "rows-by-operation: ")
      (for [[operation rows] rows-by-operation]
        (OperationTable operation rows))]))
 
@@ -82,9 +81,7 @@
 
 (rum/defc RowOperations [operations]
   [:div
-   (map (fn [operation]
-          (RowOperation operation))
-        operations)])
+   (map RowOperation operations)])
 
 (rum/defc CatalogueRow
   < {:key-fn (fn [row] (str (:code row) "-" (:text row)))}
@@ -162,7 +159,6 @@
              (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId componentParams]
-  (println "catalogue start")
   (swap! args assoc :auth-model (aget componentParams "authModel") :dom-id (name domId))
   (reset! state/org-id (js/ko.unwrap (common/oget componentParams "orgId")))
   (service/fetch-price-catalogues)

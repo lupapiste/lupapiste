@@ -122,9 +122,6 @@
    :parameters       [org-id]
    :input-validators [(partial action/non-blank-parameters [:org-id])]}
   [{:keys [data user user-organizations] :as command}]
-  (info "user-organization-price-catalogues user: " user)
-  (info "user-organization-price-catalogues org-id: " (:org-id data))
-  (info "user-organization-price-catalogues bound variable org-id: " org-id)
   (let [price-catalogues (invoices/fetch-price-catalogues org-id)]
     (invoices/validate-price-catalogues price-catalogues)
     (ok {:price-catalogues price-catalogues})))

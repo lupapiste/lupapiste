@@ -1,8 +1,7 @@
 (ns lupapalvelu.invoices.shared.util)
 
-(defn filter-rows-having-operation [rows operation]
-  (filter (fn [row] ((set (:operations row)) operation))
-          rows))
+(defn row-has-operation? [operation row]
+  ((set (:operations row)) operation))
 
 (defn rows-by-operation [{:keys [rows] :as catalogue}]
   (let [all-operations (->> rows
@@ -11,5 +10,5 @@
                             flatten
                             set)]
     (into {} (for [operation all-operations
-                   :let [operation-rows (filter-rows-having-operation rows operation)]]
+                   :let [operation-rows (filter (partial row-has-operation? operation) rows)]]
                [operation operation-rows]))))

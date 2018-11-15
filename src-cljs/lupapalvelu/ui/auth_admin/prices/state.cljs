@@ -12,12 +12,11 @@
 (def view                  (state-cursor :view))
 
 (defn set-selected-catalogue-id [catalogue-id]
-  (println "setting catalogue-id to " catalogue-id)
   (reset! selected-catalogue-id catalogue-id))
 
 (defn get-catalogue [catalogue-id]
   (some (fn [{:keys [id] :as catalogue}]
-          (if (= id catalogue-id)
+          (when (= id catalogue-id)
             catalogue))
         @catalogues))
 

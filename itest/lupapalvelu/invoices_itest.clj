@@ -16,10 +16,10 @@
             [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]))
 
 (defn catalogues-belong-to-org?
-  ([org-id catalogues]
-   (->> catalogues
-        (map :organization-id)
-        (every? (fn [catalogue-org-id] (= org-id catalogue-org-id))))))
+  [org-id catalogues]
+  (->> catalogues
+       (map :organization-id)
+       (every? (fn [catalogue-org-id] (= org-id catalogue-org-id)))))
 
 (defn belong-to-org? [org-id]
   (partial catalogues-belong-to-org? org-id))
