@@ -71,13 +71,8 @@
 (rum/defc RowOperation
   < {:key-fn (fn [operation] (str "operation-" operation))}
   [operation]
-  [:span {:style {:backgroundColor "#f39129"
-                  :box-sizing "border-box"
-                  :color "white"
-                  :display "inline-block"
-                  :margin-right "0.5em"
-                  :padding-right "0.5em"
-                  :padding-left "1em"}} (str operation " ")])
+  [:span.row-operation
+   (str operation " ")])
 
 (rum/defc RowOperations [operations]
   [:div
@@ -114,22 +109,19 @@
 
 (rum/defc ViewSwitch  < rum/reactive
   [_]
-  (let [view (rum/react state/view)
-        selected-style {:backgroundColor "#f39129"
-                        :color "white"
-                        :border "1px solid #f39129"}
-        unselected-style {:backgroundColor "white"
-                          :color "#f39129"
-                          :border "1px solid #f39129"}
-        row-button-style (if  (= view :by-rows) selected-style unselected-style)
-        operation-button-style (if  (= view :by-operations) selected-style unselected-style)]
-    [:div {:style {:margin-bottom "2em"}}
-     [:span {:style {:padding-right "1em"}} (loc "price-catalogue.show")]
-     [:button  {:style row-button-style
+  (let [view (rum/react state/view)]
+    [:div.view-switch
+     [:span.view-switch-guide-text
+      (loc "price-catalogue.show")]
+     [:button  {:className (if  (= view :by-rows)
+                             "view-switch-selected"
+                             "view-switch-unselected")
                 :on-click (fn [] (state/set-view :by-rows))}
       [:span (loc "price-catalogue.by-product-rows")]]
 
-     [:button {:style operation-button-style
+     [:button {:className (if  (= view :by-operations)
+                            "view-switch-selected"
+                            "view-switch-unselected")
                :on-click (fn [] (state/set-view :by-operations))}
       [:span (loc "price-catalogue.by-operations")]]]))
 
@@ -137,8 +129,8 @@
   [_]
   (let [selected-catalogue (state/get-catalogue (rum/react state/selected-catalogue-id))
         view (rum/react state/view)]
-    [:div
-     [:div {:style {:margin-bottom "2em"}}
+    [:div.price-catalogue
+     [:div.catalogue-select-wrapper
       (CatalogueSelect state/catalogues
                        state/selected-catalogue-id)
       ;;TODO add new taksa button here to the right side

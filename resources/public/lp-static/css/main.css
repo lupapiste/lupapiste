@@ -39346,6 +39346,42 @@ button.invoice-change-state-button {
   background-color: #dddddd;
 }
 
+.price-catalogue .catalogue-select-wrapper {
+  margin-bottom: 2em;
+}
+
+.price-catalogue .row-operation {
+  background-color: #f39129;
+  box-sizing: border-box;
+  color: white;
+  display: inline-block;
+  margin-right: 0.5em;
+  padding-right: 0.5em;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  padding-left: 1em;
+}
+
+.price-catalogue .view-switch {
+  margin-bottom: 2em;
+}
+
+.price-catalogue .view-switch-guide-text {
+  padding-right: 1em;
+}
+
+.price-catalogue .view-switch-selected {
+  background-color: #f39129;
+  color: white;
+  border: 1px solid #f39129;
+}
+
+.price-catalogue .view-switch-unselected {
+  background-color: white;
+  color: #f39129;
+  border: 1px solid #f39129;
+}
+
 #bulletins, #local-bulletins {
   font-family: "Source Sans Pro", sans-serif;
   font-weight: 400;
