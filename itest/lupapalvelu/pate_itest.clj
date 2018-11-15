@@ -1456,7 +1456,77 @@
 
     (fact "Editing no longer allowed"
       (edit-verdict :verdict-text "New verdict text")
-      => (err :error.verdict.not-draft))
+      => (err :error.verdict.not-editable))
     (fact "Published verdict cannot be deleted"
       (command sonja :delete-pate-verdict :id app-id
                :verdict-id verdict-id) => fail?)))
+
+(facts "Verdict proposal"
+  (let  [{:keys [app-id template-id]} space-saving-definitions]
+  (fact "Board verdict template"
+    (command sipoo :save-verdict-template-draft-value
+             :org-id org-id
+             :template-id template-id
+             :path ["giver"]
+             :value :lautakunta) => ok?)
+
+  (let [{verdict-id :verdict-id} (command sonja :new-pate-verdict-draft
+                                          :id app-id
+                                          :template-id template-id)
+        {edit-verdict :edit}     (verdict-fn-factory app-id verdict-id)]
+
+    (fact "Verdict proposal can't published if not filled"
+      (command sonja :publish-verdict-proposal :id app-id :verdict-id verdict-id) => (err :pate.required-fields))
+
+    (fact "Edit verdict draft"
+      (edit-verdict :verdict-date (timestamp "6.10.2017")) => ok?
+      (edit-verdict :automatic-verdict-dates true) => ok?
+      (edit-verdict :verdict-section "12") => ok?)
+
+    (fact "Applicant cant publish proposal"
+      (command pena :publish-verdict-proposal :id app-id :verdict-id verdict-id) => (err :error.unauthorized))
+
+    (fact "Verdict proposal can be published"
+      (command sonja :publish-verdict-proposal :id app-id :verdict-id verdict-id) => ok?)
+
+    (fact "State is now proposal"
+      (->> (query-application sonja app-id)
+           :pate-verdicts
+           (filter #(= (:id %) verdict-id))
+           first
+           :state
+           :_value) => "proposal")
+
+    (fact "There are verdict proposal attachment"
+      (proposal-pdf-queue-test sonja {:app-id       app-id
+                                      :verdict-id   verdict-id}))
+
+    (fact "Proposal can be updated"
+      (edit-verdict :proposal-text "Edited proposal") => ok?
+      (command sonja :publish-verdict-proposal :id app-id :verdict-id verdict-id) => ok?)
+
+    (fact "Proposal can be deleted.."
+      (let [{proposal-for-delete-id :verdict-id}  (command sonja :new-pate-verdict-draft
+                                                                 :id app-id
+                                                                 :template-id template-id)
+            verdict-count-before      (count (:pate-verdicts (query-application sonja app-id)))]
+        (fact ".. not by applicant.."
+          (command pena :delete-pate-verdict :id app-id :verdict-id proposal-for-delete-id) => (err :error.unauthorized))
+        (fact " .. but by authority."
+          (command sonja :delete-pate-verdict :id app-id :verdict-id proposal-for-delete-id) => ok?
+          (- verdict-count-before (count (:pate-verdicts (query-application sonja app-id)))) => 1)))
+
+    (fact "Verdict can be published from proposal"
+      (command sonja :publish-pate-verdict :id app-id :verdict-id verdict-id) => ok?)
+
+    (fact "State is now published"
+      (->> (query-application sonja app-id)
+           :pate-verdicts
+           (filter #(= (:id %) verdict-id))
+           first
+           :state
+           :_value) => "published")
+
+    (fact "And there is a verdict pdf"
+      (verdict-pdf-queue-test sonja {:app-id     app-id
+                                     :verdict-id verdict-id})))))
