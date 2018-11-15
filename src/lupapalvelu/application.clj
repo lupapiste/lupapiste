@@ -36,6 +36,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.pate.verdict-interface :as vif]
             [sade.coordinate :as coord]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -348,6 +349,17 @@
                           not-empty))
       application)))
 
+(defn with-municipality-permit-ids
+  "Assocs municipality permit ids found in published verdicts to
+  `:municipalityVerdictIds`, or all verdicts if the application is an
+  archiving project."
+  [application]
+  (assoc application
+         :municipalityPermitIds
+         (if (permit/archiving-project? application)
+           (vif/kuntalupatunnukset application)
+           (vif/published-municipality-permit-ids application))))
+
 (defn post-process-app [{:keys [user] :as command}]
   (->> (with-auth-models command)
        with-allowed-attachment-types
@@ -359,6 +371,7 @@
        (meta-fields/with-meta-fields user)
        action/without-system-keys
        (process-documents-and-tasks user)
+       with-municipality-permit-ids
        location->object))
 
 (defn post-process-app-for-krysp [application organization]
@@ -384,10 +397,13 @@
 
 (defn make-attachments
   [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
-  (let [types     (new-attachment-types-for-operation organization operation existing-attachments-types)
-        groups    (map (partial attachment-grouping-for-type operation) types)
-        metadatas (pmap (partial tos/metadata-for-document (:id organization) tos-function) types)]
-    (map (partial att/make-attachment created target true false false (keyword applicationState)) groups types metadatas)))
+  (let [types      (new-attachment-types-for-operation organization operation existing-attachments-types)
+        groups     (map (partial attachment-grouping-for-type operation) types)
+        metadatas  (pmap (partial tos/metadata-for-document (:id organization) tos-function) types)
+        mandatory? (boolean (some-> organization
+                                    :default-attachments-mandatory
+                                    (util/includes-as-kw? (:name operation))))]
+    (map (partial att/make-attachment created target true mandatory? false (keyword applicationState)) groups types metadatas)))
 
 (defn multioperation-attachment-updates [operation organization attachments]
   (when-let [added-op (not-empty (select-keys operation [:id :name]))]

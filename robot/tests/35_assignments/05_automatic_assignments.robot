@@ -33,6 +33,7 @@ Sonja logs in and opens application
   Open tab  attachments
 
 Automatic assignment with the attachment as the target has been created
+  Automatic assignment  0
   Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']  käsittelemätön päivitys
   Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']//a  Aita ja asema
 
@@ -62,7 +63,7 @@ Sonja adds handler to application
   Edit handler  0  Sibbo Sonja  Käsittelijä
   Logout
 
-Pena uploads two more applications
+Pena uploads two more attachments
   As Pena
   Open application  ${appname}  ${propertyid}
   Open tab  attachments
@@ -92,7 +93,7 @@ Sonja completes the automatic assignment
   Wait until  Element should not be visible  xpath=//div[@data-test-id='automatic-assignment']
   Logout
 
-Pena uploads two more applications belonging in different automatic assignment trigger groups
+Pena uploads two more attachments belonging in different automatic assignment trigger groups
   As Pena
   Open application  ${appname}  ${propertyid}
   Open tab  attachments
@@ -174,8 +175,15 @@ The assignment targets the 'Aitapiirustus' attachment
   Wait until  Element should be visible  xpath=//tr[@data-test-type='paapiirustus.aitapiirustus']
 
 Sonja changes handler
+  Automatic assignment  0  1  Sonja Sibbo
   Scroll and click test id  edit-handlers
   Edit handler  0  Sibbo Ronja  Käsittelijä
+  Positive indicator should be visible
+  Positive indicator should not be visible
+  Scroll and click test id  edit-handlers-back
+
+Automatic assignment recipient has changed
+  Automatic assignment  0  1  Ronja Sibbo
 
 Sonja has no open assignments
   Open assignments search
@@ -194,7 +202,20 @@ Ronja has one assignment
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
   Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
   Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Aita ja asema
-  Logout
+
+
+Ronja opens the application
+  Open applications search
+  Open application  ${appname}  ${propertyid}
+  Open tab  attachments
+  Automatic assignment  0  1  Ronja Sibbo
+
+Ronja uploads Asemapiirros
+  Upload attachment  ${TXT_TESTFILE_PATH}  Asemapiirros  Doodle  Yleisesti hankkeeseen
+
+Automatic assignment is updated
+  Automatic assignment  0  2  Ronja Sibbo
+  [Teardown]  Logout
 
 Frontend error
   There are no frontend errors

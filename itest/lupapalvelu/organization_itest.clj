@@ -1,20 +1,21 @@
 (ns lupapalvelu.organization-itest
-  (:require [midje.sweet :refer :all]
-            [clojure.set :refer [difference]]
-            [lupapalvelu.organization :as local-org-api]
-            [lupapalvelu.waste-ads :as waste-ads]
-            [lupapalvelu.proxy-services :as proxy]
-            [lupapalvelu.permit :as permit]
+  (:require [clojure.set :refer [difference]]
             [lupapalvelu.factlet :refer [fact* facts*]]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as local-org-api]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.proxy-services :as proxy]
+            [lupapalvelu.waste-ads :as waste-ads]
+            [midje.sweet :refer :all]
             [monger.operators :refer :all]
             [sade.core :as sade]
-            [sade.strings :as ss]
+            [sade.schema-generators :as ssg]
             [sade.schemas :as ssc]
-            [sade.schema-generators :as ssg]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 

@@ -7,6 +7,16 @@
 (def ts (now))
 (def test-queue (str "testijono_" ts))
 (def test-db (str "test_jms_itest_" ts))
+
+(defn check-fn [fetch-fn]
+  (loop [retries 6
+         msgs (fetch-fn)]
+    (if (or (= 2 (count msgs)) (zero? retries))
+      msgs
+      (do
+        (Thread/sleep 500)
+        (recur (dec retries) (fetch-fn))))))
+
 (when (env/feature? :jms)
   (mongo/connect!)
   (facts "test_db_name is respected"
@@ -29,13 +39,15 @@
         (mongo/with-db test-db
           (normal-producer "normal producer with-db")) => nil)
       (Thread/sleep 200)
+
       (fact "From normal DB"
-        (mongo/select :testi) => (just (contains {:data "default db"})
-                                       (contains {:data "normal producer default db"})
-                                       :in-any-order))
+        (check-fn #(mongo/select :testi)) => (just (contains {:data "default db"})
+                                                   (contains {:data "normal producer default db"})
+                                                   :in-any-order))
       (fact "From test-db DB"
-        (mongo/with-db test-db
-          (mongo/select :testi) => (just (contains {:data "with db"})
-                                         (contains {:data "normal producer with-db"})
-                                         :in-any-order)))
+        (check-fn
+          #(mongo/with-db test-db
+            (mongo/select :testi))) => (just (contains {:data "with db"})
+                                             (contains {:data "normal producer with-db"})
+                                             :in-any-order))
       (.close consumer))))

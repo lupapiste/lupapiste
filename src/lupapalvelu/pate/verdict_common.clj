@@ -12,6 +12,13 @@
             [lupapalvelu.user :as usr]))
 
 ;;
+;; Helpers
+;;
+
+(defn- get-data [verdict k]
+  (metadata/unwrap (get-in verdict [:data k])))
+
+;;
 ;; Predicates
 ;;
 
@@ -95,10 +102,10 @@
 (defn verdict-date [verdict]
   (cond
     (legacy? verdict)
-    (-> verdict :data :anto metadata/unwrap)
+    (get-data verdict :anto)
 
     (lupapiste-verdict? verdict)
-    (-> verdict :data :verdict-date metadata/unwrap)
+    (get-data verdict :verdict-date)
 
     :else
     (or (:paatospvm (latest-pk verdict))
@@ -131,8 +138,13 @@
     (let [{:keys [data references template]} verdict]
       (if (util/=as-kw (:giver template) :lautakunta)
        (:boardname references)
-       (:handler data)))
+       (metadata/unwrap (:handler data))))
     (-> verdict latest-pk :paatoksentekija)))
+
+(defn verdict-municipality-permit-id [verdict]
+  (if (lupapiste-verdict? verdict)
+    (get-data verdict :kuntalupatunnus)
+    (:kuntalupatunnus verdict)))
 
 (defn verdict-signatures [{:keys [signatures] :as verdict}]
   (if (lupapiste-verdict? verdict)
@@ -145,19 +157,19 @@
 
 (defn verdict-section [verdict]
   (if (lupapiste-verdict? verdict)
-    (-> verdict :data :verdict-section)
+    (get-data verdict :verdict-section)
     (-> verdict latest-pk :pykala)))
 
 (defn verdict-text [verdict]
   (if (lupapiste-verdict? verdict)
     (if (contract? verdict)
-      (-> verdict :data :contract-text)
-      (-> verdict :data :verdict-text))
+      (get-data verdict :contract-text)
+      (get-data verdict :verdict-text))
     (-> verdict last-pk :paatos))) ;; Notice last-pk, this came from bulletins verdict data
 
 (defn verdict-code [verdict]
   (if (lupapiste-verdict? verdict)
-    (-> verdict :data :verdict-code)
+    (get-data verdict :verdict-code)
     (some-> verdict first-pk :status str)))
 
 ;;

@@ -457,7 +457,9 @@
         (fact "Verdict code"
           (command sonja :edit-pate-verdict :id application-id :verdict-id verdict-id
                    :path [:verdict-code] :value "hyvaksytty") => no-errors?)
-        (command sonja :publish-pate-verdict :id application-id :verdict-id verdict-id) => no-errors?))
+        (fact "Publish verdict"
+          (command sonja :publish-pate-verdict :id application-id :verdict-id verdict-id) => no-errors?)
+        (verdict-pdf-queue-test sonja {:app-id application-id :verdict-id verdict-id})))
 
     (fact "Now document can be modified"
       (command sonja :update-post-verdict-doc :id application-id :doc building-doc-id :updates [["mitat.tilavuus" "2000"]

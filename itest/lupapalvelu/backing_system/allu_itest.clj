@@ -159,6 +159,9 @@
                   :action "undo-cancellation"})))
 
 (defn- fetch-contract [apikey app-id]
+  ;; HACK: Since check-for-verdict bypasses JMS it can fail due to a race condition with submit-application.
+  ;;       However, no actual user is fast enough to cause that, which we simulate by sleeping for a bit:
+  (Thread/sleep 1000)
   (itu/command apikey :check-for-verdict :id app-id))
 
 (defn- sign-contract [apikey app-id]

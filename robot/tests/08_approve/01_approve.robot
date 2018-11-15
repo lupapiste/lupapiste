@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Mikko can't approve application
+Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/approve_helpers.robot
 Resource       ../06_attachments/attachment_resource.robot
@@ -110,7 +111,7 @@ Sonja logs in and approves group kaytto: rakennuksen-muuttaminen is now approved
 Party tab has indicators
   Wait Until  Element should be visible  applicationPartyDocumentIndicator
 
-Integration message monotor button is not enabled
+Integration message monitor button is not enabled
   Test id disabled  show-integration-messages
 
 Sonja approves application

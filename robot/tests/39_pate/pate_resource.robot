@@ -134,8 +134,10 @@ Submit empty verdict
   Wait until  Application state should be  ${targetState}
 
 Pate upload
-  [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${test-id}=upload-input
-  Expose file input  input[data-test-id=${test-id}]
+  [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${test-id-prefix}=upload
+  ${test-id}=  Set variable  ${test-id-prefix}-input
+  Wait test id visible  ${test-id-prefix}-label
+  Expose file input  input[data-test-id=${test-id}
   Scroll to bottom
   Choose file  jquery=input[data-test-id=${test-id}]  ${path}
   Hide file input  input[data-test-id=${test-id}]

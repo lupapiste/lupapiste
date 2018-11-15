@@ -111,6 +111,12 @@ LUPAPISTE.HandlerService = function() {
     .call();
   }
 
+  function applicationSuccessFn( indicatorFn, response ) {
+    hub.send( "assignmentService::applicationAssignments",
+              {applicationId: appId()});
+    indicatorFn( response );
+  }
+
   function upsertHandler( handlerId, data ) {
     ajax.command( "upsert-application-handler",
                   _.defaults( data,
@@ -118,21 +124,21 @@ LUPAPISTE.HandlerService = function() {
                                    ? {}
                                    : {handlerId: handlerId.peek()},
                             {id: appId()}))
-    .pending( self.pending )
-    .success( function( res ) {
-      handlerId( res.id );
-      indicateSaved();
-    } )
-    .call();
+      .pending( self.pending )
+      .success( function( res ) {
+        handlerId( res.id );
+        applicationSuccessFn( indicateSaved );
+      } )
+      .call();
   }
 
   function removeHandler( handlerId ) {
     ajax.command( "remove-application-handler",
                   {id: appId(),
                    handlerId: ko.unwrap( handlerId )})
-    .pending( self.pending )
-    .success( indicateRemoved)
-    .call();
+      .pending( self.pending )
+      .success( _.partial( applicationSuccessFn, indicateRemoved))
+      .call();
   }
 
  // ---------------------------

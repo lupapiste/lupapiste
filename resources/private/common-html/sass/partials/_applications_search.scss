@@ -299,22 +299,25 @@ div.search {
 
 .assignments-search-result__table {
   th {
-    &.first {
-      width: 5%;
+    vertical-align: middle;
+    white-space: nowrap;
+    > span {
+      vertical-align: middle;
     }
-    &.second {
-      width: 15%;
+    > i {
+      vertical-align: middle;
     }
-    &.third {
+
+    &.third {  // Sijainti
       width: 10%;
     }
-    &.fourth {
+    &.fourth { // Aihe
       width: 25%;
     }
-    &.fifth {
-      width: 25%;
+    &.fifth { // Kuvaus
+      width: 100%;
     }
-    &.sixth {
+    &.sixth { // Author
       width: 15%;
     }
   }
@@ -328,6 +331,9 @@ div.search {
     }
     td.targets-added {
       color: $red-dark;
+    }
+    td.application-id {
+      white-space: nowrap;
     }
   }
 }

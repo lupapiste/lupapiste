@@ -73,10 +73,15 @@
 
 (sc/defschema AssignmentTriggerId (sc/constrained sc/Str user-created-or-uid?))
 
+(sc/defschema RecipientRole
+  "Handler role id for automatic assignments."
+  {(sc/optional-key :roleId) ssc/ObjectIdStr})
+
 (sc/defschema Recipient
-  (-> usr/SummaryUser
-      (assoc (sc/optional-key :roleId) ssc/ObjectIdStr)
-      (assoc (sc/optional-key :handlerId) ssc/ObjectIdStr)))
+  (sc/conditional :id (merge usr/SummaryUser
+                             RecipientRole
+                             {(sc/optional-key :handlerId) ssc/ObjectIdStr})
+                  :else RecipientRole))
 
 (sc/defschema Assignment
   {:id          ssc/ObjectIdStr
@@ -94,29 +99,30 @@
    :recipient   (sc/maybe Recipient)
    :status      (apply sc/enum assignment-statuses)
    :states      [AssignmentState]
-   :description sc/Str})
+   :description sc/Str
+   :modified    ssc/Timestamp})
 
 (sc/defschema NewAssignment
   (-> (select-keys Assignment [:application :description :recipient :targets])
       (assoc :state AssignmentState)))
 
 (sc/defschema UpdateAssignment
-  (select-keys Assignment [:recipient :description]))
+  (select-keys Assignment [:recipient :description :modified]))
 
 (sc/defschema AssignmentsSearchQuery
-  {:searchText (sc/maybe sc/Str)
-   :state (apply sc/enum "all" assignment-state-types)
-   :operation [(sc/maybe sc/Str)] ; allows for empty filter vector
-   :recipient [(sc/maybe sc/Str)]
-   :area [(sc/maybe sc/Str)]
+  {:searchText  (sc/maybe sc/Str)
+   :state       (apply sc/enum "all" assignment-state-types)
+   :operation   [(sc/maybe sc/Str)] ; allows for empty filter vector
+   :recipient   [(sc/maybe sc/Str)]
+   :area        [(sc/maybe sc/Str)]
    :createdDate (sc/maybe {:start (sc/maybe ssc/Timestamp)
                            :end   (sc/maybe ssc/Timestamp)})
-   :targetType [(sc/maybe sc/Str)]
-   :sort {:asc sc/Bool
-          :field sc/Str}
-   :skip   sc/Int
-   :limit  sc/Int
-   :trigger (sc/maybe sc/Str)})
+   :targetType  [(sc/maybe sc/Str)]
+   :sort        {:asc   sc/Bool
+                 :field sc/Str}
+   :skip        sc/Int
+   :limit       sc/Int
+   :trigger     (sc/maybe sc/Str)})
 
 (sc/defschema AssignmentsSearchResponse
   {:userTotalCount sc/Int
@@ -131,22 +137,6 @@
    :user user-summary
    :timestamp created})
 
-(sc/defn new-recipient :- Recipient
-  [id        :- (:id usr/SummaryUser)
-   username  :- (:username usr/SummaryUser)
-   firstName :- (:firstName usr/SummaryUser)
-   lastName  :- (:lastName usr/SummaryUser)
-   role      :- (:role usr/SummaryUser)
-   roleId    :- (sc/maybe ssc/ObjectIdStr)
-   handlerId :- (sc/maybe ssc/ObjectIdStr)]
-  {:id id
-   :username username
-   :firstName firstName
-   :lastName lastName
-   :role role
-   :roleId roleId
-   :handlerId handlerId})
-
 (sc/defn ^:always-validate new-assignment :- Assignment
   [user        :- usr/SummaryUser
    recipient   :- (sc/maybe Recipient)
@@ -155,15 +145,16 @@
    created     :- ssc/Timestamp
    description :- sc/Str
    targets     :- [{:group sc/Str, :id sc/Str}]]
-  {:id             (mongo/create-id)
-   :status         "active"
-   :trigger        trigger
-   :application    (select-keys application
-                                [:id :organization :address :municipality])
-   :states         [(new-state "created" user created)]
-   :recipient      recipient
-   :targets        (map #(assoc % :timestamp created) targets)
-   :description    description})
+  {:id          (mongo/create-id)
+   :status      "active"
+   :trigger     trigger
+   :application (select-keys application
+                             [:id :organization :address :municipality])
+   :states      [(new-state "created" user created)]
+   :recipient   recipient
+   :targets     (map #(assoc % :timestamp created) targets)
+   :description description
+   :modified    created})
 
 ;;
 ;; Querying assignments
@@ -202,10 +193,10 @@
                :targetType nil
                :skip   0
                :limit  100
-               :sort   {:asc true :field "created"}
+               :sort   {:asc true :field "modified"}
                :trigger nil})))
 
-(defn- make-query 
+(defn- make-query
     "Returns query parameters in two parts:
    - pre-lookup: query conditions that can be executed directly against the assignments collection itself
    - post-lookup: conditions that need data fetched via the assignments->applications lookup stage in aggregation query
@@ -273,7 +264,8 @@
                             :recipient      "$recipient"
                             :status         "$status"
                             :states         "$states"
-                            :description    "$description"}}
+                            :description    "$description"
+                            :modified       "$modified"}}
                           (match-state state)
                           {"$sort" (sort-query sort)}]
                          (remove nil?))
@@ -325,8 +317,9 @@
 (sc/defn ^:always-validate get-assignments-for-application :- [Assignment]
   [user           :- usr/SessionSummaryUser
    application-id :- sc/Str]
-  (get-assignments user {:application.id application-id
-                         :status {$ne "canceled"}}))
+  (sort-by :modified
+           (get-assignments user {:application.id application-id
+                                  :status {$ne "canceled"}})))
 
 (sc/defn ^:always-validate assignments-search :- AssignmentsSearchResponse
   [user  :- usr/SessionSummaryUser
@@ -375,11 +368,13 @@
                                                 timestamp     :- ssc/Timestamp]
   (update-to-db assignment-id
                 (organization-query-for-user completer {:status "active", :states.type {$ne "completed"}})
-                {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
+                {$push {:states (new-state "completed" (usr/summary completer) timestamp)}
+                 $set  {:modified timestamp}}))
 
 (defn- set-assignments-statuses [query status]
   {:pre [(assignment-statuses status)]}
-  (update-assignments query {$set {:status status}}))
+  (update-assignments query {$set {:status   status
+                                   :modified (now)}}))
 
 (sc/defn ^:always-validate cancel-assignments [application-id :- ssc/ApplicationId]
   (set-assignments-statuses {:application.id application-id} "canceled"))
@@ -422,31 +417,39 @@
     :group     group
     :timestamp timestamp}))
 
-(defn- create-recipient [handler]
-  (new-recipient (:userId handler)
-                 (:username (usr/get-user-by-id (:userId handler)))
-                 (:firstName handler)
-                 (:lastName handler)
-                 (:role (usr/get-user-by-id (:userId handler)))
-                 (:roleId handler)
-                 (:id handler)))
+(sc/defn ^:always-validate create-recipient :- (sc/maybe Recipient)
+  [role-id handler]
+  (merge (when role-id
+           {:roleId role-id})
+         (when handler
+           (let [{:keys [username role]} (usr/get-user-by-id (:userId handler))]
+             {:id        (:userId handler)
+              :username  username
+              :firstName (:firstName handler)
+              :lastName  (:lastName handler)
+              :role      role
+              :handlerId (:id handler)}))))
 
 (defn recipient [trigger application]
-  (when-let [handler   (first (filter #(= (get-in trigger [:handlerRole :id]) (:roleId %)) (:handlers application)))]
-    (create-recipient handler)))
+  (when-let [role-id (get-in trigger [:handlerRole :id])]
+    (create-recipient role-id
+                      (util/find-by-key :roleId
+                                        role-id
+                                        (:handlers application)))))
 
 (defn- upsert-assignment-targets
   [user application trigger timestamp assignment-group targets]
-  (let [query {:application.id (:id application)
-               :status "active"
-               :states.type {$nin ["completed"]}
-               :trigger (:id trigger)}
+  (let [query  {:application.id (:id application)
+                :status         "active"
+                :states.type    {$nin ["completed"]}
+                :trigger        (:id trigger)}
         update {$push {:targets {$each (map (partial ->target assignment-group timestamp)
                                             targets)}
-                       :states (new-state "targets-added"
-                                          user
-                                          timestamp)}
-                $set {:recipient (recipient trigger application)}}]
+                       :states  (new-state "targets-added"
+                                           user
+                                           timestamp)}
+                $set  {:recipient (recipient trigger application)
+                       :modified  timestamp}}]
     ; As of Mongo 3.4, the below cannot be implemented using $setOnInsert due to write conflicts.
     ; https://jira.mongodb.org/browse/SERVER-10711
     (when (not (pos? (mongo/update-n :assignments query update)))
@@ -479,15 +482,11 @@
                                      targets))))))
 
 (defn change-assignment-recipient [app-id role-id handler]
-  (let [query       {:application.id app-id
-                     :status "active"
-                     :states.type {$nin ["completed"]}
-                     :trigger {$nin ["user-created"]}
-                     :recipient.roleId role-id}
-        update      {$set {:recipient (create-recipient handler)}}]
+  (let [query  {:application.id   app-id
+                :status           "active"
+                :states.type      {$nin ["completed"]}
+                :trigger          {$nin ["user-created"]}
+                :recipient.roleId role-id}
+        update {$set {:recipient (create-recipient role-id handler)
+                      :modified  (now)}}]
     (mongo/update-n :assignments query update)))
-
-(defn remove-assignment-recipient [app-id handler-id]
-  (mongo/remove-many :assignments
-                     {:application.id app-id
-                      :recipient.handlerId handler-id}))

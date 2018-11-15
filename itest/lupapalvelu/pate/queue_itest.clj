@@ -61,16 +61,24 @@
           (if (= tries 10)
             (fact "Attachment not created. Giving up."
               true => false)
-            (if-let [atts (seq (:attachments (query-application local-query sonja app-id)))]
-              (fact "Proper attachment and nothing else"
-                atts => (just [(contains {:contents "Päätös"
-                                          :source   {:type "verdicts"
-                                                     :id   verdict-id}})]))
-              (do (Thread/sleep 1000)
-                  (recur (inc tries)))))))
+            (let [application (query-application local-query sonja app-id)]
+              (if-let [att-id (some-> (vif/find-verdict application verdict-id)
+                                      :published
+                                      :attachment-id)]
+                (fact "Proper attachment and nothing else"
+                  (:attachments application)
+                  => (just [(contains {:id       att-id
+                                       :contents "Päätös"
+                                       :source   {:type "verdicts"
+                                                  :id   verdict-id}})]))
+                (do (Thread/sleep 1000)
+                    (recur (inc tries))))))))
 
       (let [application (query-application local-query sonja app-id)
             verdict     (vif/find-verdict application verdict-id)]
+        (fact "Verdict is published"
+          (:published verdict) => (contains {:published     pos?
+                                             :attachment-id string?}))
         (fact "Cannot generate another verdict attachment"
           (pdf/create-verdict-attachment {:application application} verdict) => nil)
         (fact "Cannot generate verdict attachment if the verdict no longer exists"

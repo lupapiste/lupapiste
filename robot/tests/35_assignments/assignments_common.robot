@@ -61,3 +61,19 @@ Edit handler
   [Arguments]  ${index}  ${person}  ${role}
   Select from autocomplete by test id  edit-person-${index}  ${person}
   Select from autocomplete by test id  edit-role-${index}  ${role}
+
+Assignment text contains
+  [Arguments]  ${index}  ${text}
+  Wait until  Element should contain  jquery=div[data-test-id=automatic-assignment-${index}] div[data-test-id=assignment-text]  ${text}
+
+Assignment text does not contain
+  [Arguments]  ${index}  ${text}
+  Wait until  Element should not contain  jquery=div[data-test-id=automatic-assignment-${index}] div[data-test-id=assignment-text]  ${text}
+
+Automatic assignment
+  [Arguments]  ${index}  ${count}=1  ${assignee}=${EMPTY}  ${type}=Aita ja asema
+  Run keyword if  '${count}'=='1'  Assignment text contains  ${index}  Hakemuksella on käsittelemätön päivitys
+  Run keyword unless  '${count}'=='1'  Assignment text contains  ${index}  Hakemuksella on ${count} käsittelemätöntä päivitystä
+  Run keyword if  '${assignee}'=='${EMPTY}'  Assignment text does not contain  ${index}  : Hakemuksella
+  Run keyword unless  '${assignee}'=='${EMPTY}'  Assignment text contains  ${index}  ${assignee}: Hakemuksella
+  Assignment text contains  ${index}  ${type}
