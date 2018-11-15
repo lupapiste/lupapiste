@@ -31,22 +31,24 @@
                      :uicomponent :docgenGroup
                      :css         [:allu-group]
                      :template    "form-grid-docgen-group-template"
-                     :body        [{:name     "start-date"
-                                    :type     :date
-                                    :layout   :initial-width
-                                    ;;:placeholder "promootio.date.placeholder"
-                                    :required true}
-                                   {:name     "end-date"
-                                    :type     :date
-                                    :layout   :initial-width
-                                    ;;:placeholder "promootio.date.placeholder"
-                                    :required true}
-                                   {:name   "start-time"
-                                    :type   :time
-                                    :layout :initial-width}
-                                   ]
+                     :body        [{:name        "start-date"
+                                    :type        :date
+                                    :layout      :initial-width
+                                    :placeholder "placeholder.date"
+                                    :required    true}
+                                   {:name        "end-date"
+                                    :type        :date
+                                    :layout      :initial-width
+                                    :placeholder "placeholder.date"
+                                    :required    true}
+                                   {:name        "start-time"
+                                    :type        :time
+                                    :placeholder "placeholder.time"}
+                                   {:name        "end-time"
+                                    :type        :time
+                                    :placeholder "placeholder.time"}]
                      :rows        [["start-date" "start-time"]
-                                   ["end-date"]]})
+                                   ["end-date" "end-time"]]})
 
 (def lmv-description {:name       "lyhytaikainen-maanvuokraus"
                       :type       :group

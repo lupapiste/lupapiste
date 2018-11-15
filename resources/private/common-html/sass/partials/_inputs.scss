@@ -340,16 +340,18 @@ input.tip.timepicker {
   }
 }
 
+$timepicker-default-width: 200px;
+
 div.timepicker-container {
   min-width: 120px;
+  width: $timepicker-default-width;
   position: relative;
   input.timepicker  {
     width: 100%;
   }
-  input.timepicker-input--error {
+  input.timepicker--error {
     border-color: $negative;
     color: $negative;
-    font-weight: bold;
   }
   .timepicker-picker {
     background-color: white;
@@ -388,7 +390,13 @@ div.timepicker-container {
   }
 }
 
+timepicker.layout--full-width > div.timepicker-container {
+  width: 100%;
+}
 
+timepicker.layout--initial-width > div.timepicker-container {
+  width: $timepicker-default-width;
+}
 
 input.grid-style-input {
   @include input-fields;

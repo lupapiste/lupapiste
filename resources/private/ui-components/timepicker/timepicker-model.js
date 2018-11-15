@@ -4,6 +4,11 @@
 // [enable]: see `EnableComponentModel`
 // [disable]: see `EnableComponentModel`
 // [testId]: Test identifier for the input
+// [placeholder]: Placeholder ltext (default empty)
+//
+// The time format is h:mm. Invalid times are highlighted but still
+// passed forward. Thus, the client code is ultimately responsible for
+// the validation.
 LUPAPISTE.TimepickerModel = function( params ) {
   "use strict";
   var self = this;
@@ -12,7 +17,10 @@ LUPAPISTE.TimepickerModel = function( params ) {
 
   self.value = params.value;
   self.testId = params.testId;
+  self.placeholder = params.placeholder ? loc( params.placeholder) : "";
+
   self.hasFocus = ko.observable();
+  self.showError = ko.observable( false );
   self.showPicker = ko.observable( false );
 
   var currentHour = ko.observable();
@@ -28,8 +36,11 @@ LUPAPISTE.TimepickerModel = function( params ) {
     } else {
       currentMinute( value );
     }
-    if( _.isNumber( currentHour()) && _.isNumber( currentMinute() )) {
-      var newValue = sprintf( "%d:%02d", currentHour(), currentMinute());
+    if( _.isNumber( currentHour())) {
+      var newValue = sprintf( "%d:%02d",
+                              currentHour(),
+                              _.isNumber( currentMinute() )
+                              ? currentMinute() : 0);
       if( newValue !== self.value() ) {
         self.value( newValue );
       }
@@ -38,19 +49,43 @@ LUPAPISTE.TimepickerModel = function( params ) {
     self.showPicker( isHour );
   }
 
-  function capInt( s, cap ) {
+  function capInt( obs, s, cap ) {
     var n = parseInt( s );
-    return n < cap ? n : null;
+    obs( n < cap ? n : null );
+    return n < cap;
+  }
+
+  function resetCurrent( error ) {
+    currentHour( null );
+    currentMinute( null );
+    self.showError( error );
   }
 
   function valueToParts( value ) {
-    var parts = /(\d+):(\d+)/.exec( _.trim( value ));
-    if( parts ) {
-      currentHour( capInt( parts[1], 24 ));
-      currentMinute( capInt( parts[2], 60 ));
-    } else {
-      currentHour( null );
-      currentMinute( null );
+    var v = _.trim( value );
+    if( v === "" ) {
+      resetCurrent( false );
+      return;
+    }
+    var parts = /^(\d+)(:(\d+))?$/.exec( v );
+    switch( _.size( _.filter( parts, _.identity ))) {
+    case 0: // Bad input
+      resetCurrent( true );
+      break;
+    case 4: // Fully formed
+      var h = capInt( currentHour, parts[1], 24 );
+      var m = capInt( currentMinute, parts[3], 60 );
+      self.showError( !(h && m));
+      break;
+    case 2: // Only hours
+      h = capInt( currentHour, parts[1], 24 );
+      if( h ) {
+        setTimePart( false, 0 );
+        self.showError( false );
+        break;
+      } else {
+        resetCurrent( true );
+      }
     }
   }
 

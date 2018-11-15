@@ -8528,6 +8528,7 @@ input.tip.timepicker:disabled {
 
 div.timepicker-container {
   min-width: 120px;
+  width: 200px;
   position: relative;
 }
 
@@ -8535,10 +8536,9 @@ div.timepicker-container input.timepicker {
   width: 100%;
 }
 
-div.timepicker-container input.timepicker-input--error {
+div.timepicker-container input.timepicker--error {
   border-color: #df3215;
   color: #df3215;
-  font-weight: bold;
 }
 
 div.timepicker-container .timepicker-picker {
@@ -8581,6 +8581,14 @@ div.timepicker-container .timepicker-picker .timepicker--selectable:hover {
 div.timepicker-container .timepicker-picker .timepicker--selected {
   color: white;
   background-color: #f39129;
+}
+
+timepicker.layout--full-width > div.timepicker-container {
+  width: 100%;
+}
+
+timepicker.layout--initial-width > div.timepicker-container {
+  width: 200px;
 }
 
 input.grid-style-input {

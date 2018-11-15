@@ -8,7 +8,9 @@
   <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
   <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
   <span>
-    <timepicker params="value: value,
+    <timepicker data-bind="css: inputClasses"
+                params="value: value,
+                        placeholder: schema.placeholder,
                         disable: disabled() || readonly(),
                         testId: path.join('.')"></timepicker>
 

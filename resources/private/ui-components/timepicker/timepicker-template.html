@@ -7,7 +7,9 @@
            data-bind="value: value,
                       disable: isDisabled,
                       hasFocus: hasFocus,
-                      testId: testId">
+                      testId: testId,
+                      css: {'timepicker--error': showError},
+                      attr: {placeholder: placeholder}">
     <div class="tabby timepicker-picker"
          data-bind="visible: showPicker">
       <!-- ko foreach: rows -->

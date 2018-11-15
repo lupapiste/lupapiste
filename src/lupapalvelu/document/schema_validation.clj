@@ -160,12 +160,14 @@
 
 (defschema Date
   (merge GenInput
-         {:type       (sc/eq :date)}))
+         {:type              (sc/eq :date)
+          (opt :placeholder) sc/Str}))
 
 (defschema TimeString
-  "Time string hh:mm:ss.s"
+  "Time string hh:mm"
   (merge GenInput
-         {:type       (sc/eq :time)}))
+         {:type              (sc/eq :time)
+          (opt :placeholder) sc/Str}))
 
 (defschema MsDate
   (merge GenInput
