@@ -558,7 +558,7 @@
 "price-catalogue.draft" "fi" "Luonnos"
 "price-catalogue.show" "fi" "Näytä"
 "price-catalogue.by-product-rows" "fi" "Tuoteriveittäin"
-"price-catalogue.by-operations" "fi" "Tuoteriveittäin"
+"price-catalogue.by-operations" "fi" "Toimenpiteittäin"
 "price-catalogue.code" "fi" "Koodi"
 "price-catalogue.product" "fi" "Tuote"
 "price-catalogue.unit-price" "fi" "A-hinta"

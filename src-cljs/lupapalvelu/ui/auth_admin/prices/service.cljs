@@ -1,7 +1,6 @@
 (ns lupapalvelu.ui.auth-admin.prices.service
   (:require [lupapalvelu.ui.common :as common]
-            [lupapalvelu.ui.auth-admin.prices.state :as state]
-            ))
+            [lupapalvelu.ui.auth-admin.prices.state :as state]))
 
 (enable-console-print!)
 

@@ -72,5 +72,4 @@
                                                                        :unit "kpl"
                                                                        :price-per-unit 23
                                                                        :discount-percent 50
-                                                                       :operations ["toimenpide1" "toimenpide2"]}]}))
-       )
+                                                                       :operations ["toimenpide1" "toimenpide2"]}]})))

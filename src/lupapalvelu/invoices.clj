@@ -59,7 +59,7 @@
                    )
    :application-id sc/Str
    :organization-id sc/Str
-   :operations [InvoiceOperation]
+   :operations [InvoiceOperation]})
    (sc/optional-key :sum) MoneyResponse})
 
 (sc/defschema InvoiceInsertRequest
@@ -85,8 +85,7 @@
    (sc/optional-key :valid-until) ssc/Timestamp
    :rows [CatalogueRow]
    :meta {:created ssc/Timestamp
-          :created-by User}
-   })
+          :created-by User}})
 
 (defn fetch-invoice [invoice-id]
   (mongo/by-id :invoices invoice-id))
