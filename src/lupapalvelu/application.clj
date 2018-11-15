@@ -36,6 +36,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.pate.verdict-interface :as vif]
             [sade.coordinate :as coord]
             [sade.core :refer :all]
             [sade.env :as env]
@@ -348,6 +349,11 @@
                           not-empty))
       application)))
 
+(defn- with-published-municipality-permit-ids [application]
+  (assoc application
+         :publishedMunicipalityPermitIds
+         (vif/published-municipality-permit-ids application)))
+
 (defn post-process-app [{:keys [user] :as command}]
   (->> (with-auth-models command)
        with-allowed-attachment-types
@@ -359,6 +365,7 @@
        (meta-fields/with-meta-fields user)
        action/without-system-keys
        (process-documents-and-tasks user)
+       with-published-municipality-permit-ids
        location->object))
 
 (defn post-process-app-for-krysp [application organization]
