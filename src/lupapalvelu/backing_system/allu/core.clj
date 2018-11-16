@@ -28,7 +28,7 @@
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.backing-system.allu.conversion :refer [lang application->allu-placement-contract
                                                                 format-date-time]]
-            [lupapalvelu.backing-system.allu.schemas :refer [LoginCredentials PlacementContract AttachmentMetadata]]
+            [lupapalvelu.backing-system.allu.schemas :refer [LoginCredentials PlacementContract AttachmentMetadata AttachmentFile]]
             [lupapalvelu.file-upload :refer [save-file]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.integrations.jms :as jms]
@@ -125,35 +125,57 @@
      :request-method (route-match->request-method route-match)
      :body           (:body params)}))
 
+(defn- attachment-send-self
+  "Construct an ALLU attachment upload request to convert the application to pdf and send it to ALLU as an attachement."
+  [{:keys [application] :as command}]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)
+        params {:path {:id allu-id}
+                :multipart {:metadata {:name        (str (localize lang :application.applicationSummary) ".pdf")
+                                       :description (let [type (localize lang :attachmentType "muu" "muu")
+                                                          description (localize lang :application.applicationSummary)]
+                                                      (if (or (not description) (= type description))
+                                                        type
+                                                        (str type ": " description)))
+                                       :mimeType    "application/pdf"}
+                            :file {:attach-self true}}}
+        route-match (reitit/match-by-name allu-router [:attachments :create] (:path params))]
+    {::command (minimize-command command)
+     :uri (:path route-match)
+     :request-method (route-match->request-method route-match)
+     :multipart [{:name "metadata"
+                  :mime-type "application/json"
+                  :encoding "UTF-8"
+                  :content (-> params :multipart :metadata)}
+                 {:name "file"
+                  :mime-type (-> params :multipart :metadata :mimeType)
+                  :content (-> params :multipart :file)}]}))
+
 (defn- attachment-send
   "Construct an ALLU attachment upload request for `send-allu-request!` based on reverse routing on `allu-router`,
   `command` and `attachment` (one of `(-> command :application :attachments)`)."
-  ([command attachment]
-    (attachment-send command attachment false))
-  ([{:keys [application] :as command} {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment} attach-application?]
-   (let [allu-id (-> application :integrationKeys :ALLU :id)
+  [{:keys [application] :as command} {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment}]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)
 
-         params {:path {:id allu-id}
-                 :multipart {:metadata {:name (:filename latestVersion)
-                                        :description (let [type (localize lang :attachmentType type-group type-id)
-                                                           description (:contents attachment)]
-                                                       (if (or (not description) (= type description))
-                                                         type
-                                                         (str type ": " description)))
-                                        :mimeType (:contentType latestVersion)}
-                             :file (assoc (select-keys latestVersion [:fileId :storageSystem])
-                                     :attach-application? attach-application?)}}
-         route-match (reitit/match-by-name allu-router [:attachments :create] (:path params))]
-     {::command (minimize-command command)
-      :uri (:path route-match)
-      :request-method (route-match->request-method route-match)
-      :multipart [{:name "metadata"
-                   :mime-type "application/json"
-                   :encoding "UTF-8"
-                   :content (-> params :multipart :metadata)}
-                  {:name "file"
-                   :mime-type (-> params :multipart :metadata :mimeType)
-                   :content (-> params :multipart :file)}]})))
+        params {:path {:id allu-id}
+                :multipart {:metadata {:name (:filename latestVersion)
+                                       :description (let [type (localize lang :attachmentType type-group type-id)
+                                                          description (:contents attachment)]
+                                                      (if (or (not description) (= type description))
+                                                        type
+                                                        (str type ": " description)))
+                                       :mimeType (:contentType latestVersion)}
+                            :file (select-keys latestVersion [:fileId :storageSystem])}}
+        route-match (reitit/match-by-name allu-router [:attachments :create] (:path params))]
+    {::command (minimize-command command)
+     :uri (:path route-match)
+     :request-method (route-match->request-method route-match)
+     :multipart [{:name "metadata"
+                  :mime-type "application/json"
+                  :encoding "UTF-8"
+                  :content (-> params :multipart :metadata)}
+                 {:name "file"
+                  :mime-type (-> params :multipart :metadata :mimeType)
+                  :content (-> params :multipart :file)}]}))
 
 (defn- contract-proposal-request [{:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
@@ -378,12 +400,11 @@
   (fn [{{:keys [application user]} ::command :as request}]
     (match (-> request reitit-ring/get-match :data :name)
       [:attachments :create]
-      (let [{:keys [attach-application? fileId storageSystem]} (get-in request [:multipart 1 :content])
-            _ (println "\n\n\n\nAttach-application:" attach-application?)]
-        (if-some [file-map (if attach-application?
-                             {:content (fn [] (pdf-export-api/raw-submitted-application-pdf-export {:application application
-                                                                                                    :user user
-                                                                                                    :lang "FI"}))}
+      (let [{:keys [attach-self fileId storageSystem]} (get-in request [:multipart 1 :content])]
+        (if-some [file-map (if attach-self
+                             {:content (fn [] (:body (pdf-export-api/raw-submitted-application-pdf-export {:application application
+                                                                                                           :user user
+                                                                                                           :lang lang})))}
                              (storage/download-from-system (:id application) fileId storageSystem))]
           (with-open [contents ((:content file-map))]
             (handler (assoc-in request [:multipart 1 :content] contents)))
@@ -507,8 +528,7 @@
         ["/:id/attachments" {:name [:attachments :create]
                              :parameters {:path {:id ssc/NatString}
                                           :multipart {:metadata AttachmentMetadata
-                                                      :file {:fileId sssc/FileId
-                                                             :storageSystem sssc/StorageSystem}}}
+                                                      :file AttachmentFile}}
                              :middleware file-middleware
                              :post {:handler handler}}]]
 
@@ -635,7 +655,7 @@
   "Send the specified `attachments` of `(:application command)` to ALLU.
   Returns a seq of attachment file IDs that were sent."
   [command attachments]
-  (send-allu-request! (attachment-send command nil true))
+  (send-allu-request! (attachment-send-self command))
   (doall (for [attachment attachments]
            (send-attachment! command attachment))))
 
