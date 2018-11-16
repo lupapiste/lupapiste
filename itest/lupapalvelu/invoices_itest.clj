@@ -276,19 +276,19 @@
 
       (fact "should return unauthorized response when user is not an organization admin"
             (let [response (-> (local-query sonja :organization-price-catalogues
-                                            :org-id "753-R"))]
+                                            :organization-id "753-R"))]
               response => fail?
               (:text response) => "error.unauthorized"))
 
       (fact "should return unauthorized response when user is an or organization admin or another org"
             (let [response (-> (local-query sipoo-ya :organization-price-catalogues
-                                            :org-id "753-R"))]
+                                            :organization-id "753-R"))]
               response => fail?
               (:text response) => "error.unauthorized"))
 
       (fact "should return empty collection when no price catalogues found for org-id"
             (let [response (-> (local-query sipoo :organization-price-catalogues
-                                            :org-id "753-R"))]
+                                            :organization-id "753-R"))]
               (:price-catalogues response) => []))
 
       (fact "should return one price catalogue when one inserted in db for the org-id"
@@ -308,6 +308,6 @@
                                                :created-by dummy-user}}]
               (ensure-exists! "price-catalogues" test-price-catalogue) => :ok
               (let [response (local-query sipoo :organization-price-catalogues
-                                          :org-id "753-R")]
+                                          :organization-id "753-R")]
                 response => ok?
                 (:price-catalogues response) => (belong-to-org? "753-R")))))))

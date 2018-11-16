@@ -119,9 +119,9 @@
    :permissions      [{:required [:organization/admin]}]
    :user-roles       #{:authority}
    :feature          :invoices
-   :parameters       [org-id]
-   :input-validators [(partial action/non-blank-parameters [:org-id])]}
+   :parameters       [organization-id]
+   :input-validators [(partial action/non-blank-parameters [:organization-id])]}
   [{:keys [data user user-organizations] :as command}]
-  (let [price-catalogues (invoices/fetch-price-catalogues org-id)]
+  (let [price-catalogues (invoices/fetch-price-catalogues organization-id)]
     (invoices/validate-price-catalogues price-catalogues)
     (ok {:price-catalogues price-catalogues})))

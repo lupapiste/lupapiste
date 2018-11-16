@@ -9,4 +9,4 @@
                     (reset! state/catalogues catalogues))
                   ;;TODO sort catalogues here by relevance (?)
                   )
-                :org-id @state/org-id))
+                :organization-id @state/org-id))
