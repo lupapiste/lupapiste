@@ -88,17 +88,17 @@
   // This can be called from handleLoginSubmit or as a click handler function from the "Seuraava"-button in WP
   var checkForSso = function(cb) {
     clearError();
-    cb = cb || showPassword;
+    var callback = (typeof(cb) === "function") ? cb : showPassword;
     ajax.get("/api/login-sso-uri")
       .param("username", _.trim(getUsername()))
       .success(function(data) {
         if (data.uri) {
           window.location = data.uri;
         } else {
-          cb();
+          callback();
         }
       })
-      .error(cb)
+      .error(callback)
       .call();
   };
 
