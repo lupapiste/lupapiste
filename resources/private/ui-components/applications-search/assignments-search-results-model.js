@@ -48,9 +48,9 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
                                currentSort: self.dataProvider.sort}),
     util.createSortableColumn("sixth", "application.assignment.creator",
                               {sortable: false}),
-    util.createSortableColumn("seventh",   "common.created",
+    util.createSortableColumn("seventh",   "application.assignment.modified",
                               {sortable: true,
-                               sortField: "created.timestamp", // added during assignment search aggregation
+                               sortField: "modified",
                                currentSort: self.dataProvider.sort}),
     util.createSortableColumn("eighth", null,    // Mark complete
                               {sortable: false})

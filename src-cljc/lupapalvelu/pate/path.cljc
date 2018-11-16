@@ -280,6 +280,7 @@
           (cond
             (and flag (= op :OR))        true
             (and (not flag) (= op :AND)) false
+            (and (not flag) (= op :NOT)) true
             :else (recur op xs)))))))
 
 (defn- good? [options good-condition bad-condition]

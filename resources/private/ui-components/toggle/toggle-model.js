@@ -5,7 +5,9 @@
 //  [text]:  Label text.
 //  [prefix]: Wrapper prefix (e.g, checkbox, signbox, sectionbox, ... ). (default checkbox)
 //  ltext: Label ltext (cannot be observable). Ltext overrides text if both are given.
-//  [testId]  Test id prefix for input and label (toggle -> toggle-input, toggle-label)
+//  [testId]:  Test id prefix for input and label (toggle -> toggle-input, toggle-label)
+//  [callback]: Callback function that is called when toggle is
+//              clicked. Receives the new toggled value as argument
 LUPAPISTE.ToggleModel = function( params ) {
   "use strict";
   var self = this;
@@ -23,4 +25,11 @@ LUPAPISTE.ToggleModel = function( params ) {
 
   self.wrapperClass = prefix + "-wrapper";
   self.labelClass = prefix + "-label";
+
+  self.click = function() {
+    if( params.callback ) {
+      params.callback( !self.value() );
+    }
+    return true;
+  };
 };

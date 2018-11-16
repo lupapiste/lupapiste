@@ -81,6 +81,10 @@ $pate-grid-margin: 10px;
         padding-left: $marginL;
         padding-top: 0;
       }
+      &:empty {
+        display: none;
+        height: 0;
+      }
     }
   }
 }

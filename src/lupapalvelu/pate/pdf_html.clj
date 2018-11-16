@@ -112,6 +112,7 @@
           loc-fn         (fn [& kws]
                            (apply i18n/localize lang (flatten kws)))
           contract?      (vc/contract? verdict)
+          proposal?      (vc/proposal? verdict)
           non-migration-contract? (and contract?
                                        (not (vc/has-category? verdict
                                                               :migration-contract)))]
@@ -122,14 +123,18 @@
           [:div boardname])]
        [:div.cell.cell--20.center
         [:div (cond
-                (not published)
+                (and (not published)
+                     (not proposal?))
                 [:span.preview (i18n/localize lang :pdf.preview)]
 
                 (and (not contract?)
-                     (not legacy-kt-ymp?))
+                     (not legacy-kt-ymp?)
+                     (not proposal?))
                 (i18n/localize lang (case category-kw
                                       :p :pdf.poikkeamispaatos
-                                      :attachmentType.paatoksenteko.paatos)))]]
+                                      :attachmentType.paatoksenteko.paatos))
+                proposal?
+                (i18n/localize lang :pate-verdict-proposal))]]
        [:div.cell.cell--40.right
         [:div.permit (loc-fn (cond
                                legacy-kt-ymp?          :attachmentType.paatoksenteko.paatos

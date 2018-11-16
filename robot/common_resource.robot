@@ -1630,6 +1630,10 @@ Test id should contain
   [Arguments]  ${id}  ${text}
   Wait until  Element should contain  jquery=[data-test-id=${id}]:visible  ${text}
 
+Test id should not contain
+  [Arguments]  ${id}  ${text}
+  Wait until  Element should not contain  jquery=[data-test-id=${id}]:visible  ${text}
+
 Test id input is
   [Arguments]  ${id}  ${text}
   Wait until  Value should be  xpath=//*[@data-test-id='${id}']  ${text}

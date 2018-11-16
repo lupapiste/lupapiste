@@ -165,19 +165,29 @@
   "Collateral part (toggle, amount, type, date) included only when
   collateral? is true."
   [collateral?]
-  (let [verdict {:dictionary (merge {:boardname        {:reference {:loc-prefix :pate-verdict.giver
-                                                                    :path       :*ref.boardname}}
-                                     :verdict-section  (schema-util/required {:text {:loc-prefix :pate-verdict.section
-                                                                                     :before :section}})
-                                     :verdict-code     (schema-util/required {:reference-list {:path       :verdict-code
-                                                                                               :type       :select
-                                                                                               :loc-prefix :pate-r.verdict-code}
-                                                                              :template-dict  :verdict-code})
-                                     :verdict-text     (schema-util/required {:phrase-text   {:category :paatosteksti}
-                                                                              :template-dict :paatosteksti})
-                                     :verdict-text-ref (schema-util/required {:reference {:path :verdict-text}})}
+  (let [verdict {:dictionary (merge {:boardname           {:reference {:loc-prefix :pate-verdict.giver
+                                                                       :path       :*ref.boardname}}
+                                     :verdict-section     (schema-util/required {:text {:loc-prefix :pate-verdict.section
+                                                                                        :before     :section}})
+                                     :verdict-section-ref {:reference {:loc-prefix :pate-verdict.section
+                                                                       :path       :verdict-section}}
+                                     :verdict-code        (schema-util/required {:reference-list {:path       :verdict-code
+                                                                                                  :type       :select
+                                                                                                  :loc-prefix :pate-r.verdict-code}
+                                                                                 :template-dict  :verdict-code})
+                                     :verdict-code-ref    {:reference {:path        :verdict-code
+                                                                       :loc-prefix  :pate-r.verdict-code}}
+                                     :verdict-flag        {:toggle {:loc-prefix :pate-verdict.flag}}
+                                     :verdict-text        (schema-util/required {:phrase-text   {:category :paatosteksti}
+                                                                                 :template-dict :paatosteksti})
+                                     :verdict-text-ref    (schema-util/required {:reference {:path :verdict-text}})
+                                     :proposal-text       {:phrase-text   {:category   :paatosteksti
+                                                                           :loc-prefix :pate-verdict-proposal}
+                                                           :template-dict :proposaltext}
+                                     :proposal-text-ref    {:reference {:path  :proposal-text
+                                                                        :loc-prefix :pate-verdict-proposal}}}
                                     (when collateral? {:collateral      {:text {:loc-prefix :pate.collateral
-                                                                                :after :eur}}
+                                                                                :after      :eur}}
                                                        :collateral-flag {:toggle {:loc-prefix :pate-collateral.flag}}
                                                        :collateral-date {:date {:loc-prefix :pate.collateral-date}}
                                                        :collateral-type helper/collateral-type-select}))
@@ -186,21 +196,56 @@
                                      :rows    [[{:col   2
                                                  :hide? :_meta.editing?
                                                  :dict  :boardname}
-                                                {:col        1
-                                                 :show?      [:OR :*ref.boardname :verdict-section]
-                                                 :dict       :verdict-section}
                                                 {:show? [:AND :_meta.editing? :?.boardname]}
                                                 {:col   2
                                                  :align :full
+                                                 :hide? :?.boardname
                                                  :dict  :verdict-code}]
+
+                                               [{:col       5
+                                                 :show?     [:AND :_meta.editing? :?.boardname]
+                                                 :disabled? :verdict-flag
+                                                 :dict      :proposal-text}
+                                                {:col   5
+                                                 :show? :*ref.boardname
+                                                 :hide? :_meta.editing?
+                                                 :dict  :proposal-text-ref}]
+                                               [{:col   3
+                                                 :show? [:AND :_meta.editing? :?.boardname]
+                                                 :dict  :verdict-flag}]
+                                               [{:col   1
+                                                 :show? [:OR [:AND :_meta.editing? :verdict-flag]
+                                                             [:AND :_meta.editing? [:NOT :?.boardname]]]
+                                                 :css   [:row--tight]
+                                                 :dict  :verdict-section}
+                                                {:col   1
+                                                 :hide? [:OR :_meta.editing?
+                                                             [:NOT :?.boardname]
+                                                             [:AND [:NOT :_meta.editing?] [:NOT :verdict-flag] :?.boardname]]
+                                                 :css   [:row--tight]
+                                                 :dict  :verdict-section-ref}
+                                                {:show? [:AND :_meta.editing? :?.boardname]}
+                                                {:col   2
+                                                 :align :full
+                                                 :hide? [:NOT :?.boardname]
+                                                 :show? [:AND :_meta.editing? :verdict-flag]
+                                                 :css   [:row--tight]
+                                                 :dict  :verdict-code}
+                                                {:col   2
+                                                 :align :full
+                                                 :hide? [:OR :_meta.editing?
+                                                             [:NOT :?.boardname]
+                                                             [:AND [:NOT :_meta.editing?] [:NOT :verdict-flag] :?.boardname]]
+                                                 :css   [:row--tight]
+                                                 :dict  :verdict-code-ref}]
                                                [{:col   5
-                                                 ;;:id    "paatosteksti"
-                                                 :show? :_meta.editing?
+                                                 :show? [:OR [:AND :_meta.editing? :verdict-flag]
+                                                             [:AND :_meta.editing? [:NOT :?.boardname]]]
                                                  :dict  :verdict-text}
                                                 {:col   5
-                                                 :hide? :_meta.editing?
-                                                 :dict  :verdict-text-ref}]
-                                               ]}}}]
+                                                 :hide? [:OR :_meta.editing?
+                                                         [:AND [:NOT :_meta.editing?] [:NOT :verdict-flag] :?.boardname]]
+                                                 :dict  :verdict-text-ref}]]}}}]
     (cond-> verdict
       collateral? (update-in [:section :grid :rows]
                              concat

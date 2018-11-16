@@ -142,9 +142,13 @@
                                                  :published                       sc/Int
                                                  ;; Id for the attachment that is a PDF version of tags.
                                                  (sc/optional-key :attachment-id) ssc/AttachmentId}
+          (sc/optional-key :proposal)           {:tags                            sc/Str
+                                                 :proposed                        sc/Int
+                                                 (sc/optional-key :attachment-id) ssc/AttachmentId}
           :state                                (wrapped (sc/enum "draft"
                                                                   "publishing"
-                                                                  "published")
+                                                                  "published"
+                                                                  "proposal")
                                                          true)
           :modified                             ssc/Timestamp
           :data                                 sc/Any
@@ -443,20 +447,23 @@
 
 (defn required-filled?
   "True if every required dict item has a proper value."
-  [schema data]
-  (->> schema
-       :dictionary
-       (filter (fn [[_ v]]
-                 (or (:required? v)
-                     (:repeating v))))
-       (every? (fn [[k v]]
-                 (cond
-                   (:multi-select v) (not-empty (k data))
-                   (:reference v)    true ;; Required only for highlighting purposes
-                   (:date v)         (integer? (k data))
-                   (:repeating v)    (every? #(required-filled? {:dictionary (:repeating v)} %)
-                                             (some-> data k vals))
-                   :else (ss/not-blank? (k data)))))))
+  ([schema data excludes]
+   (->> schema
+        :dictionary
+        (filter (fn [[_ v]]
+                  (or (:required? v)
+                      (:repeating v))))
+        (remove (fn [[k _]] ((set excludes) k)))
+        (every? (fn [[k v]]
+                  (cond
+                    (:multi-select v) (not-empty (k data))
+                    (:reference v)    true ;; Required only for highlighting purposes
+                    (:date v)         (integer? (k data))
+                    (:repeating v)    (every? #(required-filled? {:dictionary (:repeating v)} %)
+                                              (some-> data k vals))
+                    :else (ss/not-blank? (k data)))))))
+  ([schema data]
+    (required-filled? schema data [])))
 
 (defn section-dicts
   "Set of :dict and :repeating keys in the given

@@ -75,23 +75,23 @@
 (defn verdict-exists
   "Returns pre-checker that fails if the verdict does not exist.
   Additional conditions:
-    :draft? fails if the verdict state is NOT draft
+    :editable? fails if the verdict state is NOT draft or proposal
     :published? fails if the verdict has NOT been published
     :legacy? fails if the verdict is a 'modern' Pate verdict
     :modern? fails if the verdict is a legacy verdict
     :contract? fails if the verdict is not a contract
     :allu-contract? fails if the verdict is not an allu-contract
     :verdict? fails for contracts
-    :not-replaced? Fails if the verdict has been OR is being replaced. "
+    :not-replaced? Fails if the verdict has been OR is being replaced"
   [& conditions]
-  {:pre [(set/superset? #{:draft? :published? :legacy? :modern? :contract?
-                          :allu-contract? :verdict? :not-replaced?}
+  {:pre [(set/superset? #{:editable? :published? :legacy? :modern? :contract?
+                          :allu-contract? :verdict? :not-replaced? :proposal?}
                         (set conditions))]}
-  (let [{:keys [draft? published?
+  (let [{:keys [editable? published?
                 legacy? modern?
                 contract? allu-contract?
-                verdict?
-                not-replaced?]} (zipmap conditions (repeat true))]
+                verdict? not-replaced?
+                proposal?]} (zipmap conditions (repeat true))]
     (fn [{:keys [data application]}]
       (when-let [verdict-id (:verdict-id data)]
         (let [verdict (util/find-by-id verdict-id
@@ -104,8 +104,9 @@
                           (not (vc/allowed-category-for-application? verdict application))
                           :error.invalid-category
 
-                          (and draft? (not= state :draft))
-                          :error.verdict.not-draft
+                          (and editable? (and (not= state :draft)
+                                              (not= state :proposal)))
+                          :error.verdict.not-editable
 
                           (and published? (not= state :published))
                           :error.verdict.not-published
@@ -128,7 +129,10 @@
                           (and not-replaced? (or (get-in verdict [:replacement :replaced-by])
                                                  (some #(some-> % :replacement :replaces (= verdict-id))
                                                        (:pate-verdicts application))))
-                          :error.verdict-replaced)
+                          :error.verdict-replaced
+
+                          (and proposal? (not= state :proposal))
+                          :error.verdict.not-proposal)
                         identity fail))))))
 
 (declare command->backing-system-verdict)
@@ -786,6 +790,12 @@
   ([command]
    (verdict-filled? command false)))
 
+(defn proposal-filled?
+  [command]
+  (let [{:keys [data] :as verdict} (command->verdict command)
+        schema (vc/verdict-schema verdict)]
+    (schemas/required-filled? schema data [:verdict-text :verdict-section :verdict-code])))
+
 (defn- app-documents-having-buildings [application]
   (->> application
        app/get-sorted-operation-documents
@@ -961,6 +971,7 @@
                                 (:data (enrich-verdict command
                                                        verdict))
                                 data)
+                        :giver (:giver template)
                         :inclusions (:inclusions template))
      :references (:references verdict)}))
 
@@ -1062,6 +1073,7 @@
     (and published
          (not legacy?)
          (not (vc/contract? verdict))
+         (not (vc/proposal? verdict))
          (not (some-> replacement :replaced-by))
          (not (util/find-first #(= (get-in % [:replacement :replaces])
                                    verdict-id)
@@ -1290,6 +1302,14 @@
                         {$set {:pate-verdicts.$.published.attachment-id attachment-id}})
         true)))
 
+(defn- pdf--proposal [command verdict]
+  (if (some-> verdict :proposal :attachment-id)
+    (pdf/create-verdict-attachment-version command verdict)
+    (when-let [attachment-id (pdf/create-verdict-attachment command verdict)]
+      (verdict-update command
+                      {$set {:pate-verdicts.$.proposal.attachment-id attachment-id}})
+      true)))
+
 (declare pdf--signatures)
 
 (defn create-verdict-pdf
@@ -1305,11 +1325,13 @@
     (cond
       (ss/blank? app-id)                     (error-fn "No application id.")
       (ss/blank? verdict-id)                 (error-fn "No verdict id.")
-      (not (#{::verdict ::signatures} mode)) (error-fn (str "Bad mode: " mode))
+      (not (#{::verdict ::signatures
+              ::proposal} mode))             (error-fn (str "Bad mode: " mode))
       :else
       (when-let [command (let [application   (domain/get-application-no-access-checking app-id)
                                command       (assoc command :application application)
-                               {error :text} ((verdict-exists :published?) command)]
+                               {error :text} (and ((verdict-exists :published?) command)
+                                                  ((verdict-exists :proposal?) command))]
                            (cond
                              (nil? application) (error-fn (str "Bad application id: " app-id))
                              error              (error-fn error)
@@ -1318,7 +1340,8 @@
          (let [verdict (command->verdict command)
                fun     (case mode
                          ::verdict    pdf--verdict
-                         ::signatures pdf--signatures)]
+                         ::signatures pdf--signatures
+                         ::proposal   pdf--proposal)]
            (if (fun command verdict)
              (.commit pate-session)
              (.rollback pate-session)))
@@ -1421,19 +1444,28 @@
                                      (codec/form-encode data))}
                    (i18n/localize lang :pate.try-again)]]]]))})
 
-(defn download-verdict
-  "PDF verdict. Shows error page if the PDF is not yet ready"
-  [{:keys [user] :as command}]
+(defn- download-pdf
+  "Downloads pdf from given path. Shows error page if the PDF is not yet ready"
+  [{:keys [user] :as command} path re-call]
   (if-let [attachment-id (some-> (command->verdict command)
-                                 :published
-                                 :attachment-id)]
+                                 (get-in path))]
     (att/output-attachment (att/get-attachment-latest-version-file user
                                                                    attachment-id
                                                                    false)
                            true)
     (try-again-page command  {:status 202 ;; Accepted
                               :error  :pate.verdict.download-not-ready
-                              :raw    :verdict-pdf})))
+                              :raw    re-call})))
+
+(defn download-verdict
+  "Download verdict PDF."
+  [command]
+  (download-pdf command [:published :attachment-id] :verdict-pdf))
+
+(defn download-proposal
+  "Download verdict proposal PDF."
+  [command]
+  (download-pdf command [:proposal :attachment-id] :proposal-pdf))
 
 (defn preview-verdict
   "Preview version of the verdict.
@@ -1642,3 +1674,32 @@
   (let [signer        (get-user-by-id (:signer-id data))
         request       (create-signature {:application application :user signer :created created})]
     (verdict-update command {$push {:pate-verdicts.$.signature-requests request}})))
+
+;; ----------------------------
+;; Proposal
+;; ----------------------------
+
+(defn finalize--proposal [{:keys [command verdict]}]
+  (let [verdict           (assoc (enrich-verdict command verdict true)
+                            :state (wrapped-state command :proposal)
+                            :proposal {:proposed (:created command)})
+        data-kws          (map #(util/kw-path :data %)
+                               (-> verdict :data keys))]
+    (apply verdict->updates verdict
+           (concat data-kws [:state :proposal.proposed]))))
+
+(defn finalize--proposal-pdf [{:keys [application verdict]}]
+  (let [tags    (pdf/verdict-tags application verdict)]
+    (-> verdict
+        (assoc-in [:proposal :tags] (ss/serialize tags))
+        (verdict->updates :proposal.tags)
+        (assoc :commit-fn (util/fn->> :command (send-command ::proposal))))))
+
+(defn publish-verdict-proposal
+  "Publishing verdict proposal does the following:
+    1. Updates verdict state to proposal
+    2. Generates PDF/A for vedict proposal"
+  [{:keys [application] :as command}]
+  (process-finalize-pipeline command application (command->verdict command)
+                             finalize--proposal
+                             finalize--proposal-pdf))

@@ -272,7 +272,10 @@
                                 :idp-uri sc/Str
                                 :trusted-domains [sc/Str]
                                 (sc/optional-key :role-mapping) {sc/Keyword sc/Str}}
-   (sc/optional-key :ely-uspa-enabled) sc/Bool})
+   (sc/optional-key :ely-uspa-enabled) sc/Bool
+   ;; List of operations for which the Not needed selection is not
+   ;; available for the default attachments.
+   (sc/optional-key :default-attachments-mandatory) [sc/Str]})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
@@ -353,7 +356,8 @@
   "Return the organization id and ad-settings for organizations, where the :ad-login.trusted-domains array
   contains the provided domain (e.g. 'pori.fi')"
   [domain]
-  (mongo/select :organizations {:ad-login.trusted-domains domain} {:_id 1 :ad-login 1}))
+  (when (re-find #"\w+\.\w+" domain)
+    (mongo/select :organizations {:ad-login.trusted-domains domain} {:_id 1 :ad-login 1})))
 
 (defn krysp-urls-not-set?
   "Takes organization as parameter.
