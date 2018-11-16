@@ -80,10 +80,16 @@
     passwordElement.focus();
   };
 
-  var checkForSso = function(username, cb) {
+  var getUsername = function() {
+    return typeof($("#login-username").val()) === "string" ? _.trim($("#login-username").val()) : username();
+  }
+
+  // This can be called from handleLoginSubmit or as a click handler function from the "Seuraava"-button in WP
+  var checkForSso = function(cb) {
     clearError();
+    cb = (typeof cb !== "undefined") ? cb : showPassword;
     ajax.get("/api/login-sso-uri")
-      .param("username", _.trim(username))
+      .param("username", _.trim(getUsername()))
       .success(function(data) {
         if (data.uri) {
           window.location = data.uri;
@@ -100,8 +106,7 @@
     if (document.getElementById("login-password").offsetParent !== null) {
       passwordVisible(true);
     }
-    var username = typeof($("#login-username").val()) === "string" ? _.trim($("#login-username").val()) : username();
-    checkForSso(username, passwordVisible() ? login : showPassword);
+    checkForSso(passwordVisible() ? login : showPassword);
   };
 
   $(function() {
