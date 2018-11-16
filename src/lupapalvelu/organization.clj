@@ -356,7 +356,8 @@
   "Return the organization id and ad-settings for organizations, where the :ad-login.trusted-domains array
   contains the provided domain (e.g. 'pori.fi')"
   [domain]
-  (mongo/select :organizations {:ad-login.trusted-domains domain} {:_id 1 :ad-login 1}))
+  (when (re-find #"\w+\.\w+" domain)
+    (mongo/select :organizations {:ad-login.trusted-domains domain} {:_id 1 :ad-login 1})))
 
 (defn krysp-urls-not-set?
   "Takes organization as parameter.
