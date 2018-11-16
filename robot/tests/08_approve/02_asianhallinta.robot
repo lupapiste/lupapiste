@@ -15,7 +15,7 @@ Mikko creates an application, permit-type R
 Mikko sets himself the applicant
   Open tab  parties
   Open accordions  parties
-  Select From List  //section[@data-doc-type="hakija-r"]//select[@data-test-id="henkilo.userId"]  Intonen Mikko
+  Select From List by label  //section[@data-doc-type="hakija-r"]//select[@data-test-id="henkilo.userId"]  Intonen Mikko
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
 
 Mikko can't approve application
@@ -46,7 +46,7 @@ Mikko creates an application, permit-type P
 Mikko sets himself the applicant and submits, doesn't see asianhallinta button and logsout
   Open tab  parties
   Open accordions  parties
-  Select From List  //section[@data-doc-type="hakija"]//select[@data-test-id="henkilo.userId"]  Intonen Mikko
+  Select From List by label  //section[@data-doc-type="hakija"]//select[@data-test-id="henkilo.userId"]  Intonen Mikko
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
   Submit application
   Wait Until  Element should be disabled  xpath=//section[@id="application"]//button[@data-test-id='to-asianhallinta']
@@ -96,7 +96,7 @@ Velho logs in, sets Mikko as maksaja and moves application to asianhallinta
   Open application  ${appname}  297-34-107-10
   Open tab  parties
   Open accordions  parties
-  Select From List  //section[@data-doc-type="maksaja"]//select[@data-test-id="henkilo.userId"]  Intonen Mikko
+  Select From List by label  //section[@data-doc-type="maksaja"]//select[@data-test-id="henkilo.userId"]  Intonen Mikko
   Wait Until  Javascript?  $("section[data-doc-type=maksaja] input[data-docgen-path='henkilo.henkilotiedot.etunimi']").val() == "Mikko"
   Scroll and click test id  to-asianhallinta
   Wait until  Application state should be  sent

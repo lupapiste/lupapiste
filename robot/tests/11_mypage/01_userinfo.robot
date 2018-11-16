@@ -19,10 +19,10 @@ Mikko changes his name and experience
   Fill test id  firstName  Mika
   Fill test id  lastName  Intola
   Scroll to  div#pw-form
-  Select From List  architect-degree-select  Arkkitehti
+  Select From List by label  architect-degree-select  Arkkitehti
   Change Textfield Value  architect.graduatingYear  2000  2001
   Change Textfield Value  architect.fise  f  fise
-  Select From List  architect-fiseKelpoisuus-select  tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)
+  Select From List by label  architect-fiseKelpoisuus-select  tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)
   Checkbox wrapper not selected  allowDirectMarketing
   Click label  allowDirectMarketing
 
@@ -43,11 +43,11 @@ Name and experience should have changed in Swedish page too
 Mika changes the name and experience back
   Change Textfield Value  firstName  Mika  Mikko
   Change Textfield Value  lastName  Intola  Intonen
-  Select From List  architect-degree-select  Timmerman
+  Select From List by label  architect-degree-select  Timmerman
   Change Textfield Value  architect.graduatingYear  2001  2000
   Textfield Value Should Be  architect.graduatingYear  2000
   Change Textfield Value  architect.fise  fise  f
-  Select From List  architect-fiseKelpoisuus-select  krävande byggnadsplanering (nybyggnad)
+  Select From List by label  architect-fiseKelpoisuus-select  krävande byggnadsplanering (nybyggnad)
   Positive indicator should not be visible
   Save User Data
   Positive indicator should be visible

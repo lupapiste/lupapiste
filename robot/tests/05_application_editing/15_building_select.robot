@@ -108,7 +108,7 @@ Clear building selection
   [Arguments]  ${doctype}
   ${selector}=  Set Variable  section[data-doc-type=${doctype}] select[name=buildingId]
   Scroll to  ${selector}
-  Wait until  Select from list  jquery=${selector}  ${EMPTY}
+  Wait until  Select from list by value  jquery=${selector}  ${EMPTY}
   No building selected  ${doctype}
   Element should not be visible  dynamic-yes-no-confirm-dialog
 
@@ -116,7 +116,7 @@ Select other building
   [Arguments]  ${doctype}
   ${selector}=  Set Variable  section[data-doc-type=${doctype}] select[name=buildingId]
   Scroll to  ${selector}
-  Wait until  Select from list  jquery=${selector}  other
+  Wait until  Select from list by value  jquery=${selector}  other
 
 Select building and cancel
   [Arguments]  ${doctype}  ${building}

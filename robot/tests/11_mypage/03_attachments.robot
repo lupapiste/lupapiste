@@ -13,7 +13,7 @@ Mikko uploads CV
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
   Click enabled by test id  test-add-architect-attachment
-  Select From List  attachmentType  osapuolet.cv
+  Select From List by value  attachmentType  osapuolet.cv
   Choose File      xpath=//input[@type='file']  ${TXT_TESTFILE_PATH}
   Click enabled by test id  userinfo-upload-ok
   Wait Until  Element should contain  xpath=//section[@id='mypage']//div[@data-test-id='filename']  ${TXT_TESTFILE_NAME}
@@ -22,7 +22,7 @@ Mikko uploads attachment with invalid mime
   Element should be visible by test id  test-add-architect-attachment
   Click enabled by test id  test-add-architect-attachment
   Wait Until  Element should be visible  jquery=select[name=attachmentType]
-  Select From List  attachmentType  osapuolet.cv
+  Select From List by value  attachmentType  osapuolet.cv
   Choose File      xpath=//input[@type='file']  ${XML_TESTFILE_PATH}
   Click enabled by test id  userinfo-upload-ok
   Wait until  Element should be visible  xpath=//div[@id='dialog-userinfo-architect-upload']//div[@data-test-id='userinfo-upload-error']

@@ -34,6 +34,21 @@ ${DB PREFIX}                    test_
 
 *** Keywords ***
 
+# Convenience replacements of deprecated keywords
+
+Focus
+  [Arguments]  ${locator}
+  Set Focus To Element  ${locator}
+
+Get Matching Xpath Count
+  [Arguments]  ${xpath}
+  ${count}=  Get Element Count  xpath:${xpath}
+  [Return]  ${count}
+
+Xpath Should Match X Times
+  [Arguments]  ${xpath}  ${times}
+  Page Should Contain Element  xpath:${xpath}  limit=${times}
+
 Set DB cookie
   ${timestamp}=  Get Time  epoch
   ${random post fix}=  Evaluate  random.randint(0, 999999999999)  modules=random
@@ -532,12 +547,12 @@ Select From List by test id and index
 Select From List by test id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
-  Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
+  Select From List by value  xpath=//select[@data-test-id="${id}"]  ${value}
 
 Select From List by id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@id="${id}"]
-  Select From List  xpath=//select[@id="${id}"]  ${value}
+  Select From List by value  xpath=//select[@id="${id}"]  ${value}
 
 Select From Autocomplete
   [Arguments]  ${container}  ${value}
@@ -919,7 +934,7 @@ Add attachment
 
   Run Keyword If  '${kind}' == 'application'  Set attachment type for upload  ${type}
   Run Keyword If  '${kind}' == 'application' and $operation  Wait until  Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
-  Run Keyword If  '${kind}' == 'application' and $operation  Select From List  attachmentOperation  ${operation}
+  Run Keyword If  '${kind}' == 'application' and $operation  Select From List by value  attachmentOperation  ${operation}
 
   Input text        text  ${description}
   Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
@@ -943,7 +958,7 @@ Delete attachment
 Set attachment type for upload
   [Arguments]  ${type}
   Wait until  Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='${type}']
-  Select From List  attachmentType  ${type}
+  Select From List by value  attachmentType  ${type}
 
 Open attachment details
   [Arguments]  ${type}  ${nth}=0
@@ -1724,7 +1739,7 @@ Toggle toggle
 
 Select from test id
   [Arguments]  ${id}  ${value}
-  Select from list  jquery=select[data-test-id=${id}]  ${value}
+  Select from list by value  jquery=select[data-test-id=${id}]  ${value}
 
 Select from test id by text
   [Arguments]  ${id}  ${text}
@@ -1796,8 +1811,8 @@ There are no frontend errors
   Go to  ${LOGOUT URL}
   Wait until  Element should be visible  xpath=//section[@id='login']//h3[1]
   # These test cases will fail if errors exist
-  Should be equal  ${FATAL_COUNT}  0  Fatal frontend errors
-  Should be equal  ${ERR_COUNT}  0  Frontend errors
+  Should be equal as integers  ${FATAL_COUNT}  0  Fatal frontend errors
+  Should be equal as integers  ${ERR_COUNT}  0  Frontend errors
 
 #
 # YA

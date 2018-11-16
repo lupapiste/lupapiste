@@ -29,7 +29,7 @@ Start editing
 
 Change eInvoice operator
   List Selection Should Be  xpath=//div[@data-test-id="company-pop"]//select  Basware Oyj (BAWCFI22)
-  Select From List  xpath=//div[@data-test-id="company-pop"]//select  Nordea (NDEAFIHH)
+  Select From List by label  xpath=//div[@data-test-id="company-pop"]//select  Nordea (NDEAFIHH)
   Click enabled by test id  company-details-save
   Wait Until  Element should be disabled  //div[@id='company-content']//button[@data-test-id='company-details-save']
 

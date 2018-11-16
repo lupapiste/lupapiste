@@ -151,7 +151,7 @@ Pena logs in and changes the type of aitapiirros to aitapiirustus
   Open tab  attachments
   Open attachment details  paapiirustus.asemapiirros
   Click enabled by test id  change-attachment-type
-  Select from list  attachment-type-select  paapiirustus.aitapiirustus
+  Select from list by value  attachment-type-select  paapiirustus.aitapiirustus
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click enabled by test id  confirm-yes
   Positive indicator should be visible
