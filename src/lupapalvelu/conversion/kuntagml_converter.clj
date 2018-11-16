@@ -83,13 +83,15 @@
 
         make-app-info {:id              id
                        :organization    organization
-                       ; :operation-name  "aiemmalla-luvalla-hakeminen" ; FIXME: no fixed operation in conversion, see above
                        :operation-name  primary-op-name
-                       ; or maybe something like:               :operation-name  "conversion"
                        :location        (app/->location (:x location-info) (:y location-info))
                        :propertyId      (:propertyId location-info)
                        :address         (:address location-info)
                        :municipality    municipality}
+
+        _ (swap! tila assoc :make-app-info make-app-info
+                 :command command
+                 :manual-schema-datas manual-schema-datas)
 
         created-application (app/make-application make-app-info
                                                   []            ; messages
@@ -209,7 +211,7 @@
   [{{:keys [kuntalupatunnus authorizeApplicants]} :data :as command}]
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
         destructured-permit-id (conv-util/destructure-permit-id kuntalupatunnus)
-        operation             "aiemmalla-luvalla-hakeminen"
+        operation             "konversio"
         filename              (format "%s/%s.xml" (:resource-path conv-util/config) kuntalupatunnus ".xml")
         permit-type           "R"
         xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)

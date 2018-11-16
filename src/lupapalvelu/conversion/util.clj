@@ -10,6 +10,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$in $ne]]
             [sade.core :refer :all]
@@ -58,6 +59,16 @@
                        (now)
                        {"kaupunkikuvatoimenpide" data}
                        (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
+
+(defn toimenpide->toimenpide-document [op-name toimenpide]
+  (let [data (model/map2updates [] {:kuvaus "Nippa nappa niukin naukin"
+                                    :tunnus "123123"
+                                    :rakennusTunnus "RAK-TUNNUS-TEST"})
+        schema-name (-> op-name operations/get-operation-metadata :schema)]
+    (app/make-document op-name
+                       (now)
+                       {schema-name data}
+                       (schemas/get-schema 1 schema-name))))
 
 (defn make-converted-application-id
   "An application id is created for the year found in the kuntalupatunnus, e.g.
@@ -185,7 +196,8 @@
        "TJO" "tyonjohtajan-nimeaminen-v2"
        "P" "purkaminen"
        "PI" "purkaminen"
-       "aiemmalla-luvalla-hakeminen")))
+       "konversio"))) ;; A generic operation for this purpose.
+                      ;; If a an application does not contain 'toimenpide'-element and is not P(I) or TJO, 'konversio it is'.
   ([kuntalupatunnus toimenpide]
    (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
         uusi? (contains? toimenpide :uusi)
@@ -197,7 +209,7 @@
                            (= "B" suffix))
         rakennelman-kuvaus (get-in toimenpide [:rakennelmatieto :Rakennelma :kuvaus :kuvaus])
         rakennelman-selite (get-in toimenpide [:rakennelmatieto :Rakennelma :tunnus :rakennuksenSelite])
-        ; _ (println toimenpide)
+        ; _ (println toimenpide) ; TODO: Remove us as well, please
         ; _ (println rakennuksen-selite)
         ; _ (println kayttotarkoitus)
          _ (swap! tila assoc :kuntalupatunnus kuntalupatunnus :toimenpide toimenpide)]
@@ -235,51 +247,6 @@
     (if-not (empty? toimenpiteet)
       (map (partial deduce-operation-type kuntalupatunnus) toimenpiteet)
       (deduce-operation-type kuntalupatunnus))))
-
-#_(defn deduce-operations
-  "Figure out the right primaryOperation for the application. EDIT: This is garbage, delete and re-think"
-  [xml]
-  (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
-        app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        toimenpiteet (:toimenpiteet app-info)
-        uusi? (contains? (first toimenpiteet) :uusi)
-        _ (swap! tila assoc :app-info app-info)
-        suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
-        btype (get-building-type xml)
-        asiantiedot (ss/lower-case (building-reader/->asian-tiedot xml))
-        {:keys [description usage]} (-> xml building-reader/->buildings-summary first)]
-    (-> app-info :toimenpiteet first deduce-operation-type)
-    #_(cond
-      (= "TJO" suffix) "tyonjohtajan-nimeaminen-v2"
-      (contains? #{"P" "PI"} suffix) "purkaminen"
-      (and (= "A" suffix)
-           (contains? #{"Asuinkerrostalo" "Kerrostalo"} btype)) "kerrostalo-rivitalo"
-      (and (= "A" suffix)
-           (contains? #{"Omakotitalo"} btype)) "pientalo"
-      (and (= "B" suffix)
-           (or (contains? #{"Omakotitalo"} btype)
-               (re-find #"yhden asunnon talo" usage))) "pientalo-laaj"
-      (and (= "B" suffix)
-           (re-find #"kerrosta|rivita" usage)) "kerrostalo-rt-laaj"
-      (and (= "B" suffix)
-           (ss/contains? usage "toimisto")) "muu-rakennus-laaj"
-      (and (= "B" suffix)
-           (ss/contains? usage "teollisuu")) "teollisuusrakennus-laaj"
-      (and (= "C" suffix)
-           (re-find #"mainos" asiantiedot)) "mainoslaite"
-      (and (= "C" suffix)
-           (re-find #"maalämpökaivo" asiantiedot)) "maalampokaivo"
-      (and (= "C" suffix)
-           (re-find #"pysäköintialue" asiantiedot)) "muu-rakentaminen"
-      (and (= "D" suffix)
-           (re-find #"yhdistäminen" asiantiedot)) "jakaminen-tai-yhdistaminen"
-      (and (= "D" suffix)
-           (re-find #"johtojen uusiminen|lvi|putki" asiantiedot)) "linjasaneeraus"
-      (and (= "D" suffix)
-           (re-find #"käyttötarkoituksen muutos|muuttaminen" asiantiedot)) "kayttotark-muutos"
-      (and (= "D" suffix)
-           (re-find #"muuttaminen .*huoneeksi|sis.* muutoks|kalustemuut" asiantiedot)) "sisatila-muutos"
-      :else "aiemmalla-luvalla-hakeminen")))
 
 (defn get-operation-types-for-testset
   "Returns a sequence for maps describing the deduced operation types
