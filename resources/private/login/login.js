@@ -81,13 +81,14 @@
   };
 
   var getUsername = function() {
-    return typeof($("#login-username").val()) === "string" ? _.trim($("#login-username").val()) : username();
+    var login = $("#login-username").val();
+    return _.isString( login ) ? _.trim( login ) : username();
   }
 
   // This can be called from handleLoginSubmit or as a click handler function from the "Seuraava"-button in WP
   var checkForSso = function(cb) {
     clearError();
-    cb = (typeof cb !== "undefined") ? cb : showPassword;
+    cb = cb || showPassword;
     ajax.get("/api/login-sso-uri")
       .param("username", _.trim(getUsername()))
       .success(function(data) {
