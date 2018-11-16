@@ -154,16 +154,22 @@
          (apply +))))
 
 (defn foremen [verdict]
-  (->> (get-in verdict [:data :foremen])
-       (map #(i18n/localize "fi" (str "pate-r.foremen." %)))
-       (ss/join ", ")))
+  (if (vc/legacy? verdict)
+    (->> (get-in verdict [:data :foremen])
+         vals
+         (map :role)
+         (ss/join ", "))
+    (->> (get-in verdict [:data :foremen])
+         (map #(i18n/localize "fi" (str "pate-r.foremen." %)))
+         (ss/join ", "))))
 
 (defn conditions [verdict]
-  (some->> (get-in verdict [:data :conditions])
-           vals
-           (map :condition)
-           (remove ss/blank?)
-           (map #(assoc {} :sisalto %))))
+  (let [condition-key (if (vc/legacy? verdict) :name :condition)]
+    (some->> (get-in verdict [:data :conditions])
+             vals
+             (map condition-key)
+             (remove ss/blank?)
+             (map #(assoc {} :sisalto %)))))
 
 (defn reference-value [key]
   (fn [verdict]
@@ -171,9 +177,14 @@
          (map (fn [id] (:fi (util/find-by-id id (get-in verdict [:references (keyword key)]))))))))
 
 (defn reviews [verdict]
-  (->> (get-in verdict [:data :reviews])
-       (map (fn [id] (:fi (util/find-by-id id (get-in verdict [:references :reviews])))))
-       (map #(assoc {} :tarkastuksenTaiKatselmuksenNimi %))))
+  (if (vc/legacy? verdict)
+    (->> (get-in verdict [:data :reviews])
+         vals
+         (map :name)
+         (map #(assoc {} :tarkastuksenTaiKatselmuksenNimi %)))
+    (->> (get-in verdict [:data :reviews])
+         (map (fn [id] (:fi (util/find-by-id id (get-in verdict [:references :reviews])))))
+         (map #(assoc {} :tarkastuksenTaiKatselmuksenNimi %)))))
 
 (def backing-system-verdict-skeleton
   {:id              (ds/access :id)
