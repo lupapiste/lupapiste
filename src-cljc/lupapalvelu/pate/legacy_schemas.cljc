@@ -19,6 +19,7 @@
                 :anto            {:date      {:i18nkey :verdict.anto}
                                   :required? true}
                 :lainvoimainen   {:date {:i18nkey :verdict.lainvoimainen}}
+                :julkipano       {:date {:i18nkey :verdict.julkipano}}
                 :verdict-text    {:text {:i18nkey :verdict.text
                                          :lines   20}}}
    :section    {:id   :verdict
@@ -41,7 +42,9 @@
                                  [{:col 2
                                    :dict :anto}
                                   {:col 2
-                                   :dict :lainvoimainen}]]}}})
+                                   :dict :lainvoimainen}
+                                  {:col 2
+                                   :dict :julkipano}]]}}})
 
 (defn remove-button [dict]
   {:button {:i18nkey :remove
@@ -170,6 +173,14 @@
                        :rows    [[{:col  6
                                    :dict :attachments}]]}}})
 
+(def legsub-bulletin
+  {:dictionary {:bulletin-op-description {:text {:i18nkey :phrase.category.toimenpide-julkipanoon}}}
+   :section    {:id   :bulletin
+                :grid {:columns 6
+                       :rows    [[{:col  2
+                                   :align :full
+                                   :dict :bulletin-op-description}]]}}})
+
 (defn build-legacy-schema [& subschemas]
   (sc/validate schemas/PateLegacyVerdict
                (assoc (apply schema-util/combine-subschemas subschemas)
@@ -185,6 +196,7 @@
                              :label?     false
                              :items      helper/review-types
                              :sort-by    :text}})
+   legsub-bulletin
    legsub-foremen
    (legsub-conditions)
    legsub-attachments
