@@ -83,7 +83,7 @@
   var getUsername = function() {
     var login = $("#login-username").val();
     return _.isString( login ) ? _.trim( login ) : username();
-  }
+  };
 
   // This can be called from handleLoginSubmit or as a click handler function from the "Seuraava"-button in WP
   var checkForSso = function(cb) {
