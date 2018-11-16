@@ -26,10 +26,7 @@
      :data     (metadata/wrap-all (metadata/wrapper command)
                                   {:handler         (pate-verdict/general-handler application)
                                    :agreement-state (allu/agreement-state application)})
-     :template {:inclusions (-> category
-                                legacy/allu-contract
-                                :dictionary
-                                pate-verdict/dicts->kw-paths)}
+     :template {:inclusions []}
      :legacy?  true}))
 
 (defn sign-allu-contract
