@@ -5,7 +5,8 @@
             [lupapalvelu.itest-util :refer [local-command local-query
                                             create-and-submit-application
                                             create-and-submit-local-application
-                                            sonja pena sipoo ok? fail?] :as itu]
+                                            sonja pena sipoo sipoo-ya
+                                            ok? fail?] :as itu]
             [lupapalvelu.invoice-api]
             [lupapalvelu.invoices :refer [validate-invoice ->invoice-db] :as invoices]
             [lupapalvelu.mongo :as mongo]
@@ -273,8 +274,14 @@
 
     (fact "organization-price-catalogues"
 
-      (fact "should return unauthorized response when user is not organization admin"
+      (fact "should return unauthorized response when user is not an organization admin"
             (let [response (-> (local-query sonja :organization-price-catalogues
+                                            :org-id "753-R"))]
+              response => fail?
+              (:text response) => "error.unauthorized"))
+
+      (fact "should return unauthorized response when user is an or organization admin or another org"
+            (let [response (-> (local-query sipoo-ya :organization-price-catalogues
                                             :org-id "753-R"))]
               response => fail?
               (:text response) => "error.unauthorized"))
