@@ -1,31 +1,36 @@
 (ns lupapalvelu.backing-system.allu.contract
-  (:require [lupapalvelu.backing-system.allu.core :as allu]
+  (:require [lupapalvelu.action :as action]
             [lupapalvelu.application-state :as app-state]
-            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.action :as action]
-            [lupapalvelu.pate.schemas :as schemas]
-            [monger.operators :refer :all]
-            [sade.core :refer [ok]]
-            [sade.util :as util]
-            [schema.core :as sc]
-            [lupapalvelu.pate.schema-util :as schema-util]
+            [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.legacy-schemas :as legacy]
-            [lupapalvelu.pate.verdict :as pate-verdict]))
+            [lupapalvelu.pate.metadata :as metadata]
+            [lupapalvelu.pate.schema-util :as schema-util]
+            [lupapalvelu.pate.schemas :as schemas]
+            [lupapalvelu.pate.verdict :as pate-verdict]
+            [lupapalvelu.pate.verdict-common :as vc]
+            [lupapalvelu.state-machine :as sm]
+            [monger.operators :refer :all]
+            [sade.core :refer [ok]]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [schema.core :as sc]))
 
 (sc/defn ^:always-validate new-allu-contract :- schemas/PateVerdict [{:keys [application created] :as command}]
-         (let [category (schema-util/application->category application)]
-           {:id       (mongo/create-id)
-            :modified created
-            :state    (pate-verdict/wrapped-state command :published)
-            :category (name category)
-            :data     {:handler (pate-verdict/general-handler application)}
-            :template {:inclusions (-> category
-                                       legacy/legacy-verdict-schema
-                                       :dictionary
-                                       pate-verdict/dicts->kw-paths)}
-            :legacy?  true}))
+  (let [category (schema-util/application->category application)]
+    {:id       (mongo/create-id)
+     :modified created
+     :state    (pate-verdict/wrapped-state command :published)
+     :category (name category)
+     :data     (metadata/wrap-all (metadata/wrapper command)
+                                  {:handler         (pate-verdict/general-handler application)
+                                   :agreement-state (allu/agreement-state application)})
+     :template {:inclusions (-> category
+                                legacy/allu-contract
+                                :dictionary
+                                pate-verdict/dicts->kw-paths)}
+     :legacy?  true}))
 
 (defn sign-allu-contract
   "Sign the contract
@@ -42,39 +47,36 @@
 
 (defn fetch-allu-contract
   [{:keys [application created user] :as command}]
-  ;; HACK: This is here instead of e.g. do-check-for-verdict to avoid verdict/allu/pate-verdict
-  ;;       dependency cycles:
+  ;; This is here instead of e.g. do-check-for-verdict to avoid
+  ;; verdict/allu/pate-verdict dependency cycles:
   (when-let [filedata (allu/load-contract-document! command)]
-    ;; FIXME: Some times should be dates, not timestamps:
-    (let [creator (:creator application)
-          signatures [{:name (:username user)
-                       :user-id (:id user)
-                       :date created}]
-          signatures (if (= :final (allu/agreement-state application))
-                       (conj signatures {:name (str (:firstName creator) " " (:lastName creator))
-                                         :user-id (:id (:creator application))
-                                         :date created})
-                       signatures)
-          verdict (new-allu-contract command)
-          verdict (assoc verdict
-                    :published {:published created
-                                :tags (pr-str {:body (pate-verdict/backing-system--tags
-                                                       application verdict)})}
-                    ;; FIXME: Should be general-handler fullname instead of current username:
-                    :archive {:verdict-giver (:username user)}
-                    ;; FIXME: Should be general-handler fullname instead of current username:
-                    :signatures signatures) ; HACK
+    (let [verdict           (merge (new-allu-contract command)
+                                   {:published {:published created
+                                                :tags      (ss/serialize {:body []})}
+                                    ;; FIXME: Should be general-handler fullname instead of current username:
+                                    :archive   {:verdict-giver (:username user)}}
+                                   (when (= :final (allu/agreement-state application))
+                                     {:signatures (->> application
+                                                       :pate-verdicts
+                                                       (util/find-first #(and (vc/has-category? % :allu-contract)
+                                                                              (util/not=as-kw (vc/allu-agreement-state %)
+                                                                                              :final)))
+                                                       :signatures
+                                                       (cons {:name    (pate-verdict/user-person-name user)
+                                                              :user-id (:id user)
+                                                              :date    created})
+                                                       (sort-by :date))}))
           transition-update (app-state/state-transition-update (sm/next-state application)
                                                                created application user)]
       (attachment/convert-and-attach! command
-                                      {:created created
+                                      {:created         created
                                        :attachment-type {:type-group :muut
-                                                         :type-id :sopimus}
-                                       :target {:id (:id verdict)
-                                                :type :verdict}
-                                       :modified created
-                                       :locked true
-                                       :read-only true}
+                                                         :type-id    :sopimus}
+                                       :target          {:id   (:id verdict)
+                                                         :type :verdict}
+                                       :modified        created
+                                       :locked          true
+                                       :read-only       true}
                                       filedata)
       (action/update-application command (util/deep-merge transition-update
                                                           {$push {:pate-verdicts verdict}}))
