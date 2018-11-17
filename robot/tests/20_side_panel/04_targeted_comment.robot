@@ -17,7 +17,7 @@ Sonja sends message to Ronja
   Open side panel  conversation
   Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   List Selection Should Be  side-panel-assigneed-authority  ${EMPTY}
-  Select From List by id  side-panel-assigneed-authority  Sibbo Ronja
+  Select From List by id and label  side-panel-assigneed-authority  Sibbo Ronja
   Click by test id  application-new-comment-btn
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
   Page Should Contain Element  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[contains(@class, 'to') and contains(text(), 'Ronja')]

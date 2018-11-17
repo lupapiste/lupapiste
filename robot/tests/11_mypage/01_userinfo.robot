@@ -73,7 +73,7 @@ Sven logs in and sees language indicator
 Sven changes his user language to Swedish
   Click element  user-name
   List selection should be  userinfo-language  fi
-  Select from list by id  userinfo-language  sv
+  Select from list by id and value  userinfo-language  sv
   Save User Data
 
 Upon saving the UI language changes

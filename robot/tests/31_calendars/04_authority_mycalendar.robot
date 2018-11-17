@@ -47,8 +47,8 @@ Authority suggests an appointment
   Open application  ${appname}  ${propertyId}
   Open tab  calendar
   Wait until  Element should be visible by test id  calendar-weekday-0
-  Wait until  Select From List by test id  reservation-type-select  Foobar
-  Wait until  Select From List by test id  attendee-select  Mikko Intonen
+  Wait until  Select From List by test id and label  reservation-type-select  Foobar
+  Wait until  Select From List by test id and label  attendee-select  Mikko Intonen
   Goto following week in calendar view
   Wait Until  Element should be visible by test id  reserve-slot-Friday-1000
   Click by test id  reserve-slot-Friday-1000
@@ -63,4 +63,3 @@ Appointment is visible in mycalendar list view
   Click by test id  view-toggle-list
   Wait until  Element should be visible  xpath=//div[contains(@class, 'calendar-pending-action-item')]
   Logout
-

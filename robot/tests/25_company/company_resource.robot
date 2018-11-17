@@ -85,7 +85,7 @@ Edit company user
   [Arguments]  ${index}  ${role}  ${submit}
   Click by test id  company-user-edit-${index}
   Select from test id  company-user-edit-role-${index}  ${role}
-  Select from test id  company-user-edit-submit-${index}  ${submit}
+  Select from test id by text  company-user-edit-submit-${index}  ${submit}
 
 Lock company
   [Arguments]  ${company}  ${date}

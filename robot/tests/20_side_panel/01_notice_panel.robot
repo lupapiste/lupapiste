@@ -40,7 +40,7 @@ Sonja can leave notice
   Wait save
 
 Sonja can set application urgency to urgent
-  Select From List by id  application-authority-urgency  urgent
+  Select From List by id and value  application-authority-urgency  urgent
   Wait save
   Check status  urgent
   Check notice  ylämaa  urgent  ${notice}
@@ -75,7 +75,7 @@ Sonja can set application urgency to pending
   Sonja logs in
   Open application  ${appname}  ${propertyId}
   Open side panel  notice
-  Select From List by id  application-authority-urgency  pending
+  Select From List by id and value  application-authority-urgency  pending
   Wait save
   Logout
 

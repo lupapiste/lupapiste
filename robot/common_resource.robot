@@ -544,15 +544,25 @@ Select From List by test id and index
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List By Index  xpath=//select[@data-test-id="${id}"]  ${index}
 
-Select From List by test id
+Select From List by test id and value
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List by value  xpath=//select[@data-test-id="${id}"]  ${value}
 
-Select From List by id
+Select From List by test id and label
+  [Arguments]  ${id}  ${label}
+  Wait until page contains element  xpath=//select[@data-test-id="${id}"]
+  Select From List by label  xpath=//select[@data-test-id="${id}"]  ${label}
+
+Select From List by id and value
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@id="${id}"]
   Select From List by value  xpath=//select[@id="${id}"]  ${value}
+
+Select From List by id and label
+  [Arguments]  ${id}  ${label}
+  Wait until page contains element  xpath=//select[@id="${id}"]
+  Select From List by label  xpath=//select[@id="${id}"]  ${label}
 
 Select From Autocomplete
   [Arguments]  ${container}  ${value}
@@ -739,7 +749,7 @@ Document status is enabled
 Table with id should have rowcount
   [Arguments]  ${id}  ${expectedRowcount}
   ${rowcount}=  Get Matching XPath Count  //table[@id='${id}']/tbody/tr
-  Should be equal  ${rowcount}  ${expectedRowcount}
+  Should be equal as integers  ${rowcount}  ${expectedRowcount}
 
 #
 # Helper for inforequest and application crud operations:

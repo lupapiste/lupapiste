@@ -93,7 +93,7 @@ Fill review info
   Open tab  tasks
   Open task  Aloituskokous
 
-  Select From List by test id  katselmus.tila  lopullinen
+  Select From List by test id and value  katselmus.tila  lopullinen
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  29.2.2016
   Input text with jQuery  input[data-test-id="katselmus.pitaja"]  Sonja Sibbo

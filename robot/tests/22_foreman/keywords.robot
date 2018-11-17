@@ -105,7 +105,7 @@ Foreman accepts invitation and fills info
 
 Set foreman role
   [Arguments]  ${role}
-  Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
+  Wait until  Select From List by test id and label  kuntaRoolikoodi  ${role}
 
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}
@@ -114,8 +114,8 @@ Foreman sets role and difficulty to foreman application
   Deny yes no dialog
   Open tab  parties
   Foreman accepts invitation and fills info
-  Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
-  Wait until  Select From List by test id  patevyysvaatimusluokka  ${difficulty}
+  Set foreman role  ${role}
+  Wait until  Select From List by test id and value  patevyysvaatimusluokka  ${difficulty}
 
 Foreman submit application
   [Arguments]  ${index}
