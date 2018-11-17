@@ -112,7 +112,7 @@
   (reduce (fn [acc {:keys [id] :as company}]
             (assoc acc id (dissoc company :id)))
           {}
-          (mongo/snapshot :companies {} [:y :name :locked :billingType])))
+          (mongo/snapshot :companies {} [:y :name :created :locked :billingType])))
 
 (defn- user-report-data [company allow professional]
   (let [users (users-spam-flags (user-list company allow professional))]
@@ -164,6 +164,9 @@
                  :company.role         {:header "Yritystilirooli"
                                         :path   [:company :role]
                                         :fun    company-role-in-finnish}
+                 :company.created      {:header "Yritystili avattu"
+                                        :path   [:company :created]
+                                        :fun    safe-local-date}
                  :company.locked       {:header "Yritystili suljettu"
                                         :path   [:company :locked]
                                         :fun    safe-local-date}}
@@ -182,7 +185,7 @@
                          :street :zip :city :architect :allowDirectMarketing :spam]
                         (when-not (= company :no)
                           [:company.name :company.billingType :company.y
-                           :company.role :company.locked]))
+                           :company.role :company.created :company.locked]))
         headers (map #(:header (user-report-cell-def nil %)) columns)
         rows    (for [row data]
                   (map #(:value (user-report-cell-def row %)) columns))]
