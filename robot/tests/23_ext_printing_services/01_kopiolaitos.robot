@@ -83,6 +83,7 @@ Sonja adds RAM attachment to Mikko's attachment
   Sonja adds RAM attachment  paapiirustus.asemapiirros
 
 Sonja marks the RAM attachment as a verdict attachment
+  Scroll to top
   Scroll and click test id  mark-verdict-attachments
   Click element  jquery=tr.attachment-row:first
   Scroll and click test id  multiselect-action-button

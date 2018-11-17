@@ -223,6 +223,7 @@ Go to page
 
 Open tab
   [Arguments]  ${name}
+  Wait until element is visible  applicationTabs
   ${is-visible}=  Run Keyword and Return Status  Element should be visible  application-${name}-tab
   Scroll to top
   Run keyword unless  ${is-visible}  Run keywords  Click by test id  application-open-${name}-tab  AND  Tab should be visible  ${name}
