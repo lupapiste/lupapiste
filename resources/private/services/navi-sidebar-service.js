@@ -29,7 +29,7 @@ LUPAPISTE.NaviSidebarService = function() {
                       loc: "auth-admin.operations-attachments"},
                      {icon: "lupicon-shopping-cart",
                       page: "price-catalogue",
-                      loc: "auth-admin.price-catalogue",
+                      loc: "auth-admin.price-catalogue.title",
                       feature: "invoices"},
                      {icon: "lupicon-link",
                       page: "backends",

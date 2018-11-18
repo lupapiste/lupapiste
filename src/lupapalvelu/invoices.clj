@@ -59,7 +59,7 @@
                    )
    :application-id sc/Str
    :organization-id sc/Str
-   :operations [InvoiceOperation]})
+   :operations [InvoiceOperation]
    (sc/optional-key :sum) MoneyResponse})
 
 (sc/defschema InvoiceInsertRequest

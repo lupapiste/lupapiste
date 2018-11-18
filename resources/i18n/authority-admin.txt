@@ -424,7 +424,7 @@
 "auth-admin.parameter" "en" "Information"
 "auth-admin.parameter" "fi" "Tieto"
 "auth-admin.parameter" "sv" "Uppgift"
-"auth-admin.price-catalogue" "fi" "Taksa"
+"auth-admin.price-catalogue.title" "fi" "Taksa"
 "auth-admin.remove-handlers-from-reverted-draft" "en" "Remove assignees from application when reverting it to draft."
 "auth-admin.remove-handlers-from-reverted-draft" "fi" "Poista käsittelijät hakemukselta, kun se palautetaan luonnokseksi."
 "auth-admin.remove-handlers-from-reverted-draft" "sv" "Ta bort handläggare från ansökan när den returneras till utkast."
