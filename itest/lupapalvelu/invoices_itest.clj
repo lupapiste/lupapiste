@@ -8,7 +8,8 @@
                                             sonja pena sipoo sipoo-ya
                                             ok? fail?] :as itu]
             [lupapalvelu.invoice-api]
-            [lupapalvelu.invoices :refer [validate-invoice ->invoice-db] :as invoices]
+            [lupapalvelu.invoices.schemas :refer [->invoice-db]]
+            [lupapalvelu.invoices :refer [validate-invoice] :as invoices]
             [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
@@ -310,4 +311,38 @@
               (let [response (local-query sipoo :organization-price-catalogues
                                           :organization-id "753-R")]
                 response => ok?
-                (:price-catalogues response) => (belong-to-org? "753-R")))))))
+                (:price-catalogues response) => (belong-to-org? "753-R")))))
+
+    (fact "organizations-transferbatches"
+          (fact "Should return transferbatch with one invoice when invoice is transferred to confirmed"
+                (defn invoice->confirmed [draft-invoice]
+                  (let [{:keys [id] :as app} (dummy-submitted-application)
+                        new-invoice-id (:invoice-id (local-command sonja :insert-invoice :id id :invoice draft-invoice))
+                        new-invoice (:invoice (local-query sonja :fetch-invoice :id id :invoice-id new-invoice-id))]
+                    (local-command sonja :update-invoice :id id :invoice (assoc new-invoice  :state "checked"))
+                    (local-command sonja :update-invoice :id id :invoice (assoc new-invoice  :state "confirmed"))))
+                (let [invoice {:operations [{:operation-id "linjasaneeraus"
+                                             :name "linjasaneeraus"
+                                             :invoice-rows [{:text "Row 1 kpl"
+                                                             :type "from-price-catalogue"
+                                                             :unit "kpl"
+                                                             :price-per-unit 10
+                                                             :units 2
+                                                             :discount-percent 0}
+                                                            {:text "Row 2 m2"
+                                                             :type "from-price-catalogue"
+                                                             :unit "m2"
+                                                             :price-per-unit 20.5
+                                                             :units 15.8
+                                                             :discount-percent 50}
+                                                            {:text "Custom row m3"
+                                                             :type "custom"
+                                                             :unit "m3"
+                                                             :price-per-unit 20.5
+                                                             :units 15.8
+                                                             :discount-percent 100}]}]}]
+                  (invoice->confirmed invoice)
+                  (let [transferbatch-result (:transfer-batches (local-query sonja :organizations-transferbatches))
+                        org-transferbatch (get transferbatch-result "753-R")]
+                    (:invoice-count (first org-transferbatch)) => 1
+                    (:invoice-row-count (first org-transferbatch)) => 3))))))

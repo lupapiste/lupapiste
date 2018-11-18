@@ -3,8 +3,7 @@
             [lupapalvelu.invoices.schemas :refer [->invoice-user ->invoice-db]]
             [midje.sweet :refer :all]
             [schema.core :as sc]
-            [sade.core]
-            [lupapalvelu.invoices :as invoices]))
+            [sade.core]))
 
 (facts "->invoice-user"
        (fact "throws (validation) error when user map given as argument lack require fields for constructing an (invoice) User"

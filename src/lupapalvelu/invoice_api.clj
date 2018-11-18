@@ -7,7 +7,8 @@
             [lupapalvelu.states :as states]
             [sade.core :refer [ok fail]]
             [schema.core :as sc]
-            [lupapalvelu.application-schema :refer [Operation]]))
+            [lupapalvelu.application-schema :refer [Operation]]
+            [lupapalvelu.invoices.transfer-batch :refer [get-transfer-batch-for-orgs]]))
 
 ;; ------------------------------------------
 ;; Invoice API
@@ -126,3 +127,14 @@
   (let [price-catalogues (invoices/fetch-price-catalogues organization-id)]
     (invoices/validate-price-catalogues price-catalogues)
     (ok {:price-catalogues price-catalogues})))
+
+(defquery organizations-transferbatches
+  {:description "Query that returns transferbatches for organization"
+   :feature          :invoices
+   :user-roles       #{:authority} ;;will be changed to laskuttaja role
+   :parameters       []}
+  [{:keys [user user-organizations] :as command}]
+  (let [required-role-in-orgs "authority" ;;Will be changed to laskuttaja role
+        user-org-ids (invoices/get-user-orgs-having-role user required-role-in-orgs)
+        transfer-batches-for-orgs (get-transfer-batch-for-orgs user-org-ids)]
+    (ok {:transfer-batches transfer-batches-for-orgs})))

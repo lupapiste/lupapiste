@@ -6,13 +6,17 @@
    [lupapalvelu.money-schema :refer [MoneyResponse]]
    [taoensso.timbre :refer [trace tracef debug debugf info infof
                                      warn warnf error errorf fatal fatalf]]
-   [lupapalvelu.user :as user]))
+   [lupapalvelu.user :as usr]))
+
+(def InvoiceId sc/Str)
+
+(def NameLength (ssc/max-length-string 255))
 
 (sc/defschema User
-  {:id                                        user/Id
-   :firstName                                 (ssc/max-length-string 255)
-   :lastName                                  (ssc/max-length-string 255)
-   :role                                      user/Role
+  {:id                                        usr/Id
+   :firstName                                 NameLength
+   :lastName                                  NameLength
+   :role                                      usr/Role
    :email                                     ssc/Email
    :username                                  ssc/Username})
 
@@ -43,14 +47,14 @@
    :invoice-rows [InvoiceRow]})
 
 (sc/defschema Invoice
-  {:id sc/Str
+  {:id InvoiceId
    :created ssc/Timestamp
    :created-by User
    :state (sc/enum "draft"       ;;created
                    "checked"     ;;checked by decision maker and moved to biller
                    "confirmed"   ;;biller has confirmed the invoice
                    "transferred" ;;biller has exported the invoice
-                   "billed"      ;;biler has marked the invoice as billed
+                   "billed"      ;;biller has marked the invoice as billed
                    )
    :application-id sc/Str
    :organization-id sc/Str
@@ -81,6 +85,32 @@
    :rows [CatalogueRow]
    :meta {:created ssc/Timestamp
           :created-by User}})
+
+(def TransferBatchId sc/Str)
+
+(sc/defschema InvoiceInTransferBatch
+  {:id InvoiceId
+   :added-to-transfer-batch ssc/Timestamp
+   :organization-id sc/Str})
+
+(sc/defschema InvoiceTransferBatch
+  {:id TransferBatchId
+   :organization-id sc/Str
+   :created ssc/Timestamp
+   :created-by User
+   :invoices [InvoiceInTransferBatch]
+   :number-of-rows sc/Num})
+
+
+(sc/defschema TransferBatchResponseTransferBatch
+  {:id sc/Str
+   :invoices [Invoice]
+   :invoice-count sc/Num
+   :invoice-row-count sc/Num
+   :transfer-batch InvoiceTransferBatch})
+
+(sc/defschema TransferBatchOrgsResponse
+  {sc/Str [TransferBatchResponseTransferBatch]})
 
 (sc/defn ^:always-validate ->invoice-user :- User
  [user]

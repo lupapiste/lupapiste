@@ -12,6 +12,8 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.domain :refer [get-application-no-access-checking]]
             [lupapalvelu.application-schema :refer [Operation]]
+            [lupapiste-invoice-commons.states :refer [state-change-direction move-to-state]]
+            [lupapalvelu.invoices.transfer-batch :refer [add-invoice-to-transfer-batch]]
             [lupapalvelu.invoices.schemas :refer [User
                                                   PriceCatalogue
                                                   DiscountPercent
@@ -20,11 +22,13 @@
                                                   InvoiceRow
                                                   InvoiceOperation
                                                   Invoice
+                                                  InvoiceId
                                                   InvoiceInsertRequest
                                                   CatalogueRow
                                                   PriceCatalogue
                                                   ->invoice-user]]))
 
+(def state-actions {:add-to-transfer-batch add-invoice-to-transfer-batch})
 
 (defn fetch-invoice [invoice-id]
   (mongo/by-id :invoices invoice-id))
@@ -96,11 +100,21 @@
 (defn update-invoice!
   [{:keys [id] :as invoice}]
   (let [current-invoice (mongo/by-id "invoices" id)
-        new-invoice (merge current-invoice (select-keys invoice [:operations :state]))]
-    (->> new-invoice
-         enrich-invoice-sums-before-save
-         validate-invoice
-         (mongo/update-by-id "invoices" id))))
+        new-invoice (merge current-invoice (select-keys invoice [:operations :state]))
+        state-change-direction (state-change-direction (:state current-invoice) (:state new-invoice) :backend)
+        state-change-response (if (= state-change-direction (or :next :previous))
+                                (move-to-state [:state] current-invoice (:state new-invoice) state-change-direction :backend)
+                                {:actions []})
+        actions (:actions state-change-response)
+        update-result (->> new-invoice
+                           enrich-invoice-sums-before-save
+                           validate-invoice
+                           (mongo/update-by-id "invoices" id))]
+    (if (not-empty actions)
+      (doseq [action actions]
+        (if-let [action-fn (action state-actions)]
+          (action-fn new-invoice (:created-by new-invoice)))))
+    update-result))
 
 (defn fetch-by-application-id [application-id]
   (mongo/select "invoices" {:application-id application-id}))
