@@ -47,7 +47,14 @@ Get Matching Xpath Count
 
 Xpath Should Match X Times
   [Arguments]  ${xpath}  ${times}
-  Page Should Contain Element  xpath:${xpath}  limit=${times}
+  Run keyword unless  ${times}==0  Wait until  Page Should Contain Element  xpath:${xpath}  limit=${times}
+  Run keyword if  ${times}==0  Wait until  Page should not contain element  xpath:${xpath}
+
+jQuery Should Match X Times
+  [Arguments]  ${selector}  ${times}
+  Run keyword unless  ${times}==0  Wait until  Page Should Contain Element  jquery:${selector}  limit=${times}
+  Run keyword if  ${times}==0  Wait until  Page should not contain element  jquery:${selector}
+
 
 Set DB cookie
   ${timestamp}=  Get Time  epoch
@@ -1776,11 +1783,6 @@ Test id select texts are
   Wait test id visible  ${tid}
   @{vals}=  Get list items  jquery=[data-test-id=${tid}]  values=False
   Should be true  @{vals} == @{texts}
-
-
-jQuery should match X times
-  [Arguments]  ${selector}  ${count}
-  Wait until  Javascript?  $("${selector}").length === ${count}
 
 Test id autocomplete options check
   [Arguments]  ${tid}  ${included}  @{options}
