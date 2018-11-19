@@ -22,7 +22,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
 
-            [midje.sweet :refer [facts fact => contains]]
+            [midje.sweet :refer [facts fact => contains just]]
             [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
             [lupapalvelu.itest-util.model-based :refer [state-graph->transitions traverse-state-transitions]]
 
@@ -171,6 +171,9 @@
                          first
                          :id)]
       (itu/command apikey :sign-allu-contract :id app-id :verdict-id verdict-id :password "pena") => ok?)))
+
+(defn- verdict-list [apikey app-id]
+  (:verdicts (itu/query apikey :pate-verdicts :id app-id)))
 
 ;;;; Mock Handler
 ;;;; ===================================================================================================================
@@ -392,15 +395,42 @@
 
                                                             (= current :submitted)
                                                             (do (fact "fetch contract"
-                                                                  (fetch-contract raktark-helsinki id) => ok?)
+                                                                  (fetch-contract raktark-helsinki id) => ok?
+                                                                  )
                                                                 current)
 
                                                             :else
                                                             (do (fact "fetch contract"
-                                                                  (fetch-contract raktark-helsinki id) => ok?)
+                                                                  (fetch-contract raktark-helsinki id) => ok?
+                                                                  (verdict-list raktark-helsinki id)
+                                                                  => (just [(just {:category "allu-contract"
+                                                                                   :giver "Hannu Helsinki"
+                                                                                   :legacy? true
+                                                                                   :proposal? false
+                                                                                   :replaced? false
+                                                                                   :published pos?
+                                                                                   :title "Sopimusehdotus"
+                                                                                   :modified pos?
+                                                                                   :id string?})]))
                                                                 dest)))
                                      :agreementSigned (fn [[_ dest] id]
                                                         (sign-contract pena id)
+                                                        (fact "fetch contract"
+                                                          (fetch-contract raktark-helsinki id) => ok?
+                                                          (verdict-list raktark-helsinki id)
+                                                          => (just [(contains {:category "allu-contract"
+                                                                               :giver "Hannu Helsinki"
+                                                                               :legacy? true
+                                                                               :proposal? false
+                                                                               :title "Sopimus"
+                                                                               :signatures (just [(contains {:name "Pena Panaani"})
+                                                                                                  (contains {:name "Hannu Helsinki"})])})
+                                                                    (contains {:category "allu-contract"
+                                                                               :giver "Hannu Helsinki"
+                                                                               :legacy? true
+                                                                               :proposal? false
+                                                                               :title "Sopimusehdotus"
+                                                                               :signatures (just [(contains {:name "Pena Panaani"})])})]))
                                                         dest)))]))
                       (state-graph->transitions full-sijoitussopimus-state-graph))
                 :visit-goal 1))
