@@ -46,9 +46,45 @@
                                     :placeholder "placeholder.time"}
                                    {:name        "end-time"
                                     :type        :time
-                                    :placeholder "placeholder.time"}]
+                                    :placeholder "placeholder.time"}
+                                   {:name      "build-days-needed"
+                                    :type      :checkbox
+                                    :inputType :checkbox-wrapper}
+                                   {:name        "build-start-date"
+                                    :type        :date
+                                    :layout      :initial-width
+                                    :placeholder "placeholder.date"
+                                    :required    true
+                                    :show-when   {:path   "build-days-needed"
+                                                  :values #{true}}}
+                                   {:name        "build-start-time"
+                                    :type        :time
+                                    :placeholder "placeholder.time"
+                                    :required    true
+                                    :show-when   {:path   "build-days-needed"
+                                                  :values #{true}}}
+                                   {:name      "demolish-days-needed"
+                                    :type      :checkbox
+                                    :inputType :checkbox-wrapper}
+                                   {:name        "demolish-end-date"
+                                    :type        :date
+                                    :layout      :initial-width
+                                    :placeholder "placeholder.date"
+                                    :required    true
+                                    :show-when   {:path   "demolish-days-needed"
+                                                  :values #{true}}}
+                                   {:name        "demolish-end-time"
+                                    :type        :time
+                                    :placeholder "placeholder.time"
+                                    :required    true
+                                    :show-when   {:path   "demolish-days-needed"
+                                                  :values #{true}}}
+                                   ]
                      :rows        [["start-date" "start-time"]
-                                   ["end-date" "end-time"]]})
+                                   ["end-date" "end-time"]
+                                   {:h3 "allu.build-and-demolish"}
+                                   ["build-days-needed" "build-start-date" "build-start-time"]
+                                   ["demolish-days-needed" "demolish-end-date" "demolish-end-time"]]})
 
 (def lmv-description {:name       "lyhytaikainen-maanvuokraus"
                       :type       :group

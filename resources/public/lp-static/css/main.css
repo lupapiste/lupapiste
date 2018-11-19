@@ -34516,6 +34516,16 @@ div.form-grid.allu-group input::-ms-input-placeholder {
   teextarea: #dddddd;
 }
 
+div.form-grid.allu-group .h3 {
+  border-top: 1px solid #dddddd;
+  padding-top: .5em;
+}
+
+div.form-grid.allu-group .row {
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

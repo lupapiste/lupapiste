@@ -17,5 +17,12 @@ div.form-grid.allu-group {
     }
   }
   @include placeholder( $gray221 );
-
+  .h3 {
+    border-top: 1px solid $gray221;
+    padding-top: .5em;
+  }
+  .row {
+    margin-top: 4px;
+    margin-bottom: 0;
+  }
 }
