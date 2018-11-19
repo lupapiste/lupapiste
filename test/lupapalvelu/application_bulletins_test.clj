@@ -79,15 +79,23 @@
                    :sopimus false
                    :metadata nil
                    :paatokset [{:id "5b7e5772e7d8a1a88e669357"
-                                :paivamaarat {:anto anto
-                                              :lainvoimainen lainvoimainen}
-                                :poytakirjat [{:paatoksentekija handler
-                                               :urlHash "5b7e5772e7d8a1a88e669356"
-                                               :status status
-                                               :paatos verdict-text
-                                               :paatospvm paatospvm
-                                               :pykala section
-                                               :paatoskoodi code}]}]})
+                                :paivamaarat    {:anto anto
+                                                 :lainvoimainen lainvoimainen}
+                                :poytakirjat    [{:paatoksentekija handler
+                                                  :urlHash "5b7e5772e7d8a1a88e669356"
+                                                  :status status
+                                                  :paatos verdict-text
+                                                  :paatospvm paatospvm
+                                                  :pykala section
+                                                  :paatoskoodi code}]
+                                :lupamaaraykset {:autopaikkojaEnintaan      0
+                                                 :autopaikkojaKiinteistolla 0
+                                                 :autopaikkojaRakennettu    0
+                                                 :maaraykset                [{:sisalto "Muu 1"}
+                                                                             {:sisalto "Muu 2"}]
+                                                 :vaaditutErityissuunnitelmat []
+                                                 :vaaditutKatselmukset [{:tarkastuksenTaiKatselmuksenNimi "Tarkastus"}]
+                                                 :vaaditutTyonjohtajat "Supervising supervisor"}}]})
 
 (def migrated-signatures
   [{:date    signed1
@@ -172,3 +180,24 @@
       ;; Feel free to disagree, just spelling out the existing implementation
       (:verdicts both-snapshot) => [(->backing-system-verdict pate-test-verdict) test-verdict]
       (:verdictData both-snapshot) => (verdict-data-for-bulletin-snapshot pate-test-verdict))))
+
+(facts "Verdict accessors"
+  (fact "for Pate verdict"
+    (foremen {:data {:foremen ["vv-tj" "vastaava-tj" "iv-tj"]}})
+      => "Vesi- ja viem\u00e4rity\u00f6njohtaja, Vastaava ty\u00f6njohtaja, Ilmanvaihtoty\u00f6njohtaja"
+    (conditions {:data {:conditions {:5beec543e9a0396ee0e14f1a {:condition "Ehto"}}}})
+      => [{:sisalto "Ehto"}]
+    (reviews {:data       {:reviews ["5beec544e9a0396ee0e14f1c"]}
+              :references {:reviews [{:fi "Katselmus"
+                                      :sv "Katslemus"
+                                      :en "Katselmus"
+                                      :type "muu-katselmus"
+                                      :id "5beec544e9a0396ee0e14f1c"}]}})
+      => [{:tarkastuksenTaiKatselmuksenNimi "Katselmus"}])
+  (fact "for legacy verdict"
+    (foremen {:category "r"
+              :legacy? true
+              :data {:foremen {:5beeca9fe9a0396ee0e14f36 {:role "Ty\u00f6njohtaja"}
+                               :5beecaa5e9a0396ee0e14f37 {:role "Vastaava ty\u00f6njohtaja"}
+                               :5beecaa8e9a0396ee0e14f38 {:role "Vesi- ja viem\u00e4rity\u00f6njohtaja"}}}})
+      => "Ty\u00f6njohtaja, Vastaava ty\u00f6njohtaja, Vesi- ja viem\u00e4rity\u00f6njohtaja"))
