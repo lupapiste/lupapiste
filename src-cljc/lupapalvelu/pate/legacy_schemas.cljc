@@ -8,43 +8,49 @@
             [sade.shared-util :as util]
             [schema.core :as sc]))
 
-(defn legsub-verdict [verdict-code-schema]
-  {:dictionary {:kuntalupatunnus {:text      {:i18nkey :verdict.id}
-                                  :required? true}
-                :handler         {:text      {:i18nkey :verdict.name}
-                                  :required? true}
-                :verdict-code    (schema-util/required verdict-code-schema)
-                :verdict-section {:text {:i18nkey :verdict.section
-                                         :before  :section}}
-                :anto            {:date      {:i18nkey :verdict.anto}
-                                  :required? true}
-                :lainvoimainen   {:date {:i18nkey :verdict.lainvoimainen}}
-                :julkipano       {:date {:i18nkey :verdict.julkipano}}
-                :verdict-text    {:text {:i18nkey :verdict.text
-                                         :lines   20}}}
-   :section    {:id   :verdict
-                :grid {:columns 12
-                       :rows    [[{:col   2
-                                   :align :full
-                                   :dict  :kuntalupatunnus}
-                                  {}
-                                  {:col   4
-                                   :align :full
-                                   :dict  :handler}]
-                                 [{:dict :verdict-section}
-                                  {:col 2}
-                                  {:col   4
-                                   :align :full
-                                   :dict  :verdict-code}]
-                                 [{:col   10
-                                   :align :full
-                                   :dict  :verdict-text}]
-                                 [{:col 2
-                                   :dict :anto}
-                                  {:col 2
-                                   :dict :lainvoimainen}
-                                  {:col 2
-                                   :dict :julkipano}]]}}})
+(defn legsub-verdict [verdict-code-schema bulletin?]
+  (let [verdict {:dictionary (merge {:kuntalupatunnus {:text      {:i18nkey :verdict.id}
+                                                       :required? true}
+                                     :handler         {:text      {:i18nkey :verdict.name}
+                                                       :required? true}
+                                     :verdict-code    (schema-util/required verdict-code-schema)
+                                     :verdict-section {:text {:i18nkey :verdict.section
+                                                              :before  :section}}
+                                     :anto            {:date      {:i18nkey :verdict.anto}
+                                                       :required? true}
+                                     :lainvoimainen   {:date {:i18nkey :verdict.lainvoimainen}}
+                                     :verdict-text    {:text {:i18nkey :verdict.text
+                                                              :lines   20}}}
+                                    (when bulletin? {:julkipano {:date {:i18nkey :verdict.julkipano}}}))
+                 :section    {:id   :verdict
+                              :grid {:columns 12
+                                     :rows    [[{:col   2
+                                                 :align :full
+                                                 :dict  :kuntalupatunnus}
+                                                {}
+                                                {:col   4
+                                                 :align :full
+                                                 :dict  :handler}]
+                                               [{:dict :verdict-section}
+                                                {:col 2}
+                                                {:col   4
+                                                 :align :full
+                                                 :dict  :verdict-code}]
+                                               [{:col   10
+                                                 :align :full
+                                                 :dict  :verdict-text}]
+                                               [{:col  2
+                                                 :dict :anto}
+                                                {:col  2
+                                                 :dict :lainvoimainen}]]}}}]
+    (cond-> verdict
+      bulletin? (assoc-in [:section :grid :rows 3]
+                           [{:col  2
+                             :dict :anto}
+                            {:col  2
+                             :dict :lainvoimainen}
+                            {:col  2
+                             :dict :julkipano}]))))
 
 (defn remove-button [dict]
   {:button {:i18nkey :remove
@@ -191,7 +197,8 @@
    (legsub-verdict {:select {:loc-prefix :verdict.status
                              :items      (map (comp keyword str) (range 1 43))
                              :sort-by    :text
-                             :type :autocomplete}})
+                             :type :autocomplete}}
+                   true)
    (legsub-reviews {:select {:loc-prefix :pate.review-type
                              :label?     false
                              :items      helper/review-types
@@ -215,7 +222,9 @@
                              ;; peruutettu
                              :items      [:1 :2 :21 :37]
                              :sort-by    :text
-                             :type       :select}})
+                             :type       :select}}
+                   true)
+   legsub-bulletin
    legsub-reviews-ya
    (legsub-conditions)
    legsub-attachments
@@ -226,7 +235,9 @@
    (legsub-verdict {:select {:loc-prefix :verdict.status
                              :items      (map (comp keyword str) (range 1 43))
                              :sort-by    :text
-                             :type :autocomplete}})
+                             :type :autocomplete}}
+                   true)
+   legsub-bulletin
    (legsub-conditions)
    legsub-attachments
    (verdict-schemas/versub-upload)))
@@ -234,14 +245,15 @@
 (def kt-legacy-verdict
   (build-legacy-schema
    (legsub-verdict {:text {:loc-prefix :verdict.status
-                           :items      [:verdict.status.43 :verdict.status.44]}})
+                           :items      [:verdict.status.43 :verdict.status.44]}}
+                   false)
    (legsub-conditions)
    legsub-attachments
    (verdict-schemas/versub-upload {:type-group #".*" :default :muut.paatosote})))
 
 (def ymp-legacy-verdict
   (build-legacy-schema
-   (legsub-verdict {:text {:i18nkey :verdict.status}})
+   (legsub-verdict {:text {:i18nkey :verdict.status}} false)
    (legsub-conditions)
    legsub-attachments
    (verdict-schemas/versub-upload {:type-group #".*" :default :muut.paatosote})))
@@ -251,7 +263,8 @@
     (legsub-verdict {:select {:loc-prefix :verdict.status
                               :items      [:1 :2 :21 :37]
                               :sort-by    :text
-                              :type :autocomplete}})
+                              :type :autocomplete}}
+                    false)
     legsub-attachments
     (verdict-schemas/versub-upload)))
 
@@ -350,7 +363,8 @@
    (legsub-verdict {:select {:loc-prefix :verdict.status
                              :items      (map (comp keyword str) (range 1 43))
                              :sort-by    :text
-                             :type :autocomplete}})
+                             :type :autocomplete}}
+                   false)
    (legsub-reviews {:select {:loc-prefix :pate.review-type
                              :label?     false
                              :items      helper/review-types
