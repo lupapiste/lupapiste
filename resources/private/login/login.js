@@ -119,7 +119,7 @@
         pending: pending,
         handleLoginSubmit: handleLoginSubmit,
         passwordVisible: passwordVisible,
-        checkForSso: checkForSso,
+        checkForSso: _.partial(checkForSso, showPassword),
         username: username,
         validUser: validUser
       });
