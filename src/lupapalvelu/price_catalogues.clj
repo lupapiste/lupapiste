@@ -1,0 +1,50 @@
+(ns lupapalvelu.price-catalogues
+  "A common interface for accessing price catalogues and related data"
+  (:require [lupapalvelu.mongo :as mongo]
+            [monger.operators :refer [$in]]
+            [schema.core :as sc]
+            [sade.core :refer [ok fail] :as sade]
+            [sade.schemas :as ssc]
+            [taoensso.timbre :refer [trace tracef debug debugf info infof
+                                     warn warnf error errorf fatal fatalf]]
+            [lupapalvelu.invoices :as invoices]))
+
+
+(sc/defschema CatalogueRow
+  {:code sc/Str
+   :text sc/Str
+   :unit invoices/InvoiceRowUnit
+   :price-per-unit sc/Num
+   (sc/optional-key :max-total-price) sc/Num
+   (sc/optional-key :min-total-price) sc/Num
+   :discount-percent invoices/DiscountPercent
+   (sc/optional-key :operations) [sc/Str]})
+
+(sc/defschema PriceCatalogue
+  {:id sc/Str
+   :organization-id sc/Str
+   :state (sc/enum "draft"       ;;created as a draft
+                   "published"   ;;published and in use if on validity period
+                   )
+   :valid-from ssc/Timestamp
+   (sc/optional-key :valid-until) ssc/Timestamp
+   :rows [CatalogueRow]
+   :meta {:created ssc/Timestamp
+          :created-by invoices/User}})
+
+(sc/defschema PriceCatalogueInsertRequest
+  {:valid-from ssc/Timestamp
+   :rows [CatalogueRow]})
+
+(defn fetch-price-catalogues [organization-id]
+  (mongo/select :price-catalogues {:organization-id organization-id}))
+
+(defn validate-price-catalogues [price-catalogues]
+  (info "validate-price-catalogues price-catalogues: " price-catalogues)
+  (if-not (empty? price-catalogues)
+    (sc/validate [PriceCatalogue] price-catalogues)))
+
+(defn validate-insert-price-catalogue-request [{{catalogue-data :price-catalogue} :data :as command}]
+  (debug ">> validate-insert-price-catalogue-request data: " catalogue-data)
+  (when (sc/check PriceCatalogueInsertRequest catalogue-data)
+    (fail :error.invalid-price-catalogue)))

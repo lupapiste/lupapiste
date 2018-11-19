@@ -3,6 +3,7 @@
             [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
             [lupapalvelu.invoices :as invoices]
             [lupapalvelu.invoices.schemas :refer [->invoice-db Invoice]]
+            [lupapalvelu.price-catalogues :as catalogues]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [sade.core :refer [ok fail]]
@@ -124,8 +125,8 @@
    :parameters       [organization-id]
    :input-validators [(partial action/non-blank-parameters [:organization-id])]}
   [{:keys [data user user-organizations] :as command}]
-  (let [price-catalogues (invoices/fetch-price-catalogues organization-id)]
-    (invoices/validate-price-catalogues price-catalogues)
+  (let [price-catalogues (catalogues/fetch-price-catalogues organization-id)]
+    (catalogues/validate-price-catalogues price-catalogues)
     (ok {:price-catalogues price-catalogues})))
 
 (defquery organizations-transferbatches
@@ -146,6 +147,6 @@
    :feature          :invoices
    :parameters       [organization-id price-catalogue]
    :input-validators [(partial action/non-blank-parameters [:organization-id])
-                      invoices/validate-insert-price-catalogue-request]}
+                      catalogues/validate-insert-price-catalogue-request]}
   [{:keys [user] :as command}]
   (ok {:i-am-not-quite "ready"}))
