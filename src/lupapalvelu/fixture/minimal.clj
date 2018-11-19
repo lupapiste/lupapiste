@@ -1055,6 +1055,10 @@
                        :scope [{:municipality "753"
                                 :permitType "YA"
                                 :inforequest-enabled true
+                                :new-application-enabled true}
+                               {:municipality "753"
+                                :permitType "A"
+                                :inforequest-enabled true
                                 :new-application-enabled true}]
                        :links [(link {:fi "Sipoo", :sv "Sibbo"}
                                      "http://sipoo.fi")]
