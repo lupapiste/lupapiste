@@ -30,6 +30,10 @@
 
 (def state-actions {:add-to-transfer-batch add-invoice-to-transfer-batch})
 
+(sc/defschema PriceCatalogueInsertRequest
+  {:valid-from ssc/Timestamp
+   :rows [CatalogueRow]})
+
 (defn fetch-invoice [invoice-id]
   (mongo/by-id :invoices invoice-id))
 
@@ -82,8 +86,6 @@
   (-> invoice
       (enrich-rows-in-operations)
       (sum-invoice)))
-
-
 
 (defn create-invoice!
   [invoice]
@@ -165,3 +167,8 @@
   (info "validate-price-catalogues price-catalogues: " price-catalogues)
   (if-not (empty? price-catalogues)
     (sc/validate [PriceCatalogue] price-catalogues)))
+
+(defn validate-insert-price-catalogue-request [{{catalogue-data :price-catalogue} :data :as command}]
+  (debug ">> validate-insert-price-catalogue-request data: " catalogue-data)
+  (when (sc/check PriceCatalogueInsertRequest catalogue-data)
+    (fail :error.invalid-price-catalogue)))
