@@ -26,3 +26,14 @@ div.form-grid.allu-group {
     margin-bottom: 0;
   }
 }
+
+.allu-group--place {
+  label {
+    padding-top: 2em;
+  }
+}
+
+// Placeholder for the actual component
+textarea.allu-map {
+  min-height: 20em;
+}

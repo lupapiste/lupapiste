@@ -62,3 +62,8 @@
 "promootio-time.promootio-time.build-start-time" "fi" "Rakentaminen alkaa klo"
 "promootio-time.promootio-time.demolish-end-date" "fi" "Purkaminen päättyy pvm"
 "promootio-time.promootio-time.demolish-end-time" "fi" "Purkaminen päättyy klo"
+"promootio-location._group_label" "fi" "Promootion sijainti"
+"promootio-location.promootio-location.place.select" "fi" "Tapahtumapaikka"
+"promootio-location.promootio-location.place.info" "fi" "Lisätietoa paikasta"
+"promootio-location.promootio-location.help" "fi" "Valitse promootion sijainti tapahtumapaikkavalikosta, tai piirrä sijainti kartalle."
+"placeholder.place-info" "fi" "Esim. Senaatintori"

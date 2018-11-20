@@ -11647,13 +11647,17 @@ div.review-done {
 
 input.form-input.layout--full-width, input.layout--full-width.form-input--inline,
 textarea.form-input.layout--full-width,
-textarea.layout--full-width.form-input--inline {
+textarea.layout--full-width.form-input--inline,
+select.form-input.layout--full-width,
+select.layout--full-width.form-input--inline {
   width: 100%;
 }
 
 input.form-input.layout--initial-width, input.layout--initial-width.form-input--inline,
 textarea.form-input.layout--initial-width,
-textarea.layout--initial-width.form-input--inline {
+textarea.layout--initial-width.form-input--inline,
+select.form-input.layout--initial-width,
+select.layout--initial-width.form-input--inline {
   width: initial;
 }
 
@@ -34524,6 +34528,14 @@ div.form-grid.allu-group .h3 {
 div.form-grid.allu-group .row {
   margin-top: 4px;
   margin-bottom: 0;
+}
+
+.allu-group--place label {
+  padding-top: 2em;
+}
+
+textarea.allu-map {
+  min-height: 20em;
 }
 
 /* VIEWS
