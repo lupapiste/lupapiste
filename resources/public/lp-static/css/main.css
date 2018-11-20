@@ -34538,6 +34538,31 @@ textarea.allu-map {
   min-height: 20em;
 }
 
+.allu-table table tr:hover {
+  background-color: white;
+}
+
+.allu-table table tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+.allu-table table td > span.form-entry {
+  min-height: 40px;
+}
+
+.allu-table table td.allu--structure span {
+  width: 100%;
+}
+
+.allu-table table tfoot > tr {
+  font-weight: bold;
+  border: none;
+}
+
+.allu-table table tfoot > tr td.footer-sum--total {
+  text-align: right;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

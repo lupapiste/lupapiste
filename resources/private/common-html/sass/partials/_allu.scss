@@ -37,3 +37,23 @@ div.form-grid.allu-group {
 textarea.allu-map {
   min-height: 20em;
 }
+
+.allu-table {
+  table {
+    @include no-row-hover;
+    td > span.form-entry {
+      min-height: 40px;
+    }
+    td.allu--structure {
+      span {
+        width: 100%;
+      }
+    }
+    tfoot > tr {
+      font-weight: bold;
+      border: none;
+      td.footer-sum--total {
+        text-align: right;
+      }
+    }}
+}

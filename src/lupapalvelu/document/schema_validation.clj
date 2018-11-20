@@ -295,7 +295,8 @@
    ;; Map item fields:
    ;; :amount the column name for data
    ;; :unit column for unit information
-   ;; :unitKey fixed unit (supported values are :t and :kg).
+   ;; :unitKey fixed unit (supported values are :t, :kg, :tonnia
+   ;; and :m2).
    ;; :unit and :unitKey are mutually exclusive.
    (opt :footer-sums)          [(sc/conditional
                                  string? sc/Str

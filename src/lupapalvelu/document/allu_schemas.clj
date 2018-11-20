@@ -4,6 +4,7 @@
 
 (def promootio-description {:name        "promootio"
                             :type        :group
+                            :i18nkey     "promootio"
                             :approvable  false
                             :group-help  "help"
                             :uicomponent :docgenGroup
@@ -26,6 +27,7 @@
 
 (def promootio-time {:name        "promootio-time"
                      :type        :group
+                     :i18nkey     "promootio-time"
                      :approvable  false
                      :group-help  "help"
                      :uicomponent :docgenGroup
@@ -87,6 +89,7 @@
 
 (def promootio-location {:name        "promootio-location"
                          :type        :group
+                         :i18nkey     "promootio-location"
                          :approvable  false
                          :group-help  "help"
                          :uicomponent :docgenGroup
@@ -114,6 +117,63 @@
                                         :css    [:allu-map]
                                         :layout :full-width}]
                          :rows        [["place::2" "map::2"]]})
+
+(def promootio-structures {:name        "promootio-structures"
+                           :type        :group
+                           :i18nkey     "promootio-structures"
+                           :approvable  false
+                           :group-help  "help"
+                           :uicomponent :docgenGroup
+                           :css         [:allu-group]
+                           :template    "form-grid-docgen-group-template"
+                           :body        [{:name      "structures-needed"
+                                          :type      :checkbox
+                                          :inputType :checkbox-wrapper}
+                                         {:name        "structures"
+                                          :type        :table
+                                          :show-when   {:path   "structures-needed"
+                                                        :values #{true}}
+                                          :copybutton  true
+                                          :repeating   true
+                                          :css         [:allu-table]
+                                          :columnCss   {"structure" [:column--80 :allu--structure]
+                                                        "area"      [:column--20]}
+                                          :body        [{:name        "structure"
+                                                         :type        :group
+                                                         :pdf-options {:other-select :structure-select}
+                                                         :approvable  false
+                                                         :template    "simple-docgen-group-template"
+                                                         :body        [{:name        "structure-select"
+                                                                        :type        :select
+                                                                        :uicomponent :docgen-select
+                                                                        :other-key   "muu"
+                                                                        :sortBy      :displayname
+                                                                        :i18nkey     "promootio-structure"
+                                                                        :css         [:dropdown]
+                                                                        :label       false
+                                                                        :body        (conj (mapv #(hash-map :name %)
+                                                                                                 ["tent" "stage" "coldtruck"])
+                                                                                           {:name "muu" :i18nkey "select-other"})
+                                                                        :hide-when   {:path "structure-select" :values #{"muu"}}}
+                                                                       {:name        "muu"
+                                                                        :type        :string
+                                                                        :label       false
+                                                                        :layout      :full-width
+                                                                        :placeholder "placeholder.structure"
+                                                                        :show-when   {:path "structure-select" :values #{"muu"}}}]}
+                                                        {:name    "area"
+                                                         :type    :string
+                                                         :subtype :decimal
+                                                         :unit    :m2
+                                                         :min     0}]
+                                          :footer-sums [{:unitKey :m2
+                                                         :amount  "area"}]}
+                                         {:name      "traffic-needed"
+                                          :type      :checkbox
+                                          :inputType :checkbox-wrapper}]
+                           :rows        [["structures-needed::2"]
+                                         ["structures::4"]
+                                         ["traffic-needed::2"]]})
 
 
 (def lmv-description {:name       "lyhytaikainen-maanvuokraus"
@@ -144,6 +204,10 @@
            :approvable true
            :order      3}
     :body [promootio-location]}
+   {:info {:name       "promootio-structures"
+           :approvable true
+           :order      4}
+    :body [promootio-structures]}
    {:info {:name       "lyhytaikainen-maanvuokraus"
            :approvable true
            :order      1}
