@@ -1,0 +1,39 @@
+.price-catalogue {
+
+    .catalogue-select-wrapper {
+        margin-bottom: 2em
+    }
+
+    .row-operation {
+        background-color: $lp-orange;
+        box-sizing: border-box;
+        color: white;
+        display: inline-block;
+        margin-right: 0.5em;
+        padding-right: 0.5em;
+        margin-top: 2px;
+        margin-bottom: 2px;
+        padding-left: 1em;
+    }
+
+    .view-switch {
+        margin-bottom: 2em
+    }
+
+    .view-switch-guide-text {
+        padding-right: 1em
+    }
+
+    .view-switch-selected {
+        background-color: $lp-orange;
+        color: white;
+        border: 1px solid $lp-orange;
+    }
+
+    .view-switch-unselected {
+        background-color: white;
+        color: $lp-orange;
+        border: 1px solid $lp-orange;
+    }
+
+}

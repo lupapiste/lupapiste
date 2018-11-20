@@ -34,7 +34,7 @@ Fill in info
   Input text by test id  register-company-address1    Katukatu 2
   Input text by test id  register-company-zip         00002
   Input text by test id  register-company-po          Kunta
-  Select From Test id  register-company-pop  Basware Oyj (BAWCFI22)
+  Select From Test id by text  register-company-pop  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-continue
 
 Summary page is opened

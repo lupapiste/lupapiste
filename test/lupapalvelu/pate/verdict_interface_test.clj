@@ -51,8 +51,38 @@
     => ["one" "two" "three" "four"]
     (kuntalupatunnukset {:verdicts backends})
     => ["first" "second"]
-    (kuntalupatunnukset nil) => nil
-    (kuntalupatunnukset {}) => nil)))
+    (kuntalupatunnukset {:pate-verdicts [draft modern blank wrapped unwrapped]
+                         :verdicts backends})
+    => ["first" "second" "one" "two" "three" "four"]
+    (kuntalupatunnukset nil) => []
+    (kuntalupatunnukset {}) => [])))
+
+(fact "published-municipality-permit-ids"
+      (published-municipality-permit-ids {:pate-verdicts [{:category "r"
+                                                           :legacy?  true
+                                                           :data     {:kuntalupatunnus "one"}}]})
+      => []
+      (published-municipality-permit-ids {:pate-verdicts [{:category  "r"
+                                                           :legacy?   true
+                                                           :published {}
+                                                           :data      {:kuntalupatunnus {:_value    "three"
+                                                                                         :_user     "hello"
+                                                                                         :_modified 12345}}}]})
+      => ["three"]
+      (published-municipality-permit-ids {:verdicts [{:kuntalupatunnus "first"}]})
+      => ["first"]
+      (published-municipality-permit-ids {:pate-verdicts [{:category  "r"
+                                                           :legacy?   true
+                                                           :published {}
+                                                           :data      {:kuntalupatunnus {:_value    "three"
+                                                                                         :_user     "hello"
+                                                                                         :_modified 12345}}}
+                                                          {:category "r"
+                                                           :legacy?  true
+                                                           :data     {:kuntalupatunnus "one"}}]
+                                          :verdicts [{:kuntalupatunnus "first"}]})
+      => ["first" "three"]
+      (published-municipality-permit-ids {}) => [])
 
 (defn- ->iso-8601-date [ts]
   (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) (c/from-long (long ts))))
@@ -210,13 +240,17 @@
                                       {:foo :bar}
                                       {:kuntalupatunnus "789"}
                                       {:kuntalupatunnus "456"}]} "456") => [{:kuntalupatunnus "456"} {:kuntalupatunnus "456"}]
-  (verdicts-by-backend-id {:pate-verdicts [{:data {:kuntalupatunnus "AAA"}}
-                                           {:data {:kuntalupatunnus "BBB"}}
-                                           {:data {:kuntalupatunnus "CCC"}}]} "BBB") => [{:data {:kuntalupatunnus "BBB"}}]
-  (verdicts-by-backend-id {:pate-verdicts [{:data {:kuntalupatunnus "AAA"}}
-                                           {:data {:kuntalupatunnus "BBB"}}
-                                           {:data {:kuntalupatunnus "CCC"}}
-                                           {:data {:kuntalupatunnus "BBB"}}
-                                           {:data {:foo :bar}}
-                                           {:data {:kuntalupatunnus "AAA"}}]} "BBB") => [{:data {:kuntalupatunnus "BBB"}}{:data {:kuntalupatunnus "BBB"}}]
+  (verdicts-by-backend-id {:pate-verdicts [{:category :r :data {:kuntalupatunnus "AAA"}}
+                                           {:category :r :data {:kuntalupatunnus "BBB"}}
+                                           {:category :r :data {:kuntalupatunnus "CCC"}}]} "BBB") => [{:category :r :data {:kuntalupatunnus "BBB"}}]
+  (verdicts-by-backend-id {:pate-verdicts [{:category :r :data {:kuntalupatunnus "AAA"}}
+                                           {:category :r :data {:kuntalupatunnus "BBB"}}
+                                           {:category :r :data {:kuntalupatunnus "CCC"}}
+                                           {:category :r :data {:kuntalupatunnus "BBB"}}
+                                           {:category :r :data {:foo :bar}}
+                                           {:category :r :data {:kuntalupatunnus "AAA"}}]} "BBB") => [{:category :r :data {:kuntalupatunnus "BBB"}}{:category :r :data {:kuntalupatunnus "BBB"}}]
+  (verdicts-by-backend-id {:pate-verdicts [{:category :r :data {:kuntalupatunnus (metadata/wrap "foo" 123 "AAA")}}]
+                           :verdicts [{:kuntalupatunnus "AAA"}]}
+                          "AAA")
+  => [{:kuntalupatunnus "AAA"} {:category :r :data {:kuntalupatunnus "AAA"}}]
   (verdicts-by-backend-id {} "123") => nil)

@@ -52,7 +52,7 @@ Mikko logs in and wants us to remember him
   Checkbox Wrapper Not Selected  rememberme
   Click label  rememberme
   Login  ${LOGIN}  ${PASSWORD}
-  Run Keyword And Ignore Error  Confirm Action
+  Run Keyword And Ignore Error  Handle alert
   User should be logged in  ${USERNAME}
   User role should be  applicant
   Applications page should be open

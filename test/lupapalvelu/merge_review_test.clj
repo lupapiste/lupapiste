@@ -15,7 +15,8 @@
                    remove-repeating-background-ids
                    lupapiste-review?
                    process-reviews
-                   review->task)
+                   review->task
+                   preprocess-tasks)
 
 (def rakennustieto-fixture [{:KatselmuksenRakennus {:kiinttun "54300601900001",
                                                     :rakennusnro "001",
@@ -227,7 +228,7 @@
                                    {:data {:muuTunnus {:value "ID"}}}])
         => {:data {:muuTunnus {:value "ID"}}})))))
 
-(fact "Remove repeating background ids"
+(fact "Remove repeating and application id background ids"
   (let [reviews [{:pitaja "One"
                   :muuTunnustieto [{:MuuTunnus {:tunnus "foo"}}]}
                  {:pitaja "Two"
@@ -247,21 +248,76 @@
                   :muuTunnustieto [{:MuuTunnus {:tunnus "bar"}}]}
                  {:pitaja "Nine"
                   :muuTunnustieto [{:MuuTunnus {:tunnus "world"}}]}]]
-    (remove-repeating-background-ids reviews)
-    => [{:pitaja "One"}
+    (remove-repeating-background-ids  "app-id" reviews)
+    => [{:pitaja "One"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Two"
-         :muuTunnustieto [{:MuuTunnus {:sovellus "Bar"}}]}
+         :muuTunnustieto [{:MuuTunnus {:sovellus "Bar" :tunnus ""}}]}
         {:pitaja "Three"
          :muuTunnustieto [{:MuuTunnus {:tunnus "hello"}}]}
         {:pitaja "Four"
-         :muuTunnustieto [{:MuuTunnus {:sovellus "Foobar"}}]}
-        {:pitaja "Five"}
+         :muuTunnustieto [{:MuuTunnus {:sovellus "Foobar" :tunnus ""}}]}
+        {:pitaja "Five"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Six"
          :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Seven"}
-        {:pitaja "Eight"}
+        {:pitaja "Eight"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
+        {:pitaja "Nine"
+         :muuTunnustieto [{:MuuTunnus {:tunnus "world"}}]}]
+    (remove-repeating-background-ids  "hello" reviews)
+    => [{:pitaja "One"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
+        {:pitaja "Two"
+         :muuTunnustieto [{:MuuTunnus {:sovellus "Bar" :tunnus ""}}]}
+        {:pitaja "Three"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
+        {:pitaja "Four"
+         :muuTunnustieto [{:MuuTunnus {:sovellus "Foobar" :tunnus ""}}]}
+        {:pitaja "Five"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
+        {:pitaja "Six"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
+        {:pitaja "Seven"}
+        {:pitaja "Eight"
+         :muuTunnustieto [{:MuuTunnus {:tunnus ""}}]}
         {:pitaja "Nine"
          :muuTunnustieto [{:MuuTunnus {:tunnus "world"}}]}]))
+
+(fact "preprocess tasks"
+  (let [tasks [{:data     {:muuTunnus        {:value "foo"}
+                           :katselmuksenLaji {:value "one"}}
+                :taskname "First"}
+               {:data     {:muuTunnus        {:value "bar"}
+                           :katselmuksenLaji {:value "two"}}
+                :taskname "Second"}
+               {:data     {:muuTunnus        {:value "foo"}
+                           :katselmuksenLaji {:value "three"}}
+                :taskname "Third"}]]
+    (preprocess-tasks {:id "app-id" :tasks tasks})
+    => tasks
+    (preprocess-tasks {:id "foo" :tasks tasks})
+    => [{:data     {:muuTunnus        {:value ""}
+                    :katselmuksenLaji {:value "one"}}
+         :taskname "First"}
+        {:data     {:muuTunnus        {:value "bar"}
+                    :katselmuksenLaji {:value "two"}}
+         :taskname "Second"}
+        {:data     {:muuTunnus        {:value ""}
+                    :katselmuksenLaji {:value "three"}}
+         :taskname "Third"}]
+    (preprocess-tasks {:id "bar" :tasks tasks})
+    => [{:data     {:muuTunnus        {:value "foo"}
+                    :katselmuksenLaji {:value "one"}}
+         :taskname "First"}
+        {:data     {:muuTunnus        {:value ""}
+                    :katselmuksenLaji {:value "two"}}
+         :taskname "Second"}
+        {:data     {:muuTunnus        {:value "foo"}
+                    :katselmuksenLaji {:value "three"}}
+         :taskname "Third"}]))
+
 
 (defn generate-kuntagml
   [reviews]
@@ -335,7 +391,7 @@
       (:attachments (review->task 12345 {} (last reviews))) => nil)
     (fact "Process reviews"
       (let [{:keys [review-tasks
-                    attachments-by-task-id]} (process-reviews app-xml 12345 {})
+                    attachments-by-task-id]} (process-reviews "app-id" app-xml 12345 {})
             one-id                           (task-id-for-person review-tasks "Person One")
             three-id                         (task-id-for-person review-tasks "Person Three")
             five-id                          (task-id-for-person review-tasks "Person Five")]

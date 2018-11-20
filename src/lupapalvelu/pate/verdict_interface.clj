@@ -37,38 +37,46 @@
   [{:keys [verdicts pate-verdicts]}]
   (concat verdicts (metadata/unwrap-all pate-verdicts)))
 
+(defn find-verdict
+  "Find a verdict by id."
+  [application verdict-id]
+  (util/find-by-id verdict-id (all-verdicts application)))
+
 (defn verdicts-by-backend-id
   "All verdicts filtered by backend Id."
-  [{:keys [verdicts pate-verdicts]} backendId]
-  (or
-    (some->> verdicts
-             (filter #(= (:kuntalupatunnus %) backendId)))
-    (some->> pate-verdicts
-             metadata/unwrap-all
-             (filter #(= (get-in % [:data :kuntalupatunnus]) backendId)))))
+  [application backendId]
+  (->> (all-verdicts application)
+       (filter #(= (vc/verdict-municipality-permit-id %)
+                   backendId))
+       not-empty))
 
 (defn published-kuntalupatunnus
   "Search kuntalupatunnus from backing-system and published legacy
   verdicts. Returns the first one found."
   [{:keys [verdicts pate-verdicts]}]
   ;; Backing system verdict has always kuntalupatunnus
-  (or (some-> verdicts first :kuntalupatunnus)
+  (or (some-> verdicts first vc/verdict-municipality-permit-id)
       (some->> pate-verdicts
                (filter vc/published?)
                (filter vc/legacy?)
-               (map (util/fn-> :data :kuntalupatunnus metadata/unwrap))
+               (map vc/verdict-municipality-permit-id)
                (remove ss/blank?)
                first)))
 
 (defn kuntalupatunnukset
   "Search all backendIds from legacy verdicts and pate verdicts."
-  [{:keys [verdicts pate-verdicts]}]
-  (or (some->> verdicts
-               (map :kuntalupatunnus)
-               (remove nil?))
-      (some->> pate-verdicts
-               (map (util/fn-> :data :kuntalupatunnus metadata/unwrap))
-               (remove ss/blank?))))
+  [application]
+  (->> (all-verdicts application)
+       (map vc/verdict-municipality-permit-id)
+       (filterv not-empty)))
+
+(defn published-municipality-permit-ids
+  "Return the municipality permit ids (aka backend ids, backing system
+  ids, kuntalupatunnukset) from all published verdicts."
+  [application]
+  (->> (all-verdicts application)
+       (filter vc/published?)
+       (mapv vc/verdict-municipality-permit-id)))
 
 (defn latest-published-verdict-date
   "The latest verdict date (timestamp) of the published application

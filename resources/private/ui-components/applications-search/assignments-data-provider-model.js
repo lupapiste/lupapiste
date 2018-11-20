@@ -51,7 +51,10 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   };
 
   function enrichAssignmentData(assignment) {
-    var createdState = _.find(assignment.states, function(state) { return state.type === "created"; });
+    var createdState = _.findLast(assignment.states,
+                                  function(state) {
+                                    return _.includes( ["created", "targets-added"], state.type );
+                                  });
     var currentState = _.maxBy(assignment.states, "timestamp");
     var completed = (currentState.type === "completed");
     return _.merge(assignment, {

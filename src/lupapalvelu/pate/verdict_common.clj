@@ -12,8 +12,24 @@
             [lupapalvelu.user :as usr]))
 
 ;;
+;; Helpers
+;;
+
+(defn- get-data [verdict k]
+  (metadata/unwrap (get-in verdict [:data k])))
+
+;;
 ;; Predicates
 ;;
+
+(defn verdict-state
+  "If no state key, the verdict is from backend system and thus
+  published."
+  [{state :state :as verdict}]
+  (when verdict
+    (if state
+      (keyword (metadata/unwrap state))
+      :published)))
 
 (defn lupapiste-verdict?
   "Is the verdict created in Lupapiste, either through Pate or legacy interface"
@@ -44,6 +60,11 @@
 
 (defn published? [verdict]
   (boolean (and verdict (not (draft? verdict)))))
+
+(defn proposal? [verdict]
+  (if (lupapiste-verdict? verdict)
+    (util/=as-kw (verdict-state verdict) :proposal)
+    false))
 
 ;; Maybe not the most useful predicate, maybe clean up later?
 (defn verdict-code-is-free-text? [verdict]
@@ -81,10 +102,10 @@
 (defn verdict-date [verdict]
   (cond
     (legacy? verdict)
-    (-> verdict :data :anto metadata/unwrap)
+    (get-data verdict :anto)
 
     (lupapiste-verdict? verdict)
-    (-> verdict :data :verdict-date metadata/unwrap)
+    (get-data verdict :verdict-date)
 
     :else
     (or (:paatospvm (latest-pk verdict))
@@ -92,15 +113,6 @@
 
 (defn verdict-id [verdict]
   (:id verdict))
-
-(defn verdict-state
-  "If no state key, the verdict is from backend system and thus
-  published."
-  [{state :state :as verdict}]
-  (when verdict
-    (if state
-      (keyword (metadata/unwrap state))
-      :published)))
 
 (defn verdict-modified [verdict]
   (if (lupapiste-verdict? verdict)
@@ -126,8 +138,13 @@
     (let [{:keys [data references template]} verdict]
       (if (util/=as-kw (:giver template) :lautakunta)
        (:boardname references)
-       (:handler data)))
+       (metadata/unwrap (:handler data))))
     (-> verdict latest-pk :paatoksentekija)))
+
+(defn verdict-municipality-permit-id [verdict]
+  (if (lupapiste-verdict? verdict)
+    (get-data verdict :kuntalupatunnus)
+    (:kuntalupatunnus verdict)))
 
 (defn verdict-signatures [{:keys [signatures] :as verdict}]
   (if (lupapiste-verdict? verdict)
@@ -140,19 +157,19 @@
 
 (defn verdict-section [verdict]
   (if (lupapiste-verdict? verdict)
-    (-> verdict :data :verdict-section)
+    (get-data verdict :verdict-section)
     (-> verdict latest-pk :pykala)))
 
 (defn verdict-text [verdict]
   (if (lupapiste-verdict? verdict)
     (if (contract? verdict)
-      (-> verdict :data :contract-text)
-      (-> verdict :data :verdict-text))
+      (get-data verdict :contract-text)
+      (get-data verdict :verdict-text))
     (-> verdict last-pk :paatos))) ;; Notice last-pk, this came from bulletins verdict data
 
 (defn verdict-code [verdict]
   (if (lupapiste-verdict? verdict)
-    (-> verdict :data :verdict-code)
+    (get-data verdict :verdict-code)
     (some-> verdict first-pk :status str)))
 
 ;;
@@ -229,10 +246,15 @@
     (lupapiste-verdict-string lang verdict dict)
     (-> verdict latest-pk :paatoskoodi)))
 
+(defn allu-agreement-state [verdict]
+  {:pre [(has-category? verdict :allu-contract)]}
+  (some-> verdict :data :agreement-state metadata/unwrap))
+
 (defn- verdict-summary-title [verdict lang section-strings]
-  (let [id (verdict-id verdict)
-        published (verdict-published verdict)
-        replaces (replaced-verdict-id verdict)
+  (let [id         (verdict-id verdict)
+        published  (verdict-published verdict)
+        replaces   (replaced-verdict-id verdict)
+        proposal?  (util/=as-kw (verdict-state verdict) :proposal)
         rep-string (title-fn replaces
                              (fn [vid]
                                (let [section (get section-strings vid)]
@@ -242,6 +264,11 @@
                                                            :pate.replaces-verdict
                                                            section)))))]
     (->> (cond
+           (has-category? verdict :allu-contract)
+           [(i18n/localize lang (if (util/=as-kw :final (allu-agreement-state verdict))
+                                  :allu.contract
+                                  :allu.contract-proposal))]
+
            (and (contract? verdict) published)
            [(i18n/localize lang :pate.verdict-table.contract)]
 
@@ -252,6 +279,10 @@
               (util/pcond-> (verdict-string lang verdict :verdict-type)
                             ss/not-blank? (str " -")))
             (verdict-string lang verdict :verdict-code)
+            rep-string]
+
+           proposal?
+           [(i18n/localize lang :pate-verdict-proposal)
             rep-string]
 
            :else
@@ -271,7 +302,8 @@
         :verdict-date       (verdict-date verdict)
         :title              (verdict-summary-title verdict lang section-strings)
         :signatures         (verdict-summary-signatures verdict)
-        :signature-requests (verdict-summary-signature-requests verdict)}
+        :signature-requests (verdict-summary-signature-requests verdict)
+        :proposal?          (proposal? verdict)}
        (util/filter-map-by-val some?)))
 
 (defn- section-strings-by-id [verdicts]
@@ -313,7 +345,8 @@
    (sc/optional-key :signatures)           [{:name sc/Str
                                              :date ssc/Timestamp}]
    (sc/optional-key :signature-requests)   [{:name sc/Str
-                                             :date ssc/Timestamp}]})
+                                             :date ssc/Timestamp}]
+   (sc/optional-key :proposal?)            sc/Bool})
 
 (defn allowed-category-for-application? [verdict application]
   (or (has-category? verdict (schema-util/application->category application))

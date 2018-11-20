@@ -652,3 +652,20 @@
     (provided
       (lupapalvelu.authorization/application-authority? anything anything) => true
       (lupapalvelu.authorization/has-auth-role? anything 2345 :writer) => true)))
+
+(fact "with-municipality-permit-ids"
+  (with-municipality-permit-ids {:verdicts [{:kuntalupatunnus "AAA" :draft true}
+                                            {:kuntalupatunnus "BBB"}]})
+  => {:verdicts [{:kuntalupatunnus "AAA" :draft true}
+                 {:kuntalupatunnus "BBB"}]
+      :municipalityPermitIds ["BBB"]}
+
+  ;; For archiving projects, municipality permit ids from draft
+  ;; verdicts are also shown
+  (with-municipality-permit-ids {:permitType "ARK"
+                                 :verdicts [{:kuntalupatunnus "AAA" :draft true}
+                                            {:kuntalupatunnus "BBB"}]})
+  => {:permitType "ARK"
+      :verdicts [{:kuntalupatunnus "AAA" :draft true}
+                 {:kuntalupatunnus "BBB"}]
+      :municipalityPermitIds ["AAA" "BBB"]})

@@ -92,7 +92,7 @@
 (defn parse-json-body [{:keys [content-type character-encoding body] :as request}]
   (let [json-body (if (or (ss/starts-with content-type "application/json")
                           (ss/starts-with content-type "application/csp-report"))
-                    (if body
+                    (if (some-> body .available pos?)
                       (-> body
                         (io/reader :encoding (or character-encoding "utf-8"))
                         (json/decode-stream keyword-no-non-printables))
@@ -365,7 +365,7 @@
   (let [request (request/ring-request)
         domain (last (ss/split username #"@"))
         enabled (-> domain org/get-organizations-by-ad-domain first (get-in [:ad-login :enabled]))]
-    (if enabled
+    (if (and enabled (pos? (count domain)))
       (resp/json (ok {:uri (str (env/value :host) "/api/saml/ad-login/" domain)}))
       (resp/json (fail :error.unauthorized)))))
 

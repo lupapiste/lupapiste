@@ -16,7 +16,7 @@ Pena sets up YMP application by filling person details and submitting
   Set Suite Variable  ${appId}  ${id}
   Open tab  parties
   Open accordions  parties
-  Select From List  xpath=//section[@data-doc-type='ilmoittaja']//select[@data-test-id='henkilo.userId']  Panaani Pena
+  Select From List by label  xpath=//section[@data-doc-type='ilmoittaja']//select[@data-test-id='henkilo.userId']  Panaani Pena
   Sleep  0.5s
   Open accordions  parties
   Input text with jQuery  section[data-doc-type='ilmoittaja'] input[data-docgen-path='henkilo.henkilotiedot.hetu']  250876-8620
@@ -38,7 +38,7 @@ Olli creates statement request to ELY
   Click by test id  add-ely-statement
   Wait until  Element should be visible by test id  ely-statement-bubble
   Element should be disabled  xpath=//button[@data-test-id='bubble-dialog-ok']
-  Select from list  ely-subtypes  Lausuntopyyntö maisematyöluvasta
+  Select from list by label  ely-subtypes  Lausuntopyyntö maisematyöluvasta
   Wait until  Element should be enabled  xpath=//button[@data-test-id='bubble-dialog-ok']
   Input text  ely-statement-saateText  Tama on saateteksti.
   ${TOMORROW} =     Add time to date  ${CURRENT_DATETIME}  1 days  %d.%m.%Y

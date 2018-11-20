@@ -11,8 +11,6 @@
 
 (def invoices                  (state-cursor :invoices))
 (def new-invoice               (state-cursor :new-invoice))
-(def price-catalogue           (state-cursor :price-catalogue))
 (def valid-units               (state-cursor :valid-units))
-(def invoice-states            (state-cursor :invoice-states))
 (def application-id            (state-cursor :application-id))
 (def operations                (state-cursor :operations))

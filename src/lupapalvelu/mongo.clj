@@ -475,6 +475,7 @@
   (ensure-index :assignments {:application.id 1, :recipient.id 1, :states.type 1})
   (ensure-index :assignments {:application.organization 1, :recipient.id 1 :modified -1})
   (ensure-index :assignments {:status 1})
+  (ensure-index :assignments {:modified 1})
   (ensure-index :application-bulletins {:versions.bulletinState 1})
   (ensure-index :application-bulletins {:versions.municipality 1})
   (ensure-index :integration-messages {:application.id 1})

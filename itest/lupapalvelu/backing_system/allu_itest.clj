@@ -1,7 +1,6 @@
 (ns lupapalvelu.backing-system.allu-itest
   "Integration tests for ALLU integration. Using local (i.e. not over HTTP) testing style."
   (:require [clojure.string :as s]
-            [clojure.java.io :as io]
             [lupapalvelu.json :as json]
             [monger.operators :refer [$set]]
             [mount.core :as mount]
@@ -23,7 +22,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
 
-            [midje.sweet :refer [facts fact => contains]]
+            [midje.sweet :refer [facts fact => contains just]]
             [lupapalvelu.itest-util :as itu :refer [pena pena-id raktark-helsinki]]
             [lupapalvelu.itest-util.model-based :refer [state-graph->transitions traverse-state-transitions]]
 
@@ -104,7 +103,7 @@
     (itu/command apikey :submit-application :id app-id) => ok?))
 
 (defn- fill [apikey app-id]
-  (let [{[attachment] :attachments :keys [documents]} (domain/get-application-no-access-checking app-id)
+  (let [{:keys [documents]} (domain/get-application-no-access-checking app-id)
         {descr-id :id} (first (filter #(= (doc-name %) "yleiset-alueet-hankkeen-kuvaus-sijoituslupa") documents))
         {applicant-id :id} (first (filter #(= (doc-name %) "hakija-ya") documents))]
     (fact "fill application"
@@ -160,6 +159,9 @@
                   :action "undo-cancellation"})))
 
 (defn- fetch-contract [apikey app-id]
+  ;; HACK: Since check-for-verdict bypasses JMS it can fail due to a race condition with submit-application.
+  ;;       However, no actual user is fast enough to cause that, which we simulate by sleeping for a bit:
+  (Thread/sleep 1000)
   (itu/command apikey :check-for-verdict :id app-id))
 
 (defn- sign-contract [apikey app-id]
@@ -169,6 +171,9 @@
                          first
                          :id)]
       (itu/command apikey :sign-allu-contract :id app-id :verdict-id verdict-id :password "pena") => ok?)))
+
+(defn- verdict-list [apikey app-id]
+  (:verdicts (itu/query apikey :pate-verdicts :id app-id)))
 
 ;;;; Mock Handler
 ;;;; ===================================================================================================================
@@ -350,7 +355,7 @@
                                                     ;; :complementNeeded should be unreachable:
                                                     (into {} (remove (fn [[src _]] (= src :complementNeeded)))))
               router (make-test-router allu-state)
-              handler (reitit-ring/ring-handler router)]
+              handler (comp (reitit-ring/ring-handler router) @#'allu/try-reload-allu-id)]
           (with-redefs [allu/allu-router router
                         allu/allu-request-handler handler]
             (facts "state transitions"
@@ -390,15 +395,42 @@
 
                                                             (= current :submitted)
                                                             (do (fact "fetch contract"
-                                                                  (fetch-contract raktark-helsinki id) => fail?)
+                                                                  (fetch-contract raktark-helsinki id) => ok?
+                                                                  )
                                                                 current)
 
                                                             :else
                                                             (do (fact "fetch contract"
-                                                                  (fetch-contract raktark-helsinki id) => ok?)
+                                                                  (fetch-contract raktark-helsinki id) => ok?
+                                                                  (verdict-list raktark-helsinki id)
+                                                                  => (just [(just {:category "allu-contract"
+                                                                                   :giver "Hannu Helsinki"
+                                                                                   :legacy? true
+                                                                                   :proposal? false
+                                                                                   :replaced? false
+                                                                                   :published pos?
+                                                                                   :title "Sopimusehdotus"
+                                                                                   :modified pos?
+                                                                                   :id string?})]))
                                                                 dest)))
                                      :agreementSigned (fn [[_ dest] id]
                                                         (sign-contract pena id)
+                                                        (fact "fetch contract"
+                                                          (fetch-contract raktark-helsinki id) => ok?
+                                                          (verdict-list raktark-helsinki id)
+                                                          => (just [(contains {:category "allu-contract"
+                                                                               :giver "Hannu Helsinki"
+                                                                               :legacy? true
+                                                                               :proposal? false
+                                                                               :title "Sopimus"
+                                                                               :signatures (just [(contains {:name "Pena Panaani"})
+                                                                                                  (contains {:name "Hannu Helsinki"})])})
+                                                                    (contains {:category "allu-contract"
+                                                                               :giver "Hannu Helsinki"
+                                                                               :legacy? true
+                                                                               :proposal? false
+                                                                               :title "Sopimusehdotus"
+                                                                               :signatures (just [(contains {:name "Pena Panaani"})])})]))
                                                         dest)))]))
                       (state-graph->transitions full-sijoitussopimus-state-graph))
                 :visit-goal 1))

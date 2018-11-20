@@ -20,12 +20,12 @@ Mikko selects Solita Oy as applicant for the application
   Open tab  parties
   Open accordions  parties
   Scroll and click input  section[data-doc-type=hakija-ya] input[value=yritys]
-  Select From List  //section[@data-doc-type="hakija-ya"]//select[@name="company-select"]  Solita Oy (1060155-5)
+  Select From List by label  //section[@data-doc-type="hakija-ya"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Wait Until  Javascript?  $("section[data-doc-type=hakija-ya] input[data-docgen-path='yritys.yritysnimi']").val() == "Solita Oy"
 
 Mikko selects himself as payer for the application
   Execute Javascript  $("section[data-doc-type='yleiset-alueet-maksaja'] input[value='henkilo']").click();
-  Select From List  //section[@data-doc-type="yleiset-alueet-maksaja"]//select[@data-test-id="henkilo.userId"]  Intonen Mikko
+  Select From List by label  //section[@data-doc-type="yleiset-alueet-maksaja"]//select[@data-test-id="henkilo.userId"]  Intonen Mikko
   Wait Until  Javascript?  $("section[data-doc-type=yleiset-alueet-maksaja] input[data-docgen-path='henkilo.henkilotiedot.etunimi']").val() == "Mikko"
 
 Mikko submits the application

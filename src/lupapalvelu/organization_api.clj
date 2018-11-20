@@ -106,6 +106,28 @@
         headers))
     organization))
 
+;;
+;; Pre-checks
+;;
+
+(defn organization-authority-admin
+  "Pre-check that fails if the user is not an authority admin in the
+  given organization (organizationId)."
+  [{:keys [data user]}]
+  (when (ss/not-blank? (:organizationId data))
+    (when-not (usr/user-has-role-in-organization? user (:organizationId data) #{:authorityAdmin})
+      sade.core/unauthorized)))
+
+(defn organization-operation
+  "Pre-check that fails if the operation (operationId) is not selected
+  in the organization (organizationId)."
+  [{:keys [data]}]
+  (let [{:keys [organizationId operationId]} data]
+    (when organizationId
+      (when-not (some-> (org/get-organization organizationId {:selected-operations 1})
+                        :selected-operations
+                        (util/includes-as-kw? operationId))
+        (fail :error.operation-not-found)))))
 
 ;;
 ;; Actions
@@ -389,7 +411,7 @@
 
 (defcommand update-ad-login-settings
   {:parameters       [org-id enabled trusted-domains idp-uri idp-cert]
-   :input-validators [(partial non-blank-parameters [:org-id])]
+   :input-validators [(partial non-blank-parameters [:org-id :trusted-domains :enabled])]
    :user-roles       #{:admin}}
   [_]
   (org/set-ad-login-settings org-id enabled trusted-domains idp-uri idp-cert)
@@ -1264,11 +1286,26 @@
   {:description "Updates active directory role mapping"
    :parameters [organizationId role-map]
    :pre-checks [org/check-ad-login-enabled
-                (fn [{:keys [data user]}]
-                  (when (ss/not-blank? (:organizationId data))
-                    (when-not (usr/user-has-role-in-organization? user (:organizationId data) #{:authorityAdmin})
-                      sade.core/unauthorized)))]
+                organization-authority-admin]
    :permissions [{:required [:organization/admin]}]
    :input-validators [role-mapping-validator]}
   [{user :user}]
   (org/update-ad-login-role-mapping role-map user))
+
+(defcommand toggle-default-attachments-mandatory-operation
+  {:description      "Whether the default attachments are mandatory for an
+  operation or not."
+   :parameters       [organizationId operationId mandatory]
+   :input-validators [(partial action/non-blank-parameters [:organizationId :operationId])
+                      (partial action/boolean-parameters [:mandatory])]
+   :permissions      [{:required [:organization/admin]}]
+   :pre-checks       [organization-authority-admin
+                      organization-operation]}
+  [{user :user}]
+  (let [already-mandatory? (boolean (some-> (org/get-organization organizationId
+                                                                  {:default-attachments-mandatory 1})
+                                            :default-attachments-mandatory
+                                            (util/includes-as-kw? operationId)))]
+    (when-not (= already-mandatory? mandatory)
+      (org/update-organization organizationId
+                               {(if mandatory $push $pull) {:default-attachments-mandatory operationId}}))))

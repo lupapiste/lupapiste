@@ -116,6 +116,9 @@
                  ; RSS
                  [clj-rss "0.2.3"]
 
+                 ;Money, handling and keeping things clean
+                 [clojurewerkz/money "1.10.0"]
+
                  ; Image processing
                  [com.github.jai-imageio/jai-imageio-core "1.3.1"]
                  [com.github.jai-imageio/jai-imageio-jpeg2000 "1.3.0"]
@@ -150,7 +153,7 @@
 
                  ; Message Queue
                  [org.apache.activemq/artemis-jms-client "2.6.2"]
-                 [lupapiste/jms-client "0.2.1"]
+                 [lupapiste/jms-client "0.4.1"]
                  [com.taoensso/nippy "2.14.0"]
 
                  ;; Lupapiste libraries
@@ -158,6 +161,8 @@
                  [lupapiste/oskari "1.47.1.3"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
                  [lupapiste/commons "0.9.29"]
+                 [lupapiste/invoice-commons "0.1.0-SNAPSHOT"]
+
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)

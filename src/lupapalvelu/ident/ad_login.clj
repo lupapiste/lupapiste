@@ -8,7 +8,6 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$set]]
-            [ring.util.codec :refer [form-encode form-decode-str url-encode base64-encode]]
             [ring.util.response :refer :all]
             [sade.env :as env]
             [sade.session :as ssess]
@@ -115,7 +114,7 @@
               {:keys [Group emailaddress givenname name surname]} (get-in parsed-saml-info [:assertions :attrs])
               _ (infof "firstName: %s, lastName: %s, groups: %s, email: %s" givenname surname Group emailaddress)
               ; Resolve authz. Received AD-groups are mapped the corresponding Lupis roles the organization has/organizations have.
-              ; The result is formatted like: {:609-R #{"commenter"} :609-YMP #("commenter" "reader")
+              ; The result is formatted like: {:609-R #{"commenter"} :609-YMP #{"commenter" "reader"}}
               authz (ad-util/resolve-authz ad-settings Group)
               _ (infof "Resolved authz for user %s (domain: %s): %s" name domain authz)]
           (cond

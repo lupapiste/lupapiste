@@ -13,9 +13,10 @@ LUPAPISTE.AutomaticAssignmentsModel = function(params) {
 
   self.assignmentText = function(assignment) {
     var numTargets = uniqueTargetsLength(assignment);
-    return (assignment.recipient ?
-              assignment.recipient.firstName + " " + assignment.recipient.lastName + ": " :
-            "")
+    var name = _.join( _.filter( [_.get( assignment, "recipient.firstName"),
+                                  _.get( assignment, "recipient.lastName")]),
+                       " ");
+    return (name ? name + ": " : "")
       + loc("application.assignment.automatic.target.attachment.message" + (numTargets === 1 ? "" : ".plural"),
             numTargets) + ": ";
   };

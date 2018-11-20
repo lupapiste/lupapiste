@@ -410,7 +410,7 @@
          henkilo        (if yritys-type-osapuoli?
                           (get-in osapuoli [:yritys :yhteyshenkilo])
                           (:henkilo osapuoli))]
-     (when (-> henkilo :henkilotiedot :sukunimi)
+     (when (-> henkilo :henkilotiedot :sukunimi ss/trim not-empty)
        (let [kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type subtype)
              omistajalaji   (muu-select-map
                               :muu (:muu-omistajalaji osapuoli)

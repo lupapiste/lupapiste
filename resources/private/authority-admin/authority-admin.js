@@ -761,6 +761,12 @@
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel
     });
+    if (features.enabled("invoices")) {
+        $("#price-catalogue").applyBindings({
+            organization:        organizationModel,
+            authorization:       lupapisteApp.models.globalAuthModel
+        });
+    }
     $("#pate-verdict-templates").applyBindings({
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel

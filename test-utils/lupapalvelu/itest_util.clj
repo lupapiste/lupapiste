@@ -12,7 +12,6 @@
             [noir.request :refer [*request*]]
             [ring.util.codec :as codec]
             [schema.core :as sc]
-            [swiss.arrows :refer [-<>>]]
             [taoensso.timbre :as timbre :refer [info error]]
             [sade.core :refer [def- fail! unauthorized not-accessible now]]
             [sade.dummy-email-server]
@@ -352,8 +351,11 @@
 ;;;; Using Dev HTTP APIs
 ;;;; ===================================================================================================================
 
-(defn feature? [& features]
-  (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name features)))))
+(defn feature? [feature]
+  (-> (query pena :features)
+      :features
+      (get feature)
+      boolean))
 
 (defn get-by-id [collection id & args]
   (stream-decoding-response http-get (str (server-address) "/dev/by-id/" (name collection) "/" id)
@@ -481,12 +483,22 @@
 ;;;; Anti-CSRF
 ;;;; ===================================================================================================================
 
+(defn anti-csrf? []
+  (not (feature? :disable-anti-csrf)))
+
 (defn set-anti-csrf! [value]
   (fact (command pena :set-feature :feature "disable-anti-csrf" :value (not value)) => ok?))
 
 (defmacro with-anti-csrf [& body]
   `(let [old-value# (feature? :disable-anti-csrf)]
      (set-anti-csrf! true)
+     (try
+       ~@body
+       (finally (set-anti-csrf! (not old-value#))))))
+
+(defmacro without-anti-csrf [& body]
+  `(let [old-value# (feature? :disable-anti-csrf)]
+     (set-anti-csrf! false)
      (try
        ~@body
        (finally (set-anti-csrf! (not old-value#))))))
