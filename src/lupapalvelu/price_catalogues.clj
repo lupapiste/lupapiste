@@ -48,3 +48,28 @@
   (debug ">> validate-insert-price-catalogue-request data: " catalogue-data)
   (when (sc/check PriceCatalogueInsertRequest catalogue-data)
     (fail :error.invalid-price-catalogue)))
+
+(defn ->price-catalogue-db
+  [price-catalogue user organization-id]
+  (debug "->price-catalogue-db price-catalogue-request: " price-catalogue " organization-id: " organization-id " user: " user)
+  (merge price-catalogue
+         {:meta {:created (sade/now)
+                 :created-by (invoices/->User user)}
+          :organization-id organization-id}))
+
+(defn with-id [price-catalogue]
+  (assoc price-catalogue :id (mongo/create-id)))
+
+(defn validate-price-catalogue [price-catalogue]
+  (sc/validate PriceCatalogue price-catalogue))
+
+(defn create-price-catalogue!
+  [price-catalogue & [defaults]]
+  (debug ">> create-price-catalogue! catalogue: " price-catalogue " defaults: " defaults)
+  (let [catalogue-doc (->> price-catalogue
+                           with-id
+                           (merge defaults))]
+    (->> catalogue-doc
+         validate-price-catalogue
+         (mongo/insert :price-catalogues))
+    (:id catalogue-doc)))

@@ -149,4 +149,6 @@
    :input-validators [(partial action/non-blank-parameters [:organization-id])
                       catalogues/validate-insert-price-catalogue-request]}
   [{:keys [user] :as command}]
-  (ok {:i-am-not-quite "ready"}))
+  (let [catalogue-to-db (catalogues/->price-catalogue-db price-catalogue user organization-id)
+        id (catalogues/create-price-catalogue! catalogue-to-db {:state "published"})]
+    (ok {:price-catalogue-id id})))

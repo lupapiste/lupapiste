@@ -15,7 +15,8 @@
             [midje.util :refer [testable-privates]]
             [sade.env :as env]
             [sade.util :refer [to-millis-from-local-date-string]]
-            [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]))
+            [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
+            [lupapalvelu.price-catalogues :as catalogues]))
 
 (defn catalogues-belong-to-org?
   [org-id catalogues]
