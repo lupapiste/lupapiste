@@ -415,7 +415,7 @@
             response (handler request)
             file-name-suffix (case (last (-> request reitit-ring/get-match :data :name))
                                :proposal "-sopimusehdotus.pdf"
-                               :final "-sopimus.pdf"
+                               :final    "-sopimus.pdf"
                                ".pdf")]
         (if (= (:status response) 200)
           (let [content-bytes (:body response)
