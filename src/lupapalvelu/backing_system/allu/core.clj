@@ -131,7 +131,7 @@
   (let [allu-id (-> application :integrationKeys :ALLU :id)
         params {:path {:id allu-id}
                 :multipart {:metadata {:name        (str (localize lang :application.applicationSummary) ".pdf")
-                                       :description (let [type (localize lang :attachmentType "muu" "muu")
+                                       :description (let [type (localize lang :attachmentType "muut" "muu")
                                                           description (localize lang :application.applicationSummary)]
                                                       (if (or (not description) (= type description))
                                                         type
@@ -415,7 +415,7 @@
             response (handler request)
             file-name-suffix (case (last (-> request reitit-ring/get-match :data :name))
                                :proposal "-sopimusehdotus.pdf"
-                               :final    "-sopimus.pdf"
+                               :final "-sopimus.pdf"
                                ".pdf")]
         (if (= (:status response) 200)
           (let [content-bytes (:body response)
@@ -655,9 +655,13 @@
   "Send the specified `attachments` of `(:application command)` to ALLU.
   Returns a seq of attachment file IDs that were sent."
   [command attachments]
-  (send-allu-request! (attachment-send-self command))
   (doall (for [attachment attachments]
            (send-attachment! command attachment))))
+
+(defn send-application-as-attachment!
+  "Convert apllication to pdf and send it to ALLU as an attachment"
+  [command]
+  (send-allu-request! (attachment-send-self command)))
 
 (defn agreement-state
   "Returns :proposal when application is still in the state where agreement proposal should be fetched.
@@ -668,7 +672,6 @@
     "agreementPrepared"  :final
     :else nil))
 
-;; TODO: Add this to batchrunner
 (defn load-placementcontract-proposal!
   "GET placement contract proposal pdf from ALLU. Saves the proposal pdf using `lupapalvelu.file-upload/save-file`."
   [command]
@@ -679,7 +682,6 @@
   [command]
   (send-allu-request! (contract-approval command)))
 
-;; TODO: Add this to batchrunner
 (defn load-placementcontract-final!
   "GET final placement contract pdf from ALLU. Saves the contract pdf using `lupapalvelu.file-upload/save-file`."
   [command]

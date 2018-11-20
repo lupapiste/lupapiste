@@ -161,7 +161,7 @@
 
   fileId: id in storage system
   storageSystem: storage database where the file is stored
-  attach-self: if ture, convert the application to pdf and send to ALLU as an attachment"
+  attach-self: if true, convert the application to pdf and send to ALLU as an attachment"
   (sc/conditional :fileId      {:fileId sssc/FileId
                                 :storageSystem sssc/StorageSystem}
                   :attach-self {:attach-self sc/Bool}))

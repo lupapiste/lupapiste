@@ -174,8 +174,7 @@
    :auth                                 [AttachmentAuthUser]
    (sc/optional-key :metadata)           {sc/Keyword sc/Any}
    (sc/optional-key :approvals)          VersionApprovals
-   (sc/optional-key :backendId)          (sc/maybe sc/Str)
-   (sc/optional-key :application-as-attachment?) sc/Bool})  ;; For ALLU: If true, convert application to pdf and send it to ALLU as an attachment
+   (sc/optional-key :backendId)          (sc/maybe sc/Str)})
 
 (def attachment-required-keys (filter sc/required-key? (keys Attachment)))
 
