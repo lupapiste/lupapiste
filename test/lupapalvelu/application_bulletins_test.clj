@@ -183,21 +183,33 @@
 
 (facts "Verdict accessors"
   (fact "for Pate verdict"
-    (foremen {:data {:foremen ["vv-tj" "vastaava-tj" "iv-tj"]}})
-      => "Vesi- ja viem\u00e4rity\u00f6njohtaja, Vastaava ty\u00f6njohtaja, Ilmanvaihtoty\u00f6njohtaja"
-    (conditions {:data {:conditions {:5beec543e9a0396ee0e14f1a {:condition "Ehto"}}}})
-      => [{:sisalto "Ehto"}]
-    (reviews {:data       {:reviews ["5beec544e9a0396ee0e14f1c"]}
-              :references {:reviews [{:fi "Katselmus"
-                                      :sv "Katslemus"
-                                      :en "Katselmus"
-                                      :type "muu-katselmus"
-                                      :id "5beec544e9a0396ee0e14f1c"}]}})
-      => [{:tarkastuksenTaiKatselmuksenNimi "Katselmus"}])
+    (let [pate-verdict {:data       {:foremen    ["vastaava-tj" "iv-tj"]
+                                     :conditions {:5beec543e9a0396ee0e14f1a {:condition "Ehto"}}
+                                     :reviews    ["5beec544e9a0396ee0e14f1c"]}
+                        :references {:reviews [{:fi   "Katselmus"
+                                                :sv   "Katslemus"
+                                                :en   "Katselmus"
+                                                :type "muu-katselmus"
+                                                :id   "5beec544e9a0396ee0e14f1c"}]}}]
+
+
+      (foremen pate-verdict)    => "Vastaava ty\u00f6njohtaja, Ilmanvaihtoty\u00f6njohtaja"
+      (conditions pate-verdict) => [{:sisalto "Ehto"}]
+      (reviews pate-verdict)    => [{:tarkastuksenTaiKatselmuksenNimi "Katselmus"}]))
   (fact "for legacy verdict"
-    (foremen {:category "r"
-              :legacy? true
-              :data {:foremen {:5beeca9fe9a0396ee0e14f36 {:role "Ty\u00f6njohtaja"}
-                               :5beecaa5e9a0396ee0e14f37 {:role "Vastaava ty\u00f6njohtaja"}
-                               :5beecaa8e9a0396ee0e14f38 {:role "Vesi- ja viem\u00e4rity\u00f6njohtaja"}}}})
-      => "Ty\u00f6njohtaja, Vastaava ty\u00f6njohtaja, Vesi- ja viem\u00e4rity\u00f6njohtaja"))
+    (let [pate-legacy-verdict {:category "r"
+                               :legacy?  true
+                               :data     {:foremen    {:5beeca9fe9a0396ee0e14f36 {:role "Ty\u00f6njohtaja"}
+                                                       :5beecaa5e9a0396ee0e14f37 {:role "Vastaava ty\u00f6njohtaja"}}
+                                          :conditions {:5beecaafe9a0396ee0e14f39 {:name "condition 1"}
+                                                       :5beecab4e9a0396ee0e14f3a {:name "condition 2"}
+                                                       :5beecab9e9a0396ee0e14f3b {:name "condition 3"}}
+                                          :reviews    {:5beeca83e9a0396ee0e14f33 {:name "Katselmus 1", :type "loppukatselmus"}
+                                                       :5beeca8be9a0396ee0e14f34 {:name "Katselmus 2", :type "osittainen-loppukatselmus"}
+                                                       :5beeca91e9a0396ee0e14f35 {:name "Katselmus 3", :type "paikan-tarkastaminen"}}}}]
+
+      (foremen pate-legacy-verdict)    => "Ty\u00f6njohtaja, Vastaava ty\u00f6njohtaja"
+      (conditions pate-legacy-verdict) => [{:sisalto "condition 1"} {:sisalto "condition 2"} {:sisalto "condition 3"}]
+      (reviews pate-legacy-verdict)    => [{:tarkastuksenTaiKatselmuksenNimi "Katselmus 1"}
+                                           {:tarkastuksenTaiKatselmuksenNimi "Katselmus 2"}
+                                           {:tarkastuksenTaiKatselmuksenNimi "Katselmus 3"}])))
