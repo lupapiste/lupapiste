@@ -83,3 +83,5 @@
 "promootio-structure.tent" "fi" "Teltta"
 "promootio-structure.stage" "fi" "Esiintymislava"
 "promootio-structure.coldtruck" "fi" "Kylmäauto"
+"promootio.traffic-link-text" "fi" "Täytä liikennejärjestelyhakemus: [Linkki hakemukseen]"
+"promootio.traffic-link-url" "fi" "http://www.evolta.fi"

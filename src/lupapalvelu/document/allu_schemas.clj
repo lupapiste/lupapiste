@@ -170,10 +170,19 @@
                                                          :amount  "area"}]}
                                          {:name      "traffic-needed"
                                           :type      :checkbox
-                                          :inputType :checkbox-wrapper}]
+                                          :inputType :checkbox-wrapper}
+                                         {:name      "traffic-link"
+                                          :pseudo?   true
+                                          :type      :textlink
+                                          :css       [:allu--link]
+                                          :text      :promootio.traffic-link-text
+                                          :url       :promootio.traffic-link-url
+                                          :icon      [:lupicon-circle-info :primary]
+                                          :show-when {:path   "traffic-needed"
+                                                      :values #{true}}}]
                            :rows        [["structures-needed::2"]
                                          ["structures::4"]
-                                         ["traffic-needed::2"]]})
+                                         ["traffic-needed::2" "traffic-link::2"]]})
 
 
 (def lmv-description {:name       "lyhytaikainen-maanvuokraus"

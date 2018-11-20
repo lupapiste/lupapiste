@@ -26,7 +26,7 @@
 (defschema GenInput
   "General leaf element schema. Base element for input elements."
   {:name              sc/Str         ;; Element name
-   :type              (sc/enum :text :string :select :checkbox :radioGroup :date :time)
+   :type              (sc/enum :text :string :select :checkbox :radioGroup :date :time :textlink)
    (opt :uicomponent) sc/Keyword     ;; Component name for special components
    (opt :inputType)   (sc/enum :string :checkbox :localized-string :inline-string
                                :check-string :checkbox-wrapper
@@ -59,7 +59,7 @@
                        :values #{single-value}}
    (opt :show-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
                        :values #{single-value}}
-})
+   })
 
 (defschema Text
   "Text area element. Represented as text-area html element"
@@ -247,6 +247,28 @@
           ;; selector.
           (opt :excludeCompanies) sc/Bool}))
 
+(defschema PseudoInput
+  "Pseudo input that does not have any database value. In other words,
+  a view only component."
+  (merge GenInput
+         {:pseudo? (sc/eq true)}))
+
+(defschema TextLink
+  "Text with embedded link and an optional icon. The :text value
+  includes a placeholder for link. For example: 'Clikc [here] to
+  proceed', where [here] will be replaced with link (link text is here
+  and url is :url value)."
+  (merge PseudoInput
+         {:type (sc/eq :textlink)
+          ;; Localization key
+          :text sc/Keyword
+          ;; Also a localization key since the url could be
+          ;; language-specific
+          :url  sc/Keyword
+          ;; Icon classes (e.g., [:lupicon-warning :negative])
+          (opt :icon) [sc/Keyword]
+          }))
+
 (defschema Input
   (sc/conditional (type-pred :text)       Text
                   (type-pred :string)     Str
@@ -259,6 +281,7 @@
                   (type-pred :linkPermitSelector) LinkPermitSelector
                   (type-pred :personSelector) PersonSelector
                   (apply type-pred special-types) Special
+                  (type-pred :textlink) TextLink
                   :else                   {:type (sc/eq nil)})) ; For better error messages
 
 (declare Element)

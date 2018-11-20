@@ -57,3 +57,10 @@ textarea.allu-map {
       }
     }}
 }
+
+textlink.allu--link {
+  display: block;
+  .like-btn {
+    @include btn-height();
+  }
+}
