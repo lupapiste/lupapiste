@@ -34573,6 +34573,14 @@ textlink.allu--link .like-btn, textlink.allu--link a.link-btn, textlink.allu--li
   line-height: 40px;
 }
 
+.allu-group.allu-group--structures label.form-label {
+  display: none;
+}
+
+.allu-group.allu-group--structures .row.allu-row--spaced {
+  margin-top: 1em;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

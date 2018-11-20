@@ -74,7 +74,7 @@
 "promootio-structures.structures._copy_label" "sv" "Kopiera den sista raden"
 "promootio-structures._group_label" "fi" "Rakenteet"
 "promootio-structures.help" "fi" "Ohjeteksti rakenteiden syöttämiseen"
-"promootio-structures.structures-needed" "fi" "Tapahtuma-alueeele rakennetaan tai sijoitetaan tilapäisiä rakenteita"
+"promootio-structures.structures-needed" "fi" "Tapahtuma-alueelle rakennetaan tai sijoitetaan tilapäisiä rakenteita"
 "promootio-structures.structures._group_label" "fi" "Tilapäiset rakenteet"
 "promootio-structures.structures.structure" "fi" "Rakenne"
 "promootio-structures.structures.area" "fi" "Pinta-ala"

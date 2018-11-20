@@ -64,3 +64,12 @@ textlink.allu--link {
     @include btn-height();
   }
 }
+
+.allu-group.allu-group--structures {
+  label.form-label {
+    display: none;
+  }
+  .row.allu-row--spaced {
+    margin-top: 1em;
+  }
+}

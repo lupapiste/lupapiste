@@ -124,7 +124,7 @@
                            :approvable  false
                            :group-help  "help"
                            :uicomponent :docgenGroup
-                           :css         [:allu-group]
+                           :css         [:allu-group :allu-group--structures]
                            :template    "form-grid-docgen-group-template"
                            :body        [{:name      "structures-needed"
                                           :type      :checkbox
@@ -180,9 +180,11 @@
                                           :icon      [:lupicon-circle-info :primary]
                                           :show-when {:path   "traffic-needed"
                                                       :values #{true}}}]
-                           :rows        [["structures-needed::2"]
+                           :rows        [{:css [:allu-row--spaced]
+                                          :row ["structures-needed::2"]}
                                          ["structures::4"]
-                                         ["traffic-needed::2" "traffic-link::2"]]})
+                                         {:css [:allu-row--sapced]
+                                          :row ["traffic-needed::2" "traffic-link::2"]}]})
 
 
 (def lmv-description {:name       "lyhytaikainen-maanvuokraus"
