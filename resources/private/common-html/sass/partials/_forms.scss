@@ -233,6 +233,11 @@ message-panel {
   }
 }
 
+.form-label.empty-label {
+  &.tip:after {
+    content: "";
+  }
+}
 
 .form-container {
   margin-top: $baseline;

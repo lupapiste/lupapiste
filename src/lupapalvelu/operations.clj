@@ -1315,7 +1315,7 @@
                                 :permit-type               permit/A
                                 :applicant-doc-schema      applicant-doc-schema-name-hakija
                                 :required                  ["maksaja" "promootio-time" "promootio-location"
-                                                            "promootio-structures"]
+                                                            "promootio-structures" "promootio-info"]
                                 :attachments               []
                                 :add-operation-allowed     false
                                 :copying-allowed           true

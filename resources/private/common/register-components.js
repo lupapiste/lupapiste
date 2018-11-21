@@ -214,7 +214,8 @@ jQuery(document).ready(function() {
     {name: "authorize-person-dialog"},
     {name: "timepicker"},
     {name: "textlink"},
-    {name: "docgen-textlink"}
+    {name: "docgen-textlink"},
+    {name: "docgen-radio-group"}
 ];
 
   ko.registerLupapisteComponents(components);

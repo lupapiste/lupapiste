@@ -8986,6 +8986,10 @@ message-panel {
   display: inline;
 }
 
+.form-label.empty-label.tip:after {
+  content: "";
+}
+
 .form-container {
   margin-top: 24px;
   padding: 24px;
@@ -34483,6 +34487,7 @@ div.printing-order-footer div.pricelist-panel .arrow:after {
 
 div.form-grid.allu-group {
   border-top: none;
+  padding-bottom: 1em;
 }
 
 div.form-grid.allu-group span.group-help-text {
@@ -34521,13 +34526,19 @@ div.form-grid.allu-group input::-ms-input-placeholder {
 }
 
 div.form-grid.allu-group .h3 {
+  font-weight: bold;
   border-top: 1px solid #dddddd;
-  padding-top: .5em;
+  padding-top: 1em;
+  margin: 0;
 }
 
 div.form-grid.allu-group .row {
   margin-top: 4px;
   margin-bottom: 0;
+}
+
+div.form-grid.allu-group .row.allu-row--spaced {
+  margin-top: 1em;
 }
 
 .allu-group--place label {
@@ -34536,6 +34547,10 @@ div.form-grid.allu-group .row {
 
 textarea.allu-map {
   min-height: 20em;
+}
+
+.allu-table table {
+  margin-bottom: 0;
 }
 
 .allu-table table tr:hover {
@@ -34559,8 +34574,19 @@ textarea.allu-map {
   border: none;
 }
 
+.allu-table table tfoot > tr td {
+  padding-bottom: 0;
+}
+
 .allu-table table tfoot > tr td.footer-sum--total {
   text-align: right;
+}
+
+.allu-table + .button-group {
+  padding: 0;
+  background-color: white;
+  border: none;
+  margin-bottom: 1em;
 }
 
 textlink.allu--link {
@@ -34577,8 +34603,23 @@ textlink.allu--link .like-btn, textlink.allu--link a.link-btn, textlink.allu--li
   display: none;
 }
 
-.allu-group.allu-group--structures .row.allu-row--spaced {
+.allu--radio.radio-wrapper {
+  min-width: 6em;
+  margin-right: 10px;
+}
+
+.allu-group.allu--info .h4 {
   margin-top: 1em;
+  margin-bottom: 8px;
+}
+
+.allu-group.allu--info .h4:after {
+  content: "*";
+  color: #df3215;
+}
+
+.allu-group.allu--info input.allu--description {
+  margin: 0;
 }
 
 /* VIEWS

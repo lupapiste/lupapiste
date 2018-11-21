@@ -1,6 +1,7 @@
 
 div.form-grid.allu-group {
   border-top: none;
+  padding-bottom: 1em;
   span.group-help-text {
     display: block;
     padding: 1em;
@@ -18,12 +19,18 @@ div.form-grid.allu-group {
   }
   @include placeholder( $gray221 );
   .h3 {
+    font-weight: bold;
     border-top: 1px solid $gray221;
-    padding-top: .5em;
+    padding-top: 1em;
+    margin: 0;
+
   }
   .row {
     margin-top: 4px;
     margin-bottom: 0;
+  }
+  .row.allu-row--spaced {
+    margin-top: 1em;
   }
 }
 
@@ -52,10 +59,22 @@ textarea.allu-map {
     tfoot > tr {
       font-weight: bold;
       border: none;
+      td {
+        padding-bottom: 0;
+      }
       td.footer-sum--total {
         text-align: right;
       }
-    }}
+    }
+    margin-bottom: 0;
+  }
+}
+
+.allu-table + .button-group {
+  padding: 0;
+  background-color: white;
+  border: none;
+  margin-bottom: 1em;
 }
 
 textlink.allu--link {
@@ -69,7 +88,23 @@ textlink.allu--link {
   label.form-label {
     display: none;
   }
-  .row.allu-row--spaced {
+}
+
+.allu--radio.radio-wrapper {
+      min-width: 6em;
+      margin-right: 10px;
+}
+
+.allu-group.allu--info {
+  .h4 {
     margin-top: 1em;
+    margin-bottom: 8px;
+    &:after {
+      content: "*";
+      color: $negative;
+    }
+  }
+  input.allu--description {
+    margin: 0;
   }
 }
