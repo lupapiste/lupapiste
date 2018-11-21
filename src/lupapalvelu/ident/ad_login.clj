@@ -123,6 +123,15 @@
                                                     (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
             (and valid-signature? (seq authz)) (->> (update-or-create-user! givenname surname emailaddress authz)
                                                     (log-user-in! req))
+
+            ;; If an applicant account exists for the received email address, the user is logged in.
+            (and valid-signature?
+                 (empty? authz)
+                 (= "applicant"
+                    (some-> emailaddress
+                            usr/get-user-by-email
+                            :role)))           (->> emailaddress usr/get-user-by-email (log-user-in! req))
+
             valid-signature? (do
                                (error "User does not have organization authorization")
                                (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
