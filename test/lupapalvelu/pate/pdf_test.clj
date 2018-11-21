@@ -176,6 +176,13 @@
     (fact "operations: operation dict"
       (pdf/operations {:lang "fi" :verdict {:data {:operation "  Grand Design   "}} :application app})
       => [{:text "Grand Design"}
+          {:text purkaminen}])
+    (fact "operations: bulletin description"
+      (pdf/operations {:lang "fi"
+                       :verdict {:data {:bulletin-desc-as-operation true
+                                        :bulletin-op-description "This is bulletin description"}}
+                       :application app})
+      => [{:text "This is bulletin description"}
           {:text purkaminen}])))
 
 (facts "Buildings"
