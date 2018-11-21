@@ -230,12 +230,17 @@
                                                           $
                                                           created))))))))))
 
-(defn document-data->op-document [{:keys [schema-version] :as application} data]
-  (let [op (app/make-op "aiemmalla-luvalla-hakeminen" (now))
-        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
-        doc (assoc-in doc [:schema-info :op] op)
-        doc-updates (lupapalvelu.document.model/map2updates [] data)]
-    (lupapalvelu.document.model/apply-updates doc doc-updates)))
+(defn document-data->op-document
+  ([application data]
+   ;; If no operation name is provided, this defaults to "aiemmalla-luvalla-hakeminen"
+   (document-data->op-document application data "aiemmalla-luvalla-hakeminen"))
+  ([{:keys [schema-version] :as application} data operation-name]
+    (let [schema-name (-> operation-name operations/get-operation-metadata :schema)
+          op (app/make-op operation-name (now))
+          doc (doc-persistence/new-doc application (schemas/get-schema schema-version schema-name) (now))
+          doc (assoc-in doc [:schema-info :op] op)
+          doc-updates (lupapalvelu.document.model/map2updates [] data)]
+      (lupapalvelu.document.model/apply-updates doc doc-updates))))
 
 (defn schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
   (map

@@ -50,7 +50,8 @@
         municipality "092"
         buildings-and-structures (building-reader/->buildings-and-structures xml)
         document-datas (prev-permit/schema-datas app-info buildings-and-structures)
-        manual-schema-datas {"aiemman-luvan-toimenpide" (first document-datas)}
+        ; manual-schema-datas {"aiemman-luvan-toimenpide" (first document-datas)}
+        manual-schema-datas {"kerrostalo-rivitalo" (first document-datas)}
         command (update-in command [:data] merge
                            {:operation operation :infoRequest false :messages []}
                            location-info)
@@ -108,9 +109,16 @@
         structure-descriptions (map :description buildings-and-structures)
         ; TODO: create operations from app-info, see above.
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
+
+        created-application (conv-util/add-description created-application xml)
+
         ; TODO: create secondaryoperations from app-info, see above.
         ;; make secondaryOperations for buildings other than the first one in case there are many
-        other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas))
+
+        ;; Okay, the following function seems to create an 'aiemmalla-luvalla-hakeminen' type of doc regardless of input
+        ;; So we need to make this select the operation type dynamically depending on input!
+        other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas) secondary-op-names)
+
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2 :name %3) other-building-docs (rest structure-descriptions) secondary-op-names)
 
         _ (swap! tila assoc

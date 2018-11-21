@@ -17,6 +17,9 @@
             [sade.env :as env]
             [sade.strings :as ss]))
 
+(def tila
+  (atom {})) ;; TODO: Remove me
+
 (def config
   {:resource-path (format "/Users/%s/Desktop/test-data" (System/getenv "USER"))})
 
@@ -27,6 +30,7 @@
 (def database-permit-id-regex
   "So-called 'database' format, e.g. 12-0477-A 63"
   #"\d{2}-\d{4}-[A-Z]{1,3} \d{2}")
+
 
 (defn destructure-permit-id
   "Split a permit id into a map of parts. Works regardless of which of the two
@@ -41,6 +45,86 @@
                 '(:kauposa :no :vuosi :tyyppi)
                 '(:vuosi :no :tyyppi :kauposa))
               (ss/split id #"[- ]")))))
+
+(defn kuntalupatunnus->description
+  "Takes a kuntalupatunnus, returns the permit type in plain text ('12-124124-92-A' -> 'Uusi rakennus' etc.)"
+  [kuntalupatunnus]
+  (let [tyyppi (-> kuntalupatunnus destructure-permit-id :tyyppi)]
+    (condp = tyyppi
+      "A" "Uusi rakennus"
+      "AJ" "Jatko"
+      "AL" "Muutos"
+      "AM" "Uusi rakennus, rakentamisen aikainen muutos"
+      "B" "Lisärakennus"
+      "BJ" "Jatko"
+      "BL" "Muutos"
+      "BM" "Lisärakennus, rakentamisen aikainen muutos"
+      "C" "Toimenpide"
+      "CJ" "Jatko"
+      "CL" "Muutos"
+      "CM" "Toimenpide"
+      "D" "Muutostyö"
+      "DJ" "Muutostyön jatkolupa"
+      "DL" "Muutostyön muutoslupa"
+      "DM" "Muutostyö, rakentamisen aikainen muutos"
+      "E" "Ennakkolupa"
+      "H" "Työmaaparakki"
+      "HAL" "Hallintopakko"
+      "HJ" "Jatko"
+      "HUO" "Huomautus"
+      "I" "Ilmoitus"
+      "ILM" "Ilmitulo"
+      "K" "Katumaan aitaaminen"
+      "KJ" "Jatko"
+      "KMK" "Kehotus"
+      "KMP" "Katselmuspöytäkirja"
+      "KNK" "Kaupunkikuvaneuvottelukunnan lausunto"
+      "KR" "Kantarakennus"
+      "KUN" "Kuntien toimenpiteettömät luvat"
+      "LAS" "Laskelma"
+      "LAU" "Pyydetty lausunto"
+      "LKH" "Lausunto kunnallistekniikasta (hulevesisuunnitelmaa varten)"
+      "LKL" "Lausunto kunnallistekniikasta (lohkomislupaa varten)"
+      "LKP" "Lausunto kunnallistekniikasta (poikkeuslupaa varten)"
+      "LKR" "Lausunto kunnallistekniikasta (rak.lupaa varten)"
+      "LKT" "Lausunto kunnallistekniikasta (tp-lupaa varten)"
+      "LOP" "Loppukatselmus"
+      "M" "Maankaivu"
+      "MAA" "Maa-aineslupa"
+      "MAI" "Maisematyölupa"
+      "MAJ" "Maisematyöluvan jatkolupa"
+      "MAK" "Maksun palautus"
+      "MAM" "Maisematyöluvan muutoslupa"
+      "N" "Purkamisilmoitus"
+      "OIK" "Oikaisuvaatimus"
+      "P" "Purkamislupa"
+      "PI" "Purkamisilmoitus"
+      "PJ" "Jatko"
+      "PL" "Lupaehdon muutos"
+      "PM" "Purkamislupa, rakentamisen aikainen muutos"
+      "POP" "Poikkeamispäätös"
+      "PSR" "Poikkeamispäätös ja suunnittelutarveratkaisu"
+      "RAM" "Rakennusaikainen muutos"
+      "RAS" "Rasite"
+      "RVA" "Rakennuttajavalvonta"
+      "S" "Poikkeuslupa"
+      "SEL" "Selityspyyntö"
+      "SM" "Poikkeuslupa"
+      "STR" "Suunnittelutarveratkaisu"
+      "TJO" "Vastuullinen työnjohtaja"
+      "US" "Uhkasakko"
+      "VAK" "Vakuus"
+      "Y" "Kokoontumishuone"
+      "YHT" "Yhteisjärjestely"
+      "YKJ" "YKEn lausunto jätevesistä haja-asutusalueilla"
+      "YKL" "Ympäristökeskuksen lausunto"
+      "YKM" "YKE:n maisematyölupa"
+      "YMP" "YKEn maalämpöporakaivolausunto"
+      "YVI" "YKEn vapautus liittymisestä viemäriin"
+      "YVJ" "YKE:n vapautus liittymisestä vesijohtoon"
+      "YVV" "YKEn vapautus liittymisestä vesijohtoon ja viemäriin"
+      "Z" "Ei luvanvarainen hanke"
+      "tunnistamaton lupatyyppi")))
 
 (defn normalize-permit-id
   "Viitelupien tunnukset on Factassa tallennettu 'tietokantaformaatissa', josta ne on tunnuksella
@@ -59,6 +143,20 @@
                        (now)
                        {"kaupunkikuvatoimenpide" data}
                        (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
+
+(defn add-description [{:keys [documents] :as app} xml]
+  (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
+        kuvaus (building-reader/->asian-tiedot xml)
+        kuvausteksti (format "Tuodun luvan tyyppi: %s (\"%s\")\nAsian kuvaus: %s"
+                             (-> kuntalupatunnus destructure-permit-id :tyyppi)
+                             (kuntalupatunnus->description kuntalupatunnus)
+                             kuvaus)]
+    (assoc app :documents
+           (map (fn [doc]
+                  (if (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
+                    (assoc-in doc [:data :kuvaus :value] kuvausteksti)
+                    doc))
+                documents))))
 
 (defn toimenpide->toimenpide-document [op-name toimenpide]
   (let [data (model/map2updates [] {:kuvaus "Nippa nappa niukin naukin"
@@ -183,9 +281,6 @@
   (->> (read-all-test-files)
        (filter #(= kuntalupatunnus (krysp-reader/xml->kuntalupatunnus %)))
        first))
-
-(def tila
-  (atom {})) ;; TODO: Remove me
 
 (defn deduce-operation-type
   "Takes a kuntalupatunnus and a 'toimenpide'-element from app-info, returns the operation type"
