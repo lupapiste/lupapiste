@@ -22,7 +22,7 @@
     // that denotes user pressing esc key and clicks outside
     // of menu area.
     hub.subscribe( "dialog-close", cancel);
-    $(document).on( "click", ".language-menu", function( e ) {
+    $(document).on( "click", "#language-menu", function( e ) {
       e.stopPropagation();
     });
     $(document).on( "click", cancel );
@@ -45,8 +45,6 @@
   var langs = new Languages();
 
   $(function() {
-    $("#language-select").applyBindings( langs );
-    $(".language-menu").applyBindings( langs );
     $("#language-menu").applyBindings(langs);
     hub.subscribe("vetumaService::serviceCreated", function(vetumaService) {
       $("#header-user-menu").applyBindings(new UserMenu(vetumaService));

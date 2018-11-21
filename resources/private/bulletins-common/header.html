@@ -11,14 +11,20 @@
                     <img alt="Lupapiste" src="/lp-static/img/Lupapiste-julkipano-logo-white.svg">
                 </a>
             </div>
-            <div id="language-select" data-bind="css: {'language-open': $root.languageMenuVisible,
-                                                 'language-closed': $root.languageMenuVisible() == false}">
-                <a data-test-id="language-link"
-                   href="#" data-bind="click: $root.toggleLanguageMenu, clickBubble: false">
-                    <span data-bind="text: $root.currentLanguage"></span>
+            <div id="language-menu" class="header-dropdown"
+                 data-bind="css: {active: $root.languageMenuVisible}">
+                <a class="header-dropdown-button" href="#" data-test-id="language-link"
+                   data-bind="click: $root.toggleLanguageMenu, clickBubble: false">
+                    <span data-bind="text: $root.currentLanguage" style="text-transform: uppercase"></span>
                     <span data-bind="css: {'lupicon-chevron-small-down': $root.languageMenuVisible() == false,
-                                     'lupicon-chevron-small-up': $root.languageMenuVisible}"></span>
+                                           'lupicon-chevron-small-up': $root.languageMenuVisible}"></span>
                 </a>
+                <ul data-bind="foreach: $root.languages">
+                    <li>
+                        <a data-bind="click: $root.changeLanguage,
+                                      text: $data.toUpperCase() + ' - ' + loc( $data )"></a>
+                    </li>
+                </ul>
             </div>
 
             <div id="header-user-menu" data-bind="visible: authenticated" data-test-id="user-nav-menu">
@@ -40,16 +46,6 @@
                 
             </div>
 
-        </div>
-    </div>
-    <div class="nav-bottom">
-        <div class="nav-box">
-            <div class="language-menu" style="display: none" data-bind="visible: $root.languageMenuVisible">
-                <ul data-bind="foreach: $root.languages">
-                    <li><a href="#" data-bind="click: $root.changeLanguage,
-                                               text: $data.toUpperCase() + ' - ' + loc( $data )"></a></li>
-                </ul>
-            </div>
         </div>
     </div>
   </div>

@@ -225,32 +225,6 @@ nav {
   .header-dropdown { @include header-dropdown; }
 }
 
-.nav-bottom {
-  @include nav-row( $language-bg );
-  .language-menu {
-    width: 100%;
-    clear: both;
-    padding: {
-      top: 1em;
-      left: $brand-width + $language-padding;
-      bottom: .5em;
-    }
-    background-color: $language-bg;
-    ul {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-      li {
-        @include nav-link( $link: white, $hover: $orange);
-        margin: {
-          bottom: .5em;
-          top: 0;
-        }
-      }
-    }
-  }
-}
-
 nav {
   .julkipano-brand {
     a.logo {
