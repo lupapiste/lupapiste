@@ -121,8 +121,10 @@
             (false? (:success? parsed-saml-info)) (do
                                                     (error "Login was not valid")
                                                     (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
-            (and valid-signature? (seq authz)) (->> (update-or-create-user! givenname surname emailaddress authz)
-                                                    (log-user-in! req))
+            (and valid-signature? (seq authz)) (do
+                                                 (infof "Logging in user %s as authority" emailaddress)
+                                                 (->> (update-or-create-user! givenname surname emailaddress authz)
+                                                      (log-user-in! req)))
 
             ;; If an applicant account exists for the received email address, the user is logged in.
             (and valid-signature?
@@ -130,7 +132,9 @@
                  (= "applicant"
                     (some-> emailaddress
                             usr/get-user-by-email
-                            :role)))           (->> emailaddress usr/get-user-by-email (log-user-in! req))
+                            :role)))           (do
+                                                 (infof "Logging in user %s as applicant" emailaddress)
+                                                 (->> emailaddress usr/get-user-by-email (log-user-in! req)))
 
             valid-signature? (do
                                (error "User does not have organization authorization")

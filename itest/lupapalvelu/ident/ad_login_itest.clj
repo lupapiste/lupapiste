@@ -20,6 +20,9 @@
 (def- response
   (-> "./dev-resources/mock-saml-response.edn" slurp read-string :encrypted-base64))
 
+(def- response-wo-groups
+  (-> "./dev-resources/mock-saml-response_without_groups.edn" slurp read-string :base64-encoded))
+
 (defn- parse-route [domain & [metadata?]]
   (format "%s/api/saml/%s/%s" (server-address)
           (if metadata? "metadata" "ad-login")
@@ -93,4 +96,10 @@
             (let [resp (client/post pori-route {:form-params {:SAMLResponse (apply str (drop-last response))}
                                                 :content-type :json
                                                 :throw-exceptions false})]
-              (:status resp) => 400)))))
+              (:status resp) => 400))
+
+          (fact "When an applicant-type user account exists, the user is logged in even if no ad-groups are found"
+            (let [resp (client/post pori-route {:form-params {:SAMLResponse response-wo-groups}
+                                                :content-type :json
+                                                :throw-exceptions false})]
+              (:status resp) => 302)))))
