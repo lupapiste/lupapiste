@@ -145,11 +145,19 @@
         distinct
         (ok :attachmentTypes)))
 
+(defquery organization-name-by-user
+  {:description "authorityAdmin organization name for all languages."
+   :permissions [{:required [:organization/admin]}]}
+  [{user :user}]
+  (ok (-> (usr/authority-admins-organization-id user)
+          org/get-organization
+          (select-keys [:id :name]))))
+
 (defquery usage-purposes
   {:description "Lupapiste usage purposes for user based on orgAuthz."
    :user-roles  roles/all-user-roles}
   [{:keys [user]}]
-  (if (:role user)                                          ; prevent NPE in applicationpage-for
+  (if (:role user)                                          ; prevent NullPointerException in applicationpage-for
     (let [applicationpage (usr/applicationpage-for user)]
       (ok :usagePurposes (into (if (= applicationpage "authority-admin")
                                  []
@@ -159,14 +167,6 @@
                                      :when (= auth :authorityAdmin)]
                                  {:type "authority-admin", :orgId org-id}))))
     (ok :usagePurposes [])))
-
-(defquery organization-name-by-user
-  {:description "authorityAdmin organization name for all languages."
-   :permissions [{:required [:organization/admin]}]}
-  [{user :user}]
-  (ok (-> (usr/authority-admins-organization-id user)
-          org/get-organization
-          (select-keys [:id :name]))))
 
 (defquery user-organizations-for-permit-type
   {:parameters       [permitType]
