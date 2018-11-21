@@ -151,19 +151,14 @@
   [{:keys [user]}]
   (if (:role user)                                          ; prevent NPE in applicationpage-for
     (let [applicationpage (usr/applicationpage-for user)]
-      (ok :usagePurposes (into (if (= applicationpage "authority-admin") [] [{:type applicationpage}])
+      (ok :usagePurposes (into (if (= applicationpage "authority-admin")
+                                 []
+                                 [{:type applicationpage}])
                                (for [[org-id authz] (:orgAuthz user)
                                      auth authz
                                      :when (= auth :authorityAdmin)]
                                  {:type "authority-admin", :orgId org-id}))))
     (ok :usagePurposes [])))
-
-(defquery organization-names-by-user
-  {:description "User organization names for all languages."
-   :user-roles  roles/all-user-roles}
-  [{:keys [user]}]
-  (let [orgs (->> user :orgAuthz (map (util/fn-> key name org/get-organization)))]
-    (ok :orgNames (into {} (map (juxt :id :name)) orgs))))
 
 (defquery organization-name-by-user
   {:description "authorityAdmin organization name for all languages."
@@ -884,6 +879,16 @@
   [_]
   (ok :names (into {} (for [{:keys [id name]} (org/get-organizations {} {:name 1})]
                         [id name]))))
+
+(defquery organization-names-by-user
+  {:description "User organization names for all languages."
+   :user-roles  roles/all-user-roles}
+  [{{:keys [orgAuthz]} :user}]
+  (ok :names (if (seq orgAuthz)
+               (let [org-ids (map (comp name key) orgAuthz)
+                     names (map :name (org/get-organizations {:_id {$in org-ids}} {:name 1}))]
+                 (zipmap org-ids names))
+               {})))
 
 (defquery vendor-backend-redirect-config
   {:permissions [{:required [:organization/admin]}]}

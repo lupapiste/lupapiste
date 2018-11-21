@@ -228,7 +228,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
       ajax.query("organization-names-by-user", {})
         .success(function (res) {
-          self.orgNames(res.orgNames);
+          self.orgNames(res.names);
           ajax.query("usage-purposes", {})
             .success(function (res) { self.usagePurposes(_.map(res.usagePurposes, function (purpose) {
               var purposeModel = {
