@@ -1,7 +1,7 @@
 .price-catalogue {
 
     .catalogue-select-wrapper {
-        margin-bottom: 2em
+        margin-bottom: 2em;
     }
 
     .row-operation {
@@ -17,11 +17,12 @@
     }
 
     .view-switch {
-        margin-bottom: 2em
+        margin-bottom: 2em;
+        float: left;
     }
 
     .view-switch-guide-text {
-        padding-right: 1em
+        padding-right: 1em;
     }
 
     .view-switch-selected {
@@ -35,5 +36,20 @@
         color: $lp-orange;
         border: 1px solid $lp-orange;
     }
+
+    .edit-buttons {
+        display: inline-block;
+        float: right;
+    }
+
+    .catalogue-button {
+        margin-left: 1em;
+    }
+
+    .right-button {
+        display: inline-block;
+        float: right;
+    }
+
 
 }

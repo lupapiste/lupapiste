@@ -39662,6 +39662,7 @@ button.invoice-change-state-button {
 
 .price-catalogue .view-switch {
   margin-bottom: 2em;
+  float: left;
 }
 
 .price-catalogue .view-switch-guide-text {
@@ -39678,6 +39679,20 @@ button.invoice-change-state-button {
   background-color: white;
   color: #f39129;
   border: 1px solid #f39129;
+}
+
+.price-catalogue .edit-buttons {
+  display: inline-block;
+  float: right;
+}
+
+.price-catalogue .catalogue-button {
+  margin-left: 1em;
+}
+
+.price-catalogue .right-button {
+  display: inline-block;
+  float: right;
 }
 
 #bulletins, #local-bulletins {

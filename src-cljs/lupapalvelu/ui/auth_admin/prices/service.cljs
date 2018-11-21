@@ -2,11 +2,25 @@
   (:require [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.auth-admin.prices.state :as state]))
 
-(defn fetch-price-catalogues []
+(defn fetch-price-catalogues [& [callback]]
   (common/query :organization-price-catalogues
                 (fn [data]
                   (let [catalogues (:price-catalogues data)]
-                    (reset! state/catalogues catalogues))
+                    (reset! state/catalogues catalogues)
+                    (when callback (callback)))
                   ;;TODO sort catalogues here by relevance (?)
                   )
                 :organization-id @state/org-id))
+
+(defn publish-catalogue [catalogue]
+  (println ">> publish-catalogue: " catalogue)
+  (let [new-catalogue (select-keys catalogue [:valid-from :rows])]
+    (common/command :insert-price-catalogue
+                    (fn [data]
+                      (let [id (:price-catalogue-id data)]
+                        (fetch-price-catalogues
+                         (fn []
+                           (state/set-mode :show)
+                           (state/set-selected-catalogue-id id)))))
+                    :organization-id @state/org-id
+                    :price-catalogue new-catalogue)))
