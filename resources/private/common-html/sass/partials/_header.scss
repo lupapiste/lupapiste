@@ -122,28 +122,6 @@ $language-padding: 20px;
   font-size: smaller;
 }
 
-@mixin language-select( $link: $orange, $hover: white, $bg: inherit, $hover-bg: $language-bg ) {
-  @include nav-link( $link: $link, $hover: $hover, $hover-bg: $hover-bg );
-  background-color: $bg;
-  display: inline-block;
-  margin: 0;
-  float: left;
-  a {
-    padding: {
-    left: $language-padding;
-    right: $language-padding;
-    top: 0;
-    bottom: 0;
-  }
-  }
-  a, span {
-    vertical-align: middle;
-    line-height: $header-height;
-    text-transform: uppercase;
-    overflow: hidden;
-  }
-}
-
 @mixin nav-row( $bg ) {
   width: 100%;
   background-color: $bg;
