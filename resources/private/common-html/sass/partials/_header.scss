@@ -196,12 +196,6 @@ nav {
       background: url("/lp-static/img/logo.png");
     }
   }
-  .language-closed {
-    @include language-select;
-  }
-  .language-open {
-    @include language-select( $link: white, $hover: $orange, $bg: $language-bg );
-  }
   .header-menu {
     display: inline-block;
     position: absolute;
@@ -252,20 +246,6 @@ nav {
       margin-right: $marginL;
       span {
         vertical-align: middle;
-      }
-    }
-    .language-closed {
-      @include language-select( $link: $orange );
-    }
-    .language-open {
-      @include language-select( $link: white, $hover: $orange, $bg: $language-bg );
-    }
-
-    .nav-bottom {
-      ul {
-        li {
-          @include nav-link($link: white, $hover: $orange);
-        }
       }
     }
   }
@@ -323,13 +303,8 @@ $notification-bottom: -60px;
     .nav-top {
       background-color: #fff;
     }
-    .language-closed {
-      @include language-select( $link: black, $hover: $orange, $hover-bg: inherit );
-    }
-    .language-open {
-      @include language-select( $link: black, $hover: $orange, $hover-bg: inherit );
-    }
-      .header-box {
+
+    .header-box {
       @include nav-link( $link: $orange-link, $hover: $orange-hover, $active: $orange-active );
       }
     }
