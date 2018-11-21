@@ -257,14 +257,15 @@
   "Text with embedded link and an optional icon. The :text value
   includes a placeholder for link. For example: 'Clikc [here] to
   proceed', where [here] will be replaced with link (link text is here
-  and url is :url value)."
+  and url is :url value). If url is not given, no substitution is
+  done."
   (merge PseudoInput
-         {:type (sc/eq :textlink)
+         {:type       (sc/eq :textlink)
           ;; Localization key
-          :text sc/Keyword
+          :text       sc/Keyword
           ;; Also a localization key since the url could be
           ;; language-specific
-          :url  sc/Keyword
+          (opt :url)  sc/Keyword
           ;; Icon classes (e.g., [:lupicon-warning :negative])
           (opt :icon) [sc/Keyword]
           }))

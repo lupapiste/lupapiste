@@ -1,7 +1,8 @@
 // Textual link.
 // Parameters [optional]:
 // text: Link text. For example: Click [here] to proceed.
-// url: Url for the embedded link (here in the above example)
+// [url]: Url for the embedded link (here in the above example). No
+// substitution is done if the url is not given
 // [icon]: Icon class.
 
 LUPAPISTE.TextlinkModel = function( params ) {
@@ -15,8 +16,10 @@ LUPAPISTE.TextlinkModel = function( params ) {
 
   var link = regex.exec( text )[1];
 
-  self.html = _.replace( text, regex, sprintf( "<a href='%s' target='_blank'>%s</a>",
-                                               params.url, link ));
+  self.html = params.url
+    ? _.replace( text, regex, sprintf( "<a href='%s' target='_blank'>%s</a>",
+                                       params.url, link ))
+    : text;
 
   self.iconCss = _.size( params.icon )
     ? _.reduce( params.icon,

@@ -7,6 +7,6 @@ LUPAPISTE.DocgenTextlinkModel = function( params ) {
   ko.utils.extend( self, new LUPAPISTE.DocgenInputModel( params ));
 
   self.text = loc( self.schema.text );
-  self.url = loc( self.schema.url );
+  self.url = self.schema.url && loc( self.schema.url );
   self.icon = self.schema.icon;
 };
