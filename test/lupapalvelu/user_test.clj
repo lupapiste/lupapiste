@@ -623,7 +623,7 @@
     (applicationpage-for {:role "authority" :orgAuthz {:123-TEST #{:foo}}}) => "authority"
     (applicationpage-for {:role "authority" :orgAuthz {:123-TEST #{:authority}}}) => "authority"
     (applicationpage-for {:role "authority" :orgAuthz {:123-TEST #{:authorityAdmin}}}) => "authority-admin"
-    (applicationpage-for {:role "authority" :orgAuthz {:123-TEST #{:authorityAdmin :anyother}}}) => "authority-admin")) ; FIXME LPK-3827 when authorityAdmin isn't single auth anymore, fix is required
+    (applicationpage-for {:role "authority" :orgAuthz {:123-TEST #{:authorityAdmin :authority}}}) => "authority"))
 
 (facts user-in-role
 
