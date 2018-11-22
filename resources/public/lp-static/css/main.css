@@ -1714,7 +1714,7 @@ nav .julkipano-brand .header-box span, nav .julkipano-brand .julkipano-user span
   vertical-align: middle;
 }
 
-.louhi #logout-header-box, .facta #logout-header-box {
+.louhi #logout-button, .facta #logout-button {
   display: none;
 }
 

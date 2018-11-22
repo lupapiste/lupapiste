@@ -285,5 +285,5 @@ $notification-bottom: -60px;
       @include nav-link( $link: $orange-link, $hover: $orange-hover, $active: $orange-active );
       }
     }
-    #logout-header-box { display: none; }
+    #logout-button { display: none; }
 }

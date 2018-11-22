@@ -10,7 +10,7 @@ Resource       ../../common_resource.robot
 
 Mikko goes to own page
   Mikko logs in
-  Click Element  user-name
+  Open My Page
   Wait for Page to Load  Mikko  Intonen
 
 Mikko has no company info
@@ -30,7 +30,7 @@ Mikko logs out
 
 Veikko goes to own page
   Veikko logs in
-  Click Element  user-name
+  Open My Page
   # Wait for Page to Load  Veikko  Viranomainen
 
 Veikko has no company info

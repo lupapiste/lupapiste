@@ -11,7 +11,7 @@ Resource        ../../common_resource.robot
 # ---------------------
 Teppo opens own details
   Teppo logs in
-  Click Element  user-name
+  Open My Page
   Open accordion by test id  mypage-personal-info-accordion
   Open accordion by test id  mypage-register-company-accordion
 

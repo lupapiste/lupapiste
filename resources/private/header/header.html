@@ -95,13 +95,14 @@
                         <li class="spacer"></li>
                         <!-- /ko -->
                         <li>
-                            <a href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
+                            <a id="mypage-button" href="#!/mypage" data-bind="attr: {'title': loc('mypage.title')}">
                                 <span class="lupicon-user"></span>
                                 <span data-bind="ltext: 'mypage.title'"></span>
                             </a>
                         </li>
                         <li>
-                            <a data-bind="attr: {href: '/app/' + $root.currentLanguage + '/logout', 'title': loc('logout')}" >
+                            <a id="logout-button"
+                               data-bind="attr: {href: '/app/' + $root.currentLanguage + '/logout', 'title': loc('logout')}" >
                                 <span class="lupicon-log-out"></span>
                                 <span class="narrow-hide" data-bind="ltext: 'logout'"></span>
                             </a>
