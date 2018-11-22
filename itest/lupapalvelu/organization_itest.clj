@@ -468,6 +468,17 @@
     (count names) => pos?
     (-> names :753-R :fi) => "Sipoon rakennusvalvonta"))
 
+(facts organization-names-by-user
+  (let [sipoo-R-names {:fi "Sipoon rakennusvalvonta", :sv "Sipoon rakennusvalvonta", :en "Sipoon rakennusvalvonta"}]
+    (query pena :organization-names-by-user) => {:ok true, :names []}
+    (query sipoo :organization-names-by-user) => {:ok true, :names {:753-R sipoo-R-names}}
+    (query sonja :organization-names-by-user)
+    => {:ok true, :names {:753-R         sipoo-R-names
+                          :753-YA        {:en "Sipoon yleisten alueiden rakentaminen"
+                                          :fi "Sipoon yleisten alueiden rakentaminen"
+                                          :sv "Sipoon yleisten alueiden rakentaminen"}
+                          :998-R-TESTI-2 sipoo-R-names}}))
+
 (facts "Organization tags"
   (fact "only auth admin can add new tags"
     (command sipoo :save-organization-tags :tags []) => ok?
