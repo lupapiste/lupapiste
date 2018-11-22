@@ -7807,6 +7807,10 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
   margin-bottom: 6px;
 }
 
+toggle.no-border > div {
+  border: none;
+}
+
 label.filter-label {
   width: 100%;
   display: inline-block;
@@ -14403,6 +14407,10 @@ div.automatic-assignments .assignment .editor {
   display: table-row;
 }
 
+span.assignment-target-group + span.assignment-target-group {
+  margin-top: .5em;
+}
+
 #ui-datepicker-div {
   background: #f6f6f6;
   border: 1px solid #dddddd;
@@ -15358,12 +15366,17 @@ div.search i {
   width: 15%;
 }
 
-.assignments-search-result__table th.first {
-  width: 5%;
+.assignments-search-result__table th {
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
-.assignments-search-result__table th.second {
-  width: 15%;
+.assignments-search-result__table th > span {
+  vertical-align: middle;
+}
+
+.assignments-search-result__table th > i {
+  vertical-align: middle;
 }
 
 .assignments-search-result__table th.third {
@@ -15375,7 +15388,7 @@ div.search i {
 }
 
 .assignments-search-result__table th.fifth {
-  width: 25%;
+  width: 100%;
 }
 
 .assignments-search-result__table th.sixth {
@@ -15392,6 +15405,10 @@ div.search i {
 
 .assignments-search-result__table tr td.targets-added {
   color: #df3215;
+}
+
+.assignments-search-result__table tr td.application-id {
+  white-space: nowrap;
 }
 
 .search-results-waiting i.spin {
@@ -15731,6 +15748,11 @@ button.rollup-button {
   padding-top: 0;
 }
 
+.pate-grid-1 > .row:empty {
+  display: none;
+  height: 0;
+}
+
 .pate-grid-2 {
   width: 100%;
   color: #333333;
@@ -15868,6 +15890,11 @@ button.rollup-button {
 .pate-grid-2 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-2 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-3 {
@@ -16047,6 +16074,11 @@ button.rollup-button {
 .pate-grid-3 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-3 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-4 {
@@ -16266,6 +16298,11 @@ button.rollup-button {
 .pate-grid-4 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-4 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-5 {
@@ -16525,6 +16562,11 @@ button.rollup-button {
 .pate-grid-5 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-5 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-6 {
@@ -16824,6 +16866,11 @@ button.rollup-button {
 .pate-grid-6 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-6 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-7 {
@@ -17163,6 +17210,11 @@ button.rollup-button {
 .pate-grid-7 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-7 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-8 {
@@ -17542,6 +17594,11 @@ button.rollup-button {
 .pate-grid-8 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-8 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-9 {
@@ -17961,6 +18018,11 @@ button.rollup-button {
 .pate-grid-9 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-9 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-10 {
@@ -18420,6 +18482,11 @@ button.rollup-button {
 .pate-grid-10 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-10 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-11 {
@@ -18919,6 +18986,11 @@ button.rollup-button {
 .pate-grid-11 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-11 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-12 {
@@ -19458,6 +19530,11 @@ button.rollup-button {
 .pate-grid-12 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-12 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-13 {
@@ -20037,6 +20114,11 @@ button.rollup-button {
 .pate-grid-13 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-13 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-14 {
@@ -20656,6 +20738,11 @@ button.rollup-button {
 .pate-grid-14 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-14 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-15 {
@@ -21315,6 +21402,11 @@ button.rollup-button {
 .pate-grid-15 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-15 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-16 {
@@ -22014,6 +22106,11 @@ button.rollup-button {
 .pate-grid-16 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-16 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-17 {
@@ -22753,6 +22850,11 @@ button.rollup-button {
 .pate-grid-17 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-17 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-18 {
@@ -23532,6 +23634,11 @@ button.rollup-button {
 .pate-grid-18 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-18 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-19 {
@@ -24351,6 +24458,11 @@ button.rollup-button {
 .pate-grid-19 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-19 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-20 {
@@ -25210,6 +25322,11 @@ button.rollup-button {
 .pate-grid-20 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-20 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-21 {
@@ -26109,6 +26226,11 @@ button.rollup-button {
 .pate-grid-21 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-21 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-22 {
@@ -27048,6 +27170,11 @@ button.rollup-button {
 .pate-grid-22 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-22 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-23 {
@@ -28027,6 +28154,11 @@ button.rollup-button {
 .pate-grid-23 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-23 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-grid-24 {
@@ -29046,6 +29178,11 @@ button.rollup-button {
 .pate-grid-24 > .row.row--indent {
   padding-left: 24px;
   padding-top: 0;
+}
+
+.pate-grid-24 > .row:empty {
+  display: none;
+  height: 0;
 }
 
 .pate-list > .item {
@@ -38797,6 +38934,42 @@ button.invoice-change-state-button {
 
 .invoice-operations-table > thead {
   background-color: #dddddd;
+}
+
+.price-catalogue .catalogue-select-wrapper {
+  margin-bottom: 2em;
+}
+
+.price-catalogue .row-operation {
+  background-color: #f39129;
+  box-sizing: border-box;
+  color: white;
+  display: inline-block;
+  margin-right: 0.5em;
+  padding-right: 0.5em;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  padding-left: 1em;
+}
+
+.price-catalogue .view-switch {
+  margin-bottom: 2em;
+}
+
+.price-catalogue .view-switch-guide-text {
+  padding-right: 1em;
+}
+
+.price-catalogue .view-switch-selected {
+  background-color: #f39129;
+  color: white;
+  border: 1px solid #f39129;
+}
+
+.price-catalogue .view-switch-unselected {
+  background-color: white;
+  color: #f39129;
+  border: 1px solid #f39129;
 }
 
 #bulletins, #local-bulletins {

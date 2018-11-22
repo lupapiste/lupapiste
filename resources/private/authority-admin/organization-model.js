@@ -74,6 +74,25 @@ LUPAPISTE.OrganizationModel = function () {
 
   self.sectionOperations = ko.observableArray();
 
+  var defaultAttachmentsMandatory = ko.observable({});
+
+  self.damForOperation = function( op ) {
+    return defaultAttachmentsMandatory()[op];
+  };
+
+  self.toggleDamForOperation = function( op, isMandatory ) {
+    defaultAttachmentsMandatory( _.set( defaultAttachmentsMandatory(),
+                                        op,
+                                        isMandatory));
+    ajax.command( "toggle-default-attachments-mandatory-operation",
+                  {organizationId: self.organizationId(),
+                   operationId: op,
+                   mandatory: isMandatory})
+      .success(util.showSavedIndicator)
+      .error(util.showSavedIndicator)
+      .call();
+  };
+
   self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };
 
   ko.computed(function() {
@@ -505,6 +524,12 @@ LUPAPISTE.OrganizationModel = function () {
     self.handlerRoles( _.get( organization, "handler-roles", []));
 
     self.assignmentTriggers( _.get( organization, "assignment-triggers", []));
+
+    defaultAttachmentsMandatory( _.reduce( _.get( organization, "default-attachments-mandatory"),
+                                           function( acc, op ) {
+                                             return _.set( acc, op, true );
+                                           },
+                                           {}));
 
     self.initialized = true;
   };

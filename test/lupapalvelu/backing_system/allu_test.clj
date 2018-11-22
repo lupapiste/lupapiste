@@ -206,7 +206,7 @@
           => passing-quick-check))
 
       (let [router (test-router {:status 200, :body allu-id})
-            handler (reitit-ring/ring-handler router)]
+            handler (comp (reitit-ring/ring-handler router) @#'allu/try-reload-allu-id)]
         (with-redefs [allu/allu-router router
                       allu/allu-request-handler handler
                       allu/send-allu-request! handler]      ; Since these are unit tests we bypass JMS.

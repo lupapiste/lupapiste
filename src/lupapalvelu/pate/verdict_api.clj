@@ -5,7 +5,8 @@
   (:require [clj-time.coerce :as tc]
             [clj-time.core :as t]
             [clojure.set :as set]
-            [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw notify some-pre-check
+                                        and-pre-check not-pre-check] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.metadata :as metadata]
@@ -52,6 +53,13 @@
   [{data :data :as command}]
   (when (:verdict-id data)
     (when-not (verdict/verdict-filled? command)
+      (fail :pate.required-fields))))
+
+(defn- proposal-filled
+  "Precheck that fails if any of the required fields for proposal is empty."
+  [{data :data :as command}]
+  (when (:verdict-id data)
+    (when-not (verdict/proposal-filled? command)
       (fail :pate.required-fields))))
 
 (defn- contractual-application
@@ -188,8 +196,8 @@
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(action/some-pre-check (verdict-exists :published?)
-                                             backing-system-verdict)]
+   :pre-checks       [(some-pre-check (verdict-exists :published?)
+                                      backing-system-verdict)]
    :states           states/post-verdict-states}
   [command]
   (ok :verdict (verdict/published-verdict-details command)))
@@ -219,14 +227,14 @@
   (ok))
 
 (defcommand edit-pate-verdict
-  {:description "Updates verdict data. Returns changes and errors
+  {:description      "Updates verdict data. Returns changes and errors
   lists (items are path-vector value pairs)"
    :user-roles       #{:authority}
    :parameters       [id verdict-id path value]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])
                       (partial action/vector-parameters [:path])]
-   :pre-checks       [(verdict-exists :draft?)]
+   :pre-checks       [(verdict-exists :editable?)]
    :states           states/post-submitted-states}
   [command]
   (let [result (verdict/edit-verdict command)]
@@ -241,8 +249,10 @@
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :draft?)
-                      verdict-filled]
+   :pre-checks       [(verdict-exists :editable?)
+                      (some-pre-check
+                        verdict-filled
+                        proposal-filled)]
    :states           states/post-submitted-states}
   [command]
   (verdict/preview-verdict command))
@@ -315,6 +325,19 @@
   [command]
   (verdict/download-verdict command))
 
+(defraw proposal-pdf
+  {:description      "Endpoint for downloading the verdict attachment."
+   :parameters       [:id :verdict-id]
+   :categories       #{:pate-verdicts}
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
+   :user-authz-roles roles/all-authz-roles
+   :pre-checks       [(some-pre-check
+                        (verdict-exists :published?)
+                        (verdict-exists :proposal?))]}
+  [command]
+  (verdict/download-proposal command))
+
 ;; ------------------------------------------
 ;; Modern actions
 ;; ------------------------------------------
@@ -340,7 +363,7 @@
    :input-validators    [(partial action/non-blank-parameters [:id])]
    :pre-checks          [pate-enabled
                          verdicts-supported
-                         (action/not-pre-check legacy-category)
+                         (not-pre-check legacy-category)
                          (template/verdict-template-check :application :published)
                          (replacement-check :replacement-id)]
    :states              states/post-submitted-states}
@@ -354,7 +377,7 @@
    :parameters          [id replacement-id]
    :input-validators    [(partial action/non-blank-parameters [:id])]
    :pre-checks          [pate-enabled
-                         (action/not-pre-check legacy-category)
+                         (not-pre-check legacy-category)
                          (template/verdict-template-check :application :published)
                          (replacement-check :replacement-id)]
    :states              states/post-submitted-states}
@@ -369,7 +392,7 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
-                      (verdict-exists :draft? :modern?)]
+                      (verdict-exists :editable? :modern?)]
    :states           states/post-submitted-states}
   [command]
   (verdict/delete-verdict verdict-id command)
@@ -384,15 +407,15 @@
    :states           (set/difference states/post-submitted-states
                                      #{:finished})
    :pre-checks       [pate-enabled
-                      (verdict-exists :draft? :modern?)
+                      (verdict-exists :editable? :modern?)
                       verdict-filled
-                      (action/some-pre-check
-                       (action/and-pre-check (verdict-exists :contract?)
-                                             (state-in states/post-submitted-states))
-                       ;; As KuntaGML message is generated the
-                       ;; application state must be at least :sent
-                       (state-in (set/difference states/post-submitted-states
-                                                 #{:complementNeeded})))]
+                      (some-pre-check
+                        (and-pre-check (verdict-exists :contract?)
+                                              (state-in states/post-submitted-states))
+                        ;; As KuntaGML message is generated the
+                        ;; application state must be at least :sent
+                        (state-in (set/difference states/post-submitted-states
+                                                  #{:complementNeeded})))]
    :notified         true
    :on-success       (notify :application-state-change)}
   [command]
@@ -410,7 +433,7 @@
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks       [verdicts-supported
-                      (action/some-pre-check (action/not-pre-check pate-enabled)
+                      (some-pre-check (not-pre-check pate-enabled)
                                              legacy-category)]
    :states           states/post-submitted-states}
   [command]
@@ -424,7 +447,7 @@
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists :legacy?)
-                      (action/some-pre-check (verdict-exists :legacy? :draft?)
+                      (some-pre-check (verdict-exists :legacy? :editable?)
                                              (state-in states/give-verdict-states))]
    :states           states/post-submitted-states
    :notified         true}
@@ -437,7 +460,7 @@
    :parameters       [id verdict-id]
    :categories       #{:pate-verdicts}
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :draft? :legacy?)
+   :pre-checks       [(verdict-exists :editable? :legacy?)
                       verdict-filled]
    :states           (set/difference states/post-submitted-states
                                      #{:finished :complementNeeded})
@@ -445,3 +468,21 @@
    :on-success       (notify :application-state-change)}
   [command]
   (ok (verdict/publish-verdict command)))
+
+;; ------------------------------------------
+;; Verdict proposal
+;; ------------------------------------------
+
+(defcommand publish-verdict-proposal
+  {:description      "Publishes verdict proposal."
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :categories       #{:pate-verdicts}
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :states           (set/difference states/post-submitted-states
+                                     #{:finished})
+   :pre-checks       [pate-enabled
+                      (verdict-exists :editable?)
+                      proposal-filled]}
+  [command]
+  (ok (verdict/publish-verdict-proposal command)))

@@ -58,6 +58,8 @@
                                                      :loc-prefix :pate-r.verdict-code}}
                 :verdict-code-link (settings-link :loc-prefix :pate-r.verdict-code)
                 :paatosteksti      {:phrase-text {:loc-prefix :pate-verdict
+                                                  :category   :paatosteksti}}
+                :proposaltext      {:phrase-text {:loc-prefix :pate-verdict-proposal
                                                   :category   :paatosteksti}}}
    :section    {:id         :verdict
                 :loc-prefix :pate-verdict-template.verdict-info
@@ -77,7 +79,9 @@
                                          :show? :*ref.settings.verdict-code
                                          :dict  :verdict-code}]
                                        [{:col  12
-                                         :dict :paatosteksti}]]}}})
+                                         :dict :paatosteksti}]
+                                       [{:col  12
+                                         :dict :proposaltext}]]}}})
 
 (def temsub-bulletin
   {:dictionary {:bulletinOpDescription {:phrase-text {:category :toimenpide-julkipanoon
@@ -247,7 +251,6 @@
                                             :list       {:labels? false
                                                          :items   [{:dict :upload}]}}]]}}
    :removable? true})
-
 
 (def r-verdict-template-schema
   (build-verdict-template-schema (temsub-verdict helper/verdict-dates)

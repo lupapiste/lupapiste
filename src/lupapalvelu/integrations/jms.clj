@@ -6,11 +6,9 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util])
-  (:import (javax.jms ExceptionListener Connection Session Queue Message
-                      MessageListener BytesMessage ObjectMessage TextMessage
-                      MessageConsumer MessageProducer JMSException JMSContext)
-           (org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection)
-           (org.apache.activemq.artemis.api.jms ActiveMQJMSClient)))
+  (:import [javax.jms Connection Session JMSContext
+                      MessageListener MessageConsumer MessageProducer Message JMSException]
+           [org.apache.activemq.artemis.jms.client ActiveMQJMSConnectionFactory ActiveMQConnection]))
 
 ; If external broker is not defined, we start a embedded broker inside the JVM for testing.
 (when (and (env/dev-mode?) (ss/blank? (env/value :jms :broker-url)))
@@ -35,7 +33,7 @@
   (defn register-conj [type object]
     (register type conj object))
 
-  (defn message-listener [cb]
+  (defn message-listener ^MessageListener [cb]
     (reify MessageListener
       (onMessage [_ m]
         (when-some [delivery-count (.getIntProperty m "JMSXDeliveryCount")]
@@ -47,38 +45,32 @@
                         test-db-name
                         mongo/*db-name*)]
           (mongo/with-db db-name
-            (condp instance? m
-              BytesMessage (cb (jms/byte-message-as-array m))
-              ObjectMessage (cb (.getObject ^ObjectMessage m))
-              TextMessage (cb (.getText ^TextMessage m))
-              (error "Unknown JMS message type:" (type m))))))))
+            (cb (jms/message-content m)))))))
 
   (def exception-listener
-    (reify ExceptionListener
-      (onException [_ e]
+    (jms/exception-listener
+      (fn [e]
         (error e "JMS exception, maybe it was a reconnect?" (.getMessage e))
         (info "After exception, is connection started:" (.isStarted ^ActiveMQConnection (:conn @state))))))
 
-  (defn queue ^Queue [name]
-    (ActiveMQJMSClient/createQueue name))
-
   (def create-session jms/create-session)
 
-  (defn create-transacted-session [conn]
-    (jms/create-session conn Session/SESSION_TRANSACTED))
+  (def create-transacted-session jms/create-transacted-session)
 
   (defn register-session [session type]
     (swap! state update (keyword (str (name type) "-session")) conj session)
     session)
 
-  (defn commit [^Session sess] (.commit sess))
-  (defn rollback [^Session sess] (.rollback sess))
+  (def commit jms/commit)
+  (def rollback jms/rollback)
 
-  (defn create-jms-message [data session-or-context]
-    (let [^Message message (jms/create-message data session-or-context)]
+  (defn create-jms-message ^Message [data session-or-context]
+    (let [message (jms/create-message data session-or-context)]
       (when (env/dev-mode?)
         (.setStringProperty message jms-test-db-property mongo/*db-name*))
       message))
+
+  (def queue jms/create-queue)
 
   ;;
   ;; Connection
@@ -93,11 +85,11 @@
 
   (defn create-connection-factory ^ActiveMQJMSConnectionFactory [{^String url :broker-url :as connection-options}]
     (let [{:keys [retry-interval retry-multipier max-retry-interval reconnect-attempts consumer-window-size]
-           :or   {retry-interval (* 2 1000)
-                  retry-multipier 2
-                  max-retry-interval (* 5 60 1000)          ; 5 mins
+           :or   {retry-interval       (* 2 1000)
+                  retry-multipier      2
+                  max-retry-interval   (* 5 60 1000)        ; 5 mins
                   consumer-window-size 0
-                  reconnect-attempts -1}} connection-options]
+                  reconnect-attempts   -1}} connection-options]
       (doto (ActiveMQJMSConnectionFactory. url)
         (.setRetryInterval (util/->long retry-interval))
         (.setRetryIntervalMultiplier (util/->double retry-multipier))
@@ -167,7 +159,7 @@
     ([queue-name]
      (create-producer (producer-session) queue-name #(create-jms-message % (producer-session))))
     ([session queue-name message-fn]
-     (-> (jms/create-producer session (queue queue-name))
+     (-> (jms/create-producer session (queue session queue-name))
          (register-producer)
          (jms/producer-fn message-fn))))
 
@@ -181,7 +173,7 @@
   (defn produce-with-context [destination-name data]
     (jms/send-with-context
       default-connection-factory
-      (queue destination-name)
+      (queue (producer-session) destination-name)
       data
       (merge (select-keys connection-properties [:username :password])
              {:session-mode JMSContext/AUTO_ACKNOWLEDGE
@@ -206,7 +198,7 @@
     ([endpoint-name callback-fn]
      (create-consumer (consumer-session) endpoint-name callback-fn))
     ([session endpoint-name callback-fn]
-     (-> (jms/listen session (queue endpoint-name) (message-listener callback-fn))
+     (-> (jms/listen session (queue session endpoint-name) (message-listener callback-fn))
          (register-consumer))))
 
   (defn nippy-callbacker [callback]

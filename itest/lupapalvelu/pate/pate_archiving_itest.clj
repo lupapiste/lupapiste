@@ -13,6 +13,7 @@
 
 (testable-privates lupapalvelu.archive.archiving generate-archive-metadata)
 
+(lupapalvelu.mongo/connect!)
 (apply-remote-fixture "pate-verdict")
 
 (def app-id (create-app-id pena

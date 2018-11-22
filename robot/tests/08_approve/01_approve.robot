@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Mikko can't approve application
+Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/approve_helpers.robot
 Resource       ../06_attachments/attachment_resource.robot
@@ -19,7 +20,7 @@ Mikko creates an application
 Mikko selects building
   Open tab  info
   Open accordions  info
-  Wait Until  Select From List  //section[@data-doc-type='rakennuksen-muuttaminen']//select[@name='buildingId']  199887766E
+  Wait Until  Select From List by value  //section[@data-doc-type='rakennuksen-muuttaminen']//select[@name='buildingId']  199887766E
   Confirm  dynamic-yes-no-confirm-dialog
 
 Got owner info from backed
@@ -28,7 +29,7 @@ Got owner info from backed
 Mikko sets himself the applicant
   Open tab  parties
   Open accordions  parties
-  Select From List  //section[@data-doc-type="hakija-r"]//select[@data-test-id="henkilo.userId"]  Intonen Mikko
+  Select From List by label  //section[@data-doc-type="hakija-r"]//select[@data-test-id="henkilo.userId"]  Intonen Mikko
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
 
 Mikko can't approve application
@@ -110,7 +111,7 @@ Sonja logs in and approves group kaytto: rakennuksen-muuttaminen is now approved
 Party tab has indicators
   Wait Until  Element should be visible  applicationPartyDocumentIndicator
 
-Integration message monotor button is not enabled
+Integration message monitor button is not enabled
   Test id disabled  show-integration-messages
 
 Sonja approves application

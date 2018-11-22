@@ -34,6 +34,28 @@ ${DB PREFIX}                    test_
 
 *** Keywords ***
 
+# Convenience replacements of deprecated keywords
+
+Focus
+  [Arguments]  ${locator}
+  Set Focus To Element  ${locator}
+
+Get Matching Xpath Count
+  [Arguments]  ${xpath}
+  ${count}=  Get Element Count  xpath:${xpath}
+  [Return]  ${count}
+
+Xpath Should Match X Times
+  [Arguments]  ${xpath}  ${times}
+  Run keyword unless  ${times}==0  Wait until  Page Should Contain Element  xpath:${xpath}  limit=${times}
+  Run keyword if  ${times}==0  Wait until  Page should not contain element  xpath:${xpath}
+
+jQuery Should Match X Times
+  [Arguments]  ${selector}  ${times}
+  Run keyword unless  ${times}==0  Wait until  Page Should Contain Element  jquery:${selector}  limit=${times}
+  Run keyword if  ${times}==0  Wait until  Page should not contain element  jquery:${selector}
+
+
 Set DB cookie
   ${timestamp}=  Get Time  epoch
   ${random post fix}=  Evaluate  random.randint(0, 999999999999)  modules=random
@@ -208,8 +230,10 @@ Go to page
 
 Open tab
   [Arguments]  ${name}
+  Wait until element is visible  applicationTabs
   ${is-visible}=  Run Keyword and Return Status  Element should be visible  application-${name}-tab
-  Run keyword unless  ${is-visible}  Run keywords  Scroll and click test id  application-open-${name}-tab  AND  Tab should be visible  ${name}
+  Scroll to top
+  Run keyword unless  ${is-visible}  Run keywords  Click by test id  application-open-${name}-tab  AND  Tab should be visible  ${name}
 
 Tab should be visible
   [Arguments]  ${name}
@@ -528,15 +552,25 @@ Select From List by test id and index
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List By Index  xpath=//select[@data-test-id="${id}"]  ${index}
 
-Select From List by test id
+Select From List by test id and value
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
-  Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
+  Select From List by value  xpath=//select[@data-test-id="${id}"]  ${value}
 
-Select From List by id
+Select From List by test id and label
+  [Arguments]  ${id}  ${label}
+  Wait until page contains element  xpath=//select[@data-test-id="${id}"]
+  Select From List by label  xpath=//select[@data-test-id="${id}"]  ${label}
+
+Select From List by id and value
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@id="${id}"]
-  Select From List  xpath=//select[@id="${id}"]  ${value}
+  Select From List by value  xpath=//select[@id="${id}"]  ${value}
+
+Select From List by id and label
+  [Arguments]  ${id}  ${label}
+  Wait until page contains element  xpath=//select[@id="${id}"]
+  Select From List by label  xpath=//select[@id="${id}"]  ${label}
 
 Select From Autocomplete
   [Arguments]  ${container}  ${value}
@@ -723,7 +757,7 @@ Document status is enabled
 Table with id should have rowcount
   [Arguments]  ${id}  ${expectedRowcount}
   ${rowcount}=  Get Matching XPath Count  //table[@id='${id}']/tbody/tr
-  Should be equal  ${rowcount}  ${expectedRowcount}
+  Should be equal as integers  ${rowcount}  ${expectedRowcount}
 
 #
 # Helper for inforequest and application crud operations:
@@ -918,7 +952,7 @@ Add attachment
 
   Run Keyword If  '${kind}' == 'application'  Set attachment type for upload  ${type}
   Run Keyword If  '${kind}' == 'application' and $operation  Wait until  Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
-  Run Keyword If  '${kind}' == 'application' and $operation  Select From List  attachmentOperation  ${operation}
+  Run Keyword If  '${kind}' == 'application' and $operation  Select From List by value  attachmentOperation  ${operation}
 
   Input text        text  ${description}
   Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
@@ -942,7 +976,7 @@ Delete attachment
 Set attachment type for upload
   [Arguments]  ${type}
   Wait until  Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='${type}']
-  Select From List  attachmentType  ${type}
+  Select From List by value  attachmentType  ${type}
 
 Open attachment details
   [Arguments]  ${type}  ${nth}=0
@@ -1629,6 +1663,10 @@ Test id should contain
   [Arguments]  ${id}  ${text}
   Wait until  Element should contain  jquery=[data-test-id=${id}]:visible  ${text}
 
+Test id should not contain
+  [Arguments]  ${id}  ${text}
+  Wait until  Element should not contain  jquery=[data-test-id=${id}]:visible  ${text}
+
 Test id input is
   [Arguments]  ${id}  ${text}
   Wait until  Value should be  xpath=//*[@data-test-id='${id}']  ${text}
@@ -1719,7 +1757,7 @@ Toggle toggle
 
 Select from test id
   [Arguments]  ${id}  ${value}
-  Select from list  jquery=select[data-test-id=${id}]  ${value}
+  Select from list by value  jquery=select[data-test-id=${id}]  ${value}
 
 Select from test id by text
   [Arguments]  ${id}  ${text}
@@ -1745,11 +1783,6 @@ Test id select texts are
   Wait test id visible  ${tid}
   @{vals}=  Get list items  jquery=[data-test-id=${tid}]  values=False
   Should be true  @{vals} == @{texts}
-
-
-jQuery should match X times
-  [Arguments]  ${selector}  ${count}
-  Wait until  Javascript?  $("${selector}").length === ${count}
 
 Test id autocomplete options check
   [Arguments]  ${tid}  ${included}  @{options}
@@ -1791,8 +1824,8 @@ There are no frontend errors
   Go to  ${LOGOUT URL}
   Wait until  Element should be visible  xpath=//section[@id='login']//h3[1]
   # These test cases will fail if errors exist
-  Should be equal  ${FATAL_COUNT}  0  Fatal frontend errors
-  Should be equal  ${ERR_COUNT}  0  Frontend errors
+  Should be equal as integers  ${FATAL_COUNT}  0  Fatal frontend errors
+  Should be equal as integers  ${ERR_COUNT}  0  Frontend errors
 
 #
 # YA

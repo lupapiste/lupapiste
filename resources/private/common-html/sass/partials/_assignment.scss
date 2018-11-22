@@ -31,3 +31,7 @@ div.automatic-assignments {
     }
   }
 }
+
+span.assignment-target-group + span.assignment-target-group {
+  margin-top: .5em;
+}

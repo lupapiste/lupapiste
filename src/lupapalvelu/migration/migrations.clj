@@ -4083,6 +4083,36 @@
           0
           (review-migration/duplicate-review-target-applications)))
 
+(def nonexisting-muuTunnus-value-in-tasks?
+  {:tasks {$elemMatch {$and [{:data.muuTunnus {$exists true}}
+                             {:data.muuTunnus.value {$exists false}}]}}})
+
+(defmigration LPK-3989-set-muuTunnus-to-empty-string
+  {:apply-when (pos? (mongo/count :applications nonexisting-muuTunnus-value-in-tasks?))}
+  (update-applications-array
+    :tasks
+    (fn [task]
+      (if (and (contains? (:data task) :muuTunnus)
+               (not (-> task :data :muuTunnus :value)))
+        (assoc-in task [:data :muuTunnus :value] "")
+        task))
+    nonexisting-muuTunnus-value-in-tasks?))
+
+(defmigration LPK-3766-assignments-modified-field
+  {:apply-when (pos? (mongo/count :assignments {:modified {$exists false}}))}
+  (let [latest-ts          #(or (:timestamp (last %)) 0)
+        target-assignments (mongo/select :assignments {:modified {$exists false}})]
+    (doseq [{:keys [id states
+                    targets]} target-assignments
+            :let              [modified (max (latest-ts states)
+                                             (latest-ts targets))]]
+      (assert (pos? modified) (str "No timestamp for assignment " id))
+      (mongo/update-by-id :assignments
+                          id
+                          {$set {:modified modified}}))
+    (count target-assignments)))
+
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

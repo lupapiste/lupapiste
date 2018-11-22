@@ -28,7 +28,7 @@
             [lupapalvelu.attachment :refer [get-attachment-file!]]
             [lupapalvelu.backing-system.allu.conversion :refer [lang application->allu-placement-contract
                                                                 format-date-time]]
-            [lupapalvelu.backing-system.allu.schemas :refer [LoginCredentials PlacementContract AttachmentMetadata]]
+            [lupapalvelu.backing-system.allu.schemas :refer [LoginCredentials PlacementContract AttachmentMetadata AttachmentFile]]
             [lupapalvelu.file-upload :refer [save-file]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.integrations.jms :as jms]
@@ -37,9 +37,11 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.storage.file-storage :as storage]
-            [lupapalvelu.allu.allu-application :as allu-application])
+            [lupapalvelu.allu.allu-application :as allu-application]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.pdf.pdf-export-api :as pdf-export-api])
   (:import [java.lang AutoCloseable]
-           [java.io InputStream ByteArrayInputStream]))
+           [java.io ByteArrayInputStream]))
 
 (defstate ^:private current-jwt
   "The JWT to be used for ALLU API authorization. Occasionally replaced by re-login."
@@ -84,7 +86,6 @@
   and `command`."
   [{:keys [application] :as command}]
   (let [allu-id (get-in application [:integrationKeys :ALLU :id])
-        _ (assert allu-id (str (:id application) " does not contain an ALLU id"))
         route-match (reitit/match-by-name allu-router [:applications :cancel] {:id allu-id})]
     {::command       (minimize-command command)
      :uri            (:path route-match)
@@ -115,7 +116,6 @@
 
 (defmethod application-update-request "sijoitussopimus" [pending-on-client {:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
-        _ (assert allu-id (str (:id application) " does not contain an ALLU id")) ;;FIXME: change asserts to fail!s
         params {:path {:id allu-id}
                 :body (application->allu-placement-contract pending-on-client
                                                             application)}
@@ -125,36 +125,60 @@
      :request-method (route-match->request-method route-match)
      :body           (:body params)}))
 
+(defn- attachment-send-self
+  "Construct an ALLU attachment upload request to convert the application to pdf and send it to ALLU as an attachement."
+  [{:keys [application] :as command}]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)
+        params {:path {:id allu-id}
+                :multipart {:metadata {:name        (str (localize lang :application.applicationSummary) ".pdf")
+                                       :description (let [type (localize lang :attachmentType "muut" "muu")
+                                                          description (localize lang :application.applicationSummary)]
+                                                      (if (or (not description) (= type description))
+                                                        type
+                                                        (str type ": " description)))
+                                       :mimeType    "application/pdf"}
+                            :file {:attach-self true}}}
+        route-match (reitit/match-by-name allu-router [:attachments :create] (:path params))]
+    {::command (minimize-command command)
+     :uri (:path route-match)
+     :request-method (route-match->request-method route-match)
+     :multipart [{:name "metadata"
+                  :mime-type "application/json"
+                  :encoding "UTF-8"
+                  :content (-> params :multipart :metadata)}
+                 {:name "file"
+                  :mime-type (-> params :multipart :metadata :mimeType)
+                  :content (-> params :multipart :file)}]}))
+
 (defn- attachment-send
   "Construct an ALLU attachment upload request for `send-allu-request!` based on reverse routing on `allu-router`,
   `command` and `attachment` (one of `(-> command :application :attachments)`)."
   [{:keys [application] :as command} {{:keys [type-group type-id]} :type :keys [latestVersion] :as attachment}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
-        _ (assert allu-id (str (:id application) " does not contain an ALLU id"))
-        params {:path      {:id allu-id}
-                :multipart {:metadata {:name        (:filename latestVersion)
+
+        params {:path {:id allu-id}
+                :multipart {:metadata {:name (:filename latestVersion)
                                        :description (let [type (localize lang :attachmentType type-group type-id)
                                                           description (:contents attachment)]
                                                       (if (or (not description) (= type description))
                                                         type
                                                         (str type ": " description)))
-                                       :mimeType    (:contentType latestVersion)}
-                            :file     (select-keys latestVersion [:fileId :storageSystem])}}
+                                       :mimeType (:contentType latestVersion)}
+                            :file (select-keys latestVersion [:fileId :storageSystem])}}
         route-match (reitit/match-by-name allu-router [:attachments :create] (:path params))]
-    {::command       (minimize-command command)
-     :uri            (:path route-match)
+    {::command (minimize-command command)
+     :uri (:path route-match)
      :request-method (route-match->request-method route-match)
-     :multipart      [{:name      "metadata"
-                       :mime-type "application/json"
-                       :encoding  "UTF-8"
-                       :content   (-> params :multipart :metadata)}
-                      {:name      "file"
-                       :mime-type (-> params :multipart :metadata :mimeType)
-                       :content   (-> params :multipart :file)}]}))
+     :multipart [{:name "metadata"
+                  :mime-type "application/json"
+                  :encoding "UTF-8"
+                  :content (-> params :multipart :metadata)}
+                 {:name "file"
+                  :mime-type (-> params :multipart :metadata :mimeType)
+                  :content (-> params :multipart :file)}]}))
 
 (defn- contract-proposal-request [{:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
-        _ (assert allu-id (str (:id application) " does not contain an ALLU id"))
         params {:path {:id allu-id}}
         route-match (reitit/match-by-name allu-router [:placementcontracts :contract :proposal] (:path params))]
     {::command       (minimize-command command)
@@ -163,7 +187,6 @@
 
 (defn- contract-approval [{:keys [application user] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
-        _ (assert allu-id (str (:id application) " does not contain an ALLU id"))
         params {:path {:id allu-id}
                 :body {:signer      (str (:firstName user) " " (:lastName user))
                        :signingTime (format-date-time (t/now))}}
@@ -175,7 +198,6 @@
 
 (defn- final-contract-request [{:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
-        _ (assert allu-id (str (:id application) " does not contain an ALLU id"))
         params {:path {:id allu-id}}
         route-match (reitit/match-by-name allu-router [:placementcontracts :contract :final] (:path params))]
     {::command       (minimize-command command)
@@ -329,6 +351,19 @@
   [post-act!]
   (fn [handler] (fn [request] (let [response (handler request)] (post-act! response) response))))
 
+;; HACK:
+(defn- try-reload-allu-id
+  "Reload ALLU id from application if the request has empty string for it."
+  [{:keys [uri] :as request}]
+  (let [{:keys [path-params] :as route-match} (reitit/match-by-path allu-router uri)] ; OPTIMIZE
+    (if (and (contains? path-params :id) (empty? (:id path-params)))
+      (let [application (domain/get-application-no-access-checking (-> request ::command :application :id)
+                                                                   {:integrationKeys true})
+            allu-id (-> application :integrationKeys :ALLU :id)]
+        (assert allu-id (str (:id application) " does not contain an ALLU id"))
+        (assoc request :uri (:path (reitit/match-by-name allu-router (-> route-match :path :name) {:id allu-id}))))
+      request)))
+
 (defn- body&multipart-as-params
   "Copy the request :body into :body-params or :multipart into :multipart-params when they exist."
   [request]
@@ -365,18 +400,26 @@
   (fn [{{:keys [application user]} ::command :as request}]
     (match (-> request reitit-ring/get-match :data :name)
       [:attachments :create]
-      (let [{:keys [fileId storageSystem]} (get-in request [:multipart 1 :content])]
-        (if-some [file-map (storage/download-from-system (:id application) fileId storageSystem)]
+      (let [{:keys [attach-self fileId storageSystem]} (get-in request [:multipart 1 :content])]
+        (if-some [file-map (if attach-self
+                             {:content (fn [] (:body (pdf-export-api/raw-submitted-application-pdf-export {:application application
+                                                                                                           :user user
+                                                                                                           :lang lang})))}
+                             (storage/download-from-system (:id application) fileId storageSystem))]
           (with-open [contents ((:content file-map))]
             (handler (assoc-in request [:multipart 1 :content] contents)))
           (allu-fail! :error.file-not-found {:fileId fileId})))
 
       [:placementcontracts :contract (:or :proposal :final)]
       (let [request (assoc request :as :byte-array)
-            response (handler request)]
+            response (handler request)
+            file-name-suffix (case (last (-> request reitit-ring/get-match :data :name))
+                               :proposal "-sopimusehdotus.pdf"
+                               :final    "-sopimus.pdf"
+                               ".pdf")]
         (if (= (:status response) 200)
           (let [content-bytes (:body response)
-                file-data {:filename     (str (:id application) "-sopimusehdotus.pdf")
+                file-data {:filename     (str (:id application) file-name-suffix)
                            :content      (ByteArrayInputStream. content-bytes)
                            :content-type (get-in response [:headers "Content-Type"])
                            :size         (alength content-bytes)}
@@ -485,8 +528,7 @@
         ["/:id/attachments" {:name [:attachments :create]
                              :parameters {:path {:id ssc/NatString}
                                           :multipart {:metadata AttachmentMetadata
-                                                      :file {:fileId sssc/FileId
-                                                             :storageSystem sssc/StorageSystem}}}
+                                                      :file AttachmentFile}}
                              :middleware file-middleware
                              :post {:handler handler}}]]
 
@@ -522,7 +564,7 @@
 
 (def allu-request-handler
   "ALLU request handler. Returns HTTP response, calls `allu-fail!` on HTTP errors."
-  (reitit-ring/ring-handler allu-router))
+  (comp (reitit-ring/ring-handler allu-router) try-reload-allu-id))
 
 ;;;; JMS resources
 ;;;; ===================================================================================================================
@@ -555,7 +597,7 @@
 
   (defstate ^AutoCloseable allu-jms-consumer
     "JMS consumer for the ALLU request JMS queue"
-    :start (jms-client/listen allu-jms-session (jms/queue allu-jms-queue-name)
+    :start (jms-client/listen allu-jms-session (jms/queue allu-jms-session allu-jms-queue-name)
                               (jms/message-listener (jms/nippy-callbacker (allu-jms-msg-handler allu-jms-session))))
     :stop (.close allu-jms-consumer)))
 
@@ -616,6 +658,11 @@
   (doall (for [attachment attachments]
            (send-attachment! command attachment))))
 
+(defn send-application-as-attachment!
+  "Convert apllication to pdf and send it to ALLU as an attachment"
+  [command]
+  (send-allu-request! (attachment-send-self command)))
+
 (defn agreement-state
   "Returns :proposal when application is still in the state where agreement proposal should be fetched.
    Returns :final when the final verdict should be fetched."
@@ -625,7 +672,6 @@
     "agreementPrepared"  :final
     :else nil))
 
-;; TODO: Add this to batchrunner
 (defn load-placementcontract-proposal!
   "GET placement contract proposal pdf from ALLU. Saves the proposal pdf using `lupapalvelu.file-upload/save-file`."
   [command]
@@ -636,7 +682,6 @@
   [command]
   (send-allu-request! (contract-approval command)))
 
-;; TODO: Add this to batchrunner
 (defn load-placementcontract-final!
   "GET final placement contract pdf from ALLU. Saves the contract pdf using `lupapalvelu.file-upload/save-file`."
   [command]

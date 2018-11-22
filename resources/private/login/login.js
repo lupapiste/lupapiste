@@ -74,35 +74,40 @@
 
   hub.onPageLoad("login", recallMe);
 
-  var checkForSso = function() {
-    clearError();
+  var showPassword = function() {
     var passwordElement = document.getElementById("login-password");
+    passwordVisible(true);
+    passwordElement.focus();
+  };
+
+  var getUsername = function() {
+    var login = $("#login-username").val();
+    return _.isString( login ) ? _.trim( login ) : username();
+  };
+
+  // This can be called from handleLoginSubmit or as a click handler function from the "Seuraava"-button in WP
+  var checkForSso = function(cb) {
+    clearError();
+    var callback = (typeof(cb) === "function") ? cb : showPassword;
     ajax.get("/api/login-sso-uri")
-      .param("username", _.trim(username()))
+      .param("username", _.trim(getUsername()))
       .success(function(data) {
         if (data.uri) {
           window.location = data.uri;
         } else {
-          passwordVisible(true);
-          passwordElement.focus();
+          callback();
         }
       })
-      .error(function() {
-        passwordVisible(true);
-        passwordElement.focus();
-      })
+      .error(callback)
       .call();
   };
 
+  // This can be called from the WP main page or the login page of the app.
   var handleLoginSubmit = function() {
     if (document.getElementById("login-password").offsetParent !== null) {
       passwordVisible(true);
     }
-    if (passwordVisible()) {
-      login();
-    } else {
-      checkForSso();
-    }
+    checkForSso(passwordVisible() ? login : showPassword);
   };
 
   $(function() {
@@ -114,7 +119,7 @@
         pending: pending,
         handleLoginSubmit: handleLoginSubmit,
         passwordVisible: passwordVisible,
-        checkForSso: checkForSso,
+        checkForSso: _.partial(checkForSso, showPassword),
         username: username,
         validUser: validUser
       });

@@ -17,38 +17,35 @@
             [sade.strings :as ss]
             [midje.sweet :refer :all]))
 
-(defn- parse-route [domain & [metadata?]]
-  (format "%s/api/saml/%s/%s" (env/value :host)
-          (if metadata? "metadata" "ad-login")
-          domain))
-
 (def- response
   (-> "./dev-resources/mock-saml-response.edn" slurp read-string :encrypted-base64))
 
+(defn- parse-route [domain & [metadata?]]
+  (format "%s/api/saml/%s/%s" (server-address)
+          (if metadata? "metadata" "ad-login")
+          domain))
+
 (when (env/feature? :ad-login)
+  (apply-remote-minimal)
   (mongo/connect!)
-  (fixture/apply-fixture "minimal")
   (let [pori-route (parse-route "pori.fi")]
 
-        (fact "Pori-R has ad-login enabled"
-          (-> (org/get-organizations-by-ad-domain "pori.fi") first (get-in [:ad-login :enabled])) => true)
-
         (fact "update-or-create-user! can create or update users"
-          (let [user (ad-login/update-or-create-user! "Terttu" "Panaani" "terttu@panaani.fi" {})]
+          (let [user (ad-login/update-or-create-user! "Pedro" "Banana" "pedro@banana.fi" {})]
             (fact "User creation works as expected"
-              (= user (usr/get-user-by-email "terttu@panaani.fi")) => true)
+              (= user (usr/get-user-by-email "pedro@banana.fi")) => true)
             (facts "Updating users should work as well"
-              (let [updated-user (ad-login/update-or-create-user! "Terttu" "Panaani" "terttu@panaani.fi" {:609-R #{"reader"}})]
-                (= {:609-R ["reader"]} (:orgAuthz (usr/get-user-by-email "terttu@panaani.fi"))) => true))))
+              (let [updated-user (ad-login/update-or-create-user! "Pedro" "Banana" "pedro@banana.fi" {:609-R #{"reader"}})]
+                (= {:609-R ["reader"]} (:orgAuthz (usr/get-user-by-email "pedro@banana.fi"))) => true))))
 
         (fact "log-user-in! should... Log user in"
-          (let [user (usr/get-user-by-email "terttu@panaani.fi")
+          (let [user (usr/get-user-by-email "pedro@banana.fi")
                 {:keys [headers session status]} (ad-login/log-user-in! {} user)]
             (facts "User is redirected to authority landing page"
               (= 302 status) => true
               (= (str (env/value :host) "/app/fi/authority") (get headers "Location")) => true)
             (fact "User is inserted into the session"
-              (= "terttu@panaani.fi" (get-in session [:user :email])) => true)))
+              (= "pedro@banana.fi" (get-in session [:user :email])) => true)))
 
         (fact "The metadata route works"
           (let [res (client/get (parse-route "pori.fi" true))
@@ -74,13 +71,25 @@
                 status => 400
                 body => "No SAML data found in request")))
 
-          (fact "Login attempt with valid response works"
+          (fact "Login attempt with a valid response works"
+            (command admin :create-user
+                     :email "terttu@panaani.fi"
+                     :role "authority"
+                     :orgAuthz {:609-R ["reader"]}) => ok?
             (let [resp (client/post pori-route {:form-params {:SAMLResponse response}
                                                 :content-type :json
                                                 :throw-exceptions false})]
               (:status resp) => 302))
 
-          (fact "Login attempt with invalid response fails"
+          (fact "The user is created from the SAML data"
+            (let [resp (query admin :users :email "terttu@panaani.fi")]
+              resp => ok?
+              (count (:users resp)) => 1))
+
+          (fact "Now erase Terttu's account"
+            (command admin :erase-user :email "terttu@panaani.fi") => ok?)
+
+          (fact "Login attempt with an invalid response fails"
             (let [resp (client/post pori-route {:form-params {:SAMLResponse (apply str (drop-last response))}
                                                 :content-type :json
                                                 :throw-exceptions false})]

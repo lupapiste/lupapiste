@@ -113,3 +113,15 @@
                                       (map (partial invoices/enrich-org-data user-organizations))
                                       (map (partial invoices/enrich-application-data applications)))]
     (ok {:invoices invoices-with-extra-data})))
+
+(defquery organization-price-catalogues
+  {:description "Query that returns price catalogues for an organization"
+   :permissions      [{:required [:organization/admin]}]
+   :user-roles       #{:authority}
+   :feature          :invoices
+   :parameters       [organization-id]
+   :input-validators [(partial action/non-blank-parameters [:organization-id])]}
+  [{:keys [data user user-organizations] :as command}]
+  (let [price-catalogues (invoices/fetch-price-catalogues organization-id)]
+    (invoices/validate-price-catalogues price-catalogues)
+    (ok {:price-catalogues price-catalogues})))

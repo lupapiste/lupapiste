@@ -1,4 +1,4 @@
-(ns features-api-itest
+(ns lupapalvelu.features-api-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]))
 

@@ -28,7 +28,7 @@ Applicant invites Solita
 Applicant sets Solita as hakija
   Open foreman accordions
   Scroll and click input  section[data-doc-type=hakija-r] input[value=yritys]
-  Wait until  Select From List  xpath=//section[@data-doc-type="hakija-r"]//select[@name="company-select"]  Solita Oy (1060155-5)
+  Wait until  Select From List by label  xpath=//section[@data-doc-type="hakija-r"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="yritys.yritysnimi"]  Solita Oy
   Logout
 

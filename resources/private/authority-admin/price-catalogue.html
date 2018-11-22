@@ -1,0 +1,8 @@
+<section class="page" id="price-catalogue">
+  <navi-sidebar></navi-sidebar>
+  <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss,
+                      if: organization.organizationId">
+    <cljs-auth-admin_prices_catalogue params="{ authModel: authorization, orgId: organization.organizationId() }"></cljs-auth-admin_prices_catalogue>
+  </div>
+</section>

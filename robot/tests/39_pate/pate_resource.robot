@@ -134,8 +134,10 @@ Submit empty verdict
   Wait until  Application state should be  ${targetState}
 
 Pate upload
-  [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${test-id}=upload-input
-  Expose file input  input[data-test-id=${test-id}]
+  [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${test-id-prefix}=upload
+  ${test-id}=  Set variable  ${test-id-prefix}-input
+  Wait test id visible  ${test-id-prefix}-label
+  Expose file input  input[data-test-id=${test-id}
   Scroll to bottom
   Choose file  jquery=input[data-test-id=${test-id}]  ${path}
   Hide file input  input[data-test-id=${test-id}]
@@ -155,7 +157,7 @@ Add legacy review
   ${name-tid}=  Test id for  reviews  ${index}  name
   ${type-tid}=  Test id for  reviews  ${index}  type
   Input text by test id  ${name-tid}  ${name}
-  Select from list by test id  ${type-tid}  ${type}
+  Select from list by test id and value  ${type-tid}  ${type}
 
 Add legacy foreman
   [Arguments]  ${index}  ${role}
