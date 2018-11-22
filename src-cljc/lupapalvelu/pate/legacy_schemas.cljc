@@ -348,6 +348,12 @@
    legsub-attachments
    (verdict-schemas/versub-upload)))
 
+
+(def allu-contract
+  (build-legacy-schema {:dictionary {:handler    {:text      {:i18nkey :verdict.name.sijoitussopimus}
+                                                  :required? true}
+                                     :agreement-state {:select {:items [:proposal :final]}}}}))
+
 (defn legacy-verdict-schema [category]
   (case (keyword category)
     :r                  r-legacy-verdict
@@ -359,5 +365,5 @@
     :tj                 tj-legacy-verdict
     :migration-contract migration-contract
     :migration-verdict  migration-verdict
-    :allu-contract      contract-legacy-verdict
+    :allu-contract      allu-contract
     (schema-util/pate-assert false "Unsupported legacy category:" category)))

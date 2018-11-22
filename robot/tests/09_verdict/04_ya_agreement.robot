@@ -25,7 +25,7 @@ Sonja sets permit subtype
   Wait until  Application state should be  submitted
   Wait until  Permit subtype is  Sijoituslupa
   Element should be enabled  permitSubtypeSelect
-  Select from list  permitSubtypeSelect  sijoitussopimus
+  Select from list by value  permitSubtypeSelect  sijoitussopimus
 
 Sonja prepares and publishes contract
   Give legacy contract  321  Sopija-Sonja  ${CURRENT_DATE}

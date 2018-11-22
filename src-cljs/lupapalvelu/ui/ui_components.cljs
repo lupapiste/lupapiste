@@ -3,6 +3,7 @@
             [lupapalvelu.ui.inspection-summaries :as inspection-summaries]
             [lupapalvelu.ui.auth-admin.ad-login.ad-login-settings :as ad-login]
             [lupapalvelu.ui.auth-admin.stamp.editor :as stamp-editor]
+            [lupapalvelu.ui.auth-admin.prices.catalogue :as price-catalogue]
             [lupapalvelu.ui.auth-admin.edit-authority.edit-view :as edit-authority-view]
             [lupapalvelu.ui.pate.verdict-templates :as verdict-templates]
             [lupapalvelu.ui.pate.verdicts :as verdicts]
@@ -18,6 +19,7 @@
 
   (->> [inspection-summaries/mount-component
         stamp-editor/mount-component
+        price-catalogue/mount-component
         verdict-templates/mount-component
         verdicts/mount-component
         invoices/mount-component

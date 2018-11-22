@@ -110,12 +110,12 @@ Mikko can't set "other" building material
   Wait Until  Element should not be visible  //section[@id='application']//div[@id='application-info-tab']//input[@data-docgen-path='rakenne.muuRakennusaine']
 
 Mikko selects building material 'other':
-  Select From List  //section[@id='application']//div[@id='application-info-tab']//select[@name='rakenne.kantavaRakennusaine']  other
+  Select From List by value  //section[@id='application']//div[@id='application-info-tab']//select[@name='rakenne.kantavaRakennusaine']  other
   Wait Until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']//input[@data-docgen-path='rakenne.muuRakennusaine']
   Input text  //section[@id='application']//div[@id='application-info-tab']//input[@data-docgen-path='rakenne.muuRakennusaine']  Purukumilla ajattelin
 
 On the second thought, set material to 'puu':
-  Select From List  //section[@id='application']//div[@id='application-info-tab']//select[@name='rakenne.kantavaRakennusaine']  puu
+  Select From List by value  //section[@id='application']//div[@id='application-info-tab']//select[@name='rakenne.kantavaRakennusaine']  puu
   Wait Until  Element should not be visible  //section[@id='application']//div[@id='application-info-tab']//input[@data-docgen-path='rakenne.muuRakennusaine']
 
 Mikko goes to parties tab of an application
@@ -127,7 +127,7 @@ Mikko inputs bad postal code for hakija-r
   Wait Until  Element should be visible  jquery=section[data-doc-type="hakija-r"] input.err[data-docgen-path="henkilo.osoite.postinumero"]
 
 Mikko changes hakija-r country and postal code becomes valid
-  Select from list  jquery=div#application-parties-tab section[data-doc-type="hakija-r"] select[data-docgen-path="henkilo.osoite.maa"]  CHN
+  Select from list by value  jquery=div#application-parties-tab section[data-doc-type="hakija-r"] select[data-docgen-path="henkilo.osoite.maa"]  CHN
   Wait Until  Element should not be visible  jquery=section[data-doc-type="hakija-r"] input.err[data-docgen-path="henkilo.osoite.postinumero"]
 
 # LPK-1995

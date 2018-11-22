@@ -48,7 +48,7 @@ Applicant sets Solita as hakija
   Open tab  parties
   Open foreman accordions
   Scroll and click input  section[data-doc-type=hakija-r] input[value=yritys]
-  Wait until  Select From List  xpath=//section[@data-doc-type="hakija-r"]//select[@name="company-select"]  Solita Oy (1060155-5)
+  Wait until  Select From List by label  xpath=//section[@data-doc-type="hakija-r"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="yritys.yritysnimi"]  Solita Oy
 
 Applicant cannot create foreman applications before verdict is given
@@ -58,7 +58,7 @@ Applicant cannot create foreman applications before verdict is given
 
 Applicant sets his info to the applicant document
   Scroll and click test id  hakija-r_append_btn
-  Wait until  Select From List  xpath=(//section[@data-doc-type="hakija-r"])[2]//div[@data-select-one-of="henkilo"]//select[@data-test-id="henkilo.userId"]  Panaani Pena
+  Wait until  Select From List by label  xpath=(//section[@data-doc-type="hakija-r"])[2]//div[@data-select-one-of="henkilo"]//select[@data-test-id="henkilo.userId"]  Panaani Pena
   Wait Until  Textfield Value Should Be  xpath=(//section[@data-doc-type="hakija-r"])[2]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Pena
   Logout
 

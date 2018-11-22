@@ -411,7 +411,7 @@
 
 (defcommand update-ad-login-settings
   {:parameters       [org-id enabled trusted-domains idp-uri idp-cert]
-   :input-validators [(partial non-blank-parameters [:org-id])]
+   :input-validators [(partial non-blank-parameters [:org-id :trusted-domains :enabled])]
    :user-roles       #{:admin}}
   [_]
   (org/set-ad-login-settings org-id enabled trusted-domains idp-uri idp-cert)

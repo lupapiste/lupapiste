@@ -1067,3 +1067,7 @@
 "plus" "en" "+"
 "plus" "fi" "+"
 "plus" "sv" "+"
+"allu.contract-proposal" "fi" "Sopimusehdotus"
+"allu.contract" "en" "Contract"
+"allu.contract" "fi" "Sopimus"
+"allu.contract" "sv" "Avtal"

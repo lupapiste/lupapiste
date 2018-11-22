@@ -35,7 +35,7 @@ Foreman uploads attachment
   Wait for Page to Load  Teppo  Nieminen
   Wait until  Click Label  architect
   Click enabled by test id  test-add-architect-attachment
-  Select From List  attachmentType  osapuolet.cv
+  Select From List by value  attachmentType  osapuolet.cv
   Choose File      xpath=//input[@type='file']  ${TXT_TESTFILE_PATH}
   Click enabled by test id  userinfo-upload-ok
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}

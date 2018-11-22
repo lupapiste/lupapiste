@@ -5,6 +5,7 @@
             [clojurewerkz.money.currencies :refer [EUR]]
             [clojurewerkz.money.format :as mf]
             [lupapalvelu.money-schema :refer [MoneyResponse]]
+            [clojurewerkz.money.conversion :refer [to-rounding-mode]]
             [schema.core :as sc])
   (:import [org.joda.money Money CurrencyUnit]))
 
@@ -12,6 +13,18 @@
 
 (sc/defschema SumByOptions
   {:currency Money})
+
+(defn ->currency
+  ([currency amount]
+   (ma/amount-of currency amount))
+  ([amount]
+   (->currency default-currency amount)))
+
+(sc/defn ->MoneyResponse [money-value]
+  {:major (ma/major-of money-value)
+      :minor (ma/minor-of money-value)
+      :text (mf/format money-value)
+   :currency (.toString (ma/currency-of money-value))})
 
 (sc/defn sum-by :- MoneyResponse
   "Sums values by given key
@@ -34,16 +47,21 @@
                        (let [value (value-key map-entry-that-has-value)]
                          (if (instance? Money value)
                            value
-                           (ma/amount-of currency value)))) data)
-         total (ma/total values)]
+                           (->currency currency value)))) data)
+
+         total (if (empty? values) (->currency currency 0) (ma/total values))]
      (assert (instance? CurrencyUnit currency) "currency is not of type CurrencyUnit.")
-     {:major (ma/major-of total)
-      :minor (ma/minor-of total)
-      :text (mf/format total)
-      :currency (.toString (ma/currency-of total))}))
+     (->MoneyResponse total)))
   ([value-key :- sc/Keyword
     data :- sc/Any]
    (sum-by value-key data {:currency default-currency})))
+
+(defn multiply-amount
+  ([multiplier amount currency]
+   (let [multiplied-amount (ma/multiply (->currency currency amount) multiplier :half-up)]
+     multiplied-amount))
+  ([multiplier amount]
+   (multiply-amount multiplier amount default-currency)))
 
 (defn discounted-value
   "Calculates discounted value for object, treats discount as percentage.
@@ -54,7 +72,7 @@
    (let [currency (or (:currency opts) (:currency opts) default-currency)
          is-decimal? (:is-decimal? opts)
          discount (if is-decimal? discount (- 1 (/ discount 100)))
-         money-value (ma/amount-of currency value)]
+         money-value (if (instance? Money value) value(->currency currency value)) ]
      (assert (and (<= discount 1) (>= discount 0)) "Invalid discount: discount > 1")
      (ma/multiply money-value discount :half-up)))
   ([value discount]

@@ -27,7 +27,7 @@ Edit notice
   Open side panel  notice
   Select From Autocomplete  div#notice-panel  ${tag}
   Wait save
-  Select From List by id  application-authority-urgency  ${urgency}
+  Select From List by id and value  application-authority-urgency  ${urgency}
   Wait save
   Fill test id  application-authority-notice  ${note}
   Wait save

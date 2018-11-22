@@ -365,7 +365,7 @@
   (let [request (request/ring-request)
         domain (last (ss/split username #"@"))
         enabled (-> domain org/get-organizations-by-ad-domain first (get-in [:ad-login :enabled]))]
-    (if enabled
+    (if (and enabled (pos? (count domain)))
       (resp/json (ok {:uri (str (env/value :host) "/api/saml/ad-login/" domain)}))
       (resp/json (fail :error.unauthorized)))))
 

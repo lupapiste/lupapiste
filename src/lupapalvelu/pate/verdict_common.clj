@@ -246,11 +246,15 @@
     (lupapiste-verdict-string lang verdict dict)
     (-> verdict latest-pk :paatoskoodi)))
 
+(defn allu-agreement-state [verdict]
+  {:pre [(has-category? verdict :allu-contract)]}
+  (some-> verdict :data :agreement-state metadata/unwrap))
+
 (defn- verdict-summary-title [verdict lang section-strings]
-  (let [id (verdict-id verdict)
-        published (verdict-published verdict)
-        replaces (replaced-verdict-id verdict)
-        proposal? (util/=as-kw (verdict-state verdict) :proposal)
+  (let [id         (verdict-id verdict)
+        published  (verdict-published verdict)
+        replaces   (replaced-verdict-id verdict)
+        proposal?  (util/=as-kw (verdict-state verdict) :proposal)
         rep-string (title-fn replaces
                              (fn [vid]
                                (let [section (get section-strings vid)]
@@ -260,6 +264,11 @@
                                                            :pate.replaces-verdict
                                                            section)))))]
     (->> (cond
+           (has-category? verdict :allu-contract)
+           [(i18n/localize lang (if (util/=as-kw :final (allu-agreement-state verdict))
+                                  :allu.contract
+                                  :allu.contract-proposal))]
+
            (and (contract? verdict) published)
            [(i18n/localize lang :pate.verdict-table.contract)]
 
