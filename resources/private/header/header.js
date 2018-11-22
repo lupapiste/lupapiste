@@ -22,7 +22,7 @@
     // that denotes user pressing esc key and clicks outside
     // of menu area.
     hub.subscribe( "dialog-close", cancel);
-    $(document).on( "click", "#language-menu", function( e ) {
+    $(document).on( "click", "#language-select", function( e ) {
       e.stopPropagation();
     });
     $(document).on( "click", cancel );
@@ -30,5 +30,5 @@
 
   var langs = new Languages();
 
-  $(function() { $("#language-menu").applyBindings(langs); });
+  $(function() { $("#language-select").applyBindings(langs); });
 })();

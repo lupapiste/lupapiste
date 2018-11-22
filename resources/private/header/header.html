@@ -8,7 +8,7 @@
             <div class="brand" >
                 <a data-bind="click: $data.openStartPage" class="logo"></a>
             </div>
-            <div id="language-menu" class="header-dropdown"
+            <div id="language-select" class="header-dropdown"
                  data-bind="css: {active: $root.languageMenuVisible}">
                 <a class="header-dropdown-button" href="#" data-test-id="language-link"
                    data-bind="click: $root.toggleLanguageMenu, clickBubble: false">
@@ -16,7 +16,7 @@
                     <span data-bind="css: {'lupicon-chevron-small-down': $root.languageMenuVisible() == false,
                                            'lupicon-chevron-small-up': $root.languageMenuVisible}"></span>
                 </a>
-                <ul data-bind="foreach: $root.languages">
+                <ul class="language-menu" data-bind="foreach: $root.languages">
                     <li>
                         <a data-bind="click: $root.changeLanguage,
                                       text: $data.toUpperCase() + ' - ' + loc( $data )"></a>

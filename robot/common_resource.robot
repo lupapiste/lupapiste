@@ -167,7 +167,7 @@ Language To
   [Arguments]  ${lang}
   Element Should Not Contain  language-select  ${lang}
   Click Link  xpath=//a[@data-test-id='language-link']
-  Wait Until  Element Should Be Visible  css=div.language-menu
+  Wait Until  Element Should Be Visible  css=ul.language-menu
   Click Element  partial link=${lang}
   Wait Until  Element Should Contain  language-select  ${lang}
   Kill dev-box
