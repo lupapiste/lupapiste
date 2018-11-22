@@ -221,7 +221,7 @@
     :role "authority"
     :enabled true
     :email "sonja.sibbo@sipoo.fi"
-    :orgAuthz {:753-R #{:authorityAdmin :authority :approver}
+    :orgAuthz {:753-R #{:authority :approver}
                :753-YA #{:authority :approver}
                :998-R-TESTI-2 #{:authority :approver}}
     :firstName "Sonja"
@@ -259,7 +259,7 @@
     :enabled true
     :language "fi"
     :email "ronja.sibbo@sipoo.fi"
-    :orgAuthz {:753-R #{:authority}}
+    :orgAuthz {:753-R #{:authority :authorityAdmin}}
     :firstName "Ronja"
     :lastName "Sibbo"
     :phone "03121991"

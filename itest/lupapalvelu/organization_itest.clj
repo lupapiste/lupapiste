@@ -471,7 +471,7 @@
 
 (facts organization-names-by-user
   (let [sipoo-R-names {:fi "Sipoon rakennusvalvonta", :sv "Sipoon rakennusvalvonta", :en "Sipoon rakennusvalvonta"}]
-    (query pena :organization-names-by-user) => {:ok true, :names []}
+    (query pena :organization-names-by-user) => {:ok true, :names {}}
     (query sipoo :organization-names-by-user) => {:ok true, :names {:753-R sipoo-R-names}}
     (query sonja :organization-names-by-user)
     => {:ok true, :names {:753-R         sipoo-R-names
@@ -1037,7 +1037,7 @@
 (facts "usage-purposes"
   (query pena :usage-purposes) => {:ok true, :usagePurposes [{:type "applicant"}]}
   (query sipoo :usage-purposes) => {:ok true, :usagePurposes [{:type "authority-admin", :orgId "753-R"}]}
-  (query sonja :usage-purposes) => {:ok true, :usagePurposes [{:type "authority"}
+  (query ronja :usage-purposes) => {:ok true, :usagePurposes [{:type "authority"}
                                                               {:type "authority-admin", :orgId "753-R"}]})
 
 (def sipoo-handler-roles (->> (query sipoo :organization-by-user) :organization :handler-roles))
