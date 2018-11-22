@@ -165,7 +165,7 @@
                                (for [[org-id authz] (:orgAuthz user)
                                      auth authz
                                      :when (= auth :authorityAdmin)]
-                                 {:type "authority-admin", :orgId org-id}))))
+                                 {:type "authority-admin", :orgId (name org-id)}))))
     (ok :usagePurposes [])))
 
 (defquery user-organizations-for-permit-type
