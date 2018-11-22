@@ -92,55 +92,76 @@
    [:td unit]
    [:td (row-operations operations)]])
 
-(rum/defc field [value & [props]]
-  [:input (merge {:type "text"
-                  :value value}
-                 props)])
+(rum/defc field < {:key-fn (fn [row] )}
+  [value on-change & [props]]
+  (let [value-atom (atom value)]
+    (println "value in value atom: " @value-atom)
+    (uc/text-edit value-atom
+                  (merge {:callback on-change}
+                         props))))
+
+(rum/defc unit-select < rum/reactive
+  [value on-change]
+  (let [value-atom (atom value)]
+    (uc/dropdown value-atom
+                 {:items  [{:value "kpl" :text "kpl"}
+                           {:value "m2" :text "m2"}
+                           {:value "m3" :text "m3"}]
+                  :callback on-change
+                  :choose? (not value)})))
+
+(defn field-setter [field-name row-index & [type]]
+  (fn [value]
+    (println "AA Changing value for field " field-name
+             " in row-index " row-index " to value " value)
+    (let [converters {:number js/Number
+                      :text str}
+          convert (converters (or type :text))]
+      (state/update-field-in-catalogue-in-edit! row-index field-name (convert value)))
+    (println "rows after change" (:rows @state/catalogue-in-edit))))
 
 (rum/defc edit-catalogue-row
   < {:key-fn (fn [row] (str (:code row) "-" (:text row)))}
-  [{:keys [code text price-per-unit discount-percent min-total-price max-total-price unit operations] :as row}]
+  [{:keys [code text price-per-unit discount-percent min-total-price max-total-price unit operations] :as row} row-index]
   [:tr
-   [:td (field code {:size "6"}) ]
-   [:td (field text {:size "25"})]
-   [:td (field price-per-unit {:size "6"})]
-   [:td (field discount-percent {:size "3"})]
-   [:td (field min-total-price {:size "6"})]
-   [:td (field max-total-price {:size "6"})]
-   [:td unit]
+   [:td (field code             (field-setter :code row-index)  {:size "6"})]
+   [:td (field text             (field-setter :text row-index) {:size "25"})]
+   [:td (field price-per-unit   (field-setter :price-per-unit row-index :number) {:size "6"})]
+   [:td (field discount-percent (field-setter :discount-percent row-index :number) {:size "3"})]
+   [:td (field min-total-price  (field-setter :min-total-price row-index :number) {:size "6"})]
+   [:td (field max-total-price  (field-setter :max-total-price row-index :number) {:size "6"})]
+   [:td (unit-select unit       (field-setter :unit row-index) )]
    [:td (row-operations operations)]])
+
+(defn catalogue-by-rows-header []
+  [:tr
+   [:th (loc "price-catalogue.code")]
+   [:th (loc "price-catalogue.product")]
+   [:th (loc "price-catalogue.unit-price")]
+   [:th (loc "price-catalogue.discount-percent")]
+   [:th (loc "price-catalogue.minimum")]
+   [:th (loc "price-catalogue.maximum")]
+   [:th (loc "price-catalogue.unit")]
+   [:th (loc "price-catalogue.row-operations")]])
 
 (rum/defc catalogue-by-rows [selected-catalogue]
   [:div
    [:table
      [:thead
-      [:tr
-       [:th (loc "price-catalogue.code")]
-       [:th (loc "price-catalogue.product")]
-       [:th (loc "price-catalogue.unit-price")]
-       [:th (loc "price-catalogue.discount-percent")]
-       [:th (loc "price-catalogue.minimum")]
-       [:th (loc "price-catalogue.maximum")]
-       [:th (loc "price-catalogue.unit")]
-       [:th (loc "price-catalogue.row-operations")]]]
+      (catalogue-by-rows-header)]
     [:tbody
      (map catalogue-row (:rows selected-catalogue))]]])
 
-(rum/defc edit-catalogue-by-rows [selected-catalogue]
+(rum/defc edit-catalogue-by-rows < rum/reactive
+  [selected-catalogue]
   [:div
    [:table
      [:thead
-      [:tr
-       [:th (loc "price-catalogue.code")]
-       [:th (loc "price-catalogue.product")]
-       [:th (loc "price-catalogue.unit-price")]
-       [:th (loc "price-catalogue.discount-percent")]
-       [:th (loc "price-catalogue.minimum")]
-       [:th (loc "price-catalogue.maximum")]
-       [:th (loc "price-catalogue.unit")]
-       [:th (loc "price-catalogue.row-operations")]]]
+      (catalogue-by-rows-header)]
     [:tbody
-     (map edit-catalogue-row (:rows selected-catalogue))]]])
+     (map-indexed (fn [row-index row]
+                    (edit-catalogue-row row row-index))
+                  (:rows selected-catalogue))]]])
 
 (rum/defc view-switch  < rum/reactive
   [_]
@@ -217,25 +238,27 @@
   (let [view (rum/react state/view)
         mode (rum/react state/mode)
         selected-catalogue (state/get-catalogue (rum/react state/selected-catalogue-id))
-        catalogue-in-edit (if (= mode :edit) (rum/react state/catalogue-in-edit))
-        active-catalogue (or selected-catalogue catalogue-in-edit)
+        catalogue-in-edit  (rum/react state/catalogue-in-edit)
+        active-catalogue (case mode
+                           :show selected-catalogue
+                           :edit catalogue-in-edit)
         render-catalogue (get-render-component mode view)]
     [:div.price-catalogue
      [:div.catalogue-select-wrapper
-      (when (= mode :show)
-        (catalogue-select state/catalogues state/selected-catalogue-id))
+      (println "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+      (println "catalogue catalogue-in-edit: " catalogue-in-edit)
+      (println "catalogue active-catalogue: " active-catalogue)
 
       (case mode
-        :show (new-catalogue-button)
+        :show [:div
+               (catalogue-select state/catalogues state/selected-catalogue-id)
+               (new-catalogue-button)]
         :edit (edit-buttons))]
 
-     [:div (if active-catalogue (view-switch))]
-
-
-
-
-     [:div (when active-catalogue
-             (render-catalogue active-catalogue))]]))
+     (when active-catalogue
+       [:div
+        (view-switch)
+        (render-catalogue active-catalogue)])]))
 
 (defonce args (atom {}))
 

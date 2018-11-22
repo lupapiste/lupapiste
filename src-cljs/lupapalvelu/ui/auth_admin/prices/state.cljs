@@ -34,3 +34,8 @@
 
 (defn set-mode [new-mode]
   (reset! mode new-mode))
+
+(defn update-field-in-catalogue-in-edit! [row-index field new-value]
+  (println ">> update-field-in-catalogue-in-edit field " field
+           " row-index " row-index " value " new-value)
+  (swap! catalogue-in-edit assoc-in [:rows row-index field] new-value))
