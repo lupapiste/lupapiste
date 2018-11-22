@@ -147,23 +147,30 @@
       result
       default)))
 
-(defn building-int-value [key]
+(defn building-int-value
+  "Returns accessor function which fetches building data numeric string values and
+   convert those to integers, (key like :autopaikat-yhteensa)."
+  [key]
   (fn [verdict]
     (->> (map key (vals (get-in verdict [:data :buildings])))
          (map util/->int)
          (apply +))))
 
-(defn foremen [verdict]
+(defn foremen
+  "Accessor function to fetch localized foreman names, returns string."
+  [verdict]
   (if (vc/legacy? verdict)
     (->> (get-in verdict [:data :foremen])
          vals
          (map :role)
          (ss/join ", "))
     (->> (get-in verdict [:data :foremen])
-         (map #(i18n/localize "fi" (str "pate-r.foremen." %)))
+         (map #(i18n/localize (or (get-in verdict [:data :language]) "fi") (str "pate-r.foremen." %)))
          (ss/join ", "))))
 
-(defn conditions [verdict]
+(defn conditions
+  "Accessor function to fetch conditions, returns conditions in map with key :sisalto."
+  [verdict]
   (let [condition-key (if (vc/legacy? verdict) :name :condition)]
     (some->> (get-in verdict [:data :conditions])
              vals
@@ -171,12 +178,16 @@
              (remove ss/blank?)
              (map #(assoc {} :sisalto %)))))
 
-(defn reference-value [key]
+(defn reference-value
+  "Accessor function to fetch actual values from references based on keys in data."
+  [key]
   (fn [verdict]
     (->> (get-in verdict [:data (keyword key)])
          (map (fn [id] (:fi (util/find-by-id id (get-in verdict [:references (keyword key)]))))))))
 
-(defn reviews [verdict]
+(defn reviews
+  "Accessor function to fetch review names, returns names in map with key :tarkastuksenTaiKatselmuksenNimi."
+  [verdict]
   (if (vc/legacy? verdict)
     (->> (get-in verdict [:data :reviews])
          vals
