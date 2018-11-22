@@ -148,7 +148,8 @@
   (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         kuvaus (building-reader/->asian-tiedot xml)
         kuvausteksti (str (when kuvaus kuvaus)
-                          (format "\nLuvan tyyppi: %s" (kuntalupatunnus->description kuntalupatunnus)))]
+                          (format "\nLuvan tyyppi: %s"
+                                  (ss/lower-case (kuntalupatunnus->description kuntalupatunnus))))]
     (assoc app :documents
            (map (fn [doc]
                   (if (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))

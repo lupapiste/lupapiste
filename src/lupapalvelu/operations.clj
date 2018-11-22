@@ -1133,7 +1133,7 @@
                                  :asianhallinta false
                                  :unsubscribe-notifications true
                                  :state-graph-resolver state-machine-resolver}
-   :konversio                   {:schema "facta-konversio"
+   :konversio                   {:schema "hankkeen-kuvaus-minimum"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required []

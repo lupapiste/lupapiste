@@ -1314,27 +1314,6 @@
                 (approvable-top-level-groups rakennuksen-tiedot)
                 rakennustunnus)}
 
-   {:info {:name "facta-konversio"
-           :subtype :hankkeen-kuvaus
-           :approvable true
-           :order 1
-           :after-update 'lupapalvelu.application-meta-fields/update-project-description-index}
-    :body [kuvaus
-           {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width} ; Longest value in Helsinki production data
-           rahoitus]}
-
-    ;; This contains way too much stuff.
-   #_{:info {:name "facta-konversio"
-           :i18name "uusiRakennus"
-           :approvable true
-           :accordion-fields buildingid-accordion-paths}
-    :body (body kuvaus
-                ; {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}
-                ; tunnus
-                ; rakennuksen-omistajat
-                ; (approvable-top-level-groups rakennuksen-tiedot)
-                #_rakennustunnus)}
-
    {:info {:name "archiving-project"
            :i18name "uusiRakennus"
            :approvable false
