@@ -51,7 +51,6 @@
         buildings-and-structures (building-reader/->buildings-and-structures xml)
         document-datas (prev-permit/schema-datas app-info buildings-and-structures)
         ; manual-schema-datas {"aiemman-luvan-toimenpide" (first document-datas)}
-        manual-schema-datas {"kerrostalo-rivitalo" (first document-datas)}
         command (update-in command [:data] merge
                            {:operation operation :infoRequest false :messages []}
                            location-info)
@@ -79,6 +78,8 @@
         primary-op-name (if (seq operations)
                           (conv-util/deduce-operation-type kuntalupatunnus (first operations))
                           (conv-util/deduce-operation-type kuntalupatunnus))
+
+        manual-schema-datas {(conv-util/op-name->schema-name primary-op-name) (first document-datas)}
 
         secondary-op-names (map (partial conv-util/deduce-operation-type kuntalupatunnus) (rest operations))
 

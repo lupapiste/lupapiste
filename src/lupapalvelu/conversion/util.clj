@@ -147,10 +147,8 @@
 (defn add-description [{:keys [documents] :as app} xml]
   (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         kuvaus (building-reader/->asian-tiedot xml)
-        kuvausteksti (format "Tuodun luvan tyyppi: %s (\"%s\")\nAsian kuvaus: %s"
-                             (-> kuntalupatunnus destructure-permit-id :tyyppi)
-                             (kuntalupatunnus->description kuntalupatunnus)
-                             kuvaus)]
+        kuvausteksti (str (when kuvaus kuvaus)
+                          (format "\nLuvan tyyppi: %s" (kuntalupatunnus->description kuntalupatunnus)))]
     (assoc app :documents
            (map (fn [doc]
                   (if (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
@@ -158,11 +156,15 @@
                     doc))
                 documents))))
 
+(defn op-name->schema-name [op-name]
+  (-> op-name operations/get-operation-metadata :schema))
+
+;; TODO: Finish me
 (defn toimenpide->toimenpide-document [op-name toimenpide]
   (let [data (model/map2updates [] {:kuvaus "Nippa nappa niukin naukin"
                                     :tunnus "123123"
                                     :rakennusTunnus "RAK-TUNNUS-TEST"})
-        schema-name (-> op-name operations/get-operation-metadata :schema)]
+        schema-name (op-name->schema-name op-name)]
     (app/make-document op-name
                        (now)
                        {schema-name data}
@@ -285,8 +287,7 @@
 (defn deduce-operation-type
   "Takes a kuntalupatunnus and a 'toimenpide'-element from app-info, returns the operation type"
   ([kuntalupatunnus]
-   (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
-         _ (swap! tila assoc :kuntalupatunnus kuntalupatunnus)]
+   (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)]
      (condp = suffix
        "TJO" "tyonjohtajan-nimeaminen-v2"
        "P" "purkaminen"
