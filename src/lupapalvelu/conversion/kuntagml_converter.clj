@@ -50,6 +50,7 @@
         municipality "092"
         buildings-and-structures (building-reader/->buildings-and-structures xml)
         document-datas (prev-permit/schema-datas app-info buildings-and-structures)
+        ; manual-schema-datas {"kerrostalo-rivitalo" (first document-datas)}
         ; manual-schema-datas {"aiemman-luvan-toimenpide" (first document-datas)}
         command (update-in command [:data] merge
                            {:operation operation :infoRequest false :messages []}
@@ -80,6 +81,8 @@
                           (conv-util/deduce-operation-type kuntalupatunnus))
 
         manual-schema-datas {(conv-util/op-name->schema-name primary-op-name) (first document-datas)}
+        _ (swap! tila assoc :msd manual-schema-datas
+                 :primary-op primary-op-name)
 
         secondary-op-names (map (partial conv-util/deduce-operation-type kuntalupatunnus) (rest operations))
 
@@ -90,10 +93,6 @@
                        :propertyId      (:propertyId location-info)
                        :address         (:address location-info)
                        :municipality    municipality}
-
-        _ (swap! tila assoc :make-app-info make-app-info
-                 :command command
-                 :manual-schema-datas manual-schema-datas)
 
         created-application (app/make-application make-app-info
                                                   []            ; messages
@@ -121,14 +120,6 @@
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas) secondary-op-names)
 
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2 :name %3) other-building-docs (rest structure-descriptions) secondary-op-names)
-
-        _ (swap! tila assoc
-                 :secondary-op-names secondary-op-names
-                 :app1 created-application
-                 :new-parties new-parties
-                 :secondary-ops secondary-ops
-                 :document-datas document-datas
-                 :other-building-docs other-building-docs)
 
         structures (->> xml krysp-reader/->rakennelmatiedot (map conv-util/rakennelmatieto->kaupunkikuvatoimenpide))
 
@@ -159,8 +150,6 @@
                                        :history history-array
                                        :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
                                        :facta-imported true))
-
-        _ (swap! tila assoc :app2 created-application)
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]

@@ -158,13 +158,14 @@
                 documents))))
 
 (defn op-name->schema-name [op-name]
-  (-> op-name operations/get-operation-metadata :schema))
+  (let [schema-name (-> op-name operations/get-operation-metadata :schema)]
+    (if-not (= "uusiRakennus" schema-name)
+      schema-name
+      op-name)))
 
 ;; TODO: Finish me
 (defn toimenpide->toimenpide-document [op-name toimenpide]
-  (let [data (model/map2updates [] {:kuvaus "Nippa nappa niukin naukin"
-                                    :tunnus "123123"
-                                    :rakennusTunnus "RAK-TUNNUS-TEST"})
+  (let [data (model/map2updates [] toimenpide)
         schema-name (op-name->schema-name op-name)]
     (app/make-document op-name
                        (now)
@@ -383,7 +384,4 @@
                       first)]
     (boolean
       (when sukunimi
-        (= "" (:value sukunimi))))))
-
-; (defn operation->operation-document
-;   [operation-name manual-schema-datas schema])
+        (empty? (:value sukunimi))))))
