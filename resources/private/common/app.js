@@ -200,7 +200,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
     function UserMenu() {
       var self = this;
-      self.open = ko.observable(true);
+      self.open = ko.observable(false);
       self.orgNames = ko.observable(undefined);
       self.usagePurposes = ko.observableArray();
 
