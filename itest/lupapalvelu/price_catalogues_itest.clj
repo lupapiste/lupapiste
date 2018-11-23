@@ -1,20 +1,22 @@
 (ns lupapalvelu.price-catalogues-itest
   (:require [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.fixture.minimal :as minimal]
+
             [lupapalvelu.integrations-api]
+            [lupapalvelu.invoice-api]
             [lupapalvelu.itest-util :refer [local-command local-query
                                             create-and-submit-application
                                             create-and-submit-local-application
                                             sonja pena sipoo sipoo-ya
                                             ok? fail?] :as itu]
-            [lupapalvelu.invoice-api]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.price-catalogues :as catalogues]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.env :as env]
             [sade.util :refer [to-millis-from-local-date-string]]
-            [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
-            [lupapalvelu.price-catalogues :as catalogues]))
+            [schema.core :as sc]
+            [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]))
 
 (defn catalogues-belong-to-org?
   [org-id catalogues]
@@ -107,6 +109,8 @@
                                    :rows [{:code "12345"
                                            :text "Taksarivi 1"
                                            :unit "kpl"
+                                           :min-total-price 1
+                                           :max-total-price 100
                                            :price-per-unit 23
                                            :discount-percent 50
                                            :operations ["toimenpide1" "toimenpide2"]}]}]
@@ -134,12 +138,53 @@
                     (:text response) => "error.invalid-price-catalogue"))
 
 
-            (fact "should save the price catalogue to db and return an ok response"
-                  (let [response (local-command sipoo :insert-price-catalogue
-                                                :organization-id "753-R"
-                                                :price-catalogue catalogue-request)]
-                    response => ok?
+            (fact "should save the price catalogue to db and return an ok response when"
 
-                    (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
-                      (catalogues/validate-price-catalogue new-catalogue)
-                      (select-keys new-catalogue [:valid-from :rows]) => catalogue-request)))))))
+                  (fact "All fields ahve "
+                        (let [response (local-command sipoo :insert-price-catalogue
+                                                      :organization-id "753-R"
+                                                      :price-catalogue catalogue-request)]
+                          response => ok?
+
+                          (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
+                            (sc/validate catalogues/PriceCatalogue new-catalogue)
+                            (select-keys new-catalogue [:valid-from :rows]) => catalogue-request)))
+
+                  (fact "optional fields have nil value"
+                        (let [catalogue-request {:valid-from (to-millis-from-local-date-string "01.01.2019")
+                                                 :rows [{:code "12345"
+                                                         :text "Taksarivi 1"
+                                                         :unit "kpl"
+                                                         :price-per-unit 23
+                                                         :discount-percent nil
+                                                         :min-total-price nil
+                                                         :max-total-price nil
+                                                         :operations ["toimenpide1" "toimenpide2"]}]}
+                              response (local-command sipoo :insert-price-catalogue
+                                                      :organization-id "753-R"
+                                                      :price-catalogue catalogue-request)]
+                          response => ok?
+                          (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
+                            (sc/validate catalogues/PriceCatalogue new-catalogue)
+                            (select-keys new-catalogue [:valid-from :rows]) => catalogue-request)))
+
+                  (fact "operations is empty"
+                        (let [catalogue-request {:valid-from (to-millis-from-local-date-string "01.01.2019")
+                                                 :rows [{:code "12345"
+                                                         :text "Taksarivi 1"
+                                                         :unit "kpl"
+                                                         :price-per-unit 23
+                                                         :discount-percent 50
+                                                         :min-total-price 10
+                                                         :max-total-price 100
+                                                         :operations []}]}
+                              response (local-command sipoo :insert-price-catalogue
+                                                      :organization-id "753-R"
+                                                      :price-catalogue catalogue-request)]
+                          response => ok?
+
+                          (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
+                            (sc/validate catalogues/PriceCatalogue new-catalogue)
+                            (select-keys new-catalogue [:valid-from :rows]) => catalogue-request)))
+                  )))
+    ))

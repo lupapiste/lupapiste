@@ -15,10 +15,10 @@
    :text sc/Str
    :unit invoices/InvoiceRowUnit
    :price-per-unit sc/Num
-   (sc/optional-key :max-total-price) sc/Num
-   (sc/optional-key :min-total-price) sc/Num
-   :discount-percent invoices/DiscountPercent
-   (sc/optional-key :operations) [sc/Str]})
+   :max-total-price (sc/maybe sc/Num)
+   :min-total-price (sc/maybe sc/Num)
+   :discount-percent (sc/maybe invoices/DiscountPercent)
+   :operations [sc/Str]})
 
 (sc/defschema PriceCatalogue
   {:id sc/Str
@@ -45,9 +45,12 @@
     (sc/validate [PriceCatalogue] price-catalogues)))
 
 (defn validate-insert-price-catalogue-request [{{catalogue-data :price-catalogue} :data :as command}]
-  (debug ">> validate-insert-price-catalogue-request data: " catalogue-data)
-  (when (sc/check PriceCatalogueInsertRequest catalogue-data)
-    (fail :error.invalid-price-catalogue)))
+  (try
+    (sc/validate PriceCatalogueInsertRequest catalogue-data)
+    nil
+    (catch Exception e
+      (warn "Invalid price catalogue request " (.getMessage e))
+      (fail :error.invalid-price-catalogue))))
 
 (defn ->price-catalogue-db
   [price-catalogue user organization-id]
