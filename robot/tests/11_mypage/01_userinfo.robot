@@ -8,8 +8,7 @@ Resource       ../../common_resource.robot
 
 Mikko goes to own page
   Mikko logs in
-  Click Element  header-user-dropdown
-  Click Element  mypage-button
+  Open My Page
   Wait for Page to Load  Mikko  Intonen
   Title Should Be  Lupapiste
 
