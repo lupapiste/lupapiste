@@ -116,23 +116,23 @@
               ; Resolve authz. Received AD-groups are mapped the corresponding Lupis roles the organization has/organizations have.
               ; The result is formatted like: {:609-R #{"commenter"} :609-YMP #{"commenter" "reader"}}
               authz (ad-util/resolve-authz ad-settings Group)
-              _ (infof "Resolved authz for user %s (domain: %s): %s" name domain authz)]
+              _ (infof "Resolved authz for user %s (domain: %s): %s" name domain authz)
+              user (usr/get-user-by-email emailaddress)]
           (cond
             (false? (:success? parsed-saml-info)) (do
                                                     (error "Login was not valid")
                                                     (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
-            (and valid-signature? (seq authz)) (do
+            (and valid-signature?
+                 (seq authz)
+                 (false? (usr/dummy? user)))    (do ;; We don't want to promote dummy users here.
                                                  (infof "Logging in user %s as authority" emailaddress)
                                                  (->> (update-or-create-user! givenname surname emailaddress authz)
                                                       (log-user-in! req)))
 
-            ;; If an applicant account exists for the received email address, the user is logged in.
+            ;; If a non-dummy account exists for the received email address, the user is logged in.
             (and valid-signature?
                  (empty? authz)
-                 (= "applicant"
-                    (some-> emailaddress
-                            usr/get-user-by-email
-                            :role)))           (do
+                 (false? (usr/dummy? user)))   (do
                                                  (infof "Logging in user %s as applicant" emailaddress)
                                                  (->> emailaddress usr/get-user-by-email (log-user-in! req)))
 
