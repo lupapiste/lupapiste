@@ -35,7 +35,7 @@
 
 (facts "user-has-org-role? test"
   (let [auth  (->> minimal/users
-                   (filter (comp (partial = "ronja.sibbo@sipoo.fi") :email))
+                   (filter (comp (partial = "sonja.sibbo@sipoo.fi") :email))
                    (first))
         admin (->> minimal/users
                    (filter (comp (partial = "admin@sipoo.fi") :email))
