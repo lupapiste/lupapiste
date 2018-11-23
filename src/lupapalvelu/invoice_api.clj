@@ -1,7 +1,8 @@
 (ns lupapalvelu.invoice-api
   (:require [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
-            [lupapalvelu.invoices :refer [Invoice] :as invoices]
+            [lupapalvelu.invoices :as invoices]
+            [lupapalvelu.invoices.schemas :refer [->invoice-db Invoice]]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [sade.core :refer [ok fail]]
@@ -24,7 +25,7 @@
    :states           states/post-submitted-states}
   [{:keys [application data user] :as command}]
   (let [invoice-request (:invoice data)
-        invoice-to-db (invoices/->invoice-db invoice-request application user)]
+        invoice-to-db (->invoice-db invoice-request application user)]
     (debug "insert-invoice invoice-request:" invoice-request)
     (ok :invoice-id (invoices/create-invoice! (merge invoice-to-db
                                                      {:state "draft"})))))

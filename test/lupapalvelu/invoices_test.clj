@@ -1,5 +1,6 @@
 (ns lupapalvelu.invoices-test
-  (:require [lupapalvelu.invoices :refer [->invoice-user ->invoice-db get-operations-from-application] :as invoices]
+  (:require [lupapalvelu.invoices :refer [get-operations-from-application] :as invoices]
+            [lupapalvelu.invoices.schemas :refer [->invoice-user ->invoice-db]]
             [midje.sweet :refer :all]
             [schema.core :as sc]
             [sade.core]
