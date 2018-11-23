@@ -66,7 +66,7 @@
                 <div id="header-user-dropdown" class="header-dropdown"
                      data-bind="with: $root.userMenu, css: {active: $root.userMenu.open()}">
                     <a class="header-dropdown-button" href="#"
-                       data-bind="click: $data.toggleOpen(), clickBubble: false">
+                       data-bind="click: $data.toggleOpen, clickBubble: false">
                         <span class="lupicon-user"></span>
                         <span class="narrow-hide" id="user-name"
                               data-bind="text: lupapisteApp.models.currentUser.displayName,
