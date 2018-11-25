@@ -95,7 +95,6 @@
 (rum/defc field < {:key-fn (fn [row] )}
   [value on-change & [props]]
   (let [value-atom (atom value)]
-    (println "value in value atom: " @value-atom)
     (uc/text-edit value-atom
                   (merge {:callback on-change}
                          props))))
@@ -112,13 +111,10 @@
 
 (defn field-setter [field-name row-index & [type]]
   (fn [value]
-    (println "AA Changing value for field " field-name
-             " in row-index " row-index " to value " value)
     (let [converters {:number js/Number
                       :text str}
           convert (converters (or type :text))]
-      (state/update-field-in-catalogue-in-edit! row-index field-name (convert value)))
-    (println "rows after change" (:rows @state/catalogue-in-edit))))
+      (state/update-field-in-catalogue-in-edit! row-index field-name (convert value)))))
 
 (rum/defc edit-catalogue-row
   < {:key-fn (fn [_ row-index] row-index)}
@@ -131,24 +127,22 @@
    [:td (field min-total-price  (field-setter :min-total-price row-index :number) {:size "6"})]
    [:td (field max-total-price  (field-setter :max-total-price row-index :number) {:size "6"})]
    [:td (unit-select unit       (field-setter :unit row-index) )]
-   [:td (row-operations operations)]])
-
-(defn catalogue-by-rows-header []
-  [:tr
-   [:th (loc "price-catalogue.code")]
-   [:th (loc "price-catalogue.product")]
-   [:th (loc "price-catalogue.unit-price")]
-   [:th (loc "price-catalogue.discount-percent")]
-   [:th (loc "price-catalogue.minimum")]
-   [:th (loc "price-catalogue.maximum")]
-   [:th (loc "price-catalogue.unit")]
-   [:th (loc "price-catalogue.row-operations")]])
+   [:td (row-operations operations)]
+   [:td [:div {:on-click (fn [] (state/remove-row! row-index))} [:i.lupicon-remove]]]])
 
 (rum/defc catalogue-by-rows [selected-catalogue]
   [:div
    [:table
      [:thead
-      (catalogue-by-rows-header)]
+      [:tr
+       [:th (loc "price-catalogue.code")]
+       [:th (loc "price-catalogue.product")]
+       [:th (loc "price-catalogue.unit-price")]
+       [:th (loc "price-catalogue.discount-percent")]
+       [:th (loc "price-catalogue.minimum")]
+       [:th (loc "price-catalogue.maximum")]
+       [:th (loc "price-catalogue.unit")]
+       [:th (loc "price-catalogue.row-operations")]]]
     [:tbody
      (map-indexed (fn [row-index row]
                     (catalogue-row row row-index))
@@ -158,8 +152,17 @@
   [selected-catalogue]
   [:div
    [:table
-     [:thead
-      (catalogue-by-rows-header)]
+    [:thead
+     [:tr
+      [:th (loc "price-catalogue.code")]
+      [:th (loc "price-catalogue.product")]
+      [:th (loc "price-catalogue.unit-price")]
+      [:th (loc "price-catalogue.discount-percent")]
+      [:th (loc "price-catalogue.minimum")]
+      [:th (loc "price-catalogue.maximum")]
+      [:th (loc "price-catalogue.unit")]
+      [:th (loc "price-catalogue.row-operations")]
+      [:th ""]]]
     [:tbody
      (map-indexed (fn [row-index row]
                     (edit-catalogue-row row row-index))

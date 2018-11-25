@@ -36,12 +36,12 @@
   (reset! mode new-mode))
 
 (defn update-field-in-catalogue-in-edit! [row-index field new-value]
-  (println ">> update-field-in-catalogue-in-edit field " field
-           " row-index " row-index " value " new-value)
   (swap! catalogue-in-edit assoc-in [:rows row-index field] new-value))
 
+(defn- prepend-vec [coll item]
+  (vec (concat [item] coll)))
+
 (defn add-empty-row []
-  (println ">> add-empty-row")
   (let [empty-row {:min-total-price nil
                    :unit nil
                    :discount-percent nil
@@ -49,7 +49,12 @@
                    :operations []
                    :max-total-price nil
                    :price-per-unit nil
-                   :text nil}
-        prepend (fn [coll item]
-                  (concat [item] coll))]
-    (swap! catalogue-in-edit update :rows prepend empty-row)))
+                   :text nil}]
+    (swap! catalogue-in-edit update :rows prepend-vec empty-row)))
+
+(defn- remove-from-vec [coll index]
+  (let [vec-coll (vec coll)]
+    (vec (concat (subvec vec-coll 0 index) (subvec vec-coll (inc index))))))
+
+(defn remove-row! [row-index]
+  (swap! catalogue-in-edit update :rows remove-from-vec row-index))
