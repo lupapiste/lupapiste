@@ -80,8 +80,8 @@
    (map row-operation operations)])
 
 (rum/defc catalogue-row
-  < {:key-fn (fn [row] (str (:code row) "-" (:text row)))}
-  [{:keys [code text price-per-unit discount-percent min-total-price max-total-price unit operations] :as row}]
+  < {:key-fn (fn [_ row-index] row-index)}
+  [{:keys [code text price-per-unit discount-percent min-total-price max-total-price unit operations] :as row} row-index]
   [:tr
    [:td code]
    [:td text]
@@ -121,7 +121,7 @@
     (println "rows after change" (:rows @state/catalogue-in-edit))))
 
 (rum/defc edit-catalogue-row
-  < {:key-fn (fn [row] (str (:code row) "-" (:text row)))}
+  < {:key-fn (fn [_ row-index] row-index)}
   [{:keys [code text price-per-unit discount-percent min-total-price max-total-price unit operations] :as row} row-index]
   [:tr
    [:td (field code             (field-setter :code row-index)  {:size "6"})]
@@ -150,7 +150,9 @@
      [:thead
       (catalogue-by-rows-header)]
     [:tbody
-     (map catalogue-row (:rows selected-catalogue))]]])
+     (map-indexed (fn [row-index row]
+                    (catalogue-row row row-index))
+                  (:rows selected-catalogue))]]])
 
 (rum/defc edit-catalogue-by-rows < rum/reactive
   [selected-catalogue]
@@ -225,6 +227,15 @@
    (publish-button)
    (cancel-button)])
 
+(rum/defc add-row-button  < rum/reactive
+  [_]
+  [:div.right-button
+   [:button  {:className "positive"
+              :on-click state/add-empty-row}
+    [:i.lupicon-circle-plus]
+    [:span (str "Lisää tuoterivi")] ;;TODO localize
+    ]])
+
 (defn get-render-component [mode view]
   (println "get-render-component view " view " mode: " mode)
   (let [components {:show {:by-rows catalogue-by-rows
@@ -237,6 +248,7 @@
   [_]
   (let [view (rum/react state/view)
         mode (rum/react state/mode)
+        edit? (= mode :edit)
         selected-catalogue (state/get-catalogue (rum/react state/selected-catalogue-id))
         catalogue-in-edit  (rum/react state/catalogue-in-edit)
         active-catalogue (case mode
@@ -244,7 +256,7 @@
                            :edit catalogue-in-edit)
         render-catalogue (get-render-component mode view)]
     [:div.price-catalogue
-     [:div.catalogue-select-wrapper
+     [:div.catalogue-select-and-buttons
       (println "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
       (println "catalogue catalogue-in-edit: " catalogue-in-edit)
       (println "catalogue active-catalogue: " active-catalogue)
@@ -256,8 +268,10 @@
         :edit (edit-buttons))]
 
      (when active-catalogue
-       [:div
-        (view-switch)
+       [:div.switch-and-catalogue
+        [:div
+         (view-switch)
+         (when edit? (add-row-button))]
         (render-catalogue active-catalogue)])]))
 
 (defonce args (atom {}))

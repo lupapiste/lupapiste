@@ -39,3 +39,17 @@
   (println ">> update-field-in-catalogue-in-edit field " field
            " row-index " row-index " value " new-value)
   (swap! catalogue-in-edit assoc-in [:rows row-index field] new-value))
+
+(defn add-empty-row []
+  (println ">> add-empty-row")
+  (let [empty-row {:min-total-price nil
+                   :unit nil
+                   :discount-percent nil
+                   :code nil
+                   :operations []
+                   :max-total-price nil
+                   :price-per-unit nil
+                   :text nil}
+        prepend (fn [coll item]
+                  (concat [item] coll))]
+    (swap! catalogue-in-edit update :rows prepend empty-row)))

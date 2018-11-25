@@ -39644,8 +39644,8 @@ button.invoice-change-state-button {
   background-color: #dddddd;
 }
 
-.price-catalogue .catalogue-select-wrapper {
-  margin-bottom: 2em;
+.price-catalogue .catalogue-select-and-buttons {
+  height: 4em;
 }
 
 .price-catalogue .row-operation {
