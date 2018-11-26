@@ -59,6 +59,16 @@
       (count sites) => 10
       (util/find-by-id 5 sites) => nil))
 
+  (fact "Reselection fails silently"
+    (command pena :add-allu-drawing :id app-id
+             :kind :promotion
+             :siteId 5) => ok?
+    (:drawings (query-application pena app-id))
+    => (just [(contains {:id      pos-int?
+                         :allu-id 5
+                         :source  "promotion"
+                         :name    "Mauno Koiviston aukio"})]))
+
   (fact "Select The Container"
     (command pena :add-allu-drawing :id app-id
              :kind :promotion

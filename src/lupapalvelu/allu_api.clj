@@ -27,10 +27,14 @@
   (ok :sites (allu/site-list application kind)))
 
 (defn- update-application-or-fail [command updates-or-error]
-  (if (map? updates-or-error)
+  (cond
+    (nil? updates-or-error) (ok)
+
+    (map? updates-or-error)
     (action/update-application command
                                updates-or-error)
-    (fail updates-or-error)))
+
+    :else (fail updates-or-error)))
 
 (defcommand add-allu-drawing
   {:description      "Adds Allu site as a drawing into the application."
