@@ -638,6 +638,7 @@
     :allowDirectMarketing false
     :private {:password "$2a$10$sVFCAX/MB7wDKA2aNp1greq7QlHCU/r3WykMX/JKMWmg7d1cp7HSq"
               :apikey "502cb9e58426c613c8b85abc"}}
+
    ;; Hakija: pena / pena
    {:id "777777777777777777000020"
     :username "pena"
@@ -728,6 +729,23 @@
     :role "applicant"
     :architect true
     :company {:id "esimerkki" :role "admin" :submit true}}
+
+   ;; Hakija: Priscilla Panaani from Pori - used in ad_login-itests
+   {:id "7777777777777777770000112"
+    :username "priscilla"
+    :enabled true
+    :language "fi"
+    :role "applicant"
+    :personId "131052-308T"
+    :personIdSource "identification-service"
+    :firstName "Priscilla"
+    :lastName "Panaani"
+    :email "priscilla.panaani@pori.fi"
+    :street "Keksikari 1 A 13"
+    :zip "28100"
+    :city "Pori"
+    :phone "040-1234567"
+    :allowDirectMarketing true}
 
    ;; Docstore
    {:id "docstore"
