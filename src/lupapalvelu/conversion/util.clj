@@ -31,7 +31,6 @@
   "So-called 'database' format, e.g. 12-0477-A 63"
   #"\d{2}-\d{4}-[A-Z]{1,3} \d{2}")
 
-
 (defn destructure-permit-id
   "Split a permit id into a map of parts. Works regardless of which of the two
   id-format is used. Returns nil if input is invalid."
@@ -147,7 +146,7 @@
 (defn add-description [{:keys [documents] :as app} xml]
   (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         kuvaus (building-reader/->asian-tiedot xml)
-        kuvausteksti (str (when kuvaus kuvaus)
+        kuvausteksti (str kuvaus
                           (format "\nLuvan tyyppi: %s"
                                   (ss/lower-case (kuntalupatunnus->description kuntalupatunnus))))]
     (assoc app :documents
@@ -163,7 +162,6 @@
       schema-name
       op-name)))
 
-;; TODO: Finish me
 (defn toimenpide->toimenpide-document [op-name toimenpide]
   (let [data (model/map2updates [] toimenpide)
         schema-name (op-name->schema-name op-name)]
@@ -294,7 +292,7 @@
        "TJO" "tyonjohtajan-nimeaminen-v2"
        "P" "purkaminen"
        "PI" "purkaminen"
-       "konversio"))) ;; A generic operation for this purpose.
+       "konversio"))) ;; A minimal generic operation for this purpose.
                       ;; If a an application does not contain 'toimenpide'-element and is not P(I) or TJO, 'konversio it is'.
   ([kuntalupatunnus toimenpide]
    (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
@@ -370,9 +368,6 @@
                                (map (partial deduce-operation-type kuntalupatunnus) toimenpiteet)
                                (deduce-operation-type kuntalupatunnus))
                       :tunnus (krysp-reader/xml->kuntalupatunnus xml)))) data)))
-
-(def tilat
-  (memoize get-operation-types-for-testset))
 
 (defn get-asian-kuvaus [kuntalupatunnus]
   (-> kuntalupatunnus get-xml-for-kuntalupatunnus building-reader/->asian-tiedot))

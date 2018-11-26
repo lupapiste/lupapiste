@@ -81,8 +81,6 @@
                           (conv-util/deduce-operation-type kuntalupatunnus))
 
         manual-schema-datas {(conv-util/op-name->schema-name primary-op-name) (first document-datas)}
-        _ (swap! tila assoc :msd manual-schema-datas
-                 :primary-op primary-op-name)
 
         secondary-op-names (map (partial conv-util/deduce-operation-type kuntalupatunnus) (rest operations))
 
@@ -94,6 +92,8 @@
                        :address         (:address location-info)
                        :municipality    municipality}
 
+        ;; For some reason this doesn't create operation documents right, at least in A-type permits. In B-permits
+        ;; they seem to be created... TODO: Investigate.
         created-application (app/make-application make-app-info
                                                   []            ; messages
                                                   (:user command)
@@ -110,7 +110,10 @@
         ; TODO: create operations from app-info, see above.
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
+        ;; Add descriptions from asianTiedot to the document.
         created-application (conv-util/add-description created-application xml)
+
+        ; first-building-doc (map (partial prev-permit/document-data->op-document created-application) (first document-datas) primary-op-name)
 
         ; TODO: create secondaryoperations from app-info, see above.
         ;; make secondaryOperations for buildings other than the first one in case there are many
@@ -118,6 +121,8 @@
         ;; Okay, the following function seems to create an 'aiemmalla-luvalla-hakeminen' type of doc regardless of input
         ;; So we need to make this select the operation type dynamically depending on input!
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas) secondary-op-names)
+        ; _ (swap! tila assoc :otherdocs other-building-docs
+        ;          :primaryDoc first-building-doc)
 
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2 :name %3) other-building-docs (rest structure-descriptions) secondary-op-names)
 
@@ -143,7 +148,7 @@
                                (error "Moving statement to statement given -state failed: %s" (.getMessage e)))))
 
         created-application (-> created-application
-                                (update-in [:documents] concat other-building-docs new-parties structures)
+                                (update-in [:documents] concat #_first-building-doc other-building-docs new-parties structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :statements given-statements
                                        :opened (:created command)
