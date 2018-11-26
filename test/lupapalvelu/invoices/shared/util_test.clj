@@ -4,7 +4,7 @@
    [midje.sweet :refer :all]))
 
 (facts "rows-by-operation"
-       (fact "returns a map of the form {<operation> [<row><row>...]}"
+       (fact "returns a map of the form {<operation> [<row><row>...] where each row has the key index with value matching the index in the original :rows vector in the catalogue}"
              (let [catalogue {:id "bar-1-id"
                               :organization-id "753-R"
                               :state "draft"
@@ -23,24 +23,24 @@
                                       :operations ["toimenpide1"]}]
                               :meta {:created 12345
                                      :created-by "dummy-user"}}]
-               (util/rows-by-operation catalogue)  => {"toimenpide1" [{:code "123"
-                                                                       :text "Taksarivi 1"
-                                                                       :unit "kpl"
-                                                                       :price-per-unit 23
-                                                                       :discount-percent 50
-                                                                       :operations ["toimenpide1" "toimenpide2"]}
-                                                                      {:code "abc"
-                                                                       :text "Taksarivi 2"
-                                                                       :unit "kpl"
-                                                                       :price-per-unit 23
-                                                                       :discount-percent 50
-                                                                       :operations ["toimenpide1"]}]
-                                                       "toimenpide2" [{:code "123"
-                                                                       :text "Taksarivi 1"
-                                                                       :unit "kpl"
-                                                                       :price-per-unit 23
-                                                                       :discount-percent 50
-                                                                       :operations ["toimenpide1" "toimenpide2"]}]}))
+               (util/rows-with-index-by-operation catalogue)  => {"toimenpide1" [{:code "123"
+                                                                                  :text "Taksarivi 1"
+                                                                                  :unit "kpl"
+                                                                                  :price-per-unit 23
+                                                                                  :discount-percent 50
+                                                                                  :operations ["toimenpide1" "toimenpide2"]}
+                                                                                 {:code "abc"
+                                                                                  :text "Taksarivi 2"
+                                                                                  :unit "kpl"
+                                                                                  :price-per-unit 23
+                                                                                  :discount-percent 50
+                                                                                  :operations ["toimenpide1"]}]
+                                                                  "toimenpide2" [{:code "123"
+                                                                                  :text "Taksarivi 1"
+                                                                                  :unit "kpl"
+                                                                                  :price-per-unit 23
+                                                                                  :discount-percent 50
+                                                                                  :operations ["toimenpide1" "toimenpide2"]}]}))
 
        (fact "does not include rows that do not operations key or its value is an empty coll}"
              (let [catalogue {:id "bar-1-id"
@@ -61,7 +61,7 @@
                                       }]
                               :meta {:created 12345
                                      :created-by "dummy-user"}}]
-               (util/rows-by-operation catalogue)  => {"toimenpide1" [{:code "123"
+               (util/rows-with-index-by-operation catalogue)  => {"toimenpide1" [{:code "123"
                                                                        :text "Taksarivi 1"
                                                                        :unit "kpl"
                                                                        :price-per-unit 23
@@ -72,4 +72,5 @@
                                                                        :unit "kpl"
                                                                        :price-per-unit 23
                                                                        :discount-percent 50
-                                                                       :operations ["toimenpide1" "toimenpide2"]}]})))
+                                                                       :operations ["toimenpide1" "toimenpide2"]}]}))
+       )

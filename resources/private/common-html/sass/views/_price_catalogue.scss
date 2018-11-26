@@ -51,5 +51,24 @@
         float: right;
     }
 
+    .add-row-to-operation {
+        padding: 0.5em;
+        border-bottom: 1px dashed $lp-light-grey;
+        border-left: 1px dashed $lp-light-grey;
+        border-right: 1px dashed $lp-light-grey;
+    }
+
+    .operations-container {
+        margin-bottom: 2em;
+    }
+
+    .operations-table {
+        margin-bottom: 0px;
+    }
+
+    .operation-product-select {
+        width: 100%;
+    }
+
 
 }

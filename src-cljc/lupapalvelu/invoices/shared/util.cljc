@@ -3,7 +3,7 @@
 (defn row-has-operation? [operation row]
   ((set (:operations row)) operation))
 
-(defn rows-by-operation [{:keys [rows] :as catalogue}]
+(defn rows-with-index-by-operation [{:keys [rows] :as catalogue}]
   (let [all-operations (->> rows
                             (map :operations)
                             (remove nil?)

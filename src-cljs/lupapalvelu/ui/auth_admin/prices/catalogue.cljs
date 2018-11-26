@@ -64,7 +64,7 @@
      (map operation-catalogue-row operation rows)]]])
 
 (rum/defc catalogue-by-operations [selected-catalogue]
-  (let [rows-by-operation (util/rows-by-operation selected-catalogue)]
+  (let [rows-by-operation (util/rows-with-index-by-operation selected-catalogue)]
     [:div
      (for [[operation rows] rows-by-operation]
        (operation-table operation rows))]))
@@ -91,6 +91,66 @@
    [:td max-total-price]
    [:td unit]
    [:td (row-operations operations)]])
+
+(rum/defc operation-product-select < rum/reactive
+  [operation rows]
+  (let [catalogue  (rum/react state/catalogue-in-edit)]
+    (println "operation-product-select operation: " operation )
+    (println "operation-product-select rows: " rows)
+    [:select.operation-product-select
+     (map (fn [[index text]]
+            [:option {:value index} text])
+          rows)]))
+
+(rum/defc edit-operation-catalogue-row
+  < {:key-fn (fn [operation row] (str operation))}
+  [operation {:keys [index text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
+  (println ">> edit-operation-catalogue-row operation: " operation " index: " index " row-text: " text)
+  [:tr
+   [:td text]
+   [:td price-per-unit]
+   [:td discount-percent]
+   [:td min-total-price]
+   [:td max-total-price]
+   [:td unit]])
+
+(rum/defc edit-operation-table
+  < rum/reactive
+  < {:key-fn (fn [operation rows] (str "edit-" operation))}
+  [operation rows]
+  (println "AAAAAAAAAAAAAAA edit-operation-table")
+  (let [all-product-rows-by-index (into {}
+                                        (map-indexed
+                                         (fn [index row]
+                                           [index (:text row)])
+                                         (:rows (rum/react state/catalogue-in-edit))))
+        all-full-product-rows-by-index (into {}
+                                             (map-indexed
+                                              (fn [index row]
+                                                [index (assoc row :index index)])
+                                              (:rows (rum/react state/catalogue-in-edit))))
+        all-rows (vals all-full-product-rows-by-index)]
+    (println "all-rows: " all-rows)
+    [:div.operations-container
+     [:table.operations-table
+      [:thead
+       [:tr
+        [:th operation]
+        [:th (loc "price-catalogue.unit-price")]
+        [:th (loc "price-catalogue.discount-percent")]
+        [:th (loc "price-catalogue.minimum")]
+        [:th (loc "price-catalogue.maximum")]
+        [:th (loc "price-catalogue.unit")]]]
+      [:tbody
+       (map (partial edit-operation-catalogue-row operation) rows)]]
+     [:div.add-row-to-operation
+      (operation-product-select operation all-product-rows-by-index)]]))
+
+(rum/defc edit-catalogue-by-operations [selected-catalogue]
+  (let [rows-by-operation (util/rows-with-index-by-operation selected-catalogue)]
+    [:div
+     (for [[operation rows] rows-by-operation]
+       (edit-operation-table operation rows))]))
 
 (rum/defc field < {:key-fn (fn [row] )}
   [value on-change & [props]]
@@ -244,7 +304,7 @@
   (let [components {:show {:by-rows catalogue-by-rows
                            :by-operations catalogue-by-operations}
                     :edit {:by-rows edit-catalogue-by-rows
-                           :by-operations catalogue-by-operations}}]
+                           :by-operations edit-catalogue-by-operations}}]
     (get-in components [mode view])))
 
 (rum/defc catalogue < rum/reactive

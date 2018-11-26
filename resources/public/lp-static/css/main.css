@@ -39695,6 +39695,25 @@ button.invoice-change-state-button {
   float: right;
 }
 
+.price-catalogue .add-row-to-operation {
+  padding: 0.5em;
+  border-bottom: 1px dashed #f6f6f6;
+  border-left: 1px dashed #f6f6f6;
+  border-right: 1px dashed #f6f6f6;
+}
+
+.price-catalogue .operations-container {
+  margin-bottom: 2em;
+}
+
+.price-catalogue .operations-table {
+  margin-bottom: 0px;
+}
+
+.price-catalogue .operation-product-select {
+  width: 100%;
+}
+
 #bulletins, #local-bulletins {
   font-family: "Source Sans Pro", sans-serif;
   font-weight: 400;
