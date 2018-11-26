@@ -151,7 +151,8 @@
                                   (ss/lower-case (kuntalupatunnus->description kuntalupatunnus))))]
     (assoc app :documents
            (map (fn [doc]
-                  (if (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
+                  (if (and (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
+                           (empty? (get-in doc [:data :kuvaus :value])))
                     (assoc-in doc [:data :kuvaus :value] kuvausteksti)
                     doc))
                 documents))))
