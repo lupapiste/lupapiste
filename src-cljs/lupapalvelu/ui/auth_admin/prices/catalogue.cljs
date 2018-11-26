@@ -94,17 +94,18 @@
 
 (rum/defc operation-product-select < rum/reactive
   [operation rows]
-  (let [catalogue  (rum/react state/catalogue-in-edit)]
+  (let [catalogue  (rum/react state/catalogue-in-edit)
+        options (map (fn [{:keys [index text]}]
+                       [:option {:key (str operation "-" index) :value index} text])
+                     rows)]
     (println "operation-product-select operation: " operation )
     (println "operation-product-select rows: " rows)
     [:select.operation-product-select {:on-change (fn [e]
-                                                    (let [row-index (js/Number (.. e -target -value))]
-                                                      (state/add-operation-to-row! operation row-index)))}
-     (map (fn [{:keys [index text]}]
-            [:option {:key (str operation "-" index)
-                      :value index}
-             text])
-          rows)]))
+                                                    (let [value (.. e -target -value)]
+                                                      (if (not (= value "empty"))
+                                                        (state/add-operation-to-row! operation (js/Number value))
+                                                        (println "empty select - no need to do anything"))))}
+     (conj options [:option {:key "empty" :value "empty"} "--valitse--"])]))
 
 (rum/defc edit-operation-catalogue-row
   < {:key-fn (fn [operation row] (str operation "-" (:index row)))}
