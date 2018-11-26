@@ -61,3 +61,9 @@
 
 (defn add-operation-to-row! [operation row-index]
   (swap! catalogue-in-edit update-in [:rows row-index :operations] conj operation))
+
+(defn- remove-operation [operations operation]
+  (remove (fn [oper] (= oper operation)) operations))
+
+(defn remove-operation-from-row! [operation row-index]
+  (swap! catalogue-in-edit update-in [:rows row-index :operations] remove-operation operation))

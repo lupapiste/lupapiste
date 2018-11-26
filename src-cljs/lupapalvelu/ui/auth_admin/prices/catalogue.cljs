@@ -117,15 +117,16 @@
    [:td discount-percent]
    [:td min-total-price]
    [:td max-total-price]
-   [:td unit]])
+   [:td unit]
+   [:td [:div.remove-icon-container {:on-click (fn [] (state/remove-operation-from-row! operation (:index row)))}
+         [:i.lupicon-remove]]]])
 
 (rum/defc edit-operation-table
   < rum/reactive
   < {:key-fn (fn [operation rows] (str "edit-" operation))}
   [operation indexed-product-rows]
   (println "AAAAAAAAAAAAAAA edit-operation-table operation: " operation)
-  (let [;;operation-indexed-product-rows (util/maps-with-index-key rows)
-        all-indexed-product-rows (util/maps-with-index-key (:rows (rum/react state/catalogue-in-edit)))
+  (let [all-indexed-product-rows (util/maps-with-index-key (:rows (rum/react state/catalogue-in-edit)))
         already-selected-indexes (map :index indexed-product-rows)
         selectable-indexed-product-rows (util/remove-maps-with-value all-indexed-product-rows :index already-selected-indexes)]
     (println "all-indexed-product-rows: " all-indexed-product-rows)
@@ -141,7 +142,8 @@
         [:th (loc "price-catalogue.discount-percent")]
         [:th (loc "price-catalogue.minimum")]
         [:th (loc "price-catalogue.maximum")]
-        [:th (loc "price-catalogue.unit")]]]
+        [:th (loc "price-catalogue.unit")]
+        [:th ""]]]
       [:tbody
        (map (partial edit-operation-catalogue-row operation) indexed-product-rows)]]
      [:div.add-row-to-operation
@@ -189,7 +191,8 @@
    [:td (field max-total-price  (field-setter :max-total-price row-index :number) {:size "6"})]
    [:td (unit-select unit       (field-setter :unit row-index) )]
    [:td (row-operations operations)]
-   [:td [:div {:on-click (fn [] (state/remove-row! row-index))} [:i.lupicon-remove]]]])
+   [:td [:div.remove-icon-container {:on-click (fn [] (state/remove-row! row-index))}
+         [:i.lupicon-remove]]]])
 
 (rum/defc catalogue-by-rows [selected-catalogue]
   [:div
@@ -312,7 +315,7 @@
   [_]
   (let [view (rum/react state/view)
         mode (rum/react state/mode)
-        edit? (= mode :edit)
+        edit-rows? (and (= mode :edit) (= view :by-rows))
         selected-catalogue (state/get-catalogue (rum/react state/selected-catalogue-id))
         catalogue-in-edit  (rum/react state/catalogue-in-edit)
         active-catalogue (case mode
@@ -335,7 +338,7 @@
        [:div.switch-and-catalogue
         [:div
          (view-switch)
-         (when edit? (add-row-button))]
+         (when edit-rows? (add-row-button))]
         (render-catalogue active-catalogue)])]))
 
 (defonce args (atom {}))

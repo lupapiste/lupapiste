@@ -39714,6 +39714,10 @@ button.invoice-change-state-button {
   width: 100%;
 }
 
+.price-catalogue .remove-icon-container {
+  text-align: right;
+}
+
 #bulletins, #local-bulletins {
   font-family: "Source Sans Pro", sans-serif;
   font-weight: 400;
