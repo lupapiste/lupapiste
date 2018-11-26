@@ -3,8 +3,8 @@
    [lupapalvelu.invoices.shared.util :as util]
    [midje.sweet :refer :all]))
 
-(facts "rows-by-operation"
-       (fact "returns a map of the form {<operation> [<row><row>...] where each row has the key index with value matching the index in the original :rows vector in the catalogue}"
+(facts "rows-with-index-by-operation"
+       (fact "returns a map of the form {<operation> [<row><row>...] where each row has the key :index with value matching the index in the original :rows vector in the catalogue}"
              (let [catalogue {:id "bar-1-id"
                               :organization-id "753-R"
                               :state "draft"
@@ -23,19 +23,22 @@
                                       :operations ["toimenpide1"]}]
                               :meta {:created 12345
                                      :created-by "dummy-user"}}]
-               (util/rows-with-index-by-operation catalogue)  => {"toimenpide1" [{:code "123"
+               (util/rows-with-index-by-operation catalogue)  => {"toimenpide1" [{:index 0
+                                                                                  :code "123"
                                                                                   :text "Taksarivi 1"
                                                                                   :unit "kpl"
                                                                                   :price-per-unit 23
                                                                                   :discount-percent 50
                                                                                   :operations ["toimenpide1" "toimenpide2"]}
-                                                                                 {:code "abc"
+                                                                                 {:index 1
+                                                                                  :code "abc"
                                                                                   :text "Taksarivi 2"
                                                                                   :unit "kpl"
                                                                                   :price-per-unit 23
                                                                                   :discount-percent 50
                                                                                   :operations ["toimenpide1"]}]
-                                                                  "toimenpide2" [{:code "123"
+                                                                  "toimenpide2" [{:index 0
+                                                                                  :code "123"
                                                                                   :text "Taksarivi 1"
                                                                                   :unit "kpl"
                                                                                   :price-per-unit 23
@@ -61,16 +64,18 @@
                                       }]
                               :meta {:created 12345
                                      :created-by "dummy-user"}}]
-               (util/rows-with-index-by-operation catalogue)  => {"toimenpide1" [{:code "123"
-                                                                       :text "Taksarivi 1"
-                                                                       :unit "kpl"
-                                                                       :price-per-unit 23
-                                                                       :discount-percent 50
-                                                                       :operations ["toimenpide1" "toimenpide2"]}]
-                                                       "toimenpide2" [{:code "123"
-                                                                       :text "Taksarivi 1"
-                                                                       :unit "kpl"
-                                                                       :price-per-unit 23
-                                                                       :discount-percent 50
-                                                                       :operations ["toimenpide1" "toimenpide2"]}]}))
+               (util/rows-with-index-by-operation catalogue)  => {"toimenpide1" [{:index 0
+                                                                                  :code "123"
+                                                                                  :text "Taksarivi 1"
+                                                                                  :unit "kpl"
+                                                                                  :price-per-unit 23
+                                                                                  :discount-percent 50
+                                                                                  :operations ["toimenpide1" "toimenpide2"]}]
+                                                                  "toimenpide2" [{:index 0
+                                                                                  :code "123"
+                                                                                  :text "Taksarivi 1"
+                                                                                  :unit "kpl"
+                                                                                  :price-per-unit 23
+                                                                                  :discount-percent 50
+                                                                                  :operations ["toimenpide1" "toimenpide2"]}]}))
        )
