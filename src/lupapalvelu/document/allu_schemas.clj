@@ -93,28 +93,16 @@
                                         ["demolish-days-needed" "demolish-end-date" "demolish-end-time"]]}))
 
 (def promootio-location (allu-group {:name "promootio-location"
-                                     :body [{:name        "place"
-                                             :type        :group
-                                             :uicomponent :docgen-group
-                                             :css         [:allu-group :allu-group--place]
-                                             :template    "form-grid-docgen-group-template"
-                                             :body        [{:name   "select"
-                                                            :type   :select
-                                                            :css    [:dropdown]
-                                                            :layout :full-width
-                                                            :body   [{:name "foo"}
-                                                                     {:name "bar"}]}
-                                                           {:name        "info"
-                                                            :type        :string
-                                                            :placeholder "placeholder.place-info"}]
-                                             :rows        [["select::4"]
-                                                           ["info::4"]]}
+                                     :body [{:name    "drawings"
+                                             :type    :allu-drawings
+                                             :pseudo? true
+                                             :kind    :promotion}
                                             {:name   "map"
                                              :type   :text
                                              :label  false
                                              :css    [:allu-map]
                                              :layout :full-width}]
-                                     :rows [["place::2" "map::2"]]}))
+                                     :rows [["drawings::2" "map::2"]]}))
 
 (def promootio-structures (allu-group {:name "promootio-structures"
                                        :css  :allu-group--structures
@@ -175,7 +163,7 @@
                                        :rows            [{:css [:allu-row--spaced]
                                                           :row ["structures-needed::2"]}
                                                          ["structures::4"]
-                                                         {:css [:allu-row--sapced]
+                                                         {:css [:allu-row--spaced]
                                                           :row ["traffic-needed::2" "traffic-link::2"]}]}))
 
 

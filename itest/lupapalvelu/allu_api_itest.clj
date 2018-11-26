@@ -1,6 +1,7 @@
-(ns lupapalvelu.allu-api-itest.clj
-  (:require [midje.sweet :refer :all]
-            [lupapalvelu.itest-util :refer :all]))
+(ns lupapalvelu.allu-api-itest
+  (:require [lupapalvelu.itest-util :refer :all]
+            [midje.sweet :refer :all]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
@@ -52,6 +53,11 @@
                          :allu-id 5
                          :source  "promotion"
                          :name    "Mauno Koiviston aukio"})]))
+
+  (fact "Manu's plaza excluded from the site list"
+    (let [{:keys [sites]} (query pena :allu-sites :id app-id :kind "promotion")]
+      (count sites) => 10
+      (util/find-by-id 5 sites) => nil))
 
   (fact "Select The Container"
     (command pena :add-allu-drawing :id app-id

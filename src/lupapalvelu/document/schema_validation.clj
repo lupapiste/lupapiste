@@ -267,8 +267,14 @@
           ;; language-specific
           (opt :url)  sc/Keyword
           ;; Icon classes (e.g., [:lupicon-warning :negative])
-          (opt :icon) [sc/Keyword]
-          }))
+          (opt :icon) [sc/Keyword]}))
+
+(defschema AlluDrawings
+  "Combination of Allu-defined fixed locations and user-added
+  drawings."
+  (merge PseudoInput
+         {:type (sc/eq :allu-drawings)
+          :kind (sc/enum :promotion)}))
 
 (defschema Input
   (sc/conditional (type-pred :text)       Text
@@ -283,6 +289,7 @@
                   (type-pred :personSelector) PersonSelector
                   (apply type-pred special-types) Special
                   (type-pred :textlink) TextLink
+                  (type-pred :allu-drawings) AlluDrawings
                   :else                   {:type (sc/eq nil)})) ; For better error messages
 
 (declare Element)

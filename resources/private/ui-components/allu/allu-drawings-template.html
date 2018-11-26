@@ -1,0 +1,20 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="allu-drawings-template">
+  <drawings-table params="drawings: alluDrawings,
+                          ltitle: 'allu.locations',
+                          deleteFn: deleteFn"></drawings-table>
+  <!-- ko if: authOk -->
+  <select class="dropdown"
+          data-bind="options: sites,
+                     optionsCaption: loc( 'choose' ),
+                     optionsText: 'name',
+                     value: selectedSite"></select>
+  <icon-button params="icon: 'circle-plus',
+                       enable: selectedSite,
+                       ltext: 'allu.add-site',
+                       click: selectFn"></icon-button>
+  <!-- /ko -->
+  <drawings-table params="drawings: userDrawings,
+                          ltitle: 'allu.user-locations',
+                          deleteFn: deleteFn"></drawings-table>
+</script>

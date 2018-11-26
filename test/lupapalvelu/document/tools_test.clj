@@ -25,11 +25,13 @@
      :type :group,
      :body
      [{:name "name", :type :string}
+      {:name "link" :type :textlink :pseudo? true}
       {:name "genre", :type :string}
       {:name "members"
        :type :group
        :repeating true
        :body [{:name "name", :type :string}
+              {:name "twitter" :type :textlink :pseudo? true}
               {:name "instrument", :type :string}]}]}]})
 
 (def expected-simple-document
@@ -90,6 +92,7 @@
                                                                       :type :group
                                                                       :body [{:name "name"
                                                                               :type :string}
+                                                                             {:name "link" :type :textlink :pseudo? true}
                                                                              {:name "genre"
                                                                               :type :string}]}])
 

@@ -61,7 +61,7 @@
 
 (defn allu-ids-for-drawings [application kind]
   (some->> (allu-drawings application kind)
-           map :allu-id
+           (map :allu-id)
            set))
 
 

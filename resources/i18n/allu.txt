@@ -114,3 +114,6 @@
 "promootio-info.sales-info" "fi" "Myynti- ja mainostoiminnan kuvaus"
 "promootio-info.other-info" "fi" "Muut lisätiedot"
 "placeholder.other-promotion-info" "fi" "Kirjoita muut mahdolliset lisätiedot promootioon liittyen"
+"allu.locations" "fi" "Valitut sijainnit"
+"allu.user-locations" "fi" "Käyttäjän piirtämät sijainnit"
+"allu.add-site" "fi" "Lisää sijainti"

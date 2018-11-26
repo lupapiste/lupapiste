@@ -118,14 +118,15 @@
 
 (defn create-unwrapped-data [{body :body} f]
   (flattened
-    (walk/prewalk
-     #(if (and (map? %) (not-empty %))
-        (when  (not (:pseudo? %))
-          (let [t (keyword (:type %))
-                v (if (#{:group :table :foremanOtherApplications} t) (group % t) (f %))]
-            {(keyword (:name %)) v}))
-         %)
-      body)))
+   (walk/prewalk
+    #(if (and (map? %) (not-empty %))
+       (if (:pseudo? %)
+         {}
+         (let [t (keyword (:type %))
+               v (if (#{:group :table :foremanOtherApplications} t) (group % t) (f %))]
+           {(keyword (:name %)) v}))
+       %)
+    body)))
 
 ;;
 ;; Public api

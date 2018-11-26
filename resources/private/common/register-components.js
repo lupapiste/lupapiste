@@ -215,7 +215,10 @@ jQuery(document).ready(function() {
     {name: "timepicker"},
     {name: "textlink"},
     {name: "docgen-textlink"},
-    {name: "docgen-radio-group"}
+    {name: "docgen-radio-group"},
+    {name: "allu-drawings"},
+    {name: "docgen-allu-drawings"},
+    {name: "drawings-table"}
 ];
 
   ko.registerLupapisteComponents(components);
