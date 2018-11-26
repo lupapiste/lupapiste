@@ -16,3 +16,6 @@
     (into {} (for [operation all-operations
                    :let [operation-rows (filter (partial row-has-operation? operation) indexed-rows)]]
                [operation operation-rows]))))
+
+(defn remove-maps-with-value [coll-of-maps key values]
+  (remove #((set values) (get % key)) coll-of-maps))

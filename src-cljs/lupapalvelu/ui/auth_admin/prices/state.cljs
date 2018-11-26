@@ -58,3 +58,6 @@
 
 (defn remove-row! [row-index]
   (swap! catalogue-in-edit update :rows remove-from-vec row-index))
+
+(defn add-operation-to-row! [operation row-index]
+  (swap! catalogue-in-edit update-in [:rows row-index :operations] conj operation))

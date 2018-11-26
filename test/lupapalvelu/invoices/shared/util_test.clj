@@ -77,5 +77,19 @@
                                                                                   :unit "kpl"
                                                                                   :price-per-unit 23
                                                                                   :discount-percent 50
-                                                                                  :operations ["toimenpide1" "toimenpide2"]}]}))
-       )
+                                                                                  :operations ["toimenpide1" "toimenpide2"]}]})))
+
+(facts "remove-maps-with-value"
+       (fact "filters out maps that have any of the given values in a given key"
+             (let [maps [{:name "George" :info "foo"}
+                         {:name "Liz"    :info "foo"}
+                         {:name "George" :info "blahblah"}
+                         {:name "Liz"    :info "bar"}]]
+
+               (util/remove-maps-with-value maps :name ["Liz"]) =>  [{:name "George" :info "foo"}
+                                                                     {:name "George" :info "blahblah"}]
+
+               (util/remove-maps-with-value maps :info ["foo"]) =>  [{:name "George" :info "blahblah"}
+                                                                     {:name "Liz"    :info "bar"}]
+
+               (util/remove-maps-with-value maps :info ["foo" "bar"]) =>  [{:name "George" :info "blahblah"}])))
