@@ -136,6 +136,11 @@
                                                  (infof "Logging in user %s as applicant" emailaddress)
                                                  (->> emailaddress usr/get-user-by-email (log-user-in! req)))
 
+            (and valid-signature?
+                 (usr/dummy? user))            (do
+                                                 (errorf "Cannot promote or login a dummy user: %s" emailaddress)
+                                                 (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
+
             valid-signature? (do
                                (error "User does not have organization authorization")
                                (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
