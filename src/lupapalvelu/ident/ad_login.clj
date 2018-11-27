@@ -129,7 +129,7 @@
                                                  (->> (update-or-create-user! givenname surname emailaddress authz)
                                                       (log-user-in! req)))
 
-            ;; If all the assertions are nil, decrypting has failed.
+            ;; If all the assertions are nil, decryption has failed.
             (every? nil?
                     (list Group emailaddress
                           givenname name
