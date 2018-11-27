@@ -117,3 +117,4 @@
 "allu.locations" "fi" "Valitut sijainnit"
 "allu.user-locations" "fi" "Käyttäjän piirtämät sijainnit"
 "allu.add-site" "fi" "Lisää sijainti"
+"allu.remove-drawing-confirmation" "fi" "Haluatko varmasti poistaa sijainnin {0}?"

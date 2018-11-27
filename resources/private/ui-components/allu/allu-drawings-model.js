@@ -49,6 +49,15 @@ LUPAPISTE.AlluDrawingsModel = function( params ) {
     lupapisteApp.models.application.lightReload();
   }
 
+  function confirmation( fun, draw ) {
+    hub.send( "show-dialog", {ltitle: "areyousure",
+                              size: "medium",
+                              component: "yes-no-dialog",
+                              componentParams: {text: loc( "allu.remove-drawing-confirmation",
+                                                           draw.name),
+                                                yesFn: _.wrap( draw, fun) }});
+  }
+
   if( self.authOk()) {
     self.deleteFn = function( draw ) {
       ajax.command( "remove-application-drawing", {id: appId(),
@@ -70,6 +79,8 @@ LUPAPISTE.AlluDrawingsModel = function( params ) {
     self.deleteFn = null;
     self.selectFn = null;
   }
+
+  self.confirmationDeleteFn = self.deleteFn ? _.wrap( self.deleteFn, confirmation) : null;
 
   self.addHubListener( "application-model-updated", fetchSites );
 

@@ -1,23 +1,15 @@
 (ns lupapalvelu.application-api
-  (:require [taoensso.timbre :refer [trace debug debugf info infof
-                                     warnf warn error errorf]]
-            [clj-time.core :refer [year]]
+  (:require [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
-            [slingshot.slingshot :refer [try+]]
-            [monger.operators :refer :all]
-            [sade.coordinate :as coord]
-            [sade.core :refer :all]
-            [sade.env :as env]
-            [sade.util :as util]
-            [sade.strings :as ss]
             [lupapalvelu.action :refer [defraw defquery defcommand
                                         update-application notify] :as action]
-            [lupapalvelu.archive.archiving-util :as archiving-util]
-            [lupapalvelu.application-replace-operation :as replace-operation]
+            [lupapalvelu.allu :as allu]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.application-replace-operation :as replace-operation]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.application-utils :as app-utils]
-            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.archive.archiving-util :as archiving-util]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
@@ -42,11 +34,20 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
             [lupapalvelu.restrictions :as restrictions]
-            [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.states :as states]
             [lupapalvelu.suti :as suti]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.ya :as ya])
+            [lupapalvelu.ya :as ya]
+            [monger.operators :refer :all]
+            [sade.coordinate :as coord]
+            [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [slingshot.slingshot :refer [try+]]
+            [taoensso.timbre :refer [trace debug debugf info infof
+                                     warnf warn error errorf]])
   (:import (java.net SocketTimeoutException)))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
@@ -377,13 +378,14 @@
 
                       {:required [:application/edit-drawings]}]
    :on-success       bs/update-callback}
-  [{:keys [created] :as command}]
+  [{:keys [application created] :as command}]
   (when (sequential? drawings)
-    (let [drawings-with-geojson (map #(assoc % :geometry-wgs84 (draw/wgs84-geometry %)) drawings)]
+    (let [{:keys [allu-drawings new-drawings]} (allu/merge-drawings application drawings)
+          drawings-with-geojson (map #(assoc % :geometry-wgs84 (draw/wgs84-geometry %)) new-drawings)]
       (if (every? :geometry-wgs84 drawings-with-geojson)
         (update-application command
                             {$set {:modified created
-                                   :drawings drawings-with-geojson}})
+                                   :drawings (concat allu-drawings drawings-with-geojson)}})
         ; We don't accept invalid GeoJSON, as then the data would not be archived nor searchable by document search
         (fail :error.invalid-drawing)))))
 

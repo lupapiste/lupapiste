@@ -2,15 +2,38 @@
   "Allu functionality that either a) supports frontend or b) is not
   directly related to the integration functionality."
   (:require [clojure.set :as set]
+            [lupapalvelu.action :as action]
             [lupapalvelu.backing-system.allu.core :as allu-core]
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [sade.coordinate :as coord]
+            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.action :as action]
-            [schema.core :as sc]))
+            [schema.core :refer [defschema] :as sc]))
 
+(def kind-schema (apply sc/enum (keys allu-core/FIXED-LOCATION-TYPES)))
+
+(defschema Drawing
+  {;; Only the drawings originating from Allu have object string
+   ;; ids. Thus, there should never be id conflicts between drawings
+   ;; from different origins.
+   :id                         (sc/conditional
+                                int?  sc/Int
+                                :else ssc/ObjectIdStr)
+   :name                       sc/Str
+   :geometry                   sc/Str
+   :geometry-wgs84             {:coordinates [(sc/one [[(sc/one sc/Num "x") (sc/one sc/Num "y")]] "first")]
+                                :type        (sc/enum "Polygon", "Point", "LineString")}
+   (sc/optional-key :desc)     sc/Str
+   (sc/optional-key :height)   sc/Str
+   (sc/optional-key :area)     sc/Str
+   (sc/optional-key :category) sc/Str
+   (sc/optional-key :allu-id)  sc/Int ;; From Allu
+   (sc/optional-key :source)   (sc/conditional
+                                keyword? kind-schema
+                                :else (apply sc/enum (map name (keys allu-core/FIXED-LOCATION-TYPES))))
+   })
 
 (defn- site->drawing [kind {:keys [id geometry area]}]
   (let [from        (get-in geometry [:crs :properties :name])
@@ -28,7 +51,7 @@
                                          coordinates)]}}))
 
 
-(defn- make-names-unique
+(defn make-names-unique
   "Adds number (1...) to each string k value that is not unique. Assumes
   that the original values do not include similar numbers."
   [k xs]
@@ -40,8 +63,6 @@
                                          (map #(update (nth (vec vs) %)
                                                        k
                                                        str " " (inc %)))))))))
-
-(def kind-schema (apply sc/enum (keys allu-core/FIXED-LOCATION-TYPES)))
 
 (sc/defn ^:always-validate fetch-fixed-locations
   [kind :- kind-schema]
@@ -82,13 +103,32 @@
                               :drawings
                               (util/find-by-id allu-id))]
       {$push {:drawings (assoc drawing
-                               :id (->> (:drawings application)
-                                        (map :id)
-                                        (cons 0)
-                                        (apply max)
-                                        (+ 1 (rand-int 100)))
+                               :id (mongo/create-id)
                                :allu-id (:id drawing))}}
       :error.not-found)))
 
 (defn remove-drawing [application drawing-id]
   {$pull {:drawings {:id drawing-id}}})
+
+(defn merge-drawings
+  "When Oskari 'saves' drawings to application, any external
+  metadata (e.g., allu-id) is not present in the drawings to be
+  saved. However, since the ids (and geometries) are untouched, we can
+  manage the situation. This function returns map with two keys:
+
+  allu-drawings: existing Allu-drawings with updated Oskari
+  metadata (name, desc, ...). If an old drawing is not listed, it has
+  been removed in Oskari.
+
+  new-drawings: totally new or modified non-Allu drawings"
+  [{old-drawings :drawings} new-drawings]
+  (let [allu-draw-ids (set/intersection (->> (filter :allu-id old-drawings)
+                                             (map :id)
+                                             set)
+                                        (set (map :id new-drawings)))]
+    {:allu-drawings (map (fn [id]
+                           (merge (util/find-by-id id old-drawings)
+                                  (util/find-by-id id new-drawings)))
+                         allu-draw-ids)
+     :new-drawings  (remove #(contains? allu-draw-ids (:id %))
+                            new-drawings)}))
