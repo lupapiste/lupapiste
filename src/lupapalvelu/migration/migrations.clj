@@ -4097,6 +4097,22 @@
         (assoc-in task [:data :muuTunnus :value] "")
         task))
     nonexisting-muuTunnus-value-in-tasks?))
+
+(defmigration LPK-3766-assignments-modified-field
+  {:apply-when (pos? (mongo/count :assignments {:modified {$exists false}}))}
+  (let [latest-ts          #(or (:timestamp (last %)) 0)
+        target-assignments (mongo/select :assignments {:modified {$exists false}})]
+    (doseq [{:keys [id states
+                    targets]} target-assignments
+            :let              [modified (max (latest-ts states)
+                                             (latest-ts targets))]]
+      (assert (pos? modified) (str "No timestamp for assignment " id))
+      (mongo/update-by-id :assignments
+                          id
+                          {$set {:modified modified}}))
+    (count target-assignments)))
+
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

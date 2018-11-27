@@ -157,7 +157,7 @@ Add legacy review
   ${name-tid}=  Test id for  reviews  ${index}  name
   ${type-tid}=  Test id for  reviews  ${index}  type
   Input text by test id  ${name-tid}  ${name}
-  Select from list by test id  ${type-tid}  ${type}
+  Select from list by test id and value  ${type-tid}  ${type}
 
 Add legacy foreman
   [Arguments]  ${index}  ${role}

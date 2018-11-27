@@ -39,16 +39,16 @@
                   (str "Only one of the keys is allowed: " allowed-keys)))
 
 (def PathCondition
-  [(sc/one (sc/enum :OR :AND) :OR)
+  [(sc/one (sc/enum :OR :AND :NOT) :OR)
    (sc/conditional
     keyword?    (sc/constrained sc/Keyword
                                 ;; util/fn-> does not pass schema
                                 ;; validation on the ClojureScript!?
-                                #(-> % #{:AND :OR} not))
+                                #(-> % #{:AND :OR :NOT} not))
     sequential? (sc/recursive #'PathCondition))])
 
 (def condition-type
-  "Paths with operator (:AND, :OR) and nesting support. A valid value is
+  "Paths with operator (:AND, :OR, :NOT) and nesting support. A valid value is
   either a keyword or list. The list must start with operator and it
   can include nested lists. Valid values:
 

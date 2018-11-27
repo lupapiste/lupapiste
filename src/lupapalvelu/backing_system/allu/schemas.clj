@@ -7,7 +7,8 @@
             [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.integrations.geojson-2008-schemas :as geo]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.states :as states]
+            [sade.shared-schemas :as sssc]))
 
 (defschema LoginCredentials
   "User credentials for ALLU login API."
@@ -154,6 +155,16 @@
   {:name        sc/Str
    :description sc/Str
    :mimeType    (sc/maybe sc/Str)})
+
+(defschema AttachmentFile
+  "Data for ALLU attachments
+
+  fileId: id in storage system
+  storageSystem: storage database where the file is stored
+  attach-self: if true, convert the application to pdf and send to ALLU as an attachment"
+  (sc/conditional :fileId      {:fileId sssc/FileId
+                                :storageSystem sssc/StorageSystem}
+                  :attach-self {:attach-self sc/Bool}))
 
 (defschema ValidPlacementApplication
   "A partial schema for a Lupapiste application that can be converted into a `PlacementContract`. For testing."

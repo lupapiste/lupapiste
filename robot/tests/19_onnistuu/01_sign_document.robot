@@ -193,7 +193,7 @@ Register wizard until signing
   Input text by test id  register-company-personId    131052-308T
   Run Keyword If  '${lang}' == 'fi'  Test id select is  register-company-language  fi
   Run Keyword If  '${lang}' <> 'fi'  Select from test id  register-company-language  ${lang}
-  Select From test id  register-company-pop  Basware Oyj (BAWCFI22)
+  Select From test id by text  register-company-pop  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-continue
   Wait until  Element should be visible  xpath=//div[contains(@class, 'register-company-summary')]
   Run Keyword If  '${account}' == 'account5'  Element should contain  xpath=//strong[@data-test-id='summary-account-text']  Yritystili 5

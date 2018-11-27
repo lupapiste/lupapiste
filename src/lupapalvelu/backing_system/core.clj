@@ -53,6 +53,7 @@
   (-cancel-application! [_ command] (allu/cancel-application! command))
   (-approve-application! [_ {:keys [application] :as command} _ _]
     (allu/lock-application! command)
+    (allu/send-application-as-attachment! command)
     (attachment/save-comments-as-attachment command)
     (let [{:keys [attachments] :as application} (domain/get-application-no-access-checking (:id application))]
       [true (allu/send-attachments! (assoc command :application application)

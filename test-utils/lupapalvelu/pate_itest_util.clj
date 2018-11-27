@@ -359,6 +359,27 @@
                     :id            verdict-id
                     :published     pos?}))))
 
+(defn- status200-check-proposal [apikey headers {:keys [app-id verdict-id
+                                                        verdict-name contents]}]
+  (let [application  (query-application apikey app-id)
+        attachment   (-> application :attachments last)]
+    (fact "Response contains correct attachment"
+      headers => (contains {"Content-Disposition"
+                            (contains (format "%s %s %s"
+                                              app-id
+                                              (ss/encode-filename verdict-name)
+                                              (util/to-local-date (now))))}))
+
+    (fact "Verdict PDF attachment has been created"
+      attachment
+      => (contains {:readOnly         false
+                    :locked           true
+                    :source           {:type "verdicts"
+                                       :id   verdict-id}
+                    :contents         contents
+                    :type             {:type-group "paatoksenteko"
+                                       :type-id    "paatosehdotus"}}))))
+
 (defn give-up [i]
   (fact "We give up after 20 tries"
     (< i 20) => true))
@@ -380,6 +401,28 @@
                                                 :contents     "P\u00e4\u00e4t\u00f6s"
                                                 :state        "verdictGiven"}
                                                options))
+
+        (> i 19) (give-up i)
+
+        (= status 202) (do
+                         (Thread/sleep 2000)
+                         (recur (inc i)))
+
+        :else (bad-status status)))))
+
+(defn proposal-pdf-queue-test
+  [apikey {:keys [app-id verdict-id] :as options}]
+  (loop [i 0]
+    (let [{:keys [status headers]} (raw apikey :proposal-pdf
+                                        :id app-id
+                                        :verdict-id verdict-id)]
+      (cond
+        (= status 200) (status200-check-proposal
+                         apikey
+                         headers
+                         (merge {:verdict-name "P\u00e4\u00e4t\u00f6sehdotus"
+                                 :contents     "P\u00e4\u00e4t\u00f6sehdotus"}
+                                options))
 
         (> i 19) (give-up i)
 

@@ -47,7 +47,8 @@
             [sade.util :refer [=as-kw not=as-kw fn-> fn->>] :as util])
   (:import [java.io File InputStream ByteArrayInputStream ByteArrayOutputStream PipedInputStream PipedOutputStream]
            [org.apache.commons.io IOUtils]
-           [java.nio.charset StandardCharsets]))
+           [java.nio.charset StandardCharsets]
+           (com.fasterxml.jackson.databind.jsontype SubtypeResolver)))
 
 ;;
 ;; Metadata

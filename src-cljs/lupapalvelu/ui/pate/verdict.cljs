@@ -27,6 +27,9 @@
   (or (can? :publish-pate-verdict)
       (can? :publish-legacy-verdict)))
 
+(defn can-propose? []
+  (can? :publish-verdict-proposal))
+
 (def can-generate? (partial can? :generate-pate-pdf))
 
 (defn updater
@@ -114,6 +117,8 @@
          :as   info} @info
         published  (:published published)
         contract?  (util/=as-kw category :contract)
+        board?     (util/=as-kw (:giver info) :lautakunta)
+        proposal?  (util/=as-kw (:state info) :proposal)
         yes-fn     (fn []
                      (reset! state/verdict-wait? true)
                      (reset! (rum/cursor-in _meta [:enabled?]) false)
@@ -133,14 +138,33 @@
                                   :wait?    state/verdict-wait?
                                   :enabled? (can-publish?)
                                   :on-click (fn []
-                                              (hub/send "show-dialog"
-                                                        {:ltitle          "areyousure"
-                                                         :size            "medium"
-                                                         :component       "yes-no-dialog"
-                                                         :componentParams {:ltext (if contract?
-                                                                                    "pate.contract.confirm-publish"
-                                                                                    "verdict.confirmpublish")
-                                                                           :yesFn yes-fn}}))})
+                                              (common/show-dialog
+                                                {:type :yes-no
+                                                 :ltext (if contract?
+                                                          "pate.contract.confirm-publish"
+                                                          "verdict.confirmpublish")
+                                                 :callback yes-fn}))})
+         (when board?
+           (components/icon-button {:text-loc (if proposal? :verdict.update.proposal :verdict.proposal)
+                                    :class    (common/css :primary :pate-left-space)
+                                    :test-id  :verdict-proposal
+                                    :icon     :lupicon-document-section-sign
+                                    :wait?    state/verdict-wait?
+                                    :enabled? (can-propose?)
+                                    :on-click (fn []
+                                                (common/show-dialog
+                                                  {:type :yes-no
+                                                  :ltext (if proposal?
+                                                           "verdict.confirm.proposal.update"
+                                                           "verdict.confirm.proposal")
+                                                  :callback (fn []
+                                                              (reset! state/verdict-wait? true)
+                                                              (reset! (rum/cursor-in _meta [:enabled?]) false)
+                                                              (service/publish-and-reopen-verdict
+                                                                @state/application-id
+                                                                info
+                                                                true
+                                                                reset-verdict))}))}))
          (components/link-button {:url      (js/sprintf "/api/raw/preview-pate-verdict?id=%s&verdict-id=%s"
                                                         @state/application-id
                                                         id)

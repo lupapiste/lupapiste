@@ -116,13 +116,39 @@
               ; Resolve authz. Received AD-groups are mapped the corresponding Lupis roles the organization has/organizations have.
               ; The result is formatted like: {:609-R #{"commenter"} :609-YMP #{"commenter" "reader"}}
               authz (ad-util/resolve-authz ad-settings Group)
-              _ (infof "Resolved authz for user %s (domain: %s): %s" name domain authz)]
+              _ (infof "Resolved authz for user %s (domain: %s): %s" name domain authz)
+              user (usr/get-user-by-email emailaddress)]
           (cond
             (false? (:success? parsed-saml-info)) (do
                                                     (error "Login was not valid")
                                                     (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
-            (and valid-signature? (seq authz)) (->> (update-or-create-user! givenname surname emailaddress authz)
-                                                    (log-user-in! req))
+            (and valid-signature?
+                 (seq authz)
+                 (false? (usr/dummy? user)))    (do ;; We don't want to promote dummy users here.
+                                                 (infof "Logging in user %s as authority" emailaddress)
+                                                 (->> (update-or-create-user! givenname surname emailaddress authz)
+                                                      (log-user-in! req)))
+
+            ;; If all the assertions are nil, decryption has failed.
+            (every? nil?
+                    (list Group emailaddress
+                          givenname name
+                               surname))        (do
+                                                  (errorf "Decrypting SAML response failed")
+                                                  (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
+
+            ;; If a non-dummy account exists for the received email address, the user is logged in.
+            (and valid-signature?
+                 (empty? authz)
+                 (false? (usr/dummy? user)))   (do
+                                                 (infof "Logging in user %s as applicant" emailaddress)
+                                                 (->> emailaddress usr/get-user-by-email (log-user-in! req)))
+
+            (and valid-signature?
+                 (usr/dummy? user))            (do
+                                                 (errorf "Cannot promote or login a dummy user: %s" emailaddress)
+                                                 (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
+
             valid-signature? (do
                                (error "User does not have organization authorization")
                                (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))

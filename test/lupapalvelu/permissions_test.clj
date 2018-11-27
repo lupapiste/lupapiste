@@ -157,51 +157,68 @@
     (provided (get-permissions-by-role :application "another-role") => #{:test/do :test/test})))
 
 (facts get-organization-permissions
-  (fact "existing role"
-    (get-organization-permissions {:application {:organization "123-T"}
-                                   :user        {:orgAuthz {:123-T #{:org-tester}}}})
-    => #{:test/do}
+       (fact "with application"
+             (fact "existing role"
+                   (get-organization-permissions {:application {:organization "123-T"}
+                                                  :user        {:orgAuthz {:123-T #{:org-tester}}}})
+                   => #{:test/do}
 
-    (provided (get-permissions-by-role :organization :org-tester) => #{:test/do}))
+                   (provided (get-permissions-by-role :organization :org-tester) => #{:test/do}))
 
-  (fact "existing multiple roles"
-    (get-organization-permissions {:application {:organization "123-T"}
-                                   :user {:orgAuthz {:123-T #{:org-tester
-                                                              :org-mighty}}}})
-    => #{:test/do :test/test :test/do-anything}
 
-    (provided (get-permissions-by-role :organization :org-tester) => #{:test/do :test/test})
-    (provided (get-permissions-by-role :organization :org-mighty) => #{:test/do-anything :test/test}))
+             (fact "existing multiple roles"
+                   (get-organization-permissions {:application {:organization "123-T"}
+                                                  :user {:orgAuthz {:123-T #{:org-tester
+                                                                             :org-mighty}}}})
+                   => #{:test/do :test/test :test/do-anything}
 
-  (fact "existing role - multiple organizations"
-    (get-organization-permissions {:application {:organization "123-T"}
-                                   :user {:orgAuthz {:123-T #{:org-nocando
-                                                              :org-mighty}
-                                                     :100-T #{:org-tester}}}})
-    => #{:test/test :test/do-anything}
+                   (provided (get-permissions-by-role :organization :org-tester) => #{:test/do :test/test})
+                   (provided (get-permissions-by-role :organization :org-mighty) => #{:test/do-anything :test/test}))
 
-    (provided (get-permissions-by-role :organization :org-mighty) => #{:test/do-anything :test/test})
-    (provided (get-permissions-by-role :organization :org-nocando) => #{}))
+             (fact "existing role - multiple organizations"
+                   (get-organization-permissions {:application {:organization "123-T"}
+                                                  :user {:orgAuthz {:123-T #{:org-nocando
+                                                                             :org-mighty}
+                                                                    :100-T #{:org-tester}}}})
+                   => #{:test/test :test/do-anything}
 
-  (fact "without application"
-    (get-organization-permissions {:user {:orgAuthz {:123-T #{:org-tester}}}})
-    => #{:test/do}
+                   (provided (get-permissions-by-role :organization :org-mighty) => #{:test/do-anything :test/test})
+                   (provided (get-permissions-by-role :organization :org-nocando) => #{})
+                   (provided (get-permissions-by-role :organization :org-tester) => #{:test/other-org-role} :times 0)))
 
-    (provided (get-permissions-by-role :organization :org-tester) => #{:test/do}))
+       (fact "without application and with organization-id in params"
+             (fact "existing role - multiple organizations"
+                   (get-organization-permissions {:data {:organization-id "123-T"}
+                                                  :user {:orgAuthz {:123-T #{:org-yes
+                                                                             :org-alsoyes}
+                                                                    :100-T #{:org-nope}}}})
+                   => #{:test/a :test/b :test/c}
 
-  (fact "without application - two orgs"
-    (get-organization-permissions {:user {:orgAuthz {:123-T #{:org-tester}
-                                                     :321-T #{:archiver}}}})
-    => #{:test/do :test/archive}
+                   (provided (get-permissions-by-role :organization :org-nope) => #{:test/other-org-role} :times 0)
+                   (provided (get-permissions-by-role :organization :org-yes) => #{:test/a :test/b})
+                   (provided (get-permissions-by-role :organization :org-alsoyes) => #{:test/c})))
 
-    (provided (get-permissions-by-role :organization :org-tester) => #{:test/do}
-              (get-permissions-by-role :organization :archiver) => #{:test/archive}))
+       (fact "without application and without organization-id in params"
 
-  (fact "without application - no orgs"
-    (get-organization-permissions {:user {:orgAuthz {}}})
-    => #{}
+             (fact "user having one org"
+                   (get-organization-permissions {:user {:orgAuthz {:123-T #{:org-tester}}}})
+                   => #{:test/do}
 
-    (provided (get-permissions-by-role :organization irrelevant) => irrelevant :times 0)))
+                   (provided (get-permissions-by-role :organization :org-tester) => #{:test/do}))
+
+             (fact "user having two orgs"
+                   (get-organization-permissions {:user {:orgAuthz {:123-T #{:org-tester}
+                                                                    :321-T #{:archiver}}}})
+                   => #{:test/do :test/archive}
+
+                   (provided (get-permissions-by-role :organization :org-tester) => #{:test/do}
+                             (get-permissions-by-role :organization :archiver) => #{:test/archive}))
+
+             (fact "user having no orgs"
+                   (get-organization-permissions {:user {:orgAuthz {}}})
+                   => #{}
+
+                   (provided (get-permissions-by-role :organization irrelevant) => irrelevant :times 0))))
 
 (testable-privates lupapalvelu.permissions apply-company-restrictions)
 

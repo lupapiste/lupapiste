@@ -87,7 +87,7 @@ Post verdict general group contains two attachments
   # Hulevesisuunnitelma + paatos
   Group row count is  archived-post-groups  attachments.general  2
 
-There is 4 attachments visible
+There are 4 attachments visible
   Total document count is  4
 
 
@@ -211,11 +211,11 @@ Group header is
 
 Section group count is
   [Arguments]  ${section}  ${count}
-  Javascript?  $("div[data-test-id=${section}] div.attachment-group-header").length === ${count}
+  jQuery should match X times  div[data-test-id=${section}] div.attachment-group-header  ${count}
 
 Total document count is
   [Arguments]  ${count}
-  Javascript?  $("div.attachment-row").length === ${count}
+  jQuery should match X times  div.attachment-row  ${count}
 
 Group row count is
   [Arguments]  ${section}  ${group}  ${count}
@@ -265,7 +265,7 @@ Attachment will be published
 
 Change type
   [Arguments]  ${type}
-  Select from list  attachment-type-select  ${type}
+  Select from list by value  attachment-type-select  ${type}
 
 Set contents
   [Arguments]  ${text}
@@ -274,17 +274,18 @@ Set contents
 Fill in archival metadata
   [Arguments]  ${julkisuusluokka}=salainen  ${salassapitoaika}=2  ${salassapitoperuste}=Koska syy  ${suojaustaso}=ei-luokiteltu  ${turvallisuusluokka}=ei-turvallisuusluokkaluokiteltu  ${kayttajaryhma}=viranomaisryhma  ${kayttajaryhmakuvaus}=muokkausoikeus  ${henkilotiedot}=ei-sisalla  ${kieli}=fi  ${arkistointi}=ikuisesti  ${perustelu}=Siksi  ${myyntipalvelu}=False  ${nakyvyys}=julkinen
   Click by test id  edit-metadata
-  Select from list  jquery=select[data-test-id=julkisuusluokka]:visible  ${julkisuusluokka}
+
+  Select from test id  julkisuusluokka  ${julkisuusluokka}
   Run Keyword If  '${julkisuusluokka}' != 'julkinen'  Input text  jquery=input[data-test-id=salassapitoaika]:visible  ${salassapitoaika}
   Run Keyword If  '${julkisuusluokka}' != 'julkinen'  Input text  jquery=input[data-test-id=salassapitoperuste]:visible  ${salassapitoperuste}
-  Run Keyword If  '${julkisuusluokka}' != 'julkinen'  Select from list  jquery=select[data-test-id=suojaustaso]:visible  ${suojaustaso}
-  Run Keyword If  '${julkisuusluokka}' != 'julkinen'  Select from list  jquery=select[data-test-id=turvallisuusluokka]:visible  ${turvallisuusluokka}
-  Run Keyword If  '${julkisuusluokka}' != 'julkinen'  Select from list  jquery=select[data-test-id=kayttajaryhma]:visible  ${kayttajaryhma}
-  Run Keyword If  '${julkisuusluokka}' != 'julkinen'  Select from list  jquery=select[data-test-id=kayttajaryhmakuvaus]:visible  ${kayttajaryhmakuvaus}
-  Select from list  jquery=select[data-test-id=henkilotiedot]:visible  ${henkilotiedot}
-  Select from list  jquery=select[data-test-id=kieli]:visible  ${kieli}
+  Run Keyword If  '${julkisuusluokka}' != 'julkinen'  Select from test id  suojaustaso  ${suojaustaso}
+  Run Keyword If  '${julkisuusluokka}' != 'julkinen'  Select from test id  turvallisuusluokka  ${turvallisuusluokka}
+  Run Keyword If  '${julkisuusluokka}' != 'julkinen'  Select from test id  kayttajaryhma  ${kayttajaryhma}
+  Run Keyword If  '${julkisuusluokka}' != 'julkinen'  Select from test id  kayttajaryhmakuvaus  ${kayttajaryhmakuvaus}
+  Select from test id  henkilotiedot  ${henkilotiedot}
+  Select from test id  kieli  ${kieli}
   Run Keyword If  ${myyntipalvelu}  Select Checkbox  jquery=input[data-test-id=myyntipalvelu]:visible
-  Select from list  jquery=select[data-test-id=nakyvyys]:visible  ${nakyvyys}
+  Select from test id  nakyvyys  ${nakyvyys}
   Wait until  Click by test id  save-metadata
 
 Select attachment to be archived

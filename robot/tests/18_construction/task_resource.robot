@@ -24,7 +24,7 @@ Edit review date
 Edit katselmus
   [Arguments]  ${select}  ${item}  ${date}  ${name}  ${notes}
   Test id disabled  review-done
-  Select From List by test id  ${select}  ${item}
+  Select From List by test id and value  ${select}  ${item}
   Edit review date  ${date}
   Wait for jQuery
   Input text with jQuery  input[data-test-id="katselmus.pitaja"]  ${name}  ${true}

@@ -177,6 +177,7 @@
                           :pate-verdict-tab
                           :pate-contract-tab
                           :pate-verdicts
+                          :proposal-pdf
                           ;; Invoices
                           :application-invoices
                           :insert-invoice

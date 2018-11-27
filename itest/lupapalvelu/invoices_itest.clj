@@ -5,14 +5,35 @@
             [lupapalvelu.itest-util :refer [local-command local-query
                                             create-and-submit-application
                                             create-and-submit-local-application
-                                            sonja pena ok? fail?] :as itu]
+                                            sonja pena sipoo sipoo-ya
+                                            ok? fail?] :as itu]
             [lupapalvelu.invoice-api]
             [lupapalvelu.invoices :refer [validate-invoice ->invoice-db] :as invoices]
             [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.env :as env]
+            [sade.util :refer [to-millis-from-local-date-string]]
             [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]))
+
+(defn catalogues-belong-to-org?
+  [org-id catalogues]
+  (->> catalogues
+       (map :organization-id)
+       (every? (fn [catalogue-org-id] (= org-id catalogue-org-id)))))
+
+(defn belong-to-org? [org-id]
+  (partial catalogues-belong-to-org? org-id))
+
+(defn ensure-exists! [collection {:keys [id] :as doc}]
+  (cond
+    (not id) :fail
+    (mongo/by-id collection id) :ok
+    :else (do
+            (mongo/insert collection doc)
+            (if (mongo/by-id collection id)
+              :ok
+              :fail))))
 
 (def dummy-user {:id                                        "penan-id"
                  :firstName                                 "pena"
@@ -125,7 +146,15 @@
                                                                     :unit "m2"
                                                                     :price-per-unit 5
                                                                     :units 10
-                                                                    :discount-percent 10}]}]}]
+                                                                    :discount-percent 10
+                                                                    :sums {:with-discount {:currency "EUR"
+                                                                                           :major 45
+                                                                                           :minor 4500
+                                                                                           :text "EUR45.00"}
+                                                                           :without-discount {:currency "EUR"
+                                                                                              :major 50
+                                                                                              :minor 5000
+                                                                                              :text "EUR50.00"}}}]}]}]
                         (local-command sonja :update-invoice :id id :invoice new-data) => ok?
                         (let [updated-invoice (mongo/by-id "invoices" invoice-id)]
                           (:operations updated-invoice) => (:operations new-data))))
@@ -241,4 +270,44 @@
                                                                                      :en "Sipoon rakennusvalvonta"
                                                                                      :sv "Sipoon rakennusvalvonta"}})
                     (fact "application data enriched to it"
-                          (get-in invoice [:enriched-data :application]) => {:address "Kukkuja 7"})))))))
+                          (get-in invoice [:enriched-data :application]) => {:address "Kukkuja 7"})))))
+
+    (fact "organization-price-catalogues"
+
+      (fact "should return unauthorized response when user is not an organization admin"
+            (let [response (-> (local-query sonja :organization-price-catalogues
+                                            :organization-id "753-R"))]
+              response => fail?
+              (:text response) => "error.unauthorized"))
+
+      (fact "should return unauthorized response when user is an or organization admin or another org"
+            (let [response (-> (local-query sipoo-ya :organization-price-catalogues
+                                            :organization-id "753-R"))]
+              response => fail?
+              (:text response) => "error.unauthorized"))
+
+      (fact "should return empty collection when no price catalogues found for org-id"
+            (let [response (-> (local-query sipoo :organization-price-catalogues
+                                            :organization-id "753-R"))]
+              (:price-catalogues response) => []))
+
+      (fact "should return one price catalogue when one inserted in db for the org-id"
+            (let [test-price-catalogue {:id "bar-id"
+                                        :organization-id "753-R"
+                                        :state "draft"
+                                        :valid-from (to-millis-from-local-date-string "01.01.2019")
+                                        :valid-until (to-millis-from-local-date-string "01.02.2019")
+                                        :rows [{:code "12345"
+                                                :text "Taksarivi 1"
+                                                :unit "kpl"
+                                                :price-per-unit 23
+                                                :discount-percent 50
+                                                :operations ["toimenpide1" "toimenpide2"]
+                                                }]
+                                        :meta {:created (to-millis-from-local-date-string "01.10.2018")
+                                               :created-by dummy-user}}]
+              (ensure-exists! "price-catalogues" test-price-catalogue) => :ok
+              (let [response (local-query sipoo :organization-price-catalogues
+                                          :organization-id "753-R")]
+                response => ok?
+                (:price-catalogues response) => (belong-to-org? "753-R")))))))

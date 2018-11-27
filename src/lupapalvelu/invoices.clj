@@ -7,6 +7,8 @@
             [sade.schemas :as ssc]
             [taoensso.timbre :refer [trace tracef debug debugf info infof
                                      warn warnf error errorf fatal fatalf]]
+            [lupapalvelu.money-schema :refer [MoneyResponse]]
+            [lupapalvelu.money :refer [sum-with-discounts ->currency ->MoneyResponse discounted-value multiply-amount]]
             [lupapalvelu.user :as user]
             [lupapalvelu.domain :refer [get-application-no-access-checking]]
             [lupapalvelu.application-schema :refer [Operation]]))
@@ -34,7 +36,9 @@
    :unit InvoiceRowUnit
    :price-per-unit sc/Num
    :units sc/Num
-   :discount-percent DiscountPercent})
+   :discount-percent DiscountPercent
+   (sc/optional-key :sums) {:without-discount MoneyResponse
+                            :with-discount MoneyResponse}})
 
 ;;TODO should operation-id and name come from constants in lupapalvelu.operations
 ;;     and/or a schema somewhere else?
@@ -55,10 +59,33 @@
                    )
    :application-id sc/Str
    :organization-id sc/Str
-   :operations [InvoiceOperation]})
+   :operations [InvoiceOperation]
+   (sc/optional-key :sum) MoneyResponse})
 
 (sc/defschema InvoiceInsertRequest
   {:operations [InvoiceOperation]})
+
+(sc/defschema CatalogueRow
+  {:code sc/Str
+   :text sc/Str
+   :unit InvoiceRowUnit
+   :price-per-unit sc/Num
+   (sc/optional-key :max-total-price) sc/Num
+   (sc/optional-key :min-total-price) sc/Num
+   :discount-percent DiscountPercent
+   (sc/optional-key :operations) [sc/Str]})
+
+(sc/defschema PriceCatalogue
+  {:id sc/Str
+   :organization-id sc/Str
+   :state (sc/enum "draft"       ;;created as a draft
+                   "published"   ;;published and in use if on validity period
+                   )
+   :valid-from ssc/Timestamp
+   (sc/optional-key :valid-until) ssc/Timestamp
+   :rows [CatalogueRow]
+   :meta {:created ssc/Timestamp
+          :created-by User}})
 
 (defn fetch-invoice [invoice-id]
   (mongo/by-id :invoices invoice-id))
@@ -72,27 +99,73 @@
   (debug ">> validate-invoice: " invoice)
   (sc/validate Invoice invoice))
 
+
+(defn sum-single-row [row]
+  (let [sum-by-units (multiply-amount (:units row) (:price-per-unit row))
+        discount-percent (:discount-percent row)]
+    {:without-discount (->MoneyResponse sum-by-units)
+     :with-discount (-> sum-by-units
+                        (discounted-value discount-percent)
+                        ->MoneyResponse)}))
+
+(defn- merge-invoice-rows [rows]
+  (map (fn [row]
+         {:row-total
+          (multiply-amount (:units row) (:price-per-unit row))
+          :discount-percent
+          (:discount-percent row)}) rows))
+
+(defn sum-invoice [invoice]
+  (let [rows (flatten (map :invoice-rows (:operations invoice)))
+        merged-invoice-rows (merge-invoice-rows rows)]
+    (assoc invoice :sum (sum-with-discounts :row-total :discount-percent merged-invoice-rows))))
+
+(defn- enrich-sums-invoice-row [row]
+  (assoc row :sums (sum-single-row row)))
+
+(defn- enrich-rows-in-operations [invoice]
+  (let [operations-from-invoice (:operations invoice)
+        enriched-operations (map (fn [operation]
+                                   (let [invoice-rows (:invoice-rows operation)]
+                                     (assoc operation :invoice-rows
+                                            (vec (map (fn [row]
+                                                        (enrich-sums-invoice-row row))
+                                                      invoice-rows))))) operations-from-invoice)
+        p (info "eriched operations " enriched-operations)]
+    (assoc invoice :operations (vec enriched-operations))))
+
+
+(defn enrich-invoice-sums-before-save [invoice]
+  (-> invoice
+      (enrich-rows-in-operations)
+      (sum-invoice)))
+
+
+
 (defn create-invoice!
   [invoice]
   (debug ">> create-invoice! invoice-request: " invoice)
   (let [id (mongo/create-id)
         invoice-with-id (assoc invoice :id id)]
     (debug ">> invoice-with-id: " invoice-with-id)
-    (validate-invoice invoice-with-id)
-    (mongo/insert :invoices invoice-with-id)
+    (->> invoice-with-id
+         enrich-invoice-sums-before-save
+         validate-invoice
+         (mongo/insert :invoices))
     id))
 
 (defn update-invoice!
   [{:keys [id] :as invoice}]
   (let [current-invoice (mongo/by-id "invoices" id)
         new-invoice (merge current-invoice (select-keys invoice [:operations :state]))]
-    (validate-invoice new-invoice)
-    (mongo/update-by-id "invoices" id new-invoice)))
+    (->> new-invoice
+         enrich-invoice-sums-before-save
+         validate-invoice
+         (mongo/update-by-id "invoices" id))))
 
 (sc/defn ^:always-validate ->invoice-user :- User
  [user]
- (select-keys user [:id :firstName :lastName :role :email :username]))
-
+  (select-keys user [:id :firstName :lastName :role :email :username]))
 (defn ->invoice-db
   [invoice {:keys [id organization] :as application} user]
   (debug "->invoice-db invoice-request: " invoice " app id: " id " user: " user)
@@ -143,3 +216,11 @@
   (let [application (get-doc application-id applications)
         address (:address application)]
     (assoc-in invoice [:enriched-data :application :address] address)))
+
+(defn fetch-price-catalogues [organization-id]
+  (mongo/select :price-catalogues {:organization-id organization-id}))
+
+(defn validate-price-catalogues [price-catalogues]
+  (info "validate-price-catalogues price-catalogues: " price-catalogues)
+  (if-not (empty? price-catalogues)
+    (sc/validate [PriceCatalogue] price-catalogues)))

@@ -265,7 +265,16 @@
     (eval-state-condition options [:AND :foo :-.baz
                                    [:AND
                                     [:AND :_meta.hii :_meta.top.level=8]
-                                    :?.rep]])=> false)
+                                    :?.rep]])=> false
+    (eval-state-condition options [:NOT :foo]) => false
+    (eval-state-condition options [:NOT :missing]) => true
+    (eval-state-condition options [:NOT [:AND :foo :missng]]) => true
+    (eval-state-condition options [:NOT [:OR :foo :missng]]) => false
+    (eval-state-condition options [:NOT [:AND [:NOT :foo] :foo]]) => true
+    (eval-state-condition options [:NOT [:AND [:NOT :missing] :missing]]) => true
+    (eval-state-condition options [:NOT [:AND [:NOT :missing] :foo]]) => false
+    (eval-state-condition options [:NOT [:AND [:NOT [:NOT :missing]] :foo]]) => true
+    (eval-state-condition options [:NOT [:AND [:NOT [:NOT :foo]] :foo]]) => false)
   (fact "good?"
     (good? options :foo :asdfasdf) => true
     (good? options :asdfasdf :foo) => false

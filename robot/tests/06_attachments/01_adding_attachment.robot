@@ -211,7 +211,7 @@ Comment is added
 Change attachment type
   [Tags]  attachments
   Click enabled by test id  change-attachment-type
-  Select from list  attachment-type-select  rakennuspaikka.ote_alueen_peruskartasta
+  Select from list by value  attachment-type-select  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click enabled by test id  confirm-yes
   Positive indicator should be visible

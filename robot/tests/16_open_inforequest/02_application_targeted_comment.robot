@@ -16,7 +16,7 @@ Sonja creates an info request to Sipoo
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Sibbo Sonja
 
 Sonja sends comment to Kosti
-  Select From List  xpath=//*[@id="side-panel-assigneed-authority"]  Kommentoija Kosti
+  Select From List by label  xpath=//*[@id="side-panel-assigneed-authority"]  Kommentoija Kosti
   Input Text  application-new-comment-text  Kommentoiva kommentti
   Click by test id  application-new-comment-btn
   Sleep  5s

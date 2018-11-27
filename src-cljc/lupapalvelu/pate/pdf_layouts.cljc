@@ -281,9 +281,12 @@
                          {:text  ""
                           :width 100}])
 
-(def entry--verdict '([{:loc    :pate-verdict
+(def entry--verdict '([{:loc    :pate-verdict-proposal
+                        :source {:dict :proposal-text}
+                        :styles [:bold :border-top]}]
+                       [{:loc    :pate-verdict
                         :source {:dict :verdict-code}
-                        :styles [:bold :border-top]}
+                        :styles  [:bold :pad-before]}
                        {:loc-prefix :pate-r.verdict-code}]
                       [{:loc    :empty
                         :source {:dict :verdict-text}

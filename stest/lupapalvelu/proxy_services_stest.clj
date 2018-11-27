@@ -241,7 +241,7 @@
                        :pvm "2016-10-26"
                        :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
                        :oikeusvaik "Oikeusvaikutteinen"
-                       :lisatieto "Kaavasta valitettu, ei lainvoimainen. Kaavasta rajapinnassa aluevarauskartta, kaavan kaikki 9 karttalehte\u00e4 ovat m\u00e4\u00e4r\u00e4ysten kanssa samassa teidostossa."
+                       :lisatieto "Kaavasta valitettu, ei lainvoimainen. Kaavasta rajapinnassa aluevarauskartta, kaavan kaikki 9 karttalehte\u00e4 ovat m\u00e4\u00e4r\u00e4ysten kanssa samassa teidostossa. Osia kaavasta kumottu-> HAO 5.2.2018 Uspa"
                        :linkki "http://liiteri.ymparisto.fi/maarays/0911010x.pdf"
                        :type "yleiskaava"})))
 

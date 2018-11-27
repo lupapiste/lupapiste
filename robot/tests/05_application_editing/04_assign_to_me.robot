@@ -20,7 +20,7 @@ Mikko creates an application
 Mikko sets himself as the applicant
   Open tab  parties
   Open accordions  parties
-  Select From List by test id  henkilo.userId  Intonen Mikko
+  Select From List by test id and label  henkilo.userId  Intonen Mikko
 
 Person ID is fully masked
   Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  ******-****

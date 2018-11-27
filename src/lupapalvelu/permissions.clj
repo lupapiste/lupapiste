@@ -60,12 +60,14 @@
 (defn get-global-permissions [{{role :role} :user}]
   (get-permissions-by-role :global (keyword role)))
 
-(defn get-organization-permissions [{{org-authz :orgAuthz} :user {org-id :organization} :application}]
-  (->> (if org-id
-         (get org-authz (keyword org-id))
-         (mapcat val org-authz)) ; FIXME LPK-3828 should figure out org from session OR from parameters
-       (map (partial get-permissions-by-role :organization))
-       (reduce into #{})))
+(defn get-organization-permissions [{:keys [application data] {org-authz :orgAuthz} :user}]
+  (let [org-id (or (:organization application) (:organization-id data))]
+    (->> (if org-id
+           (get org-authz (keyword org-id))
+           (mapcat val org-authz)) ; FIXME LPK-3828 should figure out org from session OR from parameters
+                                        ;                (16.11.2018 now reads organization-id from parameters)
+         (map (partial get-permissions-by-role :organization))
+         (reduce into #{}))))
 
 (def ^:private submit-restriction (restriction :application/submit))
 

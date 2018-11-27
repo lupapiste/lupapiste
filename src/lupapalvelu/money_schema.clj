@@ -5,5 +5,5 @@
 (s/defschema MoneyResponse
   {:minor s/Num
    :major s/Num
-   (s/optional-key :text?) s/Str
+   (s/optional-key :text) s/Str
    :currency s/Str})
