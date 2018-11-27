@@ -20,9 +20,6 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
-(def tila
-  (atom {}))
-
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
   ;; Data to be deduced from xml:
@@ -121,8 +118,6 @@
         ;; Okay, the following function seems to create an 'aiemmalla-luvalla-hakeminen' type of doc regardless of input
         ;; So we need to make this select the operation type dynamically depending on input!
         other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas) secondary-op-names)
-        ; _ (swap! tila assoc :otherdocs other-building-docs
-        ;          :primaryDoc first-building-doc)
 
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2 :name %3) other-building-docs (rest structure-descriptions) secondary-op-names)
 
@@ -148,7 +143,7 @@
                                (error "Moving statement to statement given -state failed: %s" (.getMessage e)))))
 
         created-application (-> created-application
-                                (update-in [:documents] concat #_first-building-doc other-building-docs new-parties structures)
+                                (update-in [:documents] concat other-building-docs new-parties structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :statements given-statements
                                        :opened (:created command)
