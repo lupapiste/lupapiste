@@ -13,6 +13,9 @@
 
 (def invoice-date-formatter (tformat/formatter "dd.MM.yyyy"))
 
+(defn loc-operation [operation]
+  (loc (str "operations." operation)))
+
 (defn ->date-str [timestamp]
   (when timestamp
     (->> timestamp
@@ -45,7 +48,8 @@
    [:td discount-percent]
    [:td min-total-price]
    [:td max-total-price]
-   [:td unit]])
+   [:td unit]
+   [:td ""]])
 
 (rum/defc operation-table
   < {:key-fn (fn [operation rows] (str operation))}
@@ -54,12 +58,13 @@
    [:table {:class-name "invoice-operations-table"}
      [:thead
       [:tr
-       [:th operation]
-       [:th (loc "price-catalogue.unit-price")]
-       [:th (loc "price-catalogue.discount-percent")]
-       [:th (loc "price-catalogue.minimum")]
-       [:th (loc "price-catalogue.maximum")]
-       [:th (loc "price-catalogue.unit")]]]
+       [:th.operation-header-operation        (loc-operation operation)]
+       [:th.operation-header-unit-price       (loc "price-catalogue.unit-price")]
+       [:th.operation-header-discount-percent (loc "price-catalogue.discount-percent")]
+       [:th.operation-header-minimum          (loc "price-catalogue.minimum")]
+       [:th.operation-header-maximum          (loc "price-catalogue.maximum")]
+       [:th.operation-header-unit             (loc "price-catalogue.unit")]
+       [:th.operation-header-remove            ""]]]
     [:tbody
      (map operation-catalogue-row operation rows)]]])
 
@@ -73,7 +78,7 @@
   < {:key-fn (fn [operation] (str "operation-" operation))}
   [operation]
   [:span.row-operation
-   (str operation " ")])
+   (str (loc-operation operation) " ")])
 
 (rum/defc row-operations [operations]
   [:div
@@ -137,13 +142,13 @@
      [:table.operations-table
       [:thead
        [:tr
-        [:th operation]
-        [:th (loc "price-catalogue.unit-price")]
-        [:th (loc "price-catalogue.discount-percent")]
-        [:th (loc "price-catalogue.minimum")]
-        [:th (loc "price-catalogue.maximum")]
-        [:th (loc "price-catalogue.unit")]
-        [:th ""]]]
+       [:th.operation-header-operation        (loc-operation operation)]
+       [:th.operation-header-unit-price       (loc "price-catalogue.unit-price")]
+       [:th.operation-header-discount-percent (loc "price-catalogue.discount-percent")]
+       [:th.operation-header-minimum          (loc "price-catalogue.minimum")]
+       [:th.operation-header-maximum          (loc "price-catalogue.maximum")]
+       [:th.operation-header-unit             (loc "price-catalogue.unit")]
+       [:th.operation-header-remove            ""]]]
       [:tbody
        (map (partial edit-operation-catalogue-row operation) indexed-product-rows)]]
      [:div.add-row-to-operation
@@ -352,6 +357,7 @@
 (defn ^:export start [domId componentParams]
   (swap! args assoc :auth-model (aget componentParams "authModel") :dom-id (name domId))
   (reset! state/org-id (js/ko.unwrap (common/oget componentParams "orgId")))
+  (service/fetch-organization-operations)
   (service/fetch-price-catalogues)
   (state/set-view :by-rows)
   (mount-component))

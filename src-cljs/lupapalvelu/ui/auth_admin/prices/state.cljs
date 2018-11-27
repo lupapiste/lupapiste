@@ -4,13 +4,13 @@
 (defonce state* (atom {:view :by-rows
                        :mode :show
                        :selected-catalogue-id nil
-                       :catalogue-in-edit nil
-                       }))
+                       :catalogue-in-edit nil}))
 
 (defn- state-cursor [key]
   (rum/cursor-in state* [key]))
 
 (def org-id                (state-cursor :org-id))
+(def org-operations        (state-cursor :org-operations))
 (def selected-catalogue-id (state-cursor :selected-catalogue-id))
 (def catalogues            (state-cursor :catalogues))
 (def catalogue-in-edit     (state-cursor :catalogue-in-edit))

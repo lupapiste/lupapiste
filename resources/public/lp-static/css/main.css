@@ -39718,6 +39718,34 @@ button.invoice-change-state-button {
   text-align: right;
 }
 
+.price-catalogue .operation-header-operation {
+  width: 35%;
+}
+
+.price-catalogue .operation-header-unit-price {
+  width: 12%;
+}
+
+.price-catalogue .operation-header-discount-percent {
+  width: 12%;
+}
+
+.price-catalogue .operation-header-nimimum {
+  width: 12%;
+}
+
+.price-catalogue .operation-header-maximum {
+  width: 12%;
+}
+
+.price-catalogue .operation-header-unit {
+  width: 12%;
+}
+
+.price-catalogue .operation-header-remove {
+  width: 5%;
+}
+
 #bulletins, #local-bulletins {
   font-family: "Source Sans Pro", sans-serif;
   font-weight: 400;

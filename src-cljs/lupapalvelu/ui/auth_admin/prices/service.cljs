@@ -24,3 +24,12 @@
                            (state/set-selected-catalogue-id id)))))
                     :organization-id @state/org-id
                     :price-catalogue new-catalogue)))
+
+(defn fetch-organization-operations []
+  (common/query :all-operations-for-organization
+                (fn [{:keys [operations] :as data}]
+                  (reset! state/org-operations operations)
+                  (println "YYYYYYEEEEEEEHAAAAAAA operaatiot haettu 4")
+                  (println "operations in state: " state/org-operations)
+                  )
+                :organizationId @state/org-id))
