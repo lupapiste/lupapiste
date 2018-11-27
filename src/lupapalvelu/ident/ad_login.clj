@@ -129,6 +129,14 @@
                                                  (->> (update-or-create-user! givenname surname emailaddress authz)
                                                       (log-user-in! req)))
 
+            ;; If all the assertions are nil, decrypting has failed.
+            (every? nil?
+                    (list Group emailaddress
+                          givenname name
+                               surname))        (do
+                                                  (errorf "Decrypting SAML response failed")
+                                                  (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
+
             ;; If a non-dummy account exists for the received email address, the user is logged in.
             (and valid-signature?
                  (empty? authz)
