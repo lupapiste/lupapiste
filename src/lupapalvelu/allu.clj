@@ -59,11 +59,9 @@
   (->> (group-by k xs)
        vals
        (mapcat (fn [vs]
-                 (cond-> vs
-                   (> (count vs) 1) (->> count range
-                                         (map #(update (nth (vec vs) %)
-                                                       k
-                                                       str " " (inc %)))))))))
+                 (cond->> vs
+                   (> (count vs) 1)
+                   (map-indexed #(update %2 k str " " (inc %1))))))))
 
 (sc/defn ^:always-validate fetch-fixed-locations
   [kind :- kind-schema]
