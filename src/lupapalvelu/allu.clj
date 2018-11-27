@@ -13,14 +13,15 @@
             [schema.core :refer [defschema] :as sc]))
 
 (def kind-schema (apply sc/enum (keys allu-core/FIXED-LOCATION-TYPES)))
+(def drawing-id-schema (sc/conditional
+                        int?  sc/Int
+                        :else ssc/ObjectIdStr))
 
 (defschema Drawing
   {;; Only the drawings originating from Allu have object string
    ;; ids. Thus, there should never be id conflicts between drawings
    ;; from different origins.
-   :id                         (sc/conditional
-                                int?  sc/Int
-                                :else ssc/ObjectIdStr)
+   :id                         drawing-id-schema
    :name                       sc/Str
    :geometry                   sc/Str
    :geometry-wgs84             {:coordinates [(sc/one [[(sc/one sc/Num "x") (sc/one sc/Num "y")]] "first")]

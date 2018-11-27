@@ -49,7 +49,7 @@
              :kind :promotion
              :siteId 5) => ok?
     (:drawings (query-application pena app-id))
-    => (just [(contains {:id      pos-int?
+    => (just [(contains {:id      string?
                          :allu-id 5
                          :source  "promotion"
                          :name    "Mauno Koiviston aukio"})]))
@@ -64,7 +64,7 @@
              :kind :promotion
              :siteId 5) => ok?
     (:drawings (query-application pena app-id))
-    => (just [(contains {:id      pos-int?
+    => (just [(contains {:id      string?
                          :allu-id 5
                          :source  "promotion"
                          :name    "Mauno Koiviston aukio"})]))
@@ -94,7 +94,7 @@
                              :name    "Säiliö 468"})]))
       (fact "Removing non-existing drawing fails silently"
         (command pena :remove-application-drawing :id app-id
-                 :drawingId (+ cont-id 100)) => ok?
+                 :drawingId 100) => ok?
         (:drawings (query-application pena app-id))
         => (just [(contains {:id      cont-id
                              :allu-id 11

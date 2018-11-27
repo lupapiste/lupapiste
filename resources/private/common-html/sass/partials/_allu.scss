@@ -108,3 +108,14 @@ textlink.allu--link {
     margin: 0;
   }
 }
+
+div.allu-drawings {
+  margin-top: 1em;
+
+  table.drawings-table {
+    @include no-row-hover;
+    td.drawing--name {
+      width: 100%;
+    }
+  }
+}

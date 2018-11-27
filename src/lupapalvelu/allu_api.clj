@@ -13,6 +13,11 @@
   (when (sc/check allu/kind-schema (some-> data :kind keyword))
     (fail :error.allu-bad-kind)))
 
+(defn- drawing-id-ok
+  "Input validator for drawingId"
+  [{data :data}]
+  (when (sc/check allu/drawing-id-schema (:drawingId data))))
+
 (defquery allu-sites
   {:description      "Name, id, source mapss of the Allu sites (drawings)
   for the given kind. The sites already present as drawings in the
@@ -56,7 +61,7 @@
    :user-roles       #{:applicant :authority}
    :parameters       [:id drawingId]
    :input-validators [(partial action/non-blank-parameters [:id])
-                      (partial action/positive-integer-parameters [:drawingId])]
+                      drawing-id-ok]
    :states           states/pre-sent-application-states
    :pre-checks       [(partial permit/valid-permit-types {:A []})]}
   [{:keys [application] :as command}]

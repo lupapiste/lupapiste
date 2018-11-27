@@ -8,10 +8,12 @@
   <table class="drawings-table">
     <tbody data-bind="foreach: drawings">
       <tr>
-        <td data-bind="text: $data.name"></td>
+        <td class="drawing--name"
+            data-bind="text: $data.name"></td>
         <!-- ko if: $parent.deleteFn -->
-        <td><i class="lupicon-remove primary"
-               data-bind="click: $parent.deleteFn"></i></td>
+        <td class="drawing--remove">
+          <i class="lupicon-remove primary"
+             data-bind="click: $parent.deleteFn"></i></td>
         <!-- /ko -->
       </tr>
     </tbody>

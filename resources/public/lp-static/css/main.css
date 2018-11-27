@@ -34622,6 +34622,22 @@ textlink.allu--link .like-btn, textlink.allu--link a.link-btn, textlink.allu--li
   margin: 0;
 }
 
+div.allu-drawings {
+  margin-top: 1em;
+}
+
+div.allu-drawings table.drawings-table tr:hover {
+  background-color: white;
+}
+
+div.allu-drawings table.drawings-table tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+div.allu-drawings table.drawings-table td.drawing--name {
+  width: 100%;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
