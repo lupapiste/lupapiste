@@ -448,6 +448,14 @@ var gis = (function() {
       return self;
     };
 
+    self.centerOnDrawing = function( drawing ) {
+      var wkt = _.isString(drawing) ? drawing : drawing.geometry;
+      if (wkt) {
+        var center = OpenLayers.Geometry.fromWKT(wkt).getCentroid();
+        self.center( center.x, center.y, self.map.zoom );
+      }
+    };
+
     self.addClickHandler = function(handler) {
       var ClickControl = OpenLayers.Class(OpenLayers.Control, {
         defaultHandlerOptions: {

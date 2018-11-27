@@ -3,7 +3,8 @@
   <div class="allu-drawings">
     <drawings-table params="drawings: alluDrawings,
                             ltitle: 'allu.locations',
-                            deleteFn: deleteFn"></drawings-table>
+                            deleteFn: deleteFn,
+                            locateFn: locateFn"></drawings-table>
     <!-- ko if: authOk -->
     <div class="tabby">
       <div class="tabby__row">
@@ -26,6 +27,7 @@
     <!-- /ko -->
     <drawings-table params="drawings: userDrawings,
                             ltitle: 'allu.user-locations',
-                            deleteFn: confirmationDeleteFn"></drawings-table>
+                            deleteFn: confirmationDeleteFn,
+                            locateFn: locateFn"></drawings-table>
   </div>
 </script>

@@ -96,13 +96,13 @@
                                      :body [{:name    "drawings"
                                              :type    :allu-drawings
                                              :pseudo? true
-                                             :kind    :promotion}
-                                            {:name   "map"
-                                             :type   :text
-                                             :label  false
-                                             :css    [:allu-map]
-                                             :layout :full-width}]
-                                     :rows [["drawings::2" "map::2"]]}))
+                                             :kind    :promotion
+                                             :map     "allu-map"}
+                                            {:name    "allu-map"
+                                             :type    :allu-map
+                                             :pseudo? true
+                                             :layout  :full-width}]
+                                     :rows [["drawings::2" "allu-map::2"]]}))
 
 (def promootio-structures (allu-group {:name "promootio-structures"
                                        :css  :allu-group--structures

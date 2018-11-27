@@ -1,6 +1,7 @@
 // Allu fixed locations vs. application drawings.
 // Parameters [optional]:
 // kind: Location type (promotion)
+// [mapId]: Corresponding map.
 //
 // Also disable and enable as defined in EnableComponentModel.
 LUPAPISTE.AlluDrawingsModel = function( params ) {
@@ -83,6 +84,11 @@ LUPAPISTE.AlluDrawingsModel = function( params ) {
   self.confirmationDeleteFn = self.deleteFn ? _.wrap( self.deleteFn, confirmation) : null;
 
   self.addHubListener( "application-model-updated", fetchSites );
+
+  self.locateFn = params.mapId ? function( draw ) {
+    hub.send( "allu-map-locate", {drawingId: draw.id });
+  }
+  : null;
 
   // Initialization
   fetchSites();

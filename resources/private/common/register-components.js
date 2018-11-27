@@ -218,7 +218,9 @@ jQuery(document).ready(function() {
     {name: "docgen-radio-group"},
     {name: "allu-drawings"},
     {name: "docgen-allu-drawings"},
-    {name: "drawings-table"}
+    {name: "drawings-table"},
+    {name: "allu-map"},
+    {name: "docgen-allu-map"}
 ];
 
   ko.registerLupapisteComponents(components);

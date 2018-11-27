@@ -34545,10 +34545,6 @@ div.form-grid.allu-group .row.allu-row--spaced {
   padding-top: 2em;
 }
 
-textarea.allu-map {
-  min-height: 20em;
-}
-
 .allu-table table {
   margin-bottom: 0;
 }
@@ -34636,6 +34632,29 @@ div.allu-drawings table.drawings-table tr:hover:nth-child(even) {
 
 div.allu-drawings table.drawings-table td.drawing--name {
   width: 100%;
+}
+
+div.allu-drawings table.drawings-table td.drawing--icon {
+  padding-left: 10px;
+}
+
+div.allu-drawings table.drawings-table td.drawing--icon i {
+  cursor: pointer;
+}
+
+div.allu-map-container div.allu-map {
+  min-height: 20em;
+  height: 30em;
+  width: 100%;
+}
+
+div.allu-map-container button.ghost {
+  position: absolute;
+  z-index: 1000;
+  bottom: 0;
+  left: 0;
+  margin-left: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
 }
 
 /* VIEWS

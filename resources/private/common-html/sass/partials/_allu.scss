@@ -40,11 +40,6 @@ div.form-grid.allu-group {
   }
 }
 
-// Placeholder for the actual component
-textarea.allu-map {
-  min-height: 20em;
-}
-
 .allu-table {
   table {
     @include no-row-hover;
@@ -117,5 +112,27 @@ div.allu-drawings {
     td.drawing--name {
       width: 100%;
     }
+    td.drawing--icon {
+      padding-left: 10px;
+      i {
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+div.allu-map-container {
+  div.allu-map {
+    min-height: 20em;
+    height: 30em;
+    width: 100%;
+  }
+  button.ghost {
+    position: absolute;
+    z-index: 1000;
+    bottom: 0;
+    left: 0;
+    margin-left: 20px;
+    background-color: rgba( 255, 255, 255, .8);
   }
 }

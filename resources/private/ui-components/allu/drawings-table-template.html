@@ -10,11 +10,17 @@
       <tr>
         <td class="drawing--name"
             data-bind="text: $data.name"></td>
+        <!-- ko if: $parent.locateFn -->
+        <td class="drawing--icon">
+          <i class="lupicon-viewfinder primary"
+             data-bind="click: $parent.locateFn"></i></td>
+        <!-- /ko -->
         <!-- ko if: $parent.deleteFn -->
-        <td class="drawing--remove">
+        <td class="drawing--icon">
           <i class="lupicon-remove primary"
              data-bind="click: $parent.deleteFn"></i></td>
         <!-- /ko -->
+
       </tr>
     </tbody>
   </table>
