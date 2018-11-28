@@ -7,9 +7,12 @@
             [lupapalvelu.money-schema :refer [MoneyResponse]]
             [clojurewerkz.money.conversion :refer [to-rounding-mode]]
             [schema.core :as sc])
-  (:import [org.joda.money Money CurrencyUnit]))
+  (:import [org.joda.money Money CurrencyUnit]
+           [java.util Locale]))
 
 (def default-currency EUR)
+
+(def locale (new Locale "fi_FI"))
 
 (sc/defschema SumByOptions
   {:currency Money})
@@ -23,7 +26,7 @@
 (sc/defn ->MoneyResponse [money-value]
   {:major (ma/major-of money-value)
       :minor (ma/minor-of money-value)
-      :text (mf/format money-value)
+      :text (mf/format money-value locale)
    :currency (.toString (ma/currency-of money-value))})
 
 (sc/defn sum-by :- MoneyResponse
