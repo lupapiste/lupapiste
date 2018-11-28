@@ -158,7 +158,7 @@
 
                  ;; Lupapiste libraries
                  ; Oskari map (https://github.com/lupapiste/oskari)
-                 [lupapiste/oskari "1.47.1.3"]
+                 [lupapiste/oskari "1.47.1.4"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
                  [lupapiste/commons "0.9.32"]
                  [lupapiste/invoice-commons "0.1.0-SNAPSHOT"]
