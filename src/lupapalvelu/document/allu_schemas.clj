@@ -20,20 +20,21 @@
 
 
 (def promootio-description (allu-group {:name "promootio"
-                                        :body  [{:name        "promootio-name"
-                                                 :type        :string
-                                                 :placeholder "promootio.name.placeholder"
-                                                 :required    true
-                                                 :layout      :full-width
-                                                 :uicomponent :docgen-input
-                                                 :inputType   :string}
-                                                {:name        "promootio-description"
-                                                 :type        :text
-                                                 :placeholder "promootio.description.placeholder"
-                                                 :required    true
-                                                 :layout      :full-width}]
-                                        :rows  [["promootio-name::3"]
-                                                ["promootio-description::3"]]}))
+                                        :body [{:name        "promootio-name"
+                                                :type        :string
+                                                :placeholder "promootio.name.placeholder"
+                                                :required    true
+                                                :layout      :full-width
+                                                :uicomponent :docgen-input
+                                                :inputType   :string}
+                                               {:name        "promootio-description"
+                                                :type        :text
+                                                :max-len     10000
+                                                :placeholder "promootio.description.placeholder"
+                                                :required    true
+                                                :layout      :full-width}]
+                                        :rows [["promootio-name::3"]
+                                               ["promootio-description::3"]]}))
 
 
 
@@ -209,6 +210,7 @@
 (def promootio-info (-> (info-rows ["food" "music" "alcohol" "games" "risks" "sales"])
                         (update :body concat [{:name        "other-info"
                                                :type        :text
+                                               :max-len     10000
                                                :layout      :full-width
                                                :placeholder "placeholder.other-promotion-info"}])
                         (update :rows concat [{:row ["other-info::2"]
