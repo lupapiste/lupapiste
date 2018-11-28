@@ -112,19 +112,6 @@
           (action-fn new-invoice (:created-by new-invoice)))))
     update-result))
 
-(sc/defn ^:always-validate ->User :- User
- [user]
-  (select-keys user [:id :firstName :lastName :role :email :username]))
-
-(defn ->invoice-db
-  [invoice {:keys [id organization] :as application} user]
-  (debug "->invoice-db invoice-request: " invoice " app id: " id " user: " user)
-  (merge invoice
-         {:created (sade/now)
-          :created-by (->User user)
-          :application-id id
-          :organization-id organization}))
-
 (defn fetch-by-application-id [application-id]
   (mongo/select "invoices" {:application-id application-id}))
 

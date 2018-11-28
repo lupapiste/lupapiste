@@ -92,9 +92,10 @@
                                                 :text "Taksarivi 1"
                                                 :unit "kpl"
                                                 :price-per-unit 23
+                                                :min-total-price nil
+                                                :max-total-price nil
                                                 :discount-percent 50
-                                                :operations ["toimenpide1" "toimenpide2"]
-                                                }]
+                                                :operations ["toimenpide1" "toimenpide2"]}]
                                         :meta {:created (to-millis-from-local-date-string "01.10.2018")
                                                :created-by dummy-user}}]
               (ensure-exists! "price-catalogues" test-price-catalogue) => :ok
@@ -185,6 +186,4 @@
 
                           (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
                             (sc/validate catalogues/PriceCatalogue new-catalogue)
-                            (select-keys new-catalogue [:valid-from :rows]) => catalogue-request)))
-                  )))
-    ))
+                            (select-keys new-catalogue [:valid-from :rows]) => catalogue-request))))))))

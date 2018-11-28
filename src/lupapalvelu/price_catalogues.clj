@@ -1,23 +1,24 @@
 (ns lupapalvelu.price-catalogues
   "A common interface for accessing price catalogues and related data"
-  (:require [lupapalvelu.mongo :as mongo]
+  (:require [lupapalvelu.invoices :as invoices]
+            [lupapalvelu.invoices.schemas :as invoice-schemas]
+            [lupapalvelu.mongo :as mongo]
             [monger.operators :refer [$in]]
             [schema.core :as sc]
             [sade.core :refer [ok fail] :as sade]
             [sade.schemas :as ssc]
             [taoensso.timbre :refer [trace tracef debug debugf info infof
-                                     warn warnf error errorf fatal fatalf]]
-            [lupapalvelu.invoices :as invoices]))
+                                     warn warnf error errorf fatal fatalf]]))
 
 
 (sc/defschema CatalogueRow
   {:code sc/Str
    :text sc/Str
-   :unit invoices/InvoiceRowUnit
+   :unit invoice-schemas/InvoiceRowUnit
    :price-per-unit sc/Num
    :max-total-price (sc/maybe sc/Num)
    :min-total-price (sc/maybe sc/Num)
-   :discount-percent (sc/maybe invoices/DiscountPercent)
+   :discount-percent (sc/maybe invoice-schemas/DiscountPercent)
    :operations [sc/Str]})
 
 (sc/defschema PriceCatalogue
@@ -30,7 +31,7 @@
    (sc/optional-key :valid-until) ssc/Timestamp
    :rows [CatalogueRow]
    :meta {:created ssc/Timestamp
-          :created-by invoices/User}})
+          :created-by invoice-schemas/User}})
 
 (sc/defschema PriceCatalogueInsertRequest
   {:valid-from ssc/Timestamp
@@ -57,7 +58,7 @@
   (debug "->price-catalogue-db price-catalogue-request: " price-catalogue " organization-id: " organization-id " user: " user)
   (merge price-catalogue
          {:meta {:created (sade/now)
-                 :created-by (invoices/->User user)}
+                 :created-by (invoice-schemas/->invoice-user user)}
           :organization-id organization-id}))
 
 (defn with-id [price-catalogue]
