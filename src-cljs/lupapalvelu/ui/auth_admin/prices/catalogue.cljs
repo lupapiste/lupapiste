@@ -317,7 +317,6 @@
     ]])
 
 (defn get-render-component [mode view]
-  (println "get-render-component view " view " mode: " mode)
   (let [components {:show {:by-rows catalogue-by-rows
                            :by-operations catalogue-by-operations}
                     :edit {:by-rows edit-catalogue-by-rows
@@ -365,7 +364,8 @@
 (defn ^:export start [domId componentParams]
   (swap! args assoc :auth-model (aget componentParams "authModel") :dom-id (name domId))
   (reset! state/org-id (js/ko.unwrap (common/oget componentParams "orgId")))
-  (service/fetch-organization-operations)
+  (service/fetch-organization-operations ["Rakentaminen ja purkaminen"
+                                          "Poikkeusluvat ja suunnittelutarveratkaisut"])
   (service/fetch-price-catalogues)
   (state/set-view :by-rows)
   (mount-component))

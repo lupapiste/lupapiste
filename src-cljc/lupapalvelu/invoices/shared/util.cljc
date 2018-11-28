@@ -26,16 +26,21 @@
 
 (defn pair? [x]
   (and (not (string? x))
-       (or (seq? x) (vector? x))
-       (= (count x) 2)))
+       (sequential? x)
+       (= (count x) 2)
+       (string? (first x))
+       (string? (second x))))
 
 (defn get-operations-for-category [operation-tree category]
   (let [by-category (into {} operation-tree)
-        by-subcategory (into {} (get by-category category))
-        operation-name-value-pairs (->> (vals by-subcategory)
-                                        (apply concat)
-                                        (remove #(not (pair? %))))]
-    (map second operation-name-value-pairs)))
+        category-operation-tree (get by-category category)
+        branch? (fn [x] (and (sequential? x)
+                             (not (pair? x))))]
+    (if (string? category-operation-tree)
+      [category-operation-tree] ;; category has no children. Only one operation
+      (->> (tree-seq branch? identity category-operation-tree)
+           (filter pair?)
+           (map second)))))
 
 (defn get-operations-from-tree [operation-tree categories]
   (mapcat (partial get-operations-for-category operation-tree) categories))

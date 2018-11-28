@@ -26,13 +26,8 @@
                     :organization-id @state/org-id
                     :price-catalogue new-catalogue)))
 
-(defn fetch-organization-operations []
+(defn fetch-organization-operations [operation-categories]
   (common/query :all-operations-for-organization
                 (fn [{:keys [operations] :as data}]
-                  ;;(reset! state/org-operations operations)
-                  (println "YYYYYYEEEEEEEHAAAAAAA operaatiot haettu 4")
-                  (reset! state/org-operations (util/get-operations-from-tree operations ["Rakentaminen ja purkaminen"]))
-                  ;;["pientalo" "aita" "maalampo" "mainoslaite"]
-                  (println "operations in state: " @state/org-operations)
-                  )
+                  (reset! state/org-operations (util/get-operations-from-tree operations operation-categories)))
                 :organizationId @state/org-id))

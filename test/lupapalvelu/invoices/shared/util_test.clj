@@ -174,4 +174,19 @@
                    "meluilmoitus"
                    "koeluontoinen-toiminta"
                    "ilmoitus-poikkeuksellisesta-tilanteesta"
-                   "lannan-varastointi"])))
+                   "lannan-varastointi"
+                   "pima"])
+
+         (fact "should return operations for categories that have different levels of depth"
+               (let [operations [["category-with-no-children" "level-1-operation"]
+                                 ["category-with-children"
+                                  [["sub-category-with-no-children" "level-2-operation"]
+                                   ["sub-category-with-children"
+                                    [["name-b" "level-3-operation-1"]
+                                     ["name-c" "level-3-operation-2"]]]]]]]
+                 (util/get-operations-from-tree operations ["category-with-no-children"
+                                                            "category-with-children"])
+                    => ["level-1-operation"
+                        "level-2-operation"
+                        "level-3-operation-1"
+                        "level-3-operation-2"]))))
