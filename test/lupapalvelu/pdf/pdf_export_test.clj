@@ -27,7 +27,9 @@
                        "tyonjohtaja"
                        "approval-model-with-approvals"
                        "approval-model-without-approvals"
-                       "rahoitus"})
+                       "rahoitus"
+                       "visibility-schema" ;; model-test
+                       })
 
 ;; TODO: Remove after Allu applications have been localized
 (warn "-------------------------------------------------------")
