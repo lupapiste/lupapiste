@@ -28,7 +28,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
 
   self.indicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});
-  self.css = _.reduce( params.schema["css"] || [],
+  self.css = _.reduce( params.schema.css || [],
                        function( acc, cls ) {
                          return _.set( acc, cls, true );
                        },
