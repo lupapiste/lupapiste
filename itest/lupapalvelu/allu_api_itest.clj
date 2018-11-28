@@ -99,4 +99,13 @@
         => (just [(contains {:id      cont-id
                              :allu-id 11
                              :source  "promotion"
-                             :name    "Säiliö 468"})])))))
+                             :name    "Säiliö 468"})]))))
+  (fact "Authority vs. draft"
+    (query sonja :allu-sites :id app-id :kind "promotion")
+    => fail?))
+
+(facts "Non-Allu application"
+  (let [app-id (create-app-id pena
+                              :propertyId sipoo-property-id
+                              :operation :ya-kayttolupa-terassit)]
+    (query pena :allu-sites :id app-id :kind "promotion") => fail?))

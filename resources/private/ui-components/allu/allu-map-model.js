@@ -53,9 +53,11 @@ LUPAPISTE.AlluMapModel = function( params ) {
   });
 
   self.addHubListener( "allu-map-locate", function( msg ) {
-    var draw = _.find( getDrawings(), {id: msg.drawingId} );
-    if( draw && map ) {
-      map.centerOnDrawing( draw );
+    if( self.mapId && self.mapId === msg.mapId ) {
+      var draw = _.find( getDrawings(), {id: msg.drawingId} );
+      if( draw && map ) {
+        map.centerOnDrawing( draw );
+      }
     }
   });
 

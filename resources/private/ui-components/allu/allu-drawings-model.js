@@ -86,7 +86,8 @@ LUPAPISTE.AlluDrawingsModel = function( params ) {
   self.addHubListener( "application-model-updated", fetchSites );
 
   self.locateFn = params.mapId ? function( draw ) {
-    hub.send( "allu-map-locate", {drawingId: draw.id });
+    hub.send( "allu-map-locate", {drawingId: draw.id,
+                                  mapId: params.mapId});
   }
   : null;
 

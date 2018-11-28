@@ -2,7 +2,7 @@
   (:require [lupapalvelu.document.tools :refer :all]
             [midje.sweet :refer :all]
 
-            [midje.util :refer [expose-testables]]
+            [midje.util :refer [expose-testables testable-privates]]
             [clojure.set :as s]
             [lupapalvelu.document.data-schema :as data-schema]
             [clojure.test.check.clojure-test :refer [defspec]]
@@ -17,6 +17,9 @@
             [lupapalvelu.document.yleiset-alueet-schemas]))
 
 (expose-testables lupapalvelu.document.tools)
+
+(testable-privates lupapalvelu.document.tools
+                   path-string->absolute-path)
 
 (def schema
   {:info {:name "band"},
@@ -53,6 +56,13 @@
   (-> schema
     (create-unwrapped-data nil-values)
     (wrapped :value)) => expected-wrapped-simple-document)
+
+(facts path-string->absolute-path
+  (fact "absolute-path"
+    (path-string->absolute-path [:foo :bar] "/quu/quz") => [:quu :quz])
+
+  (fact "relative-path"
+    (path-string->absolute-path [:foo :bar] "quu/quz") => [:foo :bar :quu :quz]))
 
 ;;
 ;; Public api

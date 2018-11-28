@@ -231,29 +231,30 @@
                                     :required true
                                     :layout   :full-width}]})
 
-(defschemas
-  1
-  [{:info {:name       "promootio"
-           :approvable true
-           :order      11}
-    :body [promootio-description]}
-   {:info {:name       "promootio-time"
-           :approvable true
-           :order      12}
-    :body [promootio-time]}
-   {:info {:name       "promootio-location"
-           :approvable true
-           :order      13}
-    :body [promootio-location]}
-   {:info {:name       "promootio-structures"
-           :approvable true
-           :order      14}
-    :body [promootio-structures]}
-   {:info {:name       "promootio-info"
-           :approvable true
-           :order      15}
-    :body [promootio-info]}
-   {:info {:name       "lyhytaikainen-maanvuokraus"
-           :approvable true
-           :order      11}
-    :body [lmv-description]}])
+;; The definition is used in pdf-export-test.
+(def schema-definitions [{:info {:name       "promootio"
+                                 :approvable true
+                                 :order      11}
+                          :body [promootio-description]}
+                         {:info {:name       "promootio-time"
+                                 :approvable true
+                                 :order      12}
+                          :body [promootio-time]}
+                         {:info {:name       "promootio-location"
+                                 :approvable true
+                                 :order      13}
+                          :body [promootio-location]}
+                         {:info {:name       "promootio-structures"
+                                 :approvable true
+                                 :order      14}
+                          :body [promootio-structures]}
+                         {:info {:name       "promootio-info"
+                                 :approvable true
+                                 :order      15}
+                          :body [promootio-info]}
+                         {:info {:name       "lyhytaikainen-maanvuokraus"
+                                 :approvable true
+                                 :order      11}
+                          :body [lmv-description]}])
+
+(defschemas 1 schema-definitions)
