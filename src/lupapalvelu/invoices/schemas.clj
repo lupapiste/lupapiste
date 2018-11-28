@@ -99,7 +99,8 @@
    :created ssc/Timestamp
    :created-by User
    :invoices [InvoiceInTransferBatch]
-   :number-of-rows sc/Num})
+   :number-of-rows sc/Num
+   :sum MoneyResponse})
 
 
 (sc/defschema TransferBatchResponseTransferBatch

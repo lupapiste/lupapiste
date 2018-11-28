@@ -25,4 +25,5 @@
                                                                                          :email     "pena@panaani.fi"
                                                                                      :username  "pena"}
                                                                         :invoices []
-                                                                        :number-of-rows 0})))
+                                                                                         :number-of-rows 0
+                                                                                         :sum {:currency "" :major 0 :minor 0 :text ""}})))

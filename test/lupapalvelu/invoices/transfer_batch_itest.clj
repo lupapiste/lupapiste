@@ -23,6 +23,11 @@
 (def dummy-invoice {:id "dummy-invoice-id-1"
                     :application-id "LP-753-2018-90108"
                     :organization-id "753-R"
+                    :sum {:major 20
+                          :minor 2000
+                          :currency "EUR"
+                          :text "EUR20.00"}
+
                     :state "draft"
                     :operations [{:operation-id "linjasaneeraus"
                                   :name "linjasaneeraus"
@@ -99,4 +104,5 @@
                     (mongo/insert :invoices invoice-two)
                     (let [transfer-batch-id (add-invoice-to-transfer-batch invoice-two dummy-user)
                           transfer-batch (get-transfer-batch-db transfer-batch-id)]
-                      (:number-of-rows transfer-batch) => 4)))))))
+                      (:number-of-rows transfer-batch) => 4
+                      (:sum transfer-batch) => {:currency "EUR" :major 40 :minor 4000 :text "EUR40.00"})))))))

@@ -3,6 +3,7 @@
    [sade.schemas :as ssc]
    [monger.operators :refer [$in]]
    [schema.core :as sc]
+   [lupapalvelu.money :as money]
    [sade.core :as sade]
    [lupapalvelu.mongo :as mongo]
    [lupapalvelu.invoices.schemas :refer [User
@@ -37,7 +38,11 @@
           :created-by (->invoice-user user)
           :organization-id org-id
           :number-of-rows 0
-          :invoices []}))
+          :invoices []
+          :sum {:minor 0
+                :major 0
+                :currency ""
+                :text ""}}))
 
 (defn- count-rows-in-invoice-transfer-batch [invoice-transfer-batch ]
   (let [invoices (:invoices invoice-transfer-batch)
@@ -86,8 +91,15 @@
         tb-with-invoices (assoc transfer-batch :invoices added-invoices)
         invoices-from-db (invoices-for-transferbatch tb-with-invoices)
         number-of-invoice-rows (reduce + (map (fn [invoice]
-                                                (count-rows-in-invoice invoice)) invoices-from-db))]
-    (assoc tb-with-invoices :number-of-rows number-of-invoice-rows)))
+                                                (count-rows-in-invoice invoice)) invoices-from-db))
+        invoice-sums-as-money (map (fn [invoice]
+                                     (let [invoice-sum (:sum invoice)
+                                           currency (money/->currency-code (:currency invoice-sum))
+                                           money-value (money/minor->currency currency (:minor invoice-sum))]
+                                       {:sum money-value}))
+                                   invoices-from-db)
+        sum (money/sum-by :sum invoice-sums-as-money)]
+    (assoc tb-with-invoices :number-of-rows number-of-invoice-rows :sum sum)))
 
 (defn add-invoice-to-transfer-batch
   "inserts invoice to transfer batch. Checks if organization has open transferbatch, and adds invoice to that.
@@ -119,6 +131,7 @@
                                                                          :transfer-batch tb
                                                                          :invoice-count invoice-count
                                                                          :invoice-row-count invoice-row-count
-                                                                         :invoices invoices-for-tb})) transfer-batches-for-org)]
+                                                                         :invoices invoices-for-tb}))
+                                                                     transfer-batches-for-org)]
                              (assoc memo org-id transfer-batches-for-response))) {} org-ids)]
     (validate-invoice-transfer-batches-orgs-response response)))

@@ -2,7 +2,7 @@
   "API for money calculations. Made for invoices feature, but could contain other money
   handling functions as well. Heavily utilizes clojurewerkz money library"
   (:require [clojurewerkz.money.amounts :as ma]
-            [clojurewerkz.money.currencies :refer [EUR]]
+            [clojurewerkz.money.currencies :as mc :refer [EUR]]
             [clojurewerkz.money.format :as mf]
             [lupapalvelu.money-schema :refer [MoneyResponse]]
             [clojurewerkz.money.conversion :refer [to-rounding-mode]]
@@ -23,10 +23,19 @@
   ([amount]
    (->currency default-currency amount)))
 
+(defn minor->currency
+  ([currency amount-in-minor]
+   (ma/of-minor currency amount-in-minor))
+  ([amount-in-minor]
+   (minor->currency default-currency amount-in-minor)))
+
+(defn ->currency-code [currency-string]
+  (mc/for-code currency-string))
+
 (sc/defn ->MoneyResponse [money-value]
   {:major (ma/major-of money-value)
-      :minor (ma/minor-of money-value)
-      :text (mf/format money-value locale)
+   :minor (ma/minor-of money-value)
+   :text (mf/format money-value locale)
    :currency (.toString (ma/currency-of money-value))})
 
 (sc/defn sum-by :- MoneyResponse

@@ -345,4 +345,5 @@
                   (let [transferbatch-result (:transfer-batches (local-query sonja :organizations-transferbatches))
                         org-transferbatch (get transferbatch-result "753-R")]
                     (:invoice-count (first org-transferbatch)) => 1
-                    (:invoice-row-count (first org-transferbatch)) => 3))))))
+                    (:invoice-row-count (first org-transferbatch))=> 3
+                    (:sum (:transfer-batch (first org-transferbatch))) => {:currency "EUR" :major 181 :minor 18195 :text "EUR181.95"}))))))
