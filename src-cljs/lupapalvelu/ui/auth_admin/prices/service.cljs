@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.auth-admin.prices.service
-  (:require [lupapalvelu.ui.common :as common]
+  (:require [lupapalvelu.invoices.shared.util :as util]
+            [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.auth-admin.prices.state :as state]))
 
 (defn fetch-price-catalogues [& [callback]]
@@ -28,8 +29,10 @@
 (defn fetch-organization-operations []
   (common/query :all-operations-for-organization
                 (fn [{:keys [operations] :as data}]
-                  (reset! state/org-operations operations)
+                  ;;(reset! state/org-operations operations)
                   (println "YYYYYYEEEEEEEHAAAAAAA operaatiot haettu 4")
-                  (println "operations in state: " state/org-operations)
+                  (reset! state/org-operations (util/get-operations-from-tree operations ["Rakentaminen ja purkaminen"]))
+                  ;;["pientalo" "aita" "maalampo" "mainoslaite"]
+                  (println "operations in state: " @state/org-operations)
                   )
                 :organizationId @state/org-id))

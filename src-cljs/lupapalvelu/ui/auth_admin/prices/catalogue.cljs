@@ -68,8 +68,12 @@
     [:tbody
      (map operation-catalogue-row operation rows)]]])
 
-(rum/defc catalogue-by-operations [selected-catalogue]
-  (let [rows-by-operation (util/rows-with-index-by-operation selected-catalogue)]
+(rum/defc catalogue-by-operations  < rum/reactive
+  [selected-catalogue]
+  (let [rows-by-operation (util/rows-with-index-by-operation selected-catalogue)
+        rows-by-operation (merge
+                           (util/empty-rows-by-operation (rum/react state/org-operations))
+                           (util/rows-with-index-by-operation selected-catalogue))]
     [:div
      (for [[operation rows] rows-by-operation]
        (operation-table operation rows))]))
@@ -103,19 +107,20 @@
         options (map (fn [{:keys [index text]}]
                        [:option {:key (str operation "-" index) :value index} text])
                      rows)]
-    (println "operation-product-select operation: " operation )
-    (println "operation-product-select rows: " rows)
+    ;; (println "operation-product-select operation: " operation )
+    ;; (println "operation-product-select rows: " rows)
     [:select.operation-product-select {:on-change (fn [e]
                                                     (let [value (.. e -target -value)]
                                                       (if (not (= value "empty"))
                                                         (state/add-operation-to-row! operation (js/Number value))
-                                                        (println "empty select - no need to do anything"))))}
+                                                        ;;(println "empty select - no need to do anything")
+                                                        )))}
      (conj options [:option {:key "empty" :value "empty"} "--valitse--"])]))
 
 (rum/defc edit-operation-catalogue-row
   < {:key-fn (fn [operation row] (str operation "-" (:index row)))}
   [operation {:keys [index text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
-  (println ">> edit-operation-catalogue-row operation: " operation " index: " index " row-text: " text)
+  ;;(println ">> edit-operation-catalogue-row operation: " operation " index: " index " row-text: " text)
   [:tr
    [:td text]
    [:td price-per-unit]
@@ -130,14 +135,14 @@
   < rum/reactive
   < {:key-fn (fn [operation rows] (str "edit-" operation))}
   [operation indexed-product-rows]
-  (println "AAAAAAAAAAAAAAA edit-operation-table operation: " operation)
+  ;;(println "AAAAAAAAAAAAAAA edit-operation-table operation: " operation)
   (let [all-indexed-product-rows (util/maps-with-index-key (:rows (rum/react state/catalogue-in-edit)))
         already-selected-indexes (map :index indexed-product-rows)
         selectable-indexed-product-rows (util/remove-maps-with-value all-indexed-product-rows :index already-selected-indexes)]
-    (println "all-indexed-product-rows: " all-indexed-product-rows)
-    (println "operation indexed-product-rows: " indexed-product-rows)
-    (println "already-selected-indexes: " already-selected-indexes)
-    (println "selectable-indexed-product-rows: " selectable-indexed-product-rows)
+    ;; (println "all-indexed-product-rows: " all-indexed-product-rows)
+    ;; (println "operation indexed-product-rows: " indexed-product-rows)
+    ;; (println "already-selected-indexes: " already-selected-indexes)
+    ;; (println "selectable-indexed-product-rows: " selectable-indexed-product-rows)
     [:div.operations-container
      [:table.operations-table
       [:thead
@@ -154,8 +159,11 @@
      [:div.add-row-to-operation
       (operation-product-select operation selectable-indexed-product-rows)]]))
 
-(rum/defc edit-catalogue-by-operations [selected-catalogue]
-  (let [rows-by-operation (util/rows-with-index-by-operation selected-catalogue)]
+(rum/defc edit-catalogue-by-operations < rum/reactive
+  [selected-catalogue]
+  (let [rows-by-operation (merge
+                           (util/empty-rows-by-operation (rum/react state/org-operations))
+                           (util/rows-with-index-by-operation selected-catalogue))]
     [:div
      (for [[operation rows] rows-by-operation]
        (edit-operation-table operation rows))]))
@@ -329,9 +337,9 @@
         render-catalogue (get-render-component mode view)]
     [:div.price-catalogue
      [:div.catalogue-select-and-buttons
-      (println "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-      (println "catalogue catalogue-in-edit: " catalogue-in-edit)
-      (println "catalogue active-catalogue: " active-catalogue)
+      ;; (println "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+      ;; (println "catalogue catalogue-in-edit: " catalogue-in-edit)
+      ;; (println "catalogue active-catalogue: " active-catalogue)
 
       (case mode
         :show [:div

@@ -93,3 +93,85 @@
                                                                      {:name "Liz"    :info "bar"}]
 
                (util/remove-maps-with-value maps :info ["foo" "bar"]) =>  [{:name "George" :info "blahblah"}])))
+
+(facts "empty-rows-by-operation"
+       (fact "should return empty map when no operations given"
+             (util/empty-rows-by-operation []) => {}
+             (util/empty-rows-by-operation nil) => {})
+
+       (fact "should return map of the form {operation1 [] operation2 [] ...}"
+             (util/empty-rows-by-operation ["pientalo"]) => {"pientalo" []}
+             (util/empty-rows-by-operation ["pientalo" "aita"]) => {"pientalo" []
+                                                                    "aita" []}))
+
+(facts "get-operations-from-tree"
+
+       (let [operation-tree [["Rakentaminen ja purkaminen"
+                              [["Uuden rakennuksen rakentaminen"
+                                [["kerrostalo-rivitalo" "kerrostalo-rivitalo"]
+                                 ["pientalo" "pientalo"]]]
+                               ["Rakennuksen-laajentaminen"
+                                [["kerrostalo-rt-laaj" "kerrostalo-rt-laaj"]
+                                 ["pientalo-laaj" "pientalo-laaj"]
+                                 ["vapaa-ajan-rakennus-laaj" "vapaa-ajan-rakennus-laaj"]
+                                 ["talousrakennus-laaj" "talousrakennus-laaj"]
+                                 ["teollisuusrakennus-laaj" "teollisuusrakennus-laaj"]
+                                 ["muu-rakennus-laaj" "muu-rakennus-laaj"]]]]]
+
+                             ["Poikkeusluvat ja suunnittelutarveratkaisut" "poikkeamis"]
+
+                             ["Ympäristöluvat"
+                              [["ymparistonsuojelulain-mukaiset-ilmoitukset"
+                                [["Meluilmoitus" "meluilmoitus"]
+                                 ["koeluontoinen-toiminta" "koeluontoinen-toiminta"]
+                                 ["ilmoitus-poikkeuksellisesta-tilanteesta"
+                                  "ilmoitus-poikkeuksellisesta-tilanteesta"]]]
+                               ["maatalouden-ilmoitukset"
+                                [["lannan-varastointi" "lannan-varastointi"]]]
+                               ["Pima" "pima"]
+                               ]]
+
+                             ["maanmittaustoimitukset"
+                              [["tonttijako" "tonttijako"]
+                               ["kiinteistonmuodostus" "kiinteistonmuodostus"]
+                               ["rasitetoimitus" "rasitetoimitus"]
+                               ["rajankaynti" "rajankaynti"]]]
+                             ["maankayton-muutos"
+                              [["asemakaava" "asemakaava"]
+                               ["ranta-asemakaava" "ranta-asemakaava"]
+                               ["yleiskaava" "yleiskaava"]]]]]
+
+         (fact "should return empty map when no operations given"
+               (util/get-operations-from-tree [] ["Rakentaminen ja purkaminen"]) => [])
+
+         (fact "should return empty map when no categories given"
+               (util/get-operations-from-tree operation-tree []) => [])
+
+         (fact "should return operations for one category"
+               (util/get-operations-from-tree operation-tree ["Rakentaminen ja purkaminen"])
+               => ["kerrostalo-rivitalo"
+                   "pientalo"
+                   "kerrostalo-rt-laaj"
+                   "pientalo-laaj"
+                   "vapaa-ajan-rakennus-laaj"
+                   "talousrakennus-laaj"
+                   "teollisuusrakennus-laaj"
+                   "muu-rakennus-laaj"])
+
+         (fact "should return operations for two categories"
+               (util/get-operations-from-tree operation-tree ["Rakentaminen ja purkaminen" "Ympäristöluvat"])
+               => [;;Rakentaminen ja purkaminen
+                   "kerrostalo-rivitalo"
+                   "pientalo"
+                   "kerrostalo-rt-laaj"
+                   "pientalo-laaj"
+                   "vapaa-ajan-rakennus-laaj"
+                   "talousrakennus-laaj"
+                   "teollisuusrakennus-laaj"
+                   "muu-rakennus-laaj"
+
+                   ;;Ymparistoluvat
+                   "meluilmoitus"
+                   "koeluontoinen-toiminta"
+                   "ilmoitus-poikkeuksellisesta-tilanteesta"
+                   "lannan-varastointi"])))

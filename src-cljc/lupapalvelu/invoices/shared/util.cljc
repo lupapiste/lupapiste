@@ -19,3 +19,23 @@
 
 (defn remove-maps-with-value [coll-of-maps key values]
   (remove #((set values) (get % key)) coll-of-maps))
+
+(defn empty-rows-by-operation [operations]
+  (into {} (for [operation operations]
+             [operation []])))
+
+(defn pair? [x]
+  (and (not (string? x))
+       (or (seq? x) (vector? x))
+       (= (count x) 2)))
+
+(defn get-operations-for-category [operation-tree category]
+  (let [by-category (into {} operation-tree)
+        by-subcategory (into {} (get by-category category))
+        operation-name-value-pairs (->> (vals by-subcategory)
+                                        (apply concat)
+                                        (remove #(not (pair? %))))]
+    (map second operation-name-value-pairs)))
+
+(defn get-operations-from-tree [operation-tree categories]
+  (mapcat (partial get-operations-for-category operation-tree) categories))
