@@ -176,7 +176,8 @@
           (select-keys [:id :name]))))
 
 (defquery usage-purposes
-  {:description "Lupapiste usage purposes for user based on orgAuthz."
+  {:description "Lupapiste usage purposes e.g. [{:type \"authority\"}, {:type \"authority-admin\", :orgId \"753-R\"}]
+                for user based on orgAuthz. Used by frontend role selector."
    :user-roles  roles/all-user-roles}
   [{:keys [user]}]
   (if (:role user)                                          ; prevent NullPointerException in applicationpage-for
@@ -906,11 +907,11 @@
   {:description "User organization names for all languages."
    :user-roles  roles/all-user-roles}
   [{{:keys [orgAuthz]} :user}]
-  (ok :names (if (seq orgAuthz)
-               (let [org-ids (map (comp name key) orgAuthz)
-                     names (map :name (org/get-organizations {:_id {$in org-ids}} {:name 1}))]
-                 (zipmap org-ids names))
-               {})))
+  (let [org-ids (map (comp name key) orgAuthz)
+        orgs (if (seq org-ids)
+               (org/get-organizations {:_id {$in org-ids}} {:name 1})
+               [])]
+    (ok :names (into {} (map (juxt :id :name)) orgs))))
 
 (defquery vendor-backend-redirect-config
   {:permissions [{:required [:organization/admin]}]}
