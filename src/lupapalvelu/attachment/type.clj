@@ -102,7 +102,7 @@
         :YI   attachment-types/Ymparistoilmoitukset
         :YL   attachment-types/Ymparistolupa
         :YM   attachment-types/MuutYmparistoluvat
-        :VVVL attachment-types/Ymparistoilmoitukset
+        :VVVL attachment-types/VesihuoltoVapautushakemukset
         :MAL  attachment-types/Maa-ainesluvat
         :MM   attachment-types/Kiinteistotoimitus
         :KT   attachment-types/Kiinteistotoimitus
