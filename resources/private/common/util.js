@@ -331,10 +331,8 @@ var util = (function($) {
           return labelA.length - labelB.length;
         } else if (_.startsWith(labelA, query)) {
           return -1;
-        } else if (_.startsWith(labelB, query)) {
-          return 1;
         } else {
-          return 0;
+          return _.startsWith( labelB, query ) ? 1 : 0;
         }
       });
     }
