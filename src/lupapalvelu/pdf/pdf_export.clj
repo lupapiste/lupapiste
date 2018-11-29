@@ -58,10 +58,9 @@
     {:columns 1
      :content (let [tables (remove nil? [(table-fn true) (table-fn false)])]
                 (case (count tables)
-                  0 nil
+                  0 (loc :allu.pdf.no-locations)
                   1 (first tables)
-                  2 [:pdf-table {:border           true
-                                 :background-color [100 0 0] } [0.5 0.5]
+                  2 [:pdf-table {:border true} [0.5 0.5]
                      (mapv #(vector :pdf-cell {:border false} %)
                            tables)]))}))
 

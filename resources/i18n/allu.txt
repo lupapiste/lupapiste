@@ -124,3 +124,4 @@
 "promootio-structures.promootio-structures.structures.structure" "fi" "Rakenne"
 "promootio-structures.promootio-structures.structures.area" "fi" "Pinta-ala m2"
 "promootio-structures.structures" "fi" "Rakenteet"
+"allu.pdf.no-locations" "fi" "Sijaintitieto puuttuu."
