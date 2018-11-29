@@ -48,10 +48,14 @@
 (defn log-user-in!
   "Logs the user in and redirects him/her to the main page."
   [req user]
-  (ssess/merge-to-session
-    req
-    (resp/redirect (str (env/value :host) (env/value :frontpage :fi)))
-    {:user (usr/session-summary user)}))
+  (let [url (format "%s/app/%s/%s"
+                    (env/value :host)
+                    (or (:language user) "fi")
+                    (if (usr/applicant? user) "applicant" "authority"))]
+    (ssess/merge-to-session
+      req
+      (resp/redirect url)
+      {:user (usr/session-summary user)})))
 
 (defpage [:get "/api/saml/metadata/:domain"] {domain :domain}
   (let [{:keys [app-name sp-cert]} ad-config]
