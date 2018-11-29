@@ -3,20 +3,20 @@
   (:require [lupapalvelu.document.schemas :refer [defschemas]]
             [sade.util :as util]))
 
-(defn allu-group [{group :name :keys [body rows css]}]
-  {:name        group
-   :type        :group
-   :i18nkey     group
-   :approvable  false
-   :group-help  "help"
-   :uicomponent :docgenGroup
-   :css         (cons :allu-group (flatten [(or css [])]))
-   :template    "form-grid-docgen-group-template"
-   :body        (mapv (fn [e]
-                        (assoc e :i18nkey (name (util/kw-path group (:name e)))))
-                      body)
-   :rows        rows
-   })
+(defn allu-group [{group :name :keys [body rows css pdf-options]}]
+  {:name             group
+   :exclude-from-pdf {:title true}
+   :type             :group
+   :i18nkey          group
+   :approvable       false
+   :group-help       "help"
+   :uicomponent      :docgenGroup
+   :css              (cons :allu-group (flatten [(or css [])]))
+   :template         "form-grid-docgen-group-template"
+   :body             (mapv (fn [e]
+                             (assoc e :i18nkey (name (util/kw-path group (:name e)))))
+                           body)
+   :rows             rows})
 
 
 (def promootio-description (allu-group {:name "promootio"

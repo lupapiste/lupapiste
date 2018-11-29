@@ -1,17 +1,17 @@
 (ns lupapalvelu.pdf.pdf-export
-  (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
-            [clojure.java.io :as io]
-            [pdfa-generator.core :as pdf]
+  (:require [clj-time.format :as tf]
             [clj-time.local :as tl]
-            [clj-time.format :as tf]
-            [lupapalvelu.i18n :refer [loc] :as i18n]
+            [clojure.java.io :as io]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.i18n :refer [loc] :as i18n]
+            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
+            [pdfa-generator.core :as pdf]
             [sade.core :refer :all]
             [sade.files :as files]
             [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
+            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream InputStream]
            [javax.imageio ImageIO]))
 
@@ -35,40 +35,70 @@
       (ss/blank? selected) ""
       :else (loc (format "%s.%s.%s" (or (:i18nkey schema) locstring)  (name select-kw) selected)))))
 
+(defmulti pseudo-field-pdf (fn [_ field-schema _]
+                             (:type field-schema)))
+
+(defmethod pseudo-field-pdf :default
+  [& _])
+
+(defmethod pseudo-field-pdf :allu-drawings
+  [{:keys [drawings]} _ _]
+  (letfn [(site-data [allu-id?]
+            (when-let [draws (seq ((if allu-id? filter remove)
+                                   :allu-id
+                                   drawings))]
+              {:title (loc (if allu-id? :allu.locations :allu.user-locations))
+               :sites (map (fn [{:keys [name desc]}]
+                             (cond-> name
+                               (ss/not-blank? desc) (str ": " desc)))
+                           draws)}))]
+    {:columns 1
+     :content (some->> [(site-data true) (site-data false)]
+                       (remove nil?)
+                       seq
+                       (mapcat (fn [{:keys [title sites]}]
+                                 [[[:pdf-cell {:border false} [:paragraph {:style :bold :size 9} title]]]
+                                  [[:pdf-cell {:border false} (vec (cons :list sites))]]]))
+                       vec
+                       (concat [:pdf-table {:border false} [1]])
+                       vec)}))
+
+
 (defn- combine-schema-field-and-value
   "Gets the field name and field value from a datum field and schema"
-  [{field-name :name field-type :type, :keys [i18nkey body] :as field-schema} data i18npath]
-  (let [locstring (ss/join "." (conj i18npath field-name))
-        localized-field-name (cond
-                               (not-nil? i18nkey) (loc i18nkey)
-                               (= :select field-type) (loc locstring "_group_label")
-                               :else (loc locstring))
+  [app {field-name :name field-type :type, :keys [i18nkey body] :as field-schema} data i18npath]
+  (if (:pseudo? field-schema)
+    (pseudo-field-pdf app field-schema i18npath)
+    (let [locstring (ss/join "." (conj i18npath field-name))
+         localized-field-name (cond
+                                (not-nil? i18nkey) (loc i18nkey)
+                                (= :select field-type) (loc locstring "_group_label")
+                                :else (loc locstring))
 
-        ; extract, cast and localize field-value according to type
-        field-value (get-in data [(keyword field-name) :value])
-        subschema (util/find-first #(= field-value (:name %)) body)
-
-        localized-field-value (cond
-                                (-> field-schema :pdf-options) (pdf-option-field-value field-schema data locstring)
-                                (= :checkbox field-type) (loc (if field-value "yes" "no"))
-                                (= :msDate field-type) (util/to-local-date field-value)
-                                (:i18nkey subschema) (loc (:i18nkey subschema))
-                                (and (= field-value "other") (= :select field-type)) (loc "select-other")
-                                (and field-value (not (ss/blank? field-value)) (= :select field-type)) (loc (if i18nkey i18nkey locstring) field-value)
-                                :else field-value)]
-    [localized-field-name localized-field-value]))
+                                        ; extract, cast and localize field-value according to type
+         field-value (get-in data [(keyword field-name) :value])
+         subschema (util/find-first #(= field-value (:name %)) body)
+         localized-field-value (cond
+                                 (-> field-schema :pdf-options) (pdf-option-field-value field-schema data locstring)
+                                 (= :checkbox field-type) (loc (if field-value "yes" "no"))
+                                 (= :msDate field-type) (util/to-local-date field-value)
+                                 (:i18nkey subschema) (loc (:i18nkey subschema))
+                                 (and (= field-value "other") (= :select field-type)) (loc "select-other")
+                                 (and field-value (not (ss/blank? field-value)) (= :select field-type)) (loc (if i18nkey i18nkey locstring) field-value)
+                                 :else field-value)]
+     [localized-field-name localized-field-value])))
 
 (defn- collect-fields
   "Map over the fields in a schema, pulling the data and fieldname from both"
-  [field-schemas doc path i18npath]
-  (map #(combine-schema-field-and-value % (get-in doc path) i18npath) field-schemas))
+  [app field-schemas doc path i18npath]
+  (map #(combine-schema-field-and-value app % (get-in doc path) i18npath) field-schemas))
 
 ; Helpers for filtering schemas
 ; (at least :personSelector and :radioGroup do not belong to either printable groups or fields
 (def- printable-group-types #{:group :table})
 (defn- is-printable-group-type [schema] (printable-group-types (:type schema)))
 
-(def- field-types #{:string :checkbox :select :msDate :date :text :hetu :radioGroup :time})
+(def- field-types #{:string :checkbox :select :msDate :date :text :hetu :radioGroup :time :allu-drawings})
 (defn- is-field-type [schema] (and (not (:hidden schema))
                                    (or (field-types (:type schema))
                                        (:pdf-options schema))))
@@ -126,7 +156,7 @@
                      (->> (get-in doc path) keys (sort-by util/->int) (map (partial conj path)))
                      [path])
         subschemas (->> (:body group-schema)
-                        (remove :exclude-from-pdf)
+                        (remove (comp true? :exclude-from-pdf))
                         (remove :hidden)
                         (remove schemas/select-one-of-schema?)
                         (remove #(util/=as-kw :calculation (:type %)))
@@ -145,34 +175,37 @@
 
 (defn- collect-single-group
   "Build a map from the data of a single group. Groups can be in document root or inside other groups"
-  [doc group-schema path i18npath]
+  [app doc group-schema path i18npath]
   (let [subschemas (into (sorted-map-by subschemas-order-comparator) (get-subschemas doc group-schema path))]
 
-    (array-map :title  (loc (or (:i18nkey group-schema)
-                                (:i18name group-schema)
-                                (conj i18npath "_group_label")))
-               :fields (cond->> (map (fn [[path {schemas :fields}]] (collect-fields schemas doc path i18npath)) subschemas)
+    (array-map :title  (when-not (some-> group-schema :exclude-from-pdf :title)
+                         (loc (or (:i18nkey group-schema)
+                                  (:i18name group-schema)
+                                  (conj i18npath "_group_label"))))
+               :fields (cond->> (map (fn [[path {schemas :fields}]] (collect-fields app schemas doc path i18npath)) subschemas)
                          (not (table? group-schema)) (apply concat))
-               :groups (mapcat (fn [[path {schemas :groups}]] (collect-groups schemas doc path i18npath)) subschemas)
-               :type   (:type group-schema))))
+               :groups (mapcat (fn [[path {schemas :groups}]] (collect-groups app schemas doc path i18npath)) subschemas)
+               :type   (:type group-schema)
+               :application app)))
 
 (defn- collect-groups
   "Iterate over data groups in document, building a data map of each group"
-  [group-schemas doc path i18npath]
-  (map (fn [{name :name :as schema}] (collect-single-group doc schema (conj path (keyword name)) (conj i18npath name))) group-schemas))
+  [app group-schemas doc path i18npath]
+  (map (fn [{name :name :as schema}] (collect-single-group app doc schema (conj path (keyword name)) (conj i18npath name))) group-schemas))
 
 (defn- collect-single-document
   "Build a map of the data of a single document. Entry point for recursive traversal of document data."
-  [{:keys [data schema-info] :as doc}]
-  (let [schema (schemas/get-schema (:schema-info doc))
-        op     (:op schema-info)
+  [app {:keys [data schema-info] :as doc}]
+  (let [schema     (schemas/get-schema (:schema-info doc))
+        op         (:op schema-info)
         subschemas (-> (get-subschemas data schema []) first val) ; root data is never repeating
-        doc-name (or (-> schema :info :i18name not-empty) (-> schema :info :name))]
+        doc-name   (or (-> schema :info :i18name not-empty) (-> schema :info :name))]
 
     (array-map :title (if (ss/not-blank? (:name op)) (str "operations." (:name op)) (-> schema :info :name))
                :title-desc (:description op)
-               :fields (collect-fields (:fields subschemas) data [] [doc-name])
-               :groups (collect-groups (:groups subschemas) data [] [doc-name]))))
+               :fields (collect-fields app (:fields subschemas) data [] [doc-name])
+               :groups (collect-groups app (:groups subschemas) data [] [doc-name])
+               :application app)))
 
 (defn- doc-order-comparator [x y]
   (cond
@@ -201,7 +234,7 @@
   [app]
   (let [docs (:documents app)
         decorated-docs (map (comp (partial decorate-doc-with-op app) schemas/with-current-schema-info) docs)]
-    (map collect-single-document (sort-docs decorated-docs))))
+    (map (partial collect-single-document app) (sort-docs decorated-docs))))
 
 (defn- get-general-handler [application]
   (if-let [general-handler (util/find-first :general (:handlers application))]
@@ -322,19 +355,23 @@
 (def- two-column-table-opts {:border false :bounding-box [2 2] :cell-border false})
 (def- table-cell-table-opts {:border false :cell-border false})
 
-(defn- table-cell [header content cols]
-  [:pdf-table table-cell-table-opts [cols]
-   [[:pdf-cell {:border false} [:paragraph {:style :bold :size 9} header]]]
-   [[:pdf-cell {:border false} (cond
-                                 (ss/blank? content) (loc "application.export.empty")
-                                 :else (str content))]]
-   ])
+(defn- table-cell [cell cols]
+  (let [header  (if (map? cell) (:header cell) (first cell))
+        content (if (map? cell) (:content cell) (last cell))]
+    [:pdf-table table-cell-table-opts [cols]
+     (when-not (ss/blank? header)
+       [[:pdf-cell {:border false} [:paragraph {:style :bold :size 9} header]]])
+     [[:pdf-cell {:border false} (cond
+                                   (sequential? content) content
+                                   (ss/blank? content)   (loc "application.export.empty")
+                                   :else                 (str content))]]
+     ]))
 
-(defn- single-col-table-cell [header content] (table-cell header content 1))
-(defn- two-col-table-cell [header content] (table-cell header content 2))
+(defn- single-col-table-cell [cell] (table-cell cell 1))
+(defn- two-col-table-cell [cell] (table-cell cell 2))
 
 (defn- single-col-pdf-row [row]
-  [[:pdf-cell (apply single-col-table-cell row)]])
+  [[:pdf-cell (single-col-table-cell row)]])
 
 (defn- single-column-pdf-table [data]
   (let [rows (seq data)]
@@ -345,11 +382,11 @@
 (defn- two-col-pdf-row [row]
   (case (count row)
     1 (let [cell (first row)]
-        [[:pdf-cell {:colspan 2} (apply two-col-table-cell cell)] [:pdf-cell ""]])
+        [[:pdf-cell {:colspan 2} (two-col-table-cell cell)] [:pdf-cell ""]])
     2 (let [left-cell (first row)
             right-cell (second row)]
-        [[:pdf-cell (apply two-col-table-cell left-cell)]
-         [:pdf-cell (apply two-col-table-cell right-cell)]])))
+        [[:pdf-cell (two-col-table-cell left-cell)]
+         [:pdf-cell (two-col-table-cell right-cell)]])))
 
 (defn- two-column-pdf-table [data]
   (let [rows (partition-all 2 (seq data))]
@@ -357,11 +394,11 @@
       ~@(map (fn [row] (two-col-pdf-row row)) rows)
       ]))
 
-(defn- group-section-header [group]
-  [
-   [:pdf-table single-column-table-opts [1]
-    [[:pdf-cell {:border false} [:paragraph {:size 10 :style :bold} (:title group)]]]
-    ]])
+(defn- group-section-header [{title :title}]
+  (when title
+    [[:pdf-table single-column-table-opts [1]
+      [[:pdf-cell {:border false} [:paragraph {:size 10 :style :bold} title]]]
+     ]]))
 
 (defn- long-fields [fields]
   (let [longest-string (apply max (map (fn [[k v]] (apply max [(count (str k)) (count (str v))])) fields))]
@@ -369,7 +406,8 @@
 
 (defn- render-fields [fields]
   [
-   (if (long-fields fields)
+   (if (or (util/find-by-key :columns 1 fields)
+           (long-fields fields))
      (single-column-pdf-table fields)
      (two-column-pdf-table fields))])
 

@@ -357,7 +357,9 @@
    (opt :repeating)            sc/Bool      ;; Array of groups
    (opt :repeating-init-empty) sc/Bool      ;; Init repeating group as empty array (default false)
    (opt :copybutton)           sc/Bool      ;;
-   (opt :exclude-from-pdf)     sc/Bool      ;;
+   (opt :exclude-from-pdf)     (sc/cond-pre sc/Bool          ;; The whole group
+                                            {:title sc/Bool} ;; Group title
+                                            )      ;;
    (opt :validator)            sc/Keyword   ;; Specific validator key for element (see model/validate-element)
    (opt :whitelist)            {:roles [sc/Keyword] :otherwise (sc/enum :disabled :hidden)}
    (opt :blacklist)            [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin

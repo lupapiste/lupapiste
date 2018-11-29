@@ -121,3 +121,6 @@
 "help.A.AddOperations" "en" "If you take other actions at the same time, you can apply for a permit with the same application. You can add actions to the application below or by pressing the Add Action button in the right hand corner."
 "help.A.AddOperations" "fi" "Jos teet samalla muita toimenpiteitä, voit hakea lupaa samalla hakemuksella. Voit lisätä hakemukselle toimenpiteitä alla tai oikeasta reunasta löytyvältä Lisää toimenpide -painikkeella."
 "help.A.AddOperations" "sv" "Om du samtidigt utför andra åtgärder, kan du ansöka om tillstånd med samma ansökan.  Du kan lägga till åtgärder i ansökan med Lägg till åtgärd-knappen nedan eller i högra sidan."
+"promootio-structures.promootio-structures.structures.structure" "fi" "Rakenne"
+"promootio-structures.promootio-structures.structures.area" "fi" "Pinta-ala m2"
+"promootio-structures.structures" "fi" "Rakenteet"
