@@ -107,10 +107,21 @@
          (mongo/insert :invoices))
     id))
 
+(def keys-used-to-update-invoice
+  [:operations
+   :state
+   :permit-number
+   :entity-name
+   :sap-number
+   :entity-address
+   :billing-reference
+   :identification-number
+   :internal-info])
+
 (defn update-invoice!
   [{:keys [id] :as invoice}]
   (let [current-invoice (mongo/by-id "invoices" id)
-        new-invoice (merge current-invoice (select-keys invoice [:operations :state]))
+        new-invoice (merge current-invoice (select-keys invoice keys-used-to-update-invoice))
         state-change-direction (state-change-direction (:state current-invoice) (:state new-invoice) :backend)
         state-change-response (if (= state-change-direction (or :next :previous))
                                 (move-to-state [:state] current-invoice (:state new-invoice) state-change-direction :backend)

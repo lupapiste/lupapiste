@@ -16,7 +16,6 @@
                  :firstName "pena"
                  :lastName  "panaani"
                  :role      "authority"
-                 :email     "pena@panaani.fi"
                  :username  "pena"})
 
 (def dummy-invoice {:id "dummy-invoice-id-1"

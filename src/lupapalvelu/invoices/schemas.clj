@@ -58,7 +58,14 @@
    :application-id sc/Str
    :organization-id sc/Str
    :operations [InvoiceOperation]
-   (sc/optional-key :sum) MoneyResponse})
+   (sc/optional-key :sum) MoneyResponse
+   (sc/optional-key :permit-number) sc/Str
+   (sc/optional-key :entity-name) sc/Str
+   (sc/optional-key :sap-number) sc/Str
+   (sc/optional-key :entity-address) sc/Str
+   (sc/optional-key :billing-reference) sc/Str
+   (sc/optional-key :identification-number) sc/Str
+   (sc/optional-key :internal-info) sc/Str})
 
 (sc/defschema InvoiceInsertRequest
   {:operations [InvoiceOperation]})
