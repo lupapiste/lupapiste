@@ -1,0 +1,876 @@
+{:startedBy {},
+ :archived {:initial nil, :application nil, :completed nil},
+ :suti {:id nil, :added false},
+ :started nil,
+ :closed nil,
+ :address "Hakapolku 6",
+ :primaryOperation
+ {:id "5bfe94f354426599e2d495dc",
+  :name "pientalo",
+  :description "Omakotitalo",
+  :created 1543410931627},
+ :creator
+ {:id "777777777777777777000023",
+  :username "sonja",
+  :firstName "Sonja",
+  :lastName "Sibbo",
+  :role "authority"},
+ :permitSubtype nil,
+ :bulletinOpDescription nil,
+ :agreementPrepared nil,
+ :foreman "",
+ :buildings [],
+ :authorityNotice "",
+ :authority {:firstName "", :lastName "", :id nil},
+ :reminder-sent nil,
+ :comments (),
+ :secondaryOperations
+ ({:id "5bfe94f354426599e2d495df",
+   :name "auto-katos",
+   :description "Rakennelma",
+   :created 1543410931913}),
+ :facta-imported true,
+ :attachments (),
+ :schema-version 1,
+ :openInfoRequest false,
+ :_applicantIndex [],
+ :complementNeeded nil,
+ :infoRequest false,
+ :history
+ ({:state nil,
+   :ts -2208988800000,
+   :user
+   {:id "batchrun-user",
+    :username "eraajo@lupapiste.fi",
+    :enabled true,
+    :lastName "Eräajo",
+    :firstName "Lupapiste",
+    :role "authority"}}
+  {:state :submitted,
+   :ts 1357516800000,
+   :user
+   {:id "batchrun-user",
+    :username "eraajo@lupapiste.fi",
+    :enabled true,
+    :lastName "Eräajo",
+    :firstName "Lupapiste",
+    :role "authority"}}
+  {:state :submitted,
+   :ts 1357516800000,
+   :user
+   {:id "batchrun-user",
+    :username "eraajo@lupapiste.fi",
+    :enabled true,
+    :lastName "Eräajo",
+    :firstName "Lupapiste",
+    :role "authority"}}
+  {:state :verdictGiven,
+   :ts 1362700800000,
+   :user
+   {:id "batchrun-user",
+    :username "eraajo@lupapiste.fi",
+    :enabled true,
+    :lastName "Eräajo",
+    :firstName "Lupapiste",
+    :role "authority"}}
+  {:state :verdictGiven,
+   :ts 1362960000000,
+   :user
+   {:id "batchrun-user",
+    :username "eraajo@lupapiste.fi",
+    :enabled true,
+    :lastName "Eräajo",
+    :firstName "Lupapiste",
+    :role "authority"}}
+  {:state :constructionStarted,
+   :ts 1364947200000,
+   :user
+   {:id "batchrun-user",
+    :username "eraajo@lupapiste.fi",
+    :enabled true,
+    :lastName "Eräajo",
+    :firstName "Lupapiste",
+    :role "authority"}}
+  {:state :closed,
+   :ts 1383523200000,
+   :user
+   {:id "batchrun-user",
+    :username "eraajo@lupapiste.fi",
+    :enabled true,
+    :lastName "Eräajo",
+    :firstName "Lupapiste",
+    :role "authority"}}),
+ :operation-name "pientalo",
+ :created 1543410931627,
+ :municipality "092",
+ :state :closed,
+ :opened 1543410931627,
+ :permitType "R",
+ :organization "092-R",
+ :warrantyEnd nil,
+ :handlers [],
+ :finished nil,
+ :auth
+ [{:id "777777777777777777000023",
+   :username "sonja",
+   :firstName "Sonja",
+   :lastName "Sibbo",
+   :role :writer,
+   :unsubscribed false}],
+ :modified 1543410931627,
+ :urgency "normal",
+ :sent nil,
+ :submitted nil,
+ :title "Hakapolku 6",
+ :_attachment_indicator_reset nil,
+ :tasks [],
+ :verdicts [],
+ :documents
+ ({:id "5bfe94f354426599e2d495de",
+   :schema-info
+   {:name "hakija-r", :version 1, :type :party, :subtype :hakija},
+   :created 1543410931627,
+   :data
+   {:_selected {:value "henkilo"},
+    :henkilo
+    {:userId {:value nil},
+     :henkilotiedot
+     {:etunimi {:value ""},
+      :sukunimi {:value ""},
+      :hetu {:value nil},
+      :turvakieltoKytkin {:value false}},
+     :osoite
+     {:katu {:value ""},
+      :postinumero {:value ""},
+      :postitoimipaikannimi {:value ""},
+      :maa {:value "FIN"}},
+     :yhteystiedot {:puhelin {:value ""}, :email {:value ""}},
+     :kytkimet
+     {:suoramarkkinointilupa {:value false},
+      :vainsahkoinenAsiointiKytkin {:value true}}},
+    :yritys
+    {:companyId {:value nil},
+     :yritysnimi {:value ""},
+     :liikeJaYhteisoTunnus {:value ""},
+     :osoite
+     {:katu {:value ""},
+      :postinumero {:value ""},
+      :postitoimipaikannimi {:value ""},
+      :maa {:value "FIN"}},
+     :yhteyshenkilo
+     {:henkilotiedot
+      {:etunimi {:value ""},
+       :sukunimi {:value ""},
+       :turvakieltoKytkin {:value false}},
+      :yhteystiedot {:puhelin {:value ""}, :email {:value ""}},
+      :kytkimet
+      {:suoramarkkinointilupa {:value false},
+       :vainsahkoinenAsiointiKytkin {:value true}}}}}}
+  {:id "5bfe94f354426599e2d495dd",
+   :schema-info
+   {:name "uusiRakennus",
+    :version 1,
+    :op
+    {:id "5bfe94f354426599e2d495dc",
+     :name "pientalo",
+     :description nil,
+     :created 1543410931627}},
+   :created 1543410931627,
+   :data
+   {:rakennuksenOmistajat
+    {:0
+     {:_selected {:value "henkilo"},
+      :henkilo
+      {:userId {:value nil},
+       :henkilotiedot
+       {:etunimi {:value ""},
+        :sukunimi {:value ""},
+        :hetu {:value nil},
+        :turvakieltoKytkin {:value false}},
+       :osoite
+       {:katu {:value ""},
+        :postinumero {:value ""},
+        :postitoimipaikannimi {:value ""},
+        :maa {:value "FIN"}},
+       :yhteystiedot {:puhelin {:value ""}, :email {:value ""}},
+       :kytkimet {:suoramarkkinointilupa {:value false}}},
+      :yritys
+      {:companyId {:value nil},
+       :yritysnimi {:value ""},
+       :liikeJaYhteisoTunnus {:value ""},
+       :osoite
+       {:katu {:value ""},
+        :postinumero {:value ""},
+        :postitoimipaikannimi {:value ""},
+        :maa {:value "FIN"}},
+       :yhteyshenkilo
+       {:henkilotiedot
+        {:etunimi {:value ""},
+         :sukunimi {:value ""},
+         :turvakieltoKytkin {:value false}},
+        :yhteystiedot {:puhelin {:value ""}, :email {:value ""}}}},
+      :omistajalaji {:value nil},
+      :muu-omistajalaji {:value ""}}},
+    :varusteet
+    {:viemariKytkin {:value false},
+     :saunoja {:value ""},
+     :vesijohtoKytkin {:value false},
+     :hissiKytkin {:value false},
+     :vaestonsuoja {:value ""},
+     :kaasuKytkin {:value false},
+     :aurinkopaneeliKytkin {:value false},
+     :liitettyJatevesijarjestelmaanKytkin {:value false},
+     :koneellinenilmastointiKytkin {:value false},
+     :sahkoKytkin {:value false},
+     :lamminvesiKytkin {:value false}},
+    :verkostoliittymat
+    {:viemariKytkin {:value false},
+     :vesijohtoKytkin {:value false},
+     :sahkoKytkin {:value false},
+     :maakaasuKytkin {:value false},
+     :kaapeliKytkin {:value false}},
+    :kaytto
+    {:rakentajaTyyppi {:value nil},
+     :kayttotarkoitus
+     {:value "011 yhden asunnon talot", :modified 1543410931627}},
+    :huoneistot
+    {:0
+     {:WCKytkin {:value false},
+      :huoneistoTyyppi {:value nil},
+      :keittionTyyppi {:value nil},
+      :huoneistoala {:value ""},
+      :huoneluku {:value ""},
+      :jakokirjain {:value ""},
+      :ammeTaiSuihkuKytkin {:value false},
+      :saunaKytkin {:value false},
+      :huoneistonumero {:value "000", :modified 1543410931627},
+      :porras {:value ""},
+      :muutostapa {:value "lisäys", :modified 1543410931627},
+      :lamminvesiKytkin {:value false},
+      :parvekeTaiTerassiKytkin {:value false}}},
+    :lammitys
+    {:lammitystapa {:value nil},
+     :lammonlahde {:value nil},
+     :muu-lammonlahde {:value ""}},
+    :tunnus {:value ""},
+    :rakenne
+    {:rakentamistapa {:value nil},
+     :kantavaRakennusaine {:value nil},
+     :muuRakennusaine {:value ""},
+     :julkisivu {:value nil},
+     :muuMateriaali {:value ""}},
+    :mitat
+    {:tilavuus {:value ""},
+     :kerrosala {:value ""},
+     :rakennusoikeudellinenKerrosala {:value ""},
+     :kokonaisala {:value ""},
+     :kerrosluku {:value ""},
+     :kellarinpinta-ala {:value ""}},
+    :luokitus
+    {:energialuokka {:value nil},
+     :energiatehokkuusluku {:value ""},
+     :energiatehokkuusluvunYksikko {:value "kWh/m2"},
+     :paloluokka {:value nil}},
+    :valtakunnallinenNumero {:value ""},
+    ["poikkeamat"] {:Vantaan kaupungin poikkeamispäätös 40-90-12-POP.
+
+Asuinrakennus sijaitsee alle 4 metrin etäisyydellä naapuritontin(40-9903-5) rajasta . Asemakaavan mukaan tontti on VP-aluetta. Rakennukseen ei ole vaadittu palo-osastointia. Poikkeamista voidaan pitää vähäisenä.
+
+Kerrosalaa ylitetään 14 kem2. Poikkeamista voidaan pitää vähäisenä.
+                    {:value
+                     [["kuvaus"]
+                      "Omakotitalo, autokatos  ja maalämpöporakaivo."],
+                     :modified 1543410931627}}}}
+  {:id "5bfe94f354426599e2d495e1",
+   :schema-info
+   {:name "hankkeen-kuvaus", :version 1, :subtype :hankkeen-kuvaus},
+   :created 1543410931627,
+   :data
+   {:kuvaus
+    {:value
+     "Omakotitalo, autokatos  ja maalämpöporakaivo.\nLuvan tyyppi: uusi rakennus"},
+    :poikkeamat {:value ""},
+    :rahoitus {:value nil}}}
+  {:id "5bfe94f354426599e2d495e2",
+   :schema-info {:name "paatoksen-toimitus-rakval", :version 1},
+   :created 1543410931627,
+   :data
+   {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}},
+    :osoite
+    {:katu {:value ""},
+     :postinumero {:value ""},
+     :postitoimipaikannimi {:value ""},
+     :maa {:value "FIN"}},
+    :yritys {:yritysnimi {:value ""}},
+    :fillMyInfo {:value nil}}}
+  {:id "5bfe94f354426599e2d495e3",
+   :schema-info
+   {:name "maksaja", :version 1, :type :party, :subtype :maksaja},
+   :created 1543410931627,
+   :data
+   {:_selected {:value "henkilo"},
+    :henkilo
+    {:userId {:value nil},
+     :henkilotiedot
+     {:etunimi {:value ""},
+      :sukunimi {:value ""},
+      :hetu {:value nil},
+      :turvakieltoKytkin {:value false}},
+     :osoite
+     {:katu {:value ""},
+      :postinumero {:value ""},
+      :postitoimipaikannimi {:value ""},
+      :maa {:value "FIN"}},
+     :yhteystiedot {:puhelin {:value ""}, :email {:value ""}},
+     :kytkimet {:suoramarkkinointilupa {:value false}}},
+    :yritys
+    {:companyId {:value nil},
+     :yritysnimi {:value ""},
+     :liikeJaYhteisoTunnus {:value ""},
+     :osoite
+     {:katu {:value ""},
+      :postinumero {:value ""},
+      :postitoimipaikannimi {:value ""},
+      :maa {:value "FIN"}},
+     :yhteyshenkilo
+     {:henkilotiedot
+      {:etunimi {:value ""},
+       :sukunimi {:value ""},
+       :turvakieltoKytkin {:value false}},
+      :yhteystiedot {:puhelin {:value ""}, :email {:value ""}},
+      :kytkimet {:suoramarkkinointilupa {:value false}}},
+     :verkkolaskutustieto
+     {:verkkolaskuTunnus {:value ""},
+      :ovtTunnus {:value ""},
+      :valittajaTunnus {:value nil}}},
+    :laskuviite {:value ""}}}
+  {:id "5bfe94f354426599e2d495e4",
+   :schema-info {:name "rakennuspaikka", :version 1, :type :location},
+   :created 1543410931627,
+   :data
+   {:kiinteisto
+    {:maaraalaTunnus {:value nil},
+     :tilanNimi {:value ""},
+     :rekisterointipvm {:value ""},
+     :maapintaala {:value ""},
+     :vesipintaala {:value ""}},
+    :hallintaperuste {:value nil},
+    :kaavanaste {:value nil},
+    :kaavatilanne {:value nil},
+    :hankkeestaIlmoitettu {:hankkeestaIlmoitettuPvm {:value nil}}}}
+  {:id "5bfe94f354426599e2d495e5",
+   :schema-info
+   {:name "paasuunnittelija",
+    :version 1,
+    :type :party,
+    :subtype :suunnittelija},
+   :created 1543410931627,
+   :data
+   {:suunnittelutehtavanVaativuusluokka {:value nil},
+    :userId {:value nil},
+    :henkilotiedot
+    {:etunimi {:value ""}, :sukunimi {:value ""}, :hetu {:value nil}},
+    :yritys
+    {:yritysnimi {:value ""}, :liikeJaYhteisoTunnus {:value ""}},
+    :osoite
+    {:katu {:value ""},
+     :postinumero {:value ""},
+     :postitoimipaikannimi {:value ""},
+     :maa {:value "FIN"}},
+    :yhteystiedot {:puhelin {:value ""}, :email {:value ""}},
+    :patevyys
+    {:koulutusvalinta {:value nil},
+     :koulutus {:value ""},
+     :valmistumisvuosi {:value ""},
+     :fise {:value ""},
+     :fiseKelpoisuus {:value nil},
+     :patevyysluokka {:value nil},
+     :kokemus {:value ""},
+     :patevyys {:value ""}}}}
+  {:id "5bfe94f354426599e2d495e6",
+   :schema-info
+   {:name "suunnittelija",
+    :version 1,
+    :type :party,
+    :subtype :suunnittelija},
+   :created 1543410931627,
+   :data
+   {:muuSuunnittelijaRooli {:value ""},
+    :kuntaRoolikoodi {:value nil},
+    :yritys
+    {:yritysnimi {:value ""}, :liikeJaYhteisoTunnus {:value ""}},
+    :suunnittelutehtavanVaativuusluokka {:value nil},
+    :osoite
+    {:katu {:value ""},
+     :postinumero {:value ""},
+     :postitoimipaikannimi {:value ""},
+     :maa {:value "FIN"}},
+    :yhteystiedot {:puhelin {:value ""}, :email {:value ""}},
+    :userId {:value nil},
+    :henkilotiedot
+    {:etunimi {:value ""}, :sukunimi {:value ""}, :hetu {:value nil}},
+    :patevyys
+    {:koulutusvalinta {:value nil},
+     :koulutus {:value ""},
+     :valmistumisvuosi {:value ""},
+     :fise {:value ""},
+     :fiseKelpoisuus {:value nil},
+     :patevyysluokka {:value nil},
+     :kokemus {:value ""},
+     :patevyys {:value ""}}}}
+  {:id "5bfe94f354426599e2d495e7",
+   :schema-info {:name "rakennusjatesuunnitelma", :version 1},
+   :created 1543410931627,
+   :data
+   {:rakennusJaPurkujate
+    {:0
+     {:jatetyyppi {:value nil},
+      :suunniteltuMaara {:value ""},
+      :yksikko {:value nil},
+      :painoT {:value ""}}},
+    :vaarallisetAineet
+    {:0
+     {:vaarallinenainetyyppi {:value nil},
+      :suunniteltuMaara {:value ""},
+      :yksikko {:value nil},
+      :painoT {:value ""}}}}}
+  {:id "5bfe94f354426599e2d495e0",
+   :created 1543410931913,
+   :schema-info
+   {:name "kaupunkikuvatoimenpide",
+    :approvable true,
+    :accordion-fields
+    [{:type :text,
+      :paths [["valtakunnallinenNumero"]],
+      :format " - %s"}],
+    :post-verdict-editable true,
+    :version 1,
+    :op
+    {:id "5bfe94f354426599e2d495df",
+     :name "auto-katos",
+     :description nil,
+     :created 1543410931913}},
+   :data
+   {:tunnus {:value "003", :modified nil},
+    :kokonaisala {:value ""},
+    :kayttotarkoitus {:value nil},
+    :kuvaus
+    {:value "Omakotitalo, autokatos  ja maalämpöporakaivo.",
+     :modified nil},
+    :valtakunnallinenNumero {:value ""},
+    :poikkeamat
+    {:value
+     "Vantaan kaupungin poikkeamispäätös 40-90-12-POP.\r\n\r\nAsuinrakennus sijaitsee alle 4 metrin etäisyydellä naapuritontin(40-9903-5) rajasta . Asemakaavan mukaan tontti on VP-aluetta. Rakennukseen ei ole vaadittu palo-osastointia. Poikkeamista voidaan pitää vähäisenä.\r\n\r\nKerrosalaa ylitetään 14 kem2. Poikkeamista voidaan pitää vähäisenä.",
+     :modified nil}}}
+  {:id "5bfe94f354426599e2d495e8",
+   :created 1543410931948,
+   :schema-info
+   {:editable-in-states
+    #{:open :foremanVerdictGiven :ready :constructionStarted
+      :agreementPrepared :appealed :complementNeeded :inUse :submitted
+      :draft :underReview :verdictGiven :onHold},
+    :approvable true,
+    :addable-in-states
+    #{:open :foremanVerdictGiven :ready :constructionStarted
+      :agreementPrepared :appealed :complementNeeded :inUse :submitted
+      :draft :answered :underReview :verdictGiven :onHold},
+    :redraw-on-approval true,
+    :name "suunnittelija",
+    :i18name "osapuoli",
+    :type :party,
+    :accordion-fields
+    [{:type :text,
+      :paths
+      [["henkilotiedot" "etunimi"] ["henkilotiedot" "sukunimi"]],
+      :format "- %s %s"}
+     {:type :text, :paths [["kuntaRoolikoodi"]], :format "- %s"}
+     {:type :text,
+      :paths [["suunnittelutehtavanVaativuusluokka"]],
+      :format "(%s)"}],
+    :disableable true,
+    :removable-by :all,
+    :post-verdict-party true,
+    :after-update
+    lupapalvelu.application-meta-fields/designers-index-update,
+    :repeating true,
+    :order 5,
+    :version 1,
+    :subtype :suunnittelija},
+   :data
+   {:muuSuunnittelijaRooli {:value ""},
+    :kuntaRoolikoodi {:value nil},
+    :yritys
+    {:yritysnimi {:value ""}, :liikeJaYhteisoTunnus {:value ""}},
+    :suunnittelutehtavanVaativuusluokka {:value nil},
+    :osoite
+    {:katu {:value "Myllykoskentie 56"},
+     :postinumero {:value "07170"},
+     :postitoimipaikannimi {:value "PORNAINEN"},
+     :maa {:value "FIN"}},
+    :yhteystiedot
+    {:puhelin {:value "0405537310"},
+     :email {:value "arto.leppanen@perustava.fi"}},
+    :userId {:value nil},
+    :henkilotiedot
+    {:etunimi {:value "Arto Jouni"},
+     :sukunimi {:value "Leppänen"},
+     :hetu {:value "050368-085X"}},
+    :patevyys
+    {:koulutusvalinta {:value "rakennusinsinööri"},
+     :koulutus {:value ""},
+     :valmistumisvuosi {:value "1993"},
+     :fise {:value ""},
+     :fiseKelpoisuus {:value nil},
+     :patevyysluokka {:value nil},
+     :kokemus {:value ""},
+     :patevyys {:value ""}}}}
+  {:id "5bfe94f354426599e2d495e9",
+   :created 1543410931960,
+   :schema-info
+   {:editable-in-states
+    #{:open :foremanVerdictGiven :ready :constructionStarted
+      :agreementPrepared :appealed :complementNeeded :inUse :submitted
+      :draft :underReview :verdictGiven :onHold},
+    :approvable true,
+    :addable-in-states
+    #{:open :foremanVerdictGiven :ready :constructionStarted
+      :agreementPrepared :appealed :complementNeeded :inUse :submitted
+      :draft :answered :underReview :verdictGiven :onHold},
+    :redraw-on-approval true,
+    :name "suunnittelija",
+    :i18name "osapuoli",
+    :type :party,
+    :accordion-fields
+    [{:type :text,
+      :paths
+      [["henkilotiedot" "etunimi"] ["henkilotiedot" "sukunimi"]],
+      :format "- %s %s"}
+     {:type :text, :paths [["kuntaRoolikoodi"]], :format "- %s"}
+     {:type :text,
+      :paths [["suunnittelutehtavanVaativuusluokka"]],
+      :format "(%s)"}],
+    :disableable true,
+    :removable-by :all,
+    :post-verdict-party true,
+    :after-update
+    lupapalvelu.application-meta-fields/designers-index-update,
+    :repeating true,
+    :order 5,
+    :version 1,
+    :subtype :suunnittelija},
+   :data
+   {:muuSuunnittelijaRooli {:value ""},
+    :kuntaRoolikoodi {:value "rakennussuunnittelija"},
+    :yritys
+    {:yritysnimi {:value ""}, :liikeJaYhteisoTunnus {:value ""}},
+    :suunnittelutehtavanVaativuusluokka {:value nil},
+    :osoite
+    {:katu {:value "Myllykoskentie 56"},
+     :postinumero {:value "07170"},
+     :postitoimipaikannimi {:value "PORNAINEN"},
+     :maa {:value "FIN"}},
+    :yhteystiedot
+    {:puhelin {:value "0405537310"},
+     :email {:value "arto.leppanen@perustava.fi"}},
+    :userId {:value nil},
+    :henkilotiedot
+    {:etunimi {:value "Arto Jouni"},
+     :sukunimi {:value "Leppänen"},
+     :hetu {:value "050368-085X"}},
+    :patevyys
+    {:koulutusvalinta {:value "rakennusinsinööri"},
+     :koulutus {:value ""},
+     :valmistumisvuosi {:value "1993"},
+     :fise {:value ""},
+     :fiseKelpoisuus {:value nil},
+     :patevyysluokka {:value nil},
+     :kokemus {:value ""},
+     :patevyys {:value ""}}}}
+  {:id "5bfe94f354426599e2d495ea",
+   :created 1543410931972,
+   :schema-info
+   {:editable-in-states
+    #{:open :foremanVerdictGiven :ready :constructionStarted
+      :agreementPrepared :appealed :complementNeeded :inUse :submitted
+      :draft :underReview :verdictGiven :onHold},
+    :approvable true,
+    :addable-in-states
+    #{:open :foremanVerdictGiven :ready :constructionStarted
+      :agreementPrepared :appealed :complementNeeded :inUse :submitted
+      :draft :answered :underReview :verdictGiven :onHold},
+    :redraw-on-approval true,
+    :name "suunnittelija",
+    :i18name "osapuoli",
+    :type :party,
+    :accordion-fields
+    [{:type :text,
+      :paths
+      [["henkilotiedot" "etunimi"] ["henkilotiedot" "sukunimi"]],
+      :format "- %s %s"}
+     {:type :text, :paths [["kuntaRoolikoodi"]], :format "- %s"}
+     {:type :text,
+      :paths [["suunnittelutehtavanVaativuusluokka"]],
+      :format "(%s)"}],
+    :disableable true,
+    :removable-by :all,
+    :post-verdict-party true,
+    :after-update
+    lupapalvelu.application-meta-fields/designers-index-update,
+    :repeating true,
+    :order 5,
+    :version 1,
+    :subtype :suunnittelija},
+   :data
+   {:muuSuunnittelijaRooli {:value ""},
+    :kuntaRoolikoodi {:value "IV-suunnittelija"},
+    :yritys
+    {:yritysnimi {:value ""}, :liikeJaYhteisoTunnus {:value ""}},
+    :suunnittelutehtavanVaativuusluokka {:value nil},
+    :osoite
+    {:katu {:value "Mikkelänkallio 18b"},
+     :postinumero {:value "02770"},
+     :postitoimipaikannimi {:value "ESPOO"},
+     :maa {:value "FIN"}},
+    :yhteystiedot
+    {:puhelin {:value "0400-617 700"},
+     :email {:value "info@mh-lvi.net"}},
+    :userId {:value nil},
+    :henkilotiedot
+    {:etunimi {:value "Matti Einari"},
+     :sukunimi {:value "Haapanen"},
+     :hetu {:value "240555-1994"}},
+    :patevyys
+    {:koulutusvalinta {:value "LVI-työteknikko"},
+     :koulutus {:value ""},
+     :valmistumisvuosi {:value "1991"},
+     :fise {:value ""},
+     :fiseKelpoisuus {:value nil},
+     :patevyysluokka {:value nil},
+     :kokemus {:value ""},
+     :patevyys {:value ""}}}}
+  {:id "5bfe94f354426599e2d495eb",
+   :created 1543410931983,
+   :schema-info
+   {:editable-in-states
+    #{:open :foremanVerdictGiven :ready :constructionStarted
+      :agreementPrepared :appealed :complementNeeded :inUse :submitted
+      :draft :underReview :verdictGiven :onHold},
+    :approvable true,
+    :addable-in-states
+    #{:open :foremanVerdictGiven :ready :constructionStarted
+      :agreementPrepared :appealed :complementNeeded :inUse :submitted
+      :draft :answered :underReview :verdictGiven :onHold},
+    :redraw-on-approval true,
+    :name "suunnittelija",
+    :i18name "osapuoli",
+    :type :party,
+    :accordion-fields
+    [{:type :text,
+      :paths
+      [["henkilotiedot" "etunimi"] ["henkilotiedot" "sukunimi"]],
+      :format "- %s %s"}
+     {:type :text, :paths [["kuntaRoolikoodi"]], :format "- %s"}
+     {:type :text,
+      :paths [["suunnittelutehtavanVaativuusluokka"]],
+      :format "(%s)"}],
+    :disableable true,
+    :removable-by :all,
+    :post-verdict-party true,
+    :after-update
+    lupapalvelu.application-meta-fields/designers-index-update,
+    :repeating true,
+    :order 5,
+    :version 1,
+    :subtype :suunnittelija},
+   :data
+   {:muuSuunnittelijaRooli {:value ""},
+    :kuntaRoolikoodi {:value "KVV-suunnittelija"},
+    :yritys
+    {:yritysnimi {:value ""}, :liikeJaYhteisoTunnus {:value ""}},
+    :suunnittelutehtavanVaativuusluokka {:value nil},
+    :osoite
+    {:katu {:value "Mikkelänkallio 18b"},
+     :postinumero {:value "02770"},
+     :postitoimipaikannimi {:value "ESPOO"},
+     :maa {:value "FIN"}},
+    :yhteystiedot
+    {:puhelin {:value "0400-617 700"},
+     :email {:value "info@mh-lvi.net"}},
+    :userId {:value nil},
+    :henkilotiedot
+    {:etunimi {:value "Matti Einari"},
+     :sukunimi {:value "Haapanen"},
+     :hetu {:value "240555-1994"}},
+    :patevyys
+    {:koulutusvalinta {:value "LVI-työteknikko"},
+     :koulutus {:value ""},
+     :valmistumisvuosi {:value "1991"},
+     :fise {:value ""},
+     :fiseKelpoisuus {:value nil},
+     :patevyysluokka {:value nil},
+     :kokemus {:value ""},
+     :patevyys {:value ""}}}}
+  {:id "5bfe94f354426599e2d495ec",
+   :created 1543410931995,
+   :schema-info
+   {:approvable true,
+    :name "paasuunnittelija",
+    :section-help "schemas.paasuunnittelija.section.help",
+    :i18name "osapuoli",
+    :type :party,
+    :accordion-fields
+    [{:type :text,
+      :paths
+      [["henkilotiedot" "etunimi"] ["henkilotiedot" "sukunimi"]],
+      :format "- %s %s"}
+     {:type :text, :paths [["kuntaRoolikoodi"]], :format "- %s"}
+     {:type :text,
+      :paths [["suunnittelutehtavanVaativuusluokka"]],
+      :format "(%s)"}],
+    :removable-by :authority,
+    :after-update
+    lupapalvelu.application-meta-fields/designers-index-update,
+    :order 4,
+    :version 1,
+    :subtype :suunnittelija},
+   :data
+   {:suunnittelutehtavanVaativuusluokka {:value nil},
+    :userId {:value nil},
+    :henkilotiedot
+    {:etunimi {:value "Pekka Juhani"},
+     :sukunimi {:value "Saukonoja"},
+     :hetu {:value "021164-069W"}},
+    :yritys
+    {:yritysnimi {:value ""}, :liikeJaYhteisoTunnus {:value ""}},
+    :osoite
+    {:katu {:value "Hommaksentie 9"},
+     :postinumero {:value "01740"},
+     :postitoimipaikannimi {:value "VANTAA"},
+     :maa {:value "FIN"}},
+    :yhteystiedot
+    {:puhelin {:value "040 5019471"},
+     :email {:value "pekka.saukonoja@gmail.com"}},
+    :patevyys
+    {:koulutusvalinta {:value "rakennusmestari"},
+     :koulutus {:value ""},
+     :valmistumisvuosi {:value "1988"},
+     :fise {:value ""},
+     :fiseKelpoisuus {:value nil},
+     :patevyysluokka {:value nil},
+     :kokemus {:value ""},
+     :patevyys {:value ""}}}}
+  {:id "5bfe94f454426599e2d495ed",
+   :created 1543410932006,
+   :schema-info
+   {:approvable true,
+    :name "maksaja",
+    :section-help "schemas.maksaja.section.help",
+    :i18name "osapuoli",
+    :type :party,
+    :last-removable-by :authority,
+    :accordion-fields
+    [{:type :selected,
+      :paths
+      [["henkilo" "henkilotiedot" "etunimi"]
+       ["henkilo" "henkilotiedot" "sukunimi"]
+       ["yritys" "yritysnimi"]],
+      :format "- %s %s"}],
+    :blacklist [:neighbor],
+    :removable-by :all,
+    :repeating false,
+    :order 6,
+    :version 1,
+    :subtype :maksaja},
+   :data
+   {:_selected {:value "henkilo"},
+    :henkilo
+    {:userId {:value nil},
+     :henkilotiedot
+     {:etunimi {:value "Mauri Tapani"},
+      :sukunimi {:value "Saastamoinen"},
+      :hetu {:value "220572-035X"},
+      :turvakieltoKytkin {:value false}},
+     :osoite
+     {:katu {:value "Pohjoisranta 24 C 37"},
+      :postinumero {:value "00170"},
+      :postitoimipaikannimi {:value "HELSINKI"},
+      :maa {:value "FIN"}},
+     :yhteystiedot
+     {:puhelin {:value "040-5019471"},
+      :email {:value "mauri_saastamoinen@hotmail.com"}},
+     :kytkimet {:suoramarkkinointilupa {:value false}}},
+    :yritys
+    {:companyId {:value nil},
+     :yritysnimi {:value ""},
+     :liikeJaYhteisoTunnus {:value ""},
+     :osoite
+     {:katu {:value ""},
+      :postinumero {:value ""},
+      :postitoimipaikannimi {:value ""},
+      :maa {:value "FIN"}},
+     :yhteyshenkilo
+     {:henkilotiedot
+      {:etunimi {:value ""},
+       :sukunimi {:value ""},
+       :turvakieltoKytkin {:value false}},
+      :yhteystiedot {:puhelin {:value ""}, :email {:value ""}},
+      :kytkimet {:suoramarkkinointilupa {:value false}}},
+     :verkkolaskutustieto
+     {:verkkolaskuTunnus {:value ""},
+      :ovtTunnus {:value ""},
+      :valittajaTunnus {:value nil}}},
+    :laskuviite {:value ""}}}
+  {:id "5bfe94f454426599e2d495ee",
+   :schema-info {:name "kaupunkikuvatoimenpide", :version 1},
+   :created 1543410932024,
+   :data
+   {:tunnus {:value "003", :modified 1543410932024},
+    :kokonaisala {:value "", :modified 1543410932024},
+    :kayttotarkoitus {:value nil, :modified 1543410932024},
+    :kuvaus {:value "Rakennelma", :modified 1543410932024},
+    :valtakunnallinenNumero {:value "", :modified 1543410932024}}}),
+ :warrantyStart nil,
+ :propertyIdSource nil,
+ :agreementSigned nil,
+ :_comments-seen-by {},
+ :closedBy {},
+ :acknowledged nil,
+ :location-wgs84 (24.9025 60.28259),
+ :id "LP-092-2013-90125",
+ :foremanRole "",
+ :applicant "",
+ :transfers [],
+ :_verdicts-seen-by {},
+ :options {},
+ :neighbors [],
+ :appealVerdicts [],
+ :tosFunction nil,
+ :processMetadata {},
+ :propertyId "09204000460009",
+ :reservations [],
+ :location [384018.699 6684726.83],
+ :inspection-summaries [],
+ :drawings [],
+ :metadata {},
+ :_statements-seen-by {},
+ :appeals [],
+ :convertedToApplication nil,
+ :statements
+ ({:given 1543410932029,
+   :person
+   {:userId "0",
+    :text "Viranomainen",
+    :email "eratuonti@lupapiste.fi",
+    :name "Vantaan Energia"},
+   :state :given,
+   :modified 1543410932029,
+   :in-attachment false,
+   :editor-id "5bfe94f454426599e2d495f1",
+   :modify-id "5bfe94f454426599e2d495f2",
+   :status "puollettu",
+   :id "5bfe94f454426599e2d495ef",
+   :dueDate 1543410932028,
+   :saateText "Rakennus on liitettävissä sähköverkkoon.",
+   :requested 1543410932028,
+   :metadata {:puoltotieto "puollettu"},
+   :text "Rakennus on liitettävissä sähköverkkoon."})}

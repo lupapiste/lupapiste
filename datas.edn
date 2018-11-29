@@ -1,0 +1,136 @@
+{:uusiRakennus
+ ([["poikkeamat"]
+   "Vantaan kaupungin poikkeamispäätös 40-90-12-POP.\r\n\r\nAsuinrakennus sijaitsee alle 4 metrin etäisyydellä naapuritontin(40-9903-5) rajasta . Asemakaavan mukaan tontti on VP-aluetta. Rakennukseen ei ole vaadittu palo-osastointia. Poikkeamista voidaan pitää vähäisenä.\r\n\r\nKerrosalaa ylitetään 14 kem2. Poikkeamista voidaan pitää vähäisenä."]
+  [["kuvaus"] "Omakotitalo, autokatos  ja maalämpöporakaivo."]
+  [["tunnus"] "002"]
+  [[:valtakunnallinenNumero] "1022939926"]
+  [[:luokitus :paloluokka] "P3"]
+  [[:luokitus :energiatehokkuusluvunYksikko] "kWh/brm2/vuosi"]
+  [[:luokitus :energiatehokkuusluku] "131"]
+  [[:luokitus :energialuokka] "C"]
+  [[:mitat :kellarinpinta-ala] ""]
+  [[:mitat :kerrosluku] "2"]
+  [[:mitat :kokonaisala] "140"]
+  [[:mitat :rakennusoikeudellinenKerrosala] "140"]
+  [[:mitat :kerrosala] "140"]
+  [[:mitat :tilavuus] "518"]
+  [[:rakenne :muuMateriaali] ""]
+  [[:rakenne :julkisivu] "puu"]
+  [[:rakenne :muuRakennusaine] ""]
+  [[:rakenne :kantavaRakennusaine] "puu"]
+  [[:rakenne :rakentamistapa] "paikalla"]
+  [[:lammitys :muu-lammonlahde] ""]
+  [[:lammitys :lammonlahde] "maalämpö"]
+  [[:lammitys :lammitystapa] "vesikeskus"]
+  [[:huoneistot :0 :parvekeTaiTerassiKytkin] true]
+  [[:huoneistot :0 :lamminvesiKytkin] true]
+  [[:huoneistot :0 :muutostapa] "lisäys"]
+  [[:huoneistot :0 :porras] "A"]
+  [[:huoneistot :0 :huoneistonumero] "000"]
+  [[:huoneistot :0 :saunaKytkin] true]
+  [[:huoneistot :0 :ammeTaiSuihkuKytkin] true]
+  [[:huoneistot :0 :jakokirjain] ""]
+  [[:huoneistot :0 :huoneluku] "4"]
+  [[:huoneistot :0 :huoneistoala] "121"]
+  [[:huoneistot :0 :keittionTyyppi] "keittio"]
+  [[:huoneistot :0 :huoneistoTyyppi] "asuinhuoneisto"]
+  [[:huoneistot :0 :WCKytkin] true]
+  [[:kaytto :kayttotarkoitus] "011 yhden asunnon talot"]
+  [[:kaytto :rakentajaTyyppi] "muu"]
+  [[:verkostoliittymat :kaapeliKytkin] false]
+  [[:verkostoliittymat :maakaasuKytkin] false]
+  [[:verkostoliittymat :sahkoKytkin] false]
+  [[:verkostoliittymat :vesijohtoKytkin] false]
+  [[:verkostoliittymat :viemariKytkin] false]
+  [[:varusteet :lamminvesiKytkin] false]
+  [[:varusteet :sahkoKytkin] false]
+  [[:varusteet :koneellinenilmastointiKytkin] false]
+  [[:varusteet :liitettyJatevesijarjestelmaanKytkin] false]
+  [[:varusteet :aurinkopaneeliKytkin] false]
+  [[:varusteet :kaasuKytkin] false]
+  [[:varusteet :vaestonsuoja] ""]
+  [[:varusteet :hissiKytkin] false]
+  [[:varusteet :vesijohtoKytkin] false]
+  [[:varusteet :saunoja] ""]
+  [[:varusteet :viemariKytkin] false]
+  [[:rakennuksenOmistajat :1 :omistajalaji]
+   "muu yksityinen henkilö tai perikunta"]
+  [[:rakennuksenOmistajat :1 :henkilo :osoite :postitoimipaikannimi]
+   "VANTAA"]
+  [[:rakennuksenOmistajat :1 :henkilo :osoite :postinumero] "01690"]
+  [[:rakennuksenOmistajat :1 :henkilo :osoite :katu] "Hakapolku 6"]
+  [[:rakennuksenOmistajat :1 :henkilo :henkilotiedot :hetu]
+   "071076-130C"]
+  [[:rakennuksenOmistajat :1 :henkilo :henkilotiedot :sukunimi]
+   "Eklund"]
+  [[:rakennuksenOmistajat :1 :henkilo :henkilotiedot :etunimi]
+   "Mira Johanna"]
+  [[:rakennuksenOmistajat :1 :_selected] "henkilo"]
+  [[:rakennuksenOmistajat :0 :muu-omistajalaji] ""]
+  [[:rakennuksenOmistajat :0 :omistajalaji]
+   "muu yksityinen henkilö tai perikunta"]
+  [[:rakennuksenOmistajat
+    :0
+    :yritys
+    :yhteyshenkilo
+    :yhteystiedot
+    :email]
+   ""]
+  [[:rakennuksenOmistajat
+    :0
+    :yritys
+    :yhteyshenkilo
+    :yhteystiedot
+    :puhelin]
+   ""]
+  [[:rakennuksenOmistajat
+    :0
+    :yritys
+    :yhteyshenkilo
+    :henkilotiedot
+    :turvakieltoKytkin]
+   false]
+  [[:rakennuksenOmistajat
+    :0
+    :yritys
+    :yhteyshenkilo
+    :henkilotiedot
+    :sukunimi]
+   ""]
+  [[:rakennuksenOmistajat
+    :0
+    :yritys
+    :yhteyshenkilo
+    :henkilotiedot
+    :etunimi]
+   ""]
+  [[:rakennuksenOmistajat :0 :yritys :osoite :maa] "FIN"]
+  [[:rakennuksenOmistajat :0 :yritys :osoite :postitoimipaikannimi] ""]
+  [[:rakennuksenOmistajat :0 :yritys :osoite :postinumero] ""]
+  [[:rakennuksenOmistajat :0 :yritys :osoite :katu] ""]
+  [[:rakennuksenOmistajat :0 :yritys :liikeJaYhteisoTunnus] ""]
+  [[:rakennuksenOmistajat :0 :yritys :yritysnimi] ""]
+  [[:rakennuksenOmistajat :0 :yritys :companyId] nil]
+  [[:rakennuksenOmistajat :0 :henkilo :kytkimet :suoramarkkinointilupa]
+   false]
+  [[:rakennuksenOmistajat :0 :henkilo :yhteystiedot :email] ""]
+  [[:rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin] ""]
+  [[:rakennuksenOmistajat :0 :henkilo :osoite :maa] "FIN"]
+  [[:rakennuksenOmistajat :0 :henkilo :osoite :postitoimipaikannimi]
+   "VANTAA"]
+  [[:rakennuksenOmistajat :0 :henkilo :osoite :postinumero] "01690"]
+  [[:rakennuksenOmistajat :0 :henkilo :osoite :katu] "Hakapolku 6"]
+  [[:rakennuksenOmistajat
+    :0
+    :henkilo
+    :henkilotiedot
+    :turvakieltoKytkin]
+   false]
+  [[:rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu]
+   "220572-035X"]
+  [[:rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi]
+   "Saastamoinen"]
+  [[:rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi]
+   "Mauri Tapani"]
+  [[:rakennuksenOmistajat :0 :henkilo :userId] nil]
+  [[:rakennuksenOmistajat :0 :_selected] "henkilo"])}

@@ -46,11 +46,11 @@
       (usr/create-new-user {:role "admin"} user-data))))
 
 (defn log-user-in!
-  "Logs the user in and redirects him/her to the main authority page."
+  "Logs the user in and redirects him/her to the main page."
   [req user]
   (ssess/merge-to-session
     req
-    (resp/redirect (format "%s/app/fi/authority" (env/value :host)))
+    (resp/redirect (str (env/value :host) (env/value :frontpage :fi)))
     {:user (usr/session-summary user)}))
 
 (defpage [:get "/api/saml/metadata/:domain"] {domain :domain}
