@@ -53,8 +53,7 @@
                       file-upload/file-size-legal]
    :states           {:applicant    states/pre-verdict-states
                       :authority    states/pre-verdict-states
-                      :oirAuthority states/pre-verdict-states}
-   :feature          :premises-upload}
+                      :oirAuthority states/pre-verdict-states}}
   [command]
   (premises/upload-premises-data command files doc))
 
@@ -67,8 +66,7 @@
    :parameters       [application-id document-id lang]
    :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :pre-checks       []
-   :input-validators [(partial action/non-blank-parameters [:application-id :document-id])]
-   :feature          :premises-upload}
+   :input-validators [(partial action/non-blank-parameters [:application-id :document-id])]}
   [{{:keys [application-id document-id lang]} :data user :user}]
   (let [filename (str (i18n/localize lang "huoneistot.excel-file-name")
                       "-"
