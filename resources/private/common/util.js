@@ -338,7 +338,7 @@ var util = (function($) {
         }
       });
     }
-  };
+  }
 
   function showSavedIndicator(response) {
     hub.send("indicator", {style: response.ok ? "positive" : "negative", message: response.text});
