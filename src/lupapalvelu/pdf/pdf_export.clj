@@ -43,25 +43,27 @@
 
 (defmethod pseudo-field-pdf :allu-drawings
   [{:keys [drawings]} _ _]
-  (letfn [(site-data [allu-id?]
+  (letfn [(table-fn [allu-id?]
             (when-let [draws (seq ((if allu-id? filter remove)
                                    :allu-id
                                    drawings))]
-              {:title (loc (if allu-id? :allu.locations :allu.user-locations))
-               :sites (map (fn [{:keys [name desc]}]
-                             (cond-> name
-                               (ss/not-blank? desc) (str ": " desc)))
-                           draws)}))]
+              (let [title (loc (if allu-id? :allu.locations :allu.user-locations))
+                    sites (map (fn [{:keys [name desc]}]
+                                 (cond-> name
+                                   (ss/not-blank? desc) (str ": " desc)))
+                               draws)]
+                [:pdf-table {:border false} [1]
+                 [[:pdf-cell {:border false} [:paragraph {:style :bold :size 9} title]]]
+                 [[:pdf-cell {:border false} (vec (cons :list sites))]]])))]
     {:columns 1
-     :content (some->> [(site-data true) (site-data false)]
-                       (remove nil?)
-                       seq
-                       (mapcat (fn [{:keys [title sites]}]
-                                 [[[:pdf-cell {:border false} [:paragraph {:style :bold :size 9} title]]]
-                                  [[:pdf-cell {:border false} (vec (cons :list sites))]]]))
-                       vec
-                       (concat [:pdf-table {:border false} [1]])
-                       vec)}))
+     :content (let [tables (remove nil? [(table-fn true) (table-fn false)])]
+                (case (count tables)
+                  0 nil
+                  1 (first tables)
+                  2 [:pdf-table {:border           true
+                                 :background-color [100 0 0] } [0.5 0.5]
+                     (mapv #(vector :pdf-cell {:border false} %)
+                           tables)]))}))
 
 
 (defn- combine-schema-field-and-value
