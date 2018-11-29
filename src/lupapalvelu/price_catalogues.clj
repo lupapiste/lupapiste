@@ -1,12 +1,16 @@
 (ns lupapalvelu.price-catalogues
   "A common interface for accessing price catalogues and related data"
-  (:require [lupapalvelu.invoices :as invoices]
+  (:require [clj-time.coerce :as tc]
+            [clj-time.core :as t]
+            [clj-time.format :as tf]
+            [lupapalvelu.invoices :as invoices]
             [lupapalvelu.invoices.schemas :as invoice-schemas]
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer [$in]]
             [schema.core :as sc]
             [sade.core :refer [ok fail] :as sade]
             [sade.schemas :as ssc]
+            [sade.util :refer [to-millis-from-local-date-string]]
             [taoensso.timbre :refer [trace tracef debug debugf info infof
                                      warn warnf error errorf fatal fatalf]]))
 
@@ -34,7 +38,7 @@
           :created-by invoice-schemas/User}})
 
 (sc/defschema PriceCatalogueInsertRequest
-  {:valid-from ssc/Timestamp
+  {:valid-from-str sc/Str ;;TODO dd.mm.yyyy checker here
    :rows [CatalogueRow]})
 
 (defn fetch-price-catalogues [organization-id]
@@ -45,21 +49,38 @@
   (if-not (empty? price-catalogues)
     (sc/validate [PriceCatalogue] price-catalogues)))
 
-(defn validate-insert-price-catalogue-request [{{catalogue-data :price-catalogue} :data :as command}]
+(def time-format (tf/formatter "dd.MM.YYYY"))
+
+(defn ->date [date-str]
+  (tf/parse time-format date-str))
+
+(defn tomorrow []
+  (-> (t/today)
+      (t/plus (t/days 1))
+      (tc/to-date-time)))
+
+(defn tomorrow-or-later? [date-str]
+  (if date-str
+    (not (t/before? (->date date-str) (tomorrow)))))
+
+(defn validate-insert-price-catalogue-request [{{catalogue-request :price-catalogue} :data :as command}]
   (try
-    (sc/validate PriceCatalogueInsertRequest catalogue-data)
-    nil
+    (sc/validate PriceCatalogueInsertRequest catalogue-request)
+    (if (not (tomorrow-or-later? (:valid-from-str catalogue-request)))
+      (fail :error.price-catalogue.incorrect-date))
+
     (catch Exception e
       (warn "Invalid price catalogue request " (.getMessage e))
       (fail :error.invalid-price-catalogue))))
 
 (defn ->price-catalogue-db
-  [price-catalogue user organization-id]
-  (debug "->price-catalogue-db price-catalogue-request: " price-catalogue " organization-id: " organization-id " user: " user)
-  (merge price-catalogue
-         {:meta {:created (sade/now)
-                 :created-by (invoice-schemas/->invoice-user user)}
-          :organization-id organization-id}))
+  [price-catalogue-req user organization-id]
+  (debug "->price-catalogue-db price-catalogue-request: " price-catalogue-req " organization-id: " organization-id " user: " user)
+  {:rows (:rows price-catalogue-req)
+   :valid-from (to-millis-from-local-date-string (:valid-from-str price-catalogue-req))
+   :meta {:created (sade/now)
+          :created-by (invoice-schemas/->invoice-user user)}
+   :organization-id organization-id})
 
 (defn with-id [price-catalogue]
   (assoc price-catalogue :id (mongo/create-id)))

@@ -16,28 +16,41 @@
 (defn loc-operation [operation]
   (loc (str "operations." operation)))
 
-(defn ->date-str [timestamp]
-  (when timestamp
-    (->> timestamp
-         tcoerce/from-long
-         (tformat/unparse invoice-date-formatter))))
+(defn ->date [timestamp]
+  (tcoerce/from-long timestamp))
+
+(defmulti ->date-str (fn [x] (cond
+                               (nil? x)       :default
+                               (number? x)    :timestamp
+                               (time/date? x) :date)))
+
+(defmethod ->date-str :timestamp [timestamp]
+  (tformat/unparse invoice-date-formatter (->date timestamp)))
+
+(defmethod ->date-str :date [date]
+  (tformat/unparse invoice-date-formatter date))
+
+(defmethod ->date-str :default [_]
+  nil)
 
 (defn format-catalogue-name-in-select [catalogue]
   (str
    (->date-str (:valid-from catalogue))
    " - "
    (->date-str (:valid-until catalogue))
-   (if (= "draft" (:state catalogue)) (loc "price-catalogue.draft"))))
+   (if (= "draft" (:state catalogue)) (str " [" (loc "price-catalogue.draft") "]"))))
 
 (rum/defc catalogue-select < rum/reactive
   [catalogues selected-catalogue-id]
-  (uc/select state/set-selected-catalogue-id
-             "catalogue-select"
-             (rum/react selected-catalogue-id)
-             (cons ["" (loc "choose")]
-                   (map (juxt :id format-catalogue-name-in-select)
-                        (rum/react catalogues)))
-             "dropdown"))
+  (let [options (cons ["" (loc "choose")]
+                      (map (juxt :id format-catalogue-name-in-select)
+                           (rum/react catalogues)))
+        value (rum/react selected-catalogue-id)]
+    (uc/select state/set-selected-catalogue-id
+               "catalogue-select"
+               value
+               options
+               "dropdown catalogue-select")))
 
 (rum/defc operation-catalogue-row
   < {:key-fn (fn [operation row] (str operation "-" (:index row)))}
@@ -294,9 +307,7 @@
         now-in-millis (tcoerce/to-long (time/now))]
     [:div.right-button.catalogue-button
      [:button  {:className "positive"
-                :on-click (fn []
-                            (service/publish-catalogue
-                             (assoc catalogue-in-edit :valid-from now-in-millis)))}
+                :on-click (fn [] (service/publish-catalogue catalogue-in-edit))}
       [:i.lupicon-check]
       [:span (str "Julkaise")] ;;TODO localize
       ]]))
@@ -315,6 +326,25 @@
     [:i.lupicon-circle-plus]
     [:span (str "Lisää tuoterivi")] ;;TODO localize
     ]])
+
+(defn tomorrow []
+  (time/plus (time/today-at-midnight) (time/days 1)))
+
+(defn tomorrow-or-later? [timestamp]
+  (if timestamp
+    (not (time/before? (->date timestamp) (tomorrow)))))
+
+(rum/defc catalogue-date-picker [{state :state
+                                  catalogue-timestamp :valid-from
+                                  date-chosen-on-ui :valid-from-str}]
+  [:div.date-picker
+   (let [draft-catalogue-date (if (and catalogue-timestamp (= state "draft"))
+                                    (if (tomorrow-or-later? catalogue-timestamp)
+                                      (->date-str catalogue-timestamp)
+                                      (->date-str (tomorrow))))
+         value (or date-chosen-on-ui draft-catalogue-date)]
+     (println "catalogue-date-picker timestamp: " catalogue-timestamp)
+     (uc/date-edit value {:callback state/set-valid-from-date-str}))])
 
 (defn get-render-component [mode view]
   (let [components {:show {:by-rows catalogue-by-rows
@@ -344,7 +374,11 @@
         :show [:div
                (catalogue-select state/catalogues state/selected-catalogue-id)
                (new-catalogue-button)]
-        :edit (edit-buttons))]
+        :edit [:div
+               [:h3.draft-title "Taksaluonnos"] ;; TODO localize
+               (catalogue-date-picker catalogue-in-edit)
+
+               (edit-buttons)])]
 
      (when active-catalogue
        [:div.switch-and-catalogue

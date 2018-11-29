@@ -39746,6 +39746,24 @@ button.invoice-change-state-button {
   width: 5%;
 }
 
+.price-catalogue .operation-header-remove {
+  width: 5%;
+}
+
+.price-catalogue .draft-title {
+  float: left;
+  font-size: x-large;
+}
+
+.price-catalogue .date-picker {
+  float: left;
+  margin-left: 2em;
+}
+
+.price-catalogue .catalogue-select {
+  width: 20em;
+}
+
 #bulletins, #local-bulletins {
   font-family: "Source Sans Pro", sans-serif;
   font-weight: 400;

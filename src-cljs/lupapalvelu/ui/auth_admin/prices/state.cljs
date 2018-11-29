@@ -67,3 +67,6 @@
 
 (defn remove-operation-from-row! [operation row-index]
   (swap! catalogue-in-edit update-in [:rows row-index :operations] remove-operation operation))
+
+(defn set-valid-from-date-str [date-str]
+  (swap! catalogue-in-edit assoc :valid-from-str date-str))

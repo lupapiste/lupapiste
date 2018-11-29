@@ -537,6 +537,7 @@
 "error.duplicate-handler-role" "fi" "Käsittelijärooli on jo käytössä"
 "error.duplicate-handler-role" "sv" "Handläggarrollen används redan"
 "error.invalid-price-catalogue" "fi" "Taksaa ei voitu tallentaa, koska se sisältää virheellisiä tai puutteellisia tietoja. Tarkasta, että kaikki vaaditut kentät on täytetty oikein."
+"error.price-catalogue.incorrect-date" "fi" "Päivämäärä puuttuu tai on liian aikainen. Taksan voi asettaa voimaan aikaisintaan seuraavana päivänä"
 "handler-roles.add" "en" "Add a new assignee"
 "handler-roles.add" "fi" "Lisää uusi käsittelijä"
 "handler-roles.add" "sv" "Lägg till ny handläggare"

@@ -14,9 +14,9 @@
                 :organization-id @state/org-id))
 
 (defn publish-catalogue [catalogue]
-  (println ">> publish-catalogue: " catalogue)
-  (let [new-catalogue (select-keys catalogue [:valid-from :rows])]
-    (common/command :insert-price-catalogue
+  (let [new-catalogue (select-keys catalogue [:valid-from-str :rows])]
+    (println ">> publish-catalogue: " new-catalogue)
+    (common/command :publish-price-catalogue
                     (fn [data]
                       (let [id (:price-catalogue-id data)]
                         (fetch-price-catalogues

@@ -1,7 +1,9 @@
 (ns lupapalvelu.price-catalogues-itest
-  (:require [lupapalvelu.fixture.core :as fixture]
+  (:require [clj-time.coerce :as tc]
+            [clj-time.core :as t]
+            [clj-time.format :as timeformat]
+            [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.fixture.minimal :as minimal]
-
             [lupapalvelu.integrations-api]
             [lupapalvelu.invoice-api]
             [lupapalvelu.itest-util :refer [local-command local-query
@@ -14,9 +16,17 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.env :as env]
-            [sade.util :refer [to-millis-from-local-date-string]]
+            [sade.util :refer [to-millis-from-local-date-string to-finnish-date]]
             [schema.core :as sc]
             [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]))
+
+(def time-format (timeformat/formatter "dd.MM.YYYY"))
+
+(defn today []
+  (timeformat/unparse-local-date time-format (t/today)))
+
+(defn yesterday []
+  (timeformat/unparse-local-date time-format (t/plus (t/today) (t/days -1))))
 
 (defn catalogues-belong-to-org?
   [org-id catalogues]
@@ -104,9 +114,9 @@
                 response => ok?
                 (:price-catalogues response) => (belong-to-org? "753-R")))))
 
-    (fact "insert-price-catalogue command"
+    (fact "publish-price-catalogue command"
 
-          (let [catalogue-request {:valid-from (to-millis-from-local-date-string "01.01.2019")
+          (let [catalogue-request {:valid-from-str "1.1.2019"
                                    :rows [{:code "12345"
                                            :text "Taksarivi 1"
                                            :unit "kpl"
@@ -116,43 +126,57 @@
                                            :discount-percent 50
                                            :operations ["toimenpide1" "toimenpide2"]}]}]
 
-
             (fact "should return unauthorized response when user is not an organization admin"
-                  (let [response (-> (local-command sonja :insert-price-catalogue
+                  (let [response (-> (local-command sonja :publish-price-catalogue
                                                     :organization-id "753-R"
                                                     :price-catalogue catalogue-request))]
                     response => fail?
                     (:text response) => "error.unauthorized"))
 
             (fact "should return unauthorized response when user is an or organization admin or another org"
-                  (let [response (-> (local-command sipoo-ya :insert-price-catalogue
+                  (let [response (-> (local-command sipoo-ya :publish-price-catalogue
                                                     :organization-id "753-R"
                                                     :price-catalogue catalogue-request))]
                     response => fail?
                     (:text response) => "error.unauthorized"))
 
             (fact "should return invalid-price-catalogue response when request data in not valid"
-                  (let [response (-> (local-command sipoo :insert-price-catalogue
+                  (let [response (-> (local-command sipoo :publish-price-catalogue
                                                     :organization-id "753-R"
                                                     :price-catalogue {:announcement "I'm not valid price catalogue request data" }))]
                     response => fail?
                     (:text response) => "error.invalid-price-catalogue"))
 
+            (fact "should return invalide response when valid-from-str is today"
+                  (let [response (-> (local-command sipoo :publish-price-catalogue
+                                                    :organization-id "753-R"
+                                                    :price-catalogue (assoc catalogue-request :valid-from-str (today))))]
+                    response => fail?
+                    (:text response) => "error.price-catalogue.incorrect-date"))
+
+            (fact "should return invalide response when valid-from-str is yesterday"
+                  (let [response (-> (local-command sipoo :publish-price-catalogue
+                                                    :organization-id "753-R"
+                                                    :price-catalogue (assoc catalogue-request :valid-from-str (yesterday))))]
+                    response => fail?
+                    (:text response) => "error.price-catalogue.incorrect-date"))
+
 
             (fact "should save the price catalogue to db and return an ok response when"
 
-                  (fact "All fields ahve "
-                        (let [response (local-command sipoo :insert-price-catalogue
+                  (future "all fields have values"
+                        (let [response (local-command sipoo :publish-price-catalogue
                                                       :organization-id "753-R"
                                                       :price-catalogue catalogue-request)]
                           response => ok?
 
-                          (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
+                          (let [{:keys [valid-from rows] :as new-catalogue} (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
                             (sc/validate catalogues/PriceCatalogue new-catalogue)
-                            (select-keys new-catalogue [:valid-from :rows]) => catalogue-request)))
+                            (to-finnish-date valid-from) => (:valid-from-str catalogue-request)
+                            rows => (:rows catalogue-request))))
 
                   (fact "optional fields have nil value"
-                        (let [catalogue-request {:valid-from (to-millis-from-local-date-string "01.01.2019")
+                        (let [catalogue-request {:valid-from-str "1.1.2019"
                                                  :rows [{:code "12345"
                                                          :text "Taksarivi 1"
                                                          :unit "kpl"
@@ -161,16 +185,18 @@
                                                          :min-total-price nil
                                                          :max-total-price nil
                                                          :operations ["toimenpide1" "toimenpide2"]}]}
-                              response (local-command sipoo :insert-price-catalogue
+                              response (local-command sipoo :publish-price-catalogue
                                                       :organization-id "753-R"
                                                       :price-catalogue catalogue-request)]
                           response => ok?
                           (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
                             (sc/validate catalogues/PriceCatalogue new-catalogue)
-                            (select-keys new-catalogue [:valid-from :rows]) => catalogue-request)))
+
+                            (to-finnish-date (:valid-from new-catalogue)) => (:valid-from-str catalogue-request)
+                            (:rows new-catalogue) => (:rows catalogue-request))))
 
                   (fact "operations is empty"
-                        (let [catalogue-request {:valid-from (to-millis-from-local-date-string "01.01.2019")
+                        (let [catalogue-request {:valid-from-str "1.1.2019"
                                                  :rows [{:code "12345"
                                                          :text "Taksarivi 1"
                                                          :unit "kpl"
@@ -179,11 +205,12 @@
                                                          :min-total-price 10
                                                          :max-total-price 100
                                                          :operations []}]}
-                              response (local-command sipoo :insert-price-catalogue
+                              response (local-command sipoo :publish-price-catalogue
                                                       :organization-id "753-R"
                                                       :price-catalogue catalogue-request)]
                           response => ok?
 
                           (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
                             (sc/validate catalogues/PriceCatalogue new-catalogue)
-                            (select-keys new-catalogue [:valid-from :rows]) => catalogue-request))))))))
+                            (to-finnish-date (:valid-from new-catalogue)) => (:valid-from-str catalogue-request)
+                            (:rows new-catalogue) => (:rows catalogue-request)))))))))
