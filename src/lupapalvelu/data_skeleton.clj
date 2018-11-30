@@ -81,3 +81,13 @@
   (prewalk (fetch-with-accessor initial-context
                                 accessor-functions)
            data-skeleton))
+
+;;
+;; Accessor building functions
+;;
+
+(defn get-path [path & [default]]
+  (fn [context]
+    (if-let [result (get-in context path)]
+      result
+      default)))

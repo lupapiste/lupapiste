@@ -1,17 +1,17 @@
 (ns lupapalvelu.exports.reporting-db
   (:require [lupapalvelu.data-skeleton :as ds]
-            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]))
+            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical]]))
 
-(defn reporting-app-skeleton
+(def reporting-app-skeleton
   {;; Hakemus
-   :lupanumero (ds/access :test) ;; Kuntalupatunnus? Selite: Löytyy koko numero samasata kentästä: Luvan numero - Luvan vuosi - kaupunginosa - lupatyyppi
-   :luvanNumero (ds/access :test)
-   :luvanVuosi (ds/access :test)
-   :aravalaina (ds/access :test)
-   :eiJulkistaLainaa (ds/access :test) ;; Selite: Hankkeeseen liittyvä
-   :kaupunginosa (ds/access :test)
-   :orkotukivuokra-asunnotPitkaaik (ds/access :test) ;; Selite: Johdettuna, ei tarpeellista jatkossa
-   :luvanTilanne (ds/access :test) ;; Selite: Tilakone. Vierillä, käyttöönotettu...
+   :lupanumero (ds/access :test) ;; TODO: Mistä? Kuntalupatunnus? Selite: Löytyy koko numero samasata kentästä: Luvan numero - Luvan vuosi - kaupunginosa - lupatyyppi
+   :luvanNumero (ds/access :test) ;; Oletus: lupanumerosta
+   :luvanVuosi (ds/access :test) ;; Oletus: lupanumerosta
+   :aravalaina (ds/access :test) ;; TODO: Mistä?
+   :eiJulkistaLainaa (ds/access :test) ;; TODO: Mistä? Selite: Hankkeeseen liittyvä
+   :kaupunginosa (ds/access :test) ;; TODO: Mistä?
+   :korkotukivuokra-asunnotPitkaaik (ds/access :test) ;; TODO: Mistä? Selite: Johdettuna, ei tarpeellista jatkossa
+   :luvanTilanne (ds/access :luvanTilanne) ;; Selite: Tilakone. Vierillä, käyttöönotettu...
    :luvanTyyppi (ds/access :test) ;; Selite: Voidaan päätellä toimenpidetiedosta
    :rakennuspaikanKoordinaatit (ds/access :test) ;; Selite: Luvan koordinaatti
    :rakennuspaikanLahiosoite (ds/access :test)
@@ -138,11 +138,12 @@
    })
 
 (def reporting-app-accessors
-  {:test (constantly "foo")})
+  {:test (constantly "foo")
+   :luvanTilanne (ds/get-path [:application :state])})
 
-(defn ->reporting-result [application]
+(defn ->reporting-result [application lang]
   ;; TODO check permit type
-  (let [application-canonical (application-to-canonical application)]
+  (let [application-canonical (application-to-canonical application lang)]
     (ds/build-with-skeleton reporting-app-skeleton
                             {:application application
                              :canonical application-canonical}
