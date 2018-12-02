@@ -86,8 +86,21 @@
 ;; Accessor building functions
 ;;
 
-(defn get-path [path & [default]]
-  (fn [context]
-    (if-let [result (get-in context path)]
-      result
-      default)))
+(defn from-context
+  "Produces a result from context by accessing values from given
+  `path` in order. `path` can contain functions, keywords,
+  sets (applied as functions), non-negative integers (used with `nth`).
+  A default value can be provided as an optional argument"
+  [path & [default]]
+  (fn from-context-fn [context]
+    (loop [[f & rest] path
+           result     context]
+      (cond (nil? f)                           result
+            (nil? result)                      default
+            (or (fn? f) (keyword? f) (set? f)) (recur rest (f result))
+            (and (integer? f) (not (neg? f)))  (recur rest (nth result f))
+            :else (throw (ex-info "Illegal value in path"
+                                  {:path path
+                                   :value f
+                                   :contex context
+                                   :result result}))))))

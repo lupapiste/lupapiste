@@ -12,7 +12,7 @@
    :kaupunginosa (ds/access :test) ;; TODO: Mistä?
    :korkotukivuokra-asunnotPitkaaik (ds/access :test) ;; TODO: Mistä? Selite: Johdettuna, ei tarpeellista jatkossa
    :luvanTilanne (ds/access :luvanTilanne) ;; Selite: Tilakone. Vierillä, käyttöönotettu...
-   :luvanTyyppi (ds/access :test) ;; Selite: Voidaan päätellä toimenpidetiedosta
+   :luvanTyyppi (ds/access :luvanTyyppi) ;; Selite: Voidaan päätellä toimenpidetiedosta
    :rakennuspaikanKoordinaatit (ds/access :test) ;; Selite: Luvan koordinaatti
    :rakennuspaikanLahiosoite (ds/access :test)
    :tilanteenPvm (ds/access :test) ;; Selite: Koska hakemuksen viimeisin tila on tullut voimaan
@@ -139,10 +139,11 @@
 
 (def reporting-app-accessors
   {:test (constantly "foo")
-   :luvanTilanne (ds/get-path [:application :state])})
+   :luvanTilanne (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kasittelynTilatieto last :Tilamuutos :tila])
+   :luvanTyyppi (constantly "foo")})
 
 (defn ->reporting-result [application lang]
-  ;; TODO check permit type
+  ;; TODO check permit type, R or P (or others as well?)
   (let [application-canonical (application-to-canonical application lang)]
     (ds/build-with-skeleton reporting-app-skeleton
                             {:application application

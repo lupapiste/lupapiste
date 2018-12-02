@@ -7,7 +7,7 @@
             [lupapalvelu.document.asianhallinta-canonical :as ah]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
-            [lupapalvelu.document.rakennuslupa-canonical-test :as rakennus-test]
+            [lupapalvelu.rakennuslupa-canonical-util :as rc-util]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.backing-system.asianhallinta.core]
@@ -59,7 +59,7 @@
 
 (fl/facts*
   "UusiAsia xml from suunnittelija application"
-  (let [application    (-> rakennus-test/application-suunnittelijan-nimeaminen
+  (let [application    (-> rc-util/application-suunnittelijan-nimeaminen
                          (assoc-in [:primaryOperation :name] "poikkeamis")
                          (assoc :permitType "P")
                          ua-mapping/enrich-application)
@@ -85,7 +85,7 @@
 
 (fl/facts*
   "UusiAsia xml from application with two link permits"
-  (let [application    (-> rakennus-test/application-suunnittelijan-nimeaminen
+  (let [application    (-> rc-util/application-suunnittelijan-nimeaminen
                          (assoc-in [:primaryOperation :name] "poikkeamis")
                          (assoc :permitType "P")
                          (update-in [:linkPermitData] conj link-permit-data-kuntalupatunnus)

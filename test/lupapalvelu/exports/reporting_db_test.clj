@@ -5,7 +5,8 @@
             [lupapalvelu.rakennuslupa-canonical-util :refer [application-rakennuslupa]]))
 
 (facts "->reporting-result"
-       (against-background
-         (org/pate-scope? irrelevant) => false)
-      (->reporting-result (assoc application-rakennuslupa :state "closed") "fi")
-      => (contains {:luvanTilanne "closed"}))
+  (against-background
+    (org/pate-scope? irrelevant) => false)
+  (->reporting-result application-rakennuslupa "fi")
+  => (contains {:luvanTilanne "vireillä"
+                }))

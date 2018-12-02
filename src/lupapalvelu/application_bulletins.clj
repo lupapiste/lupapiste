@@ -170,18 +170,18 @@
                                        (vc/verdict-code verdict))))))
 
 (def backing-system-verdict-accessors
-  {:id (ds/get-path [:id])
-   :kuntalupatunnus (ds/get-path [:data :kuntalupatunnus])
-   :draft (complement (ds/get-path [:published :published]))
+  {:id (ds/from-context [:id])
+   :kuntalupatunnus (ds/from-context [:data :kuntalupatunnus])
+   :draft (complement (ds/from-context [:published :published]))
    :timestamp vc/verdict-modified
    :sopimus vc/contract?
-   :anto (ds/get-path [:data :anto])
-   :lainvoimainen (ds/get-path [:data :lainvoimainen])
-   :paatoksentekija (ds/get-path [:data :handler])
+   :anto (ds/from-context [:data :anto])
+   :lainvoimainen (ds/from-context [:data :lainvoimainen])
+   :paatoksentekija (ds/from-context [:data :handler])
    :urlHash nil
    :status backing-system-status
    :paatos vc/verdict-text
-   :paatospvm (ds/get-path [:data :anto])
+   :paatospvm (ds/from-context [:data :anto])
    :pykala vc/verdict-section
    :paatoskoodi backing-system-paatoskoodi})
 

@@ -7,7 +7,6 @@
             [lupapalvelu.document.rakennuslupa-canonical :refer :all]
             [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.operations]
             [lupapalvelu.organization :as org]
@@ -18,7 +17,6 @@
             [midje.util :refer [testable-privates]]
             [sade.core :refer :all]
             [sade.schema-generators :as ssg]
-            [sade.strings :as ss]
             [sade.util :as util]))
 
 (testable-privates lupapalvelu.operations r-operations)
@@ -47,93 +45,6 @@
     (get-rakennustunnus (assoc building-info :buildingId "other") {} document)
     => (contains {:rakennusnro "123"
                   :valtakunnallinenNumero "122334455R"})))
-
-
-
-(ctc/validate-all-documents application-rakennuslupa)
-
-(def application-rakennuslupa-ilman-ilmoitusta (assoc application-rakennuslupa :documents documents-ilman-ilmoitusta))
-
-(ctc/validate-all-documents application-rakennuslupa-ilman-ilmoitusta)
-
-(def application-tyonjohtajan-nimeaminen
-  (merge application-rakennuslupa {:id "LP-753-2013-00002"
-                                   :organization "753-R"
-                                   :state "submitted"
-                                   :submitted 1426247899490
-                                   :primaryOperation {:name "tyonjohtajan-nimeaminen"
-                                                      :id "5272668be8db5aaa01084601"
-                                                      :created 1383229067483}
-                                   :permitSubtype "tyonjohtaja-hakemus"
-                                   :documents [hakija-henkilo
-                                               maksaja-henkilo
-                                               tyonjohtaja
-                                               hankkeen-kuvaus-minimum]
-                                   :linkPermitData [link-permit-data-kuntalupatunnus]
-                                   :appsLinkingToUs [app-linking-to-us]}))
-
-(ctc/validate-all-documents application-tyonjohtajan-nimeaminen)
-
-
-(def application-tyonjohtajan-nimeaminen-v2
-  (merge application-tyonjohtajan-nimeaminen  {:id "LP-753-2013-00003"
-                                               :submitted 1426247899491
-                                               :primaryOperation {:name "tyonjohtajan-nimeaminen-v2"
-                                                                  :id "5272668be8db5aaa01084601"
-                                                                  :created 1383229067483}
-                                               :documents [hakija-tj-henkilo
-                                                           maksaja-henkilo
-                                                           tyonjohtaja-v2
-                                                           hankkeen-kuvaus-minimum]}))
-
-(ctc/validate-all-documents application-tyonjohtajan-nimeaminen-v2)
-
-(def application-suunnittelijan-nimeaminen
-  (merge application-rakennuslupa {:id "LP-753-2013-00003"
-                                   :organization "753-R"
-                                   :state "submitted"
-                                   :submitted 1426247899490
-                                   :propertyId "75341600550007"
-                                   :primaryOperation {:name "suunnittelijan-nimeaminen"
-                                                      :id "527b3392e8dbbb95047a89de"
-                                                      :created 1383805842761}
-                                   :documents [hakija-henkilo
-                                               maksaja-henkilo
-                                               suunnittelija1
-                                               hankkeen-kuvaus-minimum]
-                                   :linkPermitData [link-permit-data-lupapistetunnus]
-                                   :appsLinkingToUs [app-linking-to-us]}))
-
-(def application-suunnittelijan-nimeaminen-muu
-  (merge application-rakennuslupa {:id "LP-753-2013-00003"
-                                   :organization "753-R"
-                                   :state "submitted"
-                                   :submitted 1426247899490
-                                   :propertyId "75341600550007"
-                                   :primaryOperation {:name "suunnittelijan-nimeaminen"
-                                                      :id "527b3392e8dbbb95047a89de"
-                                                      :created 1383805842761}
-                                   :documents [hakija-henkilo
-                                               maksaja-henkilo
-                                               suunnittelija3
-                                               hankkeen-kuvaus-minimum]
-                                   :linkPermitData [link-permit-data-lupapistetunnus]
-                                   :appsLinkingToUs [app-linking-to-us]}))
-
-(ctc/validate-all-documents application-suunnittelijan-nimeaminen)
-
-(def application-aurinkopaneeli
-  (merge application-rakennuslupa {:primaryOperation (op-info aurinkopaneeli)
-                                   :secondaryOperations []
-                                   :documents [hankkeen-kuvaus
-                                               hakija-henkilo
-                                               paasuunnittelija
-                                               suunnittelija1
-                                               maksaja-henkilo
-                                               rakennuspaikka
-                                               aurinkopaneeli]}))
-
-(ctc/validate-all-documents application-aurinkopaneeli)
 
 (defn- validate-minimal-person [person]
   (fact person => (contains {:nimi {:etunimi "Pena" :sukunimi "Penttil\u00e4"}})))
@@ -723,17 +634,6 @@
         (get-in result [:Rakennuspaikka :kaavanaste]) => falsey
         (get-in result [:Rakennuspaikka :kaavatilanne]) => falsey))))
 
-(defn asiakirjat-toimitettu-checker
-  "Checking depends on value of the generator above.
-  Selects newest attachment version (if applicable), and checks if actual matches version's created."
-  [actual]
-  (if-let [version (->> (map :latestVersion (:attachments application-rakennuslupa))
-                        (remove nil?)
-                        (sort-by :created)
-                        last)]
-    (= actual (-> version (:created) (util/to-xml-date)))
-    (ss/blank? actual)))
-
 (facts "Canonical model is correct"
   (against-background
     (org/pate-scope? irrelevant) => false)
@@ -1144,42 +1044,6 @@
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus => "Uuden rakennuksen rakentaminen tontille.")
     (fact "kayttotapaus" kayttotapaus => "Uuden suunnittelijan nime\u00e4minen")))
 
-(def- authority-user-jussi {:id "777777777777777777000017"
-                                     :email "jussi.viranomainen@tampere.fi"
-                                     :enabled true
-                                     :role "authority"
-                                     :username "jussi"
-                                     :organizations ["837-YA"]
-                                     :firstName "Jussi"
-                                     :lastName "Viranomainen"
-                                     :street "Katuosoite 1 a 1"
-                                     :phone "1231234567"
-                                     :zip "33456"
-                                     :city "Tampere"})
-
-(def application-rakennuslupa-verdict-given
-  (assoc application-rakennuslupa
-    :state "verdictGiven"
-    :verdicts [{:timestamp (:modified application-rakennuslupa)
-                :kuntalupatunnus "2013-01"}]
-    :buildings [{:propertyId   "21111111111111"
-                 :nationalId   "098098098"
-                 :localShortId "001"
-                 :description  "Talo"
-                 :operationId  "op1"}
-                {:propertyId   "21111111111111"
-                 :nationalId   "1234567892"
-                 :localShortId "002"
-                 :description  "Eri talo"}
-                {:propertyId   "21111111111111"
-                 :nationalId   "098098098"
-                 :localShortId "003"
-                 :operationId  "op3"}
-                {:propertyId   "21111111111111"
-                 :nationalId   "098098098"
-                 :localShortId "004"
-                 :operationId  "op4"}]))
-
 (testable-privates lupapalvelu.document.rakennuslupa-canonical enrich-review-building get-review-muutunnustieto get-review-rakennustunnus get-review-katselmuksenrakennus get-review-huomautus)
 
 (facts enrich-review-building
@@ -1526,66 +1390,6 @@
     (fact "kayttotapaus" (:kayttotapaus RakennusvalvontaAsia) => "Liitetiedoston lis\u00e4ys")))
 
 
-
-;Jatkolupa
-
-(def jatkolupa-application
-  {:schema-version 1,
-   :auth [{:lastName "Panaani",
-           :firstName "Pena",
-           :username "pena",
-           :role "writer",
-           :id "777777777777777777000020"}],
-   :submitted 1384167310181,
-   :state "submitted",
-   :permitSubtype nil,
-   :location [411063.82824707 6685145.8129883],
-   :attachments [],
-   :organization "753-R",
-   :title "It\u00e4inen Hangelbyntie 163",
-   :primaryOperation {:id "5280b764420622588b2f04fc",
-                      :name "raktyo-aloit-loppuunsaat",
-                      :created 1384167268234}
-   :secondaryOperations [],
-   :infoRequest false,
-   :openInfoRequest false,
-   :opened 1384167310181,
-   :created 1384167268234,
-   :propertyId "75340800010051",
-   :documents [{:created 1384167268234,
-                :data {:kuvaus {:modified 1384167309006,
-                                :value "Pari vuotta jatko-aikaa, ett\u00e4 saadaan rakennettua loppuun."}
-                       :jatkoaika-paattyy {:modified 1384167309006,
-                                           :value "31.12.2018"},
-                       :rakennustyo-aloitettu {:modified 1384167309006,
-                                               :value "7.6.2010"}},
-                :id "5280b764420622588b2f04fd",
-                :schema-info {:order 1,
-                              :version 1,
-                              :name "jatkoaika-hankkeen-kuvaus",
-                              :subtype "hankkeen-kuvaus"
-                              :approvable true,
-                              :op {:id "5280b764420622588b2f04fc",
-                                   :name "raktyo-aloit-loppuunsaat",
-                                   :created 1384167268234}}}
-               hakija-henkilo],
-   :_software_version "1.0.5",
-   :modified 1384167309006,
-   :comments [],
-   :address "It\u00e4inen Hangelbyntie 163",
-   :permitType "R",
-   :id "LP-753-2013-00005",
-   :municipality "753"
-   :authority {:id "777777777777777777000023"
-               :username "sonja"
-               :firstName "Sonja"
-               :lastName "Sibbo"
-               :role "authority"}
-     :linkPermitData [link-permit-data-lupapistetunnus]})
-
-(ctc/validate-all-documents jatkolupa-application)
-
-
 (fl/facts* "Canonical model for katselmus is correct"
            (let [review {:data {:katselmus {:pitoPvm {:value 1354532324658}
                                             :pitaja {:value "Sonja Silja"}
@@ -1723,91 +1527,6 @@
     (:rakennustunnus Katselmus) => nil
     (:katselmuksenRakennustieto Katselmus) => nil))
 
-
-;Aloitusoikeus (Takuu) (tyonaloitus ennen kuin valitusaika loppunut luvan myontamisesta)
-
-(def aloitusoikeus-hakemus
-  (merge
-    domain/application-skeleton
-    {:linkPermitData [link-permit-data-kuntalupatunnus],
-     :schema-version 1,
-     :auth [{:lastName "Panaani",
-             :firstName "Pena",
-             :username "pena",
-             :role "writer",
-             :id "777777777777777777000020"}],
-     :submitted 1388665814105,
-     :state "submitted",
-     :location [406390.19848633 6681812.5],
-     :organization "753-R",
-     :title "Vainuddintie 92",
-     :primaryOperation {:id "52c5461042065cf9f379de8b",
-                        :name "aloitusoikeus",
-                        :created 1388660240013}
-     :secondaryOperations [],
-     :infoRequest false,
-     :openInfoRequest false,
-     :opened 1388665814105,
-     :created 1388660240013,
-     :propertyId "75341900080007",
-     :documents [{:id "537df18fbc454ac7ac9036c7",
-                  :created 1400762767119,
-                  :schema-info {:approvable true,
-                                :subtype "hakija",
-                                :name "hakija-r",
-                                :after-update "applicant-index-update",
-                                :repeating true,
-                                :version 1,
-                                :type "party",
-                                :order 3}
-                  :data {:_selected {:value "henkilo"},
-                         :henkilo {:henkilotiedot {:etunimi {:modified 1400762778665, :value "Pena"},
-                                                   :hetu {:modified 1400762778665, :value "010203-040A"},
-                                                   :sukunimi {:modified 1400762778665, :value "Panaani"}},
-                                   :osoite {:katu {:modified 1400762778665, :value "Paapankuja 12"},
-                                            :postinumero {:modified 1400762778665, :value "10203"},
-                                            :postitoimipaikannimi
-                                            {:modified 1400762778665, :value "Piippola"}},
-                                   :userId {:modified 1400762778787, :value "777777777777777777000020"},
-                                   :yhteystiedot {:email {:modified 1400762778665, :value "pena@example.com"},
-                                                  :puhelin {:modified 1400762778665, :value "0102030405"}}}}}
-                 {:id "537df18fbc454ac7ac9036c6",
-                  :created 1400762767119,
-                  :schema-info {:version 1,
-                                :name "aloitusoikeus",
-                                :approvable true,
-                                :op {:id "537df18fbc454ac7ac9036c5",
-                                     :name "aloitusoikeus",
-                                     :created 1400762767119}}
-                  :data {:kuvaus {:modified 1400762776200, :value "Tarttis aloitta asp rakentaminen."}}}
-                 {:id "537df18fbc454ac7ac9036c8",
-                  :created 1400762767119,
-                  :schema-info {:approvable true,
-                                :name "maksaja",
-                                :repeating true,
-                                :version 1,
-                                :type "party",
-                                :order 6}
-                  :data {:henkilo {:henkilotiedot {:etunimi {:modified 1400762782277, :value "Pena"},
-                                                   :hetu {:modified 1400762782277, :value "010203-040A"},
-                                                   :sukunimi {:modified 1400762782277, :value "Panaani"}},
-                                   :osoite {:katu {:modified 1400762782277, :value "Paapankuja 12"},
-                                            :postinumero {:modified 1400762782277, :value "10203"},
-                                            :postitoimipaikannimi
-                                            {:modified 1400762782277, :value "Piippola"}},
-                                   :userId {:modified 1400762782327, :value "777777777777777777000020"},
-                                   :yhteystiedot {:email {:modified 1400762782277, :value "pena@example.com"},
-                                                  :puhelin {:modified 1400762782277, :value "0102030405"}}},
-                         :laskuviite {:modified 1400762796099, :value "1234567890"}}}]
-     :_statements-seen-by {:777777777777777777000020 1388664440961},
-     :modified 1388667087403,
-     :address "Vainuddintie 92",
-     :permitType "R",
-     :id "LP-753-2014-00001",
-     :municipality "753"}))
-
-(ctc/validate-all-documents aloitusoikeus-hakemus)
-
 (fl/facts* "Canonical model for aloitusoikeus is correct"
   (let [canonical (application-to-canonical aloitusoikeus-hakemus "sv") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
@@ -1865,37 +1584,6 @@
       (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :tunnus :jarjestysnumero)
       => 1)))
 
-(def huoneistot {:0 {:muutostapa "lis\u00e4ys"
-                     :porras "A"
-                     :huoneistonumero "1"
-                     :jakokirjain "a"
-                     :huoneistoTyyppi "asuinhuoneisto"
-                     :huoneistoala "56"
-                     :huoneluku "66"
-                     :keittionTyyppi "keittio"
-                     :parvekeTaiTerassiKytkin true
-                     :WCKytkin true}
-                 :1 {:muutostapa "muutos"
-                     :porras "A"
-                     :huoneistonumero "2"
-                     :jakokirjain "a"
-                     :huoneistoTyyppi "toimitila"
-                     :huoneistoala "03"
-                     :huoneluku "12"
-                     :keittionTyyppi "keittokomero"
-                     :ammeTaiSuihkuKytkin true
-                     :saunaKytkin true
-                     :lamminvesiKytkin true}
-                 :2 {:porras "A"
-                     :huoneistonumero "3"
-                     :jakokirjain "a"
-                     :huoneistoTyyppi "asuinhuoneisto"
-                     :huoneistoala "38.5"
-                     :huoneluku "12"
-                     :keittionTyyppi "keittokomero"
-                     :ammeTaiSuihkuKytkin true
-                     :saunaKytkin true
-                     :lamminvesiKytkin true}})
 
 ; Huoneisto lkm and pintaala in only calculated for huoneistot with muutostapa
 ; lis\u00e4ys (PATE-74). For the new buildings the only allowed muutostapa is
