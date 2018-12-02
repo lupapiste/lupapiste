@@ -140,7 +140,7 @@
 (def reporting-app-accessors
   {:test (constantly "foo")
    :luvanTilanne (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kasittelynTilatieto last :Tilamuutos :tila])
-   :luvanTyyppi (constantly "foo")})
+   :luvanTyyppi (ds/from-context [:application :permitType])})
 
 (defn ->reporting-result [application lang]
   ;; TODO check permit type, R or P (or others as well?)

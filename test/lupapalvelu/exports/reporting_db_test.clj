@@ -9,4 +9,4 @@
     (org/pate-scope? irrelevant) => false)
   (->reporting-result application-rakennuslupa "fi")
   => (contains {:luvanTilanne "vireillä"
-                }))
+                :luvanTyyppi "R"}))
