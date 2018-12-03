@@ -36,6 +36,10 @@
 (defn- add-custom-categories [items]
   (concat items (map (fn [category] {:value (name (key category)) :text (:fi (val category))}) @state/custom-phrase-categories)))
 
+(defn- filled? [value]
+  (and (some? value)
+       (not (s/blank? value))))
+
 (rum/defcs phrase-category-select < rum/reactive
   (components/initial-value-mixin ::selected)
   [{selected* ::selected} _ callback & [{:keys [include-empty? disabled?
@@ -128,6 +132,9 @@
            (components/icon-button {:icon     :lupicon-save
                                     :text-loc :save
                                     :class    :positive
+                                    :enabled? (and (filled? (:fi @new-category*))
+                                                   (filled? (:en @new-category*))
+                                                   (filled? (:sv @new-category*)))
                                     :on-click (fn [_]
                                                 (service/save-phrase-category @new-category*)
                                                 (reset! phrase* nil))

@@ -20,77 +20,87 @@
 (def- response
   (-> "./dev-resources/mock-saml-response.edn" slurp read-string :encrypted-base64))
 
+(def- response-wo-groups
+  (-> "./dev-resources/mock-saml-response_without_groups.edn" slurp read-string :base64-encoded))
+
 (defn- parse-route [domain & [metadata?]]
   (format "%s/api/saml/%s/%s" (server-address)
           (if metadata? "metadata" "ad-login")
           domain))
 
-(when (env/feature? :ad-login)
-  (apply-remote-minimal)
-  (mongo/connect!)
-  (let [pori-route (parse-route "pori.fi")]
+(apply-remote-minimal)
 
-        (fact "update-or-create-user! can create or update users"
-          (let [user (ad-login/update-or-create-user! "Pedro" "Banana" "pedro@banana.fi" {})]
-            (fact "User creation works as expected"
-              (= user (usr/get-user-by-email "pedro@banana.fi")) => true)
-            (facts "Updating users should work as well"
-              (let [updated-user (ad-login/update-or-create-user! "Pedro" "Banana" "pedro@banana.fi" {:609-R #{"reader"}})]
-                (= {:609-R ["reader"]} (:orgAuthz (usr/get-user-by-email "pedro@banana.fi"))) => true))))
+(mongo/connect!)
 
-        (fact "log-user-in! should... Log user in"
-          (let [user (usr/get-user-by-email "pedro@banana.fi")
-                {:keys [headers session status]} (ad-login/log-user-in! {} user)]
-            (facts "User is redirected to authority landing page"
-              (= 302 status) => true
-              (= (str (env/value :host) "/app/fi/authority") (get headers "Location")) => true)
-            (fact "User is inserted into the session"
-              (= "pedro@banana.fi" (get-in session [:user :email])) => true)))
+(let [pori-route (parse-route "pori.fi")]
 
-        (fact "The metadata route works"
-          (let [res (client/get (parse-route "pori.fi" true))
-                body (-> res :body sxml/parse sxml/xml->edn)
-                cert (-> body
-                         (get-in [:md:EntityDescriptor :md:SPSSODescriptor :md:KeyDescriptor])
-                         first
-                         (get-in [:ds:KeyInfo :ds:X509Data :ds:X509Certificate]))]
-            (fact "Status code is 200"
-              (:status res) => 200
-            (fact "Content-Type is XML"
-              (-> res :headers keywordize-keys :Content-Type) => "text/xml; charset=UTF-8")
-            (facts "The response contains the Service Provider certificate"
-              (string? cert) => true
-              (count cert) => 1224
-              (= cert (env/value :sso :cert)) => false
-              (= cert (parse-certificate (env/value :sso :cert))) => true))))
+  (fact "update-or-create-user! can create or update users"
+        (let [user (ad-login/update-or-create-user! "Pedro" "Banana" "pedro@banana.fi" {})]
+          (fact "User creation works as expected"
+                (= user (usr/get-user-by-email "pedro@banana.fi")) => true)
+          (facts "Updating users should work as well"
+                 (let [updated-user (ad-login/update-or-create-user! "Pedro" "Banana" "pedro@banana.fi" {:609-R #{"reader"}})]
+                   (= {:609-R ["reader"]} (:orgAuthz (usr/get-user-by-email "pedro@banana.fi"))) => true))))
 
-        (fact "Testing the main login route"
-          (fact "If the endpoint receives POST request without :SAMLResponse map, it returns 400"
-            (let [{:keys [status body]} (client/post pori-route {:throw-exceptions false})]
-              (facts "Server answers with 400 and an error message in the response body"
-                status => 400
-                body => "No SAML data found in request")))
+  (fact "log-user-in! should... Log user in"
+        (let [user (usr/get-user-by-email "pedro@banana.fi")
+              {:keys [headers session status]} (ad-login/log-user-in! {} user)]
+          (facts "User is redirected to authority landing page"
+                 (= 302 status) => true
+                 (= (str (env/value :host) "/app/fi/authority") (get headers "Location")) => true)
+          (fact "User is inserted into the session"
+                (= "pedro@banana.fi" (get-in session [:user :email])) => true)))
 
-          (fact "Login attempt with a valid response works"
-            (command admin :create-user
-                     :email "terttu@panaani.fi"
-                     :role "authority"
-                     :orgAuthz {:609-R ["reader"]}) => ok?
-            (let [resp (client/post pori-route {:form-params {:SAMLResponse response}
-                                                :content-type :json
-                                                :throw-exceptions false})]
-              (:status resp) => 302))
+  (fact "The metadata route works"
+        (let [res (client/get (parse-route "pori.fi" true))
+              body (-> res :body sxml/parse sxml/xml->edn)
+              cert (-> body
+                       (get-in [:md:EntityDescriptor :md:SPSSODescriptor :md:KeyDescriptor])
+                       first
+                       (get-in [:ds:KeyInfo :ds:X509Data :ds:X509Certificate]))]
+          (fact "Status code is 200"
+                (:status res) => 200
+                (fact "Content-Type is XML"
+                      (-> res :headers keywordize-keys :Content-Type) => "text/xml; charset=UTF-8")
+                (facts "The response contains the Service Provider certificate"
+                       (string? cert) => true
+                       (count cert) => 1224
+                       (= cert (env/value :sso :cert)) => false
+                       (= cert (parse-certificate (env/value :sso :cert))) => true))))
 
-          (fact "The user is created from the SAML data"
-            (let [resp (query admin :users :email "terttu@panaani.fi")]
-              resp => ok?
-              (count (:users resp)) => 1))
+  (fact "Testing the main login route"
+        (fact "If the endpoint receives POST request without :SAMLResponse map, it returns 400"
+              (let [{:keys [status body]} (client/post pori-route {:throw-exceptions false})]
+                (facts "Server answers with 400 and an error message in the response body"
+                       status => 400
+                       body => "No SAML data found in request")))
 
-          (fact "Now erase Terttu's account"
-            (command admin :erase-user :email "terttu@panaani.fi") => ok?)
+        (fact "Login attempt with a valid response works"
+              (command admin :create-user
+                       :email "terttu@panaani.fi"
+                       :role "authority"
+                       :orgAuthz {:609-R ["reader"]}) => ok?
+              (let [resp (client/post pori-route {:form-params {:SAMLResponse response}
+                                                  :content-type :json
+                                                  :throw-exceptions false})]
+                (:status resp) => 302))
 
-          (fact "Login attempt with an invalid response fails"
-            (let [resp (client/post pori-route {:form-params {:SAMLResponse (apply str (drop-last response))}
-                                                :content-type :json
-                                                :throw-exceptions false})]
-              (:status resp) => 400)))))
+        (fact "The user is created from the SAML data"
+              (let [resp (query admin :users :email "terttu@panaani.fi")]
+                resp => ok?
+                (count (:users resp)) => 1))
+
+        (fact "Now erase Terttu's account"
+              (command admin :erase-user :email "terttu@panaani.fi") => ok?)
+
+        (fact "Login attempt with an invalid response fails"
+              (let [resp (client/post pori-route {:form-params {:SAMLResponse (apply str (drop-last response))}
+                                                  :content-type :json
+                                                  :throw-exceptions false})]
+                (:status resp) => 400))
+
+        (fact "When an applicant-type user account exists, the user is logged in even if no ad-groups are found"
+              (let [resp (client/post pori-route {:form-params {:SAMLResponse response-wo-groups}
+                                                  :content-type :json
+                                                  :throw-exceptions false})]
+                (:status resp) => 302))))
