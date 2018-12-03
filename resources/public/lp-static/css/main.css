@@ -34561,7 +34561,7 @@ div.form-grid.allu-group .row.allu-row--spaced {
   min-height: 40px;
 }
 
-.allu-table table td.allu--structure span {
+.allu-table table td.allu--structure > span {
   width: 100%;
 }
 
@@ -34576,6 +34576,10 @@ div.form-grid.allu-group .row.allu-row--spaced {
 
 .allu-table table tfoot > tr td.footer-sum--total {
   text-align: right;
+}
+
+.allu-table table tfoot > tr i.footer-sum--error {
+  color: #df3215;
 }
 
 .allu-table + .button-group {
