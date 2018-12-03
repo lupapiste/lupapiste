@@ -8,5 +8,6 @@
   (against-background
     (org/pate-scope? irrelevant) => false)
   (->reporting-result application-rakennuslupa "fi")
-  => (contains {:luvanTilanne "vireillä"
-                :luvanTyyppi "R"}))
+  => (contains {:id (:id application-rakennuslupa)
+                :permitType "R"
+                :state "submitted"}))

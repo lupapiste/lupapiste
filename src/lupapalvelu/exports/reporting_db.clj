@@ -2,21 +2,28 @@
   (:require [lupapalvelu.data-skeleton :as ds]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical]]))
 
+;; Ei suomeksi, noudattaa omaa tietomallia
+
+;;
+
 (def reporting-app-skeleton
   {;; Hakemus
-   :lupanumero (ds/access :test) ;; TODO: Mistä? Kuntalupatunnus? Selite: Löytyy koko numero samasata kentästä: Luvan numero - Luvan vuosi - kaupunginosa - lupatyyppi
-   :luvanNumero (ds/access :test) ;; Oletus: lupanumerosta
-   :luvanVuosi (ds/access :test) ;; Oletus: lupanumerosta
-   :aravalaina (ds/access :test) ;; TODO: Mistä?
-   :eiJulkistaLainaa (ds/access :test) ;; TODO: Mistä? Selite: Hankkeeseen liittyvä
-   :kaupunginosa (ds/access :test) ;; TODO: Mistä?
-   :korkotukivuokra-asunnotPitkaaik (ds/access :test) ;; TODO: Mistä? Selite: Johdettuna, ei tarpeellista jatkossa
-   :luvanTilanne (ds/access :luvanTilanne) ;; Selite: Tilakone. Vierillä, käyttöönotettu...
-   :luvanTyyppi (ds/access :luvanTyyppi) ;; Selite: Voidaan päätellä toimenpidetiedosta
-   :rakennuspaikanKoordinaatit (ds/access :test) ;; Selite: Luvan koordinaatti
+   :id (ds/access :id)
+   ;; Factassa asian pääavain, tulee itse asiassa päätöksien tietoihin
+   ;; :lupanumero (ds/access :test) ;; TODO: Mistä? Kuntalupatunnus? Selite: Löytyy koko numero samasata kentästä: Luvan numero - Luvan vuosi - kaupunginosa - lupatyyppi
+   ;; :luvanNumero (ds/access :test) ;; Oletus: lupanumerosta
+   ;; :luvanVuosi (ds/access :test) ;; Oletus: lupanumerosta
+   :aravalaina (ds/access :test) ;; TODO: Mistä? Ara-käsittelijä flägi boolean
+   ;; :eiJulkistaLainaa (ds/access :test) ;; TODO: Mistä? Selite: Hankkeeseen liittyvä
+   ;; :kaupunginosa (ds/access :test) ;; TODO: Mistä?
+   ;; :korkotukivuokra-asunnotPitkaaik (ds/access :test) ;; TODO: Mistä? Selite: Johdettuna, ei tarpeellista jatkossa
+   :state (ds/access :state) ;; Selite: Tilakone. Vierillä, käyttöönotettu... OMAT TERMIT esim submitted
+   :permitType (ds/access :permitType) ;; Selite: Voidaan päätellä toimenpidetiedosta permitType
+
+   :rakennuspaikanKoordinaatit (ds/access :test) ;; Selite: Luvan koordinaatti Factassa ETRS, se halutaan, + lupiksesta löytyvät
    :rakennuspaikanLahiosoite (ds/access :test)
-   :tilanteenPvm (ds/access :test) ;; Selite: Koska hakemuksen viimeisin tila on tullut voimaan
-   :toimenpideteksti (ds/access :test) ;; Selite: Hankkeen kuvaus korvaamaan tätä. Konversiossa huomioitava
+   :tilanteenPvm (ds/access :test) ;; Selite: Koska hakemuksen viimeisin tila on tullut voimaan Historysta etsitään
+   :toimenpideteksti (ds/access :test) ;; Selite: Hankkeen kuvaus korvaamaan tätä. Konversiossa huomioitava, rakennusvalvonta-asian kuvaus
    :uuttaHuoneistoalaa (ds/access :test) ;; Selite: Mahdollisuus myös negatiiviseen arvoon. Oleellinen tieto. Tulee rakennuksen tietona ja summataan hakemukselle
    :uuttaKerrosalaa (ds/access :test) ;; Selite: Mahdollisuus myös negatiiviseen arvoon. Oleellinen tieto. Kerrosalassa mukana yleiset tilat. Tulee rakennuksen tietona ja summataan hakemukselle
 
@@ -88,6 +95,7 @@
    :viimeisinPaatospvm (ds/access :test) ;; Selite: Luvalla voi olla monta päätöstä, esim. oikaisuvaatimuspäätös
 
    ;; Rakennus
+   ;; Raportoidaan se mitä sattuu löytymään
    :hankkeenRakennuksenHuoneistonAla (ds/access :test)
    :hankkeenRakennuksenKerrosala (ds/access :test)
    :hankkeenRakennuksenKokonaisala (ds/access :test)
@@ -139,8 +147,9 @@
 
 (def reporting-app-accessors
   {:test (constantly "foo")
-   :luvanTilanne (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :kasittelynTilatieto last :Tilamuutos :tila])
-   :luvanTyyppi (ds/from-context [:application :permitType])})
+   :id (ds/from-context [:application :id])
+   :state (ds/from-context [:application :state])
+   :permitType (ds/from-context [:application :permitType])})
 
 (defn ->reporting-result [application lang]
   ;; TODO check permit type, R or P (or others as well?)
