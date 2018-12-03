@@ -8,7 +8,7 @@
             [lupapalvelu.invoices :as invoices]
             [lupapalvelu.invoices.schemas :as invoice-schemas]
             [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer [$in $and $lt]]
+            [monger.operators :refer [$in $and $lt $gt]]
             [schema.core :as sc]
             [sade.core :refer [ok fail] :as sade]
             [sade.schemas :as ssc]
@@ -47,16 +47,28 @@
 (defn fetch-price-catalogues [organization-id]
   (mongo/select :price-catalogues {:organization-id organization-id}))
 
-(defn fetch-previous-price-catalogue
+(defn fetch-previous-published-price-catalogue
   [{:keys [valid-from organization-id] :as price-catalogue}]
-  (debug ">>> fetch-previous-price-catalogue catalogue: " price-catalogue)
+  (debug ">> fetch-previous-published-price-catalogue catalogue: " price-catalogue)
   (if (and valid-from organization-id)
     (let [prev-catalogues (mongo/select :price-catalogues {$and [{:organization-id organization-id}
-                                                                 {:valid-from {$lt valid-from}}]})]
-      (apply max-key :valid-from prev-catalogues))))
+                                                                 {:valid-from {$lt valid-from}}
+                                                                 {:state "published"}]})]
+      (if (not (empty? prev-catalogues))
+        (apply max-key :valid-from prev-catalogues)))))
+
+(defn fetch-next-published-price-catalogue
+  [{:keys [valid-from organization-id] :as price-catalogue}]
+  (debug ">> fetch-next-price-catalogue catalogue: " price-catalogue)
+  (if (and valid-from organization-id)
+    (let [next-catalogues (mongo/select :price-catalogues {$and [{:organization-id organization-id}
+                                                                   {:valid-from {$gt valid-from}}
+                                                                   {:state "published"}]})]
+      (if (not (empty? next-catalogues))
+        (apply min-key :valid-from next-catalogues)))))
 
 (defn validate-price-catalogues [price-catalogues]
-  (info "validate-price-catalogues price-catalogues: " price-catalogues)
+  (debug ">> validate-price-catalogues price-catalogues: " price-catalogues)
   (if-not (empty? price-catalogues)
     (sc/validate [PriceCatalogue] price-catalogues)))
 
@@ -88,8 +100,10 @@
   (sc/validate PriceCatalogue price-catalogue))
 
 (defn catalogue-with-valid-until-one-day-before-timestamp [timestamp catalogue]
-  (let [date (tc/from-long timestamp)]
-    (assoc catalogue :valid-until (tc/to-long (day-before date)))))
+  (debug ">> catalogue-with-valid-until-one-day-before-timestamp timestamp" timestamp "for cat " (:id catalogue))
+  (let [date (tc/from-long timestamp)
+        timestamp-day-before (tc/to-long (day-before date))]
+    (assoc catalogue :valid-until timestamp-day-before)))
 
 (defn update-catalogue! [{:keys [id] :as catalogue}]
   ;; (println "UPDATE catalogue 3 " {:id (:id catalogue)

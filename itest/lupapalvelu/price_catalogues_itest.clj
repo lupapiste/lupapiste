@@ -235,12 +235,18 @@
 
             (fact  "should set the valid-until field for the previous price catalogue as the day before new catalogues valid-from"
 
-                   (let [previous-catalogue (catalogue-with {:id "previous-1"
-                                                             :valid-from (timestamp "1.2.2020")
-                                                             :valid-until nil})
+                   (let [previous-published-catalogue (catalogue-with {:id "previous-published"
+                                                                       :valid-from (timestamp "1.2.2020")
+                                                                       :valid-until nil
+                                                                       :state "published"})
+                         previous-draft-catalogue (catalogue-with {:id "previous-draft"
+                                                                   :valid-from (timestamp "5.2.2020")
+                                                                   :valid-until nil
+                                                                   :state "draft"})
                          new-catalogue-req (catalogue-request-with {:valid-from-str "10.2.2020"})]
 
-                     (ensure-exists! "price-catalogues" previous-catalogue) => :ok
+                     (ensure-exists! "price-catalogues" previous-published-catalogue) => :ok
+                     (ensure-exists! "price-catalogues" previous-draft-catalogue) => :ok
 
                      (let [response (local-command sipoo :publish-price-catalogue
                                                    :organization-id "753-R"
@@ -248,11 +254,32 @@
                        response => ok?
 
                        (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))
-                             previous-catalogue-in-db (mongo/by-id "price-catalogues" (:id previous-catalogue))]
+                             previous-published-catalogue-in-db (mongo/by-id "price-catalogues" (:id previous-published-catalogue))]
 
                          (sc/validate catalogues/PriceCatalogue new-catalogue)
-                         (sc/validate catalogues/PriceCatalogue previous-catalogue-in-db)
-                         (to-finnish-date (:valid-until previous-catalogue-in-db)) => "9.2.2020"))))
+                         (sc/validate catalogues/PriceCatalogue previous-published-catalogue-in-db)
+                         (to-finnish-date (:valid-until previous-published-catalogue-in-db)) => "9.2.2020"))))
+
+            (fact  "should set the valid-until field for the new catalogue as the day before the valid-from of the next published catalogue"
+
+                   (let [next-draft-catalogue     (catalogue-with {:id "later-draft" :valid-from (timestamp "8.3.2020") :state "draft"})
+                         next-published-catalogue (catalogue-with {:id "later-pub-1" :valid-from (timestamp "1.4.2020") :state "published"})
+                         much-later-catalogue     (catalogue-with {:id "later-pub-2" :valid-from (timestamp "1.5.2020") :state "published"})
+                         new-catalogue-req (catalogue-request-with {:valid-from-str "1.3.2020"})]
+
+                     (ensure-exists! "price-catalogues" next-draft-catalogue) => :ok
+                     (ensure-exists! "price-catalogues" next-published-catalogue) => :ok
+                     (ensure-exists! "price-catalogues" much-later-catalogue) => :ok
+
+                     (let [response (local-command sipoo :publish-price-catalogue
+                                                   :organization-id "753-R"
+                                                   :price-catalogue new-catalogue-req)]
+                       response => ok?
+
+                       (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
+
+                         (sc/validate catalogues/PriceCatalogue new-catalogue)
+                         (to-finnish-date (:valid-until new-catalogue)) => "31.3.2020"))))
 
             ;;TODO test the case where there is a catalogue with the same startig date (valid-from)
             ;;     In that case, the previous one should be replaced with the new one

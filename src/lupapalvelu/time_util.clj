@@ -14,6 +14,10 @@
 (defn day-before [date]
   (t/plus date (t/days -1)))
 
+(defn timestamp-day-before [timestamp]
+  (when timestamp
+    (tc/to-long (day-before (tc/from-long timestamp)))))
+
 (defn ->date [date-str]
   (tf/parse time-format date-str))
 
@@ -21,7 +25,5 @@
   (tf/unparse time-format date))
 
 (defn tomorrow-or-later? [date-str]
-  (println ">> tomorrow-or-later " date-str)
-  (println "tomorrow as findate2: " (to-finnish-date (lupapalvelu.time-util/tomorrow)))
   (if date-str
-    (not (t/before? (->date date-str) (lupapalvelu.time-util/tomorrow)))))
+    (not (t/before? (->date date-str) (tomorrow)))))

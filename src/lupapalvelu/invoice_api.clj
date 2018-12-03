@@ -1,12 +1,15 @@
 (ns lupapalvelu.invoice-api
-  (:require [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
+  (:require [clj-time.coerce :as tc]
+            [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
             [lupapalvelu.invoices :as invoices]
             [lupapalvelu.invoices.schemas :refer [->invoice-db Invoice]]
             [lupapalvelu.price-catalogues :as catalogues]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
+            [lupapalvelu.time-util :refer [timestamp-day-before]]
             [sade.core :refer [ok fail]]
+            [sade.util :refer [to-finnish-date]]
             [schema.core :as sc]
             [lupapalvelu.application-schema :refer [Operation]]
             [lupapalvelu.invoices.transfer-batch :refer [get-transfer-batch-for-orgs]]))
@@ -151,18 +154,16 @@
                       catalogues/validate-insert-price-catalogue-request]}
   [{:keys [user] :as command}]
   (let [catalogue-to-db (catalogues/->price-catalogue-db price-catalogue user organization-id)
-        previous-catalogue (catalogues/fetch-previous-price-catalogue catalogue-to-db)
-        ;;next-catalogue (catalogues/fetch-next-price-catalogue )
-        ]
+        previous-catalogue (catalogues/fetch-previous-published-price-catalogue catalogue-to-db)
+        next-catalogue (catalogues/fetch-next-published-price-catalogue catalogue-to-db)
+        valid-until (timestamp-day-before (:valid-from next-catalogue))]
+
+    ;; (info "previous catalogue: " {:id (:id previous-catalogue) :valid-from (:valid-from previous-catalogue) :findate (to-finnish-date (:valid-from previous-catalogue))})
+    ;; (info "next-catalogue " next-catalogue ;;{:id (:id next-catalogue) :valid-from (:valid-from next-catalogue) :findate (to-finnish-date (:valid-from next-catalogue))}
+    ;;       )
 
     (catalogues/update-previous-catalogue! previous-catalogue catalogue-to-db)
 
-    ;; (println "YYYYYYYYYYYYY invoice-api YYYYYYYYYYYYYYYYYYYYYYYYYYYY")
-    ;; (println "previous catalogue: " previous-catalogue)
-    ;; (println "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
-
-    (let [;;catalogue-to-db (assoc :valid-until (catalogues/day-before (:valid-from next-catalogue)))
-          id (catalogues/create-price-catalogue! catalogue-to-db {:state "published"
-                                                                  :valid-until nil})]
-
+    (let [id (catalogues/create-price-catalogue! catalogue-to-db {:state "published"
+                                                                  :valid-until valid-until})]
       (ok {:price-catalogue-id id}))))
