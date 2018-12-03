@@ -281,8 +281,34 @@
                          (sc/validate catalogues/PriceCatalogue new-catalogue)
                          (to-finnish-date (:valid-until new-catalogue)) => "31.3.2020"))))
 
-            ;;TODO test the case where there is a catalogue with the same startig date (valid-from)
-            ;;     In that case, the previous one should be replaced with the new one
+
+            (fact "should replace published catalogues that have the same valid-from as the new catalogue"
+
+                  (let [same-day-published-catalogue-1 (catalogue-with {:id "same-day-pub-cat-1" :valid-from (timestamp "1.6.2020") :state "published"})
+                        same-day-published-catalogue-2 (catalogue-with {:id "same-day-pub-cat-2" :valid-from (timestamp "1.6.2020") :state "published"})
+                        same-day-draft-catalogue       (catalogue-with {:id "same-day-draft-cat" :valid-from (timestamp "1.6.2020") :state "draft"})
+                        new-catalogue-req (catalogue-request-with {:valid-from-str "1.6.2020"})]
+
+                    (ensure-exists! "price-catalogues" same-day-published-catalogue-1) => :ok
+                    (ensure-exists! "price-catalogues" same-day-published-catalogue-2) => :ok
+                    (ensure-exists! "price-catalogues" same-day-draft-catalogue) => :ok
+
+                     (let [response (local-command sipoo :publish-price-catalogue
+                                                   :organization-id "753-R"
+                                                   :price-catalogue new-catalogue-req)]
+
+                       response => ok?
+
+                       (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))
+                             same-day-pub-cat-1-in-db (mongo/by-id "price-catalogues" (:id same-day-published-catalogue-1))
+                             same-day-pub-cat-2-in-db (mongo/by-id "price-catalogues" (:id same-day-published-catalogue-2))
+                             same-day-draft-cat-in-db  (mongo/by-id "price-catalogues" (:id same-day-draft-catalogue))]
+
+                         (sc/validate catalogues/PriceCatalogue new-catalogue)
+
+                         same-day-pub-cat-1-in-db => nil
+                         same-day-pub-cat-2-in-db => nil
+                         same-day-draft-cat-in-db => same-day-draft-catalogue))))
 
             ;;TODO test the case where there is previous catalogue that
             ;;     has a valid-until that is before this catalogues' valid-from

@@ -67,6 +67,16 @@
       (if (not (empty? next-catalogues))
         (apply min-key :valid-from next-catalogues)))))
 
+(defn fetch-same-day-published-price-catalogues
+  [{:keys [valid-from organization-id] :as price-catalogue}]
+  (debug ">>>> fetch-same-day-price-catalogue catalogue: " price-catalogue)
+  (if (and valid-from organization-id)
+    (let [same-day-catalogues (mongo/select :price-catalogues {$and [{:organization-id organization-id}
+                                                                     {:valid-from valid-from}
+                                                                     {:state "published"}
+                                                                     ]})]
+      same-day-catalogues)))
+
 (defn validate-price-catalogues [price-catalogues]
   (debug ">> validate-price-catalogues price-catalogues: " price-catalogues)
   (if-not (empty? price-catalogues)
@@ -110,7 +120,8 @@
   ;;                                :valid-until (:valid-until catalogue)
   ;;                                 :valid-until-str (to-finnish-date (:valid-until catalogue))})
   (validate-price-catalogue catalogue)
-  (mongo/update-by-id :price-catalogues id catalogue))
+  (mongo/update-by-id :price-catalogues id catalogue)
+  id)
 
 (defn update-previous-catalogue! [previous-catalogue {new-catalogue-start :valid-from :as new-catalogue}]
   (debug ">> update-previous-catalogue!")
@@ -128,3 +139,8 @@
          validate-price-catalogue
          (mongo/insert :price-catalogues))
     (:id catalogue-doc)))
+
+(defn delete-catalogues! [catalogues]
+  (doseq [{:keys [id]} catalogues]
+    (when id
+      (mongo/remove :price-catalogues id))))
