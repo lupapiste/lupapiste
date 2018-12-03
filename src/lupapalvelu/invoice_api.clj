@@ -151,5 +151,18 @@
                       catalogues/validate-insert-price-catalogue-request]}
   [{:keys [user] :as command}]
   (let [catalogue-to-db (catalogues/->price-catalogue-db price-catalogue user organization-id)
-        id (catalogues/create-price-catalogue! catalogue-to-db {:state "published"})]
-    (ok {:price-catalogue-id id})))
+        previous-catalogue (catalogues/fetch-previous-price-catalogue catalogue-to-db)
+        ;;next-catalogue (catalogues/fetch-next-price-catalogue )
+        ]
+
+    (catalogues/update-previous-catalogue! previous-catalogue catalogue-to-db)
+
+    ;; (println "YYYYYYYYYYYYY invoice-api YYYYYYYYYYYYYYYYYYYYYYYYYYYY")
+    ;; (println "previous catalogue: " previous-catalogue)
+    ;; (println "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
+
+    (let [;;catalogue-to-db (assoc :valid-until (catalogues/day-before (:valid-from next-catalogue)))
+          id (catalogues/create-price-catalogue! catalogue-to-db {:state "published"
+                                                                  :valid-until nil})]
+
+      (ok {:price-catalogue-id id}))))

@@ -3,14 +3,16 @@
   (:require [clj-time.coerce :as tc]
             [clj-time.core :as t]
             [clj-time.format :as tf]
+            [lupapalvelu.time-util :refer [tomorrow day-before ->date
+                                           ->date-str tomorrow-or-later?]]
             [lupapalvelu.invoices :as invoices]
             [lupapalvelu.invoices.schemas :as invoice-schemas]
             [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer [$in]]
+            [monger.operators :refer [$in $and $lt]]
             [schema.core :as sc]
             [sade.core :refer [ok fail] :as sade]
             [sade.schemas :as ssc]
-            [sade.util :refer [to-millis-from-local-date-string]]
+            [sade.util :refer [to-millis-from-local-date-string to-finnish-date]]
             [taoensso.timbre :refer [trace tracef debug debugf info infof
                                      warn warnf error errorf fatal fatalf]]))
 
@@ -32,7 +34,8 @@
                    "published"   ;;published and in use if on validity period
                    )
    :valid-from ssc/Timestamp
-   (sc/optional-key :valid-until) ssc/Timestamp
+   :valid-until (sc/maybe ssc/Timestamp)
+   ;;(sc/optional-key :valid-until) ssc/Timestamp
    :rows [CatalogueRow]
    :meta {:created ssc/Timestamp
           :created-by invoice-schemas/User}})
@@ -44,24 +47,20 @@
 (defn fetch-price-catalogues [organization-id]
   (mongo/select :price-catalogues {:organization-id organization-id}))
 
+(defn fetch-previous-price-catalogue
+  [{:keys [valid-from organization-id] :as price-catalogue}]
+  (debug ">>> fetch-previous-price-catalogue catalogue: " price-catalogue)
+  (if (and valid-from organization-id)
+    (let [prev-catalogues (mongo/select :price-catalogues {$and [{:organization-id organization-id}
+                                                                 {:valid-from {$lt valid-from}}]})]
+      (apply max-key :valid-from prev-catalogues))))
+
 (defn validate-price-catalogues [price-catalogues]
   (info "validate-price-catalogues price-catalogues: " price-catalogues)
   (if-not (empty? price-catalogues)
     (sc/validate [PriceCatalogue] price-catalogues)))
 
 (def time-format (tf/formatter "dd.MM.YYYY"))
-
-(defn ->date [date-str]
-  (tf/parse time-format date-str))
-
-(defn tomorrow []
-  (-> (t/today)
-      (t/plus (t/days 1))
-      (tc/to-date-time)))
-
-(defn tomorrow-or-later? [date-str]
-  (if date-str
-    (not (t/before? (->date date-str) (tomorrow)))))
 
 (defn validate-insert-price-catalogue-request [{{catalogue-request :price-catalogue} :data :as command}]
   (try
@@ -87,6 +86,23 @@
 
 (defn validate-price-catalogue [price-catalogue]
   (sc/validate PriceCatalogue price-catalogue))
+
+(defn catalogue-with-valid-until-one-day-before-timestamp [timestamp catalogue]
+  (let [date (tc/from-long timestamp)]
+    (assoc catalogue :valid-until (tc/to-long (day-before date)))))
+
+(defn update-catalogue! [{:keys [id] :as catalogue}]
+  ;; (println "UPDATE catalogue 3 " {:id (:id catalogue)
+  ;;                                :valid-until (:valid-until catalogue)
+  ;;                                 :valid-until-str (to-finnish-date (:valid-until catalogue))})
+  (validate-price-catalogue catalogue)
+  (mongo/update-by-id :price-catalogues id catalogue))
+
+(defn update-previous-catalogue! [previous-catalogue {new-catalogue-start :valid-from :as new-catalogue}]
+  (debug ">> update-previous-catalogue!")
+  (if (and previous-catalogue (not (:valid-until previous-catalogue)))
+    (let [prev-catalogue-with-valid-until (catalogue-with-valid-until-one-day-before-timestamp new-catalogue-start previous-catalogue)]
+      (update-catalogue! prev-catalogue-with-valid-until))))
 
 (defn create-price-catalogue!
   [price-catalogue & [defaults]]
