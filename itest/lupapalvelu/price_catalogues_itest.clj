@@ -233,7 +233,7 @@
                             (to-finnish-date (:valid-from new-catalogue)) => (:valid-from-str catalogue-request)
                             (:rows new-catalogue) => (:rows catalogue-request)))))
 
-            (fact  "should set the valid-until field for the previous price catalogue as the day before new catalogues valid-from"
+            (fact  "should set the valid-until field for the previous price catalogue as the day before new catalogues valid-from when valid-until is not previously set"
 
                    (let [previous-published-catalogue (catalogue-with {:id "previous-published"
                                                                        :valid-from (timestamp "1.2.2020")
@@ -259,6 +259,52 @@
                          (sc/validate catalogues/PriceCatalogue new-catalogue)
                          (sc/validate catalogues/PriceCatalogue previous-published-catalogue-in-db)
                          (to-finnish-date (:valid-until previous-published-catalogue-in-db)) => "9.2.2020"))))
+
+            (fact  "should not update valid-until of previous catalogue if the current value is before the valid-from of the new catalogue"
+
+                   (let [previous-published-catalogue-with-valid-until (catalogue-with {:id "previous-published-with-valid-until-before-new-cat"
+                                                                                        :valid-from (timestamp "15.2.2020")
+                                                                                        :valid-until (timestamp "18.2.2020")
+                                                                                        :state "published"})
+
+                         new-catalogue-req (catalogue-request-with {:valid-from-str "20.2.2020"})]
+
+                     (ensure-exists! "price-catalogues" previous-published-catalogue-with-valid-until) => :ok
+
+                     (let [response (local-command sipoo :publish-price-catalogue
+                                                   :organization-id "753-R"
+                                                   :price-catalogue new-catalogue-req)]
+                       response => ok?
+
+                       (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))
+                             previous-pub-cat-with-valid-until-in-db (mongo/by-id "price-catalogues" (:id previous-published-catalogue-with-valid-until))]
+
+                         (sc/validate catalogues/PriceCatalogue new-catalogue)
+                         (sc/validate catalogues/PriceCatalogue previous-pub-cat-with-valid-until-in-db)
+                         (to-finnish-date (:valid-until previous-pub-cat-with-valid-until-in-db)) => "18.2.2020"))))
+
+            (fact  "should update valid-until of previous catalogue if the current value is after the valid-from of the new catalogue"
+
+                   (let [previous-published-catalogue-with-valid-until (catalogue-with {:id "previous-published-with-valid-until-after-new-cat"
+                                                                                        :valid-from (timestamp "21.2.2020")
+                                                                                        :valid-until (timestamp "28.2.2020")
+                                                                                        :state "published"})
+
+                         new-catalogue-req (catalogue-request-with {:valid-from-str "25.2.2020"})]
+
+                     (ensure-exists! "price-catalogues" previous-published-catalogue-with-valid-until) => :ok
+
+                     (let [response (local-command sipoo :publish-price-catalogue
+                                                   :organization-id "753-R"
+                                                   :price-catalogue new-catalogue-req)]
+                       response => ok?
+
+                       (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))
+                             previous-pub-cat-with-valid-until-in-db (mongo/by-id "price-catalogues" (:id previous-published-catalogue-with-valid-until))]
+
+                         (sc/validate catalogues/PriceCatalogue new-catalogue)
+                         (sc/validate catalogues/PriceCatalogue previous-pub-cat-with-valid-until-in-db)
+                         (to-finnish-date (:valid-until previous-pub-cat-with-valid-until-in-db)) => "24.2.2020"))))
 
             (fact  "should set the valid-until field for the new catalogue as the day before the valid-from of the next published catalogue"
 
@@ -315,9 +361,4 @@
             ;;     meaning that that catalogue has ended and there is no need to update it
             ;;     or set the valid-until of this catalogue
 
-            ;;TODO test the case where there is previous catalogue that
-            ;;     has a valid-until that is after this catalogues' valid-from
-            ;;     meaning that there has to be a "next" or future catalogue to this cataloge.
-            ;;     In that case, this catalogues valid-until needs to be set before the valid-from value
-            ;;     of that catalogue
             ))))

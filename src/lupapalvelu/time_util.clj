@@ -6,6 +6,9 @@
 
 (def time-format (tf/formatter "dd.MM.YYYY"))
 
+(defn timestamp-after? [timestamp1 timestamp2]
+  (t/after? (tc/from-long timestamp1) (tc/from-long timestamp2)))
+
 (defn tomorrow []
   (-> (t/today)
       (t/plus (t/days 1))

@@ -4,7 +4,8 @@
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [lupapalvelu.time-util :refer [tomorrow day-before ->date
-                                           ->date-str tomorrow-or-later?]]
+                                           ->date-str tomorrow-or-later?
+                                           timestamp-after?]]
             [lupapalvelu.invoices :as invoices]
             [lupapalvelu.invoices.schemas :as invoice-schemas]
             [lupapalvelu.mongo :as mongo]
@@ -125,7 +126,9 @@
 
 (defn update-previous-catalogue! [previous-catalogue {new-catalogue-start :valid-from :as new-catalogue}]
   (debug ">> update-previous-catalogue!")
-  (if (and previous-catalogue (not (:valid-until previous-catalogue)))
+  (if (and previous-catalogue
+           (or (timestamp-after? (:valid-until previous-catalogue) new-catalogue-start)
+               (not (:valid-until previous-catalogue))))
     (let [prev-catalogue-with-valid-until (catalogue-with-valid-until-one-day-before-timestamp new-catalogue-start previous-catalogue)]
       (update-catalogue! prev-catalogue-with-valid-until))))
 
