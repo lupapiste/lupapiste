@@ -224,7 +224,7 @@ var LUPAPISTE = LUPAPISTE || {};
       }
 
       self.cancel = _.partial(self.open, false);
-      self.toggleOpen = function () { self.open(!self.open()); }
+      self.toggleOpen = function () { self.open(!self.open()); };
 
       ajax.query("organization-names-by-user", {})
         .success(function (res) {
@@ -236,7 +236,7 @@ var LUPAPISTE = LUPAPISTE || {};
                 orgName: purposeOrgName(purpose),
                 iconClasses: {},
                 href: purposeLink(purpose)
-              }
+              };
               purposeModel.iconClasses[purposeIcon(purpose)] = true;
               return purposeModel;
             })); })
