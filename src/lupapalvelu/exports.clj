@@ -177,7 +177,7 @@
    priceCode = new price codes for 'puitesopimus'
    use = usage code for some price classes (kayttotarkoitus)
    useFi = usage code in Finnish
-   useSv = usage code in Svedish
+   useSv = usage code in Swedish
    usagePriceCode = mapping from legacy priceClass to new price code (called 'kayttotarkoitushinnasto')"
   [application op]
   (let [op-name  (keyword (:name op))
