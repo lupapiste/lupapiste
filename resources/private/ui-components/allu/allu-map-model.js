@@ -36,6 +36,7 @@ LUPAPISTE.AlluMapModel = function( params ) {
     }
   }
 
+  // Create map when the view has been rendered.
   self.disposedComputed( function() {
     var lox = location();
     if( !map && self.rendered() && lox) {

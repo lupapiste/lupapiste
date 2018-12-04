@@ -13,6 +13,10 @@ LUPAPISTE.AlluDrawingsModel = function( params ) {
   var kind = params.kind;
   var appId = lupapisteApp.services.contextService.applicationId;
 
+  self.deleteFn = null;
+  self.selectFn = null;
+  self.confirmationDeleteFn = null;
+
   self.authOk = self.disposedPureComputed( function() {
     return !self.isDisabled()
       && lupapisteApp.models.applicationAuthModel.ok( "allu-sites");
@@ -59,29 +63,34 @@ LUPAPISTE.AlluDrawingsModel = function( params ) {
                                                 yesFn: _.wrap( draw, fun) }});
   }
 
-  if( self.authOk()) {
-    self.deleteFn = function( draw ) {
-      ajax.command( "remove-application-drawing", {id: appId(),
-                                                   drawingId: draw.id})
-        .success( successFn )
-      .call();
-    };
+  // We initialize observables within computed just in case auth model
+  // changes.
+  self.disposedComputed( function() {
+    if( self.authOk()) {
+      self.deleteFn = function( draw ) {
+        ajax.command( "remove-application-drawing", {id: appId(),
+                                                     drawingId: draw.id})
+          .success( successFn )
+          .call();
+      };
 
-    self.selectedSite = ko.observable();
+      self.selectedSite = ko.observable();
 
-    self.selectFn = function() {
-      ajax.command( "add-allu-drawing", {id: appId(),
-                                         kind: kind,
-                                         siteId: self.selectedSite().id})
-        .success( successFn )
-        .call();
-    };
-  } else {
-    self.deleteFn = null;
-    self.selectFn = null;
-  }
+      self.selectFn = function() {
+        ajax.command( "add-allu-drawing", {id: appId(),
+                                           kind: kind,
+                                           siteId: self.selectedSite().id})
+          .success( successFn )
+          .call();
+      };
+    }
+    else {
+      self.deleteFn = null;
+      self.selectFn = null;
+    }
 
-  self.confirmationDeleteFn = self.deleteFn ? _.wrap( self.deleteFn, confirmation) : null;
+    self.confirmationDeleteFn = self.deleteFn ? _.wrap( self.deleteFn, confirmation) : null;
+  });
 
   self.addHubListener( "application-model-updated", fetchSites );
 
