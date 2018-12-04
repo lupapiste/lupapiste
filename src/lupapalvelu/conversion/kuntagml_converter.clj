@@ -47,8 +47,6 @@
         municipality "092"
         buildings-and-structures (building-reader/->buildings-and-structures xml)
         document-datas (prev-permit/schema-datas app-info buildings-and-structures)
-        ; manual-schema-datas {"kerrostalo-rivitalo" (first document-datas)}
-        ; manual-schema-datas {"aiemman-luvan-toimenpide" (first document-datas)}
         command (update-in command [:data] merge
                            {:operation operation :infoRequest false :messages []}
                            location-info)
