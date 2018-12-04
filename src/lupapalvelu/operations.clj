@@ -1158,16 +1158,6 @@
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :copying-allowed true
-                                 :state-graph-resolver      state-machine-resolver}
-   :rak-valm-tyo                {:schema                    "maisematyo"
-                                 :permit-type               permit/R
-                                 :applicant-doc-schema      applicant-doc-schema-name-R
-                                 :required                  mini-rakval-schemas
-                                 :optional                  optional-mini-rakval-schemas
-                                 :attachments               [:paapiirustus [:asemapiirros]]
-                                 :add-operation-allowed     true
-                                 :copying-allowed           true
->>>>>>> develop
                                  :min-outgoing-link-permits 0
                                  :asianhallinta             false
                                  :state-graph-resolver      state-machine-resolver}

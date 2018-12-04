@@ -173,6 +173,7 @@
    :archiving-project                                                 "Z"
    :lyhytaikainen-maanvuokraus "D"
    :promootio                  "D"
+   :konversio                  "F"
    })
 
 (defn- resolve-price-class

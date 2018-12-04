@@ -19,8 +19,8 @@
 
 (def keyset (comp set keys))
 
-(fact "Every operation (except :konversio) has price class definition"
-  (difference (keyset ops/operations) (keyset price-classes-for-operation) ) => #{:konversio})
+(fact "Every operation has price class definition"
+  (difference (keyset ops/operations) (keyset price-classes-for-operation) ) => empty?)
 
 (fact "Every kayttotarkoitus has price class"
   (let [every-kayttotarkoitus (map :name usages/rakennuksen-kayttotarkoitus)]
