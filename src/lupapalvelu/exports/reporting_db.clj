@@ -22,7 +22,8 @@
    :state (ds/access :state) ;; Selite: Tilakone. Vierillä, käyttöönotettu... OMAT TERMIT esim submitted
    :permitType (ds/access :permitType) ;; Selite: Voidaan päätellä toimenpidetiedosta permitType
 
-   :rakennuspaikanKoordinaatit (ds/access :test) ;; Selite: Luvan koordinaatti Factassa ETRS, se halutaan, + lupiksesta löytyvät
+   :location-etrs-tm35fin (ds/access :location)
+   :location-wgs84 (ds/access :location-wgs84)
    :rakennuspaikanLahiosoite (ds/access :test)
    :tilanteenPvm (ds/access :test) ;; Selite: Koska hakemuksen viimeisin tila on tullut voimaan Historysta etsitään
    :toimenpideteksti (ds/access :test) ;; Selite: Hankkeen kuvaus korvaamaan tätä. Konversiossa huomioitava, rakennusvalvonta-asian kuvaus
@@ -153,6 +154,8 @@
    :araFunding (ds/from-context [:application #(domain/get-document-by-name % "hankkeen-kuvaus")
                                  :data tools/unwrapped :rahoitus]
                                 false)
+   :location (ds/from-context [:application :location])
+   :location-wgs84 (ds/from-context [:application :location-wgs84])
    :state (ds/from-context [:application :state])
    :permitType (ds/from-context [:application :permitType])})
 
