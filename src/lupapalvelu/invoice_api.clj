@@ -159,15 +159,8 @@
         next-catalogue (catalogues/fetch-next-published-price-catalogue catalogue-to-db)
         valid-until (timestamp-day-before (:valid-from next-catalogue))]
 
-    ;; (println "same-day catalogues: " (map (fn [{:keys [id valid-from]}]
-    ;;                                         {:id id :valid-from valid-from :findate (to-finnish-date valid-from)})
-    ;;                                       same-day-catalogues))
-
-    ;; (info "previous catalogue: " {:id (:id previous-catalogue) :valid-from (:valid-from previous-catalogue) :findate (to-finnish-date (:valid-from previous-catalogue))})
-    ;; (info "next-catalogue " next-catalogue ;;{:id (:id next-catalogue) :valid-from (:valid-from next-catalogue) :findate (to-finnish-date (:valid-from next-catalogue))}
-    ;;       )
+    (catalogues/delete-catalogues! same-day-catalogues)
     (catalogues/update-previous-catalogue! previous-catalogue catalogue-to-db)
 
     (let [id (catalogues/create-price-catalogue! catalogue-to-db {:state "published" :valid-until valid-until})]
-      (catalogues/delete-catalogues! same-day-catalogues)
       (ok {:price-catalogue-id id}))))

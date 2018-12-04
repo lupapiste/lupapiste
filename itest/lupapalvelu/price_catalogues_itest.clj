@@ -354,11 +354,4 @@
 
                          same-day-pub-cat-1-in-db => nil
                          same-day-pub-cat-2-in-db => nil
-                         same-day-draft-cat-in-db => same-day-draft-catalogue))))
-
-            ;;TODO test the case where there is previous catalogue that
-            ;;     has a valid-until that is before this catalogues' valid-from
-            ;;     meaning that that catalogue has ended and there is no need to update it
-            ;;     or set the valid-until of this catalogue
-
-            ))))
+                         same-day-draft-cat-in-db => same-day-draft-catalogue))))))))

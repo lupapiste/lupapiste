@@ -97,7 +97,7 @@
 
 (defn ->price-catalogue-db
   [price-catalogue-req user organization-id]
-  (debug "->price-catalogue-db price-catalogue-request: " price-catalogue-req " organization-id: " organization-id " user: " user)
+  (debug ">> price-catalogue-db price-catalogue-request: " price-catalogue-req " organization-id: " organization-id " user: " user)
   {:rows (:rows price-catalogue-req)
    :valid-from (to-millis-from-local-date-string (:valid-from-str price-catalogue-req))
    :meta {:created (sade/now)
@@ -111,15 +111,12 @@
   (sc/validate PriceCatalogue price-catalogue))
 
 (defn catalogue-with-valid-until-one-day-before-timestamp [timestamp catalogue]
-  (debug ">> catalogue-with-valid-until-one-day-before-timestamp timestamp" timestamp "for cat " (:id catalogue))
+  (debug ">> catalogue-with-valid-until-one-day-before-timestamp timestamp" timestamp " catalogue " (:id catalogue))
   (let [date (tc/from-long timestamp)
         timestamp-day-before (tc/to-long (day-before date))]
     (assoc catalogue :valid-until timestamp-day-before)))
 
 (defn update-catalogue! [{:keys [id] :as catalogue}]
-  ;; (println "UPDATE catalogue 3 " {:id (:id catalogue)
-  ;;                                :valid-until (:valid-until catalogue)
-  ;;                                 :valid-until-str (to-finnish-date (:valid-until catalogue))})
   (validate-price-catalogue catalogue)
   (mongo/update-by-id :price-catalogues id catalogue)
   id)
