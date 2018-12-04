@@ -1,0 +1,13 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="textlink-template">
+  <!-- ko if: iconCss -->
+  <div class="like-btn">
+    <i data-bind="css: iconCss"></i>
+    <span data-bind="html: html"></span>
+  </div>
+  <!-- /ko -->
+  <!-- ko ifnot: iconCss -->
+  <span data-bind="html: html"></span>
+  <!-- /ko -->
+
+</script>

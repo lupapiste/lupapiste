@@ -10,4 +10,6 @@ LUPAPISTE.DocgenDateModel = function( params ) {
 
   self.datepickerOptions = $.datepicker.regional[loc.getCurrentLanguage()];
 
+  self.placeholder = self.schema.placeholder ? loc( self.schema.placeholder ) : "";
+
 };

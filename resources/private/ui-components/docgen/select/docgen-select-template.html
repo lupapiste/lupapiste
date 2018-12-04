@@ -6,7 +6,7 @@
   <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
   <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
   <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
-  <select data-bind="options: schema.body,
+  <select data-bind="options: options,
                      optionsText: optionsTextFn,
                      optionsValue: 'name',
                      value: value,
@@ -19,4 +19,3 @@
   </select>
   <span data-bind="saveIndicator: indicator, label: false"></span>
 </script>
-
