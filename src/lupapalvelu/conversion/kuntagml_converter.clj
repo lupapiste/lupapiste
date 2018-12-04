@@ -20,6 +20,9 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
+(def tila
+  (atom {}))
+
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
   ;; Data to be deduced from xml:
@@ -79,6 +82,8 @@
 
         manual-schema-datas {(conv-util/op-name->schema-name primary-op-name) (first document-datas)}
 
+        _ (swap! tila assoc :msd manual-schema-datas)
+
         secondary-op-names (map (partial conv-util/deduce-operation-type kuntalupatunnus) (rest operations))
 
         make-app-info {:id              id
@@ -96,6 +101,8 @@
                                                   (:user command)
                                                   (:created command)
                                                   manual-schema-datas)
+
+        _ (swap! tila assoc :app created-application)
 
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))

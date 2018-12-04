@@ -158,10 +158,7 @@
                 documents))))
 
 (defn op-name->schema-name [op-name]
-  (let [schema-name (-> op-name operations/get-operation-metadata :schema)]
-    (if-not (= "uusiRakennus" schema-name)
-      schema-name
-      op-name)))
+  (-> op-name operations/get-operation-metadata :schema))
 
 (defn toimenpide->toimenpide-document [op-name toimenpide]
   (let [data (model/map2updates [] toimenpide)
