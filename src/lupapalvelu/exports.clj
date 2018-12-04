@@ -37,17 +37,18 @@
       {:price-class (get @kayttotarkoitus-hinnasto kayttotarkoitus) :kayttotarkoitus kayttotarkoitus})))
 
 (def permit-type-price-codes
-  {"R" 901
-   "P" 901
-   "YA" 902
-   "KT" 904
-   "MM" 904
-   "MAL" 903
-   "YI"  903
-   "YL" 903
-   "YM" 903
+  {"R"    901
+   "P"    901
+   "YA"   902
+   "A"    902
+   "KT"   904
+   "MM"   904
+   "MAL"  903
+   "YI"   903
+   "YL"   903
+   "YM"   903
    "VVVL" 903
-   "ARK" 802})
+   "ARK"  802})
 
 (def usage-price-codes
   {"A" 905
@@ -170,6 +171,8 @@
    :maa-ainesten-kotitarveotto                                        "D"
    :maastoliikennelaki-kilpailut-ja-harjoitukset                      "D"
    :archiving-project                                                 "Z"
+   :lyhytaikainen-maanvuokraus "D"
+   :promootio                  "D"
    })
 
 (defn- resolve-price-class

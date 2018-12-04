@@ -1,20 +1,21 @@
 (ns lupapalvelu.operations
-  (:require [taoensso.timbre :refer [trace debug info warn error fatal]]
-            [schema.core :as sc]
-            [sade.util :as util]
-            [sade.core :refer :all]
-            [sade.strings :as ss]
-            [monger.operators :refer :all]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.waste-schemas :as waste-schemas]
+  (:require [lupapalvelu.document.allu-schemas]
             [lupapalvelu.document.poikkeamis-schemas]
-            [lupapalvelu.document.ymparisto-schemas]
-            [lupapalvelu.document.yleiset-alueet-schemas]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.vesihuolto-schemas]
+            [lupapalvelu.document.waste-schemas :as waste-schemas]
+            [lupapalvelu.document.yleiset-alueet-schemas]
+            [lupapalvelu.document.ymparisto-schemas]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
-            [lupapiste-commons.usage-types :as usages]))
+            [lupapiste-commons.usage-types :as usages]
+            [monger.operators :refer :all]
+            [sade.core :refer :all]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [schema.core :as sc]
+            [taoensso.timbre :refer [trace debug info warn error fatal]]))
 
 (def default-description "operations.tree.default-description")
 
@@ -108,6 +109,8 @@
       ["vesistoluvat" :ya-kayttolupa-vesistoluvat]
       ["terassit" :ya-kayttolupa-terassit]
       ["kioskit" :ya-kayttolupa-kioskit]
+      ["promootio" :promootio]
+      ["lyhytaikainen-maanvuokraus" :lyhytaikainen-maanvuokraus]
       ["muu-kayttolupa" :ya-kayttolupa-muu-kayttolupa]]]
     ["jatkoaika" :ya-jatkoaika]]])
 
@@ -179,6 +182,8 @@
     ["ranta-asemakaava" :ranta-asemakaava]
     ["yleiskaava" :yleiskaava]
     ]])
+
+
 
 
 (def operation-tree
@@ -511,626 +516,626 @@
     states/full-application-state-graph))
 
 (def- r-operations
-  {:asuinrakennus               {:schema "uusiRakennus" ; Deprecated operation. Not in current operation tree, but in use in legacy applications.
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] usages/yhden-asunnon-talot]
-                                               [["huoneistot" "0" "huoneistonumero"] "000"]
-                                               [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments uuden_rakennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :kerrostalo-rivitalo         {:schema "uusiRakennus"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] usages/rivitalot]
-                                               [["huoneistot" "0" "huoneistonumero"] "000"]
-                                               [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments uuden_rakennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :pientalo                    {:schema "uusiRakennus"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] usages/yhden-asunnon-talot]
-                                               [["huoneistot" "0" "huoneistonumero"] "000"]
-                                               [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments uuden_rakennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :vapaa-ajan-asuinrakennus    {:schema "uusi-rakennus-ei-huoneistoa"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] usages/vapaa-ajan-asuinrakennus]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments uuden_rakennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :varasto-tms                 {:schema "uusi-rakennus-ei-huoneistoa"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] usages/talousrakennus]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments uuden_rakennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :julkinen-rakennus           {:schema "uusiRakennus" ; Deprecated operation. Not in current operation tree, but in use in legacy applications.
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["huoneistot" "0" "huoneistonumero"] "000"]
-                                               [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :attachments uuden_rakennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :teollisuusrakennus          {:schema "uusiRakennus"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments uuden_rakennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :muu-uusi-rakentaminen       {:schema "uusiRakennus"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["huoneistot" "0" "huoneistonumero"] "000"]
-                                               [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments uuden_rakennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
+  {:asuinrakennus            {:schema                    "uusiRakennus" ; Deprecated operation. Not in current operation tree, but in use in legacy applications.
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :schema-data               [[["kaytto" "kayttotarkoitus"] usages/yhden-asunnon-talot]
+                                                          [["huoneistot" "0" "huoneistonumero"] "000"]
+                                                          [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               uuden_rakennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :kerrostalo-rivitalo      {:schema                    "uusiRakennus"
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :schema-data               [[["kaytto" "kayttotarkoitus"] usages/rivitalot]
+                                                          [["huoneistot" "0" "huoneistonumero"] "000"]
+                                                          [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               uuden_rakennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :pientalo                 {:schema                    "uusiRakennus"
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :schema-data               [[["kaytto" "kayttotarkoitus"] usages/yhden-asunnon-talot]
+                                                          [["huoneistot" "0" "huoneistonumero"] "000"]
+                                                          [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               uuden_rakennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :vapaa-ajan-asuinrakennus {:schema                    "uusi-rakennus-ei-huoneistoa"
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :schema-data               [[["kaytto" "kayttotarkoitus"] usages/vapaa-ajan-asuinrakennus]]
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               uuden_rakennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :varasto-tms              {:schema                    "uusi-rakennus-ei-huoneistoa"
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :schema-data               [[["kaytto" "kayttotarkoitus"] usages/talousrakennus]]
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               uuden_rakennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :julkinen-rakennus        {:schema                    "uusiRakennus" ; Deprecated operation. Not in current operation tree, but in use in legacy applications.
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :schema-data               [[["huoneistot" "0" "huoneistonumero"] "000"]
+                                                          [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :attachments               uuden_rakennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :teollisuusrakennus       {:schema                    "uusiRakennus"
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               uuden_rakennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :muu-uusi-rakentaminen    {:schema                    "uusiRakennus"
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :schema-data               [[["huoneistot" "0" "huoneistonumero"] "000"]
+                                                          [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               uuden_rakennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
 
-   :laajentaminen               {:schema "rakennuksen-laajentaminen" ; Deprecated operation. Not in current operation tree, but in use in legacy applications.
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :kerrostalo-rt-laaj          {:schema "rakennuksen-laajentaminen"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :pientalo-laaj               {:schema "rakennuksen-laajentaminen"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :vapaa-ajan-rakennus-laaj    {:schema "rakennuksen-laajentaminen-ei-huoneistoja"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :talousrakennus-laaj         {:schema "rakennuksen-laajentaminen-ei-huoneistoja"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :teollisuusrakennus-laaj     {:schema "rakennuksen-laajentaminen"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :muu-rakennus-laaj           {:schema "rakennuksen-laajentaminen"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
+   :laajentaminen            {:schema                    "rakennuksen-laajentaminen" ; Deprecated operation. Not in current operation tree, but in use in legacy applications.
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               rakennuksen_laajennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :kerrostalo-rt-laaj       {:schema                    "rakennuksen-laajentaminen"
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               rakennuksen_laajennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :pientalo-laaj            {:schema                    "rakennuksen-laajentaminen"
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               rakennuksen_laajennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :vapaa-ajan-rakennus-laaj {:schema                    "rakennuksen-laajentaminen-ei-huoneistoja"
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               rakennuksen_laajennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :talousrakennus-laaj      {:schema                    "rakennuksen-laajentaminen-ei-huoneistoja"
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               rakennuksen_laajennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :teollisuusrakennus-laaj  {:schema                    "rakennuksen-laajentaminen"
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :optional                  optional-rakval-schemas
+                              :attachments               rakennuksen_laajennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
+   :muu-rakennus-laaj        {:schema                    "rakennuksen-laajentaminen"
+                              :permit-type               permit/R
+                              :applicant-doc-schema      applicant-doc-schema-name-R
+                              :required                  common-rakval-schemas
+                              :org-required              common-rakval-org-schemas
+                              :attachments               rakennuksen_laajennuksen_liitteet
+                              :add-operation-allowed     true
+                              :copying-allowed           true
+                              :min-outgoing-link-permits 0
+                              :asianhallinta             false
+                              :building                  true
+                              :state-graph-resolver      state-machine-resolver}
 
-   :perus-tai-kant-rak-muutos   {:schema "rakennuksen-muuttaminen-ei-huoneistoja"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["muutostyolaji"] schemas/perustusten-korjaus]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :kayttotark-muutos           {:schema "rakennuksen-muuttaminen"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["muutostyolaji"] schemas/kayttotarkotuksen-muutos]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_muutos_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :sisatila-muutos             {:schema "rakennuksen-muuttaminen"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["muutostyolaji"] schemas/kayttotarkotuksen-muutos]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_muutos_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :julkisivu-muutos            {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :jakaminen-tai-yhdistaminen  {:schema "rakennuksen-muuttaminen"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :rakennustietojen-korjaus    {:schema "rakennustietojen-korjaus"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required ["hankkeen-kuvaus-minimum" "maksaja" "rakennuspaikka"]
-                                 :attachments []
-                                 :add-operation-allowed true
-                                 :copying-allowed false
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :linjasaneeraus              {:schema "rakennuksen-muuttaminen"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :takka-tai-hormi             {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
-   :muu-laajentaminen           {:schema "rakennuksen-muuttaminen"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments rakennuksen_laajennuksen_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
+   :perus-tai-kant-rak-muutos  {:schema                    "rakennuksen-muuttaminen-ei-huoneistoja"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :schema-data               [[["muutostyolaji"] schemas/perustusten-korjaus]]
+                                :required                  common-rakval-schemas
+                                :org-required              common-rakval-org-schemas
+                                :optional                  optional-rakval-schemas
+                                :attachments               rakennuksen_laajennuksen_liitteet
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :building                  true
+                                :state-graph-resolver      state-machine-resolver}
+   :kayttotark-muutos          {:schema                    "rakennuksen-muuttaminen"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :schema-data               [[["muutostyolaji"] schemas/kayttotarkotuksen-muutos]]
+                                :required                  common-rakval-schemas
+                                :org-required              common-rakval-org-schemas
+                                :optional                  optional-rakval-schemas
+                                :attachments               rakennuksen_muutos_liitteet
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :building                  true
+                                :state-graph-resolver      state-machine-resolver}
+   :sisatila-muutos            {:schema                    "rakennuksen-muuttaminen"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :schema-data               [[["muutostyolaji"] schemas/kayttotarkotuksen-muutos]]
+                                :required                  common-rakval-schemas
+                                :org-required              common-rakval-org-schemas
+                                :optional                  optional-rakval-schemas
+                                :attachments               rakennuksen_muutos_liitteet
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :building                  true
+                                :state-graph-resolver      state-machine-resolver}
+   :julkisivu-muutos           {:schema                    "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :schema-data               [[["muutostyolaji"] schemas/muumuutostyo]]
+                                :required                  common-rakval-schemas
+                                :org-required              common-rakval-org-schemas
+                                :optional                  optional-rakval-schemas
+                                :attachments               rakennuksen_laajennuksen_liitteet
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :building                  true
+                                :state-graph-resolver      state-machine-resolver}
+   :jakaminen-tai-yhdistaminen {:schema                    "rakennuksen-muuttaminen"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :schema-data               [[["muutostyolaji"] schemas/muumuutostyo]]
+                                :required                  common-rakval-schemas
+                                :org-required              common-rakval-org-schemas
+                                :optional                  optional-rakval-schemas
+                                :attachments               rakennuksen_laajennuksen_liitteet
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :building                  true
+                                :state-graph-resolver      state-machine-resolver}
+   :rakennustietojen-korjaus   {:schema                    "rakennustietojen-korjaus"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :required                  ["hankkeen-kuvaus-minimum" "maksaja" "rakennuspaikka"]
+                                :attachments               []
+                                :add-operation-allowed     true
+                                :copying-allowed           false
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :building                  true
+                                :state-graph-resolver      state-machine-resolver}
+   :markatilan-laajentaminen   {:schema                    "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :schema-data               [[["muutostyolaji"] schemas/muumuutostyo]]
+                                :required                  common-rakval-schemas
+                                :org-required              common-rakval-org-schemas
+                                :optional                  optional-rakval-schemas
+                                :attachments               rakennuksen_laajennuksen_liitteet
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :building                  true
+                                :state-graph-resolver      state-machine-resolver}
+   :linjasaneeraus             {:schema                    "rakennuksen-muuttaminen"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :schema-data               [[["muutostyolaji"] schemas/muumuutostyo]]
+                                :required                  common-rakval-schemas
+                                :org-required              common-rakval-org-schemas
+                                :optional                  optional-rakval-schemas
+                                :attachments               rakennuksen_laajennuksen_liitteet
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :building                  true
+                                :state-graph-resolver      state-machine-resolver}
+   :takka-tai-hormi            {:schema                    "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :schema-data               [[["muutostyolaji"] schemas/muumuutostyo]]
+                                :required                  common-rakval-schemas
+                                :org-required              common-rakval-org-schemas
+                                :optional                  optional-rakval-schemas
+                                :attachments               rakennuksen_laajennuksen_liitteet
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :building                  true
+                                :state-graph-resolver      state-machine-resolver}
+   :parveke-tai-terassi        {:schema                    "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :schema-data               [[["muutostyolaji"] schemas/muumuutostyo]]
+                                :required                  common-rakval-schemas
+                                :org-required              common-rakval-org-schemas
+                                :optional                  optional-rakval-schemas
+                                :attachments               rakennuksen_laajennuksen_liitteet
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :building                  true
+                                :state-graph-resolver      state-machine-resolver}
+   :muu-laajentaminen          {:schema                    "rakennuksen-muuttaminen"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :schema-data               [[["muutostyolaji"] schemas/muumuutostyo]]
+                                :required                  common-rakval-schemas
+                                :org-required              common-rakval-org-schemas
+                                :optional                  optional-rakval-schemas
+                                :attachments               rakennuksen_laajennuksen_liitteet
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :building                  true
+                                :state-graph-resolver      state-machine-resolver}
 
-   :auto-katos                  {:schema "kaupunkikuvatoimenpide"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :structure true
-                                 :state-graph-resolver state-machine-resolver}
-   :masto-tms                   {:schema "kaupunkikuvatoimenpide"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :structure true
-                                 :state-graph-resolver state-machine-resolver}
-   :mainoslaite                 {:schema "kaupunkikuvatoimenpide"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :structure true
-                                 :state-graph-resolver state-machine-resolver}
-   :aita                        {:schema "kaupunkikuvatoimenpide-ei-tunnusta"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required (remove #{"paasuunnittelija"} common-rakval-schemas)
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-mini-rakval-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :structure true
-                                 :state-graph-resolver state-machine-resolver}
-   :maalampo                    {:schema "maalampokaivo"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required (remove #{"paasuunnittelija"} common-rakval-schemas)
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-mini-rakval-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :structure true
-                                 :state-graph-resolver state-machine-resolver}
-   :jatevesi                    {:schema "kaupunkikuvatoimenpide"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :structure true
-                                 :state-graph-resolver state-machine-resolver}
-   :muu-rakentaminen            {:schema "kaupunkikuvatoimenpide"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments kaupunkikuva_toimenpide_liitteet
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :structure true
-                                 :state-graph-resolver state-machine-resolver}
+   :auto-katos       {:schema                    "kaupunkikuvatoimenpide"
+                      :permit-type               permit/R
+                      :applicant-doc-schema      applicant-doc-schema-name-R
+                      :required                  common-rakval-schemas
+                      :org-required              common-rakval-org-schemas
+                      :optional                  optional-rakval-schemas
+                      :attachments               kaupunkikuva_toimenpide_liitteet
+                      :add-operation-allowed     true
+                      :copying-allowed           true
+                      :min-outgoing-link-permits 0
+                      :asianhallinta             false
+                      :structure                 true
+                      :state-graph-resolver      state-machine-resolver}
+   :masto-tms        {:schema                    "kaupunkikuvatoimenpide"
+                      :permit-type               permit/R
+                      :applicant-doc-schema      applicant-doc-schema-name-R
+                      :required                  common-rakval-schemas
+                      :org-required              common-rakval-org-schemas
+                      :optional                  optional-rakval-schemas
+                      :attachments               kaupunkikuva_toimenpide_liitteet
+                      :add-operation-allowed     true
+                      :copying-allowed           true
+                      :min-outgoing-link-permits 0
+                      :asianhallinta             false
+                      :structure                 true
+                      :state-graph-resolver      state-machine-resolver}
+   :mainoslaite      {:schema                    "kaupunkikuvatoimenpide"
+                      :permit-type               permit/R
+                      :applicant-doc-schema      applicant-doc-schema-name-R
+                      :required                  common-rakval-schemas
+                      :org-required              common-rakval-org-schemas
+                      :optional                  optional-rakval-schemas
+                      :attachments               kaupunkikuva_toimenpide_liitteet
+                      :add-operation-allowed     true
+                      :copying-allowed           true
+                      :min-outgoing-link-permits 0
+                      :asianhallinta             false
+                      :structure                 true
+                      :state-graph-resolver      state-machine-resolver}
+   :aita             {:schema                    "kaupunkikuvatoimenpide-ei-tunnusta"
+                      :permit-type               permit/R
+                      :applicant-doc-schema      applicant-doc-schema-name-R
+                      :required                  (remove #{"paasuunnittelija"} common-rakval-schemas)
+                      :org-required              common-rakval-org-schemas
+                      :optional                  optional-mini-rakval-schemas
+                      :attachments               kaupunkikuva_toimenpide_liitteet
+                      :add-operation-allowed     true
+                      :copying-allowed           true
+                      :min-outgoing-link-permits 0
+                      :asianhallinta             false
+                      :structure                 true
+                      :state-graph-resolver      state-machine-resolver}
+   :maalampo         {:schema                    "maalampokaivo"
+                      :permit-type               permit/R
+                      :applicant-doc-schema      applicant-doc-schema-name-R
+                      :required                  (remove #{"paasuunnittelija"} common-rakval-schemas)
+                      :org-required              common-rakval-org-schemas
+                      :optional                  optional-mini-rakval-schemas
+                      :attachments               kaupunkikuva_toimenpide_liitteet
+                      :add-operation-allowed     true
+                      :copying-allowed           true
+                      :min-outgoing-link-permits 0
+                      :asianhallinta             false
+                      :structure                 true
+                      :state-graph-resolver      state-machine-resolver}
+   :jatevesi         {:schema                    "kaupunkikuvatoimenpide"
+                      :permit-type               permit/R
+                      :applicant-doc-schema      applicant-doc-schema-name-R
+                      :required                  common-rakval-schemas
+                      :org-required              common-rakval-org-schemas
+                      :optional                  optional-rakval-schemas
+                      :attachments               kaupunkikuva_toimenpide_liitteet
+                      :add-operation-allowed     true
+                      :copying-allowed           true
+                      :min-outgoing-link-permits 0
+                      :asianhallinta             false
+                      :structure                 true
+                      :state-graph-resolver      state-machine-resolver}
+   :muu-rakentaminen {:schema                    "kaupunkikuvatoimenpide"
+                      :permit-type               permit/R
+                      :applicant-doc-schema      applicant-doc-schema-name-R
+                      :required                  common-rakval-schemas
+                      :org-required              common-rakval-org-schemas
+                      :optional                  optional-rakval-schemas
+                      :attachments               kaupunkikuva_toimenpide_liitteet
+                      :add-operation-allowed     true
+                      :copying-allowed           true
+                      :min-outgoing-link-permits 0
+                      :asianhallinta             false
+                      :structure                 true
+                      :state-graph-resolver      state-machine-resolver}
 
-   :purkaminen                  {:schema "purkaminen"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required common-rakval-schemas
-                                 :org-required common-rakval-org-schemas
-                                 :optional optional-rakval-schemas
-                                 :attachments [:muut [:selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
-                                                      :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta]]
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :building true
-                                 :state-graph-resolver state-machine-resolver}
+   :purkaminen {:schema                    "purkaminen"
+                :permit-type               permit/R
+                :applicant-doc-schema      applicant-doc-schema-name-R
+                :required                  common-rakval-schemas
+                :org-required              common-rakval-org-schemas
+                :optional                  optional-rakval-schemas
+                :attachments               [:muut [:selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
+                                                   :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta]]
+                :add-operation-allowed     true
+                :copying-allowed           true
+                :min-outgoing-link-permits 0
+                :asianhallinta             false
+                :building                  true
+                :state-graph-resolver      state-machine-resolver}
 
-   :kaivuu                      {:schema "maisematyo"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required mini-rakval-schemas
-                                 :optional optional-mini-rakval-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :state-graph-resolver state-machine-resolver}
-   :puun-kaataminen             {:schema "maisematyo"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required puun-kaataminen-schemas
-                                 :optional optional-mini-rakval-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :state-graph-resolver state-machine-resolver}
-   :tontin-jarjestelymuutos     {:schema "maisematyo"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required mini-rakval-schemas
-                                 :optional optional-mini-rakval-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :state-graph-resolver state-machine-resolver}
-   :muu-maisema-toimenpide      {:schema "maisematyo"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required mini-rakval-schemas
-                                 :optional optional-mini-rakval-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :state-graph-resolver state-machine-resolver}
-   :tontin-ajoliittyman-muutos  {:schema "maisematyo"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required mini-rakval-schemas
-                                 :optional optional-mini-rakval-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :state-graph-resolver state-machine-resolver}
-   :paikoutysjarjestus-muutos   {:schema "maisematyo"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required mini-rakval-schemas
-                                 :optional optional-mini-rakval-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :state-graph-resolver state-machine-resolver}
-   :kortteli-yht-alue-muutos    {:schema "maisematyo"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required mini-rakval-schemas
-                                 :optional optional-mini-rakval-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :state-graph-resolver state-machine-resolver}
-   :muu-tontti-tai-kort-muutos  {:schema "maisematyo"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required mini-rakval-schemas
-                                 :optional optional-mini-rakval-schemas
-                                 :attachments [:paapiirustus [:asemapiirros]]
-                                 :add-operation-allowed true
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :state-graph-resolver state-machine-resolver}
+   :kaivuu                     {:schema                    "maisematyo"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :required                  mini-rakval-schemas
+                                :optional                  optional-mini-rakval-schemas
+                                :attachments               [:paapiirustus [:asemapiirros]]
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :state-graph-resolver      state-machine-resolver}
+   :puun-kaataminen            {:schema                    "maisematyo"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :required                  puun-kaataminen-schemas
+                                :optional                  optional-mini-rakval-schemas
+                                :attachments               [:paapiirustus [:asemapiirros]]
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :state-graph-resolver      state-machine-resolver}
+   :tontin-jarjestelymuutos    {:schema                    "maisematyo"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :required                  mini-rakval-schemas
+                                :optional                  optional-mini-rakval-schemas
+                                :attachments               [:paapiirustus [:asemapiirros]]
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :state-graph-resolver      state-machine-resolver}
+   :muu-maisema-toimenpide     {:schema                    "maisematyo"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :required                  mini-rakval-schemas
+                                :optional                  optional-mini-rakval-schemas
+                                :attachments               [:paapiirustus [:asemapiirros]]
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :state-graph-resolver      state-machine-resolver}
+   :tontin-ajoliittyman-muutos {:schema                    "maisematyo"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :required                  mini-rakval-schemas
+                                :optional                  optional-mini-rakval-schemas
+                                :attachments               [:paapiirustus [:asemapiirros]]
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :state-graph-resolver      state-machine-resolver}
+   :paikoutysjarjestus-muutos  {:schema                    "maisematyo"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :required                  mini-rakval-schemas
+                                :optional                  optional-mini-rakval-schemas
+                                :attachments               [:paapiirustus [:asemapiirros]]
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :state-graph-resolver      state-machine-resolver}
+   :kortteli-yht-alue-muutos   {:schema                    "maisematyo"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :required                  mini-rakval-schemas
+                                :optional                  optional-mini-rakval-schemas
+                                :attachments               [:paapiirustus [:asemapiirros]]
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :state-graph-resolver      state-machine-resolver}
+   :muu-tontti-tai-kort-muutos {:schema                    "maisematyo"
+                                :permit-type               permit/R
+                                :applicant-doc-schema      applicant-doc-schema-name-R
+                                :required                  mini-rakval-schemas
+                                :optional                  optional-mini-rakval-schemas
+                                :attachments               [:paapiirustus [:asemapiirros]]
+                                :add-operation-allowed     true
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false
+                                :state-graph-resolver      state-machine-resolver}
 
-   :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required ["tyonjohtaja" "maksaja"]
-                                 :attachments []
-                                 :attachment-op-selector false
-                                 :attachments-readonly-after-sent true
-                                 :add-operation-allowed false
-                                 :copying-allowed false
+   :tyonjohtajan-nimeaminen    {:schema                          "hankkeen-kuvaus-minimum"
+                                :permit-type                     permit/R
+                                :applicant-doc-schema            applicant-doc-schema-name-R
+                                :required                        ["tyonjohtaja" "maksaja"]
+                                :attachments                     []
+                                :attachment-op-selector          false
+                                :attachments-readonly-after-sent true
+                                :add-operation-allowed           false
+                                :copying-allowed                 false
+                                :min-outgoing-link-permits       1
+                                :max-outgoing-link-permits       1
+                                :max-incoming-link-permits       0
+                                :allowed-link-permit-types       #{permit/R permit/P}
+                                :asianhallinta                   false
+                                :hidden                          true}
+   :tyonjohtajan-nimeaminen-v2 {:schema                          "tyonjohtaja-v2"
+                                :permit-type                     permit/R
+                                :applicant-doc-schema            applicant-doc-schema-name-R-TJ
+                                :subtypes                        [(keyword "") :tyonjohtaja-hakemus :tyonjohtaja-ilmoitus]
+                                :state-graph-resolver            tyonjohtaja-state-machine-resolver
+                                :required                        ["hankkeen-kuvaus-minimum"]
+                                :attachments                     []
+                                :attachment-op-selector          false
+                                :attachments-readonly-after-sent true
+                                :add-operation-allowed           false
+                                :copying-allowed                 false
+                                :min-outgoing-link-permits       1
+                                :max-outgoing-link-permits       1
+                                :max-incoming-link-permits       0
+                                :allowed-link-permit-types       #{permit/R permit/P}
+                                :asianhallinta                   false}
+
+   :suunnittelijan-nimeaminen {:schema                    "hankkeen-kuvaus-minimum"
+                               :permit-type               permit/R
+                               :applicant-doc-schema      applicant-doc-schema-name-R
+                               :required                  ["suunnittelija" "maksaja"]
+                               :attachments               []
+                               :add-operation-allowed     false
+                               :copying-allowed           true
+                               :min-outgoing-link-permits 1
+                               :asianhallinta             false}
+
+   :jatkoaika                   {:schema                    "hankkeen-kuvaus-minimum"
+                                 :permit-type               permit/R
+                                 :applicant-doc-schema      applicant-doc-schema-name-R
+                                 :required                  ["maksaja" "paatoksen-toimitus-rakval"] ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
+                                 :attachments               []
+                                 :add-operation-allowed     false
+                                 :copying-allowed           false
                                  :min-outgoing-link-permits 1
-                                 :max-outgoing-link-permits 1
-                                 :max-incoming-link-permits 0
-                                 :allowed-link-permit-types #{permit/R permit/P}
-                                 :asianhallinta false
-                                 :hidden true}
-   :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R-TJ
-                                 :subtypes [(keyword "") :tyonjohtaja-hakemus :tyonjohtaja-ilmoitus]
-                                 :state-graph-resolver tyonjohtaja-state-machine-resolver
-                                 :required ["hankkeen-kuvaus-minimum"]
-                                 :attachments []
-                                 :attachment-op-selector false
-                                 :attachments-readonly-after-sent true
-                                 :add-operation-allowed false
-                                 :copying-allowed false
-                                 :min-outgoing-link-permits 1
-                                 :max-outgoing-link-permits 1
-                                 :max-incoming-link-permits 0
-                                 :allowed-link-permit-types #{permit/R permit/P}
-                                 :asianhallinta false}
-
-   :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required ["suunnittelija" "maksaja"]
-                                 :attachments []
-                                 :add-operation-allowed false
-                                 :copying-allowed true
-                                 :min-outgoing-link-permits 1
-                                 :asianhallinta false}
-
-   :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required ["maksaja" "paatoksen-toimitus-rakval"]  ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
-                                 :attachments []
-                                 :add-operation-allowed false
-                                 :copying-allowed false
-                                 :min-outgoing-link-permits 1
-                                 :asianhallinta false
-                                 :state-graph-resolver (constantly states/r-jatkoaika-state-graph)}
-   :aiemmalla-luvalla-hakeminen {:schema "aiemman-luvan-toimenpide"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required []
-                                 :optional #{"maksaja" "paasuunnittelija" "suunnittelija"}  ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
-                                 :attachments []
-                                 :add-operation-allowed false
-                                 :copying-allowed true
+                                 :asianhallinta             false
+                                 :state-graph-resolver      (constantly states/r-jatkoaika-state-graph)}
+   :aiemmalla-luvalla-hakeminen {:schema                    "aiemman-luvan-toimenpide"
+                                 :permit-type               permit/R
+                                 :applicant-doc-schema      applicant-doc-schema-name-R
+                                 :required                  []
+                                 :optional                  #{"maksaja" "paasuunnittelija" "suunnittelija"} ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
+                                 :attachments               []
+                                 :add-operation-allowed     false
+                                 :copying-allowed           true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false
+                                 :asianhallinta             false
                                  :unsubscribe-notifications true
                                  :state-graph-resolver state-machine-resolver}
    :konversio                   {:schema "hankkeen-kuvaus-minimum"
@@ -1153,28 +1158,38 @@
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :copying-allowed true
+                                 :state-graph-resolver      state-machine-resolver}
+   :rak-valm-tyo                {:schema                    "maisematyo"
+                                 :permit-type               permit/R
+                                 :applicant-doc-schema      applicant-doc-schema-name-R
+                                 :required                  mini-rakval-schemas
+                                 :optional                  optional-mini-rakval-schemas
+                                 :attachments               [:paapiirustus [:asemapiirros]]
+                                 :add-operation-allowed     true
+                                 :copying-allowed           true
+>>>>>>> develop
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false
-                                 :state-graph-resolver state-machine-resolver}
-   :aloitusoikeus               {:schema "aloitusoikeus"
-                                 :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required ["maksaja"]
-                                 :attachments []
-                                 :add-operation-allowed false
-                                 :copying-allowed true
+                                 :asianhallinta             false
+                                 :state-graph-resolver      state-machine-resolver}
+   :aloitusoikeus               {:schema                    "aloitusoikeus"
+                                 :permit-type               permit/R
+                                 :applicant-doc-schema      applicant-doc-schema-name-R
+                                 :required                  ["maksaja"]
+                                 :attachments               []
+                                 :add-operation-allowed     false
+                                 :copying-allowed           true
                                  :min-outgoing-link-permits 1
-                                 :asianhallinta false}
-   :raktyo-aloit-loppuunsaat   {:schema "jatkoaika-hankkeen-kuvaus"
-                                :permit-type permit/R
-                                :applicant-doc-schema applicant-doc-schema-name-R
-                                :required ["maksaja" "paatoksen-toimitus-rakval"] ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
-                                :attachments []
-                                :add-operation-allowed false
-                                :copying-allowed true
-                                :min-outgoing-link-permits 1
-                                :asianhallinta false
-                                :state-graph-resolver (constantly states/r-jatkoaika-state-graph)}})
+                                 :asianhallinta             false}
+   :raktyo-aloit-loppuunsaat    {:schema                    "jatkoaika-hankkeen-kuvaus"
+                                 :permit-type               permit/R
+                                 :applicant-doc-schema      applicant-doc-schema-name-R
+                                 :required                  ["maksaja" "paatoksen-toimitus-rakval"] ;; TODO: Tuleeko talle myos "rakennusjatesuunnitelma"?
+                                 :attachments               []
+                                 :add-operation-allowed     false
+                                 :copying-allowed           true
+                                 :min-outgoing-link-permits 1
+                                 :asianhallinta             false
+                                 :state-graph-resolver      (constantly states/r-jatkoaika-state-graph)}})
 
 (def- vvvl-operations
   {:vvvl-vesijohdosta           {:schema "talousvedet"
@@ -1315,6 +1330,30 @@
                        :asianhallinta false
                        :unsubscribe-notifications true}})
 
+
+;; Allu operations (permit type A). Located within YA in the operations tree.
+(def- a-operations
+  {:promootio                  {:schema                    "promootio"
+                                :permit-type               permit/A
+                                :applicant-doc-schema      applicant-doc-schema-name-hakija
+                                :required                  ["maksaja" "promootio-time" "promootio-location"
+                                                            "promootio-structures" "promootio-info"]
+                                :attachments               []
+                                :add-operation-allowed     false
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false}
+   :lyhytaikainen-maanvuokraus {:schema                    "lyhytaikainen-maanvuokraus"
+                                :permit-type               permit/A
+                                :applicant-doc-schema      applicant-doc-schema-name-hakija
+                                :required                  ["maksaja"]
+                                :attachments               []
+                                :add-operation-allowed     false
+                                :copying-allowed           true
+                                :min-outgoing-link-permits 0
+                                :asianhallinta             false}
+   })
+
 (def operations
   (merge
     r-operations
@@ -1327,7 +1366,8 @@
     mal-operations
     kt-operations
     mm-operations
-    ark-operations))
+    ark-operations
+    a-operations))
 
 (sc/defschema Operation
   {; Documents

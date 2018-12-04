@@ -99,6 +99,7 @@
   (->> {:R    attachment-types/Rakennusluvat-v2
         :P    attachment-types/Rakennusluvat-v2
         :YA   attachment-types/YleistenAlueidenLuvat-v2
+        :A    attachment-types/Allu
         :YI   attachment-types/Ymparistoilmoitukset
         :YL   attachment-types/Ymparistolupa
         :YM   attachment-types/MuutYmparistoluvat

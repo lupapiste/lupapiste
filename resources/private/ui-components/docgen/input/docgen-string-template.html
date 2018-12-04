@@ -12,7 +12,8 @@
                               'maxlength': inputOptions.maxLength,
                               'max': inputOptions.max,
                               'min': inputOptions.min,
-                              'data-test-id': path.join('.') }"/>
+                              'data-test-id': path.join('.'),
+                              placeholder: inputOptions.placeholder}"/>
 
     <!-- ko if: schema.unit -->
     <span class="form-string-unit" data-bind="ltext: 'unit.' + schema.unit"></span>

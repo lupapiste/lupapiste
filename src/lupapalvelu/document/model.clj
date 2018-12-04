@@ -280,13 +280,26 @@
         (assoc validation-result :path []) ; Invalid path from user input should not be echoed
         validation-result))))
 
-(defn validate-fields [application info k data path]
+(defn- data-match? [doc-data doc-path {:keys [path values]}]
+  (boolean (and path
+                values
+                (contains? values (tools/get-value-by-path doc-data doc-path path)))))
+
+(defn- field-visible? [data path {:keys [hide-when show-when] :as element}]
+  (let [hide (and hide-when (data-match? data path hide-when))
+        show (and show-when (data-match? data path show-when))]
+    (or (and (nil? hide) (nil? show))
+        (and (not hide) (or (nil? show) show)))))
+
+(defn- do-validate-fields [application doc-data info k data path]
   (let [current-path (if k (conj path (name k)) path)
         element (if (not-empty current-path)
                   (keywordize-keys (find-by-name (:schema-body info) current-path))
                   {})
         selected (get-in data [(keyword schemas/select-one-of-key) :value])
         selected-path (when selected (vec (map keyword (conj path selected))))
+        invisible? (and (:name element)
+                        (not (field-visible? doc-data current-path element)))
         results (if (contains? data :value)
                   (let [result  (validate-field application element (:value data))]
                     (->validation-result info data current-path element result))
@@ -294,13 +307,22 @@
                    seq
                    (concat (flatten [(validate-element info data current-path element)])
                            (map (fn [[k2 v2]]
-                                  (validate-fields application info k2 v2 current-path)) data))))]
-    (if selected
+                                  (do-validate-fields application doc-data info k2 v2 current-path)) data))))]
+    (cond
+      selected
       (map #(if (not= selected-path (take (count selected-path) (:path %)))
               (assoc % :ignore true)
               %)
            (flatten [results]))
+
+      invisible?
+      (map #(assoc % :ignore true) (flatten [results]))
+
+      :else
       results)))
+
+(defn validate-fields [application info k data path]
+  (do-validate-fields application data info k data path))
 
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
@@ -334,7 +356,7 @@
                 (let [kw (keyword name)
                       current-path (conj path kw)
                       value (get-in data (conj current-path :value))
-                      validation-error (when required
+                      validation-error (when (and required (field-visible? data current-path element))
                                          (if (instance? Long value)
                                            (when-not (some? value)
                                              (->validation-result info nil current-path element [:tip "illegal-value:required"]))
