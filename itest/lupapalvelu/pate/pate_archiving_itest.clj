@@ -20,8 +20,8 @@
                            :propertyId sipoo-property-id
                            :operation  :kerrostalo-rivitalo))
 
-(defn- add-missing-coordinates [{:keys [location-wgs84] :as metadata}]
- (assoc metadata :location-etrs-tm35fin location-wgs84))
+(defn- add-missing-coordinates [{:keys [location] :as metadata}]
+ (assoc metadata :location-etrs-tm35fin location))
 
 (defn- change-applicant-to-list
   [{:keys [applicant] :as metadata}]
