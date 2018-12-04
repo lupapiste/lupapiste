@@ -1040,6 +1040,39 @@
                       :group-help "hankkeestaIlmoitettu.groupHelpText"
                       :body [{:name "hankkeestaIlmoitettuPvm" :type :date :i18nkey "date"}]}])
 
+;; TODO: Tehdäänpäs tähän laajennettu versio konversiota varten
+(def rakennuspaikka-kuntagml [{:name "kiinteisto"
+                               :type :group
+                               :uicomponent :propertyGroup
+                               :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size :s
+                                       :transform :zero-pad-4}
+                                      {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "maapintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-input :inputType :string}
+                                      {:name "vesipintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-input :inputType :string}
+                                      {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-input :inputType :checkbox}]}
+                              {:name "hallintaperuste" :type :select :sortBy :displayname :required true
+                               :body [{:name "oma"}
+                                      {:name "vuokra"}
+                                      ei-tiedossa]}
+                              {:name "kaavanaste" :type :select :sortBy :displayname :hidden true
+                               :body [{:name "asema"}
+                                      {:name "ranta"}
+                                      {:name "rakennus"}
+                                      {:name "yleis"}
+                                      {:name "ei kaavaa"}
+                                      ei-tiedossa]}
+                              {:name "kaavatilanne" :type :select :sortBy :displayname
+                               :body [{:name "maakuntakaava"}
+                                      {:name "oikeusvaikutteinen yleiskaava"}
+                                      {:name "oikeusvaikutukseton yleiskaava"}
+                                      {:name "asemakaava"}
+                                      {:name "ranta-asemakaava"}
+                                      {:name "ei kaavaa"}]}
+                              {:name "hankkeestaIlmoitettu" :type :group
+                               :group-help "hankkeestaIlmoitettu.groupHelpText"
+                               :body [{:name "hankkeestaIlmoitettuPvm" :type :date :i18nkey "date"}]}])
+
 (def lisakohde-rakennuspaikka [{:name "kiinteisto"
                                 :type :group
                                 :uicomponent :propertyGroup
