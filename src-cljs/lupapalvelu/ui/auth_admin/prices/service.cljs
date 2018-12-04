@@ -3,19 +3,19 @@
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.auth-admin.prices.state :as state]))
 
+(defn- sort-latest-first [catalogues]
+  (reverse (sort-by :valid-from catalogues)))
+
 (defn fetch-price-catalogues [& [callback]]
   (common/query :organization-price-catalogues
                 (fn [data]
                   (let [catalogues (:price-catalogues data)]
-                    (reset! state/catalogues catalogues)
-                    (when callback (callback)))
-                  ;;TODO sort catalogues here by relevance (?)
-                  )
+                    (reset! state/catalogues (sort-latest-first catalogues))
+                    (when callback (callback))))
                 :organization-id @state/org-id))
 
 (defn publish-catalogue [catalogue]
   (let [new-catalogue (select-keys catalogue [:valid-from-str :rows])]
-    (println ">> publish-catalogue: " new-catalogue)
     (common/command :publish-price-catalogue
                     (fn [data]
                       (let [id (:price-catalogue-id data)]
