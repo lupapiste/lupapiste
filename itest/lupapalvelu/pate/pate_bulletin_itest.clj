@@ -12,8 +12,10 @@
                            :propertyId sipoo-property-id
                            :operation  :kerrostalo-rivitalo))
 
-(def verdict-date 1542547500000)
-(def julkipano-date 1542633900000)
+(def verdict-date (sade.core/now))
+(def julkipano-date (sade.core/now))
+(def anto-date (sade.core/now))
+(def lainvoimainen-date (sade.core/now))
 
 (facts "Pate bulletin"
 
@@ -96,9 +98,9 @@
                       :kuntalupatunnus "123-456"
                       :verdict-code "1"
                       :verdict-text "Verdict given"
-                      :anto (timestamp "20.11.2018")
-                      :lainvoimainen (timestamp "20.11.20118")
-                      :julkipano (timestamp "20.11.2018")
+                      :anto anto-date
+                      :lainvoimainen lainvoimainen-date
+                      :julkipano julkipano-date
                       :bulletin-op-description "This is pate legacy bulletin description")
 
         (add-legacy-review sonja legacy-app-id verdict-id "First review" :paikan-merkitseminen)
@@ -123,8 +125,8 @@
             (:bulletinOpDescription bulletin) => "This is pate legacy bulletin description")
 
           (fact "Appeal period is correct"
-            (:appealPeriodStartsAt bulletin) => (timestamp "20.11.2018")
-            (:appealPeriodEndsAt bulletin) => (-> (timestamp "20.11.2018") c/from-long (t/plus (t/days 14)) c/to-long))
+            (:appealPeriodStartsAt bulletin) => julkipano-date
+            (:appealPeriodEndsAt bulletin) => (-> julkipano-date c/from-long (t/plus (t/days 14)) c/to-long))
 
           (fact "Bulletin have data from verdict"
             (let [lupamaaraykset (-> bulletin :verdicts first :paatokset first :lupamaaraykset)]
