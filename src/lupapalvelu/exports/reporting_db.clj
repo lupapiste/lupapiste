@@ -24,7 +24,7 @@
 
    :location-etrs-tm35fin (ds/access :location)
    :location-wgs84 (ds/access :location-wgs84)
-   :rakennuspaikanLahiosoite (ds/access :test)
+   :address (ds/access :address)
    :tilanteenPvm (ds/access :test) ;; Selite: Koska hakemuksen viimeisin tila on tullut voimaan Historysta etsitään
    :toimenpideteksti (ds/access :test) ;; Selite: Hankkeen kuvaus korvaamaan tätä. Konversiossa huomioitava, rakennusvalvonta-asian kuvaus
    :uuttaHuoneistoalaa (ds/access :test) ;; Selite: Mahdollisuus myös negatiiviseen arvoon. Oleellinen tieto. Tulee rakennuksen tietona ja summataan hakemukselle
@@ -151,6 +151,7 @@
 (def reporting-app-accessors
   {:test (constantly "foo")
    :id (ds/from-context [:application :id])
+   :address (ds/from-context [:application :address])
    :araFunding (ds/from-context [:application #(domain/get-document-by-name % "hankkeen-kuvaus")
                                  :data tools/unwrapped :rahoitus]
                                 false)

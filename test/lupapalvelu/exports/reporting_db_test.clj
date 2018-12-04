@@ -9,6 +9,7 @@
     (org/pate-scope? irrelevant) => false)
   (->reporting-result application-rakennuslupa "fi")
   => (contains {:id (:id application-rakennuslupa)
+                :address (:address application-rakennuslupa)
                 :location-etrs-tm35fin (:location application-rakennuslupa)
                 :location-wgs84 (:location-wgs84 application-rakennuslupa)
                 :permitType "R"
