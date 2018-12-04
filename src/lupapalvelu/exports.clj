@@ -59,8 +59,6 @@
    "Z" 801})
 
 (def price-classes-for-operation
-  ; See lupapiste-chef/cookbooks/lupapiste-dw/files/default/etl/setupdata/price_class_csv.csv
-
   {:asuinrakennus               uuden-rakentaminen ; old operation tree
    :vapaa-ajan-asuinrakennus    uuden-rakentaminen
    :varasto-tms                 uuden-rakentaminen
