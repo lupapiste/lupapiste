@@ -147,33 +147,91 @@
       result
       default)))
 
+(defn building-int-value
+  "Returns accessor function which fetches building data numeric string values and
+   convert those to integers, (key like :autopaikat-yhteensa)."
+  [key]
+  (fn [verdict]
+    (->> (map key (vals (get-in verdict [:data :buildings])))
+         (map util/->int)
+         (apply +))))
+
+(defn foremen
+  "Accessor function to fetch localized foreman names, returns string."
+  [verdict]
+  (if (vc/legacy? verdict)
+    (->> (get-in verdict [:data :foremen])
+         vals
+         (map :role)
+         (ss/join ", "))
+    (->> (get-in verdict [:data :foremen])
+         (map #(i18n/localize (or (get-in verdict [:data :language]) "fi") (str "pate-r.foremen." %)))
+         (ss/join ", "))))
+
+(defn conditions
+  "Accessor function to fetch conditions, returns conditions in map with key :sisalto."
+  [verdict]
+  (let [condition-key (if (vc/legacy? verdict) :name :condition)]
+    (some->> (get-in verdict [:data :conditions])
+             vals
+             (map condition-key)
+             (remove ss/blank?)
+             (map #(assoc {} :sisalto %)))))
+
+(defn reference-value
+  "Accessor function to fetch actual values from references based on keys in data."
+  [key]
+  (fn [verdict]
+    (->> (get-in verdict [:data (keyword key)])
+         (map (fn [id] (:fi (util/find-by-id id (get-in verdict [:references (keyword key)]))))))))
+
+(defn reviews
+  "Accessor function to fetch review names, returns names in map with key :tarkastuksenTaiKatselmuksenNimi."
+  [verdict]
+  (if (vc/legacy? verdict)
+    (->> (get-in verdict [:data :reviews])
+         vals
+         (map :name)
+         (map #(assoc {} :tarkastuksenTaiKatselmuksenNimi %)))
+    (->> (get-in verdict [:data :reviews])
+         (map (fn [id] (:fi (util/find-by-id id (get-in verdict [:references :reviews])))))
+         (map #(assoc {} :tarkastuksenTaiKatselmuksenNimi %)))))
+
 (def backing-system-verdict-skeleton
-  {:id (ds/access :id)
+  {:id              (ds/access :id)
    :kuntalupatunnus (ds/access :kuntalupatunnus)
-   :draft (ds/access :draft)
-   :timestamp (ds/access :timestamp)
-   :sopimus (ds/access :sopimus)
-   :paatokset [{:id (ds/access :id)
-                :paivamaarat {:anto (ds/access :anto)
-                              :lainvoimainen (ds/access :lainvoimainen)}
-                :poytakirjat [{:paatoksentekija (ds/access :paatoksentekija)
-                               :urlHash nil
-                               :status (ds/access :status)
-                               :paatos (ds/access :paatos)
-                               :paatospvm (ds/access :paatospvm)
-                               :pykala (ds/access :pykala)
-                               :paatoskoodi (ds/access :paatoskoodi)}]}]})
+   :draft           (ds/access :draft)
+   :timestamp       (ds/access :timestamp)
+   :sopimus         (ds/access :sopimus)
+   :paatokset       [{:id             (ds/access :id)
+                      :paivamaarat    {:anto          (ds/access :anto)
+                                       :lainvoimainen (ds/access :lainvoimainen)}
+                      :poytakirjat    [{:paatoksentekija (ds/access :paatoksentekija)
+                                        :urlHash         nil
+                                        :status          (ds/access :status)
+                                        :paatos          (ds/access :paatos)
+                                        :paatospvm       (ds/access :paatospvm)
+                                        :pykala          (ds/access :pykala)
+                                        :paatoskoodi     (ds/access :paatoskoodi)}]
+                      :lupamaaraykset {:autopaikkojaEnintaan        (ds/access :autopaikkojaEnintaan)
+                                       :autopaikkojaRakennettu      (ds/access :autopaikkojaRakennettu)
+                                       :autopaikkojaKiinteistolla   (ds/access :autopaikkojaKiinteistolla)
+                                       :vaaditutTyonjohtajat        (ds/access :vaaditutTyonjohtajat)
+                                       :vaaditutErityissuunnitelmat (ds/access :vaaditutErityissuunnitelmat)
+                                       :maaraykset                  (ds/access :maaraykset)
+                                       :vaaditutKatselmukset        (ds/access :vaaditutKatselmukset)}}]})
 
 (defn- backing-system-status [verdict]
   (when-not (vc/verdict-code-is-free-text? verdict)
-    (util/->int (vc/verdict-code verdict))))
+    (if (vc/legacy? verdict)
+      (util/->int (vc/verdict-code verdict)))))
 
 (defn- backing-system-paatoskoodi [verdict]
   (if (vc/verdict-code-is-free-text? verdict)
     (vc/verdict-code verdict)
-    (ss/lower-case (i18n/localize "fi"
-                                  (str "verdict.status."
-                                       (vc/verdict-code verdict))))))
+    (if (vc/legacy? verdict)
+      (ss/lower-case (i18n/localize "fi" (str "verdict.status." (vc/verdict-code verdict))))
+      (i18n/localize "fi" (str "pate-r.verdict-code." (vc/verdict-code verdict))))))
 
 (def backing-system-verdict-accessors
   {:id (with-path [:id])
@@ -189,7 +247,14 @@
    :paatos vc/verdict-text
    :paatospvm (with-path [:data :anto])
    :pykala vc/verdict-section
-   :paatoskoodi backing-system-paatoskoodi})
+   :paatoskoodi backing-system-paatoskoodi
+   :autopaikkojaEnintaan (building-int-value :autopaikat-yhteensa)
+   :autopaikkojaRakennettu (building-int-value :rakennetut-autopaikat)
+   :autopaikkojaKiinteistolla (building-int-value :kiinteiston-autopaikat)
+   :vaaditutTyonjohtajat foremen
+   :vaaditutErityissuunnitelmat (reference-value :plans)
+   :maaraykset conditions
+   :vaaditutKatselmukset reviews})
 
 (defn ->backing-system-verdict [verdict]
   (if (vc/lupapiste-verdict? verdict)
@@ -358,7 +423,7 @@
   (infof "Bulletins for removed verdict %s need to be cleaned up" verdictId)
   (mongo/remove :application-bulletins (str applicationId "_" verdictId)))
 
-(defn- fallback-appeal-end-from-appeal-start
+(defn fallback-appeal-end-from-appeal-start
   "If appeal period end date is not available, use 14 days from appeal period start"
   [appeal-period-start]
   (-> appeal-period-start tc/from-long (t/plus (t/days 14)) tc/to-long))

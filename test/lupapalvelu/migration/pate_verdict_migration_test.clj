@@ -150,7 +150,7 @@
                                                      {:type-group "muut"
                                                       :type-id    "paatosote"
                                                       :amount 1}]}
-                            :template {:inclusions [:foreman-label :conditions-title :foremen-title :kuntalupatunnus :verdict-section :verdict-text :anto :attachments :foremen.role :foremen.remove :verdict-code :conditions.name :conditions.remove :reviews-title :type-label :reviews.name :reviews.type :reviews.remove :add-review :name-label :condition-label :lainvoimainen :handler :add-foreman :upload :add-condition]}
+                            :template {:inclusions [:foreman-label :conditions-title :julkipano :foremen-title :bulletin-op-description :kuntalupatunnus :verdict-section :verdict-text :anto :attachments :foremen.role :foremen.remove :verdict-code :conditions.name :conditions.remove :reviews-title :type-label :reviews.name :reviews.type :reviews.remove :add-review :name-label :condition-label :lainvoimainen :handler :add-foreman :upload :add-condition]}
                             :legacy? true})
 
 (def migrated-test-verdict-with-signatures (assoc migrated-test-verdict :signatures migrated-signatures))
