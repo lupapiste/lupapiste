@@ -253,7 +253,8 @@
                                                                                      :en "Sipoon rakennusvalvonta"
                                                                                      :sv "Sipoon rakennusvalvonta"}})
                     (fact "application data enriched to it"
-                          (get-in invoice [:enriched-data :application]) => {:address "Kukkuja 7"})))))))
+                          (get-in invoice [:enriched-data :application]) => {:address "Kukkuja 7"})))))
+
 
     (fact "organizations-transferbatches"
           (fact "Should return transferbatch with one invoice when invoice is transferred to confirmed"
