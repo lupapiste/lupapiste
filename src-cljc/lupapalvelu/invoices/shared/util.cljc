@@ -31,7 +31,9 @@
        (string? (first x))
        (string? (second x))))
 
-(defn get-operations-for-category [operation-tree category]
+(defn get-operations-for-category
+  "Get all operations as a flat string collection from an operation tree for a top level operation category such as Rakentaminen ja purkaminen"
+  [operation-tree category]
   (let [by-category (into {} operation-tree)
         category-operation-tree (get by-category category)
         branch? (fn [x] (and (sequential? x)

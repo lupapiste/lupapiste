@@ -14,7 +14,9 @@
 (def invoice-date-formatter (tformat/formatter "dd.MM.yyyy"))
 
 (defn loc-operation [operation]
-  (loc (str "operations." operation)))
+  (if operation
+    (loc (str "operations." (name operation)))
+    operation))
 
 (defn ->date [timestamp]
   (tcoerce/from-long timestamp))
@@ -38,7 +40,7 @@
    (->date-str (:valid-from catalogue))
    " - "
    (->date-str (:valid-until catalogue))
-   (if (= "draft" (:state catalogue)) (str " [" (loc "price-catalogue.draft") "]"))))
+   (if (= "draft" (:state catalogue)) (js/sprintf " [%s]" (loc "price-catalogue.draft")))))
 
 (rum/defc catalogue-select < rum/reactive
   [catalogues selected-catalogue-id]

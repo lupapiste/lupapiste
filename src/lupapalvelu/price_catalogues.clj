@@ -51,35 +51,31 @@
   [{:keys [valid-from organization-id] :as price-catalogue}]
   (debug ">> fetch-previous-published-price-catalogue catalogue: " price-catalogue)
   (if (and valid-from organization-id)
-    (let [prev-catalogues (mongo/select :price-catalogues {$and [{:organization-id organization-id}
-                                                                 {:valid-from {$lt valid-from}}
-                                                                 {:state "published"}]})]
-      (if (not (empty? prev-catalogues))
-        (apply max-key :valid-from prev-catalogues)))))
+    (when-let [prev-catalogues (seq (mongo/select :price-catalogues {$and [{:organization-id organization-id}
+                                                                           {:valid-from {$lt valid-from}}
+                                                                           {:state "published"}]}))]
+      (apply max-key :valid-from prev-catalogues))))
 
 (defn fetch-next-published-price-catalogue
   [{:keys [valid-from organization-id] :as price-catalogue}]
   (debug ">> fetch-next-price-catalogue catalogue: " price-catalogue)
   (if (and valid-from organization-id)
-    (let [next-catalogues (mongo/select :price-catalogues {$and [{:organization-id organization-id}
-                                                                   {:valid-from {$gt valid-from}}
-                                                                   {:state "published"}]})]
-      (if (not (empty? next-catalogues))
-        (apply min-key :valid-from next-catalogues)))))
+    (when-let [next-catalogues (seq (mongo/select :price-catalogues {$and [{:organization-id organization-id}
+                                                                           {:valid-from {$gt valid-from}}
+                                                                           {:state "published"}]}))]
+      (apply min-key :valid-from next-catalogues))))
 
 (defn fetch-same-day-published-price-catalogues
   [{:keys [valid-from organization-id] :as price-catalogue}]
   (debug ">> fetch-same-day-price-catalogue catalogue: " price-catalogue)
-  (if (and valid-from organization-id)
-    (let [same-day-catalogues (mongo/select :price-catalogues {$and [{:organization-id organization-id}
-                                                                     {:valid-from valid-from}
-                                                                     {:state "published"}
-                                                                     ]})]
-      same-day-catalogues)))
+  (when (and valid-from organization-id)
+    (mongo/select :price-catalogues {$and [{:organization-id organization-id}
+                                           {:valid-from valid-from}
+                                           {:state "published"}]})))
 
 (defn validate-price-catalogues [price-catalogues]
   (debug ">> validate-price-catalogues price-catalogues: " price-catalogues)
-  (if-not (empty? price-catalogues)
+  (when (seq price-catalogues)
     (sc/validate [PriceCatalogue] price-catalogues)))
 
 (def time-format (tf/formatter "dd.MM.YYYY"))

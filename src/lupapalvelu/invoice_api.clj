@@ -142,9 +142,8 @@
         user-org-ids (invoices/get-user-orgs-having-role user required-role-in-orgs)
         transfer-batches-for-orgs (get-transfer-batch-for-orgs user-org-ids)]
     (ok {:transfer-batches transfer-batches-for-orgs})))
-    
-(defcommand publish-price-catalogue
 
+(defcommand publish-price-catalogue
   {:description      "Insert a price catalogue to the db"
    :permissions      [{:required [:organization/admin]}]
    :user-roles       #{:authority}
