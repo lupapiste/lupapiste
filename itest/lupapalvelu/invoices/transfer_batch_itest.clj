@@ -42,7 +42,7 @@
   (mongo/connect!)
 
   (mongo/with-db itu/test-db-name
-    (lupapalvelu.fixture.core/apply-fixture "minimal")
+    (lupapalvelu.fixture.core/apply-fixture "invoicing-enabled")
 
     (defn get-transfer-batch-db [id]
       (mongo/by-id transfer-batch-db-key id))

@@ -135,7 +135,8 @@
                                :openInforequestEnabled (not (:open-inforequest orig-scope))
                                :openInforequestEmail "someone@localhost.localdomain"
                                :opening nil
-                               :pateEnabled false)
+                               :pateEnabled false
+                               :invoicingEnabled false)
         updated-organization (:data (query admin :organization-by-id :organizationId organization-id))
         updated-scope        (local-org-api/resolve-organization-scope (:municipality orig-scope) (:permitType orig-scope) updated-organization)]
 
@@ -1326,7 +1327,8 @@
                :opening nil
                :bulletinsEnabled true
                :bulletinsUrl nil
-               :pateEnabled false) => ok?
+               :pateEnabled false
+               :invoicingEnabled false) => ok?
 
       (fact "is enabled"
 
@@ -1358,7 +1360,8 @@
                :opening nil
                :bulletinsEnabled true
                :bulletinsUrl "http://foo.my.url"
-               :pateEnabled false) => ok?
+               :pateEnabled false
+               :invoicingEnabled false) => ok?
 
       (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))
       => [{:permitType "R"
@@ -1400,7 +1403,8 @@
                :opening nil
                :bulletinsEnabled false
                :bulletinsUrl "http://foo.my.url"
-               :pateEnabled false) => ok?
+               :pateEnabled false
+               :invoicingEnabled false) => ok?
 
       (fact "is disabled"
         (command sipoo :update-organization-bulletin-scope
