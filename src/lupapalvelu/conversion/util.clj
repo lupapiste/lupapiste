@@ -17,9 +17,6 @@
             [sade.env :as env]
             [sade.strings :as ss]))
 
-(def tila
-  (atom {})) ;; TODO: Remove me
-
 (def config
   {:resource-path (format "/Users/%s/Desktop/test-data" (System/getenv "USER"))})
 
@@ -302,11 +299,7 @@
                            (= rakennuksen-selite "Laajennus")
                            (= "B" suffix))
         rakennelman-kuvaus (get-in toimenpide [:rakennelmatieto :Rakennelma :kuvaus :kuvaus])
-        rakennelman-selite (get-in toimenpide [:rakennelmatieto :Rakennelma :tunnus :rakennuksenSelite])
-        ; _ (println toimenpide) ; TODO: Remove us as well, please
-        ; _ (println rakennuksen-selite)
-        ; _ (println kayttotarkoitus)
-         _ (swap! tila assoc :kuntalupatunnus kuntalupatunnus :toimenpide toimenpide)]
+        rakennelman-selite (get-in toimenpide [:rakennelmatieto :Rakennelma :tunnus :rakennuksenSelite])]
     (cond
       (contains? #{"P" "PI"} suffix) "purkaminen"
       (and uusi?

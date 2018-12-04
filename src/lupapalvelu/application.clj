@@ -431,17 +431,13 @@
 
 (def db-schema-info-keys [:name :version :type :subtype :op])
 
-(def tila
-  (atom '()))
-
 (defn make-document [primary-operation-name created manual-schema-datas schema]
   (let [op-info (op/operations (keyword primary-operation-name))
         op-schema-name (:schema op-info)
         default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
                                                    op-schema-name
                                                    (:schema-data op-info))
-        merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
-        _ (swap! tila conj merged-schema-datas)
+        merged-schema-datas (merge-with concat default-schema-datas manual-schema-datas)
         schema-name (get-in schema [:info :name])]
     {:id          (mongo/create-id)
      :schema-info (select-keys (:info schema) db-schema-info-keys)
