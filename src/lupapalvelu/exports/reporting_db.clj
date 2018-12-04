@@ -26,7 +26,7 @@
    :location-wgs84 (ds/access :location-wgs84)
    :address (ds/access :address)
    :stateChangeTs (ds/access :stateChangeTs) ;; Selite: Koska hakemuksen viimeisin tila on tullut voimaan Historysta etsitään
-   :toimenpideteksti (ds/access :test) ;; Selite: Hankkeen kuvaus korvaamaan tätä. Konversiossa huomioitava, rakennusvalvonta-asian kuvaus
+   :projectDescription (ds/access :projectDescription) ;; Selite: Hankkeen kuvaus korvaamaan tätä. Konversiossa huomioitava, rakennusvalvonta-asian kuvaus
    :uuttaHuoneistoalaa (ds/access :test) ;; Selite: Mahdollisuus myös negatiiviseen arvoon. Oleellinen tieto. Tulee rakennuksen tietona ja summataan hakemukselle
    :uuttaKerrosalaa (ds/access :test) ;; Selite: Mahdollisuus myös negatiiviseen arvoon. Oleellinen tieto. Kerrosalassa mukana yleiset tilat. Tulee rakennuksen tietona ja summataan hakemukselle
 
@@ -157,6 +157,9 @@
                                 false)
    :location (ds/from-context [:application :location])
    :location-wgs84 (ds/from-context [:application :location-wgs84])
+   :projectDescription (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
+                                         :RakennusvalvontaAsia :asianTiedot :Asiantiedot
+                                         :rakennusvalvontaasianKuvaus])
    :state (ds/from-context [:application :state])
    :stateChangeTs (ds/from-context [:application :history (partial filter :state) last :ts])
    :permitType (ds/from-context [:application :permitType])})

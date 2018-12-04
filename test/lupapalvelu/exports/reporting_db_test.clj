@@ -13,6 +13,7 @@
                 :location-etrs-tm35fin (:location application-rakennuslupa)
                 :location-wgs84 (:location-wgs84 application-rakennuslupa)
                 :permitType "R"
+                :projectDescription "Uuden rakennuksen rakentaminen tontille.\n\nPuiden kaataminen:Puun kaataminen"
                 :state "submitted"
                 :stateChangeTs 12345
                 :araFunding false})
