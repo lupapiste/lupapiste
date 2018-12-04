@@ -36,13 +36,12 @@
                    )
    :valid-from ssc/Timestamp
    :valid-until (sc/maybe ssc/Timestamp)
-   ;;(sc/optional-key :valid-until) ssc/Timestamp
    :rows [CatalogueRow]
    :meta {:created ssc/Timestamp
           :created-by invoice-schemas/User}})
 
 (sc/defschema PriceCatalogueInsertRequest
-  {:valid-from-str sc/Str ;;TODO dd.mm.yyyy checker here
+  {:valid-from-str sc/Str ;; dd.mm.yyyy checker would be nice here
    :rows [CatalogueRow]})
 
 (defn fetch-price-catalogues [organization-id]
@@ -70,7 +69,7 @@
 
 (defn fetch-same-day-published-price-catalogues
   [{:keys [valid-from organization-id] :as price-catalogue}]
-  (debug ">>>> fetch-same-day-price-catalogue catalogue: " price-catalogue)
+  (debug ">> fetch-same-day-price-catalogue catalogue: " price-catalogue)
   (if (and valid-from organization-id)
     (let [same-day-catalogues (mongo/select :price-catalogues {$and [{:organization-id organization-id}
                                                                      {:valid-from valid-from}

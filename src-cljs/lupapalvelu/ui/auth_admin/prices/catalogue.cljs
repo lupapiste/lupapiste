@@ -120,20 +120,15 @@
         options (map (fn [{:keys [index text]}]
                        [:option {:key (str operation "-" index) :value index} text])
                      rows)]
-    ;; (println "operation-product-select operation: " operation )
-    ;; (println "operation-product-select rows: " rows)
     [:select.operation-product-select {:on-change (fn [e]
                                                     (let [value (.. e -target -value)]
                                                       (if (not (= value "empty"))
-                                                        (state/add-operation-to-row! operation (js/Number value))
-                                                        ;;(println "empty select - no need to do anything")
-                                                        )))}
-     (conj options [:option {:key "empty" :value "empty"} "--valitse--"])]))
+                                                        (state/add-operation-to-row! operation (js/Number value)))))}
+     (conj options [:option {:key "empty" :value "empty"} (loc "selectone")])]))
 
 (rum/defc edit-operation-catalogue-row
   < {:key-fn (fn [operation row] (str operation "-" (:index row)))}
   [operation {:keys [index text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
-  ;;(println ">> edit-operation-catalogue-row operation: " operation " index: " index " row-text: " text)
   [:tr
    [:td text]
    [:td price-per-unit]
@@ -148,14 +143,9 @@
   < rum/reactive
   < {:key-fn (fn [operation rows] (str "edit-" operation))}
   [operation indexed-product-rows]
-  ;;(println "AAAAAAAAAAAAAAA edit-operation-table operation: " operation)
   (let [all-indexed-product-rows (util/maps-with-index-key (:rows (rum/react state/catalogue-in-edit)))
         already-selected-indexes (map :index indexed-product-rows)
         selectable-indexed-product-rows (util/remove-maps-with-value all-indexed-product-rows :index already-selected-indexes)]
-    ;; (println "all-indexed-product-rows: " all-indexed-product-rows)
-    ;; (println "operation indexed-product-rows: " indexed-product-rows)
-    ;; (println "already-selected-indexes: " already-selected-indexes)
-    ;; (println "selectable-indexed-product-rows: " selectable-indexed-product-rows)
     [:div.operations-container
      [:table.operations-table
       [:thead
@@ -287,8 +277,7 @@
                             (state/set-mode :edit)
                             (state/set-catalogue-in-edit catalogue-to-edit))}
       [:i.lupicon-circle-plus]
-      [:span (str "Uusi taksa")] ;;TODO localize
-      ]]))
+      [:span (loc "price-catalogue.new")]]]))
 
 (rum/defc cancel-button  < rum/reactive
   [_]
@@ -298,8 +287,7 @@
                           (state/set-catalogue-in-edit nil)
                           (state/set-mode :show))}
     [:i.lupicon-remove]
-    [:span (str "Poista")] ;;TODO localize
-    ]])
+    [:span (loc "price-catalogue.remove")]]])
 
 (rum/defc publish-button  < rum/reactive
   [_]
@@ -309,8 +297,7 @@
      [:button  {:className "positive"
                 :on-click (fn [] (service/publish-catalogue catalogue-in-edit))}
       [:i.lupicon-check]
-      [:span (str "Julkaise")] ;;TODO localize
-      ]]))
+      [:span (loc "price-catalogue.publish")]]]))
 
 (rum/defc edit-buttons  < rum/reactive
   [_]
@@ -324,8 +311,7 @@
    [:button  {:className "positive"
               :on-click state/add-empty-row}
     [:i.lupicon-circle-plus]
-    [:span (str "Lisää tuoterivi")] ;;TODO localize
-    ]])
+    [:span (loc "price-catalogue.add-product-row")]]])
 
 (defn tomorrow []
   (time/plus (time/today-at-midnight) (time/days 1)))
@@ -343,7 +329,6 @@
                                       (->date-str catalogue-timestamp)
                                       (->date-str (tomorrow))))
          value (or date-chosen-on-ui draft-catalogue-date)]
-     (println "catalogue-date-picker timestamp: " catalogue-timestamp)
      (uc/date-edit value {:callback state/set-valid-from-date-str}))])
 
 (defn get-render-component [mode view]
@@ -366,18 +351,13 @@
         render-catalogue (get-render-component mode view)]
     [:div.price-catalogue
      [:div.catalogue-select-and-buttons
-      ;; (println "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-      ;; (println "catalogue catalogue-in-edit: " catalogue-in-edit)
-      ;; (println "catalogue active-catalogue: " active-catalogue)
-
       (case mode
         :show [:div
                (catalogue-select state/catalogues state/selected-catalogue-id)
                (new-catalogue-button)]
         :edit [:div
-               [:h3.draft-title "Taksaluonnos"] ;; TODO localize
+               [:h3.draft-title (loc "price-catalogue.catalogue-draft")]
                (catalogue-date-picker catalogue-in-edit)
-
                (edit-buttons)])]
 
      (when active-catalogue
