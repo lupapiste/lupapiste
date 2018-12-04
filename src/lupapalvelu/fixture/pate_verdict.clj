@@ -222,7 +222,93 @@
                                                         :aloitettava   {:delta 0, :unit "days"},
                                                         :voimassa      {:delta 0, :unit "days"}},
                                          :plans        [],
-                                         :reviews      []}}}]
+                                         :reviews      []}}}
+               {:id        "ba7aff3e5266a1d9c1581666"
+                :draft     {:verdict-dates         (wrap ["julkipano"])
+                            :bulletinOpDescription (wrap "Pate bulletin description")
+                            :giver                 (wrap "viranhaltija")
+                            :vastaava-tj           (wrap true)
+                            :vastaava-tj-included  (wrap true)
+                            :conditions            {}
+                            :language              (wrap "fi")
+                            :reviews               {:5a7affbf5266a1d9c1581957 {:included (wrap true)
+                                                                               :selected (wrap true)}
+                                                    :5a7affcc5266a1d9c1581958 {:included (wrap true)
+                                                                               :selected (wrap true)}
+                                                    :5a7affe15266a1d9c1581959 {:included (wrap true)
+                                                                               :selected (wrap true)}}
+                            :paatosteksti          (wrap "Ver Dict")
+                            :upload                (wrap true)
+                            :paloluokka            (wrap true)}
+                :name      (wrap "P\u00e4\u00e4t\u00f6spohja")
+                :category  "r"
+                :modified  created
+                :deleted   (wrap false)
+                :published {:published  (wrap created)
+                            :data       {:verdict-dates         ["julkipano"]
+                                         :bulletinOpDescription "Pate bulletin description"
+                                         :giver                 "viranhaltija"
+                                         :plans                 ["5a85960a809b5a1e454f3233"
+                                                                 "5a85960a809b5a1e454f3234"]
+                                         :vastaava-tj           true
+                                         :vastaava-tj-included  true
+                                         :language              "fi"
+                                         :paatosteksti          "Ver Dict"
+                                         :upload                true
+                                         :paloluokka            true}
+                            :inclusions ["appeal"
+                                         "verdict-dates"
+                                         "vss-luokka"
+                                         "bulletinOpDescription"
+                                         "purpose"
+                                         "giver"
+                                         "complexity"
+                                         "plans"
+                                         "autopaikat"
+                                         "tj"
+                                         "tj-included"
+                                         "link-to-settings"
+                                         "verdict-code"
+                                         "complexity-text"
+                                         "extra-info"
+                                         "iv-tj"
+                                         "conditions"
+                                         "rights"
+                                         "iv-tj-included"
+                                         "language"
+                                         "erityis-tj-included"
+                                         "vv-tj-included"
+                                         "reviews"
+                                         "paatosteksti"
+                                         "vastaava-tj"
+                                         "deviations"
+                                         "neighbors"
+                                         "vastaava-tj-included"
+                                         "link-to-settings-no-label"
+                                         "vv-tj"
+                                         "upload"
+                                         "statements"
+                                         "erityis-tj"
+                                         "add-condition"
+                                         "paloluokka"]
+                            :settings   {:verdict-code ["evatty" "hyvaksytty" "myonnetty" "ehdollinen" "annettu-lausunto"]
+                                         :foremen      ["vastaava-tj"]
+                                         :date-deltas  {:julkipano     {:delta 2 :unit "days"}
+                                                        :anto          {:delta 0 :unit "days"}
+                                                        :muutoksenhaku {:delta 1 :unit "days"}
+                                                        :lainvoimainen {:delta 1 :unit "days"}
+                                                        :aloitettava   {:delta 1 :unit "years"}
+                                                        :voimassa      {:delta 1 :unit "years"}}
+                                         :plans        [{:fi       "Suunnitelmat" :sv "Planer" :en "Plans"
+                                                         :selected true}
+                                                        {:fi       "ErityisSuunnitelmat" :sv "SpecialPlaner" :en "SpecialPlans"
+                                                         :selected true}]
+                                         :reviews      [{:fi   "Aloituskokous" :sv       "start" :en "start"
+                                                         :type "aloituskokous" :selected true}
+                                                        {:fi   "Loppukatselmus" :sv       "Loppu" :en "Loppu"
+                                                         :type "loppukatselmus" :selected true}
+                                                        {:fi   "Katselmus"     :sv       "Syn" :en "Review"
+                                                         :type "muu-katselmus" :selected true}]}}}]
    :settings  {:r  {:draft    {:voimassa                 (wrap "1")
                                :julkipano                (wrap "2")
                                :boardname                (wrap "asd")

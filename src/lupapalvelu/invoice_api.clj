@@ -1,12 +1,14 @@
 (ns lupapalvelu.invoice-api
   (:require [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [lupapalvelu.action :refer [defquery defcommand defraw notify] :as action]
-            [lupapalvelu.invoices :refer [Invoice] :as invoices]
+            [lupapalvelu.invoices :as invoices]
+            [lupapalvelu.invoices.schemas :refer [->invoice-db Invoice]]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [sade.core :refer [ok fail]]
             [schema.core :as sc]
-            [lupapalvelu.application-schema :refer [Operation]]))
+            [lupapalvelu.application-schema :refer [Operation]]
+            [lupapalvelu.invoices.transfer-batch :refer [get-transfer-batch-for-orgs]]))
 
 ;; ------------------------------------------
 ;; Invoice API
@@ -24,7 +26,7 @@
    :states           states/post-submitted-states}
   [{:keys [application data user] :as command}]
   (let [invoice-request (:invoice data)
-        invoice-to-db (invoices/->invoice-db invoice-request application user)]
+        invoice-to-db (->invoice-db invoice-request application user)]
     (debug "insert-invoice invoice-request:" invoice-request)
     (ok :invoice-id (invoices/create-invoice! (merge invoice-to-db
                                                      {:state "draft"})))))
@@ -125,3 +127,14 @@
   (let [price-catalogues (invoices/fetch-price-catalogues organization-id)]
     (invoices/validate-price-catalogues price-catalogues)
     (ok {:price-catalogues price-catalogues})))
+
+(defquery organizations-transferbatches
+  {:description "Query that returns transferbatches for organization"
+   :feature          :invoices
+   :user-roles       #{:authority} ;;will be changed to laskuttaja role
+   :parameters       []}
+  [{:keys [user user-organizations] :as command}]
+  (let [required-role-in-orgs "authority" ;;Will be changed to laskuttaja role
+        user-org-ids (invoices/get-user-orgs-having-role user required-role-in-orgs)
+        transfer-batches-for-orgs (get-transfer-batch-for-orgs user-org-ids)]
+    (ok {:transfer-batches transfer-batches-for-orgs})))

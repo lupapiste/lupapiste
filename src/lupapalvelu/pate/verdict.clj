@@ -943,7 +943,7 @@
   "Augments verdict data, but MUST NOT update mongo (this is called from
   query actions, too).  If final? is truthy then the enrichment is
   part of publishing."
-  ([{:keys [application]} {:keys [data template category]
+  ([{:keys [application]} {:keys [data template]
                            :as   verdict} final?]
    (let [inc-set (->> template
                       :inclusions
@@ -956,7 +956,9 @@
                   (when (:neighbors inc-set)
                     {:neighbor-states (neighbor-states application)})
                   (when (:statements inc-set)
-                    {:statements (statements application final?)}))]
+                    {:statements (statements application final?)})
+                  (when (:bulletin-desc-as-operation data)
+                    {:operation (:bulletin-op-description data)}))]
      (assoc verdict :data (merge data addons))))
   ([command verdict]
    (enrich-verdict command verdict false)))
@@ -1372,6 +1374,20 @@
         (verdict->updates :published.tags)
         (assoc :commit-fn (util/fn->> :command (send-command ::verdict))))))
 
+(defn finalize--bulletin [{:keys [verdict]}]
+  (when-let [julkipano (-> verdict :data :julkipano)]
+    {:commit-fn (fn [{:keys [command application verdict]}]
+                  (bulletins/upsert-bulletin-by-id
+                    (str (:id application) "_" (:id verdict))
+                    (bulletins/create-bulletin
+                      (util/assoc-when-pred application util/not-empty-or-nil?
+                                            :pate-verdicts [verdict])
+                      (:created command)
+                      {:verdictGivenAt (-> verdict :data :anto)
+                       :bulletinOpDescription (-> verdict :data :bulletin-op-description)
+                       :appealPeriodStartsAt julkipano
+                       :appealPeriodEndsAt (bulletins/fallback-appeal-end-from-appeal-start julkipano)})))}))
+
 (defn process-finalize-pipeline [command application verdict & finalize--fns]
   (let [{:keys [updates commit-fns verdict]
          :as result} (reduce (fn [acc fun]
@@ -1424,6 +1440,7 @@
                              ;; Point of no return (section sequence update)
                              finalize--section
                              finalize--pdf
+                             finalize--bulletin
                              finalize--kuntagml))
 
 (defn try-again-page [{:keys [lang data]} {:keys [raw status error]}]
