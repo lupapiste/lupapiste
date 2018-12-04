@@ -482,23 +482,23 @@
                                                              :kayttotarkoitusKoodi {:value "varastotilaa"}}}}}})})
 
 (def purku {:id "purku"
-                      :created 4
-                      :schema-info {:name "purkaminen"
-                                    :version 1
-                                    :op {:name "purkaminen"
-                                         :id "purkaminen-id"}}
-                      :data (conj
-                              (->
-                                common-rakennus
-                                (dissoc :huoneistot)
-                                (dissoc :lammitys)
-                                (dissoc :verkostoliittymat)
-                                (dissoc :varusteet)
-                                (dissoc :luokitus))
-                              {:rakennusnro {:value "001"}
-                               :buildingId {:value "000"}
-                               :poistumanAjankohta {:value "17.04.2013"},
-                               :poistumanSyy {:value "tuhoutunut"}})})
+            :created 4
+            :schema-info {:name "purkaminen"
+                          :version 1
+                          :op {:name "purkaminen"
+                               :id "purkaminen-id"}}
+            :data (conj
+                   (->
+                    common-rakennus
+                    (dissoc :huoneistot)
+                    (dissoc :lammitys)
+                    (dissoc :verkostoliittymat)
+                    (dissoc :varusteet)
+                    (dissoc :luokitus))
+                   {:rakennusnro {:value "001"}
+                    :buildingId {:value "000"}
+                    :poistumanAjankohta {:value "17.04.2013"},
+                    :poistumanSyy {:value "tuhoutunut"}})})
 
 (def aurinkopaneeli
   {:id "muu-rakentaminen-1"
@@ -514,27 +514,27 @@
           :valtakunnallinenNumero {:value "1940427695"}}})
 
 (def aidan-rakentaminen {:data {:kokonaisala {:value "0"}
-                                 :kayttotarkoitus {:value "Aita"}
-                                          :kuvaus { :value "Aidan rakentaminen rajalle"}}
-                                   :id "aidan-rakentaminen"
-                                   :created 5
-                                   :schema-info {:op {:id  "kaupunkikuva-id"
-                                                      :name "aita"}
-                                                 :name "kaupunkikuvatoimenpide-ei-tunnusta"
-                                                 :version 1}})
+                                :kayttotarkoitus {:value "Aita"}
+                                :kuvaus { :value "Aidan rakentaminen rajalle"}}
+                         :id "aidan-rakentaminen"
+                         :created 5
+                         :schema-info {:op {:id  "kaupunkikuva-id"
+                                            :name "aita"}
+                                       :name "kaupunkikuvatoimenpide-ei-tunnusta"
+                                       :version 1}})
 
 (def puun-kaataminen {:created 6
-                                :data { :kuvaus {:value "Puun kaataminen"}}
-                                :id "puun kaataminen"
-                                :schema-info {:op {:id "5177ad63da060e8cd8348e32"
-                                                   :name "puun-kaataminen"
-                                                   :created  1366797667137}
-                                              :name "maisematyo"
-                                              :version 1}})
+                      :data { :kuvaus {:value "Puun kaataminen"}}
+                      :id "puun kaataminen"
+                      :schema-info {:op {:id "5177ad63da060e8cd8348e32"
+                                         :name "puun-kaataminen"
+                                         :created  1366797667137}
+                                    :name "maisematyo"
+                                    :version 1}})
 
 (def hankkeen-kuvaus-minimum {:id "Hankkeen kuvaus"
-                                        :schema-info {:name "hankkeen-kuvaus-minimum" :version 1 :order 1},
-                                        :data {:kuvaus {:value "Uuden rakennuksen rakentaminen tontille."}}})
+                              :schema-info {:name "hankkeen-kuvaus-minimum" :version 1 :order 1},
+                              :data {:kuvaus {:value "Uuden rakennuksen rakentaminen tontille."}}})
 
 (def hankkeen-kuvaus
   (-> hankkeen-kuvaus-minimum

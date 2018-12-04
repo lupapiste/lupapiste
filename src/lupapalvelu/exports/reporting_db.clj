@@ -1,5 +1,7 @@
 (ns lupapalvelu.exports.reporting-db
   (:require [lupapalvelu.data-skeleton :as ds]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical]]))
 
 ;; Ei suomeksi, noudattaa omaa tietomallia
@@ -13,7 +15,7 @@
    ;; :lupanumero (ds/access :test) ;; TODO: Mistä? Kuntalupatunnus? Selite: Löytyy koko numero samasata kentästä: Luvan numero - Luvan vuosi - kaupunginosa - lupatyyppi
    ;; :luvanNumero (ds/access :test) ;; Oletus: lupanumerosta
    ;; :luvanVuosi (ds/access :test) ;; Oletus: lupanumerosta
-   :aravalaina (ds/access :test) ;; TODO: Mistä? Ara-käsittelijä flägi boolean
+   :araFunding (ds/access :araFunding) ;; TODO: Mistä? Ara-käsittelijä flägi boolean
    ;; :eiJulkistaLainaa (ds/access :test) ;; TODO: Mistä? Selite: Hankkeeseen liittyvä
    ;; :kaupunginosa (ds/access :test) ;; TODO: Mistä?
    ;; :korkotukivuokra-asunnotPitkaaik (ds/access :test) ;; TODO: Mistä? Selite: Johdettuna, ei tarpeellista jatkossa
@@ -148,6 +150,9 @@
 (def reporting-app-accessors
   {:test (constantly "foo")
    :id (ds/from-context [:application :id])
+   :araFunding (ds/from-context [:application #(domain/get-document-by-name % "hankkeen-kuvaus")
+                                 :data tools/unwrapped :rahoitus]
+                                false)
    :state (ds/from-context [:application :state])
    :permitType (ds/from-context [:application :permitType])})
 

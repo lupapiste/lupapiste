@@ -10,4 +10,14 @@
   (->reporting-result application-rakennuslupa "fi")
   => (contains {:id (:id application-rakennuslupa)
                 :permitType "R"
-                :state "submitted"}))
+                :state "submitted"
+                :araFunding false})
+
+  (->reporting-result (update application-rakennuslupa
+                              :documents
+                              (partial map #(if (= (-> % :schema-info :name)
+                                                   "hankkeen-kuvaus")
+                                              (assoc-in % [:data :rahoitus :value] true)
+                                              %)))
+                      "fi")
+  => (contains {:araFunding true}))

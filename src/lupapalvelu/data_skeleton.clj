@@ -95,8 +95,8 @@
   (fn from-context-fn [context]
     (loop [[f & rest] path
            result     context]
-      (cond (nil? f)                           result
-            (nil? result)                      default
+      (cond (nil? result)                      default
+            (nil? f)                           result
             (or (fn? f) (keyword? f) (set? f)) (recur rest (f result))
             (and (integer? f) (not (neg? f)))  (recur rest (nth result f))
             :else (throw (ex-info "Illegal value in path"
