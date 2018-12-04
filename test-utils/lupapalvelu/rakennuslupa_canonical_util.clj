@@ -593,6 +593,20 @@
            :username "pena"
            :type "owner"
            :role "writer"}]
+   :history [{:state "open"
+              :ts 12340
+              :user {:id "777777777777777777000020"
+                     :firstName "Pena"
+                     :lastName "Panaani"
+                     :username "pena"
+                     :role "applicant"}}
+             {:state "submitted"
+              :ts 12345
+              :user {:id "777777777777777777000020"
+                     :firstName "Pena"
+                     :lastName "Panaani"
+                     :username "pena"
+                     :role "applicant"}}]
    :state "submitted"
    :opened 1354532324658
    :submitted 1354532324658

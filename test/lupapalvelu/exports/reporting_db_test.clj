@@ -14,6 +14,7 @@
                 :location-wgs84 (:location-wgs84 application-rakennuslupa)
                 :permitType "R"
                 :state "submitted"
+                :stateChangeTs 12345
                 :araFunding false})
 
   (->reporting-result (update application-rakennuslupa
