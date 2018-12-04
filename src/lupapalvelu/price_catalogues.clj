@@ -139,3 +139,11 @@
   (doseq [{:keys [id]} catalogues]
     (when id
       (mongo/remove :price-catalogues id))))
+
+
+(defn get-valid-price-catalogue-on-day [catalogues timestamp]
+  (let [between-valid-from-and-valid-until (fn [{:keys [valid-from valid-until]}]
+                                             (and (<= valid-from timestamp)
+                                                  (not valid-until)))
+        valid-catalogues (filter between-valid-from-and-valid-until catalogues)]
+    (first valid-catalogues)))
