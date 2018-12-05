@@ -44,6 +44,41 @@
                 :location-wgs84 (:location-wgs84 application-rakennuslupa)
                 :permitType "R"
                 :projectDescription "Uuden rakennuksen rakentaminen tontille.\n\nPuiden kaataminen:Puun kaataminen"
+                :parties [{:VRKrooliKoodi "maksaja"
+                           :etunimi "Pena"
+                           :kuntaRooliKoodi "Rakennusvalvonta-asian laskun maksaja"
+                           :postinumero nil
+                           :postiosoite nil
+                           :postitoimipaikka nil
+                           :sukunimi "Penttilä"}
+                          {:VRKrooliKoodi "maksaja"
+                           :etunimi "Pena"
+                           :kuntaRooliKoodi "Rakennusvalvonta-asian laskun maksaja"
+                           :postinumero "33800"
+                           :postiosoite "katu"
+                           :postitoimipaikka "Tuonela"
+                           :sukunimi "Penttilä"}
+                          {:VRKrooliKoodi "muu osapuoli"
+                           :etunimi "Pena"
+                           :kuntaRooliKoodi "Hakijan asiamies"
+                           :postinumero "33800"
+                           :postiosoite "katu"
+                           :postitoimipaikka "Tuonela"
+                           :sukunimi "Penttilä"}
+                          {:VRKrooliKoodi "hakija"
+                           :etunimi "Pena"
+                           :kuntaRooliKoodi "Rakennusvalvonta-asian hakija"
+                           :postinumero "33800"
+                           :postiosoite "katu"
+                           :postitoimipaikka "Tuonela"
+                           :sukunimi "Penttilä"}
+                          {:VRKrooliKoodi "hakija"
+                           :etunimi "Pena"
+                           :kuntaRooliKoodi "Rakennusvalvonta-asian hakija"
+                           :postinumero nil
+                           :postiosoite nil
+                           :postitoimipaikka nil
+                           :sukunimi "Penttilä"}]
                 :reviews [{:type "ei tiedossa"
                            :reviewer "Reijo Revyy"
                            :date "2012-12-03"

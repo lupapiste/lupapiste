@@ -67,10 +67,19 @@
    :lausunnonAntopvm (ds/access :test)
 
    ;; Osapuoli
+   :parties (ds/array-from :parties
+                           {:VRKrooliKoodi (ds/access :parties-VRK-role)
+                            :kuntaRooliKoodi (ds/access :parties-municipality-role)
+                            :postiosoite (ds/access :parties-address)
+                            :postitoimipaikka (ds/access :parties-post-office)
+                            :postinumero (ds/access :parties-zip-code)
+                            :etunimi (ds/access :parties-first-name)
+                            :sukunimi (ds/access :parties-last-name)})
    :ammatinNimi (ds/access :test)
    :hakijanLahiosoite (ds/access :test)
    :hakijanNimi (ds/access :test)
    :hakijanPostiosoite (ds/access :test)
+
    :suunnittelijanEmail (ds/access :test)
    :suunnittelijanLaji (ds/access :test)
    :suunnittelijanLahiJaPostiosoite (ds/access :test)
@@ -164,6 +173,19 @@
    :projectDescription (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
                                          :RakennusvalvontaAsia :asianTiedot :Asiantiedot
                                          :rakennusvalvontaasianKuvaus])
+
+   :parties (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
+                              :RakennusvalvontaAsia :osapuolettieto :Osapuolet :osapuolitieto
+                              (partial mapv :Osapuoli)])
+
+   ;; TODO what to do with company parties?
+   :parties-VRK-role (ds/from-context [:context :VRKrooliKoodi])
+   :parties-municipality-role (ds/from-context [:context :kuntaRooliKoodi])
+   :parties-address (ds/from-context [:context :henkilo :osoite :osoitenimi :teksti])
+   :parties-post-office (ds/from-context [:context :henkilo :osoite :postitoimipaikannimi])
+   :parties-zip-code (ds/from-context [:context :henkilo :osoite :postinumero])
+   :parties-first-name (ds/from-context [:context :henkilo :nimi :etunimi])
+   :parties-last-name (ds/from-context [:context :henkilo :nimi :sukunimi])
 
    :reviews (ds/from-context [:application :tasks (partial mapv #(katselmus-canonical application lang % nil))])
    :review-date (ds/from-context [get-katselmustieto :pitoPvm])
