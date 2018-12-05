@@ -59,8 +59,6 @@
    "Z" 801})
 
 (def price-classes-for-operation
-  ; See lupapiste-chef/cookbooks/lupapiste-dw/files/default/etl/setupdata/price_class_csv.csv
-
   {:asuinrakennus               uuden-rakentaminen ; old operation tree
    :vapaa-ajan-asuinrakennus    uuden-rakentaminen
    :varasto-tms                 uuden-rakentaminen
@@ -173,6 +171,7 @@
    :archiving-project                                                 "Z"
    :lyhytaikainen-maanvuokraus "D"
    :promootio                  "D"
+   :konversio                  "F"
    })
 
 (defn- resolve-price-class
@@ -180,7 +179,7 @@
    priceCode = new price codes for 'puitesopimus'
    use = usage code for some price classes (kayttotarkoitus)
    useFi = usage code in Finnish
-   useSv = usage code in Svedish
+   useSv = usage code in Swedish
    usagePriceCode = mapping from legacy priceClass to new price code (called 'kayttotarkoitushinnasto')"
   [application op]
   (let [op-name  (keyword (:name op))

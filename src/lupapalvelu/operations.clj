@@ -1137,15 +1137,27 @@
                                  :min-outgoing-link-permits 0
                                  :asianhallinta             false
                                  :unsubscribe-notifications true
-                                 :state-graph-resolver      state-machine-resolver}
-   :rak-valm-tyo                {:schema                    "maisematyo"
-                                 :permit-type               permit/R
-                                 :applicant-doc-schema      applicant-doc-schema-name-R
-                                 :required                  mini-rakval-schemas
-                                 :optional                  optional-mini-rakval-schemas
-                                 :attachments               [:paapiirustus [:asemapiirros]]
-                                 :add-operation-allowed     true
-                                 :copying-allowed           true
+                                 :state-graph-resolver state-machine-resolver}
+   :konversio                   {:schema "hankkeen-kuvaus-minimum"
+                                 :permit-type permit/R
+                                 :applicant-doc-schema applicant-doc-schema-name-R
+                                 :required []
+                                 :optional #{"maksaja" "paasuunnittelija" "suunnittelija"}
+                                 :attachments []
+                                 :add-operation-allowed false
+                                 :copying-allowed true
+                                 :min-outgoing-link-permits 0
+                                 :asianhallinta false
+                                 :unsubscribe-notifications true
+                                 :state-graph-resolver state-machine-resolver}
+   :rak-valm-tyo                {:schema "maisematyo"
+                                 :permit-type permit/R
+                                 :applicant-doc-schema applicant-doc-schema-name-R
+                                 :required mini-rakval-schemas
+                                 :optional optional-mini-rakval-schemas
+                                 :attachments [:paapiirustus [:asemapiirros]]
+                                 :add-operation-allowed true
+                                 :copying-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta             false
                                  :state-graph-resolver      state-machine-resolver}
