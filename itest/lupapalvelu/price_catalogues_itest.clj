@@ -92,7 +92,7 @@
   (mongo/connect!)
 
   (mongo/with-db itu/test-db-name
-    (lupapalvelu.fixture.core/apply-fixture "minimal")
+    (lupapalvelu.fixture.core/apply-fixture "invoicing-enabled")
 
     (defn dummy-submitted-application []
       (create-and-submit-local-application

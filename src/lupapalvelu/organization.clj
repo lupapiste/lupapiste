@@ -146,7 +146,7 @@
                                               :version                   sc/Str
                                               (sc/optional-key :ftpUser) sc/Str}
    (sc/optional-key :bulletins)              {:enabled                                            sc/Bool
-                                              :url                                                sc/Str
+                                              (sc/optional-key :url)                              sc/Str
                                               (sc/optional-key :notification-email)               sc/Str
                                               (sc/optional-key :descriptions-from-backend-system) sc/Bool}
    (sc/optional-key :pate-enabled)           sc/Bool

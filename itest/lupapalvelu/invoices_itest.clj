@@ -53,13 +53,7 @@
   (local-command admin :update-organization
                :invoicingEnabled flag
                :municipality "753"
-               :permitType "R"
-               :openInforequestEmail ""
-               :opening nil
-               :pateEnabled true
-               :openInforequestEnabled true
-               :inforequestEnabled true
-               :applicationEnabled true))
+               :permitType "R"))
 
 (env/with-feature-value :invoices true
   (mongo/connect!)
