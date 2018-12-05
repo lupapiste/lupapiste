@@ -8,7 +8,7 @@
             [sade.strings :as ss]
             [sade.common-reader :as cr]
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :refer :all]
-            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
+            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical]]
             [lupapalvelu.rakennuslupa-canonical-util :refer [asiakirjat-toimitettu-checker
                                                              application-rakennuslupa
                                                              application-aurinkopaneeli

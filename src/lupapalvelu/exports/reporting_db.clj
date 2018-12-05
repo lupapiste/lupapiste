@@ -2,7 +2,7 @@
   (:require [lupapalvelu.data-skeleton :as ds]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical]]))
+            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]))
 
 ;; Ei suomeksi, noudattaa omaa tietomallia
 
@@ -35,10 +35,11 @@
    :huoneistonLisaysMuutosPoistokoodi (ds/access :test)
 
    ;; Katselmus
-   :katselmuksenLaji (ds/access :test) ;; Selite: Liittyy toimenpiteeseen
-   :katselmuksenPitopvm (ds/access :test)
-   :katselmuksenPitaja (ds/access :test)
-   :verottajanTiedoksiantovelvollisuudenLaiminlyonti (ds/access :test)
+   :reviews (ds/array-from :reviews
+                           {:type           (ds/access :review-type) ;; KatselmuksenlajiSelite: Liittyy toimenpiteeseen
+                            :date           (ds/access :review-date) ;; Pitopvm
+                            :reviewer       (ds/access :review-reviewer)
+                            :verottajanTvLl (ds/access :review-verottajanTvLl)})
 
    ;; Kiinteistö
    :autopaikkavaatimusEnintaan (ds/access :test)
@@ -148,7 +149,10 @@
    ;; TODO Kaikkia kenttiä ei vielä listattu
    })
 
-(def reporting-app-accessors
+(def get-katselmustieto
+  (ds/from-context [:context :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus]))
+
+(defn reporting-app-accessors [application lang]
   {:test (constantly "foo")
    :id (ds/from-context [:application :id])
    :address (ds/from-context [:application :address])
@@ -160,8 +164,15 @@
    :projectDescription (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
                                          :RakennusvalvontaAsia :asianTiedot :Asiantiedot
                                          :rakennusvalvontaasianKuvaus])
+
+   :reviews (ds/from-context [:application :tasks (partial mapv #(katselmus-canonical application lang % nil))])
+   :review-date (ds/from-context [get-katselmustieto :pitoPvm])
+   :review-type (ds/from-context [get-katselmustieto :katselmuksenLaji])
+   :review-reviewer (ds/from-context [get-katselmustieto :pitaja])
+   :review-verottajanTvLl (ds/from-context [get-katselmustieto :verottajanTvLlKytkin] false)
+
    :state (ds/from-context [:application :state])
-   :stateChangeTs (ds/from-context [:application :history (partial filter :state) last :ts])
+   :stateChangeTs (ds/from-context [:application :history (partial filterv :state) last :ts])
    :permitType (ds/from-context [:application :permitType])})
 
 (defn ->reporting-result [application lang]
@@ -170,4 +181,4 @@
     (ds/build-with-skeleton reporting-app-skeleton
                             {:application application
                              :canonical application-canonical}
-                            reporting-app-accessors)))
+                            (reporting-app-accessors application lang))))
