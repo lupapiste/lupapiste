@@ -106,7 +106,7 @@
         ;; Add descriptions from asianTiedot to the document.
         created-application (conv-util/add-description created-application xml)
 
-        other-building-docs (map (partial prev-permit/document-data->op-document created-application) (rest document-datas) secondary-op-names)
+        other-building-docs (map (partial app/document-data->op-document created-application) (rest document-datas) secondary-op-names)
 
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2 :name %3) other-building-docs (rest structure-descriptions) secondary-op-names)
 

@@ -875,12 +875,17 @@
                                [[:kuvaus] rakennusvalvontaasianKuvaus]))))
       buildings)))
 
-(defn document-data->op-document [{:keys [schema-version] :as application} data]
-  (let [op (make-op :archiving-project (now))
-        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "archiving-project") (now))
-        doc (assoc-in doc [:schema-info :op] op)
-        doc-updates (model/map2updates [] data)]
-    (model/apply-updates doc doc-updates)))
+(defn document-data->op-document
+  ([application data]
+   ;; If no operation name is provided, this defaults to "archiving-project"
+   (document-data->op-document application data "archiving-project"))
+  ([{:keys [schema-version] :as application} data operation-name]
+    (let [schema-name (-> operation-name op/get-operation-metadata :schema)
+          op (make-op operation-name (now))
+          doc (doc-persistence/new-doc application (schemas/get-schema schema-version schema-name) (now))
+          doc (assoc-in doc [:schema-info :op] op)
+          doc-updates (lupapalvelu.document.model/map2updates [] data)]
+      (lupapalvelu.document.model/apply-updates doc doc-updates))))
 
 (defn fetch-building-xml [organization permit-type property-id]
   (when (and organization permit-type property-id)
