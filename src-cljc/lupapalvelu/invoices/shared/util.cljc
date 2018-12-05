@@ -46,3 +46,11 @@
 
 (defn get-operations-from-tree [operation-tree categories]
   (mapcat (partial get-operations-for-category operation-tree) categories))
+
+(defn ->invoice-row [catalogue-row]
+  {:type "from-price-catalogue"
+   :text (:text catalogue-row)
+   :unit (:unit catalogue-row)
+   :units 1
+   :price-per-unit (:price-per-unit catalogue-row)
+   :discount-percent (or (:discount-percent catalogue-row) 1)})

@@ -14,3 +14,4 @@
 (def valid-units               (state-cursor :valid-units))
 (def application-id            (state-cursor :application-id))
 (def operations                (state-cursor :operations))
+(def price-catalogue           (state-cursor :price-catalogue))

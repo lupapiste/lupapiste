@@ -8,6 +8,7 @@
             [lupapiste-invoice-commons.states :as invoice-states]
             [lupapalvelu.ui.invoices.service :as service]
             [lupapalvelu.ui.invoices.state :as state]
+            [lupapalvelu.invoices.shared.util :as inv-util]
             [rum.core :as rum]
             [sade.shared-util :as util]
             [lupapalvelu.ui.components :refer [autocomplete]]))
@@ -96,6 +97,40 @@
      [:td alv]
      [:td discounted-price]]))
 
+(rum/defc editable-catalogue-invoice-row < rum/reactive
+  < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
+               (str operation-index "-" invoice-row-index))}
+  [invoice-row invoice-row-index operation-index invoice]
+  (let [discounted-price (discounted-price-from-invoice-row invoice-row)
+        alv (calc-alv discounted-price)]
+    [:tr
+     [:td (autosaving-input (:text invoice-row) (fn [value]
+                                                  (update-invoice! invoice
+                                                                   (fn [invoice_]
+                                                                     (reset!
+                                                                      invoice
+                                                                      (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index :text] value))))))]
+     [:td (autosaving-input (:units invoice-row) (fn [value_]
+                                                   (let [value (js/parseInt value_)]
+                                                     (update-invoice! invoice
+                                                                      (fn [invoice_]
+                                                                        (reset!
+                                                                         invoice_
+                                                                         (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index :units] value)))))))]
+     [:td (:unit invoice-row)]
+     [:td (:price-per-unit invoice-row)]
+     [:td (autosaving-input (:discount-percent invoice-row) (fn [value_]
+                                                              (let [value (js/parseInt value_)]
+                                                                (update-invoice! invoice
+                                                                                 (fn [invoice_]
+                                                                                   (reset!
+                                                                                    invoice_
+                                                                                    (assoc-in @invoice
+                                                                                              [:operations operation-index :invoice-rows invoice-row-index :discount-percent]
+                                                                                              value)))))))]
+     [:td alv]
+     [:td discounted-price]]))
+
 (rum/defc invoice-table-row
   < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
                (str operation-index "-" invoice-row-index))}
@@ -152,6 +187,10 @@
   [row index operation-index invoice]
   (fully-editable-invoice-row row index operation-index invoice))
 
+(defmethod create-invoice-row-element {:type :from-price-catalogue :state :draft}
+  [row index operation-index invoice]
+  (editable-catalogue-invoice-row row index operation-index invoice))
+
 (defmethod create-invoice-row-element {:state :not-draft}
   [row index operation-index invoice]
   (invoice-table-row-static row index operation-index))
@@ -195,23 +234,38 @@
   rum/reactive
   [state invoice app-id]
   (let [is-open? (::is-open? state)
+        catalogue (rum/react state/price-catalogue)
+        catalogue-rows-by-operation (inv-util/rows-with-index-by-operation catalogue)
         operations_ (rum/react state/operations)
-        operations(map (fn [operation]
+        operations (map (fn [operation]
                          {:text (translate-operation (:name operation)) :value (:name operation)}) operations_)]
+    (println "X price catalogue: " catalogue)
+    (println "catalogue rows by operation: " catalogue-rows-by-operation)
     [:div {:class "button-row-left"}
      [:button.secondary {:on-click #(reset! is-open? (not @is-open?))}
       [:i.lupicon-circle-plus]
       [:span (common/loc :invoices.operations.add-operation)]]
      (if @is-open?
        (autocomplete "" {:items operations
-                                 :callback (fn [value]
-                                             (reset! is-open? false)
-                                             (let [updated-invoice (service/add-operation-to-invoice @invoice value)]
+                         :callback (fn [operation]
+                                     (reset! is-open? false)
+                                     (let [catalogue-rows (get catalogue-rows-by-operation operation)
+                                           invoice-rows (map inv-util/->invoice-row catalogue-rows)
+                                           updated-invoice (service/add-operation-to-invoice @invoice operation invoice-rows)]
 
-                                               (service/upsert-invoice! app-id
-                                                               updated-invoice
-                                                               (fn [response]
-                                                                 (reset! invoice updated-invoice)))))}))]))
+                                       (println "-------------- invoice-add-operation calback -----------------")
+                                       (println "catalogue-rows: " catalogue-rows)
+                                       (println "invoice-rows: " invoice-rows)
+                                       (println "updated invoice: " updated-invoice)
+                                       (service/upsert-invoice! app-id
+                                                                updated-invoice
+                                                                (fn [response]
+                                                                  (reset! invoice updated-invoice)))
+                                       )
+                                     (println "-------------- END invoice-add-operation calback -----------------")
+                                     )})
+       )
+     ]))
 
 (rum/defc change-next-state-button [invoice-atom]
   (let [current-state (:state @invoice-atom)
@@ -340,7 +394,8 @@
     (reset! state/application-id app-id)
     (reset! state/new-invoice nil)
     (service/fetch-invoices app-id)
-    (service/fetch-operations app-id)))
+    (service/fetch-operations app-id)
+    (service/fetch-price-catalogue app-id)))
 
 (defn mount-component []
   (when (common/feature? :invoices)

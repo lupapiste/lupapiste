@@ -37,6 +37,12 @@
                   (reset! state/operations (:operations data)))
                 :id app-id))
 
+(defn fetch-price-catalogue [app-id]
+  (common/query :application-price-catalogue
+                (fn [data]
+                  (reset! state/price-catalogue (:price-catalogue data)))
+                :id app-id))
+
 (defn upsert-invoice! [app-id invoice-data callback]
   (if (:is-new invoice-data)
     (insert-invoice app-id {:operations (:operations invoice-data)} (fn [response]
@@ -57,8 +63,6 @@
 (defn cancel-new-invoice []
   (reset! state/new-invoice nil))
 
-
-
-(defn add-operation-to-invoice [invoice operation]
+(defn add-operation-to-invoice [invoice operation rows]
   (assoc-in invoice [:operations] (-> (:operations invoice)
-                                      (conj {:operation-id operation :name operation :invoice-rows []}))))
+                                      (conj {:operation-id operation :name operation :invoice-rows rows}))))
