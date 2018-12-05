@@ -8,6 +8,8 @@
             [lupapalvelu.action :refer [defquery defcommand defraw notify some-pre-check
                                         and-pre-check not-pre-check] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
+            [lupapalvelu.backing-system.allu.contract :as allu-contract]
+            [lupapalvelu.invoices :as invoices]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.schema-util :as schema-util]
@@ -20,8 +22,7 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.ya-extension :refer [ya-extension-app?]]
             [sade.core :refer :all]
-            [sade.util :as util]
-            [lupapalvelu.backing-system.allu.contract :as allu-contract]))
+            [sade.util :as util]))
 
 
 ;; ------------------------------------------
@@ -417,7 +418,8 @@
                         (state-in (set/difference states/post-submitted-states
                                                   #{:complementNeeded})))]
    :notified         true
-   :on-success       (notify :application-state-change)}
+   :on-success       [(notify :application-state-change)
+                      invoices/new-verdict-invoice]}
   [command]
   (ok (verdict/publish-verdict command)))
 
