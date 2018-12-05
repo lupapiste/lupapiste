@@ -144,6 +144,19 @@
 (defn get-valid-price-catalogue-on-day [catalogues timestamp]
   (let [between-valid-from-and-valid-until (fn [{:keys [valid-from valid-until]}]
                                              (and (<= valid-from timestamp)
-                                                  (not valid-until)))
-        valid-catalogues (filter between-valid-from-and-valid-until catalogues)]
-    (first valid-catalogues)))
+                                                  (or (not valid-until)
+                                                      (<= timestamp valid-until))))
+        [valid-catalogue :as valid-catalogues] (filter between-valid-from-and-valid-until catalogues)]
+
+    (println "valid catalogues")
+    (if (> (count valid-catalogues) 1)
+      (error (format "Multiple valid catalogues [ids %s] found for the timestamp %s"
+                     (pr-str (map :id valid-catalogues)) timestamp))
+      valid-catalogue)))
+
+(defn fetch-valid-catalogue [org-id timestamp]
+  (let [filter-published (fn [catalogues] (filter (fn [{:keys [state]}] (= state "published")) catalogues))]
+
+    (-> (fetch-price-catalogues org-id)
+        filter-published
+        (get-valid-price-catalogue-on-day timestamp))))

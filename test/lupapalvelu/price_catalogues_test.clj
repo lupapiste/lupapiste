@@ -12,7 +12,6 @@
 
 (def timestamp to-millis-from-local-date-string)
 
-
 (defn catalogue-with [properties]
   (merge {:id "foo-id"
           :organization-id "753-R"
@@ -68,4 +67,45 @@
                    (catalogues/get-valid-price-catalogue-on-day (timestamp "6.5.2020"))
                    :id) => "3"))
 
-       )
+       (fact "returns the catalogue that has valid-until before the timestamp and valid-until after the timestamp"
+             (let [later-catalogues [(catalogue-with {:id "1" :valid-from (timestamp "2.1.2018") :valid-until (timestamp "3.2.2018")})
+                                     (catalogue-with {:id "2" :valid-from (timestamp "4.2.2018") :valid-until (timestamp "4.5.2020")})
+                                     (catalogue-with {:id "3" :valid-from (timestamp "5.5.2020") :valid-until nil})]]
+               (-> later-catalogues
+                   (catalogues/get-valid-price-catalogue-on-day (timestamp "3.3.2020"))
+                   :id) => "2"))
+
+       (fact "returns the catalogue that has valid-until exatcly at timestamp"
+             (let [later-catalogues [(catalogue-with {:id "1" :valid-from (timestamp "2.1.2018") :valid-until (timestamp "3.2.2018")})
+                                     (catalogue-with {:id "2" :valid-from (timestamp "4.2.2018") :valid-until (timestamp "4.5.2020")})
+                                     (catalogue-with {:id "3" :valid-from (timestamp "5.5.2020") :valid-until nil})]]
+               (-> later-catalogues
+                   (catalogues/get-valid-price-catalogue-on-day (timestamp "4.5.2020"))
+                   :id) => "2"))
+
+       (fact "returns nil when multiple valid catalogues found"
+             (let [later-catalogues [(catalogue-with {:id "1" :valid-from (timestamp "2.1.2018") :valid-until (timestamp "3.2.2018")})
+                                     (catalogue-with {:id "2" :valid-from (timestamp "4.2.2018") :valid-until (timestamp "4.5.2020")})
+                                     (catalogue-with {:id "3" :valid-from (timestamp "1.5.2020") :valid-until nil})]]
+
+               (-> later-catalogues
+                   (catalogues/get-valid-price-catalogue-on-day (timestamp "4.5.2020"))) => nil?)))
+
+
+(fact "fetch-valid-catalogue"
+
+      (fact "finds the correct one when all catalogues are in the state published"
+            (let [earlier (catalogue-with {:id "1" :valid-from (timestamp "2.1.2021") :valid-until (timestamp "3.2.2021") :organization-id "753-R" :state "published"})
+                  valid   (catalogue-with {:id "2" :valid-from (timestamp "4.2.2021") :valid-until (timestamp "4.5.2021") :organization-id "753-R" :state "published"})
+                  later   (catalogue-with {:id "3" :valid-from (timestamp "5.5.2021") :valid-until nil                    :organization-id "753-R" :state "published"})]
+
+              (with-redefs [catalogues/fetch-price-catalogues (fn [organization-id] [earlier valid later])]
+                (:id (catalogues/fetch-valid-catalogue "753-R" (timestamp "3.3.2021")))) => "2"))
+
+      (fact "returns nil when the only valid catalogue is in a draft state"
+            (let [earlier (catalogue-with {:id "1" :valid-from (timestamp "2.1.2021") :valid-until (timestamp "3.2.2021") :organization-id "753-R" :state "published"})
+                  valid   (catalogue-with {:id "2" :valid-from (timestamp "4.2.2021") :valid-until (timestamp "4.5.2021") :organization-id "753-R" :state "draft"})
+                  later   (catalogue-with {:id "3" :valid-from (timestamp "5.5.2021") :valid-until nil                    :organization-id "753-R" :state "published"})]
+
+              (with-redefs [catalogues/fetch-price-catalogues (fn [organization-id] [earlier valid later])]
+                (:id (catalogues/fetch-valid-catalogue "753-R" (timestamp "3.3.2021")))) => nil)))

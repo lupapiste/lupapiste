@@ -75,7 +75,7 @@
           :organization-id "753-R"
           :state "draft"
           :valid-from (timestamp "1.1.2000")
-          :valid-until nil
+          :valid-until (timestamp "1.5.2001")
           :rows [{:code "12345"
                   :text "Taksarivi 1"
                   :unit "kpl"
