@@ -9,7 +9,7 @@
             [lupapalvelu.itest-util :refer [local-command local-query
                                             create-and-submit-application
                                             create-and-submit-local-application
-                                            sonja pena sipoo sipoo-ya
+                                            sonja pena sipoo sipoo-ya admin
                                             ok? fail?] :as itu]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.price-catalogues :as catalogues]
@@ -40,6 +40,18 @@
 (defn belong-to-org? [org-id]
   (partial catalogues-belong-to-org? org-id))
 
+(defn toggle-invoicing [flag]
+  (local-command admin :update-organization
+               :invoicingEnabled flag
+               :municipality "753"
+               :permitType "R"
+               :openInforequestEmail ""
+               :opening nil
+               :pateEnabled true
+               :openInforequestEnabled true
+               :inforequestEnabled true
+               :applicationEnabled true))
+
 (defn ensure-exists! [collection {:keys [id] :as doc}]
   (cond
     (not id) :fail
@@ -56,7 +68,6 @@
                  :role                                      "authority"
                  :email                                     "pena@panaani.fi"
                  :username                                  "pena"})
-
 
 (defn catalogue-request-with [properties]
   (merge {:valid-from-str "1.1.2019"
@@ -94,14 +105,9 @@
   (mongo/with-db itu/test-db-name
     (lupapalvelu.fixture.core/apply-fixture "invoicing-enabled")
 
-    (defn dummy-submitted-application []
-      (create-and-submit-local-application
-       pena
-       :operation "pientalo"
-       :x "385770.46" :y "6672188.964"
-       :address "Kaivokatu 1"))
+    (toggle-invoicing true)
 
-    (fact "organization-price-catalogues"
+    (fact "organization-price-catalogues query"
 
           (fact "should return unauthorized response when user is not an organization admin"
                 (let [response (-> (local-query sonja :organization-price-catalogues
@@ -354,4 +360,41 @@
 
                          same-day-pub-cat-1-in-db => nil
                          same-day-pub-cat-2-in-db => nil
-                         same-day-draft-cat-in-db => same-day-draft-catalogue))))))))
+                         same-day-draft-cat-in-db => same-day-draft-catalogue))))))
+
+    (fact "application-catalogue"
+          (fact "finds the correct one when all catalogues are in the state published"
+
+                (let [earlier (catalogue-with {:id "1" :valid-from (timestamp "2.1.2021") :valid-until (timestamp "3.2.2021") :organization-id "753-R" :state "published"})
+                      valid   (catalogue-with {:id "2" :valid-from (timestamp "4.2.2021") :valid-until (timestamp "4.5.2021") :organization-id "753-R" :state "published"})
+                      later   (catalogue-with {:id "3" :valid-from (timestamp "5.5.2021") :valid-until nil                    :organization-id "753-R" :state "published"})]
+
+                  (with-redefs [catalogues/fetch-price-catalogues (fn [organization-id] [earlier valid later])
+                                catalogues/submitted-timestamp (fn [application] (timestamp "3.3.2021"))]
+
+                    (let [application (create-and-submit-local-application pena
+                                                                           :operation "pientalo"
+                                                                           :address "Kaivokatu 1")
+                          response (local-query sonja :application-price-catalogue
+                                                :id (:id application))]
+
+                      response => ok?
+
+                      (get-in response [:price-catalogue :id]) => "2"))))
+
+          (fact "returns error when no valid price catalogue found"
+
+                (let [later1 (catalogue-with {:id "1" :valid-from (timestamp "2.1.2021") :valid-until (timestamp "3.2.2021") :organization-id "753-R" :state "published"})
+                      later2 (catalogue-with {:id "2" :valid-from (timestamp "4.2.2021") :valid-until (timestamp "4.5.2021") :organization-id "753-R" :state "published"})]
+
+                  (with-redefs [catalogues/fetch-price-catalogues (fn [organization-id] [later1 later2])
+                                catalogues/submitted-timestamp (fn [application] (timestamp "3.3.2018"))]
+
+                    (let [application (create-and-submit-local-application pena
+                                                                           :operation "pientalo"
+                                                                           :address "Kaivokatu 1")
+                          response (local-query sonja :application-price-catalogue
+                                                :id (:id application))]
+
+                      response => fail?
+                      (:text response) => "error.application-valid-unique-price-catalogue-not-found")))))))

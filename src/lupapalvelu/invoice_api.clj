@@ -178,3 +178,21 @@
 
     (let [id (catalogues/create-price-catalogue! catalogue-to-db {:state "published" :valid-until valid-until})]
       (ok {:price-catalogue-id id}))))
+
+(defquery application-price-catalogue
+  {:description      "Fetch the price catalogue that was valid when application was created"
+   :feature          :invoices
+   :user-roles       #{:authority}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :pre-checks       [invoicing-enabled]}
+  [{:keys [application] :as command}]
+  (let [submitted-timestamp (catalogues/submitted-timestamp application)
+        price-catalogue (catalogues/fetch-valid-catalogue (:organization application) submitted-timestamp)]
+    (println "submitted timestamp " submitted-timestamp)
+    (println "price-catalogue for application " price-catalogue)
+    (if price-catalogue
+      (ok :price-catalogue price-catalogue)
+      (fail :error.application-valid-unique-price-catalogue-not-found))))

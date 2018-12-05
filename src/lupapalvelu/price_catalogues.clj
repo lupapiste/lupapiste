@@ -13,7 +13,9 @@
             [schema.core :as sc]
             [sade.core :refer [ok fail] :as sade]
             [sade.schemas :as ssc]
-            [sade.util :refer [to-millis-from-local-date-string to-finnish-date]]
+            [sade.util :refer [to-millis-from-local-date-string
+                               to-finnish-date
+                               find-first]]
             [taoensso.timbre :refer [trace tracef debug debugf info infof
                                      warn warnf error errorf fatal fatalf]]))
 
@@ -152,9 +154,19 @@
                      (pr-str (map :id valid-catalogues)) timestamp))
       valid-catalogue)))
 
+(defn debug-catalogues [catalogues]
+  (doseq [{:keys [id valid-from valid-until]} catalogues]
+         (println "catalogue id:" id " valid-from:" (to-finnish-date valid-from) " valid-until:" (to-finnish-date valid-until)))
+  catalogues)
+
 (defn fetch-valid-catalogue [org-id timestamp]
+  (debug ">> fetch-valid-catalogue org-id " org-id " timestamp: " timestamp " findate: " (to-finnish-date timestamp))
   (let [filter-published (fn [catalogues] (filter (fn [{:keys [state]}] (= state "published")) catalogues))]
 
     (-> (fetch-price-catalogues org-id)
+        debug-catalogues
         filter-published
         (get-valid-price-catalogue-on-day timestamp))))
+
+(defn submitted-timestamp [application]
+  (:ts (find-first #(= "submitted" (:state %)) (:history application))))
