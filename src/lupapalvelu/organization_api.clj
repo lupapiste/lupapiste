@@ -264,9 +264,10 @@
   {:description "Update organization details."
    :parameters [permitType municipality
                 inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
-                opening pateEnabled]
+                opening pateEnabled invoicingEnabled]
    :optional-parameters [bulletinsEnabled bulletinsUrl]
    :input-validators [permit/permit-type-validator
+                      (partial action/boolean-parameters [:pateEnabled :invoicingEnabled])
                       (fn [{{:keys [permitType pateEnabled]} :data}]
                         (if (true? pateEnabled)
                           (when-not (true? (-> (pate-schema/permit-type->categories permitType)
@@ -282,7 +283,8 @@
                     :scope.$.open-inforequest openInforequestEnabled
                     :scope.$.open-inforequest-email openInforequestEmail
                     :scope.$.opening (when (number? opening) opening)
-                    :scope.$.pate-enabled pateEnabled}
+                    :scope.$.pate-enabled pateEnabled
+                    :scope.$.invoicing-enabled invoicingEnabled}
                    (when-not (nil? bulletinsEnabled)
                      {:scope.$.bulletins.enabled bulletinsEnabled
                       :scope.$.bulletins.url     (or bulletinsUrl "")}))})

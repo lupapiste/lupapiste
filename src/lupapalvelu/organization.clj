@@ -135,21 +135,22 @@
   (apply sc/enum (keys (permit/permit-types))))
 
 (sc/defschema Scope
-  {:permitType PermitType
-   :municipality sc/Str
-   :new-application-enabled sc/Bool
-   :inforequest-enabled sc/Bool
+  {:permitType                               PermitType
+   :municipality                             sc/Str
+   :new-application-enabled                  sc/Bool
+   :inforequest-enabled                      sc/Bool
    (sc/optional-key :opening)                (sc/maybe ssc/Timestamp)
    (sc/optional-key :open-inforequest)       sc/Bool
    (sc/optional-key :open-inforequest-email) ssc/OptionalEmail
-   (sc/optional-key :caseManagement) {:enabled sc/Bool
-                                      :version sc/Str
-                                      (sc/optional-key :ftpUser) sc/Str}
-   (sc/optional-key :bulletins) {:enabled sc/Bool
-                                 :url sc/Str
-                                 (sc/optional-key :notification-email) sc/Str
-                                 (sc/optional-key :descriptions-from-backend-system) sc/Bool}
-   (sc/optional-key :pate-enabled) (sc/maybe sc/Bool)})
+   (sc/optional-key :caseManagement)         {:enabled                   sc/Bool
+                                              :version                   sc/Str
+                                              (sc/optional-key :ftpUser) sc/Str}
+   (sc/optional-key :bulletins)              {:enabled                                            sc/Bool
+                                              :url                                                sc/Str
+                                              (sc/optional-key :notification-email)               sc/Str
+                                              (sc/optional-key :descriptions-from-backend-system) sc/Bool}
+   (sc/optional-key :pate-enabled)           sc/Bool
+   (sc/optional-key :invoicing-enabled)      sc/Bool})
 
 (def permit-types (map keyword (keys (permit/permit-types))))
 

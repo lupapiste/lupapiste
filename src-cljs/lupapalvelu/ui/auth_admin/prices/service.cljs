@@ -6,25 +6,30 @@
 (defn- sort-latest-first [catalogues]
   (reverse (sort-by :valid-from catalogues)))
 
+(defn- auth? [action]
+  (boolean (js/lupapisteApp.models.globalAuthModel.ok (name action))))
+
 (defn fetch-price-catalogues [& [callback]]
-  (common/query :organization-price-catalogues
-                (fn [data]
-                  (let [catalogues (:price-catalogues data)]
-                    (reset! state/catalogues (sort-latest-first catalogues))
-                    (when callback (callback))))
-                :organization-id @state/org-id))
+  (when (auth? :organization-price-catalogues)
+    (common/query :organization-price-catalogues
+                  (fn [data]
+                    (let [catalogues (:price-catalogues data)]
+                      (reset! state/catalogues (sort-latest-first catalogues))
+                      (when callback (callback))))
+                  :organization-id @state/org-id)))
 
 (defn publish-catalogue [catalogue]
-  (let [new-catalogue (select-keys catalogue [:valid-from-str :rows])]
-    (common/command :publish-price-catalogue
-                    (fn [data]
-                      (let [id (:price-catalogue-id data)]
-                        (fetch-price-catalogues
-                         (fn []
-                           (state/set-mode :show)
-                           (state/set-selected-catalogue-id id)))))
-                    :organization-id @state/org-id
-                    :price-catalogue new-catalogue)))
+  (when (auth? :publish-price-catalogue)
+    (let [new-catalogue (select-keys catalogue [:valid-from-str :rows])]
+      (common/command :publish-price-catalogue
+                      (fn [data]
+                        (let [id (:price-catalogue-id data)]
+                          (fetch-price-catalogues
+                          (fn []
+                            (state/set-mode :show)
+                            (state/set-selected-catalogue-id id)))))
+                      :organization-id @state/org-id
+                      :price-catalogue new-catalogue))))
 
 (defn fetch-organization-operations [operation-categories]
   (common/query :all-operations-for-organization

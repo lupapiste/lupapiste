@@ -5,7 +5,7 @@
             [lupapalvelu.itest-util :refer [local-command local-query
                                             create-and-submit-application
                                             create-and-submit-local-application
-                                            sonja pena sipoo sipoo-ya
+                                            sonja pena sipoo sipoo-ya admin
                                             ok? fail?] :as itu]
             [lupapalvelu.invoice-api]
             [lupapalvelu.invoices.schemas :refer [->invoice-db]]
@@ -46,11 +46,39 @@
                            :state "draft"}]
     (merge dummy-application properties)))
 
+(defn err [error]
+  (partial itu/expected-failure? error))
+
+(defn toggle-invoicing [flag]
+  (local-command admin :update-organization
+               :invoicingEnabled flag
+               :municipality "753"
+               :permitType "R"
+               :openInforequestEmail ""
+               :opening nil
+               :pateEnabled true
+               :openInforequestEnabled true
+               :inforequestEnabled true
+               :applicationEnabled true))
+
 (env/with-feature-value :invoices true
   (mongo/connect!)
 
   (mongo/with-db itu/test-db-name
     (lupapalvelu.fixture.core/apply-fixture "minimal")
+
+    (fact "Invoicing not enabled for 753-R"
+      (local-query sipoo :user-organizations-invoices)
+      => (err :error.invoicing-disabled)
+      (local-query sipoo :organization-price-catalogues
+             :organization-id "753-R")
+      => (err :error.invoicing-disabled)
+      (local-query sipoo :organizations-transferbatches)
+      => (err :error.invoicing-disabled))
+
+    (fact "Enable invoicing for 753-R"
+      (toggle-invoicing true) => ok?
+      (local-query sipoo :user-organizations-invoices) => ok?)
 
     (defn dummy-submitted-application []
       (create-and-submit-local-application
@@ -86,7 +114,15 @@
                                                               :id id
                                                               :invoice invoice) => ok?]
                   invoice-id => string?
-                  (validate-invoice  (mongo/by-id "invoices" invoice-id))))
+                  (validate-invoice  (mongo/by-id "invoices" invoice-id))
+                  (fact "Disable invoicing"
+                    (toggle-invoicing false) => ok?
+                    (local-command sonja :insert-invoice
+                                   :id id
+                                   :invoice invoice)
+                    => (err :error.invoicing-disabled))
+                  (fact "Enable invoicing"
+                    (toggle-invoicing true) => ok?)))
 
           (fact "should not create an invoice when one of the invoice-rows in the request has an unknown unit"
                 (let [{:keys [id] :as app} (dummy-submitted-application)
