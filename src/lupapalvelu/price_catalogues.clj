@@ -154,17 +154,11 @@
                      (pr-str (map :id valid-catalogues)) timestamp))
       valid-catalogue)))
 
-(defn debug-catalogues [catalogues]
-  (doseq [{:keys [id valid-from valid-until]} catalogues]
-         (println "catalogue id:" id " valid-from:" (to-finnish-date valid-from) " valid-until:" (to-finnish-date valid-until)))
-  catalogues)
-
 (defn fetch-valid-catalogue [org-id timestamp]
   (debug ">> fetch-valid-catalogue org-id " org-id " timestamp: " timestamp " findate: " (to-finnish-date timestamp))
   (let [filter-published (fn [catalogues] (filter (fn [{:keys [state]}] (= state "published")) catalogues))]
 
     (-> (fetch-price-catalogues org-id)
-        debug-catalogues
         filter-published
         (get-valid-price-catalogue-on-day timestamp))))
 
