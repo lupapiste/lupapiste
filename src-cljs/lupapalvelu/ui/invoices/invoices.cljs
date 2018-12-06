@@ -57,77 +57,42 @@
   (let [value-atom (atom value)]
     (components/dropdown value-atom {:items options
                                      :callback (fn [event] (on-blur @value-atom))})))
+(defn update-invoice-row-value! [invoice operation-index invoice-row-index field value]
+  (update-invoice! invoice
+                   (fn [_]
+                     (reset!
+                      invoice
+                      (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index field] value)))))
 
 (rum/defc fully-editable-invoice-row < rum/reactive
   < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
                (str operation-index "-" invoice-row-index))}
-  [invoice-row invoice-row-index operation-index invoice]
+  [{:keys [text units unit discount-percent price-per-unit] :as invoice-row} invoice-row-index operation-index invoice]
   (let [discounted-price (discounted-price-from-invoice-row invoice-row)
-        alv (calc-alv discounted-price)]
+        alv (calc-alv discounted-price)
+        update-field! (partial update-invoice-row-value! invoice operation-index invoice-row-index)]
     [:tr
-     [:td (autosaving-input (:text invoice-row) (fn [value]
-                                                  (update-invoice! invoice
-                                                                   (fn [invoice_]
-                                                                     (reset!
-                                                                      invoice
-                                                                      (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index :text] value))))))]
-     [:td (autosaving-input (:units invoice-row) (fn [value_]
-                                                   (let [value (js/parseInt value_)]
-                                                     (update-invoice! invoice
-                                                                      (fn [invoice_]
-                                                                        (reset!
-                                                                         invoice_
-                                                                         (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index :units] value)))))))]
-     [:td (autosaving-select (:unit invoice-row) (rum/react state/valid-units) (fn [value]
-                                                                                 (update-invoice! invoice
-                                                                                                  (fn [invoice_]
-                                                                                                    (reset!
-                                                                                                     invoice_
-                                                                                                     (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index :unit] value))))))]
-     [:td (:price-per-unit invoice-row)]
-     [:td (autosaving-input (:discount-percent invoice-row) (fn [value_]
-                                                              (let [value (js/parseInt value_)]
-                                                                (update-invoice! invoice
-                                                                                 (fn [invoice_]
-                                                                                   (reset!
-                                                                                    invoice_
-                                                                                    (assoc-in @invoice
-                                                                                              [:operations operation-index :invoice-rows invoice-row-index :discount-percent]
-                                                                                              value)))))))]
+     [:td (autosaving-input  text  (fn [value] (update-field! :text value)))]
+     [:td (autosaving-input  units (fn [value] (update-field! :units (js/parseInt value))))]
+     [:td (autosaving-select unit (rum/react state/valid-units) (fn [value] (update-field! :unit value)))]
+     [:td price-per-unit]
+     [:td (autosaving-input discount-percent (fn [value] (update-field! :discount-percent (js/parseInt value))))]
      [:td alv]
      [:td discounted-price]]))
 
 (rum/defc editable-catalogue-invoice-row < rum/reactive
   < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
                (str operation-index "-" invoice-row-index))}
-  [invoice-row invoice-row-index operation-index invoice]
+  [{:keys [text units unit discount-percent price-per-unit] :as invoice-row} invoice-row-index operation-index invoice]
   (let [discounted-price (discounted-price-from-invoice-row invoice-row)
-        alv (calc-alv discounted-price)]
+        alv (calc-alv discounted-price)
+        update-field! (partial update-invoice-row-value! invoice operation-index invoice-row-index)]
     [:tr
-     [:td (autosaving-input (:text invoice-row) (fn [value]
-                                                  (update-invoice! invoice
-                                                                   (fn [invoice_]
-                                                                     (reset!
-                                                                      invoice
-                                                                      (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index :text] value))))))]
-     [:td (autosaving-input (:units invoice-row) (fn [value_]
-                                                   (let [value (js/parseInt value_)]
-                                                     (update-invoice! invoice
-                                                                      (fn [invoice_]
-                                                                        (reset!
-                                                                         invoice_
-                                                                         (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index :units] value)))))))]
-     [:td (:unit invoice-row)]
-     [:td (:price-per-unit invoice-row)]
-     [:td (autosaving-input (:discount-percent invoice-row) (fn [value_]
-                                                              (let [value (js/parseInt value_)]
-                                                                (update-invoice! invoice
-                                                                                 (fn [invoice_]
-                                                                                   (reset!
-                                                                                    invoice_
-                                                                                    (assoc-in @invoice
-                                                                                              [:operations operation-index :invoice-rows invoice-row-index :discount-percent]
-                                                                                              value)))))))]
+     [:td text]
+     [:td (autosaving-input units (fn [value] (update-field! :units (js/parseInt value))))]
+     [:td unit]
+     [:td price-per-unit]
+     [:td (autosaving-input discount-percent (fn [value] (update-field! :discount-percent (js/parseInt value))))]
      [:td alv]
      [:td discounted-price]]))
 
