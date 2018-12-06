@@ -204,8 +204,6 @@
         operations_ (rum/react state/operations)
         operations (map (fn [operation]
                          {:text (translate-operation (:name operation)) :value (:name operation)}) operations_)]
-    (println "X price catalogue: " catalogue)
-    (println "catalogue rows by operation: " catalogue-rows-by-operation)
     [:div {:class "button-row-left"}
      [:button.secondary {:on-click #(reset! is-open? (not @is-open?))}
       [:i.lupicon-circle-plus]
@@ -218,19 +216,10 @@
                                            invoice-rows (map inv-util/->invoice-row catalogue-rows)
                                            updated-invoice (service/add-operation-to-invoice @invoice operation invoice-rows)]
 
-                                       (println "-------------- invoice-add-operation calback -----------------")
-                                       (println "catalogue-rows: " catalogue-rows)
-                                       (println "invoice-rows: " invoice-rows)
-                                       (println "updated invoice: " updated-invoice)
                                        (service/upsert-invoice! app-id
                                                                 updated-invoice
                                                                 (fn [response]
-                                                                  (reset! invoice updated-invoice)))
-                                       )
-                                     (println "-------------- END invoice-add-operation calback -----------------")
-                                     )})
-       )
-     ]))
+                                                                  (reset! invoice updated-invoice)))))}))]))
 
 (rum/defc change-next-state-button [invoice-atom]
   (let [current-state (:state @invoice-atom)
