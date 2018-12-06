@@ -147,8 +147,6 @@
                                                   (or (not valid-until)
                                                       (<= timestamp valid-until))))
         [valid-catalogue :as valid-catalogues] (filter between-valid-from-and-valid-until catalogues)]
-
-    (println "valid catalogues")
     (if (> (count valid-catalogues) 1)
       (error (format "Multiple valid catalogues [ids %s] found for the timestamp %s"
                      (pr-str (map :id valid-catalogues)) timestamp))
