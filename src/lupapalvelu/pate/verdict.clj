@@ -10,6 +10,7 @@
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.backing-system.allu.core :as allu]
             [lupapalvelu.backing-system.krysp.application-as-krysp-to-backing-system :as krysp]
             [lupapalvelu.company :as com]
             [lupapalvelu.document.tools :as tools]
@@ -54,9 +55,7 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [warnf warn errorf error]]
-            [lupapalvelu.backing-system.allu.core :as allu]
-            [lupapalvelu.attachment :as attachment]))
+            [taoensso.timbre :refer [warnf warn errorf error]]))
 
 ;; ------------------------------------------
 ;; Pre-checks
