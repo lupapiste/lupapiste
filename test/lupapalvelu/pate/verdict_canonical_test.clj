@@ -295,24 +295,29 @@
 
 (facts paatoksentekija
   (fact "empty fields"
-    (paatoksentekija "fi" {:data {:handler ""}
+    (paatoksentekija "fi" {:category :r
+                           :data {:handler ""}
                            :template {:giver ""}}) => "")
 
   (fact "nil fields"
-    (paatoksentekija "fi" {:data {:handler nil}
+    (paatoksentekija "fi" {:category :r
+                           :data {:handler nil}
                            :template {:giver nil}}) => "")
 
   (fact "empty giver"
-    (paatoksentekija "fi" {:data {:handler "handler text"}
+    (paatoksentekija "fi" {:category :r
+                           :data {:handler "handler text"}
                            :template {:giver ""}}) => "handler text")
 
   (fact "empty contact - viranhaltija - Finnish"
-    (paatoksentekija "fi" {:data {:handler ""}
+    (paatoksentekija "fi" {:category :r
+                           :data {:handler ""}
                            :template {:giver "viranhaltija"}})
     => "(Viranhaltija)")
 
   (fact "empty contact - lautakunta - Swedish"
-    (paatoksentekija "sv" {:data {:handler ""}
+    (paatoksentekija "sv" {:category :r
+                           :data {:handler ""}
                            :template {:giver "lautakunta"}})
     => "(N\u00e4mnd)")
 

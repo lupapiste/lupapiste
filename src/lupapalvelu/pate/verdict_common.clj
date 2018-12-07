@@ -15,8 +15,11 @@
 ;; Helpers
 ;;
 
-(defn- get-data [verdict k]
-  (metadata/unwrap (get-in verdict [:data k])))
+(defn- get-data
+  ([verdict]
+   (metadata/unwrap (get verdict :data)))
+  ([verdict k]
+   (metadata/unwrap (get-in verdict [:data k]))))
 
 ;;
 ;; Predicates
@@ -99,6 +102,9 @@
     (-> verdict :replacement :replaces)
     nil))
 
+(defn- get-paivamaarat [verdict]
+  (some-> verdict :paatokset first :paivamaarat))
+
 (defn verdict-date [verdict]
   (cond
     (legacy? verdict)
@@ -109,7 +115,7 @@
 
     :else
     (or (:paatospvm (latest-pk verdict))
-        (some-> verdict :paatokset first :paivamaarat :paatosdokumentinPvm))))
+        (:paatosdokumentinPvm (get-paivamaarat verdict)))))
 
 (defn verdict-id [verdict]
   (:id verdict))
@@ -172,6 +178,20 @@
     (get-data verdict :verdict-code)
     (some-> verdict first-pk :status str)))
 
+(defn verdict-dates [verdict]
+  (if (lupapiste-verdict? verdict)
+    (-> verdict
+        get-data
+        (select-keys [:aloitettava :lainvoimainen :voimassa :anto :raukeamis :valitus :julkipano])
+        (assoc :raukeamis nil))
+    {:aloitettava   (:aloitettava (get-paivamaarat verdict))
+     :anto          (:anto (get-paivamaarat verdict))
+     :julkipano     (:julkipano (get-paivamaarat verdict))
+     :lainvoimainen (:lainvoimainen (get-paivamaarat verdict))
+     :raukeamis     (:raukeamis (get-paivamaarat verdict))
+     :valitus       nil
+     :voimassa      (:voimassaHetki (get-paivamaarat verdict))
+  }))
 ;;
 ;; Verdict schema
 ;;
