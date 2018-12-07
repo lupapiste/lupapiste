@@ -105,8 +105,10 @@
             reviews                     (filter #(= "task-katselmus" (get-in % [:schema-info :name])) tasks)
             aloituskokous               (util/find-by-key :taskname "Aloituskokous" reviews)
             loppukatselmus              (util/find-by-key :taskname "Loppukatselmus" reviews)]
-        (fact "two attachments" (count attachments) => 2)
-        (fact "two" (count reviews) => 2)
+        (fact "two attachments"
+          attachments => (just [(contains {:target {:type "verdict" :id verdict-id}})
+                                (contains {:source {:type "verdicts" :id verdict-id}})]))
+        (fact "two reviews" (count reviews) => 2)
         (facts "aloituskokous"
           (fact "katselmuksenLaji" (get-in aloituskokous [:data :katselmuksenLaji :value]) => "aloituskokous")
           (fact "taskname correct" (:taskname aloituskokous)
