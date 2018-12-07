@@ -40,17 +40,6 @@
 (defn belong-to-org? [org-id]
   (partial catalogues-belong-to-org? org-id))
 
-(defn toggle-invoicing [flag]
-  (local-command admin :update-organization
-               :invoicingEnabled flag
-               :municipality "753"
-               :permitType "R"
-               :openInforequestEmail ""
-               :opening nil
-               :pateEnabled true
-               :openInforequestEnabled true
-               :inforequestEnabled true
-               :applicationEnabled true))
 
 (defn ensure-exists! [collection {:keys [id] :as doc}]
   (cond
@@ -104,8 +93,6 @@
 
   (mongo/with-db itu/test-db-name
     (lupapalvelu.fixture.core/apply-fixture "invoicing-enabled")
-
-    (toggle-invoicing true)
 
     (fact "organization-price-catalogues query"
 
