@@ -467,7 +467,8 @@
    :states           (set/difference states/post-submitted-states
                                      #{:finished :complementNeeded})
    :notified         true
-   :on-success       (notify :application-state-change)}
+   :on-success       [(notify :application-state-change)
+                      invoices/new-verdict-invoice]}
   [command]
   (ok (verdict/publish-verdict command)))
 

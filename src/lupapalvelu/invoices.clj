@@ -171,7 +171,7 @@
 (defn new-verdict-invoice
   "Post-fn for `publish-pate-verdict` command. Creates new invoice draft
   for the application."
-  [{:keys [user created application] :as command} status]
+  [{:keys [user created application] :as command} _]
   ;; Pre-checker is nil on success.
   (when-not (invoicing-enabled command)
     (let [org-id          (:organization application)
@@ -180,33 +180,36 @@
                                             (:history application))
           ops             (get-operations-from-application application)
           op-names        (map :name ops)]
-      (when-let [catalog (some->> (mongo/select-one :price-catalogues
-                                                    {:organization-id org-id
-                                                     :state           :published
-                                                     :valid-from      {$lt submitted}
-                                                     :valid-until     {$not {$lt submitted}}})
-                                  :rows
-                                  (filter (util/fn->> :operations
-                                                      (util/intersection-as-kw op-names)
-                                                      not-empty))
-                                  not-empty)]
+      (when-let [catalog (and submitted
+                              (some->> (mongo/select-one :price-catalogues
+                                                         {:organization-id org-id
+                                                          :state           :published
+                                                          :valid-from      {$lt submitted}
+                                                          :valid-until     {$not {$lt submitted}}}
+                                                         {:rows 1})
+                                       :rows
+                                       (filter (util/fn->> :operations
+                                                           (util/intersection-as-kw op-names)
+                                                       not-empty))
+                                       not-empty))]
         (->> {:id              (mongo/create-id)
               :created         created
-              :created-by      (usr/summary user)
-              :state           :draft
+              :created-by      (->invoice-user user)
+              :state           "draft"
               :application-id  (:id application)
               :organization-id org-id
               :operations      (map (fn [op]
                                       {:operation-id (:id op)
                                        :name         (:name op)
-                                       :invoice-rows (some->> (filter (util/fn-> :operations
-                                                                                 (util/includes-as-kw? (:name op)))
-                                                                      catalog)
-                                                              (map (fn [{disc :discount-percent :as row}]
-                                                                     (cond-> (assoc (select-keys row
-                                                                                                 [:text :unit :price-per-unit])
-                                                                                    :type :from-price-catalogue)
-                                                                       disc (assoc :discount-percent disc)))))})
+                                       :invoice-rows (some->> catalog
+                                                              (filter (util/fn-> :operations
+                                                                                 (util/includes-as-kw?
+                                                                                  (:name op))))
+                                                              (map #(assoc (select-keys %
+                                                                                        [:text :unit :price-per-unit
+                                                                                         :discount-percent])
+                                                                           :type "from-price-catalogue"
+                                                                           :units 0)))})
                                     ops)}
              (sc/validate Invoice)
              (mongo/insert :invoices))))))

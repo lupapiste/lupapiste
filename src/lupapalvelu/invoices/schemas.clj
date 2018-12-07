@@ -17,7 +17,6 @@
    :firstName                                 NameLength
    :lastName                                  NameLength
    :role                                      usr/Role
-   :email                                     ssc/Email
    :username                                  ssc/Username})
 
 (sc/defschema DiscountPercent
@@ -115,7 +114,7 @@
 
 (sc/defn ^:always-validate ->invoice-user :- User
  [user]
-  (select-keys user [:id :firstName :lastName :role :email :username]))
+  (select-keys user [:id :firstName :lastName :role :username]))
 
 (defn ->invoice-db
   [invoice {:keys [id organization] :as application} user]
