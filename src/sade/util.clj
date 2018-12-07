@@ -76,6 +76,11 @@
   "Makes sure that the value of key k in map m is sequental"
   [m k] (let [v (k m)] (if (and v (not (sequential? v))) (assoc m k [v]) m)))
 
+(defn sequentialize [x]
+  (if (sequential? x)
+    x
+    [x]))
+
 (defn pathwalk
   "A prewalk that keeps track of the path traversed from the root of the collection"
   ([f coll] (pathwalk f [] coll))

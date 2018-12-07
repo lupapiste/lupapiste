@@ -2,7 +2,8 @@
   (:require [lupapalvelu.data-skeleton :as ds]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]))
+            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
+            [sade.util :as util]))
 
 ;; Ei suomeksi, noudattaa omaa tietomallia
 
@@ -27,6 +28,7 @@
    :address (ds/access :address)
    :stateChangeTs (ds/access :stateChangeTs) ;; Selite: Koska hakemuksen viimeisin tila on tullut voimaan Historysta etsitään
    :projectDescription (ds/access :projectDescription) ;; Selite: Hankkeen kuvaus korvaamaan tätä. Konversiossa huomioitava, rakennusvalvonta-asian kuvaus
+
    :uuttaHuoneistoalaa (ds/access :test) ;; Selite: Mahdollisuus myös negatiiviseen arvoon. Oleellinen tieto. Tulee rakennuksen tietona ja summataan hakemukselle
    :uuttaKerrosalaa (ds/access :test) ;; Selite: Mahdollisuus myös negatiiviseen arvoon. Oleellinen tieto. Kerrosalassa mukana yleiset tilat. Tulee rakennuksen tietona ja summataan hakemukselle
 
@@ -69,14 +71,12 @@
    ;; Osapuoli
    ;; Providing all data for now as it is unclear what is actually needed
    :parties (ds/array-from :parties
-                           (ds/access :party))
+                           (ds/access :context))
 
-   :suunnittelijanEmail (ds/access :test)
-   :suunnittelijanLaji (ds/access :test)
-   :suunnittelijanLahiJaPostiosoite (ds/access :test)
-   :suunnittelijanNimi (ds/access :test)
-   :suunnittelijanPuhelinnumero (ds/access :test)
-   :suunnittelijarooli (ds/access :test)
+   ;; Osapuoli: Suunnittelijat
+   ;; Providing all data for now as it is unclear what is actually needed
+   :planners (ds/array-from :planners
+                            (ds/access :context))
 
    ;; Päätös
    :lupaehdonSisaltoteksti (ds/access :test)
@@ -159,6 +159,8 @@
    :araFunding (ds/from-context [:application #(domain/get-document-by-name % "hankkeen-kuvaus")
                                  :data tools/unwrapped :rahoitus]
                                 false)
+   :context (ds/from-context [:context])
+
    :location (ds/from-context [:application :location])
    :location-wgs84 (ds/from-context [:application :location-wgs84])
    :projectDescription (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
@@ -167,16 +169,10 @@
 
    :parties (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
                               :RakennusvalvontaAsia :osapuolettieto :Osapuolet :osapuolitieto
-                              (partial mapv :Osapuoli)])
-   :party (ds/from-context [:context])
-   ;; TODO what to do with company parties?
-   :parties-VRK-role (ds/from-context [:context :VRKrooliKoodi])
-   :parties-municipality-role (ds/from-context [:context :kuntaRooliKoodi])
-   :parties-address (ds/from-context [:context :henkilo :osoite :osoitenimi :teksti])
-   :parties-post-office (ds/from-context [:context :henkilo :osoite :postitoimipaikannimi])
-   :parties-zip-code (ds/from-context [:context :henkilo :osoite :postinumero])
-   :parties-first-name (ds/from-context [:context :henkilo :nimi :etunimi])
-   :parties-last-name (ds/from-context [:context :henkilo :nimi :sukunimi])
+                              util/sequentialize (partial mapv :Osapuoli)])
+   :planners (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
+                               :RakennusvalvontaAsia :osapuolettieto :Osapuolet :suunnittelijatieto
+                               util/sequentialize (partial mapv :Suunnittelija)])
 
    :reviews (ds/from-context [:application :tasks (partial mapv #(katselmus-canonical application lang % nil))])
    :review-date (ds/from-context [get-katselmustieto :pitoPvm])

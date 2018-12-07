@@ -147,6 +147,151 @@
                                     :puhelin "03-389 1380"
                                     :sahkopostiosoite "yritys@example.com"
                                     :vainsahkoinenAsiointiKytkin true}}]
+                :planners [{:FISEkelpoisuus "tavanomainen pääsuunnittelu (uudisrakentaminen)"
+             :FISEpatevyyskortti "http://www.ym.fi"
+             :VRKrooliKoodi "erityissuunnittelija"
+             :henkilo {:henkilotunnus "210281-9988"
+                       :nimi {:etunimi "Pena" :sukunimi "Penttilä"}
+                       :osoite {:osoitenimi {:teksti "katu"}
+                                :postinumero "33800"
+                                :postitoimipaikannimi "Tuonela"
+                                :ulkomainenLahiosoite "katu"
+                                :ulkomainenPostitoimipaikka "Tuonela"
+                                :valtioKansainvalinen "CHN"
+                                :valtioSuomeksi "Kiina"}
+                       :puhelin "+358401234567"
+                       :sahkopostiosoite "pena@example.com"}
+             :kokemusvuodet "5"
+             :koulutus "arkkitehti"
+             :muuSuunnittelijaRooli "ei listassa -rooli"
+             :patevyysvaatimusluokka "B"
+             :suunnittelijaRoolikoodi "muu"
+             :vaadittuPatevyysluokka "C"
+             :valmistumisvuosi "2010"
+             :yritys {:liikeJaYhteisotunnus "1060155-5"
+                      :nimi "Solita Oy"
+                      :postiosoite {:osoitenimi {:teksti "katu"}
+                                    :postinumero "33800"
+                                    :postitoimipaikannimi "Tuonela"
+                                    :ulkomainenLahiosoite "katu"
+                                    :ulkomainenPostitoimipaikka "Tuonela"
+                                    :valtioKansainvalinen "CHN"
+                                    :valtioSuomeksi "Kiina"}
+                      :postiosoitetieto {:postiosoite {:osoitenimi {:teksti "katu"}
+                                                       :postinumero "33800"
+                                                       :postitoimipaikannimi "Tuonela"
+                                                       :ulkomainenLahiosoite "katu"
+                                                       :ulkomainenPostitoimipaikka "Tuonela"
+                                                       :valtioKansainvalinen "CHN"
+                                                       :valtioSuomeksi "Kiina"}}}}
+            {:FISEkelpoisuus "tavanomainen pääsuunnittelu (uudisrakentaminen)"
+             :FISEpatevyyskortti "http://www.ym.fi"
+             :VRKrooliKoodi "erityissuunnittelija"
+             :henkilo {:henkilotunnus "210281-9988"
+                       :nimi {:etunimi "Pena" :sukunimi "Penttilä"}
+                       :osoite {:osoitenimi {:teksti "katu"}
+                                :postinumero "33800"
+                                :postitoimipaikannimi "Tuonela"
+                                :ulkomainenLahiosoite "katu"
+                                :ulkomainenPostitoimipaikka "Tuonela"
+                                :valtioKansainvalinen "CHN"
+                                :valtioSuomeksi "Kiina"}
+                       :puhelin "+358401234567"
+                       :sahkopostiosoite "pena@example.com"}
+             :kokemusvuodet "5"
+             :koulutus "muu"
+             :patevyysvaatimusluokka "AA"
+             :suunnittelijaRoolikoodi "GEO-suunnittelija"
+             :vaadittuPatevyysluokka "A"
+             :valmistumisvuosi "2010"
+             :yritys {:liikeJaYhteisotunnus "1060155-5"
+                      :nimi "Solita Oy"
+                      :postiosoite {:osoitenimi {:teksti "katu"}
+                                    :postinumero "33800"
+                                    :postitoimipaikannimi "Tuonela"
+                                    :ulkomainenLahiosoite "katu"
+                                    :ulkomainenPostitoimipaikka "Tuonela"
+                                    :valtioKansainvalinen "CHN"
+                                    :valtioSuomeksi "Kiina"}
+                      :postiosoitetieto {:postiosoite {:osoitenimi {:teksti "katu"}
+                                                       :postinumero "33800"
+                                                       :postitoimipaikannimi "Tuonela"
+                                                       :ulkomainenLahiosoite "katu"
+                                                       :ulkomainenPostitoimipaikka "Tuonela"
+                                                       :valtioKansainvalinen "CHN"
+                                                       :valtioSuomeksi "Kiina"}}}}
+            {:FISEkelpoisuus "tavanomainen pääsuunnittelu (uudisrakentaminen)"
+             :FISEpatevyyskortti "http://www.ym.fi"
+             :VRKrooliKoodi "erityissuunnittelija"
+             :henkilo {:henkilotunnus "210281-9988"
+                       :nimi {:etunimi "Pena" :sukunimi "Penttilä"}
+                       :osoite {:osoitenimi {:teksti "katu"}
+                                :postinumero "33800"
+                                :postitoimipaikannimi "Tuonela"
+                                :ulkomainenLahiosoite "katu"
+                                :ulkomainenPostitoimipaikka "Tuonela"
+                                :valtioKansainvalinen "CHN"
+                                :valtioSuomeksi "Kiina"}
+                       :puhelin "+358401234567"
+                       :sahkopostiosoite "pena@example.com"}
+             :kokemusvuodet "5"
+             :koulutus "arkkitehti"
+             :patevyysvaatimusluokka "B"
+             :suunnittelijaRoolikoodi "rakennusfysikaalinen suunnittelija"
+             :vaadittuPatevyysluokka "C"
+             :valmistumisvuosi "2010"
+             :yritys {:liikeJaYhteisotunnus "1060155-5"
+                      :nimi "Solita Oy"
+                      :postiosoite {:osoitenimi {:teksti "katu"}
+                                    :postinumero "33800"
+                                    :postitoimipaikannimi "Tuonela"
+                                    :ulkomainenLahiosoite "katu"
+                                    :ulkomainenPostitoimipaikka "Tuonela"
+                                    :valtioKansainvalinen "CHN"
+                                    :valtioSuomeksi "Kiina"}
+                      :postiosoitetieto {:postiosoite {:osoitenimi {:teksti "katu"}
+                                                       :postinumero "33800"
+                                                       :postitoimipaikannimi "Tuonela"
+                                                       :ulkomainenLahiosoite "katu"
+                                                       :ulkomainenPostitoimipaikka "Tuonela"
+                                                       :valtioKansainvalinen "CHN"
+                                                       :valtioSuomeksi "Kiina"}}}}
+            {:FISEkelpoisuus "tavanomainen pääsuunnittelu (uudisrakentaminen)"
+             :FISEpatevyyskortti "http://www.ym.fi"
+             :VRKrooliKoodi "pääsuunnittelija"
+             :henkilo {:henkilotunnus "210281-9988"
+                       :nimi {:etunimi "Pena" :sukunimi "Penttilä"}
+                       :osoite {:osoitenimi {:teksti "katu"}
+                                :postinumero "33800"
+                                :postitoimipaikannimi "Tuonela"
+                                :ulkomainenLahiosoite "katu"
+                                :ulkomainenPostitoimipaikka "Tuonela"
+                                :valtioKansainvalinen "CHN"
+                                :valtioSuomeksi "Kiina"}
+                       :puhelin "+358401234567"
+                       :sahkopostiosoite "pena@example.com"}
+             :kokemusvuodet "5"
+             :koulutus "arkkitehti"
+             :patevyysvaatimusluokka "ei tiedossa"
+             :suunnittelijaRoolikoodi "pääsuunnittelija"
+             :vaadittuPatevyysluokka "AA"
+             :valmistumisvuosi "2010"
+             :yritys {:liikeJaYhteisotunnus "1060155-5"
+                      :nimi "Solita Oy"
+                      :postiosoite {:osoitenimi {:teksti "katu"}
+                                    :postinumero "33800"
+                                    :postitoimipaikannimi "Tuonela"
+                                    :ulkomainenLahiosoite "katu"
+                                    :ulkomainenPostitoimipaikka "Tuonela"
+                                    :valtioKansainvalinen "CHN"
+                                    :valtioSuomeksi "Kiina"}
+                      :postiosoitetieto {:postiosoite {:osoitenimi {:teksti "katu"}
+                                                       :postinumero "33800"
+                                                       :postitoimipaikannimi "Tuonela"
+                                                       :ulkomainenLahiosoite "katu"
+                                                       :ulkomainenPostitoimipaikka "Tuonela"
+                                                       :valtioKansainvalinen "CHN"
+                                                       :valtioSuomeksi "Kiina"}}}}]
                 :reviews [{:type "ei tiedossa"
                            :reviewer "Reijo Revyy"
                            :date "2012-12-03"
