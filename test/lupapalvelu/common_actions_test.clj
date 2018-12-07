@@ -184,7 +184,8 @@
                           :invoices-tab
                           :application-operations
                           :update-invoice
-                          :fetch-invoice}
+                          :fetch-invoice
+                          :application-price-catalogue}
         user {:id "user123"
               :role "authority"}
         application {:organization "999-R"
@@ -244,7 +245,7 @@
                            ;; pate
                            :pate-verdicts :pate-verdict :pate-verdict-tab :pate-contract-tab :published-pate-verdict
                            ;; invoices
-                           :fetch-invoice :application-invoices :invoices-tab :application-operations
+                           :fetch-invoice :application-invoices :invoices-tab :application-operations :application-price-catalogue
                            ;; raw
                            :download-all-attachments :download-attachments
                            :pdf-export
