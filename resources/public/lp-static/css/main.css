@@ -1354,6 +1354,12 @@ h1 .icon {
 
 /* NAV
 ----------------------------------------------------------------------------- */
+.usage-purpose-org-name {
+  display: block;
+  margin-left: 27px;
+  font-size: smaller;
+}
+
 .nav-wrapper {
   width: 100%;
 }
@@ -1401,134 +1407,6 @@ nav .brand a.logo {
   height: 35px;
   margin: 12px;
   background: url("/lp-static/img/logo.png");
-}
-
-nav .language-closed {
-  background-color: inherit;
-  display: inline-block;
-  margin: 0;
-  float: left;
-}
-
-nav .language-closed a {
-  font-size: 16px;
-  vertical-align: middle;
-  white-space: nowrap;
-  position: relative;
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-nav .language-closed a:link, nav .language-closed a:visited {
-  color: #f7ac2e;
-  text-decoration: none;
-}
-
-nav .language-closed a:link span, nav .language-closed a:visited span {
-  color: #f7ac2e;
-}
-
-nav .language-closed a:hover, nav .language-closed a:active {
-  background-color: #555555;
-}
-
-nav .language-closed a:hover {
-  color: white;
-}
-
-nav .language-closed a:hover span {
-  color: white;
-}
-
-nav .language-closed a:active {
-  color: white;
-}
-
-nav .language-closed a:active span {
-  color: white;
-}
-
-nav .language-closed a span {
-  vertical-align: middle;
-}
-
-nav .language-closed a {
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-nav .language-closed a, nav .language-closed span {
-  vertical-align: middle;
-  line-height: 60px;
-  text-transform: uppercase;
-  overflow: hidden;
-}
-
-nav .language-open {
-  background-color: #555555;
-  display: inline-block;
-  margin: 0;
-  float: left;
-}
-
-nav .language-open a {
-  font-size: 16px;
-  vertical-align: middle;
-  white-space: nowrap;
-  position: relative;
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-nav .language-open a:link, nav .language-open a:visited {
-  color: white;
-  text-decoration: none;
-}
-
-nav .language-open a:link span, nav .language-open a:visited span {
-  color: white;
-}
-
-nav .language-open a:hover, nav .language-open a:active {
-  background-color: #555555;
-}
-
-nav .language-open a:hover {
-  color: #f7ac2e;
-}
-
-nav .language-open a:hover span {
-  color: #f7ac2e;
-}
-
-nav .language-open a:active {
-  color: #f7ac2e;
-}
-
-nav .language-open a:active span {
-  color: #f7ac2e;
-}
-
-nav .language-open a span {
-  vertical-align: middle;
-}
-
-nav .language-open a {
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-nav .language-open a, nav .language-open span {
-  vertical-align: middle;
-  line-height: 60px;
-  text-transform: uppercase;
-  overflow: hidden;
 }
 
 nav .header-menu {
@@ -1596,76 +1474,83 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   line-height: 60px;
 }
 
-.nav-bottom {
-  width: 100%;
-  background-color: #555555;
-  display: block;
-  clear: both;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-
-.nav-bottom .language-menu {
-  width: 100%;
-  clear: both;
-  padding-top: 1em;
-  padding-left: 208px;
-  padding-bottom: .5em;
-  background-color: #555555;
-}
-
-.nav-bottom .language-menu ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.nav-bottom .language-menu ul li {
-  margin-bottom: .5em;
-  margin-top: 0;
-}
-
-.nav-bottom .language-menu ul li a {
-  font-size: 16px;
-  vertical-align: middle;
-  white-space: nowrap;
-  position: relative;
+nav .header-dropdown {
   display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.nav-bottom .language-menu ul li a:link, .nav-bottom .language-menu ul li a:visited {
+nav .header-dropdown > .header-dropdown-button {
+  display: inline-block;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  height: 60px;
+  line-height: 60px;
+  color: #f7ac2e;
+  text-decoration: none;
+}
+
+nav .header-dropdown > .header-dropdown-button > span {
+  vertical-align: middle;
+}
+
+nav .header-dropdown > .header-dropdown-button:hover {
+  color: white;
+}
+
+nav .header-dropdown.active > .header-dropdown-button {
+  background-color: #555555;
+  color: white;
+}
+
+nav .header-dropdown.active > .header-dropdown-button:hover {
+  color: #f7ac2e;
+}
+
+nav .header-dropdown > ul {
+  display: none;
+  position: fixed;
+  padding: 0;
+  background-color: white;
+  border: 1px solid #f7ac2e;
+  list-style-type: none;
+}
+
+nav .header-dropdown > ul > li {
+  display: table;
+  width: 100%;
+}
+
+nav .header-dropdown > ul > li > a {
+  display: table-cell;
+  width: auto;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  color: black;
+}
+
+nav .header-dropdown > ul > li > a > span {
+  vertical-align: middle;
+}
+
+nav .header-dropdown > ul > li:hover {
+  background-color: #f7ac2e;
+}
+
+nav .header-dropdown > ul > li:hover > a {
   color: white;
   text-decoration: none;
 }
 
-.nav-bottom .language-menu ul li a:link span, .nav-bottom .language-menu ul li a:visited span {
-  color: white;
+nav .header-dropdown > ul > li.spacer {
+  height: 1px;
+  background-color: #f7ac2e;
 }
 
-.nav-bottom .language-menu ul li a:hover, .nav-bottom .language-menu ul li a:active {
-  background-color: inherit;
-}
-
-.nav-bottom .language-menu ul li a:hover {
-  color: #f7ac2e;
-}
-
-.nav-bottom .language-menu ul li a:hover span {
-  color: #f7ac2e;
-}
-
-.nav-bottom .language-menu ul li a:active {
-  color: #f7ac2e;
-}
-
-.nav-bottom .language-menu ul li a:active span {
-  color: #f7ac2e;
-}
-
-.nav-bottom .language-menu ul li a span {
-  vertical-align: middle;
+nav .header-dropdown.active > ul {
+  display: block;
 }
 
 nav .julkipano-brand a.logo {
@@ -1738,177 +1623,6 @@ nav .julkipano-brand .header-box span, nav .julkipano-brand .julkipano-user span
   vertical-align: middle;
 }
 
-nav .julkipano-brand .language-closed {
-  background-color: inherit;
-  display: inline-block;
-  margin: 0;
-  float: left;
-}
-
-nav .julkipano-brand .language-closed a {
-  font-size: 16px;
-  vertical-align: middle;
-  white-space: nowrap;
-  position: relative;
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-nav .julkipano-brand .language-closed a:link, nav .julkipano-brand .language-closed a:visited {
-  color: #f7ac2e;
-  text-decoration: none;
-}
-
-nav .julkipano-brand .language-closed a:link span, nav .julkipano-brand .language-closed a:visited span {
-  color: #f7ac2e;
-}
-
-nav .julkipano-brand .language-closed a:hover, nav .julkipano-brand .language-closed a:active {
-  background-color: #555555;
-}
-
-nav .julkipano-brand .language-closed a:hover {
-  color: white;
-}
-
-nav .julkipano-brand .language-closed a:hover span {
-  color: white;
-}
-
-nav .julkipano-brand .language-closed a:active {
-  color: white;
-}
-
-nav .julkipano-brand .language-closed a:active span {
-  color: white;
-}
-
-nav .julkipano-brand .language-closed a span {
-  vertical-align: middle;
-}
-
-nav .julkipano-brand .language-closed a {
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-nav .julkipano-brand .language-closed a, nav .julkipano-brand .language-closed span {
-  vertical-align: middle;
-  line-height: 60px;
-  text-transform: uppercase;
-  overflow: hidden;
-}
-
-nav .julkipano-brand .language-open {
-  background-color: #555555;
-  display: inline-block;
-  margin: 0;
-  float: left;
-}
-
-nav .julkipano-brand .language-open a {
-  font-size: 16px;
-  vertical-align: middle;
-  white-space: nowrap;
-  position: relative;
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-nav .julkipano-brand .language-open a:link, nav .julkipano-brand .language-open a:visited {
-  color: white;
-  text-decoration: none;
-}
-
-nav .julkipano-brand .language-open a:link span, nav .julkipano-brand .language-open a:visited span {
-  color: white;
-}
-
-nav .julkipano-brand .language-open a:hover, nav .julkipano-brand .language-open a:active {
-  background-color: #555555;
-}
-
-nav .julkipano-brand .language-open a:hover {
-  color: #f7ac2e;
-}
-
-nav .julkipano-brand .language-open a:hover span {
-  color: #f7ac2e;
-}
-
-nav .julkipano-brand .language-open a:active {
-  color: #f7ac2e;
-}
-
-nav .julkipano-brand .language-open a:active span {
-  color: #f7ac2e;
-}
-
-nav .julkipano-brand .language-open a span {
-  vertical-align: middle;
-}
-
-nav .julkipano-brand .language-open a {
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-nav .julkipano-brand .language-open a, nav .julkipano-brand .language-open span {
-  vertical-align: middle;
-  line-height: 60px;
-  text-transform: uppercase;
-  overflow: hidden;
-}
-
-nav .julkipano-brand .nav-bottom ul li a {
-  font-size: 16px;
-  vertical-align: middle;
-  white-space: nowrap;
-  position: relative;
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-nav .julkipano-brand .nav-bottom ul li a:link, nav .julkipano-brand .nav-bottom ul li a:visited {
-  color: white;
-  text-decoration: none;
-}
-
-nav .julkipano-brand .nav-bottom ul li a:link span, nav .julkipano-brand .nav-bottom ul li a:visited span {
-  color: white;
-}
-
-nav .julkipano-brand .nav-bottom ul li a:hover, nav .julkipano-brand .nav-bottom ul li a:active {
-  background-color: inherit;
-}
-
-nav .julkipano-brand .nav-bottom ul li a:hover {
-  color: #f7ac2e;
-}
-
-nav .julkipano-brand .nav-bottom ul li a:hover span {
-  color: #f7ac2e;
-}
-
-nav .julkipano-brand .nav-bottom ul li a:active {
-  color: #f7ac2e;
-}
-
-nav .julkipano-brand .nav-bottom ul li a:active span {
-  color: #f7ac2e;
-}
-
-nav .julkipano-brand .nav-bottom ul li a span {
-  vertical-align: middle;
-}
-
 .nav-notification {
   width: 100%;
   background-color: #f39129;
@@ -1957,134 +1671,6 @@ nav .julkipano-brand .nav-bottom ul li a span {
   background-color: #fff;
 }
 
-.louhi nav .language-closed, .facta nav .language-closed {
-  background-color: inherit;
-  display: inline-block;
-  margin: 0;
-  float: left;
-}
-
-.louhi nav .language-closed a, .facta nav .language-closed a {
-  font-size: 16px;
-  vertical-align: middle;
-  white-space: nowrap;
-  position: relative;
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.louhi nav .language-closed a:link, .louhi nav .language-closed a:visited, .facta nav .language-closed a:link, .facta nav .language-closed a:visited {
-  color: black;
-  text-decoration: none;
-}
-
-.louhi nav .language-closed a:link span, .louhi nav .language-closed a:visited span, .facta nav .language-closed a:link span, .facta nav .language-closed a:visited span {
-  color: black;
-}
-
-.louhi nav .language-closed a:hover, .louhi nav .language-closed a:active, .facta nav .language-closed a:hover, .facta nav .language-closed a:active {
-  background-color: inherit;
-}
-
-.louhi nav .language-closed a:hover, .facta nav .language-closed a:hover {
-  color: #f7ac2e;
-}
-
-.louhi nav .language-closed a:hover span, .facta nav .language-closed a:hover span {
-  color: #f7ac2e;
-}
-
-.louhi nav .language-closed a:active, .facta nav .language-closed a:active {
-  color: #f7ac2e;
-}
-
-.louhi nav .language-closed a:active span, .facta nav .language-closed a:active span {
-  color: #f7ac2e;
-}
-
-.louhi nav .language-closed a span, .facta nav .language-closed a span {
-  vertical-align: middle;
-}
-
-.louhi nav .language-closed a, .facta nav .language-closed a {
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.louhi nav .language-closed a, .louhi nav .language-closed span, .facta nav .language-closed a, .facta nav .language-closed span {
-  vertical-align: middle;
-  line-height: 60px;
-  text-transform: uppercase;
-  overflow: hidden;
-}
-
-.louhi nav .language-open, .facta nav .language-open {
-  background-color: inherit;
-  display: inline-block;
-  margin: 0;
-  float: left;
-}
-
-.louhi nav .language-open a, .facta nav .language-open a {
-  font-size: 16px;
-  vertical-align: middle;
-  white-space: nowrap;
-  position: relative;
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.louhi nav .language-open a:link, .louhi nav .language-open a:visited, .facta nav .language-open a:link, .facta nav .language-open a:visited {
-  color: black;
-  text-decoration: none;
-}
-
-.louhi nav .language-open a:link span, .louhi nav .language-open a:visited span, .facta nav .language-open a:link span, .facta nav .language-open a:visited span {
-  color: black;
-}
-
-.louhi nav .language-open a:hover, .louhi nav .language-open a:active, .facta nav .language-open a:hover, .facta nav .language-open a:active {
-  background-color: inherit;
-}
-
-.louhi nav .language-open a:hover, .facta nav .language-open a:hover {
-  color: #f7ac2e;
-}
-
-.louhi nav .language-open a:hover span, .facta nav .language-open a:hover span {
-  color: #f7ac2e;
-}
-
-.louhi nav .language-open a:active, .facta nav .language-open a:active {
-  color: #f7ac2e;
-}
-
-.louhi nav .language-open a:active span, .facta nav .language-open a:active span {
-  color: #f7ac2e;
-}
-
-.louhi nav .language-open a span, .facta nav .language-open a span {
-  vertical-align: middle;
-}
-
-.louhi nav .language-open a, .facta nav .language-open a {
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.louhi nav .language-open a, .louhi nav .language-open span, .facta nav .language-open a, .facta nav .language-open span {
-  vertical-align: middle;
-  line-height: 60px;
-  text-transform: uppercase;
-  overflow: hidden;
-}
-
 .louhi nav .header-box a, .facta nav .header-box a {
   font-size: 16px;
   vertical-align: middle;
@@ -2128,7 +1714,7 @@ nav .julkipano-brand .nav-bottom ul li a span {
   vertical-align: middle;
 }
 
-.louhi #logout-header-box, .facta #logout-header-box {
+.louhi #logout-button, .facta #logout-button {
   display: none;
 }
 
@@ -37447,6 +37033,10 @@ body.authority-admin .nav-box {
 body.admin .nav-box .brand > a,
 body.authority-admin .nav-box .brand > a {
   margin-left: 0;
+}
+
+nav .header-menu {
+  margin-right: 80px;
 }
 
 .navi-sidebar {

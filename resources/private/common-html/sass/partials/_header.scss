@@ -2,7 +2,6 @@ $header-padding: 12px;
 $header-height: 60px;
 $brand-width: 188px;
 $language-bg: $gray85;
-$language-padding: 20px;
 
 @mixin header-padding {
   padding: {
@@ -49,26 +48,77 @@ $language-padding: 20px;
   }
 }
 
-@mixin language-select( $link: $orange, $hover: white, $bg: inherit, $hover-bg: $language-bg ) {
-  @include nav-link( $link: $link, $hover: $hover, $hover-bg: $hover-bg );
-  background-color: $bg;
+@mixin header-dropdown( $link: $orange, $hover: white, $bg: inherit, $hover-bg: $language-bg ) {
   display: inline-block;
-  margin: 0;
-  float: left;
-  a {
-    padding: {
-    left: $language-padding;
-    right: $language-padding;
-    top: 0;
-    bottom: 0;
-  }
-  }
-  a, span {
-    vertical-align: middle;
+
+  > .header-dropdown-button {
+    display: inline-block;
+    @include header-padding;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    height: $header-height;
     line-height: $header-height;
-    text-transform: uppercase;
-    overflow: hidden;
+    color: $link;
+    text-decoration: none;
+
+    > span { vertical-align: middle; }
+
+    &:hover { color: $hover; }
   }
+  &.active > .header-dropdown-button {
+    background-color: $hover-bg;
+    color: $hover;
+
+    &:hover { color: $link; }
+  }
+
+  > ul {
+    display: none;
+    position: fixed;
+    padding: 0;
+    background-color: white;
+    border: 1px solid $link;
+    list-style-type: none;
+
+    > li {
+      display: table;
+      width: 100%;
+
+      > a {
+        display: table-cell;
+        width: auto;
+        @include header-padding;
+        padding-top: 0.5em;
+        padding-bottom: 0.5em;
+        color: black;
+
+        > span { vertical-align: middle; }
+      }
+
+      &:hover {
+        background-color: $link;
+
+        > a {
+          color: $hover;
+          text-decoration: none;
+        }
+      }
+
+      &.spacer {
+        height: 1px;
+        background-color: $link;
+      }
+    }
+  }
+  &.active > ul {
+    display: block;
+  }
+}
+
+.usage-purpose-org-name {
+  display: block;
+  margin-left: 27px;
+  font-size: smaller;
 }
 
 @mixin nav-row( $bg ) {
@@ -123,12 +173,6 @@ nav {
       background: url("/lp-static/img/logo.png");
     }
   }
-  .language-closed {
-    @include language-select;
-  }
-  .language-open {
-    @include language-select( $link: white, $hover: $orange, $bg: $language-bg );
-  }
   .header-menu {
     display: inline-block;
     position: absolute;
@@ -148,32 +192,8 @@ nav {
       }
     }
   }
-}
 
-.nav-bottom {
-  @include nav-row( $language-bg );
-  .language-menu {
-    width: 100%;
-    clear: both;
-    padding: {
-      top: 1em;
-      left: $brand-width + $language-padding;
-      bottom: .5em;
-    }
-    background-color: $language-bg;
-    ul {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-      li {
-        @include nav-link( $link: white, $hover: $orange);
-        margin: {
-          bottom: .5em;
-          top: 0;
-        }
-      }
-    }
-  }
+  .header-dropdown { @include header-dropdown; }
 }
 
 nav {
@@ -203,20 +223,6 @@ nav {
       margin-right: $marginL;
       span {
         vertical-align: middle;
-      }
-    }
-    .language-closed {
-      @include language-select( $link: $orange );
-    }
-    .language-open {
-      @include language-select( $link: white, $hover: $orange, $bg: $language-bg );
-    }
-
-    .nav-bottom {
-      ul {
-        li {
-          @include nav-link($link: white, $hover: $orange);
-        }
       }
     }
   }
@@ -274,15 +280,10 @@ $notification-bottom: -60px;
     .nav-top {
       background-color: #fff;
     }
-    .language-closed {
-      @include language-select( $link: black, $hover: $orange, $hover-bg: inherit );
-    }
-    .language-open {
-      @include language-select( $link: black, $hover: $orange, $hover-bg: inherit );
-    }
-      .header-box {
+
+    .header-box {
       @include nav-link( $link: $orange-link, $hover: $orange-hover, $active: $orange-active );
       }
     }
-    #logout-header-box { display: none; }
+    #logout-button { display: none; }
 }

@@ -31,7 +31,7 @@ No option for filling with attachments for foreman
   No such toggle  also-fill-attachments
 
 Foreman uploads attachment
-  Click Element  user-name
+  Open My Page
   Wait for Page to Load  Teppo  Nieminen
   Wait until  Click Label  architect
   Click enabled by test id  test-add-architect-attachment

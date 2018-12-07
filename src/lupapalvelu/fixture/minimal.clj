@@ -259,7 +259,7 @@
     :enabled true
     :language "fi"
     :email "ronja.sibbo@sipoo.fi"
-    :orgAuthz {:753-R #{:authority}}
+    :orgAuthz {:753-R #{:authority :authorityAdmin}}
     :firstName "Ronja"
     :lastName "Sibbo"
     :phone "03121991"

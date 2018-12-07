@@ -8,7 +8,7 @@ Resource       ../../common_resource.robot
 
 Mikko goes to own page
   Mikko logs in
-  Click Element  user-name
+  Open My Page
   Wait for Page to Load  Mikko  Intonen
   Title Should Be  Lupapiste
 
@@ -71,7 +71,7 @@ Sven logs in and sees language indicator
   Language is  FI
 
 Sven changes his user language to Swedish
-  Click element  user-name
+  Open My Page
   List selection should be  userinfo-language  fi
   Select from list by id and value  userinfo-language  sv
   Save User Data
@@ -80,7 +80,8 @@ Upon saving the UI language changes
   Wait until  Language is  SV
 
 Clicking logout refers to the Swedish login page
-  Click link  jquery=div#logout-header-box a
+  Click Element  header-user-dropdown
+  Click link  logout-button
   Wait Until  Element should be visible  login-button
   Language is  SV
 

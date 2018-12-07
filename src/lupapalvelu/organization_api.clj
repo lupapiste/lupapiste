@@ -14,6 +14,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.schema-util :as pate-schema]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]
@@ -167,12 +168,28 @@
         (ok :attachmentTypes)))
 
 (defquery organization-name-by-user
-  {:description "Lists organization names for all languages."
+  {:description "authorityAdmin organization name for all languages."
    :permissions [{:required [:organization/admin]}]}
   [{user :user}]
   (ok (-> (usr/authority-admins-organization-id user)
           org/get-organization
           (select-keys [:id :name]))))
+
+(defquery usage-purposes
+  {:description "Lupapiste usage purposes e.g. [{:type \"authority\"}, {:type \"authority-admin\", :orgId \"753-R\"}]
+                for user based on orgAuthz. Used by frontend role selector."
+   :user-roles  roles/all-user-roles}
+  [{:keys [user]}]
+  (if (:role user)                                          ; prevent NullPointerException in applicationpage-for
+    (let [applicationpage (usr/applicationpage-for user)]
+      (ok :usagePurposes (into (if (= applicationpage "authority-admin")
+                                 []
+                                 [{:type applicationpage}])
+                               (for [[org-id authz] (:orgAuthz user)
+                                     auth authz
+                                     :when (= auth :authorityAdmin)]
+                                 {:type "authority-admin", :orgId (name org-id)}))))
+    (ok :usagePurposes [])))
 
 (defquery user-organizations-for-permit-type
   {:parameters       [permitType]
@@ -905,6 +922,16 @@
   [_]
   (ok :names (into {} (for [{:keys [id name]} (org/get-organizations {} {:name 1})]
                         [id name]))))
+
+(defquery organization-names-by-user
+  {:description "User organization names for all languages."
+   :user-roles  roles/all-user-roles}
+  [{{:keys [orgAuthz]} :user}]
+  (let [org-ids (map (comp name key) orgAuthz)
+        orgs (if (seq org-ids)
+               (org/get-organizations {:_id {$in org-ids}} {:name 1})
+               [])]
+    (ok :names (into {} (map (juxt :id :name)) orgs))))
 
 (defquery vendor-backend-redirect-config
   {:permissions [{:required [:organization/admin]}]}

@@ -1,4 +1,5 @@
 *** Settings ***
+Resource        ../../common_resource.robot
 Resource        ../common_keywords/vetuma_helpers.robot
 
 *** Keywords ***
@@ -11,7 +12,7 @@ Authenticate via dummy page
   Click by test id  submit-button
 
 Navigate to email change
-  Click Element  user-name
+  Open My Page
   Open accordion by test id  mypage-change-email-accordion
   Wait Until  Element Should be visible  oldEmail
 

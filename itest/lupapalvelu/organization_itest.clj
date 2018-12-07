@@ -35,7 +35,7 @@
     (fact "sipoo can set working krysp-url containing extra spaces"
       (command sipoo :set-krysp-endpoint :url (str " " uri " ") :username "" :password "" :permitType "YA" :version "2") => ok?)
 
-   (fact "sipoo cant set incorrect krysp-url"
+   (fact "sipoo can't set incorrect krysp-url"
       (command sipoo :set-krysp-endpoint :url "BROKEN_URL" :username "" :password "" :permitType "R"  :version "1") => fail?)))
 
 (facts "set-krysp-endpoint private url"
@@ -469,6 +469,17 @@
     resp => ok?
     (count names) => pos?
     (-> names :753-R :fi) => "Sipoon rakennusvalvonta"))
+
+(facts organization-names-by-user
+  (let [sipoo-R-names {:fi "Sipoon rakennusvalvonta", :sv "Sipoon rakennusvalvonta", :en "Sipoon rakennusvalvonta"}]
+    (query pena :organization-names-by-user) => {:ok true, :names {}}
+    (query sipoo :organization-names-by-user) => {:ok true, :names {:753-R sipoo-R-names}}
+    (query sonja :organization-names-by-user)
+    => {:ok true, :names {:753-R         sipoo-R-names
+                          :753-YA        {:en "Sipoon yleisten alueiden rakentaminen"
+                                          :fi "Sipoon yleisten alueiden rakentaminen"
+                                          :sv "Sipoon yleisten alueiden rakentaminen"}
+                          :998-R-TESTI-2 sipoo-R-names}}))
 
 (facts "Organization tags"
   (fact "only auth admin can add new tags"
@@ -1023,6 +1034,12 @@
     (fact "query returns organization names for all languages"
       (query sipoo :organization-name-by-user) => {:ok true :id "753-R"
                                                    :name organization-name-map})))
+
+(facts "usage-purposes"
+  (query pena :usage-purposes) => {:ok true, :usagePurposes [{:type "applicant"}]}
+  (query sipoo :usage-purposes) => {:ok true, :usagePurposes [{:type "authority-admin", :orgId "753-R"}]}
+  (query ronja :usage-purposes) => {:ok true, :usagePurposes [{:type "authority"}
+                                                              {:type "authority-admin", :orgId "753-R"}]})
 
 (def sipoo-handler-roles (->> (query sipoo :organization-by-user) :organization :handler-roles))
 

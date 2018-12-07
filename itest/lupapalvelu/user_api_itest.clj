@@ -61,7 +61,7 @@
                :username  "ronja"
                :firstName "Ronja"
                :lastName  "Sibbo"
-               :orgAuthz  {:753-R ["authority"]}}}))
+               :orgAuthz  {:753-R ["authority" "authorityAdmin"]}}}))
 
 (facts "Check passwords"
   (fact "Good password"
