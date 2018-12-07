@@ -7,7 +7,7 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [lupapalvelu.backing-system.krysp.review-reader :as review-reader]
-            [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.model :as doc-model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
@@ -41,6 +41,35 @@
                 '(:kauposa :no :vuosi :tyyppi)
                 '(:vuosi :no :tyyppi :kauposa))
               (ss/split id #"[- ]")))))
+
+
+(def tila
+  (atom {}))
+
+(defn parse-rakennuspaikkatieto [rakennuspaikkatieto]
+  (let [data (:Rakennuspaikka rakennuspaikkatieto)
+        {:keys [kaavatilanne kaavanaste]} data
+        kiinteisto (get-in data [:rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto])]
+    {:kaavatilanne kaavatilanne
+     :kaavanaste kaavanaste
+     :hallintaperuste (:hallintaperuste kiinteisto)}))
+
+(defn rakennuspaikkatieto->rakennuspaikka-kuntagml-doc
+  "Takes a :Rakennuspaikka element extracted from KuntaGML (via building-reader/->rakennuspaikkatieto),
+  returns a document of type following the rakennuspaikka-kuntagml -schema."
+  [rakennuspaikkatieto]
+  (let [data (parse-rakennuspaikkatieto rakennuspaikkatieto)
+        doc-datas (doc-model/map2updates [] data)
+        manual-schema-datas {"rakennuspaikka-kuntagml" doc-datas}
+        schema schemas/rakennuspaikka-kuntagml
+        res (app/make-document nil (now) manual-schema-datas schema)
+        _ (swap! tila assoc :data data
+                 :input rakennuspaikkatieto
+                 :doc-datas doc-datas
+                 :msd manual-schema-datas
+                 :schema schema
+                 :res res)]
+    res))
 
 (defn kuntalupatunnus->description
   "Takes a kuntalupatunnus, returns the permit type in plain text ('12-124124-92-A' -> 'Uusi rakennus' etc.)"

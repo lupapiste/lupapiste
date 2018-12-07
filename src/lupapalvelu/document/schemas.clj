@@ -1048,9 +1048,13 @@
                                        :transform :zero-pad-4}
                                       {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "kerrosala" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "maapintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-input :inputType :string}
                                       {:name "vesipintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-input :inputType :string}
+                                      {:name "rakennusoikeusYhteensa" :type :string :readonly true :unit :m2 :uicomponent :docgen-input :inputType :string}
                                       {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-input :inputType :checkbox}]}
+                              ; {:name "osoite"
+                              ;  :body (body rakennuksen-osoite)}
                               {:name "hallintaperuste" :type :select :sortBy :displayname :required true
                                :body [{:name "oma"}
                                       {:name "vuokra"}

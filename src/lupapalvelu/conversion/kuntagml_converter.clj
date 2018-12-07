@@ -20,6 +20,10 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
+;; TODO: Remove this
+(def tila
+  (atom {}))
+
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
   ;; Data to be deduced from xml:
@@ -99,6 +103,22 @@
                                     (when (clojure.string/includes? kuntalupatunnus "TJO")
                                       (map prev-permit/tyonjohtaja->tj-document (:tyonjohtajat app-info)))))
 
+        _ (swap! tila assoc :app app-info)
+
+        location-document (->> xml
+                               building-reader/->rakennuspaikkatieto
+                               conv-util/rakennuspaikkatieto->rakennuspaikka-kuntagml-doc)
+
+        ; location-manual-schema-datas {"rakennuspaikka-kuntagml" location-data}
+
+        ; location-document (app/make-document "jee!"
+        ;                                      (now)
+        ;                                      location-manual-schema-datas
+        ;                                      schemas/rakennuspaikka-kuntagml)
+
+        ; _ (swap! tila assoc :location-document location-document
+        ;          :lmsd location-manual-schema-datas)
+
         structure-descriptions (map :description buildings-and-structures)
 
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
@@ -132,7 +152,7 @@
                                (error "Moving statement to statement given -state failed: %s" (.getMessage e)))))
 
         created-application (-> created-application
-                                (update-in [:documents] concat other-building-docs new-parties structures)
+                                (update-in [:documents] concat other-building-docs new-parties location-document structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :statements given-statements
                                        :opened (:created command)
