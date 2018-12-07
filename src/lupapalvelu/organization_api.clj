@@ -25,13 +25,13 @@
             [noir.response :as resp]
             [sade.core :refer [ok fail fail! now unauthorized]]
             [sade.municipality :as muni]
-            [sade.shared-schemas :as sssc]
-            [sade.schemas :as ssc]
             [sade.schema-utils :as ssu]
+            [sade.schemas :as ssc]
+            [sade.shared-schemas :as sssc]
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
-            [schema.core :as sc]
+            [schema.core :refer [defschema] :as sc]
             [slingshot.slingshot :refer [try+]]
             [swiss.arrows :refer :all]
             [taoensso.timbre :refer [trace debug debugf info warn error errorf fatal]]))
@@ -277,32 +277,52 @@
       (org/update-organization org-id updates))
     (ok :valid valid?)))
 
+(defschema OrgUpdateParams
+  {:permitType                               (apply sc/enum (keys (permit/permit-types)))
+   :municipality                             sc/Str
+   (sc/optional-key :inforequestEnabled)     sc/Bool
+   (sc/optional-key :applicationEnabled)     sc/Bool
+   (sc/optional-key :openInforequestEnabled) sc/Bool
+   (sc/optional-key :openInforequestEmail)   sc/Str
+   (sc/optional-key :opening)                (sc/maybe ssc/Timestamp)
+   (sc/optional-key :pateEnabled)            sc/Bool
+   (sc/optional-key :invoicingEnabled)       sc/Bool
+   (sc/optional-key :bulletinsEnabled)       sc/Bool
+   (sc/optional-key :bulletinsUrl)           sc/Str})
+
 (defcommand update-organization
-  {:description "Update organization details."
-   :parameters [permitType municipality
-                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
-                opening pateEnabled]
-   :optional-parameters [bulletinsEnabled bulletinsUrl]
-   :input-validators [permit/permit-type-validator
+  {:description      "Update organization details."
+   :input-validators [OrgUpdateParams
+                      permit/permit-type-validator
                       (fn [{{:keys [permitType pateEnabled]} :data}]
                         (if (true? pateEnabled)
                           (when-not (true? (-> (pate-schema/permit-type->categories permitType)
                                                first
                                                pate-schema/pate-category?))
                             (fail :error.pate-not-supported-for-scope))))]
-   :user-roles #{:admin}}
-  [_]
-  (mongo/update-by-query :organizations
-      {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
-      {$set (merge {:scope.$.inforequest-enabled inforequestEnabled
-                    :scope.$.new-application-enabled applicationEnabled
-                    :scope.$.open-inforequest openInforequestEnabled
-                    :scope.$.open-inforequest-email openInforequestEmail
-                    :scope.$.opening (when (number? opening) opening)
-                    :scope.$.pate-enabled pateEnabled}
-                   (when-not (nil? bulletinsEnabled)
-                     {:scope.$.bulletins.enabled bulletinsEnabled
-                      :scope.$.bulletins.url     (or bulletinsUrl "")}))})
+   :user-roles       #{:admin}}
+  [{data :data}]
+  (let [{:keys [permitType
+                municipality] } data
+        param->prop             {:inforequestEnabled     :inforequest-enabled
+                                 :applicationEnabled     :new-application-enabled
+                                 :openInforequestEnabled :open-inforequest
+                                 :openInforequestEmail   :open-inforequest-email
+                                 :opening                :opening
+                                 :pateEnabled            :pate-enabled
+                                 :invoicingEnabled       :invoicing-enabled
+                                 :bulletinsEnabled       :bulletins.enabled
+                                 :bulletinsUrl           :bulletins.url}]
+    (when-let [update (->> (keys param->prop)
+                           (filter (partial contains? data))
+                           (map (fn [param]
+                                  [(util/kw-path :scope.$ (param param->prop))
+                                   (param data)]))
+                           (into {})
+                           not-empty)]
+      (mongo/update-by-query :organizations
+                             {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
+                             {$set update})))
   (ok))
 
 (defn- duplicate-scope-validator [municipality & permit-types]

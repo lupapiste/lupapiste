@@ -135,7 +135,8 @@
                                :openInforequestEnabled (not (:open-inforequest orig-scope))
                                :openInforequestEmail "someone@localhost.localdomain"
                                :opening nil
-                               :pateEnabled false)
+                               :pateEnabled false
+                               :invoicingEnabled false)
         updated-organization (:data (query admin :organization-by-id :organizationId organization-id))
         updated-scope        (local-org-api/resolve-organization-scope (:municipality orig-scope) (:permitType orig-scope) updated-organization)]
 
@@ -1336,14 +1337,7 @@
       (command admin :update-organization
                :permitType "P"
                :municipality "753"
-               :inforequestEnabled true
-               :applicationEnabled true
-               :openInforequestEnabled false
-               :openInforequestEmail false
-               :opening nil
-               :bulletinsEnabled true
-               :bulletinsUrl nil
-               :pateEnabled false) => ok?
+               :bulletinsEnabled true) => ok?
 
       (fact "is enabled"
 
@@ -1356,8 +1350,7 @@
                          :descriptions-from-backend-system true}}
             {:permitType "P"
              :municipality "753"
-             :bulletins {:enabled true
-                         :url ""}}]
+             :bulletins {:enabled true}}]
 
         (command sipoo :update-organization-bulletin-scope
                  :permitType "P"
@@ -1368,14 +1361,7 @@
       (command admin :update-organization
                :permitType "P"
                :municipality "753"
-               :inforequestEnabled true
-               :applicationEnabled true
-               :openInforequestEnabled false
-               :openInforequestEmail false
-               :opening nil
-               :bulletinsEnabled true
-               :bulletinsUrl "http://foo.my.url"
-               :pateEnabled false) => ok?
+               :bulletinsUrl "http://foo.my.url") => ok?
 
       (:bulletin-scopes (query sipoo :user-organization-bulletin-settings))
       => [{:permitType "R"
@@ -1410,14 +1396,7 @@
       (command admin :update-organization
                :permitType "P"
                :municipality "753"
-               :inforequestEnabled true
-               :applicationEnabled true
-               :openInforequestEnabled false
-               :openInforequestEmail false
-               :opening nil
-               :bulletinsEnabled false
-               :bulletinsUrl "http://foo.my.url"
-               :pateEnabled false) => ok?
+               :bulletinsEnabled false) => ok?
 
       (fact "is disabled"
         (command sipoo :update-organization-bulletin-scope
@@ -1474,3 +1453,102 @@
       (command admin "set-organization-scope-pate-value" :permitType "R" :municipality "186" :value false) => ok?
       (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
         (:pate-enabled (first (filter #(= (:permitType %) "R") (:scope updated-org)))) => false))))
+
+(facts "update-organization"
+  (let [ya-scope #(first (:scope (util/find-by-id "753-YA" (:organizations (query admin :organizations)))))]
+    (fact "Initial YA scope"
+      (ya-scope) => {:opening                 nil
+                     :municipality            "753"
+                     :permitType              "YA"
+                     :open-inforequest-email  ""
+                     :inforequest-enabled     true
+                     :open-inforequest        false
+                     :new-application-enabled true})
+    (fact "Mandatory params missing"
+      (command admin :update-organization :municipality "753" :pateEnabled true) => fail?
+      (command admin :update-organization :permitType "YA" :pateEnabled true) => fail?)
+    (fact "Enable Pate and invoicing"
+      (command admin :update-organization
+               :permitType "YA"
+               :municipality "753"
+               :pateEnabled true
+               :invoicingEnabled true)=> ok?
+      (ya-scope) => {:opening                 nil
+                     :municipality            "753"
+                     :permitType              "YA"
+                     :open-inforequest-email  ""
+                     :inforequest-enabled     true
+                     :open-inforequest        false
+                     :new-application-enabled true
+                     :pate-enabled            true
+                     :invoicing-enabled       true})
+    (fact "Only mandatory params: no changes"
+      (command admin :update-organization
+               :permitType "YA"
+               :municipality "753")=> ok?
+      (ya-scope) => {:opening                 nil
+                     :municipality            "753"
+                     :permitType              "YA"
+                     :open-inforequest-email  ""
+                     :inforequest-enabled     true
+                     :open-inforequest        false
+                     :new-application-enabled true
+                     :pate-enabled            true
+                     :invoicing-enabled       true})
+    (facts "Bad params"
+      (fact "Unknown param"
+        (command admin :update-organization
+                 :permitType "YA"
+                 :municipality "753"
+                 :hiihoo true) => fail?)
+      (fact "Bad types"
+        (command admin :update-organization
+                 :permitType "YA"
+                 :municipality "753"
+                 :opening "bad") => fail?
+        (command admin :update-organization
+                 :permitType "YA"
+                 :municipality "753"
+                 :pateEnabled nil) => fail?
+        (command admin :update-organization
+                 :permitType "YA"
+                 :municipality "753"
+                 :openInforequestEmail 0) => fail?))
+    (fact "Opening"
+      (ya-scope) => {:opening                 nil
+                     :municipality            "753"
+                     :permitType              "YA"
+                     :open-inforequest-email  ""
+                     :inforequest-enabled     true
+                     :open-inforequest        false
+                     :new-application-enabled true
+                     :pate-enabled            true
+                     :invoicing-enabled       true}
+            (command admin :update-organization
+                     :permitType "YA"
+                     :municipality "753"
+                     :opening 12345)=> ok?
+            (ya-scope) => {:opening                 12345
+                           :municipality            "753"
+                           :permitType              "YA"
+                           :open-inforequest-email  ""
+                           :inforequest-enabled     true
+                           :open-inforequest        false
+                           :new-application-enabled true
+                           :pate-enabled            true
+                           :invoicing-enabled       true}
+            (command admin :update-organization
+                     :permitType "YA"
+                     :municipality "753"
+                     :opening nil
+                     :bulletinsUrl "https://bul.leti.ns") => ok?
+            (ya-scope) => {:opening                 nil
+                           :municipality            "753"
+                           :permitType              "YA"
+                           :open-inforequest-email  ""
+                           :inforequest-enabled     true
+                           :open-inforequest        false
+                           :new-application-enabled true
+                           :pate-enabled            true
+                           :invoicing-enabled       true
+                           :bulletins               {:url "https://bul.leti.ns"}})))

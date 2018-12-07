@@ -81,13 +81,6 @@
                             created
                             manual-schema-datas))))
 
-(defn document-data->op-document [{:keys [schema-version] :as application} data]
-  (let [op (app/make-op :archiving-project (now))
-        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "archiving-project") (now))
-        doc (assoc-in doc [:schema-info :op] op)
-        doc-updates (lupapalvelu.document.model/map2updates [] data)]
-    (lupapalvelu.document.model/apply-updates doc doc-updates)))
-
 (defn fetch-building-xml [organization permit-type property-id]
   (when (and organization permit-type property-id)
     (when-let [{url :url credentials :credentials} (org/get-building-wfs {:_id organization} permit-type)]

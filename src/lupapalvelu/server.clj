@@ -98,7 +98,8 @@
             [lupapalvelu.invoice-api]
             [lupapalvelu.financial-api]
             [lupapalvelu.premises-api]
-            [lupapalvelu.onkalo-operations-api])
+            [lupapalvelu.onkalo-operations-api]
+            [lupapalvelu.allu-api])
 
   (:import [javax.imageio ImageIO]
            [javax.activation MailcapCommandMap]

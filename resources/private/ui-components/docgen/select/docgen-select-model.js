@@ -14,4 +14,17 @@ LUPAPISTE.DocgenSelectModel = function(params) {
   self.optionsTextFn = function(item) {
     return loc(item.i18nkey || self.i18npath.concat(item.name));
   };
+
+  self.options = self.disposedPureComputed( function() {
+    return _.sortBy( self.schema.body,
+                     [function( item ) {
+                       return item.name === _.get( self.schema, "other-key")
+                         ? 1 : 0;
+                     },
+                      function( item ) {
+                        return self.schema.sortBy === "displayname"
+                          ? self.optionsTextFn( item ) : 0;
+                      }]);
+
+  });
 };

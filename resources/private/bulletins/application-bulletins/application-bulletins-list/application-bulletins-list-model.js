@@ -31,7 +31,7 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
           enddate.format("D.M.YYYY") : loc("bulletin.period.ended");
       }
 
-      var opDesc = _.get(bulletin, "bulletin-op-description");
+      var opDesc = _.get(bulletin, "bulletinOpDescription");
 
       return {
         id: bulletin.id,

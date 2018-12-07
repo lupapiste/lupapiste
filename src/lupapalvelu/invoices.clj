@@ -1,5 +1,5 @@
 (ns lupapalvelu.invoices
-  "A common interface for accessing invoices, price catalogues and related data"
+  "A common interface for accessing invoices and related data"
   (:require [lupapalvelu.mongo :as mongo]
             [monger.operators :refer [$in]]
             [schema.core :as sc]
@@ -27,9 +27,7 @@
                                                   CatalogueRow
                                                   PriceCatalogue
                                                   ->invoice-user]]))
-
 (def state-actions {:add-to-transfer-batch add-invoice-to-transfer-batch})
-
 (defn fetch-invoice [invoice-id]
   (mongo/by-id :invoices invoice-id))
 
@@ -82,8 +80,6 @@
   (-> invoice
       (enrich-rows-in-operations)
       (sum-invoice)))
-
-
 
 (defn create-invoice!
   [invoice]
@@ -157,11 +153,3 @@
   (let [application (get-doc application-id applications)
         address (:address application)]
     (assoc-in invoice [:enriched-data :application :address] address)))
-
-(defn fetch-price-catalogues [organization-id]
-  (mongo/select :price-catalogues {:organization-id organization-id}))
-
-(defn validate-price-catalogues [price-catalogues]
-  (info "validate-price-catalogues price-catalogues: " price-catalogues)
-  (if-not (empty? price-catalogues)
-    (sc/validate [PriceCatalogue] price-catalogues)))

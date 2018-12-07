@@ -47,6 +47,20 @@
   @return unquote("\"") + unquote(str-insert($str, "\\", 1)) + unquote("\"")
 }
 
+@mixin placeholder( $color ) {
+  input::placeholder {
+    color: $color
+  }
+  input::-ms-input-placeholder {
+    color: $color
+  }
+  textarea::placeholder {
+    color: $color
+  }
+  input::-ms-input-placeholder {
+    teextarea: $color
+  }
+}
 
 // Defines the following classes:
 // .cls-label
@@ -293,31 +307,96 @@ input.tip.dateinput {
   }
 }
 
-input.dateinput.dateinput--small {
-  height: 26px;
-  background-image: url("/lp-static/img/calendar-12-orange-dark.png");
-  min-height: initial;
-  font-size: 0.875em;
+input.timepicker {
+  @include input-fields;
+  background-image: url("/lp-static/img/clock-orange-dark.png");
+  background-position: right 4px center;
+  background-repeat: no-repeat;
+  padding-right: 34px;
   &:focus {
-    background-image: url("/lp-static/img/calendar-12-orange-light.png");
+    background-image: url("/lp-static/img/clock-orange-light.png");
   }
   &:disabled {
-    background-image: url("/lp-static/img/calendar-12-gray187.png");
+    background-image: url("/lp-static/img/clock-gray187.png");
+    color: $input-select-disabled-icon;
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+    padding-right: 34px;
   }
 }
 
-.form-grid input.tip.dateinput.dateinput--small,
-input.tip.dateinput.dateinput--small {
-  background-image: url("/lp-static/img/calendar-12-orange.png");
+.form-grid input.tip.timepicker,
+input.tip.timepicker {
+  background-image: url("/lp-static/img/clock-orange.png");
+  border-color: $orange-dark;
   &:focus {
-    background-image: url("/lp-static/img/calendar-12-orange-light.png");
+    border-color: $input-focus-border-color;
+    background-image: url("/lp-static/img/clock-orange-light.png");
   }
   &:disabled {
-    background-image: url("/lp-static/img/calendar-12-gray187.png");
+    border-color: $input-disabled-border-color;
+    background-image: url("/lp-static/img/clock-gray187.png");
+    color: $input-select-disabled-icon
   }
 }
 
+$timepicker-default-width: 200px;
 
+div.timepicker-container {
+  min-width: 120px;
+  width: $timepicker-default-width;
+  position: relative;
+  input.timepicker  {
+    width: 100%;
+  }
+  input.timepicker--error {
+    border-color: $negative;
+    color: $negative;
+  }
+  .timepicker-picker {
+    background-color: white;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 888;
+    min-width: 100%;
+    width: 100%;
+    padding: 4px;
+    margin: 0 0;
+    border-left: 1px solid $gray51;
+    border-right: 1px solid $gray51;
+    border-bottom: 1px solid $gray51;
+    .timepicker--cell {
+      padding: 0 0;
+      text-align: center;
+    }
+    .timepicker--hour {
+      width: 16%;
+    }
+    .timepicker--minute {
+      width: 20%;
+      border-left: 1px solid $gray51;
+    }
+    .timepicker--selectable {
+      cursor: pointer;
+      &:hover {
+        background-color: $input-focus-border-color;
+      }
+    }
+    .timepicker--selected {
+      color: white;
+      background-color: $primary;
+    }
+  }
+}
+
+timepicker.layout--full-width > div.timepicker-container {
+  width: 100%;
+}
+
+timepicker.layout--initial-width > div.timepicker-container {
+  width: $timepicker-default-width;
+}
 
 input.grid-style-input {
   @include input-fields;

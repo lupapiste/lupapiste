@@ -8045,34 +8045,136 @@ input.tip.dateinput:disabled {
   color: #bbbbbb;
 }
 
-input.dateinput.dateinput--small {
-  height: 26px;
-  background-image: url("/lp-static/img/calendar-12-orange-dark.png");
-  min-height: initial;
-  font-size: 0.875em;
+input.timepicker {
+  padding: 0 12px;
+  box-sizing: border-box;
+  min-height: 40px;
+  height: 40px;
+  font-size: 16px;
+  color: #333333;
+  border: 1px solid #bbbbbb;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+  -moz-appearance: none;
+  background-image: url("/lp-static/img/clock-orange-dark.png");
+  background-position: right 4px center;
+  background-repeat: no-repeat;
+  padding-right: 34px;
 }
 
-input.dateinput.dateinput--small:focus {
-  background-image: url("/lp-static/img/calendar-12-orange-light.png");
+input.timepicker:focus {
+  color: #333333;
+  border-color: #fbc732;
 }
 
-input.dateinput.dateinput--small:disabled {
-  background-image: url("/lp-static/img/calendar-12-gray187.png");
+input.timepicker:disabled {
+  border-color: #dddddd;
+  background-color: #f6f6f6;
+  cursor: not-allowed;
 }
 
-.form-grid input.tip.dateinput.dateinput--small,
-input.tip.dateinput.dateinput--small {
-  background-image: url("/lp-static/img/calendar-12-orange.png");
+input.timepicker.warning {
+  border-color: #df3215;
 }
 
-.form-grid input.tip.dateinput.dateinput--small:focus,
-input.tip.dateinput.dateinput--small:focus {
-  background-image: url("/lp-static/img/calendar-12-orange-light.png");
+input.timepicker.required {
+  border-color: #f39129;
 }
 
-.form-grid input.tip.dateinput.dateinput--small:disabled,
-input.tip.dateinput.dateinput--small:disabled {
-  background-image: url("/lp-static/img/calendar-12-gray187.png");
+input.timepicker:focus {
+  background-image: url("/lp-static/img/clock-orange-light.png");
+}
+
+input.timepicker:disabled {
+  background-image: url("/lp-static/img/clock-gray187.png");
+  color: #bbbbbb;
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  padding-right: 34px;
+}
+
+.form-grid input.tip.timepicker,
+input.tip.timepicker {
+  background-image: url("/lp-static/img/clock-orange.png");
+  border-color: #f39129;
+}
+
+.form-grid input.tip.timepicker:focus,
+input.tip.timepicker:focus {
+  border-color: #fbc732;
+  background-image: url("/lp-static/img/clock-orange-light.png");
+}
+
+.form-grid input.tip.timepicker:disabled,
+input.tip.timepicker:disabled {
+  border-color: #dddddd;
+  background-image: url("/lp-static/img/clock-gray187.png");
+  color: #bbbbbb;
+}
+
+div.timepicker-container {
+  min-width: 120px;
+  width: 200px;
+  position: relative;
+}
+
+div.timepicker-container input.timepicker {
+  width: 100%;
+}
+
+div.timepicker-container input.timepicker--error {
+  border-color: #df3215;
+  color: #df3215;
+}
+
+div.timepicker-container .timepicker-picker {
+  background-color: white;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 888;
+  min-width: 100%;
+  width: 100%;
+  padding: 4px;
+  margin: 0 0;
+  border-left: 1px solid #333333;
+  border-right: 1px solid #333333;
+  border-bottom: 1px solid #333333;
+}
+
+div.timepicker-container .timepicker-picker .timepicker--cell {
+  padding: 0 0;
+  text-align: center;
+}
+
+div.timepicker-container .timepicker-picker .timepicker--hour {
+  width: 16%;
+}
+
+div.timepicker-container .timepicker-picker .timepicker--minute {
+  width: 20%;
+  border-left: 1px solid #333333;
+}
+
+div.timepicker-container .timepicker-picker .timepicker--selectable {
+  cursor: pointer;
+}
+
+div.timepicker-container .timepicker-picker .timepicker--selectable:hover {
+  background-color: #fbc732;
+}
+
+div.timepicker-container .timepicker-picker .timepicker--selected {
+  color: white;
+  background-color: #f39129;
+}
+
+timepicker.layout--full-width > div.timepicker-container {
+  width: 100%;
+}
+
+timepicker.layout--initial-width > div.timepicker-container {
+  width: 200px;
 }
 
 input.grid-style-input {
@@ -8468,6 +8570,10 @@ message-panel {
 .form-label.warn:after {
   content: "!";
   display: inline;
+}
+
+.form-label.empty-label.tip:after {
+  content: "";
 }
 
 .form-container {
@@ -11127,6 +11233,22 @@ div.review-done {
   text-align: center;
   display: inherit;
   margin-bottom: 0;
+}
+
+input.form-input.layout--full-width, input.layout--full-width.form-input--inline,
+textarea.form-input.layout--full-width,
+textarea.layout--full-width.form-input--inline,
+select.form-input.layout--full-width,
+select.layout--full-width.form-input--inline {
+  width: 100%;
+}
+
+input.form-input.layout--initial-width, input.layout--initial-width.form-input--inline,
+textarea.form-input.layout--initial-width,
+textarea.layout--initial-width.form-input--inline,
+select.form-input.layout--initial-width,
+select.layout--initial-width.form-input--inline {
+  width: initial;
 }
 
 table {
@@ -33949,6 +34071,182 @@ div.printing-order-footer div.pricelist-panel .arrow:after {
   top: 22%;
 }
 
+div.form-grid.allu-group {
+  border-top: none;
+  padding-bottom: 1em;
+}
+
+div.form-grid.allu-group span.group-help-text {
+  display: block;
+  padding: 1em;
+  border-left: 8px solid #f39129;
+  background-color: #eeeeee;
+}
+
+div.form-grid.allu-group label.form-label {
+  line-height: 40px;
+}
+
+div.form-grid.allu-group label.form-label.tip {
+  color: initial;
+}
+
+div.form-grid.allu-group label.form-label.tip::after {
+  color: #df3215;
+}
+
+div.form-grid.allu-group input::placeholder {
+  color: #dddddd;
+}
+
+div.form-grid.allu-group input::-ms-input-placeholder {
+  color: #dddddd;
+}
+
+div.form-grid.allu-group textarea::placeholder {
+  color: #dddddd;
+}
+
+div.form-grid.allu-group input::-ms-input-placeholder {
+  teextarea: #dddddd;
+}
+
+div.form-grid.allu-group .h3 {
+  font-weight: bold;
+  border-top: 1px solid #dddddd;
+  padding-top: 1em;
+  margin: 0;
+}
+
+div.form-grid.allu-group .row {
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+div.form-grid.allu-group .row.allu-row--spaced {
+  margin-top: 1em;
+}
+
+.allu-group--place label {
+  padding-top: 2em;
+}
+
+.allu-table table {
+  margin-bottom: 0;
+}
+
+.allu-table table tr:hover {
+  background-color: white;
+}
+
+.allu-table table tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+.allu-table table td > span.form-entry {
+  min-height: 40px;
+}
+
+.allu-table table td.allu--structure > span {
+  width: 100%;
+}
+
+.allu-table table tfoot > tr {
+  font-weight: bold;
+  border: none;
+}
+
+.allu-table table tfoot > tr td {
+  padding-bottom: 0;
+}
+
+.allu-table table tfoot > tr td.footer-sum--total {
+  text-align: right;
+}
+
+.allu-table table tfoot > tr i.footer-sum--error {
+  color: #df3215;
+}
+
+.allu-table + .button-group {
+  padding: 0;
+  background-color: white;
+  border: none;
+  margin-bottom: 1em;
+}
+
+textlink.allu--link {
+  display: block;
+}
+
+textlink.allu--link .like-btn, textlink.allu--link a.link-btn, textlink.allu--link a.link-btn-inverse, textlink.allu--link a.link-btn-julkipano {
+  min-height: 40px;
+  max-height: 40px;
+  line-height: 40px;
+}
+
+.allu-group.allu-group--structures label.form-label {
+  display: none;
+}
+
+.allu--radio.radio-wrapper {
+  min-width: 6em;
+  margin-right: 10px;
+}
+
+.allu-group.allu--info .h4 {
+  margin-top: 1em;
+  margin-bottom: 8px;
+}
+
+.allu-group.allu--info .h4:after {
+  content: "*";
+  color: #df3215;
+}
+
+.allu-group.allu--info input.allu--description {
+  margin: 0;
+}
+
+div.allu-drawings {
+  margin-top: 1em;
+}
+
+div.allu-drawings table.drawings-table tr:hover {
+  background-color: white;
+}
+
+div.allu-drawings table.drawings-table tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+div.allu-drawings table.drawings-table td.drawing--name {
+  width: 100%;
+}
+
+div.allu-drawings table.drawings-table td.drawing--icon {
+  padding-left: 10px;
+}
+
+div.allu-drawings table.drawings-table td.drawing--icon i {
+  cursor: pointer;
+}
+
+div.allu-map-container div.allu-map {
+  min-height: 20em;
+  height: 30em;
+  width: 100%;
+}
+
+div.allu-map-container button.ghost {
+  position: absolute;
+  z-index: 1000;
+  bottom: 0;
+  left: 0;
+  margin-left: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
@@ -38936,8 +39234,8 @@ button.invoice-change-state-button {
   background-color: #dddddd;
 }
 
-.price-catalogue .catalogue-select-wrapper {
-  margin-bottom: 2em;
+.price-catalogue .catalogue-select-and-buttons {
+  height: 4em;
 }
 
 .price-catalogue .row-operation {
@@ -38954,6 +39252,7 @@ button.invoice-change-state-button {
 
 .price-catalogue .view-switch {
   margin-bottom: 2em;
+  float: left;
 }
 
 .price-catalogue .view-switch-guide-text {
@@ -38970,6 +39269,89 @@ button.invoice-change-state-button {
   background-color: white;
   color: #f39129;
   border: 1px solid #f39129;
+}
+
+.price-catalogue .edit-buttons {
+  display: inline-block;
+  float: right;
+}
+
+.price-catalogue .catalogue-button {
+  margin-left: 1em;
+}
+
+.price-catalogue .right-button {
+  display: inline-block;
+  float: right;
+}
+
+.price-catalogue .add-row-to-operation {
+  padding: 0.5em;
+  border-bottom: 1px dashed #f6f6f6;
+  border-left: 1px dashed #f6f6f6;
+  border-right: 1px dashed #f6f6f6;
+}
+
+.price-catalogue .operations-container {
+  margin-bottom: 2em;
+}
+
+.price-catalogue .operations-table {
+  margin-bottom: 0px;
+}
+
+.price-catalogue .operation-product-select {
+  width: 100%;
+}
+
+.price-catalogue .remove-icon-container {
+  text-align: right;
+}
+
+.price-catalogue .operation-header-operation {
+  width: 35%;
+}
+
+.price-catalogue .operation-header-unit-price {
+  width: 12%;
+}
+
+.price-catalogue .operation-header-discount-percent {
+  width: 12%;
+}
+
+.price-catalogue .operation-header-nimimum {
+  width: 12%;
+}
+
+.price-catalogue .operation-header-maximum {
+  width: 12%;
+}
+
+.price-catalogue .operation-header-unit {
+  width: 12%;
+}
+
+.price-catalogue .operation-header-remove {
+  width: 5%;
+}
+
+.price-catalogue .operation-header-remove {
+  width: 5%;
+}
+
+.price-catalogue .draft-title {
+  float: left;
+  font-size: x-large;
+}
+
+.price-catalogue .date-picker {
+  float: left;
+  margin-left: 2em;
+}
+
+.price-catalogue .catalogue-select {
+  width: 20em;
 }
 
 #bulletins, #local-bulletins {

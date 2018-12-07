@@ -1,0 +1,12 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="allu-map-template">
+  <div class="allu-map-container"
+       data-bind="template: {afterRender: _.wrap( true, rendered )}">
+    <div data-bind="{attr: {id: mapId}}"
+         class="allu-map"></div>
+    <button class="ghost"
+            data-bind="ltext: 'map.open',
+                       click: openMap">
+    </button>
+  </div>
+</script>

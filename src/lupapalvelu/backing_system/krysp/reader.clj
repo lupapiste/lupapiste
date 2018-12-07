@@ -492,7 +492,7 @@
        (remove #(ss/blank? (:kuvaus %)))))
 
 (defn ->verdict-date [xml]
-  (let [date (get-in (xml->edn xml) [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :paatostieto :Paatos :paivamaarat :antoPvm])]
+  (if-let [date (get-in (xml->edn xml) [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :paatostieto :Paatos :paivamaarat :antoPvm])]
     (if (clojure.string/includes? date "Z")
       (subs date 0 10)
       date)))

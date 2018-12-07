@@ -136,59 +136,60 @@
 
 (def ui-components
   {;; 3rd party libs
-   :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
-   :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
-   :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
-   :knockout       {:js ["knockout-3.4.2.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "knockout.dragdrop.js""register-lupapiste-components.js"]}
-   :lo-dash        {:js ["lodash.min.js"]}
-   :underscore     {:depends [:lo-dash]
-                    :js ["underscore.string.min.js" "underscore.string.init.js"]}
-   :sprintf        {:js ["sprintf.min.js"]}
-   :moment         {:js ["moment.min.js" "moment-timezone-with-data-2010-2020.min.js"]}
-   :open-layers    {:js ["openlayers-2.13.1.min.lupapiste_1.js" "LupapisteEditingToolbar-2.13.1.js"]}
-   ;:open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
-   ;:open-layers    {:js ["OpenLayers.debug.js" ]}
-   :ol             {:js ["openlayers-3.8.2.min.js" "ol3-popup.js"]
-                    :css ["openlayers-3.8.2.css" "ol3-popup.css"]}
-   :proj4          {:js ["proj4-2.3.3.min.js"]}
-   :stickyfill     {:js ["stickyfill.min.js"]}
-   :waypoints      {:js ["jquery.waypoints.min.js"]}
+   :cdn-fallback      {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
+   :jquery            {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
+   :jquery-upload     {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
+   :knockout          {:js ["knockout-3.4.2.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "knockout.dragdrop.js""register-lupapiste-components.js"]}
+   :lo-dash           {:js ["lodash.min.js"]}
+   :underscore        {:depends [:lo-dash]
+                       :js      ["underscore.string.min.js" "underscore.string.init.js"]}
+   :sprintf           {:js ["sprintf.min.js"]}
+   :moment            {:js ["moment.min.js" "moment-timezone-with-data-2010-2020.min.js"]}
+   :open-layers       {:js ["openlayers-2.13.1.min.lupapiste_1.js" "LupapisteEditingToolbar-2.13.1.js"]}
+                                        ;:open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+                                        ;:open-layers    {:js ["OpenLayers.debug.js" ]}
+   :ol                {:js  ["openlayers-3.8.2.min.js" "ol3-popup.js"]
+                       :css ["openlayers-3.8.2.css" "ol3-popup.css"]}
+   :proj4             {:js ["proj4-2.3.3.min.js"]}
+   :stickyfill        {:js ["stickyfill.min.js"]}
+   :waypoints         {:js ["jquery.waypoints.min.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
-   :init         {:depends [:underscore :sprintf]
-                  :js [conf "hub.js" "notify.js" "ajax.js" "log.js"]}
+   :init {:depends [:underscore :sprintf]
+          :js      [conf "hub.js" "notify.js" "ajax.js" "log.js"]}
 
    ;; Common components
 
-   :debug        (if (env/dev-mode?) debugjs {})
+   :debug (if (env/dev-mode?) debugjs {})
 
-   :mockjax      (if (env/dev-mode?) mockjax {})
+   :mockjax (if (env/dev-mode?) mockjax {})
 
-   :i18n         {:depends [:jquery :underscore]
-                  :js ["loc.js" loc->js]}
+   :i18n {:depends [:jquery :underscore]
+          :js      ["loc.js" loc->js]}
 
-   :selectm      {:js ["selectm.js"]}
+   :selectm {:js ["selectm.js"]}
 
    :selectm-html {:html ["selectm.html"]}
 
-   :expanded-content  {:depends [:jquery]
-                       :js ["expanded-content.js"]}
+   :expanded-content {:depends [:jquery]
+                      :js      ["expanded-content.js"]}
 
-   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :sprintf :moment :i18n :selectm
-                            :expanded-content :mockjax :open-layers :stickyfill :waypoints]
-                  :js ["register-components.js" "util.js" "event.js" "pageutil.js" "app.js" "nav.js" "window.js"
-                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
-                       "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
+   :common
+   {:depends [:init :jquery :jquery-upload :knockout :underscore :sprintf :moment :i18n :selectm
+              :expanded-content :mockjax :open-layers :stickyfill :waypoints]
+            :js      ["register-components.js" "util.js" "event.js" "pageutil.js" "app.js" "nav.js" "window.js"
+                      "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
+                      "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
    :cljs-component {:js ["cljs-component.js" "cljs-loader.js"]}
 
-   :common-html  {:depends [:selectm-html :cljs-component]
-                  :css ["jquery-ui.css"]
-                  :html ["404.html"]}
+   :common-html {:depends [:selectm-html :cljs-component]
+                 :css     ["jquery-ui.css"]
+                 :html    ["404.html"]}
 
    ;; Components to be included in a SPA
 
-   :analytics    {:js ["analytics.js"]}
+   :analytics {:js ["analytics.js"]}
 
    :services {:js ["area-filter-service.js"
                    "comment-service.js"
@@ -229,52 +230,52 @@
                    "organizations-users-service.js"]}
 
    :global-models {:depends [:services]
-                   :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
+                   :js      ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
 
-   :screenmessages  {:js   ["screenmessage.js"]
-                     :html ["screenmessage.html"]}
+   :screenmessages {:js   ["screenmessage.js"]
+                    :html ["screenmessage.html"]}
 
-   :map          {:depends [:common-html]
-                  :js [ "gis.js" "locationsearch.js"]}
+   :map {:depends [:common-html]
+         :js      [ "gis.js" "locationsearch.js"]}
 
-   :mypage       {:depends [:common-html]
-                  :js [ "mypage.js"]
-                  :html ["mypage.html"]}
+   :mypage {:depends [:common-html]
+            :js      [ "mypage.js"]
+            :html    ["mypage.html"]}
 
-   :header     {:html ["header.html"], :js ["header.js"]}
+   :header {:html ["header.html"], :js ["header.js"]}
 
-   :footer     {:html ["footer.html"]}
+   :footer {:html ["footer.html"]}
 
    :modal-datepicker {:depends [:common-html]
-                      :html ["modal-datepicker.html"]
-                      :js   ["modal-datepicker.js"]}
+                      :html    ["modal-datepicker.html"]
+                      :js      ["modal-datepicker.js"]}
 
    :authenticated {:depends [:screenmessages :analytics]}
 
-   :invites      {:depends [:common-html]
-                  :js ["invites-model.js" "invites.js"]}
+   :invites {:depends [:common-html]
+             :js      ["invites-model.js" "invites.js"]}
 
-   :attachment-utils   {:js ["attachment-utils.js"]}
+   :attachment-utils {:js ["attachment-utils.js"]}
 
-   :repository   {:depends [:common-html :attachment-utils]
-                  :js ["repository.js"]}
+   :repository {:depends [:common-html :attachment-utils]
+                :js      ["repository.js"]}
 
-   :tree         {:js ["tree.js"]
-                  :html ["tree.html"]}
+   :tree {:js   ["tree.js"]
+          :html ["tree.html"]}
 
-   :accordion    {:js ["accordion.js"]}
+   :accordion {:js ["accordion.js"]}
 
-   :signing      {:depends [:common-html]
-                  :html ["signing-dialogs.html"]
-                  :js ["signing-model.js" "verdict-signing-model.js"]}
+   :signing {:depends [:common-html]
+             :html    ["signing-dialogs.html"]
+             :js      ["signing-model.js" "verdict-signing-model.js"]}
 
    :metadata-editor {:depends [:common-html]
-                     :html ["metadata-editor.html"]
-                     :js ["metadata-editor.js"]}
+                     :html    ["metadata-editor.html"]
+                     :js      ["metadata-editor.js"]}
 
-   :stamp        {:depends [:common-html]
-                  :html ["stamp-template.html"]
-                  :js ["stamp-model.js" "stamp.js"]}
+   :stamp {:depends [:common-html]
+           :html    ["stamp-template.html"]
+           :js      ["stamp-model.js" "stamp.js"]}
 
    :external-api {:js (remove nil?
                               (cons (when (env/dev-mode?)
@@ -282,180 +283,180 @@
                                     ["external-api-service.js" "external-api-tools.js"]))}
 
    :verdict-attachment-prints {:depends [:common-html :ui-components]
-                               :html ["verdict-attachment-prints-order-template.html"
-                                      "verdict-attachment-prints-order-history-template.html"
-                                      "verdict-attachment-prints-multiselect.html"]
-                               :js ["verdict-attachment-prints-order-model.js"
-                                    "verdict-attachment-prints-order-history-model.js"
-                                    "verdict-attachment-prints-multiselect-model.js"]}
+                               :html    ["verdict-attachment-prints-order-template.html"
+                                         "verdict-attachment-prints-order-history-template.html"
+                                         "verdict-attachment-prints-multiselect.html"]
+                               :js      ["verdict-attachment-prints-order-model.js"
+                                         "verdict-attachment-prints-order-history-model.js"
+                                         "verdict-attachment-prints-multiselect-model.js"]}
 
 
-   :attachment   {:depends [:services :common-html :repository :signing]
-                  :js ["attachment-multi-select.js"
-                       "attachment-model.js"
-                       "attachment.js"
-                       "move-attachment-to-backing-system.js"
-                       "move-attachment-to-case-management.js"]
-                  :html ["attachment.html"
-                         "upload.html"
-                         "move-attachment-to-backing-system.html"
-                         "move-attachment-to-case-management.html"]}
+   :attachment {:depends [:services :common-html :repository :signing]
+                :js      ["attachment-multi-select.js"
+                          "attachment-model.js"
+                          "attachment.js"
+                          "move-attachment-to-backing-system.js"
+                          "move-attachment-to-case-management.js"]
+                :html    ["attachment.html"
+                          "upload.html"
+                          "move-attachment-to-backing-system.html"
+                          "move-attachment-to-case-management.html"]}
 
-   :task         {:depends [:common-html :attachment]
-                  :js ["task.js"]
-                  :html ["task.html"]}
+   :task {:depends [:common-html :attachment]
+          :js      ["task.js"]
+          :html    ["task.html"]}
 
-   :create-task  {:js ["create-task.js"]
-                  :html ["create-task.html"]}
+   :create-task {:js   ["create-task.js"]
+                 :html ["create-task.html"]}
 
    :calendar-view {:depends [:common-html]
-                   :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
-                        "reservation-slot-create-bubble-model.js" "calendar-view-model.js"
-                        "authority-calendar-model.js" "applicant-calendar-model.js"
-                        "reservation-slot-reserve-bubble-model.js" "reserved-slot-bubble-model.js" "calendar-notification-list.js"
-                        "book-appointment-filter.js" "base-calendar-model.js"]
-                   :html ["reserved-slot-bubble-template.html" "reservation-slot-edit-bubble-template.html"
-                          "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
-                          "authority-calendar-template.html" "applicant-calendar-template.html"
-                          "calendar-notification-list-template.html"
-                          "reservation-slot-reserve-bubble-template.html"
-                          "book-appointment-filter-template.html"]}
+                   :js      ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
+                             "reservation-slot-create-bubble-model.js" "calendar-view-model.js"
+                             "authority-calendar-model.js" "applicant-calendar-model.js"
+                             "reservation-slot-reserve-bubble-model.js" "reserved-slot-bubble-model.js" "calendar-notification-list.js"
+                             "book-appointment-filter.js" "base-calendar-model.js"]
+                   :html    ["reserved-slot-bubble-template.html" "reservation-slot-edit-bubble-template.html"
+                             "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
+                             "authority-calendar-template.html" "applicant-calendar-template.html"
+                             "calendar-notification-list-template.html"
+                             "reservation-slot-reserve-bubble-template.html"
+                             "book-appointment-filter-template.html"]}
 
 
    :printing-order {:depends [:common-html]
-                    :js ["printing-order.js"]
-                    :html ["printing-order-template.html"]}
+                    :js      ["printing-order.js"]
+                    :html    ["printing-order-template.html"]}
 
-   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
-                            :signing :invites :verdict-attachment-prints :calendar-view :printing-order]
-                  :js ["map-model.js" "change-location.js" "verdicts-model.js"
-                       "add-operation.js" "foreman-model.js"
-                       "add-party.js" "archival-summary.js" "case-file.js"
-                       "create-digging-permit.js"
-                       "parties-model.js"
-                       "application.js"
-                       "backend-id-manager.js"
-                       "replace-operation.js"]
-                  :html ["application.html" "inforequest.html" "add-operation.html" "change-location.html"
-                         "foreman-template.html" "archival-summary-template.html"
-                         "required-fields-summary-tab-template.html" "parties-tab-template.html"
-                         "case-file-template.html" "create-digging-permit.html"
-                         "application-actions-template.html"
-                         "backend-id-manager-template.html"
-                         "replace-operation.html"]}
+   :application {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
+                           :signing :invites :verdict-attachment-prints :calendar-view :printing-order]
+                 :js      ["map-model.js" "change-location.js" "verdicts-model.js"
+                           "add-operation.js" "foreman-model.js"
+                           "add-party.js" "archival-summary.js" "case-file.js"
+                           "create-digging-permit.js"
+                           "parties-model.js"
+                           "application.js"
+                           "backend-id-manager.js"
+                           "replace-operation.js"]
+                 :html    ["application.html" "inforequest.html" "add-operation.html" "change-location.html"
+                           "foreman-template.html" "archival-summary-template.html"
+                           "required-fields-summary-tab-template.html" "parties-tab-template.html"
+                           "case-file-template.html" "create-digging-permit.html"
+                           "application-actions-template.html"
+                           "backend-id-manager-template.html"
+                           "replace-operation.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]
-                  :html ["applications-list.html"]
-                  :js ["applications-list.js"]}
+                  :html    ["applications-list.html"]
+                  :js      ["applications-list.js"]}
 
-   :statement    {:depends [:common-html :repository]
-                  :js ["statement-service.js" "statement.js"]
-                  :html ["statement.html"]}
+   :statement {:depends [:common-html :repository]
+               :js      ["statement-service.js" "statement.js"]
+               :html    ["statement.html"]}
 
-   :neighbors    {:depends [:common-html :repository]
-                  :js ["neighbors.js"]
-                  :html ["neighbors.html"]}
+   :neighbors {:depends [:common-html :repository]
+               :js      ["neighbors.js"]
+               :html    ["neighbors.html"]}
 
-   :register     {:depends [:common-html]
-                  :js ["registration-models.js" "register.js"]
-                  :html ["register.html" "register2.html" "register3.html"]}
+   :register {:depends [:common-html]
+              :js      ["registration-models.js" "register.js"]
+              :html    ["register.html" "register2.html" "register3.html"]}
 
    :register-company {:depends [:common-html]
-                      :js ["company-registration.js"]
-                      :html ["register-company-success.html"
-                             "register-company-fail.html"
-                             "register-company-account-type.html"
-                             "register-company-existing-user-success.html"]}
+                      :js      ["company-registration.js"]
+                      :html    ["register-company-success.html"
+                                "register-company-fail.html"
+                                "register-company-account-type.html"
+                                "register-company-existing-user-success.html"]}
 
    :link-account {:depends [:register]
-                  :js ["link-account.js"]
-                  :html ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}
+                  :js      ["link-account.js"]
+                  :html    ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}
 
-   :docgen       {:depends [:accordion :common-html]
-                  :js ["docmodel.js" "docgen.js" "docutils.js" "document-approval-model.js"]}
+   :docgen {:depends [:accordion :common-html]
+            :js      ["docmodel.js" "docgen.js" "docutils.js" "document-approval-model.js"]}
 
-   :create       {:depends [:common-html :map]
-                  :js ["locationmodel.js" "municipalities.js" "create.js"]
-                  :html ["map-popup.html" "create.html"]}
+   :create {:depends [:common-html :map]
+            :js      ["locationmodel.js" "municipalities.js" "create.js"]
+            :html    ["map-popup.html" "create.html"]}
 
-   :copy         {:depends [:common-html :map :create]
-                  :html ["copy.html"]
-                  :js ["copy.js"]}
+   :copy {:depends [:common-html :map :create]
+          :html    ["copy.html"]
+          :js      ["copy.js"]}
 
-   :digitizer    {:depends [:common-html :map :create]
-                  :html ["digitizer.html"]
-                  :js ["digitizer.js"]}
+   :digitizer {:depends [:common-html :map :create]
+               :html    ["digitizer.html"]
+               :js      ["digitizer.js"]}
 
-   :iframe       {:depends [:common-html]
-                  :css ["iframe.css"]}
+   :iframe {:depends [:common-html]
+            :css     ["iframe.css"]}
 
-   :login        {:depends [:common-html]
-                  :js      ["login.js"]}
+   :login {:depends [:common-html]
+           :js      ["login.js"]}
 
-   :users        {:js ["users.js"]
-                  :html ["users.html"]}
+   :users {:js   ["users.js"]
+           :html ["users.html"]}
 
-   :company      {:js ["company.js"]
-                  :html ["company.html"]}
+   :company {:js   ["company.js"]
+             :html ["company.html"]}
 
-   :admins       {:depends [:users]}
+   :admins {:depends [:users]}
 
    :password-reset {:depends [:common-html]
-                    :js ["password-reset.js"]
-                    :html ["password-reset.html"]}
+                    :js      ["password-reset.js"]
+                    :html    ["password-reset.html"]}
 
    :change-email {:depends [:common-html]
-                  :js ["change-email.js"]
-                  :html ["init-email-change.html" "change-email.html" "change-email-simple.html"]}
+                  :js      ["change-email.js"]
+                  :html    ["init-email-change.html" "change-email.html" "change-email-simple.html"]}
 
-   :integration-error {:js [ "integration-error.js"]
+   :integration-error {:js   [ "integration-error.js"]
                        :html ["integration-error.html"]}
 
-   :integration-message-monitor {:js [ "integration-message-monitor-model.js"]
-                       :html ["integration-message-monitor-template.html"]}
+   :integration-message-monitor {:js   [ "integration-message-monitor-model.js"]
+                                 :html ["integration-message-monitor-template.html"]}
 
    :ui-components {:depends [:common-html]
-                   :js (distinct (conj (get-ui-components :ui-components :models) "docgen/ui-components.js"))
-                   :html (get-ui-components :ui-components :templates)}
+                   :js      (distinct (conj (get-ui-components :ui-components :models) "docgen/ui-components.js"))
+                   :html    (get-ui-components :ui-components :templates)}
 
    :authority-admin-components {:depends [:common-html]
-                   :js (distinct (conj (get-ui-components :authority-admin-components :models) "register-authority-admin-components.js"))
-                                :html (get-ui-components :authority-admin-components :templates)}
-   :pate {:depends [:common-html]
-          :html ["pate-verdict.html"]
-          :js ["pate-verdict.js"]}
+                                :js      (distinct (conj (get-ui-components :authority-admin-components :models) "register-authority-admin-components.js"))
+                                :html    (get-ui-components :authority-admin-components :templates)}
+   :pate                       {:depends [:common-html]
+                                :html    ["pate-verdict.html"]
+                                :js      ["pate-verdict.js"]}
 
    :invoices {:depends [:common-html]
-              :html ["invoices.html"]
-              :js ["invoices.js"]}
+              :html    ["invoices.html"]
+              :js      ["invoices.js"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
-   :hashbang     {:depends [:common-html :ui-components :header :footer]
-                  :js ["hashbang.js"]
-                  :html ["index.html"]}
+   :hashbang {:depends [:common-html :ui-components :header :footer]
+              :js      ["hashbang.js"]
+              :html    ["index.html"]}
 
-   :upload       {:depends [:iframe :attachment-utils]
-                  :js ["upload.js"]
-                  :css ["upload.css"]}
+   :upload {:depends [:iframe :attachment-utils]
+            :js      ["upload.js"]
+            :css     ["upload.css"]}
 
    :new-appointment {:depends [:calendar-view]
-                     :js ["new-appointment.js"]
-                     :html ["new-appointment.html"]}
+                     :js      ["new-appointment.js"]
+                     :html    ["new-appointment.html"]}
 
    :applicant-app {:depends []
-                   :js ["applicant.js"]}
+                   :js      ["applicant.js"]}
 
-   :applicant     {:depends [:applicant-app
-                             :common-html :authenticated :map :applications :application
-                             :statement :docgen :create :copy :mypage :header :debug
-                             :company :analytics :register-company :footer :new-appointment :ui-components
-                             :pate]}
+   :applicant {:depends [:applicant-app
+                         :common-html :authenticated :map :applications :application
+                         :statement :docgen :create :copy :mypage :header :debug
+                         :company :analytics :register-company :footer :new-appointment :ui-components
+                         :pate]}
 
-   :mycalendar   {:depends [:calendar-view]
-                  :js ["mycalendar.js"]
-                  :html ["mycalendar.html"]}
+   :mycalendar {:depends [:calendar-view]
+                :js      ["mycalendar.js"]
+                :html    ["mycalendar.html"]}
 
    :authority-app {:depends [] :js ["authority.js"]}
    :authority     {:depends [:pate :authority-app :common-html :external-api :authenticated :map :applications
@@ -467,10 +468,10 @@
    :oir-app {:depends [] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
                        :docgen :debug :analytics :header :footer :ui-components]
-             :css ["oir.css"]}
+             :css     ["oir.css"]}
 
    :authority-admin-app {:depends []
-                         :js ["authority-admin-app.js"]}
+                         :js      ["authority-admin-app.js"]}
    :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins
                                    :accordion :mypage :calendar-view :header :debug :analytics :proj4 :ol :footer
                                    :ui-components :authority-admin-components]
@@ -485,88 +486,88 @@
                                 "organization-store.html" "organization-terminal.html" "edit-authority.html" "ad-login-settings.html"]}
 
    :admin-app {:depends []
-               :js ["admin.js"]}
+               :js      ["admin.js"]}
    :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer
                          :ui-components :authority-admin-components]
-               :js ["admin-users.js" "organization.js" "organizations.js" "companies.js"
-                    "features.js" "actions.js" "sso-keys.js" "screenmessages-list.js" "notifications.js"
-                    "create-scope-model.js" "logs.js" "reports.js" "campaigns.js"]
-               :html ["index.html" "admin.html" "organization.html"
-                      "admin-users.html" "organizations.html" "companies.html"
-                      "features.html" "actions.html" "sso-keys.html"
-                      "screenmessages-list.html" "notifications.html"
-                      "create-scope-template.html" "logs.html" "reports.html"
-                      "campaigns.html"]}
+               :js      ["admin-users.js" "organization.js" "organizations.js" "companies.js"
+                         "features.js" "actions.js" "sso-keys.js" "screenmessages-list.js" "notifications.js"
+                         "create-scope-model.js" "logs.js" "reports.js" "campaigns.js"]
+               :html    ["index.html" "admin.html" "organization.html"
+                         "admin-users.html" "organizations.html" "companies.html"
+                         "features.html" "actions.html" "sso-keys.html"
+                         "screenmessages-list.html" "notifications.html"
+                         "create-scope-template.html" "logs.html" "reports.html"
+                         "campaigns.html"]}
 
    :wordpress {:depends [:login :password-reset]}
 
    :welcome-app {:depends []
-                 :js ["welcome.js"]}
+                 :js      ["welcome.js"]}
 
    :welcome {:depends [:welcome-app  :analytics :global-models :ui-components :login :register :register-company
                        :link-account :debug :header :screenmessages :password-reset :change-email :footer]
-             :js ["company-user.js"]
-             :html ["index.html" "login.html" "company-user.html" "gtm.html"]}
+             :js      ["company-user.js"]
+             :html    ["index.html" "login.html" "company-user.html" "gtm.html"]}
 
-   :oskari  {:css ["oskari.css"]}
+   :oskari {:css ["oskari.css"]}
 
    :neighbor-app {:depends []
-                  :js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components]
-              :html ["neighbor-show.html"]
-              :js ["neighbor-show.js"]}
+                  :js      ["neighbor-app.js"]}
+   :neighbor     {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components]
+                  :html    ["neighbor-show.html"]
+                  :js      ["neighbor-show.js"]}
 
    :bulletins-common {:depends []
-                      :js ["header.js" "vetuma-service.js"
-                           "application-bulletin/application-bulletin-model.js"]
-                      :html ["header.html" "footer.html"
-                             "application-bulletin/application-bulletin-template.html"]}
+                      :js      ["header.js" "vetuma-service.js"
+                                "application-bulletin/application-bulletin-model.js"]
+                      :html    ["header.html" "footer.html"
+                                "application-bulletin/application-bulletin-template.html"]}
 
    :bulletins {:depends [:bulletins-common :ui-components :map :docgen :services]
-               :html ["bulletins.html" "bulletins-template.html"
-                      "application-ymp-bulletin/application-ymp-bulletin-template.html"
-                      "application-ymp-bulletin/bulletin-comment/bulletin-comment-template.html"
-                      "application-ymp-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
-                      "application-ymp-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
-                      "application-ymp-bulletin/bulletin-comment/bulletin-comment-template.html"
-                      "application-ymp-bulletin/tabs/info/bulletin-info-tab-template.html"
-                      "application-ymp-bulletin/tabs/verdicts/verdicts-template.html"
-                      "application-ymp-bulletin/tabs/verdicts/bulletin-verdicts-tab-template.html"
-                      "application-ymp-bulletin/tabs/instructions/bulletin-instructions-tab-template.html"
-                      "application-ymp-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
-                      "application-bulletins/application-bulletins-template.html"
-                      "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
-                      "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-template.html"
-                      "application-bulletins/bulletins-search/bulletins-search-template.html"
-                      "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-template.html"
-                      "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
-               :js ["bulletins.js" "bulletins-model.js"
-                    "application-bulletins-service.js"
-                    "application-ymp-bulletin/application-ymp-bulletin-model.js"
-                    "application-ymp-bulletin/bulletin-comment/bulletin-comment-model.js"
-                    "application-ymp-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
-                    "application-ymp-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
-                    "application-ymp-bulletin/tabs/verdicts/bulletin-verdicts-tab-model.js"
-                    "application-ymp-bulletin/tabs/instructions/bulletin-instructions-tab-model.js"
-                    "application-bulletins/application-bulletins-model.js"
-                    "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
-                    "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"
-                    "application-bulletins/bulletins-search/bulletins-search-model.js"
-                    "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-model.js"
-                    "application-bulletins/bulletins-search/autocomplete/autocomplete-states-model.js"]}
+               :html    ["bulletins.html" "bulletins-template.html"
+                         "application-ymp-bulletin/application-ymp-bulletin-template.html"
+                         "application-ymp-bulletin/bulletin-comment/bulletin-comment-template.html"
+                         "application-ymp-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
+                         "application-ymp-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
+                         "application-ymp-bulletin/bulletin-comment/bulletin-comment-template.html"
+                         "application-ymp-bulletin/tabs/info/bulletin-info-tab-template.html"
+                         "application-ymp-bulletin/tabs/verdicts/verdicts-template.html"
+                         "application-ymp-bulletin/tabs/verdicts/bulletin-verdicts-tab-template.html"
+                         "application-ymp-bulletin/tabs/instructions/bulletin-instructions-tab-template.html"
+                         "application-ymp-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
+                         "application-bulletins/application-bulletins-template.html"
+                         "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
+                         "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-template.html"
+                         "application-bulletins/bulletins-search/bulletins-search-template.html"
+                         "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-template.html"
+                         "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
+               :js      ["bulletins.js" "bulletins-model.js"
+                         "application-bulletins-service.js"
+                         "application-ymp-bulletin/application-ymp-bulletin-model.js"
+                         "application-ymp-bulletin/bulletin-comment/bulletin-comment-model.js"
+                         "application-ymp-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
+                         "application-ymp-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
+                         "application-ymp-bulletin/tabs/verdicts/bulletin-verdicts-tab-model.js"
+                         "application-ymp-bulletin/tabs/instructions/bulletin-instructions-tab-model.js"
+                         "application-bulletins/application-bulletins-model.js"
+                         "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
+                         "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"
+                         "application-bulletins/bulletins-search/bulletins-search-model.js"
+                         "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-model.js"
+                         "application-bulletins/bulletins-search/autocomplete/autocomplete-states-model.js"]}
 
    :financial-authority-app {:depends []
-                             :js ["financial-authority-app.js"]}
+                             :js      ["financial-authority-app.js"]}
    :financial-authority     {:depends [:financial-authority-app :common-html :authenticated :applications :application :mypage
-                             :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components :statement]}
+                                       :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components :statement]}
 
    :local-bulletins-app {:depends []
-                         :html ["local-bulletins.html"]
-                         :js ["local-bulletins-app.js"]}
+                         :html    ["local-bulletins.html"]
+                         :js      ["local-bulletins-app.js"]}
 
    :local-bulletins {:depends [:bulletins-common :local-bulletins-app :ui-components :map :docgen :services]
-                     :html ["local-bulletins-template.html" "local-bulletins-wrapper-template.html"]
-                     :js ["local-bulletins-model.js" "local-bulletins-wrapper-model.js"]}
+                     :html    ["local-bulletins-template.html" "local-bulletins-wrapper-template.html"]
+                     :js      ["local-bulletins-model.js" "local-bulletins-wrapper-model.js"]}
    })
 
 ; Make sure all dependencies are resolvable:

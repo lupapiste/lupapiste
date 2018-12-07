@@ -118,13 +118,15 @@
 
 (defn create-unwrapped-data [{body :body} f]
   (flattened
-    (walk/prewalk
-      #(if (and (map? %) (not-empty %))
+   (walk/prewalk
+    #(if (and (map? %) (not-empty %))
+       (if (:pseudo? %)
+         {}
          (let [t (keyword (:type %))
                v (if (#{:group :table :foremanOtherApplications} t) (group % t) (f %))]
-           {(keyword (:name %)) v})
-         %)
-      body)))
+           {(keyword (:name %)) v}))
+       %)
+    body)))
 
 ;;
 ;; Public api
@@ -349,3 +351,15 @@
 
 
 (def document-ordering-fn (fn [document] (get-in document [:schema-info :order] 7)))
+
+(defn- path-string->absolute-path [elem-path path-string]
+  (->> (ss/split path-string #"/")
+       (#(if (ss/blank? (first %)) (rest %) (concat elem-path %)))
+       (mapv keyword)))
+
+(defn get-value-by-path
+  "Get element value by target-path string. target-path can be
+  absolute (/path/to/element) or relative (sibling/element). If target
+  path is given as relative, path is used to resolee absolute path."
+  [doc path target-path]
+  (get-in doc (conj (path-string->absolute-path (butlast path) target-path) :value)))

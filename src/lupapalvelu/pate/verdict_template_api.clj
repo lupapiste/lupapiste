@@ -27,7 +27,7 @@
   scope."
   [command]
   (when (empty? (->> (mapv :scope (:user-organizations command))
-                     (map #(sade.util/find-by-key :pate-enabled true %))
+                     (map #(util/find-by-key :pate-enabled true %))
                      (remove nil?)))
     (fail :error.pate-disabled)))
 

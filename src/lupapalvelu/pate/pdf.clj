@@ -126,16 +126,21 @@
 
 (defn operations
   "If the verdict has an :operation property, its value overrides the
-  application primary operation."
+  application primary operation.
+  And if verdict has bulletin-desc-as-operation property checked,
+  bulletin-op-description overrides both of the above."
   [{:keys [lang verdict application]}]
-  (let [infos     (map (util/fn->> (operation-name application)
-                                   (i18n/localize lang :operations)
-                                   (hash-map :text))
-                       (operation-infos application))
-        operation (ss/trim (get-in verdict [:data :operation]))]
-    (vec (if (ss/not-blank? operation)
-           (cons {:text operation} (rest infos))
-           infos))))
+  (let [infos         (map (util/fn->> (operation-name application)
+                                       (i18n/localize lang :operations)
+                                       (hash-map :text))
+                           (operation-infos application))
+        operation     (ss/trim (get-in verdict [:data :operation]))
+        bulletin      (get-in verdict [:data :bulletin-desc-as-operation])
+        bulletin-desc (get-in verdict [:data :bulletin-op-description])]
+    (vec (cond
+           bulletin (cons {:text bulletin-desc} (rest infos))
+           (ss/not-blank? operation) (cons {:text operation} (rest infos))
+           :else infos))))
 
 (defn verdict-buildings [{:keys [application] :as options}]
   (let [buildings (reduce-kv (fn [acc k {flag? :show-building :as v}]
