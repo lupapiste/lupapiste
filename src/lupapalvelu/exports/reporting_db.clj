@@ -67,18 +67,9 @@
    :lausunnonAntopvm (ds/access :test)
 
    ;; Osapuoli
+   ;; Providing all data for now as it is unclear what is actually needed
    :parties (ds/array-from :parties
-                           {:VRKrooliKoodi (ds/access :parties-VRK-role)
-                            :kuntaRooliKoodi (ds/access :parties-municipality-role)
-                            :postiosoite (ds/access :parties-address)
-                            :postitoimipaikka (ds/access :parties-post-office)
-                            :postinumero (ds/access :parties-zip-code)
-                            :etunimi (ds/access :parties-first-name)
-                            :sukunimi (ds/access :parties-last-name)})
-   :ammatinNimi (ds/access :test)
-   :hakijanLahiosoite (ds/access :test)
-   :hakijanNimi (ds/access :test)
-   :hakijanPostiosoite (ds/access :test)
+                           (ds/access :party))
 
    :suunnittelijanEmail (ds/access :test)
    :suunnittelijanLaji (ds/access :test)
@@ -177,7 +168,7 @@
    :parties (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
                               :RakennusvalvontaAsia :osapuolettieto :Osapuolet :osapuolitieto
                               (partial mapv :Osapuoli)])
-
+   :party (ds/from-context [:context])
    ;; TODO what to do with company parties?
    :parties-VRK-role (ds/from-context [:context :VRKrooliKoodi])
    :parties-municipality-role (ds/from-context [:context :kuntaRooliKoodi])

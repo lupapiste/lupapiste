@@ -45,40 +45,108 @@
                 :permitType "R"
                 :projectDescription "Uuden rakennuksen rakentaminen tontille.\n\nPuiden kaataminen:Puun kaataminen"
                 :parties [{:VRKrooliKoodi "maksaja"
-                           :etunimi "Pena"
+                           :henkilo {:nimi {:etunimi "Pena" :sukunimi "Penttilä"}
+                                     :puhelin "03-389 1380"
+                                     :sahkopostiosoite "yritys@example.com"}
                            :kuntaRooliKoodi "Rakennusvalvonta-asian laskun maksaja"
-                           :postinumero nil
-                           :postiosoite nil
-                           :postitoimipaikka nil
-                           :sukunimi "Penttilä"}
+                           :suoramarkkinointikieltoKytkin true
+                           :turvakieltoKytkin true
+                           :yritys {:liikeJaYhteisotunnus "1060155-5"
+                                    :nimi "Solita Oy"
+                                    :postiosoite {:osoitenimi {:teksti "katu"}
+                                                  :postinumero "33800"
+                                                  :postitoimipaikannimi "Tuonela"
+                                                  :ulkomainenLahiosoite "katu"
+                                                  :ulkomainenPostitoimipaikka "Tuonela"
+                                                  :valtioKansainvalinen "CHN"
+                                                  :valtioSuomeksi "Kiina"}
+                                    :postiosoitetieto {:postiosoite {:osoitenimi {:teksti "katu"}
+                                                                     :postinumero "33800"
+                                                                     :postitoimipaikannimi "Tuonela"
+                                                                     :ulkomainenLahiosoite "katu"
+                                                                     :ulkomainenPostitoimipaikka "Tuonela"
+                                                                     :valtioKansainvalinen "CHN"
+                                                                     :valtioSuomeksi "Kiina"}}
+                                    :puhelin "03-389 1380"
+                                    :sahkopostiosoite "yritys@example.com"
+                                    :vainsahkoinenAsiointiKytkin false
+                                    :verkkolaskutustieto {:Verkkolaskutus {:ovtTunnus "003712345671"
+                                                                           :valittajaTunnus "BAWCFI22"
+                                                                           :verkkolaskuTunnus "laskutunnus-1234"}}}}
                           {:VRKrooliKoodi "maksaja"
-                           :etunimi "Pena"
+                           :henkilo {:henkilotunnus "210281-9988"
+                                     :nimi {:etunimi "Pena" :sukunimi "Penttilä"}
+                                     :osoite {:osoitenimi {:teksti "katu"}
+                                              :postinumero "33800"
+                                              :postitoimipaikannimi "Tuonela"
+                                              :ulkomainenLahiosoite "katu"
+                                              :ulkomainenPostitoimipaikka "Tuonela"
+                                              :valtioKansainvalinen "CHN"
+                                              :valtioSuomeksi "Kiina"}
+                                     :puhelin "+358401234567"
+                                     :sahkopostiosoite "pena@example.com"
+                                     :vainsahkoinenAsiointiKytkin false}
                            :kuntaRooliKoodi "Rakennusvalvonta-asian laskun maksaja"
-                           :postinumero "33800"
-                           :postiosoite "katu"
-                           :postitoimipaikka "Tuonela"
-                           :sukunimi "Penttilä"}
+                           :suoramarkkinointikieltoKytkin true
+                           :turvakieltoKytkin true}
                           {:VRKrooliKoodi "muu osapuoli"
-                           :etunimi "Pena"
+                           :henkilo {:henkilotunnus "210281-9988"
+                                     :nimi {:etunimi "Pena" :sukunimi "Penttilä"}
+                                     :osoite {:osoitenimi {:teksti "katu"}
+                                              :postinumero "33800"
+                                              :postitoimipaikannimi "Tuonela"
+                                              :ulkomainenLahiosoite "katu"
+                                              :ulkomainenPostitoimipaikka "Tuonela"
+                                              :valtioKansainvalinen "CHN"
+                                              :valtioSuomeksi "Kiina"}
+                                     :puhelin "+358401234567"
+                                     :sahkopostiosoite "pena@example.com"
+                                     :vainsahkoinenAsiointiKytkin true}
                            :kuntaRooliKoodi "Hakijan asiamies"
-                           :postinumero "33800"
-                           :postiosoite "katu"
-                           :postitoimipaikka "Tuonela"
-                           :sukunimi "Penttilä"}
+                           :suoramarkkinointikieltoKytkin true
+                           :turvakieltoKytkin true}
                           {:VRKrooliKoodi "hakija"
-                           :etunimi "Pena"
+                           :henkilo {:henkilotunnus "210281-9988"
+                                     :nimi {:etunimi "Pena" :sukunimi "Penttilä"}
+                                     :osoite {:osoitenimi {:teksti "katu"}
+                                              :postinumero "33800"
+                                              :postitoimipaikannimi "Tuonela"
+                                              :ulkomainenLahiosoite "katu"
+                                              :ulkomainenPostitoimipaikka "Tuonela"
+                                              :valtioKansainvalinen "CHN"
+                                              :valtioSuomeksi "Kiina"}
+                                     :puhelin "+358401234567"
+                                     :sahkopostiosoite "pena@example.com"
+                                     :vainsahkoinenAsiointiKytkin true}
                            :kuntaRooliKoodi "Rakennusvalvonta-asian hakija"
-                           :postinumero "33800"
-                           :postiosoite "katu"
-                           :postitoimipaikka "Tuonela"
-                           :sukunimi "Penttilä"}
+                           :suoramarkkinointikieltoKytkin true
+                           :turvakieltoKytkin true}
                           {:VRKrooliKoodi "hakija"
-                           :etunimi "Pena"
+                           :henkilo {:nimi {:etunimi "Pena" :sukunimi "Penttilä"}
+                                     :puhelin "03-389 1380"
+                                     :sahkopostiosoite "yritys@example.com"}
                            :kuntaRooliKoodi "Rakennusvalvonta-asian hakija"
-                           :postinumero nil
-                           :postiosoite nil
-                           :postitoimipaikka nil
-                           :sukunimi "Penttilä"}]
+                           :suoramarkkinointikieltoKytkin false
+                           :turvakieltoKytkin true
+                           :yritys {:liikeJaYhteisotunnus "1060155-5"
+                                    :nimi "Solita Oy"
+                                    :postiosoite {:osoitenimi {:teksti "katu"}
+                                                  :postinumero "33800"
+                                                  :postitoimipaikannimi "Tuonela"
+                                                  :ulkomainenLahiosoite "katu"
+                                                  :ulkomainenPostitoimipaikka "Tuonela"
+                                                  :valtioKansainvalinen "CHN"
+                                                  :valtioSuomeksi "Kiina"}
+                                    :postiosoitetieto {:postiosoite {:osoitenimi {:teksti "katu"}
+                                                                     :postinumero "33800"
+                                                                     :postitoimipaikannimi "Tuonela"
+                                                                     :ulkomainenLahiosoite "katu"
+                                                                     :ulkomainenPostitoimipaikka "Tuonela"
+                                                                     :valtioKansainvalinen "CHN"
+                                                                     :valtioSuomeksi "Kiina"}}
+                                    :puhelin "03-389 1380"
+                                    :sahkopostiosoite "yritys@example.com"
+                                    :vainsahkoinenAsiointiKytkin true}}]
                 :reviews [{:type "ei tiedossa"
                            :reviewer "Reijo Revyy"
                            :date "2012-12-03"
