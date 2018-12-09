@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.invoices.invoices
   (:require [clojure.set :as set]
+            [clojure.string :refer [trim]]
             [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
@@ -8,6 +9,7 @@
             [lupapiste-invoice-commons.states :as invoice-states]
             [lupapalvelu.ui.invoices.service :as service]
             [lupapalvelu.ui.invoices.state :as state]
+            [cljs.lupapalvelu.ui.invoices.util :refer [num num?]]
             [lupapalvelu.invoices.shared.util :as inv-util]
             [rum.core :as rum]
             [sade.shared-util :as util]
@@ -57,6 +59,7 @@
   (let [value-atom (atom value)]
     (components/dropdown value-atom {:items options
                                      :callback (fn [event] (on-blur @value-atom))})))
+
 (defn update-invoice-row-value! [invoice operation-index invoice-row-index field value]
   (update-invoice! invoice
                    (fn [_]
@@ -64,19 +67,35 @@
                       invoice
                       (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index field] value)))))
 
+(defn set-local-invoice-row-value! [invoice operation-index invoice-row-index field value]
+  (reset! invoice (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index field] value)))
+
+(defn field-setter [converter save-in-backend! save-only-locally! & [can-be-saved-in-backend?]]
+  (fn [field value old-value]
+    (let [converted-value (converter value)
+          equals-old-value? (= converted-value old-value)
+          can-be-saved-in-backend? (or can-be-saved-in-backend? (constantly true))]
+      (if (and (not equals-old-value?)
+               (can-be-saved-in-backend? value))
+        (save-in-backend! field converted-value)
+        (save-only-locally! field old-value)))))
+
 (rum/defc fully-editable-invoice-row < rum/reactive
   < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
                (str operation-index "-" invoice-row-index))}
   [{:keys [text units unit discount-percent price-per-unit] :as invoice-row} invoice-row-index operation-index invoice]
   (let [discounted-price (discounted-price-from-invoice-row invoice-row)
         alv (calc-alv discounted-price)
-        update-field! (partial update-invoice-row-value! invoice operation-index invoice-row-index)]
+        save-in-backend!   (partial update-invoice-row-value!    invoice operation-index invoice-row-index)
+        save-only-locally! (partial set-local-invoice-row-value! invoice operation-index invoice-row-index)
+        update-text-field! (field-setter trim save-in-backend! save-only-locally!)
+        update-num-field!  (field-setter num save-in-backend! save-only-locally! num?)]
     [:tr
-     [:td (autosaving-input  text  (fn [value] (update-field! :text value)))]
-     [:td (autosaving-input  units (fn [value] (update-field! :units (js/parseInt value))))]
-     [:td (autosaving-select unit (rum/react state/valid-units) (fn [value] (update-field! :unit value)))]
+     [:td (autosaving-input  text  (fn [value] (update-text-field! :text value text)))]
+     [:td (autosaving-input  units (fn [value] (update-num-field! :units value units)))]
+     [:td (autosaving-select unit (rum/react state/valid-units) (fn [value] (update-text-field! :unit value)))]
      [:td price-per-unit]
-     [:td (autosaving-input discount-percent (fn [value] (update-field! :discount-percent (js/parseInt value))))]
+     [:td (autosaving-input discount-percent (fn [value] (update-num-field! :discount-percent value discount-percent)))]
      [:td alv]
      [:td discounted-price]]))
 
@@ -86,13 +105,16 @@
   [{:keys [text units unit discount-percent price-per-unit] :as invoice-row} invoice-row-index operation-index invoice]
   (let [discounted-price (discounted-price-from-invoice-row invoice-row)
         alv (calc-alv discounted-price)
-        update-field! (partial update-invoice-row-value! invoice operation-index invoice-row-index)]
+        save-in-backend!   (partial update-invoice-row-value!    invoice operation-index invoice-row-index)
+        save-only-locally! (partial set-local-invoice-row-value! invoice operation-index invoice-row-index)
+        update-text-field! (field-setter trim save-in-backend! save-only-locally!)
+        update-num-field!  (field-setter num save-in-backend! save-only-locally! num?)]
     [:tr
      [:td text]
-     [:td (autosaving-input units (fn [value] (update-field! :units (js/parseInt value))))]
+     [:td (autosaving-input  units (fn [value] (update-num-field! :units value units)))]
      [:td unit]
      [:td price-per-unit]
-     [:td (autosaving-input discount-percent (fn [value] (update-field! :discount-percent (js/parseInt value))))]
+     [:td (autosaving-input discount-percent (fn [value] (update-num-field! :discount-percent value discount-percent)))]
      [:td alv]
      [:td discounted-price]]))
 
