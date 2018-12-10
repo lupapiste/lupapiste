@@ -1,4 +1,4 @@
-(ns lupapalvelu.pate.verdict-test
+(ns lupapalvelu.pate.verdict-common-test
   (:require [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.verdict-common :as vc]
             [midje.sweet :refer :all]
