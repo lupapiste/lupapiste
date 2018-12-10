@@ -1042,7 +1042,8 @@
 
 (def rakennuspaikka-kuntagml [{:name "kiinteisto"
                                :type :group
-                               :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size :s :transform :zero-pad-4}
+                               :uicomponent :propertyGroup
+                               :body [{:name "maaraalaTunnus" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "kerrosala" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
@@ -1054,7 +1055,6 @@
                                       {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-input :inputType :checkbox}]}
                               {:name "osoite"
                                :type :group
-                               :uicomponent :propertyGroup
                                :body [{:name "kunta" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "postinumero" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "osoitenimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
@@ -1077,10 +1077,7 @@
                                       {:name "oikeusvaikutukseton yleiskaava"}
                                       {:name "asemakaava"}
                                       {:name "ranta-asemakaava"}
-                                      {:name "ei kaavaa"}]}
-                              {:name "hankkeestaIlmoitettu" :type :group
-                               :group-help "hankkeestaIlmoitettu.groupHelpText"
-                               :body [{:name "hankkeestaIlmoitettuPvm" :type :date :i18nkey "date"}]}])
+                                      {:name "ei kaavaa"}]}])
 
 (def lisakohde-rakennuspaikka [{:name "kiinteisto"
                                 :type :group
