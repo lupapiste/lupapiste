@@ -144,7 +144,7 @@
                                (errorf "Moving statement to statement given -state failed: %s" (.getMessage e)))))
 
         created-application (-> created-application
-                                (update-in [:documents] concat other-building-docs new-parties location-document structures)
+                                (update-in [:documents] concat other-building-docs new-parties [location-document] structures)
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :statements given-statements
                                        :opened (:created command)

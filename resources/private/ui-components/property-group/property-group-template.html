@@ -14,17 +14,21 @@
           <label data-bind="attr: { 'for': checkboxId }, ltext: 'kiinteisto.maaraala'"></label>
         </div>
 
-        <div class="form-entry"
-             data-bind="component: { name: 'maaraala-tunnus',
-                                     params: { schema: maaraalaSchema,
-                                               path: maaraalaSchema.path,
-                                               applicationId: applicationId,
-                                               documentId: documentId,
-                                               isMaaraala: isMaaraala,
-                                               propertyId: propertyId(),
-                                               propertyIdSource: propertyIdSource(),
-                                               isDisabled: isDisabled,
-                                               authModel: authModel }}"></div>
+        <!-- ko if: maaraalaSchema -->
+
+          <div class="form-entry"
+               data-bind="component: { name: 'maaraala-tunnus',
+                                       params: { schema: maaraalaSchema,
+                                                 path: maaraalaSchema.path,
+                                                 applicationId: applicationId,
+                                                 documentId: documentId,
+                                                 isMaaraala: isMaaraala,
+                                                 propertyId: propertyId(),
+                                                 propertyIdSource: propertyIdSource(),
+                                                 isDisabled: isDisabled,
+                                                 authModel: authModel }}"></div>
+
+        <!-- /ko -->
 
         <span data-bind="foreach: otherSchemas">
           <div class="form-entry"

@@ -431,12 +431,6 @@
 
 (def db-schema-info-keys [:name :version :type :subtype :op])
 
-(def tila
-  (atom {}))
-
-(def tila2
-  (atom {}))
-
 (defn make-document [primary-operation-name created manual-schema-datas schema]
   (let [op-info (op/operations (keyword primary-operation-name))
         op-schema-name (:schema op-info)
@@ -444,31 +438,17 @@
                                                    op-schema-name
                                                    (:schema-data op-info))
         merged-schema-datas (merge-with concat default-schema-datas manual-schema-datas)
-        schema-name (or (get-in schema [:info :name])
-                        (-> manual-schema-datas keys first))
-        result {:id          (mongo/create-id)
-                ; :schema-info (select-keys (:info schema) db-schema-info-keys)
-                :schema-info {:name "rakennuspaikka-kuntagml"
-                              :version 1}
-                :created     created
-                :data        (util/deep-merge
-                               (tools/create-document-data schema tools/default-values)
-                               (tools/timestamped
-                                 (if-let [schema-data (get-in merged-schema-datas [schema-name])]
-                                   (schema-data-to-body schema-data)
-                                   {})
-                                 created))}
-    _ (swap! (if (= :rakennuspaikka-kuntagml (-> manual-schema-datas keys first))
-               tila
-               tila2)
-             assoc :dsd default-schema-datas
-               :msd manual-schema-datas
-               :mergedsd merged-schema-datas
-               :schema-name schema-name
-               :op-info op-info
-               :schema schema
-               :result result)]
-    result))
+        schema-name (get-in schema [:info :name])]
+    {:id          (mongo/create-id)
+     :schema-info (select-keys (:info schema) db-schema-info-keys)
+     :created     created
+     :data        (util/deep-merge
+                    (tools/create-document-data schema tools/default-values)
+                    (tools/timestamped
+                      (if-let [schema-data (get-in merged-schema-datas [schema-name])]
+                        (schema-data-to-body schema-data)
+                        {})
+                      created))}))
 
 (defn make-documents [user created org op application & [manual-schema-datas]]
   {:pre [(or (nil? manual-schema-datas) (map? manual-schema-datas))]}

@@ -42,9 +42,6 @@
                 '(:vuosi :no :tyyppi :kauposa))
               (ss/split id #"[- ]")))))
 
-(def tila
-  (atom {}))
-
 (defn parse-rakennuspaikkatieto [rakennuspaikkatieto]
   (let [data (:Rakennuspaikka rakennuspaikkatieto)
         {:keys [kerrosala kaavatilanne kaavanaste rakennusoikeusYhteensa]} data
@@ -70,15 +67,8 @@
   (let [data (parse-rakennuspaikkatieto rakennuspaikkatieto)
         doc-datas (doc-model/map2updates [] data)
         manual-schema-datas {:rakennuspaikka-kuntagml doc-datas}
-        schema schemas/rakennuspaikka-kuntagml
-        res (app/make-document nil (now) manual-schema-datas schema)
-        _ (swap! tila assoc :data data
-                 :input rakennuspaikkatieto
-                 :doc-datas doc-datas
-                 :msd manual-schema-datas
-                 :schema schema
-                 :res res)]
-    res))
+        schema (schemas/get-schema 1 "rakennuspaikka-kuntagml")]
+      (app/make-document nil (now) manual-schema-datas schema)))
 
 (defn kuntalupatunnus->description
   "Takes a kuntalupatunnus, returns the permit type in plain text ('12-124124-92-A' -> 'Uusi rakennus' etc.)"

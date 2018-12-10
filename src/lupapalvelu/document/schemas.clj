@@ -1043,8 +1043,7 @@
 (def rakennuspaikka-kuntagml [{:name "kiinteisto"
                                :type :group
                                :uicomponent :propertyGroup
-                               :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size :s
-                                       :transform :zero-pad-4}
+                               :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size :s :transform :zero-pad-4}
                                       {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "kerrosala" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
