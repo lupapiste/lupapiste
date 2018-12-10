@@ -27,6 +27,16 @@
                (assoc (apply schema-util/combine-subschemas subschemas)
                       :title title)))
 
+(defn setsub-organization-name
+  ([i18nkey]
+   {:dictionary {:organization-name (schema-util/required {:text {:i18nkey i18nkey}})}
+    :section    {:id      :organization-name
+                 :i18nkey :empty
+                 :grid    {:columns 4
+                           :rows    [[{:dict  :organization-name
+                                       :align :full}]]}}})
+  ([] (setsub-organization-name :pate.verdict.organization-name)))
+
 (defn setsub-date-deltas
   "Dates is vector of date dict keys."
   [dates]
@@ -150,6 +160,7 @@
                        :remove-dict :remove-handler-title}))
 
 (def r-settings (build-settings-schema "pate-r"
+                                       (setsub-organization-name)
                                        (setsub-date-deltas helper/verdict-dates)
                                        setsub-verdict-code
                                        setsub-board
@@ -158,11 +169,13 @@
                                        (setsub-reviews helper/review-types)))
 
 (def p-settings (build-settings-schema "pate-p"
+                                       (setsub-organization-name)
                                        (setsub-date-deltas helper/verdict-dates)
                                        setsub-verdict-code
                                        setsub-board))
 
 (def ya-settings (build-settings-schema "pate-ya"
+                                        (setsub-organization-name)
                                         (setsub-date-deltas helper/ya-verdict-dates)
                                         setsub-verdict-code
                                         setsub-board
@@ -172,11 +185,13 @@
                                         (setsub-reviews helper/ya-review-types)))
 
 (def tj-settings (build-settings-schema "pate-tj"
+                                        (setsub-organization-name)
                                         (setsub-date-deltas helper/tj-verdict-dates)
                                         setsub-verdict-code
                                         setsub-board))
 
-(def contract-settings (build-settings-schema "pate-contract"))
+(def contract-settings (build-settings-schema "pate-contract"
+                                              (setsub-organization-name :pate.contract.organization-name)))
 
 (defn settings-schema [category]
   (case (keyword category)

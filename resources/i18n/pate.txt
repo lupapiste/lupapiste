@@ -1070,3 +1070,5 @@
 "plus" "en" "+"
 "plus" "fi" "+"
 "plus" "sv" "+"
+"pate.verdict.organization-name" "fi" "Päätöksellä näkyvä organisaation nimi"
+"pate.contract.organization-name" "fi" "Sopimuksessa näkyvä organisaation nimi"
