@@ -235,7 +235,7 @@
                          :callback (fn [operation]
                                      (reset! is-open? false)
                                      (let [catalogue-rows (get catalogue-rows-by-operation operation)
-                                           invoice-rows (map inv-util/->invoice-row catalogue-rows)
+                                           invoice-rows (mapv inv-util/->invoice-row catalogue-rows)
                                            updated-invoice (service/add-operation-to-invoice @invoice operation invoice-rows)]
 
                                        (service/upsert-invoice! app-id
