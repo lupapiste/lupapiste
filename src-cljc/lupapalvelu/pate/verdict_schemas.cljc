@@ -120,7 +120,8 @@
                                             dates)}]}}})
 
 (def versub-operation-ya
-  {:dictionary {:operation       {:text {:loc-prefix :pate.operation}}
+  {:dictionary {:operation       {:text {:loc-prefix :pate.operation
+                                         :lines      20}}
                 :address         {:text {:loc-prefix :pate.location}}
                 :property-title  {:loc-text :pate.property-id}
                 :propertyIds     {:repeating {:property-id        {:text {:label?     false
@@ -130,10 +131,10 @@
                                                                             :icon    :lupicon-remove
                                                                             :css     :secondary
                                                                             :remove  :propertyIds}}}}
-                :add-property-id {:button {:icon     :lupicon-circle-plus
-                                           :i18nkey  :pate.property-id.add
-                                           :css      :positive
-                                           :add      :propertyIds}}}
+                :add-property-id {:button {:icon    :lupicon-circle-plus
+                                           :i18nkey :pate.property-id.add
+                                           :css     :positive
+                                           :add     :propertyIds}}}
    :section    {:id   :pate-operation
                 :grid {:columns 2
                        :rows    [[{:dict  :operation
@@ -145,7 +146,7 @@
                                  [{:grid {:columns   9
                                           :repeating :propertyIds
                                           :rows      [[{:col  8
-                                                        :dict  :property-id}
+                                                        :dict :property-id}
                                                        {:align :right
                                                         :dict  :remove-property-id}]]}}]
                                  [{:show? :_meta.editing?
@@ -269,9 +270,10 @@
                                          :dict :bulletin-desc-as-operation}]]}}})
 
 (def versub-operation
-  {:dictionary {:operation    {:text {:loc-prefix :pate.operation}}
+  {:dictionary {:operation    {:text {:loc-prefix :pate.operation
+                                      :lines      20}}
                 :bulletin-ref {:reference {:loc-prefix :pate.operation
-                                           :path :bulletin-op-description}}
+                                           :path       :bulletin-op-description}}
                 :address      {:text {:loc-prefix :pate.address}}}
    :section    {:id   :pate-operation
                 :grid {:columns 2
