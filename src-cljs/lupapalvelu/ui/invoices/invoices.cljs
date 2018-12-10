@@ -162,11 +162,11 @@
      [:td alv]
      [:td discounted-price]]))
 
-(rum/defc filterable-select-row [on-change]
+(rum/defc filterable-select-row [on-change items]
   [:tr {:style {:border-style "dashed" :border-width "1px" :border-color "#dddddd"}}
    [:td {:col-span 7}
     (autocomplete ""
-                  {:items [{:text (common/loc :invoices.rows.customrow) :value :freerow}]
+                  {:items items ;;[{:text (common/loc :invoices.rows.customrow) :value :freerow}]
                    :callback on-change})]])
 
 (defmulti create-invoice-row-element (fn [row index operation-index invoice]
@@ -194,7 +194,33 @@
   (let [invoice-rows (map-indexed (fn [index row]
                                     (create-invoice-row-element row index operation-index invoice))
                                   (:invoice-rows operation))
-        invoice-state (keyword (:state @invoice))]
+        invoice-state (keyword (:state @invoice))
+        catalogue (rum/react state/price-catalogue)
+        catalogue-rows (inv-util/indexed-rows catalogue)
+        freerow {:text (common/loc :invoices.rows.customrow) :value :freerow}
+        items (->> catalogue-rows
+                   (map (fn [{:keys [index text]}] {:value index :text text}))
+                   (concat [freerow]))
+        on-select (fn [value]
+                    ;; (println "selected row value: " value)
+                    ;; (println "selected row: " (inv-util/find-map catalogue-rows :index value ))
+                    (let [row-from-catalogue (inv-util/->invoice-row (inv-util/find-map catalogue-rows :index value))
+                          freerow {:text ""
+                                   :unit (common/loc :unit.kpl) ;; Note that these values
+                                   :price-per-unit 20           ;; Should come from taksa in the
+                                   :units 0                     ;; not so far future
+                                   :type :custom
+                                   :discount-percent 0}
+                          row (if (= value :freerow)
+                                freerow
+                                row-from-catalogue)
+                          updated-invoice (update-in @invoice
+                                                       [:operations operation-index :invoice-rows]
+                                                       (fn [invoice-rows]
+                                                         (conj invoice-rows row)))]
+                      (reset! invoice updated-invoice)))]
+    ;; (println "catalogue-rows: " catalogue-rows)
+    ;; (println "items: " items)
     [:table {:class "invoice-operations-table"}
      [:thead
       [:tr
@@ -208,18 +234,7 @@
      [:tbody
       invoice-rows
       (if (= :draft invoice-state)
-        (filterable-select-row (fn [value]
-                                 (if (= value :freerow)
-                                   (let [updated-invoice (update-in @invoice
-                                                                    [:operations operation-index :invoice-rows]
-                                                                    (fn [invoice-rows]
-                                                                      (conj invoice-rows {:text ""
-                                                                                          :unit (common/loc :unit.kpl) ;; Note that these values
-                                                                                          :price-per-unit 20           ;; Should come from taksa in the
-                                                                                          :units 0                     ;; not so far future
-                                                                                          :type :custom
-                                                                                          :discount-percent 0})))]
-                                     (reset! invoice updated-invoice))))))]]))
+        (filterable-select-row on-select items))]]))
 
 (rum/defcs invoice-add-operation-row < (rum/local false ::is-open?)
   rum/reactive

@@ -190,3 +190,45 @@
                         "level-2-operation"
                         "level-3-operation-1"
                         "level-3-operation-2"]))))
+
+(facts "indexed-product-rows"
+       (fact "returns a coll of rows in price catalogue in the form [{:index 0, :code '123', text 'foo'..}{:index 1, :code '342', text 'bar'..} ...]"
+             (let [catalogue {:id "bar-1-id"
+                              :organization-id "753-R"
+                              :state "published"
+                              :valid-from 123456
+                              :rows [{:code "123"
+                                      :text "Taksarivi 1"
+                                      :unit "kpl"
+                                      :price-per-unit 23
+                                      :discount-percent 50
+                                      :operations ["toimenpide1" "toimenpide2"]}
+                                     {:code "abc"
+                                      :text "Taksarivi 2"
+                                      :unit "kpl"
+                                      :price-per-unit 23
+                                      :discount-percent 50
+                                      :operations ["toimenpide1"]}]
+                              :meta {:created 12345
+                                     :created-by "dummy-user"}}]
+               (util/indexed-rows catalogue)  => [{:index 0
+                                                   :code "123"
+                                                   :text "Taksarivi 1"
+                                                   :unit "kpl"
+                                                   :price-per-unit 23
+                                                   :discount-percent 50
+                                                   :operations ["toimenpide1" "toimenpide2"]}
+                                                  {:index 1
+                                                   :code "abc"
+                                                   :text "Taksarivi 2"
+                                                   :unit "kpl"
+                                                   :price-per-unit 23
+                                                   :discount-percent 50
+                                                   :operations ["toimenpide1"]}])))
+
+(facts "find-map"
+       (fact "returns the first matching item in a coll of maps"
+             (let [maps [{:id "a" :text "foo"}
+                         {:id "b" :text "bar"}
+                         {:id "c" :text "baz"}]]
+               (util/find-map maps :id "b") => {:id "b" :text "bar"})))

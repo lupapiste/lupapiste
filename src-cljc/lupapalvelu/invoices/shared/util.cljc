@@ -54,3 +54,15 @@
    :units 1
    :price-per-unit (:price-per-unit catalogue-row)
    :discount-percent (or (:discount-percent catalogue-row) 1)})
+
+(defn indexed-rows [catalogue]
+  (->> (:rows catalogue)
+       maps-with-index-key
+       vec))
+
+(defn find-map [docs key val]
+  (println ">> find-map key " key " val " val " || docs " docs)
+  (some (fn [doc]
+          (if (= (get doc key) val)
+            doc))
+        docs))
