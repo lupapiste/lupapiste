@@ -445,9 +445,11 @@
                                                    (:schema-data op-info))
         merged-schema-datas (merge-with concat default-schema-datas manual-schema-datas)
         schema-name (or (get-in schema [:info :name])
-                        (get-in schema [0 :name]))
+                        (-> manual-schema-datas keys first))
         result {:id          (mongo/create-id)
-                :schema-info (select-keys (:info schema) db-schema-info-keys)
+                ; :schema-info (select-keys (:info schema) db-schema-info-keys)
+                :schema-info {:name "rakennuspaikka-kuntagml"
+                              :version 1}
                 :created     created
                 :data        (util/deep-merge
                                (tools/create-document-data schema tools/default-values)
@@ -456,7 +458,7 @@
                                    (schema-data-to-body schema-data)
                                    {})
                                  created))}
-    _ (swap! (if (= "rakennuspaikka-kuntagml" (-> manual-schema-datas keys first))
+    _ (swap! (if (= :rakennuspaikka-kuntagml (-> manual-schema-datas keys first))
                tila
                tila2)
              assoc :dsd default-schema-datas

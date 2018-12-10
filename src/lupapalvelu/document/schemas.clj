@@ -1040,7 +1040,6 @@
                       :group-help "hankkeestaIlmoitettu.groupHelpText"
                       :body [{:name "hankkeestaIlmoitettuPvm" :type :date :i18nkey "date"}]}])
 
-;; TODO: Tehdäänpäs tähän laajennettu versio konversiota varten
 (def rakennuspaikka-kuntagml [{:name "kiinteisto"
                                :type :group
                                :uicomponent :propertyGroup
@@ -1052,9 +1051,17 @@
                                       {:name "maapintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-input :inputType :string}
                                       {:name "vesipintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-input :inputType :string}
                                       {:name "rakennusoikeusYhteensa" :type :string :readonly true :unit :m2 :uicomponent :docgen-input :inputType :string}
+                                      {:name "kylanimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "kiinteistotunnus" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-input :inputType :checkbox}]}
-                              ; {:name "osoite"
-                              ;  :body (body rakennuksen-osoite)}
+                              {:name "osoite"
+                               :type :group
+                               :uicomponent :propertyGroup
+                               :body [{:name "kunta" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "postinumero" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "osoitenimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "osoitenumero" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "postitoimipaikannimi":type :string :readonly true :uicomponent :docgen-input :inputType :string}]}
                               {:name "hallintaperuste" :type :select :sortBy :displayname :required true
                                :body [{:name "oma"}
                                       {:name "vuokra"}
@@ -1701,4 +1708,7 @@
            [{:name "yritys" :type :group
              :body [{:name "yritysnimi" :type :string}]}]
            tayta-omat-tiedot-button)}
+
+   {:info {:name "rakennuspaikka-kuntagml"}
+    :body rakennuspaikka-kuntagml}
    ])

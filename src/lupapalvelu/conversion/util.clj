@@ -42,17 +42,26 @@
                 '(:vuosi :no :tyyppi :kauposa))
               (ss/split id #"[- ]")))))
 
-
 (def tila
   (atom {}))
 
 (defn parse-rakennuspaikkatieto [rakennuspaikkatieto]
   (let [data (:Rakennuspaikka rakennuspaikkatieto)
-        {:keys [kaavatilanne kaavanaste]} data
+        {:keys [kerrosala kaavatilanne kaavanaste rakennusoikeusYhteensa]} data
+        {:keys [kunta postinumero osoitenimi osoitenumero postitoimipaikannimi]} (:osoite data)
         kiinteisto (get-in data [:rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto])]
     {:kaavatilanne kaavatilanne
      :kaavanaste kaavanaste
-     :hallintaperuste (:hallintaperuste kiinteisto)}))
+     :hallintaperuste (:hallintaperuste kiinteisto)
+     :kiinteisto {:kerrosala kerrosala
+                  :rakennusoikeusYhteensa rakennusoikeusYhteensa
+                  :kylanimi (get-in kiinteisto [:kiinteistotieto :Kiinteisto :kylanimi])
+                  :kiinteistotunnus (get-in kiinteisto [:kiinteistotieto :Kiinteisto :kiinteistotunnus])}
+     :osoite {:kunta kunta
+              :postinumero postinumero
+              :osoitenimi (->> osoitenimi :teksti (ss/join #" / "))
+              :osoitenumero osoitenumero
+              :postitoimipaikannimi postitoimipaikannimi}}))
 
 (defn rakennuspaikkatieto->rakennuspaikka-kuntagml-doc
   "Takes a :Rakennuspaikka element extracted from KuntaGML (via building-reader/->rakennuspaikkatieto),
@@ -60,7 +69,7 @@
   [rakennuspaikkatieto]
   (let [data (parse-rakennuspaikkatieto rakennuspaikkatieto)
         doc-datas (doc-model/map2updates [] data)
-        manual-schema-datas {"rakennuspaikka-kuntagml" doc-datas}
+        manual-schema-datas {:rakennuspaikka-kuntagml doc-datas}
         schema schemas/rakennuspaikka-kuntagml
         res (app/make-document nil (now) manual-schema-datas schema)
         _ (swap! tila assoc :data data
@@ -159,7 +168,7 @@
   (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) (destructure-permit-id id))))
 
 (defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
-  (let [data (model/map2updates [] {:kayttotarkoitus nil
+  (let [data (doc-model/map2updates [] {:kayttotarkoitus nil
                                     :kokonaisala ""
                                     :kuvaus (get-in raktieto [:Rakennelma :kuvaus :kuvaus])
                                     :tunnus (get-in raktieto [:Rakennelma :tunnus :rakennusnro])
@@ -187,7 +196,7 @@
   (-> op-name operations/get-operation-metadata :schema))
 
 (defn toimenpide->toimenpide-document [op-name toimenpide]
-  (let [data (model/map2updates [] toimenpide)
+  (let [data (doc-model/map2updates [] toimenpide)
         schema-name (op-name->schema-name op-name)]
     (app/make-document op-name
                        (now)

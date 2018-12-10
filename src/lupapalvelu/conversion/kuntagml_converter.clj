@@ -1,5 +1,5 @@
 (ns lupapalvelu.conversion.kuntagml-converter
-  (:require [taoensso.timbre :refer [info infof warn error]]
+  (:require [taoensso.timbre :refer [info infof warn error errorf]]
             [sade.core :refer :all]
             [sade.util :as util]
             [lupapalvelu.action :as action]
@@ -109,15 +109,7 @@
                                building-reader/->rakennuspaikkatieto
                                conv-util/rakennuspaikkatieto->rakennuspaikka-kuntagml-doc)
 
-        ; location-manual-schema-datas {"rakennuspaikka-kuntagml" location-data}
-
-        ; location-document (app/make-document "jee!"
-        ;                                      (now)
-        ;                                      location-manual-schema-datas
-        ;                                      schemas/rakennuspaikka-kuntagml)
-
-        ; _ (swap! tila assoc :location-document location-document
-        ;          :lmsd location-manual-schema-datas)
+        _ (swap! tila assoc :location-document location-document)
 
         structure-descriptions (map :description buildings-and-structures)
 
@@ -149,7 +141,7 @@
                                                        (mongo/create-id)
                                                        false)
                              (catch Exception e
-                               (error "Moving statement to statement given -state failed: %s" (.getMessage e)))))
+                               (errorf "Moving statement to statement given -state failed: %s" (.getMessage e)))))
 
         created-application (-> created-application
                                 (update-in [:documents] concat other-building-docs new-parties location-document structures)
