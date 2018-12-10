@@ -793,7 +793,7 @@
   [command]
   (let [{:keys [data] :as verdict} (command->verdict command)
         schema (vc/verdict-schema verdict)]
-    (schemas/required-filled? schema data [:verdict-text :verdict-section :verdict-code])))
+    (schemas/required-filled? schema data [:verdict-section :verdict-code])))
 
 (defn- app-documents-having-buildings [application]
   (->> application
