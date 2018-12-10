@@ -13,6 +13,7 @@
                                             ok? fail?] :as itu]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.price-catalogues :as catalogues]
+            [lupapalvelu.invoices.schemas :as invsc]
             [lupapalvelu.time-util :as tu]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
@@ -182,7 +183,7 @@
                           response => ok?
 
                           (let [{:keys [valid-from rows] :as new-catalogue} (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
-                            (sc/validate catalogues/PriceCatalogue new-catalogue)
+                            (sc/validate invsc/PriceCatalogue new-catalogue)
                             (to-finnish-date valid-from) => (:valid-from-str catalogue-request)
                             rows => (:rows catalogue-request))))
 
@@ -201,7 +202,7 @@
                                                       :price-catalogue catalogue-request)]
                           response => ok?
                           (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
-                            (sc/validate catalogues/PriceCatalogue new-catalogue)
+                            (sc/validate invsc/PriceCatalogue new-catalogue)
 
                             (to-finnish-date (:valid-from new-catalogue)) => (:valid-from-str catalogue-request)
                             (:rows new-catalogue) => (:rows catalogue-request))))
@@ -222,7 +223,7 @@
                           response => ok?
 
                           (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
-                            (sc/validate catalogues/PriceCatalogue new-catalogue)
+                            (sc/validate invsc/PriceCatalogue new-catalogue)
                             (to-finnish-date (:valid-from new-catalogue)) => (:valid-from-str catalogue-request)
                             (:rows new-catalogue) => (:rows catalogue-request)))))
 
@@ -249,8 +250,8 @@
                        (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))
                              previous-published-catalogue-in-db (mongo/by-id "price-catalogues" (:id previous-published-catalogue))]
 
-                         (sc/validate catalogues/PriceCatalogue new-catalogue)
-                         (sc/validate catalogues/PriceCatalogue previous-published-catalogue-in-db)
+                         (sc/validate invsc/PriceCatalogue new-catalogue)
+                         (sc/validate invsc/PriceCatalogue previous-published-catalogue-in-db)
                          (to-finnish-date (:valid-until previous-published-catalogue-in-db)) => "9.2.2020"))))
 
             (fact  "should not update valid-until of previous catalogue if the current value is before the valid-from of the new catalogue"
@@ -272,8 +273,8 @@
                        (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))
                              previous-pub-cat-with-valid-until-in-db (mongo/by-id "price-catalogues" (:id previous-published-catalogue-with-valid-until))]
 
-                         (sc/validate catalogues/PriceCatalogue new-catalogue)
-                         (sc/validate catalogues/PriceCatalogue previous-pub-cat-with-valid-until-in-db)
+                         (sc/validate invsc/PriceCatalogue new-catalogue)
+                         (sc/validate invsc/PriceCatalogue previous-pub-cat-with-valid-until-in-db)
                          (to-finnish-date (:valid-until previous-pub-cat-with-valid-until-in-db)) => "18.2.2020"))))
 
             (fact  "should update valid-until of previous catalogue if the current value is after the valid-from of the new catalogue"
@@ -295,8 +296,8 @@
                        (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))
                              previous-pub-cat-with-valid-until-in-db (mongo/by-id "price-catalogues" (:id previous-published-catalogue-with-valid-until))]
 
-                         (sc/validate catalogues/PriceCatalogue new-catalogue)
-                         (sc/validate catalogues/PriceCatalogue previous-pub-cat-with-valid-until-in-db)
+                         (sc/validate invsc/PriceCatalogue new-catalogue)
+                         (sc/validate invsc/PriceCatalogue previous-pub-cat-with-valid-until-in-db)
                          (to-finnish-date (:valid-until previous-pub-cat-with-valid-until-in-db)) => "24.2.2020"))))
 
             (fact  "should set the valid-until field for the new catalogue as the day before the valid-from of the next published catalogue"
@@ -317,7 +318,7 @@
 
                        (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))]
 
-                         (sc/validate catalogues/PriceCatalogue new-catalogue)
+                         (sc/validate invsc/PriceCatalogue new-catalogue)
                          (to-finnish-date (:valid-until new-catalogue)) => "31.3.2020"))))
 
 
@@ -343,7 +344,7 @@
                              same-day-pub-cat-2-in-db (mongo/by-id "price-catalogues" (:id same-day-published-catalogue-2))
                              same-day-draft-cat-in-db  (mongo/by-id "price-catalogues" (:id same-day-draft-catalogue))]
 
-                         (sc/validate catalogues/PriceCatalogue new-catalogue)
+                         (sc/validate invsc/PriceCatalogue new-catalogue)
 
                          same-day-pub-cat-1-in-db => nil
                          same-day-pub-cat-2-in-db => nil

@@ -7,7 +7,7 @@
                                            ->date-str tomorrow-or-later?
                                            timestamp-after?]]
             [lupapalvelu.invoices :as invoices]
-            [lupapalvelu.invoices.schemas :as invoice-schemas]
+            [lupapalvelu.invoices.schemas :as invsc]
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer [$in $and $lt $gt]]
             [schema.core :as sc]
@@ -18,33 +18,6 @@
                                find-first]]
             [taoensso.timbre :refer [trace tracef debug debugf info infof
                                      warn warnf error errorf fatal fatalf]]))
-
-
-(sc/defschema CatalogueRow
-  {:code sc/Str
-   :text sc/Str
-   :unit invoice-schemas/InvoiceRowUnit
-   :price-per-unit sc/Num
-   :max-total-price (sc/maybe sc/Num)
-   :min-total-price (sc/maybe sc/Num)
-   :discount-percent (sc/maybe invoice-schemas/DiscountPercent)
-   :operations [sc/Str]})
-
-(sc/defschema PriceCatalogue
-  {:id sc/Str
-   :organization-id sc/Str
-   :state (sc/enum "draft"       ;;created as a draft
-                   "published"   ;;published and in use if on validity period
-                   )
-   :valid-from ssc/Timestamp
-   :valid-until (sc/maybe ssc/Timestamp)
-   :rows [CatalogueRow]
-   :meta {:created ssc/Timestamp
-          :created-by invoice-schemas/User}})
-
-(sc/defschema PriceCatalogueInsertRequest
-  {:valid-from-str sc/Str ;; dd.mm.yyyy checker would be nice here
-   :rows [CatalogueRow]})
 
 (defn fetch-price-catalogues [organization-id]
   (mongo/select :price-catalogues {:organization-id organization-id}))
@@ -78,13 +51,13 @@
 (defn validate-price-catalogues [price-catalogues]
   (debug ">> validate-price-catalogues price-catalogues: " price-catalogues)
   (when (seq price-catalogues)
-    (sc/validate [PriceCatalogue] price-catalogues)))
+    (sc/validate [invsc/PriceCatalogue] price-catalogues)))
 
 (def time-format (tf/formatter "dd.MM.YYYY"))
 
 (defn validate-insert-price-catalogue-request [{{catalogue-request :price-catalogue} :data :as command}]
   (try
-    (sc/validate PriceCatalogueInsertRequest catalogue-request)
+    (sc/validate invsc/PriceCatalogueInsertRequest catalogue-request)
     (if (not (tomorrow-or-later? (:valid-from-str catalogue-request)))
       (fail :error.price-catalogue.incorrect-date))
 
@@ -98,14 +71,14 @@
   {:rows (:rows price-catalogue-req)
    :valid-from (to-millis-from-local-date-string (:valid-from-str price-catalogue-req))
    :meta {:created (sade/now)
-          :created-by (invoice-schemas/->invoice-user user)}
+          :created-by (invsc/->invoice-user user)}
    :organization-id organization-id})
 
 (defn with-id [price-catalogue]
   (assoc price-catalogue :id (mongo/create-id)))
 
 (defn validate-price-catalogue [price-catalogue]
-  (sc/validate PriceCatalogue price-catalogue))
+  (sc/validate invsc/PriceCatalogue price-catalogue))
 
 (defn catalogue-with-valid-until-one-day-before-timestamp [timestamp catalogue]
   (debug ">> catalogue-with-valid-until-one-day-before-timestamp timestamp" timestamp " catalogue " (:id catalogue))

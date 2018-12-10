@@ -68,10 +68,10 @@
    :text sc/Str
    :unit InvoiceRowUnit
    :price-per-unit sc/Num
-   (sc/optional-key :max-total-price) sc/Num
-   (sc/optional-key :min-total-price) sc/Num
-   :discount-percent DiscountPercent
-   (sc/optional-key :operations) [sc/Str]})
+   :max-total-price (sc/maybe sc/Num)
+   :min-total-price (sc/maybe sc/Num)
+   :discount-percent (sc/maybe DiscountPercent)
+   :operations [sc/Str]})
 
 (sc/defschema PriceCatalogue
   {:id sc/Str
@@ -80,10 +80,14 @@
                    "published"   ;;published and in use if on validity period
                    )
    :valid-from ssc/Timestamp
-   (sc/optional-key :valid-until) ssc/Timestamp
+   :valid-until (sc/maybe ssc/Timestamp)
    :rows [CatalogueRow]
    :meta {:created ssc/Timestamp
           :created-by User}})
+
+(sc/defschema PriceCatalogueInsertRequest
+  {:valid-from-str sc/Str ;; dd.mm.yyyy checker would be nice here
+   :rows [CatalogueRow]})
 
 (def TransferBatchId sc/Str)
 
