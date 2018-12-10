@@ -169,8 +169,8 @@
     (assoc-in invoice [:enriched-data :application :address] address)))
 
 (defn new-verdict-invoice
-  "Post-fn for `publish-pate-verdict` command. Creates new invoice draft
-  for the application."
+  "Post-fn for Pate verdict publishing commands. Creates new invoice
+  draft for the application."
   [{:keys [user created application] :as command} _]
   ;; Pre-checker is nil on success.
   (when-not (invoicing-enabled command)
