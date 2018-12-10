@@ -184,7 +184,6 @@
    :feature          :invoices
    :user-roles       #{:authority}
    :org-authz-roles  roles/reader-org-authz-roles
-   :user-authz-roles roles/all-authz-roles
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks       [invoicing-enabled]}
