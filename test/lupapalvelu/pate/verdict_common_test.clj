@@ -1,5 +1,6 @@
 (ns lupapalvelu.pate.verdict-common-test
-  (:require [lupapalvelu.pate.metadata :as metadata]
+  (:require [lupapalvelu.pate-test-util :refer :all]
+            [lupapalvelu.pate.metadata :as metadata]
             [lupapalvelu.pate.verdict-common :as vc]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]))
@@ -7,26 +8,6 @@
 (testable-privates lupapalvelu.pate.verdict-common
                    verdict-section-string
                    title-fn verdict-string)
-
-(defn make-verdict [& kvs]
-  (let [{:keys [id code section modified published replaces]} (apply hash-map kvs)]
-    {:id          id
-     :category    "r"
-     :schema-version 1
-     :data        {:verdict-code    code
-                   :handler         "Foo Bar"
-                   :verdict-section section
-                   :verdict-date    876543}
-     :modified    (or published modified 1)
-     :published   (when published {:published published})
-     :replacement (when replaces {:replaces replaces})
-     :template    {:inclusions ["verdict-code"
-                                "handler"
-                                "verdict-date"
-                                "verdict-section"
-                                "verdict-text"]
-                   :giver      "viranhaltija"}
-     :references  {:boardname "Broad board abroad"}}))
 
 (defn publish [verdict ts]
   (-> verdict
