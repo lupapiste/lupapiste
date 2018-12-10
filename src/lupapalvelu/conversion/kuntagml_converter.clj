@@ -103,8 +103,6 @@
                                     (when (clojure.string/includes? kuntalupatunnus "TJO")
                                       (map prev-permit/tyonjohtaja->tj-document (:tyonjohtajat app-info)))))
 
-        _ (swap! tila assoc :app app-info)
-
         location-document (->> xml
                                building-reader/->rakennuspaikkatieto
                                conv-util/rakennuspaikkatieto->rakennuspaikka-kuntagml-doc)

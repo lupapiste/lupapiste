@@ -66,9 +66,9 @@
   [rakennuspaikkatieto]
   (let [data (parse-rakennuspaikkatieto rakennuspaikkatieto)
         doc-datas (doc-model/map2updates [] data)
-        manual-schema-datas {:rakennuspaikka-kuntagml doc-datas}
+        manual-schema-datas {"rakennuspaikka-kuntagml" doc-datas}
         schema (schemas/get-schema 1 "rakennuspaikka-kuntagml")]
-      (app/make-document nil (now) manual-schema-datas schema)))
+    (app/make-document nil (now) manual-schema-datas schema)))
 
 (defn kuntalupatunnus->description
   "Takes a kuntalupatunnus, returns the permit type in plain text ('12-124124-92-A' -> 'Uusi rakennus' etc.)"
