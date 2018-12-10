@@ -1,32 +1,46 @@
 (ns lupapalvelu.invoices
   "A common interface for accessing invoices and related data"
-  (:require [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer [$in]]
-            [schema.core :as sc]
-            [sade.core :refer [ok fail] :as sade]
-            [sade.schemas :as ssc]
-            [taoensso.timbre :refer [trace tracef debug debugf info infof
-                                     warn warnf error errorf fatal fatalf]]
-            [lupapalvelu.money-schema :refer [MoneyResponse]]
-            [lupapalvelu.money :refer [sum-with-discounts ->currency ->MoneyResponse discounted-value multiply-amount]]
-            [lupapalvelu.user :as user]
+  (:require [lupapalvelu.application-schema :refer [Operation]]
             [lupapalvelu.domain :refer [get-application-no-access-checking]]
-            [lupapalvelu.application-schema :refer [Operation]]
-            [lupapiste-invoice-commons.states :refer [state-change-direction move-to-state]]
-            [lupapalvelu.invoices.transfer-batch :refer [add-invoice-to-transfer-batch]]
-            [lupapalvelu.invoices.schemas :refer [User
-                                                  PriceCatalogue
+            [lupapalvelu.invoices.schemas :refer [User PriceCatalogue
                                                   DiscountPercent
                                                   InvoiceRowType
                                                   InvoiceRowUnit
                                                   InvoiceRow
                                                   InvoiceOperation
-                                                  Invoice
-                                                  InvoiceId
+                                                  Invoice InvoiceId
                                                   InvoiceInsertRequest
                                                   CatalogueRow
                                                   PriceCatalogue
-                                                  ->invoice-user]]))
+                                                  ->invoice-user]]
+            [lupapalvelu.invoices.transfer-batch :refer [add-invoice-to-transfer-batch]]
+            [lupapalvelu.money :refer [sum-with-discounts ->currency
+                                       ->MoneyResponse discounted-value multiply-amount]]
+            [lupapalvelu.money-schema :refer [MoneyResponse]]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as usr]
+            [lupapiste-invoice-commons.states :refer [state-change-direction
+                                                      move-to-state]]
+            [monger.operators :refer :all]
+            [sade.core :refer [ok fail] :as sade]
+            [sade.schemas :as ssc]
+            [sade.util :as util]
+            [schema.core :as sc]
+            [taoensso.timbre :refer [trace tracef debug debugf info
+                                     infof warn warnf error errorf
+                                     fatal fatalf]]))
+
+(defn invoicing-enabled
+  "Pre-checker that fails if invoicing is not enabled in the application organization scope."
+  [{:keys [organization application]}]
+  (when (and organization
+             (not (-> (org/resolve-organization-scope (:municipality application)
+                                                      (:permitType application)
+                                                      @organization)
+                      :invoicing-enabled)))
+    (fail :error.invoicing-disabled)))
+
 (def state-actions {:add-to-transfer-batch add-invoice-to-transfer-batch})
 (defn fetch-invoice [invoice-id]
   (mongo/by-id :invoices invoice-id))
@@ -153,3 +167,49 @@
   (let [application (get-doc application-id applications)
         address (:address application)]
     (assoc-in invoice [:enriched-data :application :address] address)))
+
+(defn new-verdict-invoice
+  "Post-fn for Pate verdict publishing commands. Creates new invoice
+  draft for the application."
+  [{:keys [user created application] :as command} _]
+  ;; Pre-checker is nil on success.
+  (when-not (invoicing-enabled command)
+    (let [org-id          (:organization application)
+          {submitted :ts} (util/find-by-key :state
+                                            "submitted"
+                                            (:history application))
+          ops             (get-operations-from-application application)
+          op-names        (map :name ops)]
+      (when-let [catalog (and submitted
+                              (some->> (mongo/select-one :price-catalogues
+                                                         {:organization-id org-id
+                                                          :state           :published
+                                                          :valid-from      {$lt submitted}
+                                                          :valid-until     {$not {$lt submitted}}}
+                                                         {:rows 1})
+                                       :rows
+                                       (filter (util/fn->> :operations
+                                                           (util/intersection-as-kw op-names)
+                                                       not-empty))
+                                       not-empty))]
+        (->> {:id              (mongo/create-id)
+              :created         created
+              :created-by      (->invoice-user user)
+              :state           "draft"
+              :application-id  (:id application)
+              :organization-id org-id
+              :operations      (map (fn [op]
+                                      {:operation-id (:id op)
+                                       :name         (:name op)
+                                       :invoice-rows (some->> catalog
+                                                              (filter (util/fn-> :operations
+                                                                                 (util/includes-as-kw?
+                                                                                  (:name op))))
+                                                              (map #(assoc (select-keys %
+                                                                                        [:text :unit :price-per-unit
+                                                                                         :discount-percent])
+                                                                           :type "from-price-catalogue"
+                                                                           :units 0)))})
+                                    ops)}
+             (sc/validate Invoice)
+             (mongo/insert :invoices))))))

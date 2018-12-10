@@ -12,13 +12,12 @@
             [lupapalvelu.mongo :as mongo]))
 
 
-(def dummy-user {:id                                        "penan-id"
-                 :firstName                                 "pena"
-                 :lastName                                  "panaani"
-                 :role                                      "authority"
-                 :email                                     "pena@panaani.fi"
-                 :username                                  "pena"})
-
+(def dummy-user {:id        "penan-id"
+                 :firstName "pena"
+                 :lastName  "panaani"
+                 :role      "authority"
+                 :email     "pena@panaani.fi"
+                 :username  "pena"})
 
 (def dummy-invoice {:id "dummy-invoice-id-1"
                     :application-id "LP-753-2018-90108"

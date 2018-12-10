@@ -5,7 +5,6 @@
             [lupapalvelu.invoices :as invoices]
             [lupapalvelu.invoices.schemas :refer [->invoice-db Invoice]]
             [lupapalvelu.invoices.transfer-batch :refer [get-transfer-batch-for-orgs]]
-            [lupapalvelu.organization :as org]
             [lupapalvelu.price-catalogues :as catalogues]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
@@ -15,27 +14,12 @@
             [schema.core :as sc]
             [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]))
 
-
-;; ------------------------------------------
-;; Pre-checkers
-;; ------------------------------------------
-
 (defn invoicing-enabled-user-org
   "Pre-checker that fails if invoicing is not enabled in any of user
   organization scopes."
   [command]
   (when-not (some->> (mapv :scope (:user-organizations command))
                      (some #(util/find-by-key :invoicing-enabled true %)))
-    (fail :error.invoicing-disabled)))
-
-(defn invoicing-enabled
-  "Pre-checker that fails if invoicing is not enabled in the application organization scope."
-  [{:keys [organization application]}]
-  (when (and organization
-             (not (-> (org/resolve-organization-scope (:municipality application)
-                                                      (:permitType application)
-                                                      @organization)
-                      :invoicing-enabled)))
     (fail :error.invoicing-disabled)))
 
 ;; ------------------------------------------
@@ -51,7 +35,7 @@
    :parameters       [id invoice]
    :input-validators [(partial action/non-blank-parameters [:id])
                       invoices/validate-insert-invoice-request]
-   :pre-checks       [invoicing-enabled]
+   :pre-checks       [invoices/invoicing-enabled]
    :states           states/post-submitted-states}
   [{:keys [application data user] :as command}]
   (let [invoice-request (:invoice data)
@@ -70,7 +54,7 @@
    :input-validators [(partial action/non-blank-parameters [:id])
                       ;;(partial action/non-blank-parameters [:invoice])
                       ]
-   :pre-checks       [invoicing-enabled]
+   :pre-checks       [invoices/invoicing-enabled]
    :states           states/post-submitted-states}
   [{:keys [data] :as command}]
   (do (debug "update-invoice invoice-request:" (:invoice data))
@@ -85,7 +69,7 @@
    :user-authz-roles roles/all-authz-roles
    :parameters       [id invoice-id]
    :input-validators [(partial action/non-blank-parameters [:id :invoice-id])]
-   :pre-checks       [invoicing-enabled]
+   :pre-checks       [invoices/invoicing-enabled]
    :states           states/post-submitted-states}
   [{:keys [application] :as command}]
   (let [invoice (invoices/fetch-invoice invoice-id)]
@@ -100,7 +84,7 @@
    :user-authz-roles roles/all-authz-roles
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [invoicing-enabled]
+   :pre-checks       [invoices/invoicing-enabled]
    :states           states/post-submitted-states}
   [{:keys [application] :as command}]
   (debug "applicatin-invoices id: " (:id application))
@@ -127,7 +111,7 @@
   should not be shown on the UI."
    :feature          :invoices
    :parameters       [:id]
-   :pre-checks       [invoicing-enabled]
+   :pre-checks       [invoices/invoicing-enabled]
    :user-roles       #{:authority}
    :org-authz-roles  roles/reader-org-authz-roles
    :user-authz-roles roles/all-authz-roles
