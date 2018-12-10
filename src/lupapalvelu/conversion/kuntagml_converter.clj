@@ -20,10 +20,6 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
-;; TODO: Remove this
-(def tila
-  (atom {}))
-
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
   ;; Data to be deduced from xml:
@@ -106,8 +102,6 @@
         location-document (->> xml
                                building-reader/->rakennuspaikkatieto
                                conv-util/rakennuspaikkatieto->rakennuspaikka-kuntagml-doc)
-
-        _ (swap! tila assoc :location-document location-document)
 
         structure-descriptions (map :description buildings-and-structures)
 
