@@ -1274,14 +1274,13 @@
   (when (and (not (:legacy? verdict))
              (not (vc/contract? verdict))
              (org/krysp-integration? @(:organization command)
-                                         (:permitType application)))
+                                     (:permitType application)))
     {:commit-fn (fn [{:keys [command application verdict]}]
                   (try+ (krysp/verdict-as-kuntagml (assoc command
                                                           :application application)
                                                    verdict)
                         (catch [:ok false] {text :text}
-                          (error (:throwable &throw-context)
-                                 (format "KuntaGML failed for verdict %s (permit-type %s)"
+                          (error (format "KuntaGML failed for verdict %s (permit-type %s)"
                                          (:id verdict) (:permitType application))))))}))
 
 ;; Published verdict.pdf is created asynchronously via message

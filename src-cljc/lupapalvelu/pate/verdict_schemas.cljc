@@ -168,9 +168,9 @@
                                      :verdict-code-ref    {:reference {:path        :verdict-code
                                                                        :loc-prefix  :pate-r.verdict-code}}
                                      :verdict-flag        {:toggle {:loc-prefix :pate-verdict.flag}}
-                                     :verdict-text        (schema-util/required {:phrase-text   {:category :paatosteksti}
-                                                                                 :template-dict :paatosteksti})
-                                     :verdict-text-ref    (schema-util/required {:reference {:path :verdict-text}})
+                                     :verdict-text        {:phrase-text   {:category :paatosteksti}
+                                                           :template-dict :paatosteksti}
+                                     :verdict-text-ref    {:reference {:path :verdict-text}}
                                      :proposal-text       {:phrase-text   {:category   :paatosteksti
                                                                            :loc-prefix :pate-verdict-proposal}
                                                            :template-dict :proposaltext}
