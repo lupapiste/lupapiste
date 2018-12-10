@@ -56,7 +56,6 @@
                  :firstName                                 "pena"
                  :lastName                                  "panaani"
                  :role                                      "authority"
-                 :email                                     "pena@panaani.fi"
                  :username                                  "pena"})
 
 (defn catalogue-request-with [properties]

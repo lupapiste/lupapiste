@@ -186,7 +186,7 @@
    :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [invoicing-enabled]}
+   :pre-checks       [invoices/invoicing-enabled]}
   [{:keys [application] :as command}]
   (let [submitted-timestamp (catalogues/submitted-timestamp application)
         price-catalogue (catalogues/fetch-valid-catalogue (:organization application) submitted-timestamp)]
