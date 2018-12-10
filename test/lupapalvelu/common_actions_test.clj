@@ -184,8 +184,7 @@
                           :invoices-tab
                           :application-operations
                           :update-invoice
-                          :fetch-invoice
-                          :application-price-catalogue}
+                          :fetch-invoice}
         user {:id "user123"
               :role "authority"}
         application {:organization "999-R"
