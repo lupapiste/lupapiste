@@ -1071,4 +1071,8 @@
 "plus" "fi" "+"
 "plus" "sv" "+"
 "pate.verdict.organization-name" "fi" "Päätöksellä näkyvä organisaation nimi"
+"pate.verdict.organization-name" "sv" "Organisationens namn som syns på beslutet"
+"pate.verdict.organization-name" "en" "Organization name as shown in the verdict"
 "pate.contract.organization-name" "fi" "Sopimuksessa näkyvä organisaation nimi"
+"pate.contract.organization-name" "sv" "Organisationens namn som syns på avtalet"
+"pate.contract.organization-name" "en" "Organization name as shown in the contract"

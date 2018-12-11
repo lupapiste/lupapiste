@@ -103,8 +103,8 @@
   ([lang {organization :organization}]
    (org/get-organization-name organization lang))
   ([lang application verdict]
-   (get-in verdict [:references :organization-name]
-           (organization-name lang application))))
+   (or (get-in verdict [:references :organization-name])
+       (organization-name lang application))))
 
 (defn verdict-header
   [lang application {:keys [category published legacy?] :as verdict}]
