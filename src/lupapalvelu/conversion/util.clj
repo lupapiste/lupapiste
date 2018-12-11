@@ -182,10 +182,14 @@
                                   (decapitalize (kuntalupatunnus->description kuntalupatunnus))))]
     (assoc app :documents
            (map (fn [doc]
-                  (if (and (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
-                           (empty? (get-in doc [:data :kuvaus :value])))
+                  (cond
+                    (and (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
+                         (empty? (get-in doc [:data :kuvaus :value])))
                     (assoc-in doc [:data :kuvaus :value] kuvausteksti)
-                    doc))
+                    (and (re-find #"maisematyo" (get-in doc [:schema-info :name]))
+                         (empty? (get-in doc [:data :kuvaus :value])))
+                    (assoc-in doc [:data :kuvaus :value] kuvaus)
+                    :else doc))
                 documents))))
 
 (defn op-name->schema-name [op-name]
@@ -321,6 +325,7 @@
        "TJO" "tyonjohtajan-nimeaminen-v2"
        "P" "purkaminen"
        "PI" "purkaminen"
+       "MAI" "muu-maisema-toimenpide"
        "konversio"))) ;; A minimal generic operation for this purpose.
                       ;; If a an application does not contain 'toimenpide'-element and is not P(I) or TJO, 'konversio it is'.
   ([kuntalupatunnus toimenpide]
