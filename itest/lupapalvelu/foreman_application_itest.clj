@@ -517,22 +517,22 @@
                  (count (filter #(= (:username %) "teppo@example.com") auth-array)) => 1)))))
 
 (facts "foreman rights"
-  (let [applicant pena
-        foreman    teppo
+  (let [applicant     pena
+        foreman       teppo
         foreman-email (email-for-key foreman)
 
         {application-id :id :as main-application} (create-and-submit-application applicant :operation "kerrostalo-rivitalo")
-        main-attachment-1 (-> main-application :attachments first)
+        main-attachment-1                         (-> main-application :attachments first)
 
-        ; Verdict is given so that the foreman application can be created by applicant
+                                        ; Verdict is given so that the foreman application can be created by applicant
         _ (give-legacy-verdict sonja application-id)
 
-        resp (command applicant :create-foreman-application :id application-id
-               :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email)
+        resp                 (command applicant :create-foreman-application :id application-id
+                                      :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email)
         {foreman-app-id :id} resp
-        foreman-application (query-application applicant foreman-app-id)
+        foreman-application  (query-application applicant foreman-app-id)
 
-        foreman-doc (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
+        foreman-doc           (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
         foreman-applicant-doc (domain/get-document-by-name foreman-application "hakija-tj")]
 
     (fact "sanity checks"
@@ -614,9 +614,9 @@
       (command foreman :submit-application :id foreman-app-id) => ok?)
 
     (facts "attachments"
-     (let [new-main-attachment (upload-attachment foreman application-id nil true :filename "dev-resources/test-pdf.pdf")
-           attachment-by-foreman (upload-attachment foreman foreman-app-id nil true :filename "dev-resources/test-pdf.pdf")
-           attachment-by-applicant (upload-attachment applicant foreman-app-id nil true :filename "dev-resources/test-pdf.pdf")]
+      (let [new-main-attachment     (upload-attachment foreman application-id nil true :filename "dev-resources/test-pdf.pdf")
+            attachment-by-foreman   (upload-attachment foreman foreman-app-id nil true :filename "dev-resources/test-pdf.pdf")
+            attachment-by-applicant (upload-attachment applicant foreman-app-id nil true :filename "dev-resources/test-pdf.pdf")]
        (fact "foreman CAN upload a new attachment to main application" new-main-attachment => ss/not-blank?)
        (fact "foreman CAN upload a new version on main application"
          (upload-attachment foreman application-id {:id new-main-attachment} true) => new-main-attachment)
@@ -639,10 +639,10 @@
          (upload-attachment foreman foreman-app-id {:id attachment-by-applicant} false) => attachment-by-applicant)
 
        (let [{actions-by-id :actionsById} (query foreman :allowed-actions-for-category :category "attachments" :id foreman-app-id)
-             actions-for-foreman-att (get actions-by-id (keyword attachment-by-foreman))
-             actions-for-applicant-att (get actions-by-id (keyword attachment-by-applicant))
-             actions [:upload-attachment :delete-attachment :delete-attachment-version :rotate-pdf
-                      :set-attachment-type :set-attachment-meta :set-attachment-visibility]]
+             actions-for-foreman-att      (get actions-by-id (keyword attachment-by-foreman))
+             actions-for-applicant-att    (get actions-by-id (keyword attachment-by-applicant))
+             actions                      [:upload-attachment :delete-attachment :delete-attachment-version :rotate-pdf
+                                           :set-attachment-type :set-attachment-meta :set-attachment-visibility]]
 
          (fact "Foreman can edit own attachment"
            (doseq [action actions]
@@ -658,22 +658,32 @@
          (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents"}) => ok?)
 
        (give-generic-legacy-verdict sonja foreman-app-id
-                                    {:fields {:kuntalupatunnus "888-10-12"
-                                              :verdict-code    "1" ;; Granted
-                                              :verdict-text    "Lorem ipsum"
-                                              :handler         "Decider"
-                                              :anto            (timestamp "21.5.2018")
-                                              :lainvoimainen   (timestamp "30.5.2018")}
+                                    {:fields     {:kuntalupatunnus "888-10-12"
+                                                  :verdict-code    "1" ;; Granted
+                                                  :verdict-text    "Lorem ipsum"
+                                                  :handler         "Decider"
+                                                  :anto            (timestamp "21.5.2018")
+                                                  :lainvoimainen   (timestamp "30.5.2018")}
                                      :attachment {:state "foremanVerdictGiven"}})
 
-       (fact "Foreman can NOT upload new attachment after verduct is given"
+       (fact "Foreman can NOT upload new attachment after verdict is given"
          (upload-attachment foreman foreman-app-id nil false))
 
        (fact "Authority CAN upload new attachment after verduct is given"
          (upload-attachment sonja foreman-app-id nil true))
 
        (fact "Foreman can NOT set attachment meta data after verdict is given"
-         (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents2"}) => fail?)))
+         (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents2"}) => fail?)
+       (fact "Application search"
+         (-> (datatables foreman :applications-search :operations ["tyonjohtajan-nimeaminen-v2"])
+             :data :applications)
+         => (just [(contains {:state           "foremanVerdictGiven"
+                              :kuntalupatunnus "888-10-12"
+                              :verdictDate     (timestamp "21.5.2018")})
+                   (contains {:state           "draft"
+                              :kuntalupatunnus nil
+                              :verdictDate     nil})]
+                  :in-any-order))))
 
     (fact "Foreman can not upgrade own role"
       (command foreman :change-auth :id application-id :userId (id-for-key foreman) :role "writer") => unauthorized?)
@@ -688,8 +698,8 @@
         (command foreman :invite-guest :id application-id :email "foo@example.com" :role "guest") => ok?))
 
     (fact "Applicant creates another foreman appplication"
-      (let [resp (command applicant :create-foreman-application :id application-id
-                   :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email)
+      (let [resp               (command applicant :create-foreman-application :id application-id
+                                        :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email)
             {foreman-app2 :id} resp]
         resp => ok?
         (command foreman :approve-invite :id foreman-app2) => ok?
