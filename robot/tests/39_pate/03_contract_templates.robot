@@ -26,13 +26,17 @@ Initial template status
   Test id text is  template-name-text  Sopimuspohja
   Wait test id visible  required-template
 
-
 Template cannot be published without filling required information
   Test id text is  template-state  Sopimuspohjaa ei ole vielä julkaistu.
   Test id disabled  publish-template
 
 Fills required information
   Select from test id  language  fi
+
+Fill required settings
+  Click visible test id  required-settings
+  Fill test id  organization-name  Contractor
+  Click back
 
 Publish template
   Scroll and click test id  publish-template

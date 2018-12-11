@@ -233,7 +233,7 @@
   "Adds all kinds of different properties to the options. It is then up
   to category-specific verdict-body methods and corresponding
   pdf-layouts whether every property is displayed in the pdf or not."
-  [{:keys [lang application] :as options}]
+  [{:keys [lang application verdict] :as options}]
   (let [buildings (verdict-buildings options)]
     (assoc (cols/verdict-properties options)
            :application-id (:id application)
@@ -258,7 +258,7 @@
                                      ::styles {:row :pad-before}})
                          flatten)
            :attachments (verdict-attachments options)
-           :organization (html/organization-name lang application)
+           :organization (html/organization-name lang application verdict)
            :link-permits (link-permits options)
            :tj-vastattavat-tyot (tj-vastattavat-tyot application lang)
            :signatures (signatures options))))
