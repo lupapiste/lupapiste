@@ -1,5 +1,6 @@
 (ns lupapalvelu.conversion.kuntagml-converter
   (:require [taoensso.timbre :refer [info infof warn error errorf]]
+            [clojure.string :refer [includes?]]
             [sade.core :refer :all]
             [sade.util :as util]
             [lupapalvelu.action :as action]
@@ -96,12 +97,12 @@
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))
-                                    (when (clojure.string/includes? kuntalupatunnus "TJO")
+                                    (when (includes? kuntalupatunnus "TJO")
                                       (map prev-permit/tyonjohtaja->tj-document (:tyonjohtajat app-info)))))
 
         location-document (->> xml
                                building-reader/->rakennuspaikkatieto
-                               conv-util/rakennuspaikkatieto->rakennuspaikka-kuntagml-doc)
+                               (conv-util/rakennuspaikkatieto->rakennuspaikka-kuntagml-doc kuntalupatunnus))
 
         structure-descriptions (map :description buildings-and-structures)
 
@@ -136,7 +137,8 @@
                                (errorf "Moving statement to statement given -state failed: %s" (.getMessage e)))))
 
         created-application (-> created-application
-                                (update-in [:documents] concat other-building-docs new-parties [location-document] structures)
+                                (update-in [:documents] concat other-building-docs new-parties structures
+                                           (when-not (includes? kuntalupatunnus "TJO") location-document))
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :statements given-statements
                                        :opened (:created command)

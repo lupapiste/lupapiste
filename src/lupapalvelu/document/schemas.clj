@@ -1059,6 +1059,7 @@
                                       {:name "postinumero" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "osoitenimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "osoitenumero" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "kaupunginosanumero" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                                       {:name "postitoimipaikannimi":type :string :readonly true :uicomponent :docgen-input :inputType :string}]}
                               {:name "hallintaperuste" :type :select :sortBy :displayname :required true
                                :body [{:name "oma"}
