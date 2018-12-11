@@ -61,7 +61,6 @@
        vec))
 
 (defn find-map [docs key val]
-  (println ">> find-map key " key " val " val " || docs " docs)
   (some (fn [doc]
           (if (= (get doc key) val)
             doc))
