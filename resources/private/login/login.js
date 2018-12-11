@@ -16,6 +16,7 @@
   function recallMe() {
     var oldUsername = _.trim($.cookie(rememberMeCookieName));
     if (oldUsername) {
+      username(oldUsername);
       rememberMe(true);
       $("#login-username").val(oldUsername.toLowerCase());
       $("#login-password").focus();
@@ -31,7 +32,6 @@
 
   function login() {
     clearError();
-
     var username = _.trim($("#login-username").val());
     var password = $("#login-password").val();
 
