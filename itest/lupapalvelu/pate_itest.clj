@@ -72,7 +72,7 @@
     (query sipoo :pate-enabled :org-id org-id) => ok?))
 
 (facts "Settings"
-  (fact "Bad org-di"
+  (fact "Bad org-id"
     (query sipoo :verdict-template-settings
            :org-id "bad"
            :category "r") => (err :error.invalid-organization))
@@ -157,6 +157,12 @@
              :category :r
              :path [:boardname]
              :value "Board of peers")=> ok?)
+  (fact "Organization name"
+    (command sipoo :save-verdict-template-settings-value
+             :org-id org-id
+             :category :r
+             :path [:organization-name]
+             :value "The Management") => ok?)
   (fact "The settings are now filled"
     (query sipoo :verdict-template-settings :org-id org-id :category "r")
     => (contains {:filled true})))
