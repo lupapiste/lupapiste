@@ -62,6 +62,6 @@
 
 (defn find-map [docs key val]
   (some (fn [doc]
-          (if (= (get doc key) val)
+          (when (= (get doc key) val)
             doc))
         docs))
