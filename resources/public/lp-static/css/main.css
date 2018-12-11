@@ -1498,6 +1498,10 @@ nav .header-dropdown > .header-dropdown-button:hover {
   color: white;
 }
 
+nav .header-dropdown > .header-dropdown-button:focus {
+  outline: none;
+}
+
 nav .header-dropdown.active > .header-dropdown-button {
   background-color: #555555;
   color: white;

@@ -64,6 +64,7 @@ $language-bg: $gray85;
     > span { vertical-align: middle; }
 
     &:hover { color: $hover; }
+    &:focus { outline: none; }
   }
   &.active > .header-dropdown-button {
     background-color: $hover-bg;
