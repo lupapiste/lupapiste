@@ -148,7 +148,7 @@
       "YVI" "YKEn vapautus liittymisestä viemäriin"
       "YVJ" "YKE:n vapautus liittymisestä vesijohtoon"
       "YVV" "YKEn vapautus liittymisestä vesijohtoon ja viemäriin"
-      "Z" "Ei luvanvarainen hanke"
+      "Z" "Ei luvanvarainen hanke (Z-lausunto)"
       "tunnistamaton lupatyyppi")))
 
 (defn normalize-permit-id
@@ -169,12 +169,17 @@
                        {"kaupunkikuvatoimenpide" data}
                        (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
 
+(defn decapitalize
+  "Convert the first character of the string to lowercase."
+  [string]
+  (apply str (ss/lower-case (first string)) (rest string)))
+
 (defn add-description [{:keys [documents] :as app} xml]
   (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         kuvaus (building-reader/->asian-tiedot xml)
         kuvausteksti (str kuvaus
                           (format "\nLuvan tyyppi: %s"
-                                  (ss/lower-case (kuntalupatunnus->description kuntalupatunnus))))]
+                                  (decapitalize (kuntalupatunnus->description kuntalupatunnus))))]
     (assoc app :documents
            (map (fn [doc]
                   (if (and (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
