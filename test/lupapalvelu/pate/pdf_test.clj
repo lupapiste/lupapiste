@@ -255,3 +255,13 @@
                                 :sisapuolinenKvvTyo                     {:value true, :modified 1527251434831}}}}]}
    "fi")
   => ["Maanrakennusty\u00f6t" "Ulkopuolinen KVV-ty\u00f6" "Sis\u00e4puolinen KVV-ty\u00f6"])
+
+(let [organization {:name {:fi "Sipoon rakennusvalvonta"}}
+      app          {:organization "753-R"}
+      verdict      {:references {:organization-name "Special name"}}]
+  (fact "organization-name"
+    (html/organization-name :fi app) => "Sipoon rakennusvalvonta"
+    (provided (lupapalvelu.organization/get-organization "753-R") => organization)
+    (html/organization-name :fi app {}) => "Sipoon rakennusvalvonta"
+    (provided (lupapalvelu.organization/get-organization "753-R") => organization)
+    (html/organization-name :fi app verdict) => "Special name"))

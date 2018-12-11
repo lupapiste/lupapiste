@@ -218,11 +218,22 @@
       (fact "Legacy contracts no longer supported"
         (command sonja :new-legacy-verdict-draft :id app-id)
         => fail?)
-      (fact "Contract settings consist not even reviews"
+      (facts "Contract settings consist only of organization name"
           (query sipoo-ya :verdict-template-settings
                  :org-id org-id
                  :category "contract")
-          => ok?
+          => {:ok true
+              :filled false
+              :settings nil}
+          (fact "Organization name"
+            (command sipoo-ya :save-verdict-template-settings-value
+                     :org-id org-id
+                     :category :contract
+                     :path [:organization-name]
+                     :value "Contractor") => ok?)
+          (fact "The settings are now filled"
+            (query sipoo-ya :verdict-template-settings :org-id org-id :category "contract")
+            => (contains {:filled true}))
           (fact "Create contract template"
             (let [{template-id :id} (init-verdict-template sipoo-ya org-id :contract)]
               (fact "Fill template"
