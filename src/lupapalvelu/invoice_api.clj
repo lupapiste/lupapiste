@@ -89,6 +89,7 @@
   [{:keys [application] :as command}]
   (debug "applicatin-invoices id: " (:id application))
   (let [invoices (invoices/fetch-by-application-id (:id application))]
+    (debug "application invoice id:s " (pr-str (map :id invoices)))
     (sc/validate [Invoice] invoices)
     (ok :invoices invoices)))
 
