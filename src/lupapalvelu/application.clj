@@ -443,12 +443,12 @@
      :schema-info (select-keys (:info schema) db-schema-info-keys)
      :created     created
      :data        (util/deep-merge
-                   (tools/create-document-data schema tools/default-values)
-                   (tools/timestamped
-                    (if-let [schema-data (get-in merged-schema-datas [schema-name])]
-                      (schema-data-to-body schema-data)
-                      {})
-                    created))}))
+                    (tools/create-document-data schema tools/default-values)
+                    (tools/timestamped
+                      (if-let [schema-data (get-in merged-schema-datas [schema-name])]
+                        (schema-data-to-body schema-data)
+                        {})
+                      created))}))
 
 (defn make-documents [user created org op application & [manual-schema-datas]]
   {:pre [(or (nil? manual-schema-datas) (map? manual-schema-datas))]}

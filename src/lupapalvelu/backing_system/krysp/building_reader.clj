@@ -223,6 +223,14 @@
                      (select xml-no-ns [:asianTiedot :poikkeamisasianKuvaus]))]
     (-> elements first (get-in [:content 0]))))
 
+(defn ->rakennuspaikkatieto [xml]
+  (let [xml-no-ns (cr/strip-xml-namespaces xml)]
+    (-> xml
+        cr/strip-xml-namespaces
+        (select [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto :Rakennuspaikka])
+        ((partial map xml->edn))
+        first)))
+
 (defn- ->rakennelman-tiedot [rakennelma]
   {:rakennusnro (ss/trim (get-text rakennelma :tunnus :rakennusnro))
    :rakennelman-kuvaus  (get-text rakennelma :kuvaus :kuvaus)})

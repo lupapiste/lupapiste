@@ -7,7 +7,7 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [lupapalvelu.backing-system.krysp.review-reader :as review-reader]
-            [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.model :as doc-model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
@@ -41,6 +41,35 @@
                 '(:kauposa :no :vuosi :tyyppi)
                 '(:vuosi :no :tyyppi :kauposa))
               (ss/split id #"[- ]")))))
+
+(defn parse-rakennuspaikkatieto [kuntalupatunnus rakennuspaikkatieto]
+  (let [data (:Rakennuspaikka rakennuspaikkatieto)
+        {:keys [kerrosala kaavatilanne rakennusoikeusYhteensa]} data
+        {:keys [kunta postinumero osoitenimi osoitenumero postitoimipaikannimi]} (:osoite data)
+        kiinteisto (get-in data [:rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto])
+        kaupunginosanumero (-> kuntalupatunnus destructure-permit-id :kauposa)]
+    {:kaavatilanne kaavatilanne
+     :hallintaperuste (:hallintaperuste kiinteisto)
+     :kiinteisto {:kerrosala kerrosala
+                  :rakennusoikeusYhteensa rakennusoikeusYhteensa
+                  :kylanimi (get-in kiinteisto [:kiinteistotieto :Kiinteisto :kylanimi])
+                  :kiinteistotunnus (get-in kiinteisto [:kiinteistotieto :Kiinteisto :kiinteistotunnus])}
+     :osoite {:kunta kunta
+              :postinumero postinumero
+              :kaupunginosanumero kaupunginosanumero
+              :osoitenimi (->> osoitenimi :teksti (ss/join #" / "))
+              :osoitenumero osoitenumero
+              :postitoimipaikannimi postitoimipaikannimi}}))
+
+(defn rakennuspaikkatieto->rakennuspaikka-kuntagml-doc
+  "Takes a :Rakennuspaikka element extracted from KuntaGML (via `building-reader/->rakennuspaikkatieto`),
+  returns a document of type following the rakennuspaikka-kuntagml -schema."
+  [kuntalupatunnus rakennuspaikkatieto]
+  (let [data (parse-rakennuspaikkatieto kuntalupatunnus rakennuspaikkatieto)
+        doc-datas (doc-model/map2updates [] data)
+        manual-schema-datas {"rakennuspaikka-kuntagml" doc-datas}
+        schema (schemas/get-schema 1 "rakennuspaikka-kuntagml")]
+    (app/make-document nil (now) manual-schema-datas schema)))
 
 (defn kuntalupatunnus->description
   "Takes a kuntalupatunnus, returns the permit type in plain text ('12-124124-92-A' -> 'Uusi rakennus' etc.)"
@@ -130,7 +159,7 @@
   (ss/join "-" ((juxt :kauposa :no :vuosi :tyyppi) (destructure-permit-id id))))
 
 (defn rakennelmatieto->kaupunkikuvatoimenpide [raktieto]
-  (let [data (model/map2updates [] {:kayttotarkoitus nil
+  (let [data (doc-model/map2updates [] {:kayttotarkoitus nil
                                     :kokonaisala ""
                                     :kuvaus (get-in raktieto [:Rakennelma :kuvaus :kuvaus])
                                     :tunnus (get-in raktieto [:Rakennelma :tunnus :rakennusnro])
@@ -158,7 +187,7 @@
   (-> op-name operations/get-operation-metadata :schema))
 
 (defn toimenpide->toimenpide-document [op-name toimenpide]
-  (let [data (model/map2updates [] toimenpide)
+  (let [data (doc-model/map2updates [] toimenpide)
         schema-name (op-name->schema-name op-name)]
     (app/make-document op-name
                        (now)
