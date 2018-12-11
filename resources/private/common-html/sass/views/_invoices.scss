@@ -99,4 +99,33 @@ button.invoice-change-state-button {
         background-color: $gray221;
     }
 
+
+    .operation {
+        width: 50%;
+    }
+
+    .units {
+        width: 12.5%;
+    }
+
+    .unit {
+        width: 7.5%;
+    }
+
+    .unit-price {
+        width: 12.5%;
+    }
+
+    .discount {
+        width: 7.5%;
+    }
+
+    .total {
+        width: 10%;
+    }
+
+}
+
+.full-width {
+    width: 100%
 }

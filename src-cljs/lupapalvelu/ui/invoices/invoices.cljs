@@ -57,12 +57,14 @@
 
 (rum/defc autosaving-input [value on-blur]
   (let [value-atom (atom value)]
-    (components/text-edit value-atom {:callback (fn [event] (on-blur @value-atom))})))
+    (components/text-edit value-atom {:callback (fn [event] (on-blur @value-atom))
+                                      :class ["full-width"]})))
 
 (rum/defc autosaving-select [value options on-blur]
   (let [value-atom (atom value)]
     (components/dropdown value-atom {:items options
-                                     :callback (fn [event] (on-blur @value-atom))})))
+                                     :callback (fn [event] (on-blur @value-atom))
+                                     :class ["full-width"]})))
 
 (defn update-invoice-row-value! [invoice operation-index invoice-row-index field value]
   (update-invoice! invoice
@@ -98,7 +100,7 @@
      [:td (autosaving-input  text  (fn [value] (update-text-field! :text value text)))]
      [:td (autosaving-input  units (fn [value] (update-num-field! :units value units)))]
      [:td (autosaving-select unit (rum/react state/valid-units) (fn [value] (update-text-field! :unit value)))]
-     [:td price-per-unit]
+     [:td (autosaving-input  price-per-unit (fn [value] (update-num-field! :units value price-per-unit)))]
      [:td (autosaving-input discount-percent (fn [value] (update-num-field! :discount-percent value discount-percent)))]
      [:td alv]
      [:td discounted-price]]))
@@ -202,13 +204,11 @@
                    (map (fn [{:keys [index text]}] {:value index :text text}))
                    (concat [freerow]))
         on-select (fn [value]
-                    ;; (println "selected row value: " value)
-                    ;; (println "selected row: " (inv-util/find-map catalogue-rows :index value ))
                     (let [row-from-catalogue (inv-util/->invoice-row (inv-util/find-map catalogue-rows :index value))
                           freerow {:text ""
-                                   :unit (common/loc :unit.kpl) ;; Note that these values
-                                   :price-per-unit 20           ;; Should come from taksa in the
-                                   :units 0                     ;; not so far future
+                                   :unit (common/loc :unit.kpl)
+                                   :price-per-unit 0
+                                   :units 0
                                    :type :custom
                                    :discount-percent 0}
                           row (if (= value :freerow)
@@ -219,18 +219,16 @@
                                                        (fn [invoice-rows]
                                                          (conj invoice-rows row)))]
                       (reset! invoice updated-invoice)))]
-    ;; (println "catalogue-rows: " catalogue-rows)
-    ;; (println "items: " items)
     [:table {:class "invoice-operations-table"}
      [:thead
       [:tr
-       [:th (translate-operation (:name operation))]
-       [:th (common/loc :invoices.rows.amount)]
-       [:th (common/loc :invoices.rows.unit)]
-       [:th (common/loc :invoices.rows.unit-price)]
-       [:th (common/loc :invoices.rows.discount-percent)]
-       [:th (common/loc :invoices.rows.VAT)]
-       [:th (common/loc :invoices.rows.total)]]]
+       [:th.operation  (translate-operation (:name operation))]
+       [:th.units      (common/loc :invoices.rows.amount)]
+       [:th.unit       (common/loc :invoices.rows.unit)]
+       [:th.unit-price (common/loc :invoices.rows.unit-price)]
+       [:th.discount   (common/loc :invoices.rows.discount-percent)]
+       [:th.vat        (common/loc :invoices.rows.VAT)]
+       [:th.total      (common/loc :invoices.rows.total)]]]
      [:tbody
       invoice-rows
       (if (= :draft invoice-state)

@@ -39238,6 +39238,34 @@ button.invoice-change-state-button {
   background-color: #dddddd;
 }
 
+.invoice-operations-table .operation {
+  width: 50%;
+}
+
+.invoice-operations-table .units {
+  width: 12.5%;
+}
+
+.invoice-operations-table .unit {
+  width: 7.5%;
+}
+
+.invoice-operations-table .unit-price {
+  width: 12.5%;
+}
+
+.invoice-operations-table .discount {
+  width: 7.5%;
+}
+
+.invoice-operations-table .total {
+  width: 10%;
+}
+
+.full-width {
+  width: 100%;
+}
+
 .price-catalogue .catalogue-select-and-buttons {
   height: 4em;
 }
