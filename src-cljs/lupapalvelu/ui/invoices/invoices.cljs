@@ -95,7 +95,7 @@
      [:td (autosaving-input  text  (fn [value] (update-text-field! :text value text)))]
      [:td (autosaving-input  units (fn [value] (update-num-field! :units value units)))]
      [:td (autosaving-select unit (rum/react state/valid-units) (fn [value] (update-text-field! :unit value)))]
-     [:td (autosaving-input  price-per-unit (fn [value] (update-num-field! :units value price-per-unit)))]
+     [:td (autosaving-input  price-per-unit  (fn [value] (update-num-field! :price-per-unit value price-per-unit)))]
      [:td (autosaving-input discount-percent (fn [value] (update-num-field! :discount-percent value discount-percent)))]
      [:td discounted-price]]))
 
@@ -306,8 +306,7 @@
 
      (if (= :draft invoice-state)
        (invoice-add-operation-row invoice @state/application-id))
-     (invoice-summary-row invoice)
-     ]))
+     (invoice-summary-row invoice)]))
 
 (rum/defc invoice-title-component < rum/reactive [invoice]
   (let [invoice-state (:state @invoice)
