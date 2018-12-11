@@ -244,7 +244,7 @@
                            ;; pate
                            :pate-verdicts :pate-verdict :pate-verdict-tab :pate-contract-tab :published-pate-verdict
                            ;; invoices
-                           :fetch-invoice :application-invoices :invoices-tab :application-operations
+                           :fetch-invoice :application-invoices :invoices-tab :application-operations :application-price-catalogue
                            ;; raw
                            :download-all-attachments :download-attachments
                            :pdf-export

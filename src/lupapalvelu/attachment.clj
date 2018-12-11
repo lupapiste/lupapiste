@@ -1160,14 +1160,16 @@
              (not= :canceled state-kw))
         (#{:foremanVerdictGiven :ready :finished :acknowledged} state-kw))))
 
-(defn resolve-lang-for-comments-attachment [application]
-  (let [lang (-> application
-                 :handlers
-                 (first)
-                 :id
-                 (usr/get-user-by-id [:language])
-                 :language)]
-    (or lang "fi")))
+(defn resolve-lang-for-comments-attachment
+  "This function is also called from inside the Krysp conversion pipeline, so it needs to be safe from exceptions."
+  [application]
+  (try
+    (let [id (get-in application [:handlers 0 :id])]
+      (-> id (usr/get-user-by-id [:language]) :language))
+    (catch java.lang.AssertionError e
+      (do
+        (error (.getMessage e))
+        "fi"))))
 
 (defn maybe-generate-comments-attachment [user application state]
   (when (comments-saved-as-attachment? application state)

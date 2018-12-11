@@ -54,7 +54,7 @@ Basic logs in
   Confirm notification dialog
 
 Basic can change email
-  Click Element  user-name
+  Open My Page
   Wait until  Element Should Be Enabled  xpath=//input[@data-test-id='newEmail']
   Input text  xpath=//input[@data-test-id='newEmail']  new@solita.fi
   Click by test id  change-email

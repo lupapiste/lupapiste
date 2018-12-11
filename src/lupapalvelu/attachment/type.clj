@@ -99,10 +99,11 @@
   (->> {:R    attachment-types/Rakennusluvat-v2
         :P    attachment-types/Rakennusluvat-v2
         :YA   attachment-types/YleistenAlueidenLuvat-v2
+        :A    attachment-types/Allu
         :YI   attachment-types/Ymparistoilmoitukset
         :YL   attachment-types/Ymparistolupa
         :YM   attachment-types/MuutYmparistoluvat
-        :VVVL attachment-types/Ymparistoilmoitukset
+        :VVVL attachment-types/VesihuoltoVapautushakemukset
         :MAL  attachment-types/Maa-ainesluvat
         :MM   attachment-types/Kiinteistotoimitus
         :KT   attachment-types/Kiinteistotoimitus

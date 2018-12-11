@@ -153,6 +153,9 @@ Fill lautakunta settings
   Fill test id  lautakunta-muutoksenhaku  10
   Fill test id  boardname  The Board
 
+Fill organization name
+  Fill test id  organization-name  Humppilan rakennusvalvonta
+
 All required settings fields are now filled
   Scroll to top
   No such test id  settings-missing
@@ -340,6 +343,7 @@ Fill required foreman settings
 
   Fill test id  lautakunta-muutoksenhaku  20
   Fill test id  boardname  Boardmen
+  Fill test id  organization-name  Mingzi
   Click back
 
 Fill and publish template

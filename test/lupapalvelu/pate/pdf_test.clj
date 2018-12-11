@@ -176,6 +176,13 @@
     (fact "operations: operation dict"
       (pdf/operations {:lang "fi" :verdict {:data {:operation "  Grand Design   "}} :application app})
       => [{:text "Grand Design"}
+          {:text purkaminen}])
+    (fact "operations: bulletin description"
+      (pdf/operations {:lang "fi"
+                       :verdict {:data {:bulletin-desc-as-operation true
+                                        :bulletin-op-description "This is bulletin description"}}
+                       :application app})
+      => [{:text "This is bulletin description"}
           {:text purkaminen}])))
 
 (facts "Buildings"
@@ -248,3 +255,13 @@
                                 :sisapuolinenKvvTyo                     {:value true, :modified 1527251434831}}}}]}
    "fi")
   => ["Maanrakennusty\u00f6t" "Ulkopuolinen KVV-ty\u00f6" "Sis\u00e4puolinen KVV-ty\u00f6"])
+
+(let [organization {:name {:fi "Sipoon rakennusvalvonta"}}
+      app          {:organization "753-R"}
+      verdict      {:references {:organization-name "Special name"}}]
+  (fact "organization-name"
+    (html/organization-name :fi app) => "Sipoon rakennusvalvonta"
+    (provided (lupapalvelu.organization/get-organization "753-R") => organization)
+    (html/organization-name :fi app {}) => "Sipoon rakennusvalvonta"
+    (provided (lupapalvelu.organization/get-organization "753-R") => organization)
+    (html/organization-name :fi app verdict) => "Special name"))

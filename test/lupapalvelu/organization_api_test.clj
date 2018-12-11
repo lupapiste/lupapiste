@@ -50,7 +50,7 @@
                                                   :user-organizations [{:id ..org-id.. :handler-roles [{:id ..another-role-id.. :name {:fi "kasittelija" :sv "handlaggare" :en "handler"}}]}]}) => nil
     (provided (usr/authority-admins-organization-id ..user..) => ..org-id..))
 
-  (fact "no mathing authAdmin organization"
+  (fact "no matching authAdmin organization"
     (validate-handler-role-not-general {:data {:roleId nil}
                                             :user ..user..
                                             :user-organizations [{:id ..org-id.. :handler-roles [{:id ..role-id.. :name {:fi "kasittelija" :sv "handlaggare" :en "handler"}}]}]}) => nil

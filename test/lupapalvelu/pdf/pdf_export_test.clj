@@ -27,7 +27,18 @@
                        "tyonjohtaja"
                        "approval-model-with-approvals"
                        "approval-model-without-approvals"
-                       "rahoitus"})
+                       "rahoitus"
+                       "visibility-schema" ;; model-test
+                       })
+
+;; TODO: Remove after Allu applications have been localized
+(warn "-------------------------------------------------------")
+(warn "----------- Allu schemas not yet localized! -----------")
+(warn "-------------------------------------------------------")
+(def ignored-schemas (->> lupapalvelu.document.allu-schemas/schema-definitions
+                          (map (comp :name :info))
+                          set
+                          (clojure.set/union ignored-schemas)))
 
 (defn- localized-doc-headings [schema-names]
   (map #(loc (str % "._group_label")) schema-names))

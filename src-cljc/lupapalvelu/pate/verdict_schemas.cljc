@@ -119,18 +119,9 @@
                                                :dict      kw})
                                             dates)}]}}})
 
-(def versub-operation
-  {:dictionary {:operation {:text {:loc-prefix :pate.operation}}
-                :address   {:text {:loc-prefix :pate.address}}}
-   :section    {:id   :pate-operation
-                :grid {:columns 2
-                       :rows    [[{:dict  :operation
-                                   :align :full}]
-                                 [{:dict  :address
-                                   :align :full}]]}}})
-
 (def versub-operation-ya
-  {:dictionary {:operation       {:text {:loc-prefix :pate.operation}}
+  {:dictionary {:operation       {:text {:loc-prefix :pate.operation
+                                         :lines      20}}
                 :address         {:text {:loc-prefix :pate.location}}
                 :property-title  {:loc-text :pate.property-id}
                 :propertyIds     {:repeating {:property-id        {:text {:label?     false
@@ -140,10 +131,10 @@
                                                                             :icon    :lupicon-remove
                                                                             :css     :secondary
                                                                             :remove  :propertyIds}}}}
-                :add-property-id {:button {:icon     :lupicon-circle-plus
-                                           :i18nkey  :pate.property-id.add
-                                           :css      :positive
-                                           :add      :propertyIds}}}
+                :add-property-id {:button {:icon    :lupicon-circle-plus
+                                           :i18nkey :pate.property-id.add
+                                           :css     :positive
+                                           :add     :propertyIds}}}
    :section    {:id   :pate-operation
                 :grid {:columns 2
                        :rows    [[{:dict  :operation
@@ -155,7 +146,7 @@
                                  [{:grid {:columns   9
                                           :repeating :propertyIds
                                           :rows      [[{:col  8
-                                                        :dict  :property-id}
+                                                        :dict :property-id}
                                                        {:align :right
                                                         :dict  :remove-property-id}]]}}]
                                  [{:show? :_meta.editing?
@@ -178,9 +169,9 @@
                                      :verdict-code-ref    {:reference {:path        :verdict-code
                                                                        :loc-prefix  :pate-r.verdict-code}}
                                      :verdict-flag        {:toggle {:loc-prefix :pate-verdict.flag}}
-                                     :verdict-text        (schema-util/required {:phrase-text   {:category :paatosteksti}
-                                                                                 :template-dict :paatosteksti})
-                                     :verdict-text-ref    (schema-util/required {:reference {:path :verdict-text}})
+                                     :verdict-text        {:phrase-text   {:category :paatosteksti}
+                                                           :template-dict :paatosteksti}
+                                     :verdict-text-ref    {:reference {:path :verdict-text}}
                                      :proposal-text       {:phrase-text   {:category   :paatosteksti
                                                                            :loc-prefix :pate-verdict-proposal}
                                                            :template-dict :proposaltext}
@@ -263,18 +254,37 @@
                                              :dict :collateral-type}]}]))))
 
 (def versub-bulletin
-  {:dictionary
-   {:bulletinOpDescription
-    {:phrase-text {:category :toimenpide-julkipanoon
-                   :i18nkey  :phrase.category.toimenpide-julkipanoon}
-     :template-dict :bulletinOpDescription}}
-   :section {:id         :bulletin
-             :loc-prefix :bulletin
-             :show?      :?.bulletin-op-description
-             :grid       {:columns 1
-                          :rows    [[{:col  1
-                                      :id   "toimenpide-julkipanoon"
-                                      :dict :bulletinOpDescription}]]}}})
+  {:dictionary {:bulletin-op-description    {:phrase-text   {:category :toimenpide-julkipanoon
+                                                             :i18nkey  :phrase.category.toimenpide-julkipanoon}
+                                             :template-dict :bulletinOpDescription}
+                :bulletin-desc-as-operation {:toggle        {:loc-prefix :pate-bulletin-as-operation.flag}}}
+   :section    {:id         :bulletin
+                :loc-prefix :bulletin
+                :show?      :?.bulletin-op-description
+                :grid       {:columns 1
+                             :rows    [[{:col  1
+                                         :id   "toimenpide-julkipanoon"
+                                         :dict :bulletin-op-description}]
+                                       [{:col 1
+                                         :show? :_meta.editing?
+                                         :dict :bulletin-desc-as-operation}]]}}})
+
+(def versub-operation
+  {:dictionary {:operation    {:text {:loc-prefix :pate.operation
+                                      :lines      20}}
+                :bulletin-ref {:reference {:loc-prefix :pate.operation
+                                           :path       :bulletin-op-description}}
+                :address      {:text {:loc-prefix :pate.address}}}
+   :section    {:id   :pate-operation
+                :grid {:columns 2
+                       :rows    [[{:dict  :operation
+                                   :align :full
+                                   :hide? :bulletin-desc-as-operation}
+                                  {:dict  :bulletin-ref
+                                   :align :full
+                                   :show? :bulletin-desc-as-operation}]
+                                 [{:dict  :address
+                                   :align :full}]]}}})
 
 (defn versub-requirements
   "Supported arguments: :foremen, :plans and :reviews."

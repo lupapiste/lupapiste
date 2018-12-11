@@ -90,7 +90,7 @@ Mikko logs in with the new email address
   Applicant logs in  mikko@example.net  mikko123  Mikko Intonen
 
 Navigate to email change
-  Click Element  user-name
+  Open My Page
   Open accordion by test id  mypage-change-email-accordion
   Wait Until  Element Should be visible  oldEmail
 

@@ -226,7 +226,8 @@
                   openInforequestEnabled: scope["open-inforequest"],
                   openInforequestEmail: scope["open-inforequest-email"],
                   opening: openingMills,
-                  pateEnabled: scope["pate-enabled"] || false };
+                  pateEnabled: Boolean( scope ["pate-enabled"] ),
+                  invoicingEnabled: Boolean( scope ["invoicing-enabled"] )};
 
       ajax.command("update-organization", data)
         .success(util.showSavedIndicator)

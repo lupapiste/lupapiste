@@ -43,27 +43,27 @@
     (fact "Verdict draft creation OK"
       verdict-draft => ok?)
     (fact "Verdict data from minimal (+ handler, operator and address)"
-      verdict-data => (just {:handler               "Sonja Sibbo"
-                             :address               "Test Road 8"
-                             :bulletinOpDescription ""
-                             :operation             ""
-                             :deviations            ""
-                             :buildings             {(keyword (:id primaryOperation)) {:building-id   ""
-                                                                                       :description   ""
-                                                                                       :operation     "varasto-tms"
-                                                                                       :order         "0"
-                                                                                       :show-building true
-                                                                                       :tag           ""}}
-                             :verdict-text          "Ver Dict"
-                             :plans                 (just plan-ids :in-any-order)
-                             :foremen               ["vastaava-tj"]
-                             :plans-included        true
-                             :language              "fi"
-                             :reviews               (just review-ids :in-any-order)
-                             :foremen-included      true
-                             :neighbor-states       []
-                             :reviews-included      true
-                             :statements            []}))
+      verdict-data => (just {:handler                 "Sonja Sibbo"
+                             :address                 "Test Road 8"
+                             :bulletin-op-description ""
+                             :operation               ""
+                             :deviations              ""
+                             :buildings               {(keyword (:id primaryOperation)) {:building-id   ""
+                                                                                         :description   ""
+                                                                                         :operation     "varasto-tms"
+                                                                                         :order         "0"
+                                                                                         :show-building true
+                                                                                         :tag           ""}}
+                             :verdict-text            "Ver Dict"
+                             :plans                   (just plan-ids :in-any-order)
+                             :foremen                 ["vastaava-tj"]
+                             :plans-included          true
+                             :language                "fi"
+                             :reviews                 (just review-ids :in-any-order)
+                             :foremen-included        true
+                             :neighbor-states         []
+                             :reviews-included        true
+                             :statements              []}))
     (fact "while preparing verdict, VTJ-PRT and location is updated to application"
       (api-update-building-data-call app-id {:form-params  {:operationId        (:id primaryOperation)
                                                             :nationalBuildingId "1234567881"
@@ -105,8 +105,10 @@
             reviews                     (filter #(= "task-katselmus" (get-in % [:schema-info :name])) tasks)
             aloituskokous               (util/find-by-key :taskname "Aloituskokous" reviews)
             loppukatselmus              (util/find-by-key :taskname "Loppukatselmus" reviews)]
-        (fact "two attachments" (count attachments) => 2)
-        (fact "two" (count reviews) => 2)
+        (fact "two attachments"
+          attachments => (just [(contains {:target {:type "verdict" :id verdict-id}})
+                                (contains {:source {:type "verdicts" :id verdict-id}})]))
+        (fact "two reviews" (count reviews) => 2)
         (facts "aloituskokous"
           (fact "katselmuksenLaji" (get-in aloituskokous [:data :katselmuksenLaji :value]) => "aloituskokous")
           (fact "taskname correct" (:taskname aloituskokous)

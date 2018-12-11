@@ -129,6 +129,15 @@
       [[:rakennusJaPurkujate :suunniteltuJate :0]])
     => (throws Exception)))
 
+(fact "validate-pseudo-input-updates!"
+  (validate-pseudo-input-updates! {:schema-info {:name "promootio-structures"}}
+                                  [[:promootio-structures :traffic-link]])
+  => (throws Exception #"error-trying-to-update-pseudo-input-field"
+             #(some-> % ex-data :text (= "error-trying-to-update-pseudo-input-field")))
+  (validate-pseudo-input-updates! {:schema-info {:name "promootio-structures"}}
+                                  [[:promootio-structures :traffic-needed]])
+  => nil)
+
 (facts "Transform values"
        (fact "Default (no transform)" (transform-value :foobar "Foobar") => "Foobar")
        (fact "Default (no transform) nil" (transform-value :foobar nil) => nil)

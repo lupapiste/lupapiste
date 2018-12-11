@@ -161,6 +161,14 @@
         (when (validate-all-subschemas subschema)
           (fail! :error-trying-to-remove-readonly-field))))))
 
+(defn validate-pseudo-input-updates!
+  "Pseudo inputs cannot be updated."
+  [document update-paths]
+  (let [doc-schema (model/get-document-schema document)]
+    (doseq [path update-paths]
+      (when (:pseudo? (model/find-by-name (:body doc-schema) path))
+        (fail! :error-trying-to-update-pseudo-input-field)))))
+
 (defn update! [{application :application timestamp :created {role :role} :user} doc-id updates collection]
   (let [document      (tools/by-id application collection doc-id)
         model-updates (->model-updates updates)
@@ -168,6 +176,7 @@
     (when-not document (fail! :error.document-not-found))
     (validate-against-whitelist! document update-paths role application)
     (validate-readonly-updates! document update-paths)
+    (validate-pseudo-input-updates! document update-paths)
     (persist-model-updates application collection document model-updates timestamp)))
 
 (defn- empty-op-attachments-ids

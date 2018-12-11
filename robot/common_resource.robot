@@ -167,7 +167,7 @@ Language To
   [Arguments]  ${lang}
   Element Should Not Contain  language-select  ${lang}
   Click Link  xpath=//a[@data-test-id='language-link']
-  Wait Until  Element Should Be Visible  css=div.language-menu
+  Wait Until  Element Should Be Visible  css=ul.language-menu
   Click Element  partial link=${lang}
   Wait Until  Element Should Contain  language-select  ${lang}
   Kill dev-box
@@ -1474,6 +1474,10 @@ Add neighbor
 
 # User management
 
+Open My Page
+  Click Element  header-user-dropdown
+  Click Element  mypage-button
+
 Fill in new password
   [Arguments]  ${section}  ${password}
   Wait Until  Page Should Contain  Salasanan vaihtaminen
@@ -1498,7 +1502,7 @@ Fill in new company password
 
 
 Open company user listing
-  Click Element  user-name
+  Open My Page
   Wait until  Element should be visible  xpath=//div[@data-test-id="mypage-company-accordion"]
   Open accordion by test id  mypage-company-accordion
   Wait Until  Element should be visible  //div[@data-test-id='my-company']//button[@data-test-id='company-edit-users']
@@ -1506,7 +1510,7 @@ Open company user listing
   Wait until  Element should be visible  company
 
 Open company details
-  Click Element  user-name
+  Open My Page
   Open accordion by test id  mypage-company-accordion
   Wait Until  Element should be visible  //div[@data-test-id='my-company']//button[@data-test-id='company-edit-info']
   Click by test id  company-edit-info

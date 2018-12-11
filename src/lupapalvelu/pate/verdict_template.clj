@@ -277,20 +277,21 @@
   subsequent localisation changes do not affect already published
   verdict templates."
   [options category template-data]
-  (let [draft (:draft (settings (assoc options :category category)))
-        data  (into {}
-                    (for [[k v] (select-keys draft
-                                             [:verdict-code])]
-                      [k (loop [v v]
-                           (if (map? v)
-                             (recur (-> v vals first))
-                             v))]))
+  (let [draft          (:draft (settings (assoc options :category category)))
+        data           (into {}
+                             (for [[k v] (select-keys draft
+                                                      [:verdict-code])]
+                               [k (loop [v v]
+                                    (if (map? v)
+                                      (recur (-> v vals first))
+                                      v))]))
         board-verdict? (util/=as-kw (:giver template-data) :lautakunta)]
     (merge data
-           {:date-deltas    (pack-verdict-dates category draft board-verdict?)
-            :plans          (pack-dependencies draft :plans template-data)
-            :reviews        (pack-dependencies draft :reviews template-data)
-            :handler-titles (pack-dependencies draft :handler-titles template-data)}
+           {:organization-name (:organization-name draft)
+            :date-deltas       (pack-verdict-dates category draft board-verdict?)
+            :plans             (pack-dependencies draft :plans template-data)
+            :reviews           (pack-dependencies draft :reviews template-data)
+            :handler-titles    (pack-dependencies draft :handler-titles template-data)}
            (when board-verdict?
              {:boardname (:boardname draft)}))))
 

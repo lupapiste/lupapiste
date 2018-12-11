@@ -131,6 +131,7 @@
                   <th data-bind="ltext: 'organization.application.enabled'"></th>
                   <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
                   <th data-bind="text: 'Pate'"></th>
+                  <th data-bind="ltext: 'application.tabInvoice'"></th>
                   <th data-bind="ltext: 'organization.openinforequest.email'"></th>
                   <th>Palvelu avataan</th>
                   <th>Tallenna rivi</th>
@@ -149,6 +150,9 @@
                   </td>
                   <td>
                     <input type="checkbox" data-bind="checked: $data['pate-enabled']" class="form-input" >
+                  </td>
+                  <td>
+                    <input type="checkbox" data-bind="checked: $data['invoicing-enabled']" class="form-input" >
                   </td>
                   <td data-bind="">
                     <input type="text" data-bind="value: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality() + '-' + $data.permitType()}" class="form-input" >

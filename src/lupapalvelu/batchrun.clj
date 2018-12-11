@@ -315,15 +315,15 @@
   (infof "Starting fetch-allu-verdicts for 091-YA")
   (mongo/connect!)
   (let [batchrun-user (user/batchrun-user ["091-YA"])
-        apps (mongo/select :applications {:state {$in ["sent" "agreementPrepared"]} :organization "091-YA"})]
+        apps (mongo/select :applications {:state {$in ["sent" "agreementPrepared"]}
+                                          :organization "091-YA"
+                                          :integrationKeys.ALLU.id {$exists true}})]
     (doseq [app apps
             :let [command (assoc (application->command app) :user batchrun-user
                                                             :created (now)
                                                             :action "fetch-verdicts")]]
       (logging/with-logging-context {:applicationId (:id app) :userId (:id batchrun-user)}
-        (if (-> app :integrationKeys :ALLU :id)
-          (allu-contract/fetch-allu-contract command)
-          (warn "Application does not contain ALLU-id under integrationKeys.")))))
+                                    (allu-contract/fetch-allu-contract command))))
   (mongo/disconnect!))
 
 (defn- organization-has-krysp-url-function

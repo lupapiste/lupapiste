@@ -135,7 +135,7 @@ Login with the new password
   Language is  SV
 
 Company details include company name, identifier and PDF link
-  Click Element  user-name
+  Open My Page
   Open accordion by test id  mypage-company-accordion
   Wait Until  Element text should be  xpath=//span[@data-test-id='my-company-name']  Peten rakennus Oy
   Wait Until  Element text should be  xpath=//span[@data-test-id='my-company-id']  2341528-4

@@ -99,8 +99,12 @@
          [:body body (when script?
                        page-number-script)]])))
 
-(defn organization-name [lang {organization :organization}]
-  (org/get-organization-name organization lang))
+(defn organization-name
+  ([lang {organization :organization}]
+   (org/get-organization-name organization lang))
+  ([lang application verdict]
+   (or (get-in verdict [:references :organization-name])
+       (organization-name lang application))))
 
 (defn verdict-header
   [lang application {:keys [category published legacy?] :as verdict}]
@@ -118,7 +122,7 @@
                                                               :migration-contract)))]
       [:div.row.pad-after
        [:div.cell.cell--40
-        (organization-name lang application)
+        (organization-name lang application verdict)
         (when-let [boardname (some-> verdict :references :boardname)]
           [:div boardname])]
        [:div.cell.cell--20.center

@@ -37,13 +37,14 @@
    :draft    sc/Any})
 
 (defschema PatePublishedSettings
-  {(sc/optional-key :verdict-code) [(apply sc/enum (map name (keys helper/verdict-code-map)))]
-   (sc/optional-key :date-deltas)  (->> helper/verdict-dates
-                                        (map (fn [k]
-                                               [k {:delta sc/Int
-                                                   :unit  (sc/enum "days" "years")}]))
-                                        (into {}))
-   (sc/optional-key :foremen)      [(apply sc/enum (map name helper/foreman-codes))]
+  {(sc/optional-key :organization-name) sc/Str
+   (sc/optional-key :verdict-code)      [(apply sc/enum (map name (keys helper/verdict-code-map)))]
+   (sc/optional-key :date-deltas)       (->> helper/verdict-dates
+                                             (map (fn [k]
+                                                    [k {:delta sc/Int
+                                                        :unit  (sc/enum "days" "years")}]))
+                                             (into {}))
+   (sc/optional-key :foremen)           [(apply sc/enum (map name helper/foreman-codes))]
 
    ;; Boardname included only when the verdict giver is Lautakunta.
    (sc/optional-key :boardname) sc/Str})

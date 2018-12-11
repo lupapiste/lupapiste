@@ -15,7 +15,7 @@
              (let [data [{:value 10} {:value 15} {:value 20}]]
                (sum-by :value data {:currency USD}) => {:major 45
                                         :minor 4500
-                                        :text "$45.00"
+                                        :text "USD45.00"
                                         :currency "USD"}))
        (fact "Sum of items {:value 10.5} and {:value 40.32} and {:value 11.21} is 62.03€"
              (let [data [{:value 10.5} {:value 40.32} {:value 11.21}]]
@@ -33,11 +33,16 @@
              (let [data [{:value (ma/amount-of EUR 10)} {:value (ma/amount-of EUR 10.52)}]]
                (sum-by :value data {:currency "EUR"}) => (throws AssertionError))))
 
+(facts "discounted-value returns the value unaffected when discount is nil"
+       (let [result (discounted-value 10 nil)]
+         (ma/major-of result) => 10
+         (ma/minor-of result) => 1000))
+
 (facts "discounted-value-for-percentage"
        (fact "Discounted value of 10% for 10 is 9"
              (let [result (discounted-value 10 10)]
                (ma/major-of result) => 9
-               (ma/minor-of (discounted-value 10 10)) => 900))
+               (ma/minor-of result) => 900))
        (fact "Discounted value of 40% for 23.43 is 14.06"
              (let [result (discounted-value 23.43 40)]
                (ma/major-of result) => 14
@@ -86,7 +91,7 @@
              (let [data [{:value 10 :discount 10} {:value 43.32 :discount 54}]]
                (sum-with-discounts :value :discount data :currency USD) => {:major 28
                                                               :minor 2893
-                                                              :text "$28.93"
+                                                              :text "USD28.93"
                                                               :currency "USD"}))
        (fact "Sum of values {:value 10 :discount 0.10} and {:value 43.32 :discount 0.46} is 28.93"
              (let [data [{:value 10 :discount 0.90} {:value 43.32 :discount 0.46}]]
@@ -113,5 +118,5 @@
              (let [data [{:value 10 :discount 0.90} {:value 43.32 :discount 0.46}]]
                (sum-with-discounts :value :discount data :discount-is-decimal true :currency USD) => {:major 28
                                                               :minor 2893
-                                                              :text "$28.93"
+                                                              :text "USD28.93"
                                                               :currency "USD"})))

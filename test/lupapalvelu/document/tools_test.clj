@@ -2,7 +2,7 @@
   (:require [lupapalvelu.document.tools :refer :all]
             [midje.sweet :refer :all]
 
-            [midje.util :refer [expose-testables]]
+            [midje.util :refer [expose-testables testable-privates]]
             [clojure.set :as s]
             [lupapalvelu.document.data-schema :as data-schema]
             [clojure.test.check.clojure-test :refer [defspec]]
@@ -18,6 +18,9 @@
 
 (expose-testables lupapalvelu.document.tools)
 
+(testable-privates lupapalvelu.document.tools
+                   path-string->absolute-path)
+
 (def schema
   {:info {:name "band"},
    :body
@@ -25,11 +28,13 @@
      :type :group,
      :body
      [{:name "name", :type :string}
+      {:name "link" :type :textlink :pseudo? true}
       {:name "genre", :type :string}
       {:name "members"
        :type :group
        :repeating true
        :body [{:name "name", :type :string}
+              {:name "twitter" :type :textlink :pseudo? true}
               {:name "instrument", :type :string}]}]}]})
 
 (def expected-simple-document
@@ -51,6 +56,13 @@
   (-> schema
     (create-unwrapped-data nil-values)
     (wrapped :value)) => expected-wrapped-simple-document)
+
+(facts path-string->absolute-path
+  (fact "absolute-path"
+    (path-string->absolute-path [:foo :bar] "/quu/quz") => [:quu :quz])
+
+  (fact "relative-path"
+    (path-string->absolute-path [:foo :bar] "quu/quz") => [:foo :bar :quu :quz]))
 
 ;;
 ;; Public api
@@ -90,6 +102,7 @@
                                                                       :type :group
                                                                       :body [{:name "name"
                                                                               :type :string}
+                                                                             {:name "link" :type :textlink :pseudo? true}
                                                                              {:name "genre"
                                                                               :type :string}]}])
 
