@@ -31,8 +31,12 @@
 (defn translate-operation [operation]
   (common/loc (str "operations." operation)))
 
+(def currency-formatters
+  {"EUR" (fn [money]
+           (.toFixed (/ (:minor money) 100) 2))})
+
 (defn MoneyResponse->text [money]
-  (:text money))
+  ((get currency-formatters (:currency money)) money))
 
 (defn discounted-price-from-invoice-row [row]
   (MoneyResponse->text (:with-discount (:sums row))))
