@@ -229,7 +229,7 @@
         cr/strip-xml-namespaces
         (select [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto :Rakennuspaikka])
         ((partial map xml->edn))
-        first))) ;; Voiko näitä olla useampia?
+        first)))
 
 (defn- ->rakennelman-tiedot [rakennelma]
   {:rakennusnro (ss/trim (get-text rakennelma :tunnus :rakennusnro))

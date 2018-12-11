@@ -102,7 +102,8 @@
 
         location-document (->> xml
                                building-reader/->rakennuspaikkatieto
-                               (conv-util/rakennuspaikkatieto->rakennuspaikka-kuntagml-doc kuntalupatunnus))
+                               (conv-util/rakennuspaikkatieto->rakennuspaikka-kuntagml-doc kuntalupatunnus)
+                               (conj []))
 
         structure-descriptions (map :description buildings-and-structures)
 

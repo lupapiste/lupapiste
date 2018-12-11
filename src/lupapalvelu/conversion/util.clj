@@ -44,12 +44,11 @@
 
 (defn parse-rakennuspaikkatieto [kuntalupatunnus rakennuspaikkatieto]
   (let [data (:Rakennuspaikka rakennuspaikkatieto)
-        {:keys [kerrosala kaavatilanne kaavanaste rakennusoikeusYhteensa]} data
+        {:keys [kerrosala kaavatilanne rakennusoikeusYhteensa]} data
         {:keys [kunta postinumero osoitenimi osoitenumero postitoimipaikannimi]} (:osoite data)
         kiinteisto (get-in data [:rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto])
         kaupunginosanumero (-> kuntalupatunnus destructure-permit-id :kauposa)]
     {:kaavatilanne kaavatilanne
-     :kaavanaste kaavanaste
      :hallintaperuste (:hallintaperuste kiinteisto)
      :kiinteisto {:kerrosala kerrosala
                   :rakennusoikeusYhteensa rakennusoikeusYhteensa
@@ -63,14 +62,14 @@
               :postitoimipaikannimi postitoimipaikannimi}}))
 
 (defn rakennuspaikkatieto->rakennuspaikka-kuntagml-doc
-  "Takes a :Rakennuspaikka element extracted from KuntaGML (via building-reader/->rakennuspaikkatieto),
+  "Takes a :Rakennuspaikka element extracted from KuntaGML (via `building-reader/->rakennuspaikkatieto`),
   returns a document of type following the rakennuspaikka-kuntagml -schema."
   [kuntalupatunnus rakennuspaikkatieto]
   (let [data (parse-rakennuspaikkatieto kuntalupatunnus rakennuspaikkatieto)
         doc-datas (doc-model/map2updates [] data)
         manual-schema-datas {"rakennuspaikka-kuntagml" doc-datas}
         schema (schemas/get-schema 1 "rakennuspaikka-kuntagml")]
-    (conj [] (app/make-document nil (now) manual-schema-datas schema))))
+    (app/make-document nil (now) manual-schema-datas schema)))
 
 (defn kuntalupatunnus->description
   "Takes a kuntalupatunnus, returns the permit type in plain text ('12-124124-92-A' -> 'Uusi rakennus' etc.)"

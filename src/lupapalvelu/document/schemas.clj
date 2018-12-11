@@ -1065,13 +1065,6 @@
                                :body [{:name "oma"}
                                       {:name "vuokra"}
                                       ei-tiedossa]}
-                              {:name "kaavanaste" :type :select :sortBy :displayname :hidden true
-                               :body [{:name "asema"}
-                                      {:name "ranta"}
-                                      {:name "rakennus"}
-                                      {:name "yleis"}
-                                      {:name "ei kaavaa"}
-                                      ei-tiedossa]}
                               {:name "kaavatilanne" :type :select :sortBy :displayname
                                :body [{:name "maakuntakaava"}
                                       {:name "oikeusvaikutteinen yleiskaava"}
@@ -1705,6 +1698,7 @@
              :body [{:name "yritysnimi" :type :string}]}]
            tayta-omat-tiedot-button)}
 
-   {:info {:name "rakennuspaikka-kuntagml"}
+   {:info {:name "rakennuspaikka-kuntagml"
+           :order 2}
     :body rakennuspaikka-kuntagml}
    ])
