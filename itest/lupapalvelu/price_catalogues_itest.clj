@@ -18,7 +18,10 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.env :as env]
-            [sade.util :refer [to-millis-from-local-date-string to-finnish-date]]
+            [sade.util :refer [to-millis-from-local-date-string
+                               to-millis-from-local-datetime-string
+                               format-timestamp-local-tz
+                               to-finnish-date]]
             [schema.core :as sc]
             [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]))
 
@@ -338,6 +341,7 @@
 
                        response => ok?
 
+
                        (let [new-catalogue (mongo/by-id "price-catalogues" (:price-catalogue-id response))
                              same-day-pub-cat-1-in-db (mongo/by-id "price-catalogues" (:id same-day-published-catalogue-1))
                              same-day-pub-cat-2-in-db (mongo/by-id "price-catalogues" (:id same-day-published-catalogue-2))
@@ -347,7 +351,20 @@
 
                          same-day-pub-cat-1-in-db => nil
                          same-day-pub-cat-2-in-db => nil
-                         same-day-draft-cat-in-db => same-day-draft-catalogue))))))
+                         same-day-draft-cat-in-db => same-day-draft-catalogue))))
+
+            (fact "should set the valid-until timestamp for the previous catalogue at the end of the day"
+                  (let [prev-catalogue (catalogue-with {:id "prev-cat-with-correct-valid-until" :state "published"
+                                                        :valid-from (timestamp "1.8.2020") :valid-until nil})
+                        new-catalogue-req (catalogue-request-with {:valid-from-str "5.8.2020"})]
+                    (ensure-exists! :price-catalogues prev-catalogue) => :ok
+
+                    (local-command sipoo :publish-price-catalogue :organization-id "753-R" :price-catalogue new-catalogue-req)
+
+                    (-> (mongo/by-id :price-catalogues "prev-cat-with-correct-valid-until")
+                        :valid-until
+                        (format-timestamp-local-tz "d.M.YYYY HH:mm:ss:SSS"))
+                    => "4.8.2020 23:59:59:999"))))
 
     (fact "application-catalogue"
           (fact "finds the correct one when all catalogues are in the state published"

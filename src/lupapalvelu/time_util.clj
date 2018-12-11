@@ -21,6 +21,19 @@
   (when timestamp
     (tc/to-long (day-before (tc/from-long timestamp)))))
 
+(defn at-the-end-of-previous-day [date]
+  (when date
+    (-> date
+        (t/floor t/day)
+        (t/plus (t/millis -1)))))
+
+(defn timestamp-at-the-end-of-previous-day [timestamp]
+  (when timestamp
+    (-> timestamp
+        tc/from-long
+        at-the-end-of-previous-day
+        tc/to-long)))
+
 (defn ->date [date-str]
   (tf/parse time-format date-str))
 

@@ -8,7 +8,7 @@
             [lupapalvelu.price-catalogues :as catalogues]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
-            [lupapalvelu.time-util :refer [timestamp-day-before]]
+            [lupapalvelu.time-util :refer [timestamp-at-the-end-of-previous-day]]
             [sade.core :refer [ok fail]]
             [sade.util :as util]
             [schema.core :as sc]
@@ -171,7 +171,7 @@
         previous-catalogue (catalogues/fetch-previous-published-price-catalogue catalogue-to-db)
         same-day-catalogues (catalogues/fetch-same-day-published-price-catalogues catalogue-to-db)
         next-catalogue (catalogues/fetch-next-published-price-catalogue catalogue-to-db)
-        valid-until (timestamp-day-before (:valid-from next-catalogue))]
+        valid-until (timestamp-at-the-end-of-previous-day (:valid-from next-catalogue))]
 
     (catalogues/delete-catalogues! same-day-catalogues)
     (catalogues/update-previous-catalogue! previous-catalogue catalogue-to-db)
