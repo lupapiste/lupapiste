@@ -328,6 +328,8 @@
        "MAI" (cond
                (re-find #"kaatami|kaatoa" description) "puun-kaataminen"
                (re-find #"valmistele" description) "muu-tontti-tai-kort-muutos"
+               (re-find #"kaivam|kaivu" description) "kaivuu"
+               (re-find #"pysäk|liittym" description) "tontin-jarjestelymuutos"
                :else "muu-maisema-toimenpide")
        "konversio"))) ;; A minimal generic operation for this purpose.
                       ;; If a an application does not contain 'toimenpide'-element and is not P(I) or TJO, 'konversio it is'.
