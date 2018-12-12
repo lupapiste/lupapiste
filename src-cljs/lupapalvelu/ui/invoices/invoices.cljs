@@ -83,6 +83,14 @@
         (save-in-backend! field converted-value)
         (save-only-locally! field old-value)))))
 
+(rum/defc invoice-row-remove-cell [invoice operation-index invoice-row-index]
+  [:td
+   [:div.remove-icon-container {:on-click (fn [e]
+                                            (let [edited-invoice (service/remove-invoice-row-from-invoice @invoice operation-index invoice-row-index)]
+                                              (update-invoice! invoice (fn [result]
+                                                                                (reset! invoice edited-invoice)))))}
+    [:i.lupicon-remove]]])
+
 (rum/defc fully-editable-invoice-row < rum/reactive
   < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
                (str operation-index "-" invoice-row-index))}
@@ -98,7 +106,8 @@
      [:td (autosaving-select unit (rum/react state/valid-units) (fn [value] (update-text-field! :unit value)))]
      [:td (autosaving-input  price-per-unit  (fn [value] (update-num-field! :price-per-unit value price-per-unit)))]
      [:td (autosaving-input discount-percent (fn [value] (update-num-field! :discount-percent value discount-percent)))]
-     [:td discounted-price]]))
+     [:td discounted-price]
+     (invoice-row-remove-cell invoice operation-index invoice-row-index)]))
 
 (rum/defc editable-catalogue-invoice-row < rum/reactive
   < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
@@ -115,7 +124,8 @@
      [:td unit]
      [:td price-per-unit]
      [:td (autosaving-input discount-percent (fn [value] (update-num-field! :discount-percent value discount-percent)))]
-     [:td discounted-price]]))
+     [:td discounted-price]
+     (invoice-row-remove-cell invoice operation-index invoice-row-index)]))
 
 (rum/defc invoice-table-row
   < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
@@ -185,6 +195,7 @@
   (let [invoice-rows (map-indexed (fn [index row]
                                     (create-invoice-row-element row index operation-index invoice))
                                   (:invoice-rows operation))
+        app-id @state/application-id
         invoice-state (keyword (:state @invoice))
         catalogue (rum/react state/price-catalogue)
         catalogue-rows (inv-util/indexed-rows catalogue)
@@ -216,7 +227,15 @@
        [:th.unit       (common/loc :invoices.rows.unit)]
        [:th.unit-price (common/loc :invoices.rows.unit-price)]
        [:th.discount   (common/loc :invoices.rows.discount-percent)]
-       [:th.total      (common/loc :invoices.rows.total)]]]
+       [:th.total      (common/loc :invoices.rows.total)]
+       (when (= :draft invoice-state)
+         [:th.remove [:div.remove-icon-container {:on-click (fn [e]
+                                                              (let [invoice-with-operation-removed (service/remove-operation-from-invoice @invoice operation-index)]
+                                                                (update-invoice!
+                                                                 invoice
+                                                                 (fn [response]
+                                                                   (reset! invoice invoice-with-operation-removed)))))}
+                      [:i.lupicon-remove]]])]]
      [:tbody
       invoice-rows
       (if (= :draft invoice-state)
@@ -280,7 +299,7 @@
                                                                     (fn [response]
                                                                       (service/fetch-invoices app-id)))))))} state-text])))
 
-(rum/defc invoice-summary-row [invoice-atom]
+(rum/defc invoice-summary-row < rum/reactive [invoice-atom]
   (let [operations (:operations @invoice-atom)
         invoice-rows-all (mapcat :invoice-rows operations)
         sums {:sum-zero-vat (MoneyResponse->text (:sum @invoice-atom))

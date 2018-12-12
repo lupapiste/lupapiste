@@ -39218,6 +39218,12 @@ button.invoice-change-state-button {
   }
 }
 
+@media print {
+  .invoice-accordion .remove-icon-container {
+    display: none;
+  }
+}
+
 .invoice-accordion.rollup {
   border-width: 1px;
   border-color: #777777;

@@ -43,6 +43,12 @@ button.invoice-change-state-button {
         }
     }
 
+    .remove-icon-container {
+        @media print {
+            display: none;
+        }
+    }
+
 }
 
 .invoice-accordion.rollup {

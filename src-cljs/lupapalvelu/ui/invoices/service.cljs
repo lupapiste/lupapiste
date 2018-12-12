@@ -4,6 +4,10 @@
             [lupapalvelu.ui.invoices.state :as state]
             [sade.shared-util :as util]))
 
+(defn vec-remove
+  [coll pos]
+  (vec (concat (subvec coll 0 pos) (subvec coll (inc pos)))))
+
 (defn insert-invoice [app-id data callback]
   (common/command "insert-invoice"
                   callback
@@ -66,3 +70,9 @@
 (defn add-operation-to-invoice [invoice operation rows]
   (assoc-in invoice [:operations] (-> (:operations invoice)
                                       (conj {:operation-id operation :name operation :invoice-rows rows}))))
+
+(defn remove-operation-from-invoice [invoice operation-index]
+  (util/dissoc-in invoice [:operations operation-index]))
+
+(defn remove-invoice-row-from-invoice [invoice operation-index invoice-row-index]
+  (util/dissoc-in invoice [:operations operation-index :invoice-rows invoice-row-index]))
