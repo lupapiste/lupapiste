@@ -162,7 +162,8 @@
 
 (facts get-subschemas
   (fact "exclude fields by schema"
-    (get-subschemas {:_selected {:value "foo"}}
+    (get-subschemas nil
+                    {:_selected {:value "foo"}}
                     {:name "doc"
                      :type :group
                      :body [{:name "goo"
@@ -176,7 +177,8 @@
             :groups [{:name "goo", :type :group, :body [{:name "sub"}]}]}})
 
   (fact "excluded by _selected - two options"
-    (get-subschemas {:_selected {:value "foo"}}
+    (get-subschemas nil
+                    {:_selected {:value "foo"}}
                     {:name "doc"
                      :type :group
                      :body [{:name "_selected"
@@ -190,7 +192,8 @@
                              :groups []}})
 
   (fact "excluded by _selected - many options"
-    (get-subschemas {:_selected {:value "foo"}}
+    (get-subschemas nil
+                    {:_selected {:value "foo"}}
                     {:name "doc"
                      :type :group
                      :body [{:name "_selected"
@@ -208,7 +211,8 @@
             :groups []}})
 
   (fact "excluded by hide-when / show-when - root doc - non-repeating"
-    (get-subschemas {:foo {:value ..foo..} :bar {:value ..bar..} :quu {:fuz {:value ..fuz..}}}
+    (get-subschemas nil
+                    {:foo {:value ..foo..} :bar {:value ..bar..} :quu {:fuz {:value ..fuz..}}}
                     {:name "doc"
                      :type :group
                      :body [{:name "quu" :type :group :body [{:name "buz"} {:name "fuz"}]}
@@ -223,7 +227,8 @@
             :groups [{:name "quu", :type :group, :body [{:name "buz"} {:name "fuz"}]}]}})
 
   (fact "excluded by hide-when / show-when - inner group - non-repeating"
-    (get-subschemas {:foo {:value ..foo..} :bar {:value ..bar..} :quu {:fuz {:value ..fuz..}}}
+    (get-subschemas nil
+                    {:foo {:value ..foo..} :bar {:value ..bar..} :quu {:fuz {:value ..fuz..}}}
                     {:name "quu"
                      :type :group
                      :body [{:name "buz" :type :text :hide-when {:path "fuz" :values #{..fuz..}}}
@@ -236,7 +241,8 @@
                 :groups []}})
 
   (fact "excluded by hide-when / show-when - inner group - repeating"
-    (get-subschemas {:foo {:value ..foo..}
+    (get-subschemas nil
+                    {:foo {:value ..foo..}
                      :quu {:0 {:fuz {:value ..0-fuz..}
                                :bar {:value ..0-bar..}}
                            :2 {:fuz {:value ..2-fuz..}

@@ -262,9 +262,9 @@
                                        :uicomponent :docgen-input
                                        :inputType   :string
                                        :placeholder "lmv.area.placeholder"
-                                       :hide-when {:document "lyhytaikainen-maanvuokraus"
-                                                   :path "type"
-                                                   :values #{"banderolli"}}}]
+                                       :hide-when   {:document "lyhytaikainen-maanvuokraus"
+                                                     :path     "lyhytaikainen-maanvuokraus/type"
+                                                     :values   #{"banderolli"}}}]
                                :rows [["drawings::2" "allu-map::2"]
                                       ["area"]]}))
 

@@ -281,18 +281,19 @@
         (assoc validation-result :path []) ; Invalid path from user input should not be echoed
         validation-result))))
 
-(defn- data-match? [application doc-data doc-path {:keys [path values document]}]
-  (boolean (and path
-                values
-                (contains? values
-                           (if document
-                             (tools/get-value-by-path (:data (domain/get-document-by-name application
-                                                                                          document))
-                                                      nil
-                                                      path)
-                             (tools/get-value-by-path doc-data doc-path path))))))
+(defn- data-match? [application doc-data doc-path {:keys [path values document] :as m}]
+  (boolean
+   (and path
+        values
+        (contains? values
+                   (if document
+                     (tools/get-value-by-path (:data (domain/get-document-by-name application
+                                                                                  document))
+                                              nil
+                                              path)
+                     (tools/get-value-by-path doc-data doc-path path))))))
 
-(defn- field-visible? [application data path {:keys [hide-when show-when] :as element}]
+(defn field-visible? [application data path {:keys [hide-when show-when] :as element}]
   (let [hide (and hide-when (data-match? application data path hide-when))
         show (and show-when (data-match? application data path show-when))]
     (or (and (nil? hide) (nil? show))
