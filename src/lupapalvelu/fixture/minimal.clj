@@ -1077,7 +1077,9 @@
                                              :ya-kayttolupa-mainostus-ja-viitoitus
                                              :ya-kayttolupa-terassit
                                              :ya-kayttolupa-vaihtolavat
-                                             :ya-kayttolupa-nostotyot]
+                                             :ya-kayttolupa-nostotyot
+                                             :promootio
+                                             :lyhytaikainen-maanvuokraus]
                        :operations-attachments ya-default-attachments-for-operations
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
