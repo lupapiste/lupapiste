@@ -48,8 +48,11 @@
         tc/to-long)))
 
 (defn ts->str [timestamp & [{:keys [pattern timezone]}]]
-  (let [date-in-tz (DateTime. timestamp (or timezone (t/default-time-zone)))
-        frmt (tf/formatter-local (or pattern "d.M.YYYY HH:mm:ss:SSS"))]
+  (let [tz (or timezone (t/default-time-zone))
+        date-in-tz (DateTime. timestamp tz)
+        frmt (-> (or pattern "d.M.YYYY HH:mm:ss:SSS")
+                 tf/formatter-local
+                 (tf/with-zone tz))]
              (tf/unparse frmt date-in-tz)))
 
 (defn ->date [^String date-str ]
