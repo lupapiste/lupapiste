@@ -3,7 +3,8 @@
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [clj-time.local :as tl]
-            [sade.util :refer [to-finnish-date]]))
+            [sade.util :refer [format-timestamp-local-tz]])
+  (:import [org.joda.time DateTime LocalDateTime]))
 
 (def time-format (tf/formatter "dd.MM.YYYY"))
 
@@ -22,29 +23,40 @@
   (when timestamp
     (tc/to-long (day-before (tc/from-long timestamp)))))
 
+(defn ->timestamp [local-date-time-string]
+  (-> (tf/formatter-local "d.M.YYYY HH:mm:ss:SSS")
+      (tf/parse local-date-time-string)
+      tc/to-long))
+
+(defn ts->str [timestamp]
+  (format-timestamp-local-tz timestamp "d.M.YYYY HH:mm:ss:SSS"))
+
 (defn at-the-end-of-previous-day [date]
   (when date
     (-> date
         (t/floor t/day)
         (t/plus (t/millis -1)))))
 
-(defn ->local-date-time [timestamp]
-  (-> timestamp
-      tc/from-long
-      tl/to-local-date-time))
+(defn ->date-time [timestamp & [timezone]]
+  (DateTime. timestamp (or timezone (t/default-time-zone))))
 
-(defn timestamp-at-the-end-of-previous-day [timestamp]
+(defn timestamp-at-the-end-of-previous-day [timestamp & [timezone]]
   (when timestamp
     (-> timestamp
-        ->local-date-time
+        (->date-time timezone)
         at-the-end-of-previous-day
         tc/to-long)))
 
-(defn ->date [date-str]
+(defn ts->str [timestamp & [{:keys [pattern timezone]}]]
+  (let [date-in-tz (DateTime. timestamp (or timezone (t/default-time-zone)))
+        frmt (tf/formatter-local (or pattern "d.M.YYYY HH:mm:ss:SSS"))]
+             (tf/unparse frmt date-in-tz)))
+
+(defn ->date [^String date-str ]
   (tf/parse time-format date-str))
 
-(defn ->date-str [date]
-  (tf/unparse time-format date))
+(defn ->date-str [^DateTime date-time]
+  (tf/unparse time-format date-time))
 
 (defn tomorrow-or-later? [date-str]
   (if date-str
