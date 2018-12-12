@@ -2,6 +2,7 @@
   (:require [clj-time.coerce :as tc]
             [clj-time.core :as t]
             [clj-time.format :as tf]
+            [clj-time.local :as tl]
             [sade.util :refer [to-finnish-date]]))
 
 (def time-format (tf/formatter "dd.MM.YYYY"))
@@ -27,10 +28,15 @@
         (t/floor t/day)
         (t/plus (t/millis -1)))))
 
+(defn ->local-date-time [timestamp]
+  (-> timestamp
+      tc/from-long
+      tl/to-local-date-time))
+
 (defn timestamp-at-the-end-of-previous-day [timestamp]
   (when timestamp
     (-> timestamp
-        tc/from-long
+        ->local-date-time
         at-the-end-of-previous-day
         tc/to-long)))
 
