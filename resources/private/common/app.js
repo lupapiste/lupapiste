@@ -246,7 +246,6 @@ var LUPAPISTE = LUPAPISTE || {};
 
       hub.subscribe("dialog-close", self.cancel);
       $(document).on("click", self.cancel);
-      $(document).on("click", "#header-user-dropdown", function(e) { e.stopPropagation(); });
     }
 
     hub.subscribe("login", function() { wasLoggedIn = true; });
