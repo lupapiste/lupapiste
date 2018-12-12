@@ -29,6 +29,7 @@
                        "approval-model-without-approvals"
                        "rahoitus"
                        "visibility-schema" ;; model-test
+                       "crossref-schema" ;; model-test
                        })
 
 ;; TODO: Remove after Allu applications have been localized

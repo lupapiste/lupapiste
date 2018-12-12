@@ -15,13 +15,23 @@
   "Authorization model based component state. See docgen-input-model
   for how this is enforced in the frontend. Note: empty lists do not
   affect the state in any way."
-  {(opt :disabled) [sc/Keyword]  ;;Disabled if any listed action is allowed.
+  {(opt :disabled) [sc/Keyword]  ;; Disabled if any listed action is allowed.
    (opt :enabled)  [sc/Keyword]  ;; Disabled if any listed action is not allowed.
    })
 
 (defschema single-value (sc/conditional string? sc/Str
                                         number? sc/Num
                                         :else   (sc/enum true false nil)))
+
+(defschema field-matcher
+  "Definition for target value in another element. Used with
+  `:hide-when` and `:show-when`."
+  {:path           sc/Str ;; Path within document
+   :values         #{single-value}
+   ;; Target document name. Default is the "current" document. If
+   ;; there are multiple documents with the same name, only the first
+   ;; one is considered.
+   (opt :document) sc/Str})
 
 (defschema GenInput
   "General leaf element schema. Base element for input elements."
@@ -55,10 +65,8 @@
    (opt :css)         [sc/Keyword]   ;; CSS classes. Even an empty vector overrides default classes.
    (opt :auth)        Auth
    (opt :transform)   sc/Keyword     ;; Value transform. See persistence/transform-value
-   (opt :hide-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
-                       :values #{single-value}}
-   (opt :show-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
-                       :values #{single-value}}
+   (opt :hide-when)   field-matcher
+   (opt :show-when)   field-matcher
    })
 
 (defschema Text
@@ -464,9 +472,11 @@
     (when (not-empty invalid-paths) {:description "Invalid rows definition" :schema name :errors invalid-paths})))
 
 (defn validate-value-reference [key doc-schema {:keys [path] :as schema}]
-  (when (and (get schema key) (->> (build-absolute-path (butlast path) (get-in schema [key :path]))
-                               (get-in-schema doc-schema)
-                               nil?))
+  (when (and (get schema key)
+             (nil? (get-in schema [key :document]))
+             (->> (build-absolute-path (butlast path) (get-in schema [key :path]))
+                  (get-in-schema doc-schema)
+                  nil?))
     {:description (str "Invalid " (name key) " path") :schema (:name schema) :path path :errors (get-in schema [key :path])}))
 
 (defn validate-references [doc-schema]

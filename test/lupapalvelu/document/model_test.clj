@@ -1,9 +1,10 @@
 (ns lupapalvelu.document.model-test
-  (:require [midje.sweet :refer :all]
+  (:require [lupapalvelu.document.approval :as appr]
             [lupapalvelu.document.model :refer :all]
-            [lupapalvelu.document.approval :as appr]
-            [lupapalvelu.document.validators :refer [valid-against? invalid-with? valid?]]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.validators :refer [valid-against? invalid-with? valid?]]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [sade.util :as util]))
 
 ;; Define a "random" timestamp used in test.
@@ -827,15 +828,32 @@
                                 :show-when {:path   "rule1"
                                             :values #{true}}}]})
 
-(schemas/defschema 1 visibility-schema)
+(def crossref-schema {:info {:name       "crossref-schema"
+                             :version    1
+                             :approvable false}
+                      :body [{:name      "other1" :type :string :required true
+                              :show-when {:document "visibility-schema"
+                                          :path     "rule1"
+                                          :values   #{true}}}]})
 
-(defn validate-visibility [data]
-  (validate {} {:schema-info {:name "visibility-schema"
-                              :version 1}
-                :data (reduce-kv (fn [acc k v]
-                                   (assoc-in acc [k :value] v))
-                                 {}
-                                 data)}))
+(schemas/defschemas 1 [visibility-schema
+                       crossref-schema])
+
+(defn doc-data [name data]
+  {:schema-info {:name    name
+                 :version 1}
+   :data        (reduce-kv (fn [acc k v]
+                             (assoc-in acc [k :value] v))
+                           {}
+                           data)})
+
+(defn validate-visibility
+  ([docs name data]
+   (validate {:documents docs}
+             (doc-data name data)))
+  ([data]
+   (validate-visibility [] "visibility-schema" data)))
+
 (defn required [k]
   {:path   [k]
    :result [:tip "illegal-value:required"]})
@@ -915,3 +933,33 @@
     => (just [(contains (ignored :two))
               (contains (ignored :three))
               (contains (ignored :four))])))
+
+(testable-privates lupapalvelu.document.model data-match?)
+
+(facts "data-match?"
+  (data-match? {:documents [(doc-data "visibility-schema" {:rule1 true})]}
+               nil nil
+               {:path     "rule1"
+                :values   #{true}
+                :document "visibility-schema"}) => true
+  (data-match? {:documents [(doc-data "visibility-schema" {})]}
+               nil nil
+               {:path     "rule1"
+                :values   #{true}
+                :document "visibility-schema"}) => false)
+
+(facts "Cross-document visibility"
+  (fact "Rule1 ON"
+    (validate-visibility [(doc-data "visibility-schema" {:rule1 true})]
+                         "crossref-schema"
+                         {})
+    => (just [(contains (required :other1))]))
+  (fact "Rule1 OFF"
+    (validate-visibility [(doc-data "visibility-schema" {})]
+                         "crossref-schema"
+                         {})
+    => empty?
+    (validate-visibility [(doc-data "visibility-schema" {:rule false})]
+                         "crossref-schema"
+                         {})
+    => empty?))

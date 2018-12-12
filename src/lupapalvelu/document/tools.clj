@@ -360,6 +360,6 @@
 (defn get-value-by-path
   "Get element value by target-path string. target-path can be
   absolute (/path/to/element) or relative (sibling/element). If target
-  path is given as relative, path is used to resolee absolute path."
+  path is given as relative, path is used to resolve absolute path."
   [doc path target-path]
   (get-in doc (conj (path-string->absolute-path (butlast path) target-path) :value)))
