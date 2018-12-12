@@ -2780,6 +2780,8 @@
 "previous-permit-cleanup-note" "en" "Erroneous information will not be imported, so please remember to check the application after retrieval."
 "previous-permit-cleanup-note" "fi" "Virheellisiä tietoja ei tuoda, joten muista tarkistaa hakemus noudon jälkeen."
 "previous-permit-cleanup-note" "sv" "Felaktiga uppgifter importeras inte, så kom ihåg att kontrollera ansökan efter hämtningen."
+"print" "fi" "Tulosta"
+"print" "en" "Print"
 "puiden-kaataminen._group_label" "en" "Tree felling"
 "puiden-kaataminen._group_label" "fi" "Puiden kaataminen"
 "puiden-kaataminen._group_label" "sv" "Trädfällning"

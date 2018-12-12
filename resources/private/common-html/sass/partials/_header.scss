@@ -132,7 +132,10 @@ $language-bg: $gray85;
 }
 
 .nav-wrapper {
-  width: 100%;
+    width: 100%;
+    @media print {
+        display: none;
+    }
 }
 
 .nav-box {

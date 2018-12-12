@@ -7,6 +7,9 @@ $footer-hover: $gray255; // Hover and active
 $footer-bi: #555;
 
 footer {
+    @media print {
+        display: none;
+    }
   margin-top: $marginL*3;
   padding-top: $marginL;
   position: absolute;
@@ -107,4 +110,3 @@ footer ul li {
     padding: $marginM;
     color: $footer-bi;
 }
-

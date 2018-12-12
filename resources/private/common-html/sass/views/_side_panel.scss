@@ -18,6 +18,9 @@
 }
 
 #side-panel {
+    @media print {
+        display: none;
+    }
   z-index: 2001;
   color: $gray255;
   position: fixed;
