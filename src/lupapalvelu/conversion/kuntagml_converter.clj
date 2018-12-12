@@ -212,7 +212,8 @@
         permit-type           "R"
         xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        location-info         (prev-permit/get-location-info command app-info)
+        location-info         (or (prev-permit/get-location-info command app-info)
+                                  prev-permit/default-location-info)
         organization          (org/get-organization organizationId)
         validation-result     (permit/validate-verdict-xml permit-type xml organization)
         no-proper-applicants? (not-any? prev-permit/get-applicant-type (:hakijat app-info))]
