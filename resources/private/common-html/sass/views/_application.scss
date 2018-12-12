@@ -63,6 +63,9 @@ $preamble-min-height: 280px; // at least the size of the map container
 
 /*Summary styles*/
 .application_summary {
+    @media print {
+        page-break-after: always;
+    }
   background-color: $app-gray-bg;
   border-bottom: 2px solid $app-gray-darkest;
   min-height: 320px + $marginM;
@@ -443,6 +446,9 @@ $preamble-min-height: 280px; // at least the size of the map container
   }
 
   .application_actions {
+      @media print {
+          display: none;
+      }
     position: absolute;
     right: 0;
     top: $marginM;

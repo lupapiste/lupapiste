@@ -36,7 +36,8 @@
            (.toFixed (/ (:minor money) 100) 2))})
 
 (defn MoneyResponse->text [money]
-  ((get currency-formatters (:currency money)) money))
+  (when money
+    ((get currency-formatters (:currency money)) money)))
 
 (defn discounted-price-from-invoice-row [row]
   (MoneyResponse->text (:with-discount (:sums row))))
@@ -341,7 +342,13 @@
   [:button.primary {:disabled (not (nil? new-invoice))
                     :on-click #(service/create-invoice)}
       [:i.lupicon-circle-plus]
-      [:span (common/loc :invoices.new-invoice)]])
+   [:span (common/loc :invoices.new-invoice)]])
+
+(rum/defc print-button
+  []
+  [:button.secondary {:on-click (fn [e]
+                                (.print js/window))}
+   (common/loc :print)])
 
 (rum/defc invoice-list < rum/reactive
   [invoices]
@@ -351,7 +358,8 @@
      [:h2 (common/loc :invoices.title)]]
     [:div {:class "new-invoice-button-container"}
      (new-invoice-button (rum/react state/new-invoice))]
-    [:div {:class "clear"}]]
+    [:div {:class "clear"}]
+    (print-button)]
    [:div
      (invoice-table invoices)]])
 

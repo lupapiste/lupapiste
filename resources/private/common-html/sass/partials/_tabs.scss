@@ -49,6 +49,10 @@ $tab-size: 2px;
   clear: both;
   box-sizing: border-box;
   padding-top: 40px;
+
+  @media print {
+      visibility: hidden; //Otherwise causes application data to float over content
+  }
 }
 
 $indicator-size: 24px;

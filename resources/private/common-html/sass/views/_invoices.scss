@@ -20,12 +20,29 @@
             clear: both;
             width: 100%;
         }
+
+        @media print {
+            display: none;
+        }
     }
 }
 
 button.invoice-change-state-button {
     background-color: $positive;
     color: #ffffff;
+}
+
+.invoice-accordion {
+    @media print {
+        page-break-after: always;
+    }
+
+    > .rollup-accordion-content {
+        @media print {
+            display: block !important;
+        }
+    }
+
 }
 
 .invoice-accordion.rollup {
