@@ -72,9 +72,11 @@
         operations (:toimenpiteet app-info)
         kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         id (conv-util/make-converted-application-id kuntalupatunnus)
+        description (or (building-reader/->asian-tiedot xml)
+                        "") ;; So that regex checks on this don't throw errors, should the field be empty.
         primary-op-name (if (seq operations)
-                          (conv-util/deduce-operation-type kuntalupatunnus (first operations))
-                          (conv-util/deduce-operation-type kuntalupatunnus))
+                          (conv-util/deduce-operation-type kuntalupatunnus description (first operations))
+                          (conv-util/deduce-operation-type kuntalupatunnus description))
 
         manual-schema-datas {(name (conv-util/op-name->schema-name primary-op-name)) (first document-datas)}
 
@@ -210,7 +212,8 @@
         permit-type           "R"
         xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        location-info         (prev-permit/get-location-info command app-info)
+        location-info         (or (prev-permit/get-location-info command app-info)
+                                  prev-permit/default-location-info)
         organization          (org/get-organization organizationId)
         validation-result     (permit/validate-verdict-xml permit-type xml organization)
         no-proper-applicants? (not-any? prev-permit/get-applicant-type (:hakijat app-info))]

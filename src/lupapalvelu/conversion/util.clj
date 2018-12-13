@@ -182,10 +182,14 @@
                                   (decapitalize (kuntalupatunnus->description kuntalupatunnus))))]
     (assoc app :documents
            (map (fn [doc]
-                  (if (and (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
-                           (empty? (get-in doc [:data :kuvaus :value])))
+                  (cond
+                    (and (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
+                         (empty? (get-in doc [:data :kuvaus :value])))
                     (assoc-in doc [:data :kuvaus :value] kuvausteksti)
-                    doc))
+                    (and (re-find #"maisematyo" (get-in doc [:schema-info :name]))
+                         (empty? (get-in doc [:data :kuvaus :value])))
+                    (assoc-in doc [:data :kuvaus :value] kuvaus)
+                    :else doc))
                 documents))))
 
 (defn op-name->schema-name [op-name]
@@ -315,15 +319,21 @@
 
 (defn deduce-operation-type
   "Takes a kuntalupatunnus and a 'toimenpide'-element from app-info, returns the operation type"
-  ([kuntalupatunnus]
+  ([kuntalupatunnus description]
    (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)]
      (condp = suffix
        "TJO" "tyonjohtajan-nimeaminen-v2"
        "P" "purkaminen"
        "PI" "purkaminen"
+       "MAI" (cond
+               (re-find #"kaatami|kaatoa" description) "puun-kaataminen"
+               (re-find #"valmistele" description) "muu-tontti-tai-kort-muutos"
+               (re-find #"kaivam|kaivu" description) "kaivuu"
+               (re-find #"pysäk|liittym" description) "tontin-jarjestelymuutos"
+               :else "muu-maisema-toimenpide")
        "konversio"))) ;; A minimal generic operation for this purpose.
                       ;; If a an application does not contain 'toimenpide'-element and is not P(I) or TJO, 'konversio it is'.
-  ([kuntalupatunnus toimenpide]
+  ([kuntalupatunnus description toimenpide]
    (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
         uusi? (contains? toimenpide :uusi)
         rakennustieto (get-in toimenpide [:rakennustieto :Rakennus :rakennuksenTiedot])

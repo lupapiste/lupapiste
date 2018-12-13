@@ -301,6 +301,14 @@
     (-> x util/->double pos?)
     (-> y util/->double pos?)))
 
+(def default-location-info
+  "Default location info for Vantaa's conversion from Facta:
+  the address and coordinates point to the RAVA of Vantaa."
+  {:address "Kielotie 20 C"
+   :propertyId "92-61-118-2"
+   :x 391513.021
+   :y 6685671.373})
+
 (defn get-location-info [{data :data :as command} app-info]
   (when app-info
     (let [rakennuspaikka-exists? (and (:rakennuspaikka app-info)
