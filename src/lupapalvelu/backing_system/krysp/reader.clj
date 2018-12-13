@@ -20,6 +20,7 @@
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
             [sade.env :as env]
+            [sade.property :as sprop]
             [sade.strings :as ss]
             [sade.util :refer [fn-> fn->>] :as util]
             [sade.xml :refer :all]
@@ -740,7 +741,9 @@
                                (or (resolve-property-id-by-point coord-array-Rakennuspaikka)
                                    (rakennuspaikka-property-id Rakennuspaikka))
                                (rakennuspaikka-property-id Rakennuspaikka))
-            municipality (or (prop/municipality-by-property-id kiinteistotunnus) kuntakoodi)]
+            municipality   (if (and (string? kiinteistotunnus) (re-matches sprop/db-property-id-pattern kiinteistotunnus))
+                             (prop/municipality-by-property-id kiinteistotunnus)
+                             kuntakoodi)]
 
         (-> (merge
               {:id                          (->lp-tunnus asia)
