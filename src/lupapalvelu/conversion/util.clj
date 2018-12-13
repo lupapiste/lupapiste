@@ -192,6 +192,16 @@
                     :else doc))
                 documents))))
 
+(defn remove-empty-rakennuspaikka
+  "`app/make-application` creates an empty location document (using 'rakennuspaikka' schema)
+  for the created application. Since we're using 'rakennuspaikka-kuntagml'-schema instead,
+  this document is not used and can be weeded out here."
+  [{:keys [documents] :as app}]
+  (assoc app :documents
+         (filter (fn [doc]
+                   (not= "rakennuspaikka" (get-in doc [:schema-info :name])))
+                 documents)))
+
 (defn op-name->schema-name [op-name]
   (-> op-name operations/get-operation-metadata :schema))
 
@@ -407,10 +417,16 @@
 (defn get-asian-kuvaus [kuntalupatunnus]
   (-> kuntalupatunnus get-xml-for-kuntalupatunnus building-reader/->asian-tiedot))
 
+(defn is-empty-document? [doc]
+  "")
+
+(defn get-nested-map-vals [m]
+  (filter (complement map?) (tree-seq map? vals m)))
+
 (defn is-empty-osapuoli? [doc]
   (let [sukunimi (->> (tree-seq map? vals doc)
                       (filter map?)
-                      (keep :sukunimi)
+                      (keep :yhteystiedot)
                       first)]
     (boolean
       (when sukunimi
