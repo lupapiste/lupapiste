@@ -211,16 +211,12 @@
 
 (facts vaadittu-erityissuunnitelma-canonical
   (fact "suunnitelmat / Finnish"
-    (vaadittu-erityissuunnitelma-canonical "fi" verdict "5a156ddf0e40adc8ee064464")
-    => {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma "Suunnitelmat", :toteutumisPvm nil}})
-
-  (fact "suunnitelmat / Swedish"
-    (vaadittu-erityissuunnitelma-canonical "sv" verdict "5a156ddf0e40adc8ee064464")
-    => {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma "Planer", :toteutumisPvm nil}})
-
-  (fact "suunnitelmat / English"
-    (vaadittu-erityissuunnitelma-canonical "en" verdict "6a156ddf0e40adc8ee064464")
-    => {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma "Plans2", :toteutumisPvm nil}}))
+    (vaadittu-erityissuunnitelma-canonical "fi"
+                                           {:id "5a156ddf0e40adc8ee064464"
+                                            :fi "Suunnitelmat"
+                                            :sv "Planer"
+                                            :en "Plans"})
+    => {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma "Suunnitelmat", :toteutumisPvm nil}}))
 
 (fact vaadittu-tyonjohtaja-canonical
   (fact "vv-tj"

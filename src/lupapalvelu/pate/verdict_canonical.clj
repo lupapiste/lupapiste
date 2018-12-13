@@ -17,10 +17,9 @@
            (map #(assoc-in {} [:Maarays :sisalto] %))
            not-empty))
 
-(defn- vaadittu-erityissuunnitelma-canonical [lang {{plans :plans} :references} plan-id]
-  (let [plan (util/find-by-id plan-id plans)]
-    {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma (get plan (keyword lang))
-                                  :toteutumisPvm nil}}))
+(defn- vaadittu-erityissuunnitelma-canonical [lang plan]
+  {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma (get plan (keyword lang))
+                                :toteutumisPvm nil}})
 
 (defn- vaadittu-tyonjohtaja-canonical [foreman]
   {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi foreman}})
@@ -35,10 +34,11 @@
    :kerrosala nil
    :kokonaisala nil
    :rakennusoikeudellinenKerrosala nil
-   :vaaditutKatselmukset (map (partial vaadittu-katselmus-canonical lang)
-                              (vc/verdict-required-reviews verdict))
+   :vaaditutKatselmukset (mapv (partial vaadittu-katselmus-canonical lang)
+                               (vc/verdict-required-reviews verdict))
    :maaraystieto (maarays-seq-canonical verdict)
-   :vaadittuErityissuunnitelmatieto (map (partial vaadittu-erityissuunnitelma-canonical lang verdict) (:plans data))
+   :vaadittuErityissuunnitelmatieto (mapv (partial vaadittu-erityissuunnitelma-canonical lang)
+                                          (vc/verdict-required-plans verdict))
    :vaadittuTyonjohtajatieto (map vaadittu-tyonjohtaja-canonical
                                   (vc/verdict-required-foremen verdict))})
 

@@ -436,3 +436,42 @@
      {:paatokset [{:lupamaaraykset {:vaadittuTyonjohtajatieto
                                     ["KVV-työnjohtaja" "erityisalojen työnjohtaja"]}}]})
     => ["KVV-työnjohtaja" "erityisalojen työnjohtaja"]))
+
+(facts "required plans"
+  (fact "Pate verdict"
+    (vc/verdict-required-plans
+     {:category :r
+      :data {:plans ["plan0" "plan2"]}
+      :references {:plans [{:id "plan0"
+                            :fi "Suunnitelma"
+                            :sv "Plan"
+                            :en "Plan"}
+                           {:id "plan1"}
+                           {:id "plan2"
+                            :fi "Toinen suunnitelma"
+                            :sv "Annan plan"
+                            :en "Another plan"}]}})
+    => [{:id "plan0"
+         :fi "Suunnitelma"
+         :sv "Plan"
+         :en "Plan"}
+        {:id "plan2"
+         :fi "Toinen suunnitelma"
+         :sv "Annan plan"
+         :en "Another plan"}])
+
+  (fact "Legacy verdict"
+    (vc/verdict-required-plans
+     {:legacy? true
+      :category :r
+      :data irrelevant})
+    => [])
+
+  (fact "Backing system verdict"
+    (vc/verdict-required-plans
+     {:paatokset [{:lupamaaraykset {:vaaditutErityissuunnitelmat
+                                    ["KVV-suunnitelmat"]}}]})
+    => [{:id nil
+         :fi "KVV-suunnitelmat"
+         :sv "KVV-suunnitelmat"
+         :en "KVV-suunnitelmat"}]))

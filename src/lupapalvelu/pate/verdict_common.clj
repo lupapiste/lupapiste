@@ -223,7 +223,6 @@
           #(or (schema-helper/review-type-map (keyword %))
                (schema-helper/review-type-map :ei-tiedossa))))
 
-
 (defn verdict-required-reviews [verdict]
   (if (lupapiste-verdict? verdict)
     (if (legacy? verdict)
@@ -251,6 +250,20 @@
             (get-data verdict :foremen)))
     (-> verdict get-lupamaaraykset :vaadittuTyonjohtajatieto)))
 
+(defn- backing->required-plan [plan]
+  {:id nil
+   :fi plan
+   :sv plan
+   :en plan})
+
+(defn verdict-required-plans [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (legacy? verdict)
+      []
+      (mapv #(util/find-by-id % (-> verdict :references :plans))
+            (get-data verdict :plans)))
+    (->> verdict get-lupamaaraykset :vaaditutErityissuunnitelmat
+         (map backing->required-plan))))
 ;;
 ;; Verdict schema
 ;;
