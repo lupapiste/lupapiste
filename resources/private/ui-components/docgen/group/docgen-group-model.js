@@ -34,13 +34,19 @@ LUPAPISTE.DocgenGroupModel = function(params) {
                        },
                        {});
 
+  // Finds value in a document.
+  // groupPath: current path within current document
+  // pathString: path defined in show/hide-when schema
+  // documentName (optional): denotes the target document. If given,
+  // the path within the document is just pathString. Otherwise the
+  // path within current document is resolved using both groupPath and
+  // pathString
   function getValueByPathString(groupPath, pathString, documentName) {
     var path = pathString.split("/");
     var docId = self.documentId;
-    var absolutePath = null;
+    var absolutePath = path;
     if( documentName ) {
       docId = self.service.findDocumentByName( documentName ).id;
-      absolutePath = _.concat( [documentName], path );
     } else {
       absolutePath = path[0] === "" ? _.tail(path) : groupPath.concat(path);
     }
@@ -90,10 +96,10 @@ LUPAPISTE.DocgenGroupModel = function(params) {
       && _.includes(hideWhen.values, getValueByPathString(parentPath,
                                                           hideWhen.path,
                                                           hideWhen.document))
-      || showWhen
-      && !_.includes(showWhen.values, getValueByPathString(parentPath,
-                                                           showWhen.path,
-                                                           showWhen.document));
+      || (showWhen
+          && !_.includes(showWhen.values, getValueByPathString(parentPath,
+                                                               showWhen.path,
+                                                               showWhen.document)));
   }
 
   function getInSchema(schema, schemaPath, path) {

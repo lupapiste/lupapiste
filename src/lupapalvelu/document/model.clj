@@ -281,7 +281,9 @@
         (assoc validation-result :path []) ; Invalid path from user input should not be echoed
         validation-result))))
 
-(defn- data-match? [application doc-data doc-path {:keys [path values document] :as m}]
+(defn- data-match?
+  "True if show/hide-when definition resolves true in this context."
+  [application doc-data doc-path {:keys [path values document]}]
   (boolean
    (and path
         values

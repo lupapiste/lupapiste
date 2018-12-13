@@ -42,7 +42,7 @@ LUPAPISTE.AlluMapModel = function( params ) {
     if( !map && self.rendered() && lox) {
       map = gis.makeMap( self.mapId, {zoomWheelEnabled: false} );
       map.updateSize().center( lox.x, lox.y, 14 );
-            addDrawings( getDrawings() );
+      addDrawings( getDrawings() );
       self.addToDisposeQueue( {dispose: function() {
         map.clear();
       }});

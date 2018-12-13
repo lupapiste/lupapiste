@@ -358,8 +358,20 @@
        (mapv keyword)))
 
 (defn get-value-by-path
-  "Get element value by target-path string. target-path can be
-  absolute (/path/to/element) or relative (sibling/element). If target
-  path is given as relative, path is used to resolve absolute path."
+  "Get element value by target-path string. path is a list of
+  keywords. target-path can be absolute (/path/to/element) or
+  relative (sibling/element). If target path is given as relative,
+  path is used to resolve absolute _sibling_ path. Path resolution
+  examples:
+
+  path           target-path         result-path
+  -----------------------------------------------------------
+  [:hello]       'world'             [:world :value]
+  [:foo :bar]    'one/two'           [:foo :one :two :value]
+  [:foo :bar]    '/one/two'          [:one :two :value]
+  nil            '/one/two'          [:one :two :value]
+  [:foo :bar]    nil                 [:value]
+  [:foo :bar]    ''                  [:value]
+  "
   [doc path target-path]
   (get-in doc (conj (path-string->absolute-path (butlast path) target-path) :value)))

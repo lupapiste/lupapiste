@@ -1,6 +1,7 @@
 (ns lupapalvelu.pdf.pdf-export-test
   (:require [clojure.string :as str]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :refer [get-value-by-path]]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
@@ -14,7 +15,7 @@
                                      warn warnf error errorf fatal fatalf]])
   (:import (java.io FileOutputStream)))
 
-(testable-privates lupapalvelu.pdf.pdf-export get-value-by-path get-subschemas hide-by-hide-when show-by-show-when removable-groups)
+(testable-privates lupapalvelu.pdf.pdf-export get-subschemas removable-groups)
 
 (def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
                        "poikkeusasian-rakennuspaikka"
@@ -95,8 +96,12 @@
                             "2" {:kayttoonottava {:value true} :rakennus {:rakennusnro {:value "rak2"}}}
                                     }}})
 
+(defn make-app [doc-name doc-data]
+  {:documents [{:schema-info {:name doc-name}
+                :data doc-data}]})
+
 (facts get-value-by-path
-  (fact "simple strcuture"
+  (fact "simple structure"
     (get-value-by-path {:value ..value..} [] "") => ..value..)
 
   (fact "simple strcuture - with absolute path"
@@ -106,33 +111,13 @@
     (get-value-by-path {:foo {:bar {:value ..value..}}} [:hii :hoo] "/foo/bar") => ..value..)
 
   (fact "relative path"
-    (get-value-by-path {:foo {:quu {:bar {:value ..value..}}}} [:foo] "quu/bar") => ..value..)
+    (get-value-by-path {:foo {:quu {:bar {:value ..value..}}}} [:foo :extra] "quu/bar") => ..value..)
 
   (fact "not found"
     (get-value-by-path {:foo {:quu {:bar {:value ..value..}}}} [:foo] "buz") => nil)
 
   (fact "no data"
     (get-value-by-path nil [:foo] "buz") => nil))
-
-(facts hide-by-hide-when
-  (fact "match"
-    (hide-by-hide-when {:foo {:value ..foo..} :bar {:value ..bar..}} [] {:name "bar" :hide-when {:path "foo" :values #{..foo..}}}) => truthy)
-
-  (fact "no value match"
-    (hide-by-hide-when {:foo {:value ..foo..} :bar {:value ..bar..}} [] {:name "bar" :hide-when {:path "foo" :values #{..fiu..}}}) => falsey)
-
-  (fact "no hide-when"
-    (hide-by-hide-when {:foo {:value ..foo..} :bar {:value ..bar..}} [] {:name "bar"}) => falsey))
-
-(facts show-by-show-when
-  (fact "match"
-    (show-by-show-when {:foo {:value ..foo..} :bar {:value ..bar..}} [] {:name "bar" :show-when {:path "foo" :values #{..foo..}}}) => truthy)
-
-  (fact "no value match"
-    (show-by-show-when {:foo {:value ..foo..} :bar {:value ..bar..}} [] {:name "bar" :show-when {:path "foo" :values #{..fiu..}}}) => falsey)
-
-  (fact "no hide-when"
-    (show-by-show-when {:foo {:value ..foo..} :bar {:value ..bar..}} [] {:name "bar"}) => truthy))
 
 (facts removable-groups
   (fact "simple structure"
@@ -210,6 +195,8 @@
                      {:name "waz", :type :text}],
             :groups []}})
 
+
+
   (fact "excluded by hide-when / show-when - root doc - non-repeating"
     (get-subschemas nil
                     {:foo {:value ..foo..} :bar {:value ..bar..} :quu {:fuz {:value ..fuz..}}}
@@ -226,6 +213,22 @@
                      {:name "bar", :type :text, :hide-when {:path "foo", :values #{..goo..}}}]
             :groups [{:name "quu", :type :group, :body [{:name "buz"} {:name "fuz"}]}]}})
 
+  (fact "excluded by cross-document hide-when / show-when - root doc - non-repeating"
+    (get-subschemas (make-app "xref" {:foo {:value ..foo..} :bar {:value ..bar..} :quu {:fuz {:value ..fuz..}}})
+                    {}
+                    {:name "doc"
+                     :type :group
+                     :body [{:name "quu" :type :group :body [{:name "buz"} {:name "fuz"}]}
+                            {:name "fiu" :type :text :show-when {:document "xref" :path "quu/buz" :values #{..fuz..}}}
+                            {:name "fau" :type :text :show-when {:document "xref" :path "quu/fuz" :values #{..waz..}}}
+                            {:name "foo" :type :text :show-when {:document "xref" :path "quu/fuz" :values #{..fuz..}}}
+                            {:name "bar" :type :text :hide-when {:document "xref" :path "foo" :values #{..goo..}}}
+                            {:name "boo" :type :text :hide-when {:document "xref" :path "foo" :values #{..foo..}}}]}
+                    [])
+    => {[] {:fields [{:name "foo", :type :text, :show-when {:document "xref" :path "quu/fuz", :values #{..fuz..}}},
+                     {:name "bar", :type :text, :hide-when {:document "xref" :path "foo", :values #{..goo..}}}]
+            :groups [{:name "quu", :type :group, :body [{:name "buz"} {:name "fuz"}]}]}})
+
   (fact "excluded by hide-when / show-when - inner group - non-repeating"
     (get-subschemas nil
                     {:foo {:value ..foo..} :bar {:value ..bar..} :quu {:fuz {:value ..fuz..}}}
@@ -238,6 +241,22 @@
                     [:quu])
     => {[:quu] {:fields [{:name "biz", :type :text, :hide-when {:path "fuz", :values #{..guz..}}},
                          {:name "fiz", :type :text, :show-when {:path "/foo", :values #{..foo..}}}]
+                :groups []}})
+
+  (fact "excluded by cross-document hide-when / show-when - inner group - non-repeating"
+    (get-subschemas (make-app "xref" {:foo {:value ..foo..} :bar {:value ..bar..} :quu {:fuz {:value ..fuz..}}})
+                    {}
+                    {:name "quu"
+                     :type :group
+                     :body [{:name "buz" :type :text :hide-when {:document "xref" :path "quu/fuz" :values #{..fuz..}}}
+                            {:name "biz" :type :text :hide-when {:document "xref" :path "quu/fuz" :values #{..guz..}}}
+                            {:name "baz" :type :text :show-when {:document "xref" :path "/quu/fuz" :values #{..fuz..}}}
+                            {:name "fiz" :type :text :show-when {:document "xref" :path "/foo" :values #{..foo..}}}
+                            {:name "fuz" :type :text :show-when {:document "xref" :path "/foo" :values #{..goo..}}}]}
+                    [:quu])
+    => {[:quu] {:fields [{:name "biz", :type :text, :hide-when {:document "xref" :path "quu/fuz", :values #{..guz..}}}
+                         {:name "baz" :type :text :show-when {:document "xref" :path "/quu/fuz" :values #{..fuz..}}}
+                         {:name "fiz", :type :text, :show-when {:document "xref" :path "/foo", :values #{..foo..}}}]
                 :groups []}})
 
   (fact "excluded by hide-when / show-when - inner group - repeating"
@@ -361,15 +380,15 @@
               (fact "Pdf data type " (nth rows 22) => (i18n/localize (name lang) "task-katselmus.katselmuksenLaji.muu katselmus")))))))))
 
 (def foreman-roles-and-tasks {"vastaava ty\u00f6njohtaja"      ["rakennuksenMuutosJaKorjaustyo"
-                                                           "uudisrakennustyoMaanrakennustoineen"
-                                                           "uudisrakennustyoIlmanMaanrakennustoita"
-                                                           "linjasaneeraus"
-                                                           "maanrakennustyot"
-                                                           "rakennuksenPurkaminen"]
+                                                                "uudisrakennustyoMaanrakennustoineen"
+                                                                "uudisrakennustyoIlmanMaanrakennustoita"
+                                                                "linjasaneeraus"
+                                                                "maanrakennustyot"
+                                                                "rakennuksenPurkaminen"]
                               "KVV-ty\u00f6njohtaja"           ["sisapuolinenKvvTyo"
-                                                           "ulkopuolinenKvvTyo"]
+                                                                "ulkopuolinenKvvTyo"]
                               "IV-ty\u00f6njohtaja"            ["ivLaitoksenAsennustyo"
-                                                           "ivLaitoksenKorjausJaMuutostyo"]
+                                                                "ivLaitoksenKorjausJaMuutostyo"]
                               "erityisalojen ty\u00f6njohtaja" []})
 
 (defn loc-tasks [role]
