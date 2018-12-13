@@ -44,7 +44,7 @@ LUPAPISTE.AlluMapModel = function( params ) {
       map.updateSize().center( lox.x, lox.y, 14 );
       addDrawings( getDrawings() );
       self.addToDisposeQueue( {dispose: function() {
-        map.clear().destroy();
+        map.clear();
       }});
     }
   });

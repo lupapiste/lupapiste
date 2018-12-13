@@ -34,21 +34,42 @@ LUPAPISTE.DocgenGroupModel = function(params) {
                        },
                        {});
 
-  function getValueByPathString(groupPath, pathString) {
+  // Finds value in a document.
+  // groupPath: current path within current document
+  // pathString: path defined in show/hide-when schema
+  // documentName (optional): denotes the target document. If given,
+  // the path within the document is just pathString. Otherwise the
+  // path within current document is resolved using both groupPath and
+  // pathString
+  function getValueByPathString(groupPath, pathString, documentName) {
     var path = pathString.split("/");
-    var absolutePath = path[0] === "" ? _.tail(path) : groupPath.concat(path);
-    return util.getIn(self.service.getInDocument(self.documentId, absolutePath), ["model"]);
+    var docId = self.documentId;
+    var absolutePath = path;
+    if( documentName ) {
+      docId = self.service.findDocumentByName( documentName ).id;
+    } else {
+      absolutePath = path[0] === "" ? _.tail(path) : groupPath.concat(path);
+    }
+    return util.getIn(self.service.getInDocument(docId, absolutePath), ["model"]);
   }
 
   self.subSchemas = self.disposedPureComputed(function() {
     return _(params.schema.body)
       .reject(function(schema) {
         var hideWhen = schema["hide-when"];
-        return hideWhen ? _.includes(hideWhen.values, getValueByPathString(self.path, hideWhen.path)) : false;
+        return hideWhen
+          ? _.includes(hideWhen.values, getValueByPathString(self.path,
+                                                             hideWhen.path,
+                                                             hideWhen.document))
+          : false;
       })
       .filter(function(schema) {
         var showWhen = schema["show-when"];
-        return showWhen ? _.includes(showWhen.values, getValueByPathString(self.path, showWhen.path)) : true;
+        return showWhen
+          ? _.includes(showWhen.values, getValueByPathString(self.path,
+                                                             showWhen.path,
+                                                             showWhen.document))
+          : true;
       })
       .filter(function(schema) {
         return self.service.getInDocument(self.documentId, self.path.concat(schema.name));
@@ -71,8 +92,14 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   function hideSchema(schema, parentPath) {
     var hideWhen = _.get(schema, "hide-when");
     var showWhen = _.get(schema, "show-when");
-    return hideWhen && _.includes(hideWhen.values, getValueByPathString(parentPath, hideWhen.path)) ||
-      showWhen && !_.includes(showWhen.values, getValueByPathString(parentPath, showWhen.path));
+    return hideWhen
+      && _.includes(hideWhen.values, getValueByPathString(parentPath,
+                                                          hideWhen.path,
+                                                          hideWhen.document))
+      || (showWhen
+          && !_.includes(showWhen.values, getValueByPathString(parentPath,
+                                                               showWhen.path,
+                                                               showWhen.document)));
   }
 
   function getInSchema(schema, schemaPath, path) {

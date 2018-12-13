@@ -18,6 +18,9 @@
                            body)
    :rows             rows})
 
+;; -------------------------
+;; Promootio
+;; -------------------------
 
 (def promootio-description (allu-group {:name "promootio"
                                         :body [{:name        "promootio-name"
@@ -219,19 +222,64 @@
                                :css :allu--info)
                         allu-group))
 
-(def lmv-description {:name       "lyhytaikainen-maanvuokraus"
-                      :type       :group
-                      :approvable true
-                      :body       [{:name     "lmv-type"
-                                    :type     :select
-                                    :layout   :full-width
-                                    :required true
-                                    :body     [{:name "one"}
-                                               {:name "two"}]}
-                                   {:name     "lmv-description"
-                                    :type     :text
-                                    :required true
-                                    :layout   :full-width}]})
+;; ----------------------------
+;; Lyhytaikainen maanvuokraus
+;; ----------------------------
+
+(def lmv-description (allu-group {:name "lyhytaikainen-maanvuokraus"
+                                  :body [{:name "type"
+                                          :type :select
+                                          :css  [:dropdown]
+                                          :layout      :full-width
+                                          :required    true
+                                          :body        [{:name "banderolli"}
+                                                        {:name "other"}]
+                                          :uicomponent :docgen-select}
+                                         {:name        "description"
+                                          :type        :text
+                                          :max-len     10000
+                                          :placeholder "lmv.description.placeholder"
+                                          :required    true
+                                          :layout      :full-width}]
+                                  :rows [["type::3"]
+                                         ["description::3"]]}))
+
+(def lmv-location (allu-group {:name "lmv-location"
+                               :body [{:name    "drawings"
+                                       :type    :allu-drawings
+                                       :pseudo? true
+                                       :kind    :promotion
+                                       :map     "allu-map"}
+                                      {:name    "allu-map"
+                                       :type    :allu-map
+                                       :pseudo? true
+                                       :layout  :full-width}
+                                      {:name        "area"
+                                       :type        :string
+                                       :subtype     :decimal
+                                       :unit        :m2
+                                       :min         0
+                                       :uicomponent :docgen-input
+                                       :inputType   :string
+                                       :placeholder "lmv.area.placeholder"
+                                       :hide-when   {:document "lyhytaikainen-maanvuokraus"
+                                                     :path     "lyhytaikainen-maanvuokraus/type"
+                                                     :values   #{"banderolli"}}}]
+                               :rows [["drawings::2" "allu-map::2"]
+                                      ["area"]]}))
+
+(def lmv-time (allu-group {:name "lmv-time"
+                           :body [{:name        "start-date"
+                                   :type        :date
+                                   :layout      :initial-width
+                                   :placeholder "placeholder.date"
+                                   :required    true}
+                                  {:name        "end-date"
+                                   :type        :date
+                                   :layout      :initial-width
+                                   :placeholder "placeholder.date"
+                                   :required    true}]
+                           :rows [["start-date" "end-date"]]}))
 
 ;; The definition is used in pdf-export-test.
 (def schema-definitions [{:info {:name       "promootio"
@@ -257,6 +305,14 @@
                          {:info {:name       "lyhytaikainen-maanvuokraus"
                                  :approvable true
                                  :order      11}
-                          :body [lmv-description]}])
+                          :body [lmv-description]}
+                         {:info {:name       "lmv-location"
+                                 :approvable true
+                                 :order      12}
+                          :body [lmv-location]}
+                         {:info {:name       "lmv-time"
+                                 :approvable true
+                                 :order      13}
+                          :body [lmv-time]}])
 
 (defschemas 1 schema-definitions)
