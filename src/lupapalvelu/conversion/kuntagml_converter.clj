@@ -75,7 +75,7 @@
         description (or (building-reader/->asian-tiedot xml)
                         "") ;; So that regex checks on this don't throw errors, should the field be empty.
         primary-op-name (if (seq operations)
-                          (conv-util/deduce-operation-type kuntalupatunnus (first operations) description)
+                          (conv-util/deduce-operation-type kuntalupatunnus description (first operations))
                           (conv-util/deduce-operation-type kuntalupatunnus description))
 
         manual-schema-datas {(name (conv-util/op-name->schema-name primary-op-name)) (first document-datas)}

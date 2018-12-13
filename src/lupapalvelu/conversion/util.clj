@@ -333,7 +333,7 @@
                :else "muu-maisema-toimenpide")
        "konversio"))) ;; A minimal generic operation for this purpose.
                       ;; If a an application does not contain 'toimenpide'-element and is not P(I) or TJO, 'konversio it is'.
-  ([kuntalupatunnus toimenpide description]
+  ([kuntalupatunnus description toimenpide]
    (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
         uusi? (contains? toimenpide :uusi)
         rakennustieto (get-in toimenpide [:rakennustieto :Rakennus :rakennuksenTiedot])
