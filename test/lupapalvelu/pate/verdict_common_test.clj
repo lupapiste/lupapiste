@@ -378,7 +378,7 @@
          :fi "Review fi"
          :sv "Review sv"
          :en "Review en"
-         :type :osittainen-loppukatselmus}])
+         :type "osittainen loppukatselmus"}])
 
   (fact "Legacy verdict"
     (vc/verdict-required-reviews
@@ -392,12 +392,12 @@
          :fi "Review"
          :sv "Review"
          :en "Review"
-         :type :aloituskokous}
+         :type "aloituskokous"}
         {:id "review1"
          :fi "Check"
          :sv "Check"
          :en "Check"
-         :type :paikan-tarkastaminen}])
+         :type "rakennuksen paikan tarkastaminen"}])
 
   (fact "Backing system verdict"
     (vc/verdict-required-reviews
@@ -408,9 +408,31 @@
          :fi "Review"
          :sv "Review"
          :en "Review"
-         :type :osittainen-loppukatselmus}
+         :type "osittainen loppukatselmus"}
         {:id nil
          :fi nil
          :sv nil
          :en nil
-         :type :ei-tiedossa}]))
+         :type "joku ihme katselmus"}]))
+
+(facts "required foremen"
+  (fact "Pate verdict"
+    (vc/verdict-required-foremen
+     {:category :r
+      :data {:foremen [:vv-tj :erityis-tj :XYZ]}})
+    => ["KVV-työnjohtaja" "erityisalojen työnjohtaja" "ei tiedossa"])
+
+  (fact "Legacy verdict"
+    (vc/verdict-required-foremen
+     {:legacy? true
+      :category :r
+      :data {:foremen {"foreman0" {:role "vv-tj"}
+                       "foreman1" {:role "erityis-tj"}
+                       "foreman3" {:role "XYZ"}}}})
+    => ["KVV-työnjohtaja" "erityisalojen työnjohtaja" "ei tiedossa"])
+
+  (fact "Backing system verdict"
+    (vc/verdict-required-foremen
+     {:paatokset [{:lupamaaraykset {:vaadittuTyonjohtajatieto
+                                    ["KVV-työnjohtaja" "erityisalojen työnjohtaja"]}}]})
+    => ["KVV-työnjohtaja" "erityisalojen työnjohtaja"]))

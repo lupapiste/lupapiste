@@ -175,7 +175,7 @@
                                    :fi   "Katselmus"
                                    :sv   "Syn"
                                    :en   "Review"
-                                   :type "muu-katselmus"})
+                                   :type "muu katselmus"})
     => {:Katselmus {:katselmuksenLaji "muu katselmus", :tarkastuksenTaiKatselmuksenNimi "Katselmus", :muuTunnustieto []}})
 
   (fact "muu-katselmus / English"
@@ -184,7 +184,7 @@
                                    :fi   "Katselmus"
                                    :sv   "Syn"
                                    :en   "Review"
-                                   :type "muu-katselmus"})
+                                   :type "muu katselmus"})
     => {:Katselmus {:katselmuksenLaji "muu katselmus", :tarkastuksenTaiKatselmuksenNimi "Review", :muuTunnustieto []}})
 
   (fact "paikan-merkisteminen / Swedish"
@@ -193,7 +193,7 @@
                                    :fi   "Katselmus2"
                                    :sv   "Syn2"
                                    :en   "Review2"
-                                   :type "paikan-merkitseminen"})
+                                   :type "rakennuksen paikan merkitseminen"})
     => {:Katselmus {:katselmuksenLaji "rakennuksen paikan merkitseminen", :tarkastuksenTaiKatselmuksenNimi "Syn2", :muuTunnustieto []}}))
 
 (facts maarays-seq-canonical
@@ -224,20 +224,8 @@
 
 (fact vaadittu-tyonjohtaja-canonical
   (fact "vv-tj"
-    (vaadittu-tyonjohtaja-canonical "vv-tj")
-    => {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi "KVV-ty\u00f6njohtaja"}})
-
-  (fact "tj"
-    (vaadittu-tyonjohtaja-canonical "tj")
-    => {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi "ty\u00f6njohtaja"}})
-
-  (fact "nil"
-    (vaadittu-tyonjohtaja-canonical nil)
-    => {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi "ei tiedossa"}})
-
-  (fact "foo"
-    (vaadittu-tyonjohtaja-canonical "foo")
-    => {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi "ei tiedossa"}}))
+    (vaadittu-tyonjohtaja-canonical "KVV-ty\u00f6njohtaja")
+    => {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi "KVV-ty\u00f6njohtaja"}}))
 
 (facts lupamaaraykset-type-canonical
   (let [canonical (lupamaaraykset-type-canonical "fi" verdict)]

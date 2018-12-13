@@ -201,37 +201,56 @@
 (defn get-lupamaaraykset [verdict]
   (some-> verdict :paatokset (get 0) :lupamaaraykset))
 
-(def inverse-review-type-map
-  (set/map-invert schema-helper/review-type-map))
-
-(defn- backing->pate-required-review
+(defn- backing->required-review
   "Transforms backing system review requirement to look like Pate's"
   [req-review]
   {:id nil
    :fi (:tarkastuksenTaiKatselmuksenNimi req-review)
    :sv (:tarkastuksenTaiKatselmuksenNimi req-review)
    :en (:tarkastuksenTaiKatselmuksenNimi req-review)
-   :type (get inverse-review-type-map
-              (:katselmuksenLaji req-review)
-              :ei-tiedossa)})
+   :type (:katselmuksenLaji req-review)})
 
-(defn- legacy->pate-required-review [[review-id review]]
+(defn- legacy->required-review [[review-id review]]
   {:id review-id
    :fi (:name review)
    :sv (:name review)
    :en (:name review)
-   :type (:type review)})
+   :type (or (schema-helper/review-type-map (-> review :type keyword))
+             (schema-helper/review-type-map :ei-tiedossa))})
+
+(defn- pate->required-review [review]
+  (update review :type
+          #(or (schema-helper/review-type-map (keyword %))
+               (schema-helper/review-type-map :ei-tiedossa))))
+
 
 (defn verdict-required-reviews [verdict]
   (if (lupapiste-verdict? verdict)
     (if (legacy? verdict)
       (->> (get-data verdict :reviews)
-           (mapv legacy->pate-required-review)
-           (sort-by :id))
-      (mapv #(util/find-by-id % (-> verdict :references :reviews))
-            (get-data verdict :reviews)))
-    (mapv backing->pate-required-review
+           (map legacy->required-review)
+           (sort-by :id) ;; This ensures a well defined order after
+           (into []))    ;; mapping over hashmap
+      (->> (get-data verdict :reviews)
+           (map #(util/find-by-id % (-> verdict :references :reviews)))
+           (mapv pate->required-review)))
+    (mapv backing->required-review
           (-> verdict get-lupamaaraykset :vaaditutKatselmukset))))
+
+(defn- foreman-description [foreman-code]
+  (or (schema-helper/foreman-role-map (keyword foreman-code))
+      (schema-helper/foreman-role-map nil)))
+
+(defn verdict-required-foremen [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (legacy? verdict)
+      (->> (get-data verdict :foremen)
+           (sort-by first)
+           (mapv (comp foreman-description :role second)))
+      (mapv foreman-description
+            (get-data verdict :foremen)))
+    (-> verdict get-lupamaaraykset :vaadittuTyonjohtajatieto)))
+
 ;;
 ;; Verdict schema
 ;;

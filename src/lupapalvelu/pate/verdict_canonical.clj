@@ -6,7 +6,7 @@
             [lupapalvelu.pate.verdict-common :as vc]))
 
 (defn- vaadittu-katselmus-canonical [lang review]
-  {:Katselmus {:katselmuksenLaji (helper/review-type-map (or (keyword (:type review)) :ei-tiedossa))
+  {:Katselmus {:katselmuksenLaji (:type review)
                :tarkastuksenTaiKatselmuksenNimi (get review (keyword lang))
                :muuTunnustieto [#_{:MuuTunnus "yht:MuuTunnusType"}]}}) ; TODO: initialize review tasks and pass ids here
 
@@ -22,15 +22,8 @@
     {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma (get plan (keyword lang))
                                   :toteutumisPvm nil}}))
 
-(def ^:private foreman-role-mapping {:vv-tj "KVV-ty\u00f6njohtaja"
-                                     :iv-tj "IV-ty\u00f6njohtaja"
-                                     :erityis-tj "erityisalojen ty\u00f6njohtaja"
-                                     :vastaava-tj "vastaava ty\u00f6njohtaja"
-                                     :tj "ty\u00f6njohtaja"
-                                     nil "ei tiedossa"})
-
 (defn- vaadittu-tyonjohtaja-canonical [foreman]
-  {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi (get foreman-role-mapping (keyword foreman) "ei tiedossa")}})
+  {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi foreman}})
 
 (defn- lupamaaraykset-type-canonical [lang {{buildings :buildings :as data} :data :as verdict}]
   {:autopaikkojaEnintaan nil
@@ -46,7 +39,8 @@
                               (vc/verdict-required-reviews verdict))
    :maaraystieto (maarays-seq-canonical verdict)
    :vaadittuErityissuunnitelmatieto (map (partial vaadittu-erityissuunnitelma-canonical lang verdict) (:plans data))
-   :vaadittuTyonjohtajatieto (map vaadittu-tyonjohtaja-canonical (:foremen data))})
+   :vaadittuTyonjohtajatieto (map vaadittu-tyonjohtaja-canonical
+                                  (vc/verdict-required-foremen verdict))})
 
 (defn- paivamaarat-type-canonical [verdict]
   (let [data (vc/verdict-dates verdict)]
