@@ -257,7 +257,7 @@
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
         ;; make secondaryOperations for buildings other than the first one in case there are many
-        other-building-docs (map (partial app/document-data->op-document created-application) (rest document-datas))
+        other-building-docs (map (partial app/document-data->op-document created-application) (rest document-datas) "aiemmalla-luvalla-hakeminen")
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
 
         created-application (-> created-application
