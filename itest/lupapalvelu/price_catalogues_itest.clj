@@ -170,13 +170,12 @@
                       response => fail?
                       (:text response) => "error.price-catalogue.incorrect-date"))
 
-              (fact "should return invalide response when valid-from-str is yesterday"
+              (fact "should return invalid response when valid-from-str is yesterday"
                     (let [response (-> (local-command sipoo :publish-price-catalogue
                                                       :organization-id "753-R"
                                                       :price-catalogue (assoc catalogue-request :valid-from-str (yesterday))))]
                       response => fail?
                       (:text response) => "error.price-catalogue.incorrect-date"))
-
 
               (fact "should fail if discount percent is nil for some row"
 
@@ -206,6 +205,14 @@
                               (sc/validate invsc/PriceCatalogue new-catalogue)
                               (to-finnish-date valid-from) => (:valid-from-str catalogue-request)
                               rows => (:rows catalogue-request))))
+
+                    (fact "valid-from is in the past but this is the first catalogue for the org"
+                          (with-redefs [catalogues/has-previous-published-price-catalogues? (fn [org-id]
+                                                                                              (not= "753-R" org-id))] ;;We are expecting 753-R here
+                            (let [response (-> (local-command sipoo :publish-price-catalogue
+                                                              :organization-id "753-R"
+                                                              :price-catalogue (assoc catalogue-request :valid-from-str "1.1.2015")))]
+                              response => ok?)))
 
                     (fact "optional fields have nil value"
                           (let [catalogue-request {:valid-from-str "1.1.2019"
