@@ -170,15 +170,30 @@
 
 (facts vaadittu-katselmus-canonical
   (fact "muu-katselmus / Finnish"
-    (vaadittu-katselmus-canonical "fi" verdict "5a156dd40e40adc8ee064463")
+    (vaadittu-katselmus-canonical "fi"
+                                  {:id   "5a156dd40e40adc8ee064463"
+                                   :fi   "Katselmus"
+                                   :sv   "Syn"
+                                   :en   "Review"
+                                   :type "muu-katselmus"})
     => {:Katselmus {:katselmuksenLaji "muu katselmus", :tarkastuksenTaiKatselmuksenNimi "Katselmus", :muuTunnustieto []}})
 
   (fact "muu-katselmus / English"
-    (vaadittu-katselmus-canonical "en" verdict "5a156dd40e40adc8ee064463")
+    (vaadittu-katselmus-canonical "en"
+                                  {:id   "5a156dd40e40adc8ee064463"
+                                   :fi   "Katselmus"
+                                   :sv   "Syn"
+                                   :en   "Review"
+                                   :type "muu-katselmus"})
     => {:Katselmus {:katselmuksenLaji "muu katselmus", :tarkastuksenTaiKatselmuksenNimi "Review", :muuTunnustieto []}})
 
   (fact "paikan-merkisteminen / Swedish"
-    (vaadittu-katselmus-canonical "sv" verdict "6a156dd40e40adc8ee064463")
+    (vaadittu-katselmus-canonical "sv"
+                                  {:id   "6a156dd40e40adc8ee064463"
+                                   :fi   "Katselmus2"
+                                   :sv   "Syn2"
+                                   :en   "Review2"
+                                   :type "paikan-merkitseminen"})
     => {:Katselmus {:katselmuksenLaji "rakennuksen paikan merkitseminen", :tarkastuksenTaiKatselmuksenNimi "Syn2", :muuTunnustieto []}}))
 
 (facts maarays-seq-canonical

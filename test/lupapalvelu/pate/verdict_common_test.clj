@@ -358,3 +358,59 @@
               (contains {:id       "v4"
                          :modified 25
                          :title    "\u00a744 Ei puollettu"})])))
+
+(facts "required reviews"
+  (fact "Pate verdict"
+    (vc/verdict-required-reviews
+     {:category :r
+      :data {:reviews ["review0"]}
+      :references {:reviews [{:id "review0"
+                              :fi "Review fi"
+                              :sv "Review sv"
+                              :en "Review en"
+                              :type :osittainen-loppukatselmus}
+                             {:id "review1"
+                              :fi "Review"
+                              :sv "Review"
+                              :en "Review"
+                              :type :rakennekatselmus}]}})
+    => [{:id "review0"
+         :fi "Review fi"
+         :sv "Review sv"
+         :en "Review en"
+         :type :osittainen-loppukatselmus}])
+
+  (fact "Legacy verdict"
+    (vc/verdict-required-reviews
+     {:legacy? true
+      :category :r
+      :data {:reviews {"review0" {:name "Review"
+                                  :type :aloituskokous}
+                       "review1" {:name "Check"
+                                  :type :paikan-tarkastaminen}}}})
+    => [{:id "review0"
+         :fi "Review"
+         :sv "Review"
+         :en "Review"
+         :type :aloituskokous}
+        {:id "review1"
+         :fi "Check"
+         :sv "Check"
+         :en "Check"
+         :type :paikan-tarkastaminen}])
+
+  (fact "Backing system verdict"
+    (vc/verdict-required-reviews
+     {:paatokset [{:lupamaaraykset {:vaaditutKatselmukset [{:tarkastuksenTaiKatselmuksenNimi "Review"
+                                                            :katselmuksenLaji "osittainen loppukatselmus"}
+                                                           {:katselmuksenLaji "joku ihme katselmus"}]}}]})
+    => [{:id nil
+         :fi "Review"
+         :sv "Review"
+         :en "Review"
+         :type :osittainen-loppukatselmus}
+        {:id nil
+         :fi nil
+         :sv nil
+         :en nil
+         :type :ei-tiedossa}]))

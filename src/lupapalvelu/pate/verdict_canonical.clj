@@ -5,11 +5,10 @@
             [lupapalvelu.pate.schema-helper :as helper]
             [lupapalvelu.pate.verdict-common :as vc]))
 
-(defn- vaadittu-katselmus-canonical [lang {{reviews :reviews} :references} review-id]
-  (let [review (util/find-by-id review-id reviews)]
-    {:Katselmus {:katselmuksenLaji (helper/review-type-map (or (keyword (:type review)) :ei-tiedossa))
-                 :tarkastuksenTaiKatselmuksenNimi (get review (keyword lang))
-                 :muuTunnustieto [#_{:MuuTunnus "yht:MuuTunnusType"}]}})) ; TODO: initialize review tasks and pass ids here
+(defn- vaadittu-katselmus-canonical [lang review]
+  {:Katselmus {:katselmuksenLaji (helper/review-type-map (or (keyword (:type review)) :ei-tiedossa))
+               :tarkastuksenTaiKatselmuksenNimi (get review (keyword lang))
+               :muuTunnustieto [#_{:MuuTunnus "yht:MuuTunnusType"}]}}) ; TODO: initialize review tasks and pass ids here
 
 (defn- maarays-seq-canonical [{:keys [data]}]
   (some->> data :conditions vals
@@ -43,7 +42,8 @@
    :kerrosala nil
    :kokonaisala nil
    :rakennusoikeudellinenKerrosala nil
-   :vaaditutKatselmukset (map (partial vaadittu-katselmus-canonical lang verdict) (:reviews data))
+   :vaaditutKatselmukset (map (partial vaadittu-katselmus-canonical lang)
+                              (vc/verdict-required-reviews verdict))
    :maaraystieto (maarays-seq-canonical verdict)
    :vaadittuErityissuunnitelmatieto (map (partial vaadittu-erityissuunnitelma-canonical lang verdict) (:plans data))
    :vaadittuTyonjohtajatieto (map vaadittu-tyonjohtaja-canonical (:foremen data))})
@@ -65,12 +65,13 @@
        (remove ss/blank?)
        (ss/join " ")))
 
-(defn- paatospoytakirja-type-canonical [lang {data :data :as verdict}]
+(defn- paatospoytakirja-type-canonical [lang verdict]
   {:paatos (vc/verdict-text verdict)
-   :paatoskoodi (helper/verdict-code-map (or (keyword (vc/verdict-code verdict)) :ei-tiedossa))
+   :paatoskoodi (helper/verdict-code-map (or (keyword (vc/verdict-code verdict))
+                                             :ei-tiedossa))
    :paatoksentekija (paatoksentekija lang verdict)
-   :paatospvm (util/to-xml-date (:verdict-date data))
-   :pykala (:verdict-section data)})
+   :paatospvm (util/to-xml-date (vc/verdict-date verdict))
+   :pykala (vc/verdict-section verdict)})
 
 (defn verdict-canonical [lang verdict]
   {:Paatos {:lupamaaraykset (lupamaaraykset-type-canonical lang verdict)

@@ -1,12 +1,14 @@
 (ns lupapalvelu.pate.verdict-common
   "A common interface for accessing verdicts created with Pate and fetched from the backing system"
-  (:require [schema.core :as sc]
+  (:require [clojure.set :as set]
+            [schema.core :as sc]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.metadata :as metadata]
+            [lupapalvelu.pate.schema-helper :as schema-helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.user :as usr]))
@@ -190,8 +192,46 @@
      :lainvoimainen (:lainvoimainen (get-paivamaarat verdict))
      :raukeamis     (:raukeamis (get-paivamaarat verdict))
      :valitus       nil
-     :voimassa      (:voimassaHetki (get-paivamaarat verdict))
-  }))
+     :voimassa      (:voimassaHetki (get-paivamaarat verdict))}))
+
+;;
+;; Lupamaaraykset
+;;
+
+(defn get-lupamaaraykset [verdict]
+  (some-> verdict :paatokset (get 0) :lupamaaraykset))
+
+(def inverse-review-type-map
+  (set/map-invert schema-helper/review-type-map))
+
+(defn- backing->pate-required-review
+  "Transforms backing system review requirement to look like Pate's"
+  [req-review]
+  {:id nil
+   :fi (:tarkastuksenTaiKatselmuksenNimi req-review)
+   :sv (:tarkastuksenTaiKatselmuksenNimi req-review)
+   :en (:tarkastuksenTaiKatselmuksenNimi req-review)
+   :type (get inverse-review-type-map
+              (:katselmuksenLaji req-review)
+              :ei-tiedossa)})
+
+(defn- legacy->pate-required-review [[review-id review]]
+  {:id review-id
+   :fi (:name review)
+   :sv (:name review)
+   :en (:name review)
+   :type (:type review)})
+
+(defn verdict-required-reviews [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (legacy? verdict)
+      (->> (get-data verdict :reviews)
+           (mapv legacy->pate-required-review)
+           (sort-by :id))
+      (mapv #(util/find-by-id % (-> verdict :references :reviews))
+            (get-data verdict :reviews)))
+    (mapv backing->pate-required-review
+          (-> verdict get-lupamaaraykset :vaaditutKatselmukset))))
 ;;
 ;; Verdict schema
 ;;
