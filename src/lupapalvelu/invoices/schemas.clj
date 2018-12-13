@@ -77,7 +77,7 @@
    :price-per-unit sc/Num
    :max-total-price (sc/maybe sc/Num)
    :min-total-price (sc/maybe sc/Num)
-   :discount-percent (sc/maybe DiscountPercent)
+   :discount-percent DiscountPercent
    :operations [sc/Str]})
 
 (sc/defschema PriceCatalogue

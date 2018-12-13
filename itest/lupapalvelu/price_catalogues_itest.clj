@@ -67,7 +67,7 @@
                   :text "Taksarivi 1"
                   :unit "kpl"
                   :price-per-unit 23
-                  :discount-percent nil
+                  :discount-percent 0
                   :min-total-price nil
                   :max-total-price nil
                   :operations ["toimenpide1" "toimenpide2"]}]}
@@ -178,6 +178,22 @@
                       (:text response) => "error.price-catalogue.incorrect-date"))
 
 
+              (fact "should fail if discount percent is nil for some row"
+
+                    (let [catalogue-request {:valid-from-str "1.1.2019"
+                                                   :rows [{:code "12345"
+                                                           :text "Taksarivi 1"
+                                                           :unit "kpl"
+                                                           :price-per-unit 23
+                                                           :discount-percent nil
+                                                           :min-total-price 100
+                                                           :max-total-price 200
+                                                           :operations ["toimenpide1" "toimenpide2"]}]}
+                                response (local-command sipoo :publish-price-catalogue
+                                                        :organization-id "753-R"
+                                                        :price-catalogue catalogue-request)]
+                            response => fail?))
+
               (fact "should save the price catalogue to db and return an ok response when"
 
                     (fact "all fields have values"
@@ -197,7 +213,7 @@
                                                            :text "Taksarivi 1"
                                                            :unit "kpl"
                                                            :price-per-unit 23
-                                                           :discount-percent nil
+                                                           :discount-percent 5
                                                            :min-total-price nil
                                                            :max-total-price nil
                                                            :operations ["toimenpide1" "toimenpide2"]}]}
@@ -403,6 +419,4 @@
                                                   :id (:id application))]
 
                         response => fail?
-                        (:text response) => "error.application-valid-unique-price-catalogue-not-found")))))
-
-      )))
+                        (:text response) => "error.application-valid-unique-price-catalogue-not-found"))))))))
