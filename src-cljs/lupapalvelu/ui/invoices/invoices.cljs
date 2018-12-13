@@ -9,7 +9,7 @@
             [lupapiste-invoice-commons.states :as invoice-states]
             [lupapalvelu.ui.invoices.service :as service]
             [lupapalvelu.ui.invoices.state :as state]
-            [cljs.lupapalvelu.ui.invoices.util :refer [num num?]]
+            [cljs.lupapalvelu.ui.invoices.util :refer [->int ->float num?]]
             [lupapalvelu.invoices.shared.util :as inv-util]
             [rum.core :as rum]
             [sade.shared-util :as util]
@@ -79,8 +79,8 @@
           equals-old-value? (= converted-value old-value)
           can-be-saved-in-backend? (or can-be-saved-in-backend? (constantly true))]
       (if (and (not equals-old-value?)
-               (can-be-saved-in-backend? value))
-        (save-in-backend! field converted-value)
+               (can-be-saved-in-backend? converted-value))
+        (save-in-backend!   field converted-value)
         (save-only-locally! field old-value)))))
 
 (rum/defc invoice-row-remove-cell [invoice operation-index invoice-row-index]
@@ -99,13 +99,14 @@
         save-in-backend!   (partial update-invoice-row-value!    invoice operation-index invoice-row-index)
         save-only-locally! (partial set-local-invoice-row-value! invoice operation-index invoice-row-index)
         update-text-field! (field-setter trim save-in-backend! save-only-locally!)
-        update-num-field!  (field-setter num save-in-backend! save-only-locally! num?)]
+        update-int-field!  (field-setter ->int save-in-backend! save-only-locally! num?)
+        update-float-field!  (field-setter ->float save-in-backend! save-only-locally! num?)]
     [:tr
-     [:td (autosaving-input  text  (fn [value] (update-text-field! :text value text)))]
-     [:td (autosaving-input  units (fn [value] (update-num-field! :units value units)))]
+     [:td (autosaving-input  text  (fn [value] (update-text-field!  :text  value text)))]
+     [:td (autosaving-input  units (fn [value] (update-float-field! :units value units)))]
      [:td (autosaving-select unit (rum/react state/valid-units) (fn [value] (update-text-field! :unit value)))]
-     [:td (autosaving-input  price-per-unit  (fn [value] (update-num-field! :price-per-unit value price-per-unit)))]
-     [:td (autosaving-input discount-percent (fn [value] (update-num-field! :discount-percent value discount-percent)))]
+     [:td (autosaving-input  price-per-unit  (fn [value] (update-float-field! :price-per-unit value price-per-unit)))]
+     [:td (autosaving-input discount-percent (fn [value] (update-int-field!   :discount-percent value discount-percent)))]
      [:td discounted-price]
      (invoice-row-remove-cell invoice operation-index invoice-row-index)]))
 
@@ -117,13 +118,14 @@
         save-in-backend!   (partial update-invoice-row-value!    invoice operation-index invoice-row-index)
         save-only-locally! (partial set-local-invoice-row-value! invoice operation-index invoice-row-index)
         update-text-field! (field-setter trim save-in-backend! save-only-locally!)
-        update-num-field!  (field-setter num save-in-backend! save-only-locally! num?)]
+        update-int-field!  (field-setter ->int save-in-backend! save-only-locally! num?)
+        update-float-field!  (field-setter ->float save-in-backend! save-only-locally! num?)]
     [:tr
      [:td text]
-     [:td (autosaving-input  units (fn [value] (update-num-field! :units value units)))]
+     [:td (autosaving-input  units (fn [value] (update-float-field! :units value units)))]
      [:td unit]
      [:td price-per-unit]
-     [:td (autosaving-input discount-percent (fn [value] (update-num-field! :discount-percent value discount-percent)))]
+     [:td (autosaving-input discount-percent (fn [value] (update-int-field! :discount-percent value discount-percent)))]
      [:td discounted-price]
      (invoice-row-remove-cell invoice operation-index invoice-row-index)]))
 
