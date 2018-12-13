@@ -1,5 +1,5 @@
 (ns cljs.lupapalvelu.ui.invoices.util
-  (:require [clojure.string :refer [blank? join replace]]))
+  (:require [clojure.string :refer [blank? join]]))
 
 (defn- split-on-space [s]
   (clojure.string/split s #"\s"))
@@ -11,7 +11,7 @@
 
 (defn num? [val]
   (let [val (strip-whitespace val)]
-    (when (not (blank? val))
+    (when-not (blank? val)
       (not (js/isNaN val)))))
 
 (defn ->int [val]
@@ -19,8 +19,8 @@
     (js/parseInt val)))
 
 (defn comma->dot [val]
-  (when val
-    (replace val #"," ".")))
+  (when (and val (string? val))
+    (clojure.string/replace val #"," ".")))
 
 (defn ->float [val]
   (let [val-with-dot (comma->dot val)]
