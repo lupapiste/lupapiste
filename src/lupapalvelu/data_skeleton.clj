@@ -87,10 +87,19 @@
 ;;
 
 (defn from-context
-  "Produces a result from context by accessing values from given
-  `path` in order. `path` can contain functions, keywords,
-  sets (applied as functions), non-negative integers (used with `nth`).
-  A default value can be provided as an optional argument"
+  "Returns a function that produces a result from context by accessing
+  values from given `path` in order. `path` can contain functions,
+  keywords, sets (applied as functions), non-negative integers (used
+  with `nth`).  A default value can be provided as an optional
+  argument
+
+  ((from-context [:foo 0 last])
+    {:foo [[1 2 3]]}) => 3
+  ((from-context [:foo 0 last #{1 2}])
+    {:foo [[1 2 3]]}) => nil
+  ((from-context [:foo 0 last #{1 2}]
+                 :default)
+    {:foo [[1 2 3]]}) => :default"
   [path & [default]]
   (fn from-context-fn [context]
     (loop [[f & rest] path

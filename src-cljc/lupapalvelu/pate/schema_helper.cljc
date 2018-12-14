@@ -68,12 +68,14 @@
 
 (def foreman-codes [:vastaava-tj :vv-tj :iv-tj :erityis-tj :tj])
 
-(def foreman-role-map {:vv-tj "KVV-ty\u00f6njohtaja"
-                       :iv-tj "IV-ty\u00f6njohtaja"
-                       :erityis-tj "erityisalojen ty\u00f6njohtaja"
-                       :vastaava-tj "vastaava ty\u00f6njohtaja"
-                       :tj "ty\u00f6njohtaja"
-                       nil "ei tiedossa"})
+(defn foreman-role [k]
+  (get {:vv-tj "KVV-ty\u00f6njohtaja"
+        :iv-tj "IV-ty\u00f6njohtaja"
+        :erityis-tj "erityisalojen ty\u00f6njohtaja"
+        :vastaava-tj "vastaava ty\u00f6njohtaja"
+        :tj "ty\u00f6njohtaja"}
+       (keyword k)
+       "ei tiedossa"))
 
 ;; Verdict dates must include every possible date key.
 (def verdict-dates [:julkipano :anto :muutoksenhaku :lainvoimainen

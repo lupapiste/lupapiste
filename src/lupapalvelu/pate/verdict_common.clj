@@ -237,8 +237,7 @@
           (-> verdict get-lupamaaraykset :vaaditutKatselmukset))))
 
 (defn- foreman-description [foreman-code]
-  (or (schema-helper/foreman-role-map (keyword foreman-code))
-      (schema-helper/foreman-role-map nil)))
+  (schema-helper/foreman-role foreman-code))
 
 (defn verdict-required-foremen [verdict]
   (if (lupapiste-verdict? verdict)
