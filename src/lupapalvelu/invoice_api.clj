@@ -8,7 +8,8 @@
             [lupapalvelu.price-catalogues :as catalogues]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
-            [lupapalvelu.time-util :refer [timestamp-at-the-end-of-previous-day]]
+            [lupapalvelu.time-util :refer [timestamp-at-the-end-of-previous-day
+                                           tomorrow-or-later?]]
             [sade.core :refer [ok fail]]
             [sade.util :as util]
             [schema.core :as sc]
@@ -21,6 +22,13 @@
   (when-not (some->> (mapv :scope (:user-organizations command))
                      (some #(util/find-by-key :invoicing-enabled true %)))
     (fail :error.invoicing-disabled)))
+
+(defn can-set-valid-from
+  "Pre-checker that fails if trying to set catlogue valid-from in the past when previous catalogues exist"
+  [{{catalogue-request :price-catalogue org-id :organization-id} :data :as command}]
+  (if (and (catalogues/has-previous-published-price-catalogues? org-id)
+           (not (tomorrow-or-later? (:valid-from-str catalogue-request))))
+    (fail :error.price-catalogue.incorrect-date)))
 
 ;; ------------------------------------------
 ;; Invoice API
@@ -165,7 +173,8 @@
    :feature          :invoices
    :parameters       [organization-id price-catalogue]
    :input-validators [(partial action/non-blank-parameters [:organization-id])
-                      catalogues/validate-insert-price-catalogue-request]}
+                      catalogues/validate-insert-price-catalogue-request]
+   :pre-checks       [can-set-valid-from]}
   [{:keys [user] :as command}]
   (let [catalogue-to-db (catalogues/->price-catalogue-db price-catalogue user organization-id)
         previous-catalogue (catalogues/fetch-previous-published-price-catalogue catalogue-to-db)

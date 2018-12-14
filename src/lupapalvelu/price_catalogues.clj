@@ -67,11 +67,7 @@
 (defn validate-insert-price-catalogue-request [{{catalogue-request :price-catalogue org-id :organization-id} :data :as command}]
   (try
     (sc/validate invsc/PriceCatalogueInsertRequest catalogue-request)
-    (if (and
-         (has-previous-published-price-catalogues? org-id)
-         (not (tomorrow-or-later? (:valid-from-str catalogue-request))))
-      (fail :error.price-catalogue.incorrect-date))
-
+    nil
     (catch Exception e
       (warn "Invalid price catalogue request " (.getMessage e))
       (fail :error.invalid-price-catalogue))))
