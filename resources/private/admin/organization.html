@@ -7,7 +7,8 @@
                 <i class="lupicon-chevron-start"></i><span>Organisaatiolistaus</span></a>
 
         <div data-bind="with: organizationModel">
-          <h1 data-bind="text: util.getIn($data, ['organization', 'name', loc.getCurrentLanguage()])"></h1>
+          <h1 data-bind="text: util.getIn($data, ['organization', 'name', loc.getCurrentLanguage()]),
+                         css: {'organization-deactivated': deactivated}"></h1>
 
           <h2>Organisaation nimi</h2>
           <table data-test-id="organization-name-table">
@@ -26,6 +27,17 @@
           </table>
           <button data-bind="ltext: 'save',
                              click: updateOrganizationName" class="btn positive"></button>
+
+          <h2>Organisaation sulkeminen (deaktivointi)</h2>
+
+          Sulkemisen jälkeen asioitsijat ja viranomaiset voivat
+          edelleen lukea hakemuksia mutta eivät muokata niitä millään
+          lailla. Samoin uusien hakemusten luonti on estetty.
+
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="deactivated" data-bind="checked: deactivated">
+            <label class="checkbox-label" for="deactivated">Organisaatio on suljettu</label>
+          </div>
 
           <h2>Aineistokauppa</h2>
           <div class="docstore-setting">

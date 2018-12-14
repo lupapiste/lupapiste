@@ -6,6 +6,7 @@
     var isLoading = false;
     self.organization = ko.observable();
     self.names = ko.observableArray();
+    self.deactivated = ko.observable(false);
     self.permanentArchiveEnabled = ko.observable(false);
     self.digitizerToolsEnabled = ko.observable(false);
     self.calendarsEnabled = ko.observable(false);
@@ -144,6 +145,7 @@
                                                      ["areas", "areas-wgs84"])));
           isLoading = true;
           self.names(_.map(util.getIn(result, ["data", "name"]), wrapName));
+          self.deactivated( result.data.deactivated);
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
           self.digitizerToolsEnabled(result.data["digitizer-tools-enabled"]);
           self.docstoreEnabled(_.get(result, "data.docstore-info.docStoreInUse"));
@@ -302,6 +304,10 @@
         })
         .call();
     }
+
+    self.deactivated.subscribe(function(value) {
+      setBooleanAttribute("deactivated", value);
+    });
 
     self.permanentArchiveEnabled.subscribe(function(value) {
       setBooleanAttribute("permanent-archive-enabled", value);

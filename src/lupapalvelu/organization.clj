@@ -276,7 +276,10 @@
    (sc/optional-key :ely-uspa-enabled) sc/Bool
    ;; List of operations for which the Not needed selection is not
    ;; available for the default attachments.
-   (sc/optional-key :default-attachments-mandatory) [sc/Str]})
+   (sc/optional-key :default-attachments-mandatory) [sc/Str]
+   ;; If true, the organization is in a permanent read-only mode for
+   ;; every non-admin user.
+   (sc/optional-key :deactivated) sc/Bool})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
@@ -295,7 +298,7 @@
       org)))
 
 (def admin-projection
-  [:name :scope :allowedAutologinIPs :krysp
+  [:name :deactivated :scope :allowedAutologinIPs :krysp
    :pate-enabled :permanent-archive-enabled :permanent-archive-in-use-since
    :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
    :docstore-info :3d-map :default-digitalization-location

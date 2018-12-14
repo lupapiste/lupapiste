@@ -87,3 +87,10 @@ div.organizations-search, form.xml-download {
     vertical-align: middle;
   }
 }
+
+h1.organization-deactivated {
+  &:after {
+    color: $negative;
+    content: " (SULJETTU)"
+  }
+}

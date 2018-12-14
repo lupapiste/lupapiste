@@ -36716,6 +36716,11 @@ div.organizations-search input.textinput, form.xml-download input.textinput {
   vertical-align: middle;
 }
 
+h1.organization-deactivated:after {
+  color: #df3215;
+  content: " (SULJETTU)";
+}
+
 #authority-admin h2 {
   margin-top: 24px;
 }
