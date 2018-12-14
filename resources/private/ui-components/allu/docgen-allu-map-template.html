@@ -1,4 +1,5 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="docgen-allu-map-template">
-  <allu-map params="id: _.last( path )"></allu-map>
+  <allu-map params="id: _.last( path ),
+                    pageRegex: new RegExp( schema['page-re'])"></allu-map>
 </script>

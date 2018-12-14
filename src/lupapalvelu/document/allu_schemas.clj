@@ -104,6 +104,7 @@
                                              :map     "allu-map"}
                                             {:name    "allu-map"
                                              :type    :allu-map
+                                             :page-re "/info$"
                                              :pseudo? true
                                              :layout  :full-width}]
                                      :rows [["drawings::2" "allu-map::2"]]}))
@@ -252,6 +253,7 @@
                                        :map     "allu-map"}
                                       {:name    "allu-map"
                                        :type    :allu-map
+                                       :page-re "/info$"
                                        :pseudo? true
                                        :layout  :full-width}
                                       {:name        "area"
