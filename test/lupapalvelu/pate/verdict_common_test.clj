@@ -449,9 +449,10 @@
     (vc/verdict-required-conditions
      {:legacy? true
       :category :r
-      :data {"id" {:name {:_value "rakennepiiruustukset"
-                          :_user "Verdict draft Pate migration"
-                          :_modified 1537491445896}}}})
+      :data {:conditions
+             {"id" {:name {:_value "rakennepiirustukset"
+                           :_user "Verdict draft Pate migration"
+                           :_modified 1537491445896}}}}})
     => ["rakennepiirustukset"])
 
   (fact "Backing system verdict"

@@ -19,9 +19,9 @@
 
 (defn- get-data
   ([verdict]
-   (metadata/unwrap (get verdict :data)))
+   (metadata/unwrap-all (get verdict :data)))
   ([verdict k]
-   (metadata/unwrap (get-in verdict [:data k]))))
+   (metadata/unwrap-all (get-in verdict [:data k]))))
 
 ;;
 ;; Predicates
