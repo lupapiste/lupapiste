@@ -561,47 +561,60 @@
           command
           (-> command meta-data :contexts)))
 
+(defn application-read-only
+  "When application is in the read-only mode, it can be accessed like in
+  impersonation."
+  [command application]
+  (when (and (:readOnly application)
+             (case (-> command meta-data :type)
+               :command true
+               :raw (= :post (get-in command [:web :method]))
+               false))
+    unauthorized))
+
 (defn- run [command validators execute?]
   (try+
     (or
       (some #(% command) validators)
-      (let [application           (get-application command)
-            ^{:doc "Organization as delay"}
-            organization          (when application
-                                    (delay (org/get-organization (:organization application))))
-            ^{:doc "Application assignments as delay"}
-            assignments           (when application
-                                    (delay (mongo/select :assignments
-                                                         {:application.id (:id application)
-                                                          :status         {$ne "canceled"}})))
-            application-bulletins (delay
-                                    (when application
-                                      (mongo/select :application-bulletins
-                                                    ;; TODO: proper query for all application bulletins
-                                                    {:_id (:id application)})))
-            user-organizations    (lazy-seq (usr/get-organizations (:user command)))
-            company               (when-let [company-id (get-in command [:user :company :id])]
-                                    (delay (mongo/by-id :companies company-id)))
-            command               (-> {:application             application
-                                       :application-bulletins   application-bulletins
-                                       :organization            organization
-                                       :user-organizations      user-organizations
-                                       :company                 company
-                                       :application-assignments assignments}
-                                      (merge command)
-                                      (update :user update-user-application-role application)
-                                      enrich-default-permissions
-                                      enrich-action-contexts)]
+      (let [application (get-application command)]
         (or
-          (not-authorized-to-application command)
-          (access-denied-by-insufficient-permissions command)
-          (pre-checks-fail command)
-          (when execute?
-            (let [status   (executed command)
-                  post-fns (get-post-fns status (get-meta (:action command)))]
-              (invoke-post-fns! post-fns command status)
-              status))
-          (ok))))
+         (application-read-only command application)
+         (let [^{:doc "Organization as delay"}
+               organization          (when application
+                                       (delay (org/get-organization (:organization application))))
+               ^{:doc "Application assignments as delay"}
+               assignments           (when application
+                                       (delay (mongo/select :assignments
+                                                            {:application.id (:id application)
+                                                             :status         {$ne "canceled"}})))
+               application-bulletins (delay
+                                      (when application
+                                        (mongo/select :application-bulletins
+                                                      ;; TODO: proper query for all application bulletins
+                                                      {:_id (:id application)})))
+               user-organizations    (lazy-seq (usr/get-organizations (:user command)))
+               company               (when-let [company-id (get-in command [:user :company :id])]
+                                       (delay (mongo/by-id :companies company-id)))
+               command               (-> {:application             application
+                                          :application-bulletins   application-bulletins
+                                          :organization            organization
+                                          :user-organizations      user-organizations
+                                          :company                 company
+                                          :application-assignments assignments}
+                                         (merge command)
+                                         (update :user update-user-application-role application)
+                                         enrich-default-permissions
+                                         enrich-action-contexts)]
+           (or
+            (not-authorized-to-application command)
+            (access-denied-by-insufficient-permissions command)
+            (pre-checks-fail command)
+            (when execute?
+              (let [status   (executed command)
+                    post-fns (get-post-fns status (get-meta (:action command)))]
+                (invoke-post-fns! post-fns command status)
+                status))
+            (ok))))))
     (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
       (do
         (errorf "fail! in action: \"%s\" [%s:%s]: %s (%s)"
