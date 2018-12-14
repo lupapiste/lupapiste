@@ -29,9 +29,18 @@
 </script>
 
 <script class="ko-template" type="text/x-jquery-tmpl" id="form-grid-docgen-group-template">
-<div class="form-grid" data-bind="foreach: rowSchemas">
+
+  <div class="form-grid" data-bind="css: css">
+    <!-- ko if: groupHelp -->
+    <div class="row">
+      <span class="group-help-text" data-bind="ltext: groupHelp"></span>
+    </div>
+    <!-- /ko -->
+
+  <!-- ko foreach: rowSchemas -->
   <div class="row"
        data-bind="css: $data.rowCss">
+
     <!-- ko if: $data.ltext -->
     <div data-bind="ltext: $data.ltext, css: $data.css"></div>
     <!-- /ko -->
@@ -51,7 +60,7 @@
     </div>
     <!-- /ko -->
   </div>
-
+    <!-- /ko -->
 </div>
 </script>
 

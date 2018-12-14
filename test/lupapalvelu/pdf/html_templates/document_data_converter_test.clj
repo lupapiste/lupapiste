@@ -6,7 +6,6 @@
 (testable-privates lupapalvelu.pdf.html-templates.document-data-converter
                    parse-i18nkey
                    get-in-schema-with-i18n-path
-                   path-string->absolute-path
                    kw)
 
 (facts kw
@@ -52,13 +51,6 @@
   (fact "leaf i18nkey overrides doc i18name"
     (get-in-schema-with-i18n-path {:info {:name "docu" :i18name "fuz"} :body [{:name "foo" :i18nkey "bizz.buzz"  :body [{:name "bar"}]}]} [:foo :bar])
     => {:name "bar", :lupapalvelu.pdf.html-templates.document-data-converter/i18n-path [:bizz :buzz :bar]}))
-
-(facts path-string->absolute-path
-  (fact "absolute-path"
-    (path-string->absolute-path [:foo :bar] "/quu/quz") => [:quu :quz])
-
-  (fact "relative-path"
-    (path-string->absolute-path [:foo :bar] "quu/quz") => [:foo :bar :quu :quz]))
 
 (facts element-value
   (fact "string"

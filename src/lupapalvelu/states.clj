@@ -58,6 +58,8 @@
 (def r-jatkoaika-state-graph common-states/r-jatkoaika-state-graph)
 (def r-muutoslupa-state-graph common-states/r-muutoslupa-state-graph)
 
+(def allu-state-graph common-states/allu-state-graph)
+
 ; TODO draft versions this forward
 
 (def

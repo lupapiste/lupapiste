@@ -43,6 +43,7 @@
 "error.application-too-old-for-archival" "en" "Creation or submitted date of the application is earlier than the launch date of the digital archive."
 "error.application-too-old-for-archival" "fi" "Hakemuksen jättö- tai luontipäivä on aikaisempi kuin sähköisen arkiston käyttöönottopäivä."
 "error.application-too-old-for-archival" "sv" "Datumet då ansökan har lämnats in eller skapats är tidigare än datumet då elektronisk arkivering har påbörjats."
+"error.application-valid-unique-price-catalogue-not-found" "fi" "Hakemuksen jättöhetkelle ei löytynyt voimassaolevaa taksaa"
 "error.assignment-not-completed" "en" "The assignment has already been marked as completed or it is inactive"
 "error.assignment-not-completed" "fi" "Tehtävä on jo merkitty valmiiksi tai tehtävä ei ole aktiivinen"
 "error.assignment-not-completed" "sv" "Uppgiften har markerats som utförd eller är inte aktiv"

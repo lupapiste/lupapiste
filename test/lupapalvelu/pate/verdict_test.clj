@@ -3409,10 +3409,11 @@
       (vc/proposal? (assoc proposal-verdict :state "draft")) => false)
 
     (fact "proposal-filled? - verdict not"
-      (proposal-filled? {:data        {:verdict-id "proposal-1"}
-                         :application {:pate-verdicts [proposal-verdict]}}) => true
-      (verdict-filled? {:data        {:verdict-id "proposal-1"}
-                        :application {:pate-verdicts [proposal-verdict]}}) => false)
+      (let [proposal (util/dissoc-in proposal-verdict [:data :verdict-code])]
+        (proposal-filled? {:data        {:verdict-id "proposal-1"}
+                           :application {:pate-verdicts [proposal]}}) => true
+        (verdict-filled? {:data        {:verdict-id "proposal-1"}
+                          :application {:pate-verdicts [proposal]}}) => false))
 
     (fact "finalize--proposal"
       (finalize--proposal c-v-a) => {:updates {"$set" {:pate-verdicts.$.data.handler "Foo Bar"

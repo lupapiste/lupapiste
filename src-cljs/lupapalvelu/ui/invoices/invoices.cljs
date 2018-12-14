@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.invoices.invoices
   (:require [clojure.set :as set]
+            [clojure.string :refer [trim]]
             [lupapalvelu.pate.path :as path]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
@@ -8,6 +9,8 @@
             [lupapiste-invoice-commons.states :as invoice-states]
             [lupapalvelu.ui.invoices.service :as service]
             [lupapalvelu.ui.invoices.state :as state]
+            [cljs.lupapalvelu.ui.invoices.util :refer [->int ->float num?]]
+            [lupapalvelu.invoices.shared.util :as inv-util]
             [rum.core :as rum]
             [sade.shared-util :as util]
             [lupapalvelu.ui.components :refer [autocomplete]]))
@@ -28,15 +31,16 @@
 (defn translate-operation [operation]
   (common/loc (str "operations." operation)))
 
+(def currency-formatters
+  {"EUR" (fn [money]
+           (.toFixed (/ (:minor money) 100) 2))})
+
 (defn MoneyResponse->text [money]
-  (:text money))
+  (when money
+    ((get currency-formatters (:currency money)) money)))
 
 (defn discounted-price-from-invoice-row [row]
   (MoneyResponse->text (:with-discount (:sums row))))
-
-(defn calc-alv [price]
-  (* 0.24 price))
-
 
 (def state-icons {"draft" "lupicon-eye primary"
                   "checked" "lupicon-check"})
@@ -50,58 +54,87 @@
 
 (rum/defc autosaving-input [value on-blur]
   (let [value-atom (atom value)]
-    (components/text-edit value-atom {:callback (fn [event] (on-blur @value-atom))})))
+    (components/text-edit value-atom {:callback (fn [event] (on-blur @value-atom))
+                                      :class ["full-width"]})))
 
 (rum/defc autosaving-select [value options on-blur]
   (let [value-atom (atom value)]
     (components/dropdown value-atom {:items options
-                                     :callback (fn [event] (on-blur @value-atom))})))
+                                     :callback (fn [event] (on-blur @value-atom))
+                                     :class ["full-width"]})))
+
+(defn update-invoice-row-value! [invoice operation-index invoice-row-index field value]
+  (update-invoice! invoice
+                   (fn [_]
+                     (reset!
+                      invoice
+                      (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index field] value)))))
+
+(defn set-local-invoice-row-value! [invoice operation-index invoice-row-index field value]
+  (reset! invoice (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index field] value)))
+
+(defn field-setter [{:keys [convert-fn save-in-backend-fn save-locally-fn can-be-saved-in-backend?]}]
+  (fn [field value old-value]
+    (let [converted-value (convert-fn value)
+          equals-old-value? (= converted-value old-value)
+          can-be-saved-in-backend? (or can-be-saved-in-backend? (constantly true))]
+      (if (and (not equals-old-value?)
+               (can-be-saved-in-backend? converted-value))
+        (save-in-backend-fn   field converted-value)
+        (save-locally-fn field old-value)))))
+
+
+(rum/defc invoice-row-remove-cell [invoice operation-index invoice-row-index]
+  [:td
+   [:div.remove-icon-container {:on-click (fn [e]
+                                            (let [edited-invoice (service/remove-invoice-row-from-invoice @invoice operation-index invoice-row-index)]
+                                              (update-invoice! invoice (fn [result]
+                                                                                (reset! invoice edited-invoice)))))}
+    [:i.lupicon-remove]]])
 
 (rum/defc fully-editable-invoice-row < rum/reactive
   < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
                (str operation-index "-" invoice-row-index))}
-  [invoice-row invoice-row-index operation-index invoice]
+  [{:keys [text units unit discount-percent price-per-unit] :as invoice-row} invoice-row-index operation-index invoice]
   (let [discounted-price (discounted-price-from-invoice-row invoice-row)
-        alv (calc-alv discounted-price)]
+        save-in-backend!   (partial update-invoice-row-value!    invoice operation-index invoice-row-index)
+        save-only-locally! (partial set-local-invoice-row-value! invoice operation-index invoice-row-index)
+        update-text-field!  (field-setter {:convert-fn  trim   :save-in-backend-fn save-in-backend! :save-locally-fn save-only-locally!})
+        update-int-field!   (field-setter {:convert-fn ->int   :save-in-backend-fn save-in-backend! :save-locally-fn save-only-locally! :can-be-saved-in-backend? num?})
+        update-float-field! (field-setter {:convert-fn ->float :save-in-backend-fn save-in-backend! :save-locally-fn save-only-locally! :can-be-saved-in-backend? num?})]
     [:tr
-     [:td (autosaving-input (:text invoice-row) (fn [value]
-                                                  (update-invoice! invoice
-                                                                   (fn [invoice_]
-                                                                     (reset!
-                                                                      invoice
-                                                                      (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index :text] value))))))]
-     [:td (autosaving-input (:units invoice-row) (fn [value_]
-                                                   (let [value (js/parseInt value_)]
-                                                     (update-invoice! invoice
-                                                                      (fn [invoice_]
-                                                                        (reset!
-                                                                         invoice_
-                                                                         (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index :units] value)))))))]
-     [:td (autosaving-select (:unit invoice-row) (rum/react state/valid-units) (fn [value]
-                                                                                 (update-invoice! invoice
-                                                                                                  (fn [invoice_]
-                                                                                                    (reset!
-                                                                                                     invoice_
-                                                                                                     (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index :unit] value))))))]
-     [:td (:price-per-unit invoice-row)]
-     [:td (autosaving-input (:discount-percent invoice-row) (fn [value_]
-                                                              (let [value (js/parseInt value_)]
-                                                                (update-invoice! invoice
-                                                                                 (fn [invoice_]
-                                                                                   (reset!
-                                                                                    invoice_
-                                                                                    (assoc-in @invoice
-                                                                                              [:operations operation-index :invoice-rows invoice-row-index :discount-percent]
-                                                                                              value)))))))]
-     [:td alv]
-     [:td discounted-price]]))
+     [:td (autosaving-input  text  (fn [value] (update-text-field!  :text  value text)))]
+     [:td (autosaving-input  units (fn [value] (update-float-field! :units value units)))]
+     [:td (autosaving-select unit (rum/react state/valid-units) (fn [value] (update-text-field! :unit value)))]
+     [:td (autosaving-input  price-per-unit  (fn [value] (update-float-field! :price-per-unit value price-per-unit)))]
+     [:td (autosaving-input discount-percent (fn [value] (update-int-field!   :discount-percent value discount-percent)))]
+     [:td discounted-price]
+     (invoice-row-remove-cell invoice operation-index invoice-row-index)]))
+
+(rum/defc editable-catalogue-invoice-row < rum/reactive
+  < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
+               (str operation-index "-" invoice-row-index))}
+  [{:keys [text units unit discount-percent price-per-unit] :as invoice-row} invoice-row-index operation-index invoice]
+  (let [discounted-price (discounted-price-from-invoice-row invoice-row)
+        save-in-backend!   (partial update-invoice-row-value!    invoice operation-index invoice-row-index)
+        save-only-locally! (partial set-local-invoice-row-value! invoice operation-index invoice-row-index)
+        update-text-field!  (field-setter {:convert-fn trim    :save-in-backend-fn save-in-backend! :save-locally-fn save-only-locally!})
+        update-int-field!   (field-setter {:convert-fn ->int   :save-in-backend-fn save-in-backend! :save-locally-fn save-only-locally! :can-be-saved-in-backend? num?})
+        update-float-field! (field-setter {:convert-fn ->float :save-in-backend-fn save-in-backend! :save-locally-fn save-only-locally! :can-be-saved-in-backend? num?})]
+    [:tr
+     [:td text]
+     [:td (autosaving-input  units (fn [value] (update-float-field! :units value units)))]
+     [:td unit]
+     [:td price-per-unit]
+     [:td (autosaving-input discount-percent (fn [value] (update-int-field! :discount-percent value discount-percent)))]
+     [:td discounted-price]
+     (invoice-row-remove-cell invoice operation-index invoice-row-index)]))
 
 (rum/defc invoice-table-row
   < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
                (str operation-index "-" invoice-row-index))}
   [invoice-row invoice-row-index operation-index invoice]
-  (let [discounted-price (discounted-price-from-invoice-row invoice-row)
-       alv (calc-alv discounted-price)]
+  (let [discounted-price (discounted-price-from-invoice-row invoice-row)]
     [:tr
      [:td (:text invoice-row)]
      [:td (autosaving-input (:units invoice-row) (fn [value_]
@@ -117,7 +150,6 @@
                                                                                   [:operations operation-index :invoice-rows invoice-row-index :discount-percent]
                                                                                   value))
                                                                 (service/upsert-invoice! @state/application-id @invoice #()))))]
-     [:td alv]
      [:td discounted-price]]))
 
 (rum/defc invoice-table-row-static
@@ -125,22 +157,20 @@
                (str operations-row-index "-" invoice-row-index))}
   [invoice-row invoice-row-index operations-row-index]
 
-  (let [discounted-price (discounted-price-from-invoice-row invoice-row)
-        alv (calc-alv discounted-price)]
+  (let [discounted-price (discounted-price-from-invoice-row invoice-row)]
     [:tr
      [:td (:text invoice-row)]
      [:td (:units invoice-row)]
      [:td (str (:unit invoice-row))]
      [:td (:price-per-unit invoice-row)]
      [:td (:discount-percent invoice-row)]
-     [:td alv]
      [:td discounted-price]]))
 
-(rum/defc filterable-select-row [on-change]
+(rum/defc filterable-select-row [on-change items]
   [:tr {:style {:border-style "dashed" :border-width "1px" :border-color "#dddddd"}}
    [:td {:col-span 7}
     (autocomplete ""
-                  {:items [{:text (common/loc :invoices.rows.customrow) :value :freerow}]
+                  {:items items ;;[{:text (common/loc :invoices.rows.customrow) :value :freerow}]
                    :callback on-change})]])
 
 (defmulti create-invoice-row-element (fn [row index operation-index invoice]
@@ -151,6 +181,10 @@
 (defmethod create-invoice-row-element {:type :custom :state :draft}
   [row index operation-index invoice]
   (fully-editable-invoice-row row index operation-index invoice))
+
+(defmethod create-invoice-row-element {:type :from-price-catalogue :state :draft}
+  [row index operation-index invoice]
+  (editable-catalogue-invoice-row row index operation-index invoice))
 
 (defmethod create-invoice-row-element {:state :not-draft}
   [row index operation-index invoice]
@@ -164,39 +198,60 @@
   (let [invoice-rows (map-indexed (fn [index row]
                                     (create-invoice-row-element row index operation-index invoice))
                                   (:invoice-rows operation))
-        invoice-state (keyword (:state @invoice))]
+        app-id @state/application-id
+        invoice-state (keyword (:state @invoice))
+        catalogue (rum/react state/price-catalogue)
+        catalogue-rows (inv-util/indexed-rows catalogue)
+        freerow {:text (common/loc :invoices.rows.customrow) :value :freerow}
+        items (->> catalogue-rows
+                   (map (fn [{:keys [index text]}] {:value index :text text}))
+                   (concat [freerow]))
+        on-select (fn [value]
+                    (let [row-from-catalogue (inv-util/->invoice-row (inv-util/find-map catalogue-rows :index value))
+                          freerow {:text ""
+                                   :unit (common/loc :unit.kpl)
+                                   :price-per-unit 0
+                                   :units 0
+                                   :type :custom
+                                   :discount-percent 0}
+                          row (if (= value :freerow)
+                                freerow
+                                row-from-catalogue)
+                          updated-invoice (update-in @invoice
+                                                       [:operations operation-index :invoice-rows]
+                                                       (fn [invoice-rows]
+                                                         (conj invoice-rows row)))]
+                      (reset! invoice updated-invoice)))]
     [:table {:class "invoice-operations-table"}
      [:thead
       [:tr
-       [:th (translate-operation (:name operation))]
-       [:th (common/loc :invoices.rows.amount)]
-       [:th (common/loc :invoices.rows.unit)]
-       [:th (common/loc :invoices.rows.unit-price)]
-       [:th (common/loc :invoices.rows.discount-percent)]
-       [:th (common/loc :invoices.rows.VAT)]
-       [:th (common/loc :invoices.rows.total)]]]
+       [:th.operation  (translate-operation (:name operation))]
+       [:th.units      (common/loc :invoices.rows.amount)]
+       [:th.unit       (common/loc :invoices.rows.unit)]
+       [:th.unit-price (common/loc :invoices.rows.unit-price)]
+       [:th.discount   (common/loc :invoices.rows.discount-percent)]
+       [:th.total      (common/loc :invoices.rows.total)]
+       (when (= :draft invoice-state)
+         [:th.remove [:div.remove-icon-container {:on-click (fn [e]
+                                                              (let [invoice-with-operation-removed (service/remove-operation-from-invoice @invoice operation-index)]
+                                                                (update-invoice!
+                                                                 invoice
+                                                                 (fn [response]
+                                                                   (reset! invoice invoice-with-operation-removed)))))}
+                      [:i.lupicon-remove]]])]]
      [:tbody
       invoice-rows
       (if (= :draft invoice-state)
-        (filterable-select-row (fn [value]
-                                 (if (= value :freerow)
-                                   (let [updated-invoice (update-in @invoice
-                                                                    [:operations operation-index :invoice-rows]
-                                                                    (fn [invoice-rows]
-                                                                      (conj invoice-rows {:text ""
-                                                                                          :unit (common/loc :unit.kpl) ;; Note that these values
-                                                                                          :price-per-unit 20           ;; Should come from taksa in the
-                                                                                          :units 0                     ;; not so far future
-                                                                                          :type :custom
-                                                                                          :discount-percent 0})))]
-                                     (reset! invoice updated-invoice))))))]]))
+        (filterable-select-row on-select items))]]))
 
 (rum/defcs invoice-add-operation-row < (rum/local false ::is-open?)
   rum/reactive
   [state invoice app-id]
   (let [is-open? (::is-open? state)
+        catalogue (rum/react state/price-catalogue)
+        catalogue-rows-by-operation (inv-util/rows-with-index-by-operation catalogue)
         operations_ (rum/react state/operations)
-        operations(map (fn [operation]
+        operations (map (fn [operation]
                          {:text (translate-operation (:name operation)) :value (:name operation)}) operations_)]
     [:div {:class "button-row-left"}
      [:button.secondary {:on-click #(reset! is-open? (not @is-open?))}
@@ -204,14 +259,16 @@
       [:span (common/loc :invoices.operations.add-operation)]]
      (if @is-open?
        (autocomplete "" {:items operations
-                                 :callback (fn [value]
-                                             (reset! is-open? false)
-                                             (let [updated-invoice (service/add-operation-to-invoice @invoice value)]
+                         :callback (fn [operation]
+                                     (reset! is-open? false)
+                                     (let [catalogue-rows (get catalogue-rows-by-operation operation)
+                                           invoice-rows (mapv inv-util/->invoice-row catalogue-rows)
+                                           updated-invoice (service/add-operation-to-invoice @invoice operation invoice-rows)]
 
-                                               (service/upsert-invoice! app-id
-                                                               updated-invoice
-                                                               (fn [response]
-                                                                 (reset! invoice updated-invoice)))))}))]))
+                                       (service/upsert-invoice! app-id
+                                                                updated-invoice
+                                                                (fn [response]
+                                                                  (reset! invoice updated-invoice)))))}))]))
 
 (rum/defc change-next-state-button [invoice-atom]
   (let [current-state (:state @invoice-atom)
@@ -245,21 +302,17 @@
                                                                     (fn [response]
                                                                       (service/fetch-invoices app-id)))))))} state-text])))
 
-(rum/defc invoice-summary-row [invoice-atom]
+(rum/defc invoice-summary-row < rum/reactive [invoice-atom]
   (let [operations (:operations @invoice-atom)
         invoice-rows-all (mapcat :invoice-rows operations)
-
         sums {:sum-zero-vat (MoneyResponse->text (:sum @invoice-atom))
-              :sum-vat "not counted yet"
               :sum-total (MoneyResponse->text (:sum @invoice-atom))}]
     [:div {:style {:text-align "right"}}
      [:div {:style {:display "inline-block"}}
       [:div
        [:div {:style {:text-align "left" :display "inline" :padding "5em"}} (common/loc :invoices.wo-taxes)]
        [:div {:style {:text-align "right" :display "inline"}} (:sum-zero-vat sums)]]]
-     [:div
-       [:div {:style {:text-align "left" :display "inline" :padding "5em"}} (common/loc :invoices.vat24)]
-      [:div {:style {:text-align "right" :display "inline"}} (:sum-vat sums)]]
+
      [:div
        [:div {:style {:text-align "left" :display "inline" :padding "5em"}} (common/loc :invoices.rows.total)]
        [:div {:style {:text-align "right" :display "inline"}} (:sum-total sums)]]
@@ -276,8 +329,7 @@
 
      (if (= :draft invoice-state)
        (invoice-add-operation-row invoice @state/application-id))
-     (invoice-summary-row invoice)
-     ]))
+     (invoice-summary-row invoice)]))
 
 (rum/defc invoice-title-component < rum/reactive [invoice]
   (let [invoice-state (:state @invoice)
@@ -312,7 +364,13 @@
   [:button.primary {:disabled (not (nil? new-invoice))
                     :on-click #(service/create-invoice)}
       [:i.lupicon-circle-plus]
-      [:span (common/loc :invoices.new-invoice)]])
+   [:span (common/loc :invoices.new-invoice)]])
+
+(rum/defc print-button
+  []
+  [:button.secondary {:on-click (fn [e]
+                                (.print js/window))}
+   (common/loc :print)])
 
 (rum/defc invoice-list < rum/reactive
   [invoices]
@@ -322,7 +380,8 @@
      [:h2 (common/loc :invoices.title)]]
     [:div {:class "new-invoice-button-container"}
      (new-invoice-button (rum/react state/new-invoice))]
-    [:div {:class "clear"}]]
+    [:div {:class "clear"}]
+    (print-button)]
    [:div
      (invoice-table invoices)]])
 
@@ -340,7 +399,8 @@
     (reset! state/application-id app-id)
     (reset! state/new-invoice nil)
     (service/fetch-invoices app-id)
-    (service/fetch-operations app-id)))
+    (service/fetch-operations app-id)
+    (service/fetch-price-catalogue app-id)))
 
 (defn mount-component []
   (when (common/feature? :invoices)

@@ -19,7 +19,7 @@ jQuery(document).ready(function() {
     {name: "docgen-select", synchronous: true},
     {name: "docgen-button", synchronous: true},
     {name: "docgen-date", synchronous: true},
-    {name: "docgen-time", template: "docgen-input-template", synchronous: true},
+    {name: "docgen-time", synchronous: true},
     {name: "docgen-review-buildings", synchronous: true},
     {name: "docgen-building-select", synchronous: true},
     {name: "docgen-person-select", synchronous: true},
@@ -211,7 +211,16 @@ jQuery(document).ready(function() {
     {name: "generic-bulletin-tab"},
     {name: "add-link-permit"},
     {name: "premises-upload", template: "premises-upload-template"},
-    {name: "authorize-person-dialog"}
+    {name: "authorize-person-dialog"},
+    {name: "timepicker"},
+    {name: "textlink"},
+    {name: "docgen-textlink"},
+    {name: "docgen-radio-group"},
+    {name: "allu-drawings"},
+    {name: "docgen-allu-drawings"},
+    {name: "drawings-table"},
+    {name: "allu-map"},
+    {name: "docgen-allu-map"}
 ];
 
   ko.registerLupapisteComponents(components);

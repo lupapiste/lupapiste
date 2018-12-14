@@ -17,7 +17,6 @@
    :firstName                                 NameLength
    :lastName                                  NameLength
    :role                                      usr/Role
-   :email                                     ssc/Email
    :username                                  ssc/Username})
 
 (sc/defschema DiscountPercent
@@ -59,7 +58,14 @@
    :application-id sc/Str
    :organization-id sc/Str
    :operations [InvoiceOperation]
-   (sc/optional-key :sum) MoneyResponse})
+   (sc/optional-key :sum) MoneyResponse
+   (sc/optional-key :permit-number) sc/Str
+   (sc/optional-key :entity-name) sc/Str
+   (sc/optional-key :sap-number) sc/Str
+   (sc/optional-key :entity-address) sc/Str
+   (sc/optional-key :billing-reference) sc/Str
+   (sc/optional-key :identification-number) sc/Str
+   (sc/optional-key :internal-info) sc/Str})
 
 (sc/defschema InvoiceInsertRequest
   {:operations [InvoiceOperation]})
@@ -69,10 +75,10 @@
    :text sc/Str
    :unit InvoiceRowUnit
    :price-per-unit sc/Num
-   (sc/optional-key :max-total-price) sc/Num
-   (sc/optional-key :min-total-price) sc/Num
+   :max-total-price (sc/maybe sc/Num)
+   :min-total-price (sc/maybe sc/Num)
    :discount-percent DiscountPercent
-   (sc/optional-key :operations) [sc/Str]})
+   :operations [sc/Str]})
 
 (sc/defschema PriceCatalogue
   {:id sc/Str
@@ -81,10 +87,14 @@
                    "published"   ;;published and in use if on validity period
                    )
    :valid-from ssc/Timestamp
-   (sc/optional-key :valid-until) ssc/Timestamp
+   :valid-until (sc/maybe ssc/Timestamp)
    :rows [CatalogueRow]
    :meta {:created ssc/Timestamp
           :created-by User}})
+
+(sc/defschema PriceCatalogueInsertRequest
+  {:valid-from-str sc/Str ;; dd.mm.yyyy checker would be nice here
+   :rows [CatalogueRow]})
 
 (def TransferBatchId sc/Str)
 
@@ -115,7 +125,7 @@
 
 (sc/defn ^:always-validate ->invoice-user :- User
  [user]
-  (select-keys user [:id :firstName :lastName :role :email :username]))
+  (select-keys user [:id :firstName :lastName :role :username]))
 
 (defn ->invoice-db
   [invoice {:keys [id organization] :as application} user]

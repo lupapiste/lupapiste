@@ -11,6 +11,7 @@
     <input type="text"
            data-bind="datepicker: datepickerValue,
                       value: value,
+                      attr: {placeholder: placeholder},
                       datepickerOptions: datepickerOptions,
                       css: inputClasses,
                       event: events,
@@ -20,4 +21,3 @@
   </span>
   <span data-bind="saveIndicator: indicator, label: false"></span>
 </script>
-

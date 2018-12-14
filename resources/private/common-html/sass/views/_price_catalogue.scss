@@ -1,7 +1,7 @@
 .price-catalogue {
 
-    .catalogue-select-wrapper {
-        margin-bottom: 2em
+    .catalogue-select-and-buttons {
+        height: 4em;
     }
 
     .row-operation {
@@ -17,11 +17,12 @@
     }
 
     .view-switch {
-        margin-bottom: 2em
+        margin-bottom: 2em;
+        float: left;
     }
 
     .view-switch-guide-text {
-        padding-right: 1em
+        padding-right: 1em;
     }
 
     .view-switch-selected {
@@ -34,6 +35,89 @@
         background-color: white;
         color: $lp-orange;
         border: 1px solid $lp-orange;
+    }
+
+    .edit-buttons {
+        display: inline-block;
+        float: right;
+    }
+
+    .catalogue-button {
+        margin-left: 1em;
+    }
+
+    .right-button {
+        display: inline-block;
+        float: right;
+    }
+
+    .add-row-to-operation {
+        padding: 0.5em;
+        border-bottom: 1px dashed $lp-light-grey;
+        border-left: 1px dashed $lp-light-grey;
+        border-right: 1px dashed $lp-light-grey;
+    }
+
+    .operations-container {
+        margin-bottom: 2em;
+    }
+
+    .operations-table {
+        margin-bottom: 0px;
+    }
+
+    .operation-product-select {
+        width: 100%;
+    }
+
+    .remove-icon-container {
+        text-align: right;
+    }
+
+    .operation-header-operation {
+        width: 35%;
+    }
+
+    .operation-header-unit-price {
+        width: 12%;
+    }
+
+    .operation-header-discount-percent {
+        width: 12%;
+    }
+
+    .operation-header-nimimum {
+        width: 12%;
+    }
+
+    .operation-header-maximum {
+        width: 12%;
+    }
+
+    .operation-header-unit {
+        width: 12%;
+    }
+
+    .operation-header-remove {
+        width: 5%;
+    }
+
+    .operation-header-remove {
+        width: 5%;
+    }
+
+    .draft-title {
+        float: left;
+        font-size: x-large;
+    }
+
+    .date-picker {
+        float: left;
+        margin-left: 2em;
+    }
+
+    .catalogue-select {
+        width: 20em;
     }
 
 }

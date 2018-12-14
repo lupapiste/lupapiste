@@ -1,9 +1,10 @@
 (ns lupapalvelu.pdf.html-templates.document-data-converter
-  (:require [sade.util :refer [fn->>] :as util]
-            [sade.strings :as ss]
-            [clojure.walk :refer [prewalk]]
+  (:require [clojure.walk :refer [prewalk]]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.document.schemas :as schemas]))
+            [sade.strings :as ss]
+            [sade.util :refer [fn->>] :as util]))
 
 (def supported-keys #{;; General
                       :info :type :repeating :select-one-of
@@ -70,19 +71,8 @@
      (i18n/with-lang lang
        (element-value data path (::i18n-path elem-schema) elem-schema)))))
 
-(defn- path-string->absolute-path [elem-path path-string]
-  (->> (ss/split path-string #"/")
-       (#(if (ss/blank? (first %)) (rest %) (concat elem-path %)))
-       (mapv keyword)))
-
 (defn- get-title [i18n-path]
   (apply i18n/loc i18n-path))
-
-(defn- get-value-by-path
-  "Get element value by target-path string. target-path can be absolute (/path/to/element) or ralative (sibling/element).
-  If target path is given as relative, path is used to resoleve absolute path."
-  [doc path target-path]
-  (get-in doc (conj (path-string->absolute-path (butlast path) target-path) :value)))
 
 (defn- kw [& parts]
   (->> (map ss/->plain-string parts)
@@ -99,11 +89,11 @@
     [:div.element-value value]]))
 
 (defmethod convert-element ::hide-when [doc-data path i18n-path {:keys [hide-when] :as elem-schema}]
-  (when-not ((:values hide-when) (get-value-by-path doc-data path (:path hide-when)))
+  (when-not ((:values hide-when) (tools/get-value-by-path doc-data path (:path hide-when)))
     (convert-element doc-data path i18n-path (dissoc elem-schema :hide-when))))
 
 (defmethod convert-element ::show-when [doc-data path i18n-path {:keys [show-when] :as elem-schema}]
-  (when ((:values show-when) (get-value-by-path doc-data path (:path show-when)))
+  (when ((:values show-when) (tools/get-value-by-path doc-data path (:path show-when)))
     (convert-element doc-data path i18n-path (dissoc elem-schema :show-when))))
 
 (defmethod convert-element ::i18nkey [doc-data path _ elem-schema]

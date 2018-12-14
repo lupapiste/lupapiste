@@ -22,7 +22,6 @@
                                               :firstName                                 "pena"
                                               :lastName                                  "panaani"
                                               :role                                      "authority"
-                                              :email                                     "pena@panaani.fi"
                                               :username                                  "pena"})))
 
 (facts "->invoice-db"
@@ -52,7 +51,6 @@
                                                                                          :firstName "pena"
                                                                                          :lastName  "panaani"
                                                                                          :role      "authority"
-                                                                                         :email     "pena@panaani.fi"
                                                                                          :username  "pena"}
                                                                             :application-id "LPK-1-TEST"
                                                                             :organization-id "123-R-TEST"

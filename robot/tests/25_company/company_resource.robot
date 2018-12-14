@@ -100,5 +100,5 @@ Lock company
   No such test id  lock-company-${company}
 
 Not company user
-  Click Element  user-name
+  Open My Page
   Wait until  Element should be visible  xpath=//div[@data-test-id="mypage-register-company-accordion"]

@@ -15,7 +15,7 @@
   "Authorization model based component state. See docgen-input-model
   for how this is enforced in the frontend. Note: empty lists do not
   affect the state in any way."
-  {(opt :disabled) [sc/Keyword]  ;;Disabled if any listed action is allowed.
+  {(opt :disabled) [sc/Keyword]  ;; Disabled if any listed action is allowed.
    (opt :enabled)  [sc/Keyword]  ;; Disabled if any listed action is not allowed.
    })
 
@@ -23,10 +23,20 @@
                                         number? sc/Num
                                         :else   (sc/enum true false nil)))
 
+(defschema field-matcher
+  "Definition for target value in another element. Used with
+  `:hide-when` and `:show-when`."
+  {:path           sc/Str ;; Path within document
+   :values         #{single-value}
+   ;; Target document name. Default is the "current" document. If
+   ;; there are multiple documents with the same name, only the first
+   ;; one is considered.
+   (opt :document) sc/Str})
+
 (defschema GenInput
   "General leaf element schema. Base element for input elements."
   {:name              sc/Str         ;; Element name
-   :type              (sc/enum :text :string :select :checkbox :radioGroup :date :time)
+   :type              (sc/enum :text :string :select :checkbox :radioGroup :date :time :textlink)
    (opt :uicomponent) sc/Keyword     ;; Component name for special components
    (opt :inputType)   (sc/enum :string :checkbox :localized-string :inline-string
                                :check-string :checkbox-wrapper
@@ -34,7 +44,7 @@
    (opt :labelclass)  sc/Str         ;; Special label style class
    (opt :i18nkey)     sc/Str         ;; Absolute localization key
    (opt :locPrefix)   sc/Str         ;;
-   (opt :layout)      (sc/enum :full-width)
+   (opt :layout)      (sc/enum :full-width :initial-width)
    (opt :hidden)      sc/Bool        ;; Element is hidden (default false)
    (opt :label)       sc/Bool        ;; Label is shown? (default true)
    (opt :size)        (apply sc/enum input-sizes) ;; Element size (default ?)
@@ -55,11 +65,9 @@
    (opt :css)         [sc/Keyword]   ;; CSS classes. Even an empty vector overrides default classes.
    (opt :auth)        Auth
    (opt :transform)   sc/Keyword     ;; Value transform. See persistence/transform-value
-   (opt :hide-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
-                       :values #{single-value}}
-   (opt :show-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
-                       :values #{single-value}}
-})
+   (opt :hide-when)   field-matcher
+   (opt :show-when)   field-matcher
+   })
 
 (defschema Text
   "Text area element. Represented as text-area html element"
@@ -75,6 +83,7 @@
   (merge GenInput
          {:type               (sc/eq :string)
           (opt :default)      sc/Str
+          (opt :placeholder)  sc/Str
           (opt :min-len)      sc/Int
           (opt :max-len)      sc/Int
           (opt :dummy-test)   sc/Keyword}))
@@ -159,12 +168,14 @@
 
 (defschema Date
   (merge GenInput
-         {:type       (sc/eq :date)}))
+         {:type              (sc/eq :date)
+          (opt :placeholder) sc/Str}))
 
 (defschema TimeString
-  "Time string hh:mm:ss.s"
+  "Time string hh:mm"
   (merge GenInput
-         {:type       (sc/eq :time)}))
+         {:type              (sc/eq :time)
+          (opt :placeholder) sc/Str}))
 
 (defschema MsDate
   (merge GenInput
@@ -244,6 +255,41 @@
           ;; selector.
           (opt :excludeCompanies) sc/Bool}))
 
+(defschema PseudoInput
+  "Pseudo input that does not have any database value. In other words,
+  a view only component."
+  (merge GenInput
+         {:pseudo? (sc/eq true)}))
+
+(defschema TextLink
+  "Text with embedded link and an optional icon. The :text value
+  includes a placeholder for link. For example: 'Click [here] to
+  proceed', where [here] will be replaced with link (link text is here
+  and url is :url value). If url is not given, no substitution is
+  done."
+  (merge PseudoInput
+         {:type       (sc/eq :textlink)
+          ;; Localization key
+          :text       sc/Keyword
+          ;; Also a localization key since the url could be
+          ;; language-specific
+          (opt :url)  sc/Keyword
+          ;; Icon classes (e.g., [:lupicon-warning :negative])
+          (opt :icon) [sc/Keyword]}))
+
+(defschema AlluDrawings
+  "Combination of Allu-defined fixed locations and user-added
+  drawings."
+  (merge PseudoInput
+         {:type      (sc/eq :allu-drawings)
+          :kind      (sc/enum :promotion)
+          ;; AlluMap instance name.
+          (opt :map) sc/Str}))
+
+(defschema AlluMap
+  (merge PseudoInput
+         {:type (sc/eq :allu-map)}))
+
 (defschema Input
   (sc/conditional (type-pred :text)       Text
                   (type-pred :string)     Str
@@ -256,6 +302,9 @@
                   (type-pred :linkPermitSelector) LinkPermitSelector
                   (type-pred :personSelector) PersonSelector
                   (apply type-pred special-types) Special
+                  (type-pred :textlink) TextLink
+                  (type-pred :allu-drawings) AlluDrawings
+                  (type-pred :allu-map) AlluMap
                   :else                   {:type (sc/eq nil)})) ; For better error messages
 
 (declare Element)
@@ -292,7 +341,8 @@
    ;; Map item fields:
    ;; :amount the column name for data
    ;; :unit column for unit information
-   ;; :unitKey fixed unit (supported values are :t and :kg).
+   ;; :unitKey fixed unit (supported values are :t, :kg, :tonnia
+   ;; and :m2).
    ;; :unit and :unitKey are mutually exclusive.
    (opt :footer-sums)          [(sc/conditional
                                  string? sc/Str
@@ -315,7 +365,9 @@
    (opt :repeating)            sc/Bool      ;; Array of groups
    (opt :repeating-init-empty) sc/Bool      ;; Init repeating group as empty array (default false)
    (opt :copybutton)           sc/Bool      ;;
-   (opt :exclude-from-pdf)     sc/Bool      ;;
+   (opt :exclude-from-pdf)     (sc/cond-pre sc/Bool          ;; The whole group
+                                            {:title sc/Bool} ;; Group title
+                                            )      ;;
    (opt :validator)            sc/Keyword   ;; Specific validator key for element (see model/validate-element)
    (opt :whitelist)            {:roles [sc/Keyword] :otherwise (sc/enum :disabled :hidden)}
    (opt :blacklist)            [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin
@@ -339,7 +391,8 @@
    (opt :pdf-options)           {;; Select name that contains :muu option
                                  ;; The group must have :muu string field as well.
                                  (opt :other-select) sc/Keyword}
-   (opt :address-type)           (sc/enum :contact)})
+   (opt :address-type)           (sc/enum :contact)
+   (opt :css)                    [sc/Keyword]})
 
 (defschema Element
   "Any doc element."
@@ -419,9 +472,11 @@
     (when (not-empty invalid-paths) {:description "Invalid rows definition" :schema name :errors invalid-paths})))
 
 (defn validate-value-reference [key doc-schema {:keys [path] :as schema}]
-  (when (and (get schema key) (->> (build-absolute-path (butlast path) (get-in schema [key :path]))
-                               (get-in-schema doc-schema)
-                               nil?))
+  (when (and (get schema key)
+             (nil? (get-in schema [key :document]))
+             (->> (build-absolute-path (butlast path) (get-in schema [key :path]))
+                  (get-in-schema doc-schema)
+                  nil?))
     {:description (str "Invalid " (name key) " path") :schema (:name schema) :path path :errors (get-in schema [key :path])}))
 
 (defn validate-references [doc-schema]

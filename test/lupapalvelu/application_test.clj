@@ -120,7 +120,8 @@
                                ;; YM-operations, adding not allowed
                                :muistomerkin-rauhoittaminen :jatteen-keraystoiminta :lannan-varastointi
                                :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan
-                               :koeluontoinen-toiminta :maa-ainesten-kotitarveotto :ilmoitus-poikkeuksellisesta-tilanteesta}
+                               :koeluontoinen-toiminta
+                               :konversio :maa-ainesten-kotitarveotto :ilmoitus-poikkeuksellisesta-tilanteesta}
         error {:ok false :text "error.add-operation-not-allowed"}]
 
     (doseq [operation op/operations]

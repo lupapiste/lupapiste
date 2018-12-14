@@ -217,6 +217,20 @@
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
+(defn ->asian-tiedot [xml]
+  (let [xml-no-ns (cr/strip-xml-namespaces xml)
+        elements (or (select xml-no-ns [:asianTiedot :rakennusvalvontaasianKuvaus])
+                     (select xml-no-ns [:asianTiedot :poikkeamisasianKuvaus]))]
+    (-> elements first (get-in [:content 0]))))
+
+(defn ->rakennuspaikkatieto [xml]
+  (let [xml-no-ns (cr/strip-xml-namespaces xml)]
+    (-> xml
+        cr/strip-xml-namespaces
+        (select [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto :Rakennuspaikka])
+        ((partial map xml->edn))
+        first)))
+
 (defn- ->rakennelman-tiedot [rakennelma]
   {:rakennusnro (ss/trim (get-text rakennelma :tunnus :rakennusnro))
    :rakennelman-kuvaus  (get-text rakennelma :kuvaus :kuvaus)})

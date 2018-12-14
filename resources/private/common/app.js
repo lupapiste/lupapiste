@@ -198,6 +198,56 @@ var LUPAPISTE = LUPAPISTE || {};
       }
     }
 
+    function UserMenu() {
+      var self = this;
+      self.open = ko.observable(false);
+      self.orgNames = ko.observable(undefined);
+      self.usagePurposes = ko.observableArray();
+
+      function purposeName(purpose) {
+        return purpose.type === "authority-admin" ? "authorityAdmin.settings" : "permit.service";
+      }
+
+      function purposeOrgName(purpose) {
+        if (purpose.type === "authority-admin") {
+          var orgNames = self.orgNames();
+          return orgNames ? orgNames[purpose.orgId][loc.currentLanguage] : purpose.orgId;
+        } else {
+          return undefined;
+        }
+      }
+
+      function purposeIcon(purpose) { return purpose.type === "authority-admin" ? "lupicon-gear" : "lupicon-house"; }
+
+      function purposeLink(purpose) {
+        return "/app/" + loc.currentLanguage + "/" + purpose.type;
+      }
+
+      self.cancel = _.partial(self.open, false);
+      self.toggleOpen = function () { self.open(!self.open()); };
+
+      ajax.query("organization-names-by-user", {})
+        .success(function (res) {
+          self.orgNames(res.names);
+          ajax.query("usage-purposes", {})
+            .success(function (res) { self.usagePurposes(_.map(res.usagePurposes, function (purpose) {
+              var purposeModel = {
+                name: purposeName(purpose),
+                orgName: purposeOrgName(purpose),
+                iconClasses: {},
+                href: purposeLink(purpose)
+              };
+              purposeModel.iconClasses[purposeIcon(purpose)] = true;
+              return purposeModel;
+            })); })
+            .call();
+        })
+        .call();
+
+      hub.subscribe("dialog-close", self.cancel);
+      $(document).on("click", self.cancel);
+    }
+
     hub.subscribe("login", function() { wasLoggedIn = true; });
 
     hub.subscribe({eventType: "connection", status: "online"}, function () {
@@ -304,6 +354,7 @@ var LUPAPISTE = LUPAPISTE || {};
         currentLanguage: loc.getCurrentLanguage(),
         openStartPage: openStartPage,
         showUserMenu: self.showUserMenu,
+        userMenu: new UserMenu(),
         showArchiveMenuOptions: self.showArchiveMenuOptions,
         showCalendarMenuOptions: self.showCalendarMenuOptions,
         calendarMenubarVisible: self.calendarMenubarVisible,

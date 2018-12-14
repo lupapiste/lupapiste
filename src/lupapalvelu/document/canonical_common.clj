@@ -909,6 +909,7 @@
 (defn simple-application-state [app]
   (let [enums {:submitted "Vireill\u00e4"
                :sent "Haettu"
+               :complementNeeded "Vireill\u00e4"
                :closed "P\u00e4\u00e4ttynyt"}
         state (-> app :state keyword)
         date (util/to-xml-date (state app))

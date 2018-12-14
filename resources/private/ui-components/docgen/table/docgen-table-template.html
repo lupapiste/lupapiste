@@ -24,7 +24,7 @@
       <tbody data-bind="foreach: groups">
         <tr data-bind="attr: { 'id': $component.groupId + '-row-' + index , 'data-test-id': $component.schemaName + '-row-' + index}">
           <!-- ko foreach: $component.subSchemas -->
-          <td>
+          <td data-bind="css: $component.columnCss([name])">
             <span class="form-entry form-input"
               data-bind="component: { name: uicomponent,
                                       params: { schema: $data,
@@ -81,4 +81,3 @@
     </span>
   </div>
 </script>
-

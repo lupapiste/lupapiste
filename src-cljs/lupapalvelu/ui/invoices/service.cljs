@@ -2,7 +2,11 @@
   (:require [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.invoices.state :as state]
-            [sade.shared-util :as util]))
+            [lupapiste-commons.shared-utils :as util]))
+
+(defn vec-remove
+  [coll pos]
+  (vec (concat (subvec coll 0 pos) (subvec coll (inc pos)))))
 
 (defn insert-invoice [app-id data callback]
   (common/command "insert-invoice"
@@ -37,6 +41,12 @@
                   (reset! state/operations (:operations data)))
                 :id app-id))
 
+(defn fetch-price-catalogue [app-id]
+  (common/query :application-price-catalogue
+                (fn [data]
+                  (reset! state/price-catalogue (:price-catalogue data)))
+                :id app-id))
+
 (defn upsert-invoice! [app-id invoice-data callback]
   (if (:is-new invoice-data)
     (insert-invoice app-id {:operations (:operations invoice-data)} (fn [response]
@@ -57,8 +67,12 @@
 (defn cancel-new-invoice []
   (reset! state/new-invoice nil))
 
-
-
-(defn add-operation-to-invoice [invoice operation]
+(defn add-operation-to-invoice [invoice operation rows]
   (assoc-in invoice [:operations] (-> (:operations invoice)
-                                      (conj {:operation-id operation :name operation :invoice-rows []}))))
+                                      (conj {:operation-id operation :name operation :invoice-rows rows}))))
+
+(defn remove-operation-from-invoice [invoice operation-index]
+  (util/dissoc-in invoice [:operations operation-index]))
+
+(defn remove-invoice-row-from-invoice [invoice operation-index invoice-row-index]
+  (util/dissoc-in invoice [:operations operation-index :invoice-rows invoice-row-index]))

@@ -1,19 +1,20 @@
 (ns lupapalvelu.document.model
-  (:require [taoensso.timbre :refer [trace debug info warn error errorf]]
-            [clojure.walk :refer [keywordize-keys]]
+  (:require [clj-time.format :as timeformat]
             [clojure.set :refer [union difference]]
-            [clj-time.format :as timeformat]
-            [sade.util :as util]
-            [sade.strings :as ss]
-            [sade.core :refer :all]
-            [sade.validators :as v]
+            [clojure.walk :refer [keywordize-keys]]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.document.vrk :refer :all]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.subtype :as subtype]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.validator :as validator]
-            [lupapalvelu.document.subtype :as subtype]
-            [lupapalvelu.mongo :as mongo])
+            [lupapalvelu.document.vrk :refer :all]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.mongo :as mongo]
+            [sade.core :refer :all]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [sade.validators :as v]
+            [taoensso.timbre :refer [trace debug info warn error errorf]])
   (:import [org.joda.time DateTimeFieldType]
            [org.joda.time.format DateTimeFormatterBuilder]))
 
@@ -280,13 +281,35 @@
         (assoc validation-result :path []) ; Invalid path from user input should not be echoed
         validation-result))))
 
-(defn validate-fields [application info k data path]
+(defn- data-match?
+  "True if show/hide-when definition resolves true in this context."
+  [application doc-data doc-path {:keys [path values document]}]
+  (boolean
+   (and path
+        values
+        (contains? values
+                   (if document
+                     (tools/get-value-by-path (:data (domain/get-document-by-name application
+                                                                                  document))
+                                              nil
+                                              path)
+                     (tools/get-value-by-path doc-data doc-path path))))))
+
+(defn field-visible? [application data path {:keys [hide-when show-when] :as element}]
+  (let [hide (and hide-when (data-match? application data path hide-when))
+        show (and show-when (data-match? application data path show-when))]
+    (or (and (nil? hide) (nil? show))
+        (and (not hide) (or (nil? show) show)))))
+
+(defn- do-validate-fields [application doc-data info k data path]
   (let [current-path (if k (conj path (name k)) path)
         element (if (not-empty current-path)
                   (keywordize-keys (find-by-name (:schema-body info) current-path))
                   {})
         selected (get-in data [(keyword schemas/select-one-of-key) :value])
         selected-path (when selected (vec (map keyword (conj path selected))))
+        invisible? (and (:name element)
+                        (not (field-visible? application doc-data current-path element)))
         results (if (contains? data :value)
                   (let [result  (validate-field application element (:value data))]
                     (->validation-result info data current-path element result))
@@ -294,13 +317,22 @@
                    seq
                    (concat (flatten [(validate-element info data current-path element)])
                            (map (fn [[k2 v2]]
-                                  (validate-fields application info k2 v2 current-path)) data))))]
-    (if selected
+                                  (do-validate-fields application doc-data info k2 v2 current-path)) data))))]
+    (cond
+      selected
       (map #(if (not= selected-path (take (count selected-path) (:path %)))
               (assoc % :ignore true)
               %)
            (flatten [results]))
+
+      invisible?
+      (map #(assoc % :ignore true) (flatten [results]))
+
+      :else
       results)))
+
+(defn validate-fields [application info k data path]
+  (do-validate-fields application data info k data path))
 
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
@@ -329,12 +361,12 @@
                               schemas-with-other-keys)]
     (map (fn [m] (if (required-other-keys (:name m)) (assoc m :required true) m)) sub-schemas)))
 
-(defn- validate-required-fields [info path data validation-errors]
+(defn- validate-required-fields [application info path data validation-errors]
   (let [check (fn [{:keys [name required body repeating] :as element}]
                 (let [kw (keyword name)
                       current-path (conj path kw)
                       value (get-in data (conj current-path :value))
-                      validation-error (when required
+                      validation-error (when (and required (field-visible? application data current-path element))
                                          (if (instance? Long value)
                                            (when-not (some? value)
                                              (->validation-result info nil current-path element [:tip "illegal-value:required"]))
@@ -345,8 +377,8 @@
                     (if body
                       (let [newInfo (assoc info :schema-body body)]
                         (if repeating
-                          (map (fn [k] (validate-required-fields newInfo (conj current-path k) data [])) (keys (get-in data current-path)))
-                          (validate-required-fields newInfo current-path data [])))
+                          (map (fn [k] (validate-required-fields application newInfo (conj current-path k) data [])) (keys (get-in data current-path)))
+                          (validate-required-fields application newInfo current-path data [])))
                       []))))
 
         schema-body (with-required-other-fields (:schema-body info) path data)
@@ -395,7 +427,7 @@
         (flatten
           (concat
             (validate-fields application info nil data [])
-            (validate-required-fields info [] data [])
+            (validate-required-fields application info [] data [])
             (validate-document document info)))))))
 
 (defn validate-pertinent

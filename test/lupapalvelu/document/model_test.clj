@@ -1,9 +1,10 @@
 (ns lupapalvelu.document.model-test
-  (:require [midje.sweet :refer :all]
+  (:require [lupapalvelu.document.approval :as appr]
             [lupapalvelu.document.model :refer :all]
-            [lupapalvelu.document.approval :as appr]
-            [lupapalvelu.document.validators :refer [valid-against? invalid-with? valid?]]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.validators :refer [valid-against? invalid-with? valid?]]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [sade.util :as util]))
 
 ;; Define a "random" timestamp used in test.
@@ -809,3 +810,156 @@
       :7 {:porras "B" :huoneistonumero "1" :jakokirjain "g" :muutostapa "muutos"}
       :8 {:porras "A" :huoneistonumero "1" :jakokirjain "f" :muutostapa "muutos"}} ; equal with :1, :3
      [:porras :huoneistonumero :jakokirjain :muutostapa]) => (just #{:0 :3 :4 :6 :8})))
+
+(def visibility-schema {:info {:name       "visibility-schema"
+                               :version    1
+                               :approvable false}
+                        :body [{:name "rule1" :type :checkbox}
+                               {:name "rule2" :type :string}
+                               {:name "one" :type :time :required true :show-when {:path   "rule1"
+                                                                                   :values #{true}}}
+                               {:name "two" :type :date :required true :hide-when {:path   "rule1"
+                                                                                   :values #{true}}}
+                               {:name "three" :type :time :show-when {:path   "rule2"
+                                                                      :values #{"yes" "juu" "dui"}}}
+                               {:name      "four" :type :date
+                                :hide-when {:path   "rule2"
+                                            :values #{"no" "ei" "bu"}}
+                                :show-when {:path   "rule1"
+                                            :values #{true}}}]})
+
+(def crossref-schema {:info {:name       "crossref-schema"
+                             :version    1
+                             :approvable false}
+                      :body [{:name      "other1" :type :string :required true
+                              :show-when {:document "visibility-schema"
+                                          :path     "rule1"
+                                          :values   #{true}}}]})
+
+(schemas/defschemas 1 [visibility-schema
+                       crossref-schema])
+
+(defn doc-data [name data]
+  {:schema-info {:name    name
+                 :version 1}
+   :data        (reduce-kv (fn [acc k v]
+                             (assoc-in acc [k :value] v))
+                           {}
+                           data)})
+
+(defn validate-visibility
+  ([docs name data]
+   (validate {:documents docs}
+             (doc-data name data)))
+  ([data]
+   (validate-visibility [] "visibility-schema" data)))
+
+(defn required [k]
+  {:path   [k]
+   :result [:tip "illegal-value:required"]})
+
+(defn ignored [k]
+  {:path   [k]
+   :ignore true})
+
+(defn bad [k]
+  {:path   [k]
+   :result [:warn (format "illegal-value%s"
+                          (:type (util/find-by-key :name (name k) (:body visibility-schema))))]})
+
+(facts "hide-when and show-when vs. validation"
+  (fact "Empty document"
+    (validate-visibility {})
+    => (just [(contains (required :two))]))
+  (fact "Invisible errors are ignored"
+    (validate-visibility {:one "bad"})
+    => (just [(contains (ignored :one))
+              (contains (required :two))]))
+  (fact "Rule1 ON"
+    (validate-visibility {:rule1 true})
+    => (just [(contains (required :one))])
+    (validate-visibility {:rule1 true :one "bad"})
+    => (just [(contains (bad :one))])
+    (validate-visibility {:rule1 true
+                          :one "bad"
+                          :two "bad"
+                          :three "bad"
+                          :four "bad"})
+    => (just [(contains (bad :one))
+              (contains (ignored :two))
+              (contains (ignored :three))
+              (contains (bad :four))]))
+  (fact "Rule2 YES"
+    (validate-visibility {:rule2 "dui"})
+    => (just [(contains (required :two))])
+    (validate-visibility {:rule2 "dui"
+                          :one "bad"
+                          :two "19.11.2018"
+                          :three "bad"
+                          :four "bad"})
+    => (just [(contains (ignored :one))
+              (contains (bad :three))
+              (contains (ignored :four))]))
+  (fact "Rule2 NO"
+    (validate-visibility {:rule2 "bu"})
+    => (just [(contains (required :two))])
+    (validate-visibility {:rule2 "bu"
+                          :one "bad"
+                          :two "19.11.2018"
+                          :three "bad"
+                          :four "bad"})
+    => (just [(contains (ignored :one))
+              (contains (ignored :three))
+              (contains (ignored :four))]))
+  (fact "Rule1 ON Rule2 YES"
+    (validate-visibility {:rule1 true :rule2 "yes"})
+    => (just [(contains (required :one))])
+    (validate-visibility {:rule1 true :rule2 "yes"
+                          :one "19:16"
+                          :two "bad"
+                          :three "bad"
+                          :four "bad"})
+    => (just [(contains (ignored :two))
+              (contains (bad :three))
+              (contains (bad :four))]))
+  (fact "Rule1 ON Rule2 NO"
+    (validate-visibility {:rule1 true :rule2 "no"})
+    => (just [(contains (required :one))])
+    (validate-visibility {:rule1 true :rule2 "no"
+                          :one "19:16"
+                          :two "bad"
+                          :three "bad"
+                          :four "bad"})
+    => (just [(contains (ignored :two))
+              (contains (ignored :three))
+              (contains (ignored :four))])))
+
+(testable-privates lupapalvelu.document.model data-match?)
+
+(facts "data-match?"
+  (data-match? {:documents [(doc-data "visibility-schema" {:rule1 true})]}
+               nil nil
+               {:path     "rule1"
+                :values   #{true}
+                :document "visibility-schema"}) => true
+  (data-match? {:documents [(doc-data "visibility-schema" {})]}
+               nil nil
+               {:path     "rule1"
+                :values   #{true}
+                :document "visibility-schema"}) => false)
+
+(facts "Cross-document visibility"
+  (fact "Rule1 ON"
+    (validate-visibility [(doc-data "visibility-schema" {:rule1 true})]
+                         "crossref-schema"
+                         {})
+    => (just [(contains (required :other1))]))
+  (fact "Rule1 OFF"
+    (validate-visibility [(doc-data "visibility-schema" {})]
+                         "crossref-schema"
+                         {})
+    => empty?
+    (validate-visibility [(doc-data "visibility-schema" {:rule false})]
+                         "crossref-schema"
+                         {})
+    => empty?))

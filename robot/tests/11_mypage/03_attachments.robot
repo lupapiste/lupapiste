@@ -10,7 +10,7 @@ Variables      ../06_attachments/variables.py
 
 Mikko uploads CV
   Mikko logs in
-  Click Element  user-name
+  Open My Page
   Wait for Page to Load  Mikko  Intonen
   Click enabled by test id  test-add-architect-attachment
   Select From List by value  attachmentType  osapuolet.cv
@@ -38,7 +38,7 @@ Mikko copies his attachments to application
   Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
 
 Copy own attachments button is not shown to non-architect
-  Click Element  user-name
+  Open My Page
   Wait for Page to Load  Mikko  Intonen
   Wait until  Click Label  architect
   Save User Data
@@ -71,7 +71,7 @@ Mikko can't copy own attachments yet
   Element should not be visible by test id  copy-user-attachments
 
 Mikko sets himself architect
-  Click Element  user-name
+  Open My Page
   Wait for Page to Load  Mikko  Intonen
   Wait until  Scroll and click test id  architect-label
   Save User Data

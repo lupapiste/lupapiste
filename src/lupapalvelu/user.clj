@@ -787,9 +787,10 @@
 ;;
 
 (defn- resolve-authority-page [user]
-  (if (roles/authority-admins-organization-id user)
-    "authority-admin"
-    "authority"))
+  (let [admin-org-id (roles/authority-admins-organization-id user)]
+    (if (and admin-org-id (= (get-in user [:orgAuthz (keyword admin-org-id)]) #{:authorityAdmin})) ; HACK
+      "authority-admin"
+      "authority")))
 
 (defn applicationpage-for [{:keys [role] :as user}]
   (let [s (name role)]

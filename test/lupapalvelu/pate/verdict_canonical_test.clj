@@ -329,6 +329,12 @@
       :paatoskoodi "my\u00f6nnetty"
       :paatoksentekija "Pate Paattaja (Viranhaltija)"
       :paatospvm "2017-11-23"
+      :pykala "99"}
+  (paatospoytakirja-type-canonical "fi" (util/dissoc-in verdict [:data :verdict-text]))
+  => {:paatos nil
+      :paatoskoodi "my\u00f6nnetty"
+      :paatoksentekija "Pate Paattaja (Viranhaltija)"
+      :paatospvm "2017-11-23"
       :pykala "99"})
 
 (facts "Canonical for P verdict"

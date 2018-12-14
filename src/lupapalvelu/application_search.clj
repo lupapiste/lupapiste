@@ -8,6 +8,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.pate.verdict-interface :as vif]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
@@ -184,7 +185,7 @@
    :foreman :foremanRole :infoRequest :location :modified :municipality
    :neighbors :permitType :permitSubtype :primaryOperation :state :statements
    :organization ; required for authorization checks
-   :submitted :tasks :urgency :verdicts :archived])
+   :submitted :tasks :urgency :verdicts :archived :pate-verdicts])
 
 (def- indicator-fields
   (map :field meta-fields/indicator-meta-fields))
@@ -192,8 +193,8 @@
 (def- frontend-fields
   [:id :address :applicant :creator :handlers :authorityNotice
    :infoRequest :kind :location :modified :municipality
-   :primaryOperation :state :submitted :urgency :verdicts
-   :foreman :foremanRole :permitType])
+   :primaryOperation :state :submitted :urgency
+   :foreman :foremanRole :permitType :verdictDate :kuntalupatunnus])
 
 (defn- select-fields [application]
   (select-keys
@@ -203,7 +204,9 @@
 
 (defn- enrich-row [app]
   (-> app
-      (assoc :handlers (distinct (:handlers app))) ;; Each handler only once.
+      (assoc :handlers (distinct (:handlers app)) ;; Each handler only once.
+             :verdictDate (vif/latest-published-verdict-date app)
+             :kuntalupatunnus (vif/published-kuntalupatunnus app))
       app-utils/with-application-kind
       app-utils/location->object))
 

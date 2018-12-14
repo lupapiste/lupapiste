@@ -37,17 +37,18 @@
       {:price-class (get @kayttotarkoitus-hinnasto kayttotarkoitus) :kayttotarkoitus kayttotarkoitus})))
 
 (def permit-type-price-codes
-  {"R" 901
-   "P" 901
-   "YA" 902
-   "KT" 904
-   "MM" 904
-   "MAL" 903
-   "YI"  903
-   "YL" 903
-   "YM" 903
+  {"R"    901
+   "P"    901
+   "YA"   902
+   "A"    902
+   "KT"   904
+   "MM"   904
+   "MAL"  903
+   "YI"   903
+   "YL"   903
+   "YM"   903
    "VVVL" 903
-   "ARK" 802})
+   "ARK"  802})
 
 (def usage-price-codes
   {"A" 905
@@ -58,8 +59,6 @@
    "Z" 801})
 
 (def price-classes-for-operation
-  ; See lupapiste-chef/cookbooks/lupapiste-dw/files/default/etl/setupdata/price_class_csv.csv
-
   {:asuinrakennus               uuden-rakentaminen ; old operation tree
    :vapaa-ajan-asuinrakennus    uuden-rakentaminen
    :varasto-tms                 uuden-rakentaminen
@@ -170,6 +169,9 @@
    :maa-ainesten-kotitarveotto                                        "D"
    :maastoliikennelaki-kilpailut-ja-harjoitukset                      "D"
    :archiving-project                                                 "Z"
+   :lyhytaikainen-maanvuokraus "D"
+   :promootio                  "D"
+   :konversio                  "F"
    })
 
 (defn- resolve-price-class
@@ -177,7 +179,7 @@
    priceCode = new price codes for 'puitesopimus'
    use = usage code for some price classes (kayttotarkoitus)
    useFi = usage code in Finnish
-   useSv = usage code in Svedish
+   useSv = usage code in Swedish
    usagePriceCode = mapping from legacy priceClass to new price code (called 'kayttotarkoitushinnasto')"
   [application op]
   (let [op-name  (keyword (:name op))

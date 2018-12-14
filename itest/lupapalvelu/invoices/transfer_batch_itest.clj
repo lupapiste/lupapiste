@@ -12,13 +12,11 @@
             [lupapalvelu.mongo :as mongo]))
 
 
-(def dummy-user {:id                                        "penan-id"
-                 :firstName                                 "pena"
-                 :lastName                                  "panaani"
-                 :role                                      "authority"
-                 :email                                     "pena@panaani.fi"
-                 :username                                  "pena"})
-
+(def dummy-user {:id        "penan-id"
+                 :firstName "pena"
+                 :lastName  "panaani"
+                 :role      "authority"
+                 :username  "pena"})
 
 (def dummy-invoice {:id "dummy-invoice-id-1"
                     :application-id "LP-753-2018-90108"
@@ -42,7 +40,7 @@
   (mongo/connect!)
 
   (mongo/with-db itu/test-db-name
-    (lupapalvelu.fixture.core/apply-fixture "minimal")
+    (lupapalvelu.fixture.core/apply-fixture "invoicing-enabled")
 
     (defn get-transfer-batch-db [id]
       (mongo/by-id transfer-batch-db-key id))

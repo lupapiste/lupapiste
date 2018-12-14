@@ -1,0 +1,141 @@
+
+div.form-grid.allu-group {
+  border-top: none;
+  padding-bottom: 1em;
+  span.group-help-text {
+    display: block;
+    padding: 1em;
+    border-left: 8px solid $primary;
+    background-color: $gray238;
+  }
+  label.form-label {
+    line-height: 40px;
+  }
+  label.form-label.tip {
+    color: initial;
+    &::after {
+      color: $negative;
+    }
+  }
+  @include placeholder( $gray221 );
+  .h3 {
+    font-weight: bold;
+    border-top: 1px solid $gray221;
+    padding-top: 1em;
+    margin: 0;
+
+  }
+  .row {
+    margin-top: 4px;
+    margin-bottom: 0;
+  }
+  .row.allu-row--spaced {
+    margin-top: 1em;
+  }
+}
+
+.allu-group--place {
+  label {
+    padding-top: 2em;
+  }
+}
+
+.allu-table {
+  table {
+    @include no-row-hover;
+    td > span.form-entry {
+      min-height: 40px;
+    }
+    td.allu--structure {
+      > span {
+        width: 100%;
+      }
+    }
+    tfoot > tr {
+      font-weight: bold;
+      border: none;
+      td {
+        padding-bottom: 0;
+      }
+      td.footer-sum--total {
+        text-align: right;
+      }
+      i.footer-sum--error {
+        color: $negative;
+      }
+    }
+    margin-bottom: 0;
+  }
+}
+
+.allu-table + .button-group {
+  padding: 0;
+  background-color: white;
+  border: none;
+  margin-bottom: 1em;
+}
+
+textlink.allu--link {
+  display: block;
+  .like-btn {
+    @include btn-height();
+  }
+}
+
+.allu-group.allu-group--structures {
+  label.form-label {
+    display: none;
+  }
+}
+
+.allu--radio.radio-wrapper {
+      min-width: 6em;
+      margin-right: 10px;
+}
+
+.allu-group.allu--info {
+  .h4 {
+    margin-top: 1em;
+    margin-bottom: 8px;
+    &:after {
+      content: "*";
+      color: $negative;
+    }
+  }
+  input.allu--description {
+    margin: 0;
+  }
+}
+
+div.allu-drawings {
+  margin-top: 1em;
+
+  table.drawings-table {
+    @include no-row-hover;
+    td.drawing--name {
+      width: 100%;
+    }
+    td.drawing--icon {
+      padding-left: 10px;
+      i {
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+div.allu-map-container {
+  div.allu-map {
+    min-height: 20em;
+    height: 30em;
+    width: 100%;
+  }
+  button.ghost {
+    position: absolute;
+    z-index: 1000;
+    bottom: 0;
+    left: 0;
+    margin-left: 20px;
+    background-color: rgba( 255, 255, 255, .8);
+  }
+}

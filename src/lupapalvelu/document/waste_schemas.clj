@@ -101,7 +101,6 @@
               :rows [{:h3 "available-materials.contact"}
                      {:p "contact.help"}
                      ["name" "phone" "email"]]
-              :group-help "contact.help"
               :body [{:name "name" :type :string}
                      {:name "phone" :type :string :subtype :tel}
                      {:name "email" :type :string :subtype :email}
@@ -176,7 +175,6 @@
                        :uicomponent :docgenGroup
                        :approvable false
                        :template "form-grid-docgen-group-template"
-                       :group-help "contact.help"
                        :rows [["name" "phone" "email"]]
                        :body [{:name "name" :type :string}
                               {:name "phone" :type :string :subtype :tel}

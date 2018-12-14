@@ -154,7 +154,7 @@ Ulla sees herself as company admin
 #  Check invitation  0  pena@example.com  Panaani  Pena  Käyttäjä  Ei
 
 Ulla logs in and changes her username
-  Click Element  user-name
+  Open My Page
   Wait until  Element Should Be Enabled  xpath=//input[@data-test-id='newEmail']
   Input text  xpath=//input[@data-test-id='newEmail']  ulla.ser@solita.fi
   Click by test id  change-email
@@ -171,7 +171,7 @@ Ulla logs in and changes her username
 
 Subsequent username changes must use the same person id.
   Applicant logs in  ulla.ser@solita.fi  pitka123  Ulla Ser
-  Click Element  user-name
+  Open My Page
   Wait until  Element Should Be Enabled  xpath=//input[@data-test-id='newEmail']
   Input text  xpath=//input[@data-test-id='newEmail']  res.allu@solita.fi
   Click by test id  change-email

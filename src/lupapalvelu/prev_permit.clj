@@ -1,6 +1,5 @@
 (ns lupapalvelu.prev-permit
   (:require [lupapalvelu.action :as action]
-            [lupapalvelu.application :as application]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization-api :as authorization]
@@ -230,13 +229,6 @@
                                                           $
                                                           created))))))))))
 
-(defn document-data->op-document [{:keys [schema-version] :as application} data]
-  (let [op (app/make-op "aiemmalla-luvalla-hakeminen" (now))
-        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
-        doc (assoc-in doc [:schema-info :op] op)
-        doc-updates (lupapalvelu.document.model/map2updates [] data)]
-    (lupapalvelu.document.model/apply-updates doc doc-updates)))
-
 (defn schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
   (map
     (fn [{:keys [data]}]
@@ -257,7 +249,7 @@
         command (update-in command [:data] merge
                   {:operation operation :infoRequest false :messages []}
                   location-info)
-        created-application (application/do-create-application command manual-schema-datas)
+        created-application (app/do-create-application command manual-schema-datas)
         new-parties (remove empty?
                             (concat (map suunnittelija->party-document (:suunnittelijat app-info))
                                     (map osapuoli->party-document (:muutOsapuolet app-info))))
@@ -265,7 +257,7 @@
         created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
         ;; make secondaryOperations for buildings other than the first one in case there are many
-        other-building-docs (map (partial document-data->op-document created-application) (rest document-datas))
+        other-building-docs (map (partial app/document-data->op-document created-application) (rest document-datas) "aiemmalla-luvalla-hakeminen")
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
 
         created-application (-> created-application
@@ -277,7 +269,7 @@
         command (util/deep-merge command (action/application->command created-application))]
   (logging/with-logging-context {:applicationId (:id created-application)}
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
-    (application/insert-application created-application)
+    (app/insert-application created-application)
     (infof "Inserted prev-permit app: org=%s kuntalupatunnus=%s authorizeApplicants=%s"
            (:organization created-application)
            (get-in command [:data :kuntalupatunnus])
@@ -308,6 +300,14 @@
     (not (ss/blank? propertyId))
     (-> x util/->double pos?)
     (-> y util/->double pos?)))
+
+(def default-location-info
+  "Default location info for Vantaa's conversion from Facta:
+  the address and coordinates point to the RAVA of Vantaa."
+  {:address "Kielotie 20 C"
+   :propertyId "92-61-118-2"
+   :x 391513.021
+   :y 6685671.373})
 
 (defn get-location-info [{data :data :as command} app-info]
   (when app-info

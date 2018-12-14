@@ -5,7 +5,8 @@
             [schema.core :as sc]
             [lupapalvelu.document.schemas :as doc-schemas]))
 
-(defmulti coerce-type :type)
+(defmulti coerce-type (fn [{:keys [pseudo? type]}]
+                        (if pseudo? :pseudo? type)))
 
 (defmulti coerce-subtype :subtype)
 
@@ -95,6 +96,8 @@
 
 (defmethod coerce-subtype :zipcode [elem-schema]
   (data-leaf elem-schema ssc/Zipcode))
+
+(defmethod coerce-type :pseudo? [_] nil)
 
 (defmethod coerce-type :string [elem-schema]
   (coerce-subtype elem-schema))

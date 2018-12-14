@@ -556,7 +556,10 @@
 
           ["/final" {:name [:placementcontracts :contract :final]
                      :middleware file-middleware
-                     :get {:handler handler}}]]]]]])))
+                     :get {:handler handler}}]]]]
+       ["fixedlocations" {:name [:fixedlocations]
+                          :parameters {:query {:applicationKind NonBlankStr}}
+                          :get {:handler handler}}]]])))
 
 (def- allu-router
   "The Reitit router for ALLU requests."
@@ -695,3 +698,35 @@
                                    :proposal (contract-proposal-request command)
                                    :final (final-contract-request command))))
     (catch [:text "error.allu.http"] _ nil)))
+
+
+(defn json-response [handler]
+  (fn [request]
+    (-> (handler request)
+        (update :body json/decode true))))
+
+(def FIXED-LOCATION-TYPES {:promotion "PROMOTION"})
+
+(defn- non-integration-routes
+  "Routes for actions that are not part of the integration mechanisms."
+  [handler]
+  [["/" {:middleware [reitit.ring.coercion/coerce-request-middleware
+                      log-or-fail!
+                      (preprocessor->middleware (fn-> content->json jwt-authorize))
+                      json-response]
+         :coercion   reitit.coercion.schema/coercion}
+    ["fixedlocations" {:name       [:fixedlocations]
+                       :parameters {:query {:applicationKind (apply sc/enum (vals FIXED-LOCATION-TYPES))}}
+                       :get        {:handler handler}}]]])
+
+(def- allu-non-router
+  "The Reitit router for ALLU requests."
+  (reitit-ring/router (non-integration-routes (innermost-handler))))
+
+(defn load-fixed-locations! [kind]
+  (try+
+   (:body ((reitit-ring/ring-handler allu-non-router) {:uri            "/fixedlocations"
+                                                       :query-params   {:applicationKind kind}
+                                                       :request-method :get
+                                                       :insecure?      true}))
+   (catch [:text "error.allu.http"] _ nil)))

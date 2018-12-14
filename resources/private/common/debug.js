@@ -114,6 +114,10 @@ jQuery(function($) {
                                           .click(function() { createApplication("sisatila-muutos", "R"); }))
                                   .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("YA/katulupa").
                                           click(function() { createApplication("ya-katulupa-vesi-ja-viemarityot", "YA"); }))
+                                  .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("A/promootio").
+                                          click(function() { createApplication("promootio", "A"); }))
+                                  .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("A/lyhytaikainen maanvuokraus").
+                                          click(function() { createApplication("lyhytaikainen-maanvuokraus", "A"); }))
                                   .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("KT/kiinteistonmuodostus")
                                           .click(function() { createApplication("kiinteistonmuodostus", "R"); }))
                                   .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("VVVL/Vapautus viemäristä")

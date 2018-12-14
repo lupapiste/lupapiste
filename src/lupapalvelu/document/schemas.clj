@@ -1040,6 +1040,39 @@
                       :group-help "hankkeestaIlmoitettu.groupHelpText"
                       :body [{:name "hankkeestaIlmoitettuPvm" :type :date :i18nkey "date"}]}])
 
+(def rakennuspaikka-kuntagml [{:name "kiinteisto"
+                               :type :group
+                               :uicomponent :propertyGroup
+                               :body [{:name "maaraalaTunnus" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "kerrosala" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "maapintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-input :inputType :string}
+                                      {:name "vesipintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-input :inputType :string}
+                                      {:name "rakennusoikeusYhteensa" :type :string :readonly true :unit :m2 :uicomponent :docgen-input :inputType :string}
+                                      {:name "kylanimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "kiinteistotunnus" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-input :inputType :checkbox}]}
+                              {:name "osoite"
+                               :type :group
+                               :body [{:name "kunta" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "postinumero" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "osoitenimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "osoitenumero" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "kaupunginosanumero" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                      {:name "postitoimipaikannimi":type :string :readonly true :uicomponent :docgen-input :inputType :string}]}
+                              {:name "hallintaperuste" :type :select :sortBy :displayname :required true
+                               :body [{:name "oma"}
+                                      {:name "vuokra"}
+                                      ei-tiedossa]}
+                              {:name "kaavatilanne" :type :select :sortBy :displayname
+                               :body [{:name "maakuntakaava"}
+                                      {:name "oikeusvaikutteinen yleiskaava"}
+                                      {:name "oikeusvaikutukseton yleiskaava"}
+                                      {:name "asemakaava"}
+                                      {:name "ranta-asemakaava"}
+                                      {:name "ei kaavaa"}]}])
+
 (def lisakohde-rakennuspaikka [{:name "kiinteisto"
                                 :type :group
                                 :uicomponent :propertyGroup
@@ -1664,4 +1697,8 @@
            [{:name "yritys" :type :group
              :body [{:name "yritysnimi" :type :string}]}]
            tayta-omat-tiedot-button)}
+
+   {:info {:name "rakennuspaikka-kuntagml"
+           :order 2}
+    :body rakennuspaikka-kuntagml}
    ])
