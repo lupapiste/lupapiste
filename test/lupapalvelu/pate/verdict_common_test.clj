@@ -437,6 +437,31 @@
                                     ["KVV-työnjohtaja" "erityisalojen työnjohtaja"]}}]})
     => ["KVV-työnjohtaja" "erityisalojen työnjohtaja"]))
 
+(facts "required conditions"
+  (fact "Pate verdict"
+    (vc/verdict-required-conditions
+     {:category :r
+      :data {:conditions {:id0 {:condition "Muu lupaehto"}
+                          :id1 {:condition "vesijohto ja viemärisuunnitelma"}}}})
+    => ["Muu lupaehto" "vesijohto ja viemärisuunnitelma"])
+
+  (fact "Legacy verdict"
+    (vc/verdict-required-conditions
+     {:legacy? true
+      :category :r
+      :data {"id" {:name {:_value "rakennepiiruustukset"
+                          :_user "Verdict draft Pate migration"
+                          :_modified 1537491445896}}}})
+    => ["rakennepiirustukset"])
+
+  (fact "Backing system verdict"
+    (vc/verdict-required-conditions
+     {:paatokset [{:lupamaaraykset {:maaraykset
+                                    [{:sisalto "rakennepiirustukset"}
+                                     {:sisalto "vesijohto ja viemärisuunnitelma"}]}}]})
+    => ["rakennepiirustukset"
+        "vesijohto ja viemärisuunnitelma"]))
+
 (facts "required plans"
   (fact "Pate verdict"
     (vc/verdict-required-plans

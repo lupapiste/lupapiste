@@ -10,9 +10,8 @@
                :tarkastuksenTaiKatselmuksenNimi (get review (keyword lang))
                :muuTunnustieto [#_{:MuuTunnus "yht:MuuTunnusType"}]}}) ; TODO: initialize review tasks and pass ids here
 
-(defn- maarays-seq-canonical [{:keys [data]}]
-  (some->> data :conditions vals
-           (map :condition)
+(defn- maarays-seq-canonical [verdict]
+  (some->> (vc/verdict-required-conditions verdict)
            (remove ss/blank?)
            (map #(assoc-in {} [:Maarays :sisalto] %))
            not-empty))

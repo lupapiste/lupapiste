@@ -250,7 +250,7 @@
             (get-data verdict :foremen)))
     (-> verdict get-lupamaaraykset :vaadittuTyonjohtajatieto)))
 
-(defn- backing->required-plan [plan]
+(defn- string->required [plan]
   {:id nil
    :fi plan
    :sv plan
@@ -263,7 +263,19 @@
       (mapv #(util/find-by-id % (-> verdict :references :plans))
             (get-data verdict :plans)))
     (->> verdict get-lupamaaraykset :vaaditutErityissuunnitelmat
-         (map backing->required-plan))))
+         (map string->required))))
+
+(defn verdict-required-conditions [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (legacy? verdict)
+      (->> (get-data verdict :conditions)
+           (sort-by first)
+           (mapv (comp :name second)))
+      (->> (get-data verdict :conditions)
+           (sort-by first)
+           (mapv (comp :condition second))))
+    (->> verdict get-lupamaaraykset :maaraykset
+         (mapv :sisalto))))
 ;;
 ;; Verdict schema
 ;;
