@@ -26,7 +26,7 @@
 (defn can-set-valid-from
   "Pre-checker that fails if trying to set catlogue valid-from in the past when previous catalogues exist"
   [{{catalogue-request :price-catalogue org-id :organization-id} :data :as command}]
-  (if (and (catalogues/has-previous-published-price-catalogues? org-id)
+  (if (and (catalogues/has-existing-published-price-catalogues? org-id)
            (not (tomorrow-or-later? (:valid-from-str catalogue-request))))
     (fail :error.price-catalogue.incorrect-date)))
 

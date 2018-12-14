@@ -161,7 +161,7 @@
                       (:text response) => "error.invalid-price-catalogue"))
 
               (fact "should return invalid response when valid-from-str is today"
-                    (with-redefs [catalogues/has-previous-published-price-catalogues? (fn [org-id] true)]
+                    (with-redefs [catalogues/has-existing-published-price-catalogues? (fn [org-id] true)]
                       (let [response (-> (local-command sipoo :publish-price-catalogue
                                                         :organization-id "753-R"
                                                         :price-catalogue (assoc catalogue-request :valid-from-str (today))))]
@@ -169,7 +169,7 @@
                         (:text response) => "error.price-catalogue.incorrect-date")))
 
               (fact "should return invalid response when valid-from-str is yesterday"
-                    (with-redefs [catalogues/has-previous-published-price-catalogues? (fn [org-id] true)]
+                    (with-redefs [catalogues/has-existing-published-price-catalogues? (fn [org-id] true)]
                       (let [response (-> (local-command sipoo :publish-price-catalogue
                                                         :organization-id "753-R"
                                                         :price-catalogue (assoc catalogue-request :valid-from-str (yesterday))))]
@@ -206,7 +206,7 @@
                               rows => (:rows catalogue-request))))
 
                     (fact "valid-from is in the past but this is the first catalogue for the org"
-                          (with-redefs [catalogues/has-previous-published-price-catalogues? (fn [org-id] false)]
+                          (with-redefs [catalogues/has-existing-published-price-catalogues? (fn [org-id] false)]
                             (let [response (-> (local-command sipoo :publish-price-catalogue
                                                               :organization-id "753-R"
                                                               :price-catalogue (assoc catalogue-request :valid-from-str "1.1.2015")))]

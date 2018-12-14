@@ -59,10 +59,10 @@
 
 (def time-format (tf/formatter "dd.MM.YYYY"))
 
-(defn has-previous-published-price-catalogues? [org-id]
+(defn has-existing-published-price-catalogues? [org-id]
   (->> (fetch-price-catalogues org-id)
-        (filter published?)
-        ((complement empty?))))
+       (filter published?)
+       seq))
 
 (defn validate-insert-price-catalogue-request [{{catalogue-request :price-catalogue org-id :organization-id} :data :as command}]
   (try
