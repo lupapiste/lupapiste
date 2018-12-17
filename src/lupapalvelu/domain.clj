@@ -4,7 +4,6 @@
             [clojure.set :refer [difference]]
             [lupapalvelu.attachment.accessibility :as attachment-access]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.roles :as roles]

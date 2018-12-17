@@ -111,3 +111,8 @@
     (resolve-type :R :paatosote) => paatosote
     (resolve-type "YA" :paatosote) => {:type-group :muut, :type-id :paatosote}
     (resolve-type "R" "lasdkjflaskjdflakjsdf") => {}))
+
+(fact "Every permit-type has attachments defined"
+  (doseq [permit-type (keys (lupapalvelu.permit/permit-types))]
+    (fact {:midje/description (str "Permit type " permit-type)}
+      (attachment-types-by-permit-type (keyword permit-type)) => truthy)))

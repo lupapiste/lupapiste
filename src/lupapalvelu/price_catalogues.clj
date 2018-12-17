@@ -23,6 +23,9 @@
 (defn fetch-price-catalogues [organization-id]
   (mongo/select :price-catalogues {:organization-id organization-id}))
 
+(defn published? [{:keys [state] :as price-catalogue}]
+  (= state "published"))
+
 (defn fetch-previous-published-price-catalogue
   [{:keys [valid-from organization-id] :as price-catalogue}]
   (debug ">> fetch-previous-published-price-catalogue catalogue: " price-catalogue)
@@ -56,12 +59,15 @@
 
 (def time-format (tf/formatter "dd.MM.YYYY"))
 
-(defn validate-insert-price-catalogue-request [{{catalogue-request :price-catalogue} :data :as command}]
+(defn has-existing-published-price-catalogues? [org-id]
+  (->> (fetch-price-catalogues org-id)
+       (filter published?)
+       seq))
+
+(defn validate-insert-price-catalogue-request [{{catalogue-request :price-catalogue org-id :organization-id} :data :as command}]
   (try
     (sc/validate invsc/PriceCatalogueInsertRequest catalogue-request)
-    (if (not (tomorrow-or-later? (:valid-from-str catalogue-request)))
-      (fail :error.price-catalogue.incorrect-date))
-
+    nil
     (catch Exception e
       (warn "Invalid price catalogue request " (.getMessage e))
       (fail :error.invalid-price-catalogue))))
@@ -128,7 +134,7 @@
 
 (defn fetch-valid-catalogue [org-id timestamp]
   (debug ">> fetch-valid-catalogue org-id " org-id " timestamp: " timestamp " findate: " (to-finnish-date timestamp))
-  (let [filter-published (fn [catalogues] (filter (fn [{:keys [state]}] (= state "published")) catalogues))]
+  (let [filter-published (fn [catalogues] (filter published? catalogues))]
 
     (-> (fetch-price-catalogues org-id)
         filter-published

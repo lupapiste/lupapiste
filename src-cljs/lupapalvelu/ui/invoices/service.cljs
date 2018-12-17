@@ -2,7 +2,7 @@
   (:require [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.invoices.state :as state]
-            [sade.shared-util :as util]))
+            [lupapiste-commons.shared-utils :as util]))
 
 (defn vec-remove
   [coll pos]

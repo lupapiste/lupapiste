@@ -106,6 +106,13 @@
                 false?)
     (fail :error.invalid-category)))
 
+(defn- pate-supported-permit-type
+  "Precheck that fails if the application does not have a category."
+  [{:keys [application]}]
+  (when-let [permit-type (:permitType application)]
+    (when-not (schema-util/permit-type->categories permit-type)
+      (fail :error.unsupported-permit-type))))
+
 (defmethod action/allowed-actions-for-category :pate-verdicts
   [{:keys [application] :as command}]
   (if-let [verdict-id (get-in command [:data :verdict-id])]
@@ -364,6 +371,7 @@
    :input-validators    [(partial action/non-blank-parameters [:id])]
    :pre-checks          [pate-enabled
                          verdicts-supported
+                         pate-supported-permit-type
                          (not-pre-check legacy-category)
                          (template/verdict-template-check :application :published)
                          (replacement-check :replacement-id)]
@@ -435,8 +443,9 @@
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks       [verdicts-supported
+                      pate-supported-permit-type
                       (some-pre-check (not-pre-check pate-enabled)
-                                             legacy-category)]
+                                      legacy-category)]
    :states           states/post-submitted-states}
   [command]
   (ok :verdict-id (verdict/new-legacy-verdict-draft command)))

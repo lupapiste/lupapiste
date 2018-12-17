@@ -283,7 +283,7 @@
    (sc/optional-key :inforequestEnabled)     sc/Bool
    (sc/optional-key :applicationEnabled)     sc/Bool
    (sc/optional-key :openInforequestEnabled) sc/Bool
-   (sc/optional-key :openInforequestEmail)   sc/Str
+   (sc/optional-key :openInforequestEmail)   (sc/maybe sc/Str)
    (sc/optional-key :opening)                (sc/maybe ssc/Timestamp)
    (sc/optional-key :pateEnabled)            sc/Bool
    (sc/optional-key :invoicingEnabled)       sc/Bool

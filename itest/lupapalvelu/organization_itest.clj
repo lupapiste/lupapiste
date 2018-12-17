@@ -351,7 +351,9 @@
                                               [["nostotyot" "ya-kayttolupa-nostotyot"]
                                                ["vaihtolavat" "ya-kayttolupa-vaihtolavat"]]]]]
                                 ["kayttolupa" [["mainokset" "ya-kayttolupa-mainostus-ja-viitoitus"]
-                                               ["terassit" "ya-kayttolupa-terassit"]]]]]]))
+                                               ["terassit" "ya-kayttolupa-terassit"]
+                                               ["promootio" "promootio"]
+                                               ["lyhytaikainen-maanvuokraus" "lyhytaikainen-maanvuokraus"]]]]]]))
 
   (fact* "Query selected operations"
     (let [id   (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
@@ -1551,4 +1553,11 @@
                            :new-application-enabled true
                            :pate-enabled            true
                            :invoicing-enabled       true
-                           :bulletins               {:url "https://bul.leti.ns"}})))
+                           :bulletins               {:url "https://bul.leti.ns"}})
+    (fact "Email can be null"
+      (ya-scope) => (contains {:open-inforequest-email ""})
+      (command admin :update-organization
+                     :permitType "YA"
+                     :municipality "753"
+                     :openInforequestEmail nil) => ok?
+      (ya-scope) => (contains {:open-inforequest-email nil}))))

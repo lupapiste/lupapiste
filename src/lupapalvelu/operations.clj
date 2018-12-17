@@ -1336,7 +1336,7 @@
    :lyhytaikainen-maanvuokraus {:schema                    "lyhytaikainen-maanvuokraus"
                                 :permit-type               permit/A
                                 :applicant-doc-schema      applicant-doc-schema-name-hakija
-                                :required                  ["maksaja"]
+                                :required                  ["maksaja" "lmv-location" "lmv-time"]
                                 :attachments               []
                                 :add-operation-allowed     false
                                 :copying-allowed           true

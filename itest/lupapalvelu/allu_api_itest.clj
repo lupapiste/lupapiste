@@ -102,7 +102,13 @@
                              :name    "Säiliö 468"})]))))
   (fact "Authority vs. draft"
     (query sonja :allu-sites :id app-id :kind "promotion")
-    => fail?))
+    => fail?)
+
+  (fact "Submit application"
+    (command pena :submit-application :id app-id) => ok?)
+  (fact "Verdicts cannot be given for Allu applications"
+    (command sonja :new-legacy-verdict-draft :id app-id)
+    => (err :error.unsupported-permit-type)))
 
 (facts "Non-Allu application"
   (let [app-id (create-app-id pena

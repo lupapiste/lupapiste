@@ -139,9 +139,6 @@
                                              :discount-percent 50
                                              :operations ["toimenpide1" "toimenpide2"]}]}]
 
-
-
-
               (fact "should return unauthorized response when user is not an organization admin"
                     (let [response (-> (local-command sonja :publish-price-catalogue
                                                       :organization-id "753-R"
@@ -164,19 +161,20 @@
                       (:text response) => "error.invalid-price-catalogue"))
 
               (fact "should return invalid response when valid-from-str is today"
-                    (let [response (-> (local-command sipoo :publish-price-catalogue
-                                                      :organization-id "753-R"
-                                                      :price-catalogue (assoc catalogue-request :valid-from-str (today))))]
-                      response => fail?
-                      (:text response) => "error.price-catalogue.incorrect-date"))
+                    (with-redefs [catalogues/has-existing-published-price-catalogues? (fn [org-id] true)]
+                      (let [response (-> (local-command sipoo :publish-price-catalogue
+                                                        :organization-id "753-R"
+                                                        :price-catalogue (assoc catalogue-request :valid-from-str (today))))]
+                        response => fail?
+                        (:text response) => "error.price-catalogue.incorrect-date")))
 
-              (fact "should return invalide response when valid-from-str is yesterday"
-                    (let [response (-> (local-command sipoo :publish-price-catalogue
-                                                      :organization-id "753-R"
-                                                      :price-catalogue (assoc catalogue-request :valid-from-str (yesterday))))]
-                      response => fail?
-                      (:text response) => "error.price-catalogue.incorrect-date"))
-
+              (fact "should return invalid response when valid-from-str is yesterday"
+                    (with-redefs [catalogues/has-existing-published-price-catalogues? (fn [org-id] true)]
+                      (let [response (-> (local-command sipoo :publish-price-catalogue
+                                                        :organization-id "753-R"
+                                                        :price-catalogue (assoc catalogue-request :valid-from-str (yesterday))))]
+                        response => fail?
+                        (:text response) => "error.price-catalogue.incorrect-date")))
 
               (fact "should fail if discount percent is nil for some row"
 
@@ -206,6 +204,13 @@
                               (sc/validate invsc/PriceCatalogue new-catalogue)
                               (to-finnish-date valid-from) => (:valid-from-str catalogue-request)
                               rows => (:rows catalogue-request))))
+
+                    (fact "valid-from is in the past but this is the first catalogue for the org"
+                          (with-redefs [catalogues/has-existing-published-price-catalogues? (fn [org-id] false)]
+                            (let [response (-> (local-command sipoo :publish-price-catalogue
+                                                              :organization-id "753-R"
+                                                              :price-catalogue (assoc catalogue-request :valid-from-str "1.1.2015")))]
+                              response => ok?)))
 
                     (fact "optional fields have nil value"
                           (let [catalogue-request {:valid-from-str "1.1.2019"

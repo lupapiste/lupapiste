@@ -11,9 +11,18 @@
 
 (defn num? [val]
   (let [val (strip-whitespace val)]
-    (when (not (blank? val))
+    (when-not (blank? val)
       (not (js/isNaN val)))))
 
-(defn num [val]
+(defn ->int [val]
   (when (num? val)
     (js/parseInt val)))
+
+(defn comma->dot [val]
+  (when (and val (string? val))
+    (clojure.string/replace val #"," ".")))
+
+(defn ->float [val]
+  (let [val-with-dot (comma->dot val)]
+    (when (num? val-with-dot)
+      (js/parseFloat val-with-dot))))
