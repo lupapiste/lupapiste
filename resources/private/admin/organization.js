@@ -305,10 +305,6 @@
         .call();
     }
 
-    self.deactivated.subscribe(function(value) {
-      setBooleanAttribute("deactivated", value);
-    });
-
     self.permanentArchiveEnabled.subscribe(function(value) {
       setBooleanAttribute("permanent-archive-enabled", value);
     });
@@ -352,6 +348,23 @@
         })
         .call();
     });
+
+    function deactivate( flag ) {
+      ajax.command( "toggle-deactivation", {organizationId: self.organization().id(),
+                                            deactivated: flag})
+        .success( _.wrap( flag, self.deactivated))
+        .call();
+    }
+
+    self.toggleDeactivation = function( flag ) {
+      hub.send( "show-dialog",
+                {ltitle: "areyousure",
+                 size: "medium", component: "yes-no-dialog",
+                 componentParams: {text: loc(flag
+                                             ? "admin.deactivated.deactivate-info"
+                                             : "admin.deactivated.activate-info"),
+                                   yesFn: _.wrap( flag, deactivate)}});
+    };
 
     ajax
       .query("permit-types")

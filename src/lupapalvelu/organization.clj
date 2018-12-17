@@ -1066,3 +1066,25 @@
         changes (into {} (for [[k v] updated-role-map]
                            [(keyword (str "ad-login.role-mapping." (name k))) v]))]
     (update-organization org-id {$set changes})))
+
+(defn toggle-applications-read-only [org-id read-only?]
+  (mongo/update-by-query :applications
+                         {:organization org-id}
+                         {(if read-only? $set $unset) {:readOnly true}}))
+
+(defn deactivate-organization
+  "When an organization is deactivated:
+  1. Organization deactivated flag true
+  2. Inforequests and applications for scopes disabled
+  3. Applications into read-only mode."
+  [org-id]
+  (let [{:keys [scope]} (get-organization org-id {:scope.permitType 1})]
+    (let [org-update (->> (range (count scope))
+                          (map (fn [index]
+                                 {(util/kw-path :scope index :new-application-enabled) false
+                                  (util/kw-path :scope index :inforequest-enabled)     false
+                                  (util/kw-path :scope index :open-inforequest)        false}))
+                          (apply merge)
+                          (merge {:deactivated true}))]
+      (update-organization org-id {$set org-update})
+      (toggle-applications-read-only org-id true))))

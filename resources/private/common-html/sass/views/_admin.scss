@@ -88,9 +88,16 @@ div.organizations-search, form.xml-download {
   }
 }
 
-h1.organization-deactivated {
-  &:after {
+div.organization-title {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  h1 {display: inline-block;
+      margin-bottom: 0;
+      vertical-align: middle;
+     }
+  .organization--closed {
+    margin-left: 2em;
     color: $negative;
-    content: " (SULJETTU)"
+    text-transform: uppercase;
   }
 }
