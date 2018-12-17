@@ -275,6 +275,43 @@
            (mapv (comp :condition second))))
     (->> verdict get-lupamaaraykset :maaraykset
          (mapv :sisalto))))
+
+(def ^:private no-parking-space-requirements
+  {:autopaikkojaEnintaan nil
+   :autopaikkojaVahintaan nil
+   :autopaikkojaRakennettava nil
+   :autopaikkojaRakennettu nil
+   :autopaikkojaKiinteistolla nil
+   :autopaikkojaUlkopuolella nil})
+
+(defn- legacy->parking-space-requirements [verdict]
+  no-parking-space-requirements)
+
+(defn- pate->parking-space-requirements [verdict]
+  (let [buildings (get-data verdict :buildings)]
+    {:autopaikkojaEnintaan nil
+     :autopaikkojaVahintaan nil
+     :autopaikkojaRakennettava (->> (map :autopaikat-yhteensa (vals buildings)) (map util/->int) (apply +))
+     :autopaikkojaRakennettu (->> (map :rakennetut-autopaikat (vals buildings)) (map util/->int) (apply +))
+     :autopaikkojaKiinteistolla (->> (map :kiinteiston-autopaikat (vals buildings)) (map util/->int) (apply +))
+     :autopaikkojaUlkopuolella nil}))
+
+(defn- backing->parking-space-requirements [verdict]
+  (merge no-parking-space-requirements
+         (-> verdict get-lupamaaraykset
+             (select-keys [:autopaikkojaEnintaan
+                           :autopaikkojaVahintaan
+                           :autopaikkojaRakennettava
+                           :autopaikkojaRakennettu
+                           :autopaikkojaKiinteistolla
+                           :autopaikkojaUlkopuolella]))))
+
+(defn verdict-parking-space-requirements [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (legacy? verdict)
+      (legacy->parking-space-requirements verdict)
+      (pate->parking-space-requirements verdict))
+    (backing->parking-space-requirements verdict)))
 ;;
 ;; Verdict schema
 ;;
