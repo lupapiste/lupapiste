@@ -25,10 +25,8 @@
 
 (defn- lupamaaraykset-type-canonical [lang verdict]
   (merge (vc/verdict-parking-space-requirements verdict)
-         {:kerrosala nil
-          :kokonaisala nil
-          :rakennusoikeudellinenKerrosala nil
-          :vaaditutKatselmukset (mapv (partial vaadittu-katselmus-canonical lang)
+         (vc/verdict-area-requirements verdict)
+         {:vaaditutKatselmukset (mapv (partial vaadittu-katselmus-canonical lang)
                                       (vc/verdict-required-reviews verdict))
           :maaraystieto (maarays-seq-canonical verdict)
           :vaadittuErityissuunnitelmatieto (mapv (partial vaadittu-erityissuunnitelma-canonical lang)

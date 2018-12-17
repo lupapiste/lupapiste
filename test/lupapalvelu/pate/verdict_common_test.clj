@@ -503,45 +503,72 @@
          :en "KVV-suunnitelmat"}]))
 
 (facts "parking space requirements"
-       (fact "Pate verdict"
-             (vc/verdict-parking-space-requirements
-              {:category :r
-               :data {:buildings {"building0" {:rakennetut-autopaikat  "1"
-                                               :kiinteiston-autopaikat "2"
-                                               :autopaikat-yhteensa    "3"
-                                               :vss-luokka             "4"
-                                               :paloluokka             "5"}
-                                  "building1" {:rakennetut-autopaikat  "1"
-                                               :kiinteiston-autopaikat "1"
-                                               :autopaikat-yhteensa    "1"
-                                               :vss-luokka             "1"
-                                               :paloluokka             "1"}}}})
-             => {:autopaikkojaEnintaan nil
-                 :autopaikkojaVahintaan nil
-                 :autopaikkojaRakennettava 4
-                 :autopaikkojaRakennettu 2
-                 :autopaikkojaKiinteistolla 3
-                 :autopaikkojaUlkopuolella nil})
+  (fact "Pate verdict"
+    (vc/verdict-parking-space-requirements
+     {:category :r
+      :data {:buildings {"building0" {:rakennetut-autopaikat  "1"
+                                      :kiinteiston-autopaikat "2"
+                                      :autopaikat-yhteensa    "3"
+                                      :vss-luokka             "4"
+                                      :paloluokka             "5"}
+                         "building1" {:rakennetut-autopaikat  "1"
+                                      :kiinteiston-autopaikat "1"
+                                      :autopaikat-yhteensa    "1"
+                                      :vss-luokka             "1"
+                                      :paloluokka             "1"}}}})
+    => {:autopaikkojaEnintaan nil
+        :autopaikkojaVahintaan nil
+        :autopaikkojaRakennettava 4
+        :autopaikkojaRakennettu 2
+        :autopaikkojaKiinteistolla 3
+        :autopaikkojaUlkopuolella nil})
 
-       (fact "Legacy verdict"
-             (vc/verdict-parking-space-requirements
-              {:legacy? true
-               :category :r
-               :data irrelevant})
-             => {:autopaikkojaEnintaan nil
-                 :autopaikkojaVahintaan nil
-                 :autopaikkojaRakennettava nil
-                 :autopaikkojaRakennettu nil
-                 :autopaikkojaKiinteistolla nil
-                 :autopaikkojaUlkopuolella nil})
+  (fact "Legacy verdict"
+    (vc/verdict-parking-space-requirements
+     {:legacy? true
+      :category :r
+      :data irrelevant})
+    => {:autopaikkojaEnintaan nil
+        :autopaikkojaVahintaan nil
+        :autopaikkojaRakennettava nil
+        :autopaikkojaRakennettu nil
+        :autopaikkojaKiinteistolla nil
+        :autopaikkojaUlkopuolella nil})
 
-       (fact "Backing system verdict"
-             (vc/verdict-parking-space-requirements
-              {:paatokset [{:lupamaaraykset {:autopaikkojaEnintaan 2
-                                             :autopaikkojaVahintaan 1}}]})
-             => {:autopaikkojaEnintaan 2
-                 :autopaikkojaVahintaan 1
-                 :autopaikkojaRakennettava nil
-                 :autopaikkojaRakennettu nil
-                 :autopaikkojaKiinteistolla nil
-                 :autopaikkojaUlkopuolella nil}))
+  (fact "Backing system verdict"
+    (vc/verdict-parking-space-requirements
+     {:paatokset [{:lupamaaraykset {:autopaikkojaEnintaan 2
+                                    :autopaikkojaVahintaan 1}}]})
+    => {:autopaikkojaEnintaan 2
+        :autopaikkojaVahintaan 1
+        :autopaikkojaRakennettava nil
+        :autopaikkojaRakennettu nil
+        :autopaikkojaKiinteistolla nil
+        :autopaikkojaUlkopuolella nil}))
+
+(facts "parking space requirements"
+  (fact "Pate verdict"
+    (vc/verdict-area-requirements
+     {:category :r
+      :data irrelevant})
+    => {:kerrosala nil
+        :kokonaisala nil
+        :rakennusoikeudellinenKerrosala nil})
+
+  (fact "Legacy verdict"
+    (vc/verdict-area-requirements
+     {:legacy? true
+      :category :r
+      :data irrelevant})
+    => {:kerrosala nil
+        :kokonaisala nil
+        :rakennusoikeudellinenKerrosala nil})
+
+  (fact "Backing system verdict"
+    (vc/verdict-area-requirements
+     {:paatokset [{:lupamaaraykset {:kerrosala "72"
+                                    :kokonaisala "72"
+                                    :rakennusoikeudellinenKerrosala "72.000"}}]})
+    => {:kerrosala 72
+        :kokonaisala 72
+        :rakennusoikeudellinenKerrosala 72}))

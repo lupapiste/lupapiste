@@ -299,12 +299,7 @@
 (defn- backing->parking-space-requirements [verdict]
   (merge no-parking-space-requirements
          (-> verdict get-lupamaaraykset
-             (select-keys [:autopaikkojaEnintaan
-                           :autopaikkojaVahintaan
-                           :autopaikkojaRakennettava
-                           :autopaikkojaRakennettu
-                           :autopaikkojaKiinteistolla
-                           :autopaikkojaUlkopuolella]))))
+             (select-keys (keys no-parking-space-requirements)))))
 
 (defn verdict-parking-space-requirements [verdict]
   (if (lupapiste-verdict? verdict)
@@ -312,6 +307,22 @@
       (legacy->parking-space-requirements verdict)
       (pate->parking-space-requirements verdict))
     (backing->parking-space-requirements verdict)))
+
+(def ^:private no-area-requirements
+  {:kerrosala nil
+   :kokonaisala nil
+   :rakennusoikeudellinenKerrosala nil})
+
+(defn verdict-area-requirements [verdict]
+  (if (lupapiste-verdict? verdict)
+    no-area-requirements
+    (let [requirements (get-lupamaaraykset verdict)]
+      {:kerrosala (util/->int (:kerrosala requirements) nil)
+       :kokonaisala (util/->int (:kokonaisala requirements) nil)
+       :rakennusoikeudellinenKerrosala (some-> (:rakennusoikeudellinenKerrosala requirements)
+                                               (util/->double nil)
+                                               int)})))
+
 ;;
 ;; Verdict schema
 ;;
