@@ -1,5 +1,6 @@
 (ns lupapalvelu.conversion.util
-  (:require [clj-time.coerce :as c]
+  (:require [taoensso.timbre :refer [infof]]
+            [clj-time.coerce :as c]
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [lupapalvelu.application :as app]
@@ -376,6 +377,26 @@
            (or (re-find #"rivital|kerrostal" kayttotarkoitus)
                (= "omakotitalo" rakennuksen-selite))) "kerrostalo-rt-laaj"
       :else "aiemmalla-luvalla-hakeminen"))))
+
+(defn add-vakuustieto!
+  "This takes an XML of a VAK-type kuntaGML application, i.e. deposit.
+  It then retrieves the kantalupa that the VAK-applications refers to
+  and adds the info about the deposit to its verdict (poytakirja) element.
+  This needs to be run for all the VAK-type applications the Vantaa-conversion,
+  after all the applications have been converted."
+  [xml]
+  (let [kantalupa-kuntalupatunnus (-> xml krysp-reader/->viitelupatunnukset first normalize-permit-id) ;; The kuntalupatunnus the VAK-application points to.
+        kantalupa-lupapiste-id (-> kantalupa-kuntalupatunnus app/get-lp-ids-by-kuntalupatunnus first) ;; The lupapiste-id of the aforementioned kantalupa.
+        kuntalupatunnus-vak (krysp-reader/->kuntalupatunnus xml)
+        {:keys [vakuudenLaji vakuudenmaara voimassaolopvm]} (krysp-reader/->vakuustieto xml)
+        vakuus-string (format "Sisältää vakuuden (kuntalupatunnus: %s).\nVakuuden määrä: %s, vakuuden laji: %s, voimassaolopäivä: %s."
+                              kuntalupatunnus-vak vakuudenmaara vakuudenLaji voimassaolopvm)
+        kantalupa-doc (mongo/by-id :applications kantalupa-lupapiste-id)]
+    (when kantalupa-doc
+      (infof "Adding vakuustieto from %s -> %s (%s)." kuntalupatunnus-vak kantalupa-lupapiste-id kantalupa-kuntalupatunnus)
+      (mongo/update-by-id :applications kantalupa-lupapiste-id
+                          (update-in kantalupa-doc [:verdicts 0 :paatokset 0 :poytakirjat 0 :paatos]
+                                     str "\n" vakuus-string)))))
 
 (defn read-xml [kuntalupatunnus]
   (let [filename (str (:resource-path config) "/" kuntalupatunnus ".xml")]
