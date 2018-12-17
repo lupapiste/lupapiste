@@ -437,18 +437,3 @@
 
 (defn get-asian-kuvaus [kuntalupatunnus]
   (-> kuntalupatunnus get-xml-for-kuntalupatunnus building-reader/->asian-tiedot))
-
-(defn is-empty-document? [doc]
-  "")
-
-(defn get-nested-map-vals [m]
-  (filter (complement map?) (tree-seq map? vals m)))
-
-(defn is-empty-osapuoli? [doc]
-  (let [sukunimi (->> (tree-seq map? vals doc)
-                      (filter map?)
-                      (keep :yhteystiedot)
-                      first)]
-    (boolean
-      (when sukunimi
-        (empty? (:value sukunimi))))))

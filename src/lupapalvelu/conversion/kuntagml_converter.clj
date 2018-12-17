@@ -21,9 +21,6 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
-(def tila
-  (atom {}))
-
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   ;;
   ;; Data to be deduced from xml:
@@ -154,7 +151,6 @@
                                        :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
                                        :facta-imported true))
 
-        _ (swap! tila assoc :app created-application)
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
     (logging/with-logging-context {:applicationId (:id created-application)}
