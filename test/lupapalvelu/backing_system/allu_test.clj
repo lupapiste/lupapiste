@@ -196,12 +196,15 @@
       (facts "allu-application?"
         (fact "Use ALLU integration for Helsinki YA."
           (allu/allu-application? "091-YA" "YA") => true)
+        (fact "Permit type A is always Allu application"
+          (allu/allu-application? "FOO" "A") => true)
 
         (fact "Do not use ALLU integration for anything else."
           (quick-check 10
                        (for-all [org-id organizations
                                  permit-type (sg/generator PermitType)
-                                 :when (not (and (= org-id "091-YA") (= permit-type "YA")))]
+                                 :when (not (or (= permit-type "A")
+                                                (and (= org-id "091-YA") (= permit-type "YA"))))]
                                 (not (allu/allu-application? org-id permit-type))))
           => passing-quick-check))
 
