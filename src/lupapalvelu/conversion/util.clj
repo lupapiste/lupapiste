@@ -13,7 +13,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as usr]
-            [monger.operators :refer [$in $ne]]
+            [monger.operators :refer [$in $ne $elemMatch $set]]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]))
@@ -199,9 +199,7 @@
   this document is not used and can be weeded out here."
   [{:keys [documents] :as app}]
   (assoc app :documents
-         (filter (fn [doc]
-                   (not= "rakennuspaikka" (get-in doc [:schema-info :name])))
-                 documents)))
+         (remove #(= "rakennuspaikka" (get-in % [:schema-info :name]))) documents))
 
 (defn op-name->schema-name [op-name]
   (-> op-name operations/get-operation-metadata :schema))
@@ -391,12 +389,14 @@
         {:keys [vakuudenLaji vakuudenmaara voimassaolopvm]} (krysp-reader/->vakuustieto xml)
         vakuus-string (format "Sisältää vakuuden (kuntalupatunnus: %s).\nVakuuden määrä: %s, vakuuden laji: %s, voimassaolopäivä: %s."
                               kuntalupatunnus-vak vakuudenmaara vakuudenLaji voimassaolopvm)
-        kantalupa-doc (mongo/by-id :applications kantalupa-lupapiste-id)]
-    (when kantalupa-doc
+        {:keys [id paatokset]} (-> (mongo/by-id :applications kantalupa-lupapiste-id {:verdicts 1}) :verdicts first)
+        old-paatos-text (get-in paatokset [0 :poytakirjat 0 :paatos])
+        new-paatos-text (str (when-not (empty? old-paatos-text) "\n") vakuus-string)]
+    (when paatokset
       (infof "Adding vakuustieto from %s -> %s (%s)." kuntalupatunnus-vak kantalupa-lupapiste-id kantalupa-kuntalupatunnus)
-      (mongo/update-by-id :applications kantalupa-lupapiste-id
-                          (update-in kantalupa-doc [:verdicts 0 :paatokset 0 :poytakirjat 0 :paatos]
-                                     str "\n" vakuus-string)))))
+      (mongo/update-by-query :applications
+                             {:_id kantalupa-lupapiste-id :verdicts {$elemMatch {:id id}}}
+                             {$set {:verdicts.0.paatokset.0.poytakirjat.0.paatos new-paatos-text}}))))
 
 (defn read-xml [kuntalupatunnus]
   (let [filename (str (:resource-path config) "/" kuntalupatunnus ".xml")]
