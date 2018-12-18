@@ -570,6 +570,12 @@
 (defn tokenless-request? [request]
    (re-matches #"^/proxy/.*" (:uri request)))
 
+(defn bulletin-request? [request]
+  (or (some->> (get-in request [:headers "referer"])
+               (re-matches #"https://julkipano(-\w+)*.lupapiste.fi/app/fi/local-bulletins.*"))
+      (re-matches #"^/app/fi/local-bulletins.*"
+                  (:uri request))))
+
 (def anti-csrf-cookie-name "anti-csrf-token")
 
 (defn anti-csrf [handler]
@@ -579,7 +585,8 @@
       (let [cookie-attrs (dissoc (env/value :cookie) :http-only)]
         (cond
            (and (re-matches #"^/api/(command|query|datatables|upload).*" (:uri request))
-                (not (logged-in-with-apikey? request)))
+                (not (logged-in-with-apikey? request))
+                (not (bulletin-request? request)))
              (anti-forgery/crosscheck-token handler request anti-csrf-cookie-name csrf-attack-hander)
           (tokenless-request? request)
              ;; cookies via /proxy may end up overwriting current valid ones otherwise
