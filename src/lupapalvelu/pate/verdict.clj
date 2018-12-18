@@ -19,6 +19,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.integrations.jms :as jms]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as org]
@@ -1295,11 +1296,28 @@
                       (warn "No JMS connection available"))
                     (warn "JMS feature disabled")))
 
+(defn- fresh-verdict-attachment?!
+  "Checks that the command still resolves to a published verdict without
+  attachment. If not, then the attachment is deleted. Returns true on
+  fresh."
+  [{:keys [application] :as command} verdict-id attachment-id]
+  (let [{:keys [id published]} (command->verdict command true)
+        fresh? (and published
+                    (= id verdict-id)
+                    (nil? (:attachment-id published)))]
+    (when-not fresh?
+      (logging/with-logging-context {:applicationId (:id application)}
+        (warnf "Attachment %s for verdict % is not fresh!"
+               attachment-id verdict-id)
+        (att/delete-attachments! application [attachment-id])))
+    fresh?))
+
 (defn- pdf--verdict [command verdict]
   (or (some-> verdict :published :attachment-id)
       (when-let [attachment-id (pdf/create-verdict-attachment command verdict)]
-        (verdict-update command
-                        {$set {:pate-verdicts.$.published.attachment-id attachment-id}})
+        (when (fresh-verdict-attachment?! command (:id verdict) attachment-id)
+          (verdict-update command
+                          {$set {:pate-verdicts.$.published.attachment-id attachment-id}}))
         true)))
 
 (defn- pdf--proposal [command verdict]
@@ -1316,17 +1334,17 @@
   "Creates verdict PDF base on the data received from the Pate message
   queue."
   [{command ::command mode ::mode}]
-  (let [error-fn                 (fn [err]
-                                   (do
+  (let [{app-id     :id
+         verdict-id :verdict-id} (:data command)
+        error-fn                 (fn [err]
+                                   (logging/with-logging-context {:applicationId app-id}
                                      (warn "Skipping bad message. Cannot create verdict PDF." err)
-                                     (.commit pate-session)))
-        {app-id     :id
-         verdict-id :verdict-id} (:data command)]
+                                     (.commit pate-session)))]
     (cond
-      (ss/blank? app-id)                     (error-fn "No application id.")
-      (ss/blank? verdict-id)                 (error-fn "No verdict id.")
+      (ss/blank? app-id)         (error-fn "No application id.")
+      (ss/blank? verdict-id)     (error-fn "No verdict id.")
       (not (#{::verdict ::signatures
-              ::proposal} mode))             (error-fn (str "Bad mode: " mode))
+              ::proposal} mode)) (error-fn (str "Bad mode: " mode))
       :else
       (when-let [command (let [application   (domain/get-application-no-access-checking app-id)
                                command       (assoc command :application application)
