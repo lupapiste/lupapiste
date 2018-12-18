@@ -921,8 +921,8 @@
    :permissions [{:required [:application/create-continuation-period-permit]}]
    :states     #{:verdictGiven :constructionStarted}
    :pre-checks [validate-not-jatkolupa-app
-                jatkolupa-selected-for-organization
-                (partial permit/valid-permit-types {:R :all :YA :all})]}
+                (partial permit/valid-permit-types {:R :all :YA :all})
+                jatkolupa-selected-for-organization]}
   [{:keys [application] :as command}]
 
   (let [permit-type      (:permitType application)

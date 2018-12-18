@@ -8,6 +8,15 @@
 (fact* "Link permit creation and removal"
   (apply-remote-minimal)
 
+  (fact "Add continuation permit support to the organization"
+        (command sipoo-ya :set-organization-selected-operations
+                 :operations [:ya-katulupa-vesi-ja-viemarityot
+                              :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen
+                              :ya-kayttolupa-mainostus-ja-viitoitus
+                              :ya-kayttolupa-terassit
+                              :ya-kayttolupa-vaihtolavat
+                              :ya-kayttolupa-nostotyot
+                              :ya-jatkoaika]) => ok?)
   (let [apikey sonja
         property-id sipoo-property-id
 
