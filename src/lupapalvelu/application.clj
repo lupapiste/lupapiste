@@ -955,6 +955,13 @@
 (defn set-integration-key [app-id system-name key-data]
   (mongo/update-by-id :applications app-id {$set {(str "integrationKeys." (name system-name)) key-data}}))
 
+;;
+;; Metadata about contract from ALLU
+;;
+
+(defn set-metadata [app-id metadata]
+  (mongo/update-by-id :applications app-id {$set {"metadata" metadata}}))
+
 
 ;; Utils for the sheriff
 

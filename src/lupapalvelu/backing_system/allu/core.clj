@@ -204,6 +204,14 @@
      :uri            (:path route-match)
      :request-method (route-match->request-method route-match)}))
 
+(defn- contract-metadata [{:keys [application] :as command}]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)
+        params {:path {:id allu-id}}
+        route-match (reitit/match-by-name allu-router [:placementcontracts :contract :metadata] (:path params))]
+    {::command       (minimize-command command)
+     :uri            (:path route-match)
+     :request-method (route-match->request-method route-match)}))
+
 ;;;; IntegrationMessage construction
 ;;;; ===================================================================================================================
 
@@ -391,6 +399,11 @@
                                                              (update part :content json/encode)))))
     :else request))
 
+(defn json-response [handler]
+  (fn [request]
+    (-> (handler request)
+        (update :body json/decode true))))
+
 (declare allu-fail!)
 
 (defn- delimit-file-contents!
@@ -478,6 +491,15 @@
                                                              response)
       response response)))
 
+(defn- set-allu-metadata!
+  "If request was successful, store the details about the person who signed the contract to db"
+  [handler]
+  (fn [{{{app-id :id} :application} ::command :as request}]
+    (match (handler request)
+      ({:status (:or 200 201), :body body} :as response) (do (application/set-metadata app-id body)
+                                                             response)
+      response response)))
+
 (defn- log-or-fail!
   "`allu-fail!` on HTTP errors, else do logging."
   [handler]
@@ -556,7 +578,10 @@
 
           ["/final" {:name [:placementcontracts :contract :final]
                      :middleware file-middleware
-                     :get {:handler handler}}]]]]
+                     :get {:handler handler}}]
+          ["/metadata" {:name [:placementcontracts :contract :metadata]
+                        :middleware (if disable-io-middlewares? [] [set-allu-metadata! json-response])
+                        :get {:handler handler}}]]]]
        ["fixedlocations" {:name [:fixedlocations]
                           :parameters {:query {:applicationKind NonBlankStr}}
                           :get {:handler handler}}]]])))
@@ -699,11 +724,12 @@
                                    :final (final-contract-request command))))
     (catch [:text "error.allu.http"] _ nil)))
 
+(defn load-contract-metadata!
+  "GET the name of the person who signed the ALLU verdict."
+  [command]
+  (let [resp (send-allu-request! (contract-metadata command))]
+    resp))
 
-(defn json-response [handler]
-  (fn [request]
-    (-> (handler request)
-        (update :body json/decode true))))
 
 (def FIXED-LOCATION-TYPES {:promotion "PROMOTION"})
 
