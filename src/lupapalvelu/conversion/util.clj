@@ -199,7 +199,7 @@
   this document is not used and can be weeded out here."
   [{:keys [documents] :as app}]
   (assoc app :documents
-         (remove #(= "rakennuspaikka" (get-in % [:schema-info :name]))) documents))
+         (remove #(= "rakennuspaikka" (get-in % [:schema-info :name])) documents)))
 
 (defn op-name->schema-name [op-name]
   (-> op-name operations/get-operation-metadata :schema))
