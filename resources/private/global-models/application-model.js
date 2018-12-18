@@ -352,7 +352,13 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.submitButtonEnabled = ko.pureComputed(function() {
-    return !self.stateChanged() && !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && _.isEmpty(self.submitErrors());
+    return !self.stateChanged()
+      && !self.processing()
+      && !self.hasInvites()
+      && (!self.requiredFieldsFillingObligatory()
+          || !self.missingSomeInfo())
+      && _.isEmpty(self.submitErrors())
+      && lupapisteApp.models.applicationAuthModel.ok( "submit-application");
   });
 
   self.submitButtonFunction = ko.pureComputed(function() {
