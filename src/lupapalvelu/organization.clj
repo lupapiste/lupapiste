@@ -277,8 +277,9 @@
    ;; List of operations for which the Not needed selection is not
    ;; available for the default attachments.
    (sc/optional-key :default-attachments-mandatory) [sc/Str]
-   ;; If true, the organization is in a permanent read-only mode for
-   ;; every non-admin user.
+   ;; Whether the organization has been deactivated. In addition to
+   ;; this flag, scopes and applications have been updated as
+   ;; well. See `deactivate-organization` for details.
    (sc/optional-key :deactivated) sc/Bool})
 
 (sc/defschema SimpleOrg
