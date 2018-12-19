@@ -1,5 +1,6 @@
 (ns lupapalvelu.conversion.util
-  (:require [clj-time.coerce :as c]
+  (:require [taoensso.timbre :refer [infof]]
+            [clj-time.coerce :as c]
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [lupapalvelu.application :as app]
@@ -12,7 +13,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as usr]
-            [monger.operators :refer [$in $ne]]
+            [monger.operators :refer [$in $ne $elemMatch $set]]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]))
@@ -192,6 +193,14 @@
                     :else doc))
                 documents))))
 
+(defn remove-empty-rakennuspaikka
+  "`app/make-application` creates an empty location document (using 'rakennuspaikka' schema)
+  for the created application. Since we're using 'rakennuspaikka-kuntagml'-schema instead,
+  this document is not used and can be weeded out here."
+  [{:keys [documents] :as app}]
+  (assoc app :documents
+         (remove #(= "rakennuspaikka" (get-in % [:schema-info :name])) documents)))
+
 (defn op-name->schema-name [op-name]
   (-> op-name operations/get-operation-metadata :schema))
 
@@ -367,6 +376,28 @@
                (= "omakotitalo" rakennuksen-selite))) "kerrostalo-rt-laaj"
       :else "aiemmalla-luvalla-hakeminen"))))
 
+(defn add-vakuustieto!
+  "This takes an XML of a VAK-type kuntaGML application, i.e. deposit.
+  It then retrieves the kantalupa that the VAK-applications refers to
+  and adds the info about the deposit to its verdict (poytakirja) element.
+  This needs to be run for all the VAK-type applications the Vantaa-conversion,
+  after all the applications have been converted."
+  [xml]
+  (let [kantalupa-kuntalupatunnus (-> xml krysp-reader/->viitelupatunnukset first normalize-permit-id) ;; The kuntalupatunnus the VAK-application points to.
+        kantalupa-lupapiste-id (-> kantalupa-kuntalupatunnus app/get-lp-ids-by-kuntalupatunnus first) ;; The lupapiste-id of the aforementioned kantalupa.
+        kuntalupatunnus-vak (krysp-reader/->kuntalupatunnus xml)
+        {:keys [vakuudenLaji vakuudenmaara voimassaolopvm]} (krysp-reader/->vakuustieto xml)
+        vakuus-string (format "Sisältää vakuuden (kuntalupatunnus: %s).\nVakuuden määrä: %s, vakuuden laji: %s, voimassaolopäivä: %s."
+                              kuntalupatunnus-vak vakuudenmaara vakuudenLaji voimassaolopvm)
+        {:keys [id paatokset]} (-> (mongo/by-id :applications kantalupa-lupapiste-id {:verdicts 1}) :verdicts first)
+        old-paatos-text (get-in paatokset [0 :poytakirjat 0 :paatos])
+        new-paatos-text (str (when-not (empty? old-paatos-text) "\n") vakuus-string)]
+    (when paatokset
+      (infof "Adding vakuustieto from %s -> %s (%s)." kuntalupatunnus-vak kantalupa-lupapiste-id kantalupa-kuntalupatunnus)
+      (mongo/update-by-query :applications
+                             {:_id kantalupa-lupapiste-id :verdicts {$elemMatch {:id id}}}
+                             {$set {:verdicts.0.paatokset.0.poytakirjat.0.paatos new-paatos-text}}))))
+
 (defn read-xml [kuntalupatunnus]
   (let [filename (str (:resource-path config) "/" kuntalupatunnus ".xml")]
     (krysp-fetch/get-local-application-xml-by-filename filename "R")))
@@ -406,12 +437,3 @@
 
 (defn get-asian-kuvaus [kuntalupatunnus]
   (-> kuntalupatunnus get-xml-for-kuntalupatunnus building-reader/->asian-tiedot))
-
-(defn is-empty-osapuoli? [doc]
-  (let [sukunimi (->> (tree-seq map? vals doc)
-                      (filter map?)
-                      (keep :sukunimi)
-                      first)]
-    (boolean
-      (when sukunimi
-        (empty? (:value sukunimi))))))

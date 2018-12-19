@@ -80,7 +80,7 @@
 
         manual-schema-datas {(name (conv-util/op-name->schema-name primary-op-name)) (first document-datas)}
 
-        secondary-op-names (map (partial conv-util/deduce-operation-type kuntalupatunnus) (rest operations))
+        secondary-op-names (map (partial conv-util/deduce-operation-type kuntalupatunnus description) (rest operations))
 
         make-app-info {:id              id
                        :organization    organization
@@ -95,6 +95,8 @@
                                                   (:user command)
                                                   (:created command)
                                                   manual-schema-datas)
+
+        created-application (conv-util/remove-empty-rakennuspaikka created-application)
 
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
