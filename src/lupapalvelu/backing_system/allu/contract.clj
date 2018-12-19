@@ -49,7 +49,6 @@
   (when-let [filedata (allu/load-contract-document! command)]
     (when-let [allu-metadata (allu/load-contract-metadata! command)]
       (let [signer-name (-> allu-metadata :handler :name)
-            _ (println "Signer name: " signer-name)
             verdict (merge (new-allu-contract command)
                            {:published {:published created
                                         :tags (ss/serialize {:body []})}
@@ -62,7 +61,7 @@
                                                                       (util/not=as-kw (vc/allu-agreement-state %)
                                                                                       :final)))
                                                :signatures
-                                               (cons {:name (pate-verdict/user-person-name user)
+                                               (cons {:name signer-name
                                                       :user-id (:id user)
                                                       :date created})
                                                (sort-by :date))}))
