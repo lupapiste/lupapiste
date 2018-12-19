@@ -72,6 +72,7 @@
 
    ;; Lausunto -> taulukko?
    ;; TODO: Lausunnon sisältö?
+   :statements (ds/access :statements)
    :lausunnonAntajanNimi (ds/access :test)
    :lausunnonAntopvm (ds/access :test)
 
@@ -155,6 +156,19 @@
       (update-in [:lupamaaraykset :vaaditutKatselmukset]
                  (partial mapv :Katselmus))))
 
+(def rakennusvalvonta-asia
+  (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]))
+
+(def osapuolet
+  (ds/from-context [rakennusvalvonta-asia :osapuolettieto :Osapuolet]))
+
+(defn ->statements [canonical-statements]
+  (->> canonical-statements
+       (map (comp :lausuntotieto :Lausunto))
+       (remove nil?)
+       (map :Lausunto)
+       (mapv #(update % :puoltotieto :Puolto))))
+
 (defn reporting-app-accessors [application lang]
   {:test (constantly "foo")
    :id (ds/from-context [:application :id])
@@ -170,11 +184,9 @@
                                          :RakennusvalvontaAsia :asianTiedot :Asiantiedot
                                          :rakennusvalvontaasianKuvaus])
 
-   :parties (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
-                              :RakennusvalvontaAsia :osapuolettieto :Osapuolet :osapuolitieto
+   :parties (ds/from-context [osapuolet :osapuolitieto
                               util/sequentialize (partial mapv :Osapuoli)])
-   :planners (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
-                               :RakennusvalvontaAsia :osapuolettieto :Osapuolet :suunnittelijatieto
+   :planners (ds/from-context [osapuolet :suunnittelijatieto
                                util/sequentialize (partial mapv :Suunnittelija)])
 
    :reviews (ds/from-context [:application :tasks (partial mapv #(katselmus-canonical application lang % nil))])
@@ -185,6 +197,8 @@
 
    :state (ds/from-context [:application :state])
    :stateChangeTs (ds/from-context [:application :history (partial filterv :state) last :ts])
+   :statements (ds/from-context [rakennusvalvonta-asia :lausuntotieto util/sequentialize
+                                 ->statements])
    :permitType (ds/from-context [:application :permitType])
 
    :verdicts (fn [ctx]

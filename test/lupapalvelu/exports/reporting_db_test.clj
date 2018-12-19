@@ -394,6 +394,11 @@
                   :verottajanTvLl false}]
        :state "submitted"
        :stateChangeTs 12345
+       ;; Note that draft statement is not present!
+       :statements [{:lausunto "Savupiippu pitää olla."
+                     :lausuntoPvm "2013-05-09"
+                     :puoltotieto {:puolto "ehdollinen"}
+                     :viranomainen "Paloviranomainen"}]
        :araFunding false
        :verdicts []})
 
