@@ -87,3 +87,17 @@ div.organizations-search, form.xml-download {
     vertical-align: middle;
   }
 }
+
+div.organization-title {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  h1 {display: inline-block;
+      margin-bottom: 0;
+      vertical-align: middle;
+     }
+  .organization--closed {
+    margin-left: 2em;
+    color: $negative;
+    text-transform: uppercase;
+  }
+}

@@ -1502,7 +1502,8 @@
      (sort-operation-tree op-trees-for-orgs-with-selected-ops))))
 
 (defn selected-operation-for-organization?
-  "Has the organization selected the given operation?"
+  "Has the organization selected the given operation?
+  Returns true if not any selected operations."
   [organization operation-name]
   {:pre [(or (string? operation-name) (keyword? operation-name))]}
   (let [selected-operations (->> organization :selected-operations (map keyword) (set))]

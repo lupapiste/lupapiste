@@ -6,6 +6,16 @@
 
 (apply-remote-minimal)
 
+(fact "Add continuation permit support to the organization"
+        (command sipoo-ya :set-organization-selected-operations
+                 :operations [:ya-katulupa-vesi-ja-viemarityot
+                              :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen
+                              :ya-kayttolupa-mainostus-ja-viitoitus
+                              :ya-kayttolupa-terassit
+                              :ya-kayttolupa-vaihtolavat
+                              :ya-kayttolupa-nostotyot
+                              :ya-jatkoaika]) => ok?)
+
 (fact* "Application can be set to Started state after verdict has been given, and after that to Closed state."
   (let [initial-application (create-and-submit-application sonja
                               :operation "ya-katulupa-vesi-ja-viemarityot"

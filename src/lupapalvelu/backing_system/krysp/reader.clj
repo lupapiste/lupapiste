@@ -675,11 +675,16 @@
   (->> (select xml-no-ns [:toimenpidetieto :Toimenpide :rakennelmatieto])
        (map cr/all-of)))
 
+(defn ->vakuustieto [xml]
+  (->> (select xml [:rakennusvalvontaAsiatieto :lisatiedot :vakuus])
+       (map cr/all-of)
+       first))
+
 (defn ->viitelupatunnukset
   "Takes a parsed XML document, returns a list of viitelupatunnus -ids (in 'permit-id'-format) found therein."
   [xml]
   (->> (select xml [:rakennusvalvontaAsiatieto :viitelupatieto])
-       (map (comp #(get-in % [:LupaTunnus :kuntalupatunnus]) cr/all-of ))))
+       (map (comp #(get-in % [:LupaTunnus :kuntalupatunnus]) cr/all-of))))
 
 (defn is-foreman-application? [xml]
   (let [permit-type (-> xml ->kuntalupatunnus (ss/split #"-") last)]

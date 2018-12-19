@@ -894,6 +894,13 @@
   (when (app/jatkoaika-application? application)
     (fail :error.cannot-apply-jatkolupa-for-jatkolupa)))
 
+(defn- jatkolupa-selected-for-organization [{:keys [organization application]}]
+  (if (= permit/YA (:permitType application))
+    (when-not (op/selected-operation-for-organization? @organization :ya-jatkoaika)
+      (fail :error.jatkolupa-not-selected-for-organization))
+    (when-not (op/selected-operation-for-organization? @organization :raktyo-aloit-loppuunsaat)
+      (fail :error.jatkolupa-not-selected-for-organization))))
+
 ;;
 ;; ************
 ;; Lain mukaan hankeen aloituspvm on hakupvm + 21pv, tai kunnan paatospvm jos se on tata aiempi.
@@ -914,7 +921,8 @@
    :permissions [{:required [:application/create-continuation-period-permit]}]
    :states     #{:verdictGiven :constructionStarted}
    :pre-checks [validate-not-jatkolupa-app
-                (partial permit/valid-permit-types {:R :all :YA :all})]}
+                (partial permit/valid-permit-types {:R :all :YA :all})
+                jatkolupa-selected-for-organization]}
   [{:keys [application] :as command}]
 
   (let [permit-type      (:permitType application)

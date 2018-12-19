@@ -1356,3 +1356,23 @@
     (when-not (= already-mandatory? mandatory)
       (org/update-organization organizationId
                                {(if mandatory $push $pull) {:default-attachments-mandatory operationId}}))))
+
+(defcommand toggle-deactivation
+  {:description      "When an organization is deactivated, everyone of its
+  applications are marked readOnly. In addition, applications and
+  inforequests are disabled for every scope. On activation, the
+  applications are 'released' but scopes are left untouched."
+   :parameters       [organizationId deactivated]
+   :input-validators [(partial action/non-blank-parameters [:organizationId])
+                      (partial action/boolean-parameters [:deactivated])]
+   :pre-checks       [(fn [{data :data}]
+                        (when-let [organizationId (:organizationId data)]
+                          (when-not (org/get-organization organizationId {:id 1})
+                            (fail :error.no-such-organization))))]
+   :user-roles       #{:admin}}
+  [_]
+  (if deactivated
+    (org/deactivate-organization organizationId)
+    (do (org/update-organization organizationId {$unset {:deactivated 1}})
+        (org/toggle-applications-read-only organizationId false)))
+  (ok))

@@ -36716,6 +36716,23 @@ div.organizations-search input.textinput, form.xml-download input.textinput {
   vertical-align: middle;
 }
 
+div.organization-title {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+div.organization-title h1 {
+  display: inline-block;
+  margin-bottom: 0;
+  vertical-align: middle;
+}
+
+div.organization-title .organization--closed {
+  margin-left: 2em;
+  color: #df3215;
+  text-transform: uppercase;
+}
+
 #authority-admin h2 {
   margin-top: 24px;
 }
