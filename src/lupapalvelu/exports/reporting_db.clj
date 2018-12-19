@@ -3,6 +3,8 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
+            [lupapalvelu.pate.verdict-canonical :refer [verdict-canonical]]
+            [lupapalvelu.pate.verdict-common :as vc]
             [sade.util :as util]))
 
 ;; Ei suomeksi, noudattaa omaa tietomallia
@@ -63,6 +65,11 @@
    :laskutusvuosi (ds/access :test)
    :rivisumma (ds/access :test)
 
+   ;; Taksa
+   :taksanSelite (ds/access :test)
+   :taksanVoimaantulopvm (ds/access :test) ;; Selite: Liittyy laskuun
+   :taksankohta (ds/access :test)
+
    ;; Lausunto -> taulukko?
    ;; TODO: Lausunnon sisältö?
    :lausunnonAntajanNimi (ds/access :test)
@@ -79,6 +86,9 @@
                             (ds/access :context))
 
    ;; Päätös
+   :verdicts (ds/array-from :verdicts
+                            (ds/access :context))
+
    :lupaehdonSisaltoteksti (ds/access :test)
    :lisaselvitys (ds/access :test) ;; Selite: Tulee uusille päätöksille rakenteellisena.
    :lupaVoimassaSaakkaPvm (ds/access :test)
@@ -132,11 +142,6 @@
    ;; Rakentamistoimenpide
    :hankkeenRakennuksenMuutostyonLaji (ds/access :test)
 
-   ;; Taksa
-   :taksanSelite (ds/access :test)
-   :taksanVoimaantulopvm (ds/access :test) ;; Selite: Liittyy laskuun
-   :taksankohta (ds/access :test)
-
    ;; Toimenpide
    :rakentamistoimenpiteenLaji (ds/access :test) ;; (rakennuksella) Selite: Yhdellä hakemuksella voi olla useampi toimenpide
 
@@ -151,6 +156,23 @@
 
 (def get-katselmustieto
   (ds/from-context [:context :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus]))
+
+(defn- verdict-via-canonical
+  "Builds a representation of the given verdict for reporting db API
+  using mostly the canonical representation."
+  [verdict]
+  (-> (:Paatos (verdict-canonical (:lang ctx)
+                                  verdict))
+      (assoc :kuntalupatunnus
+             (vc/verdict-municipality-permit-id verdict))
+      (update-in [:lupamaaraykset :maaraystieto]
+                 (partial mapv (comp :sisalto :Maarays)))
+      (update-in [:lupamaaraykset :vaadittuErityissuunnitelmatieto]
+                 (partial mapv :VaadittuErityissuunnitelma))
+      (update-in [:lupamaaraykset :vaadittuTyonjohtajatieto]
+                 (partial mapv (comp :tyonjohtajaRooliKoodi :VaadittuTyonjohtaja)))
+      (update-in [:lupamaaraykset :vaaditutKatselmukset]
+                 (partial mapv :Katselmus))))
 
 (defn reporting-app-accessors [application lang]
   {:test (constantly "foo")
@@ -182,12 +204,18 @@
 
    :state (ds/from-context [:application :state])
    :stateChangeTs (ds/from-context [:application :history (partial filterv :state) last :ts])
-   :permitType (ds/from-context [:application :permitType])})
+   :permitType (ds/from-context [:application :permitType])
+
+   :verdicts (fn [ctx]
+               ((ds/from-context [:application vc/all-verdicts
+                                  (partial map verdict-via-canonical)])
+                ctx))})
 
 (defn ->reporting-result [application lang]
   ;; TODO check permit type, R or P (or others as well?)
   (let [application-canonical (application-to-canonical application lang)]
     (ds/build-with-skeleton reporting-app-skeleton
                             {:application application
-                             :canonical application-canonical}
+                             :canonical application-canonical
+                             :lang lang}
                             (reporting-app-accessors application lang))))

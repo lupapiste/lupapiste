@@ -81,7 +81,7 @@
                                                       :lainvoimainen {:delta 4 :unit "days"}
                                                       :aloitettava   {:delta 1 :unit "years"}
                                                       :voimassa      {:delta 2 :unit "years"}}
-                                       :verdict-code [ "pysytti-evattyna",
+                                       :verdict-code ["pysytti-evattyna",
                                                       "myonnetty",
                                                       "konversio",
                                                       "ilmoitus-tiedoksi"
