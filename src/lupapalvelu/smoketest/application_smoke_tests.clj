@@ -212,7 +212,8 @@
   (fn [application]
     (when (and
             ((states/all-application-states-but [:canceled :draft :open]) (keyword (:state application)))
-            (when-not (some #(= "aiemmalla-luvalla-hakeminen" %) (map :name (app/get-operations application)))
+            (when-not (or (:facta-imported application)
+                          (some #(= "aiemmalla-luvalla-hakeminen" %) (map :name (app/get-operations application))))
               (nil? (:submitted application))))
       "Submitted timestamp is null"))
   :submitted :state :primaryOperation :secondaryOperations)
