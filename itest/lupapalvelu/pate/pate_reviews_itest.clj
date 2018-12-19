@@ -96,6 +96,14 @@
                :path [:reviews]
                :value [(find-review-id "Aloituskokous")
                        (find-review-id "Loppukatselmus")]) => no-errors?)
+    (fact "There is only one verdict"
+      (:verdicts (query sonja :pate-verdicts :id app-id))
+      => (just [(contains {:id        verdict-id
+                           :category  "r"
+                           :legacy?   false
+                           :proposal? false
+                           :replaced? false
+                           :title     "Luonnos"})]))
     (fact "Publish PATE verdict with two reviews"
       (command sonja :publish-pate-verdict :id app-id
                :verdict-id verdict-id) => no-errors?)
@@ -254,7 +262,7 @@
                      :verdict-id (-> verdicts last :id)) => ok?))
         (fact "Check status"
           (let [{:keys [tasks attachments appeals appealVerdicts
-                      pate-verdicts verdicts state]} (query-application sonja app-id)]
+                        pate-verdicts verdicts state]} (query-application sonja app-id)]
           (count tasks) => 5
           (count attachments) => 2
           (count appeals) => 1
