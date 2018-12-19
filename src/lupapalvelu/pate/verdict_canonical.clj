@@ -23,23 +23,16 @@
 (defn- vaadittu-tyonjohtaja-canonical [foreman]
   {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi foreman}})
 
-(defn- lupamaaraykset-type-canonical [lang {{buildings :buildings :as data} :data :as verdict}]
-  {:autopaikkojaEnintaan nil
-   :autopaikkojaVahintaan nil
-   :autopaikkojaRakennettava (->> (map :autopaikat-yhteensa (vals buildings)) (map util/->int) (apply +))
-   :autopaikkojaRakennettu (->> (map :rakennetut-autopaikat (vals buildings)) (map util/->int) (apply +))
-   :autopaikkojaKiinteistolla (->> (map :kiinteiston-autopaikat (vals buildings)) (map util/->int) (apply +))
-   :autopaikkojaUlkopuolella nil
-   :kerrosala nil
-   :kokonaisala nil
-   :rakennusoikeudellinenKerrosala nil
-   :vaaditutKatselmukset (mapv (partial vaadittu-katselmus-canonical lang)
-                               (vc/verdict-required-reviews verdict))
-   :maaraystieto (maarays-seq-canonical verdict)
-   :vaadittuErityissuunnitelmatieto (mapv (partial vaadittu-erityissuunnitelma-canonical lang)
-                                          (vc/verdict-required-plans verdict))
-   :vaadittuTyonjohtajatieto (map vaadittu-tyonjohtaja-canonical
-                                  (vc/verdict-required-foremen verdict))})
+(defn- lupamaaraykset-type-canonical [lang verdict]
+  (merge (vc/verdict-parking-space-requirements verdict)
+         (vc/verdict-area-requirements verdict)
+         {:vaaditutKatselmukset (mapv (partial vaadittu-katselmus-canonical lang)
+                                      (vc/verdict-required-reviews verdict))
+          :maaraystieto (maarays-seq-canonical verdict)
+          :vaadittuErityissuunnitelmatieto (mapv (partial vaadittu-erityissuunnitelma-canonical lang)
+                                                 (vc/verdict-required-plans verdict))
+          :vaadittuTyonjohtajatieto (map vaadittu-tyonjohtaja-canonical
+                                         (vc/verdict-required-foremen verdict))}))
 
 (defn- paivamaarat-type-canonical [verdict]
   (let [data (vc/verdict-dates verdict)]

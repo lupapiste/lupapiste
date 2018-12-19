@@ -275,6 +275,57 @@
            (mapv (comp :condition second))))
     (->> verdict get-lupamaaraykset :maaraykset
          (mapv :sisalto))))
+
+(def ^:private no-parking-space-requirements
+  {:autopaikkojaEnintaan nil
+   :autopaikkojaVahintaan nil
+   :autopaikkojaRakennettava nil
+   :autopaikkojaRakennettu nil
+   :autopaikkojaKiinteistolla nil
+   :autopaikkojaUlkopuolella nil})
+
+(defn- legacy->parking-space-requirements [verdict]
+  no-parking-space-requirements)
+
+(defn- sum-building-values [buildings k]
+  (->> (map k (vals buildings)) (map util/->int) (apply +)))
+
+(defn- pate->parking-space-requirements [verdict]
+  (let [buildings (get-data verdict :buildings)]
+    {:autopaikkojaEnintaan nil
+     :autopaikkojaVahintaan nil
+     :autopaikkojaRakennettava (sum-building-values buildings :autopaikat-yhteensa)
+     :autopaikkojaRakennettu (sum-building-values buildings :rakennetut-autopaikat)
+     :autopaikkojaKiinteistolla (sum-building-values buildings :kiinteiston-autopaikat)
+     :autopaikkojaUlkopuolella nil}))
+
+(defn- backing->parking-space-requirements [verdict]
+  (merge no-parking-space-requirements
+         (-> verdict get-lupamaaraykset
+             (select-keys (keys no-parking-space-requirements)))))
+
+(defn verdict-parking-space-requirements [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (legacy? verdict)
+      (legacy->parking-space-requirements verdict)
+      (pate->parking-space-requirements verdict))
+    (backing->parking-space-requirements verdict)))
+
+(def ^:private no-area-requirements
+  {:kerrosala nil
+   :kokonaisala nil
+   :rakennusoikeudellinenKerrosala nil})
+
+(defn verdict-area-requirements [verdict]
+  (if (lupapiste-verdict? verdict)
+    no-area-requirements
+    (let [requirements (get-lupamaaraykset verdict)]
+      {:kerrosala (util/->int (:kerrosala requirements) nil)
+       :kokonaisala (util/->int (:kokonaisala requirements) nil)
+       :rakennusoikeudellinenKerrosala (some-> (:rakennusoikeudellinenKerrosala requirements)
+                                               (util/->double nil)
+                                               int)})))
+
 ;;
 ;; Verdict schema
 ;;
