@@ -960,15 +960,7 @@
 ;;
 
 (defn set-allu-application-id [app-id allu-id]
-  (mongo/update-by-id :applications app-id {$set {"allu-application-id" allu-id}}))
-
-;;
-;; Metadata about contract from ALLU
-;;
-
-(defn set-metadata [app-id metadata]
-  (mongo/update-by-id :applications app-id {$set {"metadata" metadata}}))
-
+  (mongo/update-by-id :applications app-id {$set {"allu.application-id" allu-id}}))
 
 ;; Utils for the sheriff
 

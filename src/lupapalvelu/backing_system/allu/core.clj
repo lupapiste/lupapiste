@@ -207,8 +207,7 @@
 (defn- allu-application-data [{:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
         params {:path {:id allu-id}}
-        route-match (reitit/match-by-name allu-router [:application :data] (:path params))
-        _ (println "Route match ok")]
+        route-match (reitit/match-by-name allu-router [:application :data] (:path params))]
     {:command        (minimize-command command)
      :uri            (:path route-match)
      :request-method (route-match->request-method route-match)}))
@@ -504,20 +503,8 @@
   "If request was successful, store ALLU details about about the application to db"
   [handler]
   (fn [{{{app-id :id} :application} ::command :as request}]
-    (println "Middlewaressa")
     (match (handler request)
-      ({:status (:or 200 201), :body body} :as response) (do
-                                                           (println "!!!!!!!!!!!!!!!!!!!!!!!\n" body)
-                                                           (application/set-allu-application-id app-id (:applicationId body))
-                                                             response)
-      response response)))
-
-(defn- set-allu-metadata!
-  "If request was successful, store the details about the person who signed the contract to db"
-  [handler]
-  (fn [{{{app-id :id} :application} ::command :as request}]
-    (match (handler request)
-      ({:status (:or 200 201), :body body} :as response) (do (application/set-metadata app-id body)
+      ({:status (:or 200 201), :body body} :as response) (do (application/set-allu-application-id app-id (:applicationId body))
                                                              response)
       response response)))
 
@@ -564,10 +551,6 @@
                             (conj (preprocessor->middleware (fn-> content->json jwt-authorize))))
             :coercion reitit.coercion.schema/coercion}
        ["applications"
-        #_["/:id" {:parameters {:path {:id ssc/NatString}}
-                 :name [:application :data]
-                 :middleware (if disable-io-middlewares? [] [set-allu-application-data! json-response])
-                 :get {:handler handler}}]
         ["/:id/cancelled" {:name [:applications :cancel]
                            :parameters {:path {:id ssc/NatString}}
                            :put {:handler handler}}]
@@ -577,36 +560,7 @@
                                           :multipart {:metadata AttachmentMetadata
                                                       :file AttachmentFile}}
                              :middleware file-middleware
-                             :post {:handler handler}}]
-        #_["/:id" {:parameters {:path {:id ssc/NatString}}}
-         ["" {:name [:application :data]
-              :middleware (if disable-io-middlewares? [] [set-allu-application-data! json-response])
-              :get {:handler handler}}]
-
-         ["/cancelled" {:name [:applications :cancel]
-                        :parameters {:path {:id ssc/NatString}}
-                        :put {:handler handler}}]
-
-         ["/attachments" {:name [:attachments :create]
-                          :parameters {:path {:id ssc/NatString}
-                                       :multipart {:metadata AttachmentMetadata
-                                                   :file AttachmentFile}}
-                          :middleware file-middleware
-                          :post {:handler handler}}]]
-        #_["/:id" {:parameters {:path {:id ssc/NatString}}}
-           ["" {:name [:application :data]
-                :middleware (if disable-io-middlewares? [] [set-allu-application-data! json-response])
-                :get {:handler handler}}]
-
-           ["/cancelled" {:name [:applications :cancel]
-                          :put {:handler handler}}]
-
-           ["/attachments" {:name [:attachments :create]
-                            :parameters {:multipart {:metadata AttachmentMetadata
-                                                     :file AttachmentFile}}
-                            :middleware file-middleware
-                            :post {:handler handler}}]]]
-
+                             :post {:handler handler}}]]
 
        ["placementcontracts"
         ["" {:name [:placementcontracts :create]
@@ -633,7 +587,7 @@
                      :middleware file-middleware
                      :get {:handler handler}}]
           ["/metadata" {:name [:placementcontracts :contract :metadata]
-                        :middleware (if disable-io-middlewares? [] [set-allu-metadata! json-response])
+                        :middleware [json-response]
                         :get {:handler handler}}]]]]
        ["fixedlocations" {:name [:fixedlocations]
                           :parameters {:query {:applicationKind NonBlankStr}}
@@ -780,15 +734,15 @@
 (defn load-allu-application-data!
   "GET application data from ALLU."
   [command]
-  (println "Homma alkaa")
   (let [resp (send-allu-request! (allu-application-data command))]
     resp))
 
 (defn load-contract-metadata!
   "GET the name of the person who signed the ALLU verdict."
   [command]
-  (let [resp (send-allu-request! (contract-metadata command))]
-    resp))
+  (try+
+    (:body (allu-request-handler (contract-metadata command)))
+    (catch [:text "error.allu.http"] _ nil)))
 
 
 (def FIXED-LOCATION-TYPES {:promotion "PROMOTION"})
