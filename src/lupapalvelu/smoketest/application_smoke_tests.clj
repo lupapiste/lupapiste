@@ -207,6 +207,7 @@
 
 ;;
 ;; Skips applications with operation "aiemmalla-luvalla-hakeminen" (previous permit aka paperilupa)
+;; and those with :facta-imported flag set on.
 ;;
 (mongocheck :applications
   (fn [application]
