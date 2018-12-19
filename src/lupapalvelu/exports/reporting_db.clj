@@ -89,25 +89,6 @@
    :verdicts (ds/array-from :verdicts
                             (ds/access :context))
 
-   :lupaehdonSisaltoteksti (ds/access :test)
-   :lisaselvitys (ds/access :test) ;; Selite: Tulee uusille päätöksille rakenteellisena.
-   :lupaVoimassaSaakkaPvm (ds/access :test)
-   :lupahakemuksenSaapumispvm (ds/access :test)
-   :lupatunnus (ds/access :test)
-   :luvanAntopvm (ds/access :test)
-   :luvanKerrosala (ds/access :test)
-   :luvanLainvoimaisuuspvm (ds/access :test)
-   :luvanPaatospaiva (ds/access :test)
-   :luvanUusiKerrosala (ds/access :test)
-   :luvanUusiKokonaisala (ds/access :test)
-   :luvanUusiTilavuus (ds/access :test)
-   :poikkeukset (ds/access :test) ;; Selite: Kirjattava tieto. Tulee rakenteellisena.
-   :paatoksenTekija (ds/access :test)
-   :paatoksenTulos (ds/access :test)
-   :paatospvm (ds/access :test)
-   :valmistelijanNimi (ds/access :test)
-   :viimeisinPaatospvm (ds/access :test) ;; Selite: Luvalla voi olla monta päätöstä, esim. oikaisuvaatimuspäätös
-
    ;; Rakennus
    ;; Raportoidaan se mitä sattuu löytymään
    :hankkeenRakennuksenHuoneistonAla (ds/access :test)
