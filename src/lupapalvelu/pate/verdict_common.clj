@@ -287,13 +287,16 @@
 (defn- legacy->parking-space-requirements [verdict]
   no-parking-space-requirements)
 
+(defn- sum-building-values [buildings k]
+  (->> (map k (vals buildings)) (map util/->int) (apply +)))
+
 (defn- pate->parking-space-requirements [verdict]
   (let [buildings (get-data verdict :buildings)]
     {:autopaikkojaEnintaan nil
      :autopaikkojaVahintaan nil
-     :autopaikkojaRakennettava (->> (map :autopaikat-yhteensa (vals buildings)) (map util/->int) (apply +))
-     :autopaikkojaRakennettu (->> (map :rakennetut-autopaikat (vals buildings)) (map util/->int) (apply +))
-     :autopaikkojaKiinteistolla (->> (map :kiinteiston-autopaikat (vals buildings)) (map util/->int) (apply +))
+     :autopaikkojaRakennettava (sum-building-values buildings :autopaikat-yhteensa)
+     :autopaikkojaRakennettu (sum-building-values buildings :rakennetut-autopaikat)
+     :autopaikkojaKiinteistolla (sum-building-values buildings :kiinteiston-autopaikat)
      :autopaikkojaUlkopuolella nil}))
 
 (defn- backing->parking-space-requirements [verdict]

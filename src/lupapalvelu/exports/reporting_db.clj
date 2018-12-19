@@ -141,8 +141,8 @@
 (defn- verdict-via-canonical
   "Builds a representation of the given verdict for reporting db API
   using mostly the canonical representation."
-  [verdict]
-  (-> (:Paatos (verdict-canonical (:lang ctx)
+  [lang verdict]
+  (-> (:Paatos (verdict-canonical lang
                                   verdict))
       (assoc :kuntalupatunnus
              (vc/verdict-municipality-permit-id verdict))
@@ -189,7 +189,8 @@
 
    :verdicts (fn [ctx]
                ((ds/from-context [:application vc/all-verdicts
-                                  (partial map verdict-via-canonical)])
+                                  #(map (partial verdict-via-canonical (:lang ctx))
+                                        %)])
                 ctx))})
 
 (defn ->reporting-result [application lang]
