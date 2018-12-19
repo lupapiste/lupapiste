@@ -96,8 +96,6 @@
                                                   (:created command)
                                                   manual-schema-datas)
 
-        created-application (conv-util/remove-empty-rakennuspaikka created-application)
-
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))
@@ -111,11 +109,6 @@
 
         structure-descriptions (map :description buildings-and-structures)
 
-        created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
-
-        ;; Add descriptions from asianTiedot to the document.
-        created-application (conv-util/add-description created-application xml)
-
         other-building-docs (map (partial app/document-data->op-document created-application) (rest document-datas) secondary-op-names)
 
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2 :name %3) other-building-docs (rest structure-descriptions) secondary-op-names)
@@ -125,8 +118,6 @@
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
 
         state-changes (krysp-reader/get-sorted-tilamuutos-entries xml)
-
-        history-array (conv-util/generate-history-array xml)
 
         ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
         given-statements (for [st statements
@@ -141,8 +132,14 @@
                              (catch Exception e
                                (errorf "Moving statement to statement given -state failed: %s" (.getMessage e)))))
 
+        history-array (conv-util/generate-history-array xml)
+
         created-application (-> created-application
-                                (update-in [:documents] concat other-building-docs new-parties structures
+                                (assoc-in [:primaryOperation :description] (first structure-descriptions))
+                                (conv-util/add-description xml) ;; Add descriptions from asianTiedot to the document.
+                                conv-util/remove-empty-rakennuspaikka ;; Remove empty rakennuspaikka-document that comes from the template
+                                (conv-util/add-timestamps history-array) ;; Add timestamps for different state changes
+                                (update-in [:documents] concat other-building-docs new-parties structures ;; Assemble the documents-array
                                            (when-not (includes? kuntalupatunnus "TJO") location-document))
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :statements given-statements

@@ -4,6 +4,7 @@
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
@@ -269,7 +270,8 @@
   (let [verdict-given {:state :verdictGiven
                        :ts (xml->verdict-timestamp xml)
                        :user usr/batchrun-user-data}
-        history (for [{:keys [pvm tila]} (krysp-reader/get-sorted-tilamuutos-entries xml)]
+        history (for [{:keys [pvm tila]} (krysp-reader/get-sorted-tilamuutos-entries xml)
+                      :when (translate-state tila)]
                   {:state (translate-state tila)
                    :ts pvm
                    :user usr/batchrun-user-data})
@@ -281,6 +283,18 @@
                (assoc e :state :foremanVerdictGiven)
                e))
            history-array))))
+
+(defn add-timestamps [app history-array]
+  (if (empty? history-array)
+    app
+    (let [{:keys [ts state]} (first history-array)
+          app-key (app-state/timestamp-key state)]
+      (recur (if-not (nil? app-key)
+               (assoc app app-key ts)
+               app)
+             (rest history-array)))))
+
+;; Dev time helpers
 
 (defn read-all-test-files
   ([] (read-all-test-files (:resource-path config)))
