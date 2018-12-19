@@ -81,3 +81,35 @@
   (prewalk (fetch-with-accessor initial-context
                                 accessor-functions)
            data-skeleton))
+
+;;
+;; Accessor building functions
+;;
+
+(defn from-context
+  "Returns a function that produces a result from context by accessing
+  values from given `path` in order. `path` can contain functions,
+  keywords, sets (applied as functions), non-negative integers (used
+  with `nth`).  A default value can be provided as an optional
+  argument
+
+  ((from-context [:foo 0 last])
+    {:foo [[1 2 3]]}) => 3
+  ((from-context [:foo 0 last #{1 2}])
+    {:foo [[1 2 3]]}) => nil
+  ((from-context [:foo 0 last #{1 2}]
+                 :default)
+    {:foo [[1 2 3]]}) => :default"
+  [path & [default]]
+  (fn from-context-fn [context]
+    (loop [[f & rest] path
+           result     context]
+      (cond (nil? result)                      default
+            (nil? f)                           result
+            (or (fn? f) (keyword? f) (set? f)) (recur rest (f result))
+            (and (integer? f) (not (neg? f)))  (recur rest (nth result f))
+            :else (throw (ex-info "Illegal value in path"
+                                  {:path path
+                                   :value f
+                                   :contex context
+                                   :result result}))))))

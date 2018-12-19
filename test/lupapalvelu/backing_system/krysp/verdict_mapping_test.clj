@@ -1,7 +1,7 @@
 (ns lupapalvelu.backing-system.krysp.verdict-mapping-test
   (:require [clojure.data.xml :as data-xml]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa]]
+            [lupapalvelu.rakennuslupa-canonical-util :refer [application-rakennuslupa]]
             [lupapalvelu.organization :as org]
             [lupapalvelu.pate.verdict-canonical-test :as vct]
             [lupapalvelu.permit :as permit]

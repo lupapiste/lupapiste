@@ -1,9 +1,9 @@
 (ns lupapalvelu.rest.application-data-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa
-                                                                      application-tyonjohtajan-nimeaminen
-                                                                      application-tyonjohtajan-nimeaminen-v2]]
+            [lupapalvelu.rakennuslupa-canonical-util :refer [application-rakennuslupa
+                                                             application-tyonjohtajan-nimeaminen
+                                                             application-tyonjohtajan-nimeaminen-v2]]
             [lupapalvelu.organization :as org]
             [lupapalvelu.rest.applications-data :as applications-data]
             [lupapalvelu.rest.schemas :refer :all]
