@@ -956,6 +956,13 @@
   (mongo/update-by-id :applications app-id {$set {(str "integrationKeys." (name system-name)) key-data}}))
 
 ;;
+;; Allu's internal application id
+;;
+
+(defn set-allu-application-id [app-id allu-id]
+  (mongo/update-by-id :applications app-id {$set {"allu-application-id" allu-id}}))
+
+;;
 ;; Metadata about contract from ALLU
 ;;
 
