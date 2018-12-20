@@ -68,9 +68,11 @@
   returns a document of type following the rakennuspaikka-kuntagml -schema."
   [kuntalupatunnus rakennuspaikkatieto]
   (let [data (parse-rakennuspaikkatieto kuntalupatunnus rakennuspaikkatieto)
-        doc-datas (doc-model/map2updates [] data)
-        manual-schema-datas {"rakennuspaikka-kuntagml" doc-datas}
-        schema (schemas/get-schema 1 "rakennuspaikka-kuntagml")]
+        schema (schemas/get-schema 1 "rakennuspaikka-kuntagml")
+        doc-datas (->> data
+                       (doc-model/map2updates [])
+                       (app/sanitize-document-datas schema))
+        manual-schema-datas {"rakennuspaikka-kuntagml" doc-datas}]
     (app/make-document nil (now) manual-schema-datas schema)))
 
 (defn kuntalupatunnus->description
@@ -165,10 +167,11 @@
                                     :kokonaisala ""
                                     :kuvaus (get-in raktieto [:Rakennelma :kuvaus :kuvaus])
                                     :tunnus (get-in raktieto [:Rakennelma :tunnus :rakennusnro])
-                                    :valtakunnallinenNumero ""})]
+                                    :valtakunnallinenNumero ""})
+        schema (schemas/get-schema 1 "kaupunkikuvatoimenpide")]
     (app/make-document "muu-rakentaminen"
                        (now)
-                       {"kaupunkikuvatoimenpide" data}
+                       {"kaupunkikuvatoimenpide" (app/sanitize-document-datas schema data)}
                        (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
 
 (defn decapitalize
@@ -206,8 +209,11 @@
   (-> op-name operations/get-operation-metadata :schema))
 
 (defn toimenpide->toimenpide-document [op-name toimenpide]
-  (let [data (doc-model/map2updates [] toimenpide)
-        schema-name (op-name->schema-name op-name)]
+  (let [schema-name (op-name->schema-name op-name)
+        schema (schemas/get-schema 1 schema-name)
+        data (->> toimenpide
+                  (doc-model/map2updates [])
+                  (app/sanitize-document-datas schema))]
     (app/make-document op-name
                        (now)
                        {schema-name data}
