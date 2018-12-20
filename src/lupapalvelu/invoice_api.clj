@@ -69,6 +69,21 @@
       (invoices/update-invoice! (:invoice data))
       (ok)))
 
+(defcommand delete-invoice
+  {:description      "Delete invoice from db. Deletes only invoices in draft state"
+   :feature          :invoices
+   :user-roles       #{:authority}
+   :org-authz-roles  roles/default-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :parameters       [id invoice-id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :pre-checks       [invoices/invoicing-enabled]
+   :states           states/post-submitted-states}
+  [{:keys [data] :as command}]
+  (do (debug "delete-invoice invoice-request:" data)
+      (invoices/delete-invoice! (:invoice-id data))
+      (ok)))
+
 (defquery fetch-invoice
   {:description      "Fetch invoice from db"
    :feature          :invoices

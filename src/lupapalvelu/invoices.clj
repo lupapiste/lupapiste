@@ -107,6 +107,12 @@
          (mongo/insert :invoices))
     id))
 
+(defn delete-invoice!
+  [invoice-id]
+  (let [current-invoice (mongo/by-id "invoices" invoice-id)]
+    (when (= "draft" (:state current-invoice))
+      (mongo/remove "invoices" invoice-id))))
+
 (def keys-used-to-update-invoice
   [:operations
    :state

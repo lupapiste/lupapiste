@@ -279,6 +279,14 @@
                                                                     (fn [response]
                                                                       (service/fetch-invoices app-id)))))))} state-text])))
 
+(rum/defc delete-invoice-button [invoice-id]
+  (let [app-id (js/pageutil.hashApplicationId)]
+    [:button {:class (str "delete-invoice-button secondary")
+              :on-click (fn [e] (common/show-dialog {:callback (fn [] (service/delete-invoice app-id invoice-id))
+                                                     :type :yes-no}))}
+     (common/loc :remove)]))
+
+
 (rum/defc invoice-summary-row < rum/reactive [invoice-atom]
   (let [operations (:operations @invoice-atom)
         invoice-rows-all (mapcat :invoice-rows operations)
@@ -293,9 +301,13 @@
      [:div
        [:div {:style {:text-align "left" :display "inline" :padding "5em"}} (common/loc :invoices.rows.total)]
        [:div {:style {:text-align "right" :display "inline"}} (:sum-total sums)]]
-     [:div {:style {:display "inline-block"}}
+     (if (and (= "draft" (:state @invoice-atom)) (not (:is-new @invoice-atom)))
+       [:div {:style {:display "inline-block" :float "left"}}
+        (delete-invoice-button (:id @invoice-atom))])
+     [:div {:style {:display "inline-block" :float "right"}}
       (change-next-state-button invoice-atom)
-      (change-previous-state-button invoice-atom)]]))
+      (change-previous-state-button invoice-atom)]
+     [:div {:class "clear"}]]))
 
 (rum/defc invoice-data < rum/reactive
   [invoice]
