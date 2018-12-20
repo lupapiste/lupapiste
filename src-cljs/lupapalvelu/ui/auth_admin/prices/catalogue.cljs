@@ -56,9 +56,9 @@
 
 (rum/defc operation-catalogue-row
   < {:key-fn (fn [operation row] (str operation "-" (:index row)))}
-  [operation {:keys [text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
+  [operation {:keys [code text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
   [:tr
-   [:td text]
+   [:td (str code " " text)]
    [:td price-per-unit]
    [:td discount-percent]
    [:td min-total-price]
