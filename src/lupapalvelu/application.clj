@@ -885,8 +885,8 @@
           document-datas))
 
 (defn document-data->op-document
+  "If no operation name is provided, this defaults to \"archiving-project\""
   ([application data]
-   ;; If no operation name is provided, this defaults to "archiving-project"
    (document-data->op-document application data "archiving-project"))
   ([{:keys [schema-version] :as application} data operation-name]
     (let [schema-name (-> operation-name op/get-operation-metadata :schema)
