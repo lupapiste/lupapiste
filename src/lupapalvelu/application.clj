@@ -877,10 +877,9 @@
 
 (defn sanitize-document-datas
   "This cleans document datas of all the key-value pairs that are not found in the
-  given schema. Failure to do this results in smoketests breaking, plus the data
+  given schema. Failure to do this results in smoke-tests breaking, plus the data
   wouldn't end up to the created application anyway."
   [schema document-datas]
-  ; document-datas
   (filter (fn [[k v]]
               (model/find-by-name (:body schema) k))
           document-datas))
