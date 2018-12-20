@@ -459,7 +459,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists :legacy?)
                       (some-pre-check (verdict-exists :legacy? :editable?)
-                                             (state-in states/give-verdict-states))]
+                                      (state-in states/give-verdict-states))]
    :states           states/post-submitted-states
    :notified         true}
   [command]

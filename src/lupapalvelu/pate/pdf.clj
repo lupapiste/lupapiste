@@ -296,8 +296,8 @@
   does not yet have the attachment."
   [application-id verdict-id]
   (when-let [verdict (some-> (mongo/select-one :applications
-                                       {:_id application-id}
-                                       {:verdicts 1 :pate-verdicts 1})
+                                               {:_id application-id}
+                                               {:verdicts 1 :pate-verdicts 1})
                              (vif/find-verdict verdict-id))]
     (let [field (if (vc/proposal? verdict) :proposal :published)]
       (and (field verdict) (-> verdict field :attachment-id not)))))
