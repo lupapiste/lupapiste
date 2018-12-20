@@ -119,8 +119,8 @@
 (rum/defc operation-product-select < rum/reactive
   [operation rows]
   (let [catalogue  (rum/react state/catalogue-in-edit)
-        options (map (fn [{:keys [index text]}]
-                       [:option {:key (str operation "-" index) :value index} text])
+        options (map (fn [{:keys [index code text]}]
+                       [:option {:key (str operation "-" index) :value index} (str code " " text)])
                      rows)]
     [:select.operation-product-select {:on-change (fn [e]
                                                     (let [value (.. e -target -value)]
@@ -130,9 +130,9 @@
 
 (rum/defc edit-operation-catalogue-row
   < {:key-fn (fn [operation row] (str operation "-" (:index row)))}
-  [operation {:keys [index text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
+  [operation {:keys [index code text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
   [:tr
-   [:td text]
+   [:td (str code " " text)]
    [:td price-per-unit]
    [:td discount-percent]
    [:td min-total-price]
