@@ -225,28 +225,6 @@
         counter (format (if (> 10000 nextvalue) "9%04d" "%05d") nextvalue)]
     (ss/join "-" (list "LP" "092" fullyear counter))))
 
-(defn get-duplicate-ids
-  "This takes a kuntalupatunnus and returns the LP ids of every application in the database
-  that contains the same kuntalupatunnus and does not contain :facta-imported true."
-  [kuntalupatunnus]
-  (let [ids (app/get-lp-ids-by-kuntalupatunnus kuntalupatunnus)]
-    (->> (mongo/select :applications
-                       {:_id {$in ids} :facta-imported {$ne true}}
-                       {:_id 1})
-         (map :id))))
-
-(defn get-id-listing
-  "Produces a CSV list of converted applications, where LP id is matched to kuntalupatunnus.
-  See PATE-152 for the rationale."
-  [filename]
-  (let [data (->> (mongo/select :applications ;; Data is a sequence of vectors like ["LP-092-2018-90047" "18-0030-13-A"].
-                                {:facta-imported true}
-                                {:_id 1 :verdicts.kuntalupatunnus 1})
-                  (map (fn [item]
-                         [(:id item) (get-in item [:verdicts 0 :kuntalupatunnus])])))]
-    (with-open [writer (io/writer filename)]
-      (csv/write-csv writer data))))
-
 (defn translate-state [state]
   (condp = state
     "ei tiedossa" nil
@@ -295,6 +273,28 @@
              (rest history-array)))))
 
 ;; Dev time helpers
+
+(defn get-duplicate-ids
+  "This takes a kuntalupatunnus and returns the LP ids of every application in the database
+  that contains the same kuntalupatunnus and does not contain :facta-imported true."
+  [kuntalupatunnus]
+  (let [ids (app/get-lp-ids-by-kuntalupatunnus kuntalupatunnus)]
+    (->> (mongo/select :applications
+                       {:_id {$in ids} :facta-imported {$ne true}}
+                       {:_id 1})
+         (map :id))))
+
+(defn get-id-listing
+  "Produces a CSV list of converted applications, where LP id is matched to kuntalupatunnus.
+  See PATE-152 for the rationale."
+  [filename]
+  (let [data (->> (mongo/select :applications ;; Data is a sequence of vectors like ["LP-092-2018-90047" "18-0030-13-A"].
+                                {:facta-imported true}
+                                {:_id 1 :verdicts.kuntalupatunnus 1})
+                  (map (fn [item]
+                         [(:id item) (get-in item [:verdicts 0 :kuntalupatunnus])])))]
+    (with-open [writer (io/writer filename)]
+      (csv/write-csv writer data))))
 
 (defn read-all-test-files
   ([] (read-all-test-files (:resource-path config)))
