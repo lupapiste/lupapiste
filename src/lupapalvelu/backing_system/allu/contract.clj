@@ -47,7 +47,7 @@
   ;; This is here instead of e.g. do-check-for-verdict to avoid
   ;; verdict/allu/pate-verdict dependency cycles:
   (when-let [filedata (allu/load-contract-document! command)]
-    (when-let [allu-metadata (allu/load-contract-metadata! command)]
+    (when-let [allu-metadata (allu/load-contract-metadata command)]
       (let [signer-name (-> allu-metadata :handler :name)
             signer-title (-> allu-metadata :handler :title)
             verdict (merge (new-allu-contract command)
