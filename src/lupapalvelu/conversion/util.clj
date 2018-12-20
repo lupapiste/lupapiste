@@ -270,7 +270,7 @@
 
 (defn missing-timestamp->dummy
   "Sometimes the history-array does not contains a timestamp for closing.
-  In these cases, it's se to (now). If an optional second argument is passed,
+  In these cases, it's set to (now). If an optional second argument is passed,
   the value under that key is updated instead."
   ([app]
    (missing-timestamp->dummy app :closed))
