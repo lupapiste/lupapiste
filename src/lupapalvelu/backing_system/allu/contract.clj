@@ -49,6 +49,7 @@
   (when-let [filedata (allu/load-contract-document! command)]
     (when-let [allu-metadata (allu/load-contract-metadata! command)]
       (let [signer-name (-> allu-metadata :handler :name)
+            signer-title (-> allu-metadata :handler :title)
             verdict (merge (new-allu-contract command)
                            {:published {:published created
                                         :tags (ss/serialize {:body []})}
@@ -61,7 +62,7 @@
                                                                       (util/not=as-kw (vc/allu-agreement-state %)
                                                                                       :final)))
                                                :signatures
-                                               (cons {:name signer-name
+                                               (cons {:name (str signer-title " " signer-name)
                                                       :user-id (:id user)
                                                       :date created})
                                                (sort-by :date))}))
@@ -69,7 +70,7 @@
                                                                  created application user)]
         (attachment/convert-and-attach! (update-in command [:user] assoc
                                                    :lastName signer-name
-                                                   :firstName "[ALLU]")
+                                                   :firstName signer-title)
                                         {:created created
                                          :attachment-type {:type-group :muut
                                                            :type-id :sopimus}
