@@ -268,9 +268,18 @@
                e))
            history-array))))
 
+(defn missing-timestamp->dummy
+  "Sometimes the history-array does not contains a timestamp for closing.
+  In these cases, it's se to (now). If an optional second argument is passed,
+  the value under that key is updated instead."
+  ([app]
+   (missing-timestamp->dummy app :closed))
+  ([app k]
+   (update app k (fn [ts] (if (nil? ts) (now) ts)))))
+
 (defn add-timestamps [app history-array]
   (if (empty? history-array)
-    app
+    (missing-timestamp->dummy app)
     (let [{:keys [ts state]} (first history-array)
           app-key (app-state/timestamp-key state)]
       (recur (if-not (nil? app-key)
