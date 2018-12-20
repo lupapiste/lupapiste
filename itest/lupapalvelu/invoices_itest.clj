@@ -31,6 +31,7 @@
                     :operations [{:operation-id "linjasaneeraus"
                                   :name "linjasaneeraus"
                                   :invoice-rows [{:text "Laskurivi1 kpl"
+                                                  :code "123"
                                                   :type "from-price-catalogue"
                                                   :unit "kpl"
                                                   :price-per-unit 10
@@ -87,18 +88,21 @@
                       invoice {:operations [{:operation-id "linjasaneeraus"
                                              :name "linjasaneeraus"
                                              :invoice-rows [{:text "Row 1 kpl"
+                                                             :code "111"
                                                              :type "from-price-catalogue"
                                                              :unit "kpl"
                                                              :price-per-unit 10
                                                              :units 2
                                                              :discount-percent 0}
                                                             {:text "Row 2 m2"
+                                                             :code "222"
                                                              :type "from-price-catalogue"
                                                              :unit "m2"
                                                              :price-per-unit 20.5
                                                              :units 15.8
                                                              :discount-percent 50}
                                                             {:text "Custom row m3"
+                                                             :code "333"
                                                              :type "custom"
                                                              :unit "m3"
                                                              :price-per-unit 20.5
@@ -123,6 +127,7 @@
                       invoice {:operations [{:operation-id "linjasaneeraus"
                                              :name "linjasaneeraus"
                                              :invoice-rows [{:text "Laskurivi1 kpl"
+                                                             :code "111"
                                                              :type "from-price-catalogue"
                                                              :unit "kpl"
                                                              :price-per-unit 10
@@ -143,6 +148,7 @@
                             invoice {:operations [{:operation-id "linjasaneeraus"
                                                    :name "linjasaneeraus"
                                                    :invoice-rows [{:text "Laskurivi1 kpl"
+                                                                   :code "111"
                                                                    :type "from-price-catalogue"
                                                                    :unit "kpl"
                                                                    :price-per-unit 10
@@ -177,6 +183,7 @@
                             invoice {:operations [{:operation-id "linjasaneeraus"
                                                    :name "linjasaneeraus"
                                                    :invoice-rows [{:text "Laskurivi1 kpl"
+                                                                   :code "123"
                                                                    :type "from-price-catalogue"
                                                                    :unit "kpl"
                                                                    :price-per-unit 10
@@ -297,12 +304,14 @@
                 (let [invoice {:operations [{:operation-id "linjasaneeraus"
                                              :name "linjasaneeraus"
                                              :invoice-rows [{:text "Row 1 kpl"
+                                                             :code "111"
                                                              :type "from-price-catalogue"
                                                              :unit "kpl"
                                                              :price-per-unit 10
                                                              :units 2
                                                              :discount-percent 0}
                                                             {:text "Row 2 m2"
+                                                             :code "111"
                                                              :type "from-price-catalogue"
                                                              :unit "m2"
                                                              :price-per-unit 20.5
