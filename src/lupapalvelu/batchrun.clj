@@ -331,7 +331,7 @@
     (doseq [app apps
             :let [command (assoc (application->command app) :user batchrun-user
                                                             :created (now)
-                                                            :action "fetch-verdicts")]]
+                                                            :action "fetch-allu-contract")]]
       (logging/with-logging-context {:applicationId (:id app) :userId (:id batchrun-user)}
                                     (allu-contract/fetch-allu-contract command))))
   (mongo/disconnect!))

@@ -204,6 +204,22 @@
      :uri            (:path route-match)
      :request-method (route-match->request-method route-match)}))
 
+(defn- allu-application-data [{:keys [application] :as command}]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)
+        params {:path {:id allu-id}}
+        route-match (reitit/match-by-name allu-router [:application :data] (:path params))]
+    {:command        (minimize-command command)
+     :uri            (:path route-match)
+     :request-method (route-match->request-method route-match)}))
+
+(defn- contract-metadata [{:keys [application] :as command}]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)
+        params {:path {:id allu-id}}
+        route-match (reitit/match-by-name allu-router [:placementcontracts :contract :metadata] (:path params))]
+    {::command       (minimize-command command)
+     :uri            (:path route-match)
+     :request-method (route-match->request-method route-match)}))
+
 ;;;; IntegrationMessage construction
 ;;;; ===================================================================================================================
 
@@ -391,6 +407,11 @@
                                                              (update part :content json/encode)))))
     :else request))
 
+(defn json-response [handler]
+  (fn [request]
+    (-> (handler request)
+        (update :body json/decode true))))
+
 (declare allu-fail!)
 
 (defn- delimit-file-contents!
@@ -478,6 +499,15 @@
                                                              response)
       response response)))
 
+(defn- set-allu-application-data!
+  "If request was successful, store ALLU details about the application to db"
+  [handler]
+  (fn [{{{app-id :id} :application} ::command :as request}]
+    (match (handler request)
+      ({:status (:or 200 201), :body body} :as response) (do (application/set-allu-application-id app-id (:applicationId body))
+                                                             response)
+      response response)))
+
 (defn- log-or-fail!
   "`allu-fail!` on HTTP errors, else do logging."
   [handler]
@@ -532,7 +562,6 @@
                              :middleware file-middleware
                              :post {:handler handler}}]]
 
-
        ["placementcontracts"
         ["" {:name [:placementcontracts :create]
              :parameters {:body PlacementContract}
@@ -556,7 +585,10 @@
 
           ["/final" {:name [:placementcontracts :contract :final]
                      :middleware file-middleware
-                     :get {:handler handler}}]]]]
+                     :get {:handler handler}}]
+          ["/metadata" {:name [:placementcontracts :contract :metadata]
+                        :middleware [json-response]
+                        :get {:handler handler}}]]]]
        ["fixedlocations" {:name [:fixedlocations]
                           :parameters {:query {:applicationKind NonBlankStr}}
                           :get {:handler handler}}]]])))
@@ -699,11 +731,19 @@
                                    :final (final-contract-request command))))
     (catch [:text "error.allu.http"] _ nil)))
 
+(defn load-allu-application-data!
+  "GET application data from ALLU."
+  [command]
+  (let [resp (send-allu-request! (allu-application-data command))]
+    resp))
 
-(defn json-response [handler]
-  (fn [request]
-    (-> (handler request)
-        (update :body json/decode true))))
+(defn load-contract-metadata!
+  "GET the name of the person who signed the ALLU verdict."
+  [command]
+  (try+
+    (:body (allu-request-handler (contract-metadata command)))
+    (catch [:text "error.allu.http"] _ nil)))
+
 
 (def FIXED-LOCATION-TYPES {:promotion "PROMOTION"})
 
