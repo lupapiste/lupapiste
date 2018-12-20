@@ -842,7 +842,7 @@
     {:result conversion-result
      :file converted-filedata}))
 
-(defn- attach!
+(defn attach!
   "1) Creates and saves attachment model for application, or fetches it if attachment-id is given
    2) Creates preview image in separate thread
    3) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to
