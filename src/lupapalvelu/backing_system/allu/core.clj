@@ -500,7 +500,7 @@
       response response)))
 
 (defn- set-allu-application-data!
-  "If request was successful, store ALLU details about about the application to db"
+  "If request was successful, store ALLU details about the application to db"
   [handler]
   (fn [{{{app-id :id} :application} ::command :as request}]
     (match (handler request)
