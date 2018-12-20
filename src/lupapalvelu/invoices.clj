@@ -217,7 +217,7 @@
                                                                                  (util/includes-as-kw?
                                                                                   (:name op))))
                                                               (map #(assoc (select-keys %
-                                                                                        [:text :unit :price-per-unit
+                                                                                        [:code :text :unit :price-per-unit
                                                                                          :discount-percent])
                                                                            :type "from-price-catalogue"
                                                                            :units 0)))})
