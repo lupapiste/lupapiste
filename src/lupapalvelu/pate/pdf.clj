@@ -2,12 +2,14 @@
   "PDF generation via HTML for Pate verdicts. Utilises a simple
   schema-based mechanism for the layout definiton and generation."
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as app-meta]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
@@ -20,11 +22,14 @@
             [lupapalvelu.pate.verdict-common :as vc]
             [lupapalvelu.pate.verdict-interface :as vif]
             [lupapalvelu.pdf.html-template :as html-pdf]
+            [lupapalvelu.storage.file-storage :as storage]
             [sade.core :refer :all]
             [sade.property :as property]
             [sade.strings :as ss]
             [sade.util :as util]
-            [swiss.arrows :refer :all]))
+            [swiss.arrows :refer :all]
+            [taoensso.timbre :refer [warn]])
+  (:import [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
 
 (defn applicants
@@ -285,54 +290,95 @@
   [application verdict]
   (verdict-tags-html (verdict-tags application verdict)))
 
+
+(defn- can-attach-verdict-pdf?
+  "PDF can be attached when verdict/proposal exists AND is published AND
+  does not yet have the attachment."
+  [application-id verdict-id]
+  (when-let [verdict (some-> (mongo/select-one :applications
+                                               {:_id application-id}
+                                               {:verdicts 1 :pate-verdicts 1})
+                             (vif/find-verdict verdict-id))]
+    (let [field (if (vc/proposal? verdict) :proposal :published)]
+      (and (field verdict) (-> verdict field :attachment-id not)))))
+
+(defn- upload-and-attach-pdf!
+  "Due to the asynchronous nature of verdict PDF creation, the
+  application/verdict may have changed during the PDF generation, file
+  upload and conversion. Thus, an optional `can-attach-fn?` can be
+  given for checking that attachment can be added. The function is
+  called after the delay-inducing operations (PDF, upload, convert)
+  and just before attaching. If the check fails, the created files are deleted.
+
+  One scenario, where this could happen is if a (legacy) verdict is
+  deleted before its PDF is finished. Also, in itests the message
+  queues can 'leak' from on suite to another."
+  [{:keys [command pdf attachment-options file-options can-attach-fn?]}]
+  (let [{:keys [application
+                user]} command
+        user-id        (:id user)
+        can-attach-fn? (or can-attach-fn? (constantly true))]
+    (with-open [stream (with-open [in  (:pdf-file-stream pdf)
+                                   out (ByteArrayOutputStream.)]
+                         (io/copy in out)
+                         (ByteArrayInputStream. (.toByteArray out)))]
+      (let [uploaded  (file-upload/save-file (assoc file-options :content stream)
+                                             {:linked           false
+                                              :uploader-user-id user-id})
+            ;; The same stream is reused for conversion
+            _         (.reset stream)
+            converted (att/conversion user-id nil application (assoc uploaded :content stream))
+            attached  (if (can-attach-fn?)
+                        (att/attach! command nil attachment-options uploaded converted)
+                        (do
+                          (warn "Verdict PDF cannot be attached for verdict"
+                                (get-in attachment-options [:source :id]))
+                          (storage/delete-unlinked-file user-id (:fileId uploaded))
+                          (storage/delete-unlinked-file user-id (get-in converted [:file :fileId]))))]
+        (att/cleanup-temp-file (:result converted))
+        attached))))
+
 (defn create-verdict-attachment
   "Creates PDF for the verdict and uploads it as an attachment. Returns
-  the attachment-id."
+  the attachment-id or nil if the attachment could not be created."
   [{:keys [application created] :as command} verdict]
-  (let [proposal?     (vc/proposal? verdict)
-        contract?     (vc/contract? verdict)
-        content-path  (if proposal? :proposal :published)]
+  (let [proposal?    (vc/proposal? verdict)
+        contract?    (vc/contract? verdict)
+        content-path (if proposal? :proposal :published)]
     (when-let [html (some-> verdict content-path :tags
                             edn/read-string verdict-tags-html)]
       (let [pdf (html-pdf/html->pdf application
                                     "pate-verdict"
-                                    html)
-            published (some-> (mongo/select-one :applications
-                                                {:_id (:id application)}
-                                                {:verdicts      1
-                                                 :pate-verdicts 1})
-                              (vif/find-verdict (:id verdict))
-                              content-path)]
+                                    html)]
         (when-not (:ok pdf)
           (fail! :pate.pdf-verdict-error))
-        ;; Make sure that the verdict attachment has not yet been created
-        (when (and published (not (:attachment-id published)))
-          (with-open [stream (:pdf-file-stream pdf)]
-            (:id (att/upload-and-attach!
-                   command
-                   {:created         created
-                    :attachment-type (if proposal?
-                                       (resolve-verdict-attachment-type application :paatosehdotus)
-                                       (resolve-verdict-attachment-type application))
-                    :source          {:type "verdicts"
-                                      :id   (:id verdict)}
-                    :locked          true
-                    :read-only       (if proposal? false true)
-                    :contents        (i18n/localize (cols/language verdict)
-                                                    (cond
-                                                      proposal? :pate-verdict-proposal
-                                                      contract? :pate.verdict-table.contract
-                                                      :else :pate-verdict))}
-                   {:filename (i18n/localize-and-fill (cols/language verdict)
-                                                      (cond
-                                                        proposal? :pdf.proposal.filename
-                                                        contract? :pdf.contract.filename
-                                                        :else :pdf.filename)
-                                                      (:id application)
-                                                      (util/to-local-datetime
-                                                        (or (some-> verdict :published :published)
-                                                            (some-> verdict :proposal :proposed))))
-                    :content  stream}))))))))
+        (:id (upload-and-attach-pdf!
+              {:command            command
+               :pdf                pdf
+               :attachment-options {:created         created
+                                    :attachment-type (if proposal?
+                                                       (resolve-verdict-attachment-type application :paatosehdotus)
+                                                       (resolve-verdict-attachment-type application))
+                                    :source          {:type "verdicts"
+                                                      :id   (:id verdict)}
+                                    :locked          true
+                                    :read-only       (if proposal? false true)
+                                    :contents        (i18n/localize (cols/language verdict)
+                                                                    (cond
+                                                                      proposal? :pate-verdict-proposal
+                                                                      contract? :pate.verdict-table.contract
+                                                                      :else     :pate-verdict))}
+               :file-options       {:filename (i18n/localize-and-fill (cols/language verdict)
+                                                                      (cond
+                                                                        proposal? :pdf.proposal.filename
+                                                                        contract? :pdf.contract.filename
+                                                                        :else     :pdf.filename)
+                                                                      (:id application)
+                                                                      (util/to-local-datetime
+                                                                       (or (some-> verdict :published :published)
+                                                                           (some-> verdict :proposal :proposed))))}
+               :can-attach-fn?     #(can-attach-verdict-pdf? (:id application)
+                                                             (:id verdict))}))))))
 
 ;; TODO: Verdict details MUST NOT change in the new version. Only the
 ;; signatures must be replaced.
