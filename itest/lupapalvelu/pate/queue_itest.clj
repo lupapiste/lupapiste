@@ -163,9 +163,8 @@
                              ;; between checking and attaching). We
                              ;; assume optimistically that this never
                              ;; happens in the production.
-                             (Thread/sleep (+ 100 (* i 10 (rand-int 100))))
-                             (pdf--verdict command verdict))
-                           ))
+                             (Thread/sleep (* i 200))
+                             (pdf--verdict command verdict))))
                        (range 4))]
           (doseq [future (.invokeAll pool tasks)]
             (.get future))
