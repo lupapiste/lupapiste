@@ -80,17 +80,13 @@
    :uusienAsuntojenLkm (ds/access :test) ;; Selite: Per toimenpide
    :uusienAsuntojenLkmLuvalla (ds/access :test) ;; Selite: Summattuna rakennusten lukumäärä per hakemus
 
-   ;; Rakennuspaikka
-   :rakennettu (ds/access :test) ; rakennuspaikalla valmiiden rakennusten kerrosala yhteensä. Selite: Ennen Lupapisteen tuloa olevat mahdottomia, tulevaisuudessa Matti?
-   :sallittu (ds/access :test) ; rakennuspaikan sallittu kerrosala kaavan mukaan. Selite: Tulossa rajapintaan, otetaan jatkossa mukaan. Ainakin uusille luville.
-
    ;; Rakentamistoimenpide
    :operations (ds/array-from
                 :operations
                 {:id (ds/access :operation-id)
                  :kuvaus (ds/access :operation-description)
                  :rakennus (ds/access :operation-building)
-                 :rakennelma {:tiedot :foo}})
+                 :rakennelma (ds/access :operation-structure)})
 
    :hankkeenRakennuksenMuutostyonLaji (ds/access :test)
 
@@ -149,11 +145,15 @@
   (:kuvaus (util/find-first identity (map #(get operation %) operation-types))))
 
 (defn- operation-building [context]
-  (-> ((ds/from-context [:context :rakennustieto :Rakennus]) context)
-      (update :omistajatieto (comp (partial mapv :Omistaja)
-                                   sequentialize))
-      (dissoc :alkuHetki :sijaintitieto :yksilointitieto)
-      (set/rename-keys {:rakennuksenTiedot :tiedot :omistajatieto :omistajat})))
+  (some-> ((ds/from-context [:context :rakennustieto :Rakennus]) context)
+          (update :omistajatieto (comp (partial mapv :Omistaja)
+                                       sequentialize))
+          (dissoc :alkuHetki :sijaintitieto :yksilointitieto)
+          (set/rename-keys {:rakennuksenTiedot :tiedot :omistajatieto :omistajat})))
+
+(defn- operation-structure [context]
+  (some-> ((ds/from-context [:context :rakennelmatieto :Rakennelma]) context)
+          (dissoc :alkuHetki :sijaintitieto :yksilointitieto)))
 
 (defn reporting-app-accessors [application lang]
   {:test (constantly "foo")
@@ -174,6 +174,7 @@
    :operation-description (ds/from-context [:context operation-description])
    ;; We know that :rakennustieto is not sequential, i.e. there's only one building per operation
    :operation-building operation-building
+   :operation-structure operation-structure
 
    :projectDescription (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
                                          :RakennusvalvontaAsia :asianTiedot :Asiantiedot

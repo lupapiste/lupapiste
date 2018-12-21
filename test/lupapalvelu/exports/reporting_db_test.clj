@@ -140,7 +140,7 @@
        :location-wgs84 (:location-wgs84 application-rakennuslupa)
        :operations [{:id "muu-laajentaminen-id"
                      :kuvaus "Muu rakennuksen muutostyö"
-                     :rakennelma {:tiedot :foo}
+                     :rakennelma nil
                      :rakennus {:omistajat [{:VRKrooliKoodi "rakennuksen omistaja"
                                              :henkilo {:henkilotunnus "210281-9988"
                                                        :nimi {:etunimi "Pena"
@@ -256,7 +256,7 @@
                                                              :viemariKytkin true}}}}
                     {:id "kerrostalo-rivitalo-id"
                      :kuvaus "Asuinkerrostalon tai rivitalon rakentaminen"
-                     :rakennelma {:tiedot :foo}
+                     :rakennelma nil
                      :rakennus {:omistajat [{:VRKrooliKoodi "rakennuksen omistaja"
                                              :henkilo {:henkilotunnus "210281-9988"
                                                        :nimi {:etunimi "Pena"
@@ -371,7 +371,7 @@
                                                              :viemariKytkin true}}}}
                     {:id "laajentaminen-id"
                      :kuvaus "Rakennuksen laajentaminen tai korjaaminen"
-                     :rakennelma {:tiedot :foo}
+                     :rakennelma nil
                      :rakennus {:omistajat [{:VRKrooliKoodi "rakennuksen omistaja"
                                              :henkilo {:henkilotunnus "210281-9988"
                                                        :nimi {:etunimi "Pena"
@@ -486,11 +486,15 @@
                                                              :viemariKytkin true}}}}
                     {:id "kaupunkikuva-id"
                      :kuvaus "Aidan rakentaminen"
-                     :rakennelma {:tiedot :foo}
-                     :rakennus {:omistajat []}}
+                     :rakennelma {:kayttotarkoitus "Aita"
+                                  :kiinttun "21111111111111"
+                                  :kokonaisala "0"
+                                  :kuvaus {:kuvaus "Aidan rakentaminen rajalle"}
+                                  :tunnus {:jarjestysnumero 4}}
+                     :rakennus nil}
                     {:id "purkaminen-id"
                      :kuvaus "Rakennuksen purkaminen"
-                     :rakennelma {:tiedot :foo}
+                     :rakennelma nil
                      :rakennus {:omistajat [{:VRKrooliKoodi "rakennuksen omistaja"
                                              :henkilo {:henkilotunnus "210281-9988"
                                                        :nimi {:etunimi "Pena"
