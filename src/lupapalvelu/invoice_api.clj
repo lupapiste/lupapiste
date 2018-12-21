@@ -76,12 +76,14 @@
    :org-authz-roles  roles/default-org-authz-roles
    :user-authz-roles roles/all-authz-roles
    :parameters       [id invoice-id]
-   :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [invoices/invoicing-enabled]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      (partial action/non-blank-parameters [:invoice-id])]
+   :pre-checks       [invoices/invoicing-enabled
+                      invoices/application-id-match-invoice-application-id]
    :states           states/post-submitted-states}
   [{:keys [data] :as command}]
   (do (debug "delete-invoice invoice-request:" data)
-      (invoices/delete-invoice! (:invoice-id data))
+      (invoices/delete-invoice! invoice-id)
       (ok)))
 
 (defquery fetch-invoice

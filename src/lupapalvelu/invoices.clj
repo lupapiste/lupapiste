@@ -31,6 +31,16 @@
                                      infof warn warnf error errorf
                                      fatal fatalf]]))
 
+(defn application-id-match-invoice-application-id
+  "Pre-checker for making sure that we request correct invoice for application"
+  [{:keys [application data]}]
+  (let [id (:id application)
+        invoice-id (or  (:invoice-id data) (:id (:invoice data)))
+        invoice (mongo/by-id "invoices" invoice-id)
+        match (= id (:application-id invoice))]
+    (when (not match)
+      (fail :error.application-not-accessible))))
+
 (defn invoicing-enabled
   "Pre-checker that fails if invoicing is not enabled in the application organization scope."
   [{:keys [organization application]}]

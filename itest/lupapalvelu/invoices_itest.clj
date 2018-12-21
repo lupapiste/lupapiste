@@ -18,6 +18,14 @@
             [taoensso.timbre :refer [trace tracef debug info infof warn warnf error errorf fatal spy]]
             [lupapalvelu.price-catalogues :as catalogues]))
 
+
+(defn dummy-submitted-application []
+      (create-and-submit-local-application
+       pena
+       :operation "pientalo"
+       :x "385770.46" :y "6672188.964"
+       :address "Kaivokatu 1"))
+
 (def dummy-user {:id                                        "penan-id"
                  :firstName                                 "pena"
                  :lastName                                  "panaani"
@@ -39,18 +47,17 @@
                                                   :discount-percent 0}]}]})
 
 (defn invoice->confirmed [draft-invoice]
-                  (let [{:keys [id] :as app} (dummy-submitted-application)
-                        new-invoice-id (:invoice-id (local-command sonja :insert-invoice :id id :invoice draft-invoice))
-                        new-invoice (:invoice (local-query sonja :fetch-invoice :id id :invoice-id new-invoice-id))]
-                    (local-command sonja :update-invoice :id id :invoice (assoc new-invoice  :state "checked"))
-                    (local-command sonja :update-invoice :id id :invoice (assoc new-invoice  :state "confirmed"))))
+  (let [{:keys [id] :as app} (dummy-submitted-application)
+        new-invoice-id (:invoice-id (local-command sonja :insert-invoice :id id :invoice draft-invoice))
+        new-invoice (:invoice (local-query sonja :fetch-invoice :id id :invoice-id new-invoice-id))]
+    (local-command sonja :update-invoice :id id :invoice (assoc new-invoice  :state "checked"))
+    (local-command sonja :update-invoice :id id :invoice (assoc new-invoice  :state "confirmed"))))
 
-(defn invoice->checked [draft-invoice]
-                  (let [{:keys [id] :as app} (dummy-submitted-application)
-                        new-invoice-id (:invoice-id (local-command sonja :insert-invoice :id id :invoice draft-invoice))
-                        new-invoice (:invoice (local-query sonja :fetch-invoice :id id :invoice-id new-invoice-id))]
-                    (local-command sonja :update-invoice :id id :invoice (assoc new-invoice  :state "checked"))
-                    new-invoice-id))
+(defn invoice->checked [draft-invoice id]
+  (let [new-invoice-id (:invoice-id (local-command sonja :insert-invoice :id id :invoice draft-invoice))
+        new-invoice (:invoice (local-query sonja :fetch-invoice :id id :invoice-id new-invoice-id))]
+    (local-command sonja :update-invoice :id id :invoice (assoc new-invoice  :state "checked"))
+    new-invoice-id))
 
 (defn invoice-with [properties]
   (merge dummy-invoice properties))
@@ -88,13 +95,6 @@
     (fact "Enable invoicing for 753-R"
           (toggle-invoicing true) => ok?
           (local-query sipoo :user-organizations-invoices) => ok?)
-
-    (defn dummy-submitted-application []
-      (create-and-submit-local-application
-       pena
-       :operation "pientalo"
-       :x "385770.46" :y "6672188.964"
-       :address "Kaivokatu 1"))
 
     (fact "insert-invoice command"
           (fact "should add an invoice to the db with with all the required fields"
@@ -174,7 +174,7 @@
                     (local-command sonja :delete-invoice :id id :invoice-id invoice-id) => ok?
                     (mongo/by-id "invoices" invoice-id) => nil)))
 
-          (fact "should NOT delete invoice with state "
+          (fact "should NOT delete invoice with state checked"
                 (let [{:keys [id] :as app} (dummy-submitted-application)
                       invoice {:operations [{:operation-id "linjasaneeraus"
                                              :name "linjasaneeraus"
@@ -186,11 +186,49 @@
                                                              :units 2
                                                              :discount-percent 0}]}]}
 
-                      invoice-id (invoice->checked invoice) => ok?]
+                      invoice-id (invoice->checked invoice id) => ok?]
 
                   (let [invoice-from-db (mongo/by-id "invoices" invoice-id)]
                     (:state invoice-from-db) => "checked"
                     (local-command sonja :delete-invoice :id id :invoice-id invoice-id) => ok?
+                    (mongo/by-id "invoices" invoice-id) => invoice-from-db)))
+
+          (fact "should NOT delete invoice when application id is not valid"
+                (let [{:keys [id] :as app} (dummy-submitted-application)
+                      invoice {:operations [{:operation-id "linjasaneeraus"
+                                             :name "linjasaneeraus"
+                                             :invoice-rows [{:text "Laskurivi1 kpl"
+                                                             :code "111"
+                                                             :type "from-price-catalogue"
+                                                             :unit "kpl"
+                                                             :price-per-unit 10
+                                                             :units 2
+                                                             :discount-percent 0}]}]}
+                      {:keys [invoice-id]} (local-command sonja :insert-invoice
+                                                          :id id
+                                                          :invoice invoice) => ok?]
+                  (let [invoice-from-db (mongo/by-id "invoices" invoice-id)]
+                    (local-command sonja :delete-invoice :id "foo-id" :invoice-id invoice-id) => fail?
+                    (mongo/by-id "invoices" invoice-id) => invoice-from-db)))
+
+          (fact "should NOT delete invoice when application id is not the application id for invoice"
+                (let [{:keys [id] :as app} (dummy-submitted-application)
+                      app2 (dummy-submitted-application)
+                      id2 (:id app2)
+                      invoice {:operations [{:operation-id "linjasaneeraus"
+                                             :name "linjasaneeraus"
+                                             :invoice-rows [{:text "Laskurivi1 kpl"
+                                                             :code "111"
+                                                             :type "from-price-catalogue"
+                                                             :unit "kpl"
+                                                             :price-per-unit 10
+                                                             :units 2
+                                                             :discount-percent 0}]}]}
+                      {:keys [invoice-id]} (local-command sonja :insert-invoice
+                                                          :id id
+                                                          :invoice invoice) => ok?]
+                  (let [invoice-from-db (mongo/by-id "invoices" invoice-id)]
+                    (local-command sonja :delete-invoice :id id2 :invoice-id invoice-id) => fail?
                     (mongo/by-id "invoices" invoice-id) => invoice-from-db))))
 
     (fact "update-invoice command"
