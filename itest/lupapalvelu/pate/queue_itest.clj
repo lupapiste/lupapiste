@@ -91,7 +91,12 @@
           (:published verdict) => (contains {:published     pos?
                                              :attachment-id string?}))
         (fact "Cannot generate another verdict attachment"
-          (pdf/create-verdict-attachment {:application application} verdict) => nil)
+          (pdf/create-verdict-attachment {:application application
+                                          :data        {:verdict-id verdict-id
+                                                        :id         app-id}
+                                          :user        (find-user-from-minimal "sonja")
+                                          :created     12345}
+                                         verdict) => nil)
         (fact "Cannot generate verdict attachment if the verdict no longer exists"
           (local-command sonja :delete-legacy-verdict :id app-id :verdict-id verdict-id)
           => ok?
