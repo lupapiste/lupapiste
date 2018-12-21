@@ -809,6 +809,7 @@
                                                              :ulkomainenPostitoimipaikka "Tuonela"
                                                              :valtioKansainvalinen "CHN"
                                                              :valtioSuomeksi "Kiina"}}}}]
+       ;; :foremen []
        :reviews [{:type "ei tiedossa"
                   :reviewer "Reijo Revyy"
                   :date "2012-12-03"

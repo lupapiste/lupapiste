@@ -71,6 +71,8 @@
    :planners (ds/array-from :planners
                             (ds/access :context))
 
+   :foremen (ds/access :foremen)
+
    ;; Päätös
    :verdicts (ds/array-from :verdicts
                             (ds/access :context))
@@ -155,6 +157,18 @@
   (some-> ((ds/from-context [:context :rakennelmatieto :Rakennelma]) context)
           (dissoc :alkuHetki :sijaintitieto :yksilointitieto)))
 
+(defn- ->foreman [foreman]
+  (-> foreman
+      :Tyonjohtaja
+      (update :sijaistustieto (comp (partial map :Sijaistus)
+                                    sequentialize))
+      (update :vastattavaTyotieto (comp (partial map (comp :vastattavaTyo
+                                                           :VastattavaTyo))
+                                        sequentialize))
+      (set/rename-keys {:sijaistustieto     :sijaistukset
+                        :vastattavaTyotieto :vastattavatTyot})
+      (dissoc :vastattavatTyotehtavat)))
+
 (defn reporting-app-accessors [application lang]
   {:test (constantly "foo")
    :id (ds/from-context [:application :id])
@@ -184,6 +198,8 @@
                               sequentialize (partial mapv :Osapuoli)])
    :planners (ds/from-context [osapuolet :suunnittelijatieto
                                sequentialize (partial mapv :Suunnittelija)])
+   :foremen (ds/from-context [osapuolet :tyonjohtajatieto
+                              sequentialize (partial mapv ->foreman)])
 
    :reviews (ds/from-context [:application :tasks (partial mapv #(katselmus-canonical application lang % nil))])
    :review-date (ds/from-context [get-katselmustieto :pitoPvm])
