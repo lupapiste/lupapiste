@@ -141,11 +141,11 @@
                            (operation-infos application))
         operation     (ss/trim (get-in verdict [:data :operation]))
         bulletin      (get-in verdict [:data :bulletin-desc-as-operation])
-        bulletin-desc (get-in verdict [:data :bulletin-op-description])]
+        bulletin-desc (ss/trim (get-in verdict [:data :bulletin-op-description]))]
     (vec (cond
-           bulletin (cons {:text bulletin-desc} (rest infos))
-           (ss/not-blank? operation) (cons {:text operation} (rest infos))
-           :else infos))))
+           bulletin                  [{:text bulletin-desc}]
+           (ss/not-blank? operation) [{:text operation}]
+           :else                     infos))))
 
 (defn verdict-buildings [{:keys [application] :as options}]
   (let [buildings (reduce-kv (fn [acc k {flag? :show-building :as v}]

@@ -175,15 +175,13 @@
           {:text purkaminen}])
     (fact "operations: operation dict"
       (pdf/operations {:lang "fi" :verdict {:data {:operation "  Grand Design   "}} :application app})
-      => [{:text "Grand Design"}
-          {:text purkaminen}])
+      => [{:text "Grand Design"}])
     (fact "operations: bulletin description"
       (pdf/operations {:lang "fi"
                        :verdict {:data {:bulletin-desc-as-operation true
-                                        :bulletin-op-description "This is bulletin description"}}
+                                        :bulletin-op-description "   This is bulletin description  "}}
                        :application app})
-      => [{:text "This is bulletin description"}
-          {:text purkaminen}])))
+      => [{:text "This is bulletin description"}])))
 
 (facts "Buildings"
   (let [app     {:documents           [{:schema-info {:op {:id   "op2"
