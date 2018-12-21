@@ -186,7 +186,7 @@
   ;; Pre-checker is nil on success.
   (when-not (invoicing-enabled command)
     (let [org-id          (:organization application)
-          {submitted :ts} (util/find-by-key :state
+          submitted       (util/find-by-key :state
                                             "submitted"
                                             (:history application))
           ops             (get-operations-from-application application)
@@ -195,8 +195,8 @@
                               (some->> (mongo/select-one :price-catalogues
                                                          {:organization-id org-id
                                                           :state           :published
-                                                          :valid-from      {$lt submitted}
-                                                          :valid-until     {$not {$lt submitted}}}
+                                                          :valid-from      {$lt created}
+                                                          :valid-until     {$not {$lt created}}}
                                                          {:rows 1})
                                        :rows
                                        (filter (util/fn->> :operations

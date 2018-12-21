@@ -125,12 +125,12 @@
       (no-invoices))
 
     (fact "Invoice is created"
-      (inv/new-verdict-invoice (cmd friday tuesday-app) nil)
+      (inv/new-verdict-invoice (cmd tuesday tuesday-app) nil)
       => nil
       (provided (inv/invoicing-enabled anything) => nil)
       (find-invoice tuesday-app)
       => (just {:application-id  "tuesday"
-                :created         friday
+                :created         tuesday
                 :created-by      {:firstName "Verdict"
                                   :id        "user"
                                   :lastName  "Giver"
