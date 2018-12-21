@@ -100,7 +100,12 @@
         (fact "Cannot generate verdict attachment if the verdict no longer exists"
           (local-command sonja :delete-legacy-verdict :id app-id :verdict-id verdict-id)
           => ok?
-          (pdf/create-verdict-attachment {:application application} verdict) => nil))))
+          (pdf/create-verdict-attachment {:application application
+                                          :data        {:verdict-id verdict-id
+                                                        :id         app-id}
+                                          :user        (find-user-from-minimal "sonja")
+                                          :created     12345}
+                                         verdict) => nil))))
 
   (facts "Attachment creation and timings"
     (let [{app-id :id}         (create-and-submit-local-application pena
