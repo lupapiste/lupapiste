@@ -296,28 +296,28 @@
     (if (and (not @mock-logged-in?) (not= (-> route-match :data :name) [:login]))
       {:status 401 :body "Unauthorized"}
       (match (-> route-match :data :name)
-        [:login] (let [{:keys [username password]} (json/decode (:body request) true)]
+             [:login] (let [{:keys [username password]} (json/decode (:body request) true)]
                    (if (and (= username (env/value :allu :username))
                             (= password (env/value :allu :password)))
                      (do (reset! mock-logged-in? true)
                          {:status 200, :body (json/encode password)})
                      {:status 404, :body "Wrong username and/or password"}))
 
-        [:applications :cancel] (let [id (-> route-match :path-params :id)]
+             [:applications :cancel] (let [id (-> route-match :path-params :id)]
                                   (if (response-ok? id "placementcontracts.create")
                                     {:status 200, :body ""}
                                     {:status 404, :body (str "Not Found: " id)}))
 
-        [:placementcontracts :create] (let [body (json/decode (:body request) true)]
-                                        (if-let [validation-error (sc/check PlacementContract body)]
-                                          {:status 400, :body validation-error}
-                                          {:status 200
-                                           :body   (.replace (subs (:identificationNumber body) 3) "-" "")}))
+             [:placementcontracts :create] (let [body (json/decode (:body request) true)]
+                                             (if-let [validation-error (sc/check PlacementContract body)]
+                                               {:status 400, :body validation-error}
+                                               {:status 200
+                                                :body   (.replace (subs (:identificationNumber body) 3) "-" "")}))
 
-        [:placementcontracts :update] (let [id (-> route-match :path-params :id)
-                                            body (json/decode (:body request) true)]
-                                        (if-let [validation-error (sc/check PlacementContract body)]
-                                          {:status 400, :body validation-error}
+             [:placementcontracts :update] (let [id   (-> route-match :path-params :id)
+                                                 body (json/decode (:body request) true)]
+                                             (if-let [validation-error (sc/check PlacementContract body)]
+                                               {:status 400, :body validation-error}
                                           (if (response-ok? id "placementcontracts.create")
                                             {:status 200, :body id}
                                             {:status 404, :body (str "Not Found: " id)})))
@@ -325,15 +325,23 @@
         [:placementcontracts :contract :proposal]
         (let [id (-> route-match :path-params :id)]
           (if (response-ok? id "placementcontracts.create")
-            {:status 200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
+            {:status  200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
              :headers {"Content-Type" "application/pdf"}}
             {:status 404, :body (str "Not Found: " id)}))
 
         [:placementcontracts :contract :final]
         (let [id (-> route-match :path-params :id)]
           (if (response-ok? id "placementcontracts.contract.approved")
-            {:status 200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
+            {:status  200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
              :headers {"Content-Type" "application/pdf"}}
+            {:status 404, :body (str "Not Found: " id)}))
+
+        [:placementcontracts :contract :metadata]
+        (let [id (-> route-match :path-params :id)]
+          (if (response-ok? id "placementcontracts.contract.approved")
+            {:status  200, :body (json/encode {:handler {:name  "Hannu Helsinki"
+                                                         :title "Director"}}),
+             :headers {"Content-Type" "application/json"}}
             {:status 404, :body (str "Not Found: " id)}))
 
         [:placementcontracts :contract :approved] (let [id (-> route-match :path-params :id)]
