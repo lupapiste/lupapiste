@@ -12,6 +12,7 @@
             [lupapalvelu.document.model :as doc-model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
+            [lupapiste.mongocheck.core :as mongocheck]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as usr]
             [monger.operators :refer [$in $ne $elemMatch $set]]
@@ -466,3 +467,6 @@
 
 (defn get-asian-kuvaus [kuntalupatunnus]
   (-> kuntalupatunnus get-xml-for-kuntalupatunnus building-reader/->asian-tiedot))
+
+(defn run-checks []
+  (mongocheck/execute-checks (mongo/get-db)))

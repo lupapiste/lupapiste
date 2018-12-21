@@ -894,7 +894,7 @@
           op (make-op operation-name (now))
           doc (doc-persistence/new-doc application schema (now))
           doc (assoc-in doc [:schema-info :op] op)
-          doc-updates (->> data (sanitize-document-datas schema))]
+          doc-updates (sanitize-document-datas schema data)]
       (lupapalvelu.document.model/apply-updates doc doc-updates))))
 
 (defn fetch-building-xml [organization permit-type property-id]
