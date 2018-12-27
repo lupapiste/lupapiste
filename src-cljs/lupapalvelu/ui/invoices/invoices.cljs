@@ -292,22 +292,25 @@
         invoice-rows-all (mapcat :invoice-rows operations)
         sums {:sum-zero-vat (MoneyResponse->text (:sum @invoice-atom))
               :sum-total (MoneyResponse->text (:sum @invoice-atom))}]
-    [:div {:style {:text-align "right"}}
-     [:div {:style {:display "inline-block"}}
-      [:div
-       [:div {:style {:text-align "left" :display "inline" :padding-right "5em"}} (common/loc :invoices.wo-taxes)]
-       [:div {:style {:text-align "right" :display "inline"}} (:sum-zero-vat sums)]]]
-
+    [:div.invoice-summary-table
      [:div
-       [:div {:style {:text-align "left" :display "inline" :padding-right "5em"}} (common/loc :invoices.rows.total)]
-       [:div {:style {:text-align "right" :display "inline"}} (:sum-total sums)]]
-     (if (and (= "draft" (:state @invoice-atom)) (not (:is-new @invoice-atom)))
-       [:div {:style {:display "inline-block" :float "left"}}
-        (delete-invoice-button (:id @invoice-atom))])
-     [:div {:style {:display "inline-block" :float "right"}}
-      (change-next-state-button invoice-atom)
-      (change-previous-state-button invoice-atom)]
-     [:div {:class "clear"}]]))
+      [:div
+       (if (and (= "draft" (:state @invoice-atom)) (not (:is-new @invoice-atom)))
+         (delete-invoice-button (:id @invoice-atom)))]
+      [:div.invoice-sums-container
+       [:table.invoice-summary-sums-table
+        [:tbody
+         [:tr
+          [:td
+           (common/loc :invoices.wo-taxes)]
+          [:td
+           (:sum-zero-vat sums)]]
+         [:tr
+          [:td (common/loc :invoices.rows.total)]
+          [:td (:sum-total sums)]]]]]
+      [:div
+       (change-next-state-button invoice-atom)
+       (change-previous-state-button invoice-atom)]]]))
 
 (rum/defc invoice-data < rum/reactive
   [invoice]
