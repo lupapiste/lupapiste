@@ -276,7 +276,11 @@
    (sc/optional-key :ely-uspa-enabled) sc/Bool
    ;; List of operations for which the Not needed selection is not
    ;; available for the default attachments.
-   (sc/optional-key :default-attachments-mandatory) [sc/Str]})
+   (sc/optional-key :default-attachments-mandatory) [sc/Str]
+   ;; Whether the organization has been deactivated. In addition to
+   ;; this flag, scopes and applications have been updated as
+   ;; well. See `deactivate-organization` for details.
+   (sc/optional-key :deactivated) sc/Bool})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
@@ -295,7 +299,7 @@
       org)))
 
 (def admin-projection
-  [:name :scope :allowedAutologinIPs :krysp
+  [:name :deactivated :scope :allowedAutologinIPs :krysp
    :pate-enabled :permanent-archive-enabled :permanent-archive-in-use-since
    :earliest-allowed-archiving-date :digitizer-tools-enabled :calendars-enabled
    :docstore-info :3d-map :default-digitalization-location
@@ -1063,3 +1067,25 @@
         changes (into {} (for [[k v] updated-role-map]
                            [(keyword (str "ad-login.role-mapping." (name k))) v]))]
     (update-organization org-id {$set changes})))
+
+(defn toggle-applications-read-only [org-id read-only?]
+  (mongo/update-by-query :applications
+                         {:organization org-id}
+                         {(if read-only? $set $unset) {:readOnly true}}))
+
+(defn deactivate-organization
+  "When an organization is deactivated:
+  1. Organization deactivated flag true
+  2. Inforequests and applications for scopes disabled
+  3. Applications into read-only mode."
+  [org-id]
+  (let [{:keys [scope]} (get-organization org-id {:scope.permitType 1})]
+    (let [org-update (->> (range (count scope))
+                          (map (fn [index]
+                                 {(util/kw-path :scope index :new-application-enabled) false
+                                  (util/kw-path :scope index :inforequest-enabled)     false
+                                  (util/kw-path :scope index :open-inforequest)        false}))
+                          (apply merge)
+                          (merge {:deactivated true}))]
+      (update-organization org-id {$set org-update})
+      (toggle-applications-read-only org-id true))))

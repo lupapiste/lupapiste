@@ -1,12 +1,14 @@
 (ns lupapalvelu.pate.verdict-common
   "A common interface for accessing verdicts created with Pate and fetched from the backing system"
-  (:require [schema.core :as sc]
+  (:require [clojure.set :as set]
+            [schema.core :as sc]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pate.legacy-schemas :as legacy]
             [lupapalvelu.pate.metadata :as metadata]
+            [lupapalvelu.pate.schema-helper :as schema-helper]
             [lupapalvelu.pate.schema-util :as schema-util]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
             [lupapalvelu.user :as usr]))
@@ -15,8 +17,11 @@
 ;; Helpers
 ;;
 
-(defn- get-data [verdict k]
-  (metadata/unwrap (get-in verdict [:data k])))
+(defn- get-data
+  ([verdict]
+   (metadata/unwrap-all (get verdict :data)))
+  ([verdict k]
+   (metadata/unwrap-all (get-in verdict [:data k]))))
 
 ;;
 ;; Predicates
@@ -99,6 +104,9 @@
     (-> verdict :replacement :replaces)
     nil))
 
+(defn- get-paivamaarat [verdict]
+  (some-> verdict :paatokset first :paivamaarat))
+
 (defn verdict-date [verdict]
   (cond
     (legacy? verdict)
@@ -109,7 +117,7 @@
 
     :else
     (or (:paatospvm (latest-pk verdict))
-        (some-> verdict :paatokset first :paivamaarat :paatosdokumentinPvm))))
+        (:paatosdokumentinPvm (get-paivamaarat verdict)))))
 
 (defn verdict-id [verdict]
   (:id verdict))
@@ -171,6 +179,152 @@
   (if (lupapiste-verdict? verdict)
     (get-data verdict :verdict-code)
     (some-> verdict first-pk :status str)))
+
+(defn verdict-dates [verdict]
+  (if (lupapiste-verdict? verdict)
+    (-> verdict
+        get-data
+        (select-keys [:aloitettava :lainvoimainen :voimassa :anto :raukeamis :valitus :julkipano])
+        (assoc :raukeamis nil))
+    {:aloitettava   (:aloitettava (get-paivamaarat verdict))
+     :anto          (:anto (get-paivamaarat verdict))
+     :julkipano     (:julkipano (get-paivamaarat verdict))
+     :lainvoimainen (:lainvoimainen (get-paivamaarat verdict))
+     :raukeamis     (:raukeamis (get-paivamaarat verdict))
+     :valitus       nil
+     :voimassa      (:voimassaHetki (get-paivamaarat verdict))}))
+
+;;
+;; Lupamaaraykset
+;;
+
+(defn get-lupamaaraykset [verdict]
+  (some-> verdict :paatokset (get 0) :lupamaaraykset))
+
+(defn- backing->required-review
+  "Transforms backing system review requirement to look like Pate's"
+  [req-review]
+  {:id nil
+   :fi (:tarkastuksenTaiKatselmuksenNimi req-review)
+   :sv (:tarkastuksenTaiKatselmuksenNimi req-review)
+   :en (:tarkastuksenTaiKatselmuksenNimi req-review)
+   :type (:katselmuksenLaji req-review)})
+
+(defn- legacy->required-review [[review-id review]]
+  {:id review-id
+   :fi (:name review)
+   :sv (:name review)
+   :en (:name review)
+   :type (or (schema-helper/review-type-map (-> review :type keyword))
+             (schema-helper/review-type-map :ei-tiedossa))})
+
+(defn- pate->required-review [review]
+  (update review :type
+          #(or (schema-helper/review-type-map (keyword %))
+               (schema-helper/review-type-map :ei-tiedossa))))
+
+(defn verdict-required-reviews [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (legacy? verdict)
+      (->> (get-data verdict :reviews)
+           (map legacy->required-review)
+           (sort-by :id) ;; This ensures a well defined order after
+           (into []))    ;; mapping over hashmap
+      (->> (get-data verdict :reviews)
+           (map #(util/find-by-id % (-> verdict :references :reviews)))
+           (mapv pate->required-review)))
+    (mapv backing->required-review
+          (-> verdict get-lupamaaraykset :vaaditutKatselmukset))))
+
+(defn- foreman-description [foreman-code]
+  (schema-helper/foreman-role foreman-code))
+
+(defn verdict-required-foremen [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (legacy? verdict)
+      (->> (get-data verdict :foremen)
+           (sort-by first)
+           (mapv (comp foreman-description :role second)))
+      (mapv foreman-description
+            (get-data verdict :foremen)))
+    (-> verdict get-lupamaaraykset :vaadittuTyonjohtajatieto)))
+
+(defn- string->required [plan]
+  {:id nil
+   :fi plan
+   :sv plan
+   :en plan})
+
+(defn verdict-required-plans [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (legacy? verdict)
+      []
+      (mapv #(util/find-by-id % (-> verdict :references :plans))
+            (get-data verdict :plans)))
+    (->> verdict get-lupamaaraykset :vaaditutErityissuunnitelmat
+         (map string->required))))
+
+(defn verdict-required-conditions [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (legacy? verdict)
+      (->> (get-data verdict :conditions)
+           (sort-by first)
+           (mapv (comp :name second)))
+      (->> (get-data verdict :conditions)
+           (sort-by first)
+           (mapv (comp :condition second))))
+    (->> verdict get-lupamaaraykset :maaraykset
+         (mapv :sisalto))))
+
+(def ^:private no-parking-space-requirements
+  {:autopaikkojaEnintaan nil
+   :autopaikkojaVahintaan nil
+   :autopaikkojaRakennettava nil
+   :autopaikkojaRakennettu nil
+   :autopaikkojaKiinteistolla nil
+   :autopaikkojaUlkopuolella nil})
+
+(defn- legacy->parking-space-requirements [verdict]
+  no-parking-space-requirements)
+
+(defn- sum-building-values [buildings k]
+  (->> (map k (vals buildings)) (map util/->int) (apply +)))
+
+(defn- pate->parking-space-requirements [verdict]
+  (let [buildings (get-data verdict :buildings)]
+    {:autopaikkojaEnintaan nil
+     :autopaikkojaVahintaan nil
+     :autopaikkojaRakennettava (sum-building-values buildings :autopaikat-yhteensa)
+     :autopaikkojaRakennettu (sum-building-values buildings :rakennetut-autopaikat)
+     :autopaikkojaKiinteistolla (sum-building-values buildings :kiinteiston-autopaikat)
+     :autopaikkojaUlkopuolella nil}))
+
+(defn- backing->parking-space-requirements [verdict]
+  (merge no-parking-space-requirements
+         (-> verdict get-lupamaaraykset
+             (select-keys (keys no-parking-space-requirements)))))
+
+(defn verdict-parking-space-requirements [verdict]
+  (if (lupapiste-verdict? verdict)
+    (if (legacy? verdict)
+      (legacy->parking-space-requirements verdict)
+      (pate->parking-space-requirements verdict))
+    (backing->parking-space-requirements verdict)))
+
+(def ^:private no-area-requirements
+  {:kerrosala nil
+   :kokonaisala nil
+   :rakennusoikeudellinenKerrosala nil})
+
+(defn verdict-area-requirements [verdict]
+  (if (lupapiste-verdict? verdict)
+    no-area-requirements
+    (let [requirements (get-lupamaaraykset verdict)]
+      {:kerrosala (util/->int (:kerrosala requirements) nil)
+       :kokonaisala (util/->int (:kokonaisala requirements) nil)
+       :rakennusoikeudellinenKerrosala (some-> (:rakennusoikeudellinenKerrosala requirements)
+                                               (util/->double nil)
+                                               int)})))
 
 ;;
 ;; Verdict schema

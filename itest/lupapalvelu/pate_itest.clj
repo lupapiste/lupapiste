@@ -521,6 +521,7 @@
 
     (facts "Application verdict templates"
       (let [{app-id :id} (create-and-submit-application pena
+                                                        :address "Jianguomen"
                                                         :operation :pientalo
                                                         :propertyId sipoo-property-id)]
         (fact "Create and delete verdict template"
@@ -1199,6 +1200,29 @@
                   (fact "Pena's list of verdicts contains the published verdict"
                     (map :id (:verdicts (query pena :pate-verdicts :id app-id)))
                     => [verdict-id])
+                  (facts "Applications search"
+                    (fact "New application with backing system verdict"
+                      (let [bs-app-id (:id (create-and-submit-application pena
+                                                                          :address "Xingfucun Lu"
+                                                                          :propertyId sipoo-property-id
+                                                                          :operation :purkaminen))]
+                        (command sonja :check-for-verdict :id bs-app-id) => ok?
+                        (fact "Applications search includes verdict dates"
+                          (-> (datatables pena :applications-search) :data :applications)
+                          => (just [(contains {:address         "Dongdaqiao Lu"
+                                               :state           "verdictGiven"
+                                               :verdictDate     (timestamp "6.10.2017")
+                                               :kuntalupatunnus nil})
+                                    (contains {:address         "Jianguomen"
+                                               :state           "submitted"
+                                               :verdictDate     nil
+                                               :kuntalupatunnus nil})
+                                    (contains {:address         "Xingfucun Lu"
+                                               :state           "verdictGiven"
+                                               :verdictDate     1377993600000
+                                               :kuntalupatunnus "2013-01"})]
+                                   :in-any-order)))))
+
                   (facts "buildings"
                     (let [{:keys [buildings]} (query-application sonja app-id)]
                       (count buildings) => 2

@@ -7,7 +7,14 @@
                 <i class="lupicon-chevron-start"></i><span>Organisaatiolistaus</span></a>
 
         <div data-bind="with: organizationModel">
-          <h1 data-bind="text: util.getIn($data, ['organization', 'name', loc.getCurrentLanguage()])"></h1>
+          <div class="organization-title">
+            <h1 data-bind="text: util.getIn($data, ['organization', 'name', loc.getCurrentLanguage()])"></h1>
+            <div class="like-btn organization--closed"
+                 data-bind="visible: deactivated">
+              <i class="lupicon-lock"></i>
+              <span data-bind="ltext: 'admin.deactivated'"></span>
+            </div>
+          </div>
 
           <h2>Organisaation nimi</h2>
           <table data-test-id="organization-name-table">
@@ -26,6 +33,20 @@
           </table>
           <button data-bind="ltext: 'save',
                              click: updateOrganizationName" class="btn positive"></button>
+
+          <h2 data-bind="ltext: 'admin.deactivated.title'"></h2>
+
+          <div data-bind="ltext: 'admin.deactivated.info'"></div>
+          <!-- ko if: deactivated -->
+          <button class="positive"
+                  data-bind="ltext: 'admin.deactivated.activate',
+                             click: _.wrap( false, toggleDeactivation )"></button>
+          <!-- /ko -->
+          <!-- ko ifnot: deactivated -->
+          <button class="negative"
+                  data-bind="ltext: 'admin.deactivated.deactivate',
+                             click: _.wrap( true, toggleDeactivation )"></button>
+          <!-- /ko -->
 
           <h2>Aineistokauppa</h2>
           <div class="docstore-setting">
@@ -140,13 +161,22 @@
               <tbody data-bind="if: $data">
                 <tr >
                   <td data-bind="attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality() + '-' + $data.permitType()}">
-                    <input type="checkbox" data-bind="checked: $data['inforequest-enabled']" class="form-input" >
+                    <input type="checkbox"
+                           data-bind="checked: $data['inforequest-enabled'],
+                                      disable: $root.organizationModel.deactivated"
+                           class="form-input" >
                   </td>
                   <td data-bind="attr: {'data-test-id': 'application-enabled-' + $data.municipality() + '-' + $data.permitType()}">
-                    <input type="checkbox" data-bind="checked: $data['new-application-enabled']" class="form-input" >
+                    <input type="checkbox"
+                           data-bind="checked: $data['new-application-enabled'],
+                                      disable: $root.organizationModel.deactivated"
+                           class="form-input" >
                   </td>
                   <td data-bind="attr: {'data-test-id': 'open-inforequest-' + $data.municipality() + '-' + $data.permitType()}">
-                    <input type="checkbox" data-bind="checked: $data['open-inforequest']" class="form-input" >
+                    <input type="checkbox"
+                           data-bind="checked: $data['open-inforequest'],
+                                      disable: $root.organizationModel.deactivated"
+                           class="form-input" >
                   </td>
                   <td>
                     <input type="checkbox" data-bind="checked: $data['pate-enabled']" class="form-input" >

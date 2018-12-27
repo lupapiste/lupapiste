@@ -8,7 +8,8 @@
             [lupapalvelu.price-catalogues :as catalogues]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
-            [lupapalvelu.time-util :refer [timestamp-day-before]]
+            [lupapalvelu.time-util :refer [timestamp-at-the-end-of-previous-day
+                                           tomorrow-or-later?]]
             [sade.core :refer [ok fail]]
             [sade.util :as util]
             [schema.core :as sc]
@@ -21,6 +22,13 @@
   (when-not (some->> (mapv :scope (:user-organizations command))
                      (some #(util/find-by-key :invoicing-enabled true %)))
     (fail :error.invoicing-disabled)))
+
+(defn can-set-valid-from
+  "Pre-checker that fails if trying to set catlogue valid-from in the past when previous catalogues exist"
+  [{{catalogue-request :price-catalogue org-id :organization-id} :data :as command}]
+  (if (and (catalogues/has-existing-published-price-catalogues? org-id)
+           (not (tomorrow-or-later? (:valid-from-str catalogue-request))))
+    (fail :error.price-catalogue.incorrect-date)))
 
 ;; ------------------------------------------
 ;; Invoice API
@@ -59,6 +67,23 @@
   [{:keys [data] :as command}]
   (do (debug "update-invoice invoice-request:" (:invoice data))
       (invoices/update-invoice! (:invoice data))
+      (ok)))
+
+(defcommand delete-invoice
+  {:description      "Delete invoice from db. Deletes only invoices in draft state"
+   :feature          :invoices
+   :user-roles       #{:authority}
+   :org-authz-roles  roles/default-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :parameters       [id invoice-id]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      (partial action/non-blank-parameters [:invoice-id])]
+   :pre-checks       [invoices/invoicing-enabled
+                      invoices/application-id-match-invoice-application-id]
+   :states           states/post-submitted-states}
+  [{:keys [data] :as command}]
+  (do (debug "delete-invoice invoice-request:" data)
+      (invoices/delete-invoice! invoice-id)
       (ok)))
 
 (defquery fetch-invoice
@@ -165,13 +190,14 @@
    :feature          :invoices
    :parameters       [organization-id price-catalogue]
    :input-validators [(partial action/non-blank-parameters [:organization-id])
-                      catalogues/validate-insert-price-catalogue-request]}
+                      catalogues/validate-insert-price-catalogue-request]
+   :pre-checks       [can-set-valid-from]}
   [{:keys [user] :as command}]
   (let [catalogue-to-db (catalogues/->price-catalogue-db price-catalogue user organization-id)
         previous-catalogue (catalogues/fetch-previous-published-price-catalogue catalogue-to-db)
         same-day-catalogues (catalogues/fetch-same-day-published-price-catalogues catalogue-to-db)
         next-catalogue (catalogues/fetch-next-published-price-catalogue catalogue-to-db)
-        valid-until (timestamp-day-before (:valid-from next-catalogue))]
+        valid-until (timestamp-at-the-end-of-previous-day (:valid-from next-catalogue))]
 
     (catalogues/delete-catalogues! same-day-catalogues)
     (catalogues/update-previous-catalogue! previous-catalogue catalogue-to-db)

@@ -49,6 +49,7 @@
 
 (defn ->invoice-row [catalogue-row]
   {:type "from-price-catalogue"
+   :code (:code catalogue-row)
    :text (:text catalogue-row)
    :unit (:unit catalogue-row)
    :units 1
@@ -65,3 +66,8 @@
           (when (= (get doc key) val)
             doc))
         docs))
+
+(defn row-title [{:keys [code text] :as invoice-row}]
+  (if code
+    (str code " " text)
+    (str "---- " text)))

@@ -1,6 +1,9 @@
 // Map view.
 // Params:
 //  id: Unique map identifier
+//  pageRegex: Regex that is used to determine whether the map
+//  component is (somewhat) visible and thus safe to render. The regex
+//  is matched agains the current hash.
 LUPAPISTE.AlluMapModel = function( params ) {
   "use strict";
   var self = this;
@@ -11,6 +14,13 @@ LUPAPISTE.AlluMapModel = function( params ) {
 
   self.rendered = ko.observable( false );
   self.applicationReady = ko.observable( false );
+  var mapPageVisible = ko.observable();
+
+  function checkPageVisibility() {
+    mapPageVisible( params.pageRegex.test( window.location.hash ));
+  }
+
+  self.addHubListener( "page-load", checkPageVisibility );
 
   // Copied from map-model.js
   var drawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35,
@@ -39,12 +49,12 @@ LUPAPISTE.AlluMapModel = function( params ) {
   // Create map when the view has been rendered.
   self.disposedComputed( function() {
     var lox = location();
-    if( !map && self.rendered() && lox) {
+    if( !map && self.rendered() && lox && mapPageVisible() ) {
       map = gis.makeMap( self.mapId, {zoomWheelEnabled: false} );
       map.updateSize().center( lox.x, lox.y, 14 );
       addDrawings( getDrawings() );
       self.addToDisposeQueue( {dispose: function() {
-        map.clear().destroy();
+        map.clear();
       }});
     }
   });
@@ -66,4 +76,5 @@ LUPAPISTE.AlluMapModel = function( params ) {
     lupapisteApp.models.application.openOskariMap();
   };
 
+  checkPageVisibility();
 };

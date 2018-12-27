@@ -29,7 +29,8 @@
   (sc/enum "m2" "m3" "kpl"))
 
 (sc/defschema InvoiceRow
-  {:text sc/Str
+  {(sc/optional-key :code) sc/Str
+   :text sc/Str
    :type InvoiceRowType
    :unit InvoiceRowUnit
    :price-per-unit sc/Num
@@ -77,7 +78,7 @@
    :price-per-unit sc/Num
    :max-total-price (sc/maybe sc/Num)
    :min-total-price (sc/maybe sc/Num)
-   :discount-percent (sc/maybe DiscountPercent)
+   :discount-percent DiscountPercent
    :operations [sc/Str]})
 
 (sc/defschema PriceCatalogue

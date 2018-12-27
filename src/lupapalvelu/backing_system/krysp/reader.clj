@@ -20,6 +20,7 @@
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
             [sade.env :as env]
+            [sade.property :as sprop]
             [sade.strings :as ss]
             [sade.util :refer [fn-> fn->>] :as util]
             [sade.xml :refer :all]
@@ -674,11 +675,16 @@
   (->> (select xml-no-ns [:toimenpidetieto :Toimenpide :rakennelmatieto])
        (map cr/all-of)))
 
+(defn ->vakuustieto [xml]
+  (->> (select xml [:rakennusvalvontaAsiatieto :lisatiedot :vakuus])
+       (map cr/all-of)
+       first))
+
 (defn ->viitelupatunnukset
   "Takes a parsed XML document, returns a list of viitelupatunnus -ids (in 'permit-id'-format) found therein."
   [xml]
   (->> (select xml [:rakennusvalvontaAsiatieto :viitelupatieto])
-       (map (comp #(get-in % [:LupaTunnus :kuntalupatunnus]) cr/all-of ))))
+       (map (comp #(get-in % [:LupaTunnus :kuntalupatunnus]) cr/all-of))))
 
 (defn is-foreman-application? [xml]
   (let [permit-type (-> xml ->kuntalupatunnus (ss/split #"-") last)]
@@ -740,7 +746,9 @@
                                (or (resolve-property-id-by-point coord-array-Rakennuspaikka)
                                    (rakennuspaikka-property-id Rakennuspaikka))
                                (rakennuspaikka-property-id Rakennuspaikka))
-            municipality (or (prop/municipality-by-property-id kiinteistotunnus) kuntakoodi)]
+            municipality   (if (and (string? kiinteistotunnus) (re-matches sprop/db-property-id-pattern kiinteistotunnus))
+                             (prop/municipality-by-property-id kiinteistotunnus)
+                             kuntakoodi)]
 
         (-> (merge
               {:id                          (->lp-tunnus asia)

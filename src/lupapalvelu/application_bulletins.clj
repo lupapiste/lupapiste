@@ -141,12 +141,6 @@
      :contact (vc/verdict-giver v)
      :text    (vc/verdict-text v)}))
 
-(defn with-path [path & [default]]
-  (fn [verdict]
-    (if-let [result (get-in verdict path)]
-      result
-      default)))
-
 (defn building-int-value
   "Returns accessor function which fetches building data numeric string values and
    convert those to integers, (key like :autopaikat-yhteensa)."
@@ -234,18 +228,18 @@
       (i18n/localize "fi" (str "pate-r.verdict-code." (vc/verdict-code verdict))))))
 
 (def backing-system-verdict-accessors
-  {:id (with-path [:id])
-   :kuntalupatunnus (with-path [:data :kuntalupatunnus])
-   :draft (complement (with-path [:published :published]))
+  {:id (ds/from-context [:id])
+   :kuntalupatunnus (ds/from-context [:data :kuntalupatunnus])
+   :draft (complement (ds/from-context [:published :published]))
    :timestamp vc/verdict-modified
    :sopimus vc/contract?
-   :anto (with-path [:data :anto])
-   :lainvoimainen (with-path [:data :lainvoimainen])
-   :paatoksentekija (with-path [:data :handler])
+   :anto (ds/from-context [:data :anto])
+   :lainvoimainen (ds/from-context [:data :lainvoimainen])
+   :paatoksentekija (ds/from-context [:data :handler])
    :urlHash nil
    :status backing-system-status
    :paatos vc/verdict-text
-   :paatospvm (with-path [:data :anto])
+   :paatospvm (ds/from-context [:data :anto])
    :pykala vc/verdict-section
    :paatoskoodi backing-system-paatoskoodi
    :autopaikkojaEnintaan (building-int-value :autopaikat-yhteensa)

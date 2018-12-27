@@ -81,7 +81,7 @@
                                                       :lainvoimainen {:delta 4 :unit "days"}
                                                       :aloitettava   {:delta 1 :unit "years"}
                                                       :voimassa      {:delta 2 :unit "years"}}
-                                       :verdict-code [ "pysytti-evattyna",
+                                       :verdict-code ["pysytti-evattyna",
                                                       "myonnetty",
                                                       "konversio",
                                                       "ilmoitus-tiedoksi"
@@ -170,15 +170,30 @@
 
 (facts vaadittu-katselmus-canonical
   (fact "muu-katselmus / Finnish"
-    (vaadittu-katselmus-canonical "fi" verdict "5a156dd40e40adc8ee064463")
+    (vaadittu-katselmus-canonical "fi"
+                                  {:id   "5a156dd40e40adc8ee064463"
+                                   :fi   "Katselmus"
+                                   :sv   "Syn"
+                                   :en   "Review"
+                                   :type "muu katselmus"})
     => {:Katselmus {:katselmuksenLaji "muu katselmus", :tarkastuksenTaiKatselmuksenNimi "Katselmus", :muuTunnustieto []}})
 
   (fact "muu-katselmus / English"
-    (vaadittu-katselmus-canonical "en" verdict "5a156dd40e40adc8ee064463")
+    (vaadittu-katselmus-canonical "en"
+                                  {:id   "5a156dd40e40adc8ee064463"
+                                   :fi   "Katselmus"
+                                   :sv   "Syn"
+                                   :en   "Review"
+                                   :type "muu katselmus"})
     => {:Katselmus {:katselmuksenLaji "muu katselmus", :tarkastuksenTaiKatselmuksenNimi "Review", :muuTunnustieto []}})
 
   (fact "paikan-merkisteminen / Swedish"
-    (vaadittu-katselmus-canonical "sv" verdict "6a156dd40e40adc8ee064463")
+    (vaadittu-katselmus-canonical "sv"
+                                  {:id   "6a156dd40e40adc8ee064463"
+                                   :fi   "Katselmus2"
+                                   :sv   "Syn2"
+                                   :en   "Review2"
+                                   :type "rakennuksen paikan merkitseminen"})
     => {:Katselmus {:katselmuksenLaji "rakennuksen paikan merkitseminen", :tarkastuksenTaiKatselmuksenNimi "Syn2", :muuTunnustieto []}}))
 
 (facts maarays-seq-canonical
@@ -196,33 +211,17 @@
 
 (facts vaadittu-erityissuunnitelma-canonical
   (fact "suunnitelmat / Finnish"
-    (vaadittu-erityissuunnitelma-canonical "fi" verdict "5a156ddf0e40adc8ee064464")
-    => {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma "Suunnitelmat", :toteutumisPvm nil}})
-
-  (fact "suunnitelmat / Swedish"
-    (vaadittu-erityissuunnitelma-canonical "sv" verdict "5a156ddf0e40adc8ee064464")
-    => {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma "Planer", :toteutumisPvm nil}})
-
-  (fact "suunnitelmat / English"
-    (vaadittu-erityissuunnitelma-canonical "en" verdict "6a156ddf0e40adc8ee064464")
-    => {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma "Plans2", :toteutumisPvm nil}}))
+    (vaadittu-erityissuunnitelma-canonical "fi"
+                                           {:id "5a156ddf0e40adc8ee064464"
+                                            :fi "Suunnitelmat"
+                                            :sv "Planer"
+                                            :en "Plans"})
+    => {:VaadittuErityissuunnitelma {:vaadittuErityissuunnitelma "Suunnitelmat", :toteutumisPvm nil}}))
 
 (fact vaadittu-tyonjohtaja-canonical
   (fact "vv-tj"
-    (vaadittu-tyonjohtaja-canonical "vv-tj")
-    => {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi "KVV-ty\u00f6njohtaja"}})
-
-  (fact "tj"
-    (vaadittu-tyonjohtaja-canonical "tj")
-    => {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi "ty\u00f6njohtaja"}})
-
-  (fact "nil"
-    (vaadittu-tyonjohtaja-canonical nil)
-    => {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi "ei tiedossa"}})
-
-  (fact "foo"
-    (vaadittu-tyonjohtaja-canonical "foo")
-    => {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi "ei tiedossa"}}))
+    (vaadittu-tyonjohtaja-canonical "KVV-ty\u00f6njohtaja")
+    => {:VaadittuTyonjohtaja {:tyonjohtajaRooliKoodi "KVV-ty\u00f6njohtaja"}}))
 
 (facts lupamaaraykset-type-canonical
   (let [canonical (lupamaaraykset-type-canonical "fi" verdict)]
@@ -295,24 +294,29 @@
 
 (facts paatoksentekija
   (fact "empty fields"
-    (paatoksentekija "fi" {:data {:handler ""}
+    (paatoksentekija "fi" {:category :r
+                           :data {:handler ""}
                            :template {:giver ""}}) => "")
 
   (fact "nil fields"
-    (paatoksentekija "fi" {:data {:handler nil}
+    (paatoksentekija "fi" {:category :r
+                           :data {:handler nil}
                            :template {:giver nil}}) => "")
 
   (fact "empty giver"
-    (paatoksentekija "fi" {:data {:handler "handler text"}
+    (paatoksentekija "fi" {:category :r
+                           :data {:handler "handler text"}
                            :template {:giver ""}}) => "handler text")
 
   (fact "empty contact - viranhaltija - Finnish"
-    (paatoksentekija "fi" {:data {:handler ""}
+    (paatoksentekija "fi" {:category :r
+                           :data {:handler ""}
                            :template {:giver "viranhaltija"}})
     => "(Viranhaltija)")
 
   (fact "empty contact - lautakunta - Swedish"
-    (paatoksentekija "sv" {:data {:handler ""}
+    (paatoksentekija "sv" {:category :r
+                           :data {:handler ""}
                            :template {:giver "lautakunta"}})
     => "(N\u00e4mnd)")
 

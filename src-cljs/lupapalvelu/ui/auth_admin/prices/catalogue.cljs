@@ -56,9 +56,9 @@
 
 (rum/defc operation-catalogue-row
   < {:key-fn (fn [operation row] (str operation "-" (:index row)))}
-  [operation {:keys [text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
+  [operation {:keys [code text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
   [:tr
-   [:td text]
+   [:td (str code " " text)]
    [:td price-per-unit]
    [:td discount-percent]
    [:td min-total-price]
@@ -119,8 +119,8 @@
 (rum/defc operation-product-select < rum/reactive
   [operation rows]
   (let [catalogue  (rum/react state/catalogue-in-edit)
-        options (map (fn [{:keys [index text]}]
-                       [:option {:key (str operation "-" index) :value index} text])
+        options (map (fn [{:keys [index code text]}]
+                       [:option {:key (str operation "-" index) :value index} (str code " " text)])
                      rows)]
     [:select.operation-product-select {:on-change (fn [e]
                                                     (let [value (.. e -target -value)]
@@ -130,9 +130,9 @@
 
 (rum/defc edit-operation-catalogue-row
   < {:key-fn (fn [operation row] (str operation "-" (:index row)))}
-  [operation {:keys [index text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
+  [operation {:keys [index code text price-per-unit discount-percent min-total-price max-total-price unit] :as row}]
   [:tr
-   [:td text]
+   [:td (str code " " text)]
    [:td price-per-unit]
    [:td discount-percent]
    [:td min-total-price]
@@ -200,17 +200,18 @@
 (rum/defc edit-catalogue-row
   < {:key-fn (fn [_ row-index] row-index)}
   [{:keys [code text price-per-unit discount-percent min-total-price max-total-price unit operations] :as row} row-index]
-  [:tr
-   [:td (field code             (field-setter :code row-index)  {:size "6"})]
-   [:td (field text             (field-setter :text row-index) {:size "25"})]
-   [:td (field price-per-unit   (field-setter :price-per-unit row-index :number) {:size "6"})]
-   [:td (field discount-percent (field-setter :discount-percent row-index :number) {:size "3"})]
-   [:td (field min-total-price  (field-setter :min-total-price row-index :number) {:size "6"})]
-   [:td (field max-total-price  (field-setter :max-total-price row-index :number) {:size "6"})]
-   [:td (unit-select unit       (field-setter :unit row-index) )]
-   [:td (row-operations operations)]
-   [:td [:div.remove-icon-container {:on-click (fn [] (state/remove-row! row-index))}
-         [:i.lupicon-remove]]]])
+  (let [discount-percent (or discount-percent 0)]
+    [:tr
+     [:td (field code             (field-setter :code row-index)  {:size "6"})]
+     [:td (field text             (field-setter :text row-index) {:size "25"})]
+     [:td (field price-per-unit   (field-setter :price-per-unit row-index :number) {:size "6"})]
+     [:td (field discount-percent (field-setter :discount-percent row-index :number) {:size "3"})]
+     [:td (field min-total-price  (field-setter :min-total-price row-index :number) {:size "6"})]
+     [:td (field max-total-price  (field-setter :max-total-price row-index :number) {:size "6"})]
+     [:td (unit-select unit       (field-setter :unit row-index) )]
+     [:td (row-operations operations)]
+     [:td [:div.remove-icon-container {:on-click (fn [] (state/remove-row! row-index))}
+           [:i.lupicon-remove]]]]))
 
 (rum/defc catalogue-by-rows [selected-catalogue]
   [:div

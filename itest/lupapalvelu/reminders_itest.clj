@@ -630,3 +630,25 @@
           (dummy-email-server/messages) => empty?)))
 
     ))
+
+
+(facts "No reminders for read-only applications"
+
+  (let [db-name (str db-name "_read_only")]
+    (mongo/with-db db-name
+      (fixture/apply-fixture "minimal")
+      (mongo/insert :applications (assoc reminder-application :readOnly true))
+      (mongo/insert :applications (assoc reminder-application-matching-to-inforequest :readOnly true))
+      (mongo/insert :applications (assoc ya-reminder-application :readOnly true))
+      (mongo/insert :open-inforequest-token (assoc open-inforequest-entry-matching :readOnly true))
+      (dummy-email-server/messages :reset true)  ;; clears inbox
+
+      (batchrun/statement-request-reminder)
+      (batchrun/open-inforequest-reminder)
+      (batchrun/neighbor-reminder)
+      (batchrun/application-state-reminder)
+      (batchrun/ya-work-time-is-expiring-reminder)
+
+      (Thread/sleep 100)
+      (fact "No emails sent"
+        (dummy-email-server/messages :reset true) => empty?))))

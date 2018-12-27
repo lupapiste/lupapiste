@@ -44,7 +44,7 @@
 (defn add-empty-row []
   (let [empty-row {:min-total-price nil
                    :unit nil
-                   :discount-percent nil
+                   :discount-percent 0
                    :code nil
                    :operations []
                    :max-total-price nil

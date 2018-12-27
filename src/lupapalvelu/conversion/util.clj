@@ -1,8 +1,10 @@
 (ns lupapalvelu.conversion.util
-  (:require [clj-time.coerce :as c]
+  (:require [taoensso.timbre :refer [infof]]
+            [clj-time.coerce :as c]
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
@@ -10,9 +12,10 @@
             [lupapalvelu.document.model :as doc-model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
+            [lupapiste.mongocheck.core :as mongocheck]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as usr]
-            [monger.operators :refer [$in $ne]]
+            [monger.operators :refer [$in $ne $elemMatch $set]]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]))
@@ -66,9 +69,11 @@
   returns a document of type following the rakennuspaikka-kuntagml -schema."
   [kuntalupatunnus rakennuspaikkatieto]
   (let [data (parse-rakennuspaikkatieto kuntalupatunnus rakennuspaikkatieto)
-        doc-datas (doc-model/map2updates [] data)
-        manual-schema-datas {"rakennuspaikka-kuntagml" doc-datas}
-        schema (schemas/get-schema 1 "rakennuspaikka-kuntagml")]
+        schema (schemas/get-schema 1 "rakennuspaikka-kuntagml")
+        doc-datas (->> data
+                       (doc-model/map2updates [])
+                       (app/sanitize-document-datas schema))
+        manual-schema-datas {"rakennuspaikka-kuntagml" doc-datas}]
     (app/make-document nil (now) manual-schema-datas schema)))
 
 (defn kuntalupatunnus->description
@@ -163,10 +168,11 @@
                                     :kokonaisala ""
                                     :kuvaus (get-in raktieto [:Rakennelma :kuvaus :kuvaus])
                                     :tunnus (get-in raktieto [:Rakennelma :tunnus :rakennusnro])
-                                    :valtakunnallinenNumero ""})]
+                                    :valtakunnallinenNumero ""})
+        schema (schemas/get-schema 1 "kaupunkikuvatoimenpide")]
     (app/make-document "muu-rakentaminen"
                        (now)
-                       {"kaupunkikuvatoimenpide" data}
+                       {"kaupunkikuvatoimenpide" (app/sanitize-document-datas schema data)}
                        (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
 
 (defn decapitalize
@@ -182,18 +188,33 @@
                                   (decapitalize (kuntalupatunnus->description kuntalupatunnus))))]
     (assoc app :documents
            (map (fn [doc]
-                  (if (and (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
-                           (empty? (get-in doc [:data :kuvaus :value])))
+                  (cond
+                    (and (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
+                         (empty? (get-in doc [:data :kuvaus :value])))
                     (assoc-in doc [:data :kuvaus :value] kuvausteksti)
-                    doc))
+                    (and (re-find #"maisematyo" (get-in doc [:schema-info :name]))
+                         (empty? (get-in doc [:data :kuvaus :value])))
+                    (assoc-in doc [:data :kuvaus :value] kuvaus)
+                    :else doc))
                 documents))))
+
+(defn remove-empty-rakennuspaikka
+  "`app/make-application` creates an empty location document (using 'rakennuspaikka' schema)
+  for the created application. Since we're using 'rakennuspaikka-kuntagml'-schema instead,
+  this document is not used and can be weeded out here."
+  [{:keys [documents] :as app}]
+  (assoc app :documents
+         (remove #(= "rakennuspaikka" (get-in % [:schema-info :name])) documents)))
 
 (defn op-name->schema-name [op-name]
   (-> op-name operations/get-operation-metadata :schema))
 
 (defn toimenpide->toimenpide-document [op-name toimenpide]
-  (let [data (doc-model/map2updates [] toimenpide)
-        schema-name (op-name->schema-name op-name)]
+  (let [schema-name (op-name->schema-name op-name)
+        schema (schemas/get-schema 1 schema-name)
+        data (->> toimenpide
+                  (doc-model/map2updates [])
+                  (app/sanitize-document-datas schema))]
     (app/make-document op-name
                        (now)
                        {schema-name data}
@@ -210,28 +231,6 @@
         nextvalue (mongo/get-next-sequence-value sequence-name)
         counter (format (if (> 10000 nextvalue) "9%04d" "%05d") nextvalue)]
     (ss/join "-" (list "LP" "092" fullyear counter))))
-
-(defn get-duplicate-ids
-  "This takes a kuntalupatunnus and returns the LP ids of every application in the database
-  that contains the same kuntalupatunnus and does not contain :facta-imported true."
-  [kuntalupatunnus]
-  (let [ids (app/get-lp-ids-by-kuntalupatunnus kuntalupatunnus)]
-    (->> (mongo/select :applications
-                       {:_id {$in ids} :facta-imported {$ne true}}
-                       {:_id 1})
-         (map :id))))
-
-(defn get-id-listing
-  "Produces a CSV list of converted applications, where LP id is matched to kuntalupatunnus.
-  See PATE-152 for the rationale."
-  [filename]
-  (let [data (->> (mongo/select :applications ;; Data is a sequence of vectors like ["LP-092-2018-90047" "18-0030-13-A"].
-                                {:facta-imported true}
-                                {:_id 1 :verdicts.kuntalupatunnus 1})
-                  (map (fn [item]
-                         [(:id item) (get-in item [:verdicts 0 :kuntalupatunnus])])))]
-    (with-open [writer (io/writer filename)]
-      (csv/write-csv writer data))))
 
 (defn translate-state [state]
   (condp = state
@@ -256,7 +255,8 @@
   (let [verdict-given {:state :verdictGiven
                        :ts (xml->verdict-timestamp xml)
                        :user usr/batchrun-user-data}
-        history (for [{:keys [pvm tila]} (krysp-reader/get-sorted-tilamuutos-entries xml)]
+        history (for [{:keys [pvm tila]} (krysp-reader/get-sorted-tilamuutos-entries xml)
+                      :when (translate-state tila)]
                   {:state (translate-state tila)
                    :ts pvm
                    :user usr/batchrun-user-data})
@@ -268,6 +268,49 @@
                (assoc e :state :foremanVerdictGiven)
                e))
            history-array))))
+
+(defn missing-timestamp->dummy
+  "Sometimes the history-array does not contains a timestamp for closing.
+  In these cases, it's set to (now). If an optional second argument is passed,
+  the value under that key is updated instead."
+  ([app]
+   (missing-timestamp->dummy app :closed))
+  ([app k]
+   (update app k (fn [ts] (if (nil? ts) (now) ts)))))
+
+(defn add-timestamps [app history-array]
+  (if (empty? history-array)
+    (missing-timestamp->dummy app)
+    (let [{:keys [ts state]} (first history-array)
+          app-key (app-state/timestamp-key state)]
+      (recur (if-not (nil? app-key)
+               (assoc app app-key ts)
+               app)
+             (rest history-array)))))
+
+;; Dev time helpers
+
+(defn get-duplicate-ids
+  "This takes a kuntalupatunnus and returns the LP ids of every application in the database
+  that contains the same kuntalupatunnus and does not contain :facta-imported true."
+  [kuntalupatunnus]
+  (let [ids (app/get-lp-ids-by-kuntalupatunnus kuntalupatunnus)]
+    (->> (mongo/select :applications
+                       {:_id {$in ids} :facta-imported {$ne true}}
+                       {:_id 1})
+         (map :id))))
+
+(defn get-id-listing
+  "Produces a CSV list of converted applications, where LP id is matched to kuntalupatunnus.
+  See PATE-152 for the rationale."
+  [filename]
+  (let [data (->> (mongo/select :applications ;; Data is a sequence of vectors like ["LP-092-2018-90047" "18-0030-13-A"].
+                                {:facta-imported true}
+                                {:_id 1 :verdicts.kuntalupatunnus 1})
+                  (map (fn [item]
+                         [(:id item) (get-in item [:verdicts 0 :kuntalupatunnus])])))]
+    (with-open [writer (io/writer filename)]
+      (csv/write-csv writer data))))
 
 (defn read-all-test-files
   ([] (read-all-test-files (:resource-path config)))
@@ -315,15 +358,21 @@
 
 (defn deduce-operation-type
   "Takes a kuntalupatunnus and a 'toimenpide'-element from app-info, returns the operation type"
-  ([kuntalupatunnus]
+  ([kuntalupatunnus description]
    (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)]
      (condp = suffix
        "TJO" "tyonjohtajan-nimeaminen-v2"
        "P" "purkaminen"
        "PI" "purkaminen"
+       "MAI" (cond
+               (re-find #"kaatami|kaatoa" description) "puun-kaataminen"
+               (re-find #"valmistele" description) "muu-tontti-tai-kort-muutos"
+               (re-find #"kaivam|kaivu" description) "kaivuu"
+               (re-find #"pysäk|liittym" description) "tontin-jarjestelymuutos"
+               :else "muu-maisema-toimenpide")
        "konversio"))) ;; A minimal generic operation for this purpose.
                       ;; If a an application does not contain 'toimenpide'-element and is not P(I) or TJO, 'konversio it is'.
-  ([kuntalupatunnus toimenpide]
+  ([kuntalupatunnus description toimenpide]
    (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
         uusi? (contains? toimenpide :uusi)
         rakennustieto (get-in toimenpide [:rakennustieto :Rakennus :rakennuksenTiedot])
@@ -356,6 +405,28 @@
            (or (re-find #"rivital|kerrostal" kayttotarkoitus)
                (= "omakotitalo" rakennuksen-selite))) "kerrostalo-rt-laaj"
       :else "aiemmalla-luvalla-hakeminen"))))
+
+(defn add-vakuustieto!
+  "This takes an XML of a VAK-type kuntaGML application, i.e. deposit.
+  It then retrieves the kantalupa that the VAK-applications refers to
+  and adds the info about the deposit to its verdict (poytakirja) element.
+  This needs to be run for all the VAK-type applications the Vantaa-conversion,
+  after all the applications have been converted."
+  [xml]
+  (let [kantalupa-kuntalupatunnus (-> xml krysp-reader/->viitelupatunnukset first normalize-permit-id) ;; The kuntalupatunnus the VAK-application points to.
+        kantalupa-lupapiste-id (-> kantalupa-kuntalupatunnus app/get-lp-ids-by-kuntalupatunnus first) ;; The lupapiste-id of the aforementioned kantalupa.
+        kuntalupatunnus-vak (krysp-reader/->kuntalupatunnus xml)
+        {:keys [vakuudenLaji vakuudenmaara voimassaolopvm]} (krysp-reader/->vakuustieto xml)
+        vakuus-string (format "Sisältää vakuuden (kuntalupatunnus: %s).\nVakuuden määrä: %s, vakuuden laji: %s, voimassaolopäivä: %s."
+                              kuntalupatunnus-vak vakuudenmaara vakuudenLaji voimassaolopvm)
+        {:keys [id paatokset]} (-> (mongo/by-id :applications kantalupa-lupapiste-id {:verdicts 1}) :verdicts first)
+        old-paatos-text (get-in paatokset [0 :poytakirjat 0 :paatos])
+        new-paatos-text (str (when-not (empty? old-paatos-text) "\n") vakuus-string)]
+    (when paatokset
+      (infof "Adding vakuustieto from %s -> %s (%s)." kuntalupatunnus-vak kantalupa-lupapiste-id kantalupa-kuntalupatunnus)
+      (mongo/update-by-query :applications
+                             {:_id kantalupa-lupapiste-id :verdicts {$elemMatch {:id id}}}
+                             {$set {:verdicts.0.paatokset.0.poytakirjat.0.paatos new-paatos-text}}))))
 
 (defn read-xml [kuntalupatunnus]
   (let [filename (str (:resource-path config) "/" kuntalupatunnus ".xml")]
@@ -397,11 +468,5 @@
 (defn get-asian-kuvaus [kuntalupatunnus]
   (-> kuntalupatunnus get-xml-for-kuntalupatunnus building-reader/->asian-tiedot))
 
-(defn is-empty-osapuoli? [doc]
-  (let [sukunimi (->> (tree-seq map? vals doc)
-                      (filter map?)
-                      (keep :sukunimi)
-                      first)]
-    (boolean
-      (when sukunimi
-        (empty? (:value sukunimi))))))
+(defn run-checks []
+  (mongocheck/execute-checks (mongo/get-db)))

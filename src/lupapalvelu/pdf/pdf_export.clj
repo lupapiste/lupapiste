@@ -2,6 +2,7 @@
   (:require [clj-time.format :as tf]
             [clj-time.local :as tl]
             [clojure.java.io :as io]
+            [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.i18n :refer [loc] :as i18n]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
@@ -129,30 +130,15 @@
                   :code)]
     (filter #(contains? (set (:codes %)) code) fields)))
 
-(defn- get-value-by-path
-  "Get element value by target-path string. target-path can be absolute (/path/to/element) or ralative (sibling/element).
-  If target path is given as relative, parent-path is used to resoleve absolute path."
-  [doc parent-path target-path]
-  (let [absolute-path (->> (ss/split target-path #"/")
-                           ((fn [path] (if (ss/blank? (first path)) (rest path) (concat parent-path path))))
-                           (mapv keyword))]
-    (get-in doc (conj absolute-path :value))))
-
-(defn- hide-by-hide-when [doc parent-path {:keys [hide-when]}]
-  (and hide-when ((:values hide-when) (get-value-by-path doc parent-path (:path hide-when)))))
-
-(defn- show-by-show-when [doc parent-path {:keys [show-when]}]
-  (or (not show-when) ((:values show-when) (get-value-by-path doc parent-path (:path show-when)))))
-
-(defn- filter-subschemas-by-data [doc group-schema path subschemas]
+(defn- filter-subschemas-by-data [app doc group-schema path subschemas]
   (->> (remove (comp (removable-groups doc group-schema path) :name) subschemas)
-       (remove (partial hide-by-hide-when doc path))
-       (filter (partial show-by-show-when doc path))))
+       ;; Extra path part needed for absolute (sibling) path resolution
+       (filter (partial model/field-visible? app doc (conj path :extra)))))
 
 (defn- get-subschemas
   "Returns group subschemas as hash-map. Index of a repeating group is conjoined in [:path :to :group].
   {[:path :to :group :0] {:fields [field-type-schemas] :groups [group-type-schemas]}}."
-  [doc group-schema path]
+  [app doc group-schema path]
   (let [paths      (if (:repeating group-schema)
                      (->> (get-in doc path) keys (sort-by util/->int) (map (partial conj path)))
                      [path])
@@ -164,8 +150,8 @@
                         (filter-fields-by-group-subtype doc group-schema))
         fields     (filter is-field-type subschemas)
         groups     (filter is-printable-group-type subschemas)]
-    (->> (map #(hash-map :fields (filter-subschemas-by-data doc group-schema % fields)
-                         :groups (filter-subschemas-by-data doc group-schema % groups)) paths)
+    (->> (map #(hash-map :fields (filter-subschemas-by-data app doc group-schema % fields)
+                         :groups (filter-subschemas-by-data app doc group-schema % groups)) paths)
          (zipmap paths))))
 
 (defn- subschemas-order-comparator
@@ -177,7 +163,7 @@
 (defn- collect-single-group
   "Build a map from the data of a single group. Groups can be in document root or inside other groups"
   [app doc group-schema path i18npath]
-  (let [subschemas (into (sorted-map-by subschemas-order-comparator) (get-subschemas doc group-schema path))]
+  (let [subschemas (into (sorted-map-by subschemas-order-comparator) (get-subschemas app doc group-schema path))]
 
     (array-map :title  (when-not (some-> group-schema :exclude-from-pdf :title)
                          (loc (or (:i18nkey group-schema)
@@ -199,7 +185,7 @@
   [app {:keys [data schema-info] :as doc}]
   (let [schema     (schemas/get-schema (:schema-info doc))
         op         (:op schema-info)
-        subschemas (-> (get-subschemas data schema []) first val) ; root data is never repeating
+        subschemas (-> (get-subschemas app data schema []) first val) ; root data is never repeating
         doc-name   (or (-> schema :info :i18name not-empty) (-> schema :info :name))]
 
     (array-map :title (if (ss/not-blank? (:name op)) (str "operations." (:name op)) (-> schema :info :name))

@@ -207,12 +207,14 @@
 
 ;;
 ;; Skips applications with operation "aiemmalla-luvalla-hakeminen" (previous permit aka paperilupa)
+;; and those with :facta-imported flag set on.
 ;;
 (mongocheck :applications
   (fn [application]
     (when (and
             ((states/all-application-states-but [:canceled :draft :open]) (keyword (:state application)))
-            (when-not (some #(= "aiemmalla-luvalla-hakeminen" %) (map :name (app/get-operations application)))
+            (when-not (or (:facta-imported application)
+                          (some #(= "aiemmalla-luvalla-hakeminen" %) (map :name (app/get-operations application))))
               (nil? (:submitted application))))
       "Submitted timestamp is null"))
   :submitted :state :primaryOperation :secondaryOperations)

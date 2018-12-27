@@ -8,11 +8,6 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
   self.dataProvider = params.dataProvider;
   self.data = ko.pureComputed(function() {
     return _.map(self.dataProvider.results(), function(item) {
-      var verdictCount = util.getIn(item, ["verdicts"]).length;
-      if (verdictCount > 0) {
-        item.kuntalupatunnus = util.getIn(item, ["verdicts", verdictCount - 1, "kuntalupatunnus"]);
-        item.verdictDate = util.getIn(item, ["verdicts", verdictCount - 1, "paatokset", 0, "paivamaarat", "anto"]);
-      }
       item.searchType = self.dataProvider.searchResultType();
       if (item.foremanRole) {
         item.foremanRoleI18nkey = "osapuoli.tyonjohtaja.kuntaRoolikoodi." + item.foremanRole;
@@ -64,7 +59,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
    */
   self.disposedComputed(function () {
     if (self.selectedTab() === "construction") {
-      self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.verdictGiven",  {sortField: "submitted", currentSort: self.dataProvider.sort}));
+      self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.verdictGiven",  {sortable: false, currentSort: self.dataProvider.sort}));
     } else {
       self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.submitted",  {sortField: "submitted", currentSort: self.dataProvider.sort}));
     }

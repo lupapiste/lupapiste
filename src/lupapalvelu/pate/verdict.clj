@@ -19,6 +19,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.integrations.jms :as jms]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as org]
@@ -81,7 +82,8 @@
     :contract? fails if the verdict is not a contract
     :allu-contract? fails if the verdict is not an allu-contract
     :verdict? fails for contracts
-    :not-replaced? Fails if the verdict has been OR is being replaced"
+    :not-replaced? Fails if the verdict has been OR is being replaced
+    :proposal? fails if the verdict is not proposal"
   [& conditions]
   {:pre [(set/superset? #{:editable? :published? :legacy? :modern? :contract?
                           :allu-contract? :verdict? :not-replaced? :proposal?}
@@ -1299,16 +1301,14 @@
   (or (some-> verdict :published :attachment-id)
       (when-let [attachment-id (pdf/create-verdict-attachment command verdict)]
         (verdict-update command
-                        {$set {:pate-verdicts.$.published.attachment-id attachment-id}})
-        true)))
+                        {$set {:pate-verdicts.$.published.attachment-id attachment-id}}))))
 
 (defn- pdf--proposal [command verdict]
   (if (some-> verdict :proposal :attachment-id)
     (pdf/create-verdict-attachment-version command verdict)
     (when-let [attachment-id (pdf/create-verdict-attachment command verdict)]
       (verdict-update command
-                      {$set {:pate-verdicts.$.proposal.attachment-id attachment-id}})
-      true)))
+                      {$set {:pate-verdicts.$.proposal.attachment-id attachment-id}}))))
 
 (declare pdf--signatures)
 
@@ -1316,43 +1316,43 @@
   "Creates verdict PDF base on the data received from the Pate message
   queue."
   [{command ::command mode ::mode}]
-  (let [error-fn                 (fn [err]
-                                   (do
-                                     (warn "Skipping bad message. Cannot create verdict PDF." err)
-                                     (.commit pate-session)))
-        {app-id     :id
-         verdict-id :verdict-id} (:data command)]
-    (cond
-      (ss/blank? app-id)                     (error-fn "No application id.")
-      (ss/blank? verdict-id)                 (error-fn "No verdict id.")
-      (not (#{::verdict ::signatures
-              ::proposal} mode))             (error-fn (str "Bad mode: " mode))
-      :else
-      (when-let [command (let [application   (domain/get-application-no-access-checking app-id)
-                               command       (assoc command :application application)
-                               {error :text} (and ((verdict-exists :published?) command)
-                                                  ((verdict-exists :proposal?) command))]
-                           (cond
-                             (nil? application) (error-fn (str "Bad application id: " app-id))
-                             error              (error-fn error)
-                             :else              command))]
-        (try+
-         (let [verdict (command->verdict command)
-               fun     (case mode
-                         ::verdict    pdf--verdict
-                         ::signatures pdf--signatures
-                         ::proposal   pdf--proposal)]
-           (if (fun command verdict)
-             (.commit pate-session)
-             (.rollback pate-session)))
-         (catch [:error :pdf/pdf-error] _
-           (errorf "%s: PDF generation for verdict %s failed."
-                   app-id verdict-id)
-           (.rollback pate-session))
-         (catch Object _
-           (errorf "%s: Could not create verdict attachment for verdict %s."
-                   app-id verdict-id)
-           (.rollback pate-session)))))))
+  (let [{app-id     :id
+         verdict-id :verdict-id} (:data command)
+        error-fn                 (fn [err]
+                                   (warn "Skipping bad message. Cannot create verdict PDF." err)
+                                   (.commit pate-session))]
+    (logging/with-logging-context {:applicationId app-id}
+      (cond
+        (ss/blank? app-id)         (error-fn "No application id.")
+        (ss/blank? verdict-id)     (error-fn "No verdict id.")
+        (not (#{::verdict ::signatures
+                ::proposal} mode)) (error-fn (str "Bad mode: " mode))
+        :else
+        (when-let [command (let [application   (domain/get-application-no-access-checking app-id)
+                                 command       (assoc command :application application)
+                                 {error :text} (and ((verdict-exists :published?) command)
+                                                    ((verdict-exists :proposal?) command))]
+                             (cond
+                               (nil? application) (error-fn (str "Bad application id: " app-id))
+                               error              (error-fn error)
+                               :else              command))]
+          (try+
+           (let [verdict (command->verdict command)
+                 fun     (case mode
+                           ::verdict    pdf--verdict
+                           ::signatures pdf--signatures
+                           ::proposal   pdf--proposal)]
+             (fun command verdict)
+             ;; Message is committed regardless of fun return
+             ;; value. Only exceptions rollback the message.
+             (.commit pate-session))
+           (catch [:error :pdf/pdf-error] _
+             (error "PDF generation for verdict" verdict-id "failed.")
+             (.rollback pate-session))
+           (catch Object _
+             (error "Could not create verdict attachment for verdict"
+                     verdict-id)
+             (.rollback pate-session))))))))
 
 (defonce pate-consumer (when pate-session
                          (jms/create-consumer pate-session

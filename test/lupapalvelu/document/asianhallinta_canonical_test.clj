@@ -11,7 +11,7 @@
             [lupapalvelu.backing-system.asianhallinta.asianhallinta-mapping :as ahm]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
-            [lupapalvelu.document.rakennuslupa-canonical-test :as rakennus-test]))
+            [lupapalvelu.rakennuslupa-canonical-util :as rc-util]))
 
 
 (testable-privates lupapalvelu.backing-system.asianhallinta.asianhallinta-mapping enrich-attachments-with-operation-data)
@@ -46,8 +46,8 @@
 (def- link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
 
 (fl/facts* "UusiAsia canonical with Lupapiste link permit"
-  (let [canonical   (ah/application-to-asianhallinta-canonical rakennus-test/application-suunnittelijan-nimeaminen "fi") => truthy
-        application rakennus-test/application-suunnittelijan-nimeaminen]
+  (let [canonical   (ah/application-to-asianhallinta-canonical rc-util/application-suunnittelijan-nimeaminen "fi") => truthy
+        application rc-util/application-suunnittelijan-nimeaminen]
     (fact "Viiteluvat"
       (let [links        (get-in canonical [:UusiAsia :Viiteluvat :Viitelupa])
             link         (first links)]
@@ -59,7 +59,7 @@
           (:Sovellus link) => "Lupapiste")))))
 
 (fl/facts* "UusiAsia canonical with two link permits"
-  (let [application (update-in rakennus-test/application-suunnittelijan-nimeaminen [:linkPermitData] conj link-permit-data-kuntalupatunnus)
+  (let [application (update-in rc-util/application-suunnittelijan-nimeaminen [:linkPermitData] conj link-permit-data-kuntalupatunnus)
         canonical   (ah/application-to-asianhallinta-canonical application "fi") => truthy]
     (fact "Viiteluvat"
       (let [links (get-in canonical [:UusiAsia :Viiteluvat :Viitelupa])

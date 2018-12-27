@@ -1364,6 +1364,12 @@ h1 .icon {
   width: 100%;
 }
 
+@media print {
+  .nav-wrapper {
+    display: none;
+  }
+}
+
 .nav-box {
   width: 100%;
   max-width: 1660px;
@@ -1768,6 +1774,12 @@ footer {
   height: auto;
   bottom: 0;
   width: 100%;
+}
+
+@media print {
+  footer {
+    display: none;
+  }
 }
 
 footer .informations {
@@ -12910,6 +12922,12 @@ td.users-table-actions button:first-child {
   clear: both;
   box-sizing: border-box;
   padding-top: 40px;
+}
+
+@media print {
+  .tabs-container {
+    visibility: hidden;
+  }
 }
 
 .tabs {
@@ -34529,6 +34547,12 @@ span.icon_clear:before {
   float: none;
 }
 
+@media print {
+  .application_summary {
+    page-break-after: always;
+  }
+}
+
 .application_summary .container {
   margin-bottom: 0;
 }
@@ -35134,6 +35158,12 @@ span.icon_clear:before {
   position: absolute;
   right: 0;
   top: 12px;
+}
+
+@media print {
+  .application_summary .application_actions {
+    display: none;
+  }
 }
 
 .application_summary .application_actions .muncipality-info {
@@ -36686,6 +36716,23 @@ div.organizations-search input.textinput, form.xml-download input.textinput {
   vertical-align: middle;
 }
 
+div.organization-title {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+div.organization-title h1 {
+  display: inline-block;
+  margin-bottom: 0;
+  vertical-align: middle;
+}
+
+div.organization-title .organization--closed {
+  margin-left: 2em;
+  color: #df3215;
+  text-transform: uppercase;
+}
+
 #authority-admin h2 {
   margin-top: 24px;
 }
@@ -37796,6 +37843,12 @@ ul.appeals-files li span.appeals-files__size {
   position: fixed;
   right: -500px;
   top: 60px;
+}
+
+@media print {
+  #side-panel {
+    display: none;
+  }
 }
 
 #side-panel .buttons {
@@ -39159,9 +39212,37 @@ div.summary-button-bar {
   width: 100%;
 }
 
+@media print {
+  .invoice-list-wrapper .operation-button-row {
+    display: none;
+  }
+}
+
 button.invoice-change-state-button {
   background-color: #2ca92c;
   color: #ffffff;
+}
+
+@media print {
+  .invoice-accordion {
+    page-break-after: always;
+  }
+}
+
+.invoice-accordion:last-child {
+  page-break-after: avoid;
+}
+
+@media print {
+  .invoice-accordion > .rollup-accordion-content {
+    display: block !important;
+  }
+}
+
+@media print {
+  .invoice-accordion .remove-icon-container {
+    display: none;
+  }
 }
 
 .invoice-accordion.rollup {

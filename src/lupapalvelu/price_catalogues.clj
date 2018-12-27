@@ -4,6 +4,7 @@
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [lupapalvelu.time-util :refer [tomorrow day-before ->date
+                                           timestamp-at-the-end-of-previous-day
                                            ->date-str tomorrow-or-later?
                                            timestamp-after?]]
             [lupapalvelu.invoices :as invoices]
@@ -21,6 +22,9 @@
 
 (defn fetch-price-catalogues [organization-id]
   (mongo/select :price-catalogues {:organization-id organization-id}))
+
+(defn published? [{:keys [state] :as price-catalogue}]
+  (= state "published"))
 
 (defn fetch-previous-published-price-catalogue
   [{:keys [valid-from organization-id] :as price-catalogue}]
@@ -55,12 +59,15 @@
 
 (def time-format (tf/formatter "dd.MM.YYYY"))
 
-(defn validate-insert-price-catalogue-request [{{catalogue-request :price-catalogue} :data :as command}]
+(defn has-existing-published-price-catalogues? [org-id]
+  (->> (fetch-price-catalogues org-id)
+       (filter published?)
+       seq))
+
+(defn validate-insert-price-catalogue-request [{{catalogue-request :price-catalogue org-id :organization-id} :data :as command}]
   (try
     (sc/validate invsc/PriceCatalogueInsertRequest catalogue-request)
-    (if (not (tomorrow-or-later? (:valid-from-str catalogue-request)))
-      (fail :error.price-catalogue.incorrect-date))
-
+    nil
     (catch Exception e
       (warn "Invalid price catalogue request " (.getMessage e))
       (fail :error.invalid-price-catalogue))))
@@ -80,11 +87,9 @@
 (defn validate-price-catalogue [price-catalogue]
   (sc/validate invsc/PriceCatalogue price-catalogue))
 
-(defn catalogue-with-valid-until-one-day-before-timestamp [timestamp catalogue]
-  (debug ">> catalogue-with-valid-until-one-day-before-timestamp timestamp" timestamp " catalogue " (:id catalogue))
-  (let [date (tc/from-long timestamp)
-        timestamp-day-before (tc/to-long (day-before date))]
-    (assoc catalogue :valid-until timestamp-day-before)))
+(defn catalogue-with-valid-until-at-the-end-of-previous-day [timestamp catalogue]
+  (debug ">> catalogue-with-valid-until-at-the-end-of-previous-day timestamp" timestamp " catalogue " (:id catalogue))
+  (assoc catalogue :valid-until (timestamp-at-the-end-of-previous-day timestamp)))
 
 (defn update-catalogue! [{:keys [id] :as catalogue}]
   (validate-price-catalogue catalogue)
@@ -96,7 +101,7 @@
   (if (and previous-catalogue
            (or (timestamp-after? (:valid-until previous-catalogue) new-catalogue-start)
                (not (:valid-until previous-catalogue))))
-    (let [prev-catalogue-with-valid-until (catalogue-with-valid-until-one-day-before-timestamp new-catalogue-start previous-catalogue)]
+    (let [prev-catalogue-with-valid-until (catalogue-with-valid-until-at-the-end-of-previous-day new-catalogue-start previous-catalogue)]
       (update-catalogue! prev-catalogue-with-valid-until))))
 
 (defn create-price-catalogue!
@@ -129,7 +134,7 @@
 
 (defn fetch-valid-catalogue [org-id timestamp]
   (debug ">> fetch-valid-catalogue org-id " org-id " timestamp: " timestamp " findate: " (to-finnish-date timestamp))
-  (let [filter-published (fn [catalogues] (filter (fn [{:keys [state]}] (= state "published")) catalogues))]
+  (let [filter-published (fn [catalogues] (filter published? catalogues))]
 
     (-> (fetch-price-catalogues org-id)
         filter-published

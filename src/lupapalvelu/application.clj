@@ -875,23 +875,34 @@
                                [[:kuvaus] rakennusvalvontaasianKuvaus]))))
       buildings)))
 
+(defn sanitize-document-datas
+  "This cleans document datas of all the key-value pairs that are not found in the
+  given schema. Failure to do this results in smoke-tests breaking, plus the data
+  wouldn't end up to the created application anyway."
+  [schema document-datas]
+  (filter (fn [[k v]]
+              (model/find-by-name (:body schema) k))
+          document-datas))
+
 (defn document-data->op-document
+  "If no operation name is provided, this defaults to \"archiving-project\""
   ([application data]
-   ;; If no operation name is provided, this defaults to "archiving-project"
    (document-data->op-document application data "archiving-project"))
   ([{:keys [schema-version] :as application} data operation-name]
     (let [schema-name (-> operation-name op/get-operation-metadata :schema)
+          schema (schemas/get-schema schema-version schema-name)
           op (make-op operation-name (now))
-          doc (doc-persistence/new-doc application (schemas/get-schema schema-version schema-name) (now))
+          doc (doc-persistence/new-doc application schema (now))
           doc (assoc-in doc [:schema-info :op] op)
-          doc-updates (lupapalvelu.document.model/map2updates [] data)]
+          doc-updates (sanitize-document-datas schema (if (map? data)               ;; The incoming data should already be an update vector
+                                                        (model/map2updates [] data) ;; sequence, but we'll perform an extra
+                                                        data))]                     ;; validation here to be 100 % sure.
       (lupapalvelu.document.model/apply-updates doc doc-updates))))
 
 (defn fetch-building-xml [organization permit-type property-id]
   (when (and organization permit-type property-id)
     (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} permit-type)]
       (building-reader/building-xml url credentials property-id))))
-
 
 (defn update-buildings-array! [xml application all-buildings]
   (let [doc-buildings (building/building-ids application)
@@ -955,6 +966,12 @@
 (defn set-integration-key [app-id system-name key-data]
   (mongo/update-by-id :applications app-id {$set {(str "integrationKeys." (name system-name)) key-data}}))
 
+;;
+;; Allu's internal application id
+;;
+
+(defn set-allu-application-id [app-id allu-id]
+  (mongo/update-by-id :applications app-id {$set {"allu.application-id" allu-id}}))
 
 ;; Utils for the sheriff
 

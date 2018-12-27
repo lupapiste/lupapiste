@@ -122,13 +122,15 @@
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/snapshot :applications
                              {:state {$in ["open" "submitted"]}
+                              :readOnly {$ne true}
                               :permitType {$nin ["ARK"]}
                               :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
                                                        :given nil
                                                        $or [{:reminder-sent {$exists false}}
                                                             {:reminder-sent nil}
                                                             {:reminder-sent (older-than timestamp-1-week-ago)}]}}}
-                             [:statements :state :modified :infoRequest :title :address :municipality :primaryOperation])]
+                             [:statements :state :modified :infoRequest :title :address
+                              :municipality :primaryOperation :readOnly])]
     (doseq [app apps
             statement (:statements app)
             :let [requested (:requested statement)
@@ -157,13 +159,15 @@
         apps (mongo/snapshot :applications
                              {:state      {$nin (map name (clojure.set/union states/post-verdict-states states/terminal-states))}
                               :permitType {$nin ["ARK"]}
+                              :readOnly {$ne true}
                               :statements {$elemMatch {:given nil
                                                        $and   [{:dueDate {$exists true}}
                                                                {:dueDate (older-than timestamp-now)}]
                                                        $or    [{:duedate-reminder-sent {$exists false}}
                                                                {:duedate-reminder-sent nil}
                                                                {:duedate-reminder-sent (older-than timestamp-1-week-ago)}]}}}
-                             [:statements :state :modified :infoRequest :title :address :municipality :primaryOperation])]
+                             [:statements :state :modified :infoRequest :title
+                              :address :municipality :primaryOperation :readOnly])]
     (doseq [app apps
             statement (:statements app)
             :let [due-date (:dueDate statement)
@@ -193,15 +197,16 @@
                                                            {:reminder-sent nil}
                                                            {:reminder-sent (older-than timestamp-1-week-ago)}]})]
     (doseq [oir oirs]
-      (let [application (mongo/by-id :applications (:application-id oir) [:state :modified :title :address :municipality :primaryOperation])]
-        (logging/with-logging-context {:applicationId (:id application)}
-          (when (= "info" (:state application))
-            (notifications/notify! :reminder-open-inforequest {:application application
-                                                               :data {:email (:email oir)
-                                                                      :token-id (:id oir)
-                                                                      :created-date (util/to-local-date (:created oir))}})
-            (mongo/update-by-id :open-inforequest-token (:id oir) {$set {:reminder-sent (now)}})
-            ))))))
+      (let [application (mongo/by-id :applications (:application-id oir) [:state :modified :title :address
+                                                                          :municipality :primaryOperation :readOnly])]
+        (when-not (:readOnly application)
+          (logging/with-logging-context {:applicationId (:id application)}
+            (when (= "info" (:state application))
+              (notifications/notify! :reminder-open-inforequest {:application application
+                                                                 :data {:email (:email oir)
+                                                                        :token-id (:id oir)
+                                                                        :created-date (util/to-local-date (:created oir))}})
+              (mongo/update-by-id :open-inforequest-token (:id oir) {$set {:reminder-sent (now)}}))))))))
 
 
 ;; "Naapurin kuuleminen: Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on nakyy viranomaiselle tai hakemus jatetty. Muistutus lahetetaan kerran."
@@ -209,11 +214,12 @@
   (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/snapshot :applications
                              {:state {$in ["open" "submitted"]}
+                              :readOnly {$ne true}
                               :permitType {$nin ["ARK"]}
                               :neighbors.status {$elemMatch {$and [{:state {$in ["email-sent"]}}
-                                                                   {:created (older-than timestamp-1-week-ago)}
-                                                                   ]}}}
-                             [:neighbors :state :modified :title :address :municipality :primaryOperation])]
+                                                                   {:created (older-than timestamp-1-week-ago)}]}}}
+                             [:neighbors :state :modified :title :address
+                              :municipality :primaryOperation :readOnly])]
     (doseq [app apps
             neighbor (:neighbors app)
             :let [statuses (:status neighbor)]]
@@ -247,11 +253,13 @@
   (let [timestamp-1-week-in-future (util/get-timestamp-from-now :week 1)
         apps (mongo/snapshot :applications
                              {:permitType "YA"
+                              :readOnly {$ne true}
                               :state {$in ["verdictGiven" "constructionStarted"]}
                               ;; Cannot compare timestamp directly against date string here (e.g against "08.10.2015"). Must do it in function body.
                               :documents {$elemMatch {:schema-info.name "tyoaika"}}
                               :work-time-expiring-reminder-sent {$exists false}}
-                             [:documents :auth :state :modified :title :address :municipality :infoRequest :primaryOperation])]
+                             [:documents :auth :state :modified :title :address :municipality
+                              :infoRequest :primaryOperation :readOnly])]
     (doseq [app apps
             :let [tyoaika-doc (some
                                 (fn [doc]
@@ -277,13 +285,15 @@
   []
   (let [apps (mongo/snapshot :applications
                              {:state {$in ["draft" "open"]}
+                              :readOnly {$ne true}
                               :permitType {$nin ["ARK"]}
                               $and [{:modified (older-than (util/get-timestamp-ago :month 1))}
                                     {:modified (newer-than (util/get-timestamp-ago :month 6))}]
                               $or [{:reminder-sent {$exists false}}
                                    {:reminder-sent nil}
                                    {:reminder-sent (older-than (util/get-timestamp-ago :month 1))}]}
-                             [:auth :state :modified :title :address :municipality :infoRequest :primaryOperation])]
+                             [:auth :state :modified :title :address :municipality
+                              :infoRequest :primaryOperation :readOnly])]
     (doseq [app apps]
       (logging/with-logging-context {:applicationId (:id app)}
         (notifications/notify! :reminder-application-state {:application app
@@ -321,7 +331,7 @@
     (doseq [app apps
             :let [command (assoc (application->command app) :user batchrun-user
                                                             :created (now)
-                                                            :action "fetch-verdicts")]]
+                                                            :action "fetch-allu-contract")]]
       (logging/with-logging-context {:applicationId (:id app) :userId (:id batchrun-user)}
                                     (allu-contract/fetch-allu-contract command))))
   (mongo/disconnect!))
