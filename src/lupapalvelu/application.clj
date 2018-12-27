@@ -894,14 +894,15 @@
           op (make-op operation-name (now))
           doc (doc-persistence/new-doc application schema (now))
           doc (assoc-in doc [:schema-info :op] op)
-          doc-updates (sanitize-document-datas schema data)]
+          doc-updates (sanitize-document-datas schema (if (map? data)               ;; The incoming data should already be an update vector
+                                                        (model/map2updates [] data) ;; sequence, but we'll perform an extra
+                                                        data))]                     ;; validation here to be 100 % sure.
       (lupapalvelu.document.model/apply-updates doc doc-updates))))
 
 (defn fetch-building-xml [organization permit-type property-id]
   (when (and organization permit-type property-id)
     (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} permit-type)]
       (building-reader/building-xml url credentials property-id))))
-
 
 (defn update-buildings-array! [xml application all-buildings]
   (let [doc-buildings (building/building-ids application)
