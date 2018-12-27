@@ -1,6 +1,6 @@
 (ns lupapalvelu.conversion.conversion-api
   (:require [sade.core :refer :all]
-            [lupapalvelu.action :as action :refer [defcommand]]
+            [lupapalvelu.action :as action :refer [defcommand execute]]
             [lupapalvelu.conversion.kuntagml-converter :as converter]))
 
 (defcommand convert-application
