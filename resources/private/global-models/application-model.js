@@ -358,7 +358,8 @@ LUPAPISTE.ApplicationModel = function() {
       && (!self.requiredFieldsFillingObligatory()
           || !self.missingSomeInfo())
       && _.isEmpty(self.submitErrors())
-      && lupapisteApp.models.applicationAuthModel.ok( "submit-application");
+      && (lupapisteApp.models.applicationAuthModel.ok( "submit-application") ||
+          lupapisteApp.models.applicationAuthModel.ok( "submit-archiving-project"));
   });
 
   self.submitButtonFunction = ko.pureComputed(function() {
