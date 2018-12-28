@@ -875,6 +875,34 @@
                                [[:kuvaus] rakennusvalvontaasianKuvaus]))))
       buildings)))
 
+(defn anonymize-values [updates]
+  (for [[k v] updates
+        :let [keyset (set k)
+              new-val (cond
+                        (keyset :etunimi) (rand-nth (list "Pena" "Astrid" "Tiina" "Amadeus" "Jörgen" "Camilla" "Åke" "Priscilla" "Jari" "Keke" "Adolf"))
+                        (keyset :sukunimi) "Panaani"
+                        (seq (clojure.set/intersection keyset #{:katu :osoitenimi :nimi})) (format "%s %s"
+                                                                                                   (rand-nth (list "Paapankuja" "Ukintie" "Isoisänraitti" "Mummopolku"))
+                                                                                                             (rand-int 900))
+                        (keyset :hetu) "131052-308T"
+                        (seq (clojure.set/intersection keyset #{:email :sahkopostiosoite})) (rand-nth (list "pena@example.com" "taina@taikala.fi" "raimo@finlandia-hiihto.fi"))
+                        (keyset :liikeJaYhteisoTunnus) "123123980"
+                        (keyset :puhelin) "012-3456789"
+                        (keyset :yritysnimi) (rand-nth (list "Penan Panaanitarha" "Camillan Camomillafarmi" "Piippolan Piippupaja" "Studio Jytinä")))]
+        :when (and (string? v)
+                   (pos? (count v))
+                   new-val)]
+    [k new-val]))
+
+(defn anonymize-parties [document]
+  (loop [updates (->> document (model/map2updates []) anonymize-values)
+         doc document]
+    (if (empty? updates)
+      doc
+      (let [[path data] (first updates)]
+        (recur (rest updates)
+               (assoc-in doc path data))))))
+
 (defn sanitize-document-datas
   "This cleans document datas of all the key-value pairs that are not found in the
   given schema. Failure to do this results in smoke-tests breaking, plus the data

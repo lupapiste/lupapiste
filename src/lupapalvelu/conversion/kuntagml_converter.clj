@@ -21,6 +21,9 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
+(def tila
+  (atom {}))
+
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   (let [{:keys [hakijat]} app-info
         municipality "092"
@@ -97,6 +100,9 @@
 
         history-array (conv-util/generate-history-array xml)
 
+        new-parties (map app/anonymize-parties new-parties)
+        hakijat (map app/anonymize-parties hakijat)
+
         created-application (-> created-application
                                 (assoc-in [:primaryOperation :description] (first structure-descriptions))
                                 (conv-util/add-description xml) ;; Add descriptions from asianTiedot to the document.
@@ -105,11 +111,14 @@
                                 (update-in [:documents] concat other-building-docs new-parties structures ;; Assemble the documents-array
                                            (when-not (includes? kuntalupatunnus "TJO") location-document))
                                 (update-in [:secondaryOperations] concat secondary-ops)
+                                (update-in [:documents] (partial map app/anonymize-parties)) ;; FIXME: Parties are anynymized temporarily
                                 (assoc :statements given-statements
                                        :opened (:created command)
                                        :history history-array
                                        :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
                                        :facta-imported true))
+
+        _ (swap! tila assoc :app created-application)
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
