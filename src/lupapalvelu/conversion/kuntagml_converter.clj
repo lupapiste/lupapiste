@@ -21,6 +21,9 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
+(def tila
+  (atom {}))
+
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   (let [{:keys [hakijat]} app-info
         municipality "092"
@@ -65,6 +68,8 @@
                                     (when (includes? kuntalupatunnus "TJO")
                                       (map prev-permit/tyonjohtaja->tj-document (:tyonjohtajat app-info)))))
 
+        _ (swap! tila assoc :new-parties new-parties)
+
         location-document (->> xml
                                building-reader/->rakennuspaikkatieto
                                (conv-util/rakennuspaikkatieto->rakennuspaikka-kuntagml-doc kuntalupatunnus)
@@ -104,12 +109,15 @@
                                 (conv-util/add-timestamps history-array) ;; Add timestamps for different state changes
                                 (update-in [:documents] concat other-building-docs new-parties structures ;; Assemble the documents-array
                                            (when-not (includes? kuntalupatunnus "TJO") location-document))
+                                (update-in [:documents] (partial remove conv-util/is-empty-document?))
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :statements given-statements
                                        :opened (:created command)
                                        :history history-array
                                        :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
                                        :facta-imported true))
+
+        _ (swap! tila assoc :app created-application)
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]

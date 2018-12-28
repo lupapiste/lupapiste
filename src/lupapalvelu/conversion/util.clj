@@ -175,6 +175,14 @@
                        {"kaupunkikuvatoimenpide" (app/sanitize-document-datas schema data)}
                        (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
 
+(defn is-empty-document? [doc]
+  (->> doc
+       (tree-seq map? vals)
+       (keep :value)
+       (filter string?)
+       (remove (partial contains? #{"" "FIN" "henkilo"}))
+       empty?))
+
 (defn decapitalize
   "Convert the first character of the string to lowercase."
   [string]
