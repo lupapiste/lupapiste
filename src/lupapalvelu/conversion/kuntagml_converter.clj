@@ -97,9 +97,6 @@
 
         history-array (conv-util/generate-history-array xml)
 
-        new-parties (map app/anonymize-parties new-parties)
-        hakijat (map app/anonymize-parties hakijat)
-
         created-application (-> created-application
                                 (assoc-in [:primaryOperation :description] (first structure-descriptions))
                                 (conv-util/add-description xml) ;; Add descriptions from asianTiedot to the document.
@@ -108,7 +105,6 @@
                                 (update-in [:documents] concat other-building-docs new-parties structures ;; Assemble the documents-array
                                            (when-not (includes? kuntalupatunnus "TJO") location-document))
                                 (update-in [:secondaryOperations] concat secondary-ops)
-                                (update-in [:documents] (partial map app/anonymize-parties)) ;; FIXME: Parties are anynymized temporarily
                                 (assoc :statements given-statements
                                        :opened (:created command)
                                        :history history-array

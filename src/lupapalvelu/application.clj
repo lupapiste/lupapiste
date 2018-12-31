@@ -875,7 +875,7 @@
                                [[:kuvaus] rakennusvalvontaasianKuvaus]))))
       buildings)))
 
-(defn anonymize-values [updates]
+(defn- anonymize-values [updates]
   (for [[k v] updates
         :let [keyset (set k)
               new-val (cond
@@ -892,7 +892,9 @@
                    new-val)]
     [k new-val]))
 
-(defn anonymize-parties [document]
+(defn anonymize-parties
+ "Takes a document from an application and sets Pena Panaani as the party in question."
+ [document]
   (loop [updates (->> document (model/map2updates []) anonymize-values)
          doc document]
     (if (empty? updates)
@@ -900,6 +902,17 @@
       (let [[path data] (first updates)]
         (recur (rest updates)
                (assoc-in doc path data))))))
+
+(defn anonymize-application [{:keys [documents] :as app}]
+  (assoc app :documents (map anonymize-parties documents)))
+
+(defn anonymize-application-by-id!
+  "Takes an LP id and anonymizes the said application in the database.
+  Note that only the parties are anonymized while other application
+  data is left intact."
+  [id]
+  (let [app (mongo/by-id :applications id)]
+    (mongo/update-by-id :applications id (anonymize-application app))))
 
 (defn sanitize-document-datas
   "This cleans document datas of all the key-value pairs that are not found in the
