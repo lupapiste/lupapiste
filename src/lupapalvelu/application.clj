@@ -898,13 +898,14 @@
   (loop [updates (->> document (model/map2updates []) anonymize-values)
          doc document]
     (if (empty? updates)
-      (assoc doc :applicant "Pena Panaani")
+      doc
       (let [[path data] (first updates)]
         (recur (rest updates)
                (assoc-in doc path data))))))
 
 (defn anonymize-application [{:keys [documents] :as app}]
-  (assoc app :documents (map anonymize-parties documents)))
+  (assoc app :documents (map anonymize-parties documents)
+         :applicant "Pena Panaani"))
 
 (defn anonymize-application-by-id!
   "Takes an LP id and anonymizes the said application in the database.
