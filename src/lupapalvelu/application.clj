@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :refer [trace debug debugf info infof warnf error fatal]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
-            [clojure.set :refer [difference]]
+            [clojure.set :refer [intersection]]
             [clojure.walk :refer [keywordize-keys]]
             [monger.operators :refer :all]
             [schema.core :as sc]
@@ -881,9 +881,9 @@
               new-val (cond
                         (keyset :etunimi) "Pena"
                         (keyset :sukunimi) "Panaani"
-                        (seq (clojure.set/intersection keyset #{:katu :osoitenimi :nimi})) "Paapankuja 1 A 1"
+                        (seq (intersection keyset #{:katu :osoitenimi :nimi})) "Paapankuja 1 A 1"
                         (keyset :hetu) "131052-308T"
-                        (seq (clojure.set/intersection keyset #{:email :sahkopostiosoite})) "pena@example.com"
+                        (seq (intersection keyset #{:email :sahkopostiosoite})) "pena@example.com"
                         (keyset :liikeJaYhteisoTunnus) "123123980"
                         (keyset :puhelin) "012-3456789"
                         (keyset :yritysnimi) "Penan Panaanitarha")]
