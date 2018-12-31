@@ -21,9 +21,6 @@
             [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
-(def tila
-  (atom {}))
-
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   (let [{:keys [hakijat]} app-info
         municipality "092"
@@ -67,8 +64,6 @@
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))
                                     (when (includes? kuntalupatunnus "TJO")
                                       (map prev-permit/tyonjohtaja->tj-document (:tyonjohtajat app-info)))))
-
-        _ (swap! tila assoc :new-parties new-parties)
 
         location-document (->> xml
                                building-reader/->rakennuspaikkatieto
