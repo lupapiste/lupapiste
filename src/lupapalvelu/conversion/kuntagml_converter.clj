@@ -109,7 +109,6 @@
                                 (conv-util/add-timestamps history-array) ;; Add timestamps for different state changes
                                 (update-in [:documents] concat other-building-docs new-parties structures ;; Assemble the documents-array
                                            (when-not (includes? kuntalupatunnus "TJO") location-document))
-                                (update-in [:documents] (partial remove conv-util/is-empty-document?))
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :statements given-statements
                                        :opened (:created command)
@@ -156,6 +155,14 @@
             (app/do-add-link-permit created-application link)
             (catch Exception e
               (error "Adding app-link %s -> %s failed: %s" (:id created-application) link (.getMessage e))))))
+
+      (let [app (mongo/by-id :applications id)
+            cleaned-app (conv-util/remove-empty-documents app)]
+        (when (not= app cleaned-app)
+          (do
+            (mongo/update-by-id :applications id cleaned-app)
+            (infof "Cleaned %d empty documents from application" (- (count (:documents app))
+                                                                    (count (:documents cleaned-app)))))))
 
       (let [fetched-application (mongo/by-id :applications (:id created-application))]
         (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))

@@ -183,6 +183,10 @@
        (remove (partial contains? #{"" "FIN" "henkilo"}))
        empty?))
 
+(defn remove-empty-documents [{:keys [documents] :as app}]
+  (let [docs (remove is-empty-document? documents)]
+    (assoc app :documents docs)))
+
 (defn decapitalize
   "Convert the first character of the string to lowercase."
   [string]
