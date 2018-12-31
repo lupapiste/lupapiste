@@ -111,8 +111,6 @@
                                        :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
                                        :facta-imported true))
 
-        _ (swap! tila assoc :app created-application)
-
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
     (logging/with-logging-context {:applicationId (:id created-application)}
