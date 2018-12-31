@@ -898,7 +898,7 @@
   (loop [updates (->> document (model/map2updates []) anonymize-values)
          doc document]
     (if (empty? updates)
-      doc
+      (assoc doc :applicant "Pena Panaani")
       (let [[path data] (first updates)]
         (recur (rest updates)
                (assoc-in doc path data))))))
@@ -911,8 +911,10 @@
   Note that only the parties are anonymized while other application
   data is left intact."
   [id]
-  (let [app (mongo/by-id :applications id)]
-    (mongo/update-by-id :applications id (anonymize-application app))))
+  (let [updated-app (->> id (mongo/by-id :applications) anonymize-application)
+        applicant-index (meta-fields/applicant-index updated-app)]
+    (mongo/update-by-id :applications id {$set (merge applicant-index
+                                                {:documents (:documents updated-app)})})))
 
 (defn sanitize-document-datas
   "This cleans document datas of all the key-value pairs that are not found in the
