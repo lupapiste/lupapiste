@@ -879,16 +879,14 @@
   (for [[k v] updates
         :let [keyset (set k)
               new-val (cond
-                        (keyset :etunimi) (rand-nth (list "Pena" "Astrid" "Tiina" "Amadeus" "Jörgen" "Camilla" "Åke" "Priscilla" "Jari" "Keke" "Adolf"))
+                        (keyset :etunimi) "Pena"
                         (keyset :sukunimi) "Panaani"
-                        (seq (clojure.set/intersection keyset #{:katu :osoitenimi :nimi})) (format "%s %s"
-                                                                                                   (rand-nth (list "Paapankuja" "Ukintie" "Isoisänraitti" "Mummopolku"))
-                                                                                                             (rand-int 900))
+                        (seq (clojure.set/intersection keyset #{:katu :osoitenimi :nimi})) "Paapankuja 1 A 1"
                         (keyset :hetu) "131052-308T"
-                        (seq (clojure.set/intersection keyset #{:email :sahkopostiosoite})) (rand-nth (list "pena@example.com" "taina@taikala.fi" "raimo@finlandia-hiihto.fi"))
+                        (seq (clojure.set/intersection keyset #{:email :sahkopostiosoite})) "pena@example.com"
                         (keyset :liikeJaYhteisoTunnus) "123123980"
                         (keyset :puhelin) "012-3456789"
-                        (keyset :yritysnimi) (rand-nth (list "Penan Panaanitarha" "Camillan Camomillafarmi" "Piippolan Piippupaja" "Studio Jytinä")))]
+                        (keyset :yritysnimi) "Penan Panaanitarha")]
         :when (and (string? v)
                    (pos? (count v))
                    new-val)]
