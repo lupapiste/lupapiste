@@ -47,6 +47,13 @@
                   (reset! state/price-catalogue (:price-catalogue data)))
                 :id app-id))
 
+(defn delete-invoice [app-id invoice-id]
+  (common/command :delete-invoice
+                  (fn [response]
+                    (fetch-invoices app-id))
+                  :id app-id
+                  :invoice-id invoice-id))
+
 (defn upsert-invoice! [app-id invoice-data callback]
   (if (:is-new invoice-data)
     (insert-invoice app-id {:operations (:operations invoice-data)} (fn [response]

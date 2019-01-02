@@ -125,12 +125,12 @@
       (no-invoices))
 
     (fact "Invoice is created"
-      (inv/new-verdict-invoice (cmd friday tuesday-app) nil)
+      (inv/new-verdict-invoice (cmd tuesday tuesday-app) nil)
       => nil
       (provided (inv/invoicing-enabled anything) => nil)
       (find-invoice tuesday-app)
       => (just {:application-id  "tuesday"
-                :created         friday
+                :created         tuesday
                 :created-by      {:firstName "Verdict"
                                   :id        "user"
                                   :lastName  "Giver"
@@ -139,18 +139,21 @@
                 :id              not-empty
                 :operations      [{:invoice-rows [{:discount-percent 0
                                                    :price-per-unit   1
+                                                   :code             "Item-0"
                                                    :text             "Item pientalo 0"
                                                    :type             "from-price-catalogue"
                                                    :unit             "kpl"
                                                    :units            0}
                                                   {:discount-percent 10
                                                    :price-per-unit   2
+                                                   :code             "Item-1"
                                                    :text             "Item pientalo purkaminen 1"
                                                    :type             "from-price-catalogue"
                                                    :unit             "kpl"
                                                    :units            0}
                                                   {:discount-percent 20
                                                    :price-per-unit   3
+                                                   :code             "Item-2"
                                                    :text             "Item kerrostalo-rivitalo pientalo 2"
                                                    :type             "from-price-catalogue"
                                                    :unit             "kpl"
@@ -186,18 +189,21 @@
                 :id              ss/not-blank?
                 :operations      [{:invoice-rows [{:discount-percent 0
                                                    :price-per-unit   1
+                                                   :code             "New-0"
                                                    :text             "New pientalo 0"
                                                    :type             "from-price-catalogue"
                                                    :unit             "kpl"
                                                    :units            0}
                                                   {:discount-percent 10
                                                    :price-per-unit   2
+                                                   :code             "New-1"
                                                    :text             "New pientalo purkaminen 1"
                                                    :type             "from-price-catalogue"
                                                    :unit             "kpl"
                                                    :units            0}
                                                   {:discount-percent 20
                                                    :price-per-unit   3
+                                                   :code             "New-2"
                                                    :text             "New kerrostalo-rivitalo pientalo 2"
                                                    :type             "from-price-catalogue"
                                                    :unit             "kpl"
@@ -206,12 +212,14 @@
                                    :operation-id (operation-id thursday-app "pientalo")}
                                   {:invoice-rows [{:discount-percent 10
                                                    :price-per-unit   2
+                                                   :code             "New-1"
                                                    :text             "New pientalo purkaminen 1"
                                                    :type             "from-price-catalogue"
                                                    :unit             "kpl"
                                                    :units            0}
                                                   {:discount-percent 30
                                                    :price-per-unit   4
+                                                   :code             "New-3"
                                                    :text             "New purkaminen 3"
                                                    :type             "from-price-catalogue"
                                                    :unit             "kpl"
@@ -249,6 +257,7 @@
                     :id              ss/not-blank?
                     :operations      [{:invoice-rows [{:discount-percent 20
                                                        :price-per-unit   3
+                                                       :code             "New-2"
                                                        :text             "New kerrostalo-rivitalo pientalo 2"
                                                        :type             "from-price-catalogue"
                                                        :unit             "kpl"

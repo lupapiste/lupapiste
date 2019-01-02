@@ -236,10 +236,10 @@
                                                            :encoding  (sc/eq "UTF-8")
                                                            :content   AttachmentMetadata}
                                                           (update (first multipart) :content json/decode true))
-                                 file-error (sc/check {:name      (sc/eq "file")
-                                                       :mime-type sc/Str
-                                                       :content   InputStream}
-                                                      (second multipart))]
+                                 file-error     (sc/check {:name      (sc/eq "file")
+                                                           :mime-type sc/Str
+                                                           :content   InputStream}
+                                                          (second multipart))]
                              (if-let [validation-error (or metadata-error file-error)]
                                {:status 400, :body validation-error}
                                (if (contains? (:applications @allu-state) id)
@@ -313,6 +313,17 @@
                                    :headers {"Content-Type" "application/pdf"}}
                                   {:status 400, :body "Not signed"})
                                 {:status 403, :body (str id " is not pendingOnClient")})
+                              {:status 404, :body (str "Not Found: " id)})
+                            {:status 401, :body "Unauthorized"}))}}]
+       ["/metadata"
+        {:get {:handler (fn [{{:keys [id]} :path-params :keys [headers]}]
+                          (if (= (get headers "authorization") (str "Bearer " mock-jwt))
+                            (if (contains? (:applications @allu-state) id)
+                              (if-not (get-in @allu-state [:applications id :pendingOnClient])
+                                {:status  200, :body (json/encode {:handler {:name  "Hannu Helsinki"
+                                                                             :title "Director"}}),
+                                 :headers {"Content-Type" "application/json"}}
+                                {:status 403, :body (str id " is pendingOnClient")})
                               {:status 404, :body (str "Not Found: " id)})
                             {:status 401, :body "Unauthorized"}))}}]]]]]])
 
@@ -424,7 +435,7 @@
                                                                                :proposal? false
                                                                                :title "Sopimus"
                                                                                :signatures (just [(contains {:name "Pena Panaani"})
-                                                                                                  (contains {:name "Hannu Helsinki"})])})
+                                                                                                  (contains {:name "Director Hannu Helsinki"})])})
                                                                     (contains {:category "allu-contract"
                                                                                :giver "Hannu Helsinki"
                                                                                :legacy? true

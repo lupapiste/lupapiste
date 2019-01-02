@@ -22,28 +22,6 @@
             [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
-  ;;
-  ;; Data to be deduced from xml:
-  ;;   - building-site
-  ;;   - operations and their respective document schemas
-  ;;     - Some can be deduced from XML: uusi/laajennos/uudelleenrakentaminen/purkaminen/muuMuutosTyo/kaupunkikuvatoimenpide
-  ;;     - Some types need to be selected by the permit-id type (TJO,VAK..)
-  ;;     - which is primary?
-  ;;   - buildings and structures
-  ;;   - parties
-  ;;      - hakijat, maksajat, asiamiehet, tyonjohtajat (vain TJO), suunnittelijat
-  ;;   X statements
-  ;;   X verdicts
-  ;;   X reviews
-  ;;   X app-links to :app-links collection (viitelupatieto)
-  ;;   X :history array for the application (kasittelynTilatieto / tilamuutos) (get-sorted-tilamuutos-entries)
-  ;;
-  ;;  Other things to note:
-  ;;    X linked permitIDs might be in funny order, check that it's normalised (`lupapalvelu.conversion.util/normalize-permit-id')
-  ;;    X we need to generate LP id for conversion cases (do not use do-create-application)
-  ;;
-  ;;    - Types that need special handling: VAK (not own thing, but adds data to linked application)
-  ;;
   (let [{:keys [hakijat]} app-info
         municipality "092"
         buildings-and-structures (building-reader/->buildings-and-structures xml)
@@ -51,23 +29,6 @@
         command (update-in command [:data] merge
                            {:operation operation :infoRequest false :messages []}
                            location-info)
-        ;; TODO: should we check scope, that new-applications-enabled is true?
-        ;; TODO: dig out operations from app-info:
-        ;     check `(get app-info :toimenpiteet)`
-        ;     , the count of :toimenpiteet denotes how many operations we need to create for application.
-        ;     There needs to be always atleast one operation (primaryOperation). So what if XML doesn't have
-        ;     any :Toimenpide elements, should we create a 'conversion' operation as primaryOperation, and define
-        ;     some basic document schema for that 'conversion' operation.
-        ;
-        ;     But anyways, we have :toimenpiteet which has raw :Toimenpide element datas from XML.
-        ;     Then we should check what is the root element for each of the operations.
-        ;     For example if it's '<uusi>' (or ofc :uusi key), then we need to create "new building" kind of operation.
-        ;     That operation needs to have sufficient document schema for new buildings (ie current 'uusiRakennus' schema).
-        ;     If the root element is :laajentaminen, then we need to select appropriate operation (and thus document schema).
-        ;
-        ;     After we have identified how many operations, and what kind of operations we need to create to application,
-        ;     we can create those operations to primaryOperation/secondaryOperations AND create their document data using
-        ;     `lupapalvelu.application/make-document` for example. And then save to db :)
 
         operations (:toimenpiteet app-info)
         kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
@@ -78,7 +39,9 @@
                           (conv-util/deduce-operation-type kuntalupatunnus description (first operations))
                           (conv-util/deduce-operation-type kuntalupatunnus description))
 
-        manual-schema-datas {(name (conv-util/op-name->schema-name primary-op-name)) (first document-datas)}
+        schema-name (-> primary-op-name conv-util/op-name->schema-name name)
+
+        manual-schema-datas {schema-name (app/sanitize-document-datas (schemas/get-schema 1 schema-name) (first document-datas))}
 
         secondary-op-names (map (partial conv-util/deduce-operation-type kuntalupatunnus description) (rest operations))
 
@@ -96,8 +59,6 @@
                                                   (:created command)
                                                   manual-schema-datas)
 
-        created-application (conv-util/remove-empty-rakennuspaikka created-application)
-
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))
@@ -111,11 +72,6 @@
 
         structure-descriptions (map :description buildings-and-structures)
 
-        created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
-
-        ;; Add descriptions from asianTiedot to the document.
-        created-application (conv-util/add-description created-application xml)
-
         other-building-docs (map (partial app/document-data->op-document created-application) (rest document-datas) secondary-op-names)
 
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2 :name %3) other-building-docs (rest structure-descriptions) secondary-op-names)
@@ -125,8 +81,6 @@
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
 
         state-changes (krysp-reader/get-sorted-tilamuutos-entries xml)
-
-        history-array (conv-util/generate-history-array xml)
 
         ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
         given-statements (for [st statements
@@ -141,8 +95,14 @@
                              (catch Exception e
                                (errorf "Moving statement to statement given -state failed: %s" (.getMessage e)))))
 
+        history-array (conv-util/generate-history-array xml)
+
         created-application (-> created-application
-                                (update-in [:documents] concat other-building-docs new-parties structures
+                                (assoc-in [:primaryOperation :description] (first structure-descriptions))
+                                (conv-util/add-description xml) ;; Add descriptions from asianTiedot to the document.
+                                conv-util/remove-empty-rakennuspaikka ;; Remove empty rakennuspaikka-document that comes from the template
+                                (conv-util/add-timestamps history-array) ;; Add timestamps for different state changes
+                                (update-in [:documents] concat other-building-docs new-parties structures ;; Assemble the documents-array
                                            (when-not (includes? kuntalupatunnus "TJO") location-document))
                                 (update-in [:secondaryOperations] concat secondary-ops)
                                 (assoc :statements given-statements

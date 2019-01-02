@@ -204,6 +204,22 @@
      :uri            (:path route-match)
      :request-method (route-match->request-method route-match)}))
 
+(defn- allu-application-data [{:keys [application] :as command}]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)
+        params {:path {:id allu-id}}
+        route-match (reitit/match-by-name allu-router [:application :data] (:path params))]
+    {:command        (minimize-command command)
+     :uri            (:path route-match)
+     :request-method (route-match->request-method route-match)}))
+
+(defn- contract-metadata [{:keys [application] :as command}]
+  (let [allu-id (-> application :integrationKeys :ALLU :id)
+        params {:path {:id allu-id}}
+        route-match (reitit/match-by-name allu-router [:placementcontracts :contract :metadata] (:path params))]
+    {::command       (minimize-command command)
+     :uri            (:path route-match)
+     :request-method (route-match->request-method route-match)}))
+
 ;;;; IntegrationMessage construction
 ;;;; ===================================================================================================================
 
@@ -280,28 +296,28 @@
     (if (and (not @mock-logged-in?) (not= (-> route-match :data :name) [:login]))
       {:status 401 :body "Unauthorized"}
       (match (-> route-match :data :name)
-        [:login] (let [{:keys [username password]} (json/decode (:body request) true)]
+             [:login] (let [{:keys [username password]} (json/decode (:body request) true)]
                    (if (and (= username (env/value :allu :username))
                             (= password (env/value :allu :password)))
                      (do (reset! mock-logged-in? true)
                          {:status 200, :body (json/encode password)})
                      {:status 404, :body "Wrong username and/or password"}))
 
-        [:applications :cancel] (let [id (-> route-match :path-params :id)]
+             [:applications :cancel] (let [id (-> route-match :path-params :id)]
                                   (if (response-ok? id "placementcontracts.create")
                                     {:status 200, :body ""}
                                     {:status 404, :body (str "Not Found: " id)}))
 
-        [:placementcontracts :create] (let [body (json/decode (:body request) true)]
-                                        (if-let [validation-error (sc/check PlacementContract body)]
-                                          {:status 400, :body validation-error}
-                                          {:status 200
-                                           :body   (.replace (subs (:identificationNumber body) 3) "-" "")}))
+             [:placementcontracts :create] (let [body (json/decode (:body request) true)]
+                                             (if-let [validation-error (sc/check PlacementContract body)]
+                                               {:status 400, :body validation-error}
+                                               {:status 200
+                                                :body   (.replace (subs (:identificationNumber body) 3) "-" "")}))
 
-        [:placementcontracts :update] (let [id (-> route-match :path-params :id)
-                                            body (json/decode (:body request) true)]
-                                        (if-let [validation-error (sc/check PlacementContract body)]
-                                          {:status 400, :body validation-error}
+             [:placementcontracts :update] (let [id   (-> route-match :path-params :id)
+                                                 body (json/decode (:body request) true)]
+                                             (if-let [validation-error (sc/check PlacementContract body)]
+                                               {:status 400, :body validation-error}
                                           (if (response-ok? id "placementcontracts.create")
                                             {:status 200, :body id}
                                             {:status 404, :body (str "Not Found: " id)})))
@@ -309,15 +325,23 @@
         [:placementcontracts :contract :proposal]
         (let [id (-> route-match :path-params :id)]
           (if (response-ok? id "placementcontracts.create")
-            {:status 200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
+            {:status  200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
              :headers {"Content-Type" "application/pdf"}}
             {:status 404, :body (str "Not Found: " id)}))
 
         [:placementcontracts :contract :final]
         (let [id (-> route-match :path-params :id)]
           (if (response-ok? id "placementcontracts.contract.approved")
-            {:status 200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
+            {:status  200, :body (file->byte-array "dev-resources/test-pdf.pdf"),
              :headers {"Content-Type" "application/pdf"}}
+            {:status 404, :body (str "Not Found: " id)}))
+
+        [:placementcontracts :contract :metadata]
+        (let [id (-> route-match :path-params :id)]
+          (if (response-ok? id "placementcontracts.contract.approved")
+            {:status  200, :body (json/encode {:handler {:name  "Hannu Helsinki"
+                                                         :title "Director"}}),
+             :headers {"Content-Type" "application/json"}}
             {:status 404, :body (str "Not Found: " id)}))
 
         [:placementcontracts :contract :approved] (let [id (-> route-match :path-params :id)]
@@ -390,6 +414,11 @@
                                                              part
                                                              (update part :content json/encode)))))
     :else request))
+
+(defn json-response [handler]
+  (fn [request]
+    (-> (handler request)
+        (update :body json/decode true))))
 
 (declare allu-fail!)
 
@@ -478,6 +507,15 @@
                                                              response)
       response response)))
 
+(defn- set-allu-application-data!
+  "If request was successful, store ALLU details about the application to db"
+  [handler]
+  (fn [{{{app-id :id} :application} ::command :as request}]
+    (match (handler request)
+      ({:status (:or 200 201), :body body} :as response) (do (application/set-allu-application-id app-id (:applicationId body))
+                                                             response)
+      response response)))
+
 (defn- log-or-fail!
   "`allu-fail!` on HTTP errors, else do logging."
   [handler]
@@ -532,7 +570,6 @@
                              :middleware file-middleware
                              :post {:handler handler}}]]
 
-
        ["placementcontracts"
         ["" {:name [:placementcontracts :create]
              :parameters {:body PlacementContract}
@@ -556,7 +593,10 @@
 
           ["/final" {:name [:placementcontracts :contract :final]
                      :middleware file-middleware
-                     :get {:handler handler}}]]]]
+                     :get {:handler handler}}]
+          ["/metadata" {:name [:placementcontracts :contract :metadata]
+                        :middleware [json-response]
+                        :get {:handler handler}}]]]]
        ["fixedlocations" {:name [:fixedlocations]
                           :parameters {:query {:applicationKind NonBlankStr}}
                           :get {:handler handler}}]]])))
@@ -699,11 +739,19 @@
                                    :final (final-contract-request command))))
     (catch [:text "error.allu.http"] _ nil)))
 
+(defn load-allu-application-data!
+  "GET application data from ALLU."
+  [command]
+  (let [resp (send-allu-request! (allu-application-data command))]
+    resp))
 
-(defn json-response [handler]
-  (fn [request]
-    (-> (handler request)
-        (update :body json/decode true))))
+(defn load-contract-metadata!
+  "GET the name of the person who signed the ALLU verdict."
+  [command]
+  (try+
+    (:body (allu-request-handler (contract-metadata command)))
+    (catch [:text "error.allu.http"] _ nil)))
+
 
 (def FIXED-LOCATION-TYPES {:promotion "PROMOTION"})
 

@@ -180,6 +180,7 @@
                           :proposal-pdf
                           ;; Invoices
                           :application-invoices
+                          :delete-invoice
                           :insert-invoice
                           :invoices-tab
                           :application-operations

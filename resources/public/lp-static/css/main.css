@@ -39229,6 +39229,10 @@ button.invoice-change-state-button {
   }
 }
 
+.invoice-accordion:last-child {
+  page-break-after: avoid;
+}
+
 @media print {
   .invoice-accordion > .rollup-accordion-content {
     display: block !important;

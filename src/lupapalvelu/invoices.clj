@@ -31,6 +31,16 @@
                                      infof warn warnf error errorf
                                      fatal fatalf]]))
 
+(defn application-id-match-invoice-application-id
+  "Pre-checker for making sure that we request correct invoice for application"
+  [{:keys [application data]}]
+  (let [id (:id application)
+        invoice-id (or  (:invoice-id data) (:id (:invoice data)))
+        invoice (mongo/by-id "invoices" invoice-id)
+        match (= id (:application-id invoice))]
+    (when (not match)
+      (fail :error.application-not-accessible))))
+
 (defn invoicing-enabled
   "Pre-checker that fails if invoicing is not enabled in the application organization scope."
   [{:keys [organization application]}]
@@ -106,6 +116,12 @@
          validate-invoice
          (mongo/insert :invoices))
     id))
+
+(defn delete-invoice!
+  [invoice-id]
+  (let [current-invoice (mongo/by-id "invoices" invoice-id)]
+    (when (= "draft" (:state current-invoice))
+      (mongo/remove "invoices" invoice-id))))
 
 (def keys-used-to-update-invoice
   [:operations
@@ -186,7 +202,7 @@
   ;; Pre-checker is nil on success.
   (when-not (invoicing-enabled command)
     (let [org-id          (:organization application)
-          {submitted :ts} (util/find-by-key :state
+          submitted       (util/find-by-key :state
                                             "submitted"
                                             (:history application))
           ops             (get-operations-from-application application)
@@ -195,8 +211,8 @@
                               (some->> (mongo/select-one :price-catalogues
                                                          {:organization-id org-id
                                                           :state           :published
-                                                          :valid-from      {$lt submitted}
-                                                          :valid-until     {$not {$lt submitted}}}
+                                                          :valid-from      {$lt created}
+                                                          :valid-until     {$not {$lt created}}}
                                                          {:rows 1})
                                        :rows
                                        (filter (util/fn->> :operations
@@ -217,7 +233,7 @@
                                                                                  (util/includes-as-kw?
                                                                                   (:name op))))
                                                               (map #(assoc (select-keys %
-                                                                                        [:text :unit :price-per-unit
+                                                                                        [:code :text :unit :price-per-unit
                                                                                          :discount-percent])
                                                                            :type "from-price-catalogue"
                                                                            :units 0)))})

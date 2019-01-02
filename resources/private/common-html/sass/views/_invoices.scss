@@ -37,6 +37,10 @@ button.invoice-change-state-button {
         page-break-after: always;
     }
 
+    &:last-child {
+        page-break-after: avoid;
+    }
+
     > .rollup-accordion-content {
         @media print {
             display: block !important;

@@ -122,7 +122,7 @@
         update-int-field!   (field-setter {:convert-fn ->int   :save-in-backend-fn save-in-backend! :save-locally-fn save-only-locally! :can-be-saved-in-backend? num?})
         update-float-field! (field-setter {:convert-fn ->float :save-in-backend-fn save-in-backend! :save-locally-fn save-only-locally! :can-be-saved-in-backend? num?})]
     [:tr
-     [:td text]
+     [:td (inv-util/row-title invoice-row)]
      [:td (autosaving-input  units (fn [value] (update-float-field! :units value units)))]
      [:td unit]
      [:td price-per-unit]
@@ -130,36 +130,13 @@
      [:td discounted-price]
      (invoice-row-remove-cell invoice operation-index invoice-row-index)]))
 
-(rum/defc invoice-table-row
-  < {:key-fn (fn [invoice-row invoice-row-index operation-index invoice]
-               (str operation-index "-" invoice-row-index))}
-  [invoice-row invoice-row-index operation-index invoice]
-  (let [discounted-price (discounted-price-from-invoice-row invoice-row)]
-    [:tr
-     [:td (:text invoice-row)]
-     [:td (autosaving-input (:units invoice-row) (fn [value_]
-                                                   (let [value (js/parseInt value_)]
-                                                     (reset! invoice (assoc-in @invoice [:operations operation-index :invoice-rows invoice-row-index :units] value))
-                                                     (service/upsert-invoice! @state/application-id @invoice #()))))]
-     [:td (str (:unit invoice-row))]
-     [:td (:price-per-unit invoice-row)]
-     [:td (autosaving-input (:discount-percent invoice-row) (fn [value_]
-                                                              (let [value (js/parseInt value_)]
-                                                                (reset! invoice
-                                                                        (assoc-in @invoice
-                                                                                  [:operations operation-index :invoice-rows invoice-row-index :discount-percent]
-                                                                                  value))
-                                                                (service/upsert-invoice! @state/application-id @invoice #()))))]
-     [:td discounted-price]]))
-
 (rum/defc invoice-table-row-static
   < {:key-fn (fn [invoice-row invoice-row-index operations-row-index]
                (str operations-row-index "-" invoice-row-index))}
   [invoice-row invoice-row-index operations-row-index]
-
   (let [discounted-price (discounted-price-from-invoice-row invoice-row)]
     [:tr
-     [:td (:text invoice-row)]
+     [:td (inv-util/row-title invoice-row)]
      [:td (:units invoice-row)]
      [:td (str (:unit invoice-row))]
      [:td (:price-per-unit invoice-row)]
@@ -170,7 +147,7 @@
   [:tr {:style {:border-style "dashed" :border-width "1px" :border-color "#dddddd"}}
    [:td {:col-span 7}
     (autocomplete ""
-                  {:items items ;;[{:text (common/loc :invoices.rows.customrow) :value :freerow}]
+                  {:items items
                    :callback on-change})]])
 
 (defmulti create-invoice-row-element (fn [row index operation-index invoice]
@@ -202,9 +179,9 @@
         invoice-state (keyword (:state @invoice))
         catalogue (rum/react state/price-catalogue)
         catalogue-rows (inv-util/indexed-rows catalogue)
-        freerow {:text (common/loc :invoices.rows.customrow) :value :freerow}
+        freerow {:text (inv-util/row-title {:text (common/loc :invoices.rows.customrow)}) :value :freerow}
         items (->> catalogue-rows
-                   (map (fn [{:keys [index text]}] {:value index :text text}))
+                   (map (fn [{:keys [index] :as invoice-row}] {:value index :text (inv-util/row-title invoice-row)}))
                    (concat [freerow]))
         on-select (fn [value]
                     (let [row-from-catalogue (inv-util/->invoice-row (inv-util/find-map catalogue-rows :index value))
@@ -302,6 +279,14 @@
                                                                     (fn [response]
                                                                       (service/fetch-invoices app-id)))))))} state-text])))
 
+(rum/defc delete-invoice-button [invoice-id]
+  (let [app-id (js/pageutil.hashApplicationId)]
+    [:button {:class (str "delete-invoice-button secondary")
+              :on-click (fn [e] (common/show-dialog {:callback (fn [] (service/delete-invoice app-id invoice-id))
+                                                     :type :yes-no}))}
+     (common/loc :remove)]))
+
+
 (rum/defc invoice-summary-row < rum/reactive [invoice-atom]
   (let [operations (:operations @invoice-atom)
         invoice-rows-all (mapcat :invoice-rows operations)
@@ -310,15 +295,19 @@
     [:div {:style {:text-align "right"}}
      [:div {:style {:display "inline-block"}}
       [:div
-       [:div {:style {:text-align "left" :display "inline" :padding "5em"}} (common/loc :invoices.wo-taxes)]
+       [:div {:style {:text-align "left" :display "inline" :padding-right "5em"}} (common/loc :invoices.wo-taxes)]
        [:div {:style {:text-align "right" :display "inline"}} (:sum-zero-vat sums)]]]
 
      [:div
-       [:div {:style {:text-align "left" :display "inline" :padding "5em"}} (common/loc :invoices.rows.total)]
+       [:div {:style {:text-align "left" :display "inline" :padding-right "5em"}} (common/loc :invoices.rows.total)]
        [:div {:style {:text-align "right" :display "inline"}} (:sum-total sums)]]
-     [:div {:style {:display "inline-block"}}
+     (if (and (= "draft" (:state @invoice-atom)) (not (:is-new @invoice-atom)))
+       [:div {:style {:display "inline-block" :float "left"}}
+        (delete-invoice-button (:id @invoice-atom))])
+     [:div {:style {:display "inline-block" :float "right"}}
       (change-next-state-button invoice-atom)
-      (change-previous-state-button invoice-atom)]]))
+      (change-previous-state-button invoice-atom)]
+     [:div {:class "clear"}]]))
 
 (rum/defc invoice-data < rum/reactive
   [invoice]

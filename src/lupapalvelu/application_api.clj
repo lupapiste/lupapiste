@@ -352,7 +352,8 @@
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)
                       (notify :organization-housing-office)]
-   :pre-checks       [(partial sm/validate-state-transition :submitted)]}
+   :pre-checks       [permit/is-not-archiving-project
+                      (partial sm/validate-state-transition :submitted)]}
   [{:keys [application] :as command}]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
