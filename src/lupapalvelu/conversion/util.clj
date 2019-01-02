@@ -368,7 +368,7 @@
                (re-find #"kaatami|kaatoa" description) "puun-kaataminen"
                (re-find #"valmistele" description) "muu-tontti-tai-kort-muutos"
                (re-find #"kaivam|kaivu" description) "kaivuu"
-               (re-find #"pysäk|liittym" description) "tontin-jarjestelymuutos"
+               (re-find #"pys√§k|liittym" description) "tontin-jarjestelymuutos"
                :else "muu-maisema-toimenpide")
        "konversio"))) ;; A minimal generic operation for this purpose.
                       ;; If a an application does not contain 'toimenpide'-element and is not P(I) or TJO, 'konversio it is'.
@@ -378,7 +378,8 @@
         rakennustieto (get-in toimenpide [:rakennustieto :Rakennus :rakennuksenTiedot])
         {:keys [kayttotarkoitus rakennustunnus]} rakennustieto
         rakennuksen-selite (:rakennuksenSelite rakennustunnus)
-        muuttaminen? (= "D" suffix)
+        muuttaminen? (or (= "D" suffix)
+                         (= \L (last suffix)))
         laajentaminen? (or (contains? toimenpide :laajentaminen)
                            (= rakennuksen-selite "Laajennus")
                            (= "B" suffix))
@@ -405,7 +406,7 @@
       (and laajentaminen?
            (or (re-find #"rivital|kerrostal" kayttotarkoitus)
                (#{"Kerrostalo" "Rivitalo"} rakennuksen-selite))) "kerrostalo-rt-laaj"
-      (and muuttaminen? (re-find #"ulko" description)) "julkisivu-muutos"
+      (and muuttaminen? (re-find #"(?i)ulko|julkisivu" description)) "julkisivu-muutos"
       (and muuttaminen? (re-find #"huoneeksi|asuin" description)) "sisatila-muutos"
       (->> suffix last (= \J)) "jatkoaika"
       :else "konversio"))))
