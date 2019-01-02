@@ -809,7 +809,54 @@
                                                              :ulkomainenPostitoimipaikka "Tuonela"
                                                              :valtioKansainvalinen "CHN"
                                                              :valtioSuomeksi "Kiina"}}}}]
-       ;; :foremen []
+       :foremen [{:VRKrooliKoodi "työnjohtaja"
+                  :alkamisPvm "2014-02-13"
+                  :henkilo {:henkilotunnus "210281-9988"
+                            :nimi {:etunimi "Pena" :sukunimi "Penttilä"}
+                            :osoite {:osoitenimi {:teksti "katu"}
+                                     :postinumero "33800"
+                                     :postitoimipaikannimi "Tuonela"
+                                     :ulkomainenLahiosoite "katu"
+                                     :ulkomainenPostitoimipaikka "Tuonela"
+                                     :valtioKansainvalinen "CHN"
+                                     :valtioSuomeksi "Kiina"}
+                            :puhelin "+358401234567"
+                            :sahkopostiosoite "pena@example.com"}
+                  :kokemusvuodet "3"
+                  :koulutus "muu"
+                  :paattymisPvm "2014-02-20"
+                  :patevyysvaatimusluokka "A"
+                  :sijaistettavaHlo "Jaska Jokunen"
+                  :sijaistukset [{:alkamisPvm "2014-02-13"
+                                  :paattymisPvm "2014-02-20"
+                                  :sijaistettavaHlo "Jaska Jokunen"
+                                  :sijaistettavaRooli "KVV-työnjohtaja"}]
+                  :tyonjohtajaHakemusKytkin true
+                  :tyonjohtajaRooliKoodi "KVV-työnjohtaja"
+                  :vaadittuPatevyysluokka "A"
+                  :valmistumisvuosi "2010"
+                  :valvottavienKohteidenMaara "9"
+                  :vastattavatTyot ["Kiinteistön vesi- ja viemärilaitteiston rakentaminen"
+                                    "Kiinteistön ilmanvaihtolaitteiston rakentaminen"
+                                    "Maanrakennustyö"
+                                    "Rakennelma tai laitos"
+                                    "Muu tyotehtava"]
+                  :yritys {:liikeJaYhteisotunnus "1060155-5"
+                           :nimi "Solita Oy"
+                           :postiosoite {:osoitenimi {:teksti "katu"}
+                                         :postinumero "33800"
+                                         :postitoimipaikannimi "Tuonela"
+                                         :ulkomainenLahiosoite "katu"
+                                         :ulkomainenPostitoimipaikka "Tuonela"
+                                         :valtioKansainvalinen "CHN"
+                                         :valtioSuomeksi "Kiina"}
+                           :postiosoitetieto {:postiosoite {:osoitenimi {:teksti "katu"}
+                                                            :postinumero "33800"
+                                                            :postitoimipaikannimi "Tuonela"
+                                                            :ulkomainenLahiosoite "katu"
+                                                            :ulkomainenPostitoimipaikka "Tuonela"
+                                                            :valtioKansainvalinen "CHN"
+                                                            :valtioSuomeksi "Kiina"}}}}]
        :reviews [{:type "ei tiedossa"
                   :reviewer "Reijo Revyy"
                   :date "2012-12-03"
