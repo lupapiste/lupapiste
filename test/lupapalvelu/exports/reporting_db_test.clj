@@ -188,7 +188,7 @@
                                                       :sahkopostiosoite "yritys@example.com"
                                                       :vainsahkoinenAsiointiKytkin false}}]
                                 :rakentajatyyppi "muu"
-                                :tiedot {:asuinhuoneistot {:huoneisto '({:huoneistoala "56"
+                                :tiedot {:asuinhuoneistot {:huoneisto [{:huoneistoala "56"
                                                                          :huoneistonTyyppi "asuinhuoneisto"
                                                                          :huoneistotunnus {:huoneistonumero "001"
                                                                                            :jakokirjain "a"
@@ -213,7 +213,7 @@
                                                                                      :ammeTaiSuihkuKytkin true
                                                                                      :lamminvesiKytkin true
                                                                                      :parvekeTaiTerassiKytkin false
-                                                                                     :saunaKytkin true}})}
+                                                                                     :saunaKytkin true}}]}
                                          :energialuokka "C"
                                          :energiatehokkuusluku "124"
                                          :energiatehokkuusluvunYksikko "kWh/m2"
@@ -304,7 +304,7 @@
                                                       :sahkopostiosoite "yritys@example.com"
                                                       :vainsahkoinenAsiointiKytkin false}}]
                                 :rakentajatyyppi "muu"
-                                :tiedot {:asuinhuoneistot {:huoneisto '({:huoneistoala "56"
+                                :tiedot {:asuinhuoneistot {:huoneisto [{:huoneistoala "56"
                                                                          :huoneistonTyyppi "asuinhuoneisto"
                                                                          :huoneistotunnus {:huoneistonumero "001"
                                                                                            :jakokirjain "a"
@@ -329,7 +329,7 @@
                                                                                      :ammeTaiSuihkuKytkin true
                                                                                      :lamminvesiKytkin true
                                                                                      :parvekeTaiTerassiKytkin false
-                                                                                     :saunaKytkin true}})}
+                                                                                     :saunaKytkin true}}]}
                                          :energialuokka "C"
                                          :energiatehokkuusluku "124"
                                          :energiatehokkuusluvunYksikko "kWh/m2"
@@ -419,7 +419,7 @@
                                                       :sahkopostiosoite "yritys@example.com"
                                                       :vainsahkoinenAsiointiKytkin false}}]
                                 :rakentajatyyppi "muu"
-                                :tiedot {:asuinhuoneistot {:huoneisto '({:huoneistoala "56"
+                                :tiedot {:asuinhuoneistot {:huoneisto [{:huoneistoala "56"
                                                                          :huoneistonTyyppi "asuinhuoneisto"
                                                                          :huoneistotunnus {:huoneistonumero "001"
                                                                                            :jakokirjain "a"
@@ -444,7 +444,7 @@
                                                                                      :ammeTaiSuihkuKytkin true
                                                                                      :lamminvesiKytkin true
                                                                                      :parvekeTaiTerassiKytkin false
-                                                                                     :saunaKytkin true}})}
+                                                                                     :saunaKytkin true}}]}
                                          :energialuokka "C"
                                          :energiatehokkuusluku "124"
                                          :energiatehokkuusluvunYksikko "kWh/m2"

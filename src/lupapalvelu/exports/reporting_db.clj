@@ -17,11 +17,7 @@
 (def reporting-app-skeleton
   {;; Hakemus
    :id (ds/access :id)
-   ;; Factassa asian pääavain, tulee itse asiassa päätöksien tietoihin
-   ;; :lupanumero (ds/access :test) ;; TODO: Mistä? Kuntalupatunnus? Selite: Löytyy koko numero samasata kentästä: Luvan numero - Luvan vuosi - kaupunginosa - lupatyyppi
-   ;; :luvanNumero (ds/access :test) ;; Oletus: lupanumerosta
-   ;; :luvanVuosi (ds/access :test) ;; Oletus: lupanumerosta
-   :araFunding (ds/access :araFunding) ;; TODO: Mistä? Ara-käsittelijä flägi boolean
+   :araFunding (ds/access :araFunding)
    ;; :eiJulkistaLainaa (ds/access :test) ;; TODO: Mistä? Selite: Hankkeeseen liittyvä
    ;; :kaupunginosa (ds/access :test) ;; TODO: Mistä?
    ;; :korkotukivuokra-asunnotPitkaaik (ds/access :test) ;; TODO: Mistä? Selite: Johdettuna, ei tarpeellista jatkossa
@@ -63,15 +59,15 @@
 
    ;; Osapuoli
    ;; Providing all data for now as it is unclear what is actually needed
-   :parties (ds/array-from :parties
-                           (ds/access :context))
+   :parties (ds/access :parties)
 
    ;; Osapuoli: Suunnittelijat
    ;; Providing all data for now as it is unclear what is actually needed
-   :planners (ds/array-from :planners
-                            (ds/access :context))
+   :planners (ds/access :planners)
 
+   ;; Työnjohtajaosapuolet
    :foremen (ds/access :foremen)
+   ;; TODO Viiteluvat
 
    ;; Päätös
    :verdicts (ds/array-from :verdicts
@@ -89,15 +85,6 @@
                  :kuvaus (ds/access :operation-description)
                  :rakennus (ds/access :operation-building)
                  :rakennelma (ds/access :operation-structure)})
-
-   :hankkeenRakennuksenMuutostyonLaji (ds/access :test)
-
-   ;; Toimenpide
-   :rakentamistoimenpiteenLaji (ds/access :test) ;; (rakennuksella) Selite: Yhdellä hakemuksella voi olla useampi toimenpide
-
-   ;; Työnjohtajahakemus
-   :työnjohtajanLaji (ds/access :test) ;; Työnjohtajasta oma hakemus viitelupana
-   :työnjohtajanEmail (ds/access :test)
 
    ;; Muuta
    :aluejaonNimi (ds/access :test) ;; aluejaon (suuralueen) nimi
