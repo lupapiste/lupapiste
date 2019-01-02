@@ -378,6 +378,7 @@
         rakennustieto (get-in toimenpide [:rakennustieto :Rakennus :rakennuksenTiedot])
         {:keys [kayttotarkoitus rakennustunnus]} rakennustieto
         rakennuksen-selite (:rakennuksenSelite rakennustunnus)
+        muuttaminen? (= "D" suffix)
         laajentaminen? (or (contains? toimenpide :laajentaminen)
                            (= rakennuksen-selite "Laajennus")
                            (= "B" suffix))
@@ -400,11 +401,14 @@
            (re-find #"teollisuuden tuotantorak" kayttotarkoitus)) "teollisuusrakennus-laaj"
       (and laajentaminen?
            (or (re-find #"yhden asunnon talot" kayttotarkoitus)
-               (= "omakotitalo" rakennuksen-selite))) "pientalo-laaj"
+               (= "Omakotitalo" rakennuksen-selite))) "pientalo-laaj"
       (and laajentaminen?
            (or (re-find #"rivital|kerrostal" kayttotarkoitus)
-               (= "omakotitalo" rakennuksen-selite))) "kerrostalo-rt-laaj"
-      :else "aiemmalla-luvalla-hakeminen"))))
+               (#{"Kerrostalo" "Rivitalo"} rakennuksen-selite))) "kerrostalo-rt-laaj"
+      (and muuttaminen? (re-find #"ulko" description)) "julkisivu-muutos"
+      (and muuttaminen? (re-find #"huoneeksi|asuin" description)) "sisatila-muutos"
+      (->> suffix last (= \J)) "jatkoaika"
+      :else "konversio"))))
 
 (defn add-vakuustieto!
   "This takes an XML of a VAK-type kuntaGML application, i.e. deposit.
