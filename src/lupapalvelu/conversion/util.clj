@@ -184,8 +184,12 @@
        empty?))
 
 (defn remove-empty-documents [{:keys [documents] :as app}]
-  (let [docs (remove is-empty-document? documents)]
-    (assoc app :documents docs)))
+  (let [cleaned-app (assoc app :documents (remove is-empty-document? documents))
+        docs-with-op (count (filter #(get-in % [:schema-info :op]) (:documents cleaned-app)))
+        operation-count (count (app/get-operations cleaned-app))]
+    (if (= docs-with-op operation-count) ;; Ensure that no documents related to operations are deleted, even if they're empty.
+      cleaned-app                        ;; Count mismatch breaks smokes.
+      app)))
 
 (defn decapitalize
   "Convert the first character of the string to lowercase."
