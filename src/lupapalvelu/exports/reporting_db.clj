@@ -1,38 +1,35 @@
 (ns lupapalvelu.exports.reporting-db
-  (:require [lupapalvelu.data-skeleton :as ds]
+  (:require [clojure.set :as set]
+            [lupapalvelu.data-skeleton :as ds]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
             [lupapalvelu.pate.verdict-canonical :refer [verdict-canonical]]
             [lupapalvelu.pate.verdict-common :as vc]
+            [sade.core :refer :all]
             [sade.util :as util]))
 
-;; Ei suomeksi, noudattaa omaa tietomallia
-
-;;
+(defn sequentialize [xs]
+  (if xs
+    (util/sequentialize xs)
+    []))
 
 (def reporting-app-skeleton
   {;; Hakemus
    :id (ds/access :id)
-   ;; Factassa asian pääavain, tulee itse asiassa päätöksien tietoihin
-   ;; :lupanumero (ds/access :test) ;; TODO: Mistä? Kuntalupatunnus? Selite: Löytyy koko numero samasata kentästä: Luvan numero - Luvan vuosi - kaupunginosa - lupatyyppi
-   ;; :luvanNumero (ds/access :test) ;; Oletus: lupanumerosta
-   ;; :luvanVuosi (ds/access :test) ;; Oletus: lupanumerosta
-   :araFunding (ds/access :araFunding) ;; TODO: Mistä? Ara-käsittelijä flägi boolean
+   :araFunding (ds/access :araFunding)
    ;; :eiJulkistaLainaa (ds/access :test) ;; TODO: Mistä? Selite: Hankkeeseen liittyvä
    ;; :kaupunginosa (ds/access :test) ;; TODO: Mistä?
    ;; :korkotukivuokra-asunnotPitkaaik (ds/access :test) ;; TODO: Mistä? Selite: Johdettuna, ei tarpeellista jatkossa
    :state (ds/access :state) ;; Selite: Tilakone. Vierillä, käyttöönotettu... OMAT TERMIT esim submitted
    :permitType (ds/access :permitType) ;; Selite: Voidaan päätellä toimenpidetiedosta permitType
+   ;; Kiinteistötunnus
 
    :location-etrs-tm35fin (ds/access :location)
    :location-wgs84 (ds/access :location-wgs84)
    :address (ds/access :address)
    :stateChangeTs (ds/access :stateChangeTs) ;; Selite: Koska hakemuksen viimeisin tila on tullut voimaan Historysta etsitään
    :projectDescription (ds/access :projectDescription) ;; Selite: Hankkeen kuvaus korvaamaan tätä. Konversiossa huomioitava, rakennusvalvonta-asian kuvaus
-
-   :uuttaHuoneistoalaa (ds/access :test) ;; Selite: Mahdollisuus myös negatiiviseen arvoon. Oleellinen tieto. Tulee rakennuksen tietona ja summataan hakemukselle
-   :uuttaKerrosalaa (ds/access :test) ;; Selite: Mahdollisuus myös negatiiviseen arvoon. Oleellinen tieto. Kerrosalassa mukana yleiset tilat. Tulee rakennuksen tietona ja summataan hakemukselle
 
    ;; Huoneisto
    :huoneidenLkm (ds/access :test) ;; Selite: Lupapisteessä huoneisto-käsite on huoneistomuutos
@@ -44,18 +41,6 @@
                             :date           (ds/access :review-date) ;; Pitopvm
                             :reviewer       (ds/access :review-reviewer)
                             :verottajanTvLl (ds/access :review-verottajanTvLl)})
-
-   ;; Kiinteistö
-   :autopaikkavaatimusEnintaan (ds/access :test)
-   :autopaikkavaatimusRakennettava (ds/access :test)
-   :autopaikkavaatimusRakennettavaVahintaan (ds/access :test)
-   :autopaikkojaKiinteistolla (ds/access :test)
-   :autopaikkojaKiinteistonUlkopuolella (ds/access :test)
-   :autopaikkojaRakennettavaYhteensa (ds/access :test)
-   :autopaikkojaRakennettu (ds/access :test)
-   :autopaikkojaRakennettuYhteensa (ds/access :test)
-   :autopaikkojaVahintaan (ds/access :test)
-   :kiinteistotunnus (ds/access :test) ;; Mukana mahdollinen hallintayksikkötunnus
 
    ;; Lasku -> taulukko?
    :laskurivinTaksankohdanSelite (ds/access :test) ;; Selite: Kehityksen alla oleva toiminnallisuus
@@ -70,65 +55,36 @@
    :taksanVoimaantulopvm (ds/access :test) ;; Selite: Liittyy laskuun
    :taksankohta (ds/access :test)
 
-   ;; Lausunto -> taulukko?
-   ;; TODO: Lausunnon sisältö?
-   :lausunnonAntajanNimi (ds/access :test)
-   :lausunnonAntopvm (ds/access :test)
+   :statements (ds/access :statements)
 
    ;; Osapuoli
    ;; Providing all data for now as it is unclear what is actually needed
-   :parties (ds/array-from :parties
-                           (ds/access :context))
+   :parties (ds/access :parties)
 
    ;; Osapuoli: Suunnittelijat
    ;; Providing all data for now as it is unclear what is actually needed
-   :planners (ds/array-from :planners
-                            (ds/access :context))
+   :planners (ds/access :planners)
+
+   ;; Työnjohtajaosapuolet
+   :foremen (ds/access :foremen)
+   ;; TODO Viiteluvat
 
    ;; Päätös
    :verdicts (ds/array-from :verdicts
                             (ds/access :context))
 
-   ;; Rakennus
-   ;; Raportoidaan se mitä sattuu löytymään
-   :hankkeenRakennuksenHuoneistonAla (ds/access :test)
-   :hankkeenRakennuksenKerrosala (ds/access :test)
-   :hankkeenRakennuksenKokonaisala (ds/access :test)
-   :hankkeenRakennuksenKayttotarkoitus (ds/access :test)
-   :hankkeenRakennuksenLaajennuksenKerrosala (ds/access :test)
-   :hankkeenRakennuksenLammitystapa (ds/access :test)
-   :hankkeenRakennuksenPolttoaine (ds/access :test)
-   :hankkeenRakennuksenRaukeamispvm (ds/access :test)
-   :hankkeenRakennuksenTilavuus (ds/access :test)
-   :hankkeenRakennuksenToimenpidenro (ds/access :test)
-   :hankkeenRakennuksenToidenAloituspvm (ds/access :test)
-   :hankkeenRakennuksenValmistumispvm (ds/access :test)
-
-   :rakennuksenKerrosala (ds/access :test)
-   :rakennuksenKoordinaatit (ds/access :test) ;; (KKJ ja GK) Selite: Löytyy joko WGS84 tai ETRS-formaatissa
-   :rakennuksenKayttotarkoitus (ds/access :test)
-   :rakennuksenPaaasiallinenHallinta (ds/access :test)
-   :rakennuksenRakennelmanSelite (ds/access :test)
-   :rakennusnumero (ds/access :test) ;; rakennusnumero(n viimeinen osa): Factassa kc_raknro eli vanhanmallinen
-   :rakennustunnus (ds/access :test) ;; VTJ-PRT
    :uusiaAsuntoja (ds/access :test)
    :uusienAsuntojenHuoneistoalaLuvalla (ds/access :test)
    :uusienAsuntojenLkm (ds/access :test) ;; Selite: Per toimenpide
    :uusienAsuntojenLkmLuvalla (ds/access :test) ;; Selite: Summattuna rakennusten lukumäärä per hakemus
 
-   ;; Rakennuspaikka
-   :rakennettu (ds/access :test) ; rakennuspaikalla valmiiden rakennusten kerrosala yhteensä. Selite: Ennen Lupapisteen tuloa olevat mahdottomia, tulevaisuudessa Matti?
-   :sallittu (ds/access :test) ; rakennuspaikan sallittu kerrosala kaavan mukaan. Selite: Tulossa rajapintaan, otetaan jatkossa mukaan. Ainakin uusille luville.
-
    ;; Rakentamistoimenpide
-   :hankkeenRakennuksenMuutostyonLaji (ds/access :test)
-
-   ;; Toimenpide
-   :rakentamistoimenpiteenLaji (ds/access :test) ;; (rakennuksella) Selite: Yhdellä hakemuksella voi olla useampi toimenpide
-
-   ;; Työnjohtajahakemus
-   :työnjohtajanLaji (ds/access :test) ;; Työnjohtajasta oma hakemus viitelupana
-   :työnjohtajanEmail (ds/access :test)
+   :operations (ds/array-from
+                :operations
+                {:id (ds/access :operation-id)
+                 :kuvaus (ds/access :operation-description)
+                 :rakennus (ds/access :operation-building)
+                 :rakennelma (ds/access :operation-structure)})
 
    ;; Muuta
    :aluejaonNimi (ds/access :test) ;; aluejaon (suuralueen) nimi
@@ -155,6 +111,51 @@
       (update-in [:lupamaaraykset :vaaditutKatselmukset]
                  (partial mapv :Katselmus))))
 
+(def rakennusvalvonta-asia
+  (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]))
+
+(def osapuolet
+  (ds/from-context [rakennusvalvonta-asia :osapuolettieto :Osapuolet]))
+
+(defn ->statements [canonical-statements]
+  (->> canonical-statements
+       (map (comp :lausuntotieto :Lausunto))
+       (remove nil?)
+       (map :Lausunto)
+       (mapv #(update % :puoltotieto :Puolto))))
+
+(def- operation-types
+  [:uusi :laajennus :uudelleenrakentaminen :purkaminen :muuMuutosTyo :kaupunkikuvaToimenpide])
+
+(defn- dissoc-operation-types [operation]
+  (apply dissoc operation operation-types))
+
+(defn- operation-description [operation]
+  (:kuvaus (util/find-first identity (map #(get operation %) operation-types))))
+
+(defn- operation-building [context]
+  (some-> ((ds/from-context [:context :rakennustieto :Rakennus]) context)
+          (update :omistajatieto (comp (partial mapv :Omistaja)
+                                       sequentialize))
+          (dissoc :alkuHetki :sijaintitieto :yksilointitieto)
+          (set/rename-keys {:rakennuksenTiedot :tiedot :omistajatieto :omistajat})))
+
+(defn- operation-structure [context]
+  (some-> ((ds/from-context [:context :rakennelmatieto :Rakennelma]) context)
+          (dissoc :alkuHetki :sijaintitieto :yksilointitieto)))
+
+(defn- ->foreman [foreman]
+  (-> foreman
+      :Tyonjohtaja
+      (update :sijaistustieto (comp (partial map :Sijaistus)
+                                    sequentialize))
+      (update :vastattavaTyotieto (comp (partial map (comp :vastattavaTyo
+                                                           :VastattavaTyo))
+                                        sequentialize))
+      (set/rename-keys {:sijaistustieto     :sijaistukset
+                        :vastattavaTyotieto :vastattavatTyot})
+      (dissoc :vastattavatTyotehtavat)))
+
 (defn reporting-app-accessors [application lang]
   {:test (constantly "foo")
    :id (ds/from-context [:application :id])
@@ -166,25 +167,38 @@
 
    :location (ds/from-context [:application :location])
    :location-wgs84 (ds/from-context [:application :location-wgs84])
+
+   :operations (ds/from-context [rakennusvalvonta-asia :toimenpidetieto sequentialize
+                                 (partial mapv :Toimenpide)])
+   :operation-id #(or ((ds/from-context [:context :rakennustieto :Rakennus :yksilointitieto]) %)
+                      ((ds/from-context [:context :rakennelmatieto :Rakennelma :yksilointitieto]) %))
+   :operation-description (ds/from-context [:context operation-description])
+   ;; We know that :rakennustieto is not sequential, i.e. there's only one building per operation
+   :operation-building operation-building
+   :operation-structure operation-structure
+
    :projectDescription (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
                                          :RakennusvalvontaAsia :asianTiedot :Asiantiedot
                                          :rakennusvalvontaasianKuvaus])
 
-   :parties (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
-                              :RakennusvalvontaAsia :osapuolettieto :Osapuolet :osapuolitieto
-                              util/sequentialize (partial mapv :Osapuoli)])
-   :planners (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
-                               :RakennusvalvontaAsia :osapuolettieto :Osapuolet :suunnittelijatieto
-                               util/sequentialize (partial mapv :Suunnittelija)])
+   :parties (ds/from-context [osapuolet :osapuolitieto
+                              sequentialize (partial mapv :Osapuoli)])
+   :planners (ds/from-context [osapuolet :suunnittelijatieto
+                               sequentialize (partial mapv :Suunnittelija)])
+   :foremen (ds/from-context [osapuolet :tyonjohtajatieto
+                              sequentialize (partial mapv ->foreman)])
 
    :reviews (ds/from-context [:application :tasks (partial mapv #(katselmus-canonical application lang % nil))])
    :review-date (ds/from-context [get-katselmustieto :pitoPvm])
    :review-type (ds/from-context [get-katselmustieto :katselmuksenLaji])
    :review-reviewer (ds/from-context [get-katselmustieto :pitaja])
    :review-verottajanTvLl (ds/from-context [get-katselmustieto :verottajanTvLlKytkin] false)
+   ;; TODO Propably not enough review data at the moment
 
    :state (ds/from-context [:application :state])
    :stateChangeTs (ds/from-context [:application :history (partial filterv :state) last :ts])
+   :statements (ds/from-context [rakennusvalvonta-asia :lausuntotieto sequentialize
+                                 ->statements])
    :permitType (ds/from-context [:application :permitType])
 
    :verdicts (fn [ctx]
