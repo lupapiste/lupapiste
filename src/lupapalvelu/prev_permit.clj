@@ -12,7 +12,7 @@
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.organization :as organization]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
             [lupapalvelu.review :as review]
@@ -287,7 +287,8 @@
     (let [updated-application (mongo/by-id :applications (:id created-application))
           {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml user/batchrun-user-data (now) updated-application xml)
           review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-updates")
-          update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id)]
+          only-use-inspection-from-backend? (-> updated-application :organization org/get-organization :only-use-inspection-from-backend)
+          update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id only-use-inspection-from-backend?)]
       (if (:ok update-result)
         (info "Saved review updates")
         (infof "Reviews were not saved: %s" (:desc update-result))))
@@ -340,7 +341,7 @@
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info         (get-location-info command app-info)
         organization          (when (:propertyId location-info)
-                                (organization/resolve-organization (prop/municipality-by-property-id (:propertyId location-info)) permit-type))
+                                (org/resolve-organization (prop/municipality-by-property-id (:propertyId location-info)) permit-type))
         validation-result     (permit/validate-verdict-xml permit-type xml organization)
         organizations-match?  (= organizationId (:id organization))
         no-proper-applicants? (not-any? get-applicant-type (:hakijat app-info))]

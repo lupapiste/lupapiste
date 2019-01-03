@@ -82,8 +82,6 @@
 
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
 
-        state-changes (krysp-reader/get-sorted-tilamuutos-entries xml)
-
         ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
         given-statements (for [st statements
                                :when (map? st)]
@@ -126,7 +124,7 @@
       (let [updated-application (mongo/by-id :applications (:id created-application))
             {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml false true)
             review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-updates")
-            update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id)]
+            update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id true)]
         (if (:ok update-result)
           (info "Saved review updates")
           (infof "Reviews were not saved: %s" (:desc update-result))))
