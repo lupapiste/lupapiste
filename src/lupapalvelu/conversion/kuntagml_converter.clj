@@ -53,15 +53,17 @@
                        :address         (:address location-info)
                        :municipality    municipality}
 
-        created-application (app/make-application make-app-info
-                                                  []            ; messages
-                                                  (:user command)
-                                                  (:created command)
-                                                  manual-schema-datas)
+        created-application (conv-util/remove-empty-party-documents
+                              (app/make-application make-app-info
+                                                    []            ; messages
+                                                    (:user command)
+                                                    (:created command)
+                                                    manual-schema-datas))
 
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))
+                                    (map prev-permit/hakija->party-document hakijat)
                                     (when (includes? kuntalupatunnus "TJO")
                                       (map prev-permit/tyonjohtaja->tj-document (:tyonjohtajat app-info)))))
 
@@ -124,9 +126,6 @@
       (when-let [updates (verdict/find-verdicts-from-xml command xml false)]
         (action/update-application command updates))
 
-      (prev-permit/invite-applicants command hakijat authorize-applicants)
-      (infof "Processed applicants, processable applicants count was: %s" (count (filter prev-permit/get-applicant-type hakijat)))
-
       (let [updated-application (mongo/by-id :applications (:id created-application))
             {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml false true)
             review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-updates")
@@ -148,14 +147,6 @@
             (app/do-add-link-permit created-application link)
             (catch Exception e
               (error "Adding app-link %s -> %s failed: %s" (:id created-application) link (.getMessage e))))))
-
-      (let [app (mongo/by-id :applications id)
-            cleaned-app (conv-util/remove-empty-documents app)]
-        (when (not= app cleaned-app)
-          (do
-            (mongo/update-by-id :applications id cleaned-app)
-            (infof "Cleaned %d empty documents from application" (- (count (:documents app))
-                                                                    (count (:documents cleaned-app)))))))
 
       (let [fetched-application (mongo/by-id :applications (:id created-application))]
         (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))

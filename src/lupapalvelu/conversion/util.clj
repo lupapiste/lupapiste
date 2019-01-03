@@ -175,21 +175,17 @@
                        {"kaupunkikuvatoimenpide" (app/sanitize-document-datas schema data)}
                        (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
 
-(defn is-empty-document? [doc]
-  (->> doc
-       (tree-seq map? vals)
-       (keep :value)
-       (filter string?)
-       (remove (partial contains? #{"" "FIN" "henkilo"}))
-       empty?))
+(defn is-empty-party-document? [{:keys [schema-info] :as doc}]
+  (when (= :party (:type schema-info))
+    (->> doc
+         (tree-seq map? vals)
+         (keep :value)
+         (filter string?)
+         (remove (partial contains? #{"" "FIN" "henkilo"}))
+         empty?)))
 
-(defn remove-empty-documents [{:keys [documents] :as app}]
-  (let [cleaned-app (assoc app :documents (remove is-empty-document? documents))
-        docs-with-op (count (filter #(get-in % [:schema-info :op]) (:documents cleaned-app)))
-        operation-count (count (app/get-operations cleaned-app))]
-    (if (= docs-with-op operation-count) ;; Ensure that no documents related to operations are deleted, even if they're empty.
-      cleaned-app                        ;; Count mismatch breaks smokes.
-      app)))
+(defn remove-empty-party-documents [{:keys [documents] :as app}]
+  (assoc app :documents (remove is-empty-party-document? documents)))
 
 (defn decapitalize
   "Convert the first character of the string to lowercase."
