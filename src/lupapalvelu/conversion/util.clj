@@ -175,6 +175,18 @@
                        {"kaupunkikuvatoimenpide" (app/sanitize-document-datas schema data)}
                        (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
 
+(defn is-empty-party-document? [{:keys [schema-info] :as doc}]
+  (when (= :party (:type schema-info))
+    (->> doc
+         (tree-seq map? vals)
+         (keep :value)
+         (filter string?)
+         (remove (partial contains? #{"" "FIN" "henkilo"}))
+         empty?)))
+
+(defn remove-empty-party-documents [{:keys [documents] :as app}]
+  (assoc app :documents (remove is-empty-party-document? documents)))
+
 (defn decapitalize
   "Convert the first character of the string to lowercase."
   [string]

@@ -53,15 +53,17 @@
                        :address         (:address location-info)
                        :municipality    municipality}
 
-        created-application (app/make-application make-app-info
-                                                  []            ; messages
-                                                  (:user command)
-                                                  (:created command)
-                                                  manual-schema-datas)
+        created-application (conv-util/remove-empty-party-documents
+                              (app/make-application make-app-info
+                                                    []            ; messages
+                                                    (:user command)
+                                                    (:created command)
+                                                    manual-schema-datas))
 
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))
+                                    (map prev-permit/hakija->party-document hakijat)
                                     (when (includes? kuntalupatunnus "TJO")
                                       (map prev-permit/tyonjohtaja->tj-document (:tyonjohtajat app-info)))))
 
@@ -116,16 +118,10 @@
     (logging/with-logging-context {:applicationId (:id created-application)}
       ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
       (app/insert-application created-application)
-      (infof "Inserted prev-permit app: org=%s kuntalupatunnus=%s authorizeApplicants=%s"
-             (:organization created-application)
-             (get-in command [:data :kuntalupatunnus])
-             authorize-applicants)
+      (infof "Inserted converted app: org=%s kuntalupatunnus=%s" (:organization created-application) (get-in command [:data :kuntalupatunnus]))
       ;; Get verdicts for the application
       (when-let [updates (verdict/find-verdicts-from-xml command xml false)]
         (action/update-application command updates))
-
-      (prev-permit/invite-applicants command hakijat authorize-applicants)
-      (infof "Processed applicants, processable applicants count was: %s" (count (filter prev-permit/get-applicant-type hakijat)))
 
       (let [updated-application (mongo/by-id :applications (:id created-application))
             {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml false true)

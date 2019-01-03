@@ -134,6 +134,9 @@
   (when-let [schema-name (osapuoli-kuntaRoolikoodi->doc-schema (:kuntaRooliKoodi party))]
     (party->party-doc party schema-name)))
 
+(defn hakija->party-document [party]
+  (party->party-doc party "hakija-r"))
+
 (defn suunnittelija->party-document [party]
   (when-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
     (party->party-doc party schema-name)))
