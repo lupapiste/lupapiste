@@ -379,15 +379,6 @@
     (not (#{162 163 169 611 613 712 719 722} kayttotarkoitus))
     (<= kayttotarkoitus 729)))
 
-(defvalidator :vrk:AR307
-  {:doc     "Uusien asuntojen lukumaara: sallitut arvot 0 - 300"
-   :schemas ["uusiRakennus"]
-   :fields  [huoneistot [:huoneistot ->count]]
-   :facts   {:ok   [[(repeating 1)]
-                    [(repeating 300)]]
-             :fail [[(repeating 301)]]}}
-  (not (<= 0 huoneistot 300)))
-
 (defvalidator :vrk:CR330
   {:doc    "Rakennus ei saa olla yli 150 metria korkea"
    :schemas ["uusiRakennus"]
