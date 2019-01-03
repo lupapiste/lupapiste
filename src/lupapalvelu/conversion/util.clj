@@ -371,7 +371,6 @@
                           (re-find #"pysäk|liittym" description) "tontin-jarjestelymuutos"
                           :else "muu-maisema-toimenpide")
        :else "konversio"))) ;; A minimal generic operation for this purpose.
-  ;; If a an application does not contain 'toimenpide'-element and is not P(I) or TJO, 'konversio it is'.
   ([kuntalupatunnus description toimenpide]
    (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
          uusi? (contains? toimenpide :uusi)
