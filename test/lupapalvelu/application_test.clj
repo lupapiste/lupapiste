@@ -670,3 +670,51 @@
       :verdicts [{:kuntalupatunnus "AAA" :draft true}
                  {:kuntalupatunnus "BBB"}]
       :municipalityPermitIds ["AAA" "BBB"]})
+
+(def dummy-party
+  {:created 1546007280653
+   :data {:henkilotiedot {:etunimi {:value "Aulikki"}
+                          :hetu {:value nil}
+                          :sukunimi {:value "Ananas"}}
+          :osoite {:katu {:value "Metallimiehenraitti 59"}
+                   :maa {:value "FIN"}
+                   :postinumero {:value "01650"}
+                   :postitoimipaikannimi {:value "VANTAA"}}
+          :patevyys {:fise {:value ""}
+                     :fiseKelpoisuus {:value nil}
+                     :kokemus {:value ""}
+                     :koulutus {:value ""}
+                     :koulutusvalinta {:value "rakennusinsinööri"}
+                     :patevyys {:value ""}
+                     :patevyysluokka {:value nil}
+                     :valmistumisvuosi {:value "1984"}}
+          :suunnittelutehtavanVaativuusluokka {:value nil}
+          :userId {:value nil}
+          :yhteystiedot {:email {:value "aulikki@pineapplemail.com"}
+                         :puhelin {:value "040-40129944"}}
+          :yritys {:liikeJaYhteisoTunnus {:value ""} :yritysnimi {:value ""}}}
+   :id "5c2632f03b4cd66463121e79"})
+
+(fact "anonymization works without breaking documents"
+      (anonymize-parties dummy-party) => {:created 1546007280653
+                                          :data {:henkilotiedot {:etunimi {:value "Pena"}
+                                                                 :hetu {:value nil}
+                                                                 :sukunimi {:value "Panaani"}}
+                                                 :osoite {:katu {:value "Paapankuja 1 A 1"}
+                                                          :maa {:value "FIN"}
+                                                          :postinumero {:value "01650"}
+                                                          :postitoimipaikannimi {:value "VANTAA"}}
+                                                 :patevyys {:fise {:value ""}
+                                                            :fiseKelpoisuus {:value nil}
+                                                            :kokemus {:value ""}
+                                                            :koulutus {:value ""}
+                                                            :koulutusvalinta {:value "rakennusinsinööri"}
+                                                            :patevyys {:value ""}
+                                                            :patevyysluokka {:value nil}
+                                                            :valmistumisvuosi {:value "1984"}}
+                                                 :suunnittelutehtavanVaativuusluokka {:value nil}
+                                                 :userId {:value nil}
+                                                 :yhteystiedot {:email {:value "pena@example.com"}
+                                                                :puhelin {:value "012-3456789"}}
+                                                 :yritys {:liikeJaYhteisoTunnus {:value ""} :yritysnimi {:value ""}}}
+                                          :id "5c2632f03b4cd66463121e79"})
