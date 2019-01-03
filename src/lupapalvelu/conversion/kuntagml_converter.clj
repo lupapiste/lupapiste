@@ -118,10 +118,7 @@
     (logging/with-logging-context {:applicationId (:id created-application)}
       ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
       (app/insert-application created-application)
-      (infof "Inserted prev-permit app: org=%s kuntalupatunnus=%s authorizeApplicants=%s"
-             (:organization created-application)
-             (get-in command [:data :kuntalupatunnus])
-             authorize-applicants)
+      (infof "Inserted converted app: org=%s kuntalupatunnus=%s" (:organization created-application) (get-in command [:data :kuntalupatunnus]))
       ;; Get verdicts for the application
       (when-let [updates (verdict/find-verdicts-from-xml command xml false)]
         (action/update-application command updates))
