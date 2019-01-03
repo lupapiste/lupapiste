@@ -360,56 +360,55 @@
   "Takes a kuntalupatunnus and a 'toimenpide'-element from app-info, returns the operation type"
   ([kuntalupatunnus description]
    (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)]
-     (condp = suffix
-       "TJO" "tyonjohtajan-nimeaminen-v2"
-       "P" "purkaminen"
-       "PI" "purkaminen"
-       "MAI" (cond
-               (re-find #"kaatami|kaatoa" description) "puun-kaataminen"
-               (re-find #"valmistele" description) "muu-tontti-tai-kort-muutos"
-               (re-find #"kaivam|kaivu" description) "kaivuu"
-               (re-find #"pys√§k|liittym" description) "tontin-jarjestelymuutos"
-               :else "muu-maisema-toimenpide")
-       "konversio"))) ;; A minimal generic operation for this purpose.
-                      ;; If a an application does not contain 'toimenpide'-element and is not P(I) or TJO, 'konversio it is'.
+     (cond
+       (= suffix "TJO") "tyonjohtajan-nimeaminen-v2"
+       (#{"P" "PI"} suffix) "purkaminen"
+       (->> suffix last (= \J)) "raktyo-aloit-loppuunsaat"
+       (= suffix "MAI") (cond
+                          (re-find #"kaatami|kaatoa" description) "puun-kaataminen"
+                          (re-find #"valmistele" description) "muu-tontti-tai-kort-muutos"
+                          (re-find #"kaivam|kaivu" description) "kaivuu"
+                          (re-find #"pys√§k|liittym" description) "tontin-jarjestelymuutos"
+                          :else "muu-maisema-toimenpide")
+       :else "konversio"))) ;; A minimal generic operation for this purpose.
+  ;; If a an application does not contain 'toimenpide'-element and is not P(I) or TJO, 'konversio it is'.
   ([kuntalupatunnus description toimenpide]
    (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
-        uusi? (contains? toimenpide :uusi)
-        rakennustieto (get-in toimenpide [:rakennustieto :Rakennus :rakennuksenTiedot])
-        {:keys [kayttotarkoitus rakennustunnus]} rakennustieto
-        rakennuksen-selite (:rakennuksenSelite rakennustunnus)
-        muuttaminen? (or (= "D" suffix)
-                         (= \L (last suffix)))
-        laajentaminen? (or (contains? toimenpide :laajentaminen)
-                           (= rakennuksen-selite "Laajennus")
-                           (= "B" suffix))
-        rakennelman-kuvaus (get-in toimenpide [:rakennelmatieto :Rakennelma :kuvaus :kuvaus])
-        rakennelman-selite (get-in toimenpide [:rakennelmatieto :Rakennelma :tunnus :rakennuksenSelite])]
-    (cond
-      (contains? #{"P" "PI"} suffix) "purkaminen"
-      (and uusi?
-           (= "Omakotitalo" rakennuksen-selite)) "pientalo"
-      (and uusi?
-           (contains? #{"Kerrostalo" "Asuinkerrostalo" "Rivitalo"} rakennuksen-selite)) "kerrostalo-rivitalo"
-      (and uusi?
-           (= "Talousrakennus" rakennuksen-selite)) "pientalo"
-      (and uusi?
-           (or (= "Katos" rakennelman-kuvaus)
-               (= "Autokatos" rakennelman-selite))) "auto-katos"
-      (and laajentaminen?
-           (re-find #"toimisto" kayttotarkoitus)) "talousrakennus-laaj"
-      (and laajentaminen?
-           (re-find #"teollisuuden tuotantorak" kayttotarkoitus)) "teollisuusrakennus-laaj"
-      (and laajentaminen?
-           (or (re-find #"yhden asunnon talot" kayttotarkoitus)
-               (= "Omakotitalo" rakennuksen-selite))) "pientalo-laaj"
-      (and laajentaminen?
-           (or (re-find #"rivital|kerrostal" kayttotarkoitus)
-               (#{"Kerrostalo" "Rivitalo"} rakennuksen-selite))) "kerrostalo-rt-laaj"
-      (and muuttaminen? (re-find #"(?i)ulko|julkisivu" description)) "julkisivu-muutos"
-      (and muuttaminen? (re-find #"huoneeksi|asuin" description)) "sisatila-muutos"
-      (->> suffix last (= \J)) "jatkoaika"
-      :else "konversio"))))
+         uusi? (contains? toimenpide :uusi)
+         rakennustieto (get-in toimenpide [:rakennustieto :Rakennus :rakennuksenTiedot])
+         {:keys [kayttotarkoitus rakennustunnus]} rakennustieto
+         rakennuksen-selite (:rakennuksenSelite rakennustunnus)
+         muuttaminen? (or (= "D" suffix)
+                          (= \L (last suffix)))
+         laajentaminen? (or (contains? toimenpide :laajentaminen)
+                            (= rakennuksen-selite "Laajennus")
+                            (= "B" suffix))
+         rakennelman-kuvaus (get-in toimenpide [:rakennelmatieto :Rakennelma :kuvaus :kuvaus])
+         rakennelman-selite (get-in toimenpide [:rakennelmatieto :Rakennelma :tunnus :rakennuksenSelite])]
+     (cond
+       (contains? #{"P" "PI"} suffix) "purkaminen"
+       (and uusi?
+            (= "Omakotitalo" rakennuksen-selite)) "pientalo"
+       (and uusi?
+            (contains? #{"Kerrostalo" "Asuinkerrostalo" "Rivitalo"} rakennuksen-selite)) "kerrostalo-rivitalo"
+       (and uusi?
+            (= "Talousrakennus" rakennuksen-selite)) "pientalo"
+       (and uusi?
+            (or (= "Katos" rakennelman-kuvaus)
+                (= "Autokatos" rakennelman-selite))) "auto-katos"
+       (and laajentaminen?
+            (re-find #"toimisto" kayttotarkoitus)) "talousrakennus-laaj"
+       (and laajentaminen?
+            (re-find #"teollisuuden tuotantorak" kayttotarkoitus)) "teollisuusrakennus-laaj"
+       (and laajentaminen?
+            (or (re-find #"yhden asunnon talot" kayttotarkoitus)
+                (= "Omakotitalo" rakennuksen-selite))) "pientalo-laaj"
+       (and laajentaminen?
+            (or (re-find #"rivital|kerrostal" kayttotarkoitus)
+                (#{"Kerrostalo" "Rivitalo"} rakennuksen-selite))) "kerrostalo-rt-laaj"
+       (and muuttaminen? (re-find #"(?i)ulko|julkisivu" description)) "julkisivu-muutos"
+       (and muuttaminen? (re-find #"huoneeksi|asuin" description)) "sisatila-muutos"
+       :else "konversio"))))
 
 (defn add-vakuustieto!
   "This takes an XML of a VAK-type kuntaGML application, i.e. deposit.
