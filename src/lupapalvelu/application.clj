@@ -952,8 +952,11 @@
 ;;
 ;; Kuntalupatunnus from ALLU
 ;;
-(defn set-kuntalupatunnus [app-id kuntalupatunnus]
-  (mongo/update-by-id :applications app-id {$set :ALLU.kuntalupatunnus kuntalupatunnus}))
+(defn set-kuntalupatunnus
+  "Store kuntalupatunnus here where it's read when creating a verdict. When creating a verdict kuntalupatunnus is
+  placed with other verdict data where UI can find it (see lupapalvelu.backing-system.allu.contract/new-allu-contract)."
+  [app-id kuntalupatunnus]
+  (mongo/update-by-id :applications app-id {$set {:kuntalupatunnus kuntalupatunnus}}))
 
 ;;
 ;; Integration keys
