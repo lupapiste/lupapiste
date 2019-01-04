@@ -952,11 +952,8 @@
 ;;
 ;; Kuntalupatunnus from ALLU
 ;;
-;FIXME: Works only for applications with verdicts atm, store kuntalupatunnus somewhere and add it to all verdicts that are created
 (defn set-kuntalupatunnus [app-id kuntalupatunnus]
-  (mongo/update-by-query :applications
-                         {:_id app-id :pate-verdicts.0 {$exists true}} ;; Has at leas one verdict
-                         {$set {:pate-verdicts.0.data.kuntalupatunnus kuntalupatunnus}}))
+  (mongo/update-by-id :applications app-id {$set :ALLU.kuntalupatunnus kuntalupatunnus}))
 
 ;;
 ;; Integration keys

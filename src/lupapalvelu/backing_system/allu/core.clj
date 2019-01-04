@@ -54,16 +54,14 @@
   "A command that has been abridged for sending through JMS."
   {:application {:id ssc/ApplicationId
                  :organization sc/Str
-                 :state (apply sc/enum (map name states/all-states))
-                 (sc/optional-key :integrationKeys) (sc/maybe sc/Any)}
+                 :state (apply sc/enum (map name states/all-states))}
    :action sc/Str
    :user {:id sc/Str
           :username sc/Str}})
 
 (sc/defn ^{:private true, :always-validate true} minimize-command :- MiniCommand
   [{:keys [application action user]}]
-  (println "application: " (select-keys application (map #(or (:k %) %) (keys (:application MiniCommand)))))
-  {:application          (select-keys application (map #(or (:k %) %) (keys (:application MiniCommand))))
+  {:application          (select-keys application (keys (:application MiniCommand)))
    :action               action
    :user                 (select-keys user (keys (:user MiniCommand)))})
 
@@ -236,7 +234,7 @@
    :format       "json"
    :created      (now)
    :status       status
-   :application  (select-keys application [:id :organization :state])
+   :application  application
    :initator     user
    :action       action
    :data         data})
@@ -506,22 +504,19 @@
   [handler]
   (fn [{{{app-id :id} :application} ::command :as request}]
     (match (handler request)
-      ({:status (:or 200 201), :body body} :as response) (do (println "\n\n\n\n\n!!!!!!!!!!!!!!!!!!!!!\nAsetetaan kuntalupatunnus: " (:applicationId body))
-                                                             #_(application/set-kuntalupatunnus app-id (:applicationId body))
+      ({:status (:or 200 201), :body body} :as response) (do (application/set-kuntalupatunnus app-id (:applicationId body))
                                                              response)
       response response)))
 
 (declare load-allu-application-data!)
 
-(defn- get-allu-kuntalupatunnus
-  "Makes a new GET request to fetch kuntalupatunnus from ALLU"
+(defn- get-allu-kuntalupatunnus!
+  "Makes a new GET request to fetch kuntalupatunnus from ALLU (middleware in that request stores it to db)"
   [handler]
   (fn [request]
-    ;;FIXME: ota body ja sieltä allu-integration-key. Assoccaa se commandiin ja ettei minicommand skeema hajoa (muuta mini command normaaliksi)
     (let [response (handler request)
           allu-integration-key (:body response)
           new-command (assoc-in (::command request) [:application :integrationKeys :ALLU :id] allu-integration-key)]
-      (println "Allu-integration-key näyttää tältä: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" (:body response))
       (load-allu-application-data! new-command)
       response)))
 
@@ -585,7 +580,7 @@
        ["placementcontracts"
         ["" {:name [:placementcontracts :create]
              :parameters {:body PlacementContract}
-             :middleware (if disable-io-middlewares? [] [get-allu-kuntalupatunnus set-allu-integration-key!])
+             :middleware (if disable-io-middlewares? [] [get-allu-kuntalupatunnus! set-allu-integration-key!])
              :post {:handler handler}}]
 
         ["/:id" {:parameters {:path {:id ssc/NatString}}}
@@ -607,7 +602,7 @@
                      :middleware file-middleware
                      :get {:handler handler}}]
           ["/metadata" {:name [:placementcontracts :contract :metadata]
-                        :middleware [json-response #_get-allu-kuntalupatunnus] ;FIXME: Poista get-allu-kuntalupatunnus ja laita se johonkin järkevään paikkaan
+                        :middleware [json-response]
                         :get {:handler handler}}]]]]
        ["fixedlocations" {:name [:fixedlocations]
                           :parameters {:query {:applicationKind NonBlankStr}}
