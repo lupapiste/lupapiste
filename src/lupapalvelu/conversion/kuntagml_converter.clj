@@ -53,15 +53,17 @@
                        :address         (:address location-info)
                        :municipality    municipality}
 
-        created-application (app/make-application make-app-info
-                                                  []            ; messages
-                                                  (:user command)
-                                                  (:created command)
-                                                  manual-schema-datas)
+        created-application (conv-util/remove-empty-party-documents
+                              (app/make-application make-app-info
+                                                    []            ; messages
+                                                    (:user command)
+                                                    (:created command)
+                                                    manual-schema-datas))
 
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))
+                                    (map prev-permit/hakija->party-document hakijat)
                                     (when (includes? kuntalupatunnus "TJO")
                                       (map prev-permit/tyonjohtaja->tj-document (:tyonjohtajat app-info)))))
 
@@ -79,8 +81,6 @@
         structures (->> xml krysp-reader/->rakennelmatiedot (map conv-util/rakennelmatieto->kaupunkikuvatoimenpide))
 
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
-
-        state-changes (krysp-reader/get-sorted-tilamuutos-entries xml)
 
         ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
         given-statements (for [st statements
@@ -116,21 +116,15 @@
     (logging/with-logging-context {:applicationId (:id created-application)}
       ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
       (app/insert-application created-application)
-      (infof "Inserted prev-permit app: org=%s kuntalupatunnus=%s authorizeApplicants=%s"
-             (:organization created-application)
-             (get-in command [:data :kuntalupatunnus])
-             authorize-applicants)
+      (infof "Inserted converted app: org=%s kuntalupatunnus=%s" (:organization created-application) (get-in command [:data :kuntalupatunnus]))
       ;; Get verdicts for the application
       (when-let [updates (verdict/find-verdicts-from-xml command xml false)]
         (action/update-application command updates))
 
-      (prev-permit/invite-applicants command hakijat authorize-applicants)
-      (infof "Processed applicants, processable applicants count was: %s" (count (filter prev-permit/get-applicant-type hakijat)))
-
       (let [updated-application (mongo/by-id :applications (:id created-application))
             {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml false true)
             review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-updates")
-            update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id)]
+            update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id true)]
         (if (:ok update-result)
           (info "Saved review updates")
           (infof "Reviews were not saved: %s" (:desc update-result))))
