@@ -6,6 +6,7 @@
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
             [lupapalvelu.pate.verdict-canonical :refer [verdict-canonical]]
             [lupapalvelu.pate.verdict-common :as vc]
+            [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.util :as util]))
 
@@ -215,3 +216,14 @@
                              :canonical application-canonical
                              :lang lang}
                             (reporting-app-accessors application lang))))
+
+
+(def permit-types-for-reporting-db ["R" "P"])
+
+(defn applications [start-ts end-ts]
+  {:pre [(number? start-ts) (number? end-ts)]}
+  (let [query {:modified {$gte start-ts
+                          $lte end-ts}
+               :permitType {$in permit-types-for-reporting-db}}]
+    (mapv #(->reporting-result % "fi")
+          (domain/get-multiple-applications-no-access-checking query))))
