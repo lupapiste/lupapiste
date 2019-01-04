@@ -1,5 +1,5 @@
 (ns lupapalvelu.batchrun-test
-  "Tests rely heavily on 'provided' beacause of non-functional nature (lots of side effects) of batchrun processes."
+  "Tests rely heavily on 'provided' because of non-functional nature (lots of side effects) of batchrun processes."
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [taoensso.timbre :refer [debug]]

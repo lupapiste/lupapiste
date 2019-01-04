@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :refer [debug debugf error errorf info infof warn warnf]]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
-            [clojure.set :as set]
+            [clojure.set :refer [union difference]]
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
@@ -157,7 +157,7 @@
   (let [timestamp-now (now)
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/snapshot :applications
-                             {:state      {$nin (map name (clojure.set/union states/post-verdict-states states/terminal-states))}
+                             {:state      {$nin (map name (union states/post-verdict-states states/terminal-states))}
                               :permitType {$nin ["ARK"]}
                               :readOnly {$ne true}
                               :statements {$elemMatch {:given nil
@@ -579,7 +579,7 @@
 
 (defn- organization-applications-for-review-fetching
   [organization-id permit-type projection & application-ids]
-  (let [eligible-application-states (set/difference states/post-verdict-but-terminal #{:foremanVerdictGiven})]
+  (let [eligible-application-states (difference states/post-verdict-but-terminal #{:foremanVerdictGiven})]
     (mongo/select :applications (merge {:state {$in eligible-application-states}
                                         :permitType permit-type
                                         :organization organization-id
