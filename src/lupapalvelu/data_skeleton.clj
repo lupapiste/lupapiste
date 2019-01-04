@@ -17,7 +17,9 @@
 
 (defn- assoc-context [element context]
   (postwalk (fn [x]
-              (if (accessor-key? x)
+              (if (or (accessor-key? x)
+                      (build-id-map? x)
+                      (build-array? x))
                 (assoc x ::context context)
                 x))
             element))
@@ -52,10 +54,12 @@
             (throw (ex-info "Missing accessor" x)))
 
           (build-id-map? x)
-          (build-id-map context accessor-functions x)
+          (build-id-map (assoc context :context (::context x))
+                        accessor-functions x)
 
           (build-array? x)
-          (build-array context accessor-functions x)
+          (build-array (assoc context :context (::context x))
+                       accessor-functions x)
 
           :else x)))
 

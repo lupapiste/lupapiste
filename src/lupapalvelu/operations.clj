@@ -55,7 +55,7 @@
         ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
         ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]]]
       ["Rakennuksen purkaminen" :purkaminen]
-      ["Maisemaa muutava toimenpide"
+      ["Maisemaa muuttava toimenpide"
        [["Puun kaataminen" :puun-kaataminen]
         ["tontin-jarjestelymuutos" :tontin-jarjestelymuutos]
         ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]

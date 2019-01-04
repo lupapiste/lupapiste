@@ -39229,6 +39229,10 @@ button.invoice-change-state-button {
   }
 }
 
+.invoice-accordion:last-child {
+  page-break-after: avoid;
+}
+
 @media print {
   .invoice-accordion > .rollup-accordion-content {
     display: block !important;
@@ -39295,6 +39299,52 @@ button.invoice-change-state-button {
 
 .invoice-accordion.rollup .roll-up-header .invoice-title-component div:first-child {
   padding-right: 2em;
+}
+
+.invoice-accordion.rollup .invoice-summary-table {
+  display: table;
+  width: 100%;
+  padding-top: 24px;
+  table-layout: fixed;
+}
+
+.invoice-accordion.rollup .invoice-summary-table > div {
+  display: table-row;
+}
+
+.invoice-accordion.rollup .invoice-summary-table > div > div {
+  display: table-cell;
+  vertical-align: bottom;
+}
+
+.invoice-accordion.rollup .invoice-summary-table > div > div:last-child {
+  text-align: right;
+}
+
+.invoice-accordion.rollup .invoice-summary-table > div > div.invoice-sums-container {
+  width: 70%;
+  text-align: right;
+}
+
+.invoice-accordion.rollup .invoice-summary-sums-table {
+  display: inline-table;
+  width: 15em;
+  margin-bottom: 0px;
+  font-weight: 800;
+  border-collapse: unset;
+}
+
+.invoice-accordion.rollup .invoice-summary-sums-table tr:on-hover {
+  background-color: "#ffffff";
+}
+
+.invoice-accordion.rollup .invoice-summary-sums-table tr:last-child td {
+  padding-bottom: 0px;
+}
+
+.invoice-accordion.rollup .invoice-summary-sums-table td {
+  vertical-align: bottom;
+  background: #ffffff;
 }
 
 .invoice-operations-table-wrapper {

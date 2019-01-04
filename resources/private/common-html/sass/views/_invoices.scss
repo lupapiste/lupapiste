@@ -37,6 +37,10 @@ button.invoice-change-state-button {
         page-break-after: always;
     }
 
+    &:last-child {
+        page-break-after: avoid;
+    }
+
     > .rollup-accordion-content {
         @media print {
             display: block !important;
@@ -101,6 +105,53 @@ button.invoice-change-state-button {
             }
         }
     }
+
+    .invoice-summary-table {
+        display: table;
+        width: 100%;
+        padding-top: 24px;
+        table-layout: fixed;
+
+        > div {
+            display: table-row;
+
+            > div {
+                display: table-cell;
+                vertical-align: bottom;
+
+                &:last-child {
+                    text-align: right;
+                }
+
+                &.invoice-sums-container {
+                width: 70%;
+                text-align: right;
+                }
+            }
+        }
+    }
+    .invoice-summary-sums-table {
+        display: inline-table;
+        width: 15em;
+        margin-bottom: 0px;
+        font-weight: 800;
+        border-collapse: unset;
+        tr {
+            &:on-hover {
+                background-color: "#ffffff";
+            }
+            &:last-child {
+                td {
+                    padding-bottom: 0px;
+                }
+            }
+        }
+        td {
+            vertical-align: bottom;
+            background: #ffffff;
+        }
+    }
+
 }
 
 .invoice-operations-table-wrapper {
