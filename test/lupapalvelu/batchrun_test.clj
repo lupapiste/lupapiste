@@ -193,6 +193,8 @@
     (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching "org-id" :R anything)
               => [{:id "LP-ORG-2000-00001" :permitType "R"}])
 
+    (provided (#'lupapalvelu.organization/get-organization anything)
+              => {:only-use-inspection-from-backend false})
 
     (provided (#'lupapalvelu.batchrun/fetch-reviews-for-organization-permit-type
                {:id "org-id" :krysp {:R {:url "url"}}} :R [{:id "LP-ORG-2000-00001" :permitType "R"}])

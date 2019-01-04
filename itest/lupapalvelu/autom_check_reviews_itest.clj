@@ -18,6 +18,7 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.krysp-test-util :refer [build-multi-app-xml]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.pate-legacy-itest-util :refer :all]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.review :as review]
@@ -346,11 +347,13 @@
         read-result => ok?)
       (fact "tasks have created timestamp"
         (:added-tasks-with-updated-buildings read-result) => (has every? :created))
-      (let [application (domain/get-application-no-access-checking application-id)]
+      (let [application (domain/get-application-no-access-checking application-id)
+            only-use-inspection-from-backend? (-> application :organization org/get-organization :only-use-inspection-from-backend)]
         (review/save-review-updates (assoc (action/application->command application) :user batchrun-user)
                                     (:updates read-result)
                                     (:added-tasks-with-updated-buildings read-result)
-                                    {})
+                                    {}
+                                    only-use-inspection-from-backend?)
         (let [updated-application (domain/get-application-no-access-checking application-id)
               last-attachment (last (:attachments updated-application))
               last-attachment-file-id (att/attachment-latest-file-id updated-application (:id last-attachment))]
