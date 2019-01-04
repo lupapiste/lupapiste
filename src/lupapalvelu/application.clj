@@ -948,6 +948,16 @@
         (= primary-operation "jatkoaika")
         (= primary-operation "ya-jatkoaika"))))
 
+
+;;
+;; Kuntalupatunnus from ALLU
+;;
+;FIXME: Works only for applications with verdicts atm, store kuntalupatunnus somewhere and add it to all verdicts that are created
+(defn set-kuntalupatunnus [app-id kuntalupatunnus]
+  (mongo/update-by-query :applications
+                         {:_id app-id :pate-verdicts.0 {$exists true}} ;; Has at leas one verdict
+                         {$set {:pate-verdicts.0.data.kuntalupatunnus kuntalupatunnus}}))
+
 ;;
 ;; Integration keys
 ;;
