@@ -4,6 +4,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
+            [lupapalvelu.document.poikkeamis-canonical :refer [poikkeus-application-to-canonical]]
             [lupapalvelu.pate.verdict-canonical :refer [verdict-canonical]]
             [lupapalvelu.pate.verdict-common :as vc]
             [monger.operators :refer :all]
@@ -169,6 +170,7 @@
    :location (ds/from-context [:application :location])
    :location-wgs84 (ds/from-context [:application :location-wgs84])
 
+   ;; TODO not all operations have canonical representation
    :operations (ds/from-context [rakennusvalvonta-asia :toimenpidetieto sequentialize
                                  (partial mapv :Toimenpide)])
    :operation-id #(or ((ds/from-context [:context :rakennustieto :Rakennus :yksilointitieto]) %)
@@ -210,7 +212,9 @@
 
 (defn ->reporting-result [application lang]
   ;; TODO check permit type, R or P (or others as well?)
-  (let [application-canonical (application-to-canonical application lang)]
+  (let [application-canonical (if (= (:permitType application) "R")
+                                (application-to-canonical application lang)
+                                (poikkeus-application-to-canonical application lang))]
     (ds/build-with-skeleton reporting-app-skeleton
                             {:application application
                              :canonical application-canonical

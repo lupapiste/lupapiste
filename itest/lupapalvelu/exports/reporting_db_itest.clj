@@ -29,7 +29,7 @@
       => (just [(contains {:id application-id})])))
 
   (let [timestamp-before-applications-are-created (now)
-        first-application-id (create-app-id pena :operation "aita")
+        first-application-id (create-app-id pena :operation "poikkeamis")
         timestamp-between-applications (now)
         second-application-id (create-app-id pena :operation "kerrostalo-rivitalo")]
 
