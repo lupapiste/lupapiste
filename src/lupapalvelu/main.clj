@@ -24,7 +24,8 @@
                "cleanup-uploaded-files"     'lupapalvelu.storage.file-storage/delete-old-unlinked-files
                "unarchive"                  'lupapalvelu.batchrun/unarchive
                "fix-helsinki-pdfa"          'lupapalvelu.batchrun/fix-bad-archival-conversions-in-091-R
-               "archive-digitized-projects" 'lupapalvelu.batchrun/archive-digitized-projects-in-orgs})
+               "archive-digitized-projects" 'lupapalvelu.batchrun/archive-digitized-projects-in-orgs
+               "convert-krysp"              'lupapalvelu.conversion.conversion-runner/convert!})
 
 (defn launch! [service args]
   (debugf "Loading namespace '%s'...\n" (namespace service))
