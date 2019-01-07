@@ -34,7 +34,7 @@
     (info (str "Adding vakuustieto notifications to " (count vakuus-ids) " applications."))
     (doseq [id vakuus-ids]
       (try
-        (->> {:id id :organization "092" :permitType "R"}
+        (->> {:id id :organization "092-R" :permitType "R"}
              krysp-fetch/get-application-xml-by-application-id
              conv-util/add-vakuustieto!)
         (catch Exception e
