@@ -85,6 +85,7 @@
    :operations (ds/array-from
                 :operations
                 {:id (ds/access :operation-id)
+                 :primary (ds/access :operation-primary?)
                  :kuvaus (ds/access :operation-description)
                  :nimi (ds/access :operation-name-fi)
                  :rakennus (ds/access :operation-building)
@@ -148,6 +149,24 @@
   (some-> ((ds/from-context [:context :rakennelmatieto :Rakennelma]) context)
           (dissoc :alkuHetki :sijaintitieto :yksilointitieto)))
 
+(defn- operation-id [canonical-operation]
+  (or (get-in canonical-operation [:rakennustieto :Rakennus :yksilointitieto])
+      (get-in canonical-operation [:rakennelmatieto :Rakennelma :yksilointitieto])))
+
+(defn- operations [context]
+  (let [operations (conj (-> context :application :secondaryOperations)
+                         (-> context :application :primaryOperation (assoc :primary? true)))
+        canonical-operations ((ds/from-context [rakennusvalvonta-asia :toimenpidetieto
+                                                sequentialize
+                                                (partial mapv :Toimenpide)])
+                              context)]
+    (mapv (fn [operation]
+            (merge operation
+                   (util/find-first #(= (:id operation)
+                                        (operation-id %))
+                                    canonical-operations)))
+          operations)))
+
 (defn- ->foreman [foreman]
   (-> foreman
       :Tyonjohtaja
@@ -159,24 +178,6 @@
       (set/rename-keys {:sijaistustieto     :sijaistukset
                         :vastattavaTyotieto :vastattavatTyot})
       (dissoc :vastattavatTyotehtavat)))
-
-(defn- operation-id [canonical-operation]
-  (or (get-in canonical-operation [:rakennustieto :Rakennus :yksilointitieto])
-      (get-in canonical-operation [:rakennelmatieto :Rakennelma :yksilointitieto])))
-
-(defn- operations [context]
-  (let [operations (conj (-> context :application :secondaryOperations)
-                         (-> context :application :primaryOperation (assoc :primary true)))
-        canonical-operations ((ds/from-context [rakennusvalvonta-asia :toimenpidetieto
-                                                sequentialize
-                                                (partial mapv :Toimenpide)])
-                              context)]
-    (mapv (fn [operation]
-            (merge operation
-                   (util/find-first #(= (:id operation)
-                                        (operation-id %))
-                                    canonical-operations)))
-          operations)))
 
 (defn reporting-app-accessors [application lang]
   {:test (constantly "foo")
@@ -197,6 +198,7 @@
    :operation-name-fi (ds/from-context [:context operation-name-fi])
    ;; We know that :rakennustieto is not sequential, i.e. there's only one building per operation
    :operation-building operation-building
+   :operation-primary? (ds/from-context [:context :primary?] false)
    :operation-structure operation-structure
 
    :projectDescription (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto

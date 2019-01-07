@@ -139,6 +139,7 @@
        :location-etrs-tm35fin (:location application-rakennuslupa)
        :location-wgs84 (:location-wgs84 application-rakennuslupa)
        :operations [{:id "muu-laajentaminen-id"
+                     :primary true
                      :kuvaus nil
                      :nimi "Muu rakennuksen muutostyö"
                      :rakennelma nil
@@ -256,6 +257,7 @@
                                                              :vesijohtoKytkin true
                                                              :viemariKytkin true}}}}
                     {:id "kerrostalo-rivitalo-id"
+                     :primary false
                      :kuvaus "kerrostalo-rivitalo-kuvaus"
                      :nimi "Asuinkerrostalon tai rivitalon rakentaminen"
                      :rakennelma nil
@@ -372,6 +374,7 @@
                                                              :vesijohtoKytkin true
                                                              :viemariKytkin true}}}}
                     {:id "laajentaminen-id"
+                     :primary false
                      :kuvaus nil
                      :nimi "Rakennuksen laajentaminen tai korjaaminen"
                      :rakennelma nil
@@ -488,6 +491,7 @@
                                                              :vesijohtoKytkin true
                                                              :viemariKytkin true}}}}
                     {:id "kaupunkikuva-id"
+                     :primary false
                      :kuvaus nil
                      :nimi "Aidan rakentaminen"
                      :rakennelma {:kayttotarkoitus "Aita"
@@ -497,11 +501,13 @@
                                   :tunnus {:jarjestysnumero 4}}
                      :rakennus nil}
                     {:id "5177ad63da060e8cd8348e32"
+                     :primary false
                      :kuvaus nil
                      :nimi "Puiden kaataminen"
                      :rakennelma nil
                      :rakennus nil}
                     {:id "purkaminen-id"
+                     :primary false
                      :kuvaus nil
                      :nimi "Rakennuksen purkaminen"
                      :rakennelma nil
