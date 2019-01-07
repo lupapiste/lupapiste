@@ -956,7 +956,7 @@
   "Store kuntalupatunnus here where it's read when creating a verdict. When creating a verdict kuntalupatunnus is
   placed with other verdict data where UI can find it (see lupapalvelu.backing-system.allu.contract/new-allu-contract)."
   [app-id kuntalupatunnus]
-  (mongo/update-by-id :applications app-id {$set {:kuntalupatunnus kuntalupatunnus}}))
+  (mongo/update-by-id :applications app-id {$set {:integrationKeys.ALLU.kuntalupatunnus kuntalupatunnus}}))
 
 ;;
 ;; Integration keys

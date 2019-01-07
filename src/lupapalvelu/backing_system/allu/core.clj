@@ -500,7 +500,7 @@
       response response)))
 
 (defn- set-allu-kuntalupatunnus!
-  "If request was successful, store ALLU details about about the application to db"
+  "If request was successful, store ALLU details about the application to db"
   [handler]
   (fn [{{{app-id :id} :application} ::command :as request}]
     (match (handler request)
@@ -540,7 +540,8 @@
   ([dev-mode?] (if dev-mode? imessages-mock-handler (make-remote-handler (env/value :allu :url)))))
 
 (defn- routes
-  "Compute the Reitit routes that call `handler` at their core."
+  "Compute the Reitit routes that call `handler` at their core. Special use case of reitit as this does not declare a
+  public API but an internal routing for requests to external APIs."
   ([handler] (routes (env/dev-mode?) handler))
   ([disable-io-middlewares? handler]
    (let [file-middleware (if disable-io-middlewares? [] [delimit-file-contents!])]
@@ -744,13 +745,6 @@
     (:body (allu-request-handler (case (agreement-state application)
                                    :proposal (contract-proposal-request command)
                                    :final (final-contract-request command))))
-    (catch [:text "error.allu.http"] _ nil)))
-
-(defn load-allu-application-data
-  "GET application data from ALLU."
-  [command]
-  (try+
-    (:body (allu-request-handler (allu-application-data command)))
     (catch [:text "error.allu.http"] _ nil)))
 
 (defn load-allu-application-data!

@@ -19,7 +19,7 @@
 
 (sc/defn ^:always-validate new-allu-contract :- schemas/PateVerdict [{:keys [application created] :as command}]
   (let [category (schema-util/application->category application)
-        kuntalupatunnus (:kuntalupatunnus application)]
+        kuntalupatunnus (-> application :integrationKeys :ALLU :kuntalupatunnus)]
     {:id       (mongo/create-id)
      :modified created
      :state    (pate-verdict/wrapped-state command :published)
