@@ -52,18 +52,18 @@
 
 (defschema ^:private MiniCommand
   "A command that has been abridged for sending through JMS."
-  {:application {:id           ssc/ApplicationId
+  {:application {:id ssc/ApplicationId
                  :organization sc/Str
-                 :state        (apply sc/enum (map name states/all-states))}
-   :action      sc/Str
-   :user        {:id       sc/Str
-                 :username sc/Str}})
+                 :state (apply sc/enum (map name states/all-states))}
+   :action sc/Str
+   :user {:id sc/Str
+          :username sc/Str}})
 
 (sc/defn ^{:private true, :always-validate true} minimize-command :- MiniCommand
   [{:keys [application action user]}]
-  {:application (select-keys application (keys (:application MiniCommand)))
-   :action      action
-   :user        (select-keys user (keys (:user MiniCommand)))})
+  {:application          (select-keys application (keys (:application MiniCommand)))
+   :action               action
+   :user                 (select-keys user (keys (:user MiniCommand)))})
 
 (declare allu-router)
 
@@ -207,8 +207,8 @@
 (defn- allu-application-data [{:keys [application] :as command}]
   (let [allu-id (-> application :integrationKeys :ALLU :id)
         params {:path {:id allu-id}}
-        route-match (reitit/match-by-name allu-router [:application :data] (:path params))]
-    {:command        (minimize-command command)
+        route-match (reitit/match-by-name allu-router [:applications :allu-data] (:path params))]
+    {::command        (minimize-command command)
      :uri            (:path route-match)
      :request-method (route-match->request-method route-match)}))
 
@@ -507,14 +507,26 @@
                                                              response)
       response response)))
 
-(defn- set-allu-application-data!
+(defn- set-allu-kuntalupatunnus!
   "If request was successful, store ALLU details about the application to db"
   [handler]
   (fn [{{{app-id :id} :application} ::command :as request}]
     (match (handler request)
-      ({:status (:or 200 201), :body body} :as response) (do (application/set-allu-application-id app-id (:applicationId body))
+      ({:status (:or 200 201), :body body} :as response) (do (application/set-kuntalupatunnus app-id (:applicationId body))
                                                              response)
       response response)))
+
+(declare load-allu-application-data!)
+
+(defn- get-allu-kuntalupatunnus!
+  "Makes a new GET request to fetch kuntalupatunnus from ALLU (middleware in that request stores it to db)"
+  [handler]
+  (fn [request]
+    (let [response (handler request)
+          allu-integration-key (:body response)
+          new-command (assoc-in (::command request) [:application :integrationKeys :ALLU :id] allu-integration-key)]
+      (load-allu-application-data! new-command)
+      response)))
 
 (defn- log-or-fail!
   "`allu-fail!` on HTTP errors, else do logging."
@@ -536,7 +548,8 @@
   ([dev-mode?] (if dev-mode? imessages-mock-handler (make-remote-handler (env/value :allu :url)))))
 
 (defn- routes
-  "Compute the Reitit routes that call `handler` at their core."
+  "Compute the Reitit routes that call `handler` at their core. Special use case of reitit as this does not declare a
+  public API but an internal routing for requests to external APIs."
   ([handler] (routes (env/dev-mode?) handler))
   ([disable-io-middlewares? handler]
    (let [file-middleware (if disable-io-middlewares? [] [delimit-file-contents!])]
@@ -559,21 +572,24 @@
                             (conj (preprocessor->middleware (fn-> content->json jwt-authorize))))
             :coercion reitit.coercion.schema/coercion}
        ["applications"
-        ["/:id/cancelled" {:name [:applications :cancel]
-                           :parameters {:path {:id ssc/NatString}}
-                           :put {:handler handler}}]
+        ["/:id" {:parameters {:path {:id ssc/NatString}}}
+         ["" {:name [:applications :allu-data]
+              :middleware [set-allu-kuntalupatunnus! json-response]
+              :get {:handler handler}}]
 
-        ["/:id/attachments" {:name [:attachments :create]
-                             :parameters {:path {:id ssc/NatString}
-                                          :multipart {:metadata AttachmentMetadata
-                                                      :file AttachmentFile}}
-                             :middleware file-middleware
-                             :post {:handler handler}}]]
+         ["/cancelled" {:name [:applications :cancel]
+                        :put {:handler handler}}]
+
+         ["/attachments" {:name [:attachments :create]
+                          :parameters {:multipart {:metadata AttachmentMetadata
+                                                   :file AttachmentFile}}
+                          :middleware file-middleware
+                          :post {:handler handler}}]]]
 
        ["placementcontracts"
         ["" {:name [:placementcontracts :create]
              :parameters {:body PlacementContract}
-             :middleware (if disable-io-middlewares? [] [set-allu-integration-key!])
+             :middleware (if disable-io-middlewares? [] [get-allu-kuntalupatunnus! set-allu-integration-key!])
              :post {:handler handler}}]
 
         ["/:id" {:parameters {:path {:id ssc/NatString}}}
@@ -740,14 +756,15 @@
     (catch [:text "error.allu.http"] _ nil)))
 
 (defn load-allu-application-data!
-  "GET application data from ALLU."
+  "GET application data from ALLU and store it to db."
   [command]
   (let [resp (send-allu-request! (allu-application-data command))]
     resp))
 
-(defn load-contract-metadata!
+(defn load-contract-metadata
   "GET the name of the person who signed the ALLU verdict."
   [command]
+  (allu-request-handler (contract-metadata command))
   (try+
     (:body (allu-request-handler (contract-metadata command)))
     (catch [:text "error.allu.http"] _ nil)))

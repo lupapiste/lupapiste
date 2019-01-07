@@ -1001,6 +1001,16 @@
         (= primary-operation "jatkoaika")
         (= primary-operation "ya-jatkoaika"))))
 
+
+;;
+;; Kuntalupatunnus from ALLU
+;;
+(defn set-kuntalupatunnus
+  "Store kuntalupatunnus here where it's read when creating a verdict. When creating a verdict kuntalupatunnus is
+  placed with other verdict data where UI can find it (see lupapalvelu.backing-system.allu.contract/new-allu-contract)."
+  [app-id kuntalupatunnus]
+  (mongo/update-by-id :applications app-id {$set {:integrationKeys.ALLU.kuntalupatunnus kuntalupatunnus}}))
+
 ;;
 ;; Integration keys
 ;;
@@ -1008,12 +1018,6 @@
 (defn set-integration-key [app-id system-name key-data]
   (mongo/update-by-id :applications app-id {$set {(str "integrationKeys." (name system-name)) key-data}}))
 
-;;
-;; Allu's internal application id
-;;
-
-(defn set-allu-application-id [app-id allu-id]
-  (mongo/update-by-id :applications app-id {$set {"allu.application-id" allu-id}}))
 
 ;; Utils for the sheriff
 
