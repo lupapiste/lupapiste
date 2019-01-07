@@ -139,7 +139,8 @@
        :location-etrs-tm35fin (:location application-rakennuslupa)
        :location-wgs84 (:location-wgs84 application-rakennuslupa)
        :operations [{:id "muu-laajentaminen-id"
-                     :kuvaus "Muu rakennuksen muutostyö"
+                     :kuvaus nil
+                     :nimi "Muu rakennuksen muutostyö"
                      :rakennelma nil
                      :rakennus {:omistajat [{:VRKrooliKoodi "rakennuksen omistaja"
                                              :henkilo {:henkilotunnus "210281-9988"
@@ -255,7 +256,8 @@
                                                              :vesijohtoKytkin true
                                                              :viemariKytkin true}}}}
                     {:id "kerrostalo-rivitalo-id"
-                     :kuvaus "Asuinkerrostalon tai rivitalon rakentaminen"
+                     :kuvaus "kerrostalo-rivitalo-kuvaus"
+                     :nimi "Asuinkerrostalon tai rivitalon rakentaminen"
                      :rakennelma nil
                      :rakennus {:omistajat [{:VRKrooliKoodi "rakennuksen omistaja"
                                              :henkilo {:henkilotunnus "210281-9988"
@@ -370,7 +372,8 @@
                                                              :vesijohtoKytkin true
                                                              :viemariKytkin true}}}}
                     {:id "laajentaminen-id"
-                     :kuvaus "Rakennuksen laajentaminen tai korjaaminen"
+                     :kuvaus nil
+                     :nimi "Rakennuksen laajentaminen tai korjaaminen"
                      :rakennelma nil
                      :rakennus {:omistajat [{:VRKrooliKoodi "rakennuksen omistaja"
                                              :henkilo {:henkilotunnus "210281-9988"
@@ -485,15 +488,22 @@
                                                              :vesijohtoKytkin true
                                                              :viemariKytkin true}}}}
                     {:id "kaupunkikuva-id"
-                     :kuvaus "Aidan rakentaminen"
+                     :kuvaus nil
+                     :nimi "Aidan rakentaminen"
                      :rakennelma {:kayttotarkoitus "Aita"
                                   :kiinttun "21111111111111"
                                   :kokonaisala "0"
                                   :kuvaus {:kuvaus "Aidan rakentaminen rajalle"}
                                   :tunnus {:jarjestysnumero 4}}
                      :rakennus nil}
+                    {:id "5177ad63da060e8cd8348e32"
+                     :kuvaus nil
+                     :nimi "Puiden kaataminen"
+                     :rakennelma nil
+                     :rakennus nil}
                     {:id "purkaminen-id"
-                     :kuvaus "Rakennuksen purkaminen"
+                     :kuvaus nil
+                     :nimi "Rakennuksen purkaminen"
                      :rakennelma nil
                      :rakennus {:omistajat [{:VRKrooliKoodi "rakennuksen omistaja"
                                              :henkilo {:henkilotunnus "210281-9988"

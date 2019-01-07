@@ -5,6 +5,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
             [lupapalvelu.document.poikkeamis-canonical :refer [poikkeus-application-to-canonical]]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pate.verdict-canonical :refer [verdict-canonical]]
             [lupapalvelu.pate.verdict-common :as vc]
             [monger.operators :refer :all]
@@ -85,6 +86,7 @@
                 :operations
                 {:id (ds/access :operation-id)
                  :kuvaus (ds/access :operation-description)
+                 :nimi (ds/access :operation-name-fi)
                  :rakennus (ds/access :operation-building)
                  :rakennelma (ds/access :operation-structure)})
 
@@ -132,8 +134,8 @@
 (defn- dissoc-operation-types [operation]
   (apply dissoc operation operation-types))
 
-(defn- operation-description [operation]
-  (:kuvaus (util/find-first identity (map #(get operation %) operation-types))))
+(defn- operation-name-fi [operation]
+  (i18n/localize "fi" (str "operations." (:name operation))))
 
 (defn- operation-building [context]
   (some-> ((ds/from-context [:context :rakennustieto :Rakennus]) context)
@@ -158,6 +160,24 @@
                         :vastattavaTyotieto :vastattavatTyot})
       (dissoc :vastattavatTyotehtavat)))
 
+(defn- operation-id [canonical-operation]
+  (or (get-in canonical-operation [:rakennustieto :Rakennus :yksilointitieto])
+      (get-in canonical-operation [:rakennelmatieto :Rakennelma :yksilointitieto])))
+
+(defn- operations [context]
+  (let [operations (conj (-> context :application :secondaryOperations)
+                         (-> context :application :primaryOperation (assoc :primary true)))
+        canonical-operations ((ds/from-context [rakennusvalvonta-asia :toimenpidetieto
+                                                sequentialize
+                                                (partial mapv :Toimenpide)])
+                              context)]
+    (mapv (fn [operation]
+            (merge operation
+                   (util/find-first #(= (:id operation)
+                                        (operation-id %))
+                                    canonical-operations)))
+          operations)))
+
 (defn reporting-app-accessors [application lang]
   {:test (constantly "foo")
    :id (ds/from-context [:application :id])
@@ -171,11 +191,10 @@
    :location-wgs84 (ds/from-context [:application :location-wgs84])
 
    ;; TODO not all operations have canonical representation
-   :operations (ds/from-context [rakennusvalvonta-asia :toimenpidetieto sequentialize
-                                 (partial mapv :Toimenpide)])
-   :operation-id #(or ((ds/from-context [:context :rakennustieto :Rakennus :yksilointitieto]) %)
-                      ((ds/from-context [:context :rakennelmatieto :Rakennelma :yksilointitieto]) %))
-   :operation-description (ds/from-context [:context operation-description])
+   :operations operations
+   :operation-id (ds/from-context [:context :id])
+   :operation-description (ds/from-context [:context :description])
+   :operation-name-fi (ds/from-context [:context operation-name-fi])
    ;; We know that :rakennustieto is not sequential, i.e. there's only one building per operation
    :operation-building operation-building
    :operation-structure operation-structure
