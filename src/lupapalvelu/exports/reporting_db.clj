@@ -96,6 +96,9 @@
    ;; TODO Kaikkia kenttiä ei vielä listattu
    })
 
+(defn str->num [v ks]
+  (util/update-values v ks #(util/->int % nil)))
+
 (def get-katselmustieto
   (ds/from-context [:context :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus]))
 
@@ -143,7 +146,12 @@
           (update :omistajatieto (comp (partial mapv :Omistaja)
                                        sequentialize))
           (dissoc :alkuHetki :sijaintitieto :yksilointitieto)
-          (set/rename-keys {:rakennuksenTiedot :tiedot :omistajatieto :omistajat})))
+          (set/rename-keys {:rakennuksenTiedot :tiedot :omistajatieto :omistajat})
+          (util/safe-update-in [:tiedot :asuinhuoneistot :huoneisto]
+                               (partial mapv #(str->num % [:huoneistoala :huoneluku])))
+          (update :tiedot #(str->num % [:energiatehokkuusluku :kellaripinta-ala :kerrosala
+                                        :kerrosluku :kokonaisala :rakennusoikeudellinenKerrosala
+                                        :tilavuus :kellarinpinta-ala]))))
 
 (defn- operation-structure [context]
   (some-> ((ds/from-context [:context :rakennelmatieto :Rakennelma]) context)
@@ -208,9 +216,11 @@
    :parties (ds/from-context [osapuolet :osapuolitieto
                               sequentialize (partial mapv :Osapuoli)])
    :planners (ds/from-context [osapuolet :suunnittelijatieto
-                               sequentialize (partial mapv :Suunnittelija)])
+                               sequentialize (partial mapv (comp #(str->num % [:kokemusvuodet :valmistumisvuosi])
+                                                                 :Suunnittelija))])
    :foremen (ds/from-context [osapuolet :tyonjohtajatieto
-                              sequentialize (partial mapv ->foreman)])
+                              sequentialize (partial mapv (comp #(str->num % [:kokemusvuodet :valmistumisvuosi :valvottavienKohteidenMaara])
+                                                                ->foreman))])
 
    :reviews (ds/from-context [:application :tasks (partial mapv #(katselmus-canonical application lang % nil))])
    :review-date (ds/from-context [get-katselmustieto :pitoPvm])

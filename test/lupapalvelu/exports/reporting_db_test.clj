@@ -190,47 +190,47 @@
                                                       :sahkopostiosoite "yritys@example.com"
                                                       :vainsahkoinenAsiointiKytkin false}}]
                                 :rakentajatyyppi "muu"
-                                :tiedot {:asuinhuoneistot {:huoneisto [{:huoneistoala "56"
-                                                                         :huoneistonTyyppi "asuinhuoneisto"
-                                                                         :huoneistotunnus {:huoneistonumero "001"
-                                                                                           :jakokirjain "a"
-                                                                                           :porras "A"}
-                                                                         :huoneluku "66"
-                                                                         :keittionTyyppi "keittio"
-                                                                         :muutostapa "lisäys"
-                                                                         :varusteet {:WCKytkin true
-                                                                                     :ammeTaiSuihkuKytkin false
-                                                                                     :lamminvesiKytkin false
-                                                                                     :parvekeTaiTerassiKytkin true
-                                                                                     :saunaKytkin false}}
-                                                                        {:huoneistoala "02"
-                                                                         :huoneistonTyyppi "toimitila"
-                                                                         :huoneistotunnus {:huoneistonumero "002"
-                                                                                           :jakokirjain "a"
-                                                                                           :porras "A"}
-                                                                         :huoneluku "12"
-                                                                         :keittionTyyppi "keittokomero"
-                                                                         :muutostapa "muutos"
-                                                                         :varusteet {:WCKytkin false
-                                                                                     :ammeTaiSuihkuKytkin true
-                                                                                     :lamminvesiKytkin true
-                                                                                     :parvekeTaiTerassiKytkin false
-                                                                                     :saunaKytkin true}}]}
+                                :tiedot {:asuinhuoneistot {:huoneisto [{:huoneistoala 56
+                                                                        :huoneistonTyyppi "asuinhuoneisto"
+                                                                        :huoneistotunnus {:huoneistonumero "001"
+                                                                                          :jakokirjain "a"
+                                                                                          :porras "A"}
+                                                                        :huoneluku 66
+                                                                        :keittionTyyppi "keittio"
+                                                                        :muutostapa "lisäys"
+                                                                        :varusteet {:WCKytkin true
+                                                                                    :ammeTaiSuihkuKytkin false
+                                                                                    :lamminvesiKytkin false
+                                                                                    :parvekeTaiTerassiKytkin true
+                                                                                    :saunaKytkin false}}
+                                                                       {:huoneistoala 2
+                                                                        :huoneistonTyyppi "toimitila"
+                                                                        :huoneistotunnus {:huoneistonumero "002"
+                                                                                          :jakokirjain "a"
+                                                                                          :porras "A"}
+                                                                        :huoneluku 12
+                                                                        :keittionTyyppi "keittokomero"
+                                                                        :muutostapa "muutos"
+                                                                        :varusteet {:WCKytkin false
+                                                                                    :ammeTaiSuihkuKytkin true
+                                                                                    :lamminvesiKytkin true
+                                                                                    :parvekeTaiTerassiKytkin false
+                                                                                    :saunaKytkin true}}]}
                                          :energialuokka "C"
-                                         :energiatehokkuusluku "124"
+                                         :energiatehokkuusluku 124
                                          :energiatehokkuusluvunYksikko "kWh/m2"
                                          :julkisivu {:julkisivumateriaali "puu"}
                                          :kantavaRakennusaine {:rakennusaine "puu"}
                                          :kayttotarkoitus "012 kahden asunnon talot"
-                                         :kellarinpinta-ala "100"
-                                         :kerrosala "180"
-                                         :kerrosluku "2"
-                                         :kokonaisala "1000"
+                                         :kellarinpinta-ala 100
+                                         :kerrosala 180
+                                         :kerrosluku 2
+                                         :kokonaisala 1000
                                          :lammitystapa "vesikeskus"
                                          :lammonlahde {:muu "polttopuillahan tuo"}
                                          :liitettyJatevesijarjestelmaanKytkin true
                                          :paloluokka "P1"
-                                         :rakennusoikeudellinenKerrosala "160"
+                                         :rakennusoikeudellinenKerrosala 160
                                          :rakennustunnus {:jarjestysnumero 1
                                                           :kiinttun "21111111111111"
                                                           :muuTunnustieto [{:MuuTunnus {:sovellus "toimenpideId"
@@ -240,7 +240,7 @@
                                                           :rakennusnro "001"
                                                           :valtakunnallinenNumero "1234567892"}
                                          :rakentamistapa "elementti"
-                                         :tilavuus "1500"
+                                         :tilavuus 1500
                                          :varusteet {:aurinkopaneeliKytkin true
                                                      :hissiKytkin true
                                                      :kaasuKytkin true
@@ -308,47 +308,47 @@
                                                       :sahkopostiosoite "yritys@example.com"
                                                       :vainsahkoinenAsiointiKytkin false}}]
                                 :rakentajatyyppi "muu"
-                                :tiedot {:asuinhuoneistot {:huoneisto [{:huoneistoala "56"
-                                                                         :huoneistonTyyppi "asuinhuoneisto"
-                                                                         :huoneistotunnus {:huoneistonumero "001"
-                                                                                           :jakokirjain "a"
-                                                                                           :porras "A"}
-                                                                         :huoneluku "66"
-                                                                         :keittionTyyppi "keittio"
-                                                                         :muutostapa "lisäys"
-                                                                         :varusteet {:WCKytkin true
-                                                                                     :ammeTaiSuihkuKytkin false
-                                                                                     :lamminvesiKytkin false
-                                                                                     :parvekeTaiTerassiKytkin true
-                                                                                     :saunaKytkin false}}
-                                                                        {:huoneistoala "02"
-                                                                         :huoneistonTyyppi "toimitila"
-                                                                         :huoneistotunnus {:huoneistonumero "002"
-                                                                                           :jakokirjain "a"
-                                                                                           :porras "A"}
-                                                                         :huoneluku "12"
-                                                                         :keittionTyyppi "keittokomero"
-                                                                         :muutostapa "lisäys"
-                                                                         :varusteet {:WCKytkin false
-                                                                                     :ammeTaiSuihkuKytkin true
-                                                                                     :lamminvesiKytkin true
-                                                                                     :parvekeTaiTerassiKytkin false
-                                                                                     :saunaKytkin true}}]}
+                                :tiedot {:asuinhuoneistot {:huoneisto [{:huoneistoala 56
+                                                                        :huoneistonTyyppi "asuinhuoneisto"
+                                                                        :huoneistotunnus {:huoneistonumero "001"
+                                                                                          :jakokirjain "a"
+                                                                                          :porras "A"}
+                                                                        :huoneluku 66
+                                                                        :keittionTyyppi "keittio"
+                                                                        :muutostapa "lisäys"
+                                                                        :varusteet {:WCKytkin true
+                                                                                    :ammeTaiSuihkuKytkin false
+                                                                                    :lamminvesiKytkin false
+                                                                                    :parvekeTaiTerassiKytkin true
+                                                                                    :saunaKytkin false}}
+                                                                       {:huoneistoala 2
+                                                                        :huoneistonTyyppi "toimitila"
+                                                                        :huoneistotunnus {:huoneistonumero "002"
+                                                                                          :jakokirjain "a"
+                                                                                          :porras "A"}
+                                                                        :huoneluku 12
+                                                                        :keittionTyyppi "keittokomero"
+                                                                        :muutostapa "lisäys"
+                                                                        :varusteet {:WCKytkin false
+                                                                                    :ammeTaiSuihkuKytkin true
+                                                                                    :lamminvesiKytkin true
+                                                                                    :parvekeTaiTerassiKytkin false
+                                                                                    :saunaKytkin true}}]}
                                          :energialuokka "C"
-                                         :energiatehokkuusluku "124"
+                                         :energiatehokkuusluku 124
                                          :energiatehokkuusluvunYksikko "kWh/m2"
                                          :julkisivu {:julkisivumateriaali "puu"}
                                          :kantavaRakennusaine {:rakennusaine "puu"}
                                          :kayttotarkoitus "012 kahden asunnon talot"
-                                         :kellarinpinta-ala "100"
-                                         :kerrosala "180"
-                                         :kerrosluku "2"
-                                         :kokonaisala "1000"
+                                         :kellarinpinta-ala 100
+                                         :kerrosala 180
+                                         :kerrosluku 2
+                                         :kokonaisala 1000
                                          :lammitystapa "vesikeskus"
                                          :lammonlahde {:muu "polttopuillahan tuo"}
                                          :liitettyJatevesijarjestelmaanKytkin true
                                          :paloluokka "P1"
-                                         :rakennusoikeudellinenKerrosala "160"
+                                         :rakennusoikeudellinenKerrosala 160
                                          :rakennustunnus {:jarjestysnumero 2
                                                           :kiinttun "21111111111111"
                                                           :muuTunnustieto [{:MuuTunnus {:sovellus "toimenpideId"
@@ -357,7 +357,7 @@
                                                                                         :tunnus "kerrostalo-rivitalo-id"}}]
                                                           :rakennuksenSelite "A: kerrostalo-rivitalo-kuvaus"}
                                          :rakentamistapa "elementti"
-                                         :tilavuus "1500"
+                                         :tilavuus 1500
                                          :varusteet {:aurinkopaneeliKytkin true
                                                      :hissiKytkin true
                                                      :kaasuKytkin true
@@ -425,47 +425,47 @@
                                                       :sahkopostiosoite "yritys@example.com"
                                                       :vainsahkoinenAsiointiKytkin false}}]
                                 :rakentajatyyppi "muu"
-                                :tiedot {:asuinhuoneistot {:huoneisto [{:huoneistoala "56"
-                                                                         :huoneistonTyyppi "asuinhuoneisto"
-                                                                         :huoneistotunnus {:huoneistonumero "001"
-                                                                                           :jakokirjain "a"
-                                                                                           :porras "A"}
-                                                                         :huoneluku "66"
-                                                                         :keittionTyyppi "keittio"
-                                                                         :muutostapa "lisäys"
-                                                                         :varusteet {:WCKytkin true
-                                                                                     :ammeTaiSuihkuKytkin false
-                                                                                     :lamminvesiKytkin false
-                                                                                     :parvekeTaiTerassiKytkin true
-                                                                                     :saunaKytkin false}}
-                                                                        {:huoneistoala "02"
-                                                                         :huoneistonTyyppi "toimitila"
-                                                                         :huoneistotunnus {:huoneistonumero "002"
-                                                                                           :jakokirjain "a"
-                                                                                           :porras "A"}
-                                                                         :huoneluku "12"
-                                                                         :keittionTyyppi "keittokomero"
-                                                                         :muutostapa "muutos"
-                                                                         :varusteet {:WCKytkin false
-                                                                                     :ammeTaiSuihkuKytkin true
-                                                                                     :lamminvesiKytkin true
-                                                                                     :parvekeTaiTerassiKytkin false
-                                                                                     :saunaKytkin true}}]}
+                                :tiedot {:asuinhuoneistot {:huoneisto [{:huoneistoala 56
+                                                                        :huoneistonTyyppi "asuinhuoneisto"
+                                                                        :huoneistotunnus {:huoneistonumero "001"
+                                                                                          :jakokirjain "a"
+                                                                                          :porras "A"}
+                                                                        :huoneluku 66
+                                                                        :keittionTyyppi "keittio"
+                                                                        :muutostapa "lisäys"
+                                                                        :varusteet {:WCKytkin true
+                                                                                    :ammeTaiSuihkuKytkin false
+                                                                                    :lamminvesiKytkin false
+                                                                                    :parvekeTaiTerassiKytkin true
+                                                                                    :saunaKytkin false}}
+                                                                       {:huoneistoala 2
+                                                                        :huoneistonTyyppi "toimitila"
+                                                                        :huoneistotunnus {:huoneistonumero "002"
+                                                                                          :jakokirjain "a"
+                                                                                          :porras "A"}
+                                                                        :huoneluku 12
+                                                                        :keittionTyyppi "keittokomero"
+                                                                        :muutostapa "muutos"
+                                                                        :varusteet {:WCKytkin false
+                                                                                    :ammeTaiSuihkuKytkin true
+                                                                                    :lamminvesiKytkin true
+                                                                                    :parvekeTaiTerassiKytkin false
+                                                                                    :saunaKytkin true}}]}
                                          :energialuokka "C"
-                                         :energiatehokkuusluku "124"
+                                         :energiatehokkuusluku 124
                                          :energiatehokkuusluvunYksikko "kWh/m2"
                                          :julkisivu {:julkisivumateriaali "puu"}
                                          :kantavaRakennusaine {:rakennusaine "puu"}
                                          :kayttotarkoitus "012 kahden asunnon talot"
-                                         :kellarinpinta-ala "100"
-                                         :kerrosala "180"
-                                         :kerrosluku "2"
-                                         :kokonaisala "1000"
+                                         :kellarinpinta-ala 100
+                                         :kerrosala 180
+                                         :kerrosluku 2
+                                         :kokonaisala 1000
                                          :lammitystapa "vesikeskus"
                                          :lammonlahde {:muu "polttopuillahan tuo"}
                                          :liitettyJatevesijarjestelmaanKytkin true
                                          :paloluokka "P1"
-                                         :rakennusoikeudellinenKerrosala "160"
+                                         :rakennusoikeudellinenKerrosala 160
                                          :rakennustunnus {:jarjestysnumero 3
                                                           :kiinttun "21111111111111"
                                                           :muuTunnustieto [{:MuuTunnus {:sovellus "toimenpideId"
@@ -474,7 +474,7 @@
                                                                                         :tunnus "laajentaminen-id"}}]
                                                           :rakennusnro "001"}
                                          :rakentamistapa "elementti"
-                                         :tilavuus "1500"
+                                         :tilavuus 1500
                                          :varusteet {:aurinkopaneeliKytkin true
                                                      :hissiKytkin true
                                                      :kaasuKytkin true
@@ -561,11 +561,11 @@
                                 :tiedot {:julkisivu {:julkisivumateriaali "puu"}
                                          :kantavaRakennusaine {:rakennusaine "puu"}
                                          :kayttotarkoitus "012 kahden asunnon talot"
-                                         :kellarinpinta-ala "100"
-                                         :kerrosala "180"
-                                         :kerrosluku "2"
-                                         :kokonaisala "1000"
-                                         :rakennusoikeudellinenKerrosala "160"
+                                         :kellarinpinta-ala 100
+                                         :kerrosala 180
+                                         :kerrosluku 2
+                                         :kokonaisala 1000
+                                         :rakennusoikeudellinenKerrosala 160
                                          :rakennustunnus {:jarjestysnumero 5
                                                           :kiinttun "21111111111111"
                                                           :muuTunnustieto [{:MuuTunnus {:sovellus "toimenpideId"
@@ -574,7 +574,7 @@
                                                                                         :tunnus "purkaminen-id"}}]
                                                           :rakennusnro "001"}
                                          :rakentamistapa "elementti"
-                                         :tilavuus "1500"}}}]
+                                         :tilavuus 1500}}}]
        :permitType "R"
        :projectDescription "Uuden rakennuksen rakentaminen tontille.\n\nPuiden kaataminen:Puun kaataminen"
        :parties [{:VRKrooliKoodi "maksaja"
@@ -694,13 +694,13 @@
                                       :valtioSuomeksi "Kiina"}
                              :puhelin "+358401234567"
                              :sahkopostiosoite "pena@example.com"}
-                   :kokemusvuodet "5"
+                   :kokemusvuodet 5
                    :koulutus "arkkitehti"
                    :muuSuunnittelijaRooli "ei listassa -rooli"
                    :patevyysvaatimusluokka "B"
                    :suunnittelijaRoolikoodi "muu"
                    :vaadittuPatevyysluokka "C"
-                   :valmistumisvuosi "2010"
+                   :valmistumisvuosi 2010
                    :yritys {:liikeJaYhteisotunnus "1060155-5"
                             :nimi "Solita Oy"
                             :postiosoite {:osoitenimi {:teksti "katu"}
@@ -731,12 +731,12 @@
                                       :valtioSuomeksi "Kiina"}
                              :puhelin "+358401234567"
                              :sahkopostiosoite "pena@example.com"}
-                   :kokemusvuodet "5"
+                   :kokemusvuodet 5
                    :koulutus "muu"
                    :patevyysvaatimusluokka "AA"
                    :suunnittelijaRoolikoodi "GEO-suunnittelija"
                    :vaadittuPatevyysluokka "A"
-                   :valmistumisvuosi "2010"
+                   :valmistumisvuosi 2010
                    :yritys {:liikeJaYhteisotunnus "1060155-5"
                             :nimi "Solita Oy"
                             :postiosoite {:osoitenimi {:teksti "katu"}
@@ -767,12 +767,12 @@
                                       :valtioSuomeksi "Kiina"}
                              :puhelin "+358401234567"
                              :sahkopostiosoite "pena@example.com"}
-                   :kokemusvuodet "5"
+                   :kokemusvuodet 5
                    :koulutus "arkkitehti"
                    :patevyysvaatimusluokka "B"
                    :suunnittelijaRoolikoodi "rakennusfysikaalinen suunnittelija"
                    :vaadittuPatevyysluokka "C"
-                   :valmistumisvuosi "2010"
+                   :valmistumisvuosi 2010
                    :yritys {:liikeJaYhteisotunnus "1060155-5"
                             :nimi "Solita Oy"
                             :postiosoite {:osoitenimi {:teksti "katu"}
@@ -803,12 +803,12 @@
                                       :valtioSuomeksi "Kiina"}
                              :puhelin "+358401234567"
                              :sahkopostiosoite "pena@example.com"}
-                   :kokemusvuodet "5"
+                   :kokemusvuodet 5
                    :koulutus "arkkitehti"
                    :patevyysvaatimusluokka "ei tiedossa"
                    :suunnittelijaRoolikoodi "pääsuunnittelija"
                    :vaadittuPatevyysluokka "AA"
-                   :valmistumisvuosi "2010"
+                   :valmistumisvuosi 2010
                    :yritys {:liikeJaYhteisotunnus "1060155-5"
                             :nimi "Solita Oy"
                             :postiosoite {:osoitenimi {:teksti "katu"}
@@ -838,7 +838,7 @@
                                      :valtioSuomeksi "Kiina"}
                             :puhelin "+358401234567"
                             :sahkopostiosoite "pena@example.com"}
-                  :kokemusvuodet "3"
+                  :kokemusvuodet 3
                   :koulutus "muu"
                   :paattymisPvm "2014-02-20"
                   :patevyysvaatimusluokka "A"
@@ -850,8 +850,8 @@
                   :tyonjohtajaHakemusKytkin true
                   :tyonjohtajaRooliKoodi "KVV-työnjohtaja"
                   :vaadittuPatevyysluokka "A"
-                  :valmistumisvuosi "2010"
-                  :valvottavienKohteidenMaara "9"
+                  :valmistumisvuosi 2010
+                  :valvottavienKohteidenMaara 9
                   :vastattavatTyot ["Kiinteistön vesi- ja viemärilaitteiston rakentaminen"
                                     "Kiinteistön ilmanvaihtolaitteiston rakentaminen"
                                     "Maanrakennustyö"
