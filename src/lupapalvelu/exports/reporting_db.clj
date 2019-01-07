@@ -151,6 +151,8 @@
           ;; Change various numerical values into actual numbers
           (util/safe-update-in [:tiedot :asuinhuoneistot :huoneisto]
                                (partial mapv #(str->num % [:huoneistoala :huoneluku])))
+          (util/safe-update-in [:tiedot :varusteet] #(str->num % [:saunoja]))
+
           (update :tiedot #(str->num % [:energiatehokkuusluku :kellaripinta-ala :kerrosala
                                         :kerrosluku :kokonaisala :rakennusoikeudellinenKerrosala
                                         :tilavuus :kellarinpinta-ala]))))

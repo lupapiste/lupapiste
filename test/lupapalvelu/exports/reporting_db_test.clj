@@ -247,7 +247,7 @@
                                                      :koneellinenilmastointiKytkin true
                                                      :lamminvesiKytkin true
                                                      :sahkoKytkin true
-                                                     :saunoja "1"
+                                                     :saunoja 1
                                                      :vaestonsuoja 1
                                                      :vesijohtoKytkin true
                                                      :viemariKytkin true}
@@ -364,7 +364,7 @@
                                                      :koneellinenilmastointiKytkin true
                                                      :lamminvesiKytkin true
                                                      :sahkoKytkin true
-                                                     :saunoja "1"
+                                                     :saunoja 1
                                                      :vaestonsuoja 1
                                                      :vesijohtoKytkin true
                                                      :viemariKytkin true}
@@ -481,7 +481,7 @@
                                                      :koneellinenilmastointiKytkin true
                                                      :lamminvesiKytkin true
                                                      :sahkoKytkin true
-                                                     :saunoja "1"
+                                                     :saunoja 1
                                                      :vaestonsuoja 1
                                                      :vesijohtoKytkin true
                                                      :viemariKytkin true}
