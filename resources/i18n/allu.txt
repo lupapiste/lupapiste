@@ -138,3 +138,5 @@
 "lmv.area.placeholder" "fi" "Esim. 50"
 "lyhytaikainen-maanvuokraus.help" "fi" "Vuokrauksen kuvauksen ohjeteksti."
 "lyhytaikainen-maanvuokraus._group_label" "fi" "Lyhytaikainen maanvuokraus"
+"lyhytaikainen-maanvuokraus.type.banderolli" "fi" "Banderolli"
+"lyhytaikainen-maanvuokraus.type.other" "fi" "Muu"
