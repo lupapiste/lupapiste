@@ -147,6 +147,8 @@
                                        sequentialize))
           (dissoc :alkuHetki :sijaintitieto :yksilointitieto)
           (set/rename-keys {:rakennuksenTiedot :tiedot :omistajatieto :omistajat})
+
+          ;; Change various numerical values into actual numbers
           (util/safe-update-in [:tiedot :asuinhuoneistot :huoneisto]
                                (partial mapv #(str->num % [:huoneistoala :huoneluku])))
           (update :tiedot #(str->num % [:energiatehokkuusluku :kellaripinta-ala :kerrosala
@@ -161,6 +163,12 @@
   (or (get-in canonical-operation [:rakennustieto :Rakennus :yksilointitieto])
       (get-in canonical-operation [:rakennelmatieto :Rakennelma :yksilointitieto])))
 
+(defn- merge-data-from-canonical-operation [operation canonical-operations]
+  (merge operation
+         (util/find-first #(= (:id operation)
+                              (operation-id %))
+                          canonical-operations)))
+
 (defn- operations [context]
   (let [operations (conj (-> context :application :secondaryOperations)
                          (-> context :application :primaryOperation (assoc :primary? true)))
@@ -168,12 +176,13 @@
                                                 sequentialize
                                                 (partial mapv :Toimenpide)])
                               context)]
-    (mapv (fn [operation]
-            (merge operation
-                   (util/find-first #(= (:id operation)
-                                        (operation-id %))
-                                    canonical-operations)))
+    (mapv #(merge-data-from-canonical-operation % canonical-operations)
           operations)))
+
+(defn- ->planner [planner]
+  (-> planner
+      :Suunnittelija
+      (str->num [:kokemusvuodet :valmistumisvuosi])))
 
 (defn- ->foreman [foreman]
   (-> foreman
@@ -185,7 +194,8 @@
                                         sequentialize))
       (set/rename-keys {:sijaistustieto     :sijaistukset
                         :vastattavaTyotieto :vastattavatTyot})
-      (dissoc :vastattavatTyotehtavat)))
+      (dissoc :vastattavatTyotehtavat)
+      (str->num [:kokemusvuodet :valmistumisvuosi :valvottavienKohteidenMaara])))
 
 (defn reporting-app-accessors [application lang]
   {:test (constantly "foo")
@@ -199,7 +209,6 @@
    :location (ds/from-context [:application :location])
    :location-wgs84 (ds/from-context [:application :location-wgs84])
 
-   ;; TODO not all operations have canonical representation
    :operations operations
    :operation-id (ds/from-context [:context :id])
    :operation-description (ds/from-context [:context :description])
@@ -216,11 +225,9 @@
    :parties (ds/from-context [osapuolet :osapuolitieto
                               sequentialize (partial mapv :Osapuoli)])
    :planners (ds/from-context [osapuolet :suunnittelijatieto
-                               sequentialize (partial mapv (comp #(str->num % [:kokemusvuodet :valmistumisvuosi])
-                                                                 :Suunnittelija))])
+                               sequentialize (partial mapv ->planner)])
    :foremen (ds/from-context [osapuolet :tyonjohtajatieto
-                              sequentialize (partial mapv (comp #(str->num % [:kokemusvuodet :valmistumisvuosi :valvottavienKohteidenMaara])
-                                                                ->foreman))])
+                              sequentialize (partial mapv ->foreman)])
 
    :reviews (ds/from-context [:application :tasks (partial mapv #(katselmus-canonical application lang % nil))])
    :review-date (ds/from-context [get-katselmustieto :pitoPvm])
