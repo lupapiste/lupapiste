@@ -155,7 +155,26 @@
                     (if (= j length-of-b)
                       1 (inc j))))))))))
 
+(defn safe-update-in
+  "Like update-in, but does nothing in case the given path does not exist"
+  [a-map path fn & params]
+  (if (empty? path)
+    (apply fn a-map params)
+    (let [[fst & rst] path]
+      (if (contains? a-map fst)
+        (apply update a-map fst safe-update-in rst fn params)
+        a-map))))
 
+(defn update-values
+  "Updates the values accessed by the given `keys` with `fn`"
+  [a-map keys f & params]
+  (let [keys-set (set keys)]
+    (into {}
+          (map (fn [[k v]]
+                 (if (keys-set k)
+                   [k (apply f v params)]
+                   [k v]))
+               a-map))))
 ;; ---------------------------------------------
 ;; The following are not aliased in sade.util.
 ;; ---------------------------------------------
@@ -175,15 +194,6 @@
 
 (defmacro fn->  [& body] `(fn [x#] (-> x# ~@body)))
 (defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
-
-(defn safe-update-in [a-map path fn & params]
-  "Like update-in, but does nothing in case the given path does not exist"
-  (if (empty? path)
-    (apply fn a-map params)
-    (let [[fst & rst] path]
-      (if (contains? a-map fst)
-        (apply update a-map fst safe-update-in rst fn params)
-        a-map))))
 
 (defmacro pcond->
   "Takes an expression and a set of pred/form pairs. Threads expr (via ->)
