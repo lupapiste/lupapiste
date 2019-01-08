@@ -38,7 +38,7 @@
         (conv/fetch-prev-application! {:created (now)
                                        :data {:kuntalupatunnus id}
                                        :user (usr/batchrun-user '("092-R"))}
-                                      true) ;; The last flag determines if we fetch local applications or not. TODO: Switch to false for production!
+                                      false) ;; The last flag determines if we fetch local applications or not. Must be `false` for production!
         (catch Exception e
           (warn (.getMessage e)))))
     ;; Phase 2. Add vakuustieto notification to the verdict of their main application.
