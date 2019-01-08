@@ -310,12 +310,18 @@
     }
   };
 
+
   var downloadWithIcon = "<div class='download'>"
                        + "<a href='/api/raw/latest-attachment-version?download=true&attachment-id"
                        + "=<%- attachmentId %>'>"
                        + "<i class='lupicon-download btn-small'></i>"
                        + "<span><%- download %></span></a> (<%- sizeText %>)"
                        + "</div>";
+
+  var downloadWithIconOnly  = "<span class='download'>"
+                            + "<a href='/api/raw/latest-attachment-version?download=true&attachment-id"
+                            + "=<%- attachmentId %>'>"
+                            + "<i class='lupicon-download btn-small'></i></a></span>";
 
   var viewWithDownloadTemplate =
         _.template(
@@ -345,6 +351,7 @@
   };
 
   var downloadWithIconTemplate = _.template( downloadWithIcon );
+  var downloadWithIconOnlyTemplate = _.template( downloadWithIconOnly );
 
   // Only the download and icon part from viewWithDownload.
   ko.bindingHandlers.downloadWithIcon = {
@@ -354,6 +361,17 @@
         var data = ko.mapping.toJS( v );
         $(element).html( downloadWithIconTemplate( _.merge( data, {download: loc("download-file"),
                                                                    sizeText: util.sizeString( data.size )})));
+      }
+    }
+  };
+
+  // Only the icon part from viewWithDownload.
+  ko.bindingHandlers.downloadWithIconOnly = {
+    update: function( element, valueAccessor) {
+      var v = ko.utils.unwrapObservable( valueAccessor());
+      if( v ) {
+        var data = ko.mapping.toJS( v );
+        $(element).html( downloadWithIconOnlyTemplate( _.merge( data, {download: loc("download-file")})));
       }
     }
   };
@@ -646,8 +664,7 @@
 
   ko.bindingHandlers.readonly = {
     update: function(element, valueAccessor) {
-      var value = ko.utils.unwrapObservable(valueAccessor());
-      element.readOnly = value;
+      element.readOnly = ko.utils.unwrapObservable(valueAccessor());
     }
   };
 
