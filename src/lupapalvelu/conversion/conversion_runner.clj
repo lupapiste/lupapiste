@@ -31,7 +31,6 @@
   (let [vakuus-ids (filter vakuustieto? kuntalupa-ids)
         others (filter (complement vakuustieto?) kuntalupa-ids)]
     ;; Phase 1. Convert applications and save to db.
-    (println others)
     (info (str "Converting " (count others) " applications from Krysp -> Lupapiste."))
     (doseq [id others]
       (try
