@@ -96,8 +96,10 @@
    ;; TODO Kaikkia kenttiä ei vielä listattu
    })
 
-(defn str->num [v ks]
-  (util/update-values v ks #(util/->int % nil)))
+(defn- str->num [a-map keys-to-update]
+  (util/update-values a-map
+                      keys-to-update
+                      #(util/->int % nil)))
 
 (def get-katselmustieto
   (ds/from-context [:context :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus]))

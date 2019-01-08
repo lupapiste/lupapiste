@@ -157,12 +157,12 @@
 
 (defn safe-update-in
   "Like update-in, but does nothing in case the given path does not exist"
-  [a-map path fn & params]
+  [a-map path f & params]
   (if (empty? path)
     (apply fn a-map params)
     (let [[fst & rst] path]
       (if (contains? a-map fst)
-        (apply update a-map fst safe-update-in rst fn params)
+        (apply update a-map fst safe-update-in rst f params)
         a-map))))
 
 (defn update-values
