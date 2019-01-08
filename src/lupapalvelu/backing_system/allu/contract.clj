@@ -18,14 +18,16 @@
             [schema.core :as sc]))
 
 (sc/defn ^:always-validate new-allu-contract :- schemas/PateVerdict [{:keys [application created] :as command}]
-  (let [category (schema-util/application->category application)]
+  (let [category (schema-util/application->category application)
+        kuntalupatunnus (-> application :integrationKeys :ALLU :kuntalupatunnus)]
     {:id       (mongo/create-id)
      :modified created
      :state    (pate-verdict/wrapped-state command :published)
      :category (name category)
      :data     (metadata/wrap-all (metadata/wrapper command)
                                   {:handler         (pate-verdict/general-handler application)
-                                   :agreement-state (allu/agreement-state application)})
+                                   :agreement-state (allu/agreement-state application)
+                                   :kuntalupatunnus kuntalupatunnus})
      :template {:inclusions []}
      :legacy?  true}))
 
@@ -47,7 +49,7 @@
   ;; This is here instead of e.g. do-check-for-verdict to avoid
   ;; verdict/allu/pate-verdict dependency cycles:
   (when-let [filedata (allu/load-contract-document! command)]
-    (when-let [allu-metadata (allu/load-contract-metadata! command)]
+    (when-let [allu-metadata (allu/load-contract-metadata command)]
       (let [signer-name (-> allu-metadata :handler :name)
             signer-title (-> allu-metadata :handler :title)
             verdict (merge (new-allu-contract command)

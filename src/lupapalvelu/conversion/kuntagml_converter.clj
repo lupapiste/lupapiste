@@ -153,20 +153,24 @@
   (when-not (contains? supported-import-types (keyword permittype))
     (error-and-fail! (str "Unsupported import type " permittype) :error.unsupported-permit-type)))
 
-(defn fetch-prev-local-application!
-  "A variation of `lupapalvelu.prev-permit/fetch-prev-local-application!` that exists for conversion
-  and testing purposes. Creates an application from Krysp message in a local file. To use a local Krysp
-  file:
+(defn fetch-prev-application!
+  "A variant of `lupapalvelu.prev-permit/fetch-prev-local-application!` that exists for conversion
+  and testing purposes. To use a local KuntaGML file:
   1) The local MongoDB has to contain the location info for the municipality in question (here Vantaa)
-  2) this function needs to be called from prev-permit-api/create-application-from-previous-permit instead of
-  prev-permit/fetch-prev-application!"
-  [{{:keys [kuntalupatunnus authorizeApplicants]} :data :as command}]
+  2) this function needs to be called with the `local?` argument set to `true`"
+  ([command]
+   (fetch-prev-application! command true))
+  ([{{:keys [kuntalupatunnus authorizeApplicants]} :data :as command} local?] ;; If the `local` flag is false, the application is fetched from backed system.
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
         destructured-permit-id (conv-util/destructure-permit-id kuntalupatunnus)
         operation             "konversio"
         filename              (format "%s/%s.xml" (:resource-path conv-util/config) kuntalupatunnus ".xml")
         permit-type           "R"
-        xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
+        xml                   (if local?
+                                (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
+                                (krysp-fetch/get-application-xml-by-application-id {:id kuntalupatunnus
+                                                                                    :organization "092-R"
+                                                                                    :permitType "R"}))
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info         (or (prev-permit/get-location-info command app-info)
                                   prev-permit/default-location-info)
@@ -189,7 +193,7 @@
                                                                                      authorizeApplicants)]
                                           (if no-proper-applicants?
                                             (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
-                                            (ok :id id))))))
+                                            (ok :id id)))))))
 
 (defn debug [command]
-  (fetch-prev-local-application! command))
+  (fetch-prev-application! command))
