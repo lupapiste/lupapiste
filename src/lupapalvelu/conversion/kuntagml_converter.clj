@@ -196,10 +196,5 @@
                                             (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
                                             (ok :id id)))))))
 
-(def tila
-  (atom {}))
-
 (defn debug [command]
-  (do
-    (swap! tila assoc :command command)
-    (fetch-prev-application! command)))
+  (fetch-prev-application! command))
