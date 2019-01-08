@@ -51,15 +51,3 @@
           (warn (.getMessage e)))))
     ;; Phase 3. Update app-links - they should be linked by LP id, not kuntalupatunnus
     (update-links! kuntalupa-ids)))
-
-(defn- take-testset
-  "Development time helper function that returns a list of random kuntalupa-ids from the batch available locally."
-  [amount]
-  (let [files (->> conv-util/config
-                   :resource-path
-                   io/file
-                   file-seq
-                   (filter (memfn isFile))
-                   (map (comp #(first (ss/split % #"\.")) (memfn getName)))
-                   (filter #(not= "---" (conv-util/normalize-permit-id %))))]
-    (take amount (shuffle files))))
