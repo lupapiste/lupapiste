@@ -14,6 +14,14 @@
 (defn- vakuustieto? [kuntalupatunnus]
   (-> kuntalupatunnus conv-util/destructure-permit-id :tyyppi (= "VAK")))
 
+(defn update-links!
+  "This is a separate function so that it can be run as a separate process if needed.
+  This step must be run only after all the applications have been imported."
+  [kuntalupa-ids]
+  (info (str "Updating links from kuntalupatunnus -> Lupapiste-id for " (count kuntalupa-ids) " applications."))
+  (doseq [id kuntalupa-ids]
+    (app/update-app-links! id)))
+
 (defn convert!
   "Takes a list of kuntalupatunnus-ids."
   [kuntalupa-ids]
@@ -40,9 +48,7 @@
         (catch Exception e
           (info (.getMessage e)))))
     ;; Phase 3. Update app-links - they should be linked by LP id, not kuntalupatunnus
-    (info (str "Updating links from kuntalupatunnus -> Lupapiste-id for " (count kuntalupa-ids) " applications."))
-    (doseq [id kuntalupa-ids]
-      (app/update-app-links! id))))
+    (update-links! kuntalupa-ids)))
 
 (defn- take-testset
   "Development time helper function that returns a list of random kuntalupa-ids from the batch available locally."
