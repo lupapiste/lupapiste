@@ -483,5 +483,17 @@
 (defn get-asian-kuvaus [kuntalupatunnus]
   (-> kuntalupatunnus get-xml-for-kuntalupatunnus building-reader/->asian-tiedot))
 
+(defn sample-testset
+  "Development time helper function that returns a list of random kuntalupa-ids from the batch available locally."
+  [amount]
+  (let [files (->> config
+                   :resource-path
+                   io/file
+                   file-seq
+                   (filter (memfn isFile))
+                   (map (comp #(first (ss/split % #"\.")) (memfn getName)))
+                   (filter #(not= "---" (normalize-permit-id %))))]
+    (take amount (shuffle files))))
+
 (defn run-checks []
   (mongocheck/execute-checks (mongo/get-db)))
