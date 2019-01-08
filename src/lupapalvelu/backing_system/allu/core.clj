@@ -322,6 +322,11 @@
                                             {:status 200, :body id}
                                             {:status 404, :body (str "Not Found: " id)})))
 
+             [:applications :allu-data] (let [id (-> route-match :path-params :id)]
+                                          {:status 400}
+                                          {:status 200
+                                           :body (str "SL19000" id)})
+
         [:placementcontracts :contract :proposal]
         (let [id (-> route-match :path-params :id)]
           (if (response-ok? id "placementcontracts.create")
