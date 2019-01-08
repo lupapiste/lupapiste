@@ -34,7 +34,9 @@
   [firstName lastName email orgAuthz]
   (let [user-data {:firstName firstName
                    :lastName  lastName
-                   :role      "authority"
+                   :role      (if (empty? orgAuthz)
+                                "applicant"
+                                "authority")
                    :email     email
                    :username  email
                    :enabled   true
@@ -127,9 +129,8 @@
                                                     (error "Login was not valid")
                                                     (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
             (and valid-signature?
-                 (seq authz)
                  (false? (usr/dummy? user)))    (do ;; We don't want to promote dummy users here.
-                                                 (infof "Logging in user %s as authority" emailaddress)
+                                                 (infof "Logging in user %s as %s" emailaddress (if (seq authz) "authority" "applicant"))
                                                  (->> (update-or-create-user! givenname surname emailaddress authz)
                                                       (log-user-in! req)))
 
@@ -140,13 +141,6 @@
                                surname))        (do
                                                   (errorf "Decrypting SAML response failed")
                                                   (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
-
-            ;; If a non-dummy account exists for the received email address, the user is logged in.
-            (and valid-signature?
-                 (empty? authz)
-                 (false? (usr/dummy? user)))   (do
-                                                 (infof "Logging in user %s as applicant" emailaddress)
-                                                 (->> emailaddress usr/get-user-by-email (log-user-in! req)))
 
             (and valid-signature?
                  (usr/dummy? user))            (do
