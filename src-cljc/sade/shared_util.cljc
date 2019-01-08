@@ -159,7 +159,7 @@
   "Like update-in, but does nothing in case the given path does not exist"
   [a-map path f & params]
   (if (empty? path)
-    (apply fn a-map params)
+    (apply f a-map params)
     (let [[fst & rst] path]
       (if (contains? a-map fst)
         (apply update a-map fst safe-update-in rst f params)
