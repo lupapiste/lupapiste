@@ -1076,3 +1076,6 @@
 "pate.contract.organization-name" "fi" "Sopimuksessa näkyvä organisaation nimi"
 "pate.contract.organization-name" "sv" "Organisationens namn som syns på avtalet"
 "pate.contract.organization-name" "en" "Organization name as shown in the contract"
+"pdf.rakennusoikeudellinen-kerrosala" "en" "Legal floor area of building"
+"pdf.rakennusoikeudellinen-kerrosala" "fi" "Rakennusoikeudellinen kerrosala"
+"pdf.rakennusoikeudellinen-kerrosala" "sv" "Våningsyta med byggnadsrätt"

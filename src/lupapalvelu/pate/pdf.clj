@@ -109,13 +109,6 @@
          (sort (fn [a _]
                  (if (= (:role a) head-loc) -1 1))))))
 
-(defn primary-operation-data [application]
-  (->> application
-       :primaryOperation
-       :id
-       (domain/get-document-by-operation application)
-       :data))
-
 (defn operation-infos
   [application]
   (mapv (util/fn-> :schema-info :op)
@@ -180,6 +173,59 @@
                   (remove nil?))]
     (when (seq rows)
       [:div.section rows])))
+
+(defn- update-sum-field [result target field]
+  (update result field (fn [v]
+                         (+ (or v 0)
+                            (util/->double (get target field 0))))))
+
+(defn- update-sum-map [result target fields]
+  (reduce (fn [acc field]
+            (update-sum-field acc target field))
+          result
+          fields))
+
+(defn- double->str
+  "String representation with a maximum of one decimal. Zeroes are nil.
+  3.921 -> 3.9
+  3.990 -> 4
+  0 -> nil
+  0.02 -> nil
+  nil -> nil"
+  [v]
+  (when v
+    (let [s         (format "%.1f" (double v))
+          [_ int-s] (re-find #"(\d+)\.0+$" s)
+          s         (or int-s s)]
+      (when-not (= s "0")
+        s))))
+
+(defn dimensions
+  "Map of :kerrosala, :rakennusoikeudellinenKerrosala, :kokonaisala
+  and :tilavuus keys. The values are a _sum_ of the corresponding
+  fields in the supported document schemas. Values are strings and
+  doubles are shown with one decimal. Nil if none of the application
+  documents is supported."
+  [{:keys [documents]}]
+  ;; schema name - data path
+  (let [supported {:uusiRakennus                             :mitat
+                   :uusi-rakennus-ei-huoneistoa              :mitat
+                   :rakennuksen-laajentaminen                :laajennuksen-tiedot.mitat
+                   :rakennuksen-laajentaminen-ei-huoneistoja :laajennuksen-tiedot.mitat}
+        schemas   (-> supported keys set)
+        fields    [:kerrosala :rakennusoikeudellinenKerrosala
+                   :kokonaisala :tilavuus]]
+    (some->> documents
+             (filter (util/fn->> :schema-info :name keyword (contains? schemas)))
+             (reduce (fn [acc {:keys [data schema-info]}]
+                       (update-sum-map acc
+                                       (->> schema-info :name keyword
+                                            (get supported)
+                                            util/split-kw-path
+                                            (get-in data))
+                                       fields))
+                     {})
+             (util/map-values double->str))))
 
 (defn pack-draft-attachments [{:keys [attachments]}
                               {verdict-id :id}
@@ -251,7 +297,7 @@
            :operations (assoc-in (operations options)
                                  [0 ::styles :text] :bold)
            :designers (designers options)
-           :primary (primary-operation-data application)
+           :dimensions (dimensions application)
            :paloluokka (->> buildings
                             (map :paloluokka)
                             (remove ss/blank?)
