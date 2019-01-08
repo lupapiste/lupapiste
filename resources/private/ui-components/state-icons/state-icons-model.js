@@ -1,14 +1,15 @@
 // Attachments table icon column contents. Used both by the regular
 // attachments table and attachment multiselect template.
+// Includes archive error icon in case of archive error
 LUPAPISTE.StateIconsModel = function( params ) {
   "use strict";
   var self = this;
-
 
   var attachment = ko.unwrap( params.attachment );
 
   var service    = lupapisteApp.services.attachmentsService;
   var transfers  = lupapisteApp.models.application._js.transfers;
+  var authModel  = lupapisteApp.models.applicationAuthModel;
 
   function sentToCaseManagement(attachment) {
     return attachment.sent && !_.isEmpty(_.filter(transfers, {type: "attachments-to-asianhallinta"}));
@@ -115,6 +116,15 @@ LUPAPISTE.StateIconsModel = function( params ) {
       }
       return info;
   }
+
+  self.hasArchiveProblem = function() {
+    return authModel.ok("application-organization-archive-enabled")
+      && !_.get(attachment, "latestVersion.archivable");
+  };
+
+  self.getArchivabilityError = function() {
+    return _.get(attachment, "latestVersion.archivabilityError");
+  };
 
   self.stateIcons = function() {
     return _( [[approved,                {css: "lupicon-circle-check positive",

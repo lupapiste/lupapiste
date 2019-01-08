@@ -50,11 +50,6 @@
           <td data-test-id="file-info"
               class="view-with-download">
               <a data-bind="fileLink: {attachmentId: $data.id, filename: latestVersion.filename}"></a>
-              <!-- ko if: $parent.archiveProblem( latestVersion ) -->
-                <i class="bubble-hover lupicon-circle-info negative" data-test-id="archive-problem-icon">
-                  <span class="bubble-hover-text" data-test-id="archive-problem-text" data-bind="ltext: latestVersion.archivabilityError"></span>
-                </i>
-              <!-- /ko -->
               <div data-bind="downloadWithIcon: {attachmentId: $data.id, filename: latestVersion.filename, size: latestVersion.size}"></div>
           </td>
           <td>
