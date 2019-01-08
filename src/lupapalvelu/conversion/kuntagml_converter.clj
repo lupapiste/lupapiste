@@ -154,11 +154,10 @@
     (error-and-fail! (str "Unsupported import type " permittype) :error.unsupported-permit-type)))
 
 (defn fetch-prev-application!
-  "A variation of `lupapalvelu.prev-permit/fetch-prev-local-application!` that exists for conversion
-  and testing purposes. To use a local Krysp file:
+  "A variant of `lupapalvelu.prev-permit/fetch-prev-local-application!` that exists for conversion
+  and testing purposes. To use a local KuntaGML file:
   1) The local MongoDB has to contain the location info for the municipality in question (here Vantaa)
-  2) this function needs to be called from prev-permit-api/create-application-from-previous-permit instead of
-  prev-permit/fetch-prev-application!"
+  2) this function needs to be called with the `local?` argument set to `true`"
   ([command]
    (fetch-prev-application! command true))
   ([{{:keys [kuntalupatunnus authorizeApplicants]} :data :as command} local?] ;; If the `local` flag is false, the application is fetched from backed system.

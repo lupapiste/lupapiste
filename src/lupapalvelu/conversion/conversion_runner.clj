@@ -31,7 +31,7 @@
   (let [vakuus-ids (filter vakuustieto? kuntalupa-ids)
         others (filter (complement vakuustieto?) kuntalupa-ids)]
     ;; Phase 1. Convert applications and save to db.
-    (info (str "Converting " (count others) " applications from Krysp -> Lupapiste."))
+    (info (str "Converting " (count others) " applications from KuntaGML -> Lupapiste."))
     (doseq [id others]
       (try
         (conv/fetch-prev-application! {:created (now)
