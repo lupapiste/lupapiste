@@ -170,7 +170,7 @@
         xml                   (if local?
                                 (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
                                 (krysp-fetch/get-application-xml-by-application-id {:id kuntalupatunnus
-                                                                                    :organization "092"
+                                                                                    :organization "092-R"
                                                                                     :permitType "R"}))
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info         (or (prev-permit/get-location-info command app-info)
