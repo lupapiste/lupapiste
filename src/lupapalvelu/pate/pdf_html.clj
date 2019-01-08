@@ -110,13 +110,13 @@
   [lang application {:keys [category published legacy?] :as verdict}]
   [:div.header
    [:div.section.header
-    (let [category-kw    (util/kw-path (when legacy? :legacy) category)
-          legacy-kt-ymp? (contains? #{:legacy.kt :legacy.ymp}
-                                    category-kw)
-          loc-fn         (fn [& kws]
-                           (apply i18n/localize lang (flatten kws)))
-          contract?      (vc/contract? verdict)
-          proposal?      (vc/proposal? verdict)
+    (let [category-kw             (util/kw-path (when legacy? :legacy) category)
+          legacy-kt-ymp?          (contains? #{:legacy.kt :legacy.ymp}
+                                             category-kw)
+          loc-fn                  (fn [& kws]
+                                    (apply i18n/localize lang (flatten kws)))
+          contract?               (vc/contract? verdict)
+          proposal?               (vc/proposal? verdict)
           non-migration-contract? (and contract?
                                        (not (vc/has-category? verdict
                                                               :migration-contract)))]
@@ -135,7 +135,7 @@
                      (not legacy-kt-ymp?)
                      (not proposal?))
                 (i18n/localize lang (case category-kw
-                                      :p :pdf.poikkeamispaatos
+                                      :p :empty
                                       :attachmentType.paatoksenteko.paatos))
                 proposal?
                 (i18n/localize lang :pate-verdict-proposal))]]
@@ -149,6 +149,7 @@
                                              (cols/dict-value verdict :verdict-type)]
                                  :legacy.ya [:pate.verdict-type
                                              (schema-util/ya-verdict-type application)]
+                                 :p         [:pdf.p (:permitSubtype application)]
                                  [:pdf category :permit])))]]])
     [:div.row
      [:div.cell.cell--40
