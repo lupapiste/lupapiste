@@ -4,6 +4,8 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
+            [lupapalvelu.document.poikkeamis-canonical :refer [poikkeus-application-to-canonical]]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pate.verdict-canonical :refer [verdict-canonical]]
             [lupapalvelu.pate.verdict-common :as vc]
             [monger.operators :refer :all]
@@ -83,7 +85,9 @@
    :operations (ds/array-from
                 :operations
                 {:id (ds/access :operation-id)
+                 :primary (ds/access :operation-primary?)
                  :kuvaus (ds/access :operation-description)
+                 :nimi (ds/access :operation-name-fi)
                  :rakennus (ds/access :operation-building)
                  :rakennelma (ds/access :operation-structure)})
 
@@ -91,6 +95,11 @@
    :aluejaonNimi (ds/access :test) ;; aluejaon (suuralueen) nimi
    ;; TODO Kaikkia kenttiä ei vielä listattu
    })
+
+(defn- str->num [a-map keys-to-update]
+  (util/update-values a-map
+                      keys-to-update
+                      #(util/->int % nil)))
 
 (def get-katselmustieto
   (ds/from-context [:context :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus]))
@@ -131,19 +140,53 @@
 (defn- dissoc-operation-types [operation]
   (apply dissoc operation operation-types))
 
-(defn- operation-description [operation]
-  (:kuvaus (util/find-first identity (map #(get operation %) operation-types))))
+(defn- operation-name-fi [operation]
+  (i18n/localize "fi" (str "operations." (:name operation))))
 
 (defn- operation-building [context]
   (some-> ((ds/from-context [:context :rakennustieto :Rakennus]) context)
           (update :omistajatieto (comp (partial mapv :Omistaja)
                                        sequentialize))
           (dissoc :alkuHetki :sijaintitieto :yksilointitieto)
-          (set/rename-keys {:rakennuksenTiedot :tiedot :omistajatieto :omistajat})))
+          (set/rename-keys {:rakennuksenTiedot :tiedot :omistajatieto :omistajat})
+
+          ;; Change various numerical values into actual numbers
+          (util/safe-update-in [:tiedot :asuinhuoneistot :huoneisto]
+                               (partial mapv #(str->num % [:huoneistoala :huoneluku])))
+          (util/safe-update-in [:tiedot :varusteet] #(str->num % [:saunoja]))
+
+          (update :tiedot #(str->num % [:energiatehokkuusluku :kellaripinta-ala :kerrosala
+                                        :kerrosluku :kokonaisala :rakennusoikeudellinenKerrosala
+                                        :tilavuus :kellarinpinta-ala]))))
 
 (defn- operation-structure [context]
   (some-> ((ds/from-context [:context :rakennelmatieto :Rakennelma]) context)
           (dissoc :alkuHetki :sijaintitieto :yksilointitieto)))
+
+(defn- operation-id [canonical-operation]
+  (or (get-in canonical-operation [:rakennustieto :Rakennus :yksilointitieto])
+      (get-in canonical-operation [:rakennelmatieto :Rakennelma :yksilointitieto])))
+
+(defn- merge-data-from-canonical-operation [operation canonical-operations]
+  (merge operation
+         (util/find-first #(= (:id operation)
+                              (operation-id %))
+                          canonical-operations)))
+
+(defn- operations [context]
+  (let [operations (conj (-> context :application :secondaryOperations)
+                         (-> context :application :primaryOperation (assoc :primary? true)))
+        canonical-operations ((ds/from-context [rakennusvalvonta-asia :toimenpidetieto
+                                                sequentialize
+                                                (partial mapv :Toimenpide)])
+                              context)]
+    (mapv #(merge-data-from-canonical-operation % canonical-operations)
+          operations)))
+
+(defn- ->planner [planner]
+  (-> planner
+      :Suunnittelija
+      (str->num [:kokemusvuodet :valmistumisvuosi])))
 
 (defn- ->foreman [foreman]
   (-> foreman
@@ -155,7 +198,8 @@
                                         sequentialize))
       (set/rename-keys {:sijaistustieto     :sijaistukset
                         :vastattavaTyotieto :vastattavatTyot})
-      (dissoc :vastattavatTyotehtavat)))
+      (dissoc :vastattavatTyotehtavat)
+      (str->num [:kokemusvuodet :valmistumisvuosi :valvottavienKohteidenMaara])))
 
 (defn reporting-app-accessors [application lang]
   {:test (constantly "foo")
@@ -169,13 +213,13 @@
    :location (ds/from-context [:application :location])
    :location-wgs84 (ds/from-context [:application :location-wgs84])
 
-   :operations (ds/from-context [rakennusvalvonta-asia :toimenpidetieto sequentialize
-                                 (partial mapv :Toimenpide)])
-   :operation-id #(or ((ds/from-context [:context :rakennustieto :Rakennus :yksilointitieto]) %)
-                      ((ds/from-context [:context :rakennelmatieto :Rakennelma :yksilointitieto]) %))
-   :operation-description (ds/from-context [:context operation-description])
+   :operations operations
+   :operation-id (ds/from-context [:context :id])
+   :operation-description (ds/from-context [:context :description])
+   :operation-name-fi (ds/from-context [:context operation-name-fi])
    ;; We know that :rakennustieto is not sequential, i.e. there's only one building per operation
    :operation-building operation-building
+   :operation-primary? (ds/from-context [:context :primary?] false)
    :operation-structure operation-structure
 
    :projectDescription (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto
@@ -185,7 +229,7 @@
    :parties (ds/from-context [osapuolet :osapuolitieto
                               sequentialize (partial mapv :Osapuoli)])
    :planners (ds/from-context [osapuolet :suunnittelijatieto
-                               sequentialize (partial mapv :Suunnittelija)])
+                               sequentialize (partial mapv ->planner)])
    :foremen (ds/from-context [osapuolet :tyonjohtajatieto
                               sequentialize (partial mapv ->foreman)])
 
@@ -210,7 +254,9 @@
 
 (defn ->reporting-result [application lang]
   ;; TODO check permit type, R or P (or others as well?)
-  (let [application-canonical (application-to-canonical application lang)]
+  (let [application-canonical (if (= (:permitType application) "R")
+                                (application-to-canonical application lang)
+                                (poikkeus-application-to-canonical application lang))]
     (ds/build-with-skeleton reporting-app-skeleton
                             {:application application
                              :canonical application-canonical

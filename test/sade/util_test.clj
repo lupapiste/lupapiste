@@ -649,3 +649,7 @@
 
 (fact "to-finnish-date"
   (to-finnish-date 1517838282483) => "5.2.2018")
+
+(fact "update-values"
+  (update-values {:foo 1 :bar 2} [:foo] inc) => {:foo 2 :bar 2}
+  (update-values {:foo "str" :bar "str"} [:foo] str "ing") => {:foo "string" :bar "str"})

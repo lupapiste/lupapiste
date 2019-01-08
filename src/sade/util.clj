@@ -205,6 +205,8 @@
 
 (defalias safe-update-in shared/safe-update-in)
 
+(defalias update-values shared/update-values)
+
 (defn ->keyword [x]
   ((if (number? x)
      (comp keyword str)
