@@ -492,10 +492,10 @@
   (allu-request-handler (login-request (env/value :allu :username) (env/value :allu :password))))
 
 
-(defn- re-login-on-unauthorized!
+(defn- re-login-on-auth-errors!
   "Re-login on HTTP 401."
   [{:keys [status]}]
-  (when (= status 401)
+  (when (or (= status 401) (= status 403))
     (login!)))
 
 (defn- reset-jwt!
@@ -572,7 +572,7 @@
                              multipart-middleware
                              reitit.ring.coercion/coerce-request-middleware
                              log-or-fail!
-                             (post-action->middleware re-login-on-unauthorized!)]
+                             (post-action->middleware re-login-on-auth-errors!)]
                             (into (if disable-io-middlewares? [] [save-messages!]))
                             (conj (preprocessor->middleware (fn-> content->json jwt-authorize))))
             :coercion reitit.coercion.schema/coercion}
@@ -648,7 +648,7 @@
           (allu-request-handler msg)
           (jms/commit session)
 
-          (catch Exception exn
+          (catch Throwable exn
             (let [operation-name (route-name->string (-> (reitit/match-by-path allu-router uri) :data :name))]
               (error operation-name "failed:" (type exn) (.getMessage exn))
               (error "Rolling back" operation-name))
