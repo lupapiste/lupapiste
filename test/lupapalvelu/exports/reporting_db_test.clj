@@ -136,6 +136,9 @@
   => (contains
       {:id (:id application-rakennuslupa)
        :address (:address application-rakennuslupa)
+       :propertyId (:propertyId application-rakennuslupa)
+       :organization (:organization application-rakennuslupa)
+       :municipality (:municipality application-rakennuslupa)
        :location-etrs-tm35fin (:location application-rakennuslupa)
        :location-wgs84 (:location-wgs84 application-rakennuslupa)
        :operations [{:id "muu-laajentaminen-id"
@@ -879,6 +882,8 @@
                   :verottajanTvLl false}]
        :state "submitted"
        :stateChangeTs 12345
+       :createdTs (:created application-rakennuslupa)
+       :modifiedTs (:modified application-rakennuslupa)
        ;; Note that draft statement is not present!
        :statements [{:lausunto "Savupiippu pitää olla."
                      :lausuntoPvm "2013-05-09"

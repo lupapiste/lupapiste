@@ -12,31 +12,52 @@
             [sade.core :refer :all]
             [sade.util :as util]))
 
-(defn sequentialize [xs]
+;;
+;; Helpers
+;;
+
+(defn- sequentialize [xs]
   (if xs
     (util/sequentialize xs)
     []))
 
-(def reporting-app-skeleton
-  {;; Hakemus
-   :id (ds/access :id)
-   :araFunding (ds/access :araFunding)
-   ;; :eiJulkistaLainaa (ds/access :test) ;; TODO: Mistä? Selite: Hankkeeseen liittyvä
-   ;; :kaupunginosa (ds/access :test) ;; TODO: Mistä?
-   ;; :korkotukivuokra-asunnotPitkaaik (ds/access :test) ;; TODO: Mistä? Selite: Johdettuna, ei tarpeellista jatkossa
-   :state (ds/access :state) ;; Selite: Tilakone. Vierillä, käyttöönotettu... OMAT TERMIT esim submitted
-   :permitType (ds/access :permitType) ;; Selite: Voidaan päätellä toimenpidetiedosta permitType
-   ;; Kiinteistötunnus
+(defn- str->num
+  "Change the given `keys-to-update` in `a-map` into numerical values,
+  if possible. Otherwise set them to `nil`"
+  [a-map keys-to-update]
+  (util/update-values a-map
+                      keys-to-update
+                      #(util/->int % nil)))
 
+(def get-katselmustieto
+  (ds/from-context [:context :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus]))
+
+
+(def rakennusvalvonta-asia
+  (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]))
+
+(def osapuolet
+  (ds/from-context [rakennusvalvonta-asia :osapuolettieto :Osapuolet]))
+
+;;
+;; The application report
+;;
+
+(def reporting-app-skeleton
+  {:id (ds/access :id) ;; Application id
+   :araFunding (ds/access :araFunding) ;; Does the project receive ARA funding?
+   :state (ds/access :state) ;; The internal Lupapiste representation of state, ie. not a 1-to-1 mapping with KuntaGML
+   :permitType (ds/access :permitType)
    :location-etrs-tm35fin (ds/access :location)
    :location-wgs84 (ds/access :location-wgs84)
    :address (ds/access :address)
-   :stateChangeTs (ds/access :stateChangeTs) ;; Selite: Koska hakemuksen viimeisin tila on tullut voimaan Historysta etsitään
-   :projectDescription (ds/access :projectDescription) ;; Selite: Hankkeen kuvaus korvaamaan tätä. Konversiossa huomioitava, rakennusvalvonta-asian kuvaus
-
-   ;; Huoneisto
-   :huoneidenLkm (ds/access :test) ;; Selite: Lupapisteessä huoneisto-käsite on huoneistomuutos
-   :huoneistonLisaysMuutosPoistokoodi (ds/access :test)
+   :propertyId (ds/access :propertyId)
+   :organization (ds/access :organization)
+   :municipality (ds/access :municipality)
+   :stateChangeTs (ds/access :stateChangeTs) ;; The timestamp of the latest state change, also see `:state`
+   :createdTs (ds/access :created)
+   :modifiedTs (ds/access :modified)
+   :projectDescription (ds/access :projectDescription)
 
    ;; Katselmus
    :reviews (ds/array-from :reviews
@@ -45,64 +66,31 @@
                             :reviewer       (ds/access :review-reviewer)
                             :verottajanTvLl (ds/access :review-verottajanTvLl)})
 
-   ;; Lasku -> taulukko?
-   :laskurivinTaksankohdanSelite (ds/access :test) ;; Selite: Kehityksen alla oleva toiminnallisuus
-   :laskunPvm (ds/access :test)
-   :laskunSummaYhteensa (ds/access :test)
-   :laskunViiteasiatunnus (ds/access :test)
-   :laskutusvuosi (ds/access :test)
-   :rivisumma (ds/access :test)
-
-   ;; Taksa
-   :taksanSelite (ds/access :test)
-   :taksanVoimaantulopvm (ds/access :test) ;; Selite: Liittyy laskuun
-   :taksankohta (ds/access :test)
-
    :statements (ds/access :statements)
-
-   ;; Osapuoli
-   ;; Providing all data for now as it is unclear what is actually needed
    :parties (ds/access :parties)
-
-   ;; Osapuoli: Suunnittelijat
-   ;; Providing all data for now as it is unclear what is actually needed
    :planners (ds/access :planners)
-
-   ;; Työnjohtajaosapuolet
    :foremen (ds/access :foremen)
+
    ;; TODO Viiteluvat
 
    ;; Päätös
    :verdicts (ds/array-from :verdicts
                             (ds/access :context))
 
-   :uusiaAsuntoja (ds/access :test)
-   :uusienAsuntojenHuoneistoalaLuvalla (ds/access :test)
-   :uusienAsuntojenLkm (ds/access :test) ;; Selite: Per toimenpide
-   :uusienAsuntojenLkmLuvalla (ds/access :test) ;; Selite: Summattuna rakennusten lukumäärä per hakemus
-
-   ;; Rakentamistoimenpide
    :operations (ds/array-from
                 :operations
-                {:id (ds/access :operation-id)
-                 :primary (ds/access :operation-primary?)
+                {:id (ds/access :operation-id) ;; Lupapiste operation id
+                 :primary (ds/access :operation-primary?) ;; Is this the primary operation in Lupapiste
                  :kuvaus (ds/access :operation-description)
-                 :nimi (ds/access :operation-name-fi)
+                 :nimi (ds/access :operation-name-fi) ;; The KuntaGML `kuvaus`, not the internal `:name`
                  :rakennus (ds/access :operation-building)
                  :rakennelma (ds/access :operation-structure)})
 
-   ;; Muuta
-   :aluejaonNimi (ds/access :test) ;; aluejaon (suuralueen) nimi
-   ;; TODO Kaikkia kenttiä ei vielä listattu
    })
 
-(defn- str->num [a-map keys-to-update]
-  (util/update-values a-map
-                      keys-to-update
-                      #(util/->int % nil)))
-
-(def get-katselmustieto
-  (ds/from-context [:context :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus]))
+;;
+;; Accessors
+;;
 
 (defn- verdict-via-canonical
   "Builds a representation of the given verdict for reporting db API
@@ -121,11 +109,6 @@
       (update-in [:lupamaaraykset :vaaditutKatselmukset]
                  (partial mapv :Katselmus))))
 
-(def rakennusvalvonta-asia
-  (ds/from-context [:canonical :Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]))
-
-(def osapuolet
-  (ds/from-context [rakennusvalvonta-asia :osapuolettieto :Osapuolet]))
 
 (defn ->statements [canonical-statements]
   (->> canonical-statements
@@ -134,16 +117,11 @@
        (map :Lausunto)
        (mapv #(update % :puoltotieto :Puolto))))
 
-(def- operation-types
-  [:uusi :laajennus :uudelleenrakentaminen :purkaminen :muuMuutosTyo :kaupunkikuvaToimenpide])
-
-(defn- dissoc-operation-types [operation]
-  (apply dissoc operation operation-types))
-
 (defn- operation-name-fi [operation]
   (i18n/localize "fi" (str "operations." (:name operation))))
 
 (defn- operation-building [context]
+  ;; We know that :rakennustieto is not sequential, i.e. there's only one building per operation
   (some-> ((ds/from-context [:context :rakennustieto :Rakennus]) context)
           (update :omistajatieto (comp (partial mapv :Omistaja)
                                        sequentialize))
@@ -202,22 +180,24 @@
       (str->num [:kokemusvuodet :valmistumisvuosi :valvottavienKohteidenMaara])))
 
 (defn reporting-app-accessors [application lang]
-  {:test (constantly "foo")
-   :id (ds/from-context [:application :id])
+  {:id (ds/from-context [:application :id])
    :address (ds/from-context [:application :address])
+   :propertyId (ds/from-context [:application :propertyId])
+   :organization (ds/from-context [:application :organization])
+   :municipality (ds/from-context [:application :municipality])
    :araFunding (ds/from-context [:application #(domain/get-document-by-name % "hankkeen-kuvaus")
                                  :data tools/unwrapped :rahoitus]
                                 false)
    :context (ds/from-context [:context])
-
+   :created (ds/from-context [:application :created])
    :location (ds/from-context [:application :location])
    :location-wgs84 (ds/from-context [:application :location-wgs84])
+   :modified (ds/from-context [:application :modified])
 
    :operations operations
    :operation-id (ds/from-context [:context :id])
    :operation-description (ds/from-context [:context :description])
    :operation-name-fi (ds/from-context [:context operation-name-fi])
-   ;; We know that :rakennustieto is not sequential, i.e. there's only one building per operation
    :operation-building operation-building
    :operation-primary? (ds/from-context [:context :primary?] false)
    :operation-structure operation-structure
@@ -262,7 +242,6 @@
                              :canonical application-canonical
                              :lang lang}
                             (reporting-app-accessors application lang))))
-
 
 (def permit-types-for-reporting-db ["R" "P"])
 
