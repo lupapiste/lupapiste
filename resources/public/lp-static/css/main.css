@@ -12355,11 +12355,15 @@ table.table-even-odd tr.odd-row:hover {
 div.attachments-table-container {
   padding-top: 1em;
   padding-right: .6em;
-  padding-left: 0em;
+  padding-left: 0;
 }
 
 div.attachments-table-container table.attachments-table {
   margin-bottom: 1em;
+}
+
+div.attachments-table-container table.attachments-table th {
+  white-space: nowrap;
 }
 
 div.attachments-table-container table.attachments-table tr.row--rejected {

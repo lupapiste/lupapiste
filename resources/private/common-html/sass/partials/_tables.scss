@@ -350,7 +350,10 @@ div.attachments-table-container {
   left: 0;
   }
   table.attachments-table {
-        tr.row--rejected {
+    th {
+      white-space: nowrap;
+    }
+    tr.row--rejected {
       border-bottom: none;
       td {
         padding-bottom: 0;
