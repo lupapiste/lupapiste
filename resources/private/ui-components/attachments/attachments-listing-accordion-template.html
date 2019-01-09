@@ -31,8 +31,11 @@
                                                  upload: $parent.upload }}"></div>
         </div>
         <!-- /ko -->
+        <!-- Shown only if the amount of files does not equal the amount in the category containing this one -->
         <button data-bind="click: $parent.downloadAll,
-                           enable: $parent.hasFile,
+                           visible: $parent.hasFile() &&
+                                        (!$parents[3].hasOwnProperty('getFileCount') ||
+                                            $parent.getFileCount()() !== $parents[3].getFileCount()()),
                            attr: {'data-test-id': 'download-accordion-attachments-button-' + _.last($data.name)}"
                 class="secondary">
           <i class="lupicon-download"></i>
@@ -41,4 +44,6 @@
       </div>
     </rollup>
   <!-- /ko -->
+
+
 </script>

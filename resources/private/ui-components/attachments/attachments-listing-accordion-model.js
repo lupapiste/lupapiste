@@ -61,6 +61,10 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
     return fileCount() > 0;
   });
 
+  self.getFileCount = self.disposedPureComputed( function() {
+    return fileCount;
+  });
+
   self.downloadAll = function() {
     service.downloadAttachments(_.map(self.filteredAttachments(),
                                       _.ary( _.partialRight( util.getIn, ["id"]), 1 )));

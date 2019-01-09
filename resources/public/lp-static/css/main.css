@@ -12355,7 +12355,7 @@ table.table-even-odd tr.odd-row:hover {
 div.attachments-table-container {
   padding-top: 1em;
   padding-right: .6em;
-  padding-left: .5em;
+  padding-left: 0em;
 }
 
 div.attachments-table-container table.attachments-table {
@@ -38940,7 +38940,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 .attachments-accordion-content {
   padding-left: 6px;
   padding-right: 6px;
-  padding-bottom: 24px;
+  padding-bottom: 6px;
   padding-top: 6px;
   position: relative;
   border: 1px solid #dddddd;
