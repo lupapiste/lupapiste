@@ -67,6 +67,8 @@
                    :path [:verdict-code] :value "hyvaksytty") => no-errors?)
         (command sonja :publish-pate-verdict :id continuation-app-id :verdict-id c-verdict-id) => no-errors?)
 
+      (check-verdict-date sonja continuation-app-id 1523440000000)
+
       (facts "Main application should have continuation period info"
         (let [application          (query-application sonja app-id)
               continuation-period  (first (:continuationPeriods application))]
