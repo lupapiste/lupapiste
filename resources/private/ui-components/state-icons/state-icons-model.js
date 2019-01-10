@@ -1,11 +1,19 @@
 // Attachments table icon column contents. Used both by the regular
 // attachments table and attachment multiselect template.
-// Includes archive error icon in case of archive error
+// Archive error icon is handled in a different part of the template from other icons
+
+// Param primary can be:
+// undefined (show all icons)
+// true (show only "primary" status icons)
+// false (show only secondary icons)
+
 LUPAPISTE.StateIconsModel = function( params ) {
   "use strict";
   var self = this;
 
   var attachment = ko.unwrap( params.attachment );
+  var primary = params.primary;
+  var primaryIcons = ["state", "approved", "rejected"];
 
   var service    = lupapisteApp.services.attachmentsService;
   var transfers  = lupapisteApp.models.application._js.transfers;
@@ -117,8 +125,23 @@ LUPAPISTE.StateIconsModel = function( params ) {
       return info;
   }
 
+  function getIconFilterFunction(primary) {
+    // Filtering primary icons or secondary icons from the view;
+    // by default shows all (when param primary is undefined)
+    var filter = _.identity;
+    if (primary === true) {
+      filter = _.partial(_.includes, primaryIcons)
+    } else if (primary === false) {
+      filter = _.partial(_.negate(_.includes), primaryIcons);
+    }
+
+    return function (x) { return filter(x[1].icon); };
+  }
+
   self.hasArchiveProblem = function() {
-    return authModel.ok("application-organization-archive-enabled")
+    // Archive error icon is only shown when primary icons are to prevent it showing up twice when
+    // primary and secondary icons are shown separately in the same view
+    return primary !== false && authModel.ok("application-organization-archive-enabled")
       && !_.get(attachment, "latestVersion.archivable");
   };
 
@@ -168,6 +191,7 @@ LUPAPISTE.StateIconsModel = function( params ) {
                                           title: "",
                                           info: loc("arkistoitu")}]])
       .filter(function(icon) { return _.first(icon)(attachment); })
+      .filter(getIconFilterFunction(primary))
       .map(_.last)
       .value();
   };

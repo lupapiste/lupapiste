@@ -30,7 +30,7 @@
                        'odd-row': util.isOdd( $index() ),
                        'row--rejected':  $parent.isRejected( $data )}">
           <td>
-            <state-icons params="attachment: $data"></state-icons>
+            <state-icons params="{attachment: $data, primary: true}"></state-icons>
           </td>
           <td>
             <!-- ko if: $data.drawingNumber -->
@@ -41,7 +41,7 @@
 
           <!-- ko if: $parent.hasFile( $data ) -->
           <td>
-            <attachment-type-id params="attachment: $data"></attachment-type-id>
+            <span data-bind="text: $data.contents() || ''" data-test-id="attachment-contents"></span>
             <br>
             <a data-bind="attr: {'href': $parent.buildHash( $data )}"
                data-test-id="open-attachment">
@@ -51,6 +51,9 @@
           </td>
           <td>
             <!-- TODO: Status icons here -->
+            <attachment-type-id class="status-icon-text-line" params="attachment: $data"></attachment-type-id>
+            <br>
+            <state-icons params="{attachment: $data, primary: false}"></state-icons>
           </td>
           <td>
             <span data-bind="dateString: latestVersion.created"></span><br>

@@ -161,6 +161,17 @@ table.tasks {
   }
 }
 
+// Main attachments table
+table.attachments-table {
+
+  .status-icon-text-line {
+    white-space: nowrap;
+    text-transform: lowercase;
+  }
+}
+
+
+// Multiselect attachments table
 table.attachments-template-table {
 
   .center {
