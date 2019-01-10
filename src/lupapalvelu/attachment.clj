@@ -263,22 +263,15 @@
         (apply mongo/generate-array-updates :attachments (:attachments $) pred kvs)))
 
 (defn sorted-attachments
-  "Sorted attachments for command:
-    1. Localized type info ascending (using lang in command)
-    2. Latest version timestamp descending."
-  [{{attachments :attachments} :application lang :lang}]
-  (letfn [(type-text [{{:keys [type-id type-group]} :type}]
-            (i18n/localize lang (format "attachmentType.%s.%s" type-group type-id)))
-          (filestamp [attachment]
-            (-> attachment :latestVersion :created))]
-    (sort (fn [att1 att2]
-            (let [txt1        (type-text att1)
-                  txt2        (type-text att2)
-                  txt-compare (compare txt1 txt2)]
-              (if (zero? txt-compare)
-                (compare (filestamp att2) (filestamp att1))
-                txt-compare)))
-          attachments)))
+  "Sorted attachments for command in the following order:
+    1. Attachments with files before attachments without files
+    2. Attachments in alphabetical order according to content field"
+  [{{attachments :attachments} :application}]
+  (letfn [(file-val [attachment] (if (:latestVersion attachment) 0 1))
+          (cont-val [attachment] (or (:contents attachment) ""))]
+    (->> attachments
+         (sort-by (juxt file-val cont-val)))))
+
 ;;
 ;; Api
 ;;
