@@ -885,6 +885,22 @@
        (ok)
        (fail :error.user-not-found)))))
 
+(defn- remove-orgAuthz [user-id]
+  (mongo/update-by-query :users {:_id user-id} {$unset {"orgAuthz" 1}}))
+
+(defn demote-authority-by-email
+  "Demotes an authority user to applicant. Needed, though the case is rare, in AD-login.
+  Returns (ok) or (fail :error.user-not-found)"
+  [email]
+  {:pre [(string? email)]}
+  (let [{:keys [id] :as user} (get-user-by-email (ss/canonize-email email))
+        res (update-user-by-email email (assoc user :role "applicant"))
+        authz-removed? (when (:ok res)
+                         (remove-orgAuthz id))]
+    (if (pos? authz-removed?)
+      (ok)
+      (fail :error.user-not-found))))
+
 ;;
 ;; ==============================================================================
 ;; Remove dummy user
