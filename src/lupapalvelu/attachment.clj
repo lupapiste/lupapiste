@@ -265,12 +265,16 @@
 (defn sorted-attachments
   "Sorted attachments for command in the following order:
     1. Attachments with files before attachments without files
-    2. Attachments in alphabetical order according to content field"
-  [{{attachments :attachments} :application}]
+    2. Alphabetical order according to content field if attachment has a file, type if it does not"
+  [{{attachments :attachments} :application lang :lang}]
   (letfn [(file-val [attachment] (if (:latestVersion attachment) 0 1))
-          (cont-val [attachment] (or (:contents attachment) ""))]
+          (cont-val [attachment] (or (:contents attachment) ""))
+          (type-val [{{:keys [type-id type-group]} :type}]
+            (i18n/localize lang (format "attachmentType.%s.%s" type-group type-id)))
+          (text-val [attachment]
+            (if (:latestVersion attachment) (cont-val attachment) (type-val attachment)))]
     (->> attachments
-         (sort-by (juxt file-val cont-val)))))
+         (sort-by (juxt file-val text-val)))))
 
 ;;
 ;; Api
