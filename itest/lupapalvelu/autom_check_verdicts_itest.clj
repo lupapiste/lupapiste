@@ -64,8 +64,11 @@
           (count emails) => 6)
         (get (last emails) :subject) => (contains "P\u00e4\u00e4t\u00f6s annettu")
         (:state application-submitted) => "submitted"
+        (:verdictDate application-submitted) => nil
         (:state application-sent) => "sent"
-        (:state application-verdict-given) => "verdictGiven")
+        (:verdictDate application-sent) => nil
+        (:state application-verdict-given) => "verdictGiven"
+        (:verdictDate application-verdict-given) => pos?)
 
       (fact "checking verdicts and sending emails to the authorities related to the applications"
         (fetch-verdicts {:jms? true :wait-ms 2000}) => nil?)
@@ -89,8 +92,11 @@
             application-sent (query-application local-query sonja application-id-sent) => truthy
             application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy]
         (:state application-submitted) => "submitted"
+        (:verdictDate application-submitted) => nil
         (:state application-sent) => "verdictGiven"
+        (:verdictDate application-sent) => pos?
         (:state application-verdict-given) => "verdictGiven"
+        (:verdictDate application-verdict-given) => pos?
 
         (fact "state history"
           (-> application-sent :history last :state) => "verdictGiven"
@@ -126,6 +132,4 @@
           (mongo/select :organizations anything anything) => [{:id "bar" :krysp {:foo {:url "http://test"}}}]
           (lupapalvelu.logging/log-event :error anything) => nil
           (lupapalvelu.logging/log-event :info irrelevant) => irrelevant
-          (lupapalvelu.verdict/do-check-for-verdict anything) => (fail :bar))))))
-)
-)
+          (lupapalvelu.verdict/do-check-for-verdict anything) => (fail :bar))))))))
