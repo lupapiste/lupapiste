@@ -90,7 +90,7 @@
           <!-- ko if: $component.appModel.isArchivingProject() -->
           <td>
             <button class="btn-icon-only"
-                    data-bind="enable: $data.authModel.ok('set-myyntipalvelu-for-attachment'),
+                    data-bind="visible: $data.authModel.ok('set-myyntipalvelu-for-attachment'),
                                css: { positive: $parent.isResellable( $data ),
                                       approve: !$parent.isResellable( $data ) },
                                click: $parent.toggleResell,
@@ -102,7 +102,7 @@
           <!-- ko if: $parent.isAuthority() -->
           <td>
             <button class="btn-icon-only"
-                    data-bind="enable: $data.authModel.ok('approve-attachment'),
+                    data-bind="visible: $data.authModel.ok('approve-attachment'),
                                css: { positive: $parent.isApproved( $data ),
                                       'no-events': $parent.isApproved( $data ),
                                       approve: !$parent.isApproved( $data ) },
@@ -113,7 +113,7 @@
           </td>
           <td>
             <button class="btn-icon-only"
-                    data-bind="enable: $data.authModel.ok('reject-attachment'),
+                    data-bind="visible: $data.authModel.ok('reject-attachment'),
                                css: { negative: $parent.isRejected( $data ),
                                       reject: !$parent.isRejected( $data ) },
                                click: $parent.reject,
