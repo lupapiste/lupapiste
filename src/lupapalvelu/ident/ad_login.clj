@@ -34,18 +34,20 @@
   [firstName lastName email orgAuthz]
   (let [user-data {:firstName firstName
                    :lastName  lastName
-                   :role      (if (empty? orgAuthz)
-                                "applicant"
-                                "authority")
+                   :role     "authority"
                    :email     email
                    :username  email
                    :enabled   true
                    :orgAuthz  orgAuthz}]
-    (if-let [user-from-db (usr/get-user-by-email email)]
-      (let [updated-user-data (util/deep-merge user-from-db user-data)]
-        (usr/update-user-by-email email updated-user-data)
-        updated-user-data)
-      (usr/create-new-user {:role "admin"} user-data))))
+    (if (empty? orgAuthz)
+      (do
+        (usr/demote-authority-by-email email)
+        (usr/get-user-by-email email))
+      (if-let [user-from-db (usr/get-user-by-email email)]
+        (let [merged-user-data (util/deep-merge user-from-db user-data)]
+          (usr/update-user-by-email email merged-user-data)
+          merged-user-data)
+        (usr/create-new-user {:role "admin"} user-data)))))
 
 (defn log-user-in!
   "Logs the user in and redirects him/her to the main page."
