@@ -39,15 +39,12 @@
                    :username  email
                    :enabled   true
                    :orgAuthz  orgAuthz}]
-    (if (empty? orgAuthz)
-      (do
-        (usr/demote-authority-by-email email)
-        (usr/get-user-by-email email))
-      (if-let [user-from-db (usr/get-user-by-email email)]
-        (let [merged-user-data (util/deep-merge user-from-db user-data)]
-          (usr/update-user-by-email email merged-user-data)
-          merged-user-data)
-        (usr/create-new-user {:role "admin"} user-data)))))
+    (if-let [user-from-db (usr/get-user-by-email email)]
+      (let [merged-user-data (cond-> (util/deep-merge user-from-db user-data)
+                               (empty? orgAuthz) (assoc :orgAuthz {}))]
+        (usr/update-user-by-email email merged-user-data)
+        merged-user-data)
+      (usr/create-new-user {:role "admin"} user-data))))
 
 (defn log-user-in!
   "Logs the user in and redirects him/her to the main page."
@@ -125,16 +122,21 @@
               ; The result is formatted like: {:609-R #{"commenter"} :609-YMP #{"commenter" "reader"}}
               authz (ad-util/resolve-authz ad-settings Group)
               _ (infof "Resolved authz for user %s (domain: %s): %s" name domain authz)
-              user (usr/get-user-by-email emailaddress)]
+              {:keys [role] :as user} (usr/get-user-by-email emailaddress)]
           (cond
             (false? (:success? parsed-saml-info)) (do
                                                     (error "Login was not valid")
                                                     (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
             (and valid-signature?
-                 (false? (usr/dummy? user)))    (do ;; We don't want to promote dummy users here.
-                                                 (infof "Logging in user %s as %s" emailaddress (if (seq authz) "authority" "applicant"))
+                 (= role "authority"))         (do
+                                                 (infof "Logging in user %s as %s" emailaddress role)
                                                  (->> (update-or-create-user! givenname surname emailaddress authz)
                                                       (log-user-in! req)))
+
+            (and valid-signature?
+                 (= role "applicant"))         (do
+                                                 (infof "Logging in user %s as %s" emailaddress role)
+                                                 (log-user-in! req user))
 
             ;; If all the assertions are nil, decryption has failed.
             (every? nil?

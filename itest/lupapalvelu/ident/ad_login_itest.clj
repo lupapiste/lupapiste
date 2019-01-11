@@ -38,20 +38,20 @@
         (let [user (ad-login/update-or-create-user! "Pedro" "Banana" "pedro@banana.fi" {:609-R ["reader"]})]
           (fact "User creation works as expected"
                 (= user (usr/get-user-by-email "pedro@banana.fi")) => true)
-          (facts "When provided orgAuthz, an authority user is created"
+          (facts "When a new user is created via SAML, it's always an authority user"
                 (:role user) => "authority"
                 (:orgAuthz user) => {:609-R ["reader"]})
           (facts "Updating users should work as well"
                  (let [updated-user (ad-login/update-or-create-user! "Pedro" "Banana" "pedro@banana.fi" {})]
-                   (:orgAuthz updated-user) => nil
-                   (:role updated-user) => "applicant"))))
+                   (:orgAuthz updated-user) => {}
+                   (:role updated-user) => "authority"))))
 
   (fact "log-user-in! should... Log user in"
         (let [user (usr/get-user-by-email "pedro@banana.fi")
               {:keys [headers session status]} (ad-login/log-user-in! {} user)]
-          (facts "User is redirected to applicant landing page"
+          (facts "User is redirected to authority landing page"
                  (= 302 status) => true
-                 (= (str (env/value :host) "/app/fi/applicant") (get headers "Location")) => true)
+                 (= (str (env/value :host) "/app/fi/authority") (get headers "Location")) => true)
           (fact "User is inserted into the session"
                 (= "pedro@banana.fi" (get-in session [:user :email])) => true)))
 
