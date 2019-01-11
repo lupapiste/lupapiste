@@ -98,8 +98,8 @@
       base-query)))
 
 (defn- event-search [event]
-  (and (not (empty? event))
-       (not (empty? (:eventType event)))))
+  (and (seq event)
+       (seq (:eventType event))))
 
 (defn make-query [query {:keys [searchText applicationType handlers tags companyTags organizations operations areas modifiedAfter event]} user]
 
