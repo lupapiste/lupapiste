@@ -267,8 +267,10 @@
     1. Attachments with files before attachments without files
     2. Alphabetical order according to content field if attachment has a file, type if it does not"
   [{{attachments :attachments} :application lang :lang}]
-  (letfn [(file-val [attachment] (if (:latestVersion attachment) 0 1))
-          (cont-val [attachment] (or (:contents attachment) ""))
+  (letfn [(file-val [attachment]
+            (if (:latestVersion attachment) 0 1))
+          (cont-val [attachment]
+            (or (:contents attachment) ""))
           (type-val [{{:keys [type-id type-group]} :type}]
             (i18n/localize lang (format "attachmentType.%s.%s" type-group type-id)))
           (text-val [attachment]
