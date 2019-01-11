@@ -3,6 +3,9 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization-api :as authorization]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [lupapalvelu.document.model :as doc-model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
@@ -13,15 +16,13 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.pate.verdict-date :as verdict-date]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.property :as prop]
             [lupapalvelu.review :as review]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
-            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -276,7 +277,8 @@
            authorize-applicants)
     ;; Get verdicts for the application
     (when-let [updates (verdict/find-verdicts-from-xml command xml)]
-      (action/update-application command updates))
+      (action/update-application command updates)
+      (verdict-date/update-verdict-date (:id created-application)))
 
     (invite-applicants command hakijat authorize-applicants)
     (infof "Processed applicants, processable applicants count was: %s" (count (filter get-applicant-type hakijat)))

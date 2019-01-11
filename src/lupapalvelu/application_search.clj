@@ -185,7 +185,7 @@
    :foreman :foremanRole :infoRequest :location :modified :municipality
    :neighbors :permitType :permitSubtype :primaryOperation :state :statements
    :organization ; required for authorization checks
-   :submitted :tasks :urgency :verdicts :archived :pate-verdicts])
+   :submitted :tasks :urgency :verdicts :archived :pate-verdicts :verdictDate])
 
 (def- indicator-fields
   (map :field meta-fields/indicator-meta-fields))
@@ -205,20 +205,20 @@
 (defn- enrich-row [app]
   (-> app
       (assoc :handlers (distinct (:handlers app)) ;; Each handler only once.
-             :verdictDate (vif/latest-published-verdict-date app)
              :kuntalupatunnus (vif/published-kuntalupatunnus app))
       app-utils/with-application-kind
       app-utils/location->object))
 
-(def- sort-field-mapping {"applicant" :applicant
-                          "handler" [:handlers.0.lastName :handlers.0.firstName]
-                          "location" :address
-                          "modified" :modified
-                          "submitted" :submitted
-                          "foreman" :foreman
+(def- sort-field-mapping {"applicant"   :applicant
+                          "handler"     [:handlers.0.lastName :handlers.0.firstName]
+                          "location"    :address
+                          "modified"    :modified
+                          "submitted"   :submitted
+                          "foreman"     :foreman
                           "foremanRole" :foremanRole
-                          "state" :state
-                          "id" :_id})
+                          "state"       :state
+                          "verdictDate" :verdictDate
+                          "id"          :_id})
 
 (defn dir [asc] (if asc 1 -1))
 

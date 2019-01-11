@@ -1,5 +1,5 @@
 (ns lupapalvelu.pate.verdict-interface
-  "Accessor interface for verdict clien code. This interface should be
+  "Accessor interface for verdict client code. This interface should be
   used (and extended) instead of directly accessing application or
   mongo."
   (:require [lupapalvelu.pate.metadata :as metadata]

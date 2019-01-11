@@ -72,6 +72,7 @@
                    :verdict-id verdict-id) => ok?
           (verdict-pdf-queue-test sonja {:app-id     app-id
                                          :verdict-id verdict-id})
+          (check-verdict-date sonja app-id (timestamp "21.5.2018"))
           (let [{:keys [tasks attachments
                         state]} (query-application sonja app-id)
                 file-id         (-> attachments first :latestVersion :fileId)
@@ -120,6 +121,7 @@
                     (query sonja :pate-verdict :id app-id
                            :verdict-id verdict-id)
                     => fail?)
+                  (check-verdict-date sonja app-id nil)
                   (let [{:keys [attachments tasks state]} (query-application sonja app-id)]
                     (fact "No attachments and the file has been removed"
                       attachments => empty?
@@ -170,6 +172,7 @@
                    :verdict-id vid1) => ok?)
         (verdict-pdf-queue-test sonja {:app-id     app-id
                                        :verdict-id vid1})
+        (check-verdict-date sonja app-id (timestamp "22.5.2018"))
         (fact "State is verdictGiven"
           (query-application sonja app-id)
           => (contains {:state "verdictGiven"}))
@@ -185,6 +188,7 @@
                    :verdict-id vid2) => ok?)
         (verdict-pdf-queue-test sonja {:app-id     app-id
                                        :verdict-id vid2})
+        (check-verdict-date sonja app-id (timestamp "23.5.2018"))
         (fact "There are now two tasks and four attachments"
           (let [{:keys [attachments tasks]} (query-application sonja app-id)]
             (count attachments) => 4
@@ -192,6 +196,7 @@
         (fact "Delete the second verdict"
           (command sonja :delete-legacy-verdict :id app-id
                    :verdict-id vid2) => ok?)
+        (check-verdict-date sonja app-id (timestamp "22.5.2018"))
         (fact "There are now one task and two attachments."
           (let [{:keys [attachments tasks state]} (query-application sonja app-id)]
             (count attachments) => 2
@@ -210,7 +215,8 @@
             (command sonja :delete-pate-verdict :id app-id
                      :verdict-id vid1)) => fail?
           (command sonja :delete-legacy-verdict :id app-id
-                   :verdict-id vid1)=> ok?
+                   :verdict-id vid1) => ok?
+          (check-verdict-date sonja app-id nil)
           (let [{:keys [attachments tasks state]} (query-application sonja app-id)]
             (count attachments) => 1
             tasks => empty?
@@ -233,11 +239,13 @@
                      :verdict-id vid3) => fail?)
           (command sonja :publish-legacy-verdict :id app-id
                    :verdict-id vid3) => ok?)
+        (check-verdict-date sonja app-id (timestamp "24.5.2018"))
         (fact "Delete the verdict and rewind to sent"
           (command sonja :delete-legacy-verdict :id app-id
                    :verdict-id vid3) => ok?
           (:state (query-application sonja app-id))
           => "sent")
+        (check-verdict-date sonja app-id nil)
         (fact "Disable Pate in Sipoo"
           (command admin :set-organization-scope-pate-value
                    :permitType "R"
@@ -266,7 +274,8 @@
               (command sonja :approve-application :id app-id :lang "fi") => ok?
               (command sonja :publish-legacy-verdict :id app-id
                        :verdict-id verdict-id) => ok?
-              (:state (query-application sonja app-id)) => "verdictGiven")))))))
+              (:state (query-application sonja app-id)) => "verdictGiven")
+            (check-verdict-date sonja app-id (timestamp "24.5.2018"))))))))
 
 (fact "Legacy TJ verdict"
   (let [{app-id :id} (create-and-submit-application pena
@@ -297,13 +306,14 @@
                       :lainvoimainen (timestamp "19.8.2018"))
         (command sonja :publish-legacy-verdict :id tj-app-id :verdict-id verdict-id) => ok?)
 
+      (check-verdict-date sonja tj-app-id (timestamp "9.8.2018"))
       (let [tj-app (query-application sonja tj-app-id)
             tj-verdict (first (:pate-verdicts tj-app))]
 
         (fact "TJ application state is foremanVerdictGiven"
           tj-app => (contains {:state "foremanVerdictGiven"}))
 
-        (fact "TJ verdict have given data"
+        (fact "TJ verdict has the given data"
           (get-in tj-verdict [:data :handler]) => "Sonja Sibbo"
           (get-in tj-verdict [:data :kuntalupatunnus]) => "TJ-123"
           (get-in tj-verdict [:data :verdict-code]) => "1"
