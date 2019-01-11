@@ -1,8 +1,12 @@
 (ns lupapalvelu.municipality-itest
   (:require [lupapalvelu.itest-util :refer [admin command query apply-remote-minimal pena ok?]]
-            [midje.sweet :refer :all]))
+            [midje.sweet :refer :all]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
+
+(def future-date (util/get-timestamp-from-now :day 7))
+(def past-date   (util/get-timestamp-ago :day 7))
 
 (fact "nothing is found successfully"
   (let [resp (query pena :municipality-borders)]
@@ -39,14 +43,30 @@
       :applicationEnabled false
       :openInforequestEnabled false
       :openInforequestEmail "someone@localhost"
-      :opening 123
+      :opening future-date
       :pateEnabled false) => ok?
     (let [m (query pena :municipality-active :municipality "999")]
       (:applications m) => empty?
       (:infoRequests m) => empty?
-      (:opening m) => [{:permitType "R", :opening 123}])
+      (:opening m) => [{:permitType "R", :opening future-date}])
     (let [all-active-m (:municipalities (query pena :active-municipalities))]
-      (:opening  (first (filter #(= (:id %) "999") all-active-m))) => [{:opening 123, :permitType "R"}]))
+      (:opening  (first (filter #(= (:id %) "999") all-active-m))) => [{:opening future-date, :permitType "R"}]))
+  (fact "nothing enabled, and the opening date has passed"
+    (command admin :update-organization
+      :permitType "R"
+      :municipality "999"
+      :inforequestEnabled false
+      :applicationEnabled false
+      :openInforequestEnabled false
+      :openInforequestEmail "someone@localhost"
+      :opening past-date
+      :pateEnabled false) => ok?
+    (let [m (query pena :municipality-active :municipality "999")]
+      (:applications m) => empty?
+      (:infoRequests m) => empty?
+      (:opening m) => empty?)
+    (let [all-active-m (:municipalities (query pena :active-municipalities))]
+      (:opening  (first (filter #(= (:id %) "999") all-active-m))) => empty?))
   (fact "opening is not included, if applications enabled"
     (command admin :update-organization
              :permitType "R"
@@ -55,7 +75,7 @@
              :applicationEnabled true
              :openInforequestEnabled false
              :openInforequestEmail "someone@localhost"
-             :opening 123
+             :opening future-date
              :pateEnabled false) => ok?
     (let [resp (query pena :municipality-active :municipality "999")]
       (:applications resp) => (just "R")
@@ -69,12 +89,12 @@
              :applicationEnabled false
              :openInforequestEnabled true
              :openInforequestEmail "someone@localhost"
-             :opening 123
+             :opening future-date
              :pateEnabled false) => ok?
     (let [resp (query pena :municipality-active :municipality "999")]
       (:applications resp) => empty?
       (:infoRequests resp) => (just "R")
-      (:opening resp) => (just #{(just {:opening 123 :permitType "R"})})))
+      (:opening resp) => (just #{(just {:opening future-date :permitType "R"})})))
 
   (fact "municipality in two organizations"
     (let [oulu (query pena :municipality-active :municipality "564")
