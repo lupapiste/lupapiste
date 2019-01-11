@@ -90,7 +90,7 @@
                  :id application-id :verdict-id verdict-id) => ok?)
       (verdict-pdf-queue-test sonja {:app-id     application-id
                                      :verdict-id verdict-id})
-
+      (check-verdict-date sonja application-id 123)
       (let [application      (query-application sonja application-id)
             {:keys [verdict]} (query sonja :pate-verdict :id application-id
                                      :verdict-id (-> application :pate-verdicts

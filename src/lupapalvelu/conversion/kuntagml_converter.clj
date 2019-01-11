@@ -1,25 +1,26 @@
 (ns lupapalvelu.conversion.kuntagml-converter
-  (:require [taoensso.timbre :refer [info infof warn error errorf]]
-            [clojure.string :refer [includes?]]
-            [sade.core :refer :all]
-            [sade.util :as util]
+  (:require [clojure.string :refer [includes?]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [lupapalvelu.conversion.util :as conv-util]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.verdict-date :as verdict-date]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.review :as review]
-            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
-            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
+            [sade.core :refer :all]
+            [sade.util :as util]
+            [taoensso.timbre :refer [info infof warn error errorf]]))
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   (let [{:keys [hakijat]} app-info
@@ -119,7 +120,8 @@
       (infof "Inserted converted app: org=%s kuntalupatunnus=%s" (:organization created-application) (get-in command [:data :kuntalupatunnus]))
       ;; Get verdicts for the application
       (when-let [updates (verdict/find-verdicts-from-xml command xml false)]
-        (action/update-application command updates))
+        (action/update-application command updates)
+        (verdict-date/update-verdict-date (:id created-application)))
 
       (let [updated-application (mongo/by-id :applications (:id created-application))
             {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml false true)
