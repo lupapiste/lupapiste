@@ -119,7 +119,7 @@ Mikko goes back to attachments listing and sees filters are set as they were
   Checkbox wrapper not selected by test id  other-filter
 
 Mikko toggles all filters on
-  Scroll and click test id  toggle-all-filters-label
+  Wait until  Scroll and click test id  toggle-all-filters-label
   Wait until  Toggle all filters is selected
   Checkbox wrapper selected by test id  postVerdict-filter
   Checkbox wrapper selected by test id  preVerdict-filter
