@@ -16,6 +16,7 @@
             [lupapalvelu.pate.verdict :refer [pate-enabled verdict-exists
                                               backing-system-verdict] :as verdict]
             [lupapalvelu.pate.verdict-common :as vc]
+            [lupapalvelu.pate.verdict-date :as verdict-date]
             [lupapalvelu.pate.verdict-template :as template]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
@@ -402,7 +403,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [pate-enabled
                       (verdict-exists :editable? :modern?)]
-   :states           states/post-submitted-states}
+   :states           states/post-submitted-states
+   :on-success       [verdict-date/update-verdict-date]}
   [command]
   (verdict/delete-verdict verdict-id command)
   (ok))
@@ -427,7 +429,8 @@
                                                   #{:complementNeeded})))]
    :notified         true
    :on-success       [(notify :application-state-change)
-                      invoices/new-verdict-invoice]}
+                      invoices/new-verdict-invoice
+                      verdict-date/update-verdict-date]}
   [command]
   (ok (verdict/publish-verdict command)))
 
@@ -461,7 +464,8 @@
                       (some-pre-check (verdict-exists :legacy? :editable?)
                                       (state-in states/give-verdict-states))]
    :states           states/post-submitted-states
-   :notified         true}
+   :notified         true
+   :on-success       [verdict-date/update-verdict-date]}
   [command]
   (ok (verdict/delete-legacy-verdict command)))
 
@@ -477,7 +481,8 @@
                                      #{:finished :complementNeeded})
    :notified         true
    :on-success       [(notify :application-state-change)
-                      invoices/new-verdict-invoice]}
+                      invoices/new-verdict-invoice
+                      verdict-date/update-verdict-date]}
   [command]
   (ok (verdict/publish-verdict command)))
 

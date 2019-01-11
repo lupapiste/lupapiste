@@ -104,6 +104,7 @@
                                         :contents     "Sopimus"
                                         :state        "agreementPrepared"
                                         :type-group   "muut"})
+         (check-verdict-date sonja app-id (timestamp "4.6.2018"))
          (facts "Application updated"
            (let [{:keys [tasks attachments state]} (query-application sonja app-id)
                  source                            {:type "verdict"
@@ -279,6 +280,7 @@
                                                  :contents     "Sopimus"
                                                  :state        "agreementPrepared"
                                                  :type-group   "muut"})
+                  (check-verdict-date sonja app-id (timestamp "11.6.2018"))
                   (let [{:keys [tasks attachments]} (query-application sonja app-id)]
                     (fact "Task has been created"
                       tasks => (contains [(contains {:taskname    "Some random condition."

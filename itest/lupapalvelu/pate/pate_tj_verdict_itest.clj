@@ -50,6 +50,7 @@
         (verdict-pdf-queue-test sonja {:app-id     foreman-app-id
                                        :verdict-id verdict-id
                                        :state      "foremanVerdictGiven"})
+        (check-verdict-date sonja foreman-app-id tj-verdict-date)
         (fact "Applicant cant create verdict"
           (command pena :new-pate-verdict-draft :id foreman-app-id :template-id template-id) => unauthorized?)
 

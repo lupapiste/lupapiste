@@ -105,7 +105,13 @@
                                (update :paatokset (comp vec butlast))
                                (update-in [:paatokset 0 :poytakirjat] (fn [pks]
                                                                         (map #(dissoc % :paatospvm) pks)))
-                               (assoc-in [:paatokset 0 :paivamaarat :paatosdokumentinPvm] 220033))]
+                               (assoc-in [:paatokset 0 :paivamaarat :paatosdokumentinPvm] 220033))
+        legacy-contract    {:id       "legacy-contract"
+                            :category "contract"
+                            :legacy?  true
+                            :data     {:handler      "Foo Bar"
+                                       :verdict-date 54321}
+                            :modified 12345}]
 
     (fact "Nil"
       (vc/draft? nil) => false
@@ -334,7 +340,29 @@
               :giver        "Foo Bar"
               :verdict-date 876543
               :replaces     "v2"
-              :title        "\u00a71 Sijoituslupa - Annettu lausunto (korvaa p\u00e4\u00e4t\u00f6ksen \u00a72)"})))))
+              :title        "\u00a71 Sijoituslupa - Annettu lausunto (korvaa p\u00e4\u00e4t\u00f6ksen \u00a72)"})))
+    (facts "Legacy contract"
+      (fact "Draft"
+        (vc/verdict-summary "fi" section-strings legacy-contract)
+        => {:category     "contract"
+            :giver        "Foo Bar"
+            :id           "legacy-contract"
+            :legacy?      true
+            :modified     12345
+            :proposal?    false
+            :title        "Luonnos"
+            :verdict-date 54321})
+      (fact "Published"
+        (vc/verdict-summary "fi" section-strings (publish legacy-contract 88888))
+        => {:category     "contract"
+            :giver        "Foo Bar"
+            :id           "legacy-contract"
+            :legacy?      true
+            :modified     12345
+            :proposal?    false
+            :title        "Sopimus"
+            :verdict-date 54321
+            :published    88888}))))
 
 (facts "verdict-list"
   (let [v1 (make-verdict :id "v1" :code "ei-tutkittu-1" :section "11" :published 10)

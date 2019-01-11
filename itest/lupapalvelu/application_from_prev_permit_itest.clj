@@ -141,6 +141,9 @@
 
               resp1  => ok?
 
+              (fact "verdictDate exists"
+                (:verdictDate application) => pos?)
+
               ;; Test count of the invited emails, because invalid emails are ignored
               (fact "invites count"
                 (count invites) => 3
@@ -269,7 +272,8 @@
                             resp-body => ok?
                             (keyword (:text resp-body)) => :created-new-application
                             (let [application (query-application raktark-jarvenpaa (:id resp-body))]
-                              (:opened application) => truthy)))
+                              (:opened application) => truthy
+                              (:verdictDate application) => pos?)))
 
                         (facts "should return the LP application if the kuntalupatunnus matches an existing app"
                           (fact "Pate verdict"

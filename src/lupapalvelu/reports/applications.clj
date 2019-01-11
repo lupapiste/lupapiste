@@ -82,17 +82,18 @@
                   query
                   [:_id :created :attachments])))
 
-(defn- get-latest-verdict-ts [{verdicts :verdicts}]
-  (->> verdicts (sort-by :timestamp) (last) :timestamp))
-
 (defn- post-verdict-applications [organizationId startTs endTs]
-  (let [applications           (mongo/select :applications
-                                             {:organization organizationId
-                                              :state {$in states/post-verdict-states}
-                                              :verdicts {$elemMatch {:timestamp {$gte startTs}}}}
-                                             [:_id :state :primaryOperation :verdicts :documents :tosFunction :organization])
-        verdict-in-time-period (fn [app] (< startTs (get-latest-verdict-ts app) (if (< (now) endTs) (now) endTs)))]
-    (filter verdict-in-time-period applications)))
+  (mongo/aggregate :applications
+                   [{$match {:organization organizationId
+                             :state        {$in states/post-verdict-states}}}
+                    {"$addFields" {:_backingLatest   {$max :$verdicts.timestamp}
+                                   :_publishedLatest {$max :$pate-verdicts.published.published}}}
+                    {"$addFields" {:reportTimestamp {$max [:$_backingLatest :$_publishedLatest]}}}
+                    {$match {:reportTimestamp {$gte startTs $lte endTs}}}
+                    {$project {:_id              1 :state           1
+                               :primaryOperation 1 :verdictDate     1
+                               :documents        1 :tosFunction     1
+                               :organization     1 :reportTimestamp 1}}]))
 
 (defn- authority [app]
   (->> app
@@ -241,16 +242,18 @@
                               "application.applicants.email"
                               "operations.primary"
                               "applications.status"
-                              "verdictGiven"
+                              "pate-verdict-template.published"
+                              "pate-dates.verdict-date"
                               (when archiving-enabled? "tos.function")]
           header-row-content (map (partial i18n/localize lang) (remove nil? header-titles))
           data               (post-verdict-applications organizationId startTs endTs)
-          cell-data-fns      [:id
+          cell-data-fns      [:_id
                               applicants
                               applicants-emails
                               (partial localized-primary-operation lang)
                               (partial localized-state lang)
-                              #(-> % get-latest-verdict-ts util/to-local-date)
+                              (comp util/to-local-date :reportTimestamp)
+                              (comp util/to-local-date :verdictDate)
                               (when archiving-enabled? tos-function-name)]
           row-fn             (->> cell-data-fns
                                   (remove nil?)

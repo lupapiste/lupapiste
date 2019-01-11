@@ -116,15 +116,10 @@
                                            {:date "19.12.2017" :attachments 18}]))
 
 (facts "Post verdict applications"
-  (let [updated-app (assoc application :verdicts [{:timestamp 1498827288337}
-                                                  {:timestamp 1514385423295}])
-        updated-app (update updated-app :documents conj {:schema-info {:subtype "hakija" :version 1}
-                                                         :data {:_selected {:value "yritys"}
-                                                                :yritys {:yritysnimi {:value "Firma"}
-                                                                         :yhteyshenkilo {:yhteystiedot {:email {:value "anders.anderson@firma.com"}}}}}})]
-
-    (fact "Latest verdicts"
-      (get-latest-verdict-ts updated-app) => 1514385423295)
+  (let [updated-app (update application :documents conj {:schema-info {:subtype "hakija" :version 1}
+                                                        :data {:_selected {:value "yritys"}
+                                                               :yritys {:yritysnimi {:value "Firma"}
+                                                                        :yhteyshenkilo {:yhteystiedot {:email {:value "anders.anderson@firma.com"}}}}}})]
 
     (fact "Applicants"
       (applicants updated-app) => "Firstname Lastname; Firma")

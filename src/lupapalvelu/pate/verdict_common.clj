@@ -109,6 +109,9 @@
 
 (defn verdict-date [verdict]
   (cond
+    (contract? verdict)
+    (get-data verdict :verdict-date)
+
     (legacy? verdict)
     (get-data verdict :anto)
 
