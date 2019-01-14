@@ -1,25 +1,26 @@
 (ns lupapalvelu.conversion.kuntagml-converter
-  (:require [taoensso.timbre :refer [info infof warn error errorf]]
-            [clojure.string :refer [includes?]]
-            [sade.core :refer :all]
-            [sade.util :as util]
+  (:require [clojure.string :refer [includes?]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
+            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]
             [lupapalvelu.conversion.util :as conv-util]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.verdict-date :as verdict-date]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.review :as review]
-            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.backing-system.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.backing-system.krysp.building-reader :as building-reader]
-            [lupapalvelu.backing-system.krysp.reader :as krysp-reader]))
+            [sade.core :refer :all]
+            [sade.util :as util]
+            [taoensso.timbre :refer [info infof warn error errorf]]))
 
 (defn convert-application-from-xml [command operation organization xml app-info location-info authorize-applicants]
   (let [{:keys [hakijat]} app-info
@@ -119,7 +120,8 @@
       (infof "Inserted converted app: org=%s kuntalupatunnus=%s" (:organization created-application) (get-in command [:data :kuntalupatunnus]))
       ;; Get verdicts for the application
       (when-let [updates (verdict/find-verdicts-from-xml command xml false)]
-        (action/update-application command updates))
+        (action/update-application command updates)
+        (verdict-date/update-verdict-date (:id created-application)))
 
       (let [updated-application (mongo/by-id :applications (:id created-application))
             {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml false true)
@@ -153,20 +155,24 @@
   (when-not (contains? supported-import-types (keyword permittype))
     (error-and-fail! (str "Unsupported import type " permittype) :error.unsupported-permit-type)))
 
-(defn fetch-prev-local-application!
-  "A variation of `lupapalvelu.prev-permit/fetch-prev-local-application!` that exists for conversion
-  and testing purposes. Creates an application from Krysp message in a local file. To use a local Krysp
-  file:
+(defn fetch-prev-application!
+  "A variant of `lupapalvelu.prev-permit/fetch-prev-local-application!` that exists for conversion
+  and testing purposes. To use a local KuntaGML file:
   1) The local MongoDB has to contain the location info for the municipality in question (here Vantaa)
-  2) this function needs to be called from prev-permit-api/create-application-from-previous-permit instead of
-  prev-permit/fetch-prev-application!"
-  [{{:keys [kuntalupatunnus authorizeApplicants]} :data :as command}]
+  2) this function needs to be called with the `local?` argument set to `true`"
+  ([command]
+   (fetch-prev-application! command true))
+  ([{{:keys [kuntalupatunnus authorizeApplicants]} :data :as command} local?] ;; If the `local` flag is false, the application is fetched from backed system.
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
         destructured-permit-id (conv-util/destructure-permit-id kuntalupatunnus)
         operation             "konversio"
         filename              (format "%s/%s.xml" (:resource-path conv-util/config) kuntalupatunnus ".xml")
         permit-type           "R"
-        xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
+        xml                   (if local?
+                                (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
+                                (krysp-fetch/get-application-xml-by-application-id {:id kuntalupatunnus
+                                                                                    :organization "092-R"
+                                                                                    :permitType "R"}))
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info         (or (prev-permit/get-location-info command app-info)
                                   prev-permit/default-location-info)
@@ -189,7 +195,7 @@
                                                                                      authorizeApplicants)]
                                           (if no-proper-applicants?
                                             (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
-                                            (ok :id id))))))
+                                            (ok :id id)))))))
 
 (defn debug [command]
-  (fetch-prev-local-application! command))
+  (fetch-prev-application! command))

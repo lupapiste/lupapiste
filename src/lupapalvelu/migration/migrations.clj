@@ -31,6 +31,7 @@
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.pate.verdict-date :as verdict-date]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.tasks :refer [task-doc-validation] :as tasks]
@@ -4112,6 +4113,13 @@
                           {$set {:modified modified}}))
     (count target-assignments)))
 
+(defmigration PATE-216-verdictDate
+  (doseq [{app-id :id} (mongo/select :applications
+                                     {:$or         [{:verdicts.0 {$exists true}}
+                                                    {:pate-verdicts.0 {$exists true}}]
+                                      :verdictDate {$exists false}}
+                                     {:_id 1})]
+    (verdict-date/update-verdict-date app-id)))
 
 ;;
 ;; ****** NOTE! ******

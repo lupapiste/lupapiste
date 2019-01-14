@@ -34,15 +34,16 @@
   [firstName lastName email orgAuthz]
   (let [user-data {:firstName firstName
                    :lastName  lastName
-                   :role      "authority"
+                   :role     "authority"
                    :email     email
                    :username  email
                    :enabled   true
                    :orgAuthz  orgAuthz}]
     (if-let [user-from-db (usr/get-user-by-email email)]
-      (let [updated-user-data (util/deep-merge user-from-db user-data)]
-        (usr/update-user-by-email email updated-user-data)
-        updated-user-data)
+      (let [merged-user-data (cond-> (util/deep-merge user-from-db user-data)
+                               (empty? orgAuthz) (assoc :orgAuthz {}))]
+        (usr/update-user-by-email email merged-user-data)
+        merged-user-data)
       (usr/create-new-user {:role "admin"} user-data))))
 
 (defn log-user-in!
@@ -121,17 +122,21 @@
               ; The result is formatted like: {:609-R #{"commenter"} :609-YMP #{"commenter" "reader"}}
               authz (ad-util/resolve-authz ad-settings Group)
               _ (infof "Resolved authz for user %s (domain: %s): %s" name domain authz)
-              user (usr/get-user-by-email emailaddress)]
+              {:keys [role] :as user} (usr/get-user-by-email emailaddress)]
           (cond
             (false? (:success? parsed-saml-info)) (do
                                                     (error "Login was not valid")
                                                     (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
             (and valid-signature?
-                 (seq authz)
-                 (false? (usr/dummy? user)))    (do ;; We don't want to promote dummy users here.
-                                                 (infof "Logging in user %s as authority" emailaddress)
+                 (= role "authority"))         (do
+                                                 (infof "Logging in user %s as %s" emailaddress role)
                                                  (->> (update-or-create-user! givenname surname emailaddress authz)
                                                       (log-user-in! req)))
+
+            (and valid-signature?
+                 (= role "applicant"))         (do
+                                                 (infof "Logging in user %s as %s" emailaddress role)
+                                                 (log-user-in! req user))
 
             ;; If all the assertions are nil, decryption has failed.
             (every? nil?
@@ -140,13 +145,6 @@
                                surname))        (do
                                                   (errorf "Decrypting SAML response failed")
                                                   (resp/redirect (format "%s/app/fi/welcome#!/login" (env/value :host))))
-
-            ;; If a non-dummy account exists for the received email address, the user is logged in.
-            (and valid-signature?
-                 (empty? authz)
-                 (false? (usr/dummy? user)))   (do
-                                                 (infof "Logging in user %s as applicant" emailaddress)
-                                                 (->> emailaddress usr/get-user-by-email (log-user-in! req)))
 
             (and valid-signature?
                  (usr/dummy? user))            (do

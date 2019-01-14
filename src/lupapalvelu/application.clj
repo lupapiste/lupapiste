@@ -746,8 +746,8 @@
           (do
             (info (format "Updating app-link: %s -> %s" app-link-id (str link-permit-id "|" (:id application))))
             (mongo/remove app-link-id)
-            (do-add-link-permit application link-permit-id)))
-        (error (format "Could not update app-link for permit %s / %s" kuntalupatunnus link-permit-id))))))
+            (do-add-link-permit application link-permit-id))
+          (error (format "Could not update app-link for permit %s / %s" kuntalupatunnus link-permit-id)))))))
 
 ;; Submit
 (defn submit [{:keys [application created user] :as command} ]
@@ -979,19 +979,18 @@
         secondary-ops             (mapv #(assoc (-> %1 :schema-info :op) :description %2) (rest building-docs) (rest structure-descriptions))
         application               (update-in application [:documents] concat building-docs)
         command                   (util/deep-merge command (action/application->command application))]
-  (when (some? (:id primary-operation))
-    (do
+    (when (some? (:id primary-operation))
       (run! #(doc-persistence/remove! command %) old-building-docs)
       (action/update-application command {$set  {:primaryOperation    primary-operation
                                                  :secondaryOperations secondary-ops}
                                           $push {:documents {$each building-docs}}})
-      (update-buildings-array! building-xml (mongo/by-id :applications (:id application)) all-buildings)))))
+      (update-buildings-array! building-xml (mongo/by-id :applications (:id application)) all-buildings))))
 
 (defn remove-secondary-buildings [{:keys [application] :as command}]
   (let [building-docs (domain/get-documents-by-name application "archiving-project")
         primary-op-id (get-in application [:primaryOperation :id])
-        secondary-building-docs (filter #(not (= (-> % :schema-info :op :id) primary-op-id)) building-docs)
-        secondary-buildings (filter #(not (= (:operationId %) primary-op-id)) (:buildings application))]
+        secondary-building-docs (filter #(not= (-> % :schema-info :op :id) primary-op-id) building-docs)
+        secondary-buildings (filter #(not= (:operationId %) primary-op-id) (:buildings application))]
     (run! #(doc-persistence/remove! command  %) secondary-building-docs)
     (action/update-application command {$pull {:buildings {:buildingId {$in (map :buildingId secondary-buildings)}}}})))
 

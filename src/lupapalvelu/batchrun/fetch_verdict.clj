@@ -1,12 +1,13 @@
 (ns lupapalvelu.batchrun.fetch-verdict
-  (:require [taoensso.timbre :refer [error errorf info infof warn]]
-            [sade.core :refer :all]
-            [lupapalvelu.action :refer [application->command]]
+  (:require [lupapalvelu.action :refer [application->command]]
             [lupapalvelu.application :as app]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.verdict :as verdict]))
+            [lupapalvelu.pate.verdict-date :as verdict-date]
+            [lupapalvelu.verdict :as verdict]
+            [sade.core :refer :all]
+            [taoensso.timbre :refer [error errorf info infof warn]]))
 
 (defn fetch-verdict
   [batchrun-name batchrun-user {:keys [id permitType organization] :as app}]
@@ -16,6 +17,7 @@
       (let [command (assoc (application->command app) :user batchrun-user :created (now) :action "fetch-verdicts")
             result (verdict/do-check-for-verdict command)]
         (when (-> result :verdicts count pos?)
+          (verdict-date/update-verdict-date (:id app))
           (infof "Found %s verdicts" (-> result :verdicts count))
           ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
           (logging/log-event :info {:run-by batchrun-name :event "Found new verdict"})

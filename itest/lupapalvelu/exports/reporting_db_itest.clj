@@ -29,17 +29,17 @@
       => (just [(contains {:id application-id})])))
 
   (let [timestamp-before-applications-are-created (now)
-        first-application-id (create-app-id pena :operation "aita")
+        first-application-id (create-app-id pena :operation "poikkeamis")
         timestamp-between-applications (now)
         second-application-id (create-app-id pena :operation "kerrostalo-rivitalo")]
 
     (fact "Two apps created, but only one is exported if the timestamp of the second one is not within the time interval"
-          (:applications (export-applications timestamp-before-applications-are-created
-                                              timestamp-between-applications))
-          => (just [(contains {:id first-application-id})]))
+      (:applications (export-applications timestamp-before-applications-are-created
+                                          timestamp-between-applications))
+      => (just [(contains {:id first-application-id})]))
 
     (fact "Both apps are exported if their timestamps are contained within the time interval"
-          (:applications (export-applications timestamp-before-applications-are-created (now)))
-          => (just [(contains {:id first-application-id})
-                    (contains {:id second-application-id})]
-                   :in-any-order))))
+      (:applications (export-applications timestamp-before-applications-are-created (now)))
+      => (just [(contains {:id first-application-id})
+                (contains {:id second-application-id})]
+               :in-any-order))))

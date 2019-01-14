@@ -675,14 +675,14 @@
        (fact "Foreman can NOT set attachment meta data after verdict is given"
          (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents2"}) => fail?)
        (fact "Application search"
-         (-> (datatables foreman :applications-search :operations ["tyonjohtajan-nimeaminen-v2"])
-             :data :applications)
-         => (just [(contains {:state           "foremanVerdictGiven"
-                              :kuntalupatunnus "888-10-12"
-                              :verdictDate     (timestamp "21.5.2018")})
-                   (contains {:state           "draft"
-                              :kuntalupatunnus nil
-                              :verdictDate     nil})]
+         (->> (datatables foreman :applications-search :operations ["tyonjohtajan-nimeaminen-v2"])
+             :data :applications
+             (map #(select-keys % [:state :kuntalupatunnus :verdictDate])))
+         => (just [{:state           "foremanVerdictGiven"
+                    :kuntalupatunnus "888-10-12"
+                    :verdictDate     (timestamp "21.5.2018")}
+                   {:state           "draft"
+                    :kuntalupatunnus nil}]
                   :in-any-order))))
 
     (fact "Foreman can not upgrade own role"

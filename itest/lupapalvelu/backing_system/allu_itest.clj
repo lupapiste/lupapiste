@@ -219,35 +219,44 @@
 
    ["/"
     ["applications"
-     ["/:id/cancelled"
-      {:put {:handler (fn [{{:keys [id]} :path-params :keys [headers]}]
-                        (if (= (get headers "authorization") (str "Bearer " mock-jwt))
-                          (if (contains? (:applications @allu-state) id)
-                            (do (swap! allu-state update :applications dissoc id)
-                                {:status 200, :body ""})
-                            {:status 404, :body (str "Not Found: " id)})
-                          {:status 401, :body "Unauthorized"}))}}]
-
-     ["/:id/attachments"
-      {:post {:handler (fn [{{:keys [id]} :path-params :keys [headers multipart]}]
+     ["/:id"
+      [""
+       {:get {:handler (fn [{{:keys [id]} :path-params :keys [headers]}]
                          (if (= (get headers "authorization") (str "Bearer " mock-jwt))
-                           (let [metadata-error (sc/check {:name      (sc/eq "metadata")
-                                                           :mime-type (sc/eq "application/json")
-                                                           :encoding  (sc/eq "UTF-8")
-                                                           :content   AttachmentMetadata}
-                                                          (update (first multipart) :content json/decode true))
-                                 file-error     (sc/check {:name      (sc/eq "file")
-                                                           :mime-type sc/Str
-                                                           :content   InputStream}
-                                                          (second multipart))]
-                             (if-let [validation-error (or metadata-error file-error)]
-                               {:status 400, :body validation-error}
-                               (if (contains? (:applications @allu-state) id)
-                                 (let [attachment {:metadata (-> multipart (get-in [0 :content]) (json/decode true))}]
-                                   (swap! allu-state update-in [:applications id :attachments] (fnil conj []) attachment)
-                                   {:status 200, :body ""})
-                                 {:status 404, :body (str "Not Found: " id)})))
-                           {:status 401, :body "Unauthorized"}))}}]]
+                           (if-let [validation-error (sc/check sc/Str id)]
+                             {:status 404, :body (str "Not Found: " id)}
+                             {:status 200, :body (str "{\"applicationId\": \"SL00000" id "\"}")})
+                           {:status 401, :body "Unauthorized"}))}}]
+
+      ["/cancelled"
+       {:put {:handler (fn [{{:keys [id]} :path-params :keys [headers]}]
+                         (if (= (get headers "authorization") (str "Bearer " mock-jwt))
+                           (if (contains? (:applications @allu-state) id)
+                             (do (swap! allu-state update :applications dissoc id)
+                                 {:status 200, :body ""})
+                             {:status 404, :body (str "Not Found: " id)})
+                           {:status 401, :body "Unauthorized"}))}}]
+
+      ["/attachments"
+       {:post {:handler (fn [{{:keys [id]} :path-params :keys [headers multipart]}]
+                          (if (= (get headers "authorization") (str "Bearer " mock-jwt))
+                            (let [metadata-error (sc/check {:name (sc/eq "metadata")
+                                                            :mime-type (sc/eq "application/json")
+                                                            :encoding (sc/eq "UTF-8")
+                                                            :content AttachmentMetadata}
+                                                           (update (first multipart) :content json/decode true))
+                                  file-error (sc/check {:name (sc/eq "file")
+                                                        :mime-type sc/Str
+                                                        :content InputStream}
+                                                       (second multipart))]
+                              (if-let [validation-error (or metadata-error file-error)]
+                                {:status 400, :body validation-error}
+                                (if (contains? (:applications @allu-state) id)
+                                  (let [attachment {:metadata (-> multipart (get-in [0 :content]) (json/decode true))}]
+                                    (swap! allu-state update-in [:applications id :attachments] (fnil conj []) attachment)
+                                    {:status 200, :body ""})
+                                  {:status 404, :body (str "Not Found: " id)})))
+                            {:status 401, :body "Unauthorized"}))}}]]]
 
 
     ["placementcontracts"

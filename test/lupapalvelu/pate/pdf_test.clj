@@ -3,7 +3,9 @@
   (:require [lupapalvelu.pate.pdf :as pdf]
             [lupapalvelu.pate.pdf-html :as html]
             [lupapalvelu.pate.verdict-schemas :as verdict-schemas]
-            [midje.sweet :refer :all]))
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [sade.util :as util]))
 
 (defn address  [street zip city country]
   {:katu                 street
@@ -156,9 +158,6 @@
                          :secondaryOperations [{:id "op2" :created 1}]}
         sisatila-muutos "Rakennuksen sis\u00e4tilojen muutos (k\u00e4ytt\u00f6tarkoitus ja/tai muu merkitt\u00e4v\u00e4 sis\u00e4muutos)"
         purkaminen      "Rakennuksen purkaminen"]
-    (fact "Primary operation data"
-      (pdf/primary-operation-data app)
-      => {:foo "bar"})
     (fact "Operation infos"
       (pdf/operation-infos app)
       => [{:id   "op1"
@@ -263,3 +262,99 @@
     (html/organization-name :fi app {}) => "Sipoon rakennusvalvonta"
     (provided (lupapalvelu.organization/get-organization "753-R") => organization)
     (html/organization-name :fi app verdict) => "Special name"))
+
+(testable-privates lupapalvelu.pate.pdf
+                   update-sum-field update-sum-map double->str)
+
+(defn mitat [kala rakala koala tila]
+  {:mitat (util/assoc-when {}
+                           :kerrosala kala
+                           :rakennusoikeudellinenKerrosala rakala
+                           :kokonaisala koala
+                           :tilavuus tila)})
+
+(facts "Dimensions"
+  (fact "double->str"
+    (double->str nil) => nil
+    (double->str 0) => nil
+    (double->str 0.04) => nil
+    (double->str 0.05) => "0.1"
+    (double->str 3.04) => "3"
+    (double->str 12.0500) => "12.1")
+  (fact "update-sum-field"
+    (update-sum-field {} {} :foo) => {:foo 0.0}
+    (update-sum-field nil nil :foo) => {:foo 0.0}
+    (update-sum-field nil {:foo "hello"} :foo) => {:foo 0.0}
+    (update-sum-field {:foo 10} {:foo "hello"} :foo) => {:foo 10.0}
+    (update-sum-field {:bar 4} {} :foo) => {:bar 4 :foo 0.0}
+    (update-sum-field {:bar 4} {:foo 9} :foo) => {:bar 4 :foo 9.0}
+    (update-sum-field {:bar 4 :foo 2} {:foo 9.21} :foo) => {:bar 4 :foo 11.21})
+  (fact "update-sum-map"
+    (update-sum-map {} {} [:foo :bar :baz]) => {:foo 0.0 :bar 0.0 :baz 0.0}
+    (update-sum-map {} nil [:foo :bar :baz]) => {:foo 0.0 :bar 0.0 :baz 0.0}
+    (update-sum-map nil nil [:foo :bar :baz]) => {:foo 0.0 :bar 0.0 :baz 0.0}
+    (update-sum-map {:hii 8} {:foo 1 :bar 2} [:foo :bar :baz])
+    => {:hii 8 :foo 1.0 :bar 2.0 :baz 0.0}
+    (update-sum-map {:hii 8 :foo 3 :baz 9} {:foo 1 :bar 2} [:foo :bar :baz])
+    => {:hii 8 :foo 4.0 :bar 2.0 :baz 9.0})
+  (fact "dimensions"
+    (let [new-build1 {:schema-info {:name "uusiRakennus"}
+                      :data        (mitat 1 2 3 4)}
+          new-build2 {:schema-info {:name "uusi-rakennus-ei-huoneistoa"}
+                      :data        (mitat 10 12 13 14)}
+          extend1    {:schema-info {:name "rakennuksen-laajentaminen"}
+                      :data        (assoc (mitat 1 2 3 4)
+                                          :laajennuksen-tiedot (mitat 101 102 103 104))}
+          extend2    {:schema-info {:name "rakennuksen-laajentaminen-ei-huoneistoja"}
+                      :data        (assoc (mitat 1 2 3 4)
+                                          :laajennuksen-tiedot (mitat 201 202 203 204))}
+          skip       {:schema-info {:name "onpahanVaanRakennus"}
+                      :data        (mitat 1 2 3 4)}]
+      (pdf/dimensions {:documents [new-build1 new-build2 extend1 extend2 skip]})
+      => {:kerrosala                      "313" ; (+ 1 10 101 201)
+          :rakennusoikeudellinenKerrosala "318" ; (+ 2 12 102 202)
+          :kokonaisala                    "322" ; (+ 3 13 103 203)
+          :tilavuus                       "326" ; (+ 4 14 104 204)
+          }
+      (pdf/dimensions {:documents [new-build1 new-build2 extend1
+                                   extend2 skip new-build1 new-build2
+                                   extend1 extend2 skip]})
+      => {:kerrosala                      "626"
+          :rakennusoikeudellinenKerrosala "636"
+          :kokonaisala                    "644"
+          :tilavuus                       "652"}
+      (pdf/dimensions {:documents skip}) => {})))
+
+(fact "missing dimensions"
+    (let [new-build1 {:schema-info {:name "uusiRakennus"}
+                      :data        (mitat nil 2 3 4)}
+          new-build2 {:schema-info {:name "uusi-rakennus-ei-huoneistoa"}
+                      :data        (mitat 10 nil 13 14)}
+          extend1    {:schema-info {:name "rakennuksen-laajentaminen"}
+                      :data        (assoc (mitat 1 2 3 4)
+                                          :laajennuksen-tiedot (mitat 101 102 nil 104))}
+          extend2    {:schema-info {:name "rakennuksen-laajentaminen-ei-huoneistoja"}
+                      :data        (assoc (mitat 1 2 3 4)
+                                          :laajennuksen-tiedot (mitat 201 202 203 nil))}]
+      (pdf/dimensions {:documents [new-build1 new-build2 extend1 extend2]})
+      => {:kerrosala                      "312"
+          :rakennusoikeudellinenKerrosala "306"
+          :kokonaisala                    "219"
+          :tilavuus                       "122"}))
+
+(fact "bad dimensions"
+    (let [new-build1 {:schema-info {:name "uusiRakennus"}
+                      :data        (mitat "Bad" 2 3 4)}
+          new-build2 {:schema-info {:name "uusi-rakennus-ei-huoneistoa"}
+                      :data        (mitat 10 "to" 13 14)}
+          extend1    {:schema-info {:name "rakennuksen-laajentaminen"}
+                      :data        (assoc (mitat 1 2 3 4)
+                                          :laajennuksen-tiedot (mitat 101 102 "the" 104))}
+          extend2    {:schema-info {:name "rakennuksen-laajentaminen-ei-huoneistoja"}
+                      :data        (assoc (mitat 1 2 3 4)
+                                          :laajennuksen-tiedot (mitat 201 202 203 "bone"))}]
+      (pdf/dimensions {:documents [new-build1 new-build2 extend1 extend2]})
+      => {:kerrosala                      "312"
+          :rakennusoikeudellinenKerrosala "306"
+          :kokonaisala                    "219"
+          :tilavuus                       "122"}))
