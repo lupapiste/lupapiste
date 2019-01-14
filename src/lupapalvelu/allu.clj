@@ -70,7 +70,7 @@
                                seq
                                (make-names-unique :area)
                                (sort-by :area)
-                               (map (partial kind site->drawing)))]
+                               (map (partial site->drawing kind)))]
     (mongo/update-by-id :allu-data
                         kind
                         {$set {:drawings drawings}}
