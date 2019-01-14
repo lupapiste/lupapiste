@@ -176,7 +176,7 @@
                                                               "application.handlers.other"
                                                               "applications.status"
                                                               "applications.submitted"
-                                                              "verdictGiven"
+                                                              "pate-dates.verdict-date"
                                                               "operations.primary"
                                                               "application.operations.secondary"])
         row-fn (juxt :id
