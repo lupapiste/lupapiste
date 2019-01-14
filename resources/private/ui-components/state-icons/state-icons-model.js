@@ -143,7 +143,7 @@ LUPAPISTE.StateIconsModel = function( params ) {
     // primary and secondary icons are shown separately in the same view
     return primary !== false
       && authModel.ok("application-organization-archive-enabled")
-      && !_.get(attachment, "latestVersion.archivable");
+      && _.get(attachment, "latestVersion.archivable") === false;
   };
 
   self.getArchivabilityError = function() {
