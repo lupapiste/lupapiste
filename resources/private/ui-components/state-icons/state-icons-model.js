@@ -130,7 +130,7 @@ LUPAPISTE.StateIconsModel = function( params ) {
     // by default shows all (when param primary is undefined)
     var filter = _.identity;
     if (primary === true) {
-      filter = _.partial(_.includes, primaryIcons)
+      filter = _.partial(_.includes, primaryIcons);
     } else if (primary === false) {
       filter = _.partial(_.negate(_.includes), primaryIcons);
     }
