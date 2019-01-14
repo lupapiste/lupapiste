@@ -98,11 +98,11 @@ No archive problems
 
 Icon selector
   [Arguments]  ${type}
-  Set Suite Variable  ${icon-selector}  tr[data-test-type='${type}'] td[data-test-id=file-info] i[data-test-id=archive-problem-icon]
+  Set Suite Variable  ${icon-selector}  tr[data-test-type='${type}'] i[data-test-id=archive-problem-icon]
 
 Text selector
   [Arguments]  ${type}
-  Set Suite Variable  ${text-selector}  tr[data-test-type='${type}'] td[data-test-id=file-info] i[data-test-id=archive-problem-icon] span[data-test-id=archive-problem-text]
+  Set Suite Variable  ${text-selector}  tr[data-test-type='${type}'] i[data-test-id=archive-problem-icon] span[data-test-id=archive-problem-text]
 
 No archive error
   [Arguments]  ${type}

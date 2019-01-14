@@ -61,6 +61,15 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
     return fileCount() > 0;
   });
 
+  self.getFileCount = self.disposedPureComputed( function() {
+    return fileCount;
+  });
+
+  self.isDownloadAllVisible = function(selfFiles, parentFiles) {
+    // Don't show the inner button if the outer button is the same
+    return selfFiles > 0 && selfFiles !== parentFiles;
+  };
+
   self.downloadAll = function() {
     service.downloadAttachments(_.map(self.filteredAttachments(),
                                       _.ary( _.partialRight( util.getIn, ["id"]), 1 )));
