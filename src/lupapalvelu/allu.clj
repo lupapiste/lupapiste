@@ -10,7 +10,8 @@
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
-            [schema.core :refer [defschema] :as sc]))
+            [schema.core :refer [defschema] :as sc]
+            [taoensso.timbre :refer [error]]))
 
 (def kind-schema (apply sc/enum (keys allu-core/FIXED-LOCATION-TYPES)))
 (def drawing-id-schema (sc/conditional
@@ -24,8 +25,13 @@
    :id                         drawing-id-schema
    :name                       sc/Str
    :geometry                   sc/Str
-   :geometry-wgs84             {:coordinates [(sc/one [[(sc/one sc/Num "x") (sc/one sc/Num "y")]] "first")]
-                                :type        (sc/enum "Polygon", "Point", "LineString")}
+   :geometry-wgs84             (sc/conditional
+                                #(util/=as-kw (:type %) :Point)
+                                {:coordinates [(sc/one sc/Num "x") (sc/one sc/Num "y")]
+                                 :type        (sc/enum "Point")}
+                                :else
+                                {:coordinates [(sc/one [[(sc/one sc/Num "x") (sc/one sc/Num "y")]] "first")]
+                                 :type        (sc/enum "Polygon" "LineString")})
    (sc/optional-key :desc)     sc/Str
    (sc/optional-key :height)   sc/Str
    (sc/optional-key :area)     sc/Str
@@ -36,20 +42,39 @@
                                 :else (apply sc/enum (map name (keys allu-core/FIXED-LOCATION-TYPES))))
    })
 
+(defn- convert-xy [from xy]
+  (ss/join " " (coord/convert from "EPSG:3067" 3 xy)))
+
+(defn- shape-geometry [shape from coordinates]
+  (->> coordinates
+       (map (partial convert-xy from))
+       (ss/join ",")
+       (format "%s((%s))" (ss/upper-case shape))))
+
+(defn- point-geometry [from coordinates]
+  (format "POINT(%S)" (convert-xy from coordinates)))
+
 (defn- site->drawing [kind {:keys [id geometry area]}]
   (let [from        (get-in geometry [:crs :properties :name])
-        coordinates (get-in geometry [:geometries 0 :coordinates 0])]
-    {:name           area
-     :id             id
-     :source         kind
-     :geometry       (->> coordinates
-                          (map #(let [[x y] (coord/convert from "EPSG:3067" 3 %)]
-                                  (format "%s %s" x y)))
-                          (ss/join ",")
-                          (format "POLYGON((%s))"))
-     :geometry-wgs84 {:type        "Polygon"
-                      :coordinates [(map #(coord/convert from "WGS84" 8 %)
-                                         coordinates)]}}))
+        shape       (get-in geometry [:geometries 0 :type])
+        point?      (util/=as-kw shape :Point)
+        coordinates (get-in geometry (cond-> [:geometries 0 :coordinates]
+                                       (not point?) (conj 0)))
+        wgs84-fn    (partial coord/convert from "WGS84" 8)]
+    (try
+      (sc/validate Drawing
+                   {:name           area
+                    :id             id
+                    :source         kind
+                    :geometry       (if point?
+                                      (point-geometry from coordinates)
+                                      (shape-geometry shape from coordinates))
+                    :geometry-wgs84 {:type        shape
+                                     :coordinates (if point?
+                                                    (wgs84-fn coordinates)
+                                                    [(map wgs84-fn coordinates)])}})
+      (catch Exception err
+        (error err kind id)))))
 
 
 (defn make-names-unique
@@ -70,7 +95,9 @@
                                seq
                                (make-names-unique :area)
                                (sort-by :area)
-                               (map (partial site->drawing kind)))]
+                               (map (partial site->drawing kind))
+                               (remove nil?)
+                               seq)]
     (mongo/update-by-id :allu-data
                         kind
                         {$set {:drawings drawings}}
