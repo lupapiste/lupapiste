@@ -33,9 +33,9 @@
         <!-- /ko -->
         <!-- Shown only if the amount of files does not equal the amount in the category containing this one -->
         <button data-bind="click: $parent.downloadAll,
-                           visible: $parent.hasFile() &&
-                                        (!_.has($parents[3], 'getFileCount') ||
-                                            $parent.getFileCount()() !== $parents[3].getFileCount()()),
+                           visible: $parent.isDownloadAllVisible(
+                                        $parent.getFileCount()(),
+                                        _.has($parents[3], 'getFileCount') ? $parents[3].getFileCount()() : 0),
                            attr: {'data-test-id': 'download-accordion-attachments-button-' + _.last($data.name)}"
                 class="secondary">
           <i class="lupicon-download"></i>

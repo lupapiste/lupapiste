@@ -141,7 +141,8 @@ LUPAPISTE.StateIconsModel = function( params ) {
   self.hasArchiveProblem = function() {
     // Archive error icon is only shown when primary icons are to prevent it showing up twice when
     // primary and secondary icons are shown separately in the same view
-    return primary !== false && authModel.ok("application-organization-archive-enabled")
+    return primary !== false
+      && authModel.ok("application-organization-archive-enabled")
       && !_.get(attachment, "latestVersion.archivable");
   };
 

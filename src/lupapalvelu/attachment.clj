@@ -275,8 +275,7 @@
             (i18n/localize lang (format "attachmentType.%s.%s" type-group type-id)))
           (text-val [attachment]
             (if (:latestVersion attachment) (cont-val attachment) (type-val attachment)))]
-    (->> attachments
-         (sort-by (juxt file-val text-val)))))
+    (sort-by (juxt file-val text-val) attachments)))
 
 ;;
 ;; Api
