@@ -76,6 +76,10 @@
                         {$set {:drawings drawings}}
                         :upsert true)))
 
+(defn fetch-all-fixed-locations []
+  (doseq [kind (keys allu-core/FIXED-LOCATION-TYPES)]
+    (fetch-fixed-locations kind)))
+
 (defn allu-drawings [{:keys [drawings]} kind]
   (filter #(util/=as-kw kind (:source %)) drawings))
 
