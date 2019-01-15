@@ -6,6 +6,7 @@
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
             [lupapalvelu.document.poikkeamis-canonical :refer [poikkeus-application-to-canonical]]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pate.verdict-canonical :refer [verdict-canonical]]
             [lupapalvelu.pate.verdict-common :as vc]
             [monger.operators :refer :all]
@@ -86,7 +87,7 @@
                  :rakennus (ds/access :operation-building)
                  :rakennelma (ds/access :operation-structure)})
 
-   })
+   :links (ds/access :links)})
 
 ;;
 ;; Accessors
@@ -179,6 +180,19 @@
       (dissoc :vastattavatTyotehtavat)
       (str->num [:kokemusvuodet :valmistumisvuosi :valvottavienKohteidenMaara])))
 
+(defn- get-link
+  "Get the data for the app that is linked to app with `app-id`"
+  [{:keys [link] :as link-data} app-id]
+  (let [linked-id (->> link (remove #(util/=as-kw % app-id)) first)]
+    {:id (name linked-id)
+     :permitType (:apptype (get link-data (keyword linked-id)))}))
+
+(defn- app-links [context]
+  (let [app-id (-> context :application :id keyword)]
+    (->> (:app-links context)
+         (filter #(get % app-id))
+         (map #(get-link % app-id)))))
+
 (defn reporting-app-accessors [application lang]
   {:id (ds/from-context [:application :id])
    :address (ds/from-context [:application :address])
@@ -230,9 +244,10 @@
                ((ds/from-context [:application vc/all-verdicts
                                   #(map (partial verdict-via-canonical (:lang ctx))
                                         %)])
-                ctx))})
+                ctx))
+   :links app-links})
 
-(defn ->reporting-result [application lang]
+(defn ->reporting-result [application app-links lang]
   ;; TODO check permit type, R or P (or others as well?)
   (let [application-canonical (if (= (:permitType application) "R")
                                 (application-to-canonical application lang)
@@ -240,15 +255,29 @@
     (ds/build-with-skeleton reporting-app-skeleton
                             {:application application
                              :canonical application-canonical
+                             :app-links app-links
                              :lang lang}
                             (reporting-app-accessors application lang))))
 
 (def permit-types-for-reporting-db ["R" "P"])
 
-(defn applications [start-ts end-ts]
-  {:pre [(number? start-ts) (number? end-ts)]}
+(defn- applications-to-report
+  "Fetch applications of relevant permit types that are modified
+  between `start-ts` and `end-ts`"
+  [start-ts end-ts]
   (let [query {:modified {$gte start-ts
                           $lte end-ts}
                :permitType {$in permit-types-for-reporting-db}}]
-    (mapv #(->reporting-result % "fi")
-          (domain/get-multiple-applications-no-access-checking query))))
+    (domain/get-multiple-applications-no-access-checking query)))
+
+(defn- links-for-reported-apps
+  "Fetch application links to the given `apps`"
+  [apps]
+  (mongo/select :app-links {:link {$in (mapv :id apps)}}))
+
+(defn applications [start-ts end-ts]
+  {:pre [(number? start-ts) (number? end-ts)]}
+  (let [apps (applications-to-report start-ts end-ts)
+        app-links (links-for-reported-apps apps)]
+    (mapv #(->reporting-result % app-links "fi")
+          apps)))
