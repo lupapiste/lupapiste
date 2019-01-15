@@ -41,6 +41,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.applicationModel = lupapisteApp.models.application;
 
   var reload = function() {
+    self.attachments([]);
     self.queryAll();
     self.groupTypes.reset();
   };
