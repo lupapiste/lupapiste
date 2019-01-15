@@ -85,11 +85,15 @@
 
         ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
         given-statements (for [st statements
-                               :when (map? st)]
+                               :when (map? st)
+                               :let [puoltotieto (some-> st
+                                                         (get-in [:metadata :puoltotieto])
+                                                         (clojure.string/replace #"\s" "-"))]]
+                           ;;^ Normalization, since the input data from KuntaGML contains values like 'ei huomautettavaa' (should be 'ei-huomautettavaa') etc.
                            (try
                              (statement/give-statement st
                                                        (:saateText st)
-                                                       (get-in st [:metadata :puoltotieto])
+                                                       puoltotieto
                                                        (mongo/create-id)
                                                        (mongo/create-id)
                                                        false)
@@ -106,7 +110,7 @@
                                 (update-in [:documents] concat other-building-docs new-parties structures ;; Assemble the documents-array
                                            (when-not (includes? kuntalupatunnus "TJO") location-document))
                                 (update-in [:secondaryOperations] concat secondary-ops)
-                                (assoc :statements given-statements
+                                (assoc :statements (or given-statements [])
                                        :opened (:created command)
                                        :history history-array
                                        :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
