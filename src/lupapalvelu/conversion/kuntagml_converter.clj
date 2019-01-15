@@ -110,7 +110,7 @@
                                 (update-in [:documents] concat other-building-docs new-parties structures ;; Assemble the documents-array
                                            (when-not (includes? kuntalupatunnus "TJO") location-document))
                                 (update-in [:secondaryOperations] concat secondary-ops)
-                                (assoc :statements given-statements
+                                (assoc :statements (or given-statements [])
                                        :opened (:created command)
                                        :history history-array
                                        :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
