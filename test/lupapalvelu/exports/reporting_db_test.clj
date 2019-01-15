@@ -132,12 +132,26 @@
     (org/pate-scope? irrelevant) => false)
   (->reporting-result (assoc application-rakennuslupa
                              :tasks [review])
+                      [{:_id irrelevant
+                        :link [(:id application-rakennuslupa)
+                               "LP-000-2019-00000"]
+                        (keyword (:id application-rakennuslupa)) {:type "linkpermit"
+                                                                  :apptype (:permitType application-rakennuslupa)
+                                                                  :propertyId (:propertyId application-rakennuslupa)}
+                        :LP-000-2019-00000 {:type "linkpermit"
+                                            :linkpermittype "lupapistetunnus"
+                                            :apptype "tyonjohtajan-nimeaminen-v2"}}]
                       "fi")
   => (contains
       {:id (:id application-rakennuslupa)
        :address (:address application-rakennuslupa)
+       :propertyId (:propertyId application-rakennuslupa)
+       :organization (:organization application-rakennuslupa)
+       :municipality (:municipality application-rakennuslupa)
        :location-etrs-tm35fin (:location application-rakennuslupa)
        :location-wgs84 (:location-wgs84 application-rakennuslupa)
+       :links [{:id "LP-000-2019-00000"
+                :permitType "tyonjohtajan-nimeaminen-v2"}]
        :operations [{:id "muu-laajentaminen-id"
                      :primary true
                      :kuvaus nil
@@ -879,6 +893,8 @@
                   :verottajanTvLl false}]
        :state "submitted"
        :stateChangeTs 12345
+       :createdTs (:created application-rakennuslupa)
+       :modifiedTs (:modified application-rakennuslupa)
        ;; Note that draft statement is not present!
        :statements [{:lausunto "Savupiippu pitää olla."
                      :lausuntoPvm "2013-05-09"
@@ -893,10 +909,11 @@
                                                    "hankkeen-kuvaus")
                                               (assoc-in % [:data :rahoitus :value] true)
                                               %)))
+                      []
                       "fi")
   => (contains {:araFunding true})
 
-  (->reporting-result application-rakennuslupa-with-verdicts "fi")
+  (->reporting-result application-rakennuslupa-with-verdicts [] "fi")
   => (contains {:verdicts
                 [{:kuntalupatunnus nil
                   :lupamaaraykset {:autopaikkojaEnintaan nil

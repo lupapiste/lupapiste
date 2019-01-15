@@ -1,6 +1,7 @@
 (ns lupapalvelu.exports.reporting-db-itest
   (:require [lupapalvelu.exports.reporting-db :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.pate-legacy-itest-util :refer :all]
             [midje.sweet :refer :all]
             [sade.core :refer [now]]))
 
@@ -42,4 +43,16 @@
       (:applications (export-applications timestamp-before-applications-are-created (now)))
       => (just [(contains {:id first-application-id})
                 (contains {:id second-application-id})]
-               :in-any-order))))
+               :in-any-order)))
+  (let [timestamp-before-applications-are-created (now)
+        application-id (:id (create-and-submit-application pena :operation "kerrostalo-rivitalo"))
+        _ (give-legacy-verdict sonja application-id)
+        foreman-app-id (create-foreman-application application-id pena pena-id "KVV-työnjohtaja" "B")]
+
+    (fact "Application links are present in both linked applications"
+          (:applications (export-applications timestamp-before-applications-are-created (now)))
+          => (just [(contains {:id application-id
+                               :links [{:id foreman-app-id :permitType "tyonjohtajan-nimeaminen-v2"}]})
+                    (contains {:id foreman-app-id
+                               :links [{:id application-id :permitType "kerrostalo-rivitalo"}]})]
+                   :in-any-order))))
