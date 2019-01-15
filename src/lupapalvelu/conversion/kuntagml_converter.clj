@@ -85,11 +85,15 @@
 
         ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
         given-statements (for [st statements
-                               :when (map? st)]
+                               :when (map? st)
+                               :let [puoltotieto (-> st
+                                                     (get-in [:metadata :puoltotieto])
+                                                     (clojure.string/replace #"\s" "-"))]]
+                           ;;^ Normalization, since the input data from KuntaGML contains values like 'ei huomautettavaa' (should be 'ei-huomautettavaa') etc.
                            (try
                              (statement/give-statement st
                                                        (:saateText st)
-                                                       (get-in st [:metadata :puoltotieto])
+                                                       puoltotieto
                                                        (mongo/create-id)
                                                        (mongo/create-id)
                                                        false)
