@@ -7,7 +7,7 @@
           <th></th>
           <th data-bind="ltext: 'attachment.th-drawing-number'"></th>
           <th data-bind="ltext: 'attachment.th-content'"
-              class="attachments-table--widest"></th>
+              class="attachments-table--wide"></th>
           <th data-bind="ltext: 'attachment.th-type-status'"></th>
           <th data-bind="ltext: 'attachment.th-edited'"></th>
           <!-- ko if: $component.appModel.isArchivingProject() -->
@@ -41,10 +41,12 @@
 
           <!-- ko if: $parent.hasFile( $data ) -->
           <td>
-            <span data-bind="text: $data.contents() || ''" data-test-id="attachment-contents"></span>
-            <br>
             <a data-bind="attr: {'href': $parent.buildHash( $data )}"
                data-test-id="open-attachment">
+                <span data-bind="text: $data.contents() || ''" data-test-id="attachment-contents"></span>
+            </a>
+            <br>
+            <a data-bind="attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $data.id}">
               <span data-bind="text: latestVersion.filename"></span>
             </a>
             <span data-bind="downloadWithIconOnly: {attachmentId: $data.id}"></span>
