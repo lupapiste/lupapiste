@@ -59,7 +59,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
    */
   self.disposedComputed(function () {
     if (self.selectedTab() === "construction") {
-      self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.verdictGiven",  {sortable: false, currentSort: self.dataProvider.sort}));
+      self.columns.splice(5, 1, util.createSortableColumn("sixth",   "pate-dates.verdict-date",  {sortField: "verdictDate", currentSort: self.dataProvider.sort}));
     } else {
       self.columns.splice(5, 1, util.createSortableColumn("sixth",   "applications.submitted",  {sortField: "submitted", currentSort: self.dataProvider.sort}));
     }

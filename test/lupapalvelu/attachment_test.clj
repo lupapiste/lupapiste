@@ -417,28 +417,33 @@
 
 (facts "Sorted attachments"
        (let [attachments [{:id "rasitesopimus"
+                           :contents "Rasitesopimus"
                            :type {:type-group "kiinteiston_hallinta"
                                   :type-id "rasitesopimus"}
-                           :latestVersion {:created 123}}
+                           :latestVersion {}}
                           {:id "rasitesopimus2"
+                           :contents "Rasitesopimus 2"
                            :type {:type-group "kiinteiston_hallinta"
                                   :type-id "rasitesopimus"}
-                           :latestVersion {:created 321}}
+                           :latestVersion {}}
                           {:id "rasitesopimus3"
+                           :contents "Rasitesopimus 3"
                            :type {:type-group "kiinteiston_hallinta"
                                   :type-id "rasitesopimus"}}
-                          {:id "yhtiojarjestys"
-                           :type {:type-group "kiinteiston_hallinta"
-                                  :type-id "yhtiojarjestys"}
-                           :latestVersion {:created 888}}
+                          {:id "energiaselvitys" ; SV: Energikalkyl
+                           :type {:type-group "selvitykset"
+                                  :type-id "energiataloudellinen_selvitys"}}
+                          {:id "energiatodistus" ; SV: Energicertifikat
+                           :type {:type-group "selvitykset"
+                                  :type-id "energiatodistus"}}
                           {:id "empty"}]]
 
          (fact "Finnish"
                (map :id (sorted-attachments {:application {:attachments attachments} :lang :fi}))
-               => ["empty" "rasitesopimus2" "rasitesopimus" "rasitesopimus3" "yhtiojarjestys"])
+               => ["rasitesopimus" "rasitesopimus2" "empty" "energiaselvitys" "energiatodistus" "rasitesopimus3"])
          (fact "Swedish"
                (map :id (sorted-attachments {:application {:attachments attachments} :lang :sv}))
-               => ["empty" "yhtiojarjestys" "rasitesopimus2" "rasitesopimus" "rasitesopimus3"])))
+               => ["rasitesopimus" "rasitesopimus2" "empty" "energiatodistus" "energiaselvitys" "rasitesopimus3"])))
 
 (facts signature-updates
 

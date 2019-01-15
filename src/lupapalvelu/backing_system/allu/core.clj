@@ -492,10 +492,10 @@
   (allu-request-handler (login-request (env/value :allu :username) (env/value :allu :password))))
 
 
-(defn- re-login-on-unauthorized!
+(defn- re-login-on-auth-errors!
   "Re-login on HTTP 401."
   [{:keys [status]}]
-  (when (= status 401)
+  (when (or (= status 401) (= status 403))
     (login!)))
 
 (defn- reset-jwt!
@@ -572,7 +572,7 @@
                              multipart-middleware
                              reitit.ring.coercion/coerce-request-middleware
                              log-or-fail!
-                             (post-action->middleware re-login-on-unauthorized!)]
+                             (post-action->middleware re-login-on-auth-errors!)]
                             (into (if disable-io-middlewares? [] [save-messages!]))
                             (conj (preprocessor->middleware (fn-> content->json jwt-authorize))))
             :coercion reitit.coercion.schema/coercion}
@@ -648,7 +648,7 @@
           (allu-request-handler msg)
           (jms/commit session)
 
-          (catch Exception exn
+          (catch Throwable exn
             (let [operation-name (route-name->string (-> (reitit/match-by-path allu-router uri) :data :name))]
               (error operation-name "failed:" (type exn) (.getMessage exn))
               (error "Rolling back" operation-name))
@@ -775,7 +775,50 @@
     (catch [:text "error.allu.http"] _ nil)))
 
 
-(def FIXED-LOCATION-TYPES {:promotion "PROMOTION"})
+(def FIXED-LOCATION-TYPES {:agile-kiosk-area              "AGILE_KIOSK_AREA"
+                           :art                           "ART"
+                           :benji                         "BENJI"
+                           :bridge-banner                 "BRIDGE_BANNER"
+                           :christmas-tree-sales-area     "CHRISTMAS_TREE_SALES_AREA"
+                           :circus                        "CIRCUS"
+                           :city-cycling-area             "CITY_CYCLING_AREA"
+                           :construction                  "CONSTRUCTION"
+                           :container-barrack             "CONTAINER_BARRACK"
+                           :data-transfer                 "DATA_TRANSFER"
+                           :dog-training-event            "DOG_TRAINING_EVENT"
+                           :dog-training-field            "DOG_TRAINING_FIELD"
+                           :election-add-stand            "ELECTION_ADD_STAND"
+                           :electricity                   "ELECTRICITY"
+                           :geological-survey             "GEOLOGICAL_SURVEY"
+                           :heating-cooling               "HEATING_COOLING"
+                           :keskuskatu-sales              "KESKUSKATU_SALES"
+                           :lifting                       "LIFTING"
+                           :military-excercise            "MILITARY_EXCERCISE"
+                           :new-building-construction     "NEW_BUILDING_CONSTRUCTION"
+                           :other                         "OTHER"
+                           :other-subvision-of-state-area "OTHER_SUBVISION_OF_STATE_AREA"
+                           :outdoorevent                  "OUTDOOREVENT"
+                           :photo-shooting                "PHOTO_SHOOTING"
+                           :promotion                     "PROMOTION"
+                           :promotion-or-sales            "PROMOTION_OR_SALES"
+                           :property-renovation           "PROPERTY_RENOVATION"
+                           :public-event                  "PUBLIC_EVENT"
+                           :relocation                    "RELOCATION"
+                           :repaving                      "REPAVING"
+                           :roll-off                      "ROLL_OFF"
+                           :season-sale                   "SEASON_SALE"
+                           :small-art-and-culture         "SMALL_ART_AND_CULTURE"
+                           :snow-gather-area              "SNOW_GATHER_AREA"
+                           :snow-heap-area                "SNOW_HEAP_AREA"
+                           :snow-work                     "SNOW_WORK"
+                           :statement                     "STATEMENT"
+                           :storage-area                  "STORAGE_AREA"
+                           :street-and-green              "STREET_AND_GREEN"
+                           :summer-theater                "SUMMER_THEATER"
+                           :urban-farming                 "URBAN_FARMING"
+                           :water-and-sewage              "WATER_AND_SEWAGE"
+                           :winter-parking                "WINTER_PARKING"
+                           :yard                          "YARD"})
 
 (defn- non-integration-routes
   "Routes for actions that are not part of the integration mechanisms."

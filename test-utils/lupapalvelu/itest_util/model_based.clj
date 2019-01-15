@@ -33,7 +33,7 @@
                                                                [transitions visited*]))
                                 :else [transitions visited*])))
                           [[] visited] (get states current))]
-              [(if (seq usefuls) (rand-nth usefuls) nil)    ; HACK: rand-nth
+              [(when (seq usefuls) (rand-nth usefuls))    ; HACK: rand-nth
                visited]))]
     (first (useful current-state #{}))))
 

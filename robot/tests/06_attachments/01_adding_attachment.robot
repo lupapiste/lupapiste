@@ -383,7 +383,7 @@ Sign attachment button should be visible
 
 Attachment state should be ok
   [Tags]  attachments
-  Scroll and click test id  back-to-application-from-attachment
+  Wait Until  Scroll and click test id  back-to-application-from-attachment
   Tab should be visible  attachments
   Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  ok
 
@@ -434,7 +434,6 @@ Mikko signs everything blindly
 
 No frontend errors
   There are no frontend errors
-
 
 *** Keywords ***
 

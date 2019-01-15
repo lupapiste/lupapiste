@@ -1,14 +1,23 @@
 // Attachments table icon column contents. Used both by the regular
 // attachments table and attachment multiselect template.
+// Archive error icon is handled in a different part of the template from other icons
+
+// Param primary can be:
+// undefined (show all icons)
+// true (show only "primary" status icons)
+// false (show only secondary icons)
+
 LUPAPISTE.StateIconsModel = function( params ) {
   "use strict";
   var self = this;
 
-
   var attachment = ko.unwrap( params.attachment );
+  var primary = params.primary;
+  var primaryIcons = ["state", "approved", "rejected"];
 
   var service    = lupapisteApp.services.attachmentsService;
   var transfers  = lupapisteApp.models.application._js.transfers;
+  var authModel  = lupapisteApp.models.applicationAuthModel;
 
   function sentToCaseManagement(attachment) {
     return attachment.sent && !_.isEmpty(_.filter(transfers, {type: "attachments-to-asianhallinta"}));
@@ -116,6 +125,31 @@ LUPAPISTE.StateIconsModel = function( params ) {
       return info;
   }
 
+  function getIconFilterFunction(primary) {
+    // Filtering primary icons or secondary icons from the view;
+    // by default shows all (when param primary is undefined)
+    var filter = _.identity;
+    if (primary === true) {
+      filter = _.partial(_.includes, primaryIcons);
+    } else if (primary === false) {
+      filter = _.partial(_.negate(_.includes), primaryIcons);
+    }
+
+    return function (x) { return filter(x[1].icon); };
+  }
+
+  self.hasArchiveProblem = function() {
+    // Archive error icon is only shown when primary icons are to prevent it showing up twice when
+    // primary and secondary icons are shown separately in the same view
+    return primary !== false
+      && authModel.ok("application-organization-archive-enabled")
+      && _.get(attachment, "latestVersion.archivable") === false;
+  };
+
+  self.getArchivabilityError = function() {
+    return _.get(attachment, "latestVersion.archivabilityError");
+  };
+
   self.stateIcons = function() {
     return _( [[approved,                {css: "lupicon-circle-check positive",
                                           icon: "approved",
@@ -158,6 +192,7 @@ LUPAPISTE.StateIconsModel = function( params ) {
                                           title: "",
                                           info: loc("arkistoitu")}]])
       .filter(function(icon) { return _.first(icon)(attachment); })
+      .filter(getIconFilterFunction(primary))
       .map(_.last)
       .value();
   };

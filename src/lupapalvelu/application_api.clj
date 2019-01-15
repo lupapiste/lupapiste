@@ -333,7 +333,7 @@
    :permissions      [{:required [:application/edit]}]
    :states           #{:draft :open}}
   [command]
-  (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data (:application command)))]
+  (let [command (update-in command [:application] meta-fields/enrich-with-link-permit-data)]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
       (ok))))

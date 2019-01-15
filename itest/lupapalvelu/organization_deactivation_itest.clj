@@ -44,6 +44,11 @@
     (set-authority-notice sonja app "looks") => ok?
     (set-authority-notice sonja ya-app "good") => ok?)
 
+  (fact "Sipoo-R is active"
+    (query pena :municipality-active :municipality "753")
+    => (contains {:applications (contains "R")
+                  :infoRequests (contains "R")}))
+
   (facts "Deactivate organization"
     (fact "Organization must exist"
       (command admin :toggle-deactivation
@@ -61,6 +66,10 @@
       (command admin :toggle-deactivation
                :organizationId "753-R"
                :deactivated true) => ok?)
+    (fact "Sipoo-R is no longer active"
+      (query pena :municipality-active :municipality "753")
+      => (contains {:applications ["YA" "A"]
+                    :infoRequests ["YA" "A"]}))
     (fact "R application cannot be edited"
       (set-hankkeen-kuvaus pena app "no can do") => fail?
       (set-authority-notice sonja app "nope") => fail?)

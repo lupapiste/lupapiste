@@ -35,12 +35,16 @@
 (let [pori-route (parse-route "pori.fi")]
 
   (fact "update-or-create-user! can create or update users"
-        (let [user (ad-login/update-or-create-user! "Pedro" "Banana" "pedro@banana.fi" {})]
+        (let [user (ad-login/update-or-create-user! "Pedro" "Banana" "pedro@banana.fi" {:609-R ["reader"]})]
           (fact "User creation works as expected"
                 (= user (usr/get-user-by-email "pedro@banana.fi")) => true)
+          (facts "When a new user is created via SAML, it's always an authority user"
+                (:role user) => "authority"
+                (:orgAuthz user) => {:609-R ["reader"]})
           (facts "Updating users should work as well"
-                 (let [updated-user (ad-login/update-or-create-user! "Pedro" "Banana" "pedro@banana.fi" {:609-R #{"reader"}})]
-                   (= {:609-R ["reader"]} (:orgAuthz (usr/get-user-by-email "pedro@banana.fi"))) => true))))
+                 (let [updated-user (ad-login/update-or-create-user! "Pedro" "Banana" "pedro@banana.fi" {})]
+                   (:orgAuthz updated-user) => {}
+                   (:role updated-user) => "authority"))))
 
   (fact "log-user-in! should... Log user in"
         (let [user (usr/get-user-by-email "pedro@banana.fi")

@@ -546,7 +546,6 @@
 
 ;;; Verdicts
 
-
 (defn find-plan-id [references fi]
   (:id (util/find-by-key :fi fi (:plans references))))
 
@@ -1183,7 +1182,8 @@
                         (-> data :statements first)
                         => (just {:text   "Paloviranomainen"
                                   :given  pos?
-                                  :status "puollettu"}))))
+                                  :status "puollettu"})))
+                    (check-verdict-date sonja app-id (timestamp "6.10.2017")))
                   (Thread/sleep 100) ; wait for email delivery
                   (fact "Email notification about application state change is sent"
                     (let [email (last-email)]
@@ -1208,19 +1208,19 @@
                                                                           :operation :purkaminen))]
                         (command sonja :check-for-verdict :id bs-app-id) => ok?
                         (fact "Applications search includes verdict dates"
-                          (-> (datatables pena :applications-search) :data :applications)
-                          => (just [(contains {:address         "Dongdaqiao Lu"
-                                               :state           "verdictGiven"
-                                               :verdictDate     (timestamp "6.10.2017")
-                                               :kuntalupatunnus nil})
-                                    (contains {:address         "Jianguomen"
-                                               :state           "submitted"
-                                               :verdictDate     nil
-                                               :kuntalupatunnus nil})
-                                    (contains {:address         "Xingfucun Lu"
-                                               :state           "verdictGiven"
-                                               :verdictDate     1377993600000
-                                               :kuntalupatunnus "2013-01"})]
+                          (->> (datatables pena :applications-search) :data :applications
+                               (map #(select-keys % [:address :state :verdictDate :kuntalupatunnus])))
+                          => (just [{:address         "Dongdaqiao Lu"
+                                     :state           "verdictGiven"
+                                     :verdictDate     (timestamp "6.10.2017")
+                                     :kuntalupatunnus nil}
+                                    {:address         "Jianguomen"
+                                     :state           "submitted"
+                                     :kuntalupatunnus nil}
+                                    {:address         "Xingfucun Lu"
+                                     :state           "verdictGiven"
+                                     :verdictDate     1377993600000
+                                     :kuntalupatunnus "2013-01"}]
                                    :in-any-order)))))
 
                   (facts "buildings"
@@ -1419,6 +1419,8 @@
           (command sonja :publish-pate-verdict
                    :id app-id
                    :verdict-id verdict-id) => ok?)
+        (fact "Application verdict date is the latest"
+          (check-verdict-date sonja app-id (timestamp "6.10.2017")))
         (facts "Published verdict"
           (let [data (-> (open-verdict) :verdict :data)]
             (fact "Section is 88"

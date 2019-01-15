@@ -235,21 +235,22 @@
                           :width 100}]))
 
 (def entry--dimensions '([{:loc    :verdict.kerrosala
-                           :source :primary
+                           :source :dimensions
                            :styles :pad-before}
-                          {:path :mitat.kerrosala
+                          {:path :kerrosala
+                           :unit :m2}]
+                         [{:loc    :pdf.rakennusoikeudellinen-kerrosala
+                           :source :dimensions}
+                          {:path :rakennusoikeudellinenKerrosala
                            :unit :m2}]
                          [{:loc    :verdict.kokonaisala
-                           :source :primary}
-                          {:path :mitat.kokonaisala
+                           :source :dimensions}
+                          {:path :kokonaisala
                            :unit :m2}]
                          [{:loc    :pdf.volume
-                           :source :primary}
-                          {:path :mitat.tilavuus
-                           :unit :m3}]
-                         [{:loc    :purku.mitat.kerrosluku
-                           :source :primary}
-                          {:path :mitat.kerrosluku}]))
+                           :source :dimensions}
+                          {:path :tilavuus
+                           :unit :m3}]))
 
 (def entry--buildings '([{:loc    :pate-buildings.info.paloluokka
                           :source :paloluokka}]

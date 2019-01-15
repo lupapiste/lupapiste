@@ -431,3 +431,7 @@
                          (recur (inc i)))
 
         :else (bad-status status)))))
+
+(defn check-verdict-date [apikey app-id ts]
+  (fact {:midje/description (str "Verdict date is " ts)}
+    (:verdictDate (query-application apikey app-id)) => ts))
