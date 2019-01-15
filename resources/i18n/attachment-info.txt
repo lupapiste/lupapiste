@@ -553,7 +553,7 @@
 "attachmentType.paatoksenteko.paatos.info" "sv" "Beslutsdokument i ärendet"
 "attachmentType.paatoksenteko.paatosehdotus.info" "en" ""
 "attachmentType.paatoksenteko.paatosehdotus.info" "fi" "Ehdotus päätösasiakirjasta"
-"attachmentType.paatoksenteko.paatosehdotus.info" "sv" ""
+"attachmentType.paatoksenteko.paatosehdotus.info" "sv" "Förslag om beslutsdokument"
 "attachmentType.paatoksenteko.paatosote.info" "en" "When a separate extract has been made to the applicant"
 "attachmentType.paatoksenteko.paatosote.info" "fi" "Kun päätöksestä on tehty hakijalle erillinen päätösote"
 "attachmentType.paatoksenteko.paatosote.info" "sv" "När särskilt beslutsutdrag gjorts till sökanden"
