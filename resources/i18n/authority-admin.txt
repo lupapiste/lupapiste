@@ -130,6 +130,7 @@
 "auth-admin.create-statement-person" "en" "Add a statement giver"
 "auth-admin.create-statement-person" "fi" "Lisää lausunnonantaja"
 "auth-admin.create-statement-person" "sv" "Lägg till givare av utlåtande"
+"auth-admin.default-attachments-mandatory" "en" "Default attachments are mandatory"
 "auth-admin.default-attachments-mandatory" "fi" "Oletusliitteet pakollisia"
 "auth-admin.default-attachments-mandatory" "sv" "Standardbilagor är obligatoriska"
 "auth-admin.docstore.document-request.email" "en" "Email address to receive document requests"
