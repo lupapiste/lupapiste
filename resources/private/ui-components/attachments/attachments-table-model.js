@@ -31,7 +31,7 @@ LUPAPISTE.AttachmentsTableModel = function(params) {
   };
 
   self.hasContents = function(attachment) {
-    var contents = _.get(ko.utils.unwrapObservable(attachment), "contents")();
+    var contents = _.get(ko.utils.unwrapObservable(attachment), "contents", "")();
     return !_.isEmpty(_.trim(contents));
   };
 
