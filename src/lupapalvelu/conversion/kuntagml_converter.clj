@@ -190,13 +190,6 @@
       (empty? app-info)                 (error-and-fail! "No app-info available" :error.no-previous-permit-found-from-backend)
       (not location-info)               (error-and-fail! "No location info" :error.more-prev-app-info-needed)
       (not (:propertyId location-info)) (error-and-fail! "No property-id" :error.previous-permit-no-propertyid)
-      ; :else                             (let [{id :id} (prev-permit/do-create-application-from-previous-permit command
-      ;                                                                                operation
-      ;                                                                                ; organization
-      ;                                                                                xml
-      ;                                                                                app-info
-      ;                                                                                location-info
-      ;                                                                                authorizeApplicants)]
       :else                             (let [{id :id} (convert-application-from-xml command
                                                                                      operation
                                                                                      organization
