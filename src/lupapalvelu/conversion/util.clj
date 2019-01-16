@@ -78,16 +78,10 @@
 
 (defn get-elements-from-document-datas
   "Accepts an update sequence (a seq of vectors), returns a sequence of the values of the provided key."
-  [doc-datas dkey]
+  [dkey doc-datas]
   (for [[[k] v] doc-datas
         :when (= dkey k)]
     v))
-
-(defn get-poikkeamat [dd]
-  (get-elements-from-document-datas dd "poikkeamat"))
-
-(defn get-kuvaus [dd]
-  (get-elements-from-document-datas dd "kuvaus"))
 
 (defn kuntalupatunnus->description
   "Takes a kuntalupatunnus, returns the permit type in plain text ('12-124124-92-A' -> 'Uusi rakennus' etc.)"
@@ -205,9 +199,14 @@
   [string]
   (apply str (ss/lower-case (first string)) (rest string)))
 
-(defn add-description-and-deviation-info [{:keys [documents] :as app} kuntalupatunnus document-datas]
-  (let [kuvaus (->> document-datas (map get-kuvaus) flatten set (clojure.string/join #"\n"))
-        poikkeamat (->> document-datas (map get-poikkeamat) flatten set (clojure.string/join #"\n"))
+(defn add-description-and-deviation-info [{:keys [documents] :as app} xml document-datas]
+  (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
+        kuvaus (building-reader/->asian-tiedot xml)
+        poikkeamat (->> document-datas
+                        (map (partial get-elements-from-document-datas "poikkeamat"))
+                        flatten
+                        set
+                        (clojure.string/join #"\n"))
         kuvausteksti (str kuvaus
                           (format "\nLuvan tyyppi: %s"
                                   (decapitalize (kuntalupatunnus->description kuntalupatunnus))))]
