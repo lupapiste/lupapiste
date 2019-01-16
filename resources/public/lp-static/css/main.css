@@ -11421,7 +11421,6 @@ table.tasks .task-state .icon {
 
 table.attachments-table .status-icon-text-line {
   white-space: nowrap;
-  text-transform: lowercase;
 }
 
 table.attachments-template-table .center {
