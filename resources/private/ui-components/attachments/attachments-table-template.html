@@ -43,7 +43,12 @@
           <td>
             <a data-bind="attr: {'href': $parent.buildHash( $data )}"
                data-test-id="open-attachment">
-                <span data-bind="text: $data.contents() || ''" data-test-id="attachment-contents"></span>
+                <!-- ko if: $parent.hasContents($data) -->
+                <span data-bind="text: $data.contents()" data-test-id="attachment-contents"></span>
+                <!-- /ko -->
+                <!-- ko ifnot: $parent.hasContents($data) -->
+                <attachment-type-id params="attachment: $data"></attachment-type-id>
+                <!-- /ko -->
             </a>
             <br>
             <a data-bind="attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $data.id}">
