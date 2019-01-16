@@ -114,7 +114,7 @@
 (defn- copy-old-document-data [old-doc new-doc]
   (let [new-data-keys       (-> new-doc :data (keys))
         document-data (-> old-doc :data (select-keys new-data-keys))]
-    (assoc new-doc :data (merge (:data new-doc) document-data))))
+    (update-in new-doc [:data] merge document-data)))
 
 (defn- create-document [doc-name application created & [old-document]]
   (let [op-name (:name (get-operation-by-key application :created created))

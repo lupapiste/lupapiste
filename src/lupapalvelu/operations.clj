@@ -55,7 +55,7 @@
         ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
         ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]]]
       ["Rakennuksen purkaminen" :purkaminen]
-      ["Maisemaa muutava toimenpide"
+      ["Maisemaa muuttava toimenpide"
        [["Puun kaataminen" :puun-kaataminen]
         ["tontin-jarjestelymuutos" :tontin-jarjestelymuutos]
         ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]
@@ -1138,7 +1138,7 @@
                                  :asianhallinta             false
                                  :unsubscribe-notifications true
                                  :state-graph-resolver state-machine-resolver}
-   :konversio                   {:schema "hankkeen-kuvaus-minimum"
+   :konversio                   {:schema "hankkeen-kuvaus"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required []

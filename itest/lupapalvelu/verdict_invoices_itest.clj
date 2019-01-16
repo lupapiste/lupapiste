@@ -247,7 +247,7 @@
           (-> (local-query sonja :application-invoices :id app-id)
               :invoices
               first)
-          => (just {:application-id  "LP-753-2018-90001"
+          => (just {:application-id  app-id
                     :created         pos?
                     :created-by      {:firstName "Sonja"
                                       :id        "777777777777777777000023"

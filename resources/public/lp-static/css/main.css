@@ -11419,6 +11419,10 @@ table.tasks .task-state .icon {
   margin: 12px 6px 6px 6px;
 }
 
+table.attachments-table .status-icon-text-line {
+  white-space: nowrap;
+}
+
 table.attachments-template-table .center {
   text-align: center;
 }
@@ -12355,11 +12359,15 @@ table.table-even-odd tr.odd-row:hover {
 div.attachments-table-container {
   padding-top: 1em;
   padding-right: .6em;
-  padding-left: .5em;
+  padding-left: 0;
 }
 
 div.attachments-table-container table.attachments-table {
   margin-bottom: 1em;
+}
+
+div.attachments-table-container table.attachments-table th {
+  white-space: nowrap;
 }
 
 div.attachments-table-container table.attachments-table tr.row--rejected {
@@ -38940,7 +38948,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 .attachments-accordion-content {
   padding-left: 6px;
   padding-right: 6px;
-  padding-bottom: 24px;
+  padding-bottom: 6px;
   padding-top: 6px;
   position: relative;
   border: 1px solid #dddddd;
@@ -39299,6 +39307,52 @@ button.invoice-change-state-button {
 
 .invoice-accordion.rollup .roll-up-header .invoice-title-component div:first-child {
   padding-right: 2em;
+}
+
+.invoice-accordion.rollup .invoice-summary-table {
+  display: table;
+  width: 100%;
+  padding-top: 24px;
+  table-layout: fixed;
+}
+
+.invoice-accordion.rollup .invoice-summary-table > div {
+  display: table-row;
+}
+
+.invoice-accordion.rollup .invoice-summary-table > div > div {
+  display: table-cell;
+  vertical-align: bottom;
+}
+
+.invoice-accordion.rollup .invoice-summary-table > div > div:last-child {
+  text-align: right;
+}
+
+.invoice-accordion.rollup .invoice-summary-table > div > div.invoice-sums-container {
+  width: 70%;
+  text-align: right;
+}
+
+.invoice-accordion.rollup .invoice-summary-sums-table {
+  display: inline-table;
+  width: 15em;
+  margin-bottom: 0px;
+  font-weight: 800;
+  border-collapse: unset;
+}
+
+.invoice-accordion.rollup .invoice-summary-sums-table tr:on-hover {
+  background-color: "#ffffff";
+}
+
+.invoice-accordion.rollup .invoice-summary-sums-table tr:last-child td {
+  padding-bottom: 0px;
+}
+
+.invoice-accordion.rollup .invoice-summary-sums-table td {
+  vertical-align: bottom;
+  background: #ffffff;
 }
 
 .invoice-operations-table-wrapper {

@@ -9,6 +9,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.exports :as exports :refer [application-to-salesforce exported-application validate-application-export-data]]
+            [lupapalvelu.exports.reporting-db :as reporting-db]
             [lupapalvelu.mongo :as mongo]))
 
 
@@ -71,6 +72,18 @@
             (fail :error.invalid-timestamps))
         (ok (exports/archive-api-usage-to-salesforce start-ts end-ts))))))
 
+
+(defexport export-applications-for-reporting-db
+  {:user-roles #{:trusted-etl}}
+  [{{start-ts :modifiedAfterTimestampMillis
+     end-ts :modifiedBeforeTimestampMillis} :data}]
+  (let [now-ts (now)
+        start-ts (or (when start-ts (Long/parseLong start-ts 10)) 0)
+        end-ts (or (when end-ts (Long/parseLong end-ts 10)) now-ts)]
+    (if (> start-ts end-ts)
+      (do (timbre/errorf "startTimestampMillis > endTimestampMillis: %d > %d" start-ts end-ts)
+          (fail :error.invalid-timestamps))
+      (ok {:applications (reporting-db/applications start-ts end-ts)}))))
 
 (defexport export-organizations
   {:user-roles #{:trusted-etl}}

@@ -235,12 +235,12 @@
       (let [duplicates (map first
                             (filter #(> (second %) 1)
                                     (frequencies keys)))]
-        (throw (ex-info
+        (throw (do (println (set duplicates)) (ex-info
                 "The same key appears in multiple sources"
                 {:duplicate-keys (->> sources-and-keys
                                       (filter (comp (set duplicates)
                                                     second))
-                                      (sort-by second))}))))))
+                                      (sort-by second))})))))))
 
 (defn- merge-localization-maps [loc-maps]
   (ensure-no-duplicate-keys! loc-maps)

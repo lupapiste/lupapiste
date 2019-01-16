@@ -288,11 +288,7 @@
 
 (defschema AlluMap
   (merge PseudoInput
-         {:type    (sc/eq :allu-map)
-          ;; FIXME: Map can be successfully rendered only if it
-          ;; is (practically) visible. The visibility is resolved by
-          ;; matching :page-re (regex patten) against page hash.
-          :page-re sc/Str}))
+         {:type    (sc/eq :allu-map)}))
 
 (defschema Input
   (sc/conditional (type-pred :text)       Text

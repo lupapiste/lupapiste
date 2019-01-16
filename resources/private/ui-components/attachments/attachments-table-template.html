@@ -4,12 +4,12 @@
     <table class="attachments-table table-even-odd">
       <thead>
         <tr>
-          <th data-bind="ltext:'application.attachmentState'"></th>
+          <th></th>
           <th data-bind="ltext: 'attachment.th-drawing-number'"></th>
-          <th data-bind="ltext: 'attachment.th-type'"
-              class="attachments-table--widest"></th>
-          <th data-bind="ltext: 'application.attachmentFile'"></th>
-          <th data-bind="ltext: 'attachment.th-not-needed'"></th>
+          <th data-bind="ltext: 'attachment.th-content'"
+              class="attachments-table--wide"></th>
+          <th data-bind="ltext: 'attachment.th-type-status'"></th>
+          <th data-bind="ltext: 'attachment.th-edited'"></th>
           <!-- ko if: $component.appModel.isArchivingProject() -->
           <th data-bind="ltext: 'attachments.resell.header'" data-test-id="myyntipalvelu-column"></th>
           <!-- /ko -->
@@ -30,35 +30,39 @@
                        'odd-row': util.isOdd( $index() ),
                        'row--rejected':  $parent.isRejected( $data )}">
           <td>
-            <state-icons params="attachment: $data"></state-icons>
+            <state-icons params="{attachment: $data, primary: true}"></state-icons>
           </td>
           <td>
             <!-- ko if: $data.drawingNumber -->
             <span data-bind="text: $data.drawingNumber" class="attachment-drawing-number"></span>
             <!-- /ko -->
           </td>
+
+
           <!-- ko if: $parent.hasFile( $data ) -->
           <td>
             <a data-bind="attr: {'href': $parent.buildHash( $data )}"
                data-test-id="open-attachment">
-              <attachment-type-id params="attachment: $data"></attachment-type-id>
+                <!-- ko if: $parent.hasContents($data) -->
+                <span data-bind="text: $data.contents()" data-test-id="attachment-contents"></span>
+                <!-- /ko -->
+                <!-- ko ifnot: $parent.hasContents($data) -->
+                <attachment-type-id params="attachment: $data"></attachment-type-id>
+                <!-- /ko -->
             </a>
             <br>
-            <span data-bind="text: $data.contents() || ''"
-                  data-test-id="attachment-contents"></span>
-          </td>
-          <td data-test-id="file-info"
-              class="view-with-download">
-              <a data-bind="fileLink: {attachmentId: $data.id, filename: latestVersion.filename}"></a>
-              <!-- ko if: $parent.archiveProblem( latestVersion ) -->
-                <i class="bubble-hover lupicon-circle-info negative" data-test-id="archive-problem-icon">
-                  <span class="bubble-hover-text" data-test-id="archive-problem-text" data-bind="ltext: latestVersion.archivabilityError"></span>
-                </i>
-              <!-- /ko -->
-              <div data-bind="downloadWithIcon: {attachmentId: $data.id, filename: latestVersion.filename, size: latestVersion.size}"></div>
+            <a data-bind="attr: {href: '/api/raw/latest-attachment-version?attachment-id=' + $data.id}">
+              <span data-bind="text: latestVersion.filename"></span>
+            </a>
+            <span data-bind="downloadWithIconOnly: {attachmentId: $data.id}"></span>
           </td>
           <td>
-            <span data-bind="dateString: latestVersion.created"></span><br>
+            <attachment-type-id class="status-icon-text-line" params="attachment: $data"></attachment-type-id>
+            <br>
+            <state-icons params="{attachment: $data, primary: false}"></state-icons>
+          </td>
+          <td>
+            <span data-bind="dateTimeString: latestVersion.created"></span><br>
             <span data-bind="firstLastName: latestVersion.user"></span>
           </td>
           <!-- /ko -->
@@ -93,7 +97,7 @@
           <!-- ko if: $component.appModel.isArchivingProject() -->
           <td>
             <button class="btn-icon-only"
-                    data-bind="enable: $data.authModel.ok('set-myyntipalvelu-for-attachment'),
+                    data-bind="visible: $data.authModel.ok('set-myyntipalvelu-for-attachment'),
                                css: { positive: $parent.isResellable( $data ),
                                       approve: !$parent.isResellable( $data ) },
                                click: $parent.toggleResell,
@@ -105,7 +109,7 @@
           <!-- ko if: $parent.isAuthority() -->
           <td>
             <button class="btn-icon-only"
-                    data-bind="enable: $data.authModel.ok('approve-attachment'),
+                    data-bind="visible: $data.authModel.ok('approve-attachment'),
                                css: { positive: $parent.isApproved( $data ),
                                       'no-events': $parent.isApproved( $data ),
                                       approve: !$parent.isApproved( $data ) },
@@ -116,7 +120,7 @@
           </td>
           <td>
             <button class="btn-icon-only"
-                    data-bind="enable: $data.authModel.ok('reject-attachment'),
+                    data-bind="visible: $data.authModel.ok('reject-attachment'),
                                css: { negative: $parent.isRejected( $data ),
                                       reject: !$parent.isRejected( $data ) },
                                click: $parent.reject,

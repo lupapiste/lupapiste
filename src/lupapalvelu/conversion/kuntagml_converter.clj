@@ -54,15 +54,17 @@
                        :address         (:address location-info)
                        :municipality    municipality}
 
-        created-application (app/make-application make-app-info
-                                                  []            ; messages
-                                                  (:user command)
-                                                  (:created command)
-                                                  manual-schema-datas)
+        created-application (conv-util/remove-empty-party-documents
+                              (app/make-application make-app-info
+                                                    []            ; messages
+                                                    (:user command)
+                                                    (:created command)
+                                                    manual-schema-datas))
 
         new-parties (remove empty?
                             (concat (map prev-permit/suunnittelija->party-document (:suunnittelijat app-info))
                                     (map prev-permit/osapuoli->party-document (:muutOsapuolet app-info))
+                                    (map prev-permit/hakija->party-document hakijat)
                                     (when (includes? kuntalupatunnus "TJO")
                                       (map prev-permit/tyonjohtaja->tj-document (:tyonjohtajat app-info)))))
 
@@ -81,15 +83,17 @@
 
         statements (->> xml krysp-reader/->lausuntotiedot (map prev-permit/lausuntotieto->statement))
 
-        state-changes (krysp-reader/get-sorted-tilamuutos-entries xml)
-
         ;; Siirretaan lausunnot luonnos-tilasta "lausunto annettu"-tilaan
         given-statements (for [st statements
-                               :when (map? st)]
+                               :when (map? st)
+                               :let [puoltotieto (some-> st
+                                                         (get-in [:metadata :puoltotieto])
+                                                         (clojure.string/replace #"\s" "-"))]]
+                           ;;^ Normalization, since the input data from KuntaGML contains values like 'ei huomautettavaa' (should be 'ei-huomautettavaa') etc.
                            (try
                              (statement/give-statement st
                                                        (:saateText st)
-                                                       (get-in st [:metadata :puoltotieto])
+                                                       puoltotieto
                                                        (mongo/create-id)
                                                        (mongo/create-id)
                                                        false)
@@ -100,13 +104,13 @@
 
         created-application (-> created-application
                                 (assoc-in [:primaryOperation :description] (first structure-descriptions))
-                                (conv-util/add-description xml) ;; Add descriptions from asianTiedot to the document.
+                                (conv-util/add-description-and-deviation-info xml document-datas) ;; Add poikkeamat and kuvaus to the "hankkeen-kuvaus" doc.
                                 conv-util/remove-empty-rakennuspaikka ;; Remove empty rakennuspaikka-document that comes from the template
                                 (conv-util/add-timestamps history-array) ;; Add timestamps for different state changes
                                 (update-in [:documents] concat other-building-docs new-parties structures ;; Assemble the documents-array
                                            (when-not (includes? kuntalupatunnus "TJO") location-document))
                                 (update-in [:secondaryOperations] concat secondary-ops)
-                                (assoc :statements given-statements
+                                (assoc :statements (or given-statements [])
                                        :opened (:created command)
                                        :history history-array
                                        :state :closed ;; Asetetaan hanke "päätös annettu"-tilaan
@@ -117,22 +121,16 @@
     (logging/with-logging-context {:applicationId (:id created-application)}
       ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
       (app/insert-application created-application)
-      (infof "Inserted prev-permit app: org=%s kuntalupatunnus=%s authorizeApplicants=%s"
-             (:organization created-application)
-             (get-in command [:data :kuntalupatunnus])
-             authorize-applicants)
+      (infof "Inserted converted app: org=%s kuntalupatunnus=%s" (:organization created-application) (get-in command [:data :kuntalupatunnus]))
       ;; Get verdicts for the application
       (when-let [updates (verdict/find-verdicts-from-xml command xml false)]
         (action/update-application command updates)
         (verdict-date/update-verdict-date (:id created-application)))
 
-      (prev-permit/invite-applicants command hakijat authorize-applicants)
-      (infof "Processed applicants, processable applicants count was: %s" (count (filter prev-permit/get-applicant-type hakijat)))
-
       (let [updated-application (mongo/by-id :applications (:id created-application))
             {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml usr/batchrun-user-data (now) updated-application xml false true)
             review-command (assoc (action/application->command updated-application (:user command)) :action "prev-permit-review-updates")
-            update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id)]
+            update-result (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id true)]
         (if (:ok update-result)
           (info "Saved review updates")
           (infof "Reviews were not saved: %s" (:desc update-result))))
@@ -161,20 +159,24 @@
   (when-not (contains? supported-import-types (keyword permittype))
     (error-and-fail! (str "Unsupported import type " permittype) :error.unsupported-permit-type)))
 
-(defn fetch-prev-local-application!
-  "A variation of `lupapalvelu.prev-permit/fetch-prev-local-application!` that exists for conversion
-  and testing purposes. Creates an application from Krysp message in a local file. To use a local Krysp
-  file:
+(defn fetch-prev-application!
+  "A variant of `lupapalvelu.prev-permit/fetch-prev-local-application!` that exists for conversion
+  and testing purposes. To use a local KuntaGML file:
   1) The local MongoDB has to contain the location info for the municipality in question (here Vantaa)
-  2) this function needs to be called from prev-permit-api/create-application-from-previous-permit instead of
-  prev-permit/fetch-prev-application!"
-  [{{:keys [kuntalupatunnus authorizeApplicants]} :data :as command}]
+  2) this function needs to be called with the `local?` argument set to `true`"
+  ([command]
+   (fetch-prev-application! command true))
+  ([{{:keys [kuntalupatunnus authorizeApplicants]} :data :as command} local?] ;; If the `local` flag is false, the application is fetched from backed system.
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
         destructured-permit-id (conv-util/destructure-permit-id kuntalupatunnus)
         operation             "konversio"
         filename              (format "%s/%s.xml" (:resource-path conv-util/config) kuntalupatunnus ".xml")
         permit-type           "R"
-        xml                   (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
+        xml                   (if local?
+                                (krysp-fetch/get-local-application-xml-by-filename filename permit-type)
+                                (krysp-fetch/get-application-xml-by-application-id {:id kuntalupatunnus
+                                                                                    :organization "092-R"
+                                                                                    :permitType "R"}))
         app-info              (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info         (or (prev-permit/get-location-info command app-info)
                                   prev-permit/default-location-info)
@@ -197,7 +199,7 @@
                                                                                      authorizeApplicants)]
                                           (if no-proper-applicants?
                                             (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
-                                            (ok :id id))))))
+                                            (ok :id id)))))))
 
 (defn debug [command]
-  (fetch-prev-local-application! command))
+  (fetch-prev-application! command))

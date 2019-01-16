@@ -161,6 +161,16 @@ table.tasks {
   }
 }
 
+// Main attachments table
+table.attachments-table {
+
+  .status-icon-text-line {
+    white-space: nowrap;
+  }
+}
+
+
+// Multiselect attachments table
 table.attachments-template-table {
 
   .center {
@@ -347,10 +357,13 @@ div.attachments-table-container {
   padding: {
   top: 1em;
   right: .6em;
-  left: .5em;
+  left: 0;
   }
   table.attachments-table {
-        tr.row--rejected {
+    th {
+      white-space: nowrap;
+    }
+    tr.row--rejected {
       border-bottom: none;
       td {
         padding-bottom: 0;

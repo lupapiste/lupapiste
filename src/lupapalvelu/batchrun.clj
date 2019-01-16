@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :refer [debug debugf error errorf info infof warn warnf]]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
-            [clojure.set :as set]
+            [clojure.set :refer [union difference]]
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
@@ -19,7 +19,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.neighbors-api :as neighbors]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.organization :as organization]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.review :as review]
             [lupapalvelu.states :as states]
@@ -157,7 +157,7 @@
   (let [timestamp-now (now)
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/snapshot :applications
-                             {:state      {$nin (map name (clojure.set/union states/post-verdict-states states/terminal-states))}
+                             {:state      {$nin (map name (union states/post-verdict-states states/terminal-states))}
                               :permitType {$nin ["ARK"]}
                               :readOnly {$ne true}
                               :statements {$elemMatch {:given nil
@@ -377,7 +377,7 @@
 
 (defn fetch-verdicts-by-org-ids [ids]
   (infof "Starting fetch-verdicts-by-org-ids with %s ids" (count ids))
-  (if-let [orgs (seq (organization/get-organizations {:_id {$in ids}} [:krysp]))]
+  (if-let [orgs (seq (org/get-organizations {:_id {$in ids}} [:krysp]))]
     (let [applications (mongo/select :applications {:state {$in ["sent"]}
                                                     :permitType {$nin ["ARK"]}
                                                     :organization {$in ids}})
@@ -394,7 +394,7 @@
     (fetch-verdicts-by-org-ids args)))
 
 (defn fetch-verdicts-default [& [{:keys [jms?] :or {jms? false}}]]
-  (let [organizations-with-krysp-url (organization/get-organizations
+  (let [organizations-with-krysp-url (org/get-organizations
                                        {$or [{:krysp.R.url {$exists true}}
                                              {:krysp.YA.url {$exists true}}
                                              {:krysp.P.url {$exists true}}
@@ -484,15 +484,17 @@
                 {:krysp true}))
 
 (defn- save-reviews-for-application [user application {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id] :as result}]
-  (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
-    (when (ok? result)
-      (try
-        (review/save-review-updates (assoc (application->command application) :user user)
-                                    updates
-                                    added-tasks-with-updated-buildings
-                                    attachments-by-task-id)
-        (catch Throwable t
-          {:ok false :desc (.getMessage t)})))))
+  (let [only-use-inspection-from-backend? (-> application :organization org/get-organization :only-use-inspection-from-backend)]
+    (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
+      (when (ok? result)
+        (try
+          (review/save-review-updates (assoc (application->command application) :user user)
+                                      updates
+                                      added-tasks-with-updated-buildings
+                                      attachments-by-task-id
+                                      only-use-inspection-from-backend?)
+          (catch Throwable t
+            {:ok false :desc (.getMessage t)}))))))
 
 (defn- read-reviews-for-application
   [user created application app-xml & [overwrite-background-reviews?]]
@@ -577,7 +579,7 @@
 
 (defn- organization-applications-for-review-fetching
   [organization-id permit-type projection & application-ids]
-  (let [eligible-application-states (set/difference states/post-verdict-but-terminal #{:foremanVerdictGiven})]
+  (let [eligible-application-states (difference states/post-verdict-but-terminal #{:foremanVerdictGiven})]
     (mongo/select :applications (merge {:state {$in eligible-application-states}
                                         :permitType permit-type
                                         :organization organization-id

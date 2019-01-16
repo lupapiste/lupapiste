@@ -76,6 +76,13 @@
         manual-schema-datas {"rakennuspaikka-kuntagml" doc-datas}]
     (app/make-document nil (now) manual-schema-datas schema)))
 
+(defn get-elements-from-document-datas
+  "Accepts an update sequence (a seq of vectors), returns a sequence of the values of the provided key."
+  [dkey doc-datas]
+  (for [[[k] v] doc-datas
+        :when (= dkey k)]
+    v))
+
 (defn kuntalupatunnus->description
   "Takes a kuntalupatunnus, returns the permit type in plain text ('12-124124-92-A' -> 'Uusi rakennus' etc.)"
   [kuntalupatunnus]
@@ -175,14 +182,31 @@
                        {"kaupunkikuvatoimenpide" (app/sanitize-document-datas schema data)}
                        (schemas/get-schema 1 "kaupunkikuvatoimenpide"))))
 
+(defn is-empty-party-document? [{:keys [schema-info] :as doc}]
+  (when (= :party (:type schema-info))
+    (->> doc
+         (tree-seq map? vals)
+         (keep :value)
+         (filter string?)
+         (remove (partial contains? #{"" "FIN" "henkilo"}))
+         empty?)))
+
+(defn remove-empty-party-documents [{:keys [documents] :as app}]
+  (assoc app :documents (remove is-empty-party-document? documents)))
+
 (defn decapitalize
   "Convert the first character of the string to lowercase."
   [string]
   (apply str (ss/lower-case (first string)) (rest string)))
 
-(defn add-description [{:keys [documents] :as app} xml]
+(defn add-description-and-deviation-info [{:keys [documents] :as app} xml document-datas]
   (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         kuvaus (building-reader/->asian-tiedot xml)
+        poikkeamat (->> document-datas
+                        (map (partial get-elements-from-document-datas "poikkeamat"))
+                        flatten
+                        set
+                        (clojure.string/join #"\n"))
         kuvausteksti (str kuvaus
                           (format "\nLuvan tyyppi: %s"
                                   (decapitalize (kuntalupatunnus->description kuntalupatunnus))))]
@@ -191,7 +215,9 @@
                   (cond
                     (and (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
                          (empty? (get-in doc [:data :kuvaus :value])))
-                    (assoc-in doc [:data :kuvaus :value] kuvausteksti)
+                    (-> doc
+                      (assoc-in [:data :kuvaus :value] kuvausteksti)
+                      (assoc-in [:data :poikkeamat :value] poikkeamat))
                     (and (re-find #"maisematyo" (get-in doc [:schema-info :name]))
                          (empty? (get-in doc [:data :kuvaus :value])))
                     (assoc-in doc [:data :kuvaus :value] kuvaus)
@@ -360,51 +386,54 @@
   "Takes a kuntalupatunnus and a 'toimenpide'-element from app-info, returns the operation type"
   ([kuntalupatunnus description]
    (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)]
-     (condp = suffix
-       "TJO" "tyonjohtajan-nimeaminen-v2"
-       "P" "purkaminen"
-       "PI" "purkaminen"
-       "MAI" (cond
-               (re-find #"kaatami|kaatoa" description) "puun-kaataminen"
-               (re-find #"valmistele" description) "muu-tontti-tai-kort-muutos"
-               (re-find #"kaivam|kaivu" description) "kaivuu"
-               (re-find #"pysäk|liittym" description) "tontin-jarjestelymuutos"
-               :else "muu-maisema-toimenpide")
-       "konversio"))) ;; A minimal generic operation for this purpose.
-                      ;; If a an application does not contain 'toimenpide'-element and is not P(I) or TJO, 'konversio it is'.
+     (cond
+       (= suffix "TJO") "tyonjohtajan-nimeaminen-v2"
+       (#{"P" "PI"} suffix) "purkaminen"
+       (->> suffix last (= \J)) "raktyo-aloit-loppuunsaat"
+       (= suffix "MAI") (cond
+                          (re-find #"kaatami|kaatoa" description) "puun-kaataminen"
+                          (re-find #"valmistele" description) "muu-tontti-tai-kort-muutos"
+                          (re-find #"kaivam|kaivu" description) "kaivuu"
+                          (re-find #"pysäk|liittym" description) "tontin-jarjestelymuutos"
+                          :else "muu-maisema-toimenpide")
+       :else "konversio"))) ;; A minimal generic operation for this purpose.
   ([kuntalupatunnus description toimenpide]
    (let [suffix (-> kuntalupatunnus destructure-permit-id :tyyppi)
-        uusi? (contains? toimenpide :uusi)
-        rakennustieto (get-in toimenpide [:rakennustieto :Rakennus :rakennuksenTiedot])
-        {:keys [kayttotarkoitus rakennustunnus]} rakennustieto
-        rakennuksen-selite (:rakennuksenSelite rakennustunnus)
-        laajentaminen? (or (contains? toimenpide :laajentaminen)
-                           (= rakennuksen-selite "Laajennus")
-                           (= "B" suffix))
-        rakennelman-kuvaus (get-in toimenpide [:rakennelmatieto :Rakennelma :kuvaus :kuvaus])
-        rakennelman-selite (get-in toimenpide [:rakennelmatieto :Rakennelma :tunnus :rakennuksenSelite])]
-    (cond
-      (contains? #{"P" "PI"} suffix) "purkaminen"
-      (and uusi?
-           (= "Omakotitalo" rakennuksen-selite)) "pientalo"
-      (and uusi?
-           (contains? #{"Kerrostalo" "Asuinkerrostalo" "Rivitalo"} rakennuksen-selite)) "kerrostalo-rivitalo"
-      (and uusi?
-           (= "Talousrakennus" rakennuksen-selite)) "pientalo"
-      (and uusi?
-           (or (= "Katos" rakennelman-kuvaus)
-               (= "Autokatos" rakennelman-selite))) "auto-katos"
-      (and laajentaminen?
-           (re-find #"toimisto" kayttotarkoitus)) "talousrakennus-laaj"
-      (and laajentaminen?
-           (re-find #"teollisuuden tuotantorak" kayttotarkoitus)) "teollisuusrakennus-laaj"
-      (and laajentaminen?
-           (or (re-find #"yhden asunnon talot" kayttotarkoitus)
-               (= "omakotitalo" rakennuksen-selite))) "pientalo-laaj"
-      (and laajentaminen?
-           (or (re-find #"rivital|kerrostal" kayttotarkoitus)
-               (= "omakotitalo" rakennuksen-selite))) "kerrostalo-rt-laaj"
-      :else "aiemmalla-luvalla-hakeminen"))))
+         uusi? (contains? toimenpide :uusi)
+         rakennustieto (get-in toimenpide [:rakennustieto :Rakennus :rakennuksenTiedot])
+         {:keys [kayttotarkoitus rakennustunnus]} rakennustieto
+         rakennuksen-selite (:rakennuksenSelite rakennustunnus)
+         muuttaminen? (or (= "D" suffix)
+                          (= \L (last suffix)))
+         laajentaminen? (or (contains? toimenpide :laajentaminen)
+                            (= rakennuksen-selite "Laajennus")
+                            (= "B" suffix))
+         rakennelman-kuvaus (get-in toimenpide [:rakennelmatieto :Rakennelma :kuvaus :kuvaus])
+         rakennelman-selite (get-in toimenpide [:rakennelmatieto :Rakennelma :tunnus :rakennuksenSelite])]
+     (cond
+       (contains? #{"P" "PI"} suffix) "purkaminen"
+       (and uusi?
+            (= "Omakotitalo" rakennuksen-selite)) "pientalo"
+       (and uusi?
+            (contains? #{"Kerrostalo" "Asuinkerrostalo" "Rivitalo"} rakennuksen-selite)) "kerrostalo-rivitalo"
+       (and uusi?
+            (= "Talousrakennus" rakennuksen-selite)) "pientalo"
+       (and uusi?
+            (or (= "Katos" rakennelman-kuvaus)
+                (= "Autokatos" rakennelman-selite))) "auto-katos"
+       (and laajentaminen?
+            (re-find #"toimisto" kayttotarkoitus)) "talousrakennus-laaj"
+       (and laajentaminen?
+            (re-find #"teollisuuden tuotantorak" kayttotarkoitus)) "teollisuusrakennus-laaj"
+       (and laajentaminen?
+            (or (re-find #"yhden asunnon talot" kayttotarkoitus)
+                (= "Omakotitalo" rakennuksen-selite))) "pientalo-laaj"
+       (and laajentaminen?
+            (or (re-find #"rivital|kerrostal" kayttotarkoitus)
+                (#{"Kerrostalo" "Rivitalo"} rakennuksen-selite))) "kerrostalo-rt-laaj"
+       (and muuttaminen? (re-find #"(?i)ulko|julkisivu" description)) "julkisivu-muutos"
+       (and muuttaminen? (re-find #"huoneeksi|asuin" description)) "sisatila-muutos"
+       :else "konversio"))))
 
 (defn add-vakuustieto!
   "This takes an XML of a VAK-type kuntaGML application, i.e. deposit.
@@ -467,6 +496,18 @@
 
 (defn get-asian-kuvaus [kuntalupatunnus]
   (-> kuntalupatunnus get-xml-for-kuntalupatunnus building-reader/->asian-tiedot))
+
+(defn sample-testset
+  "Development time helper function that returns a list of random kuntalupa-ids from the batch available locally."
+  [amount]
+  (let [files (->> config
+                   :resource-path
+                   io/file
+                   file-seq
+                   (filter (memfn isFile))
+                   (map (comp #(first (ss/split % #"\.")) (memfn getName)))
+                   (filter #(not= "---" (normalize-permit-id %))))]
+    (take amount (shuffle files))))
 
 (defn run-checks []
   (mongocheck/execute-checks (mongo/get-db)))

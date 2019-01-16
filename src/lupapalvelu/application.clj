@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :refer [trace debug debugf info infof warnf error fatal]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
-            [clojure.set :refer [difference]]
+            [clojure.set :refer [intersection]]
             [clojure.walk :refer [keywordize-keys]]
             [monger.operators :refer :all]
             [schema.core :as sc]
@@ -746,8 +746,8 @@
           (do
             (info (format "Updating app-link: %s -> %s" app-link-id (str link-permit-id "|" (:id application))))
             (mongo/remove app-link-id)
-            (do-add-link-permit application link-permit-id)))
-        (error (format "Could not update app-link for permit %s / %s" kuntalupatunnus link-permit-id))))))
+            (do-add-link-permit application link-permit-id))
+          (error (format "Could not update app-link for permit %s / %s" kuntalupatunnus link-permit-id)))))))
 
 ;; Submit
 (defn submit [{:keys [application created user] :as command} ]
@@ -875,6 +875,48 @@
                                [[:kuvaus] rakennusvalvontaasianKuvaus]))))
       buildings)))
 
+(defn- anonymize-values [updates]
+  (for [[k v] updates
+        :let [keyset (set k)
+              new-val (cond
+                        (keyset :etunimi) "Pena"
+                        (keyset :sukunimi) "Panaani"
+                        (seq (intersection keyset #{:katu :osoitenimi :nimi})) "Paapankuja 1 A 1"
+                        (keyset :hetu) "131052-308T"
+                        (seq (intersection keyset #{:email :sahkopostiosoite})) "pena@example.com"
+                        (keyset :liikeJaYhteisoTunnus) "123123980"
+                        (keyset :puhelin) "012-3456789"
+                        (keyset :yritysnimi) "Penan Panaanitarha")]
+        :when (and (string? v)
+                   (pos? (count v))
+                   new-val)]
+    [k new-val]))
+
+(defn anonymize-parties
+ "Takes a document from an application and sets Pena Panaani as the party in question."
+ [document]
+  (loop [updates (->> document (model/map2updates []) anonymize-values)
+         doc document]
+    (if (empty? updates)
+      doc
+      (let [[path data] (first updates)]
+        (recur (rest updates)
+               (assoc-in doc path data))))))
+
+(defn anonymize-application [{:keys [documents] :as app}]
+  (assoc app :documents (map anonymize-parties documents)
+         :applicant "Pena Panaani"))
+
+(defn anonymize-application-by-id!
+  "Takes an LP id and anonymizes the said application in the database.
+  Note that only the parties are anonymized while other application
+  data is left intact."
+  [id]
+  (let [updated-app (->> id (mongo/by-id :applications) anonymize-application)
+        applicant-index (meta-fields/applicant-index updated-app)]
+    (mongo/update-by-id :applications id {$set (merge applicant-index
+                                                {:documents (:documents updated-app)})})))
+
 (defn sanitize-document-datas
   "This cleans document datas of all the key-value pairs that are not found in the
   given schema. Failure to do this results in smoke-tests breaking, plus the data
@@ -937,19 +979,18 @@
         secondary-ops             (mapv #(assoc (-> %1 :schema-info :op) :description %2) (rest building-docs) (rest structure-descriptions))
         application               (update-in application [:documents] concat building-docs)
         command                   (util/deep-merge command (action/application->command application))]
-  (when (some? (:id primary-operation))
-    (do
+    (when (some? (:id primary-operation))
       (run! #(doc-persistence/remove! command %) old-building-docs)
       (action/update-application command {$set  {:primaryOperation    primary-operation
                                                  :secondaryOperations secondary-ops}
                                           $push {:documents {$each building-docs}}})
-      (update-buildings-array! building-xml (mongo/by-id :applications (:id application)) all-buildings)))))
+      (update-buildings-array! building-xml (mongo/by-id :applications (:id application)) all-buildings))))
 
 (defn remove-secondary-buildings [{:keys [application] :as command}]
   (let [building-docs (domain/get-documents-by-name application "archiving-project")
         primary-op-id (get-in application [:primaryOperation :id])
-        secondary-building-docs (filter #(not (= (-> % :schema-info :op :id) primary-op-id)) building-docs)
-        secondary-buildings (filter #(not (= (:operationId %) primary-op-id)) (:buildings application))]
+        secondary-building-docs (filter #(not= (-> % :schema-info :op :id) primary-op-id) building-docs)
+        secondary-buildings (filter #(not= (:operationId %) primary-op-id) (:buildings application))]
     (run! #(doc-persistence/remove! command  %) secondary-building-docs)
     (action/update-application command {$pull {:buildings {:buildingId {$in (map :buildingId secondary-buildings)}}}})))
 
@@ -959,6 +1000,16 @@
         (= primary-operation "jatkoaika")
         (= primary-operation "ya-jatkoaika"))))
 
+
+;;
+;; Kuntalupatunnus from ALLU
+;;
+(defn set-kuntalupatunnus
+  "Store kuntalupatunnus here where it's read when creating a verdict. When creating a verdict kuntalupatunnus is
+  placed with other verdict data where UI can find it (see lupapalvelu.backing-system.allu.contract/new-allu-contract)."
+  [app-id kuntalupatunnus]
+  (mongo/update-by-id :applications app-id {$set {:integrationKeys.ALLU.kuntalupatunnus kuntalupatunnus}}))
+
 ;;
 ;; Integration keys
 ;;
@@ -966,12 +1017,6 @@
 (defn set-integration-key [app-id system-name key-data]
   (mongo/update-by-id :applications app-id {$set {(str "integrationKeys." (name system-name)) key-data}}))
 
-;;
-;; Allu's internal application id
-;;
-
-(defn set-allu-application-id [app-id allu-id]
-  (mongo/update-by-id :applications app-id {$set {"allu.application-id" allu-id}}))
 
 ;; Utils for the sheriff
 

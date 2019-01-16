@@ -70,7 +70,7 @@
       (when (not-empty op) :operation)
       general-group-tag))
 
-(def application-group-types [:parties :general :reports :technical-reports])
+(def application-group-types [:general :reports :technical-reports :parties])
 
 (def application-group-type-tag :application)
 

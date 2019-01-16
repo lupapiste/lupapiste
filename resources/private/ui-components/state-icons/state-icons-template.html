@@ -10,4 +10,16 @@
         <!-- /ko -->
     </i>
   </div>
+
+  <!-- Archive Problem Icon -->
+  <div class="attachment-state-icons">
+      <!-- ko if: hasArchiveProblem() -->
+          <i class="lupicon-circle-info negative bubble-hover"
+            data-test-id="archive-problem-icon">
+              <span class="bubble-hover-text"
+                  data-bind="ltext: getArchivabilityError(),
+                             testId: 'archive-problem-text'"></span>
+          </i>
+      <!-- /ko -->
+  </div>
 </script>

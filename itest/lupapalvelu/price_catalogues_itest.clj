@@ -97,7 +97,8 @@
   (mongo/with-db itu/test-db-name
     (lupapalvelu.fixture.core/apply-fixture "invoicing-enabled")
 
-    (with-redefs [t/default-time-zone (fn [] (t/time-zone-for-id "Europe/Helsinki"))]
+    (with-redefs [t/default-time-zone (fn [] (t/time-zone-for-id "Europe/Helsinki"))
+                  t/today (fn [] (t/local-date 2018 8 15))]
 
       (fact "organization-price-catalogues query"
 

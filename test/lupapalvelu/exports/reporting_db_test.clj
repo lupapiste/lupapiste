@@ -132,12 +132,463 @@
     (org/pate-scope? irrelevant) => false)
   (->reporting-result (assoc application-rakennuslupa
                              :tasks [review])
+                      [{:_id irrelevant
+                        :link [(:id application-rakennuslupa)
+                               "LP-000-2019-00000"]
+                        (keyword (:id application-rakennuslupa)) {:type "linkpermit"
+                                                                  :apptype (:permitType application-rakennuslupa)
+                                                                  :propertyId (:propertyId application-rakennuslupa)}
+                        :LP-000-2019-00000 {:type "linkpermit"
+                                            :linkpermittype "lupapistetunnus"
+                                            :apptype "tyonjohtajan-nimeaminen-v2"}}]
                       "fi")
   => (contains
       {:id (:id application-rakennuslupa)
        :address (:address application-rakennuslupa)
+       :propertyId (:propertyId application-rakennuslupa)
+       :organization (:organization application-rakennuslupa)
+       :municipality (:municipality application-rakennuslupa)
        :location-etrs-tm35fin (:location application-rakennuslupa)
        :location-wgs84 (:location-wgs84 application-rakennuslupa)
+       :links [{:id "LP-000-2019-00000"
+                :permitType "tyonjohtajan-nimeaminen-v2"}]
+       :operations [{:id "muu-laajentaminen-id"
+                     :primary true
+                     :kuvaus nil
+                     :nimi "Muu rakennuksen muutostyö"
+                     :rakennelma nil
+                     :rakennus {:omistajat [{:VRKrooliKoodi "rakennuksen omistaja"
+                                             :henkilo {:henkilotunnus "210281-9988"
+                                                       :nimi {:etunimi "Pena"
+                                                              :sukunimi "Penttilä"}
+                                                       :osoite {:osoitenimi {:teksti "katu"}
+                                                                :postinumero "33800"
+                                                                :postitoimipaikannimi "Tuonela"
+                                                                :ulkomainenLahiosoite "katu"
+                                                                :ulkomainenPostitoimipaikka "Tuonela"
+                                                                :valtioKansainvalinen "CHN"
+                                                                :valtioSuomeksi "Kiina"}
+                                                       :puhelin "+358401234567"
+                                                       :sahkopostiosoite "pena@example.com"
+                                                       :vainsahkoinenAsiointiKytkin false}
+                                             :kuntaRooliKoodi "Rakennuksen omistaja"
+                                             :omistajalaji {:omistajalaji "muu yksityinen henkilö tai perikunta"}
+                                             :suoramarkkinointikieltoKytkin true
+                                             :turvakieltoKytkin true}
+                                            {:VRKrooliKoodi "rakennuksen omistaja"
+                                             :henkilo {:nimi {:etunimi "Pena"
+                                                              :sukunimi "Penttilä"}
+                                                       :puhelin "03-389 1380"
+                                                       :sahkopostiosoite "yritys@example.com"}
+                                             :kuntaRooliKoodi "Rakennuksen omistaja"
+                                             :omistajalaji {:omistajalaji "yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta)"}
+                                             :suoramarkkinointikieltoKytkin true
+                                             :turvakieltoKytkin true
+                                             :yritys {:liikeJaYhteisotunnus "1060155-5"
+                                                      :nimi "Solita Oy"
+                                                      :postiosoite {:osoitenimi {:teksti "katu"}
+                                                                    :postinumero "33800"
+                                                                    :postitoimipaikannimi "Tuonela"
+                                                                    :ulkomainenLahiosoite "katu"
+                                                                    :ulkomainenPostitoimipaikka "Tuonela"
+                                                                    :valtioKansainvalinen "CHN"
+                                                                    :valtioSuomeksi "Kiina"}
+                                                      :postiosoitetieto {:postiosoite {:osoitenimi {:teksti "katu"}
+                                                                                       :postinumero "33800"
+                                                                                       :postitoimipaikannimi "Tuonela"
+                                                                                       :ulkomainenLahiosoite "katu"
+                                                                                       :ulkomainenPostitoimipaikka "Tuonela"
+                                                                                       :valtioKansainvalinen "CHN"
+                                                                                       :valtioSuomeksi "Kiina"}}
+                                                      :puhelin "03-389 1380"
+                                                      :sahkopostiosoite "yritys@example.com"
+                                                      :vainsahkoinenAsiointiKytkin false}}]
+                                :rakentajatyyppi "muu"
+                                :tiedot {:asuinhuoneistot {:huoneisto [{:huoneistoala 56
+                                                                        :huoneistonTyyppi "asuinhuoneisto"
+                                                                        :huoneistotunnus {:huoneistonumero "001"
+                                                                                          :jakokirjain "a"
+                                                                                          :porras "A"}
+                                                                        :huoneluku 66
+                                                                        :keittionTyyppi "keittio"
+                                                                        :muutostapa "lisäys"
+                                                                        :varusteet {:WCKytkin true
+                                                                                    :ammeTaiSuihkuKytkin false
+                                                                                    :lamminvesiKytkin false
+                                                                                    :parvekeTaiTerassiKytkin true
+                                                                                    :saunaKytkin false}}
+                                                                       {:huoneistoala 2
+                                                                        :huoneistonTyyppi "toimitila"
+                                                                        :huoneistotunnus {:huoneistonumero "002"
+                                                                                          :jakokirjain "a"
+                                                                                          :porras "A"}
+                                                                        :huoneluku 12
+                                                                        :keittionTyyppi "keittokomero"
+                                                                        :muutostapa "muutos"
+                                                                        :varusteet {:WCKytkin false
+                                                                                    :ammeTaiSuihkuKytkin true
+                                                                                    :lamminvesiKytkin true
+                                                                                    :parvekeTaiTerassiKytkin false
+                                                                                    :saunaKytkin true}}]}
+                                         :energialuokka "C"
+                                         :energiatehokkuusluku 124
+                                         :energiatehokkuusluvunYksikko "kWh/m2"
+                                         :julkisivu {:julkisivumateriaali "puu"}
+                                         :kantavaRakennusaine {:rakennusaine "puu"}
+                                         :kayttotarkoitus "012 kahden asunnon talot"
+                                         :kellarinpinta-ala 100
+                                         :kerrosala 180
+                                         :kerrosluku 2
+                                         :kokonaisala 1000
+                                         :lammitystapa "vesikeskus"
+                                         :lammonlahde {:muu "polttopuillahan tuo"}
+                                         :liitettyJatevesijarjestelmaanKytkin true
+                                         :paloluokka "P1"
+                                         :rakennusoikeudellinenKerrosala 160
+                                         :rakennustunnus {:jarjestysnumero 1
+                                                          :kiinttun "21111111111111"
+                                                          :muuTunnustieto [{:MuuTunnus {:sovellus "toimenpideId"
+                                                                                        :tunnus "muu-laajentaminen-id"}}
+                                                                           {:MuuTunnus {:sovellus "Lupapiste"
+                                                                                        :tunnus "muu-laajentaminen-id"}}]
+                                                          :rakennusnro "001"
+                                                          :valtakunnallinenNumero "1234567892"}
+                                         :rakentamistapa "elementti"
+                                         :tilavuus 1500
+                                         :varusteet {:aurinkopaneeliKytkin true
+                                                     :hissiKytkin true
+                                                     :kaasuKytkin true
+                                                     :koneellinenilmastointiKytkin true
+                                                     :lamminvesiKytkin true
+                                                     :sahkoKytkin true
+                                                     :saunoja 1
+                                                     :vaestonsuoja 1
+                                                     :vesijohtoKytkin true
+                                                     :viemariKytkin true}
+                                         :verkostoliittymat {:kaapeliKytkin true
+                                                             :maakaasuKytkin true
+                                                             :sahkoKytkin true
+                                                             :vesijohtoKytkin true
+                                                             :viemariKytkin true}}}}
+                    {:id "kerrostalo-rivitalo-id"
+                     :primary false
+                     :kuvaus "kerrostalo-rivitalo-kuvaus"
+                     :nimi "Asuinkerrostalon tai rivitalon rakentaminen"
+                     :rakennelma nil
+                     :rakennus {:omistajat [{:VRKrooliKoodi "rakennuksen omistaja"
+                                             :henkilo {:henkilotunnus "210281-9988"
+                                                       :nimi {:etunimi "Pena"
+                                                              :sukunimi "Penttilä"}
+                                                       :osoite {:osoitenimi {:teksti "katu"}
+                                                                :postinumero "33800"
+                                                                :postitoimipaikannimi "Tuonela"
+                                                                :ulkomainenLahiosoite "katu"
+                                                                :ulkomainenPostitoimipaikka "Tuonela"
+                                                                :valtioKansainvalinen "CHN"
+                                                                :valtioSuomeksi "Kiina"}
+                                                       :puhelin "+358401234567"
+                                                       :sahkopostiosoite "pena@example.com"
+                                                       :vainsahkoinenAsiointiKytkin false}
+                                             :kuntaRooliKoodi "Rakennuksen omistaja"
+                                             :omistajalaji {:omistajalaji "muu yksityinen henkilö tai perikunta"}
+                                             :suoramarkkinointikieltoKytkin true
+                                             :turvakieltoKytkin true}
+                                            {:VRKrooliKoodi "rakennuksen omistaja"
+                                             :henkilo {:nimi {:etunimi "Pena"
+                                                              :sukunimi "Penttilä"}
+                                                       :puhelin "03-389 1380"
+                                                       :sahkopostiosoite "yritys@example.com"}
+                                             :kuntaRooliKoodi "Rakennuksen omistaja"
+                                             :omistajalaji {:omistajalaji "yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta)"}
+                                             :suoramarkkinointikieltoKytkin true
+                                             :turvakieltoKytkin true
+                                             :yritys {:liikeJaYhteisotunnus "1060155-5"
+                                                      :nimi "Solita Oy"
+                                                      :postiosoite {:osoitenimi {:teksti "katu"}
+                                                                    :postinumero "33800"
+                                                                    :postitoimipaikannimi "Tuonela"
+                                                                    :ulkomainenLahiosoite "katu"
+                                                                    :ulkomainenPostitoimipaikka "Tuonela"
+                                                                    :valtioKansainvalinen "CHN"
+                                                                    :valtioSuomeksi "Kiina"}
+                                                      :postiosoitetieto {:postiosoite {:osoitenimi {:teksti "katu"}
+                                                                                       :postinumero "33800"
+                                                                                       :postitoimipaikannimi "Tuonela"
+                                                                                       :ulkomainenLahiosoite "katu"
+                                                                                       :ulkomainenPostitoimipaikka "Tuonela"
+                                                                                       :valtioKansainvalinen "CHN"
+                                                                                       :valtioSuomeksi "Kiina"}}
+                                                      :puhelin "03-389 1380"
+                                                      :sahkopostiosoite "yritys@example.com"
+                                                      :vainsahkoinenAsiointiKytkin false}}]
+                                :rakentajatyyppi "muu"
+                                :tiedot {:asuinhuoneistot {:huoneisto [{:huoneistoala 56
+                                                                        :huoneistonTyyppi "asuinhuoneisto"
+                                                                        :huoneistotunnus {:huoneistonumero "001"
+                                                                                          :jakokirjain "a"
+                                                                                          :porras "A"}
+                                                                        :huoneluku 66
+                                                                        :keittionTyyppi "keittio"
+                                                                        :muutostapa "lisäys"
+                                                                        :varusteet {:WCKytkin true
+                                                                                    :ammeTaiSuihkuKytkin false
+                                                                                    :lamminvesiKytkin false
+                                                                                    :parvekeTaiTerassiKytkin true
+                                                                                    :saunaKytkin false}}
+                                                                       {:huoneistoala 2
+                                                                        :huoneistonTyyppi "toimitila"
+                                                                        :huoneistotunnus {:huoneistonumero "002"
+                                                                                          :jakokirjain "a"
+                                                                                          :porras "A"}
+                                                                        :huoneluku 12
+                                                                        :keittionTyyppi "keittokomero"
+                                                                        :muutostapa "lisäys"
+                                                                        :varusteet {:WCKytkin false
+                                                                                    :ammeTaiSuihkuKytkin true
+                                                                                    :lamminvesiKytkin true
+                                                                                    :parvekeTaiTerassiKytkin false
+                                                                                    :saunaKytkin true}}]}
+                                         :energialuokka "C"
+                                         :energiatehokkuusluku 124
+                                         :energiatehokkuusluvunYksikko "kWh/m2"
+                                         :julkisivu {:julkisivumateriaali "puu"}
+                                         :kantavaRakennusaine {:rakennusaine "puu"}
+                                         :kayttotarkoitus "012 kahden asunnon talot"
+                                         :kellarinpinta-ala 100
+                                         :kerrosala 180
+                                         :kerrosluku 2
+                                         :kokonaisala 1000
+                                         :lammitystapa "vesikeskus"
+                                         :lammonlahde {:muu "polttopuillahan tuo"}
+                                         :liitettyJatevesijarjestelmaanKytkin true
+                                         :paloluokka "P1"
+                                         :rakennusoikeudellinenKerrosala 160
+                                         :rakennustunnus {:jarjestysnumero 2
+                                                          :kiinttun "21111111111111"
+                                                          :muuTunnustieto [{:MuuTunnus {:sovellus "toimenpideId"
+                                                                                        :tunnus "kerrostalo-rivitalo-id"}}
+                                                                           {:MuuTunnus {:sovellus "Lupapiste"
+                                                                                        :tunnus "kerrostalo-rivitalo-id"}}]
+                                                          :rakennuksenSelite "A: kerrostalo-rivitalo-kuvaus"}
+                                         :rakentamistapa "elementti"
+                                         :tilavuus 1500
+                                         :varusteet {:aurinkopaneeliKytkin true
+                                                     :hissiKytkin true
+                                                     :kaasuKytkin true
+                                                     :koneellinenilmastointiKytkin true
+                                                     :lamminvesiKytkin true
+                                                     :sahkoKytkin true
+                                                     :saunoja 1
+                                                     :vaestonsuoja 1
+                                                     :vesijohtoKytkin true
+                                                     :viemariKytkin true}
+                                         :verkostoliittymat {:kaapeliKytkin true
+                                                             :maakaasuKytkin true
+                                                             :sahkoKytkin true
+                                                             :vesijohtoKytkin true
+                                                             :viemariKytkin true}}}}
+                    {:id "laajentaminen-id"
+                     :primary false
+                     :kuvaus nil
+                     :nimi "Rakennuksen laajentaminen tai korjaaminen"
+                     :rakennelma nil
+                     :rakennus {:omistajat [{:VRKrooliKoodi "rakennuksen omistaja"
+                                             :henkilo {:henkilotunnus "210281-9988"
+                                                       :nimi {:etunimi "Pena"
+                                                              :sukunimi "Penttilä"}
+                                                       :osoite {:osoitenimi {:teksti "katu"}
+                                                                :postinumero "33800"
+                                                                :postitoimipaikannimi "Tuonela"
+                                                                :ulkomainenLahiosoite "katu"
+                                                                :ulkomainenPostitoimipaikka "Tuonela"
+                                                                :valtioKansainvalinen "CHN"
+                                                                :valtioSuomeksi "Kiina"}
+                                                       :puhelin "+358401234567"
+                                                       :sahkopostiosoite "pena@example.com"
+                                                       :vainsahkoinenAsiointiKytkin false}
+                                             :kuntaRooliKoodi "Rakennuksen omistaja"
+                                             :omistajalaji {:omistajalaji "muu yksityinen henkilö tai perikunta"}
+                                             :suoramarkkinointikieltoKytkin true
+                                             :turvakieltoKytkin true}
+                                            {:VRKrooliKoodi "rakennuksen omistaja"
+                                             :henkilo {:nimi {:etunimi "Pena"
+                                                              :sukunimi "Penttilä"}
+                                                       :puhelin "03-389 1380"
+                                                       :sahkopostiosoite "yritys@example.com"}
+                                             :kuntaRooliKoodi "Rakennuksen omistaja"
+                                             :omistajalaji {:omistajalaji "yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta)"}
+                                             :suoramarkkinointikieltoKytkin true
+                                             :turvakieltoKytkin true
+                                             :yritys {:liikeJaYhteisotunnus "1060155-5"
+                                                      :nimi "Solita Oy"
+                                                      :postiosoite {:osoitenimi {:teksti "katu"}
+                                                                    :postinumero "33800"
+                                                                    :postitoimipaikannimi "Tuonela"
+                                                                    :ulkomainenLahiosoite "katu"
+                                                                    :ulkomainenPostitoimipaikka "Tuonela"
+                                                                    :valtioKansainvalinen "CHN"
+                                                                    :valtioSuomeksi "Kiina"}
+                                                      :postiosoitetieto {:postiosoite {:osoitenimi {:teksti "katu"}
+                                                                                       :postinumero "33800"
+                                                                                       :postitoimipaikannimi "Tuonela"
+                                                                                       :ulkomainenLahiosoite "katu"
+                                                                                       :ulkomainenPostitoimipaikka "Tuonela"
+                                                                                       :valtioKansainvalinen "CHN"
+                                                                                       :valtioSuomeksi "Kiina"}}
+                                                      :puhelin "03-389 1380"
+                                                      :sahkopostiosoite "yritys@example.com"
+                                                      :vainsahkoinenAsiointiKytkin false}}]
+                                :rakentajatyyppi "muu"
+                                :tiedot {:asuinhuoneistot {:huoneisto [{:huoneistoala 56
+                                                                        :huoneistonTyyppi "asuinhuoneisto"
+                                                                        :huoneistotunnus {:huoneistonumero "001"
+                                                                                          :jakokirjain "a"
+                                                                                          :porras "A"}
+                                                                        :huoneluku 66
+                                                                        :keittionTyyppi "keittio"
+                                                                        :muutostapa "lisäys"
+                                                                        :varusteet {:WCKytkin true
+                                                                                    :ammeTaiSuihkuKytkin false
+                                                                                    :lamminvesiKytkin false
+                                                                                    :parvekeTaiTerassiKytkin true
+                                                                                    :saunaKytkin false}}
+                                                                       {:huoneistoala 2
+                                                                        :huoneistonTyyppi "toimitila"
+                                                                        :huoneistotunnus {:huoneistonumero "002"
+                                                                                          :jakokirjain "a"
+                                                                                          :porras "A"}
+                                                                        :huoneluku 12
+                                                                        :keittionTyyppi "keittokomero"
+                                                                        :muutostapa "muutos"
+                                                                        :varusteet {:WCKytkin false
+                                                                                    :ammeTaiSuihkuKytkin true
+                                                                                    :lamminvesiKytkin true
+                                                                                    :parvekeTaiTerassiKytkin false
+                                                                                    :saunaKytkin true}}]}
+                                         :energialuokka "C"
+                                         :energiatehokkuusluku 124
+                                         :energiatehokkuusluvunYksikko "kWh/m2"
+                                         :julkisivu {:julkisivumateriaali "puu"}
+                                         :kantavaRakennusaine {:rakennusaine "puu"}
+                                         :kayttotarkoitus "012 kahden asunnon talot"
+                                         :kellarinpinta-ala 100
+                                         :kerrosala 180
+                                         :kerrosluku 2
+                                         :kokonaisala 1000
+                                         :lammitystapa "vesikeskus"
+                                         :lammonlahde {:muu "polttopuillahan tuo"}
+                                         :liitettyJatevesijarjestelmaanKytkin true
+                                         :paloluokka "P1"
+                                         :rakennusoikeudellinenKerrosala 160
+                                         :rakennustunnus {:jarjestysnumero 3
+                                                          :kiinttun "21111111111111"
+                                                          :muuTunnustieto [{:MuuTunnus {:sovellus "toimenpideId"
+                                                                                        :tunnus "laajentaminen-id"}}
+                                                                           {:MuuTunnus {:sovellus "Lupapiste"
+                                                                                        :tunnus "laajentaminen-id"}}]
+                                                          :rakennusnro "001"}
+                                         :rakentamistapa "elementti"
+                                         :tilavuus 1500
+                                         :varusteet {:aurinkopaneeliKytkin true
+                                                     :hissiKytkin true
+                                                     :kaasuKytkin true
+                                                     :koneellinenilmastointiKytkin true
+                                                     :lamminvesiKytkin true
+                                                     :sahkoKytkin true
+                                                     :saunoja 1
+                                                     :vaestonsuoja 1
+                                                     :vesijohtoKytkin true
+                                                     :viemariKytkin true}
+                                         :verkostoliittymat {:kaapeliKytkin true
+                                                             :maakaasuKytkin true
+                                                             :sahkoKytkin true
+                                                             :vesijohtoKytkin true
+                                                             :viemariKytkin true}}}}
+                    {:id "kaupunkikuva-id"
+                     :primary false
+                     :kuvaus nil
+                     :nimi "Aidan rakentaminen"
+                     :rakennelma {:kayttotarkoitus "Aita"
+                                  :kiinttun "21111111111111"
+                                  :kokonaisala "0"
+                                  :kuvaus {:kuvaus "Aidan rakentaminen rajalle"}
+                                  :tunnus {:jarjestysnumero 4}}
+                     :rakennus nil}
+                    {:id "5177ad63da060e8cd8348e32"
+                     :primary false
+                     :kuvaus nil
+                     :nimi "Puiden kaataminen"
+                     :rakennelma nil
+                     :rakennus nil}
+                    {:id "purkaminen-id"
+                     :primary false
+                     :kuvaus nil
+                     :nimi "Rakennuksen purkaminen"
+                     :rakennelma nil
+                     :rakennus {:omistajat [{:VRKrooliKoodi "rakennuksen omistaja"
+                                             :henkilo {:henkilotunnus "210281-9988"
+                                                       :nimi {:etunimi "Pena"
+                                                              :sukunimi "Penttilä"}
+                                                       :osoite {:osoitenimi {:teksti "katu"}
+                                                                :postinumero "33800"
+                                                                :postitoimipaikannimi "Tuonela"
+                                                                :ulkomainenLahiosoite "katu"
+                                                                :ulkomainenPostitoimipaikka "Tuonela"
+                                                                :valtioKansainvalinen "CHN"
+                                                                :valtioSuomeksi "Kiina"}
+                                                       :puhelin "+358401234567"
+                                                       :sahkopostiosoite "pena@example.com"
+                                                       :vainsahkoinenAsiointiKytkin false}
+                                             :kuntaRooliKoodi "Rakennuksen omistaja"
+                                             :omistajalaji {:omistajalaji "muu yksityinen henkilö tai perikunta"}
+                                             :suoramarkkinointikieltoKytkin true
+                                             :turvakieltoKytkin true}
+                                            {:VRKrooliKoodi "rakennuksen omistaja"
+                                             :henkilo {:nimi {:etunimi "Pena"
+                                                              :sukunimi "Penttilä"}
+                                                       :puhelin "03-389 1380"
+                                                       :sahkopostiosoite "yritys@example.com"}
+                                             :kuntaRooliKoodi "Rakennuksen omistaja"
+                                             :omistajalaji {:omistajalaji "yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta)"}
+                                             :suoramarkkinointikieltoKytkin true
+                                             :turvakieltoKytkin true
+                                             :yritys {:liikeJaYhteisotunnus "1060155-5"
+                                                      :nimi "Solita Oy"
+                                                      :postiosoite {:osoitenimi {:teksti "katu"}
+                                                                    :postinumero "33800"
+                                                                    :postitoimipaikannimi "Tuonela"
+                                                                    :ulkomainenLahiosoite "katu"
+                                                                    :ulkomainenPostitoimipaikka "Tuonela"
+                                                                    :valtioKansainvalinen "CHN"
+                                                                    :valtioSuomeksi "Kiina"}
+                                                      :postiosoitetieto {:postiosoite {:osoitenimi {:teksti "katu"}
+                                                                                       :postinumero "33800"
+                                                                                       :postitoimipaikannimi "Tuonela"
+                                                                                       :ulkomainenLahiosoite "katu"
+                                                                                       :ulkomainenPostitoimipaikka "Tuonela"
+                                                                                       :valtioKansainvalinen "CHN"
+                                                                                       :valtioSuomeksi "Kiina"}}
+                                                      :puhelin "03-389 1380"
+                                                      :sahkopostiosoite "yritys@example.com"
+                                                      :vainsahkoinenAsiointiKytkin false}}]
+                                :rakentajatyyppi "muu"
+                                :tiedot {:julkisivu {:julkisivumateriaali "puu"}
+                                         :kantavaRakennusaine {:rakennusaine "puu"}
+                                         :kayttotarkoitus "012 kahden asunnon talot"
+                                         :kellarinpinta-ala 100
+                                         :kerrosala 180
+                                         :kerrosluku 2
+                                         :kokonaisala 1000
+                                         :rakennusoikeudellinenKerrosala 160
+                                         :rakennustunnus {:jarjestysnumero 5
+                                                          :kiinttun "21111111111111"
+                                                          :muuTunnustieto [{:MuuTunnus {:sovellus "toimenpideId"
+                                                                                        :tunnus "purkaminen-id"}}
+                                                                           {:MuuTunnus {:sovellus "Lupapiste"
+                                                                                        :tunnus "purkaminen-id"}}]
+                                                          :rakennusnro "001"}
+                                         :rakentamistapa "elementti"
+                                         :tilavuus 1500}}}]
        :permitType "R"
        :projectDescription "Uuden rakennuksen rakentaminen tontille.\n\nPuiden kaataminen:Puun kaataminen"
        :parties [{:VRKrooliKoodi "maksaja"
@@ -257,13 +708,13 @@
                                       :valtioSuomeksi "Kiina"}
                              :puhelin "+358401234567"
                              :sahkopostiosoite "pena@example.com"}
-                   :kokemusvuodet "5"
+                   :kokemusvuodet 5
                    :koulutus "arkkitehti"
                    :muuSuunnittelijaRooli "ei listassa -rooli"
                    :patevyysvaatimusluokka "B"
                    :suunnittelijaRoolikoodi "muu"
                    :vaadittuPatevyysluokka "C"
-                   :valmistumisvuosi "2010"
+                   :valmistumisvuosi 2010
                    :yritys {:liikeJaYhteisotunnus "1060155-5"
                             :nimi "Solita Oy"
                             :postiosoite {:osoitenimi {:teksti "katu"}
@@ -294,12 +745,12 @@
                                       :valtioSuomeksi "Kiina"}
                              :puhelin "+358401234567"
                              :sahkopostiosoite "pena@example.com"}
-                   :kokemusvuodet "5"
+                   :kokemusvuodet 5
                    :koulutus "muu"
                    :patevyysvaatimusluokka "AA"
                    :suunnittelijaRoolikoodi "GEO-suunnittelija"
                    :vaadittuPatevyysluokka "A"
-                   :valmistumisvuosi "2010"
+                   :valmistumisvuosi 2010
                    :yritys {:liikeJaYhteisotunnus "1060155-5"
                             :nimi "Solita Oy"
                             :postiosoite {:osoitenimi {:teksti "katu"}
@@ -330,12 +781,12 @@
                                       :valtioSuomeksi "Kiina"}
                              :puhelin "+358401234567"
                              :sahkopostiosoite "pena@example.com"}
-                   :kokemusvuodet "5"
+                   :kokemusvuodet 5
                    :koulutus "arkkitehti"
                    :patevyysvaatimusluokka "B"
                    :suunnittelijaRoolikoodi "rakennusfysikaalinen suunnittelija"
                    :vaadittuPatevyysluokka "C"
-                   :valmistumisvuosi "2010"
+                   :valmistumisvuosi 2010
                    :yritys {:liikeJaYhteisotunnus "1060155-5"
                             :nimi "Solita Oy"
                             :postiosoite {:osoitenimi {:teksti "katu"}
@@ -366,12 +817,12 @@
                                       :valtioSuomeksi "Kiina"}
                              :puhelin "+358401234567"
                              :sahkopostiosoite "pena@example.com"}
-                   :kokemusvuodet "5"
+                   :kokemusvuodet 5
                    :koulutus "arkkitehti"
                    :patevyysvaatimusluokka "ei tiedossa"
                    :suunnittelijaRoolikoodi "pääsuunnittelija"
                    :vaadittuPatevyysluokka "AA"
-                   :valmistumisvuosi "2010"
+                   :valmistumisvuosi 2010
                    :yritys {:liikeJaYhteisotunnus "1060155-5"
                             :nimi "Solita Oy"
                             :postiosoite {:osoitenimi {:teksti "katu"}
@@ -388,12 +839,67 @@
                                                              :ulkomainenPostitoimipaikka "Tuonela"
                                                              :valtioKansainvalinen "CHN"
                                                              :valtioSuomeksi "Kiina"}}}}]
+       :foremen [{:VRKrooliKoodi "työnjohtaja"
+                  :alkamisPvm "2014-02-13"
+                  :henkilo {:henkilotunnus "210281-9988"
+                            :nimi {:etunimi "Pena" :sukunimi "Penttilä"}
+                            :osoite {:osoitenimi {:teksti "katu"}
+                                     :postinumero "33800"
+                                     :postitoimipaikannimi "Tuonela"
+                                     :ulkomainenLahiosoite "katu"
+                                     :ulkomainenPostitoimipaikka "Tuonela"
+                                     :valtioKansainvalinen "CHN"
+                                     :valtioSuomeksi "Kiina"}
+                            :puhelin "+358401234567"
+                            :sahkopostiosoite "pena@example.com"}
+                  :kokemusvuodet 3
+                  :koulutus "muu"
+                  :paattymisPvm "2014-02-20"
+                  :patevyysvaatimusluokka "A"
+                  :sijaistettavaHlo "Jaska Jokunen"
+                  :sijaistukset [{:alkamisPvm "2014-02-13"
+                                  :paattymisPvm "2014-02-20"
+                                  :sijaistettavaHlo "Jaska Jokunen"
+                                  :sijaistettavaRooli "KVV-työnjohtaja"}]
+                  :tyonjohtajaHakemusKytkin true
+                  :tyonjohtajaRooliKoodi "KVV-työnjohtaja"
+                  :vaadittuPatevyysluokka "A"
+                  :valmistumisvuosi 2010
+                  :valvottavienKohteidenMaara 9
+                  :vastattavatTyot ["Kiinteistön vesi- ja viemärilaitteiston rakentaminen"
+                                    "Kiinteistön ilmanvaihtolaitteiston rakentaminen"
+                                    "Maanrakennustyö"
+                                    "Rakennelma tai laitos"
+                                    "Muu tyotehtava"]
+                  :yritys {:liikeJaYhteisotunnus "1060155-5"
+                           :nimi "Solita Oy"
+                           :postiosoite {:osoitenimi {:teksti "katu"}
+                                         :postinumero "33800"
+                                         :postitoimipaikannimi "Tuonela"
+                                         :ulkomainenLahiosoite "katu"
+                                         :ulkomainenPostitoimipaikka "Tuonela"
+                                         :valtioKansainvalinen "CHN"
+                                         :valtioSuomeksi "Kiina"}
+                           :postiosoitetieto {:postiosoite {:osoitenimi {:teksti "katu"}
+                                                            :postinumero "33800"
+                                                            :postitoimipaikannimi "Tuonela"
+                                                            :ulkomainenLahiosoite "katu"
+                                                            :ulkomainenPostitoimipaikka "Tuonela"
+                                                            :valtioKansainvalinen "CHN"
+                                                            :valtioSuomeksi "Kiina"}}}}]
        :reviews [{:type "ei tiedossa"
                   :reviewer "Reijo Revyy"
                   :date "2012-12-03"
                   :verottajanTvLl false}]
        :state "submitted"
        :stateChangeTs 12345
+       :createdTs (:created application-rakennuslupa)
+       :modifiedTs (:modified application-rakennuslupa)
+       ;; Note that draft statement is not present!
+       :statements [{:lausunto "Savupiippu pitää olla."
+                     :lausuntoPvm "2013-05-09"
+                     :puoltotieto {:puolto "ehdollinen"}
+                     :viranomainen "Paloviranomainen"}]
        :araFunding false
        :verdicts []})
 
@@ -403,10 +909,11 @@
                                                    "hankkeen-kuvaus")
                                               (assoc-in % [:data :rahoitus :value] true)
                                               %)))
+                      []
                       "fi")
   => (contains {:araFunding true})
 
-  (->reporting-result application-rakennuslupa-with-verdicts "fi")
+  (->reporting-result application-rakennuslupa-with-verdicts [] "fi")
   => (contains {:verdicts
                 [{:kuntalupatunnus nil
                   :lupamaaraykset {:autopaikkojaEnintaan nil

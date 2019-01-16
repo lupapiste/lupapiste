@@ -8,13 +8,7 @@ LUPAPISTE.AttachmentsTableModel = function(params) {
   var accordionService = lupapisteApp.services.accordionService;
 
   self.appModel = lupapisteApp.models.application;
-
   self.authModel = lupapisteApp.models.applicationAuthModel;
-
-  self.archiveProblem =  function( latestVersion ) {
-    return self.authModel.ok( "application-organization-archive-enabled")
-        && !latestVersion.archivable;
-  };
 
   self.attachments = params.attachments;
   self.upload = params.upload;
@@ -34,6 +28,11 @@ LUPAPISTE.AttachmentsTableModel = function(params) {
 
   self.hasFile = function(attachment) {
     return _.get(ko.utils.unwrapObservable(attachment), "latestVersion");
+  };
+
+  self.hasContents = function(attachment) {
+    var contents = _.get(ko.utils.unwrapObservable(attachment), "contents", "")();
+    return !_.isEmpty(_.trim(contents));
   };
 
   self.buildHash = function(attachment) {
