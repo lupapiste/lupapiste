@@ -76,6 +76,13 @@
         manual-schema-datas {"rakennuspaikka-kuntagml" doc-datas}]
     (app/make-document nil (now) manual-schema-datas schema)))
 
+(defn get-elements-from-document-datas
+  "Accepts an update sequence (a seq of vectors), returns a sequence of the values of the provided key."
+  [dkey doc-datas]
+  (for [[[k] v] doc-datas
+        :when (= dkey k)]
+    v))
+
 (defn kuntalupatunnus->description
   "Takes a kuntalupatunnus, returns the permit type in plain text ('12-124124-92-A' -> 'Uusi rakennus' etc.)"
   [kuntalupatunnus]
@@ -192,9 +199,14 @@
   [string]
   (apply str (ss/lower-case (first string)) (rest string)))
 
-(defn add-description [{:keys [documents] :as app} xml]
+(defn add-description-and-deviation-info [{:keys [documents] :as app} xml document-datas]
   (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
         kuvaus (building-reader/->asian-tiedot xml)
+        poikkeamat (->> document-datas
+                        (map (partial get-elements-from-document-datas "poikkeamat"))
+                        flatten
+                        set
+                        (clojure.string/join #"\n"))
         kuvausteksti (str kuvaus
                           (format "\nLuvan tyyppi: %s"
                                   (decapitalize (kuntalupatunnus->description kuntalupatunnus))))]
@@ -203,7 +215,9 @@
                   (cond
                     (and (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
                          (empty? (get-in doc [:data :kuvaus :value])))
-                    (assoc-in doc [:data :kuvaus :value] kuvausteksti)
+                    (-> doc
+                      (assoc-in [:data :kuvaus :value] kuvausteksti)
+                      (assoc-in [:data :poikkeamat :value] poikkeamat))
                     (and (re-find #"maisematyo" (get-in doc [:schema-info :name]))
                          (empty? (get-in doc [:data :kuvaus :value])))
                     (assoc-in doc [:data :kuvaus :value] kuvaus)

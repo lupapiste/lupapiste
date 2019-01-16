@@ -104,7 +104,7 @@
 
         created-application (-> created-application
                                 (assoc-in [:primaryOperation :description] (first structure-descriptions))
-                                (conv-util/add-description xml) ;; Add descriptions from asianTiedot to the document.
+                                (conv-util/add-description-and-deviation-info xml document-datas) ;; Add poikkeamat and kuvaus to the "hankkeen-kuvaus" doc.
                                 conv-util/remove-empty-rakennuspaikka ;; Remove empty rakennuspaikka-document that comes from the template
                                 (conv-util/add-timestamps history-array) ;; Add timestamps for different state changes
                                 (update-in [:documents] concat other-building-docs new-parties structures ;; Assemble the documents-array
