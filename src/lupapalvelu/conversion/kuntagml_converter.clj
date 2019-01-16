@@ -104,7 +104,7 @@
 
         created-application (-> created-application
                                 (assoc-in [:primaryOperation :description] (first structure-descriptions))
-                                (conv-util/add-description xml) ;; Add descriptions from asianTiedot to the document.
+                                (conv-util/add-description-and-deviation-info kuntalupatunnus document-datas) ;; Add poikkeamat and kuvaus to the "hankkeen-kuvaus" doc.
                                 conv-util/remove-empty-rakennuspaikka ;; Remove empty rakennuspaikka-document that comes from the template
                                 (conv-util/add-timestamps history-array) ;; Add timestamps for different state changes
                                 (update-in [:documents] concat other-building-docs new-parties structures ;; Assemble the documents-array
@@ -169,7 +169,7 @@
   ([{{:keys [kuntalupatunnus authorizeApplicants]} :data :as command} local?] ;; If the `local` flag is false, the application is fetched from backed system.
   (let [organizationId        "092-R" ;; Vantaa, bypass the selection from form
         destructured-permit-id (conv-util/destructure-permit-id kuntalupatunnus)
-        operation             "konversio"
+        operation             "konversio" ; "aiemmalla-luvalla-hakeminen"
         filename              (format "%s/%s.xml" (:resource-path conv-util/config) kuntalupatunnus ".xml")
         permit-type           "R"
         xml                   (if local?
@@ -190,6 +190,13 @@
       (empty? app-info)                 (error-and-fail! "No app-info available" :error.no-previous-permit-found-from-backend)
       (not location-info)               (error-and-fail! "No location info" :error.more-prev-app-info-needed)
       (not (:propertyId location-info)) (error-and-fail! "No property-id" :error.previous-permit-no-propertyid)
+      ; :else                             (let [{id :id} (prev-permit/do-create-application-from-previous-permit command
+      ;                                                                                operation
+      ;                                                                                ; organization
+      ;                                                                                xml
+      ;                                                                                app-info
+      ;                                                                                location-info
+      ;                                                                                authorizeApplicants)]
       :else                             (let [{id :id} (convert-application-from-xml command
                                                                                      operation
                                                                                      organization

@@ -76,6 +76,19 @@
         manual-schema-datas {"rakennuspaikka-kuntagml" doc-datas}]
     (app/make-document nil (now) manual-schema-datas schema)))
 
+(defn get-elements-from-document-datas
+  "Accepts an update sequence (a seq of vectors), returns a sequence of the values of the provided key."
+  [doc-datas dkey]
+  (for [[[k] v] doc-datas
+        :when (= dkey k)]
+    v))
+
+(defn get-poikkeamat [dd]
+  (get-elements-from-document-datas dd "poikkeamat"))
+
+(defn get-kuvaus [dd]
+  (get-elements-from-document-datas dd "kuvaus"))
+
 (defn kuntalupatunnus->description
   "Takes a kuntalupatunnus, returns the permit type in plain text ('12-124124-92-A' -> 'Uusi rakennus' etc.)"
   [kuntalupatunnus]
@@ -192,9 +205,9 @@
   [string]
   (apply str (ss/lower-case (first string)) (rest string)))
 
-(defn add-description [{:keys [documents] :as app} xml]
-  (let [kuntalupatunnus (krysp-reader/xml->kuntalupatunnus xml)
-        kuvaus (building-reader/->asian-tiedot xml)
+(defn add-description-and-deviation-info [{:keys [documents] :as app} kuntalupatunnus document-datas]
+  (let [kuvaus (->> document-datas (map get-kuvaus) flatten set (clojure.string/join #"\n"))
+        poikkeamat (->> document-datas (map get-poikkeamat) flatten set (clojure.string/join #"\n"))
         kuvausteksti (str kuvaus
                           (format "\nLuvan tyyppi: %s"
                                   (decapitalize (kuntalupatunnus->description kuntalupatunnus))))]
@@ -203,7 +216,9 @@
                   (cond
                     (and (re-find #"hankkeen-kuvaus" (get-in doc [:schema-info :name]))
                          (empty? (get-in doc [:data :kuvaus :value])))
-                    (assoc-in doc [:data :kuvaus :value] kuvausteksti)
+                    (-> doc
+                      (assoc-in [:data :kuvaus :value] kuvausteksti)
+                      (assoc-in [:data :poikkeamat :value] poikkeamat))
                     (and (re-find #"maisematyo" (get-in doc [:schema-info :name]))
                          (empty? (get-in doc [:data :kuvaus :value])))
                     (assoc-in doc [:data :kuvaus :value] kuvaus)
